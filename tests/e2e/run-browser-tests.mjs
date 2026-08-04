@@ -344,8 +344,8 @@ async function runAppSuite() {
       await browser.page.clickAt(trailingPoint.x, trailingPoint.y);
       await browser.page.waitFor(() => {
         const editor=document.getElementById('editor');
-        return editor?.selectionStart===trailingPoint.position
-          && editor?.selectionEnd===trailingPoint.position
+        return editor?.selectionStart===editor?.textLength
+          && editor?.selectionEnd===editor?.textLength
           && editor?.virtualEditor?.getPresentationStats?.().sourceActiveLines===1;
       }, { description: 'trailing source active line' });
       const snapshot = await browser.page.evaluate(`(()=>{
