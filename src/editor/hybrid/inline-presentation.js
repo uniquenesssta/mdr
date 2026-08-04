@@ -620,7 +620,45 @@ function addLinkPresentation(view, node, replace, addMark, referenceDefinitions)
   return true;
 }
 
+function normalizeTrailingEmptyCaretRanges(view, editableRanges) {
+  const selection = view.state.selection.main;
+  const documentLength = view.state.doc.length;
+  if (view.hasFocus === false
+    || !selection.empty
+    || selection.head !== documentLength) return editableRanges;
+
+  const trailingLine = view.state.doc.lineAt(documentLength);
+  if (trailingLine.from !== documentLength || trailingLine.to !== documentLength) {
+    return editableRanges;
+  }
+
+  let replaced = false;
+  const normalized = [];
+  for (const range of editableRanges || []) {
+    const from = Number(range?.from);
+    const to = Number(range?.to);
+    if (range?.revealBlock
+      && Number.isFinite(from)
+      && Number.isFinite(to)
+      && from <= documentLength
+      && documentLength <= to) {
+      if (!replaced) {
+        normalized.push({
+          from: documentLength,
+          to: documentLength,
+          revealBlock: true
+        });
+        replaced = true;
+      }
+      continue;
+    }
+    normalized.push(range);
+  }
+  return replaced ? normalized : editableRanges;
+}
+
 export function buildInlinePresentation(view, tree, editableRanges, blockRanges, activeSourceRanges = []) {
+  editableRanges = normalizeTrailingEmptyCaretRanges(view, editableRanges);
   const ranges = [];
   const replacements = [];
   const lineClasses = new Map();
