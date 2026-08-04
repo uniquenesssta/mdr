@@ -327,21 +327,25 @@ async function runAppSuite() {
       await browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)},{layout:'hybrid',selection:${source.length},codeVisualEditing:true,tableVisualEditing:true})`);
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'closed code widget' });
       const trailingPoint = await browser.page.evaluate(`(()=>{
-        const widget=document.querySelector('[data-hybrid-block-type="code"]');
-        const scroller=document.querySelector('.cm-scroller');
-        if(!widget||!scroller)return null;
-        const widgetRect=widget.getBoundingClientRect();
-        const scrollerRect=scroller.getBoundingClientRect();
+        const editor=document.getElementById('editor');
+        const view=editor?.virtualEditor?.view;
+        const position=editor?.textLength;
+        if(!view||!Number.isInteger(position))return null;
+        editor.virtualEditor.scrollPositionIntoView(position,'auto',0.5);
+        const rect=view.coordsAtPos(position,1)||view.coordsAtPos(position,-1);
+        if(!rect)return null;
         return {
-          x:Math.max(scrollerRect.left+12,Math.min(scrollerRect.right-12,widgetRect.left+24)),
-          y:Math.max(widgetRect.bottom+8,Math.min(scrollerRect.bottom-12,widgetRect.bottom+24))
+          x:Math.max(2,rect.left+2),
+          y:rect.top+Math.max(1,rect.bottom-rect.top)/2,
+          position
         };
       })()`);
-      if (!trailingPoint) throw new Error('Unable to resolve trailing editor click point');
+      if (!trailingPoint) throw new Error('Unable to resolve final document caret point');
       await browser.page.clickAt(trailingPoint.x, trailingPoint.y);
       await browser.page.waitFor(() => {
         const editor=document.getElementById('editor');
-        return editor?.selectionStart===editor?.textLength
+        return editor?.selectionStart===trailingPoint.position
+          && editor?.selectionEnd===trailingPoint.position
           && editor?.virtualEditor?.getPresentationStats?.().sourceActiveLines===1;
       }, { description: 'trailing source active line' });
       const snapshot = await browser.page.evaluate(`(()=>{
