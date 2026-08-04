@@ -161,6 +161,19 @@ const hybridBlockDecorationField = StateField.define({
   provide: field => EditorView.decorations.from(field)
 });
 
+function getBlockPresentationRange(view, descriptor) {
+  const from = Math.max(0, Number(descriptor?.from) || 0);
+  let to = Math.max(from, Number(descriptor?.to) || from);
+  const type = String(descriptor?.type || '');
+  if ((type === 'code' || type === 'mermaid')
+    && to === view.state.doc.length
+    && to > from
+    && view.state.doc.sliceString(Math.max(from, to - 2), to) === '\n\n') {
+    to -= 1;
+  }
+  return { from, to };
+}
+
 function createBlockDecoration(view, descriptor) {
   let widget = null;
   if (descriptor.type === 'code') {
@@ -179,7 +192,11 @@ function createBlockDecoration(view, descriptor) {
   else if (descriptor.type === 'math') widget = new MathBlockWidget(descriptor);
   else if (descriptor.type === 'html') widget = new HtmlBlockWidget(descriptor);
   if (!widget) return null;
-  return Decoration.replace({ widget, block: true, inclusive: false }).range(descriptor.from, descriptor.to);
+  const presentationRange = getBlockPresentationRange(view, descriptor);
+  return Decoration.replace({ widget, block: true, inclusive: false }).range(
+    presentationRange.from,
+    presentationRange.to
+  );
 }
 
 function validateHybridBlocks(view, blocks) {
@@ -261,7 +278,7 @@ export function buildHybridMarkdownDecorations(view) {
     const activeSourceRange = getActiveHybridSourceRange(view);
     const protectedSourceRanges = activeSourceRange ? [activeSourceRange] : [];
     const blocks = validateHybridBlocks(view, collectHybridBlocks(view, tree, protectedSourceRanges));
-    const blockRanges = blocks.map(block => ({ from: block.from, to: block.to }));
+    const blockRanges = blocks.map(block => getBlockPresentationRange(view, block));
     const blockDecorationRanges = [];
     for (const block of blocks) {
       try {
