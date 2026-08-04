@@ -31,6 +31,12 @@ test('application installs the E2E bridge only through explicit opt-in', async (
   assert.match(bridge, /searchParams\.get\('e2e'\) === '1'/);
 });
 
+test('E2E fixture loading follows the application document lifecycle', async () => {
+  const bridge = await readFile(new URL('../src/runtime/e2e-bridge.js', import.meta.url), 'utf8');
+  assert.match(bridge, /loadTextContentAsDocument/);
+  assert.doesNotMatch(bridge, /virtualEditor\.loadDocument/);
+  assert.doesNotMatch(bridge, /dispatchEditorInput/);
+});
 
 test('hybrid widgets keep geometry and outside-pointer lifecycle wiring explicit', async () => {
   const widgets = await readFile(new URL('../src/editor/hybrid/widgets.js', import.meta.url), 'utf8');
