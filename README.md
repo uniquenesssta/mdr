@@ -53,6 +53,8 @@ logs/                       # 开发者性能日志目录
 ```
 
 ## Change Log
+<!-- stage-01-node:01-04 -->
+- 2026-08-04：阶段 1 Atomic Task 1.4（资源销毁注册表）完成：新增 `src/app/disposer-registry.js`，统一拥有资源清理登记、严格 LIFO、提前幂等释放、并发清理、异常聚合和失败项重试；生产模块清单增至 61 个。专项 run 30920143493 与完整基线 run 30920143387 全部通过，现有启动链和用户行为未切换，Atomic Task 1.5 尚未开始。
 <!-- stage-01-node:01-03 -->
 - 2026-08-04：阶段 1 Atomic Task 1.3（应用生命周期状态机）完成：新增 `src/app/application-lifecycle.js`，统一拥有 `idle / starting / running / stopping / failed` 状态、并发幂等、注册顺序启动、严格逆序回滚与销毁、异常聚合和失败清理重试；生产模块清单增至 60 个。专项 run 30911793856 与完整基线 run 30911794047 全部通过，现有启动链和用户行为未切换，Atomic Task 1.4 尚未开始。
 <!-- stage-01-node:01-02 -->
