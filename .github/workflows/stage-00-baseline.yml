@@ -31,7 +31,7 @@ permissions:
 
 concurrency:
   group: stage-00-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   baseline:
