@@ -59,9 +59,16 @@ jobs:
 
       - name: Install declared Rust toolchain
         continue-on-error: true
-        run: >-
-          node scripts/stage-00/run-check.mjs rust-toolchain bash -lc
-          "rustup toolchain install 1.77.2 --profile minimal --no-self-update && rustup default 1.77.2"
+        shell: bash
+        run: |
+          RUST_TOOLCHAIN="$(sed -n 's/^rust-version = "\([^"]*\)"/\1/p' src-tauri/Cargo.toml)"
+          if [[ -z "$RUST_TOOLCHAIN" ]]; then
+            echo "src-tauri/Cargo.toml does not declare rust-version" >&2
+            exit 1
+          fi
+          echo "RUST_TOOLCHAIN=$RUST_TOOLCHAIN" >> "$GITHUB_ENV"
+          node scripts/stage-00/run-check.mjs rust-toolchain bash -lc \
+            "rustup toolchain install $RUST_TOOLCHAIN --profile minimal --no-self-update && rustup default $RUST_TOOLCHAIN && rustc --version && cargo --version"
 
       - name: Install Tauri Linux system dependencies
         continue-on-error: true
@@ -110,13 +117,13 @@ jobs:
       - name: Run Rust tests with lockfile
         continue-on-error: true
         run: >-
-          node scripts/stage-00/run-check.mjs cargo-test cargo +1.77.2 test
+          node scripts/stage-00/run-check.mjs cargo-test cargo test
           --manifest-path src-tauri/Cargo.toml --locked
 
       - name: Run Rust check with lockfile
         continue-on-error: true
         run: >-
-          node scripts/stage-00/run-check.mjs cargo-check cargo +1.77.2 check
+          node scripts/stage-00/run-check.mjs cargo-check cargo check
           --manifest-path src-tauri/Cargo.toml --locked
 
       - name: Run extended Tauri Linux build
