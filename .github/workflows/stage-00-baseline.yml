@@ -54,6 +54,26 @@ jobs:
           node-version: '22'
           cache: npm
 
+      - name: Apply trailing-line presentation fix
+        run: node scripts/stage-00/apply-trailing-line-fix.mjs
+
+      - name: Commit trailing-line presentation fix
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/editor/hybrid/controller.js
+          if git diff --cached --quiet; then
+            echo "Trailing-line presentation fix is already committed."
+          else
+            git diff --cached --check
+            git commit -m "fix(stage0): preserve trailing line after fenced blocks"
+            git push origin "HEAD:${{ github.head_ref }}"
+          fi
+
       - name: Install declared Rust toolchain
         continue-on-error: true
         shell: bash
