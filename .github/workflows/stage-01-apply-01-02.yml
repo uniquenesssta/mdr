@@ -84,74 +84,6 @@ jobs:
               }
             });
           }
-          ''',
-              '.github/workflows/stage-01-atomic.yml': '''
-          name: Stage 1 Atomic Verification
-
-          on:
-            pull_request:
-              branches:
-                - main
-              types:
-                - opened
-                - synchronize
-                - reopened
-              paths:
-                - .github/workflows/stage-01-atomic.yml
-                - scripts/stage-01/**
-                - src/app/**
-                - tests/architecture/**
-                - docs/rewrite-progress/stage-01/**
-                - README.md
-
-          permissions:
-            contents: read
-
-          concurrency:
-            group: stage-01-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}
-            cancel-in-progress: true
-
-          jobs:
-            architecture-foundation:
-              name: Verify Stage 1 architecture foundation
-              runs-on: ubuntu-22.04
-              timeout-minutes: 30
-              env:
-                CHROME_PATH: /usr/bin/google-chrome
-              steps:
-                - uses: actions/checkout@v4
-                  with:
-                    ref: ${{ github.head_ref || github.ref_name }}
-                - uses: actions/setup-node@v4
-                  with:
-                    node-version: '22'
-                    cache: npm
-                - name: Install frontend dependencies
-                  run: npm ci
-                - name: Verify production module ownership fixture
-                  run: node --test tests/architecture/module-inventory.test.mjs
-                - name: Verify minimal composition root
-                  run: node --test tests/architecture/application-composition.test.mjs
-                - name: Collect machine-readable module inventory
-                  run: node scripts/stage-01/collect-module-inventory.mjs --output=artifacts/stage-01/01-01-module-inventory.json
-                - name: Record composition-root evidence
-                  shell: bash
-                  run: |
-                    mkdir -p artifacts/stage-01
-                    node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-02-composition-root.json',JSON.stringify({node:'stage-01/01-02',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT},null,2)+'\\n')"
-                - name: Run existing Node regression suite
-                  run: npm test
-                - name: Run browser interaction contract
-                  run: npm run test:browser:contract
-                - name: Build current application
-                  run: npm run build
-                - name: Upload Atomic Task evidence
-                  uses: actions/upload-artifact@v4
-                  with:
-                    name: stage-01-architecture-foundation-${{ github.run_id }}-${{ github.run_attempt }}
-                    path: artifacts/stage-01
-                    if-no-files-found: error
-                    retention-days: 30
           '''
           }
 
@@ -188,16 +120,13 @@ jobs:
           manifest['modules'].extend(record for record in additions if record[0] not in existing)
           manifest['modules'].sort(key=lambda record: record[0])
           manifest_path.write_text(json.dumps(manifest, separators=(',', ':')) + '\n', encoding='utf-8')
-
-          Path('.github/workflows/stage-01-apply-01-02.yml').unlink()
           PY
       - name: Commit Atomic Task implementation
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/workflows/stage-01-atomic.yml src/app tests/architecture/fixtures/production-modules.json
-          git add -u .github/workflows/stage-01-apply-01-02.yml
+          git add src/app tests/architecture/fixtures/production-modules.json
           git diff --cached --check
           git commit -m "feat(stage1): add minimal application composition root"
           git push origin "HEAD:${{ github.head_ref }}"
