@@ -1,0 +1,63 @@
+name: Stage 1 README Sync
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - .github/workflows/stage-01-readme-sync.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - name: Update README Stage 1 record
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('README.md')
+          source = path.read_text(encoding='utf-8')
+          marker = '<!-- stage-01-node:01-01 -->'
+          entry = (
+              f'{marker}\n'
+              '- 2026-08-04：阶段 1 Atomic Task 1.1（基线与模块清单）完成：建立覆盖 57 个生产 JS/Rust/CSS/HTML 文件的机器可读职责、状态所有权、生命周期、迁移处置和冻结边界清单，并新增真实导入、导出、监听器、全局写入与副作用采集器；专项验证 run 30904310568 和完整基线回归 run 30904310598 全部通过。未修改生产行为，Atomic Task 1.2 尚未开始。\n'
+          )
+          source = re.sub(r'<!-- stage-01-node:01-01 -->\n- [^\n]*\n', '', source)
+          heading = '## Change Log'
+          index = source.find(heading)
+          if index < 0:
+              source = source.rstrip() + '\n\n' + heading + '\n' + entry
+          else:
+              insert_at = source.find('\n', index + len(heading))
+              insert_at = len(source) if insert_at < 0 else insert_at + 1
+              source = source[:insert_at] + entry + source[insert_at:]
+          path.write_text(source, encoding='utf-8')
+          PY
+      - name: Commit README record
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "README Stage 1 record is already synchronized."
+          else
+            git commit -m "docs(stage1): record module inventory completion"
+            git push origin "HEAD:${{ github.head_ref }}"
+          fi
