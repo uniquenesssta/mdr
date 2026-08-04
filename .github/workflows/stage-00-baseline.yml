@@ -1,9 +1,14 @@
 name: Stage 0 Baseline Verification
 
 on:
-  push:
+  pull_request:
     branches:
-      - rewrite/modular-rebuild
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
     paths:
       - .github/workflows/stage-00-baseline.yml
       - ALL_AI_CODE.md
@@ -16,21 +21,13 @@ on:
       - src-tauri/**
       - tests/**
       - scripts/stage-00/**
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: stage-00-${{ github.ref }}
+  group: stage-00-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
