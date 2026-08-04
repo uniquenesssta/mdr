@@ -5,6 +5,7 @@ import { collectHybridBlocks } from './block-registry.js';
 import { buildInlinePresentation } from './inline-presentation.js';
 import { getEditableRanges } from './ranges.js';
 import { clearHybridComponentStates } from './component-state.js';
+import { scheduleHybridWidgetGeometry } from './widget-lifecycle.js';
 import {
   CodeBlockWidget,
   clearActiveHybridSourceRange,

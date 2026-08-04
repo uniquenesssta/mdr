@@ -133,8 +133,9 @@ async function revealPosition(position, options = {}) {
   if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable');
   const safePosition = Math.max(0, Math.min(editor.textLength, Number(position) || 0));
   if (options.preserveSelection !== true) {
-    editor.setSelectionRange(safePosition, safePosition);
     editor.focus({ preventScroll: true });
+    await waitForAnimationFrames(1);
+    editor.setSelectionRange(safePosition, safePosition);
   }
   editor.virtualEditor.scrollPositionIntoView?.(
     safePosition,

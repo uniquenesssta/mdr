@@ -326,6 +326,7 @@ async function runAppSuite() {
       const source = '```\n\n\n```\n\n';
       await browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)},{layout:'hybrid',selection:${source.length},codeVisualEditing:true,tableVisualEditing:true})`);
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'closed code widget' });
+      await browser.page.waitFor(() => document.getElementById('editor')?.virtualEditor?.getPresentationStats?.().sourceActiveLines === 1, { description: 'trailing source active line' });
       const snapshot = await browser.page.evaluate(`(()=>{
         const widget=document.querySelector('[data-hybrid-block-type="code"]');
         const widgetRect=widget?.getBoundingClientRect();
