@@ -326,7 +326,24 @@ async function runAppSuite() {
       const source = '```\n\n\n```\n\n';
       await browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)},{layout:'hybrid',selection:${source.length},codeVisualEditing:true,tableVisualEditing:true})`);
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'closed code widget' });
-      await browser.page.waitFor(() => document.getElementById('editor')?.virtualEditor?.getPresentationStats?.().sourceActiveLines === 1, { description: 'trailing source active line' });
+      const trailingPoint = await browser.page.evaluate(`(()=>{
+        const widget=document.querySelector('[data-hybrid-block-type="code"]');
+        const scroller=document.querySelector('.cm-scroller');
+        if(!widget||!scroller)return null;
+        const widgetRect=widget.getBoundingClientRect();
+        const scrollerRect=scroller.getBoundingClientRect();
+        return {
+          x:Math.max(scrollerRect.left+12,Math.min(scrollerRect.right-12,widgetRect.left+24)),
+          y:Math.max(widgetRect.bottom+8,Math.min(scrollerRect.bottom-12,widgetRect.bottom+24))
+        };
+      })()`);
+      if (!trailingPoint) throw new Error('Unable to resolve trailing editor click point');
+      await browser.page.clickAt(trailingPoint.x, trailingPoint.y);
+      await browser.page.waitFor(() => {
+        const editor=document.getElementById('editor');
+        return editor?.selectionStart===editor?.textLength
+          && editor?.virtualEditor?.getPresentationStats?.().sourceActiveLines===1;
+      }, { description: 'trailing source active line' });
       const snapshot = await browser.page.evaluate(`(()=>{
         const widget=document.querySelector('[data-hybrid-block-type="code"]');
         const widgetRect=widget?.getBoundingClientRect();

@@ -273,6 +273,21 @@ export class CdpPage {
   }
 }
 
+async function removeProfileDirectory(path, attempts = 8) {
+  let lastError = null;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      await rm(path, { recursive: true, force: true });
+      return;
+    } catch (error) {
+      lastError = error;
+      if (!['ENOTEMPTY', 'EBUSY', 'EPERM'].includes(error?.code) || attempt >= attempts - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 80 * (attempt + 1)));
+    }
+  }
+  if (lastError) throw lastError;
+}
+
 export async function launchChromium(options = {}) {
   const executable = findChromiumExecutable();
   if (!executable) throw new Error('Chromium/Chrome was not found. Set CHROMIUM_PATH to its executable.');
@@ -322,13 +337,13 @@ export async function launchChromium(options = {}) {
           processHandle.once('exit', () => { clearTimeout(timer); resolve(); });
         });
         if (!processHandle.killed) processHandle.kill('SIGKILL');
-        await rm(profileDir, { recursive: true, force: true });
+        await removeProfileDirectory(profileDir);
       },
       get stderr() { return stderr; }
     };
   } catch (error) {
     if (!processHandle.killed) processHandle.kill('SIGKILL');
-    await rm(profileDir, { recursive: true, force: true });
+    await removeProfileDirectory(profileDir);
     throw new Error(`${error.message}${stderr ? `\nChromium: ${stderr.slice(-1200)}` : ''}`);
   }
 }
