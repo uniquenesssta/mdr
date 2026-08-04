@@ -5,10 +5,10 @@
 - 结果：**失败，阶段 0 硬性门禁未通过**
 - 后续阶段：**禁止进入阶段 1**
 - 工作流：`Stage 0 Baseline Verification`
-- Actions run：`30883814364`，attempt `1`
-- 证据工件：`stage-00-baseline-30883814364-1`
+- Actions run：`30885170810`，attempt `1`
+- 证据工件：`stage-00-baseline-30885170810-1`
 - 工作分支：`rewrite/modular-rebuild`
-- 验证提交：`28c70e51b4119b1161e35668994e5f504ff4a630`
+- 验证提交：`a80d065aa51474c82018a9403bba490aa627500c`
 - 原始业务源码基线：`main@8ec8bf4ed58e6fd1c5c91466569a56ba247b6a62`
 - 运行环境：GitHub-hosted `ubuntu-22.04`、Node 22、Rust 1.77.2、Chrome headless
 
@@ -18,21 +18,21 @@
 
 | 检查 | 状态 | 退出码 | 耗时 ms |
 |---|---:|---:|---:|
-| `rust-toolchain` | passed | 0 | 7014 |
-| `tauri-system-deps` | passed | 0 | 29715 |
-| `npm-ci` | passed | 0 | 6275 |
-| `npm-test` | passed | 0 | 393 |
-| `browser-contract` | passed | 0 | 7993 |
-| `frontend-build` | passed | 0 | 11547 |
-| `browser-app` | failed | 1 | 115463 |
-| `cargo-test` | failed | 101 | 2569 |
-| `cargo-check` | failed | 101 | 172 |
+| `rust-toolchain` | passed | 0 | 7508 |
+| `tauri-system-deps` | passed | 0 | 31511 |
+| `npm-ci` | passed | 0 | 4790 |
+| `npm-test` | passed | 0 | 317 |
+| `browser-contract` | passed | 0 | 3260 |
+| `frontend-build` | passed | 0 | 9294 |
+| `browser-app` | failed | 1 | 115015 |
+| `cargo-test` | failed | 101 | 71689 |
+| `cargo-check` | failed | 101 | 47313 |
 
 ### 扩展检查
 
 | 检查 | 状态 | 退出码 | 耗时 ms |
 |---|---:|---:|---:|
-| `tauri-build` | failed | 1 | 11842 |
+| `tauri-build` | failed | 1 | 114243 |
 
 ## 已通过路径
 
@@ -51,10 +51,10 @@
 `npm run test:browser` 共执行 7 项，2 项通过、5 项失败：
 
 - application code block placeholder never receives a phantom source highlight (353ms)
-- application code block ignores single click and opens on strict double click (19176ms)
-- application keeps only one direct editor active (19154ms)
-- application Mermaid presentation stays normalized across hybrid and preview layouts (28097ms)
-- application source edit exits when pointer moves outside the source range (19100ms)
+- application code block ignores single click and opens on strict double click (19156ms)
+- application keeps only one direct editor active (19138ms)
+- application Mermaid presentation stays normalized across hybrid and preview layouts (28073ms)
+- application source edit exits when pointer moves outside the source range (19093ms)
 
 这些失败发生在当前未修改的业务实现上。阶段 0 不修改实现，因此本节点仅冻结现象并阻止进入后续重写阶段。
 
@@ -67,7 +67,7 @@
 > node tests/e2e/run-browser-tests.mjs --app
 
 [stdout] Browser artifacts: /home/runner/work/mdr/mdr/artifacts/stage-00/browser
-[stdout] ok - application switches deterministically across every layout mode (8564ms)
+[stdout] ok - application switches deterministically across every layout mode (8547ms)
 [stderr] not ok - application code block placeholder never receives a phantom source highlight (353ms)
 [stderr] AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
 
@@ -78,31 +78,31 @@
     at async runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:325:5)
     at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:414:13
 [stderr]   screenshot: /home/runner/work/mdr/mdr/artifacts/stage-00/browser/02-application-code-block-placeholder-never-receives-a-phantom-source-highlight.png
-[stderr] not ok - application code block ignores single click and opens on strict double click (19176ms)
-[stderr] Error: Timed out waiting for code editor open
+[stderr] not ok - application code block ignores single click and opens on strict double click (19156ms)
+Error: Timed out waiting for code editor open
     at CdpPage.waitFor (file:///home/runner/work/mdr/mdr/tests/e2e/lib/cdp-browser.mjs:200:11)
     at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:344:7
     at async test (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:27:5)
     at async runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:339:5)
     at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:414:13
 [stderr]   screenshot: /home/runner/work/mdr/mdr/artifacts/stage-00/browser/03-application-code-block-ignores-single-click-and-opens-on-strict-double-click.png
-[stderr] not ok - application keeps only one direct editor active (19154ms)
-[stderr] Error: Timed out waiting for condition
+[stderr] not ok - application keeps only one direct editor active (19138ms)
+Error: Timed out waiting for condition
     at CdpPage.waitFor (file:///home/runner/work/mdr/mdr/tests/e2e/lib/cdp-browser.mjs:200:11)
     at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:353:7
     at async test (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:27:5)
     at async runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:350:5)
     at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:414:13
 [stderr]   screenshot: /home/runner/work/mdr/mdr/artifacts/stage-00/browser/04-application-keeps-only-one-direct-editor-active.png
-[stderr] not ok - application Mermaid presentation stays normalized across hybrid and preview layouts (28097ms)
-[stderr] Error: Timed out waiting for hybrid Mermaid SVG
+[stderr] not ok - application Mermaid presentation stays normalized across hybrid and preview layouts (28073ms)
+Error: Timed out waiting for hybrid Mermaid SVG
     at CdpPage.waitFor (file:///home/runner/work/mdr/mdr/tests/e2e/lib/cdp-browser.mjs:200:11)
     at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:367:7
     at async test (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:27:5)
     at async runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:364:5)
     at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:414:13
 [stderr]   screenshot: /home/runner/work/mdr/mdr/artifacts/stage-00/browser/05-application-mermaid-presentation-stays-normalized-across-hybrid-and-preview-layouts.png
-[stderr] not ok - application source edit exits when pointer moves outside the source range (19100ms)
+[stderr] not ok - application source edit exits when pointer moves outside the source range (19093ms)
 [stderr] Error: Timed out waiting for source range open
     at CdpPage.waitFor (file:///home/runner/work/mdr/mdr/tests/e2e/lib/cdp-browser.mjs:200:11)
     at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:380:7
@@ -110,7 +110,7 @@
     at async runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:376:5)
     at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:414:13
 [stderr]   screenshot: /home/runner/work/mdr/mdr/artifacts/stage-00/browser/06-application-source-edit-exits-when-pointer-moves-outside-the-source-range.png
-[stdout] ok - application pointer drag maps to exact editor characters (18771ms)
+[stdout] ok - application pointer drag maps to exact editor characters (18768ms)
 [stdout] 
 Browser tests: 7, passed: 2, failed: 5
 ```
@@ -136,40 +136,40 @@ Browser tests: 7, passed: 2, failed: 5
 <summary>Rust 失败日志摘录</summary>
 
 ```text
-[stderr]   Downloaded byteorder v1.5.0
-[stderr]   Downloaded bitflags v2.13.0
-[stderr]   Downloaded bitflags v1.3.2
-[stderr]   Downloaded bit-vec v0.8.0
-[stderr]   Downloaded alloc-stdlib v0.2.4
-[stderr]   Downloaded alloc-no-stdlib v2.0.4
-[stderr]   Downloaded schemars v0.8.22
-[stderr]   Downloaded ryu v1.0.23
-[stderr]   Downloaded rustls-pki-types v1.15.0
-[stderr]   Downloaded dpi v0.1.2
-[stderr]   Downloaded deranged v0.4.0
-[stderr]   Downloaded crypto-common v0.1.7
-[stderr]   Downloaded cfg-if v1.0.4
-[stderr]   Downloaded selectors v0.36.1
-[stderr]   Downloaded digest v0.10.7
-[stderr]   Downloaded compression-core v0.4.32
-[stderr]   Downloaded block-buffer v0.10.4
-[stderr]   Downloaded rustc-hash v2.1.3
-[stderr]   Downloaded dirs v6.0.0
-[stderr]   Downloaded cpufeatures v0.2.17
-[stderr]   Downloaded gobject-sys v0.18.0
-[stderr]   Downloaded cargo-platform v0.1.8
-[stderr]   Downloaded dlopen2_derive v0.4.2
-[stderr] error: failed to download replaced source registry `crates-io`
+[stderr]    Compiling flate2 v1.1.9
+[stderr]    Compiling soup3 v0.5.0
+[stderr]    Compiling javascriptcore-rs v1.1.2
+[stderr]    Compiling tauri v2.11.5
+[stderr]    Compiling block-buffer v0.10.4
+[stderr]    Compiling crypto-common v0.1.7
+[stderr]    Compiling fdeflate v0.3.7
+[stderr]    Compiling tauri-plugin v2.6.3
+[stderr]    Compiling zeroize v1.8.2
+[stderr]    Compiling rustls-pki-types v1.15.0
+[stderr]    Compiling png v0.17.16
+[stderr]    Compiling digest v0.10.7
+[stderr]    Compiling crossbeam-channel v0.5.16
+[stderr]    Compiling http-body v1.0.1
+[stderr]    Compiling dlopen2_derive v0.4.2
+[stderr] error[E0658]: `let` expressions in this position are unstable
+  --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dlopen2_derive-0.4.2/src/common.rs:20:20
+   |
+20 |                 if let Some(ident) = meta.path.get_ident()
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: see issue #53667 <https://github.com/rust-lang/rust/issues/53667> for more information
 
-Caused by:
-  failed to parse manifest at `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dlopen2_derive-0.4.2/Cargo.toml`
+[stderr] error[E0658]: `let` expressions in this position are unstable
+  --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dlopen2_derive-0.4.2/src/common.rs:42:16
+   |
+42 |             if let Some(ident) = attr.path().get_ident()
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: see issue #53667 <https://github.com/rust-lang/rust/issues/53667> for more information
 
-Caused by:
-  feature `edition2024` is required
-
-  The package requires the Cargo feature called `edition2024`, but that feature is not stabilized in this version of Cargo (1.77.2 (e52e36006 2024-03-26)).
-  Consider trying a newer version of Cargo (this may require the nightly release).
-  See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#edition-2024 for more information about the status of this feature.
+[stderr] For more information about this error, try `rustc --explain E0658`.
+[stderr] error: could not compile `dlopen2_derive` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
 ```
 
 </details>
@@ -178,39 +178,39 @@ Caused by:
 <summary>Tauri build 失败日志摘录</summary>
 
 ```text
-dist/assets/sequenceDiagram-DBY2YBRQ-CkwpMkeG.js        117.00 kB │ gzip:  31.16 kB
-[stdout] dist/assets/swimlanes-5IMT3BWC-r6p67yPZ.js              118.90 kB │ gzip:  43.67 kB
-dist/assets/architectureDiagram-ZJ3FMSHR-8zgIzPCF.js    151.40 kB │ gzip:  43.02 kB
-dist/assets/cytoscape.esm-D3_iZ_3b.js                   442.92 kB │ gzip: 141.93 kB
-[stdout] dist/assets/mermaid.core-JMHOLC4Y.js                    581.90 kB │ gzip: 136.90 kB
-dist/assets/cynefin-VYW2F7L2-jq6gSZGO.js                688.17 kB │ gzip: 154.20 kB
-dist/assets/index-DIGGSYZe.js                         1,047.60 kB │ gzip: 337.04 kB
-[stderr] 
-(!) Some chunks are larger than 500 kB after minification. Consider:
-- Using dynamic import() to code-split the application
-- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
-- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
-[stdout] ✓ built in 10.57s
-[stderr]      Running [tauri_cli] Command `cargo build --bins --features tauri/custom-protocol --release`
-[stderr]  Downloading crates ...
-[stderr] error: failed to download `dlopen2_derive v0.4.2`
+[stderr]    Compiling crypto-common v0.1.7
+[stderr]    Compiling block-buffer v0.10.4
+[stderr]    Compiling fdeflate v0.3.7
+[stderr]    Compiling tauri-plugin v2.6.3
+[stderr]    Compiling zeroize v1.8.2
+[stderr]    Compiling png v0.17.16
+[stderr]    Compiling rustls-pki-types v1.15.0
+[stderr]    Compiling webkit2gtk v2.0.2
+[stderr]    Compiling digest v0.10.7
+[stderr]    Compiling crossbeam-channel v0.5.16
+[stderr]    Compiling http-body v1.0.1
+[stderr]    Compiling getrandom v0.2.17
+[stderr]    Compiling dlopen2_derive v0.4.2
+[stderr] error[E0658]: `let` expressions in this position are unstable
+  --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dlopen2_derive-0.4.2/src/common.rs:20:20
+   |
+20 |                 if let Some(ident) = meta.path.get_ident()
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: see issue #53667 <https://github.com/rust-lang/rust/issues/53667> for more information
 
-Caused by:
-  unable to get packages from source
+[stderr] error[E0658]: `let` expressions in this position are unstable
+  --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dlopen2_derive-0.4.2/src/common.rs:42:16
+   |
+42 |             if let Some(ident) = attr.path().get_ident()
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: see issue #53667 <https://github.com/rust-lang/rust/issues/53667> for more information
 
-Caused by:
-  failed to download replaced source registry `crates-io`
-
-Caused by:
-  failed to parse manifest at `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dlopen2_derive-0.4.2/Cargo.toml`
-
-Caused by:
-[stderr]   feature `edition2024` is required
-
-  The package requires the Cargo feature called `edition2024`, but that feature is not stabilized in this version of Cargo (1.77.2 (e52e36006 2024-03-26)).
-  Consider trying a newer version of Cargo (this may require the nightly release).
-  See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#edition-2024 for more information about the status of this feature.
-[stderr] failed to build app: failed to build app[stderr] 
+[stderr] For more information about this error, try `rustc --explain E0658`.
+[stderr] error: could not compile `dlopen2_derive` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+[stderr] failed to build app: failed to build app
 [stderr]        Error [tauri_cli_node] failed to build app: failed to build app
 ```
 
@@ -232,7 +232,7 @@ Caused by:
 
 ## 契约采集结果
 
-- 跟踪文件：122 个。
+- 跟踪文件：129 个。
 - 冻结模型：9 个。
 - Tauri command 注解：19 个。
 - `generate_handler!` 注册项：19 个。
