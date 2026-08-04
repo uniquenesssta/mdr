@@ -5,10 +5,10 @@
 - 结果：**失败，阶段 0 硬性门禁未通过**
 - 后续阶段：**禁止进入阶段 1**
 - 工作流：`Stage 0 Baseline Verification`
-- Actions run：`30885986334`，attempt `1`
-- 证据工件：`stage-00-baseline-30885986334-1`
+- Actions run：`30887511179`，attempt `1`
+- 证据工件：`stage-00-baseline-30887511179-1`
 - 工作分支：`rewrite/modular-rebuild`
-- 验证提交：`07ec284bf80babaf9e484e47cf95f66730816cdd`
+- 验证提交：`d2327b04db4043c3bbbc21fdf10b0e2aca89b601`
 - 原始业务源码基线：`main@8ec8bf4ed58e6fd1c5c91466569a56ba247b6a62`
 - 运行环境：GitHub-hosted `ubuntu-22.04`、Node 22、Rust 1.77.2、Chrome headless
 
@@ -18,21 +18,21 @@
 
 | 检查 | 状态 | 退出码 | 耗时 ms |
 |---|---:|---:|---:|
-| `rust-toolchain` | passed | 0 | 8128 |
-| `tauri-system-deps` | passed | 0 | 27019 |
-| `npm-ci` | passed | 0 | 6185 |
-| `npm-test` | passed | 0 | 512 |
-| `browser-contract` | passed | 0 | 6198 |
-| `frontend-build` | passed | 0 | 10911 |
-| `browser-app` | failed | 1 | 161692 |
-| `cargo-test` | passed | 0 | 112093 |
-| `cargo-check` | passed | 0 | 67282 |
+| `rust-toolchain` | passed | 0 | 8668 |
+| `tauri-system-deps` | passed | 0 | 22760 |
+| `npm-ci` | passed | 0 | 6387 |
+| `npm-test` | passed | 0 | 434 |
+| `browser-contract` | passed | 0 | 6467 |
+| `frontend-build` | passed | 0 | 11236 |
+| `browser-app` | failed | 1 | 9325 |
+| `cargo-test` | passed | 0 | 110402 |
+| `cargo-check` | passed | 0 | 66678 |
 
 ### 扩展检查
 
 | 检查 | 状态 | 退出码 | 耗时 ms |
 |---|---:|---:|---:|
-| `tauri-build` | passed | 0 | 226061 |
+| `tauri-build` | passed | 0 | 226329 |
 
 ## 已通过路径
 
@@ -50,9 +50,7 @@
 
 `npm run test:browser` 共执行 7 项，2 项通过、5 项失败：
 
-- application code block placeholder never receives a phantom source highlight (669ms)
-- application Mermaid presentation stays normalized across hybrid and preview layouts (39229ms)
-- application source edit exits when pointer moves outside the source range (30241ms)
+- application code block placeholder never receives a phantom source highlight (683ms)
 
 这些失败发生在当前未修改的业务实现上。阶段 0 不修改实现，因此本节点仅冻结现象并阻止进入后续重写阶段。
 
@@ -65,8 +63,8 @@
 > node tests/e2e/run-browser-tests.mjs --app
 
 [stdout] Browser artifacts: /home/runner/work/mdr/mdr/artifacts/stage-00/browser
-[stdout] ok - application switches deterministically across every layout mode (8548ms)
-[stderr] not ok - application code block placeholder never receives a phantom source highlight (669ms)
+[stdout] ok - application switches deterministically across every layout mode (850ms)
+[stderr] not ok - application code block placeholder never receives a phantom source highlight (683ms)
 [stderr] AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
 
 0 !== 1
@@ -74,29 +72,22 @@
     at file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:336:14
     at async test (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:27:5)
     at async runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:325:5)
-    at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:414:13
+    at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:416:13
 [stderr]   screenshot: /home/runner/work/mdr/mdr/artifacts/stage-00/browser/02-application-code-block-placeholder-never-receives-a-phantom-source-highlight.png
-[stdout] ok - application code block ignores single click and opens on strict double click (25278ms)
-[stdout] ok - application keeps only one direct editor active (25362ms)
-[stderr] not ok - application Mermaid presentation stays normalized across hybrid and preview layouts (39229ms)
-[stderr] Error: Timed out waiting for hybrid Mermaid SVG
-    at CdpPage.waitFor (file:///home/runner/work/mdr/mdr/tests/e2e/lib/cdp-browser.mjs:200:11)
-    at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:367:7
-    at async test (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:27:5)
-    at async runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:364:5)
-    at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:414:13
-[stderr]   screenshot: /home/runner/work/mdr/mdr/artifacts/stage-00/browser/05-application-mermaid-presentation-stays-normalized-across-hybrid-and-preview-layouts.png
-[stderr] not ok - application source edit exits when pointer moves outside the source range (30241ms)
-[stderr] Error: Timed out waiting for source range close
-    at CdpPage.waitFor (file:///home/runner/work/mdr/mdr/tests/e2e/lib/cdp-browser.mjs:200:11)
-    at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:385:7
-    at async test (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:27:5)
-    at async runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:376:5)
-    at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:414:13
-[stderr]   screenshot: /home/runner/work/mdr/mdr/artifacts/stage-00/browser/06-application-source-edit-exits-when-pointer-moves-outside-the-source-range.png
-[stdout] ok - application pointer drag maps to exact editor characters (29875ms)
-[stdout] 
-Browser tests: 7, passed: 4, failed: 3
+[stdout] ok - application code block ignores single click and opens on strict double click (801ms)
+[stdout] ok - application keeps only one direct editor active (875ms)
+[stdout] ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1311ms)
+[stdout] ok - application source edit exits when pointer moves outside the source range (962ms)
+[stdout] ok - application pointer drag maps to exact editor characters (1538ms)
+[stderr] file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:405
+      throw new Error(`Browser exceptions detected: ${JSON.stringify(browser.page.exceptions.slice(0, 3))}`);
+            ^
+
+Error: Browser exceptions detected: [{"exceptionId":1,"text":"Uncaught","lineNumber":361,"columnNumber":45264,"scriptId":"11","url":"https://markdown-editor-app.test/assets/index-Bp1Eelii.js","stackTrace":{"callFrames":[{"functionName":"","scriptId":"11","url":"https://markdown-editor-app.test/assets/index-Bp1Eelii.js","lineNumber":361,"columnNumber":45264}]},"exception":{"type":"object","subtype":"error","className":"ReferenceError","description":"ReferenceError: scheduleHybridWidgetGeometry is not defined\n    at https://markdown-editor-app.test/assets/index-Bp1Eelii.js:362:45265","objectId":"-3167483578020616641.1.16","preview":{"type":"object","subtype":"error","description":"ReferenceError: scheduleHybridWidgetGeometry is not defined\n    at https://markdown-editor-app.test/assets/index-Bp1Eelii.js:362:45265","overflow":false,"properties":[{"name":"stack","type":"string","value":"ReferenceError: scheduleHybridWidgetGeometry is no…ditor-app.test/assets/index-Bp1Eelii.js:362:45265"},{"name":"message","type":"string","value":"scheduleHybridWidgetGeometry is not defined"}]}},"executionContextId":1}]
+    at runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:405:13)
+    at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:416:13
+
+Node.js v22.23.1
 ```
 
 </details>
@@ -135,16 +126,16 @@ Browser tests: 7, passed: 4, failed: 3
      = note: `#[warn(unused_imports)]` on by default
 
 [stderr] warning: `markdown-editor` (bin "markdown-editor" test) generated 1 warning
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 51s
+[stderr]     Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 49s
 [stderr]      Running unittests src/main.rs (src-tauri/target/debug/deps/markdown_editor-b81fe3d9e1fe4efd)
 [stdout] 
 running 12 tests
 [stdout] test document_store::tests::alternates_snapshot_slots_without_overwriting_current_snapshot ... ok
 [stdout] test document_store::tests::applies_utf16_changes_for_chinese_and_emoji ... ok
-test document_store::tests::builds_sparse_index_and_ignores_fenced_headings ... ok
+test document_store::tests::builds_sparse_index_and_ignores_fenced_headings ... ok[stdout] 
 [stdout] test external_link::tests::accepts_supported_schemes ... ok
 [stdout] test external_link::tests::rejects_unsupported_schemes ... ok
-[stdout] test local_file::tests::lists_supported_text_files_as_a_nested_tree ... ok
+[stdout] test local_file::tests::lists_supported_text_files_as_a_nested_tree ... [stdout] ok[stdout] 
 [stdout] test local_file::tests::recognizes_supported_text_extensions_case_insensitively ... ok
 [stdout] test local_file::tests::resolves_relative_image_against_document_directory ... ok
 [stdout] test local_file::tests::writes_text_and_binary_to_absolute_paths ... ok
@@ -152,7 +143,7 @@ test document_store::tests::builds_sparse_index_and_ignores_fenced_headings ... 
 [stdout] test document_store::tests::falls_back_to_other_snapshot_slot_when_latest_is_corrupt ... ok
 [stdout] test document_store::tests::saves_million_character_snapshot_from_chunks ... ok
 
-test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
 ```
 
 </details>
@@ -161,13 +152,13 @@ test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 <summary>Tauri build 失败日志摘录</summary>
 
 ```text
-[stderr]    Compiling tracing-core v0.1.36
 [stderr]    Compiling serialize-to-javascript-impl v0.1.2
-[stderr]    Compiling compression-core v0.4.32
-[stderr]    Compiling atomic-waker v1.1.2
+[stderr]    Compiling tracing-core v0.1.36
 [stderr]    Compiling subtle v2.6.1
-[stderr]    Compiling hyper v1.10.1
+[stderr]    Compiling atomic-waker v1.1.2
+[stderr]    Compiling compression-core v0.4.32
 [stderr]    Compiling compression-codecs v0.4.38
+[stderr]    Compiling hyper v1.10.1
 [stderr]    Compiling serialize-to-javascript v0.1.2
 [stderr]    Compiling tracing v0.1.44
 [stderr]    Compiling tauri-macros v2.6.3
@@ -176,10 +167,10 @@ test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 [stderr]    Compiling serde_repr v0.1.20
 [stderr]    Compiling sync_wrapper v1.0.2
 [stderr]    Compiling ipnet v2.12.0
-[stderr]    Compiling tower-layer v0.3.3
-[stderr]    Compiling rfd v0.16.0
-[stderr]    Compiling futures-sink v0.3.32
 [stderr]    Compiling mime v0.3.17
+[stderr]    Compiling tower-layer v0.3.3
+[stderr]    Compiling futures-sink v0.3.32
+[stderr]    Compiling rfd v0.16.0
 [stderr]    Compiling tokio-util v0.7.18
 [stderr]    Compiling tower v0.5.3
 [stderr]    Compiling hyper-util v0.1.20
@@ -241,14 +232,14 @@ test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 - `package-lock.json`：2674 行，94961 bytes。
 - `public/app/core.js`：2418 行，101501 bytes。
 - `public/i18n.js`：1906 行，104672 bytes。
-- `src/editor/hybrid/widgets.js`：1785 行，66404 bytes。
+- `src/editor/hybrid/widgets.js`：1788 行，66491 bytes。
 - `public/app/scroll-sync.js`：1369 行，60811 bytes。
 - `public/app/preview.js`：1271 行，55146 bytes。
 - `src-tauri/src/document_store.rs`：1159 行，39644 bytes。
 - `public/app/editor-tools.js`：1103 行，40955 bytes。
 - `index.html`：944 行，68834 bytes。
 - `public/app/export.js`：927 行，36448 bytes。
-- `src/editor/hybrid/inline-presentation.js`：905 行，35970 bytes。
+- `src/editor/hybrid/inline-presentation.js`：921 行，36759 bytes。
 - `src/preview/virtual-preview.js`：760 行，29897 bytes。
 
 行数只作为风险信号；后续拆分仍以职责、状态所有权和依赖边界为依据。

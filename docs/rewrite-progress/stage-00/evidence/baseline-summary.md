@@ -1,9 +1,9 @@
 # Stage 0 baseline collection
 
-- Collected at: 2026-08-04T07:00:04.967Z
+- Collected at: 2026-08-04T07:22:37.882Z
 - Repository: uniquenesssta/mdr
 - Branch: 1/merge
-- Commit: bc99cae74d961cfbbea26078efbabb3adf9518bf
+- Commit: 661e3f091de0a30b27c25ff4e2295dce7419a6e1
 - Tracked files: 129
 - Source manifest entries: 129
 - Frozen model entries: 9
@@ -22,7 +22,7 @@
 - public/app/core.js: 2418 lines, 101501 bytes
 - docs/markdown-main-full-rewrite-taskbook-18-docs/01-全局架构规划与基线冻结.md: 1968 lines, 65431 bytes
 - public/i18n.js: 1906 lines, 104672 bytes
-- src/editor/hybrid/widgets.js: 1785 lines, 66404 bytes
+- src/editor/hybrid/widgets.js: 1788 lines, 66491 bytes
 - public/app/scroll-sync.js: 1369 lines, 60811 bytes
 - public/app/preview.js: 1271 lines, 55146 bytes
 - src-tauri/src/document_store.rs: 1159 lines, 39644 bytes
