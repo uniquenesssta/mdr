@@ -53,6 +53,8 @@ logs/                       # 开发者性能日志目录
 ```
 
 ## Change Log
+<!-- stage-01-node:01-02 -->
+- 2026-08-04：阶段 1 Atomic Task 1.2（最小组合根）完成：新增纯依赖注入的 `src/app/application-context.js` 与 `src/app/create-application.js`，公开 `start()`、`destroy()`、`commands` 和 `events`，构造期间不访问 DOM、Storage、Tauri 或 Worker，也未接入现有启动链；专项验证 run 30906897816 与完整基线回归 run 30906897895 全部通过。Atomic Task 1.3 尚未开始。
 <!-- stage-01-node:01-01 -->
 - 2026-08-04：阶段 1 Atomic Task 1.1（基线与模块清单）完成：建立覆盖 57 个生产 JS/Rust/CSS/HTML 文件的机器可读职责、状态所有权、生命周期、迁移处置和冻结边界清单，并新增真实导入、导出、监听器、全局写入与副作用采集器；专项验证 run 30904310568 和完整基线回归 run 30904310598 全部通过。未修改生产行为，Atomic Task 1.2 尚未开始。
 <!-- stage-00-run:30898202198:1 -->
