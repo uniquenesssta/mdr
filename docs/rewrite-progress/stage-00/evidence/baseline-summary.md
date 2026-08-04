@@ -1,9 +1,9 @@
 # Stage 0 baseline collection
 
-- Collected at: 2026-08-04T07:54:36.268Z
+- Collected at: 2026-08-04T08:08:48.495Z
 - Repository: uniquenesssta/mdr
 - Branch: 1/merge
-- Commit: f0f34992bb61cf7270f2c17a7c13d39d3c63c9d0
+- Commit: 5965a9b21e580049e33e923e7f7658e75733a469
 - Tracked files: 129
 - Source manifest entries: 129
 - Frozen model entries: 9
