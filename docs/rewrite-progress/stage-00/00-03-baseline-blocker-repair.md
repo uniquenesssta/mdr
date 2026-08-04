@@ -1,0 +1,98 @@
+# 阶段 0 / 节点 00-03：基线阻塞修复与最终验证
+
+## 节点状态
+
+- 结果：**通过**
+- 阶段门禁：`passed`
+- 工作流：`Stage 0 Baseline Verification`
+- Actions run：`30898202198`，attempt `1`
+- 证据工件：`stage-00-baseline-30898202198-1`
+- 工作分支：`rewrite/modular-rebuild`
+- 验证提交：`fb0cbe32b8fd39f5e03fd28b4c0b1a6180baf057`
+- 原始业务源码基线：`main@8ec8bf4ed58e6fd1c5c91466569a56ba247b6a62`
+- 运行环境：GitHub-hosted Ubuntu 22.04、Node 22.23.1、Rust/Cargo 1.88.0、Chrome 150 headless。
+- 后续阶段：**阶段 0 已完成，阶段 1 尚未开始**。
+
+## 实际解决的问题
+
+### 1. Rust 声明版本与锁定依赖不兼容
+
+- 将 `src-tauri/Cargo.toml` 的最低 Rust 工具链调整为 1.88.0。
+- Actions 不再硬编码 Rust 版本，而是从 `Cargo.toml` 读取唯一版本来源。
+- 保持 Rust 2021 edition、原依赖集合和锁文件不变，没有通过依赖降级或跳过 Rust 检查掩盖问题。
+
+### 2. 应用浏览器回归链路失稳
+
+- E2E 夹具改走应用文档生命周期，不再直接替换虚拟编辑器文档，避免文档身份、generation、预览重置和保存状态分叉。
+- 为虚拟化编辑器补齐目标源码范围定位，确保代码块、表格和 Mermaid 在交互前稳定挂载。
+- Mermaid 改为组件挂载后的下一帧启动异步渲染，避免“尚未连接 DOM”被当作取消。
+- 修复源码编辑关闭路径缺少 `scheduleHybridWidgetGeometry` 导入的问题。
+- 围栏组件的展示替换范围不再吞掉文档末尾真实空行。
+- 文档末尾空光标仅允许最终行获得活动源码样式，修复相邻半开区间边界同时高亮两行的问题。
+- Chromium 临时 profile 清理增加有界重试，避免功能用例全部通过后被文件系统清理竞态误判为失败。
+
+### 3. 阶段记录器错误与 Actions 提交竞争
+
+- 将阶段记录渲染、README 更新和结果持久化拆分为独立职责模块。
+- 记录内容改为读取 `verification-summary.json`，不再硬编码初始失败模板。
+- README 中阶段 0 运行记录收敛为单一最新结论，不再堆积重复错误条目。
+- 移除 Actions 内自动 `git push`，避免多个排队运行相互取消后提交缺失结果；Actions 只生成工作区文档与证据工件，正式记录由阶段节点一次性提交。
+
+## 影响文件
+
+- `.github/workflows/stage-00-baseline.yml`
+- `src-tauri/Cargo.toml`
+- `src/runtime/e2e-bridge.js`
+- `src/editor/hybrid/controller.js`
+- `src/editor/hybrid/inline-presentation.js`
+- `src/editor/hybrid/widgets.js`
+- `tests/e2e/run-browser-tests.mjs`
+- `tests/e2e/lib/cdp-browser.mjs`
+- `tests/browser-e2e-contract.test.mjs`
+- `scripts/stage-00/persist-results.mjs`
+- `scripts/stage-00/persistence/render-stage-record.mjs`
+- `scripts/stage-00/persistence/update-readme-record.mjs`
+
+## 行为与兼容性
+
+- 冻结的文档模型、增量预览、表格模型、数学范围、混合范围、选区映射、数学源码、块注册和 Rust 文档存储哈希均保持不变。
+- 公共接口、数据格式、持久化结构、配置默认值、错误语义和用户数据没有改变。
+- 代码块、Mermaid、表格、源码编辑和布局切换的既有交互语义保持不变。
+- 唯一环境兼容性变化是最低 Rust 工具链由 1.77.2 调整为 1.88.0，这是当前锁定依赖链的实际要求。
+
+## 最终验证结果
+
+| 检查 | 状态 | 退出码 | 耗时 ms |
+|---|---:|---:|---:|
+| `rust-toolchain` | passed | 0 | 8159 |
+| `tauri-system-deps` | passed | 0 | 23403 |
+| `npm-ci` | passed | 0 | 5337 |
+| `npm-test` | passed | 0 | 403 |
+| `browser-contract` | passed | 0 | 7979 |
+| `frontend-build` | passed | 0 | 11010 |
+| `browser-app` | passed | 0 | 9651 |
+| `cargo-test` | passed | 0 | 113891 |
+| `cargo-check` | passed | 0 | 67928 |
+| `tauri-build` | passed | 0 | 229619 |
+
+应用级浏览器回归共 7 项，7 项全部通过，包括：
+
+- 全布局模式确定性切换；
+- 代码块占位不产生幽灵源码高亮；
+- 单击与严格双击语义；
+- 单一直接编辑器互斥；
+- Mermaid 在混合和预览布局中的 SVG 归一化一致性；
+- 指针移出源码范围后退出源码编辑；
+- 精确字符拖选。
+
+结构化结果：`requiredPassed=true`、`extendedPassed=true`、`stageGate=passed`。
+
+## 已知限制与非门禁警告
+
+- 完整门禁运行在 Ubuntu 22.04；Windows 原生窗口、文件关联和桌面拖放仍需后续在对应平台验证。
+- `npm ci` 仍报告既有的 1 个 low、1 个 high audit 项，本阶段未擅自升级生产依赖。
+- Vite 仍报告部分产物超过 500 kB；该项作为后续模块化和加载性能治理信号记录，不影响当前构建。
+
+## 阶段结论
+
+原始基线阻塞已解决，所有已确认受影响路径均完成回归验证，临时诊断脚本和专项工作流已清理。阶段 0 完成；未开始阶段 1。
