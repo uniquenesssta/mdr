@@ -1,236 +1,114 @@
 {
-  "generatedAt": "2026-08-04T09:45:33.680Z",
+  "generatedAt": "2026-08-04T09:49:25.297Z",
   "requiredChecks": [
     {
       "id": "rust-toolchain",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "rustup toolchain install 1.88.0 --profile minimal --no-self-update && rustup default 1.88.0 && rustc --version && cargo --version"
-      ],
-      "commandLine": "\"bash\" \"-lc\" \"rustup toolchain install 1.88.0 --profile minimal --no-self-update && rustup default 1.88.0 && rustc --version && cargo --version\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:36:50.246Z",
-      "finishedAt": "2026-08-04T09:36:58.266Z",
-      "durationMs": 8020,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     },
     {
       "id": "tauri-system-deps",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev"
-      ],
-      "commandLine": "\"bash\" \"-lc\" \"sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:36:58.318Z",
-      "finishedAt": "2026-08-04T09:37:47.203Z",
-      "durationMs": 48885,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     },
     {
       "id": "npm-ci",
-      "command": "npm",
-      "args": [
-        "ci"
-      ],
-      "commandLine": "\"npm\" \"ci\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:37:49.455Z",
-      "finishedAt": "2026-08-04T09:37:53.829Z",
-      "durationMs": 4374,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     },
     {
       "id": "npm-test",
-      "command": "npm",
-      "args": [
-        "test"
-      ],
-      "commandLine": "\"npm\" \"test\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:37:53.884Z",
-      "finishedAt": "2026-08-04T09:37:54.323Z",
-      "durationMs": 439,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     },
     {
       "id": "browser-contract",
-      "command": "npm",
-      "args": [
-        "run",
-        "test:browser:contract"
-      ],
-      "commandLine": "\"npm\" \"run\" \"test:browser:contract\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:37:54.375Z",
-      "finishedAt": "2026-08-04T09:38:02.008Z",
-      "durationMs": 7633,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     },
     {
       "id": "frontend-build",
-      "command": "npm",
-      "args": [
-        "run",
-        "build"
-      ],
-      "commandLine": "\"npm\" \"run\" \"build\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:38:02.061Z",
-      "finishedAt": "2026-08-04T09:38:13.512Z",
-      "durationMs": 11451,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     },
     {
       "id": "browser-app",
-      "command": "npm",
-      "args": [
-        "run",
-        "test:browser"
-      ],
-      "commandLine": "\"npm\" \"run\" \"test:browser\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:38:13.566Z",
-      "finishedAt": "2026-08-04T09:38:23.252Z",
-      "durationMs": 9686,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     },
     {
       "id": "cargo-test",
-      "command": "cargo",
-      "args": [
-        "test",
-        "--manifest-path",
-        "src-tauri/Cargo.toml",
-        "--locked"
-      ],
-      "commandLine": "\"cargo\" \"test\" \"--manifest-path\" \"src-tauri/Cargo.toml\" \"--locked\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:38:23.308Z",
-      "finishedAt": "2026-08-04T09:40:18.401Z",
-      "durationMs": 115093,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     },
     {
       "id": "cargo-check",
-      "command": "cargo",
-      "args": [
-        "check",
-        "--manifest-path",
-        "src-tauri/Cargo.toml",
-        "--locked"
-      ],
-      "commandLine": "\"cargo\" \"check\" \"--manifest-path\" \"src-tauri/Cargo.toml\" \"--locked\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:40:18.452Z",
-      "finishedAt": "2026-08-04T09:41:28.911Z",
-      "durationMs": 70459,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     }
   ],
   "extendedChecks": [
     {
       "id": "tauri-build",
-      "command": "npm",
-      "args": [
-        "run",
-        "tauri:build",
-        "--",
-        "--verbose"
-      ],
-      "commandLine": "\"npm\" \"run\" \"tauri:build\" \"--\" \"--verbose\"",
-      "cwd": "/home/runner/work/mdr/mdr",
-      "startedAt": "2026-08-04T09:41:28.961Z",
-      "finishedAt": "2026-08-04T09:45:33.627Z",
-      "durationMs": 244666,
-      "exitCode": 0,
-      "signal": null,
-      "status": "passed",
-      "launchError": null,
-      "runner": {
-        "os": "linux",
-        "architecture": "x64",
-        "node": "v22.23.1"
-      }
+      "status": "missing",
+      "exitCode": null
     }
   ],
-  "requiredPassed": true,
-  "extendedPassed": true,
-  "stageGate": "passed",
-  "requiredFailures": [],
-  "extendedFailures": []
+  "requiredPassed": false,
+  "extendedPassed": false,
+  "stageGate": "failed",
+  "requiredFailures": [
+    {
+      "id": "rust-toolchain",
+      "status": "missing",
+      "exitCode": null
+    },
+    {
+      "id": "tauri-system-deps",
+      "status": "missing",
+      "exitCode": null
+    },
+    {
+      "id": "npm-ci",
+      "status": "missing",
+      "exitCode": null
+    },
+    {
+      "id": "npm-test",
+      "status": "missing",
+      "exitCode": null
+    },
+    {
+      "id": "browser-contract",
+      "status": "missing",
+      "exitCode": null
+    },
+    {
+      "id": "frontend-build",
+      "status": "missing",
+      "exitCode": null
+    },
+    {
+      "id": "browser-app",
+      "status": "missing",
+      "exitCode": null
+    },
+    {
+      "id": "cargo-test",
+      "status": "missing",
+      "exitCode": null
+    },
+    {
+      "id": "cargo-check",
+      "status": "missing",
+      "exitCode": null
+    }
+  ],
+  "extendedFailures": [
+    {
+      "id": "tauri-build",
+      "status": "missing",
+      "exitCode": null
+    }
+  ]
 }
