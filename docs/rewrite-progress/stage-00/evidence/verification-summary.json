@@ -1,0 +1,260 @@
+{
+  "generatedAt": "2026-08-04T06:26:55.336Z",
+  "requiredChecks": [
+    {
+      "id": "rust-toolchain",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "rustup toolchain install 1.77.2 --profile minimal --no-self-update && rustup default 1.77.2"
+      ],
+      "commandLine": "\"bash\" \"-lc\" \"rustup toolchain install 1.77.2 --profile minimal --no-self-update && rustup default 1.77.2\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:23:39.159Z",
+      "finishedAt": "2026-08-04T06:23:46.172Z",
+      "durationMs": 7014,
+      "exitCode": 0,
+      "signal": null,
+      "status": "passed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    },
+    {
+      "id": "tauri-system-deps",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev"
+      ],
+      "commandLine": "\"bash\" \"-lc\" \"sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:23:46.223Z",
+      "finishedAt": "2026-08-04T06:24:15.938Z",
+      "durationMs": 29715,
+      "exitCode": 0,
+      "signal": null,
+      "status": "passed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    },
+    {
+      "id": "npm-ci",
+      "command": "npm",
+      "args": [
+        "ci"
+      ],
+      "commandLine": "\"npm\" \"ci\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:24:18.672Z",
+      "finishedAt": "2026-08-04T06:24:24.947Z",
+      "durationMs": 6275,
+      "exitCode": 0,
+      "signal": null,
+      "status": "passed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    },
+    {
+      "id": "npm-test",
+      "command": "npm",
+      "args": [
+        "test"
+      ],
+      "commandLine": "\"npm\" \"test\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:24:24.999Z",
+      "finishedAt": "2026-08-04T06:24:25.393Z",
+      "durationMs": 393,
+      "exitCode": 0,
+      "signal": null,
+      "status": "passed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    },
+    {
+      "id": "browser-contract",
+      "command": "npm",
+      "args": [
+        "run",
+        "test:browser:contract"
+      ],
+      "commandLine": "\"npm\" \"run\" \"test:browser:contract\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:24:25.445Z",
+      "finishedAt": "2026-08-04T06:24:33.438Z",
+      "durationMs": 7993,
+      "exitCode": 0,
+      "signal": null,
+      "status": "passed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    },
+    {
+      "id": "frontend-build",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "commandLine": "\"npm\" \"run\" \"build\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:24:33.489Z",
+      "finishedAt": "2026-08-04T06:24:45.036Z",
+      "durationMs": 11547,
+      "exitCode": 0,
+      "signal": null,
+      "status": "passed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    },
+    {
+      "id": "browser-app",
+      "command": "npm",
+      "args": [
+        "run",
+        "test:browser"
+      ],
+      "commandLine": "\"npm\" \"run\" \"test:browser\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:24:45.088Z",
+      "finishedAt": "2026-08-04T06:26:40.551Z",
+      "durationMs": 115463,
+      "exitCode": 1,
+      "signal": null,
+      "status": "failed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    },
+    {
+      "id": "cargo-test",
+      "command": "cargo",
+      "args": [
+        "+1.77.2",
+        "test",
+        "--manifest-path",
+        "src-tauri/Cargo.toml",
+        "--locked"
+      ],
+      "commandLine": "\"cargo\" \"+1.77.2\" \"test\" \"--manifest-path\" \"src-tauri/Cargo.toml\" \"--locked\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:26:40.603Z",
+      "finishedAt": "2026-08-04T06:26:43.172Z",
+      "durationMs": 2569,
+      "exitCode": 101,
+      "signal": null,
+      "status": "failed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    },
+    {
+      "id": "cargo-check",
+      "command": "cargo",
+      "args": [
+        "+1.77.2",
+        "check",
+        "--manifest-path",
+        "src-tauri/Cargo.toml",
+        "--locked"
+      ],
+      "commandLine": "\"cargo\" \"+1.77.2\" \"check\" \"--manifest-path\" \"src-tauri/Cargo.toml\" \"--locked\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:26:43.224Z",
+      "finishedAt": "2026-08-04T06:26:43.396Z",
+      "durationMs": 172,
+      "exitCode": 101,
+      "signal": null,
+      "status": "failed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    }
+  ],
+  "extendedChecks": [
+    {
+      "id": "tauri-build",
+      "command": "npm",
+      "args": [
+        "run",
+        "tauri:build",
+        "--",
+        "--verbose"
+      ],
+      "commandLine": "\"npm\" \"run\" \"tauri:build\" \"--\" \"--verbose\"",
+      "cwd": "/home/runner/work/mdr/mdr",
+      "startedAt": "2026-08-04T06:26:43.445Z",
+      "finishedAt": "2026-08-04T06:26:55.287Z",
+      "durationMs": 11842,
+      "exitCode": 1,
+      "signal": null,
+      "status": "failed",
+      "launchError": null,
+      "runner": {
+        "os": "linux",
+        "architecture": "x64",
+        "node": "v22.23.1"
+      }
+    }
+  ],
+  "requiredPassed": false,
+  "extendedPassed": false,
+  "stageGate": "failed",
+  "requiredFailures": [
+    {
+      "id": "browser-app",
+      "status": "failed",
+      "exitCode": 1
+    },
+    {
+      "id": "cargo-test",
+      "status": "failed",
+      "exitCode": 101
+    },
+    {
+      "id": "cargo-check",
+      "status": "failed",
+      "exitCode": 101
+    }
+  ],
+  "extendedFailures": [
+    {
+      "id": "tauri-build",
+      "status": "failed",
+      "exitCode": 1
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "path": "src/document/document-model.js",
+    "present": true,
+    "bytes": 11803,
+    "lines": 370,
+    "sha256": "d74ef9f70d389f3cc6afaca8acc3e7b0ae0cee9790c527f92868a69c60dd83b9",
+    "scope": "algorithm and public behavior frozen"
+  },
+  {
+    "path": "src/preview/incremental-preview.js",
+    "present": true,
+    "bytes": 12010,
+    "lines": 353,
+    "sha256": "40ba7731e01d336277a20b2c9937854665e1d5bff1894529f38c353fee7ccad9",
+    "scope": "algorithm and public behavior frozen"
+  },
+  {
+    "path": "src/editor/hybrid/table-model.js",
+    "present": true,
+    "bytes": 3055,
+    "lines": 102,
+    "sha256": "c09d43ec577c294f67c18dd6aa6fae4ff119da78d4bf456b78875c0173319186",
+    "scope": "algorithm and public behavior frozen"
+  },
+  {
+    "path": "src/editor/hybrid/math-ranges.js",
+    "present": true,
+    "bytes": 6960,
+    "lines": 204,
+    "sha256": "8abe184871e44a2099e1f58f270ec0cc27a37eebfb06218982f33b0cef4f427c",
+    "scope": "algorithm and public behavior frozen"
+  },
+  {
+    "path": "src/editor/hybrid/ranges.js",
+    "present": true,
+    "bytes": 4903,
+    "lines": 127,
+    "sha256": "365b54cf15e35a71c98af5c9fa475839a1f111048bab6df5a0373b8b4bf79301",
+    "scope": "algorithm and public behavior frozen"
+  },
+  {
+    "path": "src/sync/selection-mapping.js",
+    "present": true,
+    "bytes": 28068,
+    "lines": 743,
+    "sha256": "f74121ec0086885c81e7fa3b9a85adf3d3553dfde75e043a2c826a711343ebb2",
+    "scope": "algorithm and public behavior frozen"
+  },
+  {
+    "path": "src/preview/math-source.js",
+    "present": true,
+    "bytes": 3506,
+    "lines": 100,
+    "sha256": "3d86e20d41c0c85a426d2ee83848f68527ef4f7042d9479573eeb31ffe6ba6ee",
+    "scope": "algorithm and public behavior frozen"
+  },
+  {
+    "path": "src/editor/hybrid/block-registry.js",
+    "present": true,
+    "bytes": 11756,
+    "lines": 335,
+    "sha256": "c7e7c8067dd1c0717ff0901383cd2a0e4126168405dcf9968d3700e587a5c0fe",
+    "scope": "algorithm and public behavior frozen"
+  },
+  {
+    "path": "src-tauri/src/document_store.rs",
+    "present": true,
+    "bytes": 39644,
+    "lines": 1159,
+    "sha256": "1711566aff18c164388d8466f81435adcd6fc54c444ccd4ab5ea9799e6a80715",
+    "scope": "data format and behavior contract; file may be decomposed later"
+  }
+]

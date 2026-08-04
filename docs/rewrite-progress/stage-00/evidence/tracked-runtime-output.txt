@@ -1,0 +1,4 @@
+.vite/deps/_metadata.json
+.vite/deps/package.json
+logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl
+logs/performance-2026-07-25_17-29-13-389_pid-20484.jsonl
