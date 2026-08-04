@@ -54,6 +54,26 @@ jobs:
           node-version: '22'
           cache: npm
 
+      - name: Apply pointer and Chromium cleanup fixes
+        run: node scripts/stage-00/apply-pointer-and-cleanup-fix.mjs
+
+      - name: Commit pointer and Chromium cleanup fixes
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/run-browser-tests.mjs tests/e2e/lib/cdp-browser.mjs
+          if git diff --cached --quiet; then
+            echo "Pointer and Chromium cleanup fixes are already committed."
+          else
+            git diff --cached --check
+            git commit -m "fix(stage0): use real pointer focus and robust browser cleanup"
+            git push origin "HEAD:${{ github.head_ref }}"
+          fi
+
       - name: Install declared Rust toolchain
         continue-on-error: true
         shell: bash
