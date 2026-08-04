@@ -1,0 +1,58 @@
+name: Stage 1 Atomic Verification
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - .github/workflows/stage-01-atomic.yml
+      - scripts/stage-01/**
+      - tests/architecture/**
+      - docs/rewrite-progress/stage-01/**
+      - README.md
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-01-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  module-inventory:
+    name: Verify Stage 1 module inventory
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Verify production module ownership fixture
+        run: node --test tests/architecture/module-inventory.test.mjs
+      - name: Collect machine-readable module inventory
+        run: node scripts/stage-01/collect-module-inventory.mjs --output=artifacts/stage-01/01-01-module-inventory.json
+      - name: Run existing Node regression suite
+        run: npm test
+      - name: Run browser interaction contract
+        run: npm run test:browser:contract
+      - name: Build current application
+        run: npm run build
+      - name: Upload Atomic Task evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-01-01-01-module-inventory-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-01
+          if-no-files-found: error
+          retention-days: 30
