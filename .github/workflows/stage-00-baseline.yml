@@ -24,7 +24,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: stage-00-${{ github.event.pull_request.head.ref || github.ref_name }}
@@ -132,27 +132,10 @@ jobs:
         if: always()
         run: node scripts/stage-00/summarize-results.mjs
 
-      - name: Persist Stage 0 evidence in repository
+      - name: Generate Stage 0 documentation in workspace
         if: always()
         continue-on-error: true
         run: node scripts/stage-00/persist-results.mjs
-
-      - name: Commit Stage 0 documentation
-        if: >-
-          always() && github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository
-        continue-on-error: true
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add README.md docs/rewrite-progress/stage-00
-          if git diff --cached --quiet; then
-            echo "No Stage 0 documentation changes to commit."
-          else
-            git commit -m "docs(stage0): record baseline verification run"
-            git push origin "HEAD:${{ github.head_ref }}"
-          fi
 
       - name: Upload Stage 0 evidence
         if: always()
