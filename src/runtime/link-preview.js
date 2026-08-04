@@ -1,0 +1,300 @@
+const SUPPORTED_SCHEMES = new Set(['http:', 'https:', 'mailto:', 'tel:']);
+const PREVIEWABLE_SCHEMES = new Set(['http:', 'https:']);
+
+let overlay = null;
+let frame = null;
+let titleElement = null;
+let urlElement = null;
+let closeButton = null;
+let externalButton = null;
+let currentUrl = '';
+let returnFocus = null;
+
+function report(event, details = {}, status = 'ok') {
+  window.markdownEditorPerf?.record?.(event, {
+    category: 'link.preview',
+    status,
+    details
+  });
+}
+
+function showMessage(message) {
+  if (typeof window.showToast === 'function') window.showToast(message);
+  else console.warn(message);
+}
+
+function parseDocumentUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw || raw.startsWith('#')) return null;
+
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return { raw, supported: false, reason: '链接必须使用完整的 http、https、mailto 或 tel 地址' };
+  }
+
+  if (!SUPPORTED_SCHEMES.has(parsed.protocol)) {
+    return { raw, supported: false, reason: '不支持打开此链接' };
+  }
+
+  return {
+    raw,
+    url: parsed.href,
+    protocol: parsed.protocol,
+    supported: true,
+    previewable: PREVIEWABLE_SCHEMES.has(parsed.protocol)
+  };
+}
+
+async function openInSystemBrowser(url) {
+  const value = String(url || '').trim();
+  if (!value) return;
+  report('link.preview-external-open', {
+    scheme: value.split(':', 1)[0].toLowerCase(),
+    inputLength: value.length
+  });
+
+  if (window.markdownEditorNative?.isAvailable) {
+    await window.markdownEditorNative.openExternalUrl(value);
+    return;
+  }
+
+  const opened = window.open(value, '_blank', 'noopener,noreferrer');
+  if (!opened) throw new Error('浏览器阻止了链接打开');
+}
+
+function createButton(className, label, title) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = className;
+  button.setAttribute('aria-label', label);
+  button.title = title || label;
+  return button;
+}
+
+function ensureOverlay() {
+  if (overlay) return overlay;
+
+  overlay = document.createElement('section');
+  overlay.id = 'link-preview-overlay';
+  overlay.className = 'link-preview-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.setAttribute('aria-label', '链接预览');
+
+  const toolbar = document.createElement('header');
+  toolbar.className = 'link-preview-toolbar';
+
+  const identity = document.createElement('div');
+  identity.className = 'link-preview-identity';
+
+  titleElement = document.createElement('strong');
+  titleElement.className = 'link-preview-title';
+  titleElement.textContent = '链接预览';
+
+  urlElement = document.createElement('span');
+  urlElement.className = 'link-preview-url';
+
+  identity.append(titleElement, urlElement);
+
+  const actions = document.createElement('div');
+  actions.className = 'link-preview-actions';
+
+  externalButton = createButton('link-preview-external', '在系统浏览器打开', '在系统浏览器打开');
+  externalButton.textContent = '在浏览器打开';
+  externalButton.addEventListener('click', () => {
+    openInSystemBrowser(currentUrl).catch(error => showMessage(error?.message || String(error)));
+  });
+
+  closeButton = createButton('link-preview-close', '关闭链接预览', '关闭并返回编辑器');
+  closeButton.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>';
+  closeButton.addEventListener('click', () => closeLinkPreview('close-button'));
+
+  actions.append(externalButton, closeButton);
+  toolbar.append(identity, actions);
+
+  const notice = document.createElement('div');
+  notice.className = 'link-preview-notice';
+  notice.textContent = '网页拒绝嵌入或显示异常时，可使用右上角“在浏览器打开”。';
+
+  const body = document.createElement('div');
+  body.className = 'link-preview-body';
+
+  frame = document.createElement('iframe');
+  frame.className = 'link-preview-frame';
+  frame.title = '外部链接内容';
+  frame.referrerPolicy = 'no-referrer';
+  frame.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-scripts allow-same-origin');
+  frame.setAttribute('allow', 'clipboard-read; clipboard-write');
+  frame.addEventListener('load', () => {
+    if (!currentUrl || currentUrl === 'about:blank') return;
+    overlay?.classList.remove('is-loading');
+    report('link.preview-loaded', {
+      host: safeHost(currentUrl),
+      inputLength: currentUrl.length
+    });
+  });
+
+  body.append(frame);
+  overlay.append(toolbar, notice, body);
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+function safeHost(value) {
+  try {
+    return new URL(value).host;
+  } catch {
+    return '';
+  }
+}
+
+function openLinkPreview(value, options = {}) {
+  const parsed = parseDocumentUrl(value);
+  if (!parsed?.supported) {
+    showMessage(parsed?.reason || '链接地址无效');
+    return false;
+  }
+
+  if (!parsed.previewable) {
+    openInSystemBrowser(parsed.url).catch(error => showMessage(error?.message || String(error)));
+    return true;
+  }
+
+  ensureOverlay();
+  currentUrl = parsed.url;
+  returnFocus = options.sourceElement instanceof HTMLElement ? options.sourceElement : document.activeElement;
+  titleElement.textContent = safeHost(parsed.url) || '链接预览';
+  urlElement.textContent = parsed.url;
+  urlElement.title = parsed.url;
+  overlay.classList.add('is-loading');
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.documentElement.classList.add('link-preview-open');
+  frame.src = parsed.url;
+  requestAnimationFrame(() => closeButton?.focus({ preventScroll: true }));
+
+  report('link.preview-open', {
+    host: safeHost(parsed.url),
+    source: String(options.source || 'document-link'),
+    inputLength: parsed.url.length
+  });
+  return true;
+}
+
+function closeLinkPreview(reason = 'api') {
+  if (!overlay?.classList.contains('show')) return false;
+  const closedUrl = currentUrl;
+  overlay.classList.remove('show', 'is-loading');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.documentElement.classList.remove('link-preview-open');
+  currentUrl = '';
+
+  // Stop remote audio/video and release the remote document after the close transition.
+  window.setTimeout(() => {
+    if (!overlay?.classList.contains('show') && frame) frame.src = 'about:blank';
+  }, 180);
+
+  if (returnFocus instanceof HTMLElement && returnFocus.isConnected) {
+    requestAnimationFrame(() => returnFocus.focus({ preventScroll: true }));
+  }
+  returnFocus = null;
+
+  report('link.preview-close', {
+    reason,
+    host: safeHost(closedUrl)
+  });
+  return true;
+}
+
+function findDocumentLink(event) {
+  const target = event.target instanceof Element ? event.target : null;
+  if (!target || target.closest('#link-preview-overlay')) return null;
+
+  const anchor = target.closest('a[href]');
+  if (anchor && !anchor.hasAttribute('download')) {
+    const inPreview = Boolean(anchor.closest('#preview'));
+    const inEditor = Boolean(anchor.closest('#editor'));
+    if (!inPreview && !inEditor) return null;
+    return {
+      element: anchor,
+      value: anchor.getAttribute('href'),
+      source: inPreview ? 'live-preview' : 'hybrid-html-link',
+      requiresModifier: false
+    };
+  }
+
+  const hybridLink = target.closest('[data-hybrid-link-url]');
+  if (!hybridLink || !hybridLink.closest('#editor')) return null;
+  return {
+    element: hybridLink,
+    value: hybridLink.getAttribute('data-hybrid-link-url'),
+    source: 'hybrid-markdown-link',
+    requiresModifier: false
+  };
+}
+
+function handleDocumentLinkPointerDown(event) {
+  if (event.defaultPrevented || event.button !== 0) return;
+  const link = findDocumentLink(event);
+  if (!link) return;
+
+  // A hybrid link is rendered inside CodeMirror's content DOM. Without an
+  // early pointer guard, CodeMirror processes mousedown first, moves the
+  // selection into the hidden Markdown range and reveals the source before
+  // the later click handler can open the preview. Keep the link read-only on
+  // pointer down; the click handler below owns navigation.
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function handleDocumentLinkClick(event) {
+  if (event.defaultPrevented || event.button !== 0) return;
+  const link = findDocumentLink(event);
+  if (!link) return;
+  if (link.requiresModifier && !event.ctrlKey && !event.metaKey) return;
+
+  const parsed = parseDocumentUrl(link.value);
+  if (!parsed) return; // Preserve same-document hash navigation.
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!parsed.supported) {
+    showMessage(parsed.reason);
+    report('link.preview-blocked', {
+      source: link.source,
+      reason: parsed.reason,
+      inputLength: String(link.value || '').length
+    }, 'error');
+    return;
+  }
+
+  if (event.ctrlKey || event.metaKey || event.shiftKey) {
+    openInSystemBrowser(parsed.url).catch(error => showMessage(error?.message || String(error)));
+    return;
+  }
+
+  openLinkPreview(parsed.url, {
+    source: link.source,
+    sourceElement: link.element
+  });
+}
+
+function handleKeydown(event) {
+  if (event.key !== 'Escape' || !overlay?.classList.contains('show')) return;
+  event.preventDefault();
+  event.stopPropagation();
+  closeLinkPreview('escape');
+}
+
+document.addEventListener('mousedown', handleDocumentLinkPointerDown, true);
+document.addEventListener('click', handleDocumentLinkClick, true);
+document.addEventListener('keydown', handleKeydown, true);
+
+window.markdownEditorLinkPreview = Object.freeze({
+  open: openLinkPreview,
+  close: closeLinkPreview,
+  openExternal: openInSystemBrowser,
+  isOpen: () => Boolean(overlay?.classList.contains('show'))
+});

@@ -1,0 +1,8 @@
+[
+  {"type":"code","direct":true,"source":true},
+  {"type":"mermaid","direct":true,"source":true},
+  {"type":"table","direct":true,"source":true},
+  {"type":"math","direct":false,"source":true},
+  {"type":"html","direct":false,"source":true},
+  {"type":"image","direct":false,"source":true}
+]

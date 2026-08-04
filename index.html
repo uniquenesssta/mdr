@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+</head>
+<body data-theme="light">
+
+  <!-- SVG 图标精灵 -->
+  <svg class="icon-sprite" style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true">
+    <defs>
+      <symbol id="icon-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></symbol>
+      <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></symbol>
+      <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></symbol>
+      <symbol id="icon-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></symbol>
+      <symbol id="icon-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></symbol>
+      <symbol id="icon-menu-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v5h5"></path><line x1="9" y1="12" x2="15" y2="12"></line><line x1="9" y1="16" x2="15" y2="16"></line></symbol>
+      <symbol id="icon-menu-edit" viewBox="0 0 24 24"><path d="M4 20l4.2-1 10.9-10.9a2.1 2.1 0 0 0-3-3L5.2 16z"></path><line x1="14.8" y1="6.4" x2="17.6" y2="9.2"></line></symbol>
+      <symbol id="icon-menu-view" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"></path><circle cx="12" cy="12" r="2.5"></circle></symbol>
+      <symbol id="icon-menu-insert" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></symbol>
+      <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></symbol>
+      <symbol id="icon-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></symbol>
+      <symbol id="icon-folder" viewBox="0 0 24 24"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H10l2 2h6.5A2.5 2.5 0 0 1 21 7.5v9A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z"></path></symbol>
+      <symbol id="icon-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></symbol>
+      <symbol id="icon-undo" viewBox="0 0 24 24"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></symbol>
+      <symbol id="icon-redo" viewBox="0 0 24 24"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"></path></symbol>
+      <symbol id="icon-quote" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21c0 1 0 1 1 1z"></path><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21c0 1 0 1 1 1z"></path></symbol>
+      <symbol id="icon-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></symbol>
+      <symbol id="icon-list-numbered" viewBox="0 0 24 24"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 10h2"></path><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path></symbol>
+      <symbol id="icon-task" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></symbol>
+      <symbol id="icon-code" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></symbol>
+      <symbol id="icon-braces" viewBox="0 0 24 24"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"></path><path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path></symbol>
+      <symbol id="icon-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></symbol>
+      <symbol id="icon-table" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="12" y1="3" x2="12" y2="21"></line></symbol>
+      <symbol id="icon-layout" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></symbol>
+      <symbol id="icon-chevron-left" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></symbol>
+      <symbol id="icon-chevron-right" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></symbol>
+      <symbol id="icon-minimize" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></symbol>
+      <symbol id="icon-maximize" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1.5" ry="1.5"></rect></symbol>
+      <symbol id="icon-restore" viewBox="0 0 24 24"><path d="M9 9h10v10H9z"></path><path d="M15 9V5H5v10h4"></path></symbol>
+      <symbol id="icon-upload-cloud" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></symbol>
+      <symbol id="icon-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></symbol>
+      <symbol id="icon-mermaid" viewBox="0 0 24 24">
+        <circle cx="12" cy="5" r="3"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="10" x2="7" y2="8"></line>
+        <line x1="12" y1="10" x2="17" y2="8"></line>
+        <line x1="12" y1="12" x2="7" y2="16"></line>
+        <line x1="12" y1="12" x2="17" y2="16"></line>
+        <circle cx="7" cy="17" r="2"></circle>
+        <circle cx="17" cy="17" r="2"></circle>
+        <circle cx="7" cy="7" r="2"></circle>
+        <circle cx="17" cy="7" r="2"></circle>
+      </symbol>
+    </defs>
+  </svg>
+  <div class="app">
+    <nav class="menu-bar" aria-label="应用菜单">
+      <div class="app-brand window-drag-region" aria-label="Markdown Editor">
+        <span class="app-brand-mark" aria-hidden="true">M</span>
+        <span class="app-brand-name">Markdown Editor</span>
+      </div>
+      <span class="menu-bar-divider" aria-hidden="true"></span>
+      <div class="menu-dropdown" id="file-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('file-menu')" title="文件" aria-label="文件菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="#icon-menu-file"></use></svg><span class="menu-button-label">文件</span></button>
+        <div class="menu-dropdown-list" id="file-menu">
+          <div class="menu-item" onclick="newDocument(); closeAppMenus();"><span>新建文档</span><kbd>Ctrl+N</kbd></div>
+          <div class="menu-item" onclick="triggerImportFile(); closeAppMenus();"><span>打开文件...</span><kbd>Ctrl+O</kbd></div>
+          <div class="menu-item" onclick="saveCurrentFile(); closeAppMenus();"><span>保存</span><kbd>Ctrl+S</kbd></div>
+          <div class="menu-item" onclick="saveAsMarkdown(); closeAppMenus();"><span>另存为...</span><kbd>Ctrl+Shift+S</kbd></div>
+          <div class="menu-item" onclick="renameCurrentDocument(); closeAppMenus();"><span>重命名当前文档...</span><kbd>F2</kbd></div>
+          <div class="menu-item" onclick="openSettings(); closeAppMenus();"><span>设置...</span><kbd>Ctrl+,</kbd></div>
+          <div class="menu-item menu-submenu" id="recent-files-menu-item"><span>最近打开</span><span class="menu-arrow">›</span>
+            <div class="menu-dropdown-list menu-submenu-list recent-files-menu" id="recent-files-menu"></div>
+          </div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" onclick="openUrlModal(); closeAppMenus();"><span>从网页导入 Markdown...</span></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item menu-submenu"><span>导出</span><span class="menu-arrow">›</span>
+            <div class="menu-dropdown-list menu-submenu-list">
+              <div class="menu-item" onclick="exportFile(); closeAppMenus();"><span>Markdown</span></div>
+              <div class="menu-item" onclick="exportWord(); closeAppMenus();"><span>Word</span></div>
+              <div class="menu-item" onclick="exportPDF(); closeAppMenus();"><span>PDF</span></div>
+              <div class="menu-item" onclick="exportHTML(); closeAppMenus();"><span>HTML</span></div>
+              <div class="menu-item" onclick="openExportImageModal(); closeAppMenus();"><span>图片...</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="menu-dropdown" id="edit-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('edit-menu')" title="编辑" aria-label="编辑菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="#icon-menu-edit"></use></svg><span class="menu-button-label">编辑</span></button>
+        <div class="menu-dropdown-list" id="edit-menu">
+          <div class="menu-item" onclick="undo(); closeAppMenus();"><span>撤销</span><kbd>Ctrl+Z</kbd></div>
+          <div class="menu-item" onclick="redo(); closeAppMenus();"><span>重做</span><kbd>Ctrl+Y</kbd></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" onclick="formatBold(); closeAppMenus();"><span>加粗</span><kbd>Ctrl+B</kbd></div>
+          <div class="menu-item" onclick="formatItalic(); closeAppMenus();"><span>斜体</span><kbd>Ctrl+I</kbd></div>
+          <div class="menu-item" onclick="formatUnderline(); closeAppMenus();"><span>下划线</span><kbd>Ctrl+U</kbd></div>
+          <div class="menu-item" onclick="openFindModal(); closeAppMenus();"><span>查找 / 替换...</span><kbd>Ctrl+F</kbd></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" onclick="clearDoc(); closeAppMenus();"><span>清空当前文档</span></div>
+        </div>
+      </div>
+      <div class="menu-dropdown" id="view-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('app-view-menu')" title="视图" aria-label="视图菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="#icon-menu-view"></use></svg><span class="menu-button-label">视图</span></button>
+        <div class="menu-dropdown-list" id="app-view-menu">
+          <div class="menu-item" onclick="toggleSidebar(); closeAppMenus();"><span>显示 / 隐藏侧边栏</span><kbd>Ctrl+Shift+B</kbd></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" onclick="setLayoutMode('both'); closeAppMenus();"><span>编辑 + 预览</span></div>
+          <div class="menu-item" onclick="setLayoutMode('edit'); closeAppMenus();"><span>仅编辑</span></div>
+          <div class="menu-item" onclick="setLayoutMode('preview'); closeAppMenus();"><span>仅预览</span></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" onclick="togglePageFullscreen(); closeAppMenus();"><span>专注模式</span><kbd>F11</kbd></div>
+          <div class="menu-item" onclick="toggleFullscreen(); closeAppMenus();"><span>系统全屏</span></div>
+        </div>
+      </div>
+      <div class="menu-dropdown" id="insert-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('insert-menu')" title="插入" aria-label="插入菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="#icon-menu-insert"></use></svg><span class="menu-button-label">插入</span></button>
+        <div class="menu-dropdown-list" id="insert-menu">
+          <div class="menu-item menu-submenu"><span>标题</span><span class="menu-arrow">›</span>
+            <div class="menu-dropdown-list menu-submenu-list">
+              <div class="menu-item" onclick="insertHeading(1); closeAppMenus();"><span>H1 一级标题</span></div>
+              <div class="menu-item" onclick="insertHeading(2); closeAppMenus();"><span>H2 二级标题</span></div>
+              <div class="menu-item" onclick="insertHeading(3); closeAppMenus();"><span>H3 三级标题</span></div>
+              <div class="menu-item" onclick="insertHeading(4); closeAppMenus();"><span>H4 四级标题</span></div>
+              <div class="menu-item" onclick="insertHeading(5); closeAppMenus();"><span>H5 五级标题</span></div>
+              <div class="menu-item" onclick="insertHeading(6); closeAppMenus();"><span>H6 六级标题</span></div>
+            </div>
+          </div>
+          <div class="menu-item" onclick="insertLink(); closeAppMenus();"><span>链接</span><kbd>Ctrl+K</kbd></div>
+          <div class="menu-item" onclick="openImageModal(); closeAppMenus();"><span>图片...</span><kbd>Ctrl+Shift+K</kbd></div>
+          <div class="menu-item" onclick="insertTable(3, 3); closeAppMenus();"><span>表格 3 × 3</span></div>
+          <div class="menu-item menu-switch-item" id="table-visual-editing-toggle" role="menuitemcheckbox" aria-checked="false" onclick="toggleTableVisualEditing(event)">
+            <span>表格深度可视化编辑</span>
+            <span class="menu-inline-switch" aria-hidden="true"><span class="menu-inline-switch-track"><span class="menu-inline-switch-thumb"></span></span><span class="menu-inline-switch-state">关</span></span>
+          </div>
+          <div class="menu-item menu-switch-item" id="code-visual-editing-toggle" role="menuitemcheckbox" aria-checked="false" onclick="toggleCodeVisualEditing(event)">
+            <span>代码块深度可视化编辑</span>
+            <span class="menu-inline-switch" aria-hidden="true"><span class="menu-inline-switch-track"><span class="menu-inline-switch-thumb"></span></span><span class="menu-inline-switch-state">关</span></span>
+          </div>
+          <div class="menu-item menu-submenu"><span>数学公式</span><span class="menu-arrow">›</span>
+            <div class="menu-dropdown-list menu-submenu-list">
+              <div class="menu-item" onclick="insertInlineMath(); closeAppMenus();"><span>行内公式 $…$</span></div>
+              <div class="menu-item" onclick="insertBlockMath(); closeAppMenus();"><span>块级公式 $$…$$</span></div>
+            </div>
+          </div>
+          <div class="menu-item" onclick="openMermaidModal(); closeAppMenus();"><span>Mermaid 图表...</span></div>
+        </div>
+      </div>
+      <div class="menu-dropdown" id="help-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('help-menu')" title="帮助" aria-label="帮助菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="#icon-help"></use></svg><span class="menu-button-label">帮助</span></button>
+        <div class="menu-dropdown-list" id="help-menu">
+          <div class="menu-item" onclick="openHelp(); closeAppMenus();"><span>使用帮助</span></div>
+        </div>
+      </div>
+      <div class="menu-bar-spacer window-drag-region"></div>
+      <div class="window-controls" id="window-controls" hidden aria-label="窗口控制">
+        <button type="button" class="window-control-btn" id="window-minimize-btn" title="最小化" aria-label="最小化">
+          <svg class="icon"><use href="#icon-minimize"></use></svg>
+        </button>
+        <button type="button" class="window-control-btn" id="window-maximize-btn" title="最大化" aria-label="最大化" data-maximized="false">
+          <svg class="icon"><use href="#icon-maximize"></use></svg>
+        </button>
+        <button type="button" class="window-control-btn close" id="window-close-btn" title="关闭" aria-label="关闭">
+          <svg class="icon"><use href="#icon-close"></use></svg>
+        </button>
+      </div>
+    </nav>
+    <input type="text" id="filename" value="未命名文档.md" hidden>
+    <input type="file" id="importFile" accept=".md,.markdown,.txt" onchange="importFile(this)" hidden>
+
+    <div class="editor-toolbar">
+      <div class="format-group">
+        <button onclick="undo()" data-i18n-title="undoTitle" title="撤销 Ctrl+Z"><svg class="icon"><use href="#icon-undo"></use></svg></button>
+        <button onclick="redo()" data-i18n-title="redoTitle" title="重做 Ctrl+Y / Ctrl+Shift+Z"><svg class="icon"><use href="#icon-redo"></use></svg></button>
+        <span class="divider"></span>
+        <button onclick="formatBold()" data-toolbar-item="bold" data-i18n-title="boldTitle" title="加粗 Ctrl+B"><b>B</b></button>
+        <button onclick="formatItalic()" data-toolbar-item="italic" data-i18n-title="italicTitle" title="斜体 Ctrl+I"><i>I</i></button>
+        <button onclick="formatUnderline()" data-toolbar-item="underline" data-i18n-title="underlineTitle" title="下划线 Ctrl+U"><u>U</u></button>
+        <button onclick="formatStrikethrough()" data-toolbar-item="strikethrough" data-i18n-title="strikethroughTitle" title="删除线"><s>S</s></button>
+        <button onclick="formatSubscript()" data-toolbar-item="script" data-i18n-title="subscriptTitle" title="下标">x₂</button>
+        <button onclick="formatSuperscript()" data-toolbar-item="script" data-i18n-title="superscriptTitle" title="上标">x²</button>
+        <div class="dropdown color-dropdown" id="text-color-dropdown" data-toolbar-item="textColor">
+          <button type="button" id="text-color-button" class="color-tool-button" onclick="toggleInlineColorMenu('text')" title="文字颜色（请先选择文字）" aria-haspopup="true" aria-expanded="false" disabled>
+            <span class="color-tool-glyph">A</span><span class="color-tool-indicator" id="text-color-indicator"></span><svg class="icon icon-sm"><use href="#icon-chevron-down"></use></svg>
+          </button>
+          <div class="dropdown-menu color-menu" id="text-color-menu">
+            <strong>文字颜色</strong>
+            <div class="color-swatches" aria-label="文字颜色预设">
+              <button type="button" class="color-swatch" style="--swatch-color:#1a1d23" title="黑色" onclick="applyInlineColor('text','#1a1d23')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#6b7280" title="灰色" onclick="applyInlineColor('text','#6b7280')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#dc2626" title="红色" onclick="applyInlineColor('text','#dc2626')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#ea580c" title="橙色" onclick="applyInlineColor('text','#ea580c')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#ca8a04" title="黄色" onclick="applyInlineColor('text','#ca8a04')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#16a34a" title="绿色" onclick="applyInlineColor('text','#16a34a')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#0891b2" title="青色" onclick="applyInlineColor('text','#0891b2')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#2563eb" title="蓝色" onclick="applyInlineColor('text','#2563eb')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#7c3aed" title="紫色" onclick="applyInlineColor('text','#7c3aed')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#db2777" title="粉色" onclick="applyInlineColor('text','#db2777')"></button>
+            </div>
+            <div class="color-menu-actions">
+              <label class="custom-color-action">自定义<input type="color" id="custom-text-color" value="#2563eb" onchange="applyInlineColor('text',this.value)"></label>
+              <button type="button" onclick="clearInlineColor('text')">清除颜色</button>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown color-dropdown" id="highlight-color-dropdown" data-toolbar-item="highlight">
+          <button type="button" id="highlight-color-button" class="color-tool-button" onclick="toggleInlineColorMenu('highlight')" title="文字高亮（请先选择文字）" aria-haspopup="true" aria-expanded="false" disabled>
+            <span class="color-tool-glyph color-tool-highlight">A</span><span class="color-tool-indicator" id="highlight-color-indicator"></span><svg class="icon icon-sm"><use href="#icon-chevron-down"></use></svg>
+          </button>
+          <div class="dropdown-menu color-menu" id="highlight-color-menu">
+            <strong>文字高亮</strong>
+            <div class="color-swatches" aria-label="文字高亮预设">
+              <button type="button" class="color-swatch" style="--swatch-color:#fff3a3" title="黄色" onclick="applyInlineColor('highlight','#fff3a3')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#fed7aa" title="橙色" onclick="applyInlineColor('highlight','#fed7aa')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#fecaca" title="红色" onclick="applyInlineColor('highlight','#fecaca')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#bbf7d0" title="绿色" onclick="applyInlineColor('highlight','#bbf7d0')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#bae6fd" title="蓝色" onclick="applyInlineColor('highlight','#bae6fd')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#ddd6fe" title="紫色" onclick="applyInlineColor('highlight','#ddd6fe')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#fbcfe8" title="粉色" onclick="applyInlineColor('highlight','#fbcfe8')"></button>
+              <button type="button" class="color-swatch" style="--swatch-color:#e5e7eb" title="灰色" onclick="applyInlineColor('highlight','#e5e7eb')"></button>
+            </div>
+            <div class="color-menu-actions">
+              <label class="custom-color-action">自定义<input type="color" id="custom-highlight-color" value="#fff3a3" onchange="applyInlineColor('highlight',this.value)"></label>
+              <button type="button" onclick="clearInlineColor('highlight')">清除高亮</button>
+            </div>
+          </div>
+        </div>
+        <span class="divider"></span>
+        <div class="dropdown" id="heading-dropdown" data-toolbar-item="heading">
+          <button onclick="toggleHeadingMenu()" data-i18n-title="heading" title="标题">H <svg class="icon icon-sm"><use href="#icon-chevron-down"></use></svg></button>
+          <div class="dropdown-menu" id="heading-menu">
+            <div class="dropdown-item" onclick="insertHeading(1); closeHeadingMenu();" data-i18n="headingH1">H1 一级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(2); closeHeadingMenu();" data-i18n="headingH2">H2 二级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(3); closeHeadingMenu();" data-i18n="headingH3">H3 三级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(4); closeHeadingMenu();" data-i18n="headingH4">H4 四级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(5); closeHeadingMenu();" data-i18n="headingH5">H5 五级标题</div>
+            <div class="dropdown-item" onclick="insertHeading(6); closeHeadingMenu();" data-i18n="headingH6">H6 六级标题</div>
+          </div>
+        </div>
+        <span class="divider"></span>
+        <button onclick="formatQuote()" data-toolbar-item="quote" data-i18n-title="quote" title="引用"><svg class="icon"><use href="#icon-quote"></use></svg> <span data-i18n="quote">引用</span></button>
+        <button onclick="formatUnorderedList()" data-toolbar-item="lists" data-i18n-title="unordered" title="无序列表"><svg class="icon"><use href="#icon-list"></use></svg> <span data-i18n="unordered">无序</span></button>
+        <button onclick="formatOrderedList()" data-toolbar-item="lists" data-i18n-title="ordered" title="有序列表"><svg class="icon"><use href="#icon-list-numbered"></use></svg> <span data-i18n="ordered">有序</span></button>
+        <button onclick="formatTaskList()" data-toolbar-item="lists" data-i18n-title="task" title="任务列表"><svg class="icon"><use href="#icon-task"></use></svg> <span data-i18n="task">任务</span></button>
+        <span class="divider"></span>
+        <button onclick="insertCodeRow()" data-toolbar-item="code" data-i18n-title="inlineCode" title="行内代码"><svg class="icon"><use href="#icon-code"></use></svg> <span data-i18n="inlineCode">行内代码</span></button>
+        <button onclick="insertCode()" data-toolbar-item="code" data-i18n-title="codeBlock" title="代码块"><svg class="icon"><use href="#icon-braces"></use></svg></button>
+        <button onclick="insertLink()" data-toolbar-item="link" data-i18n-title="link" title="插入链接 Ctrl+K"><svg class="icon"><use href="#icon-link"></use></svg> <span data-i18n="link">链接</span></button>
+        <button onclick="openImageModal()" data-toolbar-item="image" data-i18n-title="image" title="插入图片 Ctrl+Shift+K"><svg class="icon"><use href="#icon-image"></use></svg> <span data-i18n="image">图片</span></button>
+        <div class="dropdown" id="table-dropdown" data-toolbar-item="table">
+          <button onclick="toggleTableMenu()" data-i18n-title="table" title="插入表格"><svg class="icon"><use href="#icon-table"></use></svg> <span data-i18n="table">表格</span></button>
+          <div class="dropdown-menu table-selector-menu" id="table-menu">
+            <div class="table-grid" id="table-grid"></div>
+            <div class="table-size-label" id="table-size-label">0 行 × 0 列</div>
+          </div>
+        </div>
+        <button onclick="openFindModal()" data-toolbar-item="find" data-i18n-title="find" title="查找替换 Ctrl+F"><svg class="icon"><use href="#icon-search"></use></svg> <span data-i18n="find">查找</span></button>
+        <button onclick="openMermaidModal()" data-toolbar-item="mermaid" data-i18n-title="mermaid" title="插入 Mermaid 图表"><svg class="icon"><use href="#icon-mermaid"></use></svg> <span data-i18n="mermaid">Mermaid</span></button>
+      </div>
+      <div class="editor-actions">
+        <div class="dropdown" id="view-dropdown">
+          <button onclick="toggleViewMenu()" data-i18n-title="view" title="视图布局"><svg class="icon"><use href="#icon-layout"></use></svg> <span data-i18n="view">视图</span> <svg class="icon icon-sm"><use href="#icon-chevron-down"></use></svg></button>
+          <div class="dropdown-menu" id="view-menu">
+            <div class="dropdown-item" onclick="setLayoutMode('both'); closeViewMenu();" data-i18n="viewBoth">编辑 + 预览</div>
+            <div class="dropdown-item" onclick="setLayoutMode('hybrid'); closeViewMenu();" data-i18n="viewHybrid">单视图混合编辑</div>
+            <div class="dropdown-item" onclick="setLayoutMode('edit'); closeViewMenu();" data-i18n="viewEdit">仅编辑</div>
+            <div class="dropdown-item" onclick="setLayoutMode('preview'); closeViewMenu();" data-i18n="viewPreview">仅预览</div>
+            <div class="dropdown-item" onclick="togglePageFullscreen(); closeViewMenu();" data-i18n="pageFullscreen">页面全屏</div>
+            <div class="dropdown-item" onclick="toggleFullscreen(); closeViewMenu();" data-i18n="systemFullscreen">系统全屏</div>
+          </div>
+        </div>
+        <button onclick="toggleTheme()" data-i18n-title="theme" title="切换主题"><svg class="icon"><use href="#icon-sun"></use></svg> <span data-i18n="theme">主题</span></button>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-heading">
+            <span class="sidebar-kicker">WORKSPACE</span>
+            <strong>内容导航</strong>
+          </div>
+          <button onclick="toggleSidebar()" title="隐藏侧边栏"><svg class="icon icon-sm"><use href="#icon-chevron-left"></use></svg></button>
+        </div>
+        <div class="sidebar-tabs">
+          <button class="active" id="sidebar-docs-tab" onclick="setSidebarTab('docs')"><svg class="icon icon-sm"><use href="#icon-book"></use></svg><span>文档</span></button>
+          <button id="sidebar-files-tab" onclick="setSidebarTab('files')" title="文件树：当前文件所在文件夹"><svg class="icon icon-sm"><use href="#icon-folder"></use></svg><span>文件</span></button>
+          <button id="sidebar-outline-tab" onclick="setSidebarTab('outline')"><svg class="icon icon-sm"><use href="#icon-list"></use></svg><span>大纲</span></button>
+        </div>
+        <section class="sidebar-panel active" id="sidebar-docs-panel" oncontextmenu="openSidebarContextMenu(event)">
+          <div class="document-list" id="document-list"></div>
+        </section>
+        <section class="sidebar-panel sidebar-files-panel" id="sidebar-files-panel">
+          <div class="folder-tree-header">
+            <div class="folder-tree-root-summary">
+              <strong id="folder-file-tree-root">未关联文件夹</strong>
+              <small id="folder-file-tree-summary"></small>
+            </div>
+            <button type="button" id="folder-file-tree-refresh" class="folder-tree-refresh" title="刷新文件树" aria-label="刷新文件树"><svg class="icon icon-sm"><use href="#icon-redo"></use></svg></button>
+          </div>
+          <div class="folder-file-tree" id="folder-file-tree"></div>
+        </section>
+        <section class="sidebar-panel" id="sidebar-outline-panel" oncontextmenu="openOutlineContextMenu(event)">
+          <div class="outline-list" id="outline-list"></div>
+        </section>
+      </aside>
+      <div class="sidebar-resizer" id="sidebar-resizer" role="separator" aria-orientation="vertical" aria-label="调整侧边栏宽度" title="拖动调整侧边栏宽度"></div>
+
+      <div class="main">
+        <div class="pane editor-pane">
+          <div class="pane-header">
+            <span class="pane-title" data-i18n="editorPaneTitle">编辑</span>
+            <span class="editor-presentation-badge" id="editor-presentation-badge" hidden data-i18n="viewHybrid">单视图混合编辑</span>
+            <span data-i18n="editorPaneHint">支持 Markdown 语法</span>
+            <button class="collapse-btn" id="editor-collapse-btn" onclick="togglePane('editor')" title="收起编辑区"><svg class="icon icon-sm"><use href="#icon-chevron-left"></use></svg></button>
+          </div>
+          <div id="editor" class="virtual-editor-host" data-i18n-placeholder="editorPlaceholder" data-placeholder="开始输入 Markdown..."></div>
+        </div>
+        <div class="resizer" id="resizer"></div>
+        <div class="pane preview-pane">
+          <div class="pane-header">
+            <button class="collapse-btn" id="preview-collapse-btn" onclick="togglePane('preview')" title="收起预览区"><svg class="icon icon-sm"><use href="#icon-chevron-right"></use></svg></button>
+            <span class="pane-title" data-i18n="previewPaneTitle">实时预览</span>
+            <span class="preview-strategy-badge" id="preview-strategy-badge" hidden></span>
+            <span id="word-count">0 字</span>
+          </div>
+          <div class="preview-content" id="preview"></div>
+          <textarea id="preview-source" class="preview-source" data-i18n-placeholder="previewSourcePlaceholder" placeholder="在此编辑 Markdown 源码..." spellcheck="false" hidden></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <div class="statusbar-left">
+        <div class="app-mode-badge statusbar-mode-badge" title="本地优先，无需联网">
+          <span class="app-mode-dot" aria-hidden="true"></span>
+          <span>本地编辑</span>
+        </div>
+        <span id="status-left" hidden aria-hidden="true"></span>
+      </div>
+      <span class="save-hint" id="save-hint">✓ 已保存</span>
+      <span class="statusbar-spacer"></span>
+      <span class="statusbar-format">Markdown</span>
+    </div>
+
+    <!-- 拖放文件提示遮罩 -->
+    <div class="drop-overlay" id="drop-overlay">
+      <div class="drop-message"><svg class="icon icon-lg"><use href="#icon-upload-cloud"></use></svg> <span data-i18n="dropMessage">释放以打开文件或插入图片</span></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="context-menu" id="document-context-menu" role="menu">
+    <button onclick="openContextDocument(); closeContextMenus();">打开</button>
+    <button onclick="renameContextDocument(); closeContextMenus();">重命名...</button>
+    <button onclick="duplicateContextDocument(); closeContextMenus();">复制副本</button>
+    <button onclick="saveAsContextDocument(); closeContextMenus();">另存为...</button>
+    <button onclick="exportContextDocument(); closeContextMenus();">导出 Markdown</button>
+    <button onclick="copyContextDocumentTitle(); closeContextMenus();">复制文件名</button>
+    <div class="context-separator"></div>
+    <button onclick="closeContextDocument(); closeContextMenus();">关闭文档</button>
+  </div>
+
+  <div class="context-menu" id="sidebar-context-menu" role="menu">
+    <button onclick="newDocument(); closeContextMenus();">新建文档</button>
+    <button onclick="duplicateDocument(); closeContextMenus();">复制当前文档</button>
+    <button onclick="triggerImportFile(); closeContextMenus();">打开文件...</button>
+    <button onclick="openUrlModal(); closeContextMenus();">从网页导入 Markdown...</button>
+  </div>
+
+
+  <div class="context-menu" id="outline-context-menu" role="menu">
+    <button onclick="expandAllOutline(); closeContextMenus();">展开全部大纲</button>
+    <button onclick="collapseAllOutline(); closeContextMenus();">折叠全部大纲</button>
+    <div class="context-separator" id="outline-context-node-separator" hidden></div>
+    <button id="outline-context-collapse-node" onclick="collapseContextOutlineNode(); closeContextMenus();" hidden>折叠此大纲的所有子集</button>
+  </div>
+
+  <!-- 使用帮助模态框 -->
+
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal preferences-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="modal-header preferences-header">
+        <div>
+          <h3 id="settings-title">设置</h3>
+          <p>按分类调整应用、编辑器和保存行为</p>
+        </div>
+        <button onclick="closeSettings()" aria-label="关闭设置"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="preferences-layout">
+        <nav class="preferences-nav" aria-label="设置分类">
+          <button type="button" class="preferences-nav-item active" data-settings-page="general" aria-selected="true" onclick="switchSettingsPage('general')">
+            <span>通用</span><small>主题、语言与布局</small>
+          </button>
+          <button type="button" class="preferences-nav-item" data-settings-page="editor" aria-selected="false" onclick="switchSettingsPage('editor')">
+            <span>编辑器</span><small>字号与显示颜色</small>
+          </button>
+          <button type="button" class="preferences-nav-item" data-settings-page="save" aria-selected="false" onclick="switchSettingsPage('save')">
+            <span>保存与导出</span><small>自动保存和默认路径</small>
+          </button>
+          <button type="button" class="preferences-nav-item" data-settings-page="toolbar" aria-selected="false" onclick="switchSettingsPage('toolbar')">
+            <span>工具栏</span><small>显示与项目管理</small>
+          </button>
+          <button type="button" class="preferences-nav-item" data-settings-page="performance" aria-selected="false" onclick="switchSettingsPage('performance')">
+            <span>性能</span><small>超大文档预览策略</small>
+          </button>
+        </nav>
+        <div class="preferences-content settings-body">
+          <section class="preferences-page active" data-settings-page-panel="general" aria-labelledby="settings-general-title">
+            <div class="preferences-page-heading">
+              <h4 id="settings-general-title">通用</h4>
+              <p>控制应用外观、语言和启动后的默认工作区。</p>
+            </div>
+            <div class="settings-field-grid">
+              <div class="settings-field">
+                <label for="setting-theme">主题</label>
+                <select id="setting-theme" onchange="syncSettingsThemeDefaults()">
+                  <option value="light">浅色</option>
+                  <option value="dark">深色</option>
+                </select>
+              </div>
+              <div class="settings-field">
+                <label for="setting-language">语言</label>
+                <select id="setting-language">
+                  <option value="zh-CN">简体中文</option>
+                  <option value="zh-TW">繁體中文</option>
+                  <option value="en">English</option>
+                  <option value="ja">日本語</option>
+                  <option value="ko">한국어</option>
+                  <option value="es">Español</option>
+                  <option value="fr">Français</option>
+                  <option value="de">Deutsch</option>
+                  <option value="ru">Русский</option>
+                  <option value="pt">Português</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-field">
+              <label for="setting-layout">默认布局</label>
+              <select id="setting-layout">
+                <option value="both">编辑 + 预览</option>
+                <option value="hybrid">单视图混合编辑</option>
+                <option value="edit">仅编辑</option>
+                <option value="preview">仅预览</option>
+              </select>
+              <p class="hint">单视图模式在同一编辑器内呈现排版效果；光标所在块与选区会显示原始 Markdown。</p>
+            </div>
+            <label class="settings-check settings-card-check">
+              <input type="checkbox" id="setting-sidebar-visible">
+              <span><b>启动时显示左侧栏</b><small>左侧栏包含当前会话文档、同目录文件树和标题大纲。</small></span>
+            </label>
+          </section>
+
+          <section class="preferences-page" data-settings-page-panel="editor" aria-labelledby="settings-editor-title" hidden>
+            <div class="preferences-page-heading">
+              <h4 id="settings-editor-title">编辑器</h4>
+              <p>调整源码编辑区域的字号、文字色和当前行提示。</p>
+            </div>
+            <div class="settings-field">
+              <label for="setting-editor-font-size">编辑器字号</label>
+              <select id="setting-editor-font-size">
+                <option value="14">14 px</option>
+                <option value="15">15 px</option>
+                <option value="16">16 px</option>
+                <option value="18">18 px</option>
+                <option value="20">20 px</option>
+              </select>
+            </div>
+            <div class="settings-field-grid">
+              <div class="settings-field">
+                <label for="setting-editor-text-color">源码编辑文字色</label>
+                <div class="settings-color-field">
+                  <input type="color" id="setting-editor-text-color" aria-label="源码编辑文字色" oninput="markSettingColorCustom(this)">
+                  <button type="button" onclick="resetSettingColor('text')">跟随主题</button>
+                </div>
+              </div>
+              <div class="settings-field">
+                <label for="setting-active-line-color">光标所在行底色</label>
+                <div class="settings-color-field">
+                  <input type="color" id="setting-active-line-color" aria-label="光标所在行底色" oninput="markSettingColorCustom(this)">
+                  <button type="button" onclick="resetSettingColor('line')">跟随主题</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="preferences-page" data-settings-page-panel="save" aria-labelledby="settings-save-title" hidden>
+            <div class="preferences-page-heading">
+              <h4 id="settings-save-title">保存与导出</h4>
+              <p>管理自动保存节奏，以及桌面版导出时默认打开的位置。</p>
+            </div>
+            <label class="settings-check settings-card-check">
+              <input type="checkbox" id="setting-autosave-enabled">
+              <span><b>启用自动保存</b><small>关闭后仅在手动保存、切换文档或导出时写入当前内容。</small></span>
+            </label>
+            <div class="settings-field">
+              <label for="setting-autosave-delay">自动保存间隔</label>
+              <select id="setting-autosave-delay" onchange="toggleCustomAutosaveDelay()">
+                <option value="500">0.5 秒</option>
+                <option value="1000">1 秒</option>
+                <option value="2000">2 秒</option>
+                <option value="5000">5 秒</option>
+                <option value="custom">自定义</option>
+              </select>
+              <div class="settings-inline-field" id="setting-autosave-custom-wrap" hidden>
+                <input type="number" id="setting-autosave-custom-seconds" min="0.5" max="3600" step="0.5" inputmode="decimal" aria-label="自定义自动保存间隔">
+                <span>秒</span>
+              </div>
+            </div>
+            <div class="settings-field">
+              <label for="setting-export-directory">默认导出路径</label>
+              <div class="settings-path-field">
+                <input type="text" id="setting-export-directory" placeholder="未设置：导出时手动选择路径" readonly>
+                <button type="button" onclick="chooseExportDirectory()">选择目录</button>
+                <button type="button" onclick="clearExportDirectory()">清除</button>
+              </div>
+              <p class="hint">Markdown、Word、HTML 和图片导出会默认打开此目录；PDF 由系统打印窗口选择保存位置。</p>
+            </div>
+          </section>
+
+          <section class="preferences-page" data-settings-page-panel="toolbar" aria-labelledby="settings-toolbar-title" hidden>
+            <div class="preferences-page-heading">
+              <h4 id="settings-toolbar-title">工具栏</h4>
+              <p>保留常用格式按钮，隐藏暂时不需要的项目。</p>
+            </div>
+            <label class="settings-check settings-card-check">
+              <input type="checkbox" id="setting-toolbar-visible">
+              <span><b>显示格式工具栏</b><small>撤销、重做、视图和主题按钮始终保留。</small></span>
+            </label>
+            <div class="settings-field">
+              <label>工具栏项目</label>
+              <div class="toolbar-settings-grid" id="setting-toolbar-items">
+                <label><input type="checkbox" data-toolbar-setting="bold">加粗</label>
+                <label><input type="checkbox" data-toolbar-setting="italic">斜体</label>
+                <label><input type="checkbox" data-toolbar-setting="underline">下划线</label>
+                <label><input type="checkbox" data-toolbar-setting="strikethrough">删除线</label>
+                <label><input type="checkbox" data-toolbar-setting="script">上下标</label>
+                <label><input type="checkbox" data-toolbar-setting="textColor">文字颜色</label>
+                <label><input type="checkbox" data-toolbar-setting="highlight">文字高亮</label>
+                <label><input type="checkbox" data-toolbar-setting="heading">标题</label>
+                <label><input type="checkbox" data-toolbar-setting="quote">引用</label>
+                <label><input type="checkbox" data-toolbar-setting="lists">列表与任务</label>
+                <label><input type="checkbox" data-toolbar-setting="code">代码</label>
+                <label><input type="checkbox" data-toolbar-setting="link">链接</label>
+                <label><input type="checkbox" data-toolbar-setting="image">图片</label>
+                <label><input type="checkbox" data-toolbar-setting="table">表格</label>
+                <label><input type="checkbox" data-toolbar-setting="find">查找</label>
+                <label><input type="checkbox" data-toolbar-setting="mermaid">Mermaid</label>
+              </div>
+            </div>
+          </section>
+
+          <section class="preferences-page" data-settings-page-panel="performance" aria-labelledby="settings-performance-title" hidden>
+            <div class="preferences-page-heading">
+              <h4 id="settings-performance-title">性能</h4>
+              <p>选择超大文档的实时预览范围，平衡完整性与响应速度。</p>
+            </div>
+            <div class="settings-field">
+              <label for="setting-preview-performance-mode">超大文档预览策略</label>
+              <select id="setting-preview-performance-mode">
+                <option value="auto">自动（推荐）</option>
+                <option value="virtual">全文虚拟预览</option>
+                <option value="chapter">仅当前章节</option>
+                <option value="full">完整预览（高负载）</option>
+              </select>
+              <div class="settings-info-card">
+                <b>自动模式</b>
+                <p>超大文档会启用虚拟预览；达到百万字符后优先显示当前章节，避免一次挂载全部预览节点。</p>
+              </div>
+              <div class="settings-info-card warning">
+                <b>完整预览</b>
+                <p>会创建完整预览内容，适合较小文档；百万字符文档可能明显增加内存和渲染负载。</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeSettings()">取消</button>
+        <button class="primary" onclick="applySettings()">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="help-modal">
+    <div class="modal preferences-modal help-preferences-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <div class="modal-header preferences-header">
+        <div>
+          <h3 id="help-title"><svg class="icon icon-lg"><use href="#icon-book"></use></svg> <span data-i18n="helpTitle">使用帮助</span></h3>
+          <p>按主题查看操作说明与常用快捷键</p>
+        </div>
+        <button onclick="closeHelp()" aria-label="关闭帮助"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="preferences-layout">
+        <nav class="preferences-nav" aria-label="帮助分类">
+          <button type="button" class="preferences-nav-item active" data-help-page="start" aria-selected="true" onclick="switchHelpPage('start')">
+            <span>快速开始</span><small>写作与基本操作</small>
+          </button>
+          <button type="button" class="preferences-nav-item" data-help-page="views" aria-selected="false" onclick="switchHelpPage('views')">
+            <span>视图与导航</span><small>布局、侧栏和定位</small>
+          </button>
+          <button type="button" class="preferences-nav-item" data-help-page="files" aria-selected="false" onclick="switchHelpPage('files')">
+            <span>文件与导出</span><small>打开、保存和导出</small>
+          </button>
+          <button type="button" class="preferences-nav-item" data-help-page="shortcuts" aria-selected="false" onclick="switchHelpPage('shortcuts')">
+            <span>快捷键</span><small>应用级常用操作</small>
+          </button>
+          <button type="button" class="preferences-nav-item" data-help-page="markdown" aria-selected="false" onclick="switchHelpPage('markdown')">
+            <span>Markdown 功能</span><small>图片、公式与图表</small>
+          </button>
+          <button type="button" class="preferences-nav-item" data-help-page="about" aria-selected="false" onclick="switchHelpPage('about')">
+            <span>关于</span><small>应用信息</small>
+          </button>
+        </nav>
+        <div class="preferences-content help-content" id="help-body">
+          <section class="preferences-page active" data-help-page-panel="start" aria-labelledby="help-start-title">
+            <div class="preferences-page-heading">
+              <h4 id="help-start-title">快速开始</h4>
+              <p>打开文档后即可在编辑区输入 Markdown，预览区会同步更新。</p>
+            </div>
+            <div class="help-step-list">
+              <div><span>1</span><p><b>开始写作</b><small>在编辑区输入内容，或将 .md / .txt 文件直接拖入窗口。</small></p></div>
+              <div><span>2</span><p><b>使用格式工具</b><small>选中文字后点击加粗、列表、引用、代码、链接等按钮。</small></p></div>
+              <div><span>3</span><p><b>保存文档</b><small>按 Ctrl+S 保存；有原始路径的文件会直接写回原文件。</small></p></div>
+            </div>
+          </section>
+
+          <section class="preferences-page" data-help-page-panel="views" aria-labelledby="help-views-title" hidden>
+            <div class="preferences-page-heading">
+              <h4 id="help-views-title">视图与导航</h4>
+              <p>根据写作阶段切换编辑、预览或单视图混合模式。</p>
+            </div>
+            <div class="help-topic-card">
+              <h5>布局切换</h5>
+              <ul>
+                <li>“编辑 + 预览”同时显示源码和实时预览。</li>
+                <li>“单视图混合编辑”在同一编辑器中显示排版效果，当前块保留源码。</li>
+                <li>“仅编辑”和“仅预览”用于集中写作或阅读。</li>
+              </ul>
+            </div>
+            <div class="help-topic-card">
+              <h5>侧栏与定位</h5>
+              <ul>
+                <li>拖动侧栏右侧分隔线调整宽度。</li>
+                <li>文档页用于切换当前会话文档；文件树页显示当前文件同目录的 Markdown/TXT 文件；大纲页用于按标题跳转。</li>
+                <li>拖动编辑区与预览区中间分隔线可调整双栏比例。</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="preferences-page" data-help-page-panel="files" aria-labelledby="help-files-title" hidden>
+            <div class="preferences-page-heading">
+              <h4 id="help-files-title">文件与导出</h4>
+              <p>桌面版会保留打开文件的原始路径，并维护最近打开记录。</p>
+            </div>
+            <div class="help-topic-card">
+              <h5>打开与保存</h5>
+              <ul>
+                <li>使用“文件 → 打开文件”或直接拖入 .md / .txt 文件。</li>
+                <li>按 Ctrl+S 保存当前文件，Ctrl+Shift+S 另存为新文件。</li>
+                <li>“文件 → 最近打开”保留最近 20 个外部文件。</li>
+              </ul>
+            </div>
+            <div class="help-topic-card">
+              <h5>导入与导出</h5>
+              <ul>
+                <li>支持导出 Markdown、HTML、Word、PDF 和图片。</li>
+                <li>可从网页链接提取正文并转换为 Markdown。</li>
+                <li>需要登录或受限页面时，可粘贴 HTML 源码后转换。</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="preferences-page" data-help-page-panel="shortcuts" aria-labelledby="help-shortcuts-title" hidden>
+            <div class="preferences-page-heading">
+              <h4 id="help-shortcuts-title">快捷键</h4>
+              <p>应用级快捷键在焦点位于编辑器、菜单或其他控件时均可使用。</p>
+            </div>
+            <div class="shortcut-grid">
+              <div><span>新建文档</span><kbd>Ctrl+N</kbd></div>
+              <div><span>打开文件</span><kbd>Ctrl+O</kbd></div>
+              <div><span>保存</span><kbd>Ctrl+S</kbd></div>
+              <div><span>另存为</span><kbd>Ctrl+Shift+S</kbd></div>
+              <div><span>设置</span><kbd>Ctrl+,</kbd></div>
+              <div><span>重命名</span><kbd>F2</kbd></div>
+              <div><span>撤销</span><kbd>Ctrl+Z</kbd></div>
+              <div><span>重做</span><kbd>Ctrl+Y</kbd></div>
+              <div><span>加粗</span><kbd>Ctrl+B</kbd></div>
+              <div><span>斜体</span><kbd>Ctrl+I</kbd></div>
+              <div><span>下划线</span><kbd>Ctrl+U</kbd></div>
+              <div><span>插入链接</span><kbd>Ctrl+K</kbd></div>
+              <div><span>插入图片</span><kbd>Ctrl+Shift+K</kbd></div>
+              <div><span>查找</span><kbd>Ctrl+F</kbd></div>
+              <div><span>替换</span><kbd>Ctrl+H</kbd></div>
+              <div><span>页面全屏</span><kbd>F11</kbd></div>
+            </div>
+          </section>
+
+          <section class="preferences-page" data-help-page-panel="markdown" aria-labelledby="help-markdown-title" hidden>
+            <div class="preferences-page-heading">
+              <h4 id="help-markdown-title">Markdown 功能</h4>
+              <p>除常用 Markdown 语法外，还支持图片、公式和 Mermaid 图表。</p>
+            </div>
+            <div class="help-topic-card">
+              <h5>图片</h5>
+              <p>可插入网络图片链接，或上传本地图片并以 Base64 嵌入文档。</p>
+            </div>
+            <div class="help-topic-card">
+              <h5>数学公式</h5>
+              <p>使用 <code>$...$</code> 编写行内公式，使用 <code>$$...$$</code> 编写块级公式。</p>
+            </div>
+            <div class="help-topic-card">
+              <h5>Mermaid</h5>
+              <p>通过工具栏插入流程图或思维导图源码，预览区会自动渲染。</p>
+            </div>
+          </section>
+
+          <section class="preferences-page" data-help-page-panel="about" aria-labelledby="help-about-title" hidden>
+            <div class="preferences-page-heading">
+              <h4 id="help-about-title">关于 Markdown Editor</h4>
+              <p>本地轻量 Markdown 编辑器</p>
+            </div>
+            <div class="about-app-card">
+              <span class="about-app-mark" aria-hidden="true">M</span>
+              <div>
+                <b>Markdown Editor</b>
+                <small>版本 1.0.0</small>
+              </div>
+            </div>
+            <p>应用采用 Tauri、Rust 和原生前端技术构建，支持离线编辑、实时预览与超大文档虚拟化。</p>
+          </section>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeHelp()" class="primary" data-i18n="helpOk">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 插入链接模态框 -->
+  <div class="modal-overlay" id="link-modal">
+    <div class="modal" style="max-width: 440px;" role="dialog" aria-modal="true" aria-labelledby="link-modal-title">
+      <div class="modal-header">
+        <h3 id="link-modal-title"><svg class="icon icon-lg"><use href="#icon-link"></use></svg> <span data-i18n="link">链接</span></h3>
+        <button onclick="closeLinkModal()" aria-label="关闭"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="link-url-input" data-i18n="promptLinkUrl">请输入链接地址</label>
+        <input type="url" id="link-url-input" autocomplete="url" spellcheck="false" placeholder="https://">
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeLinkModal()" data-i18n="cancel">取消</button>
+        <button onclick="confirmLinkInsert()" class="primary" data-i18n="insert">插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 网页转 Markdown 模态框 -->
+  <div class="modal-overlay" id="url-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-globe"></use></svg> <span data-i18n="urlTitle">网页转 Markdown</span></h3>
+        <button onclick="closeUrlModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="url-input" data-i18n="urlLabel">网页地址</label>
+        <input type="url" id="url-input" data-i18n-placeholder="urlPlaceholder" placeholder="https://example.com/article">
+        <div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;">
+          <input type="checkbox" id="use-local-proxy" style="width:auto;margin:0;" onchange="toggleProxyInput()">
+          <label for="use-local-proxy" style="display:inline;margin:0;font-weight:normal;cursor:pointer;" data-i18n="useProxy">使用 Rust 本地后端（桌面版默认）</label>
+        </div>
+        <input type="url" id="proxy-url" value="http://localhost:8765/fetch" data-i18n-placeholder="proxyPlaceholder" placeholder="浏览器预览代理地址" style="display:none;margin-bottom:10px;">
+        <button onclick="fetchUrl()" class="primary" data-i18n="fetchBtn">尝试获取</button>
+        <div id="url-status" style="margin-top:10px;font-size:13px;color:var(--text-muted);"></div>
+        <div id="manual-area" style="display:none;margin-top:14px;">
+          <label for="manual-html" data-i18n="manualLabel">网页 HTML 源码（手动粘贴）</label>
+          <textarea id="manual-html" rows="6" data-i18n-placeholder="manualPlaceholder" placeholder="在浏览器中打开目标网页 → 右键「查看网页源代码」→ 全选复制 → 粘贴到此处"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeUrlModal()" data-i18n="cancel">取消</button>
+        <button onclick="convertAndInsert()" class="primary" data-i18n="convertInsert">转换并插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 查找与替换模态框 -->
+  <div class="modal-overlay" id="find-modal">
+    <div class="modal" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-search"></use></svg> <span data-i18n="findTitle">查找与替换</span></h3>
+        <button onclick="closeFindModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="find-input" data-i18n="findLabel">查找</label>
+        <input type="text" id="find-input" data-i18n-placeholder="findPlaceholder" placeholder="要查找的内容">
+        <label for="replace-input" data-i18n="replaceLabel">替换为</label>
+        <input type="text" id="replace-input" data-i18n-placeholder="replacePlaceholder" placeholder="替换后的内容">
+        <div id="find-status" style="margin-top: 8px; font-size: 13px; color: var(--text-muted);"></div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeFindModal()" data-i18n="cancel">关闭</button>
+        <button onclick="replaceAll()" data-i18n="replaceAll">全部替换</button>
+        <button onclick="replaceOne()" data-i18n="replaceOne">替换</button>
+        <button onclick="findNext()" class="primary" data-i18n="findNext">查找下一个</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出图片模态框 -->
+  <div class="modal-overlay export-progress-overlay" id="export-progress-modal" aria-live="polite">
+    <div class="modal export-progress-modal" role="dialog" aria-modal="true" aria-labelledby="export-progress-title">
+      <div class="modal-header">
+        <h3 id="export-progress-title">正在准备导出</h3>
+      </div>
+      <div class="modal-body">
+        <div class="export-progress-track" aria-hidden="true">
+          <div class="export-progress-value" id="export-progress-value"></div>
+        </div>
+        <p class="export-progress-status" id="export-progress-status">正在准备文档…</p>
+        <p class="hint">超大文档会分批构建导出内容，编辑器不会长时间无响应。</p>
+      </div>
+      <div class="modal-footer">
+        <button id="export-progress-cancel" onclick="cancelActiveExport()">取消导出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="export-image-modal">
+    <div class="modal" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-image"></use></svg> <span data-i18n="exportImageTitle">导出图片</span></h3>
+        <button onclick="closeExportImageModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label data-i18n="ratioLabel">分享比例</label>
+        <div class="ratio-grid">
+          <button class="ratio-btn active" data-ratio="9:16" onclick="selectImageRatio('9:16')">9:16<br><small data-i18n="ratio9_16">手机竖屏/故事</small></button>
+          <button class="ratio-btn" data-ratio="4:5" onclick="selectImageRatio('4:5')">4:5<br><small data-i18n="ratio4_5">小红书/IG</small></button>
+          <button class="ratio-btn" data-ratio="3:4" onclick="selectImageRatio('3:4')">3:4<br><small data-i18n="ratio3_4">竖图</small></button>
+          <button class="ratio-btn" data-ratio="1:1" onclick="selectImageRatio('1:1')">1:1<br><small data-i18n="ratio1_1">方形</small></button>
+          <button class="ratio-btn" data-ratio="16:9" onclick="selectImageRatio('16:9')">16:9<br><small data-i18n="ratio16_9">横图</small></button>
+        </div>
+        <div class="option-row">
+          <input type="checkbox" id="image-crop-fit" onchange="renderExportImagePreview()">
+          <label for="image-crop-fit" data-i18n="cropLabel">过长时裁剪为固定比例（默认生成长图）</label>
+        </div>
+        <label data-i18n="previewLabel">预览</label>
+        <div id="export-image-preview-wrap">
+          <img id="export-image-preview" alt="导出预览" data-i18n-alt="exportImagePreviewAlt" style="display:none;">
+        </div>
+        <p class="hint" data-i18n="exportImageHint">内容较长时将按内容高度生成长图，方便手机阅读。</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeExportImageModal()" data-i18n="cancel">取消</button>
+        <button onclick="renderExportImagePreview()" data-i18n="refreshPreview">刷新预览</button>
+        <button onclick="downloadExportImage()" class="primary" data-i18n="downloadPng">下载 PNG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 插入图片模态框 -->
+  <div class="modal-overlay" id="image-modal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-image"></use></svg> <span data-i18n="imageTitle">插入图片</span></h3>
+        <button onclick="closeImageModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="image-modal-tabs">
+          <button type="button" class="image-tab active" data-tab="url" onclick="switchImageTab('url')" data-i18n="imageTabUrl">链接</button>
+          <button type="button" class="image-tab" data-tab="upload" onclick="switchImageTab('upload')" data-i18n="imageTabUpload">本地上传</button>
+        </div>
+        <div class="image-tab-panel active" id="image-tab-url">
+          <label for="image-url-input" data-i18n="imageUrlLabel">图片链接</label>
+          <input type="url" id="image-url-input" data-i18n-placeholder="imageUrlPlaceholder" placeholder="https://example.com/image.png">
+          <label for="image-url-alt" data-i18n="imageAltLabel">描述文字</label>
+          <input type="text" id="image-url-alt" data-i18n-placeholder="imageAltPlaceholder" placeholder="图片描述">
+        </div>
+        <div class="image-tab-panel" id="image-tab-upload">
+          <div class="upload-area" id="image-upload-area">
+            <p data-i18n="uploadArea">点击选择或拖拽图片到此处</p>
+            <input type="file" id="image-file-input" accept="image/*" onchange="handleImageFileSelect(this)">
+          </div>
+          <div id="image-upload-preview" class="upload-preview"></div>
+          <label for="image-upload-alt" data-i18n="imageAltLabel">描述文字</label>
+          <input type="text" id="image-upload-alt" data-i18n-placeholder="imageAltPlaceholder" placeholder="图片描述">
+        </div>
+        <p class="hint" data-i18n="imageHint">本地图片将以 Base64 嵌入文档，文件过大可能影响性能和保存。</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeImageModal()" data-i18n="cancel">取消</button>
+        <button onclick="confirmImageInsert()" class="primary" data-i18n="insert">插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 插入 Mermaid 模态框 -->
+  <div class="modal-overlay" id="mermaid-modal">
+    <div class="modal" style="max-width: 560px;">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="#icon-mermaid"></use></svg> <span data-i18n="mermaidTitle">插入 Mermaid 图表</span></h3>
+        <button onclick="closeMermaidModal()"><svg class="icon"><use href="#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="mermaid-type" data-i18n="mermaidTypeLabel">图表类型</label>
+        <select id="mermaid-type" onchange="updateMermaidTemplate()">
+          <option value="mindmap" data-i18n="mermaidTypeMindmap">思维导图</option>
+          <option value="flowchart" data-i18n="mermaidTypeFlowchart">流程图</option>
+        </select>
+        <label for="mermaid-code" data-i18n="mermaidCodeLabel">Mermaid 源码</label>
+        <textarea id="mermaid-code" rows="10" data-i18n-placeholder="mermaidCodePlaceholder" placeholder="mindmap\n  root((主题))\n    子主题 A\n    子主题 B"></textarea>
+        <p class="hint" data-i18n="mermaidHint">支持 Mermaid 语法，插入后将在预览区自动渲染。</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeMermaidModal()" data-i18n="cancel">取消</button>
+        <button onclick="confirmMermaidInsert()" class="primary" data-i18n="insert">插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Marked.js：体积约 40KB，CDN 加载，离线也可编辑（预览降级为纯文本） -->
+
+
+
+
+
+
+<!-- 导出图片隐藏舞台 -->
+  <div id="export-image-stage" class="export-image-stage" aria-hidden="true">
+    <div id="export-image-content"></div>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

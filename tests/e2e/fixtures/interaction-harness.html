@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hybrid interaction harness</title>
+<style>
+  *{box-sizing:border-box} body{font:16px/1.5 system-ui,sans-serif;margin:0;padding:24px;background:#f6f7f9;color:#20242c}
+  .toolbar{display:flex;gap:8px;margin-bottom:18px}.toolbar button{padding:7px 12px}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.component{background:white;border:1px solid #ccd3df;border-radius:10px;overflow:hidden}
+  .component[data-mode="direct"]{outline:2px solid #3278ff}.component[data-mode="source"]{outline:2px solid #d35400}
+  .component header{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#eef1f5}.component-body{padding:24px;min-height:100px;user-select:none}
+  textarea{width:100%;min-height:100px;font:14px/1.5 ui-monospace,monospace}.outside{margin-top:22px;padding:24px;background:white;border:1px dashed #8994a5}
+  .selection{margin-top:24px;background:white;padding:18px;font:18px/1.7 ui-monospace,monospace;user-select:text}.token{display:inline}
+  #event-log{white-space:pre-wrap;font:12px/1.4 ui-monospace,monospace;max-height:160px;overflow:auto;background:#111827;color:#e5e7eb;padding:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="toolbar" aria-label="view modes">
+  <button data-view="hybrid">混合</button><button data-view="both">双栏</button><button data-view="preview">预览</button>
+</div>
+<div class="grid">
+  <section class="component" data-component="code" data-mode="presented">
+    <header><span>code</span><button data-source>编辑源码</button></header><div class="component-body" data-double-zone="body">const alpha = 1;</div>
+  </section>
+  <section class="component" data-component="table" data-mode="presented">
+    <header><span>table</span><button data-source>编辑源码</button></header><div class="component-body" data-double-zone="cell">A1</div>
+  </section>
+  <section class="component" data-component="math" data-mode="presented">
+    <header><span>math</span><button data-source>编辑源码</button></header><div class="component-body" data-double-zone="formula">E = mc²</div>
+  </section>
+</div>
+<div class="outside" tabindex="0">组件外部区域</div>
+<div class="selection" data-selection-line>选择测试：<span class="token" data-token="alpha">alpha</span> <span class="token" data-token="beta">beta</span> <span class="token" data-token="gamma">gamma</span></div>
+<div id="presentation-parity" hidden><div data-render-surface="hybrid"></div><div data-render-surface="preview"></div></div>
+<pre id="event-log"></pre>
+<script type="module" src="./interaction-harness.js"></script>
+</body>
+</html>

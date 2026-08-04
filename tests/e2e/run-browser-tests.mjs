@@ -1,0 +1,419 @@
+import assert from 'node:assert/strict';
+import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, resolve, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { launchChromium } from './lib/cdp-browser.mjs';
+import { installVirtualFileHost } from './lib/virtual-file-host.mjs';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const projectRoot = resolve(here, '../..');
+const argumentsSet = new Set(process.argv.slice(2));
+const runContract = argumentsSet.has('--contract') || !argumentsSet.has('--app');
+const runApp = argumentsSet.has('--app') || !argumentsSet.has('--contract');
+const externalUrlArgument = process.argv.find(value => value.startsWith('--url='));
+const externalUrl = externalUrlArgument?.slice('--url='.length) || process.env.E2E_BASE_URL || '';
+const artifactRoot = process.env.E2E_ARTIFACT_DIR
+  ? resolve(process.env.E2E_ARTIFACT_DIR)
+  : await mkdtemp(join(tmpdir(), 'markdown-editor-e2e-artifacts-'));
+await mkdir(artifactRoot, { recursive: true });
+
+const results = [];
+let activePage = null;
+
+async function test(name, callback) {
+  const started = performance.now();
+  try {
+    await callback();
+    const duration = Math.round(performance.now() - started);
+    results.push({ name, ok: true, duration });
+    console.log(`ok - ${name} (${duration}ms)`);
+  } catch (error) {
+    const duration = Math.round(performance.now() - started);
+    results.push({ name, ok: false, duration, error });
+    console.error(`not ok - ${name} (${duration}ms)`);
+    console.error(error?.stack || error);
+    if (activePage) {
+      const fileName = `${String(results.length).padStart(2, '0')}-${name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase()}.png`;
+      try {
+        await activePage.screenshot(join(artifactRoot, fileName));
+        console.error(`  screenshot: ${join(artifactRoot, fileName)}`);
+      } catch (_) {}
+    }
+  }
+}
+
+async function getTextBoundary(page, selector, search, edge = 'start', contains = '') {
+  const payload = JSON.stringify({ selector, search, edge, contains });
+  const point = await page.evaluate(`(() => {
+    const {selector, search, edge, contains} = ${payload};
+    const root = contains
+      ? Array.from(document.querySelectorAll(selector)).find(element => String(element.textContent || '').includes(contains))
+      : document.querySelector(selector);
+    if (!root) return null;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let text = '';
+    while (walker.nextNode()) { nodes.push({node: walker.currentNode, start: text.length}); text += walker.currentNode.nodeValue || ''; }
+    const index = text.indexOf(search);
+    if (index < 0) return null;
+    const absolute = edge === 'end' ? index + search.length : index;
+    let entry = nodes.at(-1);
+    for (const candidate of nodes) {
+      const length = candidate.node.nodeValue?.length || 0;
+      if (absolute <= candidate.start + length) { entry = candidate; break; }
+    }
+    if (!entry) return null;
+    const offset = Math.max(0, Math.min(entry.node.nodeValue?.length || 0, absolute - entry.start));
+    const range = document.createRange();
+    range.setStart(entry.node, offset); range.collapse(true);
+    let rect = range.getBoundingClientRect();
+    if (!rect.width && !rect.height && offset > 0) {
+      range.setStart(entry.node, offset - 1); range.setEnd(entry.node, offset); rect = range.getBoundingClientRect();
+      return {x: rect.right, y: rect.top + rect.height / 2};
+    }
+    return {x: rect.left, y: rect.top + Math.max(1, rect.height) / 2};
+  })()`);
+  if (!point) throw new Error(`Unable to resolve text boundary ${search} in ${selector}`);
+  return point;
+}
+
+async function centerByText(page, rootSelector, text) {
+  const payload = JSON.stringify({ rootSelector, text });
+  const point = await page.evaluate(`(() => {
+    const {rootSelector,text}=${payload};
+    const root=document.querySelector(rootSelector); if(!root)return null;
+    const element=Array.from(root.querySelectorAll('button,[role="button"]')).find(item=>item.textContent.trim()===text);
+    if(!element)return null; const rect=element.getBoundingClientRect(); return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+  })()`);
+  if (!point) throw new Error(`Button not found: ${rootSelector} / ${text}`);
+  return point;
+}
+
+async function runContractSuite() {
+  const browser = await launchChromium();
+  const virtualHost = await installVirtualFileHost(browser.page, { root: projectRoot, origin: 'https://markdown-editor.test' });
+  activePage = browser.page;
+  try {
+    let harnessHtml = await readFile(resolve(projectRoot, 'tests/e2e/fixtures/interaction-harness.html'), 'utf8');
+    harnessHtml = harnessHtml
+      .replace('<head>', `<head><base href="${virtualHost.origin}/tests/e2e/fixtures/">`)
+      .replace(/<script type="module" src="\.\/interaction-harness\.js"><\/script>/, '');
+    await browser.page.setDocumentContent(harnessHtml);
+    await browser.page.evaluate(`import('${virtualHost.origin}/tests/e2e/fixtures/interaction-harness.js').then(()=>true)`);
+    await browser.page.waitFor(() => window.__interactionHarness?.ready === true, { description: 'interaction harness' });
+
+    await test('single click keeps a component presented', async () => {
+      await browser.page.evaluate('window.__interactionHarness.reset()');
+      await browser.page.click('[data-component="code"] .component-body');
+      const mode = await browser.page.evaluate('document.querySelector("[data-component=code]").dataset.mode');
+      assert.equal(mode, 'presented');
+    });
+
+    await test('strict double click opens direct editing on the same logical target', async () => {
+      await browser.page.evaluate('window.__interactionHarness.reset()');
+      await browser.page.click('[data-component="code"] .component-body', { count: 2, intervalMs: 90 });
+      await browser.page.waitFor(() => document.querySelector('[data-component="code"]')?.dataset.mode === 'direct', { description: 'code direct mode' });
+      const snapshot = await browser.page.evaluate('window.__interactionHarness.snapshot()');
+      assert.equal(snapshot.active.type, 'code');
+      assert.equal(snapshot.active.mode, 'direct');
+    });
+
+    await test('fast clicks across components never count as a double click', async () => {
+      await browser.page.evaluate('window.__interactionHarness.reset()');
+      await browser.page.click('[data-component="code"] .component-body');
+      await browser.page.click('[data-component="table"] .component-body');
+      const modes = await browser.page.evaluate(`Array.from(document.querySelectorAll('[data-component]')).map(item=>item.dataset.mode)`);
+      assert.deepEqual(modes, ['presented', 'presented', 'presented']);
+    });
+
+    await test('opening another component closes the previous interactive component', async () => {
+      await browser.page.evaluate('window.__interactionHarness.reset()');
+      await browser.page.click('[data-component="code"] .component-body', { count: 2 });
+      await browser.page.click('[data-component="table"] .component-body', { count: 2 });
+      await browser.page.waitFor(() => document.querySelector('[data-component="table"]')?.dataset.mode === 'direct');
+      const modes = await browser.page.evaluate(`Object.fromEntries(Array.from(document.querySelectorAll('[data-component]')).map(item=>[item.dataset.component,item.dataset.mode]))`);
+      assert.equal(modes.code, 'presented');
+      assert.equal(modes.table, 'direct');
+    });
+
+    await test('source editing closes on an outside pointer action', async () => {
+      await browser.page.evaluate('window.__interactionHarness.reset()');
+      await browser.page.click('[data-component="math"] [data-source]');
+      await browser.page.waitFor(() => document.querySelector('[data-component="math"]')?.dataset.mode === 'source');
+      await browser.page.click('.outside');
+      await browser.page.waitFor(() => document.querySelector('[data-component="math"]')?.dataset.mode === 'presented');
+      const snapshot = await browser.page.evaluate('window.__interactionHarness.snapshot()');
+      assert.equal(snapshot.active, null);
+    });
+
+    await test('layout switching closes active component editing', async () => {
+      await browser.page.evaluate('window.__interactionHarness.reset()');
+      await browser.page.click('[data-component="code"] .component-body', { count: 2 });
+      await browser.page.click('[data-view="both"]');
+      const snapshot = await browser.page.evaluate('window.__interactionHarness.snapshot()');
+      assert.equal(snapshot.layout, 'both');
+      assert.equal(snapshot.active, null);
+      assert.ok(snapshot.states.every(item => item.mode === 'presented'));
+    });
+
+    await test('real pointer drag selects only the intended characters', async () => {
+      await browser.page.evaluate('window.__interactionHarness.reset()');
+      const start = await getTextBoundary(browser.page, '[data-selection-line]', 'alpha', 'start');
+      const end = await getTextBoundary(browser.page, '[data-selection-line]', 'beta', 'end');
+      await browser.page.drag({ x: start.x + 1, y: start.y }, { x: end.x - 1, y: end.y }, { steps: 16 });
+      const selected = await browser.page.evaluate('String(getSelection()?.toString() || "")');
+      assert.equal(selected.trim(), 'alpha beta');
+    });
+
+    await test('shared Mermaid renderer keeps hybrid and preview SVG normalization identical', async () => {
+      const result = await browser.page.evaluate('window.__interactionHarness.renderMermaidParity("dark")');
+      for (const surface of [result.hybrid, result.preview]) {
+        assert.equal(surface.role, 'img');
+        assert.equal(surface.label, 'Mermaid 图表');
+        assert.equal(surface.height, 'auto');
+        assert.equal(surface.maxWidth, '100%');
+        assert.equal(surface.background, 'transparent');
+        assert.equal(surface.theme, 'dark');
+      }
+      assert.equal(result.hybridResult.status, 'rendered');
+      assert.equal(result.previewResult.status, 'rendered');
+      assert.equal(result.calls.filter(item => item.type === 'initialize').length, 1);
+      assert.equal(result.calls.filter(item => item.type === 'render').length, 2);
+    });
+
+    await test('folder file tree renders nested readable files and opens the selected path', async () => {
+      await browser.page.setDocumentContent(`<!doctype html><html><body>
+        <svg style="display:none"><symbol id="icon-folder"></symbol><symbol id="icon-menu-file"></symbol><symbol id="icon-chevron-down"></symbol><symbol id="icon-chevron-right"></symbol></svg>
+        <section id="sidebar-files-panel">
+          <strong id="folder-file-tree-root"></strong><small id="folder-file-tree-summary"></small>
+          <button id="folder-file-tree-refresh"></button><div id="folder-file-tree"></div>
+        </section>
+      </body></html>`);
+      const moduleUrl = `${virtualHost.origin}/src/sidebar/folder-file-tree.js`;
+      await browser.page.evaluate(`(async()=>{
+        const {createFolderFileTreeController}=await import(${JSON.stringify(moduleUrl)});
+        window.__folderTreeOpened=[];
+        window.__folderTreeController=createFolderFileTreeController({
+          nativeApi:{isAvailable:true,async listTextFileTree(){return {
+            rootPath:'F:/Notes',rootName:'Notes',fileCount:3,directoryCount:1,skippedCount:0,truncated:false,
+            nodes:[
+              {kind:'directory',name:'Archive',path:'F:/Notes/Archive',children:[{kind:'file',name:'old.md',path:'F:/Notes/Archive/old.md'}]},
+              {kind:'file',name:'current.md',path:'F:/Notes/current.md'},
+              {kind:'file',name:'next.txt',path:'F:/Notes/next.txt'}
+            ]
+          }}},
+          getCurrentContext:()=>({filePath:'F:/Notes/current.md'}),
+          openFile:async path=>{window.__folderTreeOpened.push(path);return true;}
+        });
+        await window.__folderTreeController.activate();
+      })()`);
+      await browser.page.waitFor(() => document.querySelectorAll('.folder-tree-file-row').length === 3, { description: 'folder tree rows' });
+      const snapshot = await browser.page.evaluate(`(()=>({
+        root:document.getElementById('folder-file-tree-root').textContent,
+        summary:document.getElementById('folder-file-tree-summary').textContent,
+        names:Array.from(document.querySelectorAll('.folder-tree-file-row')).map(row=>row.textContent.trim()),
+        active:document.querySelector('.folder-tree-file-row.active')?.textContent.trim()||''
+      }))()`);
+      assert.equal(snapshot.root, 'Notes');
+      assert.match(snapshot.summary, /3 个文件/);
+      assert.deepEqual(snapshot.names, ['old.md', 'current.md', 'next.txt']);
+      assert.equal(snapshot.active, 'current.md');
+      await browser.page.evaluate(`Array.from(document.querySelectorAll('.folder-tree-file-row')).find(row=>row.textContent.includes('next.txt')).click()`);
+      await browser.page.waitFor(() => window.__folderTreeOpened?.length === 1, { description: 'folder tree open callback' });
+      assert.equal(await browser.page.evaluate('window.__folderTreeOpened[0]'), 'F:/Notes/next.txt');
+    });
+  } finally {
+    activePage = null;
+    await virtualHost.close();
+    await browser.close();
+  }
+}
+
+const APP_FIXTURE = await readFile(resolve(projectRoot, 'tests/fixtures/hybrid-regression.md'), 'utf8');
+
+async function loadAppFixture(page) {
+  const fixture = JSON.stringify(APP_FIXTURE);
+  return page.evaluate(`(async()=>{
+    const source=${fixture};
+    if(window.__markdownEditorE2E){
+      await window.__markdownEditorE2E.loadMarkdown(source,{layout:'hybrid',codeVisualEditing:true,tableVisualEditing:true});
+      return window.__markdownEditorE2E.snapshot();
+    }
+    const editor=document.getElementById('editor');
+    editor.virtualEditor.loadDocument(source,{selection:0});
+    editor.virtualEditor.setHybridCodeVisualEditing(true);
+    editor.virtualEditor.setHybridTableVisualEditing(true);
+    editor.dispatchEvent(new Event('input',{bubbles:true}));
+    setLayoutMode('hybrid',false);
+    await new Promise(resolve=>setTimeout(resolve,700));
+    return {layout:document.body.classList.contains('hybrid-view-mode')?'hybrid':'unknown'};
+  })()`);
+}
+
+async function setAppLayout(page, mode) {
+  const encoded = JSON.stringify(mode);
+  await page.evaluate(`(async()=>{
+    if(window.__markdownEditorE2E) return window.__markdownEditorE2E.setLayout(${encoded});
+    setLayoutMode(${encoded},false); await new Promise(resolve=>setTimeout(resolve,250)); return ${encoded};
+  })()`);
+}
+
+async function appSnapshot(page) {
+  return page.evaluate(`window.__markdownEditorE2E?.snapshot?.() || (()=>{
+    const editor=document.getElementById('editor');
+    return {layout:document.body.classList.contains('hybrid-view-mode')?'hybrid':'other',selectionStart:editor.selectionStart,selectionEnd:editor.selectionEnd,selectedText:editor.value.slice(editor.selectionStart,editor.selectionEnd),presentationStats:editor.virtualEditor.getPresentationStats(),components:Array.from(document.querySelectorAll('[data-hybrid-block-type]')).map(item=>({type:item.dataset.hybridBlockType,directEditing:Boolean(item.querySelector('[data-hybrid-code-editor],[data-hybrid-table-cell-input]'))}))};
+  })()`);
+}
+
+async function runAppSuite() {
+  const browser = await launchChromium({ width: 1440, height: 1000 });
+  const virtualHost = externalUrl ? null : await installVirtualFileHost(browser.page, {
+    root: resolve(projectRoot, 'dist'),
+    origin: 'https://markdown-editor-app.test'
+  });
+  const baseUrl = externalUrl || virtualHost.origin;
+  activePage = browser.page;
+  try {
+    if (externalUrl) {
+      await browser.page.navigate(`${baseUrl.replace(/\/$/, '')}/?e2e=1`);
+    } else {
+      let appHtml = await readFile(resolve(projectRoot, 'dist/index.html'), 'utf8');
+      const moduleMatch = appHtml.match(/<script type="module"[^>]*src="([^"]+)"[^>]*><\/script>/);
+      const styleMatch = appHtml.match(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/);
+      if (!moduleMatch || !styleMatch) throw new Error('Unable to locate built application assets');
+      const moduleUrl = new URL(moduleMatch[1], `${virtualHost.origin}/`).href;
+      const styleUrl = new URL(styleMatch[1], `${virtualHost.origin}/`).href;
+      appHtml = appHtml
+        .replace('<head>', `<head><base href="${virtualHost.origin}/">`)
+        .replace(moduleMatch[0], '')
+        .replace(styleMatch[0], '')
+        .replace(/<script src="\/i18n\.js"><\/script>/, '');
+      await browser.page.setDocumentContent(appHtml);
+      await browser.page.evaluate(`(()=>{
+        const values=new Map();
+        const storage={getItem:key=>values.has(String(key))?values.get(String(key)):null,setItem:(key,value)=>values.set(String(key),String(value)),removeItem:key=>values.delete(String(key)),clear:()=>values.clear(),key:index=>Array.from(values.keys())[index]??null,get length(){return values.size;}};
+        Object.defineProperty(window,'localStorage',{configurable:true,value:storage});
+        window.__MARKDOWN_EDITOR_E2E__=true;
+        localStorage.setItem('md_editor_help_shown','true');
+        localStorage.setItem('md_editor_sidebar_visible','false');
+      })()`);
+      await browser.page.evaluate(`new Promise((resolve,reject)=>{const link=document.createElement('link');link.rel='stylesheet';link.href=${JSON.stringify(styleUrl)};link.onload=resolve;link.onerror=()=>reject(new Error('stylesheet failed'));document.head.appendChild(link);})`);
+      await browser.page.evaluate(`new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='${virtualHost.origin}/i18n.js';script.onload=resolve;script.onerror=()=>reject(new Error('i18n failed'));document.body.appendChild(script);})`);
+      await browser.page.evaluate(`import(${JSON.stringify(moduleUrl)}).then(()=>true)`);
+    }
+    await browser.page.waitFor(() => document.documentElement.classList.contains('app-ready'), { timeoutMs: 20000, description: 'application ready' });
+    const bridgeAvailable = await browser.page.evaluate('Boolean(window.__markdownEditorE2E)');
+    if (!externalUrl && !bridgeAvailable) {
+      throw new Error('Built dist is stale or was not produced from the current source. Run npm run build before npm run test:browser.');
+    }
+    await loadAppFixture(browser.page);
+    await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]') && document.querySelector('[data-hybrid-block-type="table"]')), { timeoutMs: 10000, description: 'hybrid widgets' });
+
+    await test('application switches deterministically across every layout mode', async () => {
+      for (const mode of ['both', 'hybrid', 'edit', 'preview', 'both']) {
+        await setAppLayout(browser.page, mode);
+        const snapshot = await appSnapshot(browser.page);
+        if (mode === 'hybrid') assert.equal(snapshot.presentationMode || snapshot.layout, 'hybrid');
+        if (mode === 'edit' || mode === 'both' || mode === 'preview') {
+          assert.notEqual(snapshot.presentationMode, 'hybrid');
+        }
+      }
+      await setAppLayout(browser.page, 'hybrid');
+    });
+
+    await test('application code block placeholder never receives a phantom source highlight', async () => {
+      const source = '```\n\n\n```\n\n';
+      await browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)},{layout:'hybrid',selection:${source.length},codeVisualEditing:true,tableVisualEditing:true})`);
+      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'closed code widget' });
+      const snapshot = await browser.page.evaluate(`(()=>{
+        const widget=document.querySelector('[data-hybrid-block-type="code"]');
+        const widgetRect=widget?.getBoundingClientRect();
+        const active=Array.from(document.querySelectorAll('.cm-hybrid-source-active')).map(element=>{const rect=element.getBoundingClientRect();return {top:rect.top,bottom:rect.bottom,text:element.textContent||''};});
+        return {widgetTop:widgetRect?.top||0,widgetBottom:widgetRect?.bottom||0,active,presentation:document.getElementById('editor')?.virtualEditor?.getPresentationStats?.()||{}};
+      })()`);
+      assert.equal(snapshot.presentation.codeBlocks, 1);
+      assert.equal(snapshot.active.length, 1);
+      assert.ok(snapshot.active.every(line => line.top >= snapshot.widgetBottom - 1), JSON.stringify(snapshot));    });
+
+    await test('application code block ignores single click and opens on strict double click', async () => {
+      await loadAppFixture(browser.page);
+      await browser.page.click('[data-hybrid-block-type="code"] .cm-hybrid-code-body');
+      assert.equal(await browser.page.evaluate('Boolean(document.querySelector("[data-hybrid-code-editor]"))'), false);
+      await browser.page.click('[data-hybrid-block-type="code"] .cm-hybrid-code-body', { count: 2, intervalMs: 90 });
+      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-code-editor]')), { description: 'code editor open' });
+      const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
+      await browser.page.clickAt(outside.x + 2, outside.y);
+      await browser.page.waitFor(() => !document.querySelector('[data-hybrid-code-editor]'), { description: 'code editor close' });
+    });
+
+    await test('application keeps only one direct editor active', async () => {
+      await loadAppFixture(browser.page);
+      await browser.page.click('[data-hybrid-block-type="code"] .cm-hybrid-code-body', { count: 2 });
+      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-code-editor]')));
+      const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
+      await browser.page.clickAt(outside.x + 2, outside.y);
+      await browser.page.waitFor(() => !document.querySelector('[data-hybrid-code-editor]'));
+      await browser.page.click('[data-hybrid-block-type="table"] td', { count: 2 });
+      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-table-cell-input]')));
+      assert.equal(await browser.page.evaluate('Boolean(document.querySelector("[data-hybrid-code-editor]"))'), false);
+      await browser.page.clickAt(outside.x + 2, outside.y);
+      await browser.page.waitFor(() => !document.querySelector('[data-hybrid-table-cell-input]'));
+    });
+
+    await test('application Mermaid presentation stays normalized across hybrid and preview layouts', async () => {
+      await loadAppFixture(browser.page);
+      await setAppLayout(browser.page, 'hybrid');
+      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type=\"mermaid\"] svg')), { timeoutMs: 10000, description: 'hybrid Mermaid SVG' });
+      const hybrid = await browser.page.evaluate(`(()=>{const svg=document.querySelector('[data-hybrid-block-type=\"mermaid\"] svg');return {role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),height:svg?.style.height,maxWidth:svg?.style.maxWidth,background:svg?.style.background}})()`);
+      await setAppLayout(browser.page, 'preview');
+      await browser.page.waitFor(() => Boolean(document.querySelector('.preview-pane .mermaid svg')), { timeoutMs: 10000, description: 'preview Mermaid SVG' });
+      const previewResult = await browser.page.evaluate(`(()=>{const svg=document.querySelector('.preview-pane .mermaid svg');return {role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),height:svg?.style.height,maxWidth:svg?.style.maxWidth,background:svg?.style.background}})()`);
+      assert.deepEqual(previewResult, hybrid);
+      await setAppLayout(browser.page, 'hybrid');
+    });
+
+    await test('application source edit exits when pointer moves outside the source range', async () => {
+      await loadAppFixture(browser.page);
+      const point = await centerByText(browser.page, '[data-hybrid-block-type="code"]', '编辑源码');
+      await browser.page.clickAt(point.x, point.y);
+      await browser.page.waitFor(() => !document.querySelector('[data-hybrid-block-type="code"]') && document.getElementById('editor')?.selectionEnd > document.getElementById('editor')?.selectionStart, { description: 'source range open' });
+      const selectedSource = await browser.page.evaluate(`(()=>{const editor=document.getElementById('editor');return editor.value.slice(editor.selectionStart,editor.selectionEnd)})()`);
+      assert.match(selectedSource, /plain code/);
+      const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
+      await browser.page.clickAt(outside.x + 2, outside.y);
+      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'source range close' });
+    });
+
+    await test('application pointer drag maps to exact editor characters', async () => {
+      await loadAppFixture(browser.page);
+      await setAppLayout(browser.page, 'edit');
+      await browser.page.evaluate(`(()=>{const editor=document.getElementById('editor'); const position=editor.value.indexOf('selection alpha'); editor.setSelectionRange(position,position); editor.virtualEditor.scrollPositionIntoView(position);})()`);
+      await new Promise(resolve => setTimeout(resolve, 250));
+      const lineSelector = '.cm-line';
+      const start = await getTextBoundary(browser.page, lineSelector, 'alpha', 'start', 'selection alpha');
+      const end = await getTextBoundary(browser.page, lineSelector, 'beta', 'end', 'selection alpha');
+      await browser.page.drag({ x: start.x + 1, y: start.y }, { x: end.x - 1, y: end.y }, { steps: 18 });
+      const snapshot = await appSnapshot(browser.page);
+      assert.equal(snapshot.selectedText.trim(), 'alpha beta');
+      await setAppLayout(browser.page, 'hybrid');
+    });
+
+    if (browser.page.exceptions.length) {
+      throw new Error(`Browser exceptions detected: ${JSON.stringify(browser.page.exceptions.slice(0, 3))}`);
+    }
+  } finally {
+    activePage = null;
+    await virtualHost?.close();
+    await browser.close();
+  }
+}
+
+console.log(`Browser artifacts: ${artifactRoot}`);
+if (runContract) await runContractSuite();
+if (runApp) await runAppSuite();
+
+const failed = results.filter(result => !result.ok);
+console.log(`\nBrowser tests: ${results.length}, passed: ${results.length - failed.length}, failed: ${failed.length}`);
+if (!failed.length && !process.env.E2E_ARTIFACT_DIR) await rm(artifactRoot, { recursive: true, force: true });
+if (failed.length) process.exitCode = 1;
