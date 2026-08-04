@@ -53,6 +53,8 @@ logs/                       # 开发者性能日志目录
 ```
 
 ## Change Log
+<!-- stage-01-node:01-05 -->
+- 2026-08-04：阶段 1 Atomic Task 1.5（命令注册表与命令总线）完成：新增 `src/app/commands/command-ids.js`、`command-registry.js` 和 `command-bus.js`，建立集中命令 ID、唯一处理器所有权、重复注册拒绝、精确幂等注销、Promise 化执行、缺失命令拒绝及业务异常原样传播；生产模块清单增至 64 个。专项 run 30923323509 与完整基线 run 30923323395 全部通过，现有生产入口和用户行为未切换，Atomic Task 1.6 尚未开始。
 <!-- stage-01-node:01-04 -->
 - 2026-08-04：阶段 1 Atomic Task 1.4（资源销毁注册表）完成：新增 `src/app/disposer-registry.js`，统一拥有资源清理登记、严格 LIFO、提前幂等释放、并发清理、异常聚合和失败项重试；生产模块清单增至 61 个。专项 run 30920143493 与完整基线 run 30920143387 全部通过，现有启动链和用户行为未切换，Atomic Task 1.5 尚未开始。
 <!-- stage-01-node:01-03 -->
