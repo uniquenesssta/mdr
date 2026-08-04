@@ -55,7 +55,7 @@ test('frozen model classification matches the Stage 0 frozen hash contract', () 
 });
 
 test('module inventory collector records imports, exports, listeners, state and side-effect signals', async () => {
-  const inventory = await buildModuleInventory({ root, manifest });
+  const inventory = await buildModuleInventory({ root, manifest: rawManifest });
   assert.equal(inventory.moduleCount, manifest.modules.length);
   for (const record of inventory.modules) {
     assert.ok(record.detected && Array.isArray(record.detected.imports));
