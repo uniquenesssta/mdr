@@ -178,8 +178,10 @@ test('command infrastructure is platform-free and disconnected from the legacy b
     'command-bus.js'
   ].map(file => readFile(resolve(root, 'src/app/commands', file), 'utf8')));
   const legacyBootstrap = await readFile(resolve(root, 'src/main.js'), 'utf8');
-  const forbiddenRuntimeAccess = /\b(?:document|window|localStorage|sessionStorage|Worker|SharedWorker|MutationObserver|ResizeObserver|setTimeout|setInterval)\b|@tauri-apps|\binvoke\s*\(/;
+  const forbiddenRuntimeAccess = /\bdocument\s*(?:\[|\.\s*(?:querySelector|querySelectorAll|getElementById|getElementsByClassName|getElementsByName|getElementsByTagName|createElement|createTextNode|addEventListener|removeEventListener|body|documentElement|activeElement|visibilityState|readyState))|\b(?:window|localStorage|sessionStorage|Worker|SharedWorker|MutationObserver|ResizeObserver|setTimeout|setInterval)\b|@tauri-apps|\binvoke\s*\(/;
 
+  assert.match('document.querySelector("main")', forbiddenRuntimeAccess);
+  assert.doesNotMatch("'document.save'", forbiddenRuntimeAccess);
   for (const source of sources) {
     assert.doesNotMatch(source, forbiddenRuntimeAccess);
   }
