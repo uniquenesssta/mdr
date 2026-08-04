@@ -44,6 +44,8 @@ jobs:
         run: node --test tests/architecture/module-inventory.test.mjs
       - name: Verify minimal composition root
         run: node --test tests/architecture/application-composition.test.mjs
+      - name: Verify application lifecycle state machine
+        run: node --test tests/architecture/application-lifecycle.test.mjs
       - name: Collect machine-readable module inventory
         run: node scripts/stage-01/collect-module-inventory.mjs --output=artifacts/stage-01/01-01-module-inventory.json
       - name: Record composition-root evidence
@@ -51,6 +53,11 @@ jobs:
         run: |
           mkdir -p artifacts/stage-01
           node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-02-composition-root.json',JSON.stringify({node:'stage-01/01-02',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT},null,2)+'\n')"
+      - name: Record lifecycle evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-03-application-lifecycle.json',JSON.stringify({node:'stage-01/01-03',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,states:['idle','starting','running','stopping','failed'],startupOrder:'registration',rollbackOrder:'reverse',shutdownOrder:'reverse'},null,2)+'\n')"
       - name: Run existing Node regression suite
         run: npm test
       - name: Run browser interaction contract
