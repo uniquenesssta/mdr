@@ -48,6 +48,8 @@ jobs:
         run: node --test tests/architecture/application-lifecycle.test.mjs
       - name: Verify disposer registry
         run: node --test tests/architecture/disposer-registry.test.mjs
+      - name: Verify command registry and command bus
+        run: node --test tests/architecture/command-bus.test.mjs
       - name: Collect machine-readable module inventory
         run: node scripts/stage-01/collect-module-inventory.mjs --output=artifacts/stage-01/01-01-module-inventory.json
       - name: Record composition-root evidence
@@ -65,6 +67,11 @@ jobs:
         run: |
           mkdir -p artifacts/stage-01
           node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-04-disposer-registry.json',JSON.stringify({node:'stage-01/01-04',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,states:['open','disposing','failed'],cleanupOrder:'lifo',retryPolicy:'failed-only',concurrentDispose:'shared-transition'},null,2)+'\n')"
+      - name: Record command-infrastructure evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-05-command-infrastructure.json',JSON.stringify({node:'stage-01/01-05',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,registryOwnership:'unique-handler',duplicatePolicy:'reject',unregisterPolicy:'exact-idempotent',dispatchResult:'promise',missingCommand:'reject',handlerErrors:'preserve'},null,2)+'\n')"
       - name: Run existing Node regression suite
         run: npm test
       - name: Run browser interaction contract
