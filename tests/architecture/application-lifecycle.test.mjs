@@ -44,8 +44,12 @@ test('lifecycle starts in order, destroys in reverse order and supports restart'
 
   await lifecycle.start(context);
   assert.equal(lifecycle.state, LIFECYCLE_STATES.RUNNING);
+  await lifecycle.start(context);
+  assert.equal(calls.length, 3);
   await lifecycle.destroy(context);
   assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+  await lifecycle.destroy(context);
+  assert.equal(calls.length, 6);
   await lifecycle.start(context);
   await lifecycle.destroy(context);
 
@@ -75,6 +79,7 @@ test('concurrent start and destroy calls share the active transition', async () 
 
   const firstStart = lifecycle.start({ id: 'ctx' });
   const secondStart = lifecycle.start({ id: 'ctx' });
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STARTING);
   assert.strictEqual(firstStart, secondStart);
   startGate.resolve();
   await firstStart;
@@ -82,6 +87,7 @@ test('concurrent start and destroy calls share the active transition', async () 
 
   const firstDestroy = lifecycle.destroy();
   const secondDestroy = lifecycle.destroy();
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPING);
   assert.strictEqual(firstDestroy, secondDestroy);
   destroyGate.resolve();
   await firstDestroy;
