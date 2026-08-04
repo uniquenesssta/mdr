@@ -1,0 +1,444 @@
+name: Apply Stage 1 Atomic Task 1.3
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - .github/workflows/stage-01-apply-01-03.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+      - name: Apply lifecycle state owner
+        shell: bash
+        run: |
+          mkdir -p src/app tests/architecture
+          cat > src/app/application-lifecycle.js <<'EOF'
+          const LIFECYCLE_STATES = Object.freeze({
+            IDLE: 'idle',
+            STARTING: 'starting',
+            RUNNING: 'running',
+            STOPPING: 'stopping',
+            FAILED: 'failed'
+          });
+
+          function assertParticipant(participant, index) {
+            if (
+              participant === null ||
+              typeof participant !== 'object' ||
+              Array.isArray(participant) ||
+              typeof participant.start !== 'function' ||
+              typeof participant.destroy !== 'function'
+            ) {
+              throw new TypeError(
+                `Lifecycle participant at index ${index} must implement start() and destroy().`
+              );
+            }
+          }
+
+          function normalizeParticipants(participants) {
+            if (!Array.isArray(participants)) {
+              throw new TypeError('Lifecycle participants must be an array.');
+            }
+
+            return Object.freeze(participants.map((participant, index) => {
+              assertParticipant(participant, index);
+              return participant;
+            }));
+          }
+
+          export { LIFECYCLE_STATES };
+
+          export function createApplicationLifecycle(participants = []) {
+            const orderedParticipants = normalizeParticipants(participants);
+            let state = LIFECYCLE_STATES.IDLE;
+            let activeParticipants = [];
+            let transitionPromise = null;
+            let lastContext;
+
+            async function destroyActiveParticipants(context) {
+              const errors = [];
+
+              for (let index = activeParticipants.length - 1; index >= 0; index -= 1) {
+                const participant = activeParticipants[index];
+                try {
+                  await participant.destroy(context);
+                  activeParticipants.splice(index, 1);
+                } catch (error) {
+                  errors.push(error);
+                }
+              }
+
+              return errors;
+            }
+
+            function trackTransition(operation) {
+              let transition;
+              transition = operation.finally(() => {
+                if (transitionPromise === transition) transitionPromise = null;
+              });
+              transitionPromise = transition;
+              return transition;
+            }
+
+            function beginStart(context) {
+              state = LIFECYCLE_STATES.STARTING;
+              lastContext = context;
+
+              return trackTransition((async () => {
+                try {
+                  for (const participant of orderedParticipants) {
+                    await participant.start(context);
+                    activeParticipants.push(participant);
+                  }
+                  state = LIFECYCLE_STATES.RUNNING;
+                } catch (startError) {
+                  const rollbackErrors = await destroyActiveParticipants(context);
+                  state = rollbackErrors.length === 0
+                    ? LIFECYCLE_STATES.IDLE
+                    : LIFECYCLE_STATES.FAILED;
+
+                  if (rollbackErrors.length === 0) throw startError;
+
+                  throw new AggregateError(
+                    [startError, ...rollbackErrors],
+                    'Application startup failed and rollback was incomplete.'
+                  );
+                }
+              })());
+            }
+
+            function beginDestroy(context) {
+              state = LIFECYCLE_STATES.STOPPING;
+              lastContext = context ?? lastContext;
+
+              return trackTransition((async () => {
+                const errors = await destroyActiveParticipants(lastContext);
+                state = errors.length === 0
+                  ? LIFECYCLE_STATES.IDLE
+                  : LIFECYCLE_STATES.FAILED;
+
+                if (errors.length > 0) {
+                  throw new AggregateError(
+                    errors,
+                    'Application shutdown completed with lifecycle errors.'
+                  );
+                }
+              })());
+            }
+
+            const lifecycle = {
+              get state() {
+                return state;
+              },
+              start(context) {
+                if (state === LIFECYCLE_STATES.RUNNING) return Promise.resolve();
+                if (state === LIFECYCLE_STATES.STARTING) return transitionPromise;
+                if (state === LIFECYCLE_STATES.STOPPING) {
+                  return transitionPromise.then(() => lifecycle.start(context));
+                }
+                if (state === LIFECYCLE_STATES.FAILED) {
+                  return Promise.reject(
+                    new Error('Application lifecycle cannot start while cleanup is incomplete.')
+                  );
+                }
+                return beginStart(context);
+              },
+              destroy(context) {
+                if (state === LIFECYCLE_STATES.IDLE) return Promise.resolve();
+                if (state === LIFECYCLE_STATES.STOPPING) return transitionPromise;
+                if (state === LIFECYCLE_STATES.STARTING) {
+                  return transitionPromise.then(
+                    () => lifecycle.destroy(context),
+                    () => lifecycle.destroy(context)
+                  );
+                }
+                return beginDestroy(context);
+              }
+            };
+
+            return Object.freeze(lifecycle);
+          }
+          EOF
+
+          cat > tests/architecture/application-lifecycle.test.mjs <<'EOF'
+          import assert from 'node:assert/strict';
+          import test from 'node:test';
+          import {
+            LIFECYCLE_STATES,
+            createApplicationLifecycle
+          } from '../../src/app/application-lifecycle.js';
+          import { createApplication } from '../../src/app/create-application.js';
+
+          function deferred() {
+            let resolve;
+            let reject;
+            const promise = new Promise((resolvePromise, rejectPromise) => {
+              resolve = resolvePromise;
+              reject = rejectPromise;
+            });
+            return { promise, resolve, reject };
+          }
+
+          function participant(name, calls, overrides = {}) {
+            return {
+              name,
+              async start(context) {
+                calls.push(`start:${name}:${context?.id}`);
+                await overrides.start?.(context);
+              },
+              async destroy(context) {
+                calls.push(`destroy:${name}:${context?.id}`);
+                await overrides.destroy?.(context);
+              }
+            };
+          }
+
+          test('lifecycle starts in order, destroys in reverse order and supports restart', async () => {
+            const calls = [];
+            const context = { id: 'ctx' };
+            const lifecycle = createApplicationLifecycle([
+              participant('a', calls),
+              participant('b', calls),
+              participant('c', calls)
+            ]);
+
+            assert.ok(Object.isFrozen(lifecycle));
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+
+            await lifecycle.start(context);
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.RUNNING);
+            await lifecycle.destroy(context);
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+            await lifecycle.start(context);
+            await lifecycle.destroy(context);
+
+            assert.deepEqual(calls, [
+              'start:a:ctx', 'start:b:ctx', 'start:c:ctx',
+              'destroy:c:ctx', 'destroy:b:ctx', 'destroy:a:ctx',
+              'start:a:ctx', 'start:b:ctx', 'start:c:ctx',
+              'destroy:c:ctx', 'destroy:b:ctx', 'destroy:a:ctx'
+            ]);
+          });
+
+          test('concurrent start and destroy calls share the active transition', async () => {
+            const startGate = deferred();
+            const destroyGate = deferred();
+            let starts = 0;
+            let destroys = 0;
+            const lifecycle = createApplicationLifecycle([{
+              async start() {
+                starts += 1;
+                await startGate.promise;
+              },
+              async destroy() {
+                destroys += 1;
+                await destroyGate.promise;
+              }
+            }]);
+
+            const firstStart = lifecycle.start({ id: 'ctx' });
+            const secondStart = lifecycle.start({ id: 'ctx' });
+            assert.strictEqual(firstStart, secondStart);
+            startGate.resolve();
+            await firstStart;
+            assert.equal(starts, 1);
+
+            const firstDestroy = lifecycle.destroy();
+            const secondDestroy = lifecycle.destroy();
+            assert.strictEqual(firstDestroy, secondDestroy);
+            destroyGate.resolve();
+            await firstDestroy;
+            assert.equal(destroys, 1);
+          });
+
+          test('startup failure rolls back successful participants in reverse order', async () => {
+            const calls = [];
+            const failure = new Error('b failed');
+            const lifecycle = createApplicationLifecycle([
+              participant('a', calls),
+              participant('b', calls, { start() { throw failure; } }),
+              participant('c', calls)
+            ]);
+
+            await assert.rejects(lifecycle.start({ id: 'ctx' }), error => error === failure);
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+            assert.deepEqual(calls, ['start:a:ctx', 'start:b:ctx', 'destroy:a:ctx']);
+          });
+
+          test('incomplete startup rollback enters failed state and destroy retries remaining cleanup', async () => {
+            const calls = [];
+            const startFailure = new Error('start failed');
+            const rollbackFailure = new Error('rollback failed');
+            let rollbackAttempts = 0;
+            const lifecycle = createApplicationLifecycle([
+              participant('a', calls, {
+                destroy() {
+                  rollbackAttempts += 1;
+                  if (rollbackAttempts === 1) throw rollbackFailure;
+                }
+              }),
+              participant('b', calls, { start() { throw startFailure; } })
+            ]);
+
+            await assert.rejects(lifecycle.start({ id: 'ctx' }), error => {
+              assert.ok(error instanceof AggregateError);
+              assert.deepEqual(error.errors, [startFailure, rollbackFailure]);
+              return true;
+            });
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.FAILED);
+            await assert.rejects(lifecycle.start({ id: 'ctx' }), /cleanup is incomplete/);
+
+            await lifecycle.destroy({ id: 'ctx' });
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+            assert.equal(rollbackAttempts, 2);
+          });
+
+          test('shutdown continues in reverse order, aggregates errors and retries only failed cleanup', async () => {
+            const calls = [];
+            const bFailure = new Error('b destroy failed');
+            let bAttempts = 0;
+            const lifecycle = createApplicationLifecycle([
+              participant('a', calls),
+              participant('b', calls, {
+                destroy() {
+                  bAttempts += 1;
+                  if (bAttempts === 1) throw bFailure;
+                }
+              }),
+              participant('c', calls)
+            ]);
+
+            await lifecycle.start({ id: 'ctx' });
+            await assert.rejects(lifecycle.destroy({ id: 'ctx' }), error => {
+              assert.ok(error instanceof AggregateError);
+              assert.deepEqual(error.errors, [bFailure]);
+              return true;
+            });
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.FAILED);
+            assert.deepEqual(calls.slice(3), ['destroy:c:ctx', 'destroy:b:ctx', 'destroy:a:ctx']);
+
+            await lifecycle.destroy({ id: 'ctx' });
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+            assert.equal(bAttempts, 2);
+            assert.equal(calls.at(-1), 'destroy:b:ctx');
+          });
+
+          test('destroy requested during startup waits and then releases resources', async () => {
+            const gate = deferred();
+            const calls = [];
+            const lifecycle = createApplicationLifecycle([
+              participant('a', calls, { start: () => gate.promise })
+            ]);
+
+            const startPromise = lifecycle.start({ id: 'ctx' });
+            const destroyPromise = lifecycle.destroy({ id: 'ctx' });
+            gate.resolve();
+            await Promise.all([startPromise, destroyPromise]);
+
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+            assert.deepEqual(calls, ['start:a:ctx', 'destroy:a:ctx']);
+          });
+
+          test('start requested during shutdown waits and starts a new lifecycle generation', async () => {
+            const gate = deferred();
+            const calls = [];
+            let destroyCount = 0;
+            const lifecycle = createApplicationLifecycle([
+              participant('a', calls, {
+                destroy() {
+                  destroyCount += 1;
+                  if (destroyCount === 1) return gate.promise;
+                }
+              })
+            ]);
+
+            await lifecycle.start({ id: 'first' });
+            const destroyPromise = lifecycle.destroy({ id: 'first' });
+            const restartPromise = lifecycle.start({ id: 'second' });
+            gate.resolve();
+            await Promise.all([destroyPromise, restartPromise]);
+
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.RUNNING);
+            assert.deepEqual(calls, ['start:a:first', 'destroy:a:first', 'start:a:second']);
+            await lifecycle.destroy({ id: 'second' });
+          });
+
+          test('participant collection and contracts are validated', () => {
+            assert.throws(
+              () => createApplicationLifecycle({}),
+              { name: 'TypeError', message: 'Lifecycle participants must be an array.' }
+            );
+            assert.throws(
+              () => createApplicationLifecycle([{}]),
+              {
+                name: 'TypeError',
+                message: 'Lifecycle participant at index 0 must implement start() and destroy().'
+              }
+            );
+          });
+
+          test('lifecycle port integrates with the minimal application composition root', async () => {
+            const calls = [];
+            const lifecycle = createApplicationLifecycle([
+              participant('module', calls)
+            ]);
+            const application = createApplication({
+              commands: { register() {}, async execute() {} },
+              events: { subscribe() {}, publish() {} },
+              lifecycle
+            });
+
+            await application.start();
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.RUNNING);
+            await application.destroy();
+            assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+            assert.deepEqual(calls, ['start:module:undefined', 'destroy:module:undefined']);
+          });
+          EOF
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('tests/architecture/fixtures/production-modules.json')
+          manifest = json.loads(path.read_text(encoding='utf-8'))
+          module_path = 'src/app/application-lifecycle.js'
+          if not any(record[0] == module_path for record in manifest['modules']):
+              manifest['modules'].append([
+                  module_path,
+                  'esm-module',
+                  'composition',
+                  'Application lifecycle state machine, ordered startup, reverse rollback and aggregated shutdown cleanup.',
+                  'application-lifecycle',
+                  'explicit-instance',
+                  'retain',
+                  False
+              ])
+          manifest['modules'].sort(key=lambda record: record[0])
+          path.write_text(json.dumps(manifest, separators=(',', ':')) + '\n', encoding='utf-8')
+          PY
+      - name: Commit lifecycle implementation
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/application-lifecycle.js tests/architecture/application-lifecycle.test.mjs tests/architecture/fixtures/production-modules.json
+          git diff --cached --check
+          git commit -m "feat(stage1): add application lifecycle state machine"
+          git push origin "HEAD:${{ github.head_ref }}"
