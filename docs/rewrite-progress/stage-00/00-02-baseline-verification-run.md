@@ -5,10 +5,10 @@
 - 结果：**失败，阶段 0 硬性门禁未通过**
 - 后续阶段：**禁止进入阶段 1**
 - 工作流：`Stage 0 Baseline Verification`
-- Actions run：`30895471055`，attempt `1`
-- 证据工件：`stage-00-baseline-30895471055-1`
+- Actions run：`30896866498`，attempt `1`
+- 证据工件：`stage-00-baseline-30896866498-1`
 - 工作分支：`rewrite/modular-rebuild`
-- 验证提交：`5c97dec408794d4a55045a94b77211bd71b61f3b`
+- 验证提交：`1c76a97ff99c032597e0ad3dcec3e788b5a03ef2`
 - 原始业务源码基线：`main@8ec8bf4ed58e6fd1c5c91466569a56ba247b6a62`
 - 运行环境：GitHub-hosted `ubuntu-22.04`、Node 22、Rust 1.77.2、Chrome headless
 
@@ -18,21 +18,21 @@
 
 | 检查 | 状态 | 退出码 | 耗时 ms |
 |---|---:|---:|---:|
-| `rust-toolchain` | passed | 0 | 8758 |
-| `tauri-system-deps` | passed | 0 | 24726 |
-| `npm-ci` | passed | 0 | 5933 |
-| `npm-test` | passed | 0 | 490 |
-| `browser-contract` | passed | 0 | 10882 |
-| `frontend-build` | passed | 0 | 11166 |
-| `browser-app` | failed | 1 | 14793 |
-| `cargo-test` | passed | 0 | 112036 |
-| `cargo-check` | passed | 0 | 65727 |
+| `rust-toolchain` | passed | 0 | 8020 |
+| `tauri-system-deps` | passed | 0 | 48885 |
+| `npm-ci` | passed | 0 | 4374 |
+| `npm-test` | passed | 0 | 439 |
+| `browser-contract` | passed | 0 | 7633 |
+| `frontend-build` | passed | 0 | 11451 |
+| `browser-app` | passed | 0 | 9686 |
+| `cargo-test` | passed | 0 | 115093 |
+| `cargo-check` | passed | 0 | 70459 |
 
 ### 扩展检查
 
 | 检查 | 状态 | 退出码 | 耗时 ms |
 |---|---:|---:|---:|
-| `tauri-build` | passed | 0 | 225499 |
+| `tauri-build` | passed | 0 | 244666 |
 
 ## 已通过路径
 
@@ -50,7 +50,7 @@
 
 `npm run test:browser` 共执行 7 项，2 项通过、5 项失败：
 
-- application code block placeholder never receives a phantom source highlight (5727ms)
+- 未能解析失败项目名称，见日志摘录。
 
 这些失败发生在当前未修改的业务实现上。阶段 0 不修改实现，因此本节点仅冻结现象并阻止进入后续重写阶段。
 
@@ -63,22 +63,15 @@
 > node tests/e2e/run-browser-tests.mjs --app
 
 [stdout] Browser artifacts: /home/runner/work/mdr/mdr/artifacts/stage-00/browser
-[stdout] ok - application switches deterministically across every layout mode (900ms)
-[stderr] not ok - application code block placeholder never receives a phantom source highlight (5727ms)
-[stderr] Error: Timed out waiting for trailing source active line
-    at CdpPage.waitFor (file:///home/runner/work/mdr/mdr/tests/e2e/lib/cdp-browser.mjs:200:11)
-    at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:345:7
-    at async test (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:27:5)
-    at async runAppSuite (file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:325:5)
-    at async file:///home/runner/work/mdr/mdr/tests/e2e/run-browser-tests.mjs:438:13
-[stderr]   screenshot: /home/runner/work/mdr/mdr/artifacts/stage-00/browser/02-application-code-block-placeholder-never-receives-a-phantom-source-highlight.png
-[stdout] ok - application code block ignores single click and opens on strict double click (867ms)
-[stdout] ok - application keeps only one direct editor active (896ms)
-[stdout] ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1295ms)
-[stdout] ok - application source edit exits when pointer moves outside the source range (997ms)
-[stdout] ok - application pointer drag maps to exact editor characters (1586ms)
+[stdout] ok - application switches deterministically across every layout mode (833ms)
+[stdout] ok - application code block placeholder never receives a phantom source highlight (746ms)
+[stdout] ok - application code block ignores single click and opens on strict double click (883ms)
+[stdout] ok - application keeps only one direct editor active (947ms)
+[stdout] ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1340ms)
+[stdout] ok - application source edit exits when pointer moves outside the source range (999ms)
+[stdout] ok - application pointer drag maps to exact editor characters (1601ms)
 [stdout] 
-Browser tests: 7, passed: 6, failed: 1
+Browser tests: 7, passed: 7, failed: 0
 ```
 
 </details>
@@ -103,9 +96,9 @@ Browser tests: 7, passed: 6, failed: 1
 
 ```text
 [stderr]    Compiling ryu v1.0.23
-[stderr]    Compiling tower-http v0.6.11
-[stderr]    Compiling serde_urlencoded v0.7.1
 [stderr]    Compiling hyper-rustls v0.27.7
+[stderr]    Compiling serde_urlencoded v0.7.1
+[stderr]    Compiling tower-http v0.6.11
 [stderr]    Compiling markdown-editor v1.0.0 (/home/runner/work/mdr/mdr/src-tauri)
 [stderr]    Compiling reqwest v0.12.28
 [stderr] warning: unused import: `std::io::Write`
@@ -117,24 +110,24 @@ Browser tests: 7, passed: 6, failed: 1
      = note: `#[warn(unused_imports)]` on by default
 
 [stderr] warning: `markdown-editor` (bin "markdown-editor" test) generated 1 warning
-[stderr]     Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 51s
+[stderr]     Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 54s
 [stderr]      Running unittests src/main.rs (src-tauri/target/debug/deps/markdown_editor-b81fe3d9e1fe4efd)
 [stdout] 
 running 12 tests
 [stdout] test document_store::tests::alternates_snapshot_slots_without_overwriting_current_snapshot ... ok
 test document_store::tests::applies_utf16_changes_for_chinese_and_emoji ... ok
-[stdout] test document_store::tests::builds_sparse_index_and_ignores_fenced_headings ... ok
+test document_store::tests::builds_sparse_index_and_ignores_fenced_headings ... ok
 [stdout] test external_link::tests::accepts_supported_schemes ... ok
-test external_link::tests::rejects_unsupported_schemes ... ok
-[stdout] test local_file::tests::lists_supported_text_files_as_a_nested_tree ... ok
+[stdout] test external_link::tests::rejects_unsupported_schemes ... ok
+test local_file::tests::lists_supported_text_files_as_a_nested_tree ... ok
 [stdout] test local_file::tests::recognizes_supported_text_extensions_case_insensitively ... ok
-test local_file::tests::resolves_relative_image_against_document_directory ... ok
-test local_file::tests::writes_text_and_binary_to_absolute_paths ... ok
+[stdout] test local_file::tests::resolves_relative_image_against_document_directory ... ok
+[stdout] test local_file::tests::writes_text_and_binary_to_absolute_paths ... ok
 [stdout] test document_store::tests::repairs_truncated_journal_after_last_valid_transaction ... ok
 [stdout] test document_store::tests::falls_back_to_other_snapshot_slot_when_latest_is_corrupt ... ok
 [stdout] test document_store::tests::saves_million_character_snapshot_from_chunks ... ok
 
-test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
 ```
 
 </details>
@@ -145,11 +138,11 @@ test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 ```text
 [stderr]    Compiling serialize-to-javascript-impl v0.1.2
 [stderr]    Compiling tracing-core v0.1.36
-[stderr]    Compiling atomic-waker v1.1.2
-[stderr]    Compiling subtle v2.6.1
 [stderr]    Compiling compression-core v0.4.32
-[stderr]    Compiling compression-codecs v0.4.38
+[stderr]    Compiling subtle v2.6.1
+[stderr]    Compiling atomic-waker v1.1.2
 [stderr]    Compiling hyper v1.10.1
+[stderr]    Compiling compression-codecs v0.4.38
 [stderr]    Compiling tracing v0.1.44
 [stderr]    Compiling serialize-to-javascript v0.1.2
 [stderr]    Compiling tauri-macros v2.6.3
@@ -158,10 +151,10 @@ test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 [stderr]    Compiling serde_repr v0.1.20
 [stderr]    Compiling sync_wrapper v1.0.2
 [stderr]    Compiling rfd v0.16.0
-[stderr]    Compiling mime v0.3.17
 [stderr]    Compiling ipnet v2.12.0
-[stderr]    Compiling futures-sink v0.3.32
 [stderr]    Compiling tower-layer v0.3.3
+[stderr]    Compiling futures-sink v0.3.32
+[stderr]    Compiling mime v0.3.17
 [stderr]    Compiling tower v0.5.3
 [stderr]    Compiling tokio-util v0.7.18
 [stderr]    Compiling hyper-util v0.1.20
@@ -175,7 +168,7 @@ test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 [stderr]    Compiling tower-http v0.6.11
 [stderr]    Compiling markdown-editor v1.0.0 (/home/runner/work/mdr/mdr/src-tauri)
 [stderr]    Compiling reqwest v0.12.28
-[stderr]     Finished `release` profile [optimized] target(s) in 3m 33s
+[stderr]     Finished `release` profile [optimized] target(s) in 3m 52s
 [stderr]        Built [tauri_cli::build] application at: /home/runner/work/mdr/mdr/src-tauri/target/release/markdown-editor
 ```
 
@@ -228,7 +221,7 @@ test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 - `public/app/preview.js`：1271 行，55146 bytes。
 - `src-tauri/src/document_store.rs`：1159 行，39644 bytes。
 - `public/app/editor-tools.js`：1103 行，40955 bytes。
-- `src/editor/hybrid/inline-presentation.js`：959 行，37904 bytes。
+- `src/editor/hybrid/inline-presentation.js`：962 行，37938 bytes。
 - `index.html`：944 行，68834 bytes。
 - `public/app/export.js`：927 行，36448 bytes。
 - `src/preview/virtual-preview.js`：760 行，29897 bytes。
