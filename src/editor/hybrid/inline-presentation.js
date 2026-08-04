@@ -620,45 +620,36 @@ function addLinkPresentation(view, node, replace, addMark, referenceDefinitions)
   return true;
 }
 
-function normalizeTrailingEmptyCaretRanges(view, editableRanges) {
+function getTrailingEmptyCaretLineFrom(view) {
   const selection = view.state.selection.main;
   const documentLength = view.state.doc.length;
   if (view.hasFocus === false
     || !selection.empty
-    || selection.head !== documentLength) return editableRanges;
-
+    || selection.head !== documentLength) return null;
   const trailingLine = view.state.doc.lineAt(documentLength);
-  if (trailingLine.from !== documentLength || trailingLine.to !== documentLength) {
-    return editableRanges;
-  }
+  return trailingLine.from === documentLength && trailingLine.to === documentLength
+    ? trailingLine.from
+    : null;
+}
 
-  let replaced = false;
-  const normalized = [];
-  for (const range of editableRanges || []) {
-    const from = Number(range?.from);
-    const to = Number(range?.to);
-    if (range?.revealBlock
-      && Number.isFinite(from)
-      && Number.isFinite(to)
-      && from <= documentLength
-      && documentLength <= to) {
-      if (!replaced) {
-        normalized.push({
-          from: documentLength,
-          to: documentLength,
-          revealBlock: true
-        });
-        replaced = true;
-      }
-      continue;
-    }
-    normalized.push(range);
+function shouldDecoratePresentationSourceActiveLine(
+  editableRanges,
+  blockRanges,
+  from,
+  to,
+  trailingEmptyCaretLineFrom
+) {
+  if (trailingEmptyCaretLineFrom !== null) {
+    const safeFrom = Math.max(0, Number(from) || 0);
+    const safeTo = Math.max(safeFrom + 1, Number(to) || safeFrom);
+    return safeFrom === trailingEmptyCaretLineFrom
+      && !overlapsRanges(blockRanges, safeFrom, safeTo);
   }
-  return replaced ? normalized : editableRanges;
+  return shouldDecorateSourceActiveLine(editableRanges, blockRanges, from, to);
 }
 
 export function buildInlinePresentation(view, tree, editableRanges, blockRanges, activeSourceRanges = []) {
-  editableRanges = normalizeTrailingEmptyCaretRanges(view, editableRanges);
+  const trailingEmptyCaretLineFrom = getTrailingEmptyCaretLineFrom(view);
   const ranges = [];
   const replacements = [];
   const lineClasses = new Map();
@@ -780,7 +771,13 @@ export function buildInlinePresentation(view, tree, editableRanges, blockRanges,
   for (const line of visibleLines) {
     const text = line.text;
     if (overlapsRanges(blockRanges, line.from, Math.max(line.from + 1, line.to))) continue;
-    if (shouldDecorateSourceActiveLine(editableRanges, blockRanges, line.from, line.to)) {
+    if (shouldDecoratePresentationSourceActiveLine(
+        editableRanges,
+        blockRanges,
+        line.from,
+        line.to,
+        trailingEmptyCaretLineFrom
+      )) {
       addLineClass(lineClasses, line.from, 'cm-hybrid-source-active');
       continue;
     }
@@ -908,7 +905,13 @@ export function buildInlinePresentation(view, tree, editableRanges, blockRanges,
     if (!range.revealBlock) continue;
     let line = view.state.doc.lineAt(Math.min(view.state.doc.length, range.from));
     while (line.from <= range.to) {
-      if (shouldDecorateSourceActiveLine(editableRanges, blockRanges, line.from, line.to)) {
+      if (shouldDecoratePresentationSourceActiveLine(
+        editableRanges,
+        blockRanges,
+        line.from,
+        line.to,
+        trailingEmptyCaretLineFrom
+      )) {
         addLineClass(lineClasses, line.from, 'cm-hybrid-source-active');
       }
       if (line.number >= view.state.doc.lines) break;
