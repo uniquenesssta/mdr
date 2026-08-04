@@ -11,6 +11,7 @@ on:
     paths:
       - .github/workflows/stage-01-atomic.yml
       - scripts/stage-01/**
+      - src/app/**
       - tests/architecture/**
       - docs/rewrite-progress/stage-01/**
       - README.md
@@ -23,8 +24,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  module-inventory:
-    name: Verify Stage 1 module inventory
+  architecture-foundation:
+    name: Verify Stage 1 architecture foundation
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -41,8 +42,15 @@ jobs:
         run: npm ci
       - name: Verify production module ownership fixture
         run: node --test tests/architecture/module-inventory.test.mjs
+      - name: Verify minimal composition root
+        run: node --test tests/architecture/application-composition.test.mjs
       - name: Collect machine-readable module inventory
         run: node scripts/stage-01/collect-module-inventory.mjs --output=artifacts/stage-01/01-01-module-inventory.json
+      - name: Record composition-root evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-02-composition-root.json',JSON.stringify({node:'stage-01/01-02',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT},null,2)+'\n')"
       - name: Run existing Node regression suite
         run: npm test
       - name: Run browser interaction contract
@@ -52,7 +60,7 @@ jobs:
       - name: Upload Atomic Task evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-01-01-01-module-inventory-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-01-architecture-foundation-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-01
           if-no-files-found: error
           retention-days: 30
