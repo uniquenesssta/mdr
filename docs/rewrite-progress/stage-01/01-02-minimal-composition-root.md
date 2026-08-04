@@ -11,6 +11,9 @@
 - 专项证据工件：`stage-01-architecture-foundation-30906897816-1`
 - 证据工件 ID：`8891411347`
 - 完整基线回归：GitHub Actions run `30906897895`
+- 最终清理提交：`6091eebbc6fc6863557872bd526c7a676253250c`
+- 最终专项复验：GitHub Actions run `30908652346`
+- 最终完整复验：GitHub Actions run `30908651642`
 - 阶段 0 完成基线：`f714feb73338ae049abf53907ff6469c887e1f6b`
 
 ## 实际目标
@@ -113,6 +116,8 @@ CI 只读取仓库和上传证据，不修改或自动推送仓库内容。
 - 一次性应用和 README 同步工作流均已删除；
 - 没有降低仓库权限、没有长期保留临时工作流、没有绕过测试。
 
+README 同步后曾发生一次内容替换误操作。该问题在节点结束前被检测，并从已验证提交精确恢复；临时恢复工作流随后删除。恢复后的 README 与误操作前 blob 一致，最终分支头重新完成专项门禁和完整回归。
+
 ## 专项验证结果
 
 GitHub Actions run `30906897816`：**通过**。
@@ -142,6 +147,8 @@ GitHub Actions run `30906897895`：**通过**。
 - `cargo check --manifest-path src-tauri/Cargo.toml --locked`：通过；
 - Tauri Linux release build：通过；
 - 阶段 0 硬门禁复验：通过。
+
+最终清理提交 `6091eebbc6fc6863557872bd526c7a676253250c` 的专项 run `30908652346` 和完整 run `30908651642` 也全部通过，证明临时工作流清理与 README 恢复后没有遗留关联问题。
 
 ## 行为与兼容性
 
