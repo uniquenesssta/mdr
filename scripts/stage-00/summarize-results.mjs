@@ -8,6 +8,8 @@ const summaryDirectory = resolve(reportRoot, 'summary');
 await mkdir(summaryDirectory, { recursive: true });
 
 const requiredChecks = new Set([
+  'rust-toolchain',
+  'tauri-system-deps',
   'npm-ci',
   'npm-test',
   'browser-contract',
