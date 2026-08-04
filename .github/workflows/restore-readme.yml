@@ -22,11 +22,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
-          fetch-depth: 2
-      - name: Restore README from previous commit
+          fetch-depth: 0
+      - name: Restore verified README
         shell: bash
         run: |
-          git show HEAD^:README.md > README.md
+          git show 73489d39a798d8278bf6ea45ed5321bd3fba75ba:README.md > README.md
           git diff --check
       - name: Commit restoration
         shell: bash
