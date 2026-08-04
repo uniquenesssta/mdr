@@ -1,0 +1,465 @@
+name: Apply Stage 1 Atomic Task 1.5
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - .github/workflows/stage-01-apply-01-05.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+      - name: Apply command infrastructure
+        shell: bash
+        run: |
+          mkdir -p src/app/commands tests/architecture
+
+          cat > src/app/commands/command-ids.js <<'EOF'
+          const COMMAND_ID_PATTERN = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/;
+          const COMMAND_NAME_PATTERN = /^[A-Z][A-Z0-9_]*$/;
+
+          export function assertCommandId(commandId) {
+            if (typeof commandId !== 'string' || !COMMAND_ID_PATTERN.test(commandId)) {
+              throw new TypeError(
+                'Command ID must be a lower-case dotted identifier such as "document.save-as".'
+              );
+            }
+            return commandId;
+          }
+
+          export function defineCommandIds(definitions) {
+            if (
+              definitions === null ||
+              typeof definitions !== 'object' ||
+              Array.isArray(definitions)
+            ) {
+              throw new TypeError('Command ID definitions must be an object.');
+            }
+
+            const catalog = {};
+            const declaredIds = new Set();
+
+            for (const [name, commandId] of Object.entries(definitions)) {
+              if (!COMMAND_NAME_PATTERN.test(name)) {
+                throw new TypeError(
+                  `Command constant name "${name}" must use upper snake case.`
+                );
+              }
+              assertCommandId(commandId);
+              if (declaredIds.has(commandId)) {
+                throw new Error(`Command ID "${commandId}" is declared more than once.`);
+              }
+              declaredIds.add(commandId);
+              catalog[name] = commandId;
+            }
+
+            return Object.freeze(catalog);
+          }
+          EOF
+
+          cat > src/app/commands/command-registry.js <<'EOF'
+          import { assertCommandId } from './command-ids.js';
+
+          export class DuplicateCommandRegistrationError extends Error {
+            constructor(commandId) {
+              super(`Command "${commandId}" already has a registered handler.`);
+              this.name = 'DuplicateCommandRegistrationError';
+              this.commandId = commandId;
+            }
+          }
+
+          export class CommandNotRegisteredError extends Error {
+            constructor(commandId) {
+              super(`Command "${commandId}" does not have a registered handler.`);
+              this.name = 'CommandNotRegisteredError';
+              this.commandId = commandId;
+            }
+          }
+
+          function assertCommandHandler(handler) {
+            if (typeof handler !== 'function') {
+              throw new TypeError('Command handler must be a function.');
+            }
+          }
+
+          export function createCommandRegistry() {
+            const entries = new Map();
+
+            function register(commandId, handler) {
+              assertCommandId(commandId);
+              assertCommandHandler(handler);
+
+              if (entries.has(commandId)) {
+                throw new DuplicateCommandRegistrationError(commandId);
+              }
+
+              const entry = Object.freeze({ commandId, handler });
+              entries.set(commandId, entry);
+              let active = true;
+
+              return function unregisterCommand() {
+                if (!active) return false;
+                active = false;
+                if (entries.get(commandId) !== entry) return false;
+                entries.delete(commandId);
+                return true;
+              };
+            }
+
+            function resolve(commandId) {
+              assertCommandId(commandId);
+              const entry = entries.get(commandId);
+              if (!entry) throw new CommandNotRegisteredError(commandId);
+              return entry.handler;
+            }
+
+            function has(commandId) {
+              assertCommandId(commandId);
+              return entries.has(commandId);
+            }
+
+            return Object.freeze({
+              get size() {
+                return entries.size;
+              },
+              register,
+              resolve,
+              has
+            });
+          }
+          EOF
+
+          cat > src/app/commands/command-bus.js <<'EOF'
+          import { createCommandRegistry } from './command-registry.js';
+
+          function isObject(value) {
+            return value !== null && typeof value === 'object' && !Array.isArray(value);
+          }
+
+          function assertCommandRegistry(registry) {
+            if (
+              !isObject(registry) ||
+              typeof registry.register !== 'function' ||
+              typeof registry.resolve !== 'function'
+            ) {
+              throw new TypeError(
+                'Command bus registry must implement register() and resolve().'
+              );
+            }
+          }
+
+          export function createCommandBus(dependencies = {}) {
+            if (!isObject(dependencies)) {
+              throw new TypeError('Command bus dependencies must be an object.');
+            }
+
+            const registry = dependencies.registry ?? createCommandRegistry();
+            assertCommandRegistry(registry);
+
+            return Object.freeze({
+              register(commandId, handler) {
+                return registry.register(commandId, handler);
+              },
+              execute(commandId, payload) {
+                let handler;
+                try {
+                  handler = registry.resolve(commandId);
+                } catch (error) {
+                  return Promise.reject(error);
+                }
+                return Promise.resolve().then(() => handler(payload));
+              }
+            });
+          }
+          EOF
+
+          cat > tests/architecture/command-bus.test.mjs <<'EOF'
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+          import { resolve } from 'node:path';
+          import test from 'node:test';
+          import { fileURLToPath } from 'node:url';
+          import { createApplication } from '../../src/app/create-application.js';
+          import { createCommandBus } from '../../src/app/commands/command-bus.js';
+          import {
+            CommandNotRegisteredError,
+            DuplicateCommandRegistrationError,
+            createCommandRegistry
+          } from '../../src/app/commands/command-registry.js';
+          import {
+            assertCommandId,
+            defineCommandIds
+          } from '../../src/app/commands/command-ids.js';
+
+          const root = fileURLToPath(new URL('../..', import.meta.url));
+
+          test('command ID declarations validate names, values, uniqueness and immutability', () => {
+            const ids = defineCommandIds({
+              DOCUMENT_SAVE: 'document.save',
+              LAYOUT_TOGGLE_SIDEBAR: 'layout.toggle-sidebar'
+            });
+
+            assert.ok(Object.isFrozen(ids));
+            assert.deepEqual(ids, {
+              DOCUMENT_SAVE: 'document.save',
+              LAYOUT_TOGGLE_SIDEBAR: 'layout.toggle-sidebar'
+            });
+            assert.equal(assertCommandId('app.open-settings'), 'app.open-settings');
+            assert.throws(() => assertCommandId('Save'), /lower-case dotted identifier/);
+            assert.throws(() => assertCommandId('save'), /lower-case dotted identifier/);
+            assert.throws(
+              () => defineCommandIds({ badName: 'document.save' }),
+              /upper snake case/
+            );
+            assert.throws(
+              () => defineCommandIds({ A: 'document.save', B: 'document.save' }),
+              /declared more than once/
+            );
+          });
+
+          test('registry owns one handler per command and unregisters by exact entry identity', () => {
+            const registry = createCommandRegistry();
+            const firstHandler = () => 'first';
+            const unregisterFirst = registry.register('document.save', firstHandler);
+
+            assert.ok(Object.isFrozen(registry));
+            assert.equal(registry.size, 1);
+            assert.equal(registry.has('document.save'), true);
+            assert.strictEqual(registry.resolve('document.save'), firstHandler);
+            assert.throws(
+              () => registry.register('document.save', () => 'duplicate'),
+              error => error instanceof DuplicateCommandRegistrationError &&
+                error.commandId === 'document.save'
+            );
+
+            assert.equal(unregisterFirst(), true);
+            assert.equal(unregisterFirst(), false);
+            const unregisterSecond = registry.register('document.save', () => 'second');
+            assert.equal(unregisterFirst(), false);
+            assert.equal(registry.size, 1);
+            assert.equal(unregisterSecond(), true);
+            assert.equal(registry.size, 0);
+          });
+
+          test('command bus executes synchronous and asynchronous handlers with the exact payload', async () => {
+            const bus = createCommandBus();
+            const payload = { documentId: 'doc-1' };
+            let receivedPayload;
+
+            bus.register('document.save', input => {
+              receivedPayload = input;
+              return { status: 'saved' };
+            });
+            bus.register('document.load', async input => ({ loaded: input.documentId }));
+
+            assert.ok(Object.isFrozen(bus));
+            assert.deepEqual(await bus.execute('document.save', payload), { status: 'saved' });
+            assert.strictEqual(receivedPayload, payload);
+            assert.deepEqual(
+              await bus.execute('document.load', payload),
+              { loaded: 'doc-1' }
+            );
+          });
+
+          test('missing commands reject instead of silently succeeding', async () => {
+            const bus = createCommandBus();
+
+            await assert.rejects(bus.execute('document.save'), error => {
+              assert.ok(error instanceof CommandNotRegisteredError);
+              assert.equal(error.commandId, 'document.save');
+              return true;
+            });
+          });
+
+          test('handler failures propagate without wrapping or conversion', async () => {
+            const bus = createCommandBus();
+            const synchronousFailure = new Error('sync failure');
+            const asynchronousFailure = new Error('async failure');
+
+            bus.register('document.sync-failure', () => {
+              throw synchronousFailure;
+            });
+            bus.register('document.async-failure', async () => {
+              throw asynchronousFailure;
+            });
+
+            await assert.rejects(
+              bus.execute('document.sync-failure'),
+              error => error === synchronousFailure
+            );
+            await assert.rejects(
+              bus.execute('document.async-failure'),
+              error => error === asynchronousFailure
+            );
+          });
+
+          test('an execution keeps its resolved handler while later executions observe unregister', async () => {
+            const bus = createCommandBus();
+            let calls = 0;
+            const unregister = bus.register('document.save', async payload => {
+              calls += 1;
+              await Promise.resolve();
+              return payload;
+            });
+
+            const inFlight = bus.execute('document.save', 'first');
+            assert.equal(unregister(), true);
+            assert.equal(await inFlight, 'first');
+            assert.equal(calls, 1);
+            await assert.rejects(
+              bus.execute('document.save', 'second'),
+              CommandNotRegisteredError
+            );
+          });
+
+          test('registry and bus dependency contracts reject invalid inputs', () => {
+            const registry = createCommandRegistry();
+
+            assert.throws(
+              () => registry.register('document.save', null),
+              { name: 'TypeError', message: 'Command handler must be a function.' }
+            );
+            assert.throws(
+              () => createCommandBus(null),
+              { name: 'TypeError', message: 'Command bus dependencies must be an object.' }
+            );
+            assert.throws(
+              () => createCommandBus({ registry: {} }),
+              /must implement register\(\) and resolve\(\)/
+            );
+          });
+
+          test('command bus satisfies the minimal application composition-root port', async () => {
+            const calls = [];
+            const commands = createCommandBus();
+            commands.register('application.ping', payload => {
+              calls.push(payload);
+              return 'pong';
+            });
+            const application = createApplication({
+              commands,
+              events: { subscribe() {}, publish() {} },
+              lifecycle: { async start() {}, async destroy() {} }
+            });
+
+            assert.strictEqual(application.commands, commands);
+            assert.equal(await application.commands.execute('application.ping', 1), 'pong');
+            assert.deepEqual(calls, [1]);
+          });
+
+          test('command infrastructure is platform-free and disconnected from the legacy bootstrap', async () => {
+            const sources = await Promise.all([
+              'command-ids.js',
+              'command-registry.js',
+              'command-bus.js'
+            ].map(file => readFile(resolve(root, 'src/app/commands', file), 'utf8')));
+            const legacyBootstrap = await readFile(resolve(root, 'src/main.js'), 'utf8');
+            const forbiddenRuntimeAccess = /\b(?:document|window|localStorage|sessionStorage|Worker|SharedWorker|MutationObserver|ResizeObserver|setTimeout|setInterval)\b|@tauri-apps|\binvoke\s*\(/;
+
+            for (const source of sources) {
+              assert.doesNotMatch(source, forbiddenRuntimeAccess);
+            }
+            assert.doesNotMatch(
+              legacyBootstrap,
+              /(?:import|export)[^;]*app\/commands\/|import\([^)]*app\/commands\//
+            );
+          });
+          EOF
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('tests/architecture/fixtures/production-modules.json')
+          manifest = json.loads(path.read_text(encoding='utf-8'))
+          records = {
+              'src/app/commands/command-ids.js': [
+                  'src/app/commands/command-ids.js',
+                  'esm-module',
+                  'composition',
+                  'Command identifier validation and immutable centralized command catalog declaration.',
+                  'none',
+                  'pure',
+                  'retain',
+                  False
+              ],
+              'src/app/commands/command-registry.js': [
+                  'src/app/commands/command-registry.js',
+                  'esm-module',
+                  'composition',
+                  'Unique command-handler ownership, duplicate prevention, exact lookup and idempotent unregister.',
+                  'command-registry',
+                  'explicit-instance',
+                  'retain',
+                  False
+              ],
+              'src/app/commands/command-bus.js': [
+                  'src/app/commands/command-bus.js',
+                  'esm-module',
+                  'composition',
+                  'Promise-based command dispatch through an injected command registry without business state.',
+                  'none',
+                  'explicit-instance',
+                  'retain',
+                  False
+              ]
+          }
+          existing = {record[0]: record for record in manifest['modules']}
+          existing.update(records)
+          manifest['modules'] = sorted(existing.values(), key=lambda record: record[0])
+          path.write_text(json.dumps(manifest, separators=(',', ':')) + '\n', encoding='utf-8')
+          PY
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/workflows/stage-01-atomic.yml')
+          source = path.read_text(encoding='utf-8')
+
+          test_anchor = "      - name: Verify disposer registry\n        run: node --test tests/architecture/disposer-registry.test.mjs\n"
+          test_entry = test_anchor + "      - name: Verify command registry and command bus\n        run: node --test tests/architecture/command-bus.test.mjs\n"
+          if 'Verify command registry and command bus' not in source:
+              if test_anchor not in source:
+                  raise SystemExit('Stage 1 test insertion anchor missing')
+              source = source.replace(test_anchor, test_entry)
+
+          evidence_anchor = "      - name: Run existing Node regression suite\n"
+          evidence_entry = (
+              "      - name: Record command-infrastructure evidence\n"
+              "        shell: bash\n"
+              "        run: |\n"
+              "          mkdir -p artifacts/stage-01\n"
+              "          node -e \"const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-05-command-infrastructure.json',JSON.stringify({node:'stage-01/01-05',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,registryOwnership:'unique-handler',duplicatePolicy:'reject',unregisterPolicy:'exact-idempotent',dispatchResult:'promise',missingCommand:'reject',handlerErrors:'preserve'},null,2)+'\\n')\"\n"
+          )
+          if 'Record command-infrastructure evidence' not in source:
+              if evidence_anchor not in source:
+                  raise SystemExit('Stage 1 evidence insertion anchor missing')
+              source = source.replace(evidence_anchor, evidence_entry + evidence_anchor)
+
+          path.write_text(source, encoding='utf-8')
+          PY
+
+      - name: Commit command infrastructure
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/commands tests/architecture/command-bus.test.mjs tests/architecture/fixtures/production-modules.json .github/workflows/stage-01-atomic.yml
+          git diff --cached --check
+          git commit -m "feat(stage1): add command registry and command bus"
+          git push origin "HEAD:${{ github.head_ref }}"
