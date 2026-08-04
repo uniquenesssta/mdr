@@ -87,11 +87,6 @@ async function waitForIdle(options = {}) {
   return false;
 }
 
-function dispatchEditorInput(editor) {
-  const event = new Event('input', { bubbles: true, cancelable: false });
-  editor.dispatchEvent(event);
-}
-
 async function setLayout(mode) {
   const normalized = ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
   if (typeof globalThis.setLayoutMode !== 'function') {
@@ -116,13 +111,31 @@ async function setVisualEditing(options = {}) {
   await waitForIdle();
 }
 
-async function loadMarkdown(source, options = {}) {
+async function loadApplicationDocument(source, options = {}) {
+  if (typeof globalThis.loadTextContentAsDocument !== 'function') {
+    throw new Error('application document import flow is unavailable');
+  }
+  const content = String(source || '');
+  const loaded = await globalThis.loadTextContentAsDocument(
+    String(options.name || 'e2e-fixture.md'),
+    content,
+    ''
+  );
+  if (!loaded) throw new Error('application document import flow rejected the E2E fixture');
+
   const editor = getEditor();
-  if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable');
-  editor.virtualEditor.loadDocument(String(source || ''), {
-    selection: Number.isFinite(Number(options.selection)) ? Number(options.selection) : 0
-  });
-  dispatchEditorInput(editor);
+  if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable after document import');
+  const requestedSelection = Number(options.selection);
+  const selection = Math.max(
+    0,
+    Math.min(editor.textLength, Number.isFinite(requestedSelection) ? requestedSelection : 0)
+  );
+  editor.setSelectionRange(selection, selection);
+  return editor;
+}
+
+async function loadMarkdown(source, options = {}) {
+  await loadApplicationDocument(source, options);
   await setVisualEditing({
     code: options.codeVisualEditing !== false,
     table: options.tableVisualEditing !== false
