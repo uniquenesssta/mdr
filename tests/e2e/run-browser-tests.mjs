@@ -364,6 +364,7 @@ async function runAppSuite() {
     await test('application Mermaid presentation stays normalized across hybrid and preview layouts', async () => {
       await loadAppFixture(browser.page);
       await setAppLayout(browser.page, 'hybrid');
+      await browser.page.evaluate(`window.__markdownEditorE2E.revealText('flowchart LR',{preserveSelection:true})`);
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type=\"mermaid\"] svg')), { timeoutMs: 10000, description: 'hybrid Mermaid SVG' });
       const hybrid = await browser.page.evaluate(`(()=>{const svg=document.querySelector('[data-hybrid-block-type=\"mermaid\"] svg');return {role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),height:svg?.style.height,maxWidth:svg?.style.maxWidth,background:svg?.style.background}})()`);
       await setAppLayout(browser.page, 'preview');
@@ -380,6 +381,7 @@ async function runAppSuite() {
       await browser.page.waitFor(() => !document.querySelector('[data-hybrid-block-type="code"]') && document.getElementById('editor')?.selectionEnd > document.getElementById('editor')?.selectionStart, { description: 'source range open' });
       const selectedSource = await browser.page.evaluate(`(()=>{const editor=document.getElementById('editor');return editor.value.slice(editor.selectionStart,editor.selectionEnd)})()`);
       assert.match(selectedSource, /plain code/);
+      await browser.page.evaluate(`window.__markdownEditorE2E.revealText('selection alpha',{preserveSelection:true})`);
       const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
       await browser.page.clickAt(outside.x + 2, outside.y);
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'source range close' });

@@ -878,6 +878,22 @@ export function buildInlinePresentation(view, tree, editableRanges, blockRanges,
     }
   }
 
+  // At the final empty line, Lezer resolves a left-biased document-end caret
+  // into the preceding fenced block. Keep the rendered block mounted, but mark
+  // the real trailing line as active so the visual caret never appears on the
+  // block placeholder itself.
+  const mainSelection = view.state.selection.main;
+  if (view.hasFocus !== false
+    && mainSelection.empty
+    && mainSelection.head === view.state.doc.length) {
+    const trailingLine = view.state.doc.lineAt(view.state.doc.length);
+    const trailingTo = Math.max(trailingLine.from + 1, trailingLine.to);
+    if (trailingLine.from === view.state.doc.length
+      && !overlapsRanges(blockRanges, trailingLine.from, trailingTo)) {
+      addLineClass(lineClasses, trailingLine.from, 'cm-hybrid-source-active');
+    }
+  }
+
   let headingLines = 0;
   let sourceActiveLines = 0;
   for (const [lineFrom, classes] of lineClasses) {

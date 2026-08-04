@@ -877,7 +877,10 @@ export class MermaidBlockWidget extends WidgetType {
       body.title = this.visualEditing
         ? '双击直接编辑 Mermaid；点击“编辑源码”编辑 Markdown 源码'
         : '双击编辑 Mermaid 源码';
-      void renderHybridMermaid(body, codeValue, view, renderState);
+      requestAnimationFrame(() => {
+        if (!body.isConnected) return;
+        void renderHybridMermaid(body, codeValue, view, renderState);
+      });
       if (this.visualEditing) {
         bindStrictDoubleActivation(body, (event, gesture) => {
           recordHybridInteraction('hybrid.mermaid-direct-edit-open', {
