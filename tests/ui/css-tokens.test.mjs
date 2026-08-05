@@ -68,56 +68,76 @@ const requiredTokens = {
   ]
 };
 
-test('Atomic Task 2.7 exposes one ordered stylesheet entry and one token authority', async () => {
-  const [entrySource, mainEntrySource, tokenSource, legacySource] = await Promise.all([
+test('Atomic Task 2.7 keeps one ordered stylesheet entry and one semantic token contract', async () => {
+  const [entrySource, mainEntrySource, tokenSource, lightSource, darkSource, legacySource] = await Promise.all([
     readText('src/styles/index.css'),
     readText('src/main.js'),
     readText('src/styles/foundation/tokens.css'),
+    readText('src/styles/themes/light.css'),
+    readText('src/styles/themes/dark.css'),
     readText('src/styles/main.css')
   ]);
 
-  assert.equal(entrySource, "@import './foundation/tokens.css';\n@import './main.css';\n");
+  assert.equal(entrySource, [
+    "@import './foundation/tokens.css';",
+    "@import './themes/light.css';",
+    "@import './themes/dark.css';",
+    "@import './main.css';",
+    ''
+  ].join('\n'));
   assert.match(mainEntrySource, /^import '\.\/styles\/index\.css';/);
   assert.doesNotMatch(mainEntrySource, /styles\/main\.css/);
   assert.match(tokenSource, /^:root\s*\{/);
-  assert.match(tokenSource, /\[data-theme="dark"\]\s*\{/);
-  assert.doesNotMatch(legacySource, /(^|\n):root\s*\{/);
-  assert.doesNotMatch(legacySource, /(^|\n)\[data-theme="dark"\]\s*\{\s*--/);
+  assert.match(lightSource, /^:root\s*\{/);
+  assert.match(darkSource, /^\[data-theme="dark"\]\s*\{/);
+  assert.doesNotMatch(tokenSource, /\[data-theme/);
+  assert.doesNotMatch(legacySource, /(^|\n):root\s*\{|\[data-theme/);
 });
 
 test('token contract separates required semantic categories without page-position names', async () => {
-  const tokenSource = await readText('src/styles/foundation/tokens.css');
-  const rootDefinitions = collectDefinitions(extractRule(tokenSource, ':root'));
-  const darkDefinitions = collectDefinitions(extractRule(tokenSource, '[data-theme="dark"]'));
+  const [tokenSource, lightSource, darkSource] = await Promise.all([
+    readText('src/styles/foundation/tokens.css'),
+    readText('src/styles/themes/light.css'),
+    readText('src/styles/themes/dark.css')
+  ]);
+  const baseDefinitions = collectDefinitions(extractRule(tokenSource, ':root'));
+  const lightDefinitions = collectDefinitions(extractRule(lightSource, ':root'));
+  const darkDefinitions = collectDefinitions(extractRule(darkSource, '[data-theme="dark"]'));
+  const defaultDefinitions = new Map([...baseDefinitions, ...lightDefinitions]);
 
   for (const [category, names] of Object.entries(requiredTokens)) {
-    for (const name of names) assert.ok(rootDefinitions.has(name), `${category} token missing: ${name}`);
+    for (const name of names) assert.ok(defaultDefinitions.has(name), `${category} token missing: ${name}`);
   }
   for (const name of darkDefinitions.keys()) {
-    assert.ok(rootDefinitions.has(name), `dark override has no base token: ${name}`);
+    assert.ok(lightDefinitions.has(name), `dark override has no light default: ${name}`);
   }
-  for (const name of rootDefinitions.keys()) {
+  for (const name of defaultDefinitions.keys()) {
     assert.doesNotMatch(name, /(?:left|right|top|bottom|sidebar|workspace|header|footer)/, name);
   }
 
-  assert.equal(rootDefinitions.get('--color-canvas'), '#eef1f5');
-  assert.equal(rootDefinitions.get('--color-editor-text'), '#202530');
-  assert.equal(rootDefinitions.get('--radius-md'), '7px');
-  assert.equal(rootDefinitions.get('--motion-duration-moderate'), '0.20s');
-  assert.equal(rootDefinitions.get('--code-background'), '#f5f7fb');
+  assert.equal(lightDefinitions.get('--color-canvas'), '#eef1f5');
+  assert.equal(lightDefinitions.get('--color-editor-text'), '#202530');
+  assert.equal(baseDefinitions.get('--radius-md'), '7px');
+  assert.equal(baseDefinitions.get('--motion-duration-moderate'), '0.20s');
+  assert.equal(lightDefinitions.get('--code-background'), '#f5f7fb');
   assert.equal(darkDefinitions.get('--color-canvas'), '#0c1017');
   assert.equal(darkDefinitions.get('--code-background'), '#0b0f15');
 });
 
 test('production callers use semantic tokens and consolidated CSS has no color literals', async () => {
-  const [tokenSource, mainSource, sourceFiles] = await Promise.all([
+  const [tokenSource, lightSource, darkSource, mainSource, sourceFiles] = await Promise.all([
     readText('src/styles/foundation/tokens.css'),
+    readText('src/styles/themes/light.css'),
+    readText('src/styles/themes/dark.css'),
     readText('src/styles/main.css'),
     Promise.all(['src', 'public'].map(listSourceFiles))
   ]);
-  const tokenDefinitions = collectDefinitions(tokenSource);
-  const mainDefinitions = collectDefinitions(mainSource);
-  const available = new Set([...tokenDefinitions.keys(), ...mainDefinitions.keys()]);
+  const available = new Set([
+    ...collectDefinitions(tokenSource).keys(),
+    ...collectDefinitions(lightSource).keys(),
+    ...collectDefinitions(darkSource).keys(),
+    ...collectDefinitions(mainSource).keys()
+  ]);
   const runtimeOwned = new Set([
     '--editor-font-size', '--indicator-color', '--sidebar-width', '--swatch-color', '--tree-depth'
   ]);

@@ -1,2 +1,4 @@
 @import './foundation/tokens.css';
+@import './themes/light.css';
+@import './themes/dark.css';
 @import './main.css';

@@ -36,8 +36,10 @@ src/                        # 前端源码
     performance.js          # 前端操作与渲染性能采集
   styles/
     index.css               # 单一样式公共入口
-    foundation/tokens.css   # 语义化 CSS 令牌权威
-    main.css                # 当前合并应用规则
+    foundation/tokens.css   # 主题无关的语义令牌
+    themes/light.css        # 默认亮色视觉令牌
+    themes/dark.css         # 暗色视觉令牌覆盖
+    main.css                # 待 Atomic Task 2.9 分层的现有规则
 public/
   i18n.js                   # 多语言文本
   app/                      # 前端功能模块（按职责拆分）
@@ -113,6 +115,8 @@ npm run check
 - 当前完整桌面基线在 Ubuntu 22.04 验证；Windows 原生窗口、文件关联和系统拖放仍需在涉及这些路径的阶段执行真实平台验证。
 
 ## Change Log
+<!-- stage-02-node:02-08 -->
+- 2026-08-06：阶段 2 Atomic Task 2.8（主题）完成：新增 `src/styles/themes/light.css` 与 `src/styles/themes/dark.css`，亮暗主题只定义颜色、基础阴影、代码展示和内容图片透明度等视觉令牌；`foundation/tokens.css` 仅保留主题无关尺度和组合令牌，`main.css` 已移除全部 `data-theme` 组件选择器。既有 157 个默认令牌值和 41 个暗色覆盖值逐项保持一致，主题状态、localStorage、Mermaid 协调及设置行为仍由原兼容链拥有。生产模块记录由 89 增至 91，并将 Stage 2 证据生成从工作流内联脚本提取为 `scripts/stage-02/record-ui-foundation-evidence.mjs`；实现验证头 `3ea4493155c0567ccd5eb929971bc6d214e7888f` 的 Stage 2 run `31035151976`、Stage 1 run `31035151969`、Stage 0 run `31035151751` 全部通过，覆盖 30/30 阶段专项、36/36 Node、架构硬门禁、9/9 浏览器契约、生产构建、11/11 构建后浏览器、Rust test/check 与 Tauri Linux build。未修改依赖、锁文件、Rust、Tauri 配置、冻结模型、持久化或业务接口；依赖审计仍为既有 1 low / 1 high，样式分层仍属于 Atomic Task 2.9。
 <!-- stage-02-node:02-07 -->
 - 2026-08-06：阶段 2 Atomic Task 2.7（CSS 令牌）完成：新增单一样式入口 `src/styles/index.css` 与单一语义令牌权威 `src/styles/foundation/tokens.css`，集中颜色、字体与字号、间距、圆角、阴影、层级、动效和代码展示令牌；现有 CSS、HTML 和 JavaScript 调用者已切换，`main.css` 不再保留 `:root` 权威或颜色字面量，运行时侧栏宽度、编辑器字号及局部状态属性保持原所有权。生产模块记录由 87 增至 89；实现验证头 `4e0b8a6c1df1be20af6be09987ae720a3e8e373b` 的 Stage 2 run `31029253144`、Stage 1 run `31029252663`、Stage 0 run `31029252956` 全部通过，覆盖 31/31 阶段专项、36/36 Node、架构硬门禁、9/9 浏览器契约、生产构建、10/10 构建后浏览器、Rust test/check 与 Tauri Linux build。未修改依赖、锁文件、冻结模型、持久化或业务行为；依赖审计仍为既有 1 low / 1 high，主题拆分与样式分层仍分别属于 Atomic Task 2.8 和 2.9。
 <!-- stage-02-node:02-06 -->

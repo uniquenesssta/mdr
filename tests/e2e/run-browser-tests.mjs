@@ -336,6 +336,52 @@ async function runAppSuite() {
       assert.deepEqual(snapshot.duplicateIds, []);
     });
 
+    await test('application theme switch changes visual tokens without changing shell geometry', async () => {
+      const result = await browser.page.evaluate(`(async()=>{
+        const selectors={
+          shell:'[data-ui-shell="app"]',
+          menu:'.menu-bar',
+          toolbar:'.editor-toolbar',
+          workspace:'.workspace',
+          main:'.main',
+          editor:'.editor-pane',
+          preview:'.preview-pane',
+          status:'.statusbar',
+          overlay:'#overlay-root'
+        };
+        const round=value=>Math.round(value*1000)/1000;
+        const snapshot=()=>({
+          geometry:Object.fromEntries(Object.entries(selectors).map(([name,selector])=>{
+            const rect=document.querySelector(selector)?.getBoundingClientRect();
+            return [name,rect?{x:round(rect.x),y:round(rect.y),width:round(rect.width),height:round(rect.height)}:null];
+          })),
+          document:{width:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight},
+          tokens:{
+            canvas:getComputedStyle(document.body).getPropertyValue('--color-canvas').trim(),
+            text:getComputedStyle(document.body).getPropertyValue('--color-text-primary').trim(),
+            imageOpacity:getComputedStyle(document.body).getPropertyValue('--content-image-opacity').trim()
+          }
+        });
+        const apply=theme=>new Promise(resolve=>{
+          document.body.setAttribute('data-theme',theme);
+          requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(snapshot())));
+        });
+        const light=await apply('light');
+        const dark=await apply('dark');
+        const restored=await apply('light');
+        return {light,dark,restored,theme:document.body.getAttribute('data-theme')};
+      })()`);
+      assert.equal(result.theme, 'light');
+      assert.equal(result.light.tokens.canvas, '#eef1f5');
+      assert.equal(result.dark.tokens.canvas, '#0c1017');
+      assert.equal(result.light.tokens.imageOpacity, '1');
+      assert.equal(Number(result.dark.tokens.imageOpacity), 0.95);
+      assert.notEqual(result.light.tokens.text, result.dark.tokens.text);
+      assert.deepEqual(result.dark.geometry, result.light.geometry);
+      assert.deepEqual(result.dark.document, result.light.document);
+      assert.deepEqual(result.restored, result.light);
+    });
+
     await test('application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy', async () => {
       await browser.page.evaluate(`(()=>{
         document.getElementById('modal-shell-focus-source')?.remove();

@@ -15,7 +15,8 @@ test('browser E2E runner stays dependency-free and covers required interactions'
     'application code block placeholder never receives a phantom source highlight',
     'application Mermaid presentation stays normalized across hybrid and preview layouts',
     'source editing closes on an outside pointer action',
-    'layout switching closes active component editing'
+    'layout switching closes active component editing',
+    'application theme switch changes visual tokens without changing shell geometry'
   ]) assert.ok(runner.includes(phrase), `missing browser scenario: ${phrase}`);
   assert.match(runner, /node:assert\/strict/);
   assert.doesNotMatch(runner, /playwright|puppeteer|selenium-webdriver/i);
