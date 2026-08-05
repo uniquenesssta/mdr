@@ -43,8 +43,10 @@ jobs:
         run: node --test tests/svg-sprite.test.mjs
       - name: Verify Atomic Task 2.4 App Shell and strict refs
         run: node --test tests/ui/app-shell.test.mjs
+      - name: Verify Atomic Task 2.5 bounded DOM primitives
+        run: node --test tests/ui/dom-primitives.test.mjs
       - name: Run architecture hard gate
-        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-04-architecture-scan.json
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-05-architecture-scan.json
       - name: Record current Stage 2 evidence
         shell: bash
         run: |
@@ -55,6 +57,7 @@ jobs:
           import { collectInlineEvents } from './scripts/architecture/source-analysis.mjs';
           import { collectIconReferences, inspectSvgSprite } from './scripts/stage-02/icon-sprite/inspect-svg-sprite.mjs';
           import * as iconView from './src/ui/components/icon-view.js';
+          import * as domPrimitives from './src/ui/dom/index.js';
 
           const indexSource = await readFile('index.html', 'utf8');
           const shellSource = await readFile('public/compatibility/current-shell.html', 'utf8');
@@ -68,6 +71,8 @@ jobs:
           const iconViewExports = Object.keys(iconView).sort();
           const compatibilitySlots = [...shellSource.matchAll(/<template\s+data-compat-slot="([^"]+)">/g)].map(match => match[1]);
           const appShellModules = moduleFixture.modules.filter(record => record[2] === 'ui-shell').map(record => record[0]).sort();
+          const domPrimitiveModules = moduleFixture.modules.filter(record => record[2] === 'ui-dom').map(record => record[0]).sort();
+          const domPrimitiveExports = Object.keys(domPrimitives).sort();
 
           if (indexInventory.summary.inlineEventCount !== 0 || inlineEvents !== 184) process.exit(1);
           if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35) process.exit(1);
@@ -77,7 +82,8 @@ jobs:
           if (/<symbol\b|class="icon-sprite"|href="#icon-/i.test(shellSource)) process.exit(1);
           if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) process.exit(1);
           if (/<div class="app">|<nav class="menu-bar"|<div class="editor-toolbar"|<div class="workspace"|<aside class="sidebar"|<div class="statusbar"/.test(shellSource)) process.exit(1);
-          if (moduleFixture.modules.length !== 79 || appShellModules.length !== 8) process.exit(1);
+          if (moduleFixture.modules.length !== 85 || appShellModules.length !== 8 || domPrimitiveModules.length !== 6) process.exit(1);
+          if (JSON.stringify(domPrimitiveExports) !== JSON.stringify(['collectRequiredRefs','createEventScope','createFocusScope','createSafeElement','createTransitionVisibility','isElementRef','requireElementRef'])) process.exit(1);
 
           await writeFile('artifacts/stage-02/02-02-minimal-index-evidence.json', `${JSON.stringify({
             node: 'stage-02/02-02',
@@ -86,8 +92,8 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'minimal-index-and-module-entry',
-            currentStage2State: '2.4-completed',
-            nextAtomicTask: '2.5-not-started',
+            currentStage2State: '2.5-completed',
+            nextAtomicTask: '2.6-not-started',
             index: indexInventory.source,
             indexSummary: indexInventory.summary,
             compatibilityShell: {
@@ -102,7 +108,8 @@ jobs:
               'vite-tauri-resource-paths-preserved',
               'task-2.3-completed-with-external-svg-sprite',
               'task-2.4-completed-with-single-app-shell',
-              'tasks-2.5-and-2.6-not-started'
+              'task-2.5-completed-with-bounded-dom-primitives',
+              'task-2.6-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
 
@@ -113,7 +120,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'external-svg-sprite-and-generic-icon-view',
-            nextAtomicTask: '2.5-not-started',
+            nextAtomicTask: '2.6-not-started',
             sprite: {
               path: 'public/assets/icons.svg',
               symbolCount: sprite.symbolCount,
@@ -142,7 +149,7 @@ jobs:
               'no-inline-business-meaning-or-behavior',
               'generic-icon-view-has-no-business-state-or-listeners',
               'legacy-and-esm-callers-use-the-same-external-sprite',
-              'atomic-task-2.4-completed-and-2.5-not-started'
+              'atomic-tasks-2.4-and-2.5-completed-and-2.6-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
 
@@ -153,7 +160,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'single-app-shell-and-strict-ui-refs',
-            nextAtomicTask: '2.5-not-started',
+            nextAtomicTask: '2.6-not-started',
             publicContract: {
               createUI: 'createUI(root)',
               refs: ['menu','toolbar','sidebar','editor','preview','status','overlay']
@@ -167,8 +174,38 @@ jobs:
               'presentation-only-shell-does-not-query-business-store',
               'legacy-business-content-mounted-through-explicit-templates',
               'exact-idempotent-destroy-and-root-restoration',
-              'no-dom-primitives-modal-shell-or-css-layering-absorbed',
-              'atomic-task-2.5-not-started'
+              'bounded-dom-primitives-completed-through-public-entry',
+              'no-modal-shell-or-css-layering-absorbed',
+              'atomic-task-2.6-not-started'
+            ]
+          }, null, 2)}\n`, 'utf8');
+
+          await writeFile('artifacts/stage-02/02-05-dom-primitives-evidence.json', `${JSON.stringify({
+            node: 'stage-02/02-05',
+            status: 'passed',
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            attempt: process.env.GITHUB_RUN_ATTEMPT,
+            scope: 'bounded-dom-primitives',
+            nextAtomicTask: '2.6-not-started',
+            publicEntry: 'src/ui/dom/index.js',
+            exports: domPrimitiveExports,
+            modules: domPrimitiveModules,
+            productionModuleCount: moduleFixture.modules.length,
+            migratedCallers: [
+              'src/ui/create-ui.js',
+              'src/ui/compatibility/mount-current-shell.js',
+              'src/ui/shell/*.js',
+              'src/runtime/link-preview.js'
+            ],
+            guarantees: [
+              'safe-element-creation-rejects-executable-markup-surfaces',
+              'required-element-refs-fail-fast-with-named-contracts',
+              'event-listeners-have-idempotent-reverse-cleanup',
+              'focus-boundaries-own-initial-containment-restoration-and-destroy',
+              'transition-visibility-cancels-stale-hide-results',
+              'production-callers-import-only-the-public-dom-entry',
+              'modal-shell-and-css-layering-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
           NODE
