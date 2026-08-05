@@ -54,7 +54,6 @@ jobs:
               '- 2026-08-05：阶段 1 Atomic Task 1.8（架构脚本）完成：新增模块化架构扫描器与四个独立执行入口，建立无通配豁免的精确迁移基线，逐项锁定 9 个经典脚本、184 个内联事件、38 个业务全局和 4 个既有跟踪运行产物；新增依赖方向、跨 Feature 内部导入、循环依赖、模块导入副作用、生成文件、旧后缀和 README 记录门禁。专项 run 30970380961 与完整基线 run 30970380963 全部通过，生产模块仍为 67 个，生产实现、冻结契约、依赖和用户行为未改变；Atomic Task 1.9 尚未开始。\n'
           ).encode('utf-8')
 
-          print({'treeAnchors': data.count(tree_anchor), 'changeLogAnchors': data.count(changelog_anchor)})
           if data.count(tree_anchor) != 1:
               raise SystemExit('README logs anchor is not unique')
           if data.count(changelog_anchor) != 1:
@@ -66,26 +65,23 @@ jobs:
           if record_path.exists():
               raise SystemExit('Atomic Task 1.8 detailed record already exists')
 
-          updated = data.replace(tree_anchor, tree_insert, 1)
-          updated = updated.replace(changelog_anchor, changelog_insert, 1)
-          readme_path.write_bytes(updated)
+          readme_path.write_bytes(
+              data.replace(tree_anchor, tree_insert, 1)
+                  .replace(changelog_anchor, changelog_insert, 1)
+          )
           record_path.parent.mkdir(parents=True, exist_ok=True)
           record_path.write_bytes(payload_path.read_bytes())
-          payload_path.unlink()
           PY
 
           git config user.name "uniquenesssta"
           git config user.email "uniquenesssta@live.com"
-          git add -A README.md docs/rewrite-progress/stage-01/01-08-architecture-scripts.md .github/stage-01-08-record.payload.md
+          git add README.md docs/rewrite-progress/stage-01/01-08-architecture-scripts.md
           git diff --cached --check
-          git diff --cached --name-only
-          git diff --cached --numstat -- README.md
           node --input-type=module <<'NODE'
           import { execFileSync } from 'node:child_process';
           const names = execFileSync('git', ['diff', '--cached', '--name-only'], { encoding: 'utf8' })
             .trim().split('\n').filter(Boolean).sort();
           const expected = [
-            '.github/stage-01-08-record.payload.md',
             'README.md',
             'docs/rewrite-progress/stage-01/01-08-architecture-scripts.md'
           ].sort();
