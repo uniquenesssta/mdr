@@ -2251,8 +2251,8 @@ const editor = document.getElementById('editor');
       const editorBtn = editorPane.querySelector('.collapse-btn');
       const previewBtn = previewPane.querySelector('.collapse-btn');
 
-      const chevronLeft = '<svg class="icon icon-sm"><use href="#icon-chevron-left"></use></svg>';
-      const chevronRight = '<svg class="icon icon-sm"><use href="#icon-chevron-right"></use></svg>';
+      const chevronLeft = '<svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg>';
+      const chevronRight = '<svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-right"></use></svg>';
       editorBtn.innerHTML = editorCollapsed ? chevronRight : chevronLeft;
       previewBtn.innerHTML = previewCollapsed ? chevronLeft : chevronRight;
 

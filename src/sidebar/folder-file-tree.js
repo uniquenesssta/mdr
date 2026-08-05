@@ -1,3 +1,5 @@
+import { createIconView, getIconHref } from '../ui/components/icon-view.js';
+
 const SUPPORTED_FILE_EXTENSIONS = new Set(['md', 'markdown', 'txt']);
 
 function normalizePath(value) {
@@ -40,16 +42,6 @@ export function getNativeParentPath(value) {
 function getExtension(name) {
   const match = String(name || '').toLocaleLowerCase().match(/\.([^.]+)$/);
   return match ? match[1] : '';
-}
-
-function createIcon(symbolId, className = 'icon icon-sm') {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', className);
-  svg.setAttribute('aria-hidden', 'true');
-  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-  use.setAttribute('href', `#${symbolId}`);
-  svg.appendChild(use);
-  return svg;
 }
 
 function sortTreeNodes(nodes) {
@@ -169,8 +161,8 @@ export function createFolderFileTreeController(options = {}) {
       row.setAttribute('aria-expanded', String(expanded));
       row.title = node.path;
 
-      const chevron = createIcon(expanded ? 'icon-chevron-down' : 'icon-chevron-right', 'icon folder-tree-chevron');
-      const folder = createIcon('icon-folder', 'icon icon-sm folder-tree-kind-icon');
+      const chevron = createIconView(document, expanded ? 'icon-chevron-down' : 'icon-chevron-right', { className: 'icon folder-tree-chevron' });
+      const folder = createIconView(document, 'icon-folder', { className: 'icon icon-sm folder-tree-kind-icon' });
       const label = document.createElement('span');
       label.className = 'folder-tree-name';
       label.textContent = node.name;
@@ -185,7 +177,7 @@ export function createFolderFileTreeController(options = {}) {
         const nextExpanded = row.getAttribute('aria-expanded') !== 'true';
         row.setAttribute('aria-expanded', String(nextExpanded));
         children.hidden = !nextExpanded;
-        chevron.querySelector('use')?.setAttribute('href', nextExpanded ? '#icon-chevron-down' : '#icon-chevron-right');
+        chevron.querySelector('use')?.setAttribute('href', getIconHref(nextExpanded ? 'icon-chevron-down' : 'icon-chevron-right'));
         setDirectoryExpanded(node.path, nextExpanded);
       });
       item.append(row, children);
@@ -205,7 +197,7 @@ export function createFolderFileTreeController(options = {}) {
 
     const spacer = document.createElement('span');
     spacer.className = 'folder-tree-chevron-spacer';
-    const fileIcon = createIcon('icon-menu-file', 'icon icon-sm folder-tree-kind-icon');
+    const fileIcon = createIconView(document, 'icon-menu-file', { className: 'icon icon-sm folder-tree-kind-icon' });
     const label = document.createElement('span');
     label.className = 'folder-tree-name';
     label.textContent = node.name;

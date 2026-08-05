@@ -63,7 +63,7 @@
       maximizeButton.dataset.maximized = maximized ? 'true' : 'false';
       maximizeButton.title = maximized ? '还原窗口' : '最大化';
       maximizeButton.setAttribute('aria-label', maximized ? '还原窗口' : '最大化');
-      if (maximizeUse) maximizeUse.setAttribute('href', maximized ? '#icon-restore' : '#icon-maximize');
+      if (maximizeUse) maximizeUse.setAttribute('href', maximized ? '/assets/icons.svg#icon-restore' : '/assets/icons.svg#icon-maximize');
       document.documentElement.classList.toggle('window-maximized', maximized);
     }
 

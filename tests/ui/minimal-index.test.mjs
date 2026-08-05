@@ -47,9 +47,11 @@ test('current shell compatibility asset remains the single honest owner of unmig
   assert.equal(inlineEvents.reduce((sum, record) => sum + record.count, 0), 184);
   assert.doesNotMatch(markup, /<script\b/i);
   assert.doesNotMatch(markup, /<html\b|<head\b|<body\b/i);
-  for (const required of ['id="editor"', 'id="preview"', 'id="settings-modal"', 'class="icon-sprite"']) {
+  for (const required of ['id="editor"', 'id="preview"', 'id="settings-modal"']) {
     assert.match(markup, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
+  assert.doesNotMatch(markup, /<symbol\b|class="icon-sprite"|href="#icon-/i);
+  assert.match(markup, /href="\/assets\/icons\.svg#icon-/i);
 });
 
 test('module entry owns resource loading while the mount module is independently destroyable', async () => {

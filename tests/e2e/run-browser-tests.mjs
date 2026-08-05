@@ -184,8 +184,7 @@ async function runContractSuite() {
     });
 
     await test('folder file tree renders nested readable files and opens the selected path', async () => {
-      await browser.page.setDocumentContent(`<!doctype html><html><body>
-        <svg style="display:none"><symbol id="icon-folder"></symbol><symbol id="icon-menu-file"></symbol><symbol id="icon-chevron-down"></symbol><symbol id="icon-chevron-right"></symbol></svg>
+      await browser.page.setDocumentContent(`<!doctype html><html><head><base href="${virtualHost.origin}/"></head><body>
         <section id="sidebar-files-panel">
           <strong id="folder-file-tree-root"></strong><small id="folder-file-tree-summary"></small>
           <button id="folder-file-tree-refresh"></button><div id="folder-file-tree"></div>
@@ -214,12 +213,15 @@ async function runContractSuite() {
         root:document.getElementById('folder-file-tree-root').textContent,
         summary:document.getElementById('folder-file-tree-summary').textContent,
         names:Array.from(document.querySelectorAll('.folder-tree-file-row')).map(row=>row.textContent.trim()),
-        active:document.querySelector('.folder-tree-file-row.active')?.textContent.trim()||''
+        active:document.querySelector('.folder-tree-file-row.active')?.textContent.trim()||'',
+        iconHrefs:Array.from(document.querySelectorAll('.folder-tree-row use')).map(use=>use.getAttribute('href'))
       }))()`);
       assert.equal(snapshot.root, 'Notes');
       assert.match(snapshot.summary, /3 个文件/);
       assert.deepEqual(snapshot.names, ['old.md', 'current.md', 'next.txt']);
       assert.equal(snapshot.active, 'current.md');
+      assert.ok(snapshot.iconHrefs.length >= 4);
+      assert.ok(snapshot.iconHrefs.every(href => /^\/assets\/icons\.svg#icon-[a-z0-9-]+$/.test(href)));
       await browser.page.evaluate(`Array.from(document.querySelectorAll('.folder-tree-file-row')).find(row=>row.textContent.includes('next.txt')).click()`);
       await browser.page.waitFor(() => window.__folderTreeOpened?.length === 1, { description: 'folder tree open callback' });
       assert.equal(await browser.page.evaluate('window.__folderTreeOpened[0]'), 'F:/Notes/next.txt');

@@ -1,3 +1,5 @@
+import { createIconView } from '../ui/components/icon-view.js';
+
 const SUPPORTED_SCHEMES = new Set(['http:', 'https:', 'mailto:', 'tel:']);
 const PREVIEWABLE_SCHEMES = new Set(['http:', 'https:']);
 
@@ -107,7 +109,7 @@ function ensureOverlay() {
   });
 
   closeButton = createButton('link-preview-close', '关闭链接预览', '关闭并返回编辑器');
-  closeButton.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>';
+  closeButton.append(createIconView(document, 'icon-close'));
   closeButton.addEventListener('click', () => closeLinkPreview('close-button'));
 
   actions.append(externalButton, closeButton);
