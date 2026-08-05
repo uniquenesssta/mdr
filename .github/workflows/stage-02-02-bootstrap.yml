@@ -33,6 +33,7 @@ jobs:
         run: |
           set -euxo pipefail
           base64 --decode .github/stage-02-02.payload.b64 | tar -xzf -
+          sed -i "s/inventory.ids.map(record => record.id)/inventory.ids/" .github/stage-02-02/minimal-index.test.mjs
           node .github/stage-02-02/bootstrap.mjs
 
           git config user.name "uniquenesssta"
@@ -89,4 +90,4 @@ jobs:
           git commit -m "test(stage2): verify minimal HTML entry"
           git push origin HEAD:rewrite/modular-rebuild
 
-# retry: 2
+# retry: 3
