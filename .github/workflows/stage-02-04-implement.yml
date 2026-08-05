@@ -1,0 +1,82 @@
+name: Implement Stage 2 Atomic Task 2.4
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/stage-02-04-implement.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stage-02-04-implementation
+  cancel-in-progress: false
+
+jobs:
+  implement:
+    name: Apply and verify App Shell implementation
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rewrite/modular-rebuild
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify expected implementation ancestry
+        run: |
+          git merge-base --is-ancestor 7806480003b42602b83e913c30a96c738e92c3a6 HEAD
+          test -f .github/stage-02-04.patch.gz.b64
+          test -f .github/workflows/stage-02-04-snapshot.yml
+      - name: Apply exact implementation patch
+        shell: bash
+        run: |
+          base64 -d .github/stage-02-04.patch.gz.b64 | gunzip > /tmp/stage-02-04.patch
+          git apply --check /tmp/stage-02-04.patch
+          git apply /tmp/stage-02-04.patch
+          rm -f .github/stage-02-04.patch.gz.b64 .github/workflows/stage-02-04-implement.yml
+          test ! -e .github/workflows/stage-02-04-snapshot.yml
+          git diff --check
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify Atomic Task 2.4 contract
+        run: node --test tests/ui/app-shell.test.mjs tests/ui/minimal-index.test.mjs tests/svg-sprite.test.mjs tests/ui/dom-asset-inventory.test.mjs
+      - name: Verify production module ownership
+        run: node --test tests/architecture/module-inventory.test.mjs
+      - name: Run existing Node regression suite
+        run: npm test
+      - name: Run architecture hard gates
+        run: |
+          npm run verify:architecture
+          npm run verify:no-legacy-runtime
+          npm run verify:generated-files
+          npm run verify:readme-record
+      - name: Run browser interaction contract
+        run: npm run test:browser:contract
+      - name: Build current application
+        run: npm run build
+      - name: Run built application browser regression
+        run: npm run test:browser
+      - name: Verify final implementation tree
+        shell: bash
+        run: |
+          git diff --check
+          test ! -e .github/stage-02-04.patch.gz.b64
+          test ! -e .github/workflows/stage-02-04-implement.yml
+          test ! -e .github/workflows/stage-02-04-snapshot.yml
+          git status --short
+      - name: Commit verified implementation
+        shell: bash
+        run: |
+          git config user.name uniquenesssta
+          git config user.email uniquenesssta@live.com
+          git add -A
+          git commit -m "feat(stage2): implement Atomic Task 2.4 App Shell"
+          git push origin HEAD:rewrite/modular-rebuild
