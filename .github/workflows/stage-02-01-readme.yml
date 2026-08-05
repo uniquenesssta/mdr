@@ -1,0 +1,68 @@
+name: Stage 2 Atomic Task 2.1 README Finalizer
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/stage-02-01-readme.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize-readme:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rewrite/modular-rebuild
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Add exact Atomic Task 2.1 README record
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('README.md')
+          text = path.read_text(encoding='utf-8')
+          anchor = '## Change Log\n'
+          marker = '<!-- stage-02-node:02-01 -->'
+          entry = (
+              '## Change Log\n'
+              '<!-- stage-02-node:02-01 -->\n'
+              '- 2026-08-05：阶段 2 Atomic Task 2.1（DOM 资产盘点）完成：新增模块化 HTML 解析、仓库选择器/class 证据扫描和迁移映射工具，冻结旧 `index.html` 的 1054 个元素、173 个 ID、140 个静态 class、184 个内联事件、72 个 ARIA 节点、351 个生产选择器调用、45 个测试选择器调用及 225 个 class 变更调用，并将全部节点唯一分配到 31 个语义区域；无归属和多重归属均为 0。专项 run 30992035044 与完整基线 run 30992034408 全部通过；生产 `index.html`、CSS、JavaScript、Rust、启动链、依赖、锁文件、冻结契约和用户行为未改变，Atomic Task 2.2 尚未开始。\n'
+          )
+          if text.count(anchor) != 1:
+              raise SystemExit('README Change Log anchor is not unique')
+          if marker in text:
+              raise SystemExit('README already contains Atomic Task 2.1 marker')
+          path.write_text(text.replace(anchor, entry, 1), encoding='utf-8')
+          PY
+
+          git config user.name "uniquenesssta"
+          git config user.email "uniquenesssta@live.com"
+          git add README.md
+          git diff --cached --check
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          const files = execFileSync('git', ['diff', '--cached', '--name-only'], { encoding: 'utf8' }).trim();
+          if (files !== 'README.md') throw new Error(`Unexpected staged files: ${JSON.stringify(files)}`);
+          const numstat = execFileSync('git', ['diff', '--cached', '--numstat', '--', 'README.md'], { encoding: 'utf8' }).trim();
+          if (numstat !== '2\t0\tREADME.md') throw new Error(`Unexpected README numstat: ${JSON.stringify(numstat)}`);
+          NODE
+          npm run verify:readme-record
+          npm run verify:architecture
+          node --test tests/ui/dom-asset-inventory.test.mjs
+          npm test
+          git commit -m "docs(stage2): complete Atomic Task 2.1 record"
+          git push origin HEAD:rewrite/modular-rebuild
