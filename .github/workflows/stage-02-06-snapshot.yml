@@ -20,11 +20,11 @@ jobs:
           fetch-depth: 0
       - name: Package repository
         shell: bash
-        run: tar --exclude='./repository.tar.gz' -czf repository.tar.gz .
+        run: tar -C .. -czf "${RUNNER_TEMP}/repository.tar.gz" mdr
       - name: Upload repository snapshot
         uses: actions/upload-artifact@v4
         with:
           name: stage-02-06-repository-${{ github.run_id }}-${{ github.run_attempt }}
-          path: repository.tar.gz
+          path: ${{ runner.temp }}/repository.tar.gz
           if-no-files-found: error
           retention-days: 1
