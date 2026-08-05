@@ -1,4 +1,5 @@
 name: Stage 2 Atomic Task 2.1 Bootstrap
+# Retry after aligning the deterministic trailing-newline line count.
 
 on:
   push:
