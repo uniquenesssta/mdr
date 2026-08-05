@@ -34,6 +34,7 @@ jobs:
         run: |
           git merge-base --is-ancestor 7806480003b42602b83e913c30a96c738e92c3a6 HEAD
           test -f .github/workflows/stage-02-04-snapshot.yml
+          test -f .github/workflows/stage-02-04-implement.yml
           test -f .github/stage-02-04.patch.gz.b64
           test "$(find .github/stage-02-04-patch -maxdepth 1 -type f -name 'part-*' | wc -l)" -eq 6
           test "$(cat .github/stage-02-04-patch/part-* | wc -c)" -eq 23024
@@ -44,9 +45,6 @@ jobs:
           base64 -d /tmp/stage-02-04.patch.gz.b64 | gunzip > /tmp/stage-02-04.patch
           git apply --check /tmp/stage-02-04.patch
           git apply /tmp/stage-02-04.patch
-          rm -f .github/stage-02-04.patch.gz.b64 .github/workflows/stage-02-04-implement.yml
-          rm -rf .github/stage-02-04-patch
-          test ! -e .github/workflows/stage-02-04-snapshot.yml
           git diff --check
       - name: Install locked dependencies
         run: npm ci
@@ -68,20 +66,30 @@ jobs:
         run: npm run build
       - name: Run built application browser regression
         run: npm run test:browser
-      - name: Verify final implementation tree
+      - name: Restore workflow transport files outside the code commit
         shell: bash
         run: |
+          git restore --source=HEAD --staged --worktree -- \
+            .github/stage-02-04.patch.gz.b64 \
+            .github/stage-02-04-patch \
+            .github/workflows/stage-02-04-implement.yml \
+            .github/workflows/stage-02-04-snapshot.yml \
+            .github/workflows/stage-02-atomic.yml
+          test -z "$(git status --short .github)"
           git diff --check
-          test ! -e .github/stage-02-04.patch.gz.b64
-          test ! -e .github/stage-02-04-patch
-          test ! -e .github/workflows/stage-02-04-implement.yml
-          test ! -e .github/workflows/stage-02-04-snapshot.yml
+      - name: Verify final code-only implementation tree
+        shell: bash
+        run: |
           git status --short
-      - name: Commit verified implementation
+          test -n "$(git status --short)"
+          test -z "$(git status --short .github)"
+          git diff --check
+      - name: Commit verified code implementation
         shell: bash
         run: |
           git config user.name uniquenesssta
           git config user.email uniquenesssta@live.com
           git add -A
+          test -z "$(git diff --cached --name-only -- .github)"
           git commit -m "feat(stage2): implement Atomic Task 2.4 App Shell"
           git push origin HEAD:rewrite/modular-rebuild
