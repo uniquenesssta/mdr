@@ -61,6 +61,8 @@ scripts/
 ```
 
 ## Change Log
+<!-- stage-01-node:01-09 -->
+- 2026-08-05：阶段 1 Atomic Task 1.9（package scripts）完成：在 `package.json` 新增 `verify:architecture`、`verify:no-legacy-runtime`、`verify:generated-files` 和 `verify:readme-record` 四个本地 Node 验证入口，并新增独立契约测试，精确锁定既有 9 个 package 命令语义、目标脚本路径以及无构建产物、包安装或联网依赖。专项 run 30973431231 与完整基线 run 30973431241 全部通过，`package-lock.json`、依赖、生产模块、冻结契约和用户行为未改变；Atomic Task 1.10 尚未开始。
 <!-- stage-01-node:01-08 -->
 - 2026-08-05：阶段 1 Atomic Task 1.8（架构脚本）完成：新增模块化架构扫描器与四个独立执行入口，建立无通配豁免的精确迁移基线，逐项锁定 9 个经典脚本、184 个内联事件、38 个业务全局和 4 个既有跟踪运行产物；新增依赖方向、跨 Feature 内部导入、循环依赖、模块导入副作用、生成文件、旧后缀和 README 记录门禁。专项 run 30970380961 与完整基线 run 30970380963 全部通过，生产模块仍为 67 个，生产实现、冻结契约、依赖和用户行为未改变；Atomic Task 1.9 尚未开始。
 <!-- stage-01-node:01-07 -->
