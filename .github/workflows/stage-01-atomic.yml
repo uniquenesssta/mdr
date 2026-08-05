@@ -141,9 +141,10 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             handoffScope: 'architecture-foundation-only',
-            stage2: 'not-started',
-            productionBootstrap: 'legacy-src-main-and-classic-scripts',
-            productionModules: moduleFixture.modules.length,
+            stage2: 'in-progress-after-handoff',
+            productionBootstrap: 'stage-02-module-entry-and-current-shell-compatibility',
+            stage1ProductionModules: 67,
+            currentProductionModules: moduleFixture.modules.length,
             exactMigrationBaseline: {
               wildcardExemptions: baseline.policy.wildcardExemptions,
               classicScripts: baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0),
