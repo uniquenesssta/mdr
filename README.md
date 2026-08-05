@@ -111,7 +111,7 @@ npm run check
 
 ## Change Log
 <!-- stage-02-node:02-03 -->
-- 2026-08-05：阶段 2 Atomic Task 2.3（SVG Sprite）已实施并进入最终复验：将兼容壳中的 35 个既有 SVG 符号按原 ID 与几何提取到 `public/assets/icons.svg`，移除测试侧 4 个重复定义，新增无业务语义、无状态、无监听器的 `src/ui/components/icon-view.js`，并将兼容壳、经典脚本及 ESM 调用者切换到单一外部 Sprite 权威；提交前 Node、架构、浏览器契约、生产构建和完整应用浏览器回归均通过，Atomic Task 2.4 尚未开始。
+- 2026-08-05：阶段 2 Atomic Task 2.3（SVG Sprite）完成：将兼容壳中的 35 个既有 SVG 符号按原 ID、`viewBox` 与几何提取到 `public/assets/icons.svg`，删除兼容壳和测试侧重复定义，新增无业务语义、无状态、无监听器的 `src/ui/components/icon-view.js`，并将兼容壳、经典脚本及 ESM 调用者切换到单一外部 Sprite 权威。实现验证头 `69275601dd6b258f7dca287d3a83e933f2b8f695` 的 Stage 2 run `31004015345`、Stage 1 run `31004015370`、Stage 0 run `31004015506` 全部通过；未修改 CSS、Rust、依赖、锁文件、冻结模型、持久化或用户行为，Atomic Task 2.4 尚未开始。
 <!-- stage-02-node:02-02 -->
 - 2026-08-05：阶段 2 Atomic Task 2.2（最小 index.html）完成收口：入口仅保留标准 head、`#app-root` 与单一模块入口，旧 DOM 由唯一阶段兼容挂载链承载；构建后浏览器资产解析继续硬性要求模块脚本，允许 CSS 由模块图加载，并移除测试侧重复 i18n 注入以保持模块入口单一所有权。实现头 `f30d0b674348b607f696f4b1e27c39193acd70fd` 的 Stage 2 run `31000219098`、Stage 1 run `31000219093`、Stage 0 run `31000219107` 全部通过；未修改生产行为、依赖或锁文件，Atomic Task 2.3 尚未开始。
 <!-- stage-02-node:02-01 -->
