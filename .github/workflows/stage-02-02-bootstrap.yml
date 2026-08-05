@@ -50,8 +50,6 @@ jobs:
             tests/folder-file-tree.test.mjs \
             tests/architecture/fixtures/production-modules.json \
             tests/stage-01-handoff.test.mjs \
-            .github/workflows/stage-01-atomic.yml \
-            .github/workflows/stage-02-atomic.yml \
             README.md \
             docs/rewrite-progress/stage-02/02-02-minimal-index.md
           git diff --cached --check
@@ -60,8 +58,6 @@ jobs:
           const actual = execFileSync('git', ['diff', '--cached', '--name-only'], { encoding: 'utf8' })
             .trim().split('\n').filter(Boolean).sort();
           const expected = [
-            '.github/workflows/stage-01-atomic.yml',
-            '.github/workflows/stage-02-atomic.yml',
             'README.md',
             'docs/rewrite-progress/stage-02/02-02-minimal-index.md',
             'index.html',
@@ -94,4 +90,4 @@ jobs:
           git commit -m "test(stage2): verify minimal HTML entry"
           git push origin HEAD:rewrite/modular-rebuild
 
-# retry: 6
+# retry: 7
