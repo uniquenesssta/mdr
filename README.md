@@ -110,6 +110,8 @@ npm run check
 - 当前完整桌面基线在 Ubuntu 22.04 验证；Windows 原生窗口、文件关联和系统拖放仍需在涉及这些路径的阶段执行真实平台验证。
 
 ## Change Log
+<!-- stage-02-node:02-04 -->
+- 2026-08-05：阶段 2 Atomic Task 2.4（App Shell）已实施并进入正式复验：新增 `createUI(root)` 与按职责拆分的菜单、工具栏、侧栏、工作区、状态栏和 overlay 壳模块，严格返回 `menu/toolbar/sidebar/editor/preview/status/overlay` refs；兼容 HTML 已拆为 8 个显式业务内容模板并仅挂入新壳，不再拥有第二套生产壳结构。依赖无关的专项契约、历史基线、模块清单、源码语法和差异检查已通过；完整 Node、架构、浏览器、构建与桌面链路等待 GitHub CI 验证，Atomic Task 2.5 尚未开始。
 <!-- stage-02-node:02-03 -->
 - 2026-08-05：阶段 2 Atomic Task 2.3（SVG Sprite）完成：将兼容壳中的 35 个既有 SVG 符号按原 ID、`viewBox` 与几何提取到 `public/assets/icons.svg`，删除兼容壳和测试侧重复定义，新增无业务语义、无状态、无监听器的 `src/ui/components/icon-view.js`，并将兼容壳、经典脚本及 ESM 调用者切换到单一外部 Sprite 权威。实现验证头 `69275601dd6b258f7dca287d3a83e933f2b8f695` 的 Stage 2 run `31004015345`、Stage 1 run `31004015370`、Stage 0 run `31004015506` 全部通过；未修改 CSS、Rust、依赖、锁文件、冻结模型、持久化或用户行为，Atomic Task 2.4 尚未开始。
 <!-- stage-02-node:02-02 -->

@@ -304,6 +304,38 @@ async function runAppSuite() {
     if (!externalUrl && !bridgeAvailable) {
       throw new Error('Built dist is stale or was not produced from the current source. Run npm run build before npm run test:browser.');
     }
+    await test('application mounts one App Shell with strict named slots', async () => {
+      const snapshot = await browser.page.evaluate(`(()=>{
+        const root=document.getElementById('app-root');
+        const shell=root?.querySelector('[data-ui-shell="app"]');
+        const slotNames=['menu','toolbar','sidebar','editor','preview','status','overlay'];
+        const counts=Object.fromEntries(slotNames.map(name=>[name,document.querySelectorAll('[data-ui-slot="'+name+'"]').length]));
+        const ids=Array.from(document.querySelectorAll('[id]')).map(element=>element.id);
+        return {
+          shellCount:document.querySelectorAll('[data-ui-shell="app"]').length,
+          appCount:document.querySelectorAll('.app').length,
+          counts,
+          appChildren:Array.from(shell?.children||[]).map(element=>element.className),
+          workspaceChildren:Array.from(shell?.querySelector('.workspace')?.children||[]).map(element=>element.id||element.className),
+          mainChildren:Array.from(shell?.querySelector('.main')?.children||[]).map(element=>element.id||element.className),
+          overlayParent:document.getElementById('overlay-root')?.parentElement?.id||'',
+          settingsParent:document.getElementById('settings-modal')?.parentElement?.id||'',
+          filePortParents:['filename','importFile'].map(id=>document.getElementById(id)?.parentElement?.id||''),
+          duplicateIds:ids.filter((id,index)=>ids.indexOf(id)!==index)
+        };
+      })()`);
+      assert.equal(snapshot.shellCount, 1);
+      assert.equal(snapshot.appCount, 1);
+      assert.deepEqual(snapshot.counts, {menu:1,toolbar:1,sidebar:1,editor:1,preview:1,status:1,overlay:1});
+      assert.deepEqual(snapshot.appChildren, ['menu-bar','editor-toolbar','workspace','statusbar']);
+      assert.deepEqual(snapshot.workspaceChildren, ['sidebar','sidebar-resizer','main']);
+      assert.deepEqual(snapshot.mainChildren, ['pane editor-pane','resizer','pane preview-pane']);
+      assert.equal(snapshot.overlayParent, 'app-root');
+      assert.equal(snapshot.settingsParent, 'overlay-root');
+      assert.deepEqual(snapshot.filePortParents, ['app-root','app-root']);
+      assert.deepEqual(snapshot.duplicateIds, []);
+    });
+
     await loadAppFixture(browser.page);
     await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]') && document.querySelector('[data-hybrid-block-type="table"]')), { timeoutMs: 10000, description: 'hybrid widgets' });
 

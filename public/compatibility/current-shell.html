@@ -1,5 +1,4 @@
-<div class="app">
-    <nav class="menu-bar" aria-label="应用菜单">
+<template data-compat-slot="menu">
       <div class="app-brand window-drag-region" aria-label="Markdown Editor">
         <span class="app-brand-mark" aria-hidden="true">M</span>
         <span class="app-brand-name">Markdown Editor</span>
@@ -109,11 +108,9 @@
           <svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg>
         </button>
       </div>
-    </nav>
-    <input type="text" id="filename" value="未命名文档.md" hidden>
-    <input type="file" id="importFile" accept=".md,.markdown,.txt" onchange="importFile(this)" hidden>
+</template>
 
-    <div class="editor-toolbar">
+<template data-compat-slot="toolbar">
       <div class="format-group">
         <button onclick="undo()" data-i18n-title="undoTitle" title="撤销 Ctrl+Z"><svg class="icon"><use href="/assets/icons.svg#icon-undo"></use></svg></button>
         <button onclick="redo()" data-i18n-title="redoTitle" title="重做 Ctrl+Y / Ctrl+Shift+Z"><svg class="icon"><use href="/assets/icons.svg#icon-redo"></use></svg></button>
@@ -216,10 +213,9 @@
         </div>
         <button onclick="toggleTheme()" data-i18n-title="theme" title="切换主题"><svg class="icon"><use href="/assets/icons.svg#icon-sun"></use></svg> <span data-i18n="theme">主题</span></button>
       </div>
-    </div>
+</template>
 
-    <div class="workspace">
-      <aside class="sidebar" id="sidebar">
+<template data-compat-slot="sidebar">
         <div class="sidebar-header">
           <div class="sidebar-heading">
             <span class="sidebar-kicker">WORKSPACE</span>
@@ -248,11 +244,9 @@
         <section class="sidebar-panel" id="sidebar-outline-panel" oncontextmenu="openOutlineContextMenu(event)">
           <div class="outline-list" id="outline-list"></div>
         </section>
-      </aside>
-      <div class="sidebar-resizer" id="sidebar-resizer" role="separator" aria-orientation="vertical" aria-label="调整侧边栏宽度" title="拖动调整侧边栏宽度"></div>
+</template>
 
-      <div class="main">
-        <div class="pane editor-pane">
+<template data-compat-slot="editor">
           <div class="pane-header">
             <span class="pane-title" data-i18n="editorPaneTitle">编辑</span>
             <span class="editor-presentation-badge" id="editor-presentation-badge" hidden data-i18n="viewHybrid">单视图混合编辑</span>
@@ -260,9 +254,9 @@
             <button class="collapse-btn" id="editor-collapse-btn" onclick="togglePane('editor')" title="收起编辑区"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg></button>
           </div>
           <div id="editor" class="virtual-editor-host" data-i18n-placeholder="editorPlaceholder" data-placeholder="开始输入 Markdown..."></div>
-        </div>
-        <div class="resizer" id="resizer"></div>
-        <div class="pane preview-pane">
+</template>
+
+<template data-compat-slot="preview">
           <div class="pane-header">
             <button class="collapse-btn" id="preview-collapse-btn" onclick="togglePane('preview')" title="收起预览区"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-right"></use></svg></button>
             <span class="pane-title" data-i18n="previewPaneTitle">实时预览</span>
@@ -271,11 +265,9 @@
           </div>
           <div class="preview-content" id="preview"></div>
           <textarea id="preview-source" class="preview-source" data-i18n-placeholder="previewSourcePlaceholder" placeholder="在此编辑 Markdown 源码..." spellcheck="false" hidden></textarea>
-        </div>
-      </div>
-    </div>
+</template>
 
-    <div class="statusbar">
+<template data-compat-slot="status">
       <div class="statusbar-left">
         <div class="app-mode-badge statusbar-mode-badge" title="本地优先，无需联网">
           <span class="app-mode-dot" aria-hidden="true"></span>
@@ -286,13 +278,13 @@
       <span class="save-hint" id="save-hint">✓ 已保存</span>
       <span class="statusbar-spacer"></span>
       <span class="statusbar-format">Markdown</span>
-    </div>
+</template>
 
+<template data-compat-slot="overlay">
     <!-- 拖放文件提示遮罩 -->
     <div class="drop-overlay" id="drop-overlay">
       <div class="drop-message"><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-upload-cloud"></use></svg> <span data-i18n="dropMessage">释放以打开文件或插入图片</span></div>
     </div>
-  </div>
 
   <div class="toast" id="toast"></div>
 
@@ -876,3 +868,9 @@
   <div id="export-image-stage" class="export-image-stage" aria-hidden="true">
     <div id="export-image-content"></div>
   </div>
+</template>
+
+<template data-compat-slot="ports">
+    <input type="text" id="filename" value="未命名文档.md" hidden>
+    <input type="file" id="importFile" accept=".md,.markdown,.txt" onchange="importFile(this)" hidden>
+</template>

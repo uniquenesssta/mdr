@@ -41,12 +41,14 @@ test('Atomic Task 2.2 reduces index.html to the exact minimal document shell', a
   assert.doesNotMatch(source, /\/i18n\.js|\/src\/main\.js|\son[a-z]+=|<svg|modal|menu-bar|data-theme/i);
 });
 
-test('current shell compatibility asset remains the single honest owner of unmigrated DOM', async () => {
+test('compatibility asset owns unmigrated business content while App Shell owns the mounted structure', async () => {
   const markup = await readText('public/compatibility/current-shell.html');
   const inlineEvents = collectInlineEvents('public/compatibility/current-shell.html', markup);
   assert.equal(inlineEvents.reduce((sum, record) => sum + record.count, 0), 184);
   assert.doesNotMatch(markup, /<script\b/i);
   assert.doesNotMatch(markup, /<html\b|<head\b|<body\b/i);
+  assert.deepEqual([...markup.matchAll(/<template\s+data-compat-slot=\"([^\"]+)\">/g)].map(match => match[1]), ['menu', 'toolbar', 'sidebar', 'editor', 'preview', 'status', 'overlay', 'ports']);
+  assert.doesNotMatch(markup, /<div class=\"app\">|<nav class=\"menu-bar\"|<div class=\"editor-toolbar\"|<div class=\"workspace\"|<aside class=\"sidebar\"|<div class=\"statusbar\"/);
   for (const required of ['id="editor"', 'id="preview"', 'id="settings-modal"']) {
     assert.match(markup, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
@@ -60,12 +62,15 @@ test('module entry owns resource loading while the mount module is independently
     import(pathToFileURL(resolve(root, 'src/ui/compatibility/mount-current-shell.js')).href)
   ]);
   assert.equal(typeof mountModule.mountCurrentShell, 'function');
+  const uiModule = await import(pathToFileURL(resolve(root, 'src/ui/create-ui.js')).href);
+  assert.equal(typeof uiModule.createUI, 'function');
   assert.throws(() => mountModule.mountCurrentShell(null, '<div></div>'), /#app-root/);
   assert.match(entrySource, /\/compatibility\/current-shell\.html/);
   assert.match(entrySource, /\/i18n\.js/);
   assert.match(entrySource, /import\('\.\.\/main\.js'\)/);
   assert.match(entrySource, /getElementById\('app-root'\)/);
   assert.match(entrySource, /shellMount\.destroy\(\)/);
+  assert.match(await readText('src/ui/compatibility/mount-current-shell.js'), /createUIImpl = createUI/);
   assert.match(entrySource, /classicScript\?\.remove\(\)/);
   assert.doesNotMatch(entrySource, /\bwindow\./);
 });
