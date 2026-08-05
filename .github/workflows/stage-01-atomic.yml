@@ -8,14 +8,6 @@ on:
       - opened
       - synchronize
       - reopened
-    paths:
-      - .github/workflows/stage-01-atomic.yml
-      - scripts/stage-01/**
-      - src/app/**
-      - src/model-kernel/**
-      - tests/architecture/**
-      - docs/rewrite-progress/stage-01/**
-      - README.md
 
 permissions:
   contents: read
@@ -55,6 +47,16 @@ jobs:
         run: node --test tests/architecture/event-bus.test.mjs
       - name: Verify stable model-kernel facade
         run: node --test tests/architecture/model-kernel-contract.test.mjs
+      - name: Verify architecture scanner contracts
+        run: >-
+          node --test
+          tests/architecture/dependency-boundaries.test.mjs
+          tests/architecture/no-global-business-api.test.mjs
+          tests/architecture/no-inline-events.test.mjs
+          tests/architecture/module-side-effects.test.mjs
+          tests/architecture/architecture-tooling.test.mjs
+      - name: Run architecture hard gate
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-01/01-08-architecture-scan.json
       - name: Collect machine-readable module inventory
         run: node scripts/stage-01/collect-module-inventory.mjs --output=artifacts/stage-01/01-01-module-inventory.json
       - name: Record composition-root evidence
@@ -87,6 +89,41 @@ jobs:
         run: |
           mkdir -p artifacts/stage-01
           node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-07-model-kernel.json',JSON.stringify({node:'stage-01/01-07',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,javascriptFrozenModules:8,totalFrozenContracts:9,publicExports:26,exportPolicy:'explicit-named-reexports',importerPolicy:'non-model-through-facade',frozenHashes:'unchanged'},null,2)+'\n')"
+      - name: Record architecture-gate evidence
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const baseline = JSON.parse(await readFile('tests/architecture/fixtures/architecture-baseline.json', 'utf8'));
+          const scan = JSON.parse(await readFile('artifacts/stage-01/01-08-architecture-scan.json', 'utf8'));
+          if (scan.status !== 'passed' || scan.issueCount !== 0) process.exit(1);
+          await writeFile('artifacts/stage-01/01-08-architecture-gates.json', `${JSON.stringify({
+            node: 'stage-01/01-08',
+            status: 'passed',
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            attempt: process.env.GITHUB_RUN_ATTEMPT,
+            gates: [
+              'inline-events',
+              'classic-scripts',
+              'business-globals',
+              'cross-feature-internal-imports',
+              'circular-dependencies',
+              'module-import-side-effects',
+              'tracked-generated-files',
+              'legacy-file-suffixes',
+              'readme-stage-records'
+            ],
+            exactMigrationBaseline: {
+              sourceCommit: baseline.sourceCommit,
+              wildcardExemptions: baseline.policy.wildcardExemptions,
+              classicScripts: baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0),
+              inlineEvents: baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0),
+              businessGlobals: baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0),
+              trackedGeneratedFiles: baseline.trackedGeneratedFiles.length
+            }
+          }, null, 2)}\n`, 'utf8');
+          NODE
       - name: Run existing Node regression suite
         run: npm test
       - name: Run browser interaction contract
