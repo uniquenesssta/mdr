@@ -35,6 +35,7 @@ jobs:
           base64 --decode .github/stage-02-02.payload.b64 | tar -xzf -
           sed -i "s/inventory.ids.map(record => record.id)/inventory.ids/" .github/stage-02-02/minimal-index.test.mjs
           node .github/stage-02-02/bootstrap.mjs
+          sed -i "s/不得把该历史交接解释为业务功能已迁移/不得宣称业务功能已经迁移/" README.md
 
           git config user.name "uniquenesssta"
           git config user.email "uniquenesssta@live.com"
@@ -90,4 +91,4 @@ jobs:
           git commit -m "test(stage2): verify minimal HTML entry"
           git push origin HEAD:rewrite/modular-rebuild
 
-# retry: 4
+# retry: 5
