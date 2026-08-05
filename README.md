@@ -110,6 +110,8 @@ npm run check
 - 当前完整桌面基线在 Ubuntu 22.04 验证；Windows 原生窗口、文件关联和系统拖放仍需在涉及这些路径的阶段执行真实平台验证。
 
 ## Change Log
+<!-- stage-01-node:01-10 -->
+- 2026-08-05：阶段 1 Atomic Task 1.10（README 与架构交接）完成：新增 `## Stage 1 架构交接`，公开阶段 2 可依赖的组合根、生命周期、资源清理、命令、事件与冻结模型入口，明确单一状态所有者、依赖方向、精确迁移基线、删除候选和已知限制；新增交接契约测试与结构化 CI 证据。专项 run 30986994815 与完整基线 run 30986994863 全部通过，生产模块仍为 67 个，生产启动链、业务行为、冻结契约、依赖和锁文件未改变；阶段 1 已完成，阶段 2 尚未开始。
 <!-- stage-01-node:01-09 -->
 - 2026-08-05：阶段 1 Atomic Task 1.9（package scripts）完成：在 `package.json` 新增 `verify:architecture`、`verify:no-legacy-runtime`、`verify:generated-files` 和 `verify:readme-record` 四个本地 Node 验证入口，并新增独立契约测试，精确锁定既有 9 个 package 命令语义、目标脚本路径以及无构建产物、包安装或联网依赖。专项 run 30973431231 与完整基线 run 30973431241 全部通过，`package-lock.json`、依赖、生产模块、冻结契约和用户行为未改变；Atomic Task 1.10 尚未开始。
 <!-- stage-01-node:01-08 -->
