@@ -1,9 +1,11 @@
+import { requireElementRef } from './dom/index.js';
 import { createAppShellView } from './shell/app-shell-view.js';
 
 const mounts = new WeakMap();
 
 function assertRoot(root) {
-  if (!root || root.id !== 'app-root' || typeof root.replaceChildren !== 'function') {
+  requireElementRef(root, '#app-root');
+  if (root.id !== 'app-root' || typeof root.replaceChildren !== 'function') {
     throw new TypeError('createUI requires the #app-root element.');
   }
   if (!root.ownerDocument || typeof root.ownerDocument.createElement !== 'function') {

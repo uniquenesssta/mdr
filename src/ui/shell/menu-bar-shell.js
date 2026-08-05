@@ -1,14 +1,11 @@
-function assertDocument(documentRef) {
-  if (!documentRef || typeof documentRef.createElement !== 'function') {
-    throw new TypeError('createMenuBarShell requires a document.');
-  }
-}
+import { createSafeElement } from '../dom/index.js';
 
 export function createMenuBarShell(documentRef) {
-  assertDocument(documentRef);
-  const menu = documentRef.createElement('nav');
-  menu.className = 'menu-bar';
-  menu.setAttribute('aria-label', '应用菜单');
-  menu.setAttribute('data-ui-slot', 'menu');
-  return menu;
+  return createSafeElement(documentRef, 'nav', {
+    className: 'menu-bar',
+    attributes: {
+      'aria-label': '应用菜单',
+      'data-ui-slot': 'menu'
+    }
+  });
 }

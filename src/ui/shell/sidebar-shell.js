@@ -1,15 +1,12 @@
-function assertDocument(documentRef) {
-  if (!documentRef || typeof documentRef.createElement !== 'function') {
-    throw new TypeError('createSidebarShell requires a document.');
-  }
-}
+import { createSafeElement } from '../dom/index.js';
 
 export function createSidebarShell(documentRef) {
-  assertDocument(documentRef);
-  const sidebar = documentRef.createElement('aside');
-  sidebar.id = 'sidebar';
-  sidebar.className = 'sidebar';
-  sidebar.setAttribute('aria-label', '工作区导航');
-  sidebar.setAttribute('data-ui-slot', 'sidebar');
-  return sidebar;
+  return createSafeElement(documentRef, 'aside', {
+    id: 'sidebar',
+    className: 'sidebar',
+    attributes: {
+      'aria-label': '工作区导航',
+      'data-ui-slot': 'sidebar'
+    }
+  });
 }

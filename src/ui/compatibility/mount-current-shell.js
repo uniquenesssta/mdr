@@ -1,4 +1,5 @@
 import { createUI } from '../create-ui.js';
+import { createSafeElement, requireElementRef } from '../dom/index.js';
 
 const mounts = new WeakMap();
 const REQUIRED_COMPATIBILITY_SLOTS = Object.freeze([
@@ -13,7 +14,8 @@ const REQUIRED_COMPATIBILITY_SLOTS = Object.freeze([
 ]);
 
 function assertMountRoot(root) {
-  if (!root || root.id !== 'app-root' || typeof root.append !== 'function') {
+  requireElementRef(root, '#app-root');
+  if (root.id !== 'app-root' || typeof root.append !== 'function') {
     throw new TypeError('mountCurrentShell requires the #app-root element.');
   }
   if (!root.ownerDocument?.body || typeof root.ownerDocument.createElement !== 'function') {
@@ -45,7 +47,8 @@ function collectSlotTemplates(fragment) {
 }
 
 function mountTemplate(template, target) {
-  if (!target || typeof target.append !== 'function') {
+  requireElementRef(target, 'compatibility slot target');
+  if (!template?.content || typeof target.append !== 'function') {
     throw new TypeError('Compatibility slot target is unavailable.');
   }
   target.append(template.content);
@@ -70,8 +73,8 @@ export function mountCurrentShell(root, markup, {
   if (existing) return existing;
 
   const documentRef = root.ownerDocument;
-  const body = documentRef.body;
-  const template = documentRef.createElement('template');
+  const body = requireElementRef(documentRef.body, 'document body');
+  const template = createSafeElement(documentRef, 'template');
   template.innerHTML = markup;
   const slotTemplates = collectSlotTemplates(template.content);
   const previousTheme = body.getAttribute('data-theme');

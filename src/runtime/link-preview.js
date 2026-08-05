@@ -1,4 +1,11 @@
 import { createIconView } from '../ui/components/icon-view.js';
+import {
+  createEventScope,
+  createFocusScope,
+  createSafeElement,
+  createTransitionVisibility,
+  isElementRef
+} from '../ui/dom/index.js';
 
 const SUPPORTED_SCHEMES = new Set(['http:', 'https:', 'mailto:', 'tel:']);
 const PREVIEWABLE_SCHEMES = new Set(['http:', 'https:']);
@@ -10,7 +17,10 @@ let urlElement = null;
 let closeButton = null;
 let externalButton = null;
 let currentUrl = '';
-let returnFocus = null;
+let focusScope = null;
+let visibility = null;
+let focusGeneration = 0;
+const documentEvents = createEventScope();
 
 function report(event, details = {}, status = 'ok') {
   window.markdownEditorPerf?.record?.(event, {
@@ -67,68 +77,74 @@ async function openInSystemBrowser(url) {
 }
 
 function createButton(className, label, title) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = className;
-  button.setAttribute('aria-label', label);
-  button.title = title || label;
-  return button;
+  return createSafeElement(document, 'button', {
+    className,
+    attributes: {
+      type: 'button',
+      'aria-label': label,
+      title: title || label
+    }
+  });
 }
 
 function ensureOverlay() {
   if (overlay) return overlay;
 
-  overlay = document.createElement('section');
-  overlay.id = 'link-preview-overlay';
-  overlay.className = 'link-preview-overlay';
-  overlay.setAttribute('aria-hidden', 'true');
-  overlay.setAttribute('aria-label', '链接预览');
+  overlay = createSafeElement(document, 'section', {
+    id: 'link-preview-overlay',
+    className: 'link-preview-overlay',
+    attributes: {
+      'aria-hidden': 'true',
+      'aria-label': '链接预览'
+    }
+  });
+  visibility = createTransitionVisibility(overlay, {
+    visibleClass: 'show',
+    hiddenAttribute: 'aria-hidden',
+    timeout: 180
+  });
+  const overlayEvents = createEventScope();
 
-  const toolbar = document.createElement('header');
-  toolbar.className = 'link-preview-toolbar';
+  const toolbar = createSafeElement(document, 'header', { className: 'link-preview-toolbar' });
+  const identity = createSafeElement(document, 'div', { className: 'link-preview-identity' });
 
-  const identity = document.createElement('div');
-  identity.className = 'link-preview-identity';
-
-  titleElement = document.createElement('strong');
-  titleElement.className = 'link-preview-title';
-  titleElement.textContent = '链接预览';
-
-  urlElement = document.createElement('span');
-  urlElement.className = 'link-preview-url';
-
+  titleElement = createSafeElement(document, 'strong', {
+    className: 'link-preview-title',
+    text: '链接预览'
+  });
+  urlElement = createSafeElement(document, 'span', { className: 'link-preview-url' });
   identity.append(titleElement, urlElement);
 
-  const actions = document.createElement('div');
-  actions.className = 'link-preview-actions';
-
+  const actions = createSafeElement(document, 'div', { className: 'link-preview-actions' });
   externalButton = createButton('link-preview-external', '在系统浏览器打开', '在系统浏览器打开');
   externalButton.textContent = '在浏览器打开';
-  externalButton.addEventListener('click', () => {
+  overlayEvents.listen(externalButton, 'click', () => {
     openInSystemBrowser(currentUrl).catch(error => showMessage(error?.message || String(error)));
   });
 
   closeButton = createButton('link-preview-close', '关闭链接预览', '关闭并返回编辑器');
   closeButton.append(createIconView(document, 'icon-close'));
-  closeButton.addEventListener('click', () => closeLinkPreview('close-button'));
+  overlayEvents.listen(closeButton, 'click', () => closeLinkPreview('close-button'));
 
   actions.append(externalButton, closeButton);
   toolbar.append(identity, actions);
 
-  const notice = document.createElement('div');
-  notice.className = 'link-preview-notice';
-  notice.textContent = '网页拒绝嵌入或显示异常时，可使用右上角“在浏览器打开”。';
+  const notice = createSafeElement(document, 'div', {
+    className: 'link-preview-notice',
+    text: '网页拒绝嵌入或显示异常时，可使用右上角“在浏览器打开”。'
+  });
+  const body = createSafeElement(document, 'div', { className: 'link-preview-body' });
 
-  const body = document.createElement('div');
-  body.className = 'link-preview-body';
-
-  frame = document.createElement('iframe');
-  frame.className = 'link-preview-frame';
-  frame.title = '外部链接内容';
-  frame.referrerPolicy = 'no-referrer';
-  frame.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-scripts allow-same-origin');
-  frame.setAttribute('allow', 'clipboard-read; clipboard-write');
-  frame.addEventListener('load', () => {
+  frame = createSafeElement(document, 'iframe', {
+    className: 'link-preview-frame',
+    attributes: {
+      title: '外部链接内容',
+      referrerpolicy: 'no-referrer',
+      sandbox: 'allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-scripts allow-same-origin',
+      allow: 'clipboard-read; clipboard-write'
+    }
+  });
+  overlayEvents.listen(frame, 'load', () => {
     if (!currentUrl || currentUrl === 'about:blank') return;
     overlay?.classList.remove('is-loading');
     report('link.preview-loaded', {
@@ -165,16 +181,23 @@ function openLinkPreview(value, options = {}) {
 
   ensureOverlay();
   currentUrl = parsed.url;
-  returnFocus = options.sourceElement instanceof HTMLElement ? options.sourceElement : document.activeElement;
+  focusGeneration += 1;
+  focusScope?.destroy({ restoreFocus: false });
+  focusScope = createFocusScope(overlay, {
+    initialFocus: closeButton,
+    returnFocus: isElementRef(options.sourceElement) ? options.sourceElement : document.activeElement,
+    trap: true
+  });
   titleElement.textContent = safeHost(parsed.url) || '链接预览';
   urlElement.textContent = parsed.url;
   urlElement.title = parsed.url;
   overlay.classList.add('is-loading');
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
+  visibility.show();
   document.documentElement.classList.add('link-preview-open');
   frame.src = parsed.url;
-  requestAnimationFrame(() => closeButton?.focus({ preventScroll: true }));
+  requestAnimationFrame(() => {
+    if (visibility?.isVisible() && !focusScope?.isDestroyed()) focusScope?.focusInitial({ preventScroll: true });
+  });
 
   report('link.preview-open', {
     host: safeHost(parsed.url),
@@ -185,22 +208,24 @@ function openLinkPreview(value, options = {}) {
 }
 
 function closeLinkPreview(reason = 'api') {
-  if (!overlay?.classList.contains('show')) return false;
+  if (!visibility?.isVisible()) return false;
   const closedUrl = currentUrl;
-  overlay.classList.remove('show', 'is-loading');
-  overlay.setAttribute('aria-hidden', 'true');
+  const closingGeneration = focusGeneration;
+  const closingFocusScope = focusScope;
+  focusScope = null;
+  overlay.classList.remove('is-loading');
+  const hidden = visibility.hide();
   document.documentElement.classList.remove('link-preview-open');
   currentUrl = '';
 
-  // Stop remote audio/video and release the remote document after the close transition.
-  window.setTimeout(() => {
-    if (!overlay?.classList.contains('show') && frame) frame.src = 'about:blank';
-  }, 180);
-
-  if (returnFocus instanceof HTMLElement && returnFocus.isConnected) {
-    requestAnimationFrame(() => returnFocus.focus({ preventScroll: true }));
-  }
-  returnFocus = null;
+  hidden.then(completed => {
+    if (completed && frame) frame.src = 'about:blank';
+  });
+  requestAnimationFrame(() => {
+    closingFocusScope?.destroy({
+      restoreFocus: closingGeneration === focusGeneration && !visibility?.isVisible()
+    });
+  });
 
   report('link.preview-close', {
     reason,
@@ -284,19 +309,19 @@ function handleDocumentLinkClick(event) {
 }
 
 function handleKeydown(event) {
-  if (event.key !== 'Escape' || !overlay?.classList.contains('show')) return;
+  if (event.key !== 'Escape' || !visibility?.isVisible()) return;
   event.preventDefault();
   event.stopPropagation();
   closeLinkPreview('escape');
 }
 
-document.addEventListener('mousedown', handleDocumentLinkPointerDown, true);
-document.addEventListener('click', handleDocumentLinkClick, true);
-document.addEventListener('keydown', handleKeydown, true);
+documentEvents.listen(document, 'mousedown', handleDocumentLinkPointerDown, true);
+documentEvents.listen(document, 'click', handleDocumentLinkClick, true);
+documentEvents.listen(document, 'keydown', handleKeydown, true);
 
 window.markdownEditorLinkPreview = Object.freeze({
   open: openLinkPreview,
   close: closeLinkPreview,
   openExternal: openInSystemBrowser,
-  isOpen: () => Boolean(overlay?.classList.contains('show'))
+  isOpen: () => Boolean(visibility?.isVisible())
 });

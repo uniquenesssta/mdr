@@ -1,14 +1,11 @@
-function assertDocument(documentRef) {
-  if (!documentRef || typeof documentRef.createElement !== 'function') {
-    throw new TypeError('createStatusBarShell requires a document.');
-  }
-}
+import { createSafeElement } from '../dom/index.js';
 
 export function createStatusBarShell(documentRef) {
-  assertDocument(documentRef);
-  const status = documentRef.createElement('div');
-  status.className = 'statusbar';
-  status.setAttribute('aria-label', '状态栏');
-  status.setAttribute('data-ui-slot', 'status');
-  return status;
+  return createSafeElement(documentRef, 'div', {
+    className: 'statusbar',
+    attributes: {
+      'aria-label': '状态栏',
+      'data-ui-slot': 'status'
+    }
+  });
 }

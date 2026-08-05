@@ -336,6 +336,41 @@ async function runAppSuite() {
       assert.deepEqual(snapshot.duplicateIds, []);
     });
 
+    await test('application link preview uses scoped focus and cancels stale close completion', async () => {
+      await browser.page.evaluate(`(()=>{
+        document.getElementById('dom-primitive-focus-source')?.remove();
+        const source=document.createElement('button');
+        source.id='dom-primitive-focus-source';
+        source.type='button';
+        source.textContent='focus source';
+        document.body.append(source);
+        source.focus();
+        window.markdownEditorLinkPreview.open('https://example.com/first',{sourceElement:source,source:'dom-primitive-test'});
+      })()`);
+      await browser.page.waitFor(() => document.activeElement?.classList.contains('link-preview-close'), { description: 'link preview initial focus' });
+      await browser.page.pressKey('Tab');
+      assert.equal(await browser.page.evaluate("document.activeElement?.classList.contains('link-preview-external')"), true);
+
+      await browser.page.evaluate(`(()=>{
+        const source=document.getElementById('dom-primitive-focus-source');
+        window.markdownEditorLinkPreview.close('stale-close-test');
+        window.markdownEditorLinkPreview.open('https://example.com/second',{sourceElement:source,source:'dom-primitive-test'});
+      })()`);
+      await new Promise(resolve => setTimeout(resolve, 240));
+      const reopened = await browser.page.evaluate(`(()=>({
+        open:window.markdownEditorLinkPreview.isOpen(),
+        src:document.querySelector('.link-preview-frame')?.getAttribute('src')||'',
+        focusClass:document.activeElement?.className||''
+      }))()`);
+      assert.equal(reopened.open, true);
+      assert.match(reopened.src, /example\.com\/second/);
+      assert.match(reopened.focusClass, /link-preview-close/);
+
+      await browser.page.evaluate("window.markdownEditorLinkPreview.close('dom-primitive-test')");
+      await browser.page.waitFor(() => document.activeElement?.id === 'dom-primitive-focus-source', { description: 'link preview focus restoration' });
+      assert.equal(await browser.page.evaluate('window.markdownEditorLinkPreview.isOpen()'), false);
+    });
+
     await loadAppFixture(browser.page);
     await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]') && document.querySelector('[data-hybrid-block-type="table"]')), { timeoutMs: 10000, description: 'hybrid widgets' });
 
