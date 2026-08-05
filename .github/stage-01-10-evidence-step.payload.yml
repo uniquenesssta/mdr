@@ -1,0 +1,33 @@
+      - name: Record Stage 1 handoff evidence
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const baseline = JSON.parse(await readFile('tests/architecture/fixtures/architecture-baseline.json', 'utf8'));
+          const modules = JSON.parse(await readFile('tests/architecture/fixtures/production-modules.json', 'utf8'));
+          const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
+          await writeFile('artifacts/stage-01/01-10-stage-01-handoff.json', `${JSON.stringify({
+            node: 'stage-01/01-10',
+            status: 'passed',
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            attempt: process.env.GITHUB_RUN_ATTEMPT,
+            handoffScope: 'architecture-foundation-only',
+            stage2: 'not-started',
+            productionBootstrap: 'legacy-src-main-and-classic-scripts',
+            productionModules: modules.length,
+            exactMigrationBaseline: {
+              wildcardExemptions: baseline.policy.wildcardExemptions,
+              classicScripts: baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0),
+              inlineEvents: baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0),
+              businessGlobals: baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0),
+              trackedGeneratedFiles: baseline.trackedGeneratedFiles.length
+            },
+            packageVerificationEntries: [
+              'verify:architecture',
+              'verify:no-legacy-runtime',
+              'verify:generated-files',
+              'verify:readme-record'
+            ].map(name => ({ name, command: packageJson.scripts[name] }))
+          }, null, 2)}\n`, 'utf8');
+          NODE
