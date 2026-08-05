@@ -112,12 +112,14 @@ test('documented Stage 1 public modules expose the exact handoff surface', async
   assert.deepEqual(Object.keys(modelKernel).sort(), [...MODEL_KERNEL_EXPORTS].sort());
 });
 
-test('handoff counts and local package verification entries match committed architecture facts', async () => {
+test('Stage 1 historical counts and current package verification entries remain explicit', async () => {
   const packageJson = await readJson('package.json');
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 67);
+  assert.equal(moduleFixture.modules.length, 70);
+  const readme = await readText('README.md');
+  assert.match(extractSection(readme, '## Stage 1 架构交接'), /67 个生产模块/);
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 9);
   assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 184);
   assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 38);
