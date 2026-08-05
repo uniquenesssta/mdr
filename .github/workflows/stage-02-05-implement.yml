@@ -1,0 +1,86 @@
+name: Implement Stage 2 Atomic Task 2.5
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/stage-02-05-implement.yml
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: rewrite/modular-rebuild
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify isolated input head
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "31fd599a07913b3a9d8f80773205e2061f849dcd"
+          test "$(git diff --name-only adc068df47f2a9f6198c20458cb1a0c46246787a...HEAD | grep -vc '^\.github/' || true)" = "0"
+          test "$(cat .github/stage-02-05-code.patch.gz.b64.part-* | wc -c)" = "15620"
+      - name: Reconstruct and apply verified patch
+        shell: bash
+        run: |
+          cat .github/stage-02-05-code.patch.gz.b64.part-* > /tmp/stage-02-05.patch.gz.b64
+          test "$(sha256sum /tmp/stage-02-05.patch.gz.b64 | cut -d' ' -f1)" = "060da75c45b1ca289923a26329a2bbd1654374dfc98e575f471ec2ca4ab948ce"
+          base64 -d /tmp/stage-02-05.patch.gz.b64 | gzip -d > /tmp/stage-02-05.patch
+          test "$(sha256sum /tmp/stage-02-05.patch | cut -d' ' -f1)" = "bc650c5aab959be8ff05a4ab6a4c31a18b9c67666f4fdd9e9f7bea133d0be3b5"
+          git apply --index --check /tmp/stage-02-05.patch
+          git apply /tmp/stage-02-05.patch
+          git diff --check
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify Atomic Tasks 2.1 through 2.5
+        run: >-
+          node --test
+          tests/ui/dom-asset-inventory.test.mjs
+          tests/ui/minimal-index.test.mjs
+          tests/svg-sprite.test.mjs
+          tests/ui/app-shell.test.mjs
+          tests/ui/dom-primitives.test.mjs
+          tests/architecture/module-inventory.test.mjs
+          tests/browser-e2e-contract.test.mjs
+      - name: Run architecture and repository hard gates
+        shell: bash
+        run: |
+          npm run verify:architecture
+          npm run verify:no-legacy-runtime
+          npm run verify:generated-files
+          npm run verify:readme-record
+      - name: Run complete Node regression
+        run: npm test
+      - name: Run browser contract
+        run: npm run test:browser:contract
+      - name: Build production frontend
+        run: npm run build
+      - name: Run built application browser regression
+        run: npm run test:browser
+      - name: Verify implementation scope
+        shell: bash
+        run: |
+          test -z "$(git diff --name-only | grep -E '^(src-tauri/|package(-lock)?\.json$|src/styles/|.*\.css$)' || true)"
+          test -z "$(git diff --name-only | grep '^\.github/' || true)"
+          test "$(node -e "const f=require('./tests/architecture/fixtures/production-modules.json');process.stdout.write(String(f.modules.length))")" = "85"
+          git diff --check
+      - name: Commit verified implementation
+        shell: bash
+        run: |
+          git config user.name uniquenesssta
+          git config user.email uniquenesssta@live.com
+          git add README.md docs src tests
+          test -z "$(git diff --cached --name-only | grep '^\.github/' || true)"
+          git commit -m "feat(stage2): add bounded DOM primitives"
+          git push origin HEAD:rewrite/modular-rebuild
