@@ -29,6 +29,7 @@ jobs:
       - name: Apply exact README and detailed record
         shell: bash
         run: |
+          set -euxo pipefail
           python - <<'PY'
           from pathlib import Path
 
@@ -53,6 +54,7 @@ jobs:
               '- 2026-08-05：阶段 1 Atomic Task 1.8（架构脚本）完成：新增模块化架构扫描器与四个独立执行入口，建立无通配豁免的精确迁移基线，逐项锁定 9 个经典脚本、184 个内联事件、38 个业务全局和 4 个既有跟踪运行产物；新增依赖方向、跨 Feature 内部导入、循环依赖、模块导入副作用、生成文件、旧后缀和 README 记录门禁。专项 run 30970380961 与完整基线 run 30970380963 全部通过，生产模块仍为 67 个，生产实现、冻结契约、依赖和用户行为未改变；Atomic Task 1.9 尚未开始。\n'
           ).encode('utf-8')
 
+          print({'treeAnchors': data.count(tree_anchor), 'changeLogAnchors': data.count(changelog_anchor)})
           if data.count(tree_anchor) != 1:
               raise SystemExit('README logs anchor is not unique')
           if data.count(changelog_anchor) != 1:
@@ -74,10 +76,27 @@ jobs:
 
           git config user.name "uniquenesssta"
           git config user.email "uniquenesssta@live.com"
-          git add README.md docs/rewrite-progress/stage-01/01-08-architecture-scripts.md .github/stage-01-08-record.payload.md
+          git add -A README.md docs/rewrite-progress/stage-01/01-08-architecture-scripts.md .github/stage-01-08-record.payload.md
           git diff --cached --check
-          test "$(git diff --cached --name-only)" = $'.github/stage-01-08-record.payload.md\nREADME.md\ndocs/rewrite-progress/stage-01/01-08-architecture-scripts.md'
-          test "$(git diff --cached --numstat README.md)" = $'8\t0\tREADME.md'
+          git diff --cached --name-only
+          git diff --cached --numstat -- README.md
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          const names = execFileSync('git', ['diff', '--cached', '--name-only'], { encoding: 'utf8' })
+            .trim().split('\n').filter(Boolean).sort();
+          const expected = [
+            '.github/stage-01-08-record.payload.md',
+            'README.md',
+            'docs/rewrite-progress/stage-01/01-08-architecture-scripts.md'
+          ].sort();
+          if (JSON.stringify(names) !== JSON.stringify(expected)) {
+            throw new Error(`Unexpected staged files: ${JSON.stringify(names)}`);
+          }
+          const numstat = execFileSync('git', ['diff', '--cached', '--numstat', '--', 'README.md'], { encoding: 'utf8' }).trim();
+          if (numstat !== '8\t0\tREADME.md') {
+            throw new Error(`Unexpected README numstat: ${JSON.stringify(numstat)}`);
+          }
+          NODE
           node scripts/verify-readme-record.mjs
           node scripts/verify-architecture.mjs
           git commit -m "docs(stage1): record Atomic Task 1.8 completion"
