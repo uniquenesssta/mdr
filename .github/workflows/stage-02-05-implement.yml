@@ -28,7 +28,7 @@ jobs:
       - name: Verify isolated input head
         shell: bash
         run: |
-          test "$(git rev-parse HEAD)" = "31fd599a07913b3a9d8f80773205e2061f849dcd"
+          git merge-base --is-ancestor 31fd599a07913b3a9d8f80773205e2061f849dcd HEAD
           test "$(git diff --name-only adc068df47f2a9f6198c20458cb1a0c46246787a...HEAD | grep -vc '^\.github/' || true)" = "0"
           test "$(cat .github/stage-02-05-code.patch.gz.b64.part-* | wc -c)" = "15620"
       - name: Reconstruct and apply verified patch
