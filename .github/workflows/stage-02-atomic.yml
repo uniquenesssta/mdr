@@ -39,9 +39,11 @@ jobs:
         run: node --test tests/ui/dom-asset-inventory.test.mjs
       - name: Verify Atomic Task 2.2 minimal index and module entry
         run: node --test tests/ui/minimal-index.test.mjs
+      - name: Verify Atomic Task 2.3 SVG sprite and icon view
+        run: node --test tests/svg-sprite.test.mjs
       - name: Run architecture hard gate
-        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-02-architecture-scan.json
-      - name: Record Atomic Task 2.2 evidence
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-03-architecture-scan.json
+      - name: Record current Stage 2 evidence
         shell: bash
         run: |
           mkdir -p artifacts/stage-02
@@ -49,12 +51,26 @@ jobs:
           import { readFile, writeFile } from 'node:fs/promises';
           import { buildHtmlInventory } from './scripts/stage-02/dom-inventory/html-inventory.mjs';
           import { collectInlineEvents } from './scripts/architecture/source-analysis.mjs';
+          import { collectIconReferences, inspectSvgSprite } from './scripts/stage-02/icon-sprite/inspect-svg-sprite.mjs';
+          import * as iconView from './src/ui/components/icon-view.js';
+
           const indexSource = await readFile('index.html', 'utf8');
           const shellSource = await readFile('public/compatibility/current-shell.html', 'utf8');
+          const spriteSource = await readFile('public/assets/icons.svg', 'utf8');
           const indexInventory = buildHtmlInventory(indexSource);
           const inlineEvents = collectInlineEvents('public/compatibility/current-shell.html', shellSource)
             .reduce((sum, record) => sum + record.count, 0);
+          const sprite = inspectSvgSprite(spriteSource);
+          const shellIconReferences = collectIconReferences(shellSource);
+          const iconViewExports = Object.keys(iconView).sort();
+
           if (indexInventory.summary.inlineEventCount !== 0 || inlineEvents !== 184) process.exit(1);
+          if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35) process.exit(1);
+          if (sprite.duplicates.length || sprite.invalidIds.length || sprite.missingViewBoxes.length || sprite.forbiddenMarkup) process.exit(1);
+          if (shellIconReferences.length !== 50) process.exit(1);
+          if (!shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) process.exit(1);
+          if (/<symbol\b|class="icon-sprite"|href="#icon-/i.test(shellSource)) process.exit(1);
+
           await writeFile('artifacts/stage-02/02-02-minimal-index-evidence.json', `${JSON.stringify({
             node: 'stage-02/02-02',
             status: 'passed',
@@ -62,7 +78,8 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'minimal-index-and-module-entry',
-            nextAtomicTask: '2.3-not-started',
+            currentStage2State: '2.3-completed',
+            nextAtomicTask: '2.4-not-started',
             index: indexInventory.source,
             indexSummary: indexInventory.summary,
             compatibilityShell: {
@@ -75,7 +92,48 @@ jobs:
               'no-index-inline-events-or-business-dom',
               'legacy-dom-remains-single-authoritative-compatibility-shell',
               'vite-tauri-resource-paths-preserved',
-              'tasks-2.3-through-2.6-not-started'
+              'task-2.3-completed-with-external-svg-sprite',
+              'tasks-2.4-through-2.6-not-started'
+            ]
+          }, null, 2)}\n`, 'utf8');
+
+          await writeFile('artifacts/stage-02/02-03-svg-sprite-evidence.json', `${JSON.stringify({
+            node: 'stage-02/02-03',
+            status: 'passed',
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            attempt: process.env.GITHUB_RUN_ATTEMPT,
+            scope: 'external-svg-sprite-and-generic-icon-view',
+            nextAtomicTask: '2.4-not-started',
+            sprite: {
+              path: 'public/assets/icons.svg',
+              symbolCount: sprite.symbolCount,
+              uniqueSymbolCount: sprite.uniqueSymbolCount,
+              ids: sprite.ids,
+              duplicateIds: sprite.duplicates,
+              invalidIds: sprite.invalidIds,
+              missingViewBoxes: sprite.missingViewBoxes,
+              forbiddenMarkup: sprite.forbiddenMarkup
+            },
+            compatibilityShell: {
+              path: 'public/compatibility/current-shell.html',
+              iconReferenceCount: shellIconReferences.length,
+              inlineSymbolCount: 0,
+              localFragmentReferenceCount: 0
+            },
+            iconView: {
+              path: 'src/ui/components/icon-view.js',
+              exports: iconViewExports,
+              spriteUrl: iconView.ICON_SPRITE_URL
+            },
+            guarantees: [
+              '35-preserved-stable-icon-ids',
+              'single-authoritative-icon-geometry-file',
+              'no-duplicate-symbol-definitions',
+              'no-inline-business-meaning-or-behavior',
+              'generic-icon-view-has-no-business-state-or-listeners',
+              'legacy-and-esm-callers-use-the-same-external-sprite',
+              'atomic-task-2.4-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
           NODE
