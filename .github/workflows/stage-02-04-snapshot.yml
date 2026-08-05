@@ -1,0 +1,30 @@
+name: Stage 2.4 Snapshot
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/stage-02-04-snapshot.yml
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rewrite/modular-rebuild
+          fetch-depth: 0
+      - name: Verify clean checkout
+        run: git status --short --branch
+      - name: Upload repository snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-02-04-repository-snapshot-${{ github.run_id }}
+          path: .
+          include-hidden-files: true
+          retention-days: 1
