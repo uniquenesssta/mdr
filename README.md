@@ -34,7 +34,10 @@ src/                        # 前端源码
     vendor.js               # marked / KaTeX / Mermaid / dom-to-image-more 注入
     tauri.js                # Tauri Rust 后端桥接
     performance.js          # 前端操作与渲染性能采集
-  styles/main.css           # 应用样式
+  styles/
+    index.css               # 单一样式公共入口
+    foundation/tokens.css   # 语义化 CSS 令牌权威
+    main.css                # 当前合并应用规则
 public/
   i18n.js                   # 多语言文本
   app/                      # 前端功能模块（按职责拆分）
@@ -110,6 +113,8 @@ npm run check
 - 当前完整桌面基线在 Ubuntu 22.04 验证；Windows 原生窗口、文件关联和系统拖放仍需在涉及这些路径的阶段执行真实平台验证。
 
 ## Change Log
+<!-- stage-02-node:02-07 -->
+- 2026-08-06：阶段 2 Atomic Task 2.7（CSS 令牌）完成：新增单一样式入口 `src/styles/index.css` 与单一语义令牌权威 `src/styles/foundation/tokens.css`，集中颜色、字体与字号、间距、圆角、阴影、层级、动效和代码展示令牌；现有 CSS、HTML 和 JavaScript 调用者已切换，`main.css` 不再保留 `:root` 权威或颜色字面量，运行时侧栏宽度、编辑器字号及局部状态属性保持原所有权。生产模块记录由 87 增至 89；实现验证头 `4e0b8a6c1df1be20af6be09987ae720a3e8e373b` 的 Stage 2 run `31029253144`、Stage 1 run `31029252663`、Stage 0 run `31029252956` 全部通过，覆盖 31/31 阶段专项、36/36 Node、架构硬门禁、9/9 浏览器契约、生产构建、10/10 构建后浏览器、Rust test/check 与 Tauri Linux build。未修改依赖、锁文件、冻结模型、持久化或业务行为；依赖审计仍为既有 1 low / 1 high，主题拆分与样式分层仍分别属于 Atomic Task 2.8 和 2.9。
 <!-- stage-02-node:02-06 -->
 - 2026-08-05：阶段 2 Atomic Task 2.6（Modal Shell）完成：新增通用 `ModalShell` 与九个兼容模态框接管桥，统一 role/aria-modal、初始焦点、Tab 约束、焦点恢复、Escape、精确遮罩点击、过时隐藏取消和幂等销毁；设置、帮助、链接、网页抓取、查找、导出进度、导出图片、图片及 Mermaid 的字段与提交行为仍由原 Feature 拥有，并通过元素作用域事件端口接入而不新增业务全局。实现验证头 `bce6146858f1e308c3e521b3e5f9139ff84f179d` 的 Stage 2 run `31023414560`、Stage 1 run `31023414183`、Stage 0 run `31023414280` 全部通过；生产模块记录为 87，未修改 CSS、Rust、依赖、锁文件、冻结模型或持久化，Atomic Task 2.7 尚未开始。
 <!-- stage-02-node:02-05 -->

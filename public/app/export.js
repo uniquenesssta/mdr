@@ -704,8 +704,8 @@ ${'</scr' + 'ipt>'}
         clone.style.fontSize = Math.round(preset.width / 36) + 'px';
         clone.style.lineHeight = '1.7';
         clone.style.boxSizing = 'border-box';
-        clone.style.background = 'var(--panel-bg)';
-        clone.style.color = 'var(--text)';
+        clone.style.background = 'var(--color-surface-raised)';
+        clone.style.color = 'var(--color-text-primary)';
         clone.style.overflow = 'visible';
         clone.style.maxWidth = 'none';
         clone.style.margin = '0';

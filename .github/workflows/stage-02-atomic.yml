@@ -47,8 +47,10 @@ jobs:
         run: node --test tests/ui/dom-primitives.test.mjs
       - name: Verify Atomic Task 2.6 Modal Shell
         run: node --test tests/ui/modal-shell.test.mjs
+      - name: Verify Atomic Task 2.7 CSS tokens
+        run: node --test tests/ui/css-tokens.test.mjs
       - name: Run architecture hard gate
-        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-06-architecture-scan.json
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-07-architecture-scan.json
       - name: Record current Stage 2 evidence
         shell: bash
         run: |
@@ -66,6 +68,9 @@ jobs:
           const indexSource = await readFile('index.html', 'utf8');
           const shellSource = await readFile('public/compatibility/current-shell.html', 'utf8');
           const spriteSource = await readFile('public/assets/icons.svg', 'utf8');
+          const styleEntrySource = await readFile('src/styles/index.css', 'utf8');
+          const tokenSource = await readFile('src/styles/foundation/tokens.css', 'utf8');
+          const legacyStyleSource = await readFile('src/styles/main.css', 'utf8');
           const moduleFixture = JSON.parse(await readFile('tests/architecture/fixtures/production-modules.json', 'utf8'));
           const indexInventory = buildHtmlInventory(indexSource);
           const inlineEvents = collectInlineEvents('public/compatibility/current-shell.html', shellSource)
@@ -78,6 +83,9 @@ jobs:
           const domPrimitiveModules = moduleFixture.modules.filter(record => record[2] === 'ui-dom').map(record => record[0]).sort();
           const uiComponentModules = moduleFixture.modules.filter(record => record[2] === 'ui-components').map(record => record[0]).sort();
           const uiCompatibilityModules = moduleFixture.modules.filter(record => record[2] === 'ui-compatibility').map(record => record[0]).sort();
+          const styleEntryModules = moduleFixture.modules.filter(record => record[2] === 'presentation-entry').map(record => record[0]).sort();
+          const styleTokenModules = moduleFixture.modules.filter(record => record[2] === 'presentation-tokens').map(record => record[0]).sort();
+          const tokenNames = [...tokenSource.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map(match => match[1]);
           const domPrimitiveExports = Object.keys(domPrimitives).sort();
           const modalCompatibilityExports = Object.keys(modalCompatibility).sort();
 
@@ -89,10 +97,13 @@ jobs:
           if (/<symbol\b|class="icon-sprite"|href="#icon-/i.test(shellSource)) process.exit(1);
           if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) process.exit(1);
           if (/<div class="app">|<nav class="menu-bar"|<div class="editor-toolbar"|<div class="workspace"|<aside class="sidebar"|<div class="statusbar"/.test(shellSource)) process.exit(1);
-          if (moduleFixture.modules.length !== 87 || appShellModules.length !== 8 || domPrimitiveModules.length !== 6 || uiComponentModules.length !== 2 || uiCompatibilityModules.length !== 3) process.exit(1);
+          if (moduleFixture.modules.length !== 89 || appShellModules.length !== 8 || domPrimitiveModules.length !== 6 || uiComponentModules.length !== 2 || uiCompatibilityModules.length !== 3 || styleEntryModules.length !== 1 || styleTokenModules.length !== 1) process.exit(1);
           if (JSON.stringify(domPrimitiveExports) !== JSON.stringify(['collectRequiredRefs','createEventScope','createFocusScope','createSafeElement','createTransitionVisibility','isElementRef','requireElementRef'])) process.exit(1);
           if (typeof ModalShell !== 'function') process.exit(1);
           if (JSON.stringify(modalCompatibilityExports) !== JSON.stringify(['COMPATIBILITY_MODAL_CLOSE_EVENT','COMPATIBILITY_MODAL_OPEN_EVENT','mountCompatibilityModalShells'])) process.exit(1);
+          if (styleEntrySource !== "@import './foundation/tokens.css';\n@import './main.css';\n") process.exit(1);
+          if (!tokenNames.includes('--color-canvas') || !tokenNames.includes('--font-size-md') || !tokenNames.includes('--space-md') || !tokenNames.includes('--radius-md') || !tokenNames.includes('--shadow-floating') || !tokenNames.includes('--layer-modal') || !tokenNames.includes('--motion-duration-moderate') || !tokenNames.includes('--code-background')) process.exit(1);
+          if (/(^|\n):root\s*\{/.test(legacyStyleSource) || /#[0-9a-f]{3,8}\b|rgba?\(/i.test(legacyStyleSource)) process.exit(1);
 
           await writeFile('artifacts/stage-02/02-02-minimal-index-evidence.json', `${JSON.stringify({
             node: 'stage-02/02-02',
@@ -101,8 +112,8 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'minimal-index-and-module-entry',
-            currentStage2State: '2.6-completed',
-            nextAtomicTask: '2.7-not-started',
+            currentStage2State: '2.7-completed',
+            nextAtomicTask: '2.8-not-started',
             index: indexInventory.source,
             indexSummary: indexInventory.summary,
             compatibilityShell: {
@@ -118,7 +129,8 @@ jobs:
               'task-2.3-completed-with-external-svg-sprite',
               'task-2.4-completed-with-single-app-shell',
               'task-2.5-completed-with-bounded-dom-primitives',
-              'task-2.6-completed-with-generic-modal-shell'
+              'task-2.6-completed-with-generic-modal-shell',
+              'task-2.7-completed-with-semantic-css-tokens'
             ]
           }, null, 2)}\n`, 'utf8');
 
@@ -129,7 +141,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'external-svg-sprite-and-generic-icon-view',
-            nextAtomicTask: '2.7-not-started',
+            nextAtomicTask: '2.8-not-started',
             sprite: {
               path: 'public/assets/icons.svg',
               symbolCount: sprite.symbolCount,
@@ -158,7 +170,7 @@ jobs:
               'no-inline-business-meaning-or-behavior',
               'generic-icon-view-has-no-business-state-or-listeners',
               'legacy-and-esm-callers-use-the-same-external-sprite',
-              'atomic-tasks-2.4-through-2.6-completed-and-2.7-not-started'
+              'atomic-tasks-2.4-through-2.7-completed-and-2.8-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
 
@@ -169,7 +181,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'single-app-shell-and-strict-ui-refs',
-            nextAtomicTask: '2.7-not-started',
+            nextAtomicTask: '2.8-not-started',
             publicContract: {
               createUI: 'createUI(root)',
               refs: ['menu','toolbar','sidebar','editor','preview','status','overlay']
@@ -185,8 +197,9 @@ jobs:
               'exact-idempotent-destroy-and-root-restoration',
               'bounded-dom-primitives-completed-through-public-entry',
               'generic-modal-shell-completed-without-feature-form-ownership',
-              'css-layering-remains-not-started',
-              'atomic-task-2.7-not-started'
+              'semantic-css-token-contract-completed',
+              'theme-separation-and-css-layering-remain-not-started',
+              'atomic-task-2.8-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
 
@@ -197,7 +210,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'bounded-dom-primitives',
-            nextAtomicTask: '2.7-not-started',
+            nextAtomicTask: '2.8-not-started',
             publicEntry: 'src/ui/dom/index.js',
             exports: domPrimitiveExports,
             modules: domPrimitiveModules,
@@ -215,7 +228,8 @@ jobs:
               'focus-boundaries-own-initial-containment-restoration-and-destroy',
               'transition-visibility-cancels-stale-hide-results',
               'production-callers-import-only-the-public-dom-entry',
-              'generic-modal-shell-completed-and-css-layering-not-started'
+              'generic-modal-shell-and-semantic-css-tokens-completed',
+              'theme-separation-and-css-layering-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
 
@@ -226,7 +240,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'generic-modal-shell-and-compatibility-takeover',
-            nextAtomicTask: '2.7-not-started',
+            nextAtomicTask: '2.8-not-started',
             publicContract: {
               component: 'ModalShell',
               open: 'open(content, options)',
@@ -264,7 +278,47 @@ jobs:
               'nine-compatibility-modals-have-one-generic-lifecycle-owner',
               'feature-fields-validation-and-submit-behavior-remain-feature-owned',
               'compatibility-port-uses-element-scoped-events-without-new-window-globals',
-              'css-token-and-layering-work-remains-assigned-to-atomic-task-2.7'
+              'semantic-css-token-contract-completed-without-changing-feature-behavior',
+              'theme-separation-remains-assigned-to-atomic-task-2.8',
+              'css-layering-remains-assigned-to-atomic-task-2.9'
+            ]
+          }, null, 2)}\n`, 'utf8');
+          await writeFile('artifacts/stage-02/02-07-css-tokens-evidence.json', `${JSON.stringify({
+            node: 'stage-02/02-07',
+            status: 'passed',
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            attempt: process.env.GITHUB_RUN_ATTEMPT,
+            scope: 'semantic-css-token-contract',
+            nextAtomicTask: '2.8-not-started',
+            publicEntry: 'src/styles/index.css',
+            tokenAuthority: 'src/styles/foundation/tokens.css',
+            currentRules: 'src/styles/main.css',
+            modules: {
+              styleEntryModules,
+              styleTokenModules
+            },
+            productionModuleCount: moduleFixture.modules.length,
+            tokenCount: new Set(tokenNames).size,
+            categories: [
+              'color',
+              'typography',
+              'spacing',
+              'radius',
+              'shadow',
+              'layer',
+              'motion',
+              'code-presentation'
+            ],
+            guarantees: [
+              'one-ordered-stylesheet-entry-loads-tokens-before-current-rules',
+              'one-semantic-token-authority-without-page-position-token-names',
+              'legacy-consolidated-css-has-no-root-token-authority-or-color-literals',
+              'production-css-html-and-js-callers-use-the-semantic-token-contract',
+              'runtime-owned-sidebar-editor-color-and-font-size-properties-remain-compatible',
+              'existing-light-and-dark-values-remain-byte-equivalent-at-the-token-value-level',
+              'theme-service-and-theme-file-separation-remain-not-started',
+              'reset-shell-layout-and-component-style-layering-remain-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
           NODE

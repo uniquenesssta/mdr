@@ -2054,10 +2054,10 @@ const editor = document.getElementById('editor');
 
     function applyEditorPreferences() {
       document.documentElement.style.setProperty('--editor-font-size', editorFontSize + 'px');
-      if (editorTextColor) document.body.style.setProperty('--editor-text-color', editorTextColor);
-      else document.body.style.removeProperty('--editor-text-color');
-      if (activeLineColor) document.body.style.setProperty('--editor-active-line-color', activeLineColor);
-      else document.body.style.removeProperty('--editor-active-line-color');
+      if (editorTextColor) document.body.style.setProperty('--color-editor-text', editorTextColor);
+      else document.body.style.removeProperty('--color-editor-text');
+      if (activeLineColor) document.body.style.setProperty('--color-editor-active-line', activeLineColor);
+      else document.body.style.removeProperty('--color-editor-active-line');
       const toolbar = document.querySelector('.editor-toolbar');
       if (toolbar) toolbar.classList.toggle('hidden', !toolbarVisible);
       updateToolbarItemVisibility();

@@ -1,4 +1,4 @@
-import './styles/main.css';
+import './styles/index.css';
 import './runtime/vendor.js';
 import './runtime/tauri.js';
 import './runtime/link-preview.js';
