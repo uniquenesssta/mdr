@@ -90,4 +90,4 @@ jobs:
           git commit -m "test(stage2): verify minimal HTML entry"
           git push origin HEAD:rewrite/modular-rebuild
 
-# retry: 3
+# retry: 4
