@@ -53,7 +53,7 @@ jobs:
           import { readFile, writeFile } from 'node:fs/promises';
           const inventory = JSON.parse(await readFile('artifacts/stage-02/02-01-dom-asset-inventory.json', 'utf8'));
           const migrationMap = JSON.parse(await readFile('artifacts/stage-02/02-01-dom-migration-map.json', 'utf8'));
-          if (migrationMap.summary.unassignedNodeCount !== 0 || migrationMap.summary.ambiguousNodeCount !== 0) process.exit(1);
+          if (migrationMap.coverage.unassignedNodeCount !== 0 || migrationMap.coverage.ambiguousNodeCount !== 0) process.exit(1);
           await writeFile('artifacts/stage-02/02-01-dom-asset-inventory-evidence.json', `${JSON.stringify({
             node: 'stage-02/02-01',
             status: 'passed',
@@ -65,7 +65,7 @@ jobs:
             nextAtomicTask: '2.2-not-started',
             source: inventory.source,
             summary: inventory.summary,
-            migrationCoverage: migrationMap.summary,
+            migrationCoverage: migrationMap.coverage,
             guarantees: [
               'every-legacy-html-node-has-one-semantic-region',
               'every-legacy-html-node-has-one-migration-disposition',
