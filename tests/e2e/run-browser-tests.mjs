@@ -5,6 +5,7 @@ import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { launchChromium } from './lib/cdp-browser.mjs';
 import { installVirtualFileHost } from './lib/virtual-file-host.mjs';
+import { prepareBuiltApplicationDocument } from './lib/built-application-assets.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '../..');
@@ -279,16 +280,9 @@ async function runAppSuite() {
       await browser.page.navigate(`${baseUrl.replace(/\/$/, '')}/?e2e=1`);
     } else {
       let appHtml = await readFile(resolve(projectRoot, 'dist/index.html'), 'utf8');
-      const moduleMatch = appHtml.match(/<script type="module"[^>]*src="([^"]+)"[^>]*><\/script>/);
-      const styleMatch = appHtml.match(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/);
-      if (!moduleMatch || !styleMatch) throw new Error('Unable to locate built application assets');
-      const moduleUrl = new URL(moduleMatch[1], `${virtualHost.origin}/`).href;
-      const styleUrl = new URL(styleMatch[1], `${virtualHost.origin}/`).href;
-      appHtml = appHtml
-        .replace('<head>', `<head><base href="${virtualHost.origin}/">`)
-        .replace(moduleMatch[0], '')
-        .replace(styleMatch[0], '')
-        .replace(/<script src="\/i18n\.js"><\/script>/, '');
+      const preparedApplication = prepareBuiltApplicationDocument(appHtml, virtualHost.origin);
+      const { moduleUrl, stylesheetUrl } = preparedApplication;
+      appHtml = preparedApplication.html;
       await browser.page.setDocumentContent(appHtml);
       await browser.page.evaluate(`(()=>{
         const values=new Map();
@@ -298,8 +292,9 @@ async function runAppSuite() {
         localStorage.setItem('md_editor_help_shown','true');
         localStorage.setItem('md_editor_sidebar_visible','false');
       })()`);
-      await browser.page.evaluate(`new Promise((resolve,reject)=>{const link=document.createElement('link');link.rel='stylesheet';link.href=${JSON.stringify(styleUrl)};link.onload=resolve;link.onerror=()=>reject(new Error('stylesheet failed'));document.head.appendChild(link);})`);
-      await browser.page.evaluate(`new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='${virtualHost.origin}/i18n.js';script.onload=resolve;script.onerror=()=>reject(new Error('i18n failed'));document.body.appendChild(script);})`);
+      if (stylesheetUrl) {
+        await browser.page.evaluate(`new Promise((resolve,reject)=>{const link=document.createElement('link');link.rel='stylesheet';link.href=${JSON.stringify(stylesheetUrl)};link.onload=resolve;link.onerror=()=>reject(new Error('stylesheet failed'));document.head.appendChild(link);})`);
+      }
       await browser.page.evaluate(`import(${JSON.stringify(moduleUrl)}).then(()=>true)`);
     }
     await browser.page.waitFor(() => document.documentElement.classList.contains('app-ready'), { timeoutMs: 20000, description: 'application ready' });

@@ -111,7 +111,7 @@ npm run check
 
 ## Change Log
 <!-- stage-02-node:02-02 -->
-- 2026-08-05：阶段 2 Atomic Task 2.2（最小 index.html）已实施：入口缩减为 head、#app-root 与单一模块入口，旧 DOM 移至唯一阶段兼容资产并通过独立挂载模块运行；验证状态：passed；Atomic Task 2.3 尚未开始。
+- 2026-08-05：阶段 2 Atomic Task 2.2（最小 index.html）已实施并进入最终收口复验：入口缩减为 head、#app-root 与单一模块入口，旧 DOM 移至唯一阶段兼容资产并通过独立挂载模块运行；构建后浏览器测试继续硬性要求模块入口，允许 CSS 由模块图加载，并由模块入口唯一加载 i18n 后真实执行完整应用回归；Atomic Task 2.3 尚未开始。
 <!-- stage-02-node:02-01 -->
 - 2026-08-05：阶段 2 Atomic Task 2.1（DOM 资产盘点）完成：新增模块化 HTML 解析、仓库选择器/class 证据扫描和迁移映射工具，冻结旧 `index.html` 的 1054 个元素、173 个 ID、140 个静态 class、184 个内联事件、72 个 ARIA 节点、351 个生产选择器调用、45 个测试选择器调用及 225 个 class 变更调用，并将全部节点唯一分配到 31 个语义区域；无归属和多重归属均为 0。专项 run 30992035044 与完整基线 run 30992034408 全部通过；生产 `index.html`、CSS、JavaScript、Rust、启动链、依赖、锁文件、冻结契约和用户行为未改变，Atomic Task 2.2 尚未开始。
 <!-- stage-01-node:01-10 -->
