@@ -52,9 +52,17 @@ src-tauri/                  # Tauri / Rust 桌面后端
   src/web_fetch.rs
   src/performance_log.rs    # 性能日志落盘
 logs/                       # 开发者性能日志目录
+scripts/
+  architecture/             # 架构事实提取、规则检查、仓库读取与 CLI 基础模块
+  verify-architecture.mjs   # 全量架构硬门禁
+  verify-no-legacy-runtime.mjs
+  verify-generated-files.mjs
+  verify-readme-record.mjs
 ```
 
 ## Change Log
+<!-- stage-01-node:01-08 -->
+- 2026-08-05：阶段 1 Atomic Task 1.8（架构脚本）完成：新增模块化架构扫描器与四个独立执行入口，建立无通配豁免的精确迁移基线，逐项锁定 9 个经典脚本、184 个内联事件、38 个业务全局和 4 个既有跟踪运行产物；新增依赖方向、跨 Feature 内部导入、循环依赖、模块导入副作用、生成文件、旧后缀和 README 记录门禁。专项 run 30970380961 与完整基线 run 30970380963 全部通过，生产模块仍为 67 个，生产实现、冻结契约、依赖和用户行为未改变；Atomic Task 1.9 尚未开始。
 <!-- stage-01-node:01-07 -->
 - 2026-08-05：阶段 1 Atomic Task 1.7（模型稳定入口）完成：新增 `src/model-kernel/index.js`，以 26 个显式命名导出统一公开 8 个冻结 JavaScript 模型模块，并将应用启动、混合编辑、预览 Worker 与数学展示调用者切换到稳定入口；新增导出集合、引用身份、函数签名、冻结哈希和禁止绕过入口的架构门禁，生产模块清单增至 67 个。专项 run 30964745475 与完整基线 run 30964745509 全部通过，9 个冻结模型/数据契约文件、公共行为、持久化和依赖保持不变；Atomic Task 1.8 尚未开始。
 <!-- stage-01-node:01-06 -->
