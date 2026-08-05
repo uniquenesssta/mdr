@@ -7,7 +7,7 @@ import { renderMathFormula } from '../../rendering/math-presentation.js';
 import { getMermaidTheme, renderMermaidDiagram } from '../../rendering/mermaid-presentation.js';
 import { bindStrictDoubleActivation } from './double-activation.js';
 import { resolveHybridImageSource, invalidateHybridImageSource } from './image-source.js';
-import { encodeTableCell } from './table-model.js';
+import { encodeTableCell } from '../../model-kernel/index.js';
 import {
   HYBRID_COMPONENT_MODES,
   closeHybridComponent,

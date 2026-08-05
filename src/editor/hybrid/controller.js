@@ -1,9 +1,11 @@
 import { syntaxTree } from '@codemirror/language';
 import { Facet, StateEffect, StateField } from '@codemirror/state';
 import { Decoration, EditorView, ViewPlugin } from '@codemirror/view';
-import { collectHybridBlocks } from './block-registry.js';
+import {
+  collectHybridBlocks,
+  getEditableRanges
+} from '../../model-kernel/index.js';
 import { buildInlinePresentation } from './inline-presentation.js';
-import { getEditableRanges } from './ranges.js';
 import { clearHybridComponentStates } from './component-state.js';
 import { scheduleHybridWidgetGeometry } from './widget-lifecycle.js';
 import {

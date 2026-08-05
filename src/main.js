@@ -4,16 +4,18 @@ import './runtime/tauri.js';
 import './runtime/link-preview.js';
 import './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
-import { IncrementalPreviewModel } from './preview/incremental-preview.js';
+import {
+  createDocumentModel,
+  IncrementalPreviewModel,
+  selectionMappingApi
+} from './model-kernel/index.js';
 import { createPreviewWorkerClient } from './preview/preview-worker-client.js';
 import { createVirtualPreviewController } from './preview/virtual-preview.js';
 import { createPreviewEnhancementQueue } from './preview/enhancement-queue.js';
 import { createNativeDocumentStore } from './storage/native-document-store.js';
-import { createDocumentModel } from './document/document-model.js';
 import { createTaskScheduler } from './runtime/task-scheduler.js';
 import { createScrollSyncController } from './sync/scroll-controller.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
-import { selectionMappingApi } from './sync/selection-mapping.js';
 import { createMarkdownPresentationApi } from './rendering/presentation-api.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import { createFolderFileTreeController } from './sidebar/folder-file-tree.js';

@@ -1,14 +1,14 @@
 import { Decoration } from '@codemirror/view';
 import { marked } from 'marked';
 import { HybridPrefixWidget, HorizontalRuleWidget, InlineMathWidget } from './widgets.js';
-import { collectInlineMathRanges } from './math-ranges.js';
 import {
+  collectInlineMathRanges,
   collectVisibleLines,
   intersectsRanges,
   intersectsRevealRanges,
   overlapsRanges,
   shouldDecorateSourceActiveLine
-} from './ranges.js';
+} from '../../model-kernel/index.js';
 
 const HEADING_FONT_SCALES = new Map([
   [1, '190%'], [2, '155%'], [3, '130%'], [4, '114%'], [5, '104%'], [6, '100%']

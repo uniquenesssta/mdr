@@ -12,6 +12,7 @@ on:
       - .github/workflows/stage-01-atomic.yml
       - scripts/stage-01/**
       - src/app/**
+      - src/model-kernel/**
       - tests/architecture/**
       - docs/rewrite-progress/stage-01/**
       - README.md
@@ -52,6 +53,8 @@ jobs:
         run: node --test tests/architecture/command-bus.test.mjs
       - name: Verify event types and event bus
         run: node --test tests/architecture/event-bus.test.mjs
+      - name: Verify stable model-kernel facade
+        run: node --test tests/architecture/model-kernel-contract.test.mjs
       - name: Collect machine-readable module inventory
         run: node scripts/stage-01/collect-module-inventory.mjs --output=artifacts/stage-01/01-01-module-inventory.json
       - name: Record composition-root evidence
@@ -79,6 +82,11 @@ jobs:
         run: |
           mkdir -p artifacts/stage-01
           node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-06-event-infrastructure.json',JSON.stringify({node:'stage-01/01-06',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,payloadPolicy:'deep-frozen-plain-data-snapshot',deliveryOrder:'registration',oncePolicy:'remove-before-invoke',unsubscribePolicy:'exact-idempotent',listenerErrors:'isolated-reported',publishResult:'void',destroyedUse:'reject'},null,2)+'\n')"
+      - name: Record model-kernel evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-07-model-kernel.json',JSON.stringify({node:'stage-01/01-07',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,javascriptFrozenModules:8,totalFrozenContracts:9,publicExports:26,exportPolicy:'explicit-named-reexports',importerPolicy:'non-model-through-facade',frozenHashes:'unchanged'},null,2)+'\n')"
       - name: Run existing Node regression suite
         run: npm test
       - name: Run browser interaction contract

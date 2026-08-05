@@ -1,6 +1,9 @@
 import { marked } from 'marked';
-import { IncrementalPreviewModel } from './incremental-preview.js';
-import { protectMarkdownMathSource, restoreMarkdownMathSource } from './math-source.js';
+import {
+  IncrementalPreviewModel,
+  protectMarkdownMathSource,
+  restoreMarkdownMathSource
+} from '../model-kernel/index.js';
 
 marked.setOptions({ breaks: true, gfm: true });
 
