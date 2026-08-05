@@ -1,0 +1,47 @@
+name: Stage 1 Atomic Task 1.8 Baseline Export
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/stage-01-08-baseline-export.yml
+      - scripts/architecture/**
+      - scripts/verify-architecture.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  export-baseline:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Generate exact migration regression baseline
+        run: node scripts/verify-architecture.mjs --write-baseline --output=artifacts/stage-01/architecture-baseline.json
+      - name: Validate generated baseline has no wildcard exemptions
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          const baseline = JSON.parse(await readFile('artifacts/stage-01/architecture-baseline.json', 'utf8'));
+          if (baseline.kind !== 'stage-01-exact-migration-regression-baseline') process.exit(1);
+          if (JSON.stringify(baseline).includes('*')) process.exit(1);
+          console.log(JSON.stringify({
+            classicScripts: baseline.legacyClassicScripts.length,
+            inlineEvents: baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0),
+            businessGlobals: baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0),
+            trackedGeneratedFiles: baseline.trackedGeneratedFiles.length
+          }));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stage-01-08-architecture-baseline
+          path: artifacts/stage-01/architecture-baseline.json
+          if-no-files-found: error
