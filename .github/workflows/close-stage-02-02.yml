@@ -25,6 +25,7 @@ jobs:
           set -euo pipefail
           test -z "$(git status --porcelain)"
           test -f scripts/tmp-close-stage-02-02.py
+          test -f scripts/tmp-close-stage-02-02-followup.py
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -35,8 +36,10 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Apply closeout patch
-        run: python scripts/tmp-close-stage-02-02.py
+      - name: Apply closeout patches
+        run: |
+          python scripts/tmp-close-stage-02-02.py
+          python scripts/tmp-close-stage-02-02-followup.py
 
       - name: Verify closeout change set
         run: |
