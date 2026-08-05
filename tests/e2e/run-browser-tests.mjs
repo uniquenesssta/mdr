@@ -336,6 +336,83 @@ async function runAppSuite() {
       assert.deepEqual(snapshot.duplicateIds, []);
     });
 
+    await test('application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy', async () => {
+      await browser.page.evaluate(`(()=>{
+        document.getElementById('modal-shell-focus-source')?.remove();
+        const source=document.createElement('button');
+        source.id='modal-shell-focus-source';
+        source.type='button';
+        source.textContent='modal focus source';
+        document.body.append(source);
+        source.focus();
+        openSettings();
+      })()`);
+      await browser.page.waitFor(() => {
+        const root=document.getElementById('settings-modal');
+        const panel=root?.firstElementChild;
+        return root?.classList.contains('show')
+          && root?.getAttribute('aria-hidden')==='false'
+          && panel?.contains(document.activeElement);
+      }, { description: 'settings modal initial focus' });
+      const opened = await browser.page.evaluate(`(()=>{
+        const root=document.getElementById('settings-modal');
+        const panel=root?.firstElementChild;
+        return {
+          role:panel?.getAttribute('role')||'',
+          ariaModal:panel?.getAttribute('aria-modal')||'',
+          labelledBy:panel?.getAttribute('aria-labelledby')||'',
+          display:root?.style.display||''
+        };
+      })()`);
+      assert.deepEqual(opened, {
+        role: 'dialog',
+        ariaModal: 'true',
+        labelledBy: 'settings-title',
+        display: 'flex'
+      });
+
+      await browser.page.pressKey('Escape');
+      await browser.page.waitFor(() => (
+        document.getElementById('settings-modal')?.style.display === 'none'
+          && document.activeElement?.id === 'modal-shell-focus-source'
+      ), { description: 'settings Escape close and focus restoration' });
+
+      await browser.page.evaluate('openSettings()');
+      await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'));
+      await browser.page.evaluate(`(()=>{
+        const root=document.getElementById('settings-modal');
+        root.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));
+      })()`);
+      await browser.page.waitFor(() => (
+        document.getElementById('settings-modal')?.style.display === 'none'
+          && document.activeElement?.id === 'modal-shell-focus-source'
+      ), { description: 'settings backdrop close and focus restoration' });
+
+      await browser.page.evaluate(`(()=>{
+        const root=document.getElementById('export-progress-modal');
+        const detail={options:{initialFocus:document.getElementById('export-progress-cancel')}};
+        root.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open',{detail}));
+        if(detail.error)throw detail.error;
+      })()`);
+      await browser.page.waitFor(() => document.getElementById('export-progress-modal')?.classList.contains('show'));
+      await browser.page.pressKey('Escape');
+      await browser.page.evaluate(`(()=>{
+        const root=document.getElementById('export-progress-modal');
+        root.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));
+      })()`);
+      assert.equal(
+        await browser.page.evaluate("document.getElementById('export-progress-modal')?.classList.contains('show')"),
+        true
+      );
+      await browser.page.evaluate(`(()=>{
+        const root=document.getElementById('export-progress-modal');
+        const detail={reason:'browser-test'};
+        root.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close',{detail}));
+        if(detail.error)throw detail.error;
+      })()`);
+      await browser.page.waitFor(() => document.getElementById('export-progress-modal')?.style.display === 'none');
+    });
+
     await test('application link preview uses scoped focus and cancels stale close completion', async () => {
       await browser.page.evaluate(`(()=>{
         document.getElementById('dom-primitive-focus-source')?.remove();

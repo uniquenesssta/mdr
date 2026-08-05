@@ -30,19 +30,11 @@
       setTimeout(renderDocumentList, 550);
     });
 
-    const linkModal = document.getElementById('link-modal');
     const linkUrlInput = document.getElementById('link-url-input');
     linkUrlInput?.addEventListener('keydown', event => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        confirmLinkInsert();
-      } else if (event.key === 'Escape') {
-        event.preventDefault();
-        closeLinkModal();
-      }
-    });
-    linkModal?.addEventListener('mousedown', event => {
-      if (event.target === linkModal) closeLinkModal();
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      confirmLinkInsert();
     });
 
     function bindCompactPaneActivation(selector, pane) {

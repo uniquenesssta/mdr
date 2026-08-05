@@ -49,6 +49,7 @@
         title,
         cancelled: false,
         cancelable: true,
+        modalOpened: false,
         update(progress, message) {
           if (activeExportTask !== task) return;
           const modal = document.getElementById('export-progress-modal');
@@ -58,11 +59,13 @@
           if (heading) heading.textContent = task.title;
           if (value) value.style.width = Math.max(0, Math.min(100, Number(progress) || 0)) + '%';
           if (status) status.textContent = message || '正在处理…';
-          if (modal) {
-            modal.style.display = 'flex';
-            requestAnimationFrame(() => {
-              if (activeExportTask === task) modal.classList.add('show');
-            });
+          if (modal && !task.modalOpened) {
+            task.modalOpened = true;
+            const request = {
+              options: { initialFocus: document.getElementById('export-progress-cancel') }
+            };
+            modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+            if (request.error) throw request.error;
           }
         },
         setCancelable(value) {
@@ -87,10 +90,9 @@
       if (!task || activeExportTask !== task) return;
       activeExportTask = null;
       const modal = document.getElementById('export-progress-modal');
-      modal?.classList.remove('show');
-      setTimeout(() => {
-        if (modal && !modal.classList.contains('show')) modal.style.display = 'none';
-      }, 180);
+      const request = { reason: 'export-finished' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function cancelActiveExport() {
@@ -618,18 +620,21 @@ ${'</scr' + 'ipt>'}
       if (previewMode !== 'preview') {
         setPreviewMode('preview');
       }
-      const el = document.getElementById('export-image-modal');
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
       document.getElementById('image-crop-fit').checked = false;
       selectImageRatio(currentImageRatio);
+      const modal = document.getElementById('export-image-modal');
+      const request = {
+        options: { initialFocus: document.querySelector('#export-image-modal .ratio-btn.active') }
+      };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function closeExportImageModal() {
-      const el = document.getElementById('export-image-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
+      const modal = document.getElementById('export-image-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function selectImageRatio(ratio) {

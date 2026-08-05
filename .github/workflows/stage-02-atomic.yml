@@ -45,8 +45,10 @@ jobs:
         run: node --test tests/ui/app-shell.test.mjs
       - name: Verify Atomic Task 2.5 bounded DOM primitives
         run: node --test tests/ui/dom-primitives.test.mjs
+      - name: Verify Atomic Task 2.6 Modal Shell
+        run: node --test tests/ui/modal-shell.test.mjs
       - name: Run architecture hard gate
-        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-05-architecture-scan.json
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-06-architecture-scan.json
       - name: Record current Stage 2 evidence
         shell: bash
         run: |
@@ -57,6 +59,8 @@ jobs:
           import { collectInlineEvents } from './scripts/architecture/source-analysis.mjs';
           import { collectIconReferences, inspectSvgSprite } from './scripts/stage-02/icon-sprite/inspect-svg-sprite.mjs';
           import * as iconView from './src/ui/components/icon-view.js';
+          import { ModalShell } from './src/ui/components/modal-shell.js';
+          import * as modalCompatibility from './src/ui/compatibility/mount-modal-shells.js';
           import * as domPrimitives from './src/ui/dom/index.js';
 
           const indexSource = await readFile('index.html', 'utf8');
@@ -72,7 +76,10 @@ jobs:
           const compatibilitySlots = [...shellSource.matchAll(/<template\s+data-compat-slot="([^"]+)">/g)].map(match => match[1]);
           const appShellModules = moduleFixture.modules.filter(record => record[2] === 'ui-shell').map(record => record[0]).sort();
           const domPrimitiveModules = moduleFixture.modules.filter(record => record[2] === 'ui-dom').map(record => record[0]).sort();
+          const uiComponentModules = moduleFixture.modules.filter(record => record[2] === 'ui-components').map(record => record[0]).sort();
+          const uiCompatibilityModules = moduleFixture.modules.filter(record => record[2] === 'ui-compatibility').map(record => record[0]).sort();
           const domPrimitiveExports = Object.keys(domPrimitives).sort();
+          const modalCompatibilityExports = Object.keys(modalCompatibility).sort();
 
           if (indexInventory.summary.inlineEventCount !== 0 || inlineEvents !== 184) process.exit(1);
           if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35) process.exit(1);
@@ -82,8 +89,10 @@ jobs:
           if (/<symbol\b|class="icon-sprite"|href="#icon-/i.test(shellSource)) process.exit(1);
           if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) process.exit(1);
           if (/<div class="app">|<nav class="menu-bar"|<div class="editor-toolbar"|<div class="workspace"|<aside class="sidebar"|<div class="statusbar"/.test(shellSource)) process.exit(1);
-          if (moduleFixture.modules.length !== 85 || appShellModules.length !== 8 || domPrimitiveModules.length !== 6) process.exit(1);
+          if (moduleFixture.modules.length !== 87 || appShellModules.length !== 8 || domPrimitiveModules.length !== 6 || uiComponentModules.length !== 2 || uiCompatibilityModules.length !== 3) process.exit(1);
           if (JSON.stringify(domPrimitiveExports) !== JSON.stringify(['collectRequiredRefs','createEventScope','createFocusScope','createSafeElement','createTransitionVisibility','isElementRef','requireElementRef'])) process.exit(1);
+          if (typeof ModalShell !== 'function') process.exit(1);
+          if (JSON.stringify(modalCompatibilityExports) !== JSON.stringify(['COMPATIBILITY_MODAL_CLOSE_EVENT','COMPATIBILITY_MODAL_OPEN_EVENT','mountCompatibilityModalShells'])) process.exit(1);
 
           await writeFile('artifacts/stage-02/02-02-minimal-index-evidence.json', `${JSON.stringify({
             node: 'stage-02/02-02',
@@ -92,8 +101,8 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'minimal-index-and-module-entry',
-            currentStage2State: '2.5-completed',
-            nextAtomicTask: '2.6-not-started',
+            currentStage2State: '2.6-completed',
+            nextAtomicTask: '2.7-not-started',
             index: indexInventory.source,
             indexSummary: indexInventory.summary,
             compatibilityShell: {
@@ -109,7 +118,7 @@ jobs:
               'task-2.3-completed-with-external-svg-sprite',
               'task-2.4-completed-with-single-app-shell',
               'task-2.5-completed-with-bounded-dom-primitives',
-              'task-2.6-not-started'
+              'task-2.6-completed-with-generic-modal-shell'
             ]
           }, null, 2)}\n`, 'utf8');
 
@@ -120,7 +129,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'external-svg-sprite-and-generic-icon-view',
-            nextAtomicTask: '2.6-not-started',
+            nextAtomicTask: '2.7-not-started',
             sprite: {
               path: 'public/assets/icons.svg',
               symbolCount: sprite.symbolCount,
@@ -149,7 +158,7 @@ jobs:
               'no-inline-business-meaning-or-behavior',
               'generic-icon-view-has-no-business-state-or-listeners',
               'legacy-and-esm-callers-use-the-same-external-sprite',
-              'atomic-tasks-2.4-and-2.5-completed-and-2.6-not-started'
+              'atomic-tasks-2.4-through-2.6-completed-and-2.7-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
 
@@ -160,7 +169,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'single-app-shell-and-strict-ui-refs',
-            nextAtomicTask: '2.6-not-started',
+            nextAtomicTask: '2.7-not-started',
             publicContract: {
               createUI: 'createUI(root)',
               refs: ['menu','toolbar','sidebar','editor','preview','status','overlay']
@@ -175,8 +184,9 @@ jobs:
               'legacy-business-content-mounted-through-explicit-templates',
               'exact-idempotent-destroy-and-root-restoration',
               'bounded-dom-primitives-completed-through-public-entry',
-              'no-modal-shell-or-css-layering-absorbed',
-              'atomic-task-2.6-not-started'
+              'generic-modal-shell-completed-without-feature-form-ownership',
+              'css-layering-remains-not-started',
+              'atomic-task-2.7-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
 
@@ -187,7 +197,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
             scope: 'bounded-dom-primitives',
-            nextAtomicTask: '2.6-not-started',
+            nextAtomicTask: '2.7-not-started',
             publicEntry: 'src/ui/dom/index.js',
             exports: domPrimitiveExports,
             modules: domPrimitiveModules,
@@ -205,7 +215,56 @@ jobs:
               'focus-boundaries-own-initial-containment-restoration-and-destroy',
               'transition-visibility-cancels-stale-hide-results',
               'production-callers-import-only-the-public-dom-entry',
-              'modal-shell-and-css-layering-not-started'
+              'generic-modal-shell-completed-and-css-layering-not-started'
+            ]
+          }, null, 2)}\n`, 'utf8');
+
+          await writeFile('artifacts/stage-02/02-06-modal-shell-evidence.json', `${JSON.stringify({
+            node: 'stage-02/02-06',
+            status: 'passed',
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            attempt: process.env.GITHUB_RUN_ATTEMPT,
+            scope: 'generic-modal-shell-and-compatibility-takeover',
+            nextAtomicTask: '2.7-not-started',
+            publicContract: {
+              component: 'ModalShell',
+              open: 'open(content, options)',
+              close: 'close(reason)',
+              destroy: 'destroy()'
+            },
+            modules: {
+              component: 'src/ui/components/modal-shell.js',
+              compatibilityBridge: 'src/ui/compatibility/mount-modal-shells.js',
+              uiComponentModules,
+              uiCompatibilityModules
+            },
+            compatibilityEvents: {
+              open: modalCompatibility.COMPATIBILITY_MODAL_OPEN_EVENT,
+              close: modalCompatibility.COMPATIBILITY_MODAL_CLOSE_EVENT
+            },
+            compatibilityModals: [
+              'settings-modal',
+              'help-modal',
+              'link-modal',
+              'url-modal',
+              'find-modal',
+              'export-progress-modal',
+              'export-image-modal',
+              'image-modal',
+              'mermaid-modal'
+            ],
+            productionModuleCount: moduleFixture.modules.length,
+            guarantees: [
+              'dialog-role-and-aria-modal-owned-by-modal-shell',
+              'initial-focus-tab-containment-and-focus-restoration-owned-by-modal-shell',
+              'escape-and-exact-backdrop-close-policy-owned-by-modal-shell',
+              'stale-close-completion-cannot-hide-a-reopened-modal',
+              'destroy-is-idempotent-and-restores-adopted-dom-state',
+              'nine-compatibility-modals-have-one-generic-lifecycle-owner',
+              'feature-fields-validation-and-submit-behavior-remain-feature-owned',
+              'compatibility-port-uses-element-scoped-events-without-new-window-globals',
+              'css-token-and-layering-work-remains-assigned-to-atomic-task-2.7'
             ]
           }, null, 2)}\n`, 'utf8');
           NODE

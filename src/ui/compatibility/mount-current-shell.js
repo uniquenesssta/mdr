@@ -1,5 +1,6 @@
 import { createUI } from '../create-ui.js';
 import { createSafeElement, requireElementRef } from '../dom/index.js';
+import { mountCompatibilityModalShells } from './mount-modal-shells.js';
 
 const mounts = new WeakMap();
 const REQUIRED_COMPATIBILITY_SLOTS = Object.freeze([
@@ -79,16 +80,21 @@ export function mountCurrentShell(root, markup, {
   const slotTemplates = collectSlotTemplates(template.content);
   const previousTheme = body.getAttribute('data-theme');
   const ui = createUIImpl(root);
+  let modalShells = null;
 
   try {
     for (const slotName of ['menu', 'toolbar', 'sidebar', 'editor', 'preview', 'status', 'overlay']) {
       mountTemplate(slotTemplates.get(slotName), ui[slotName]);
     }
     mountTemplate(slotTemplates.get('ports'), root);
+    modalShells = mountCompatibilityModalShells(ui.overlay);
     if (previousTheme === null) body.setAttribute('data-theme', theme);
   } catch (error) {
-    ui.destroy();
-    throw error;
+    const errors = [error];
+    try { modalShells?.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    try { ui.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    if (errors.length === 1) throw error;
+    throw new AggregateError(errors, 'Failed to mount the current compatibility shell.');
   }
 
   let destroyed = false;
@@ -96,10 +102,13 @@ export function mountCurrentShell(root, markup, {
     destroy() {
       if (destroyed) return;
       destroyed = true;
-      ui.destroy();
+      const errors = [];
+      try { modalShells?.destroy(); } catch (error) { errors.push(error); }
+      try { ui.destroy(); } catch (error) { errors.push(error); }
       if (previousTheme === null) body.removeAttribute('data-theme');
       else body.setAttribute('data-theme', previousTheme);
       mounts.delete(root);
+      if (errors.length) throw new AggregateError(errors, 'Failed to destroy the current compatibility shell.');
     }
   });
   mounts.set(root, handle);

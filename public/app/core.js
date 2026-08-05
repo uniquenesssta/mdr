@@ -1845,7 +1845,6 @@ const editor = document.getElementById('editor');
     }
 
     function openSettings(page = activeSettingsPage) {
-      const el = document.getElementById('settings-modal');
       document.getElementById('setting-theme').value = document.body.getAttribute('data-theme') || 'light';
       document.getElementById('setting-language').value = currentLang;
       document.getElementById('setting-layout').value = localStorage.getItem(LAYOUT_MODE_KEY) || 'both';
@@ -1871,15 +1870,22 @@ const editor = document.getElementById('editor');
       });
       document.getElementById('setting-preview-performance-mode').value = previewPerformanceMode;
       switchSettingsPage(page);
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
+      const modal = document.getElementById('settings-modal');
+      const request = {
+        options: {
+          initialFocus: document.querySelector('[data-settings-page].active')
+            || document.getElementById('setting-theme')
+        }
+      };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function closeSettings() {
-      const el = document.getElementById('settings-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
+      const modal = document.getElementById('settings-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function toggleCustomAutosaveDelay() {

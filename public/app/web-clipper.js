@@ -1,8 +1,4 @@
     function openUrlModal() {
-      const el = document.getElementById('url-modal');
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
       document.getElementById('url-input').value = '';
       document.getElementById('url-status').textContent = '';
       document.getElementById('url-status').style.color = 'var(--text-muted)';
@@ -12,22 +8,27 @@
       document.getElementById('proxy-url').style.display = 'none';
       toggleProxyInput();
       fetchedHtml = '';
+      const modal = document.getElementById('url-modal');
+      const request = {
+        options: {
+          initialFocus: document.getElementById('url-input'),
+          onClose: () => { fetchedHtml = ''; }
+        }
+      };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
     }
     function closeUrlModal() {
-      const el = document.getElementById('url-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
-      fetchedHtml = '';
+      const modal = document.getElementById('url-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     // 查找与替换
     let findIndex = 0;
 
     function openFindModal() {
-      const el = document.getElementById('find-modal');
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
       const findInput = document.getElementById('find-input');
       const ed = getActiveEditor();
       if (ed.selectionStart !== ed.selectionEnd) {
@@ -38,15 +39,23 @@
             : ed.value.slice(ed.selectionStart, ed.selectionEnd);
       }
       document.getElementById('find-status').textContent = '';
-      findInput.focus();
-      findInput.select();
+      const modal = document.getElementById('find-modal');
+      const request = {
+        options: {
+          initialFocus: findInput,
+          onClose: () => { document.getElementById('find-status').textContent = ''; }
+        }
+      };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
+      requestAnimationFrame(() => findInput.select());
     }
 
     function closeFindModal() {
-      const el = document.getElementById('find-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
-      document.getElementById('find-status').textContent = '';
+      const modal = document.getElementById('find-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     async function findNext() {

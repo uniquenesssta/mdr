@@ -110,6 +110,8 @@ npm run check
 - 当前完整桌面基线在 Ubuntu 22.04 验证；Windows 原生窗口、文件关联和系统拖放仍需在涉及这些路径的阶段执行真实平台验证。
 
 ## Change Log
+<!-- stage-02-node:02-06 -->
+- 2026-08-05：阶段 2 Atomic Task 2.6（Modal Shell）完成：新增通用 `ModalShell` 与九个兼容模态框接管桥，统一 role/aria-modal、初始焦点、Tab 约束、焦点恢复、Escape、精确遮罩点击、过时隐藏取消和幂等销毁；设置、帮助、链接、网页抓取、查找、导出进度、导出图片、图片及 Mermaid 的字段与提交行为仍由原 Feature 拥有，并通过元素作用域事件端口接入而不新增业务全局。实现验证头 `bce6146858f1e308c3e521b3e5f9139ff84f179d` 的 Stage 2 run `31023414560`、Stage 1 run `31023414183`、Stage 0 run `31023414280` 全部通过；生产模块记录为 87，未修改 CSS、Rust、依赖、锁文件、冻结模型或持久化，Atomic Task 2.7 尚未开始。
 <!-- stage-02-node:02-05 -->
 - 2026-08-05：阶段 2 Atomic Task 2.5（DOM 原语）完成：新增 `src/ui/dom/index.js` 及安全元素创建、必需引用校验、事件作用域、焦点作用域、过渡可见性 5 个职责模块；App Shell、兼容挂载链和链接预览只经公共入口使用这些原语，链接预览增加初始焦点、Tab 约束、焦点恢复与过时隐藏结果取消。实现提交 `9f3f4cbbdba992944cf93e0b275da9634d59007f`，清理验证头 `77ee167155dc3e36915cf8df15dc449dd3191898` 的 Stage 2 run `31016721386`、Stage 1 run `31016721135`、Stage 0 run `31016724092` 全部通过；生产模块记录为 85，未实现 Modal Shell、CSS 分层或业务表单行为，未修改 Rust、依赖、锁文件、冻结模型或持久化，Atomic Task 2.6 尚未开始。
 <!-- stage-02-node:02-04 -->

@@ -456,17 +456,25 @@
       }
       pendingLinkInsert = { start, end, selected };
       input.value = t('promptLinkDefault');
-      modal.classList.add('show');
-      requestAnimationFrame(() => {
-        input.focus();
-        input.select();
-      });
+      const request = {
+        options: {
+          initialFocus: input,
+          onClose: () => {
+            pendingLinkInsert = null;
+            editor.focus({ preventScroll: true });
+          }
+        }
+      };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
+      requestAnimationFrame(() => input.select());
     }
 
     function closeLinkModal() {
-      document.getElementById('link-modal')?.classList.remove('show');
-      pendingLinkInsert = null;
-      editor.focus({ preventScroll: true });
+      const modal = document.getElementById('link-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function confirmLinkInsert() {
@@ -489,9 +497,7 @@
       updatePreview();
       updateCount();
       autoSave();
-      document.getElementById('link-modal')?.classList.remove('show');
-      pendingLinkInsert = null;
-      el.focus({ preventScroll: true });
+      closeLinkModal();
     }
 
     function insertImageMarkdown(alt, url) {
@@ -695,17 +701,22 @@
       document.getElementById('image-upload-preview').innerHTML = '';
       document.getElementById('image-file-input').value = '';
       switchImageTab('url');
-      const el = document.getElementById('image-modal');
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
+      const modal = document.getElementById('image-modal');
+      const request = {
+        options: {
+          initialFocus: document.getElementById('image-url-input'),
+          onClose: () => { pendingImageDataUrl = ''; }
+        }
+      };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function closeImageModal() {
-      const el = document.getElementById('image-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
-      pendingImageDataUrl = '';
+      const modal = document.getElementById('image-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function switchImageTab(tab) {
@@ -777,16 +788,17 @@
     function openMermaidModal() {
       document.getElementById('mermaid-type').value = 'mindmap';
       updateMermaidTemplate();
-      const el = document.getElementById('mermaid-modal');
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
+      const modal = document.getElementById('mermaid-modal');
+      const request = { options: { initialFocus: document.getElementById('mermaid-code') } };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function closeMermaidModal() {
-      const el = document.getElementById('mermaid-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
+      const modal = document.getElementById('mermaid-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function updateMermaidTemplate() {
@@ -1086,17 +1098,22 @@
     }
 
     function openHelp(page = activeHelpPage) {
-      const el = document.getElementById('help-modal');
       switchHelpPage(page);
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
+      const modal = document.getElementById('help-modal');
+      const request = {
+        options: {
+          initialFocus: document.querySelector('[data-help-page].active'),
+          onClose: () => localStorage.setItem(HELP_SHOWN_KEY, 'true')
+        }
+      };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
     }
     function closeHelp() {
-      const el = document.getElementById('help-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
-      localStorage.setItem(HELP_SHOWN_KEY, 'true');
+      const modal = document.getElementById('help-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     // 网页转 Markdown 模态框
