@@ -1,0 +1,64 @@
+name: Stage 1 Atomic Task 1.7 README Fix
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/stage-01-07-readme-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix-readme:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rewrite/modular-rebuild
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Apply exact Atomic Task 1.7 README record
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('README.md')
+          data = path.read_bytes()
+          tree_anchor = b'  main.js\n'
+          changelog_anchor = b'## Change Log\n'
+          tree_insert = (
+              '  main.js\n'
+              '  model-kernel/\n'
+              '    index.js                # 冻结 JavaScript 模型能力的稳定显式公共入口\n'
+          ).encode('utf-8')
+          changelog_insert = (
+              '## Change Log\n'
+              '<!-- stage-01-node:01-07 -->\n'
+              '- 2026-08-05：阶段 1 Atomic Task 1.7（模型稳定入口）完成：新增 `src/model-kernel/index.js`，以 26 个显式命名导出统一公开 8 个冻结 JavaScript 模型模块，并将应用启动、混合编辑、预览 Worker 与数学展示调用者切换到稳定入口；新增导出集合、引用身份、函数签名、冻结哈希和禁止绕过入口的架构门禁，生产模块清单增至 67 个。专项 run 30964745475 与完整基线 run 30964745509 全部通过，9 个冻结模型/数据契约文件、公共行为、持久化和依赖保持不变；Atomic Task 1.8 尚未开始。\n'
+          ).encode('utf-8')
+
+          if data.count(tree_anchor) != 1:
+              raise SystemExit('README main.js anchor is not unique')
+          if data.count(changelog_anchor) != 1:
+              raise SystemExit('README Change Log anchor is not unique')
+          if b'stage-01-node:01-07' in data:
+              raise SystemExit('README already contains Atomic Task 1.7 record')
+
+          updated = data.replace(tree_anchor, tree_insert, 1)
+          updated = updated.replace(changelog_anchor, changelog_insert, 1)
+          path.write_bytes(updated)
+          PY
+
+          git diff --check
+          test "$(git diff --name-only)" = "README.md"
+          test "$(git diff --numstat README.md)" = $'4\t0\tREADME.md'
+
+          git config user.name "uniquenesssta"
+          git config user.email "uniquenesssta@live.com"
+          git add README.md
+          git commit -m "docs(stage1): record Atomic Task 1.7 completion"
+          git push origin HEAD:rewrite/modular-rebuild
