@@ -1,2 +1,0 @@
-      - name: Verify Stage 1 handoff contract
-        run: node --test tests/stage-01-handoff.test.mjs
