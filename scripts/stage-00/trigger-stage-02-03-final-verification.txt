@@ -1,0 +1,1 @@
+Atomic Task 2.3 final verification trigger. This file is removed immediately so the verified head contains no temporary artifact.
