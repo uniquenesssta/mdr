@@ -1,5 +1,4 @@
 name: Stage 1 Atomic Task 1.10 Handoff Bootstrap
-# Retry after correcting the production-module fixture reader.
 
 on:
   push:
@@ -27,7 +26,7 @@ jobs:
           cache: npm
       - name: Install frontend dependencies
         run: npm ci
-      - name: Apply Stage 1 handoff contract
+      - name: Apply Stage 1 README and handoff contract test
         shell: bash
         run: |
           set -euxo pipefail
@@ -35,55 +34,29 @@ jobs:
           from pathlib import Path
 
           readme_path = Path('README.md')
-          workflow_path = Path('.github/workflows/stage-01-atomic.yml')
           test_payload_path = Path('.github/stage-01-10-handoff-test.payload.mjs')
           readme_payload_path = Path('.github/stage-01-10-readme.payload.md')
-          test_step_path = Path('.github/stage-01-10-test-step.payload.yml')
-          evidence_step_path = Path('.github/stage-01-10-evidence-step.payload.yml')
           test_path = Path('tests/stage-01-handoff.test.mjs')
 
-          required_payloads = [
-              test_payload_path,
-              readme_payload_path,
-              test_step_path,
-              evidence_step_path,
+          missing = [
+              str(path)
+              for path in (test_payload_path, readme_payload_path)
+              if not path.is_file()
           ]
-          missing = [str(path) for path in required_payloads if not path.is_file()]
           if missing:
               raise SystemExit(f'Missing Stage 1.10 payloads: {missing}')
 
           readme = readme_path.read_text(encoding='utf-8')
-          readme_anchor = '## Change Log\n'
-          if readme.count(readme_anchor) != 1:
+          anchor = '## Change Log\n'
+          if readme.count(anchor) != 1:
               raise SystemExit('README Change Log anchor is not unique')
           if '## Stage 1 架构交接\n' in readme:
               raise SystemExit('README already contains Stage 1 handoff')
           handoff = readme_payload_path.read_text(encoding='utf-8')
           readme_path.write_text(
-              readme.replace(readme_anchor, handoff + readme_anchor, 1),
+              readme.replace(anchor, handoff + anchor, 1),
               encoding='utf-8',
           )
-
-          workflow = workflow_path.read_text(encoding='utf-8')
-          hard_gate_anchor = '      - name: Run architecture hard gate\n        run: node scripts/verify-architecture.mjs --output=artifacts/stage-01/01-08-architecture-scan.json\n'
-          regression_anchor = '      - name: Run existing Node regression suite\n        run: npm test\n'
-          if workflow.count(hard_gate_anchor) != 1:
-              raise SystemExit('Stage 1 architecture hard-gate anchor is not unique')
-          if workflow.count(regression_anchor) != 1:
-              raise SystemExit('Stage 1 Node regression anchor is not unique')
-          if 'Verify Stage 1 handoff contract' in workflow:
-              raise SystemExit('Stage 1 workflow already contains handoff contract')
-          workflow = workflow.replace(
-              hard_gate_anchor,
-              test_step_path.read_text(encoding='utf-8') + hard_gate_anchor,
-              1,
-          )
-          workflow = workflow.replace(
-              regression_anchor,
-              evidence_step_path.read_text(encoding='utf-8') + regression_anchor,
-              1,
-          )
-          workflow_path.write_text(workflow, encoding='utf-8')
 
           if test_path.exists():
               raise SystemExit('Stage 1 handoff test already exists')
@@ -92,17 +65,13 @@ jobs:
 
           git config user.name "uniquenesssta"
           git config user.email "uniquenesssta@live.com"
-          git add README.md .github/workflows/stage-01-atomic.yml tests/stage-01-handoff.test.mjs
+          git add README.md tests/stage-01-handoff.test.mjs
           git diff --cached --check
           node --input-type=module <<'NODE'
           import { execFileSync } from 'node:child_process';
           const actual = execFileSync('git', ['diff', '--cached', '--name-only'], { encoding: 'utf8' })
             .trim().split('\n').filter(Boolean).sort();
-          const expected = [
-            '.github/workflows/stage-01-atomic.yml',
-            'README.md',
-            'tests/stage-01-handoff.test.mjs'
-          ].sort();
+          const expected = ['README.md', 'tests/stage-01-handoff.test.mjs'].sort();
           if (JSON.stringify(actual) !== JSON.stringify(expected)) {
             throw new Error(`Unexpected staged files: ${JSON.stringify(actual)}`);
           }
