@@ -1,0 +1,54 @@
+name: Stage 1 Atomic Task 1.7 README Export
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/stage-01-07-readme-export.yml
+
+permissions:
+  contents: read
+
+jobs:
+  export-readme:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Generate updated README artifact
+        shell: bash
+        run: |
+          mkdir -p artifacts/readme
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+
+          const readme = readFileSync('README.md', 'utf8');
+          const treeNeedle = '  main.js\n';
+          const treeInsert = '  main.js\n  model-kernel/\n    index.js                # 冻结 JavaScript 模型能力的稳定显式公共入口\n';
+          const changelogNeedle = '## Change Log\n';
+          const changelogInsert = `## Change Log
+          <!-- stage-01-node:01-07 -->
+          - 2026-08-05：阶段 1 Atomic Task 1.7（模型稳定入口）完成：新增 \`src/model-kernel/index.js\`，以 26 个显式命名导出统一公开 8 个冻结 JavaScript 模型模块，并将应用启动、混合编辑、预览 Worker 与数学展示调用者切换到稳定入口；新增导出集合、引用身份、函数签名、冻结哈希和禁止绕过入口的架构门禁，生产模块清单增至 67 个。专项 run 30964745475 与完整基线 run 30964745509 全部通过，9 个冻结模型/数据契约文件、公共行为、持久化和依赖保持不变；Atomic Task 1.8 尚未开始。
+          `;
+
+          if ((readme.split(treeNeedle).length - 1) !== 1) {
+            throw new Error('README tree insertion anchor is not unique');
+          }
+          if ((readme.split(changelogNeedle).length - 1) !== 1) {
+            throw new Error('README changelog insertion anchor is not unique');
+          }
+          const updated = readme
+            .replace(treeNeedle, treeInsert)
+            .replace(changelogNeedle, changelogInsert);
+          writeFileSync('artifacts/readme/README.md', updated, 'utf8');
+          NODE
+      - name: Upload updated README
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-01-07-readme-${{ github.run_id }}
+          path: artifacts/readme/README.md
+          if-no-files-found: error
+          retention-days: 1
