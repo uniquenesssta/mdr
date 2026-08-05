@@ -1,0 +1,89 @@
+name: Stage 2 Atomic Verification
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-02-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  ui-foundation:
+    name: Verify Stage 2 UI foundation
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Verify Stage 1 handoff remains intact
+        run: node --test tests/stage-01-handoff.test.mjs
+      - name: Verify Atomic Task 2.1 DOM inventory contract
+        run: node --test tests/ui/dom-asset-inventory.test.mjs
+      - name: Collect DOM asset inventory and migration map
+        run: node scripts/stage-02/collect-dom-asset-inventory.mjs
+      - name: Verify generated evidence matches committed fixtures
+        shell: bash
+        run: |
+          cmp tests/ui/fixtures/dom-asset-inventory.json artifacts/stage-02/02-01-dom-asset-inventory.json
+          cmp tests/ui/fixtures/dom-migration-map.json artifacts/stage-02/02-01-dom-migration-map.json
+      - name: Run architecture hard gate
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-01-architecture-scan.json
+      - name: Record Atomic Task 2.1 evidence
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const inventory = JSON.parse(await readFile('artifacts/stage-02/02-01-dom-asset-inventory.json', 'utf8'));
+          const migrationMap = JSON.parse(await readFile('artifacts/stage-02/02-01-dom-migration-map.json', 'utf8'));
+          if (migrationMap.summary.unassignedNodeCount !== 0 || migrationMap.summary.ambiguousNodeCount !== 0) process.exit(1);
+          await writeFile('artifacts/stage-02/02-01-dom-asset-inventory-evidence.json', `${JSON.stringify({
+            node: 'stage-02/02-01',
+            status: 'passed',
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            attempt: process.env.GITHUB_RUN_ATTEMPT,
+            scope: 'legacy-dom-inventory-only',
+            productionUiMigration: 'not-started',
+            nextAtomicTask: '2.2-not-started',
+            source: inventory.source,
+            summary: inventory.summary,
+            migrationCoverage: migrationMap.summary,
+            guarantees: [
+              'every-legacy-html-node-has-one-semantic-region',
+              'every-legacy-html-node-has-one-migration-disposition',
+              'aria-ids-inline-events-dynamic-classes-mounts-and-test-selectors-recorded',
+              'production-index-html-and-bootstrap-unchanged'
+            ]
+          }, null, 2)}\n`, 'utf8');
+          NODE
+      - name: Run existing Node regression suite
+        run: npm test
+      - name: Run browser interaction contract
+        run: npm run test:browser:contract
+      - name: Build current application
+        run: npm run build
+      - name: Upload Atomic Task evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-02-ui-foundation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-02
+          if-no-files-found: error
+          retention-days: 30
