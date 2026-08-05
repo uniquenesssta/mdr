@@ -8,6 +8,8 @@ Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前
 index.html                  # 前端入口
 src/                        # 前端源码
   main.js
+  model-kernel/
+    index.js                # 冻结 JavaScript 模型能力的稳定显式公共入口
   document/
     document-model.js       # Unified document versions, transaction journal, and explicit snapshots
   editor/
@@ -53,6 +55,8 @@ logs/                       # 开发者性能日志目录
 ```
 
 ## Change Log
+<!-- stage-01-node:01-07 -->
+- 2026-08-05：阶段 1 Atomic Task 1.7（模型稳定入口）完成：新增 `src/model-kernel/index.js`，以 26 个显式命名导出统一公开 8 个冻结 JavaScript 模型模块，并将应用启动、混合编辑、预览 Worker 与数学展示调用者切换到稳定入口；新增导出集合、引用身份、函数签名、冻结哈希和禁止绕过入口的架构门禁，生产模块清单增至 67 个。专项 run 30964745475 与完整基线 run 30964745509 全部通过，9 个冻结模型/数据契约文件、公共行为、持久化和依赖保持不变；Atomic Task 1.8 尚未开始。
 <!-- stage-01-node:01-06 -->
 - 2026-08-05：阶段 1 Atomic Task 1.6（事件类型与事件总线）完成：新增 `src/app/events/event-types.js` 和 `event-bus.js`，建立事件类型集中声明、深层冻结普通数据快照、精确幂等退订、`once` 调用前移除、同步/异步监听器异常隔离和幂等销毁；生产模块清单增至 66 个。专项 run 30961354098 与完整基线 run 30961354097 全部通过，现有生产入口和用户行为未切换，Atomic Task 1.7 尚未开始。
 <!-- stage-01-node:01-05 -->
