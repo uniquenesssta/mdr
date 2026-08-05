@@ -12,6 +12,10 @@
     "test": "node --test tests/*.test.mjs",
     "test:browser:contract": "node tests/e2e/run-browser-tests.mjs --contract",
     "test:browser": "node tests/e2e/run-browser-tests.mjs --app",
+    "verify:architecture": "node scripts/verify-architecture.mjs",
+    "verify:no-legacy-runtime": "node scripts/verify-no-legacy-runtime.mjs",
+    "verify:generated-files": "node scripts/verify-generated-files.mjs",
+    "verify:readme-record": "node scripts/verify-readme-record.mjs",
     "check": "npm run test && npm run test:browser:contract && npm run build && npm run test:browser"
   },
   "dependencies": {
