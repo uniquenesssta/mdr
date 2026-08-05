@@ -111,7 +111,7 @@ npm run check
 
 ## Change Log
 <!-- stage-02-node:02-05 -->
-- 2026-08-05：阶段 2 Atomic Task 2.5（DOM 原语）已实施并进入正式复验：新增 `src/ui/dom/index.js` 及安全元素创建、必需引用校验、事件作用域、焦点作用域、过渡可见性 5 个职责模块；App Shell、兼容挂载链和链接预览只经公共入口使用这些原语，链接预览新增焦点约束/恢复与过时关闭结果取消。生产模块记录为 85；未实现 Modal Shell、CSS 分层或业务表单行为，未修改 Rust、依赖、锁文件、冻结模型或持久化，Atomic Task 2.6 尚未开始。
+- 2026-08-05：阶段 2 Atomic Task 2.5（DOM 原语）完成：新增 `src/ui/dom/index.js` 及安全元素创建、必需引用校验、事件作用域、焦点作用域、过渡可见性 5 个职责模块；App Shell、兼容挂载链和链接预览只经公共入口使用这些原语，链接预览增加初始焦点、Tab 约束、焦点恢复与过时隐藏结果取消。实现提交 `9f3f4cbbdba992944cf93e0b275da9634d59007f`，清理验证头 `77ee167155dc3e36915cf8df15dc449dd3191898` 的 Stage 2 run `31016721386`、Stage 1 run `31016721135`、Stage 0 run `31016724092` 全部通过；生产模块记录为 85，未实现 Modal Shell、CSS 分层或业务表单行为，未修改 Rust、依赖、锁文件、冻结模型或持久化，Atomic Task 2.6 尚未开始。
 <!-- stage-02-node:02-04 -->
 - 2026-08-05：阶段 2 Atomic Task 2.4（App Shell）完成：新增 `createUI(root)` 与按职责拆分的菜单、工具栏、侧栏、工作区、状态栏和 overlay 壳模块，严格返回 `menu/toolbar/sidebar/editor/preview/status/overlay` refs；兼容 HTML 拆为 `menu/toolbar/sidebar/editor/preview/status/overlay/ports` 八个显式业务内容模板并只挂入唯一新壳。实现代码提交 `660c0e22312f41885ca6c86078b2f0189541d5e9`，清理验证头 `b5bc87719e71b9ac27c0bc2512ba9121a4e24d07` 的 Stage 2 run `31009862503`、Stage 1 run `31009862345`、Stage 0 run `31009863167` 全部通过；生产模块记录为 79，未修改 CSS、Rust、依赖、锁文件、冻结模型、持久化或用户行为，Atomic Task 2.5 尚未开始。
 <!-- stage-02-node:02-03 -->
