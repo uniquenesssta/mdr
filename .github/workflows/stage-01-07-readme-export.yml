@@ -52,3 +52,5 @@ jobs:
           path: artifacts/readme/README.md
           if-no-files-found: error
           retention-days: 1
+
+# Triggered after workflow registration; removed in the final Atomic Task commit.
