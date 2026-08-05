@@ -33,44 +33,49 @@ jobs:
           cache: npm
       - name: Install frontend dependencies
         run: npm ci
-      - name: Verify Stage 1 handoff remains intact
+      - name: Verify Stage 1 historical handoff remains intact
         run: node --test tests/stage-01-handoff.test.mjs
-      - name: Verify Atomic Task 2.1 DOM inventory contract
+      - name: Verify Atomic Task 2.1 frozen DOM inventory
         run: node --test tests/ui/dom-asset-inventory.test.mjs
-      - name: Collect DOM asset inventory and migration map
-        run: node scripts/stage-02/collect-dom-asset-inventory.mjs
-      - name: Verify generated evidence matches committed fixtures
-        shell: bash
-        run: |
-          cmp tests/ui/fixtures/dom-asset-inventory.json artifacts/stage-02/02-01-dom-asset-inventory.json
-          cmp tests/ui/fixtures/dom-migration-map.json artifacts/stage-02/02-01-dom-migration-map.json
+      - name: Verify Atomic Task 2.2 minimal index and module entry
+        run: node --test tests/ui/minimal-index.test.mjs
       - name: Run architecture hard gate
-        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-01-architecture-scan.json
-      - name: Record Atomic Task 2.1 evidence
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-02-architecture-scan.json
+      - name: Record Atomic Task 2.2 evidence
         shell: bash
         run: |
+          mkdir -p artifacts/stage-02
           node --input-type=module <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
-          const inventory = JSON.parse(await readFile('artifacts/stage-02/02-01-dom-asset-inventory.json', 'utf8'));
-          const migrationMap = JSON.parse(await readFile('artifacts/stage-02/02-01-dom-migration-map.json', 'utf8'));
-          if (migrationMap.coverage.unassignedNodeCount !== 0 || migrationMap.coverage.ambiguousNodeCount !== 0) process.exit(1);
-          await writeFile('artifacts/stage-02/02-01-dom-asset-inventory-evidence.json', `${JSON.stringify({
-            node: 'stage-02/02-01',
+          import { buildHtmlInventory } from './scripts/stage-02/dom-inventory/html-inventory.mjs';
+          import { collectInlineEvents } from './scripts/architecture/source-analysis.mjs';
+          const indexSource = await readFile('index.html', 'utf8');
+          const shellSource = await readFile('public/compatibility/current-shell.html', 'utf8');
+          const indexInventory = buildHtmlInventory(indexSource);
+          const inlineEvents = collectInlineEvents('public/compatibility/current-shell.html', shellSource)
+            .reduce((sum, record) => sum + record.count, 0);
+          if (indexInventory.summary.inlineEventCount !== 0 || inlineEvents !== 184) process.exit(1);
+          await writeFile('artifacts/stage-02/02-02-minimal-index-evidence.json', `${JSON.stringify({
+            node: 'stage-02/02-02',
             status: 'passed',
             commit: process.env.GITHUB_SHA,
             runId: process.env.GITHUB_RUN_ID,
             attempt: process.env.GITHUB_RUN_ATTEMPT,
-            scope: 'legacy-dom-inventory-only',
-            productionUiMigration: 'not-started',
-            nextAtomicTask: '2.2-not-started',
-            source: inventory.source,
-            summary: inventory.summary,
-            migrationCoverage: migrationMap.coverage,
+            scope: 'minimal-index-and-module-entry',
+            nextAtomicTask: '2.3-not-started',
+            index: indexInventory.source,
+            indexSummary: indexInventory.summary,
+            compatibilityShell: {
+              path: 'public/compatibility/current-shell.html',
+              inlineEvents,
+              scriptElements: 0
+            },
             guarantees: [
-              'every-legacy-html-node-has-one-semantic-region',
-              'every-legacy-html-node-has-one-migration-disposition',
-              'aria-ids-inline-events-dynamic-classes-mounts-and-test-selectors-recorded',
-              'production-index-html-and-bootstrap-unchanged'
+              'index-has-only-head-app-root-and-module-entry',
+              'no-index-inline-events-or-business-dom',
+              'legacy-dom-remains-single-authoritative-compatibility-shell',
+              'vite-tauri-resource-paths-preserved',
+              'tasks-2.3-through-2.6-not-started'
             ]
           }, null, 2)}\n`, 'utf8');
           NODE
