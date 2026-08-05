@@ -36,6 +36,7 @@ jobs:
           sed -i "s/inventory.ids.map(record => record.id)/inventory.ids/" .github/stage-02-02/minimal-index.test.mjs
           node .github/stage-02-02/bootstrap.mjs
           sed -i "s/不得把该历史交接解释为业务功能已迁移/不得宣称业务功能已经迁移/" README.md
+          sed -i "s#../index.html#../public/compatibility/current-shell.html#" tests/folder-file-tree.test.mjs
 
           git config user.name "uniquenesssta"
           git config user.email "uniquenesssta@live.com"
@@ -46,6 +47,7 @@ jobs:
             src/ui/compatibility/mount-current-shell.js \
             tests/ui/dom-asset-inventory.test.mjs \
             tests/ui/minimal-index.test.mjs \
+            tests/folder-file-tree.test.mjs \
             tests/architecture/fixtures/production-modules.json \
             tests/stage-01-handoff.test.mjs \
             .github/workflows/stage-01-atomic.yml \
@@ -67,6 +69,7 @@ jobs:
             'src/bootstrap/module-entry.js',
             'src/ui/compatibility/mount-current-shell.js',
             'tests/architecture/fixtures/production-modules.json',
+            'tests/folder-file-tree.test.mjs',
             'tests/stage-01-handoff.test.mjs',
             'tests/ui/dom-asset-inventory.test.mjs',
             'tests/ui/minimal-index.test.mjs'
@@ -91,4 +94,4 @@ jobs:
           git commit -m "test(stage2): verify minimal HTML entry"
           git push origin HEAD:rewrite/modular-rebuild
 
-# retry: 5
+# retry: 6
