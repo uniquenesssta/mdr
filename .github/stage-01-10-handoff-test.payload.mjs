@@ -115,9 +115,9 @@ test('documented Stage 1 public modules expose the exact handoff surface', async
 test('handoff counts and local package verification entries match committed architecture facts', async () => {
   const packageJson = await readJson('package.json');
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
-  const modules = await readJson('tests/architecture/fixtures/production-modules.json');
+  const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(modules.length, 67);
+  assert.equal(moduleFixture.modules.length, 67);
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 9);
   assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 184);
   assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 38);
