@@ -1,0 +1,37 @@
+name: Stage 2.5 Repository Snapshot
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/stage-02-05-snapshot.yml
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: rewrite/modular-rebuild
+      - name: Verify requested head
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          git status --short --branch
+      - name: Package repository snapshot
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-02-05-snapshot
+          tar --exclude='./artifacts/stage-02-05-snapshot' -czf artifacts/stage-02-05-snapshot/repository.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stage-02-05-repository-snapshot-${{ github.run_id }}
+          path: artifacts/stage-02-05-snapshot/repository.tar.gz
+          if-no-files-found: error
+          retention-days: 1
