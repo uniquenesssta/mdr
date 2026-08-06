@@ -77,6 +77,17 @@ version = "1"
   $capability.permissions = @($capability.permissions) + 'wdio-webdriver:default'
   $capability | ConvertTo-Json -Depth 10 | Set-Content -Path $capabilityPath -Encoding utf8
 
+  $tauriConfigPath = Join-Path $hostRootPath 'src-tauri\tauri.conf.json'
+  $tauriConfig = Get-Content $tauriConfigPath -Raw | ConvertFrom-Json
+  if (-not $tauriConfig.build.frontendDist) {
+    throw 'Isolated Windows driver host requires build.frontendDist.'
+  }
+  $productionDevUrl = $tauriConfig.build.devUrl
+  $productionBeforeDevCommand = $tauriConfig.build.beforeDevCommand
+  $tauriConfig.build.PSObject.Properties.Remove('devUrl')
+  $tauriConfig.build.PSObject.Properties.Remove('beforeDevCommand')
+  $tauriConfig | ConvertTo-Json -Depth 20 | Set-Content -Path $tauriConfigPath -Encoding utf8
+
   & cargo generate-lockfile --manifest-path $manifestPath
   if ($LASTEXITCODE -ne 0) {
     throw 'Cargo lock generation failed for the isolated Windows driver host.'
@@ -88,7 +99,11 @@ version = "1"
     binary = (Join-Path $hostRootPath 'src-tauri\target\debug\markdown-editor.exe')
     productionManifestUnchanged = $true
     productionCapabilityUnchanged = $true
+    productionConfigUnchanged = $true
     driverProvider = 'embedded'
+    frontendSource = 'embedded-dist'
+    removedDevUrl = [bool]$productionDevUrl
+    removedBeforeDevCommand = [bool]$productionBeforeDevCommand
   } | ConvertTo-Json | Set-Content -Path (Join-Path $hostRootPath 'driver-host.json') -Encoding utf8
 } finally {
   if (Test-Path $archivePath) {
