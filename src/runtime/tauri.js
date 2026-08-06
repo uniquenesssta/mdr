@@ -1,6 +1,5 @@
 import { getCurrentWebview } from '@tauri-apps/api/webview';
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createDialogClient, createInvokeClient, createRuntimeCapabilities, detectPlatformEnvironment } from '../platform/index.js';
+import { createDialogClient, createInvokeClient, createRuntimeCapabilities, createWindowClient, detectPlatformEnvironment } from '../platform/index.js';
 
 const platformEnvironment = detectPlatformEnvironment(window);
 const capabilities = createRuntimeCapabilities(platformEnvironment, window);
@@ -13,6 +12,7 @@ const dialogClient = createDialogClient({
   now: () => performance.now(),
   record: (operation, entry) => window.markdownEditorPerf?.record(operation, entry)
 });
+const windowClient = createWindowClient();
 
 if (isAvailable) {
   document.documentElement.classList.add('tauri-shell');
@@ -217,36 +217,34 @@ window.markdownEditorNative = {
   },
   async onCloseRequested(handler) {
     if (!isAvailable) return null;
-    return getCurrentWindow().onCloseRequested(handler);
+    return windowClient.subscribeCloseRequest(handler);
   },
   async startWindowDragging() {
     if (!isAvailable) return;
-    return getCurrentWindow().startDragging();
+    return windowClient.startDrag();
   },
   async minimizeWindow() {
     if (!isAvailable) return;
-    return getCurrentWindow().minimize();
+    return windowClient.minimize();
   },
   async toggleMaximizeWindow() {
     if (!isAvailable) return false;
-    const currentWindow = getCurrentWindow();
-    await currentWindow.toggleMaximize();
-    return currentWindow.isMaximized();
+    return windowClient.toggleMaximize();
   },
   async isWindowMaximized() {
     if (!isAvailable) return false;
-    return getCurrentWindow().isMaximized();
+    return windowClient.isMaximized();
   },
   async onWindowResized(handler) {
     if (!isAvailable) return null;
-    return getCurrentWindow().onResized(handler);
+    return windowClient.subscribeResize(handler);
   },
   async closeWindow() {
     if (!isAvailable) return;
-    return getCurrentWindow().close();
+    return windowClient.requestClose();
   },
   async destroyWindow() {
     if (!isAvailable) return;
-    return getCurrentWindow().destroy();
+    return windowClient.forceClose();
   }
 };

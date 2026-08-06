@@ -17,6 +17,7 @@ import {
   createDialogClient,
   createInvokeClient,
   createRuntimeCapabilities,
+  createWindowClient,
   detectPlatformEnvironment
 } from '../../src/platform/index.js';
 
@@ -55,7 +56,7 @@ const expectedPortFiles = Object.freeze([
   'web-port.js', 'window-port.js'
 ]);
 const expectedEnvironmentFiles = Object.freeze(['platform-detection.js', 'runtime-capabilities.js']);
-const expectedDesktopFiles = Object.freeze(['dialog-client.js', 'invoke-client.js']);
+const expectedDesktopFiles = Object.freeze(['dialog-client.js', 'invoke-client.js', 'window-client.js']);
 
 function createBrowserRuntime() {
   class Element {}
@@ -101,10 +102,12 @@ const declaredTargets = new Set(
 );
 const sentinelOwners = [];
 const dialogPluginOwners = [];
+const windowApiOwners = [];
 for (const [path] of moduleFixture.modules) {
   const source = await readFile(path, 'utf8');
   if (source.includes('__TAURI_INTERNALS__')) sentinelOwners.push(path);
   if (source.includes('@tauri-apps/plugin-dialog')) dialogPluginOwners.push(path);
+  if (source.includes('@tauri-apps/api/window')) windowApiOwners.push(path);
 }
 
 const browserRuntime = createBrowserRuntime();
@@ -166,11 +169,36 @@ const dialogResults = {
   confirm: await dialogClient.confirm('Continue?')
 };
 
+const windowCalls = [];
+const windowDisposals = [];
+const evidenceWindow = {
+  async startDragging() { windowCalls.push('startDragging'); },
+  async minimize() { windowCalls.push('minimize'); },
+  async toggleMaximize() { windowCalls.push('toggleMaximize'); },
+  async isMaximized() { windowCalls.push('isMaximized'); return true; },
+  async onResized(handler) { windowCalls.push({ method: 'onResized', handler }); return () => windowDisposals.push('resize'); },
+  async onCloseRequested(handler) { windowCalls.push({ method: 'onCloseRequested', handler }); return () => windowDisposals.push('close'); },
+  async close() { windowCalls.push('close'); },
+  async destroy() { windowCalls.push('destroy'); }
+};
+const windowClient = createWindowClient({ getCurrentWindow: () => evidenceWindow });
+const resizeHandler = () => {};
+const closeHandler = () => {};
+await windowClient.startDrag();
+await windowClient.minimize();
+const toggledMaximized = await windowClient.toggleMaximize();
+const maximized = await windowClient.isMaximized();
+await windowClient.subscribeResize(resizeHandler);
+await windowClient.subscribeCloseRequest(closeHandler);
+await windowClient.requestClose();
+await windowClient.forceClose();
+await windowClient.destroy();
+
 if (JSON.stringify(PLATFORM_PORT_NAMES) !== JSON.stringify(expectedPortNames)) process.exit(1);
 if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exit(1);
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
 if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
-if (moduleFixture.modules.length !== 159 || platformModules.length !== 20) process.exit(1);
+if (moduleFixture.modules.length !== 160 || platformModules.length !== 21) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -178,6 +206,7 @@ if (portSources.some(source => /@tauri|__TAURI|markdownEditorNative|getCurrentWi
 if (portSources.some(source => /\bwindow\.|\bdocument\.|\blocalStorage\b|\bnavigator\./.test(source))) process.exit(1);
 if (sentinelOwners.length !== 1 || sentinelOwners[0] !== 'src/platform/environment/platform-detection.js') process.exit(1);
 if (dialogPluginOwners.length !== 1 || dialogPluginOwners[0] !== 'src/platform/desktop/dialog-client.js') process.exit(1);
+if (windowApiOwners.length !== 1 || windowApiOwners[0] !== 'src/platform/desktop/window-client.js') process.exit(1);
 if (!environmentSources['platform-detection.js'].includes('__TAURI_INTERNALS__')) process.exit(1);
 if (/@tauri|__TAURI|\binvoke\s*\(/.test(environmentSources['runtime-capabilities.js'])) process.exit(1);
 if (/\bwindow\.|\bdocument\.|\bnavigator\./.test(environmentSources['runtime-capabilities.js'])) process.exit(1);
@@ -189,10 +218,14 @@ if (!desktopSources['invoke-client.js'].includes('throw error')) process.exit(1)
 if (!desktopSources['dialog-client.js'].includes("@tauri-apps/plugin-dialog")) process.exit(1);
 if (!desktopSources['dialog-client.js'].includes('normalizeSaveFileName')) process.exit(1);
 if (!desktopSources['dialog-client.js'].includes('joinNativePath')) process.exit(1);
+if (!desktopSources['window-client.js'].includes("@tauri-apps/api/window")) process.exit(1);
+if (!desktopSources['window-client.js'].includes('activeDisposers')) process.exit(1);
 if (legacyRuntimeSource.includes("@tauri-apps/api/core") || legacyRuntimeSource.includes('invokeMeasured')) process.exit(1);
 if (legacyRuntimeSource.includes('@tauri-apps/plugin-dialog') || legacyRuntimeSource.includes('showOpenDialog')) process.exit(1);
+if (legacyRuntimeSource.includes('@tauri-apps/api/window') || legacyRuntimeSource.includes('getCurrentWindow')) process.exit(1);
 if ((legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length !== 19) process.exit(1);
 if ((legacyRuntimeSource.match(/dialogClient\.(?:openFile|openDirectory|saveFile|confirm)\(/g) || []).length !== 4) process.exit(1);
+if ((legacyRuntimeSource.match(/windowClient\.(?:subscribeCloseRequest|startDrag|minimize|toggleMaximize|isMaximized|subscribeResize|requestClose|forceClose)\(/g) || []).length !== 8) process.exit(1);
 if (!legacyRuntimeSource.includes("write_performance_logs', { entries }, {}, { record: false }")) process.exit(1);
 if (invokeCalls.length !== 1 || invokeCalls[0].operation !== 'load_document_state' || invokeCalls[0].args !== invokeArgs) process.exit(1);
 if (invokeResult.args !== invokeArgs || capturedInvokeError !== invokeError) process.exit(1);
@@ -201,6 +234,9 @@ if (dialogCalls.length !== 4) process.exit(1);
 if (dialogResults.openFile !== '/tmp/evidence.md' || dialogResults.openDirectory !== null) process.exit(1);
 if (dialogResults.saveFile !== '/tmp/evidence.md' || dialogResults.confirm !== false) process.exit(1);
 if (dialogTelemetry.length !== 3 || dialogTelemetry[1].entry.status !== 'cancelled') process.exit(1);
+if (!toggledMaximized || !maximized) process.exit(1);
+if (windowCalls.length !== 10 || windowDisposals.join(',') !== 'close,resize') process.exit(1);
+if (windowCalls[4].handler !== resizeHandler || windowCalls[5].handler !== closeHandler) process.exit(1);
 if (browserEnvironment.kind !== 'browser' || desktopEnvironment.kind !== 'desktop') process.exit(1);
 if (!Object.isFrozen(browserEnvironment) || !Object.isFrozen(desktopEnvironment)) process.exit(1);
 if (!Object.isFrozen(browserCapabilities) || !Object.isFrozen(browserCapabilities.browser) || !Object.isFrozen(browserCapabilities.desktop)) process.exit(1);
@@ -234,7 +270,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-01-platform-ports-evidence.json`, `${JSO
     'all-thirty-three-legacy-native-methods-have-explicit-destination-mappings',
     'atomic-task-3.1-contracts-remain-runtime-neutral',
     'capability-detection-is-owned-by-atomic-task-3.2',
-    'invoke-and-dialog-client-cutovers-are-owned-by-atomic-tasks-3.3-and-3.4'
+    'invoke-dialog-and-window-client-cutovers-are-owned-by-atomic-tasks-3.3-through-3.5'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -257,7 +293,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-02-runtime-capabilities-evidence.json`, 
     'legacy-runtime-availability-derived-from-public-capabilities',
     'no-production-business-module-checks-tauri-internals',
     'existing-native-method-contracts-and-command-fields-remain-unchanged',
-    'invoke-and-dialog-clients-are-owned-by-atomic-tasks-3.3-and-3.4'
+    'invoke-dialog-and-window-clients-are-owned-by-atomic-tasks-3.3-through-3.5'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -278,7 +314,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-03-invoke-client-evidence.json`, `${JSON
     'telemetry-failures-cannot-replace-native-semantics',
     'performance-log-transport-explicitly-suppresses-recursive-telemetry',
     'legacy-runtime-retains-all-nineteen-command-fields-through-the-public-invoke-client',
-    'dialog-client-is-owned-by-atomic-task-3.4-and-later-adapters-remain-deferred'
+    'dialog-and-window-clients-are-owned-by-atomic-tasks-3.4-and-3.5'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -302,6 +338,30 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-04-dialog-client-evidence.json`, `${JSON
     'native-dialog-errors-are-rethrown-with-original-identity',
     'dialog-telemetry-failures-cannot-replace-native-results-or-errors',
     'legacy-runtime-retains-browser-confirm-and-unavailable-null-fallbacks',
-    'window-dragdrop-filesystem-document-store-web-link-and-log-adapters-remain-deferred'
+    'dragdrop-filesystem-document-store-web-link-and-log-adapters-remain-deferred'
+  ]
+}, null, 2)}\n`, 'utf8');
+
+await writeFile(`${OUTPUT_DIRECTORY}/03-05-window-client-evidence.json`, `${JSON.stringify({
+  node: 'stage-03/03-05', atomicTask: '3.5', status: 'passed',
+  commit: process.env.GITHUB_SHA || null, runId: process.env.GITHUB_RUN_ID || null,
+  attempt: process.env.GITHUB_RUN_ATTEMPT || null,
+  scope: 'desktop-window-controls-and-owned-subscriptions',
+  publicEntry: 'src/platform/index.js',
+  implementationFiles: [`${DESKTOP_DIRECTORY}/window-client.js`],
+  productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
+  windowApiOwners,
+  delegationCount: (legacyRuntimeSource.match(/windowClient\.(?:subscribeCloseRequest|startDrag|minimize|toggleMaximize|isMaximized|subscribeResize|requestClose|forceClose)\(/g) || []).length,
+  sample: { calls: windowCalls, disposals: windowDisposals, toggledMaximized, maximized },
+  guarantees: [
+    'single-production-owner-of-tauri-window-api-import',
+    'drag-minimize-toggle-maximize-state-query-close-and-force-close-have-one-desktop-client',
+    'resize-and-close-request-subscriptions-return-idempotent-owned-disposers',
+    'client-destroy-disposes-active-subscriptions-in-reverse-order',
+    'late-subscription-results-are-disposed-after-client-destroy',
+    'request-close-preserves-close-request-events-while-force-close-preserves-native-destroy-fallback',
+    'native-window-results-and-error-identity-remain-unchanged',
+    'save-before-close-policy-remains-in-the-application-layer',
+    'dragdrop-filesystem-document-store-web-link-and-log-adapters-remain-deferred'
   ]
 }, null, 2)}\n`, 'utf8');
