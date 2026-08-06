@@ -22,6 +22,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          # This workflow self-deletes in the same commit as the concurrency repair.
           git clone \
             --branch rewrite/modular-rebuild \
             --single-branch \
