@@ -1441,8 +1441,10 @@ const editor = document.getElementById('editor');
       if (!sidebar) return;
       const visible = isSidebarEffectivelyVisible();
       sidebar.classList.toggle('hidden', !visible);
+      sidebar.classList.toggle('is-hidden', !visible);
       sidebar.setAttribute('aria-hidden', visible ? 'false' : 'true');
       document.getElementById('sidebar-resizer')?.classList.toggle('hidden', !visible);
+      document.getElementById('sidebar-resizer')?.classList.toggle('is-hidden', !visible);
       const setting = document.getElementById('setting-sidebar-visible');
       if (setting) setting.checked = sidebarVisible;
       scheduleEditorMetricsRebuild(100);
@@ -1456,6 +1458,7 @@ const editor = document.getElementById('editor');
       compactShellActive = nextCompact;
       sidebarAutoCollapsed = nextCompact;
       document.documentElement.classList.toggle('compact-shell', nextCompact);
+      document.documentElement.classList.toggle('is-compact-shell', nextCompact);
       if (changed) {
         closeAppMenus();
         applySidebarVisibility();
@@ -2059,7 +2062,10 @@ const editor = document.getElementById('editor');
       if (activeLineColor) document.body.style.setProperty('--color-editor-active-line', activeLineColor);
       else document.body.style.removeProperty('--color-editor-active-line');
       const toolbar = document.querySelector('.editor-toolbar');
-      if (toolbar) toolbar.classList.toggle('hidden', !toolbarVisible);
+      if (toolbar) {
+        toolbar.classList.toggle('hidden', !toolbarVisible);
+        toolbar.classList.toggle('is-hidden', !toolbarVisible);
+      }
       updateToolbarItemVisibility();
       initializeToolbarBoundaryLayout();
       if (typeof updateInlineColorToolAvailability === 'function') updateInlineColorToolAvailability();
@@ -2121,6 +2127,7 @@ const editor = document.getElementById('editor');
 
     function setCompactSplitClass(active) {
       document.querySelector('.main')?.classList.toggle('compact-split', Boolean(active));
+      document.querySelector('.main')?.classList.toggle('is-compact-split', Boolean(active));
     }
 
     function persistPaneCollapsedState() {
@@ -2251,8 +2258,11 @@ const editor = document.getElementById('editor');
       const previewPane = document.querySelector('.preview-pane');
       const resizer = document.getElementById('resizer');
       editorPane.classList.toggle('collapsed', editorCollapsed);
+      editorPane.classList.toggle('is-collapsed', editorCollapsed);
       previewPane.classList.toggle('collapsed', previewCollapsed);
+      previewPane.classList.toggle('is-collapsed', previewCollapsed);
       resizer.classList.toggle('hidden', editorCollapsed || previewCollapsed);
+      resizer.classList.toggle('is-hidden', editorCollapsed || previewCollapsed);
 
       const editorBtn = editorPane.querySelector('.collapse-btn');
       const previewBtn = previewPane.querySelector('.collapse-btn');
@@ -2307,8 +2317,8 @@ const editor = document.getElementById('editor');
       if (!isSidebarEffectivelyVisible() || compactShellActive || window.matchMedia?.('(max-width: 768px)').matches) return;
       isSidebarResizing = true;
       sidebarResizeRect = document.querySelector('.workspace')?.getBoundingClientRect() || null;
-      document.body.classList.add('resizing', 'sidebar-resizing');
-      document.getElementById('sidebar-resizer')?.classList.add('dragging');
+      document.body.classList.add('resizing', 'sidebar-resizing', 'is-resizing', 'is-sidebar-resizing');
+      document.getElementById('sidebar-resizer')?.classList.add('dragging', 'is-dragging');
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
       event.preventDefault();
@@ -2330,8 +2340,8 @@ const editor = document.getElementById('editor');
       isSidebarResizing = false;
       sidebarResizeRect = null;
       localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth));
-      document.body.classList.remove('resizing', 'sidebar-resizing');
-      document.getElementById('sidebar-resizer')?.classList.remove('dragging');
+      document.body.classList.remove('resizing', 'sidebar-resizing', 'is-resizing', 'is-sidebar-resizing');
+      document.getElementById('sidebar-resizer')?.classList.remove('dragging', 'is-dragging');
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       scheduleEditorMetricsRebuild(40);
@@ -2344,9 +2354,9 @@ const editor = document.getElementById('editor');
       resizeStartedAt = performance.now();
       resizeMoveEvents = 0;
       resizeStartRatio = editorRatio;
-      document.body.classList.add('resizing');
+      document.body.classList.add('resizing', 'is-resizing');
       const resizer = document.getElementById('resizer');
-      resizer.classList.add('dragging');
+      resizer.classList.add('dragging', 'is-dragging');
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
       e.preventDefault();
@@ -2357,9 +2367,9 @@ const editor = document.getElementById('editor');
       isResizing = false;
       resizeRect = null;
       localStorage.setItem(RATIO_KEY, editorRatio);
-      document.body.classList.remove('resizing');
+      document.body.classList.remove('resizing', 'is-resizing');
       const resizer = document.getElementById('resizer');
-      resizer.classList.remove('dragging');
+      resizer.classList.remove('dragging', 'is-dragging');
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       scheduleEditorMetricsRebuild(40);

@@ -1,5 +1,5 @@
 // Records machine-readable Stage 2 UI foundation evidence for the current verified commit.
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { buildHtmlInventory } from './dom-inventory/html-inventory.mjs';
 import { collectInlineEvents } from '../architecture/source-analysis.mjs';
 import { collectIconReferences, inspectSvgSprite } from './icon-sprite/inspect-svg-sprite.mjs';
@@ -10,300 +10,271 @@ import * as domPrimitives from '../../src/ui/dom/index.js';
 
 await mkdir('artifacts/stage-02', { recursive: true });
 
-const indexSource = await readFile('index.html', 'utf8');
-const shellSource = await readFile('public/compatibility/current-shell.html', 'utf8');
-const spriteSource = await readFile('public/assets/icons.svg', 'utf8');
-const styleEntrySource = await readFile('src/styles/index.css', 'utf8');
-const tokenSource = await readFile('src/styles/foundation/tokens.css', 'utf8');
-const lightThemeSource = await readFile('src/styles/themes/light.css', 'utf8');
-const darkThemeSource = await readFile('src/styles/themes/dark.css', 'utf8');
-const legacyStyleSource = await readFile('src/styles/main.css', 'utf8');
-const moduleFixture = JSON.parse(await readFile('tests/architecture/fixtures/production-modules.json', 'utf8'));
+const readText = path => readFile(path, 'utf8');
+const moduleFixture = JSON.parse(await readText('tests/architecture/fixtures/production-modules.json'));
+const styleRecords = moduleFixture.modules.filter(record => record[0].startsWith('src/styles/'));
+const stylePaths = styleRecords.map(record => record[0]);
+const layerModules = Object.freeze({
+  foundation: styleRecords.filter(record => ['presentation-foundation', 'presentation-tokens'].includes(record[2])).map(record => record[0]).sort(),
+  themes: styleRecords.filter(record => record[2] === 'presentation-theme').map(record => record[0]).sort(),
+  shell: styleRecords.filter(record => record[2] === 'presentation-shell').map(record => record[0]).sort(),
+  layout: styleRecords.filter(record => record[2] === 'presentation-layout').map(record => record[0]).sort(),
+  components: styleRecords.filter(record => record[2] === 'presentation-component').map(record => record[0]).sort(),
+  features: styleRecords.filter(record => record[2] === 'presentation-feature').map(record => record[0]).sort()
+});
+const styleEntryModules = styleRecords.filter(record => record[2] === 'presentation-entry').map(record => record[0]);
+const expectedStyleImports = Object.freeze([
+  './foundation/reset.css',
+  './foundation/tokens.css',
+  './foundation/typography.css',
+  './foundation/accessibility.css',
+  './foundation/motion.css',
+  './themes/light.css',
+  './themes/dark.css',
+  './shell/app-shell.css',
+  './shell/menu-bar.css',
+  './shell/toolbar-shell.css',
+  './shell/workspace-shell.css',
+  './shell/status-bar.css',
+  './shell/window-controls.css',
+  './layout/sidebar-layout.css',
+  './layout/split-pane.css',
+  './layout/resize-state.css',
+  './layout/compact-shell.css',
+  './layout/compact-split.css',
+  './layout/fullscreen.css',
+  './components/icon.css',
+  './components/menu.css',
+  './components/form.css',
+  './components/tabs.css',
+  './components/color-picker.css',
+  './components/table-picker.css',
+  './components/modal.css',
+  './components/progress.css',
+  './components/badge.css',
+  './components/drop-overlay.css',
+  './components/toast.css',
+  './components/link-preview.css',
+  './features/sidebar-navigation.css',
+  './features/sidebar-documents.css',
+  './features/sidebar-outline.css',
+  './features/editor.css',
+  './features/preview.css',
+  './features/export.css',
+  './features/media.css',
+  './features/content-rendering.css',
+  './features/preferences.css',
+  './features/settings.css',
+  './features/help.css',
+  './features/hybrid.css',
+  './features/hybrid-html.css',
+  './features/hybrid-media.css',
+  './features/hybrid-table.css',
+  './features/hybrid-code.css',
+  './features/hybrid-mermaid.css',
+  './features/hybrid-math.css',
+  './features/code-presentation.css',
+  './features/file-tree.css',
+]);
+const expectedStyleEntry = `${expectedStyleImports.map(path => `@import '${path}';`).join('\n')}\n`;
+
+const [indexSource, shellSource, spriteSource, styleEntrySource, tokenSource, lightThemeSource, darkThemeSource] = await Promise.all([
+  readText('index.html'),
+  readText('public/compatibility/current-shell.html'),
+  readText('public/assets/icons.svg'),
+  readText('src/styles/index.css'),
+  readText('src/styles/foundation/tokens.css'),
+  readText('src/styles/themes/light.css'),
+  readText('src/styles/themes/dark.css')
+]);
+const nonEntryStylePaths = stylePaths.filter(path => path !== 'src/styles/index.css');
+const styleSources = await Promise.all(nonEntryStylePaths.map(async path => Object.freeze({ path, source: await readText(path) })));
+const visualStyles = styleSources.filter(record => !record.path.includes('/themes/') && !record.path.endsWith('/foundation/tokens.css'));
+const visualStyleSource = visualStyles.map(record => record.source).join('\n');
+
+function collectRuleHeaders(source) {
+  const headers = [];
+  let boundary = 0;
+  let depth = 0;
+  let quote = '';
+  let escaped = false;
+  let inComment = false;
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    const next = source[index + 1];
+    if (inComment) {
+      if (char === '*' && next === '/') {
+        inComment = false;
+        index += 1;
+      }
+      continue;
+    }
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === quote) quote = '';
+      continue;
+    }
+    if (char === '/' && next === '*') {
+      inComment = true;
+      index += 1;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === '{') {
+      const header = source.slice(boundary, index).replace(/\/\*[\s\S]*?\*\//g, '').trim();
+      if (header) headers.push(header);
+      depth += 1;
+      boundary = index + 1;
+      continue;
+    }
+    if (char === ';') {
+      boundary = index + 1;
+      continue;
+    }
+    if (char === '}') {
+      depth -= 1;
+      if (depth < 0) throw new Error('Unbalanced CSS closing brace.');
+      boundary = index + 1;
+    }
+  }
+  if (depth !== 0 || quote || inComment) throw new Error('Incomplete CSS source.');
+  return headers;
+}
+
 const indexInventory = buildHtmlInventory(indexSource);
 const inlineEvents = collectInlineEvents('public/compatibility/current-shell.html', shellSource)
   .reduce((sum, record) => sum + record.count, 0);
 const sprite = inspectSvgSprite(spriteSource);
 const shellIconReferences = collectIconReferences(shellSource);
-const iconViewExports = Object.keys(iconView).sort();
 const compatibilitySlots = [...shellSource.matchAll(/<template\s+data-compat-slot="([^"]+)">/g)].map(match => match[1]);
-const appShellModules = moduleFixture.modules.filter(record => record[2] === 'ui-shell').map(record => record[0]).sort();
-const domPrimitiveModules = moduleFixture.modules.filter(record => record[2] === 'ui-dom').map(record => record[0]).sort();
-const uiComponentModules = moduleFixture.modules.filter(record => record[2] === 'ui-components').map(record => record[0]).sort();
-const uiCompatibilityModules = moduleFixture.modules.filter(record => record[2] === 'ui-compatibility').map(record => record[0]).sort();
-const styleEntryModules = moduleFixture.modules.filter(record => record[2] === 'presentation-entry').map(record => record[0]).sort();
-const styleTokenModules = moduleFixture.modules.filter(record => record[2] === 'presentation-tokens').map(record => record[0]).sort();
-const styleThemeModules = moduleFixture.modules.filter(record => record[2] === 'presentation-theme').map(record => record[0]).sort();
 const collectTokenNames = source => [...source.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map(match => match[1]);
 const baseTokenNames = collectTokenNames(tokenSource);
 const lightTokenNames = collectTokenNames(lightThemeSource);
 const darkTokenNames = collectTokenNames(darkThemeSource);
-const tokenNames = [...baseTokenNames, ...lightTokenNames, ...darkTokenNames];
-const domPrimitiveExports = Object.keys(domPrimitives).sort();
-const modalCompatibilityExports = Object.keys(modalCompatibility).sort();
+const visualSelectors = visualStyles.flatMap(record => collectRuleHeaders(record.source)
+  .filter(header => !header.startsWith('@'))
+  .map(header => Object.freeze({ path: record.path, header })));
 
-if (indexInventory.summary.inlineEventCount !== 0 || inlineEvents !== 184) process.exit(1);
-if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35) process.exit(1);
-if (sprite.duplicates.length || sprite.invalidIds.length || sprite.missingViewBoxes.length || sprite.forbiddenMarkup) process.exit(1);
-if (shellIconReferences.length !== 50) process.exit(1);
-if (!shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) process.exit(1);
-if (/<symbol\b|class="icon-sprite"|href="#icon-/i.test(shellSource)) process.exit(1);
-if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) process.exit(1);
-if (/<div class="app">|<nav class="menu-bar"|<div class="editor-toolbar"|<div class="workspace"|<aside class="sidebar"|<div class="statusbar"/.test(shellSource)) process.exit(1);
-if (moduleFixture.modules.length !== 91 || appShellModules.length !== 8 || domPrimitiveModules.length !== 6 || uiComponentModules.length !== 2 || uiCompatibilityModules.length !== 3 || styleEntryModules.length !== 1 || styleTokenModules.length !== 1 || styleThemeModules.length !== 2) process.exit(1);
-if (JSON.stringify(domPrimitiveExports) !== JSON.stringify(['collectRequiredRefs','createEventScope','createFocusScope','createSafeElement','createTransitionVisibility','isElementRef','requireElementRef'])) process.exit(1);
-if (typeof ModalShell !== 'function') process.exit(1);
-if (JSON.stringify(modalCompatibilityExports) !== JSON.stringify(['COMPATIBILITY_MODAL_CLOSE_EVENT','COMPATIBILITY_MODAL_OPEN_EVENT','mountCompatibilityModalShells'])) process.exit(1);
-if (styleEntrySource !== "@import './foundation/tokens.css';\n@import './themes/light.css';\n@import './themes/dark.css';\n@import './main.css';\n") process.exit(1);
-if (!tokenNames.includes('--color-canvas') || !tokenNames.includes('--font-size-md') || !tokenNames.includes('--space-md') || !tokenNames.includes('--radius-md') || !tokenNames.includes('--shadow-floating') || !tokenNames.includes('--layer-modal') || !tokenNames.includes('--motion-duration-moderate') || !tokenNames.includes('--code-background') || !tokenNames.includes('--content-image-opacity')) process.exit(1);
-if (/\[data-theme/.test(tokenSource) || !/^:root\s*\{/.test(lightThemeSource) || !/^\[data-theme="dark"\]\s*\{/.test(darkThemeSource)) process.exit(1);
-if (darkTokenNames.some(name => !lightTokenNames.includes(name))) process.exit(1);
-if (/(^|\n):root\s*\{|\[data-theme/.test(legacyStyleSource) || /#[0-9a-f]{3,8}\b|rgba?\(/i.test(legacyStyleSource)) process.exit(1);
+const architectureModules = Object.freeze({
+  appShell: moduleFixture.modules.filter(record => record[2] === 'ui-shell').map(record => record[0]).sort(),
+  domPrimitives: moduleFixture.modules.filter(record => record[2] === 'ui-dom').map(record => record[0]).sort(),
+  uiComponents: moduleFixture.modules.filter(record => record[2] === 'ui-components').map(record => record[0]).sort(),
+  uiCompatibility: moduleFixture.modules.filter(record => record[2] === 'ui-compatibility').map(record => record[0]).sort()
+});
 
-await writeFile('artifacts/stage-02/02-02-minimal-index-evidence.json', `${JSON.stringify({
-  node: 'stage-02/02-02',
+if (indexInventory.summary.inlineEventCount !== 0 || inlineEvents !== 184) throw new Error('HTML baseline drifted.');
+if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35 || sprite.duplicates.length || sprite.invalidIds.length || sprite.missingViewBoxes.length || sprite.forbiddenMarkup) throw new Error('SVG sprite contract drifted.');
+if (shellIconReferences.length !== 50 || !shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) throw new Error('Icon references drifted.');
+if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) throw new Error('Compatibility slot contract drifted.');
+if (moduleFixture.modules.length !== 138) throw new Error(`Unexpected production module count: ${moduleFixture.modules.length}`);
+if (architectureModules.appShell.length !== 8 || architectureModules.domPrimitives.length !== 6 || architectureModules.uiComponents.length !== 2 || architectureModules.uiCompatibility.length !== 3) throw new Error('UI architecture counts drifted.');
+if (styleEntryModules.length !== 1 || layerModules.foundation.length !== 5 || layerModules.themes.length !== 2 || layerModules.shell.length !== 6 || layerModules.layout.length !== 6 || layerModules.components.length !== 12 || layerModules.features.length !== 20) throw new Error('Style layer counts drifted.');
+if (Object.keys(domPrimitives).sort().join(',') !== 'collectRequiredRefs,createEventScope,createFocusScope,createSafeElement,createTransitionVisibility,isElementRef,requireElementRef') throw new Error('DOM primitive exports drifted.');
+if (typeof ModalShell !== 'function' || Object.keys(modalCompatibility).sort().join(',') !== 'COMPATIBILITY_MODAL_CLOSE_EVENT,COMPATIBILITY_MODAL_OPEN_EVENT,mountCompatibilityModalShells') throw new Error('Modal contract drifted.');
+if (styleEntrySource !== expectedStyleEntry) throw new Error('Style entry ordering drifted.');
+if (styleEntrySource.includes('./main.css')) throw new Error('Consolidated stylesheet remains imported.');
+await access('src/styles/main.css').then(() => { throw new Error('Consolidated stylesheet still exists.'); }, () => {});
+if (/\sstyle\s*=/i.test(shellSource)) throw new Error('Stable compatibility inline style remains.');
+if (visualSelectors.some(record => /#[a-z_][a-z0-9_-]*/i.test(record.header))) throw new Error('Visual ID selector remains.');
+if (/#[0-9a-f]{3,8}\b|rgba?\(/i.test(visualStyleSource)) throw new Error('Visual color literal escaped theme ownership.');
+if (/\[data-theme/.test(tokenSource + visualStyleSource) || !/^:root\s*\{/.test(lightThemeSource) || !/^\[data-theme="dark"\]\s*\{/.test(darkThemeSource)) throw new Error('Theme ownership drifted.');
+if (darkTokenNames.some(name => !lightTokenNames.includes(name))) throw new Error('Dark token lacks light default.');
+if (styleSources.some(record => record.source.split('\n').length > 380)) throw new Error('Style responsibility module exceeds the bounded size.');
+if (styleSources.some(record => !record.path.endsWith('/foundation/tokens.css') && !record.path.includes('/themes/') && !/^\/\* Responsibility: [^\n]+ \*\//.test(record.source))) throw new Error('Style responsibility header missing.');
+
+const common = Object.freeze({
   status: 'passed',
-  commit: process.env.GITHUB_SHA,
-  runId: process.env.GITHUB_RUN_ID,
-  attempt: process.env.GITHUB_RUN_ATTEMPT,
+  commit: process.env.GITHUB_SHA || null,
+  runId: process.env.GITHUB_RUN_ID || null,
+  attempt: process.env.GITHUB_RUN_ATTEMPT || null,
+  currentStage2State: '2.9-completed',
+  nextAtomicTask: '2.10-not-started',
+  productionModuleCount: moduleFixture.modules.length,
+  dependencyAuditDecision: Object.freeze({
+    observed: '1 low / 1 high',
+    changedInTask29: false,
+    decision: 'deferred-until-final-local-real-device-testing'
+  })
+});
+
+async function record(fileName, payload) {
+  await writeFile(`artifacts/stage-02/${fileName}`, `${JSON.stringify({ ...common, ...payload }, null, 2)}\n`, 'utf8');
+}
+
+await record('02-02-minimal-index-evidence.json', {
+  node: 'stage-02/02-02',
   scope: 'minimal-index-and-module-entry',
-  currentStage2State: '2.8-completed',
-  nextAtomicTask: '2.9-not-started',
   index: indexInventory.source,
   indexSummary: indexInventory.summary,
-  compatibilityShell: {
-    path: 'public/compatibility/current-shell.html',
-    inlineEvents,
-    scriptElements: 0
-  },
-  guarantees: [
-    'index-has-only-head-app-root-and-module-entry',
-    'no-index-inline-events-or-business-dom',
-    'unmigrated-business-dom-remains-in-explicit-compatibility-templates',
-    'vite-tauri-resource-paths-preserved',
-    'task-2.3-completed-with-external-svg-sprite',
-    'task-2.4-completed-with-single-app-shell',
-    'task-2.5-completed-with-bounded-dom-primitives',
-    'task-2.6-completed-with-generic-modal-shell',
-    'task-2.7-completed-with-semantic-css-tokens',
-    'task-2.8-completed-with-token-only-light-and-dark-themes'
-  ]
-}, null, 2)}\n`, 'utf8');
-
-await writeFile('artifacts/stage-02/02-03-svg-sprite-evidence.json', `${JSON.stringify({
+  compatibilityShell: { path: 'public/compatibility/current-shell.html', inlineEvents, scriptElements: 0 }
+});
+await record('02-03-svg-sprite-evidence.json', {
   node: 'stage-02/02-03',
-  status: 'passed',
-  commit: process.env.GITHUB_SHA,
-  runId: process.env.GITHUB_RUN_ID,
-  attempt: process.env.GITHUB_RUN_ATTEMPT,
   scope: 'external-svg-sprite-and-generic-icon-view',
-  nextAtomicTask: '2.9-not-started',
-  sprite: {
-    path: 'public/assets/icons.svg',
-    symbolCount: sprite.symbolCount,
-    uniqueSymbolCount: sprite.uniqueSymbolCount,
-    ids: sprite.ids,
-    duplicateIds: sprite.duplicates,
-    invalidIds: sprite.invalidIds,
-    missingViewBoxes: sprite.missingViewBoxes,
-    forbiddenMarkup: sprite.forbiddenMarkup
-  },
-  compatibilityShell: {
-    path: 'public/compatibility/current-shell.html',
-    iconReferenceCount: shellIconReferences.length,
-    inlineSymbolCount: 0,
-    localFragmentReferenceCount: 0
-  },
-  iconView: {
-    path: 'src/ui/components/icon-view.js',
-    exports: iconViewExports,
-    spriteUrl: iconView.ICON_SPRITE_URL
-  },
-  guarantees: [
-    '35-preserved-stable-icon-ids',
-    'single-authoritative-icon-geometry-file',
-    'no-duplicate-symbol-definitions',
-    'no-inline-business-meaning-or-behavior',
-    'generic-icon-view-has-no-business-state-or-listeners',
-    'legacy-and-esm-callers-use-the-same-external-sprite',
-    'atomic-tasks-2.4-through-2.8-completed-and-2.9-not-started'
-  ]
-}, null, 2)}\n`, 'utf8');
-
-await writeFile('artifacts/stage-02/02-04-app-shell-evidence.json', `${JSON.stringify({
+  sprite: { path: 'public/assets/icons.svg', symbolCount: sprite.symbolCount, ids: sprite.ids },
+  compatibilityIconReferences: shellIconReferences.length,
+  iconView: { path: 'src/ui/components/icon-view.js', exports: Object.keys(iconView).sort(), spriteUrl: iconView.ICON_SPRITE_URL }
+});
+await record('02-04-app-shell-evidence.json', {
   node: 'stage-02/02-04',
-  status: 'passed',
-  commit: process.env.GITHUB_SHA,
-  runId: process.env.GITHUB_RUN_ID,
-  attempt: process.env.GITHUB_RUN_ATTEMPT,
   scope: 'single-app-shell-and-strict-ui-refs',
-  nextAtomicTask: '2.9-not-started',
-  publicContract: {
-    createUI: 'createUI(root)',
-    refs: ['menu','toolbar','sidebar','editor','preview','status','overlay']
-  },
+  publicContract: { createUI: 'createUI(root)', refs: ['menu','toolbar','sidebar','editor','preview','status','overlay'] },
   compatibilityTemplates: compatibilitySlots,
-  appShellModules,
-  productionModuleCount: moduleFixture.modules.length,
-  guarantees: [
-    'one-production-app-shell',
-    'strict-named-ui-refs',
-    'presentation-only-shell-does-not-query-business-store',
-    'legacy-business-content-mounted-through-explicit-templates',
-    'exact-idempotent-destroy-and-root-restoration',
-    'bounded-dom-primitives-completed-through-public-entry',
-    'generic-modal-shell-completed-without-feature-form-ownership',
-    'semantic-css-token-contract-completed',
-    'token-only-light-and-dark-theme-separation-completed',
-    'css-layering-remains-not-started',
-    'atomic-task-2.9-not-started'
-  ]
-}, null, 2)}\n`, 'utf8');
-
-await writeFile('artifacts/stage-02/02-05-dom-primitives-evidence.json', `${JSON.stringify({
+  modules: architectureModules.appShell
+});
+await record('02-05-dom-primitives-evidence.json', {
   node: 'stage-02/02-05',
-  status: 'passed',
-  commit: process.env.GITHUB_SHA,
-  runId: process.env.GITHUB_RUN_ID,
-  attempt: process.env.GITHUB_RUN_ATTEMPT,
   scope: 'bounded-dom-primitives',
-  nextAtomicTask: '2.9-not-started',
   publicEntry: 'src/ui/dom/index.js',
-  exports: domPrimitiveExports,
-  modules: domPrimitiveModules,
-  productionModuleCount: moduleFixture.modules.length,
-  migratedCallers: [
-    'src/ui/create-ui.js',
-    'src/ui/compatibility/mount-current-shell.js',
-    'src/ui/shell/*.js',
-    'src/runtime/link-preview.js'
-  ],
-  guarantees: [
-    'safe-element-creation-rejects-executable-markup-surfaces',
-    'required-element-refs-fail-fast-with-named-contracts',
-    'event-listeners-have-idempotent-reverse-cleanup',
-    'focus-boundaries-own-initial-containment-restoration-and-destroy',
-    'transition-visibility-cancels-stale-hide-results',
-    'production-callers-import-only-the-public-dom-entry',
-    'generic-modal-shell-and-semantic-css-tokens-completed',
-    'token-only-theme-separation-completed-and-css-layering-not-started'
-  ]
-}, null, 2)}\n`, 'utf8');
-
-await writeFile('artifacts/stage-02/02-06-modal-shell-evidence.json', `${JSON.stringify({
+  exports: Object.keys(domPrimitives).sort(),
+  modules: architectureModules.domPrimitives
+});
+await record('02-06-modal-shell-evidence.json', {
   node: 'stage-02/02-06',
-  status: 'passed',
-  commit: process.env.GITHUB_SHA,
-  runId: process.env.GITHUB_RUN_ID,
-  attempt: process.env.GITHUB_RUN_ATTEMPT,
   scope: 'generic-modal-shell-and-compatibility-takeover',
-  nextAtomicTask: '2.9-not-started',
-  publicContract: {
-    component: 'ModalShell',
-    open: 'open(content, options)',
-    close: 'close(reason)',
-    destroy: 'destroy()'
-  },
-  modules: {
-    component: 'src/ui/components/modal-shell.js',
-    compatibilityBridge: 'src/ui/compatibility/mount-modal-shells.js',
-    uiComponentModules,
-    uiCompatibilityModules
-  },
-  compatibilityEvents: {
-    open: modalCompatibility.COMPATIBILITY_MODAL_OPEN_EVENT,
-    close: modalCompatibility.COMPATIBILITY_MODAL_CLOSE_EVENT
-  },
-  compatibilityModals: [
-    'settings-modal',
-    'help-modal',
-    'link-modal',
-    'url-modal',
-    'find-modal',
-    'export-progress-modal',
-    'export-image-modal',
-    'image-modal',
-    'mermaid-modal'
-  ],
-  productionModuleCount: moduleFixture.modules.length,
-  guarantees: [
-    'dialog-role-and-aria-modal-owned-by-modal-shell',
-    'initial-focus-tab-containment-and-focus-restoration-owned-by-modal-shell',
-    'escape-and-exact-backdrop-close-policy-owned-by-modal-shell',
-    'stale-close-completion-cannot-hide-a-reopened-modal',
-    'destroy-is-idempotent-and-restores-adopted-dom-state',
-    'nine-compatibility-modals-have-one-generic-lifecycle-owner',
-    'feature-fields-validation-and-submit-behavior-remain-feature-owned',
-    'compatibility-port-uses-element-scoped-events-without-new-window-globals',
-    'semantic-css-token-contract-completed-without-changing-feature-behavior',
-    'token-only-theme-separation-completed-without-moving-theme-state-ownership',
-    'css-layering-remains-assigned-to-atomic-task-2.9'
-  ]
-}, null, 2)}\n`, 'utf8');
-await writeFile('artifacts/stage-02/02-07-css-tokens-evidence.json', `${JSON.stringify({
+  component: 'src/ui/components/modal-shell.js',
+  compatibilityBridge: 'src/ui/compatibility/mount-modal-shells.js'
+});
+await record('02-07-css-tokens-evidence.json', {
   node: 'stage-02/02-07',
-  status: 'passed',
-  commit: process.env.GITHUB_SHA,
-  runId: process.env.GITHUB_RUN_ID,
-  attempt: process.env.GITHUB_RUN_ATTEMPT,
   scope: 'semantic-css-token-contract',
-  nextAtomicTask: '2.9-not-started',
   publicEntry: 'src/styles/index.css',
   tokenAuthority: 'src/styles/foundation/tokens.css',
-  currentRules: 'src/styles/main.css',
-  modules: {
-    styleEntryModules,
-    styleTokenModules,
-    styleThemeModules
-  },
-  productionModuleCount: moduleFixture.modules.length,
-  tokenCount: new Set(tokenNames).size,
-  categories: [
-    'color',
-    'typography',
-    'spacing',
-    'radius',
-    'shadow',
-    'layer',
-    'motion',
-    'code-presentation'
-  ],
-  guarantees: [
-    'one-ordered-stylesheet-entry-loads-tokens-before-current-rules',
-    'one-semantic-token-authority-without-page-position-token-names',
-    'legacy-consolidated-css-has-no-root-token-authority-or-color-literals',
-    'production-css-html-and-js-callers-use-the-semantic-token-contract',
-    'runtime-owned-sidebar-editor-color-and-font-size-properties-remain-compatible',
-    'existing-light-and-dark-values-remain-byte-equivalent-at-the-token-value-level',
-    'light-and-dark-theme-files-own-only-visual-token-values',
-    'theme-state-service-migration-remains-assigned-to-its-later-feature-stage',
-    'reset-shell-layout-and-component-style-layering-remain-not-started'
-  ]
-}, null, 2)}\n`, 'utf8');
-await writeFile('artifacts/stage-02/02-08-theme-evidence.json', `${JSON.stringify({
+  tokenCount: new Set([...baseTokenNames, ...lightTokenNames, ...darkTokenNames]).size,
+  styleLayers: layerModules
+});
+await record('02-08-theme-evidence.json', {
   node: 'stage-02/02-08',
-  status: 'passed',
-  commit: process.env.GITHUB_SHA,
-  runId: process.env.GITHUB_RUN_ID,
-  attempt: process.env.GITHUB_RUN_ATTEMPT,
   scope: 'token-only-light-and-dark-themes',
-  nextAtomicTask: '2.9-not-started',
+  themes: layerModules.themes,
+  tokens: { base: new Set(baseTokenNames).size, light: new Set(lightTokenNames).size, darkOverrides: new Set(darkTokenNames).size }
+});
+await record('02-09-style-layering-evidence.json', {
+  node: 'stage-02/02-09',
+  scope: 'reset-shell-layout-component-and-feature-style-layering',
   publicEntry: 'src/styles/index.css',
-  foundation: 'src/styles/foundation/tokens.css',
-  themes: styleThemeModules,
-  currentRules: 'src/styles/main.css',
-  productionModuleCount: moduleFixture.modules.length,
-  tokens: {
-    base: new Set(baseTokenNames).size,
-    light: new Set(lightTokenNames).size,
-    darkOverrides: new Set(darkTokenNames).size
+  importedStylesheetCount: nonEntryStylePaths.length,
+  layers: layerModules,
+  contracts: {
+    visualIdSelectors: 0,
+    stableInlineStyleAttributes: 0,
+    stableGeneratedStyleStrings: 0,
+    prefixedNaming: ['c-', 'l-', 'f-', 'is-', 'has-'],
+    legacyShellClasses: 'compatibility-query-hooks-only',
+    consolidatedMainCss: 'removed'
   },
   guarantees: [
-    'light-and-dark-themes-are-independent-stylesheet-modules',
-    'theme-files-contain-only-semantic-visual-token-declarations',
-    'dark-overrides-have-corresponding-light-defaults',
-    'consolidated-component-rules-have-no-data-theme-selectors',
-    'theme-switch-preserves-shell-layout-geometry',
-    'existing-body-data-theme-persistence-and-mermaid-coordination-remain-owned-by-compatibility-code',
-    'reset-shell-layout-and-component-style-layering-remain-assigned-to-atomic-task-2.9'
+    'foundation-shell-layout-component-and-feature-responsibilities-are-independent-bounded-files',
+    'ordered-public-style-entry-is-the-only-load-authority',
+    'visual-css-has-no-id-selectors',
+    'compatibility-html-has-no-stable-inline-style-attributes',
+    'prefixed-classes-own-new-visual-shell-contracts',
+    'legacy-classes-remain-only-to-preserve-unmigrated-feature-query-contracts',
+    'theme-switch-and-layout-behavior-remain-compatible',
+    'responsive-multi-viewport-acceptance-remains-atomic-task-2.10'
   ]
-}, null, 2)}\n`, 'utf8');
+});

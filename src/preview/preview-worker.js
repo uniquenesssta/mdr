@@ -242,7 +242,7 @@ function renderBlocksByIds(blocks, ids, definitions, forcePayload = false) {
         const protectedMath = protectMarkdownMathSource(renderSource, 'WORKER_MATH');
         html = restoreMarkdownMathSource(marked.parse(protectedMath.text), protectedMath.placeholders);
       } catch (_) {
-        html = `<pre style="white-space:pre-wrap">${block.raw.replace(/[&<>]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char])}</pre>`;
+        html = `<pre class="f-raw-fallback">${block.raw.replace(/[&<>]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char])}</pre>`;
       }
       htmlCache.set(block.id, { raw: block.raw, html });
     }

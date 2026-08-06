@@ -1,30 +1,16 @@
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
 import test from 'node:test';
-
-const root = process.cwd();
-const readText = path => readFile(resolve(root, path), 'utf8');
-
-function extractRule(source, selector) {
-  const start = source.indexOf(selector);
-  assert.notEqual(start, -1, `missing CSS rule: ${selector}`);
-  const open = source.indexOf('{', start);
-  let depth = 0;
-  for (let index = open; index < source.length; index += 1) {
-    if (source[index] === '{') depth += 1;
-    else if (source[index] === '}') {
-      depth -= 1;
-      if (depth === 0) return source.slice(open + 1, index);
-    }
-  }
-  assert.fail(`unclosed CSS rule: ${selector}`);
-}
-
-function collectDefinitions(source) {
-  return new Map([...source.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/gi)]
-    .map(match => [match[1], match[2].trim()]));
-}
+import {
+  STYLE_IMPORTS,
+  collectDefinitions,
+  expectedStyleEntry,
+  extractRule,
+  readImportedStyles,
+  readText,
+  root
+} from './style-test-utils.mjs';
 
 async function listSourceFiles(directory) {
   const entries = await readdir(resolve(root, directory), { withFileTypes: true });
@@ -68,30 +54,28 @@ const requiredTokens = {
   ]
 };
 
-test('Atomic Task 2.7 keeps one ordered stylesheet entry and one semantic token contract', async () => {
-  const [entrySource, mainEntrySource, tokenSource, lightSource, darkSource, legacySource] = await Promise.all([
+test('Atomic Task 2.7 keeps one ordered stylesheet entry and one semantic token contract after 2.9 layering', async () => {
+  const [entrySource, mainEntrySource, tokenSource, lightSource, darkSource, styles] = await Promise.all([
     readText('src/styles/index.css'),
     readText('src/main.js'),
     readText('src/styles/foundation/tokens.css'),
     readText('src/styles/themes/light.css'),
     readText('src/styles/themes/dark.css'),
-    readText('src/styles/main.css')
+    readImportedStyles()
   ]);
 
-  assert.equal(entrySource, [
-    "@import './foundation/tokens.css';",
-    "@import './themes/light.css';",
-    "@import './themes/dark.css';",
-    "@import './main.css';",
-    ''
-  ].join('\n'));
+  assert.equal(entrySource, expectedStyleEntry());
+  assert.equal(styles.length, STYLE_IMPORTS.length);
   assert.match(mainEntrySource, /^import '\.\/styles\/index\.css';/);
   assert.doesNotMatch(mainEntrySource, /styles\/main\.css/);
   assert.match(tokenSource, /^:root\s*\{/);
   assert.match(lightSource, /^:root\s*\{/);
   assert.match(darkSource, /^\[data-theme="dark"\]\s*\{/);
   assert.doesNotMatch(tokenSource, /\[data-theme/);
-  assert.doesNotMatch(legacySource, /(^|\n):root\s*\{|\[data-theme/);
+  for (const { path, source } of styles.filter(record => !record.path.includes('/themes/'))) {
+    if (path.endsWith('/foundation/tokens.css')) continue;
+    assert.doesNotMatch(source, /(^|\n):root\s*\{|\[data-theme/, path);
+  }
 });
 
 test('token contract separates required semantic categories without page-position names', async () => {
@@ -124,25 +108,19 @@ test('token contract separates required semantic categories without page-positio
   assert.equal(darkDefinitions.get('--code-background'), '#0b0f15');
 });
 
-test('production callers use semantic tokens and consolidated CSS has no color literals', async () => {
-  const [tokenSource, lightSource, darkSource, mainSource, sourceFiles] = await Promise.all([
-    readText('src/styles/foundation/tokens.css'),
-    readText('src/styles/themes/light.css'),
-    readText('src/styles/themes/dark.css'),
-    readText('src/styles/main.css'),
+test('production callers use semantic tokens and layered CSS has no visual color literals outside themes', async () => {
+  const [styles, sourceFiles] = await Promise.all([
+    readImportedStyles(),
     Promise.all(['src', 'public'].map(listSourceFiles))
   ]);
-  const available = new Set([
-    ...collectDefinitions(tokenSource).keys(),
-    ...collectDefinitions(lightSource).keys(),
-    ...collectDefinitions(darkSource).keys(),
-    ...collectDefinitions(mainSource).keys()
-  ]);
+  const available = new Set(styles.flatMap(record => [...collectDefinitions(record.source).keys()]));
   const runtimeOwned = new Set([
     '--editor-font-size', '--indicator-color', '--sidebar-width', '--swatch-color', '--tree-depth'
   ]);
 
-  assert.doesNotMatch(mainSource, /#[0-9a-f]{3,8}\b|rgba?\(/i);
+  for (const { path, source } of styles.filter(record => !record.path.includes('/themes/'))) {
+    assert.doesNotMatch(source, /#[0-9a-f]{3,8}\b|rgba?\(/i, path);
+  }
   const productionFiles = sourceFiles.flat();
   for (const path of productionFiles) {
     const source = await readText(path);

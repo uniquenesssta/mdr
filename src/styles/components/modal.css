@@ -1,0 +1,159 @@
+/* Responsibility: Generic modal, form and modal navigation components. */
+
+/* 模态框 */
+.modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--color-overlay-scrim);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--layer-menu);
+      padding: var(--space-2xl);
+      opacity: 0;
+      transition: opacity var(--motion-duration-moderate) ease;
+}
+
+.modal-overlay.show {
+      opacity: 1;
+}
+
+.modal {
+      background: var(--color-surface-raised);
+      color: var(--color-text-primary);
+      border-radius: var(--radius-3xl);
+      width: 100%;
+      max-width: 560px;
+      max-height: 86vh;
+      box-shadow: var(--shadow-overlay);
+      border: 1px solid var(--color-border-subtle);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(12px) scale(0.98);
+      opacity: 0;
+      transition: all var(--motion-duration-slow) var(--motion-ease-emphasized);
+}
+
+.modal-overlay.show .modal {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+}
+
+.modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-2xl) var(--space-3xl);
+      border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.modal-header h3 { margin: 0; font-size: 17px; font-weight: 600; display: inline-flex; align-items: center; gap: var(--space-md); }
+
+.modal-header button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      padding: var(--space-xs);
+      border-radius: var(--radius-md);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      line-height: 1;
+      transition: color var(--motion-duration-quick) ease, background var(--motion-duration-quick) ease;
+}
+
+.modal-header button:hover { color: var(--color-text-primary); background: var(--color-surface-subtle); }
+
+.modal-body {
+      padding: 18px var(--space-3xl);
+      overflow-y: auto;
+      font-size: var(--font-size-lg);
+      line-height: 1.7;
+}
+
+.modal-body p { margin: 0 0 var(--space-xl); color: var(--color-text-secondary); }
+
+.modal-body ul { margin: var(--space-md) 0 14px; padding-left: 1.6em; }
+
+.modal-body li { margin: 5px 0; }
+
+.modal-footer {
+      padding: 14px var(--space-3xl);
+      border-top: 1px solid var(--color-border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-md);
+}
+
+.modal-footer button {
+      padding: var(--space-md) var(--space-2xl);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--color-surface-raised);
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--motion-duration-quick) ease;
+}
+
+.modal-footer button:hover { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-surface-subtle); }
+
+.modal-footer button.primary {
+      background: var(--color-accent);
+      color: var(--color-on-accent);
+      border-color: var(--color-accent);
+}
+
+.modal-footer button.primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); color: var(--color-on-accent); }
+
+.modal-overlay {
+  background: var(--color-overlay-scrim-soft);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+
+.modal {
+  border-color: var(--color-border-strong);
+  border-radius: 17px;
+  box-shadow: var(--shadow-overlay);
+}
+
+.modal-header {
+  min-height: 58px;
+  padding: 14px 18px;
+  background: color-mix(in srgb, var(--color-surface-raised) 94%, var(--color-surface-subtle));
+}
+
+.modal-header h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 720;
+}
+
+.modal-body {
+  padding: var(--space-3xl);
+}
+
+.modal-footer {
+  padding: var(--space-xl) 18px;
+  background: color-mix(in srgb, var(--color-surface-raised) 94%, var(--color-surface-subtle));
+}
+
+.modal-footer button {
+  min-height: 34px;
+  padding: 7px 14px;
+  border-radius: var(--radius-lg);
+  font-weight: 620;
+}
+
+/* Stable modal and form geometry formerly expressed as inline style attributes. */
+.c-modal--narrow { max-width: 440px; }
+
+.c-modal--medium { max-width: 520px; }
+
+.c-modal--wide { max-width: 560px; }
+
+.c-modal--preview { max-width: 640px; }

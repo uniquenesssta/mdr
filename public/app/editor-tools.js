@@ -431,7 +431,7 @@
     }
 
     function syncEditorFromActive() {
-      if (!previewSource || previewSource.hidden || previewSource.style.display === 'none') return;
+      if (!previewSource || previewSource.hidden) return;
       previewSource.value = editor.value;
     }
 
@@ -1050,8 +1050,10 @@
     function togglePageFullscreen() {
       const app = document.querySelector('.app');
       app.classList.toggle('page-fullscreen');
-      const isActive = app.classList.contains('page-fullscreen');
+      app.classList.toggle('is-page-fullscreen');
+      const isActive = app.classList.contains('is-page-fullscreen');
       document.body.classList.toggle('page-fullscreen-active', isActive);
+      document.body.classList.toggle('is-page-fullscreen-active', isActive);
       localStorage.setItem(PAGE_FULLSCREEN_KEY, isActive ? 'true' : 'false');
       showToast(isActive ? '专注模式已开启：已隐藏工具栏、侧边栏和状态栏' : '专注模式已关闭');
     }

@@ -1,11 +1,21 @@
+    function setClipperHidden(element, hidden) {
+      element?.classList.toggle('is-hidden', Boolean(hidden));
+    }
+
+    function setClipperStatusTone(element, tone = 'muted') {
+      if (!element) return;
+      element.classList.remove('is-muted', 'is-success', 'is-error');
+      element.classList.add(tone === 'success' ? 'is-success' : tone === 'error' ? 'is-error' : 'is-muted');
+    }
+
     function openUrlModal() {
       document.getElementById('url-input').value = '';
       document.getElementById('url-status').textContent = '';
-      document.getElementById('url-status').style.color = 'var(--color-text-muted)';
-      document.getElementById('manual-area').style.display = 'none';
+      setClipperStatusTone(document.getElementById('url-status'), 'muted');
+      setClipperHidden(document.getElementById('manual-area'), true);
       document.getElementById('manual-html').value = '';
       document.getElementById('use-local-proxy').checked = Boolean(window.markdownEditorNative?.isAvailable);
-      document.getElementById('proxy-url').style.display = 'none';
+      setClipperHidden(document.getElementById('proxy-url'), true);
       toggleProxyInput();
       fetchedHtml = '';
       const modal = document.getElementById('url-modal');
@@ -175,11 +185,11 @@
       if (!proxyInput) return;
 
       if (window.markdownEditorNative?.isAvailable) {
-        proxyInput.style.display = 'none';
+        setClipperHidden(proxyInput, true);
         return;
       }
 
-      proxyInput.style.display = checked ? 'block' : 'none';
+      setClipperHidden(proxyInput, !checked);
     }
 
     async function fetchWithNativeBackend(url) {
@@ -198,12 +208,12 @@
 
       if (!url) {
         status.textContent = t('urlStatusEmptyUrl');
-        status.style.color = 'var(--color-danger)';
+        setClipperStatusTone(status, 'error');
         return;
       }
 
       status.textContent = t('urlStatusFetching');
-      status.style.color = 'var(--color-text-muted)';
+      setClipperStatusTone(status, 'muted');
       fetchedHtml = '';
 
       // 桌面版优先使用 Rust 后端，不再依赖 Python 代理或公网 CORS 服务。
@@ -213,13 +223,13 @@
           fetchedHtml = data?.html || data?.content || '';
           if (!fetchedHtml) throw new Error('Native backend returned empty content');
           status.textContent = t('urlStatusLocalSuccess');
-          status.style.color = 'var(--color-accent)';
-          manualArea.style.display = 'none';
+          setClipperStatusTone(status, 'success');
+          setClipperHidden(manualArea, true);
           return;
         } catch (err) {
           status.innerHTML = t('urlStatusLocalFailed', err.message || String(err));
-          status.style.color = 'var(--color-danger)';
-          manualArea.style.display = 'block';
+          setClipperStatusTone(status, 'error');
+          setClipperHidden(manualArea, false);
           return;
         }
       }
@@ -238,14 +248,14 @@
           fetchedHtml = data.html || data.content || '';
           if (!fetchedHtml) throw new Error('Local proxy returned empty content');
           status.textContent = t('urlStatusLocalSuccess');
-          status.style.color = 'var(--color-accent)';
-          manualArea.style.display = 'none';
+          setClipperStatusTone(status, 'success');
+          setClipperHidden(manualArea, true);
           return;
         } catch (err) {
           const hint = data?.hint ? data.hint : '';
           status.innerHTML = t('urlStatusLocalFailed', err.message) + (hint ? '<br><small>' + hint + '</small>' : '');
-          status.style.color = 'var(--color-danger)';
-          manualArea.style.display = 'block';
+          setClipperStatusTone(status, 'error');
+          setClipperHidden(manualArea, false);
           return;
         }
       }
@@ -276,8 +286,8 @@
           if (!text || text.length < 100) throw new Error('Content too short');
           fetchedHtml = text;
           status.textContent = t('urlStatusPublicSuccess');
-          status.style.color = 'var(--color-accent)';
-          manualArea.style.display = 'none';
+          setClipperStatusTone(status, 'success');
+          setClipperHidden(manualArea, true);
           return;
         } catch (err) {
           lastError = err.message;
@@ -285,8 +295,8 @@
       }
 
       status.textContent = t('urlStatusPublicFailed', lastError);
-      status.style.color = 'var(--color-danger)';
-      manualArea.style.display = 'block';
+      setClipperStatusTone(status, 'error');
+      setClipperHidden(manualArea, false);
     }
 
     // 提取网页元信息

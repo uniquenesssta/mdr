@@ -1,0 +1,27 @@
+/* Responsibility: Focus and page-fullscreen layout states. */
+
+/* 专注模式 */
+.l-app-shell.is-page-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: var(--layer-raised);
+}
+
+body.is-page-fullscreen-active { overflow: hidden; }
+
+.l-app-shell.is-page-fullscreen .l-toolbar-shell,
+.l-app-shell.is-page-fullscreen .l-sidebar,
+.l-app-shell.is-page-fullscreen .l-status-bar {
+      display: none !important;
+}
+
+.l-app-shell.is-page-fullscreen .l-menu-bar {
+      box-shadow: var(--shadow-low);
+}
+
+.l-app-shell.is-page-fullscreen .l-workspace {
+      flex: 1;
+}

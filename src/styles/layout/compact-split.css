@@ -1,0 +1,49 @@
+/* Responsibility: Small-screen split and toolbar fallback layout. */
+
+/* 移动端 */
+@media (max-width: 768px) {
+      .l-toolbar-shell { padding: var(--space-sm); gap: var(--space-md); }
+      .l-toolbar-shell .format-group, .l-toolbar-shell .editor-actions { gap: 3px; padding: 3px; }
+      .l-toolbar-shell button span { display: none; }
+      .l-menu-bar { overflow-x: auto; }
+      .l-workspace { flex-direction: column; }
+      .l-sidebar { width: 100%; flex: 0 0 180px; border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
+      .l-sidebar.is-hidden { flex-basis: 0; height: 0; border-bottom: none; }
+      .l-sidebar-resizer { display: none; }
+      .l-split-pane { flex-direction: column; }
+      .f-preview-pane { border-left: none; border-top: 1px solid var(--color-border-subtle); }
+      .l-pane { flex: 1; height: auto; min-height: 0; }
+      .l-pane.is-collapsed {
+        flex: 0 0 40px !important;
+        min-width: auto;
+        max-width: none;
+        width: 100%;
+        height: 40px;
+      }
+      .l-pane.is-collapsed .pane-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-md) var(--space-2xl);
+        height: 100%;
+        writing-mode: horizontal-tb;
+      }
+      .l-pane.is-collapsed .pane-title {
+        writing-mode: horizontal-tb;
+      }
+      .l-pane-resizer { display: none; }
+      .preview-content .markdown-body { padding: var(--space-3xl) var(--space-4xl); }
+}
+
+.l-split-pane.is-compact-split .l-pane.is-collapsed {
+  cursor: pointer;
+}
+
+.l-split-pane.is-compact-split .l-pane.is-collapsed .pane-header {
+  background: color-mix(in srgb, var(--color-surface-raised) 86%, var(--color-surface-subtle));
+}
+
+.l-split-pane.is-compact-split .l-pane.is-collapsed:hover .pane-header {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}

@@ -193,7 +193,7 @@ function openLinkPreview(value, options = {}) {
   urlElement.title = parsed.url;
   overlay.classList.add('is-loading');
   visibility.show();
-  document.documentElement.classList.add('link-preview-open');
+  document.documentElement.classList.add('link-preview-open', 'has-link-preview');
   frame.src = parsed.url;
   requestAnimationFrame(() => {
     if (visibility?.isVisible() && !focusScope?.isDestroyed()) focusScope?.focusInitial({ preventScroll: true });
@@ -215,7 +215,7 @@ function closeLinkPreview(reason = 'api') {
   focusScope = null;
   overlay.classList.remove('is-loading');
   const hidden = visibility.hide();
-  document.documentElement.classList.remove('link-preview-open');
+  document.documentElement.classList.remove('link-preview-open', 'has-link-preview');
   currentUrl = '';
 
   hidden.then(completed => {

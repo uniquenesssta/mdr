@@ -83,25 +83,25 @@ test('createUI returns the exact named App Shell refs and owns an idempotent lif
   assert.equal(appRoot.childNodes.length, 2);
 
   assert.equal(ui.menu.tagName, 'NAV');
-  assert.equal(ui.menu.className, 'menu-bar');
+  assert.equal(ui.menu.className, 'l-menu-bar menu-bar');
   assert.equal(ui.menu.getAttribute('aria-label'), '应用菜单');
-  assert.equal(ui.toolbar.className, 'editor-toolbar');
+  assert.equal(ui.toolbar.className, 'l-toolbar-shell editor-toolbar');
   assert.equal(ui.toolbar.getAttribute('role'), 'toolbar');
   assert.equal(ui.sidebar.id, 'sidebar');
-  assert.equal(ui.editor.className, 'pane editor-pane');
-  assert.equal(ui.preview.className, 'pane preview-pane');
-  assert.equal(ui.status.className, 'statusbar');
+  assert.equal(ui.editor.className, 'l-pane f-editor-pane pane editor-pane');
+  assert.equal(ui.preview.className, 'l-pane f-preview-pane pane preview-pane');
+  assert.equal(ui.status.className, 'l-status-bar statusbar');
   assert.equal(ui.overlay.id, 'overlay-root');
 
   const app = appRoot.childNodes[0];
-  assert.equal(app.className, 'app');
+  assert.equal(app.className, 'l-app-shell app');
   assert.equal(app.getAttribute('data-ui-shell'), 'app');
-  assert.deepEqual(app.childNodes.map(node => node.className), ['menu-bar', 'editor-toolbar', 'workspace', 'statusbar']);
+  assert.deepEqual(app.childNodes.map(node => node.className), ['l-menu-bar menu-bar', 'l-toolbar-shell editor-toolbar', 'l-workspace workspace', 'l-status-bar statusbar']);
   const workspace = app.childNodes[2];
-  assert.deepEqual(workspace.childNodes.map(node => node.id || node.className), ['sidebar', 'sidebar-resizer', 'main']);
+  assert.deepEqual(workspace.childNodes.map(node => node.id || node.className), ['sidebar', 'sidebar-resizer', 'l-split-pane main']);
   assert.equal(workspace.childNodes[1].getAttribute('aria-label'), '调整侧边栏宽度');
   assert.equal(workspace.childNodes[1].title, '拖动调整侧边栏宽度');
-  assert.deepEqual(workspace.childNodes[2].childNodes.map(node => node.id || node.className), ['pane editor-pane', 'resizer', 'pane preview-pane']);
+  assert.deepEqual(workspace.childNodes[2].childNodes.map(node => node.id || node.className), ['l-pane f-editor-pane pane editor-pane', 'resizer', 'l-pane f-preview-pane pane preview-pane']);
 
   ui.destroy();
   ui.destroy();

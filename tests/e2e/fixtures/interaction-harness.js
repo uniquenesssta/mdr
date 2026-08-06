@@ -70,7 +70,7 @@ window.__interactionHarness=Object.freeze({
     const source='flowchart LR; A-->B';
     const hybridResult=await renderMermaidDiagram(hybrid,source,{theme,cacheKey:'hybrid:1',renderIdPrefix:'hybrid'});
     const previewResult=await renderMermaidDiagram(preview,source,{theme,cacheKey:'preview:1',renderIdPrefix:'preview'});
-    const inspect=element=>{const svg=element.querySelector('svg');return {html:element.innerHTML,role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),height:svg?.style.height,maxWidth:svg?.style.maxWidth,background:svg?.style.background,theme:element.dataset.mermaidTheme};};
+    const inspect=element=>{const svg=element.querySelector('svg');return {html:element.innerHTML,role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),className:svg?.getAttribute('class')||'',heightAttribute:svg?.getAttribute('height'),inlineStyle:svg?.getAttribute('style'),theme:element.dataset.mermaidTheme};};
     return {hybrid:inspect(hybrid),preview:inspect(preview),hybridResult,previewResult,calls};
   }
 });

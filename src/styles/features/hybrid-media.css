@@ -1,0 +1,113 @@
+/* Responsibility: Hybrid media widget feedback and transition states. */
+
+.virtual-editor-host .cm-hybrid-image-label {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+}
+
+.virtual-editor-host .cm-hybrid-image-label > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.virtual-editor-host .cm-hybrid-image-source-badge {
+  flex: 0 0 auto;
+  padding: 1px var(--space-sm);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 24%, var(--color-border-subtle));
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--font-size-3xs);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.virtual-editor-host .cm-hybrid-image-error {
+  width: min(100%, 620px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+}
+
+.virtual-editor-host .cm-hybrid-image-error strong {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  font-weight: 650;
+}
+
+.virtual-editor-host .cm-hybrid-image-error code {
+  max-width: 100%;
+  padding: 5px var(--space-md);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-base);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.virtual-editor-host .cm-hybrid-image-retry {
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-raised);
+}
+
+.virtual-editor-host .cm-hybrid-image-widget {
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.virtual-editor-host .cm-hybrid-image-frame {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  background:
+linear-gradient(45deg, color-mix(in srgb, var(--color-surface-subtle) 60%, transparent) 25%, transparent 25%) 0 0 / 16px 16px,
+linear-gradient(-45deg, color-mix(in srgb, var(--color-surface-subtle) 60%, transparent) 25%, transparent 25%) 0 8px / 16px 16px,
+var(--color-surface-raised);
+}
+
+.virtual-editor-host .cm-hybrid-image-widget img {
+  display: block;
+  max-width: 100%;
+  max-height: min(62vh, 720px);
+  object-fit: contain;
+  border-radius: var(--radius-md);
+}
+
+.virtual-editor-host .cm-hybrid-image-widget.is-loading .cm-hybrid-image-frame::before {
+  content: '图片加载中…';
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.virtual-editor-host .cm-hybrid-image-widget.is-loading img {
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.virtual-editor-host .cm-hybrid-image-error {
+  max-width: 100%;
+  padding: 18px;
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.virtual-editor-host .cm-hybrid-image-widget figcaption {
+  padding: var(--space-md) var(--space-xl) var(--space-lg);
+  border-top: 1px solid var(--color-border-subtle);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  text-align: center;
+}

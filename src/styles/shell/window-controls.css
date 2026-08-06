@@ -1,0 +1,78 @@
+/* Responsibility: Native desktop titlebar, drag region and window controls. */
+
+/* Custom desktop window chrome */
+html.tauri-shell,
+html.tauri-shell body {
+  background: var(--color-canvas);
+}
+
+html.tauri-shell body {
+  padding: 0;
+}
+
+html.tauri-shell .l-app-shell {
+  height: 100vh;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--color-canvas);
+  box-shadow: none;
+}
+
+html.tauri-shell.window-maximized .l-app-shell {
+  border: 0;
+  border-radius: 0;
+}
+
+.window-drag-region {
+  cursor: default;
+}
+
+.window-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 0 0 auto;
+}
+
+.window-controls[hidden] {
+  display: none !important;
+}
+
+.window-control-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--motion-duration-fast) ease, color var(--motion-duration-fast) ease, border-color var(--motion-duration-fast) ease;
+}
+
+.window-control-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-hover);
+}
+
+.window-control-btn.close:hover {
+  color: var(--color-on-accent);
+  border-color: transparent;
+  background: var(--color-danger-control);
+}
+
+@media (max-width: 900px) {
+  .window-controls {
+margin-left: var(--space-sm);
+  }
+
+  .window-control-btn {
+width: 28px;
+height: 28px;
+  }
+}

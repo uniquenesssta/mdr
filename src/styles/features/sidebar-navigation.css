@@ -1,0 +1,188 @@
+/* Responsibility: Sidebar document, outline and navigation feature presentation. */
+
+.sidebar-header {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-xl);
+      border-bottom: 1px solid var(--color-border-subtle);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-md);
+}
+
+.sidebar-header button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--color-text-muted);
+      border-radius: var(--radius-md);
+      padding: 5px;
+      cursor: pointer;
+}
+
+.sidebar-header button:hover { color: var(--color-accent); background: var(--color-surface-subtle); }
+
+.sidebar-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xs);
+      padding: var(--space-md);
+      background: var(--color-surface-subtle);
+      border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.sidebar-tabs button {
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 7px var(--space-md);
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      cursor: pointer;
+}
+
+.sidebar-tabs button.active {
+      color: var(--color-accent);
+      background: var(--color-surface-raised);
+      box-shadow: var(--shadow-low);
+}
+
+.sidebar-panel {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: var(--space-md);
+}
+
+.sidebar-panel.active { display: flex; flex-direction: column; }
+
+.sidebar-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+}
+
+.sidebar-actions button {
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-canvas);
+      color: var(--color-text-secondary);
+      border-radius: var(--radius-md);
+      padding: 7px var(--space-lg);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+}
+
+.sidebar-actions button:hover { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-accent-soft); }
+
+.document-list, .outline-list { display: flex; flex-direction: column; gap: var(--space-xs); }
+
+.sidebar-empty {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
+      padding: var(--space-2xl) var(--space-md);
+      text-align: center;
+}
+
+.sidebar-header {
+  height: 58px;
+  padding: 0 var(--space-xl) 0 15px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: transparent;
+}
+
+.sidebar-heading {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.sidebar-kicker {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-3xs);
+  font-weight: 750;
+  letter-spacing: .14em;
+}
+
+.sidebar-heading strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-header button,
+.collapse-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+}
+
+.sidebar-header button:hover,
+.collapse-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-subtle);
+}
+
+.sidebar-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  margin: var(--space-lg) var(--space-lg) var(--space-xs);
+  padding: 3px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg-plus);
+  background: var(--color-surface-subtle);
+}
+
+.sidebar-tabs button {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: 30px;
+  padding: 5px var(--space-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 620;
+}
+
+.sidebar-tabs button.active {
+  color: var(--color-text-primary);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-bordered-control);
+}
+
+.sidebar-panel {
+  padding: var(--space-md) var(--space-lg) var(--space-xl);
+}
+
+.document-list,
+.outline-list {
+  gap: 5px;
+}
+
+.sidebar-tabs button {
+  min-width: 0;
+  gap: var(--space-xs);
+  padding-inline: 5px;
+}
+
+.sidebar-tabs button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

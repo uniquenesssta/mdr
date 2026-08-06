@@ -8,7 +8,7 @@ import { createWorkspaceShell } from './workspace-shell.js';
 
 export function createAppShellView(documentRef) {
   const app = createSafeElement(documentRef, 'div', {
-    className: 'app',
+    className: 'l-app-shell app',
     attributes: { 'data-ui-shell': 'app' }
   });
   const menu = createMenuBarShell(documentRef);

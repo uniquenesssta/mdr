@@ -142,11 +142,11 @@
             ? mathApi.restoreSource(rendered, protectedMath.placeholders)
             : rendered;
         } else {
-          body.innerHTML = '<pre style="white-space:pre-wrap">' + escapeHtml(source) + '</pre>';
+          body.innerHTML = '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
         }
       } catch (error) {
         console.error('Export preview render error:', error);
-        body.innerHTML = '<pre style="white-space:pre-wrap">' + escapeHtml(source) + '</pre>';
+        body.innerHTML = '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
       }
       task?.throwIfCancelled();
       task?.update(60, '完整文档已解析');
@@ -758,7 +758,7 @@ ${'</scr' + 'ipt>'}
         currentImageDataUrl = dataUrl;
         const previewImg = document.getElementById('export-image-preview');
         previewImg.src = dataUrl;
-        previewImg.style.display = 'block';
+        previewImg.classList.remove('is-hidden');
         showToast(t('toastPreviewGenerated'));
       } catch (error) {
         if (!(error instanceof ExportCancelledError)) {

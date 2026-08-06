@@ -1,0 +1,219 @@
+/* Responsibility: Settings fields, cards, toolbar options and settings-only form layout. */
+
+.settings-body .settings-check {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: 14px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+}
+
+.settings-body .settings-check input { width: auto; margin: 0; }
+
+.settings-body .settings-inline-field {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin: -4px 0 var(--space-xl);
+}
+
+.settings-body .settings-inline-field[hidden] { display: none; }
+
+.settings-body .settings-inline-field input { margin: 0; }
+
+.settings-body .settings-inline-field span {
+      flex: 0 0 auto;
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+}
+
+.settings-body .settings-color-field,
+.settings-body .settings-path-field {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin: 0 0 var(--space-xl);
+}
+
+.settings-body .settings-color-field input[type="color"] {
+      width: 54px;
+      height: 38px;
+      flex: 0 0 54px;
+      margin: 0;
+      padding: 3px;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--color-canvas);
+      cursor: pointer;
+}
+
+.settings-body .settings-path-field input[type="text"] {
+      min-width: 0;
+      flex: 1 1 auto;
+      margin: 0;
+}
+
+.settings-body .settings-color-field button,
+.settings-body .settings-path-field button {
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 0 11px;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--color-surface-raised);
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+      cursor: pointer;
+}
+
+.settings-body .settings-color-field button:hover,
+.settings-body .settings-path-field button:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      background: var(--color-surface-subtle);
+}
+
+.toolbar-settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px var(--space-xl);
+      margin: 0 0 var(--space-md);
+      padding: 11px var(--space-xl);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--color-canvas);
+}
+
+.toolbar-settings-grid label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      cursor: pointer;
+}
+
+.toolbar-settings-grid input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+}
+
+.settings-field {
+  margin-bottom: 18px;
+}
+
+.settings-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2xl);
+}
+
+.settings-body .settings-check.settings-card-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-lg);
+  margin: 0 0 18px;
+  padding: var(--space-xl) 13px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-canvas);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.settings-body .settings-check.settings-card-check:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-subtle);
+}
+
+.settings-body .settings-check.settings-card-check input {
+  flex: 0 0 auto;
+  margin: 3px 0 0;
+}
+
+.settings-card-check span {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+
+.settings-card-check b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+.settings-card-check small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.settings-body .settings-inline-field {
+  margin: var(--space-md) 0 0;
+}
+
+.settings-body .settings-inline-field input {
+  min-width: 0;
+}
+
+.settings-body .settings-color-field,
+.settings-body .settings-path-field {
+  margin: 0;
+}
+
+.settings-body .settings-color-field input[type="color"] {
+  height: 40px;
+}
+
+.settings-body .settings-color-field button,
+.settings-body .settings-path-field button {
+  min-height: 40px;
+}
+
+.toolbar-settings-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+  margin: 0;
+  padding: 13px;
+}
+
+.toolbar-settings-grid label {
+  min-width: 0;
+  padding: 7px var(--space-md);
+  border-radius: var(--radius-base);
+}
+
+.toolbar-settings-grid label:hover {
+  background: var(--color-surface-subtle);
+  color: var(--color-text-primary);
+}
+
+.settings-info-card {
+  margin-top: var(--space-xl);
+  padding: var(--space-xl) 13px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+}
+
+.settings-info-card.warning {
+  border-color: color-mix(in srgb, var(--color-warning) 30%, var(--color-border-subtle));
+}
+
+.settings-info-card b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+}
+
+.settings-info-card p {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+}

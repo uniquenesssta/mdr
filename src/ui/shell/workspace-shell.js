@@ -19,21 +19,21 @@ export function createWorkspaceShell(documentRef, sidebar) {
   if (sidebar.id !== 'sidebar') throw new TypeError('createWorkspaceShell requires the sidebar shell.');
 
   const workspace = createSafeElement(documentRef, 'div', {
-    className: 'workspace',
+    className: 'l-workspace workspace',
     attributes: { 'data-ui-region': 'workspace' }
   });
   const sidebarResizer = createSeparator(documentRef, {
-    className: 'sidebar-resizer',
+    className: 'l-sidebar-resizer sidebar-resizer',
     id: 'sidebar-resizer',
     label: '调整侧边栏宽度',
     title: '拖动调整侧边栏宽度'
   });
   const main = createSafeElement(documentRef, 'div', {
-    className: 'main',
+    className: 'l-split-pane main',
     attributes: { 'data-ui-region': 'workspace-main' }
   });
   const editor = createSafeElement(documentRef, 'div', {
-    className: 'pane editor-pane',
+    className: 'l-pane f-editor-pane pane editor-pane',
     attributes: {
       role: 'region',
       'aria-label': '编辑区',
@@ -41,12 +41,12 @@ export function createWorkspaceShell(documentRef, sidebar) {
     }
   });
   const paneResizer = createSeparator(documentRef, {
-    className: 'resizer',
+    className: 'l-pane-resizer resizer',
     id: 'resizer',
     label: '调整编辑与预览区域宽度'
   });
   const preview = createSafeElement(documentRef, 'div', {
-    className: 'pane preview-pane',
+    className: 'l-pane f-preview-pane pane preview-pane',
     attributes: {
       role: 'region',
       'aria-label': '预览区',

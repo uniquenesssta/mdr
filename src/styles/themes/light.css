@@ -55,6 +55,26 @@
   --color-editor-text: #202530;
   --color-editor-active-line: rgba(37, 99, 235, 0.055);
 
+  /* Editor color presets */
+  --color-preset-text-ink: #1a1d23;
+  --color-preset-text-gray: #6b7280;
+  --color-preset-text-red: #dc2626;
+  --color-preset-text-orange: #ea580c;
+  --color-preset-text-yellow: #ca8a04;
+  --color-preset-text-green: #16a34a;
+  --color-preset-text-cyan: #0891b2;
+  --color-preset-text-blue: #2563eb;
+  --color-preset-text-purple: #7c3aed;
+  --color-preset-text-pink: #db2777;
+  --color-preset-highlight-yellow: #fff3a3;
+  --color-preset-highlight-orange: #fed7aa;
+  --color-preset-highlight-red: #fecaca;
+  --color-preset-highlight-green: #bbf7d0;
+  --color-preset-highlight-blue: #bae6fd;
+  --color-preset-highlight-purple: #ddd6fe;
+  --color-preset-highlight-pink: #fbcfe8;
+  --color-preset-highlight-gray: #e5e7eb;
+
   /* Base elevation */
   --shadow-low: 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-raised: 0 6px 18px rgba(15, 23, 42, 0.055);

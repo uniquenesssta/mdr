@@ -1,0 +1,61 @@
+/* Responsibility: Hybrid KaTeX presentation. */
+
+/* KaTeX presentation shared by inline and block widgets in hybrid mode. */
+.virtual-editor-host .cm-hybrid-inline-math {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  padding: 0 3px;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  cursor: default;
+  vertical-align: baseline;
+  transition: background-color var(--motion-duration-fast) ease, box-shadow var(--motion-duration-fast) ease;
+}
+
+.virtual-editor-host .cm-hybrid-inline-math:hover {
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.virtual-editor-host .cm-hybrid-inline-math:focus {
+  outline: none;
+  background: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+
+.virtual-editor-host .cm-hybrid-inline-math.is-error {
+  color: var(--color-danger);
+  font-family: var(--font-family-mono);
+  font-size: .92em;
+}
+
+.virtual-editor-host .cm-hybrid-math-widget {
+  background: color-mix(in srgb, var(--color-surface-raised) 92%, var(--color-accent-soft));
+}
+
+.virtual-editor-host .cm-hybrid-math-body {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 22px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.virtual-editor-host .cm-hybrid-math-body .katex-display {
+  margin: 0;
+  padding: .45em var(--space-2xs);
+  overflow: visible;
+}
+
+.virtual-editor-host .cm-hybrid-math-body.is-error {
+  justify-content: flex-start;
+  color: var(--color-danger);
+  font-family: var(--font-family-mono);
+  font-size: .9em;
+  white-space: pre-wrap;
+  text-align: left;
+}

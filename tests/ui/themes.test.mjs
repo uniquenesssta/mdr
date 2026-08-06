@@ -1,30 +1,12 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import test from 'node:test';
-
-const root = process.cwd();
-const readText = path => readFile(resolve(root, path), 'utf8');
-
-function extractRule(source, selector) {
-  const start = source.indexOf(selector);
-  assert.notEqual(start, -1, `missing CSS rule: ${selector}`);
-  const open = source.indexOf('{', start);
-  let depth = 0;
-  for (let index = open; index < source.length; index += 1) {
-    if (source[index] === '{') depth += 1;
-    else if (source[index] === '}') {
-      depth -= 1;
-      if (depth === 0) return source.slice(open + 1, index);
-    }
-  }
-  assert.fail(`unclosed CSS rule: ${selector}`);
-}
-
-function collectDefinitions(source) {
-  return new Map([...source.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/gi)]
-    .map(match => [match[1], match[2].trim()]));
-}
+import {
+  collectDefinitions,
+  expectedStyleEntry,
+  extractRule,
+  readImportedStyles,
+  readText
+} from './style-test-utils.mjs';
 
 function assertOnlyCustomProperties(source, selector) {
   const body = extractRule(source, selector)
@@ -34,26 +16,23 @@ function assertOnlyCustomProperties(source, selector) {
   assert.equal(body, '', `${selector} contains non-token declarations: ${body}`);
 }
 
-test('Atomic Task 2.8 loads separate light and dark token themes before component rules', async () => {
-  const [entrySource, tokenSource, lightSource, darkSource, mainSource] = await Promise.all([
+test('Atomic Task 2.8 loads token-only themes before every shell, layout, component and feature module', async () => {
+  const [entrySource, tokenSource, lightSource, darkSource, styles] = await Promise.all([
     readText('src/styles/index.css'),
     readText('src/styles/foundation/tokens.css'),
     readText('src/styles/themes/light.css'),
     readText('src/styles/themes/dark.css'),
-    readText('src/styles/main.css')
+    readImportedStyles()
   ]);
 
-  assert.equal(entrySource, [
-    "@import './foundation/tokens.css';",
-    "@import './themes/light.css';",
-    "@import './themes/dark.css';",
-    "@import './main.css';",
-    ''
-  ].join('\n'));
+  assert.equal(entrySource, expectedStyleEntry());
   assert.doesNotMatch(tokenSource, /\[data-theme/);
   assert.match(lightSource, /^:root\s*\{/);
   assert.match(darkSource, /^\[data-theme="dark"\]\s*\{/);
-  assert.doesNotMatch(mainSource, /\[data-theme/);
+  for (const { path, source } of styles.filter(record => !record.path.includes('/themes/'))) {
+    assert.doesNotMatch(source, /\[data-theme/, path);
+  }
+  assert.ok(entrySource.indexOf("./themes/dark.css") < entrySource.indexOf("./shell/app-shell.css"));
 });
 
 test('theme styles contain only visual token declarations and dark overrides have light defaults', async () => {
@@ -75,7 +54,7 @@ test('theme styles contain only visual token declarations and dark overrides hav
   assert.doesNotMatch(lightSource + darkSource, /(?:--font-|--space-|--radius-|--layer-|--motion-)/);
 });
 
-test('theme split preserves existing light and dark values without duplicating component selectors', async () => {
+test('theme split preserves the 2.8 values while 2.9 adds only named editor color presets', async () => {
   const [lightSource, darkSource] = await Promise.all([
     readText('src/styles/themes/light.css'),
     readText('src/styles/themes/dark.css')
@@ -93,5 +72,7 @@ test('theme split preserves existing light and dark values without duplicating c
   assert.equal(dark.get('--shadow-floating'), '0 18px 42px rgba(0, 0, 0, 0.34)');
   assert.equal(dark.get('--code-background'), '#0b0f15');
   assert.equal(dark.get('--content-image-opacity'), '0.95');
+  assert.equal(light.get('--color-preset-text-blue'), '#2563eb');
+  assert.equal(light.get('--color-preset-highlight-yellow'), '#fff3a3');
   assert.doesNotMatch(lightSource + darkSource, /(?:^|\n)\s*(?:\.|#|[a-z][a-z0-9-]*\s+)[^{]*\{/i);
 });

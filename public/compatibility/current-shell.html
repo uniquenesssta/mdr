@@ -128,16 +128,16 @@
           <div class="dropdown-menu color-menu" id="text-color-menu">
             <strong>文字颜色</strong>
             <div class="color-swatches" aria-label="文字颜色预设">
-              <button type="button" class="color-swatch" style="--swatch-color:#1a1d23" title="黑色" onclick="applyInlineColor('text','#1a1d23')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#6b7280" title="灰色" onclick="applyInlineColor('text','#6b7280')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#dc2626" title="红色" onclick="applyInlineColor('text','#dc2626')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#ea580c" title="橙色" onclick="applyInlineColor('text','#ea580c')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#ca8a04" title="黄色" onclick="applyInlineColor('text','#ca8a04')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#16a34a" title="绿色" onclick="applyInlineColor('text','#16a34a')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#0891b2" title="青色" onclick="applyInlineColor('text','#0891b2')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#2563eb" title="蓝色" onclick="applyInlineColor('text','#2563eb')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#7c3aed" title="紫色" onclick="applyInlineColor('text','#7c3aed')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#db2777" title="粉色" onclick="applyInlineColor('text','#db2777')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-ink" title="黑色" onclick="applyInlineColor('text','#1a1d23')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-gray" title="灰色" onclick="applyInlineColor('text','#6b7280')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-red" title="红色" onclick="applyInlineColor('text','#dc2626')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-orange" title="橙色" onclick="applyInlineColor('text','#ea580c')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-yellow" title="黄色" onclick="applyInlineColor('text','#ca8a04')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-green" title="绿色" onclick="applyInlineColor('text','#16a34a')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-cyan" title="青色" onclick="applyInlineColor('text','#0891b2')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-blue" title="蓝色" onclick="applyInlineColor('text','#2563eb')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-purple" title="紫色" onclick="applyInlineColor('text','#7c3aed')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-pink" title="粉色" onclick="applyInlineColor('text','#db2777')"></button>
             </div>
             <div class="color-menu-actions">
               <label class="custom-color-action">自定义<input type="color" id="custom-text-color" value="#2563eb" onchange="applyInlineColor('text',this.value)"></label>
@@ -152,14 +152,14 @@
           <div class="dropdown-menu color-menu" id="highlight-color-menu">
             <strong>文字高亮</strong>
             <div class="color-swatches" aria-label="文字高亮预设">
-              <button type="button" class="color-swatch" style="--swatch-color:#fff3a3" title="黄色" onclick="applyInlineColor('highlight','#fff3a3')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#fed7aa" title="橙色" onclick="applyInlineColor('highlight','#fed7aa')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#fecaca" title="红色" onclick="applyInlineColor('highlight','#fecaca')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#bbf7d0" title="绿色" onclick="applyInlineColor('highlight','#bbf7d0')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#bae6fd" title="蓝色" onclick="applyInlineColor('highlight','#bae6fd')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#ddd6fe" title="紫色" onclick="applyInlineColor('highlight','#ddd6fe')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#fbcfe8" title="粉色" onclick="applyInlineColor('highlight','#fbcfe8')"></button>
-              <button type="button" class="color-swatch" style="--swatch-color:#e5e7eb" title="灰色" onclick="applyInlineColor('highlight','#e5e7eb')"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-yellow" title="黄色" onclick="applyInlineColor('highlight','#fff3a3')"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-orange" title="橙色" onclick="applyInlineColor('highlight','#fed7aa')"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-red" title="红色" onclick="applyInlineColor('highlight','#fecaca')"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-green" title="绿色" onclick="applyInlineColor('highlight','#bbf7d0')"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-blue" title="蓝色" onclick="applyInlineColor('highlight','#bae6fd')"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-purple" title="紫色" onclick="applyInlineColor('highlight','#ddd6fe')"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-pink" title="粉色" onclick="applyInlineColor('highlight','#fbcfe8')"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-gray" title="灰色" onclick="applyInlineColor('highlight','#e5e7eb')"></button>
             </div>
             <div class="color-menu-actions">
               <label class="custom-color-action">自定义<input type="color" id="custom-highlight-color" value="#fff3a3" onchange="applyInlineColor('highlight',this.value)"></label>
@@ -253,7 +253,7 @@
             <span data-i18n="editorPaneHint">支持 Markdown 语法</span>
             <button class="collapse-btn" id="editor-collapse-btn" onclick="togglePane('editor')" title="收起编辑区"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg></button>
           </div>
-          <div id="editor" class="virtual-editor-host" data-i18n-placeholder="editorPlaceholder" data-placeholder="开始输入 Markdown..."></div>
+          <div id="editor" class="virtual-editor-host f-editor-surface" data-i18n-placeholder="editorPlaceholder" data-placeholder="开始输入 Markdown..."></div>
 </template>
 
 <template data-compat-slot="preview">
@@ -263,7 +263,7 @@
             <span class="preview-strategy-badge" id="preview-strategy-badge" hidden></span>
             <span id="word-count">0 字</span>
           </div>
-          <div class="preview-content" id="preview"></div>
+          <div class="preview-content f-preview-surface" id="preview"></div>
           <textarea id="preview-source" class="preview-source" data-i18n-placeholder="previewSourcePlaceholder" placeholder="在此编辑 Markdown 源码..." spellcheck="false" hidden></textarea>
 </template>
 
@@ -273,7 +273,7 @@
           <span class="app-mode-dot" aria-hidden="true"></span>
           <span>本地编辑</span>
         </div>
-        <span id="status-left" hidden aria-hidden="true"></span>
+        <span id="status-left" hidden aria-hidden="true" class="f-status-message"></span>
       </div>
       <span class="save-hint" id="save-hint">✓ 已保存</span>
       <span class="statusbar-spacer"></span>
@@ -677,7 +677,7 @@
 
   <!-- 插入链接模态框 -->
   <div class="modal-overlay" id="link-modal">
-    <div class="modal" style="max-width: 440px;" role="dialog" aria-modal="true" aria-labelledby="link-modal-title">
+    <div class="modal c-modal c-modal--narrow" role="dialog" aria-modal="true" aria-labelledby="link-modal-title">
       <div class="modal-header">
         <h3 id="link-modal-title"><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-link"></use></svg> <span data-i18n="link">链接</span></h3>
         <button onclick="closeLinkModal()" aria-label="关闭"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
@@ -703,14 +703,14 @@
       <div class="modal-body">
         <label for="url-input" data-i18n="urlLabel">网页地址</label>
         <input type="url" id="url-input" data-i18n-placeholder="urlPlaceholder" placeholder="https://example.com/article">
-        <div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;">
-          <input type="checkbox" id="use-local-proxy" style="width:auto;margin:0;" onchange="toggleProxyInput()">
-          <label for="use-local-proxy" style="display:inline;margin:0;font-weight:normal;cursor:pointer;" data-i18n="useProxy">使用 Rust 本地后端（桌面版默认）</label>
+        <div class="c-form-inline-option">
+          <input type="checkbox" id="use-local-proxy" class="c-inline-checkbox" onchange="toggleProxyInput()">
+          <label for="use-local-proxy" class="c-inline-label" data-i18n="useProxy">使用 Rust 本地后端（桌面版默认）</label>
         </div>
-        <input type="url" id="proxy-url" value="http://localhost:8765/fetch" data-i18n-placeholder="proxyPlaceholder" placeholder="浏览器预览代理地址" style="display:none;margin-bottom:10px;">
+        <input type="url" id="proxy-url" value="http://localhost:8765/fetch" data-i18n-placeholder="proxyPlaceholder" placeholder="浏览器预览代理地址" class="c-proxy-input is-hidden">
         <button onclick="fetchUrl()" class="primary" data-i18n="fetchBtn">尝试获取</button>
-        <div id="url-status" style="margin-top:10px;font-size:13px;color:var(--color-text-muted);"></div>
-        <div id="manual-area" style="display:none;margin-top:14px;">
+        <div id="url-status" class="c-form-status"></div>
+        <div id="manual-area" class="c-manual-input is-hidden">
           <label for="manual-html" data-i18n="manualLabel">网页 HTML 源码（手动粘贴）</label>
           <textarea id="manual-html" rows="6" data-i18n-placeholder="manualPlaceholder" placeholder="在浏览器中打开目标网页 → 右键「查看网页源代码」→ 全选复制 → 粘贴到此处"></textarea>
         </div>
@@ -724,7 +724,7 @@
 
   <!-- 查找与替换模态框 -->
   <div class="modal-overlay" id="find-modal">
-    <div class="modal" style="max-width: 440px;">
+    <div class="modal c-modal c-modal--narrow">
       <div class="modal-header">
         <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-search"></use></svg> <span data-i18n="findTitle">查找与替换</span></h3>
         <button onclick="closeFindModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
@@ -734,7 +734,7 @@
         <input type="text" id="find-input" data-i18n-placeholder="findPlaceholder" placeholder="要查找的内容">
         <label for="replace-input" data-i18n="replaceLabel">替换为</label>
         <input type="text" id="replace-input" data-i18n-placeholder="replacePlaceholder" placeholder="替换后的内容">
-        <div id="find-status" style="margin-top: 8px; font-size: 13px; color: var(--color-text-muted);"></div>
+        <div id="find-status" class="c-form-status"></div>
       </div>
       <div class="modal-footer">
         <button onclick="closeFindModal()" data-i18n="cancel">关闭</button>
@@ -765,7 +765,7 @@
   </div>
 
   <div class="modal-overlay" id="export-image-modal">
-    <div class="modal" style="max-width: 640px;">
+    <div class="modal c-modal c-modal--preview">
       <div class="modal-header">
         <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-image"></use></svg> <span data-i18n="exportImageTitle">导出图片</span></h3>
         <button onclick="closeExportImageModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
@@ -784,8 +784,8 @@
           <label for="image-crop-fit" data-i18n="cropLabel">过长时裁剪为固定比例（默认生成长图）</label>
         </div>
         <label data-i18n="previewLabel">预览</label>
-        <div id="export-image-preview-wrap">
-          <img id="export-image-preview" alt="导出预览" data-i18n-alt="exportImagePreviewAlt" style="display:none;">
+        <div id="export-image-preview-wrap" class="f-export-image-preview-wrap">
+          <img id="export-image-preview" alt="导出预览" data-i18n-alt="exportImagePreviewAlt" class="f-export-image-preview is-hidden">
         </div>
         <p class="hint" data-i18n="exportImageHint">内容较长时将按内容高度生成长图，方便手机阅读。</p>
       </div>
@@ -799,7 +799,7 @@
 
   <!-- 插入图片模态框 -->
   <div class="modal-overlay" id="image-modal">
-    <div class="modal" style="max-width: 520px;">
+    <div class="modal c-modal c-modal--medium">
       <div class="modal-header">
         <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-image"></use></svg> <span data-i18n="imageTitle">插入图片</span></h3>
         <button onclick="closeImageModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
@@ -835,7 +835,7 @@
 
   <!-- 插入 Mermaid 模态框 -->
   <div class="modal-overlay" id="mermaid-modal">
-    <div class="modal" style="max-width: 560px;">
+    <div class="modal c-modal c-modal--wide">
       <div class="modal-header">
         <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-mermaid"></use></svg> <span data-i18n="mermaidTitle">插入 Mermaid 图表</span></h3>
         <button onclick="closeMermaidModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
@@ -871,6 +871,6 @@
 </template>
 
 <template data-compat-slot="ports">
-    <input type="text" id="filename" value="未命名文档.md" hidden>
-    <input type="file" id="importFile" accept=".md,.markdown,.txt" onchange="importFile(this)" hidden>
+    <input type="text" id="filename" value="未命名文档.md" hidden class="c-file-input">
+    <input type="file" id="importFile" accept=".md,.markdown,.txt" onchange="importFile(this)" hidden class="c-file-input">
 </template>

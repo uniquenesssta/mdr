@@ -424,8 +424,7 @@
       }
       const textarea = document.createElement('textarea');
       textarea.value = value;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
+      textarea.className = 'c-clipboard-buffer';
       textarea.setAttribute('readonly', '');
       document.body.appendChild(textarea);
       textarea.select();
@@ -723,10 +722,10 @@
       let html = '';
       const renderSource = previewReferenceDefinitions ? previewReferenceDefinitions + '\n' + text : text;
       try {
-        html = typeof marked !== 'undefined' ? marked.parse(renderSource) : '<pre style="white-space:pre-wrap">' + escapeHtml(source) + '</pre>';
+        html = typeof marked !== 'undefined' ? marked.parse(renderSource) : '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
       } catch (error) {
         console.error('Markdown block render error:', error);
-        html = '<pre style="white-space:pre-wrap">' + escapeHtml(source) + '</pre>';
+        html = '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
       }
       if (placeholders.length) html = restoreMath(html, placeholders);
       return html;
@@ -1146,11 +1145,11 @@
             }
           } catch (error) {
             console.error('Markdown render error:', error);
-            html = '<pre style="white-space:pre-wrap">' + escapeHtml(fallbackSource) + '</pre>';
+            html = '<pre class="f-raw-fallback">' + escapeHtml(fallbackSource) + '</pre>';
             blockTokens = [];
           }
         } else {
-          html = '<pre style="white-space:pre-wrap">' + escapeHtml(fallbackSource) + '</pre>';
+          html = '<pre class="f-raw-fallback">' + escapeHtml(fallbackSource) + '</pre>';
         }
         if (placeholders.length) html = restoreMath(html, placeholders);
         patchResult = patchPreviewBody(html, forceFullRebuild);
@@ -1257,9 +1256,9 @@
       if (previewSource) {
         // 右侧源码编辑器已停用。虚拟编辑器场景不再复制整篇正文到隐藏 textarea。
         previewSource.value = editor.virtualEditor ? '' : editor.value;
-        previewSource.style.display = 'none';
+        previewSource.hidden = true;
       }
-      preview.style.display = '';
+      preview.hidden = false;
       if (!skipRefresh) {
         updatePreview();
         updateCount();

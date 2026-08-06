@@ -1,0 +1,206 @@
+/* Responsibility: Editor toolbar shell geometry and toolbar-local controls. */
+
+.l-toolbar-shell button, .l-toolbar-shell label {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-xl);
+      border: none;
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--motion-duration-moderate) ease;
+      user-select: none;
+      white-space: nowrap;
+}
+
+.l-toolbar-shell button:hover, .l-toolbar-shell label:hover {
+      background: var(--color-surface-subtle);
+      color: var(--color-accent);
+}
+
+.l-toolbar-shell button.primary {
+      background: var(--color-accent);
+      color: var(--color-on-accent);
+      box-shadow: var(--shadow-accent-control);
+}
+
+.l-toolbar-shell button.primary:hover {
+      background: var(--color-accent-hover);
+      box-shadow: var(--shadow-accent-control-hover);
+}
+
+.l-toolbar-shell .divider {
+      width: 1px;
+      height: 18px;
+      background: var(--color-border-subtle);
+      margin: 0 var(--space-xs);
+}
+
+/* 编辑器工具栏 */
+.l-toolbar-shell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-xl);
+      padding: var(--space-md) 14px;
+      background: var(--color-canvas);
+      border-bottom: 1px solid var(--color-border-subtle);
+      flex-wrap: wrap;
+}
+
+.l-toolbar-shell.is-hidden { display: none; }
+
+.l-toolbar-shell .format-group,
+.l-toolbar-shell .editor-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      flex-wrap: wrap;
+      padding: var(--space-xs);
+      background: var(--color-surface-subtle);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-xl);
+}
+
+.l-toolbar-shell button {
+      padding: 5px;
+      border-radius: var(--radius-md);
+}
+
+.l-toolbar-shell button svg.icon {
+      width: 15px;
+      height: 15px;
+}
+
+.l-toolbar-shell button b,
+.l-toolbar-shell button i,
+.l-toolbar-shell button u,
+.l-toolbar-shell button s {
+      font-size: var(--font-size-md);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 15px;
+}
+
+.l-toolbar-shell button:disabled {
+      opacity: .42;
+      cursor: not-allowed;
+}
+
+.l-toolbar-shell button:disabled:hover {
+      background: transparent;
+      color: var(--color-text-secondary);
+}
+
+.l-toolbar-shell [data-toolbar-item].toolbar-item-hidden,
+.l-toolbar-shell .divider.toolbar-divider-hidden {
+      display: none !important;
+}
+
+.l-toolbar-shell {
+  min-height: 54px;
+  margin: var(--space-md) 0;
+  padding: var(--space-sm);
+  gap: var(--space-md);
+  flex-wrap: nowrap;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-2xl-plus);
+  background: color-mix(in srgb, var(--color-card) 96%, transparent);
+  box-shadow: var(--shadow-raised);
+  overflow: visible;
+}
+
+.l-toolbar-shell .format-group,
+.l-toolbar-shell .editor-actions {
+  min-height: 40px;
+  padding: var(--space-xs);
+  gap: var(--space-2xs);
+  flex-wrap: nowrap;
+  border: none;
+  border-radius: var(--radius-lg-plus);
+  background: transparent;
+}
+
+.l-toolbar-shell .format-group {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.l-toolbar-shell .editor-actions {
+  position: relative;
+  flex: 0 0 auto;
+  padding-left: var(--space-lg);
+  margin-left: auto;
+}
+
+.l-toolbar-shell .editor-actions::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--color-border-subtle);
+}
+
+.l-toolbar-shell button,
+.l-toolbar-shell label {
+  min-width: 30px;
+  min-height: 30px;
+  justify-content: center;
+  padding: 5px var(--space-md);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 580;
+  transition: background-color var(--motion-duration-fast) ease, color var(--motion-duration-fast) ease, box-shadow var(--motion-duration-fast) ease, transform var(--motion-duration-fast) ease;
+}
+
+.l-toolbar-shell button:hover,
+.l-toolbar-shell label:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+}
+
+.l-toolbar-shell button:active,
+.l-toolbar-shell label:active {
+  transform: translateY(1px);
+}
+
+.l-toolbar-shell .divider {
+  height: 18px;
+  margin: 0 3px;
+  background: var(--color-border-subtle);
+}
+
+.l-toolbar-shell button.primary {
+  background: var(--color-accent);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent) 26%, transparent);
+}
+
+.l-toolbar-shell.toolbar-boundary-wrap .format-group {
+  width: 100%;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+}
+
+.l-toolbar-shell.toolbar-boundary-wrap .editor-actions {
+  width: 100%;
+  flex: 1 1 100%;
+  justify-content: flex-end;
+  padding-top: 5px;
+  padding-left: 0;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.l-toolbar-shell.toolbar-boundary-wrap .editor-actions::before {
+  display: none;
+}
+
+/* 工具栏下拉按钮文字 */
+.l-toolbar-shell button { white-space: nowrap; }

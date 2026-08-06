@@ -1,0 +1,9 @@
+/* Responsibility: Workspace shell container geometry and surface. */
+
+.l-workspace {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      background: var(--color-canvas);
+}

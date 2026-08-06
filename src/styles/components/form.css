@@ -1,0 +1,78 @@
+/* Responsibility: Shared form controls, stable field geometry and form state presentation. */
+
+.c-file-input {
+      display: none;
+}
+
+.modal-body label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: var(--space-sm);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-md);
+}
+
+.modal-body input[type="url"],
+.modal-body textarea,
+.modal-body input[type="text"],
+.modal-body input[type="number"],
+.modal-body select {
+      width: 100%;
+      padding: var(--space-lg) var(--space-xl);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--color-canvas);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-lg);
+      outline: none;
+      margin-bottom: var(--space-xl);
+      transition: border-color var(--motion-duration-moderate) ease, box-shadow var(--motion-duration-moderate) ease;
+}
+
+.modal-body input[type="url"]:focus,
+.modal-body textarea:focus,
+.modal-body input[type="text"]:focus,
+.modal-body input[type="number"]:focus,
+.modal-body select:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.modal-body textarea { font-family: var(--font-family-mono); resize: vertical; }
+
+.modal-body input[type="url"],
+.modal-body textarea,
+.modal-body input[type="text"],
+.modal-body input[type="number"],
+.modal-body select {
+  min-height: 40px;
+  border-color: var(--color-border-strong);
+  border-radius: 9px;
+  background: var(--color-surface-subtle);
+}
+
+.c-form-inline-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin: var(--space-md) 0 var(--space-lg);
+}
+
+.c-inline-checkbox { width: auto; margin: 0; }
+
+.c-inline-label { display: inline; margin: 0; font-weight: 400; cursor: pointer; }
+
+.c-proxy-input { margin-bottom: var(--space-lg); }
+
+.c-form-status { margin-top: var(--space-lg); font-size: var(--font-size-lg); color: var(--color-text-muted); }
+
+.c-manual-input { margin-top: var(--space-xl); }
+
+.c-proxy-input.is-hidden,
+.c-manual-input.is-hidden { display: none; }
+
+.c-form-status.is-muted { color: var(--color-text-muted); }
+
+.c-form-status.is-success { color: var(--color-accent); }
+
+.c-form-status.is-error { color: var(--color-danger); }

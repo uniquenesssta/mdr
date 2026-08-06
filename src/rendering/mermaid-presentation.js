@@ -40,9 +40,9 @@ export function normalizeMermaidSvg(container, options = {}) {
   const svg = container?.querySelector?.('svg');
   if (!(svg instanceof SVGElement)) throw new Error('Mermaid 未返回有效 SVG');
   svg.removeAttribute('height');
-  svg.style.maxWidth = '100%';
-  svg.style.height = 'auto';
-  svg.style.background = 'transparent';
+  svg.style.removeProperty('max-width');
+  if (!svg.getAttribute('style')?.trim()) svg.removeAttribute('style');
+  svg.classList.add('f-mermaid-svg');
   svg.setAttribute('role', 'img');
   svg.setAttribute('aria-label', options.ariaLabel || 'Mermaid 图表');
   return svg;

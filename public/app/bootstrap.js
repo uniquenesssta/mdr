@@ -86,8 +86,8 @@
 
       // 恢复页面全屏
       if (localStorage.getItem(PAGE_FULLSCREEN_KEY) === 'true') {
-        document.querySelector('.app').classList.add('page-fullscreen');
-        document.body.classList.add('page-fullscreen-active');
+        document.querySelector('.app').classList.add('page-fullscreen', 'is-page-fullscreen');
+        document.body.classList.add('page-fullscreen-active', 'is-page-fullscreen-active');
       }
 
       if (!localStorage.getItem(HELP_SHOWN_KEY)) {

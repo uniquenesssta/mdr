@@ -1,0 +1,33 @@
+/* Responsibility: Transient toast component. */
+
+.toast {
+  bottom: 44px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-dark-panel-border);
+  border-radius: var(--radius-lg-plus);
+  background: var(--color-dark-panel-background);
+  box-shadow: var(--shadow-floating);
+  font-size: var(--font-size-sm);
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* 加载提示 */
+.toast {
+      position: fixed;
+      bottom: 56px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--color-toast-background);
+      color: var(--color-on-accent);
+      padding: var(--space-lg) 18px;
+      border-radius: var(--radius-pill);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: all var(--motion-duration-slower) ease;
+      z-index: var(--layer-dropdown);
+      box-shadow: var(--shadow-floating);
+      backdrop-filter: blur(8px);
+}

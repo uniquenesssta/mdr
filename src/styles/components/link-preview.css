@@ -1,0 +1,177 @@
+/* Responsibility: In-app external-link preview component. */
+
+.link-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-link-preview);
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(5px);
+  transition: opacity var(--motion-duration-normal) ease, transform var(--motion-duration-normal) ease, visibility var(--motion-duration-none) linear var(--motion-duration-normal);
+}
+
+.link-preview-overlay.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition-delay: var(--motion-duration-none);
+}
+
+.link-preview-toolbar {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-2xl);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-surface-raised) 96%, var(--color-surface-subtle));
+  box-shadow: var(--shadow-toolbar);
+}
+
+.link-preview-identity {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xl);
+}
+
+.link-preview-title {
+  flex: 0 0 auto;
+  font-size: var(--font-size-md);
+  font-weight: 720;
+  color: var(--color-text-primary);
+}
+
+.link-preview-url {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.link-preview-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.link-preview-external,
+.link-preview-close {
+  min-height: 34px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--motion-duration-fast) ease, color var(--motion-duration-fast) ease, border-color var(--motion-duration-fast) ease, box-shadow var(--motion-duration-fast) ease;
+}
+
+.link-preview-external {
+  padding: var(--space-sm) var(--space-xl);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 620;
+}
+
+.link-preview-close {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--color-text-primary);
+}
+
+.link-preview-close .icon {
+  width: 19px;
+  height: 19px;
+}
+
+.link-preview-external:hover,
+.link-preview-close:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-subtle));
+  color: var(--color-accent);
+}
+
+.link-preview-external:focus-visible,
+.link-preview-close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+.link-preview-notice {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-2xl);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface-raised));
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.link-preview-body {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-embedded-page);
+}
+
+.link-preview-body::before {
+  content: '正在加载网页…';
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  color: var(--color-text-muted);
+  background: var(--color-canvas);
+  font-size: var(--font-size-md);
+}
+
+.link-preview-overlay.is-loading .link-preview-body::before {
+  display: grid;
+}
+
+.link-preview-frame {
+  position: relative;
+  z-index: var(--layer-raised);
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  background: var(--color-embedded-page);
+}
+
+@media (max-width: 720px) {
+  .link-preview-toolbar {
+min-height: 50px;
+padding-left: var(--space-xl);
+  }
+
+  .link-preview-url,
+  .link-preview-notice {
+display: none;
+  }
+
+  .link-preview-external {
+padding-inline: 9px;
+  }
+}
+
+/* In-app external-link preview. It prevents document links from replacing the editor WebView. */
+html.has-link-preview,
+html.has-link-preview body {
+  overflow: hidden;
+}

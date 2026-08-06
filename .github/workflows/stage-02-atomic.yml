@@ -51,8 +51,10 @@ jobs:
         run: node --test tests/ui/css-tokens.test.mjs
       - name: Verify Atomic Task 2.8 themes
         run: node --test tests/ui/themes.test.mjs
+      - name: Verify Atomic Task 2.9 style layering and naming
+        run: node --test tests/ui/style-layering.test.mjs
       - name: Run architecture hard gate
-        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-08-architecture-scan.json
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-09-architecture-scan.json
       - name: Record current Stage 2 evidence
         run: node scripts/stage-02/record-ui-foundation-evidence.mjs
       - name: Run existing Node regression suite
@@ -61,7 +63,7 @@ jobs:
         run: npm run test:browser:contract
       - name: Build current application
         run: npm run build
-      - name: Verify built application theme layout invariance
+      - name: Verify built application style layering and theme layout invariance
         run: npm run test:browser
       - name: Upload Atomic Task evidence
         uses: actions/upload-artifact@v4

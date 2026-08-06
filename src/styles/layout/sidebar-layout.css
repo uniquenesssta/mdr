@@ -1,0 +1,87 @@
+/* Responsibility: Sidebar column, navigation panels and sidebar resize layout. */
+
+.l-sidebar {
+      flex: 0 0 var(--sidebar-width);
+      width: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: var(--color-surface-raised);
+      border-right: 1px solid var(--color-border-subtle);
+      transition: width var(--motion-duration-moderate) ease, flex-basis var(--motion-duration-moderate) ease, transform var(--motion-duration-moderate) ease;
+      overflow: hidden;
+}
+
+.l-sidebar.is-hidden {
+      flex-basis: 0;
+      width: 0;
+      border-right: none;
+}
+
+.l-sidebar-resizer {
+      position: relative;
+      z-index: var(--layer-resize-handle);
+      flex: 0 0 7px;
+      width: 7px;
+      margin-left: -4px;
+      margin-right: -3px;
+      cursor: col-resize;
+      background: transparent;
+      touch-action: none;
+}
+
+.l-sidebar-resizer::after {
+      content: '';
+      position: absolute;
+      inset: 0 3px;
+      background: transparent;
+      transition: background var(--motion-duration-quick) ease;
+}
+
+.l-sidebar-resizer:hover::after,
+.l-sidebar-resizer.is-dragging::after {
+      background: var(--color-accent);
+}
+
+.l-sidebar-resizer.is-hidden { display: none; }
+
+/* 主编辑区 */
+.l-split-pane {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+}
+
+.l-workspace {
+  gap: var(--space-md);
+  background: transparent;
+}
+
+.l-sidebar {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl);
+  background: color-mix(in srgb, var(--color-card) 97%, transparent);
+  box-shadow: var(--shadow-raised);
+}
+
+.l-sidebar.is-hidden {
+  border: none;
+  box-shadow: none;
+}
+
+.l-sidebar-resizer {
+  flex-basis: 8px;
+  width: 8px;
+  margin-left: -6px;
+  margin-right: -10px;
+}
+
+.l-sidebar-resizer::after {
+  inset: 9px 3px;
+  border-radius: var(--radius-pill);
+}
+
+.l-workspace:has(> .l-sidebar.is-hidden) {
+  gap: 0;
+}

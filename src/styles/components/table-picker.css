@@ -1,0 +1,37 @@
+/* Responsibility: Table-size picker component. */
+
+/* 表格选择器 */
+.table-selector-menu {
+      padding: var(--space-xl);
+      min-width: auto;
+}
+
+.table-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 22px);
+      grid-template-rows: repeat(8, 22px);
+      gap: 3px;
+}
+
+.table-grid-cell {
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 4px;
+      cursor: pointer;
+      background: var(--color-surface-raised);
+      transition: background var(--motion-duration-instant-feedback) ease, border-color var(--motion-duration-instant-feedback) ease;
+}
+
+.table-grid-cell:hover,
+.table-grid-cell.active {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+}
+
+.table-size-label {
+      text-align: center;
+      margin-top: var(--space-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+}

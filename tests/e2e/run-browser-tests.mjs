@@ -172,9 +172,9 @@ async function runContractSuite() {
       for (const surface of [result.hybrid, result.preview]) {
         assert.equal(surface.role, 'img');
         assert.equal(surface.label, 'Mermaid 图表');
-        assert.equal(surface.height, 'auto');
-        assert.equal(surface.maxWidth, '100%');
-        assert.equal(surface.background, 'transparent');
+        assert.match(surface.className, /(?:^|\s)f-mermaid-svg(?:\s|$)/);
+        assert.equal(surface.heightAttribute, null);
+        assert.equal(surface.inlineStyle, null);
         assert.equal(surface.theme, 'dark');
       }
       assert.equal(result.hybridResult.status, 'rendered');
@@ -313,11 +313,12 @@ async function runAppSuite() {
         const ids=Array.from(document.querySelectorAll('[id]')).map(element=>element.id);
         return {
           shellCount:document.querySelectorAll('[data-ui-shell="app"]').length,
-          appCount:document.querySelectorAll('.app').length,
+          appCount:document.querySelectorAll('.l-app-shell').length,
+          legacyAppHookCount:document.querySelectorAll('.app').length,
           counts,
           appChildren:Array.from(shell?.children||[]).map(element=>element.className),
-          workspaceChildren:Array.from(shell?.querySelector('.workspace')?.children||[]).map(element=>element.id||element.className),
-          mainChildren:Array.from(shell?.querySelector('.main')?.children||[]).map(element=>element.id||element.className),
+          workspaceChildren:Array.from(shell?.querySelector('.l-workspace')?.children||[]).map(element=>element.id||element.className),
+          mainChildren:Array.from(shell?.querySelector('.l-split-pane')?.children||[]).map(element=>element.id||element.className),
           overlayParent:document.getElementById('overlay-root')?.parentElement?.id||'',
           settingsParent:document.getElementById('settings-modal')?.parentElement?.id||'',
           filePortParents:['filename','importFile'].map(id=>document.getElementById(id)?.parentElement?.id||''),
@@ -326,10 +327,11 @@ async function runAppSuite() {
       })()`);
       assert.equal(snapshot.shellCount, 1);
       assert.equal(snapshot.appCount, 1);
+      assert.equal(snapshot.legacyAppHookCount, 1);
       assert.deepEqual(snapshot.counts, {menu:1,toolbar:1,sidebar:1,editor:1,preview:1,status:1,overlay:1});
-      assert.deepEqual(snapshot.appChildren, ['menu-bar','editor-toolbar','workspace','statusbar']);
-      assert.deepEqual(snapshot.workspaceChildren, ['sidebar','sidebar-resizer','main']);
-      assert.deepEqual(snapshot.mainChildren, ['pane editor-pane','resizer','pane preview-pane']);
+      assert.deepEqual(snapshot.appChildren, ['l-menu-bar menu-bar','l-toolbar-shell editor-toolbar','l-workspace workspace','l-status-bar statusbar']);
+      assert.deepEqual(snapshot.workspaceChildren, ['sidebar','sidebar-resizer','l-split-pane main']);
+      assert.deepEqual(snapshot.mainChildren, ['l-pane f-editor-pane pane editor-pane','resizer','l-pane f-preview-pane pane preview-pane']);
       assert.equal(snapshot.overlayParent, 'app-root');
       assert.equal(snapshot.settingsParent, 'overlay-root');
       assert.deepEqual(snapshot.filePortParents, ['app-root','app-root']);
@@ -340,14 +342,14 @@ async function runAppSuite() {
       const result = await browser.page.evaluate(`(async()=>{
         const selectors={
           shell:'[data-ui-shell="app"]',
-          menu:'.menu-bar',
-          toolbar:'.editor-toolbar',
-          workspace:'.workspace',
-          main:'.main',
-          editor:'.editor-pane',
-          preview:'.preview-pane',
-          status:'.statusbar',
-          overlay:'#overlay-root'
+          menu:'.l-menu-bar',
+          toolbar:'.l-toolbar-shell',
+          workspace:'.l-workspace',
+          main:'.l-split-pane',
+          editor:'.f-editor-pane',
+          preview:'.f-preview-pane',
+          status:'.l-status-bar',
+          overlay:'.l-overlay-root'
         };
         const round=value=>Math.round(value*1000)/1000;
         const snapshot=()=>({
@@ -575,11 +577,17 @@ async function runAppSuite() {
       await setAppLayout(browser.page, 'hybrid');
       await browser.page.evaluate(`window.__markdownEditorE2E.revealText('flowchart LR',{preserveSelection:true})`);
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type=\"mermaid\"] svg')), { timeoutMs: 10000, description: 'hybrid Mermaid SVG' });
-      const hybrid = await browser.page.evaluate(`(()=>{const svg=document.querySelector('[data-hybrid-block-type=\"mermaid\"] svg');return {role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),height:svg?.style.height,maxWidth:svg?.style.maxWidth,background:svg?.style.background}})()`);
+      const inspectMermaid = `selector=>{const svg=document.querySelector(selector);const style=svg?getComputedStyle(svg):null;return {role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),className:svg?.getAttribute('class')||'',heightAttribute:svg?.getAttribute('height'),inlineStyle:svg?.getAttribute('style'),maxWidth:style?.maxWidth||'',backgroundColor:style?.backgroundColor||''}}`;
+      const hybrid = await browser.page.evaluate(`(${inspectMermaid})('[data-hybrid-block-type=\"mermaid\"] svg')`);
       await setAppLayout(browser.page, 'preview');
       await browser.page.waitFor(() => Boolean(document.querySelector('.preview-pane .mermaid svg')), { timeoutMs: 10000, description: 'preview Mermaid SVG' });
-      const previewResult = await browser.page.evaluate(`(()=>{const svg=document.querySelector('.preview-pane .mermaid svg');return {role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),height:svg?.style.height,maxWidth:svg?.style.maxWidth,background:svg?.style.background}})()`);
+      const previewResult = await browser.page.evaluate(`(${inspectMermaid})('.preview-pane .mermaid svg')`);
       assert.deepEqual(previewResult, hybrid);
+      assert.match(hybrid.className, /(?:^|\s)f-mermaid-svg(?:\s|$)/);
+      assert.equal(hybrid.heightAttribute, null);
+      assert.equal(hybrid.inlineStyle, null);
+      assert.equal(hybrid.maxWidth, '100%');
+      assert.equal(hybrid.backgroundColor, 'rgba(0, 0, 0, 0)');
       await setAppLayout(browser.page, 'hybrid');
     });
 

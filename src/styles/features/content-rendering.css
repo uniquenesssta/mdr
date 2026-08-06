@@ -1,0 +1,36 @@
+/* Responsibility: KaTeX, task list and rendered Markdown content presentation. */
+
+.preview-content .katex-display {
+      margin: var(--space-2xl) 0;
+      padding: .45em var(--space-2xs);
+      overflow-x: auto;
+      overflow-y: hidden;
+}
+
+/* 任务列表 */
+.preview-content input[type="checkbox"] {
+      margin-right: var(--space-sm);
+      vertical-align: middle;
+}
+
+.preview-content li.task-item {
+      list-style: none;
+      margin-left: -1.4em;
+}
+
+.preview-content ul.task-list {
+      padding-left: 1.8em;
+}
+
+.f-raw-fallback {
+  white-space: pre-wrap;
+}
+
+.f-mermaid-svg {
+  max-width: 100%;
+  height: auto;
+  background: transparent;
+}
+
+/* KaTeX */
+.katex { font-size: 1.1em; }
