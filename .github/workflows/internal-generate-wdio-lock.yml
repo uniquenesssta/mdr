@@ -11,14 +11,10 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: internal-generate-wdio-lock-${{ github.ref_name }}
-  cancel-in-progress: true
-
 jobs:
   generate-lock:
     name: Generate debug WebDriver Cargo lock
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       REPOSITORY_DIRECTORY: repository
