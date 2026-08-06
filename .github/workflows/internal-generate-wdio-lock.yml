@@ -20,14 +20,23 @@ jobs:
     name: Generate debug WebDriver Cargo lock
     runs-on: ubuntu-22.04
     timeout-minutes: 20
+    env:
+      REPOSITORY_DIRECTORY: repository
     steps:
-      - name: Checkout branch
-        uses: actions/checkout@v4
-        with:
-          ref: rewrite/modular-rebuild
+      - name: Clone branch without marketplace actions
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git clone \
+            --branch rewrite/modular-rebuild \
+            --single-branch \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "$REPOSITORY_DIRECTORY"
 
       - name: Install declared Rust toolchain
         shell: bash
+        working-directory: repository
         run: |
           toolchain="$(sed -n 's/^rust-version = "\([^"]*\)"/\1/p' src-tauri/Cargo.toml)"
           test -n "$toolchain"
@@ -35,10 +44,12 @@ jobs:
           rustup default "$toolchain"
 
       - name: Generate Cargo lock
+        working-directory: repository
         run: cargo generate-lockfile --manifest-path src-tauri/Cargo.toml
 
       - name: Commit generated Cargo lock
         shell: bash
+        working-directory: repository
         run: |
           if git diff --quiet -- src-tauri/Cargo.lock; then
             echo 'Cargo.lock is already current.'
