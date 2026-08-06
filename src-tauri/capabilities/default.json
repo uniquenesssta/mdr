@@ -16,7 +16,6 @@
     "fs:allow-write-file",
     "core:window:allow-minimize",
     "core:window:allow-start-dragging",
-    "core:window:allow-toggle-maximize",
-    "wdio-webdriver:default"
+    "core:window:allow-toggle-maximize"
   ]
 }
