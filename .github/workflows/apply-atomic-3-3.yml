@@ -9,9 +9,7 @@ on:
       - scripts/stage-03/atomic-3-3-payload/**
 
 permissions:
-  actions: read
   contents: write
-  pull-requests: read
 
 concurrency:
   group: apply-atomic-3-3
@@ -20,9 +18,8 @@ concurrency:
 jobs:
   apply:
     runs-on: ubuntu-22.04
-    timeout-minutes: 55
+    timeout-minutes: 20
     env:
-      GH_TOKEN: ${{ github.token }}
       BRANCH_NAME: rewrite/modular-rebuild
     steps:
       - uses: actions/checkout@v4
@@ -48,13 +45,13 @@ jobs:
           node --check scripts/stage-03/record-platform-evidence.mjs
           node --test tests/unit/platform/invoke-client.test.mjs
           git diff --check
-      - name: Commit and push implementation
+      - name: Commit and push implementation source
         shell: bash
         run: |
+          git restore .github/workflows/stage-03-atomic.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
-            .github/workflows/stage-03-atomic.yml \
             scripts/stage-03/record-platform-evidence.mjs \
             src/platform/index.js \
             src/platform/desktop/invoke-client.js \
@@ -66,79 +63,4 @@ jobs:
             tests/unit/platform/invoke-client.test.mjs
           git diff --cached --check
           git commit -m "feat(platform): complete atomic task 3.3 invoke client"
-          IMPLEMENTATION_SHA=$(git rev-parse HEAD)
-          echo "IMPLEMENTATION_SHA=$IMPLEMENTATION_SHA" >> "$GITHUB_ENV"
-          git push origin HEAD:"$BRANCH_NAME"
-      - name: Wait for controlled verification
-        shell: bash
-        run: |
-          node <<'NODE'
-          const { execFileSync } = require('node:child_process');
-          const required = [
-            'Stage 0 Baseline Verification',
-            'Stage 1 Atomic Verification',
-            'Stage 2 Atomic Verification',
-            'Stage 3 Atomic Verification'
-          ];
-          const repository = process.env.GITHUB_REPOSITORY;
-          const sha = process.env.IMPLEMENTATION_SHA;
-          const deadline = Date.now() + 45 * 60 * 1000;
-          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-          const api = path => JSON.parse(execFileSync('gh', ['api', path], { encoding: 'utf8' }));
-          while (Date.now() < deadline) {
-            const payload = api(`/repos/${repository}/actions/runs?head_sha=${sha}&event=pull_request&per_page=100`);
-            const selected = new Map();
-            for (const run of payload.workflow_runs || []) {
-              if (!required.includes(run.name)) continue;
-              const previous = selected.get(run.name);
-              if (!previous || run.id > previous.id) selected.set(run.name, run);
-            }
-            const status = required.map(name => {
-              const run = selected.get(name);
-              return `${name}: ${run ? `${run.status}/${run.conclusion || '-'}` : 'missing'}`;
-            });
-            console.log(status.join('\n'));
-            if (required.every(name => selected.get(name)?.status === 'completed')) {
-              for (const name of required) {
-                const run = selected.get(name);
-                if (run.conclusion !== 'success') {
-                  throw new Error(`${name} failed: run ${run.id}, conclusion ${run.conclusion}`);
-                }
-                const envName = name.match(/Stage (\d)/)[1];
-                require('node:fs').appendFileSync(process.env.GITHUB_ENV, `STAGE${envName}_RUN_ID=${run.id}\n`);
-              }
-              const stage3 = selected.get('Stage 3 Atomic Verification');
-              const artifacts = api(`/repos/${repository}/actions/runs/${stage3.id}/artifacts?per_page=100`).artifacts || [];
-              const artifact = artifacts.find(item => item.name.startsWith('stage-03-platform-foundation-'));
-              if (!artifact) throw new Error(`Stage 3 evidence artifact missing for run ${stage3.id}`);
-              const digest = artifact.digest || '';
-              if (!digest) throw new Error(`Stage 3 evidence artifact digest missing for ${artifact.id}`);
-              const fs = require('node:fs');
-              fs.appendFileSync(process.env.GITHUB_ENV, `STAGE3_ARTIFACT_NAME=${artifact.name}\n`);
-              fs.appendFileSync(process.env.GITHUB_ENV, `STAGE3_ARTIFACT_ID=${artifact.id}\n`);
-              fs.appendFileSync(process.env.GITHUB_ENV, `STAGE3_ARTIFACT_DIGEST=${digest}\n`);
-              process.exit(0);
-            }
-            await sleep(15000);
-          }
-          throw new Error(`Timed out waiting for controlled verification of ${sha}`);
-          NODE
-      - name: Finalize README and progress record
-        shell: bash
-        run: |
-          git fetch origin "$BRANCH_NAME"
-          test "$(git rev-parse origin/$BRANCH_NAME)" = "$IMPLEMENTATION_SHA"
-          node /tmp/apply-atomic-3-3.mjs finalize
-          git diff --check
-          test ! -e .github/workflows/apply-atomic-3-3.yml
-          test ! -e scripts/stage-03/atomic-3-3-payload
-      - name: Commit finalized record and cleanup
-        shell: bash
-        run: |
-          git add -A README.md docs/rewrite-progress/stage-03/03-03-invoke-client.md \
-            .github/workflows/apply-atomic-3-3.yml scripts/stage-03/atomic-3-3-payload
-          git diff --cached --check
-          git commit -m "docs(platform): record atomic task 3.3 verification [skip ci]"
-          git fetch origin "$BRANCH_NAME"
-          test "$(git rev-parse origin/$BRANCH_NAME)" = "$IMPLEMENTATION_SHA"
           git push origin HEAD:"$BRANCH_NAME"
