@@ -42,6 +42,7 @@ if (-not (Test-Path $driverExecutable)) {
 }
 
 $driverDirectory | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+"MSEDGEDRIVER_PATH=$driverExecutable" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 "MSEDGEDRIVER_TELEMETRY_OPTOUT=1" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 "MSEDGEDRIVER_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
