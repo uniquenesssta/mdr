@@ -72,7 +72,7 @@ jobs:
         run: npm ci
 
       - name: Install pinned transient WebDriver client
-        run: npm install --no-save --no-package-lock webdriverio@9.30.0
+        run: npm install --no-save --no-package-lock selenium-webdriver@4.34.0
 
       - name: Build current frontend
         run: npm run build
@@ -121,9 +121,12 @@ jobs:
           if (-not (Test-Path $env:TAURI_DRIVER_PATH)) {
             throw "tauri-driver missing: $env:TAURI_DRIVER_PATH"
           }
+          if (-not (Test-Path $env:MSEDGEDRIVER_PATH)) {
+            throw "Microsoft Edge WebDriver missing: $env:MSEDGEDRIVER_PATH"
+          }
           Get-Item $env:MARKDOWN_EDITOR_BINARY
           Get-Item $env:TAURI_DRIVER_PATH
-          Get-Command msedgedriver.exe
+          Get-Item $env:MSEDGEDRIVER_PATH
 
       - name: Run native Windows window automation
         run: node tests/e2e/windows/run-window-automation.mjs
