@@ -39,7 +39,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
       RUST_BACKTRACE: '1'
-      MARKDOWN_EDITOR_BINARY: src-tauri/target/release/markdown-editor.exe
+      MARKDOWN_EDITOR_BINARY: src-tauri/target/debug/markdown-editor.exe
       TAURI_DRIVER_PATH: ${{ github.workspace }}\.cargo-bin\tauri-driver.exe
 
     steps:
@@ -77,8 +77,11 @@ jobs:
       - name: Build current frontend
         run: npm run build
 
-      - name: Build current Windows application
+      - name: Build current Windows release application
         run: cargo build --release --locked --manifest-path src-tauri/Cargo.toml
+
+      - name: Build WebDriver debug application
+        run: cargo build --locked --manifest-path src-tauri/Cargo.toml
 
       - name: Prepare Windows evidence directory
         shell: pwsh
@@ -90,6 +93,8 @@ jobs:
             runner = '${{ runner.os }}'
             image = '${{ runner.name }}'
             status = 'workflow-started'
+            releaseBinary = 'src-tauri/target/release/markdown-editor.exe'
+            webdriverBinary = $env:MARKDOWN_EDITOR_BINARY
           } | ConvertTo-Json | Set-Content -Path "$evidenceDirectory/workflow-bootstrap.json" -Encoding utf8
 
       - name: Install pinned tauri-driver
@@ -115,8 +120,12 @@ jobs:
       - name: Verify automation inputs
         shell: pwsh
         run: |
+          $releaseBinary = 'src-tauri/target/release/markdown-editor.exe'
+          if (-not (Test-Path $releaseBinary)) {
+            throw "Windows release application binary missing: $releaseBinary"
+          }
           if (-not (Test-Path $env:MARKDOWN_EDITOR_BINARY)) {
-            throw "Windows application binary missing: $env:MARKDOWN_EDITOR_BINARY"
+            throw "Windows WebDriver debug binary missing: $env:MARKDOWN_EDITOR_BINARY"
           }
           if (-not (Test-Path $env:TAURI_DRIVER_PATH)) {
             throw "tauri-driver missing: $env:TAURI_DRIVER_PATH"
@@ -124,6 +133,7 @@ jobs:
           if (-not (Test-Path $env:MSEDGEDRIVER_PATH)) {
             throw "Microsoft Edge WebDriver missing: $env:MSEDGEDRIVER_PATH"
           }
+          Get-Item $releaseBinary
           Get-Item $env:MARKDOWN_EDITOR_BINARY
           Get-Item $env:TAURI_DRIVER_PATH
           Get-Item $env:MSEDGEDRIVER_PATH
