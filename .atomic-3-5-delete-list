@@ -1,0 +1,10 @@
+.github/workflows/analyze-atomic-3-5.yml
+.github/workflows/apply-atomic-3-5.yml
+scripts/stage-03/atomic-3-5-payload/00.part
+scripts/stage-03/finalize-atomic-3-5.mjs
+.atomic-3-5-cleanup-placeholder
+.atomic-3-5-cleanup-instructions
+.atomic-3-5-cleanup-tree-note
+.atomic-3-5-do-not-keep
+.atomic-3-5-cleanup-final-marker
+.atomic-3-5-cleanup-final-final
