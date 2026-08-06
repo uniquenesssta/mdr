@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - rewrite/modular-rebuild
-    paths:
-      - .github/workflows/apply-windows-readme-migration.yml
-      - scripts/stage-03/windows-automation-payload.part-*
 
 permissions:
   contents: write
