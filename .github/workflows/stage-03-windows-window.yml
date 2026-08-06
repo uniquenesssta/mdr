@@ -1,0 +1,123 @@
+name: Stage 3 Windows Window Automation
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - .github/workflows/stage-03-windows-window.yml
+      - package.json
+      - package-lock.json
+      - public/app/events.js
+      - src/platform/desktop/window-client.js
+      - src/runtime/tauri.js
+      - src-tauri/**
+      - scripts/stage-03/windows/**
+      - tests/e2e/windows/**
+      - tests/windows-window-automation.test.mjs
+      - README.md
+      - docs/README.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-03-windows-window-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  windows-window:
+    name: Verify native Windows window lifecycle
+    runs-on: windows-2025
+    timeout-minutes: 90
+    env:
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: '1'
+      MARKDOWN_EDITOR_BINARY: src-tauri/target/release/markdown-editor.exe
+      TAURI_DRIVER_PATH: ${{ github.workspace }}\.cargo-bin\tauri-driver.exe
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install declared Rust toolchain
+        shell: pwsh
+        run: |
+          $manifest = Get-Content src-tauri/Cargo.toml -Raw
+          if ($manifest -notmatch 'rust-version\s*=\s*"([^"]+)"') {
+            throw 'src-tauri/Cargo.toml does not declare rust-version.'
+          }
+          $toolchain = $Matches[1]
+          rustup toolchain install $toolchain --profile minimal --no-self-update
+          rustup default $toolchain
+          rustc --version
+          cargo --version
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Install pinned transient WebDriver client
+        run: npm install --no-save --no-package-lock webdriverio@9.30.0
+
+      - name: Build current frontend
+        run: npm run build
+
+      - name: Build current Windows application
+        run: cargo build --release --locked --manifest-path src-tauri/Cargo.toml
+
+      - name: Install pinned tauri-driver
+        shell: pwsh
+        run: |
+          $installRoot = Join-Path $env:GITHUB_WORKSPACE '.cargo-bin'
+          New-Item -ItemType Directory -Force -Path $installRoot | Out-Null
+          cargo install tauri-driver --version 2.0.6 --locked --root $installRoot
+          & (Join-Path $installRoot 'bin\tauri-driver.exe') --version
+          Copy-Item (Join-Path $installRoot 'bin\tauri-driver.exe') (Join-Path $installRoot 'tauri-driver.exe') -Force
+
+      - name: Prepare Windows evidence directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path artifacts/stage-03/windows-window | Out-Null
+
+      - name: Install matching Microsoft Edge WebDriver
+        shell: pwsh
+        run: ./scripts/stage-03/windows/install-edge-driver.ps1
+
+      - name: Verify automation inputs
+        shell: pwsh
+        run: |
+          if (-not (Test-Path $env:MARKDOWN_EDITOR_BINARY)) {
+            throw "Windows application binary missing: $env:MARKDOWN_EDITOR_BINARY"
+          }
+          if (-not (Test-Path $env:TAURI_DRIVER_PATH)) {
+            throw "tauri-driver missing: $env:TAURI_DRIVER_PATH"
+          }
+          Get-Item $env:MARKDOWN_EDITOR_BINARY
+          Get-Item $env:TAURI_DRIVER_PATH
+          Get-Command msedgedriver.exe
+
+      - name: Run native Windows window automation
+        run: node tests/e2e/windows/run-window-automation.mjs
+
+      - name: Upload Windows window evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-03-windows-window-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-03/windows-window
+          if-no-files-found: error
+          retention-days: 30
