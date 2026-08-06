@@ -46,3 +46,14 @@ test('Stage 2 workflow verifies the shell cutover contract', async () => {
   assert.match(workflow, /Verify Atomic Task 2\.11 old shell cutover/);
   assert.match(workflow, /tests\/ui\/shell-cutover\.test\.mjs/);
 });
+
+
+test('Stage 2 evidence keeps its exact module scope while later stages add independent modules', async () => {
+  const recorder = await readText('scripts/stage-02/record-ui-foundation-evidence.mjs');
+  assert.match(recorder, /const stage2OwnedModulePaths = Object\.freeze/);
+  assert.match(recorder, /stage2OwnedModulePaths\.length !== 72/);
+  assert.match(recorder, /new Set\(stage2OwnedModulePaths\)\.size !== 72/);
+  assert.match(recorder, /stage2OwnedModuleCount: stage2OwnedModulePaths\.length/);
+  assert.match(recorder, /nextStage: hasStage3PlatformModules \? 'stage-03-started' : 'stage-03-not-started'/);
+  assert.doesNotMatch(recorder, /moduleFixture\.modules\.length !== 139/);
+});

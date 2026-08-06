@@ -165,12 +165,17 @@ const architectureModules = Object.freeze({
   uiComponents: moduleFixture.modules.filter(record => record[2] === 'ui-components').map(record => record[0]).sort(),
   uiCompatibility: moduleFixture.modules.filter(record => record[2] === 'ui-compatibility').map(record => record[0]).sort()
 });
+const stage2OwnedModulePaths = Object.freeze([
+  ...stylePaths,
+  ...Object.values(architectureModules).flat()
+].sort());
+const hasStage3PlatformModules = moduleFixture.modules.some(record => record[0].startsWith('src/platform/'));
 
 if (indexInventory.summary.inlineEventCount !== 0 || inlineEvents !== 184) throw new Error('HTML baseline drifted.');
 if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35 || sprite.duplicates.length || sprite.invalidIds.length || sprite.missingViewBoxes.length || sprite.forbiddenMarkup) throw new Error('SVG sprite contract drifted.');
 if (shellIconReferences.length !== 50 || !shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) throw new Error('Icon references drifted.');
 if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) throw new Error('Compatibility slot contract drifted.');
-if (moduleFixture.modules.length !== 139) throw new Error(`Unexpected production module count: ${moduleFixture.modules.length}`);
+if (stage2OwnedModulePaths.length !== 72 || new Set(stage2OwnedModulePaths).size !== 72) throw new Error(`Unexpected Stage 2-owned module count: ${stage2OwnedModulePaths.length}`);
 if (architectureModules.appShell.length !== 8 || architectureModules.domPrimitives.length !== 6 || architectureModules.uiComponents.length !== 2 || architectureModules.uiCompatibility.length !== 4) throw new Error('UI architecture counts drifted.');
 if (styleEntryModules.length !== 1 || layerModules.foundation.length !== 5 || layerModules.themes.length !== 2 || layerModules.shell.length !== 6 || layerModules.layout.length !== 6 || layerModules.components.length !== 12 || layerModules.features.length !== 20) throw new Error('Style layer counts drifted.');
 if (Object.keys(domPrimitives).sort().join(',') !== 'collectRequiredRefs,createEventScope,createFocusScope,createSafeElement,createTransitionVisibility,isElementRef,requireElementRef') throw new Error('DOM primitive exports drifted.');
@@ -228,7 +233,8 @@ const common = Object.freeze({
   runId: process.env.GITHUB_RUN_ID || null,
   attempt: process.env.GITHUB_RUN_ATTEMPT || null,
   currentStage2State: '2.11-completed',
-  nextStage: 'stage-03-not-started',
+  nextStage: hasStage3PlatformModules ? 'stage-03-started' : 'stage-03-not-started',
+  stage2OwnedModuleCount: stage2OwnedModulePaths.length,
   productionModuleCount: moduleFixture.modules.length,
   dependencyAuditDecision: Object.freeze({
     observed: '1 low / 1 high',
