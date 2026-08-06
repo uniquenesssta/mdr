@@ -155,16 +155,17 @@ test('legacy runtime delegates all nineteen native commands without changing com
   assert.match(source, /write_performance_logs[\s\S]*record: false/);
 });
 
-test('Stage 3 verification runs Atomic Task 3.3 before architecture and later adapters', async () => {
+test('Stage 3 verification runs Atomic Task 3.3 before dialog, architecture and later adapters', async () => {
   const workflow = await readFile(
     new URL('../../../.github/workflows/stage-03-atomic.yml', import.meta.url),
     'utf8'
   );
   const detectionIndex = workflow.indexOf('Verify Atomic Task 3.2 capability detection');
   const invokeIndex = workflow.indexOf('Verify Atomic Task 3.3 invoke client');
+  const dialogIndex = workflow.indexOf('Verify Atomic Task 3.4 dialog client');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && architectureIndex > invokeIndex);
+  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && architectureIndex > dialogIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/invoke-client\.test\.mjs/);
-  assert.match(workflow, /03-03-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[4-9]|Atomic Task 3\.1[0-9]/);
+  assert.match(workflow, /03-04-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.[5-9]|Atomic Task 3\.1[0-9]/);
 });

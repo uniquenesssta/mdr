@@ -1,7 +1,6 @@
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { confirm as showConfirmDialog, open as showOpenDialog, save as showSaveDialog } from '@tauri-apps/plugin-dialog';
-import { createInvokeClient, createRuntimeCapabilities, detectPlatformEnvironment } from '../platform/index.js';
+import { createDialogClient, createInvokeClient, createRuntimeCapabilities, detectPlatformEnvironment } from '../platform/index.js';
 
 const platformEnvironment = detectPlatformEnvironment(window);
 const capabilities = createRuntimeCapabilities(platformEnvironment, window);
@@ -10,26 +9,15 @@ const invokeClient = createInvokeClient({
   now: () => performance.now(),
   record: (operation, entry) => window.markdownEditorPerf?.record(operation, entry)
 });
+const dialogClient = createDialogClient({
+  now: () => performance.now(),
+  record: (operation, entry) => window.markdownEditorPerf?.record(operation, entry)
+});
 
 if (isAvailable) {
   document.documentElement.classList.add('tauri-shell');
 }
 
-
-function normalizeSaveFileName(name, extension = 'md', acceptedExtensions = [extension]) {
-  const fallback = `未命名文档.${extension}`;
-  const value = String(name || '').trim().replace(/[\\/:*?"<>|]+/g, '_');
-  if (!value) return fallback;
-  const hasAcceptedExtension = acceptedExtensions.some(item => new RegExp(`\\.${item}$`, 'i').test(value));
-  return hasAcceptedExtension ? value : `${value}.${extension}`;
-}
-
-function joinNativePath(directory, fileName) {
-  const base = String(directory || '').trim().replace(/[\\/]+$/, '');
-  if (!base) return String(fileName || '');
-  const separator = base.includes('\\') && !base.includes('/') ? '\\' : '/';
-  return `${base}${separator}${fileName}`;
-}
 
 function bytesToBase64(bytes) {
   const chunkSize = 32 * 1024;
@@ -175,71 +163,15 @@ window.markdownEditorNative = {
   },
   async chooseOpenPath(options = {}) {
     if (!isAvailable) return null;
-    const started = performance.now();
-    const selectedPath = await showOpenDialog({
-      title: String(options.title || '打开 Markdown'),
-      multiple: false,
-      directory: false,
-      filters: [{
-        name: String(options.filterName || 'Markdown 和文本文件'),
-        extensions: Array.isArray(options.extensions) && options.extensions.length
-          ? options.extensions.map(item => String(item).replace(/^\./, '')).filter(Boolean)
-          : ['md', 'markdown', 'txt']
-      }]
-    });
-    window.markdownEditorPerf?.record('native.open-file-dialog', {
-      category: 'native.dialog',
-      durationMs: performance.now() - started,
-      status: selectedPath ? 'ok' : 'cancelled'
-    });
-    return typeof selectedPath === 'string' ? selectedPath : null;
+    return dialogClient.openFile(options);
   },
   async chooseDirectoryPath(options = {}) {
     if (!isAvailable) return null;
-    const started = performance.now();
-    const selectedPath = await showOpenDialog({
-      title: String(options.title || '选择目录'),
-      multiple: false,
-      directory: true,
-      defaultPath: String(options.defaultPath || '').trim() || undefined
-    });
-    window.markdownEditorPerf?.record('native.open-directory-dialog', {
-      category: 'native.dialog',
-      durationMs: performance.now() - started,
-      status: selectedPath ? 'ok' : 'cancelled'
-    });
-    return typeof selectedPath === 'string' ? selectedPath : null;
+    return dialogClient.openDirectory(options);
   },
   async chooseSavePath(preferredName, options = {}) {
     if (!isAvailable) return null;
-    const extension = String(options.extension || 'md').replace(/^\./, '') || 'md';
-    const acceptedExtensions = (Array.isArray(options.extensions) && options.extensions.length
-      ? options.extensions
-      : [extension])
-      .map(item => String(item).replace(/^\./, '').trim())
-      .filter(Boolean);
-    const defaultName = normalizeSaveFileName(preferredName, extension, acceptedExtensions);
-    const defaultPath = joinNativePath(options.defaultDirectory, defaultName);
-    const started = performance.now();
-    const selectedPath = await showSaveDialog({
-      title: String(options.title || '另存为'),
-      defaultPath,
-      filters: [{
-        name: String(options.filterName || 'Markdown 文档'),
-        extensions: Array.isArray(options.extensions) && options.extensions.length
-          ? options.extensions.map(item => String(item).replace(/^\./, '')).filter(Boolean)
-          : [extension, 'markdown']
-      }]
-    });
-    window.markdownEditorPerf?.record('native.save-file-dialog', {
-      category: 'native.dialog',
-      durationMs: performance.now() - started,
-      status: selectedPath ? 'ok' : 'cancelled',
-      details: { extension }
-    });
-    if (!selectedPath) return null;
-    const hasAcceptedExtension = acceptedExtensions.some(item => new RegExp(`\\.${item}$`, 'i').test(selectedPath));
-    return hasAcceptedExtension ? selectedPath : `${selectedPath}.${extension}`;
+    return dialogClient.saveFile(preferredName, options);
   },
   async writeTextFile(path, content, details = {}) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
@@ -276,12 +208,7 @@ window.markdownEditorNative = {
   },
   async confirmAction(message, options = {}) {
     if (!isAvailable) return window.confirm(String(message || ''));
-    return showConfirmDialog(String(message || ''), {
-      title: String(options.title || 'Markdown Editor'),
-      kind: options.kind || 'warning',
-      okLabel: String(options.okLabel || '确定'),
-      cancelLabel: String(options.cancelLabel || '取消')
-    });
+    return dialogClient.confirm(message, options);
   },
   async onDragDrop(handler) {
     if (!isAvailable) return null;

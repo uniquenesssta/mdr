@@ -124,11 +124,13 @@ test('Stage 3 verification keeps the 3.1 contract before later platform checks',
   const portsIndex = workflow.indexOf('Verify Atomic Task 3.1 platform ports');
   const detectionIndex = workflow.indexOf('Verify Atomic Task 3.2 capability detection');
   const invokeIndex = workflow.indexOf('Verify Atomic Task 3.3 invoke client');
-  assert.ok(portsIndex >= 0 && detectionIndex > portsIndex && invokeIndex > detectionIndex);
+  const dialogIndex = workflow.indexOf('Verify Atomic Task 3.4 dialog client');
+  assert.ok(portsIndex >= 0 && detectionIndex > portsIndex && invokeIndex > detectionIndex && dialogIndex > invokeIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/invoke-client\.test\.mjs/);
-  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-03-architecture-scan\.json/);
+  assert.match(workflow, /node --test tests\/unit\/platform\/dialog-client\.test\.mjs/);
+  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-04-architecture-scan\.json/);
   assert.match(workflow, /scripts\/stage-03\/record-platform-evidence\.mjs/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[4-9]|Atomic Task 3\.1[0-9]/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.[5-9]|Atomic Task 3\.1[0-9]/);
 });
 
 test('the frozen legacy capability inventory maps every old native method to declared ports', async () => {
