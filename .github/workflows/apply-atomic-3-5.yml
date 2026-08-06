@@ -38,6 +38,19 @@ jobs:
           echo '098fb07e9354682e8b187d35637c8b32c740f441e02aed275086e391e600c794  /tmp/atomic-3-5-payload.gz' | sha256sum -c -
           gzip -d -c /tmp/atomic-3-5-payload.gz > /tmp/apply-atomic-3-5.mjs
           echo '152ff10934ad4d14333a8a41a442631d4d758e1b5124a7d781c54e24aef8f628  /tmp/apply-atomic-3-5.mjs' | sha256sum -c -
+          python - <<'PY'
+          path = '/tmp/apply-atomic-3-5.mjs'
+          source = open(path, encoding='utf-8').read()
+          source = source.replace(
+              "  assert.throws(() => client.subscribeResize(() => {}), /window client is destroyed/);",
+              "  await assert.rejects(client.subscribeResize(() => {}), /window client is destroyed/);"
+          )
+          source = source.replace(
+              "  assert.throws(() => invalidHandler.subscribeResize(null), /handler must be a function/);",
+              "  await assert.rejects(invalidHandler.subscribeResize(null), /handler must be a function/);"
+          )
+          open(path, 'w', encoding='utf-8').write(source)
+          PY
           node --check /tmp/apply-atomic-3-5.mjs
       - name: Inspect task state
         id: state
