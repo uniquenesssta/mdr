@@ -25,10 +25,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: stage-03-windows-window-${{ github.event.pull_request.head.ref || github.ref_name }}
+  group: stage-03-windows-window-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -135,81 +135,3 @@ jobs:
           path: artifacts/stage-03/windows-window
           if-no-files-found: error
           retention-days: 30
-
-  # BEGIN INTERNAL CONCURRENCY REPAIR
-  repair-concurrency:
-    name: Repair verification concurrency keys
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - name: Patch latest branch and self-clean
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          git clone \
-            --branch rewrite/modular-rebuild \
-            --single-branch \
-            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-            repository
-          cd repository
-          python3 - <<'PY'
-          from pathlib import Path
-
-          replacements = {
-              '.github/workflows/stage-00-baseline.yml': (
-                  '  group: stage-00-${{ github.event.pull_request.head.ref || github.ref_name }}',
-                  '  group: stage-00-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.event.pull_request.head.sha || github.sha }}',
-              ),
-              '.github/workflows/stage-01-atomic.yml': (
-                  '  group: stage-01-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}',
-                  '  group: stage-01-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.event.pull_request.head.sha || github.sha }}',
-              ),
-              '.github/workflows/stage-02-atomic.yml': (
-                  '  group: stage-02-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}',
-                  '  group: stage-02-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.event.pull_request.head.sha || github.sha }}',
-              ),
-              '.github/workflows/stage-03-atomic.yml': (
-                  '  group: stage-03-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}',
-                  '  group: stage-03-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.event.pull_request.head.sha || github.sha }}',
-              ),
-              '.github/workflows/stage-03-windows-window.yml': (
-                  '  group: stage-03-windows-window-${{ github.event.pull_request.head.ref || github.ref_name }}',
-                  '  group: stage-03-windows-window-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.event.pull_request.head.sha || github.sha }}',
-              ),
-          }
-
-          for file_name, (old, new) in replacements.items():
-              path = Path(file_name)
-              text = path.read_text(encoding='utf-8')
-              if text.count(old) != 1:
-                  raise SystemExit(f'{file_name}: expected exactly one original concurrency key')
-              path.write_text(text.replace(old, new), encoding='utf-8')
-
-          windows_path = Path('.github/workflows/stage-03-windows-window.yml')
-          windows_text = windows_path.read_text(encoding='utf-8')
-          begin = '  # BEGIN INTERNAL CONCURRENCY REPAIR\n'
-          end = '  # END INTERNAL CONCURRENCY REPAIR\n'
-          if windows_text.count(begin) != 1 or windows_text.count(end) != 1:
-              raise SystemExit('Windows workflow repair block markers are missing or ambiguous')
-          start_index = windows_text.index(begin)
-          end_index = windows_text.index(end, start_index) + len(end)
-          windows_text = windows_text[:start_index] + windows_text[end_index:]
-          windows_text = windows_text.replace(
-              'permissions:\n  contents: write',
-              'permissions:\n  contents: read',
-              1,
-          )
-          windows_path.write_text(windows_text, encoding='utf-8')
-
-          temporary_workflow = Path('.github/workflows/internal-isolate-ci-concurrency.yml')
-          if temporary_workflow.exists():
-              temporary_workflow.unlink()
-          PY
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .github/workflows
-          git commit -m 'ci: isolate verification concurrency by commit'
-          git push origin HEAD:rewrite/modular-rebuild
-  # END INTERNAL CONCURRENCY REPAIR
