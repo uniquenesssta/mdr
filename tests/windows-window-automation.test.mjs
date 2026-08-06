@@ -63,9 +63,11 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
     'resizeDisposer',
     'isWindowMaximized',
     'destroyWindow',
-    'waitForProcessExit'
+    'waitForProcessExit',
+    'waitForNativeWindow',
+    'snapshot.pid === child.pid'
   ]) {
-    assert.match(runner, new RegExp(contract));
+    assert.match(runner, new RegExp(contract.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
 
   assert.match(runner, /withEmbeddedSession/);
@@ -76,6 +78,10 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(sessionOwner, /\/status/);
   assert.match(sessionOwner, /setBrowserName\('tauri'\)/);
   assert.match(sessionOwner, /Builder, By, Capabilities/);
+  assert.match(sessionOwner, /getAllWindowHandles\(\)/);
+  assert.match(sessionOwner, /switchTo\(\)\.window/);
+  assert.match(sessionOwner, /isWindowStartupRace/);
+  assert.match(sessionOwner, /assertApplicationRunning/);
   assert.doesNotMatch(sessionOwner, /tauri:options|--native-driver|node:net/);
 
   assert.match(nativeHelper, /GetWindowPlacement/);
