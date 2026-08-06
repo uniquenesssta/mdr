@@ -200,6 +200,27 @@ export class CdpPage {
     throw new Error(`Timed out waiting for ${description}${lastError ? `: ${lastError.message}` : ''}`);
   }
 
+  async setViewport(options = {}) {
+    const width = Math.round(Number(options.width));
+    const height = Math.round(Number(options.height));
+    const deviceScaleFactor = Number(options.deviceScaleFactor) || 1;
+    if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
+      throw new TypeError('Viewport width and height must be positive finite numbers');
+    }
+    await this.connection.send('Emulation.setDeviceMetricsOverride', {
+      width,
+      height,
+      deviceScaleFactor,
+      mobile: false,
+      screenWidth: width,
+      screenHeight: height,
+      positionX: 0,
+      positionY: 0
+    });
+    await this.evaluate(`new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))`);
+    return { width, height, deviceScaleFactor };
+  }
+
   async elementRect(selector) {
     const encoded = JSON.stringify(selector);
     const rect = await this.evaluate(`(() => {

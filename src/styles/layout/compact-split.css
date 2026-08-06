@@ -2,6 +2,12 @@
 
 /* 移动端 */
 @media (max-width: 768px) {
+      .l-workspace,
+      .l-split-pane,
+      .l-pane {
+        min-width: 0;
+        min-height: 0;
+      }
       .l-toolbar-shell { padding: var(--space-sm); gap: var(--space-md); }
       .l-toolbar-shell .format-group, .l-toolbar-shell .editor-actions { gap: 3px; padding: 3px; }
       .l-toolbar-shell button span { display: none; }

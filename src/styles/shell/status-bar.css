@@ -31,6 +31,8 @@
       display: flex;
       align-items: center;
       justify-content: flex-start;
+      min-width: 0;
+      overflow: hidden;
       gap: 18px;
       padding: 5px var(--space-2xl);
       background: var(--color-canvas);
@@ -42,8 +44,17 @@
 .statusbar-left {
   display: inline-flex;
   align-items: center;
+  flex: 0 1 auto;
   gap: var(--space-lg);
   min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.l-status-bar .save-hint,
+.statusbar-format {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .statusbar-left .f-status-message {

@@ -186,17 +186,53 @@ if (darkTokenNames.some(name => !lightTokenNames.includes(name))) throw new Erro
 if (styleSources.some(record => record.source.split('\n').length > 380)) throw new Error('Style responsibility module exceeds the bounded size.');
 if (styleSources.some(record => !record.path.endsWith('/foundation/tokens.css') && !record.path.includes('/themes/') && !/^\/\* Responsibility: [^\n]+ \*\//.test(record.source))) throw new Error('Style responsibility header missing.');
 
+const responsiveShellReportPath = 'artifacts/stage-02/browser-app/responsive-shell-report.json';
+const expectedResponsiveViewports = Object.freeze([
+  Object.freeze({ name: 'desktop-1280', width: 1280, height: 800, compact: false }),
+  Object.freeze({ name: 'desktop-900', width: 900, height: 700, compact: false }),
+  Object.freeze({ name: 'compact-720', width: 720, height: 700, compact: true }),
+  Object.freeze({ name: 'compact-600', width: 600, height: 700, compact: true }),
+  Object.freeze({ name: 'short-900x480', width: 900, height: 480, compact: false }),
+  Object.freeze({ name: 'short-600x480', width: 600, height: 480, compact: true })
+]);
+
+async function readResponsiveShellReport() {
+  try {
+    return JSON.parse(await readText(responsiveShellReportPath));
+  } catch (error) {
+    if (error?.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+const responsiveShellReport = await readResponsiveShellReport();
+if (responsiveShellReport) {
+  if (!Array.isArray(responsiveShellReport) || responsiveShellReport.length !== expectedResponsiveViewports.length) {
+    throw new Error('Responsive shell report matrix drifted.');
+  }
+  for (const [index, snapshot] of responsiveShellReport.entries()) {
+    const expected = expectedResponsiveViewports[index];
+    if (JSON.stringify(snapshot.viewport) !== JSON.stringify(expected)) throw new Error(`Responsive viewport drifted at index ${index}.`);
+    if (snapshot.actualViewport?.width !== expected.width || snapshot.actualViewport?.height !== expected.height) throw new Error(`Responsive viewport metrics drifted for ${expected.name}.`);
+    if (snapshot.document?.scrollWidth > expected.width + 1 || snapshot.document?.bodyScrollWidth > expected.width + 1) throw new Error(`Responsive document overflow detected for ${expected.name}.`);
+    if (snapshot.pageScroll?.x !== 0 || snapshot.pageScroll?.y !== 0) throw new Error(`Responsive page scroll detected for ${expected.name}.`);
+    if (snapshot.states?.compact !== expected.compact || snapshot.states?.sidebarHidden !== expected.compact) throw new Error(`Responsive compact-shell state drifted for ${expected.name}.`);
+    if (!Array.isArray(snapshot.viewportIssues) || snapshot.viewportIssues.length) throw new Error(`Responsive structural issue detected for ${expected.name}.`);
+    if (!Array.isArray(snapshot.focusIssues) || snapshot.focusIssues.length) throw new Error(`Responsive focus issue detected for ${expected.name}.`);
+  }
+}
+
 const common = Object.freeze({
   status: 'passed',
   commit: process.env.GITHUB_SHA || null,
   runId: process.env.GITHUB_RUN_ID || null,
   attempt: process.env.GITHUB_RUN_ATTEMPT || null,
-  currentStage2State: '2.9-completed',
-  nextAtomicTask: '2.10-not-started',
+  currentStage2State: '2.10-completed',
+  nextAtomicTask: '2.11-not-started',
   productionModuleCount: moduleFixture.modules.length,
   dependencyAuditDecision: Object.freeze({
     observed: '1 low / 1 high',
-    changedInTask29: false,
+    changedInTask210: false,
     decision: 'deferred-until-final-local-real-device-testing'
   })
 });
@@ -276,5 +312,33 @@ await record('02-09-style-layering-evidence.json', {
     'legacy-classes-remain-only-to-preserve-unmigrated-feature-query-contracts',
     'theme-switch-and-layout-behavior-remain-compatible',
     'responsive-multi-viewport-acceptance-remains-atomic-task-2.10'
+  ]
+});
+
+await record('02-10-responsive-shell-evidence.json', {
+  node: 'stage-02/02-10',
+  scope: 'responsive-app-shell-structure-and-focus-verification',
+  requiredViewports: expectedResponsiveViewports,
+  runtimeReport: responsiveShellReport
+    ? {
+        status: 'passed',
+        path: responsiveShellReportPath,
+        snapshotCount: responsiveShellReport.length,
+        viewportIssueCount: responsiveShellReport.reduce((sum, snapshot) => sum + snapshot.viewportIssues.length, 0),
+        focusIssueCount: responsiveShellReport.reduce((sum, snapshot) => sum + snapshot.focusIssues.length, 0)
+      }
+    : {
+        status: 'not-run-in-current-environment',
+        path: responsiveShellReportPath,
+        reason: 'built-application-browser-report-not-present'
+      },
+  structuralContracts: [
+    '1280-900-720-600-required-widths',
+    '480-required-short-height',
+    'no-document-horizontal-overflow',
+    'no-shell-region-outside-viewport',
+    'no-clipped-visible-focus-targets',
+    'compact-shell-state-matches-viewport-contract',
+    'responsive-validation-does-not-create-business-behavior'
   ]
 });

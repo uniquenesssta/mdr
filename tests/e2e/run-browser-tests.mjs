@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +18,15 @@ const artifactRoot = process.env.E2E_ARTIFACT_DIR
   ? resolve(process.env.E2E_ARTIFACT_DIR)
   : await mkdtemp(join(tmpdir(), 'markdown-editor-e2e-artifacts-'));
 await mkdir(artifactRoot, { recursive: true });
+
+const RESPONSIVE_SHELL_VIEWPORTS = Object.freeze([
+  Object.freeze({ name: 'desktop-1280', width: 1280, height: 800, compact: false }),
+  Object.freeze({ name: 'desktop-900', width: 900, height: 700, compact: false }),
+  Object.freeze({ name: 'compact-720', width: 720, height: 700, compact: true }),
+  Object.freeze({ name: 'compact-600', width: 600, height: 700, compact: true }),
+  Object.freeze({ name: 'short-900x480', width: 900, height: 480, compact: false }),
+  Object.freeze({ name: 'short-600x480', width: 600, height: 480, compact: true })
+]);
 
 const results = [];
 let activePage = null;
@@ -269,6 +278,137 @@ async function appSnapshot(page) {
   })()`);
 }
 
+async function applyResponsiveViewport(page, viewport) {
+  await page.setViewport({ width: 1200, height: 720 });
+  await page.waitFor(() => window.innerWidth === 1200 && window.innerHeight === 720, {
+    description: 'responsive viewport reset'
+  });
+  await page.setViewport(viewport);
+  await page.waitFor(`(()=>window.innerWidth===${viewport.width}&&window.innerHeight===${viewport.height})()`, {
+    description: `responsive viewport ${viewport.name}`
+  });
+  await page.evaluate(`new Promise(resolve=>setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(resolve)),180))`);
+}
+
+async function inspectResponsiveShell(page, viewport) {
+  const payload = JSON.stringify(viewport);
+  return page.evaluate(`(async()=>{
+    const viewport=${payload};
+    scrollTo(0,0);
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const shell=document.querySelector('.l-app-shell');
+    const selectors={
+      shell:'.l-app-shell',
+      menu:'.l-menu-bar',
+      toolbar:'.l-toolbar-shell',
+      workspace:'.l-workspace',
+      main:'.l-split-pane',
+      status:'.l-status-bar'
+    };
+    const round=value=>Math.round(Number(value||0)*1000)/1000;
+    const toRect=element=>{
+      if(!element)return null;
+      const rect=element.getBoundingClientRect();
+      return {left:round(rect.left),top:round(rect.top),right:round(rect.right),bottom:round(rect.bottom),width:round(rect.width),height:round(rect.height)};
+    };
+    const regions=Object.fromEntries(Object.entries(selectors).map(([name,selector])=>{
+      const element=document.querySelector(selector);
+      const style=element?getComputedStyle(element):null;
+      return [name,element?{
+        rect:toRect(element),
+        clientWidth:element.clientWidth,
+        clientHeight:element.clientHeight,
+        scrollWidth:element.scrollWidth,
+        scrollHeight:element.scrollHeight,
+        overflowX:style?.overflowX||'',
+        overflowY:style?.overflowY||'',
+        display:style?.display||'',
+        flexDirection:style?.flexDirection||''
+      }:null];
+    }));
+    const viewportIssues=[];
+    for(const [name,region] of Object.entries(regions)){
+      const rect=region?.rect;
+      if(!rect){viewportIssues.push({name,reason:'missing'});continue;}
+      if(rect.left < -1 || rect.right > innerWidth + 1 || rect.top < -1 || rect.bottom > innerHeight + 1){
+        viewportIssues.push({name,reason:'outside-viewport',rect});
+      }
+      if(region.scrollWidth > region.clientWidth + 1){
+        viewportIssues.push({name,reason:'horizontal-overflow',clientWidth:region.clientWidth,scrollWidth:region.scrollWidth,overflowX:region.overflowX});
+      }
+    }
+    const focusSelector=[
+      '.l-menu-bar button:not([disabled])',
+      '.l-toolbar-shell button:not([disabled])',
+      '.l-toolbar-shell input:not([disabled])',
+      '.l-toolbar-shell select:not([disabled])',
+      '.l-split-pane .collapse-btn:not([disabled])'
+    ].join(',');
+    const focusables=Array.from(document.querySelectorAll(focusSelector)).filter(element=>{
+      const style=getComputedStyle(element);
+      const rect=element.getBoundingClientRect();
+      return style.display!=='none'&&style.visibility!=='hidden'&&rect.width>0&&rect.height>0;
+    });
+    const focusIssues=[];
+    for(const [index,element] of focusables.entries()){
+      element.focus({preventScroll:true});
+      await new Promise(resolve=>requestAnimationFrame(resolve));
+      const rect=element.getBoundingClientRect();
+      const clippedBy=[];
+      let ancestor=element.parentElement;
+      while(ancestor&&ancestor!==shell?.parentElement){
+        const style=getComputedStyle(ancestor);
+        if(/hidden|clip|auto|scroll/.test(String(style.overflowX)+' '+String(style.overflowY))){
+          const boundary=ancestor.getBoundingClientRect();
+          if(rect.left < boundary.left - 1 || rect.right > boundary.right + 1 || rect.top < boundary.top - 1 || rect.bottom > boundary.bottom + 1){
+            clippedBy.push(ancestor.id||ancestor.className||ancestor.tagName);
+          }
+        }
+        ancestor=ancestor.parentElement;
+      }
+      const active=document.activeElement===element;
+      const outside=rect.left < -1 || rect.right > innerWidth + 1 || rect.top < -1 || rect.bottom > innerHeight + 1;
+      if(!active||outside||clippedBy.length){
+        focusIssues.push({
+          index,
+          target:element.id||element.getAttribute('aria-label')||element.getAttribute('title')||String(element.textContent||'').trim().slice(0,48),
+          active,
+          outside,
+          clippedBy,
+          rect:toRect(element)
+        });
+      }
+    }
+    const pageScroll={x:round(scrollX),y:round(scrollY)};
+    if(pageScroll.x!==0||pageScroll.y!==0){
+      viewportIssues.push({name:'document',reason:'page-scroll',pageScroll});
+    }
+    return {
+      viewport,
+      pageScroll,
+      actualViewport:{width:innerWidth,height:innerHeight},
+      document:{
+        clientWidth:document.documentElement.clientWidth,
+        clientHeight:document.documentElement.clientHeight,
+        scrollWidth:document.documentElement.scrollWidth,
+        scrollHeight:document.documentElement.scrollHeight,
+        bodyScrollWidth:document.body.scrollWidth,
+        bodyScrollHeight:document.body.scrollHeight
+      },
+      states:{
+        compact:document.documentElement.classList.contains('is-compact-shell'),
+        toolbarWrapped:document.querySelector('.l-toolbar-shell')?.classList.contains('toolbar-boundary-wrap')||false,
+        sidebarHidden:document.querySelector('.l-sidebar')?.classList.contains('is-hidden')||false,
+        compactSplit:document.querySelector('.l-split-pane')?.classList.contains('is-compact-split')||false
+      },
+      regions,
+      focusableCount:focusables.length,
+      viewportIssues,
+      focusIssues
+    };
+  })()`);
+}
+
 async function runAppSuite() {
   const browser = await launchChromium({ width: 1440, height: 1000 });
   const virtualHost = externalUrl ? null : await installVirtualFileHost(browser.page, {
@@ -459,6 +599,12 @@ async function runAppSuite() {
         if(detail.error)throw detail.error;
       })()`);
       await browser.page.waitFor(() => document.getElementById('export-progress-modal')?.style.display === 'none');
+      await browser.page.evaluate(`(()=>{
+        const source=document.getElementById('modal-shell-focus-source');
+        if(document.activeElement===source)source.blur();
+        source?.remove();
+        scrollTo(0,0);
+      })()`);
     });
 
     await test('application link preview uses scoped focus and cancels stale close completion', async () => {
@@ -494,6 +640,12 @@ async function runAppSuite() {
       await browser.page.evaluate("window.markdownEditorLinkPreview.close('dom-primitive-test')");
       await browser.page.waitFor(() => document.activeElement?.id === 'dom-primitive-focus-source', { description: 'link preview focus restoration' });
       assert.equal(await browser.page.evaluate('window.markdownEditorLinkPreview.isOpen()'), false);
+      await browser.page.evaluate(`(()=>{
+        const source=document.getElementById('dom-primitive-focus-source');
+        if(document.activeElement===source)source.blur();
+        source?.remove();
+        scrollTo(0,0);
+      })()`);
     });
 
     await loadAppFixture(browser.page);
@@ -509,6 +661,56 @@ async function runAppSuite() {
         }
       }
       await setAppLayout(browser.page, 'hybrid');
+    });
+
+
+    await test('application shell has no structural overflow or clipped focus across required viewports', async () => {
+      const report = [];
+      try {
+        await browser.page.setViewport({ width: 1200, height: 720 });
+        await browser.page.waitFor(() => !document.documentElement.classList.contains('is-compact-shell'), {
+          description: 'wide shell before responsive verification'
+        });
+        await setAppLayout(browser.page, 'both');
+        await browser.page.evaluate(`(()=>{
+          const sidebar=document.querySelector('.l-sidebar');
+          if(sidebar?.classList.contains('is-hidden')) toggleSidebar();
+        })()`);
+        for (const viewport of RESPONSIVE_SHELL_VIEWPORTS) {
+          await applyResponsiveViewport(browser.page, viewport);
+          report.push(await inspectResponsiveShell(browser.page, viewport));
+        }
+        await writeFile(join(artifactRoot, 'responsive-shell-report.json'), `${JSON.stringify(report, null, 2)}\n`);
+        for (const snapshot of report) {
+          const context = JSON.stringify(snapshot);
+          assert.deepEqual(snapshot.actualViewport, {
+            width: snapshot.viewport.width,
+            height: snapshot.viewport.height
+          }, context);
+          assert.equal(snapshot.document.scrollWidth <= snapshot.viewport.width + 1, true, context);
+          assert.equal(snapshot.document.bodyScrollWidth <= snapshot.viewport.width + 1, true, context);
+          assert.equal(snapshot.states.compact, snapshot.viewport.compact, context);
+          assert.equal(snapshot.states.sidebarHidden, snapshot.viewport.compact, context);
+          if (snapshot.viewport.width <= 768) {
+            assert.equal(snapshot.states.toolbarWrapped, true, context);
+            assert.equal(snapshot.regions.main.flexDirection, 'column', context);
+          } else {
+            assert.equal(snapshot.regions.main.flexDirection, 'row', context);
+          }
+          assert.equal(snapshot.regions.shell.rect.height, snapshot.viewport.height, context);
+          assert.ok(snapshot.regions.workspace.rect.height >= 80, context);
+          assert.ok(snapshot.regions.main.rect.width > 0 && snapshot.regions.main.rect.height >= 48, context);
+          assert.ok(snapshot.focusableCount > 0, context);
+          assert.deepEqual(snapshot.viewportIssues, [], context);
+          assert.deepEqual(snapshot.focusIssues, [], context);
+        }
+      } finally {
+        await browser.page.setViewport({ width: 1440, height: 1000 });
+        await browser.page.waitFor(() => window.innerWidth === 1440 && window.innerHeight === 1000, {
+          description: 'restore default application viewport'
+        });
+        await setAppLayout(browser.page, 'hybrid');
+      }
     });
 
     await test('application code block placeholder never receives a phantom source highlight', async () => {

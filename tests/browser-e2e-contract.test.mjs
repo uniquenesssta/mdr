@@ -17,7 +17,8 @@ test('browser E2E runner stays dependency-free and covers required interactions'
     'source editing closes on an outside pointer action',
     'layout switching closes active component editing',
     'application theme switch changes visual tokens without changing shell geometry',
-    'application mounts one App Shell with strict named slots'
+    'application mounts one App Shell with strict named slots',
+    'application shell has no structural overflow or clipped focus across required viewports'
   ]) assert.ok(runner.includes(phrase), `missing browser scenario: ${phrase}`);
   assert.match(runner, /node:assert\/strict/);
   assert.doesNotMatch(runner, /playwright|puppeteer|selenium-webdriver/i);
