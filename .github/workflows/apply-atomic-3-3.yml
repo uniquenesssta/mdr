@@ -6,7 +6,7 @@ on:
       - rewrite/modular-rebuild
     paths:
       - .github/workflows/apply-atomic-3-3.yml
-      - scripts/stage-03/apply-atomic-3-3.payload.b64
+      - scripts/stage-03/atomic-3-3-payload/**
 
 permissions:
   actions: read
@@ -36,7 +36,7 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
       - name: Decode Atomic Task implementation
-        run: base64 -d scripts/stage-03/apply-atomic-3-3.payload.b64 | gzip -d > /tmp/apply-atomic-3-3.mjs
+        run: cat scripts/stage-03/atomic-3-3-payload/*.part | base64 -d | gzip -d > /tmp/apply-atomic-3-3.mjs
       - name: Apply Atomic Task 3.3
         run: node /tmp/apply-atomic-3-3.mjs apply
       - name: Verify implementation before commit
@@ -131,12 +131,12 @@ jobs:
           node /tmp/apply-atomic-3-3.mjs finalize
           git diff --check
           test ! -e .github/workflows/apply-atomic-3-3.yml
-          test ! -e scripts/stage-03/apply-atomic-3-3.payload.b64
+          test ! -e scripts/stage-03/atomic-3-3-payload
       - name: Commit finalized record and cleanup
         shell: bash
         run: |
           git add -A README.md docs/rewrite-progress/stage-03/03-03-invoke-client.md \
-            .github/workflows/apply-atomic-3-3.yml scripts/stage-03/apply-atomic-3-3.payload.b64
+            .github/workflows/apply-atomic-3-3.yml scripts/stage-03/atomic-3-3-payload
           git diff --cached --check
           git commit -m "docs(platform): record atomic task 3.3 verification [skip ci]"
           git fetch origin "$BRANCH_NAME"
