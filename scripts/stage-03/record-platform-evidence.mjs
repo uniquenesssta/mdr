@@ -235,8 +235,8 @@ if (dialogResults.openFile !== '/tmp/evidence.md' || dialogResults.openDirectory
 if (dialogResults.saveFile !== '/tmp/evidence.md' || dialogResults.confirm !== false) process.exit(1);
 if (dialogTelemetry.length !== 3 || dialogTelemetry[1].entry.status !== 'cancelled') process.exit(1);
 if (!toggledMaximized || !maximized) process.exit(1);
-if (windowCalls.length !== 10 || windowDisposals.join(',') !== 'close,resize') process.exit(1);
-if (windowCalls[4].handler !== resizeHandler || windowCalls[5].handler !== closeHandler) process.exit(1);
+if (windowCalls.length !== 9 || windowDisposals.join(',') !== 'close,resize') process.exit(1);
+if (windowCalls[5].handler !== resizeHandler || windowCalls[6].handler !== closeHandler) process.exit(1);
 if (browserEnvironment.kind !== 'browser' || desktopEnvironment.kind !== 'desktop') process.exit(1);
 if (!Object.isFrozen(browserEnvironment) || !Object.isFrozen(desktopEnvironment)) process.exit(1);
 if (!Object.isFrozen(browserCapabilities) || !Object.isFrozen(browserCapabilities.browser) || !Object.isFrozen(browserCapabilities.desktop)) process.exit(1);
