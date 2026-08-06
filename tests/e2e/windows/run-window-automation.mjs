@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { createWriteStream } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { connect } from 'node:net';
 import { homedir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
@@ -29,30 +28,6 @@ function pause(milliseconds) {
   return new Promise(resolvePromise => setTimeout(resolvePromise, milliseconds));
 }
 
-async function waitForPort(port, timeoutMs = 30_000) {
-  const deadline = Date.now() + timeoutMs;
-  let lastError = null;
-
-  while (Date.now() < deadline) {
-    try {
-      await new Promise((resolvePromise, reject) => {
-        const socket = connect({ host: '127.0.0.1', port });
-        socket.once('connect', () => {
-          socket.destroy();
-          resolvePromise();
-        });
-        socket.once('error', reject);
-      });
-      return;
-    } catch (error) {
-      lastError = error;
-      await pause(150);
-    }
-  }
-
-  throw new Error(`tauri-driver did not listen on port ${port}: ${lastError?.message || 'timeout'}`);
-}
-
 async function startDriver(label, port) {
   if (!edgeDriverPath) {
     throw new Error('MSEDGEDRIVER_PATH is required for deterministic Windows automation.');
@@ -75,12 +50,19 @@ async function startDriver(label, port) {
   child.stderr.pipe(log);
 
   let startupError = null;
+  let startupExitCode = null;
   child.once('error', error => {
     startupError = error;
   });
+  child.once('exit', code => {
+    startupExitCode = code;
+  });
 
-  await waitForPort(port);
+  await pause(750);
   if (startupError) throw startupError;
+  if (startupExitCode !== null) {
+    throw new Error(`tauri-driver exited during startup with code ${startupExitCode}.`);
+  }
 
   return {
     child,
