@@ -1,0 +1,44 @@
+name: Internal Generate WDIO Lock
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/internal-generate-wdio-lock.yml
+      - src-tauri/Cargo.toml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: internal-generate-wdio-lock-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  generate-lock:
+    name: Generate debug WebDriver Cargo lock
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Install declared Rust toolchain
+        shell: bash
+        run: |
+          toolchain="$(sed -n 's/^rust-version = "\([^"]*\)"/\1/p' src-tauri/Cargo.toml)"
+          test -n "$toolchain"
+          rustup toolchain install "$toolchain" --profile minimal --no-self-update
+          rustup default "$toolchain"
+
+      - name: Generate Cargo lock
+        run: cargo generate-lockfile --manifest-path src-tauri/Cargo.toml
+
+      - name: Upload generated Cargo lock
+        uses: actions/upload-artifact@v4
+        with:
+          name: internal-wdio-cargo-lock-${{ github.run_id }}
+          path: src-tauri/Cargo.lock
+          if-no-files-found: error
+          retention-days: 1
