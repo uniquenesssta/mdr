@@ -8,17 +8,19 @@ function pause(milliseconds) {
   return new Promise(resolvePromise => setTimeout(resolvePromise, milliseconds));
 }
 
+function assertApplicationRunning(process, logPath, stage) {
+  if (process.exitCode === null) return;
+  throw new Error(
+    `Markdown Editor exited during ${stage} (code ${process.exitCode}). See ${logPath}.`
+  );
+}
+
 async function waitForEmbeddedServer({ port, process, logPath, timeout = 30_000 }) {
   const deadline = Date.now() + timeout;
   let lastError = null;
 
   while (Date.now() < deadline) {
-    if (process.exitCode !== null) {
-      throw new Error(
-        `Markdown Editor exited before the embedded WebDriver server was ready `
-        + `(code ${process.exitCode}). See ${logPath}.`
-      );
-    }
+    assertApplicationRunning(process, logPath, 'embedded WebDriver startup');
 
     try {
       const response = await fetch(`http://127.0.0.1:${port}/status`, {
@@ -140,15 +142,69 @@ function createBrowserAdapter(driver) {
   });
 }
 
-async function createSession(port) {
-  const capabilities = new Capabilities();
-  capabilities.setBrowserName('tauri');
+async function waitForWindowHandle({ driver, process, logPath, timeout = 20_000 }) {
+  const deadline = Date.now() + timeout;
+  let lastError = null;
 
-  const driver = await new Builder()
-    .usingServer(`http://127.0.0.1:${port}/`)
-    .withCapabilities(capabilities)
-    .build();
+  while (Date.now() < deadline) {
+    assertApplicationRunning(process, logPath, 'WebDriver window attachment');
 
+    try {
+      const handles = await driver.getAllWindowHandles();
+      if (handles.length > 0) {
+        await driver.switchTo().window(handles[0]);
+        return handles[0];
+      }
+      lastError = new Error('WebDriver session returned no window handles.');
+    } catch (error) {
+      lastError = error;
+    }
+
+    await pause(150);
+  }
+
+  throw new Error(
+    `WebDriver session did not attach to a Tauri window. `
+    + `Last error: ${lastError?.message || 'unknown error'}. See ${logPath}.`
+  );
+}
+
+function isWindowStartupRace(error) {
+  return error?.name === 'NoSuchWindowError'
+    || /no window could be found|no such window/i.test(String(error?.message || error));
+}
+
+async function buildDriver({ port, process, logPath, timeout = 20_000 }) {
+  const deadline = Date.now() + timeout;
+  let lastError = null;
+
+  while (Date.now() < deadline) {
+    assertApplicationRunning(process, logPath, 'WebDriver session creation');
+
+    const capabilities = new Capabilities();
+    capabilities.setBrowserName('tauri');
+
+    try {
+      return await new Builder()
+        .usingServer(`http://127.0.0.1:${port}/`)
+        .withCapabilities(capabilities)
+        .build();
+    } catch (error) {
+      if (!isWindowStartupRace(error)) throw error;
+      lastError = error;
+      await pause(200);
+    }
+  }
+
+  throw new Error(
+    `Embedded WebDriver session was not created after the native window became available. `
+    + `Last error: ${lastError?.message || 'unknown error'}. See ${logPath}.`
+  );
+}
+
+async function createSession({ port, process, logPath }) {
+  const driver = await buildDriver({ port, process, logPath });
+  await waitForWindowHandle({ driver, process, logPath });
   await driver.manage().setTimeouts({
     implicit: 0,
     pageLoad: 30_000,
@@ -172,7 +228,14 @@ export async function withEmbeddedSession(options, run) {
   let browser = null;
 
   try {
-    browser = await createSession(options.port);
+    if (typeof options.waitForNativeWindow === 'function') {
+      await options.waitForNativeWindow(application.child);
+    }
+    browser = await createSession({
+      port: options.port,
+      process: application.child,
+      logPath: application.logPath
+    });
     return await run(browser);
   } finally {
     await closeSession(browser);
