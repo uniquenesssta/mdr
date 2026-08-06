@@ -17,6 +17,7 @@ on:
       - src/platform/desktop/window-client.js
       - src/runtime/tauri.js
       - src-tauri/**
+      - scripts/stage-03/windows/prepare-embedded-driver-host.ps1
       - tests/e2e/windows/**
       - tests/windows-window-automation.test.mjs
       - README.md
@@ -38,7 +39,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
       RUST_BACKTRACE: '1'
-      MARKDOWN_EDITOR_BINARY: src-tauri/target/debug/markdown-editor.exe
+      MARKDOWN_EDITOR_BINARY: .windows-driver-host/src-tauri/target/debug/markdown-editor.exe
 
     steps:
       - name: Checkout branch
@@ -78,20 +79,25 @@ jobs:
       - name: Build current Windows release application
         run: cargo build --release --locked --manifest-path src-tauri/Cargo.toml
 
-      - name: Build embedded WebDriver debug application
-        run: cargo build --locked --manifest-path src-tauri/Cargo.toml
+      - name: Prepare isolated embedded WebDriver host
+        shell: pwsh
+        run: ./scripts/stage-03/windows/prepare-embedded-driver-host.ps1
+
+      - name: Build isolated embedded WebDriver application
+        run: cargo build --locked --manifest-path .windows-driver-host/src-tauri/Cargo.toml
 
       - name: Prepare Windows evidence directory
         shell: pwsh
         run: |
           $evidenceDirectory = 'artifacts/stage-03/windows-window'
           New-Item -ItemType Directory -Force -Path $evidenceDirectory | Out-Null
+          Copy-Item '.windows-driver-host/driver-host.json' "$evidenceDirectory/driver-host.json" -Force
           [pscustomobject]@{
             headSha = '${{ github.event.pull_request.head.sha || github.sha }}'
             runner = '${{ runner.os }}'
             image = '${{ runner.name }}'
             status = 'workflow-started'
-            driverProvider = 'embedded'
+            driverProvider = 'embedded-isolated-host'
             releaseBinary = 'src-tauri/target/release/markdown-editor.exe'
             webdriverBinary = $env:MARKDOWN_EDITOR_BINARY
           } | ConvertTo-Json | Set-Content -Path "$evidenceDirectory/workflow-bootstrap.json" -Encoding utf8
@@ -104,7 +110,13 @@ jobs:
             throw "Windows release application binary missing: $releaseBinary"
           }
           if (-not (Test-Path $env:MARKDOWN_EDITOR_BINARY)) {
-            throw "Windows embedded WebDriver debug binary missing: $env:MARKDOWN_EDITOR_BINARY"
+            throw "Windows embedded WebDriver test binary missing: $env:MARKDOWN_EDITOR_BINARY"
+          }
+          if ((Get-Content 'src-tauri/Cargo.toml' -Raw) -match 'tauri-plugin-wdio-webdriver') {
+            throw 'Production Cargo.toml was modified by the Windows automation preparation.'
+          }
+          if ((Get-Content 'src-tauri/src/main.rs' -Raw) -match 'tauri_plugin_wdio_webdriver') {
+            throw 'Production main.rs was modified by the Windows automation preparation.'
           }
           Get-Item $releaseBinary
           Get-Item $env:MARKDOWN_EDITOR_BINARY
