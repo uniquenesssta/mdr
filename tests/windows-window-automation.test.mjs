@@ -35,6 +35,7 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(runner, /setBrowserName\('wry'\)/);
   assert.match(runner, /--native-driver/);
   assert.match(runner, /MSEDGEDRIVER_PATH/);
+  assert.doesNotMatch(runner, /node:net|waitForPort/);
   assert.match(helper, /GetWindowPlacement/);
   assert.match(helper, /GetWindowRect/);
   assert.match(helper, /mouse_event/);
