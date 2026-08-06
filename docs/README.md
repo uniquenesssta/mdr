@@ -124,6 +124,8 @@ npm run check
 - 当前完整桌面基线在 Ubuntu 22.04 验证；Windows 原生窗口、文件关联和系统拖放仍需在涉及这些路径的阶段执行真实平台验证。
 
 ## Change Log
+<!-- stage-03-windows-automation:03-05 -->
+- 2026-08-06：阶段 3 Atomic Task 3.5 的 Windows Automated 补充实现完成：新增独立 Windows 2025 门禁，以固定版本 WebdriverIO 和 tauri-driver 驱动真实 WebView2，覆盖最大化/还原、最小化/恢复、resize 订阅与幂等 disposer、标题栏真实拖动、close-request 阻止及保存边界、正常关闭和强制关闭。测试工具仅在 CI 中临时安装，未修改生产依赖、锁文件、Rust、权限或 Tauri 全局 API 配置。原根 README 已完整迁移到 `docs/README.md`，根 README 改为简短项目介绍；架构记录和 Stage 0 持久化入口同步迁移。Windows 实际运行结果将在门禁完成后替换本记录。
 <!-- stage-03-node:03-05 -->
 - 2026-08-06：阶段 3 Atomic Task 3.5（Window client）完成：新增 `src/platform/desktop/window-client.js`，由该模块唯一持有 `@tauri-apps/api/window` 导入，统一窗口拖动、最小化、最大化切换、最大化状态读取、resize 与 close-request 订阅、正常关闭和强制关闭。Window client 独占原生订阅 disposer，返回幂等 disposer，`destroy()` 按逆序清理且自身幂等；销毁后才完成的订阅会立即释放，不进入活动集合，原生调用与清理异常保持原始语义。`src/runtime/tauri.js` 已移除 `getCurrentWindow` 直连并通过公共平台入口委托八个窗口方法，桌面不可用时的 `null`、`false` 和空返回保持不变。关闭前保存、`preventDefault()`、最终快照等待与失败时强制关闭策略继续由 `public/app/events.js` 拥有，未下沉到平台层。生产模块清单由 159 增至 160，平台模块由 20 增至 21。实现提交 `227a1d86f6c959ecc14874a0e2b151abff6ae113`，受控验证提交 `77fce3ef8041d54b5cd6a67edbea03d9facbd637`：Stage 0 run `31105812402`、Stage 1 run `31105812432`、Stage 2 run `31105812320`、Stage 3 run `31105812338` 全部通过；Stage 3 覆盖 3.1–3.5 专项契约、架构硬门禁、完整 Node 回归、Chromium 交互契约、生产构建、构建后应用回归和机器证据生成，Stage 0 同时通过 Rust test/check 与 Tauri Linux build。证据制品 `stage-03-platform-foundation-31105812338-1`（artifact `8969486354`，`sha256:d731c13a4a52fbdf79b774f95c6d63e431fb609b906e944647d7fbfe34fd68e9`）已生成。未修改 Rust、DTO、持久化、冻结模型、生产依赖或锁文件；既有 `1 low / 1 high` 依赖审计结果未扩大。Windows 原生 WebView 的窗口拖动、最大化、resize、关闭请求与 disposer 路径尚未执行真实平台验证；DragDrop 及后续 adapter 仍由后续 Atomic Task 实施。
 <!-- stage-03-node:03-04 -->

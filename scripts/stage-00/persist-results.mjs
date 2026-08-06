@@ -86,7 +86,7 @@ for (const [source, target] of evidenceCopies) {
   await copyFile(resolve(reportRoot, source), resolve(evidenceDirectory, target));
 }
 
-const readmePath = resolve(root, 'README.md');
+const readmePath = resolve(root, 'docs/README.md');
 const readme = await readFile(readmePath, 'utf8');
 const readmeEntry = renderStage0ReadmeEntry({ date, runId, runAttempt, summary });
 await writeFile(readmePath, updateStage0Readme(readme, readmeEntry), 'utf8');

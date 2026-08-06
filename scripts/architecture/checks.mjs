@@ -420,7 +420,7 @@ export async function checkModuleImportSideEffects({ root = process.cwd() } = {}
 }
 
 export async function checkReadmeRecord({ root = process.cwd() } = {}) {
-  const readmePath = 'README.md';
+  const readmePath = 'docs/README.md';
   const readme = await readRepositoryText(root, readmePath);
   const files = await listRepositoryFiles(root);
   const markerPattern = /<!--\s*stage-01-node:(01-\d{2})\s*-->/g;
