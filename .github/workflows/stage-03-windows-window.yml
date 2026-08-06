@@ -17,7 +17,6 @@ on:
       - src/platform/desktop/window-client.js
       - src/runtime/tauri.js
       - src-tauri/**
-      - scripts/stage-03/windows/**
       - tests/e2e/windows/**
       - tests/windows-window-automation.test.mjs
       - README.md
@@ -40,7 +39,6 @@ jobs:
       CARGO_TERM_COLOR: always
       RUST_BACKTRACE: '1'
       MARKDOWN_EDITOR_BINARY: src-tauri/target/debug/markdown-editor.exe
-      TAURI_DRIVER_PATH: ${{ github.workspace }}\.cargo-bin\tauri-driver.exe
 
     steps:
       - name: Checkout branch
@@ -80,7 +78,7 @@ jobs:
       - name: Build current Windows release application
         run: cargo build --release --locked --manifest-path src-tauri/Cargo.toml
 
-      - name: Build WebDriver debug application
+      - name: Build embedded WebDriver debug application
         run: cargo build --locked --manifest-path src-tauri/Cargo.toml
 
       - name: Prepare Windows evidence directory
@@ -93,29 +91,10 @@ jobs:
             runner = '${{ runner.os }}'
             image = '${{ runner.name }}'
             status = 'workflow-started'
+            driverProvider = 'embedded'
             releaseBinary = 'src-tauri/target/release/markdown-editor.exe'
             webdriverBinary = $env:MARKDOWN_EDITOR_BINARY
           } | ConvertTo-Json | Set-Content -Path "$evidenceDirectory/workflow-bootstrap.json" -Encoding utf8
-
-      - name: Install pinned tauri-driver
-        shell: pwsh
-        run: |
-          $installRoot = Join-Path $env:GITHUB_WORKSPACE '.cargo-bin'
-          $installedDriver = Join-Path $installRoot 'bin\tauri-driver.exe'
-          New-Item -ItemType Directory -Force -Path $installRoot | Out-Null
-          cargo install tauri-driver --version 2.0.6 --locked --root $installRoot
-          if (-not (Test-Path $installedDriver)) {
-            throw "tauri-driver installation did not produce $installedDriver"
-          }
-          Copy-Item $installedDriver $env:TAURI_DRIVER_PATH -Force
-          if (-not (Test-Path $env:TAURI_DRIVER_PATH)) {
-            throw "tauri-driver copy missing: $env:TAURI_DRIVER_PATH"
-          }
-          & $env:TAURI_DRIVER_PATH --help | Out-File -FilePath 'artifacts/stage-03/windows-window/tauri-driver-help.txt' -Encoding utf8
-
-      - name: Install matching Microsoft Edge WebDriver
-        shell: pwsh
-        run: ./scripts/stage-03/windows/install-edge-driver.ps1
 
       - name: Verify automation inputs
         shell: pwsh
@@ -125,18 +104,10 @@ jobs:
             throw "Windows release application binary missing: $releaseBinary"
           }
           if (-not (Test-Path $env:MARKDOWN_EDITOR_BINARY)) {
-            throw "Windows WebDriver debug binary missing: $env:MARKDOWN_EDITOR_BINARY"
-          }
-          if (-not (Test-Path $env:TAURI_DRIVER_PATH)) {
-            throw "tauri-driver missing: $env:TAURI_DRIVER_PATH"
-          }
-          if (-not (Test-Path $env:MSEDGEDRIVER_PATH)) {
-            throw "Microsoft Edge WebDriver missing: $env:MSEDGEDRIVER_PATH"
+            throw "Windows embedded WebDriver debug binary missing: $env:MARKDOWN_EDITOR_BINARY"
           }
           Get-Item $releaseBinary
           Get-Item $env:MARKDOWN_EDITOR_BINARY
-          Get-Item $env:TAURI_DRIVER_PATH
-          Get-Item $env:MSEDGEDRIVER_PATH
 
       - name: Run native Windows window automation
         run: node tests/e2e/windows/run-window-automation.mjs
