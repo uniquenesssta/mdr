@@ -49,7 +49,12 @@ try {
   if ($manifest -match 'tauri-plugin-wdio-webdriver') {
     throw 'Production Cargo.toml already contains the Windows automation driver dependency.'
   }
-  $manifest = $manifest.TrimEnd() + "`n`n[dependencies.tauri-plugin-wdio-webdriver]`nversion = \"1\"`n"
+  $driverDependency = @'
+
+[dependencies.tauri-plugin-wdio-webdriver]
+version = "1"
+'@
+  $manifest = $manifest.TrimEnd() + $driverDependency + "`n"
   Set-Content -Path $manifestPath -Value $manifest -Encoding utf8
 
   $entryPath = Join-Path $hostRootPath 'src-tauri\src\main.rs'
