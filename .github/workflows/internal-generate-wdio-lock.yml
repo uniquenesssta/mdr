@@ -9,7 +9,7 @@ on:
       - src-tauri/Cargo.toml
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: internal-generate-wdio-lock-${{ github.ref_name }}
@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
+        with:
+          ref: rewrite/modular-rebuild
 
       - name: Install declared Rust toolchain
         shell: bash
@@ -35,10 +37,15 @@ jobs:
       - name: Generate Cargo lock
         run: cargo generate-lockfile --manifest-path src-tauri/Cargo.toml
 
-      - name: Upload generated Cargo lock
-        uses: actions/upload-artifact@v4
-        with:
-          name: internal-wdio-cargo-lock-${{ github.run_id }}
-          path: src-tauri/Cargo.lock
-          if-no-files-found: error
-          retention-days: 1
+      - name: Commit generated Cargo lock
+        shell: bash
+        run: |
+          if git diff --quiet -- src-tauri/Cargo.lock; then
+            echo 'Cargo.lock is already current.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src-tauri/Cargo.lock
+          git commit -m 'build: lock embedded WebDriver dependency'
+          git push origin HEAD:rewrite/modular-rebuild
