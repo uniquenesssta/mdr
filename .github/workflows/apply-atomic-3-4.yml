@@ -63,7 +63,7 @@ jobs:
           node --check src/runtime/tauri.js
           node --check tests/unit/platform/dialog-client.test.mjs
           node --check scripts/stage-03/record-platform-evidence.mjs
-          node --test --test-name-pattern='Atomic Task 3\.4|file and directory cancellation|save-file normalization|confirmation delegates|native dialog errors|invalid dialog client|sole production owner|legacy runtime delegates' tests/unit/platform/dialog-client.test.mjs
+          node --test --test-name-pattern='^(Atomic Task 3\.4 normalizes|file and directory cancellation|save-file normalization|confirmation delegates|native dialog errors|invalid dialog client|the desktop dialog client|legacy runtime delegates)' tests/unit/platform/dialog-client.test.mjs
           git diff --check
       - name: Commit and push Atomic Task implementation
         if: ${{ !contains(steps.state.outputs.state, '"implemented":true') }}
