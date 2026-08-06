@@ -9,7 +9,11 @@ mod web_fetch;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     performance_log::record_lifecycle("app.start");
-    let result = tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    #[cfg(debug_assertions)]
+    let builder = builder.plugin(tauri_plugin_wdio_webdriver::init());
+
+    let result = builder
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .manage(document_store::DocumentStore::default())
