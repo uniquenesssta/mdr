@@ -1,0 +1,39 @@
+name: Analyze Atomic 3.5
+
+on:
+  push:
+    branches:
+      - rewrite/modular-rebuild
+    paths:
+      - .github/workflows/analyze-atomic-3-5.yml
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rewrite/modular-rebuild
+          fetch-depth: 0
+      - name: Inspect repository state and window call chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== HEAD ==='
+          git rev-parse HEAD
+          git status --short
+          echo '=== WINDOW FILES ==='
+          find src tests scripts -type f | sort | grep -Ei 'window|lifecycle|titlebar|shell|tauri|platform' || true
+          echo '=== WINDOW SYMBOL CALLERS ==='
+          grep -RInE 'getCurrentWindow|onCloseRequested|startWindowDragging|minimizeWindow|toggleMaximizeWindow|isWindowMaximized|onWindowResized|closeWindow|destroyWindow|subscribeCloseRequest|subscribeResize|requestClose|forceClose' src tests scripts .github/workflows || true
+          echo '=== NATIVE WINDOW ACCESS ==='
+          grep -RInE 'markdownEditorNative\.(onCloseRequested|startWindowDragging|minimizeWindow|toggleMaximizeWindow|isWindowMaximized|onWindowResized|closeWindow|destroyWindow)' src tests || true
+          echo '=== RELEVANT FILE CONTENTS ==='
+          for file in $(grep -RIlE 'getCurrentWindow|onCloseRequested|startWindowDragging|minimizeWindow|toggleMaximizeWindow|isWindowMaximized|onWindowResized|closeWindow|destroyWindow|subscribeCloseRequest|subscribeResize|requestClose|forceClose' src tests scripts .github/workflows || true); do
+            echo "--- $file ---"
+            sed -n '1,260p' "$file"
+          done
