@@ -1,13 +1,14 @@
-import { mountCurrentShell } from '../ui/compatibility/mount-current-shell.js';
+import { createUI } from '../ui/create-ui.js';
+import { createCompatibilityBusinessContentPort } from '../ui/compatibility/index.js';
 
-const CURRENT_SHELL_URL = '/compatibility/current-shell.html';
+const COMPATIBILITY_CONTENT_URL = '/compatibility/business-content.html';
 const I18N_SCRIPT_URL = '/i18n.js';
 const starts = new WeakMap();
 
-async function fetchCurrentShell(fetchImpl) {
-  const response = await fetchImpl(CURRENT_SHELL_URL, { cache: 'no-store' });
+async function fetchCompatibilityContent(fetchImpl) {
+  const response = await fetchImpl(COMPATIBILITY_CONTENT_URL, { cache: 'no-store' });
   if (!response?.ok) {
-    throw new Error(`Failed to load current shell: ${response?.status ?? 'unknown'}`);
+    throw new Error(`Failed to load compatibility business content: ${response?.status ?? 'unknown'}`);
   }
   return response.text();
 }
@@ -27,6 +28,14 @@ function loadClassicScript(documentRef, src) {
   });
 }
 
+function destroyStartupResources({ classicScript, contentPort, ui }) {
+  const errors = [];
+  try { classicScript?.remove(); } catch (error) { errors.push(error); }
+  try { contentPort?.destroy(); } catch (error) { errors.push(error); }
+  try { ui?.destroy(); } catch (error) { errors.push(error); }
+  return errors;
+}
+
 export function startModuleEntry({
   documentRef = globalThis.document,
   fetchImpl = globalThis.fetch?.bind(globalThis),
@@ -42,17 +51,21 @@ export function startModuleEntry({
     const root = documentRef.getElementById('app-root');
     if (!root) throw new Error('Application root is missing.');
 
-    const markup = await fetchCurrentShell(fetchImpl);
-    const shellMount = mountCurrentShell(root, markup);
+    let ui = null;
+    let contentPort = null;
     let classicScript = null;
     try {
+      ui = createUI(root);
+      contentPort = createCompatibilityBusinessContentPort(root, ui);
+      const markup = await fetchCompatibilityContent(fetchImpl);
+      contentPort.mount(markup);
       classicScript = await loadClassicScript(documentRef, I18N_SCRIPT_URL);
       await importApplication();
     } catch (error) {
-      classicScript?.remove();
-      shellMount.destroy();
+      const cleanupErrors = destroyStartupResources({ classicScript, contentPort, ui });
       starts.delete(documentRef);
-      throw error;
+      if (!cleanupErrors.length) throw error;
+      throw new AggregateError([error, ...cleanupErrors], 'Application startup failed and cleanup was incomplete.');
     }
 
     let destroyed = false;
@@ -60,9 +73,9 @@ export function startModuleEntry({
       destroy() {
         if (destroyed) return;
         destroyed = true;
-        classicScript?.remove();
-        shellMount.destroy();
+        const errors = destroyStartupResources({ classicScript, contentPort, ui });
         starts.delete(documentRef);
+        if (errors.length) throw new AggregateError(errors, 'Application bootstrap cleanup failed.');
       }
     });
   })();

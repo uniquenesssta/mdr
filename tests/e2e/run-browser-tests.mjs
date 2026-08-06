@@ -235,6 +235,80 @@ async function runContractSuite() {
       await browser.page.waitFor(() => window.__folderTreeOpened?.length === 1, { description: 'folder tree open callback' });
       assert.equal(await browser.page.evaluate('window.__folderTreeOpened[0]'), 'F:/Notes/next.txt');
     });
+
+
+    await test('temporary compatibility business port mounts and destroys without owning the App Shell', async () => {
+      await browser.page.setDocumentContent(`<!doctype html><html><head><base href="${virtualHost.origin}/"></head><body>
+        <div id="app-root" hidden><span id="pre-shell-node">before</span></div>
+      </body></html>`);
+      const result = await browser.page.evaluate(`(async()=>{
+        const [{createUI},{createCompatibilityBusinessContentPort}]=await Promise.all([
+          import('${virtualHost.origin}/src/ui/create-ui.js'),
+          import('${virtualHost.origin}/src/ui/compatibility/index.js')
+        ]);
+        const markup=await fetch('${virtualHost.origin}/public/compatibility/business-content.html').then(response=>response.text());
+        const root=document.getElementById('app-root');
+        const ui=createUI(root);
+        let foreignSlotError='';
+        try{createCompatibilityBusinessContentPort(root,{...ui,menu:document.createElement('nav')});}
+        catch(error){foreignSlotError=error.message;}
+        const port=createCompatibilityBusinessContentPort(root,ui);
+        let invalidMarkupError='';
+        try{port.mount('<template data-compat-slot=\"menu\"></template>');}
+        catch(error){invalidMarkupError=error.message;}
+        const cleanAfterInvalid={
+          shellCount:root.querySelectorAll('[data-ui-shell=\"app\"]').length,
+          portHostPresent:Boolean(document.getElementById('compatibility-business-ports')),
+          menuChildren:ui.menu.childNodes.length
+        };
+        const firstMount=port.mount(markup);
+        const secondMount=port.mount(markup);
+        const mounted={
+          firstMount,secondMount,
+          rootChildren:Array.from(root.children).map(node=>node.id||node.getAttribute('data-ui-shell')||''),
+          shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,
+          portHostParent:document.getElementById('compatibility-business-ports')?.parentElement?.id||'',
+          filePortParent:document.getElementById('filename')?.parentElement?.id||'',
+          settingsParent:document.getElementById('settings-modal')?.parentElement?.id||'',
+          previousPresent:Boolean(document.getElementById('pre-shell-node'))
+        };
+        port.destroy();
+        port.destroy();
+        let remountError='';
+        try{port.mount(markup);}catch(error){remountError=error.message;}
+        const afterPort={
+          shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,
+          settingsPresent:Boolean(document.getElementById('settings-modal')),
+          filePortPresent:Boolean(document.getElementById('filename')),
+          portHostPresent:Boolean(document.getElementById('compatibility-business-ports')),
+          remountError
+        };
+        ui.destroy();
+        const afterUI={
+          hidden:root.hidden,
+          children:Array.from(root.children).map(node=>node.id),
+          shellCount:root.querySelectorAll('[data-ui-shell="app"]').length
+        };
+        return {foreignSlotError,invalidMarkupError,cleanAfterInvalid,mounted,afterPort,afterUI};
+      })()`);
+      assert.match(result.foreignSlotError, /outside the current application root/);
+      assert.match(result.invalidMarkupError, /Missing compatibility templates/);
+      assert.deepEqual(result.cleanAfterInvalid, { shellCount: 1, portHostPresent: false, menuChildren: 0 });
+      assert.deepEqual(result.mounted.rootChildren, ['app', 'overlay-root']);
+      assert.equal(result.mounted.firstMount, true);
+      assert.equal(result.mounted.secondMount, false);
+      assert.equal(result.mounted.shellCount, 1);
+      assert.equal(result.mounted.portHostParent, 'overlay-root');
+      assert.equal(result.mounted.filePortParent, 'compatibility-business-ports');
+      assert.equal(result.mounted.settingsParent, 'overlay-root');
+      assert.equal(result.mounted.previousPresent, false);
+      assert.equal(result.afterPort.shellCount, 1);
+      assert.equal(result.afterPort.settingsPresent, false);
+      assert.equal(result.afterPort.filePortPresent, false);
+      assert.equal(result.afterPort.portHostPresent, false);
+      assert.match(result.afterPort.remountError, /destroyed/);
+      assert.deepEqual(result.afterUI, { hidden: true, children: ['pre-shell-node'], shellCount: 0 });
+    });
   } finally {
     activePage = null;
     await virtualHost.close();
@@ -461,6 +535,7 @@ async function runAppSuite() {
           mainChildren:Array.from(shell?.querySelector('.l-split-pane')?.children||[]).map(element=>element.id||element.className),
           overlayParent:document.getElementById('overlay-root')?.parentElement?.id||'',
           settingsParent:document.getElementById('settings-modal')?.parentElement?.id||'',
+          compatibilityPortHostParent:document.getElementById('compatibility-business-ports')?.parentElement?.id||'',
           filePortParents:['filename','importFile'].map(id=>document.getElementById(id)?.parentElement?.id||''),
           duplicateIds:ids.filter((id,index)=>ids.indexOf(id)!==index)
         };
@@ -474,7 +549,8 @@ async function runAppSuite() {
       assert.deepEqual(snapshot.mainChildren, ['l-pane f-editor-pane pane editor-pane','resizer','l-pane f-preview-pane pane preview-pane']);
       assert.equal(snapshot.overlayParent, 'app-root');
       assert.equal(snapshot.settingsParent, 'overlay-root');
-      assert.deepEqual(snapshot.filePortParents, ['app-root','app-root']);
+      assert.equal(snapshot.compatibilityPortHostParent, 'overlay-root');
+      assert.deepEqual(snapshot.filePortParents, ['compatibility-business-ports','compatibility-business-ports']);
       assert.deepEqual(snapshot.duplicateIds, []);
     });
 

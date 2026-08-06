@@ -56,7 +56,7 @@
   ],
   "inlineEvents": [
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
       "handler": "applyInlineColor('highlight',this.value)",
       "count": 1,
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
       "handler": "applyInlineColor('text',this.value)",
       "count": 1,
@@ -74,7 +74,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
       "handler": "handleImageFileSelect(this)",
       "count": 1,
@@ -83,7 +83,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
       "handler": "importFile(this)",
       "count": 1,
@@ -92,7 +92,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
       "handler": "renderExportImagePreview()",
       "count": 1,
@@ -101,7 +101,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
       "handler": "syncSettingsThemeDefaults()",
       "count": 1,
@@ -110,7 +110,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
       "handler": "toggleCustomAutosaveDelay()",
       "count": 1,
@@ -119,7 +119,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
       "handler": "toggleProxyInput()",
       "count": 1,
@@ -128,7 +128,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
       "handler": "updateMermaidTemplate()",
       "count": 1,
@@ -137,7 +137,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('highlight','#bae6fd')",
       "count": 1,
@@ -146,7 +146,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('highlight','#bbf7d0')",
       "count": 1,
@@ -155,7 +155,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('highlight','#ddd6fe')",
       "count": 1,
@@ -164,7 +164,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('highlight','#e5e7eb')",
       "count": 1,
@@ -173,7 +173,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('highlight','#fbcfe8')",
       "count": 1,
@@ -182,7 +182,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('highlight','#fecaca')",
       "count": 1,
@@ -191,7 +191,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('highlight','#fed7aa')",
       "count": 1,
@@ -200,7 +200,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('highlight','#fff3a3')",
       "count": 1,
@@ -209,7 +209,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#0891b2')",
       "count": 1,
@@ -218,7 +218,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#16a34a')",
       "count": 1,
@@ -227,7 +227,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#1a1d23')",
       "count": 1,
@@ -236,7 +236,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#2563eb')",
       "count": 1,
@@ -245,7 +245,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#6b7280')",
       "count": 1,
@@ -254,7 +254,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#7c3aed')",
       "count": 1,
@@ -263,7 +263,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#ca8a04')",
       "count": 1,
@@ -272,7 +272,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#db2777')",
       "count": 1,
@@ -281,7 +281,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#dc2626')",
       "count": 1,
@@ -290,7 +290,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applyInlineColor('text','#ea580c')",
       "count": 1,
@@ -299,7 +299,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "applySettings()",
       "count": 1,
@@ -308,7 +308,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "cancelActiveExport()",
       "count": 1,
@@ -317,7 +317,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "chooseExportDirectory()",
       "count": 1,
@@ -326,7 +326,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "clearDoc(); closeAppMenus();",
       "count": 1,
@@ -335,7 +335,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "clearExportDirectory()",
       "count": 1,
@@ -344,7 +344,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "clearInlineColor('highlight')",
       "count": 1,
@@ -353,7 +353,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "clearInlineColor('text')",
       "count": 1,
@@ -362,7 +362,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeContextDocument(); closeContextMenus();",
       "count": 1,
@@ -371,7 +371,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeExportImageModal()",
       "count": 2,
@@ -381,7 +381,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeFindModal()",
       "count": 2,
@@ -391,7 +391,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeHelp()",
       "count": 2,
@@ -401,7 +401,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeImageModal()",
       "count": 2,
@@ -411,7 +411,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeLinkModal()",
       "count": 2,
@@ -421,7 +421,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeMermaidModal()",
       "count": 2,
@@ -431,7 +431,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeSettings()",
       "count": 2,
@@ -441,7 +441,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeUrlModal()",
       "count": 2,
@@ -451,7 +451,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "collapseAllOutline(); closeContextMenus();",
       "count": 1,
@@ -460,7 +460,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "collapseContextOutlineNode(); closeContextMenus();",
       "count": 1,
@@ -469,7 +469,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "confirmImageInsert()",
       "count": 1,
@@ -478,7 +478,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "confirmLinkInsert()",
       "count": 1,
@@ -487,7 +487,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "confirmMermaidInsert()",
       "count": 1,
@@ -496,7 +496,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "convertAndInsert()",
       "count": 1,
@@ -505,7 +505,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "copyContextDocumentTitle(); closeContextMenus();",
       "count": 1,
@@ -514,7 +514,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "downloadExportImage()",
       "count": 1,
@@ -523,7 +523,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "duplicateContextDocument(); closeContextMenus();",
       "count": 1,
@@ -532,7 +532,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "duplicateDocument(); closeContextMenus();",
       "count": 1,
@@ -541,7 +541,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "expandAllOutline(); closeContextMenus();",
       "count": 1,
@@ -550,7 +550,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "exportContextDocument(); closeContextMenus();",
       "count": 1,
@@ -559,7 +559,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "exportFile(); closeAppMenus();",
       "count": 1,
@@ -568,7 +568,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "exportHTML(); closeAppMenus();",
       "count": 1,
@@ -577,7 +577,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "exportPDF(); closeAppMenus();",
       "count": 1,
@@ -586,7 +586,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "exportWord(); closeAppMenus();",
       "count": 1,
@@ -595,7 +595,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "fetchUrl()",
       "count": 1,
@@ -604,7 +604,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "findNext()",
       "count": 1,
@@ -613,7 +613,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatBold()",
       "count": 1,
@@ -622,7 +622,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatBold(); closeAppMenus();",
       "count": 1,
@@ -631,7 +631,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatItalic()",
       "count": 1,
@@ -640,7 +640,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatItalic(); closeAppMenus();",
       "count": 1,
@@ -649,7 +649,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatOrderedList()",
       "count": 1,
@@ -658,7 +658,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatQuote()",
       "count": 1,
@@ -667,7 +667,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatStrikethrough()",
       "count": 1,
@@ -676,7 +676,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatSubscript()",
       "count": 1,
@@ -685,7 +685,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatSuperscript()",
       "count": 1,
@@ -694,7 +694,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatTaskList()",
       "count": 1,
@@ -703,7 +703,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatUnderline()",
       "count": 1,
@@ -712,7 +712,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatUnderline(); closeAppMenus();",
       "count": 1,
@@ -721,7 +721,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "formatUnorderedList()",
       "count": 1,
@@ -730,7 +730,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertBlockMath(); closeAppMenus();",
       "count": 1,
@@ -739,7 +739,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertCode()",
       "count": 1,
@@ -748,7 +748,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertCodeRow()",
       "count": 1,
@@ -757,7 +757,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(1); closeAppMenus();",
       "count": 1,
@@ -766,7 +766,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(1); closeHeadingMenu();",
       "count": 1,
@@ -775,7 +775,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(2); closeAppMenus();",
       "count": 1,
@@ -784,7 +784,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(2); closeHeadingMenu();",
       "count": 1,
@@ -793,7 +793,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(3); closeAppMenus();",
       "count": 1,
@@ -802,7 +802,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(3); closeHeadingMenu();",
       "count": 1,
@@ -811,7 +811,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(4); closeAppMenus();",
       "count": 1,
@@ -820,7 +820,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(4); closeHeadingMenu();",
       "count": 1,
@@ -829,7 +829,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(5); closeAppMenus();",
       "count": 1,
@@ -838,7 +838,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(5); closeHeadingMenu();",
       "count": 1,
@@ -847,7 +847,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(6); closeAppMenus();",
       "count": 1,
@@ -856,7 +856,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertHeading(6); closeHeadingMenu();",
       "count": 1,
@@ -865,7 +865,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertInlineMath(); closeAppMenus();",
       "count": 1,
@@ -874,7 +874,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertLink()",
       "count": 1,
@@ -883,7 +883,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertLink(); closeAppMenus();",
       "count": 1,
@@ -892,7 +892,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "insertTable(3, 3); closeAppMenus();",
       "count": 1,
@@ -901,7 +901,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "newDocument(); closeAppMenus();",
       "count": 1,
@@ -910,7 +910,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "newDocument(); closeContextMenus();",
       "count": 1,
@@ -919,7 +919,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openContextDocument(); closeContextMenus();",
       "count": 1,
@@ -928,7 +928,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openExportImageModal(); closeAppMenus();",
       "count": 1,
@@ -937,7 +937,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openFindModal()",
       "count": 1,
@@ -946,7 +946,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openFindModal(); closeAppMenus();",
       "count": 1,
@@ -955,7 +955,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openHelp(); closeAppMenus();",
       "count": 1,
@@ -964,7 +964,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openImageModal()",
       "count": 1,
@@ -973,7 +973,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openImageModal(); closeAppMenus();",
       "count": 1,
@@ -982,7 +982,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openMermaidModal()",
       "count": 1,
@@ -991,7 +991,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openMermaidModal(); closeAppMenus();",
       "count": 1,
@@ -1000,7 +1000,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openSettings(); closeAppMenus();",
       "count": 1,
@@ -1009,7 +1009,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openUrlModal(); closeAppMenus();",
       "count": 1,
@@ -1018,7 +1018,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "openUrlModal(); closeContextMenus();",
       "count": 1,
@@ -1027,7 +1027,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "redo()",
       "count": 1,
@@ -1036,7 +1036,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "redo(); closeAppMenus();",
       "count": 1,
@@ -1045,7 +1045,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "renameContextDocument(); closeContextMenus();",
       "count": 1,
@@ -1054,7 +1054,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "renameCurrentDocument(); closeAppMenus();",
       "count": 1,
@@ -1063,7 +1063,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "renderExportImagePreview()",
       "count": 1,
@@ -1072,7 +1072,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "replaceAll()",
       "count": 1,
@@ -1081,7 +1081,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "replaceOne()",
       "count": 1,
@@ -1090,7 +1090,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "resetSettingColor('line')",
       "count": 1,
@@ -1099,7 +1099,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "resetSettingColor('text')",
       "count": 1,
@@ -1108,7 +1108,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "saveAsContextDocument(); closeContextMenus();",
       "count": 1,
@@ -1117,7 +1117,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "saveAsMarkdown(); closeAppMenus();",
       "count": 1,
@@ -1126,7 +1126,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "saveCurrentFile(); closeAppMenus();",
       "count": 1,
@@ -1135,7 +1135,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "selectImageRatio('1:1')",
       "count": 1,
@@ -1144,7 +1144,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "selectImageRatio('16:9')",
       "count": 1,
@@ -1153,7 +1153,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "selectImageRatio('3:4')",
       "count": 1,
@@ -1162,7 +1162,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "selectImageRatio('4:5')",
       "count": 1,
@@ -1171,7 +1171,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "selectImageRatio('9:16')",
       "count": 1,
@@ -1180,7 +1180,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setLayoutMode('both'); closeAppMenus();",
       "count": 1,
@@ -1189,7 +1189,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setLayoutMode('both'); closeViewMenu();",
       "count": 1,
@@ -1198,7 +1198,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setLayoutMode('edit'); closeAppMenus();",
       "count": 1,
@@ -1207,7 +1207,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setLayoutMode('edit'); closeViewMenu();",
       "count": 1,
@@ -1216,7 +1216,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setLayoutMode('hybrid'); closeViewMenu();",
       "count": 1,
@@ -1225,7 +1225,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setLayoutMode('preview'); closeAppMenus();",
       "count": 1,
@@ -1234,7 +1234,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setLayoutMode('preview'); closeViewMenu();",
       "count": 1,
@@ -1243,7 +1243,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setSidebarTab('docs')",
       "count": 1,
@@ -1252,7 +1252,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setSidebarTab('files')",
       "count": 1,
@@ -1261,7 +1261,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "setSidebarTab('outline')",
       "count": 1,
@@ -1270,7 +1270,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchHelpPage('about')",
       "count": 1,
@@ -1279,7 +1279,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchHelpPage('files')",
       "count": 1,
@@ -1288,7 +1288,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchHelpPage('markdown')",
       "count": 1,
@@ -1297,7 +1297,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchHelpPage('shortcuts')",
       "count": 1,
@@ -1306,7 +1306,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchHelpPage('start')",
       "count": 1,
@@ -1315,7 +1315,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchHelpPage('views')",
       "count": 1,
@@ -1324,7 +1324,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchImageTab('upload')",
       "count": 1,
@@ -1333,7 +1333,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchImageTab('url')",
       "count": 1,
@@ -1342,7 +1342,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchSettingsPage('editor')",
       "count": 1,
@@ -1351,7 +1351,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchSettingsPage('general')",
       "count": 1,
@@ -1360,7 +1360,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchSettingsPage('performance')",
       "count": 1,
@@ -1369,7 +1369,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchSettingsPage('save')",
       "count": 1,
@@ -1378,7 +1378,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "switchSettingsPage('toolbar')",
       "count": 1,
@@ -1387,7 +1387,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleAppMenu('app-view-menu')",
       "count": 1,
@@ -1396,7 +1396,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleAppMenu('edit-menu')",
       "count": 1,
@@ -1405,7 +1405,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleAppMenu('file-menu')",
       "count": 1,
@@ -1414,7 +1414,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleAppMenu('help-menu')",
       "count": 1,
@@ -1423,7 +1423,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleAppMenu('insert-menu')",
       "count": 1,
@@ -1432,7 +1432,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleCodeVisualEditing(event)",
       "count": 1,
@@ -1441,7 +1441,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleFullscreen(); closeAppMenus();",
       "count": 1,
@@ -1450,7 +1450,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleFullscreen(); closeViewMenu();",
       "count": 1,
@@ -1459,7 +1459,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleHeadingMenu()",
       "count": 1,
@@ -1468,7 +1468,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleInlineColorMenu('highlight')",
       "count": 1,
@@ -1477,7 +1477,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleInlineColorMenu('text')",
       "count": 1,
@@ -1486,7 +1486,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "togglePageFullscreen(); closeAppMenus();",
       "count": 1,
@@ -1495,7 +1495,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "togglePageFullscreen(); closeViewMenu();",
       "count": 1,
@@ -1504,7 +1504,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "togglePane('editor')",
       "count": 1,
@@ -1513,7 +1513,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "togglePane('preview')",
       "count": 1,
@@ -1522,7 +1522,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleSidebar()",
       "count": 1,
@@ -1531,7 +1531,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleSidebar(); closeAppMenus();",
       "count": 1,
@@ -1540,7 +1540,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleTableMenu()",
       "count": 1,
@@ -1549,7 +1549,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleTableVisualEditing(event)",
       "count": 1,
@@ -1558,7 +1558,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleTheme()",
       "count": 1,
@@ -1567,7 +1567,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "toggleViewMenu()",
       "count": 1,
@@ -1576,7 +1576,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "triggerImportFile(); closeAppMenus();",
       "count": 1,
@@ -1585,7 +1585,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "triggerImportFile(); closeContextMenus();",
       "count": 1,
@@ -1594,7 +1594,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "undo()",
       "count": 1,
@@ -1603,7 +1603,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "undo(); closeAppMenus();",
       "count": 1,
@@ -1612,7 +1612,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "oncontextmenu",
       "handler": "openOutlineContextMenu(event)",
       "count": 1,
@@ -1621,7 +1621,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "oncontextmenu",
       "handler": "openSidebarContextMenu(event)",
       "count": 1,
@@ -1630,7 +1630,7 @@
       ]
     },
     {
-      "path": "public/compatibility/current-shell.html",
+      "path": "public/compatibility/business-content.html",
       "attribute": "oninput",
       "handler": "markSettingColorCustom(this)",
       "count": 2,

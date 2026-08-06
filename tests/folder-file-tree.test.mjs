@@ -47,7 +47,7 @@ test('folder file tree keeps supported files, sorts directories first, and norma
 
 test('folder file tree is wired through the sidebar, runtime bridge, core state, and Rust command', async () => {
   const [index, main, core, tauri, rustMain, rustLocal] = await Promise.all([
-    readFile(new URL('../public/compatibility/current-shell.html', import.meta.url), 'utf8'),
+    readFile(new URL('../public/compatibility/business-content.html', import.meta.url), 'utf8'),
     readFile(new URL('../src/main.js', import.meta.url), 'utf8'),
     readFile(new URL('../public/app/core.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/runtime/tauri.js', import.meta.url), 'utf8'),

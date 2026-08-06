@@ -5,7 +5,7 @@ import { collectInlineEvents } from '../architecture/source-analysis.mjs';
 import { collectIconReferences, inspectSvgSprite } from './icon-sprite/inspect-svg-sprite.mjs';
 import * as iconView from '../../src/ui/components/icon-view.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
-import * as modalCompatibility from '../../src/ui/compatibility/mount-modal-shells.js';
+import * as uiCompatibility from '../../src/ui/compatibility/index.js';
 import * as domPrimitives from '../../src/ui/dom/index.js';
 
 await mkdir('artifacts/stage-02', { recursive: true });
@@ -78,9 +78,9 @@ const expectedStyleImports = Object.freeze([
 ]);
 const expectedStyleEntry = `${expectedStyleImports.map(path => `@import '${path}';`).join('\n')}\n`;
 
-const [indexSource, shellSource, spriteSource, styleEntrySource, tokenSource, lightThemeSource, darkThemeSource] = await Promise.all([
+const [indexSource, compatibilityContentSource, spriteSource, styleEntrySource, tokenSource, lightThemeSource, darkThemeSource] = await Promise.all([
   readText('index.html'),
-  readText('public/compatibility/current-shell.html'),
+  readText('public/compatibility/business-content.html'),
   readText('public/assets/icons.svg'),
   readText('src/styles/index.css'),
   readText('src/styles/foundation/tokens.css'),
@@ -146,11 +146,11 @@ function collectRuleHeaders(source) {
 }
 
 const indexInventory = buildHtmlInventory(indexSource);
-const inlineEvents = collectInlineEvents('public/compatibility/current-shell.html', shellSource)
+const inlineEvents = collectInlineEvents('public/compatibility/business-content.html', compatibilityContentSource)
   .reduce((sum, record) => sum + record.count, 0);
 const sprite = inspectSvgSprite(spriteSource);
-const shellIconReferences = collectIconReferences(shellSource);
-const compatibilitySlots = [...shellSource.matchAll(/<template\s+data-compat-slot="([^"]+)">/g)].map(match => match[1]);
+const shellIconReferences = collectIconReferences(compatibilityContentSource);
+const compatibilitySlots = [...compatibilityContentSource.matchAll(/<template\s+data-compat-slot="([^"]+)">/g)].map(match => match[1]);
 const collectTokenNames = source => [...source.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map(match => match[1]);
 const baseTokenNames = collectTokenNames(tokenSource);
 const lightTokenNames = collectTokenNames(lightThemeSource);
@@ -170,15 +170,15 @@ if (indexInventory.summary.inlineEventCount !== 0 || inlineEvents !== 184) throw
 if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35 || sprite.duplicates.length || sprite.invalidIds.length || sprite.missingViewBoxes.length || sprite.forbiddenMarkup) throw new Error('SVG sprite contract drifted.');
 if (shellIconReferences.length !== 50 || !shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) throw new Error('Icon references drifted.');
 if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) throw new Error('Compatibility slot contract drifted.');
-if (moduleFixture.modules.length !== 138) throw new Error(`Unexpected production module count: ${moduleFixture.modules.length}`);
-if (architectureModules.appShell.length !== 8 || architectureModules.domPrimitives.length !== 6 || architectureModules.uiComponents.length !== 2 || architectureModules.uiCompatibility.length !== 3) throw new Error('UI architecture counts drifted.');
+if (moduleFixture.modules.length !== 139) throw new Error(`Unexpected production module count: ${moduleFixture.modules.length}`);
+if (architectureModules.appShell.length !== 8 || architectureModules.domPrimitives.length !== 6 || architectureModules.uiComponents.length !== 2 || architectureModules.uiCompatibility.length !== 4) throw new Error('UI architecture counts drifted.');
 if (styleEntryModules.length !== 1 || layerModules.foundation.length !== 5 || layerModules.themes.length !== 2 || layerModules.shell.length !== 6 || layerModules.layout.length !== 6 || layerModules.components.length !== 12 || layerModules.features.length !== 20) throw new Error('Style layer counts drifted.');
 if (Object.keys(domPrimitives).sort().join(',') !== 'collectRequiredRefs,createEventScope,createFocusScope,createSafeElement,createTransitionVisibility,isElementRef,requireElementRef') throw new Error('DOM primitive exports drifted.');
-if (typeof ModalShell !== 'function' || Object.keys(modalCompatibility).sort().join(',') !== 'COMPATIBILITY_MODAL_CLOSE_EVENT,COMPATIBILITY_MODAL_OPEN_EVENT,mountCompatibilityModalShells') throw new Error('Modal contract drifted.');
+if (typeof ModalShell !== 'function' || Object.keys(uiCompatibility).sort().join(',') !== 'COMPATIBILITY_MODAL_CLOSE_EVENT,COMPATIBILITY_MODAL_OPEN_EVENT,createCompatibilityBusinessContentPort,mountCompatibilityModalShells') throw new Error('Modal contract drifted.');
 if (styleEntrySource !== expectedStyleEntry) throw new Error('Style entry ordering drifted.');
 if (styleEntrySource.includes('./main.css')) throw new Error('Consolidated stylesheet remains imported.');
 await access('src/styles/main.css').then(() => { throw new Error('Consolidated stylesheet still exists.'); }, () => {});
-if (/\sstyle\s*=/i.test(shellSource)) throw new Error('Stable compatibility inline style remains.');
+if (/\sstyle\s*=/i.test(compatibilityContentSource)) throw new Error('Stable compatibility inline style remains.');
 if (visualSelectors.some(record => /#[a-z_][a-z0-9_-]*/i.test(record.header))) throw new Error('Visual ID selector remains.');
 if (/#[0-9a-f]{3,8}\b|rgba?\(/i.test(visualStyleSource)) throw new Error('Visual color literal escaped theme ownership.');
 if (/\[data-theme/.test(tokenSource + visualStyleSource) || !/^:root\s*\{/.test(lightThemeSource) || !/^\[data-theme="dark"\]\s*\{/.test(darkThemeSource)) throw new Error('Theme ownership drifted.');
@@ -227,12 +227,12 @@ const common = Object.freeze({
   commit: process.env.GITHUB_SHA || null,
   runId: process.env.GITHUB_RUN_ID || null,
   attempt: process.env.GITHUB_RUN_ATTEMPT || null,
-  currentStage2State: '2.10-completed',
-  nextAtomicTask: '2.11-not-started',
+  currentStage2State: '2.11-completed',
+  nextStage: 'stage-03-not-started',
   productionModuleCount: moduleFixture.modules.length,
   dependencyAuditDecision: Object.freeze({
     observed: '1 low / 1 high',
-    changedInTask210: false,
+    changedInTask211: false,
     decision: 'deferred-until-final-local-real-device-testing'
   })
 });
@@ -246,7 +246,7 @@ await record('02-02-minimal-index-evidence.json', {
   scope: 'minimal-index-and-module-entry',
   index: indexInventory.source,
   indexSummary: indexInventory.summary,
-  compatibilityShell: { path: 'public/compatibility/current-shell.html', inlineEvents, scriptElements: 0 }
+  compatibilityContent: { path: 'public/compatibility/business-content.html', inlineEvents, scriptElements: 0 }
 });
 await record('02-03-svg-sprite-evidence.json', {
   node: 'stage-02/02-03',
@@ -315,6 +315,21 @@ await record('02-09-style-layering-evidence.json', {
   ]
 });
 
+
+await record('02-11-shell-cutover-evidence.json', {
+  node: 'stage-02/02-11',
+  scope: 'single-production-app-shell-with-temporary-business-content-port',
+  productionShellOwner: 'src/ui/create-ui.js',
+  productionEntry: 'src/bootstrap/module-entry.js',
+  compatibilityPublicEntry: 'src/ui/compatibility/index.js',
+  compatibilityContent: 'public/compatibility/business-content.html',
+  removedOldShellPaths: [
+    'public/compatibility/current-shell.html',
+    'src/ui/compatibility/mount-current-shell.js'
+  ],
+  compatibilityModules: architectureModules.uiCompatibility,
+  deletionTask: 'stage-16/16-08'
+});
 await record('02-10-responsive-shell-evidence.json', {
   node: 'stage-02/02-10',
   scope: 'responsive-app-shell-structure-and-focus-verification',

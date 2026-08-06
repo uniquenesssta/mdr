@@ -42,8 +42,8 @@ test('Atomic Task 2.2 reduces index.html to the exact minimal document shell', a
 });
 
 test('compatibility asset owns unmigrated business content while App Shell owns the mounted structure', async () => {
-  const markup = await readText('public/compatibility/current-shell.html');
-  const inlineEvents = collectInlineEvents('public/compatibility/current-shell.html', markup);
+  const markup = await readText('public/compatibility/business-content.html');
+  const inlineEvents = collectInlineEvents('public/compatibility/business-content.html', markup);
   assert.equal(inlineEvents.reduce((sum, record) => sum + record.count, 0), 184);
   assert.doesNotMatch(markup, /<script\b/i);
   assert.doesNotMatch(markup, /<html\b|<head\b|<body\b/i);
@@ -56,21 +56,23 @@ test('compatibility asset owns unmigrated business content while App Shell owns 
   assert.match(markup, /href="\/assets\/icons\.svg#icon-/i);
 });
 
-test('module entry owns resource loading while the mount module is independently destroyable', async () => {
-  const [entrySource, mountModule] = await Promise.all([
+test('module entry creates the App Shell before mounting temporary compatibility content', async () => {
+  const [entrySource, compatibilityModule] = await Promise.all([
     readText('src/bootstrap/module-entry.js'),
-    import(pathToFileURL(resolve(root, 'src/ui/compatibility/mount-current-shell.js')).href)
+    import(pathToFileURL(resolve(root, 'src/ui/compatibility/index.js')).href)
   ]);
-  assert.equal(typeof mountModule.mountCurrentShell, 'function');
+  assert.equal(typeof compatibilityModule.createCompatibilityBusinessContentPort, 'function');
   const uiModule = await import(pathToFileURL(resolve(root, 'src/ui/create-ui.js')).href);
   assert.equal(typeof uiModule.createUI, 'function');
-  assert.throws(() => mountModule.mountCurrentShell(null, '<div></div>'), /#app-root/);
-  assert.match(entrySource, /\/compatibility\/current-shell\.html/);
+  assert.throws(() => compatibilityModule.createCompatibilityBusinessContentPort(null, {}), /#app-root/);
+  assert.match(entrySource, /\/compatibility\/business-content\.html/);
   assert.match(entrySource, /\/i18n\.js/);
   assert.match(entrySource, /import\('\.\.\/main\.js'\)/);
-  assert.match(entrySource, /getElementById\('app-root'\)/);
-  assert.match(entrySource, /shellMount\.destroy\(\)/);
-  assert.match(await readText('src/ui/compatibility/mount-current-shell.js'), /createUIImpl = createUI/);
-  assert.match(entrySource, /classicScript\?\.remove\(\)/);
-  assert.doesNotMatch(entrySource, /\bwindow\./);
+  assert.match(entrySource, /ui = createUI\(root\)/);
+  assert.match(entrySource, /contentPort = createCompatibilityBusinessContentPort\(root, ui\)/);
+  assert.match(entrySource, /contentPort\.mount\(markup\)/);
+  assert.match(entrySource, /contentPort\?\.destroy\(\)/);
+  assert.match(entrySource, /ui\?\.destroy\(\)/);
+  assert.doesNotMatch(await readText('src/ui/compatibility/business-content-port.js'), /createUI|app-shell-view|shell\//);
+  assert.doesNotMatch(entrySource, /current-shell|mountCurrentShell|\bwindow\./);
 });

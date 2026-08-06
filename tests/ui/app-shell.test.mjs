@@ -131,16 +131,20 @@ test('App Shell modules are presentation-only and do not query business state or
   }
 });
 
-test('compatibility markup contains exact business-content templates and no second shell authority', async () => {
-  const [markup, mountSource] = await Promise.all([
-    readText('public/compatibility/current-shell.html'),
-    readText('src/ui/compatibility/mount-current-shell.js')
+test('compatibility business content is a temporary port and never owns shell creation', async () => {
+  const [markup, portSource, entrySource] = await Promise.all([
+    readText('public/compatibility/business-content.html'),
+    readText('src/ui/compatibility/business-content-port.js'),
+    readText('src/bootstrap/module-entry.js')
   ]);
   const slotNames = [...markup.matchAll(/<template\s+data-compat-slot="([^"]+)">/g)].map(match => match[1]);
   assert.deepEqual(slotNames, [...REQUIRED_REFS, 'ports']);
   assert.doesNotMatch(markup, /<div class="app">|<nav class="menu-bar"|<div class="editor-toolbar"|<div class="workspace"|<aside class="sidebar"|<div class="statusbar"/);
-  assert.match(mountSource, /import \{ createUI \} from '\.\.\/create-ui\.js'/);
-  assert.match(mountSource, /mountTemplate\(slotTemplates\.get\(slotName\), ui\[slotName\]\)/);
-  assert.match(mountSource, /mountTemplate\(slotTemplates\.get\('ports'\), root\)/);
-  assert.doesNotMatch(mountSource, /root\.before|root\.hidden\s*=\s*true|className\s*=\s*['"]app['"]/);
+  assert.doesNotMatch(portSource, /createUI|app-shell-view|shell\//);
+  assert.match(portSource, /createCompatibilityBusinessContentPort/);
+  assert.match(portSource, /slots\[name\]/);
+  assert.match(portSource, /compatibility-business-ports/);
+  assert.match(entrySource, /ui = createUI\(root\)/);
+  assert.match(entrySource, /createCompatibilityBusinessContentPort\(root, ui\)/);
+  assert.doesNotMatch(entrySource, /mountCurrentShell|current-shell/);
 });

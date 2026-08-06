@@ -428,7 +428,7 @@ test('compatibility modal bridge installs one authoritative registry for all nin
 
 test('compatibility feature callers use the explicit modal event port without new globals or duplicate lifecycle ownership', async () => {
   const bridgeSource = await readFile('src/ui/compatibility/mount-modal-shells.js', 'utf8');
-  const mountSource = await readFile('src/ui/compatibility/mount-current-shell.js', 'utf8');
+  const mountSource = await readFile('src/ui/compatibility/business-content-port.js', 'utf8');
   const featureSources = await Promise.all([
     'public/app/core.js',
     'public/app/editor-tools.js',
@@ -437,7 +437,7 @@ test('compatibility feature callers use the explicit modal event port without ne
   ].map(path => readFile(path, 'utf8')));
   const eventSource = await readFile('public/app/events.js', 'utf8');
 
-  assert.match(mountSource, /mountCompatibilityModalShells\(ui\.overlay\)/);
+  assert.match(mountSource, /mountCompatibilityModalShells\(slots\.overlay\)/);
   assert.doesNotMatch(bridgeSource, /windowRef|markdownEditorModalShells|window\.|globalThis\./);
   for (const source of featureSources) {
     assert.match(source, /markdown-editor:modal-shell-open|markdown-editor:modal-shell-close/);

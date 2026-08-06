@@ -61,7 +61,7 @@ test('Atomic Task 2.3 sprite has one stable definition for every preserved icon 
 
 test('compatibility and dynamic callers reference the external sprite without a second geometry authority', async () => {
   const [shell, core, events, linkPreview, folderTree, browserTest] = await Promise.all([
-    readText('public/compatibility/current-shell.html'),
+    readText('public/compatibility/business-content.html'),
     readText('public/app/core.js'),
     readText('public/app/events.js'),
     readText('src/runtime/link-preview.js'),

@@ -18,6 +18,7 @@ test('browser E2E runner stays dependency-free and covers required interactions'
     'layout switching closes active component editing',
     'application theme switch changes visual tokens without changing shell geometry',
     'application mounts one App Shell with strict named slots',
+    'temporary compatibility business port mounts and destroys without owning the App Shell',
     'application shell has no structural overflow or clipped focus across required viewports'
   ]) assert.ok(runner.includes(phrase), `missing browser scenario: ${phrase}`);
   assert.match(runner, /node:assert\/strict/);

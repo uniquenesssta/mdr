@@ -55,6 +55,8 @@ jobs:
         run: node --test tests/ui/style-layering.test.mjs
       - name: Verify Atomic Task 2.10 responsive shell
         run: node --test tests/ui/responsive-shell.test.mjs
+      - name: Verify Atomic Task 2.11 old shell cutover
+        run: node --test tests/ui/shell-cutover.test.mjs
       - name: Run architecture hard gate
         run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-10-architecture-scan.json
       - name: Run existing Node regression suite
