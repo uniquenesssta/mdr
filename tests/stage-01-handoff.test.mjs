@@ -71,7 +71,7 @@ const MODEL_KERNEL_EXPORTS = Object.freeze([
 ]);
 
 test('README exposes the exact Stage 1 architecture handoff without claiming feature migration', async () => {
-  const readme = await readText('README.md');
+  const readme = await readText('docs/README.md');
   assert.equal((readme.match(/^## Stage 1 架构交接$/gm) || []).length, 1);
   const section = extractSection(readme, '## Stage 1 架构交接');
 
@@ -118,7 +118,7 @@ test('Stage 1 historical counts and current package verification entries remain 
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
   assert.equal(moduleFixture.modules.length, 160);
-  const readme = await readText('README.md');
+  const readme = await readText('docs/README.md');
   assert.match(extractSection(readme, '## Stage 1 架构交接'), /67 个生产模块/);
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 9);
   assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 184);
@@ -142,7 +142,7 @@ test('Stage 1 historical counts and current package verification entries remain 
   );
 });
 test('Stage 1 completion record is grounded in verified artifacts', async () => {
-  const readme = await readText('README.md');
+  const readme = await readText('docs/README.md');
   assert.equal((readme.match(/<!-- stage-01-node:01-10 -->/g) || []).length, 1);
   assert.match(readme, /30986994815/);
   assert.match(readme, /30986994863/);
