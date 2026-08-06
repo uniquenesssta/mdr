@@ -13,6 +13,9 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   ]);
 
   assert.match(workflow, /runs-on: windows-2025/);
+  assert.match(workflow, /MARKDOWN_EDITOR_BINARY: src-tauri\/target\/debug\/markdown-editor\.exe/);
+  assert.match(workflow, /cargo build --release --locked/);
+  assert.match(workflow, /cargo build --locked --manifest-path src-tauri\/Cargo\.toml/);
   assert.match(workflow, /selenium-webdriver@4\.34\.0/);
   assert.match(workflow, /tauri-driver --version 2\.0\.6 --locked/);
   assert.match(workflow, /--no-save --no-package-lock/);
