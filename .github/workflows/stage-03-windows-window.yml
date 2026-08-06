@@ -70,6 +70,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Verify Windows automation architecture contract
+        run: node --test tests/windows-window-automation.test.mjs
+
       - name: Install pinned transient WebDriver client
         run: npm install --no-save --no-package-lock selenium-webdriver@4.34.0
 
