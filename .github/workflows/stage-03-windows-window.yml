@@ -80,18 +80,33 @@ jobs:
       - name: Build current Windows application
         run: cargo build --release --locked --manifest-path src-tauri/Cargo.toml
 
+      - name: Prepare Windows evidence directory
+        shell: pwsh
+        run: |
+          $evidenceDirectory = 'artifacts/stage-03/windows-window'
+          New-Item -ItemType Directory -Force -Path $evidenceDirectory | Out-Null
+          [pscustomobject]@{
+            headSha = '${{ github.event.pull_request.head.sha || github.sha }}'
+            runner = '${{ runner.os }}'
+            image = '${{ runner.name }}'
+            status = 'workflow-started'
+          } | ConvertTo-Json | Set-Content -Path "$evidenceDirectory/workflow-bootstrap.json" -Encoding utf8
+
       - name: Install pinned tauri-driver
         shell: pwsh
         run: |
           $installRoot = Join-Path $env:GITHUB_WORKSPACE '.cargo-bin'
+          $installedDriver = Join-Path $installRoot 'bin\tauri-driver.exe'
           New-Item -ItemType Directory -Force -Path $installRoot | Out-Null
           cargo install tauri-driver --version 2.0.6 --locked --root $installRoot
-          & (Join-Path $installRoot 'bin\tauri-driver.exe') --version
-          Copy-Item (Join-Path $installRoot 'bin\tauri-driver.exe') (Join-Path $installRoot 'tauri-driver.exe') -Force
-
-      - name: Prepare Windows evidence directory
-        shell: pwsh
-        run: New-Item -ItemType Directory -Force -Path artifacts/stage-03/windows-window | Out-Null
+          if (-not (Test-Path $installedDriver)) {
+            throw "tauri-driver installation did not produce $installedDriver"
+          }
+          Copy-Item $installedDriver $env:TAURI_DRIVER_PATH -Force
+          if (-not (Test-Path $env:TAURI_DRIVER_PATH)) {
+            throw "tauri-driver copy missing: $env:TAURI_DRIVER_PATH"
+          }
+          & $env:TAURI_DRIVER_PATH --help | Out-File -FilePath 'artifacts/stage-03/windows-window/tauri-driver-help.txt' -Encoding utf8
 
       - name: Install matching Microsoft Edge WebDriver
         shell: pwsh
