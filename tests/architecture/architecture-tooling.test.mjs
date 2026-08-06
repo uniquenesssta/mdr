@@ -44,7 +44,7 @@ test('requires one newest-first README record for every Stage 1 detail document'
   const root = await createArchitectureFixture({
     'docs/rewrite-progress/stage-01/01-01-inventory.md': '# 1.1\n',
     'docs/rewrite-progress/stage-01/01-02-root.md': '# 1.2\n',
-    'README.md': [
+    'docs/README.md': [
       '# Fixture',
       '',
       '## Change Log',
