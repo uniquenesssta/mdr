@@ -44,6 +44,11 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(workflow, /driverProvider = 'embedded-isolated-host'/);
   assert.match(workflow, /--no-save --no-package-lock/);
   assert.match(workflow, /upload-artifact@v4/);
+  assert.match(
+    workflow,
+    /stage-03-windows-window-\$\{\{ github\.event\.pull_request\.head\.ref \|\| github\.ref_name \}\}-\$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/
+  );
+  assert.doesNotMatch(workflow, /contents: write|INTERNAL CONCURRENCY REPAIR/);
   assert.doesNotMatch(workflow, /tauri-driver|MSEDGEDRIVER|install-edge-driver/);
 
   assert.match(hostBuilder, /git -C \$repositoryRoot archive/);
@@ -54,6 +59,10 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(hostBuilder, /cargo generate-lockfile/);
   assert.match(hostBuilder, /Production Cargo\.toml already contains/);
   assert.match(hostBuilder, /Production capability already exposes/);
+  assert.match(hostBuilder, /Properties\.Remove\('devUrl'\)/);
+  assert.match(hostBuilder, /Properties\.Remove\('beforeDevCommand'\)/);
+  assert.match(hostBuilder, /frontendSource = 'embedded-dist'/);
+  assert.match(hostBuilder, /productionConfigUnchanged = \$true/);
 
   for (const contract of [
     'native-window-state-subscriptions-and-close-cancellation',
@@ -94,5 +103,7 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.doesNotMatch(capability, /wdio-webdriver:default/);
   assert.doesNotMatch(packageJson, /selenium-webdriver|webdriverio|tauri-driver/);
   assert.match(tauriConfig, /"withGlobalTauri": false/);
+  assert.match(tauriConfig, /"devUrl": "http:\/\/127\.0\.0\.1:16663"/);
+  assert.match(tauriConfig, /"beforeDevCommand": "npm run dev"/);
   assert.doesNotMatch(runner, /browser\.tauri|@wdio\/tauri-plugin/);
 });
