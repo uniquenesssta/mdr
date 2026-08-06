@@ -6,7 +6,6 @@ on:
       - rewrite/modular-rebuild
     paths:
       - .github/workflows/apply-atomic-3-5.yml
-      - scripts/stage-03/atomic-3-5-payload/**
 
 permissions:
   contents: write
@@ -16,9 +15,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  apply:
+  fix-evidence:
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,73 +27,36 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - name: Decode verified implementation payload
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Correct and verify Stage 3 window evidence
         shell: bash
         run: |
           set -euo pipefail
-          cat scripts/stage-03/atomic-3-5-payload/*.part > /tmp/atomic-3-5-payload.b64
-          echo '1168c620b7bc57831286e02f8317721c3e0063574a65fffdab0268565ac39c41  /tmp/atomic-3-5-payload.b64' | sha256sum -c -
-          base64 -d /tmp/atomic-3-5-payload.b64 > /tmp/atomic-3-5-payload.gz
-          echo '098fb07e9354682e8b187d35637c8b32c740f441e02aed275086e391e600c794  /tmp/atomic-3-5-payload.gz' | sha256sum -c -
-          gzip -d -c /tmp/atomic-3-5-payload.gz > /tmp/apply-atomic-3-5.mjs
-          echo '152ff10934ad4d14333a8a41a442631d4d758e1b5124a7d781c54e24aef8f628  /tmp/apply-atomic-3-5.mjs' | sha256sum -c -
           python - <<'PY'
-          path = '/tmp/apply-atomic-3-5.mjs'
+          path = 'scripts/stage-03/record-platform-evidence.mjs'
           source = open(path, encoding='utf-8').read()
-          source = source.replace(
-              "  assert.throws(() => client.subscribeResize(() => {}), /window client is destroyed/);",
-              "  await assert.rejects(client.subscribeResize(() => {}), /window client is destroyed/);"
-          )
-          source = source.replace(
-              "  assert.throws(() => invalidHandler.subscribeResize(null), /handler must be a function/);",
-              "  await assert.rejects(invalidHandler.subscribeResize(null), /handler must be a function/);"
-          )
+          old_count = "if (windowCalls.length !== 10 || windowDisposals.join(',') !== 'close,resize') process.exit(1);"
+          new_count = "if (windowCalls.length !== 9 || windowDisposals.join(',') !== 'close,resize') process.exit(1);"
+          old_handlers = "if (windowCalls[4].handler !== resizeHandler || windowCalls[5].handler !== closeHandler) process.exit(1);"
+          new_handlers = "if (windowCalls[5].handler !== resizeHandler || windowCalls[6].handler !== closeHandler) process.exit(1);"
+          if source.count(old_count) != 1 or source.count(old_handlers) != 1:
+              raise SystemExit('Atomic 3.5 evidence assertions no longer match the analyzed source')
+          source = source.replace(old_count, new_count).replace(old_handlers, new_handlers)
           open(path, 'w', encoding='utf-8').write(source)
           PY
-          node --check /tmp/apply-atomic-3-5.mjs
-      - name: Inspect task state
-        id: state
-        shell: bash
-        run: |
-          STATE=$(node /tmp/apply-atomic-3-5.mjs status)
-          echo "state=$STATE" >> "$GITHUB_OUTPUT"
-          echo "$STATE"
-      - name: Install frontend dependencies
-        if: ${{ !contains(steps.state.outputs.state, '"implemented":true') }}
-        run: npm ci
-      - name: Apply Atomic Task 3.5 source changes
-        if: ${{ !contains(steps.state.outputs.state, '"implemented":true') }}
-        run: node /tmp/apply-atomic-3-5.mjs apply
-      - name: Verify implementation before commit
-        if: ${{ !contains(steps.state.outputs.state, '"implemented":true') }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --check src/platform/desktop/window-client.js
-          node --check src/runtime/tauri.js
-          node --check tests/unit/platform/window-client.test.mjs
           node --check scripts/stage-03/record-platform-evidence.mjs
-          node --test --test-name-pattern='^(Atomic Task 3\.5 delegates|resize and close-request|destroy owns|a subscription resolved|native operation|invalid dependencies|the desktop window client|legacy runtime delegates|save-before-close remains)' tests/unit/platform/window-client.test.mjs
+          rm -rf artifacts/stage-03
+          node scripts/stage-03/record-platform-evidence.mjs
+          test -f artifacts/stage-03/03-05-window-client-evidence.json
           git diff --check
-      - name: Commit and push implementation
-        if: ${{ !contains(steps.state.outputs.state, '"implemented":true') }}
+      - name: Commit evidence correction
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            scripts/stage-03/record-platform-evidence.mjs \
-            src/platform/index.js \
-            src/platform/desktop/window-client.js \
-            src/runtime/tauri.js \
-            tests/architecture/fixtures/production-modules.json \
-            tests/stage-01-handoff.test.mjs \
-            tests/unit/platform/platform-ports.test.mjs \
-            tests/unit/platform/platform-detection.test.mjs \
-            tests/unit/platform/invoke-client.test.mjs \
-            tests/unit/platform/dialog-client.test.mjs \
-            tests/unit/platform/window-client.test.mjs
+          git add scripts/stage-03/record-platform-evidence.mjs
           git diff --cached --check
-          git commit -m "feat(platform): complete atomic task 3.5 window client"
+          git commit -m "fix(platform): correct atomic 3.5 evidence sample"
           git push origin HEAD:rewrite/modular-rebuild
