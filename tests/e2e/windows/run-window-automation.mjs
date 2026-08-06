@@ -42,7 +42,11 @@ async function withSession(label, port, run) {
       port,
       binaryPath,
       repositoryRoot,
-      artifactDirectory
+      artifactDirectory,
+      waitForNativeWindow: child => waitForWindowSnapshot(
+        snapshot => snapshot.pid === child.pid && snapshot.handle !== 0,
+        { timeoutMs: 30_000, intervalMs: 150 }
+      )
     },
     async browser => {
       await waitForApplication(browser);
