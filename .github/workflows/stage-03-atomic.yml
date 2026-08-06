@@ -37,8 +37,10 @@ jobs:
         run: node --test tests/ui/shell-cutover.test.mjs
       - name: Verify Atomic Task 3.1 platform ports
         run: node --test tests/unit/platform/platform-ports.test.mjs
+      - name: Verify Atomic Task 3.2 capability detection
+        run: node --test tests/unit/platform/platform-detection.test.mjs
       - name: Run architecture hard gate
-        run: node scripts/verify-architecture.mjs --output=artifacts/stage-03/03-01-architecture-scan.json
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-03/03-02-architecture-scan.json
       - name: Run existing Node regression suite
         run: npm test
       - name: Run browser interaction contract

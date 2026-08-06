@@ -2,8 +2,11 @@ import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm as showConfirmDialog, open as showOpenDialog, save as showSaveDialog } from '@tauri-apps/plugin-dialog';
+import { createRuntimeCapabilities, detectPlatformEnvironment } from '../platform/index.js';
 
-const isAvailable = Boolean(window.__TAURI_INTERNALS__);
+const platformEnvironment = detectPlatformEnvironment(window);
+const capabilities = createRuntimeCapabilities(platformEnvironment, window);
+const isAvailable = capabilities.desktop.invoke;
 
 if (isAvailable) {
   document.documentElement.classList.add('tauri-shell');
@@ -58,6 +61,7 @@ async function invokeMeasured(operation, args, details = {}) {
 
 window.markdownEditorNative = {
   isAvailable,
+  capabilities,
   async fetchUrl(url) {
     if (!isAvailable) {
       throw new Error('Tauri runtime is not available');

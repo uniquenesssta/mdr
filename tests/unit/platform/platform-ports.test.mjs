@@ -114,16 +114,17 @@ test('Atomic Task 3.1 exposes the exact business-neutral platform port surface',
   }
 });
 
-test('Stage 3 verification runs the 3.1 contract before architecture and application regression', async () => {
+test('Stage 3 verification keeps the 3.1 contract before later platform checks', async () => {
   const workflow = await readFile(
     new URL('../../../.github/workflows/stage-03-atomic.yml', import.meta.url),
     'utf8'
   );
   assert.match(workflow, /Verify Atomic Task 3\.1 platform ports/);
   assert.match(workflow, /node --test tests\/unit\/platform\/platform-ports\.test\.mjs/);
-  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-01-architecture-scan\.json/);
+  assert.match(workflow, /Verify Atomic Task 3\.2 capability detection/);
+  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-02-architecture-scan\.json/);
   assert.match(workflow, /scripts\/stage-03\/record-platform-evidence\.mjs/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[2-9]|Atomic Task 3\.1[0-9]/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.[3-9]|Atomic Task 3\.1[0-9]/);
 });
 
 test('the frozen legacy capability inventory maps every old native method to declared ports', async () => {
