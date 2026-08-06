@@ -14,6 +14,7 @@ import {
   STORAGE_PORT_METHODS,
   WEB_PORT_METHODS,
   WINDOW_PORT_METHODS,
+  createInvokeClient,
   createRuntimeCapabilities,
   detectPlatformEnvironment
 } from '../../src/platform/index.js';
@@ -22,6 +23,7 @@ const OUTPUT_DIRECTORY = 'artifacts/stage-03';
 const PLATFORM_ROOT = 'src/platform';
 const PORT_DIRECTORY = `${PLATFORM_ROOT}/ports`;
 const ENVIRONMENT_DIRECTORY = `${PLATFORM_ROOT}/environment`;
+const DESKTOP_DIRECTORY = `${PLATFORM_ROOT}/desktop`;
 const INVENTORY_PATH = 'tests/unit/platform/fixtures/platform-port-inventory.json';
 const MODULE_FIXTURE_PATH = 'tests/architecture/fixtures/production-modules.json';
 const LEGACY_RUNTIME_PATH = 'src/runtime/tauri.js';
@@ -76,6 +78,9 @@ const expectedEnvironmentFiles = Object.freeze([
   'platform-detection.js',
   'runtime-capabilities.js'
 ]);
+const expectedDesktopFiles = Object.freeze([
+  'invoke-client.js'
+]);
 
 function createBrowserRuntime() {
   class Element {}
@@ -112,11 +117,15 @@ const inventory = JSON.parse(await readFile(INVENTORY_PATH, 'utf8'));
 const moduleFixture = JSON.parse(await readFile(MODULE_FIXTURE_PATH, 'utf8'));
 const portFiles = (await readdir(PORT_DIRECTORY)).sort();
 const environmentFiles = (await readdir(ENVIRONMENT_DIRECTORY)).sort();
+const desktopFiles = (await readdir(DESKTOP_DIRECTORY)).sort();
 const portSources = await Promise.all([
   ...portFiles.map(file => readFile(`${PORT_DIRECTORY}/${file}`, 'utf8'))
 ]);
 const environmentSources = Object.fromEntries(await Promise.all(
   environmentFiles.map(async file => [file, await readFile(`${ENVIRONMENT_DIRECTORY}/${file}`, 'utf8')])
+));
+const desktopSources = Object.fromEntries(await Promise.all(
+  desktopFiles.map(async file => [file, await readFile(`${DESKTOP_DIRECTORY}/${file}`, 'utf8')])
 ));
 const legacyRuntimeSource = await readFile(LEGACY_RUNTIME_PATH, 'utf8');
 const platformModules = moduleFixture.modules
@@ -142,11 +151,43 @@ const browserEnvironment = detectPlatformEnvironment(browserRuntime);
 const desktopEnvironment = detectPlatformEnvironment(desktopRuntime);
 const browserCapabilities = createRuntimeCapabilities(browserEnvironment, browserRuntime);
 const desktopCapabilities = createRuntimeCapabilities(desktopEnvironment, desktopRuntime);
+const invokeCalls = [];
+const invokeTelemetry = [];
+let invokeNow = 100;
+const invokeClient = createInvokeClient({
+  invoke: async (operation, args) => {
+    invokeCalls.push({ operation, args });
+    return Object.freeze({ operation, args });
+  },
+  now: () => {
+    invokeNow += 5;
+    return invokeNow;
+  },
+  record: (operation, entry) => invokeTelemetry.push({ operation, entry })
+});
+const invokeArgs = Object.freeze({ documentId: 'evidence-document' });
+const invokeResult = await invokeClient.invoke('load_document_state', invokeArgs, { documentId: 'evidence-document' });
+const invokeError = new Error('evidence invoke error');
+const failingInvokeClient = createInvokeClient({
+  invoke: async () => { throw invokeError; },
+  now: () => {
+    invokeNow += 5;
+    return invokeNow;
+  },
+  record: (operation, entry) => invokeTelemetry.push({ operation, entry })
+});
+let capturedInvokeError = null;
+try {
+  await failingInvokeClient.invoke('fetch_url', { url: 'https://example.com' }, { inputLength: 19 });
+} catch (error) {
+  capturedInvokeError = error;
+}
 
 if (JSON.stringify(PLATFORM_PORT_NAMES) !== JSON.stringify(expectedPortNames)) process.exit(1);
 if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exit(1);
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
-if (moduleFixture.modules.length !== 157 || platformModules.length !== 18) process.exit(1);
+if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
+if (moduleFixture.modules.length !== 158 || platformModules.length !== 19) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -159,6 +200,14 @@ if (/\bwindow\.|\bdocument\.|\bnavigator\./.test(environmentSources['runtime-cap
 if (!legacyRuntimeSource.includes("from '../platform/index.js'")) process.exit(1);
 if (!legacyRuntimeSource.includes('isAvailable = capabilities.desktop.invoke')) process.exit(1);
 if (legacyRuntimeSource.includes('__TAURI_INTERNALS__')) process.exit(1);
+if (!desktopSources['invoke-client.js'].includes("@tauri-apps/api/core")) process.exit(1);
+if (!desktopSources['invoke-client.js'].includes('throw error')) process.exit(1);
+if (legacyRuntimeSource.includes("@tauri-apps/api/core") || legacyRuntimeSource.includes('invokeMeasured')) process.exit(1);
+if ((legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length !== 19) process.exit(1);
+if (!legacyRuntimeSource.includes("write_performance_logs', { entries }, {}, { record: false }")) process.exit(1);
+if (invokeCalls.length !== 1 || invokeCalls[0].operation !== 'load_document_state' || invokeCalls[0].args !== invokeArgs) process.exit(1);
+if (invokeResult.args !== invokeArgs || capturedInvokeError !== invokeError) process.exit(1);
+if (invokeTelemetry.length !== 2 || invokeTelemetry[0].entry.status === 'error' || invokeTelemetry[1].entry.status !== 'error') process.exit(1);
 if (browserEnvironment.kind !== 'browser' || desktopEnvironment.kind !== 'desktop') process.exit(1);
 if (!Object.isFrozen(browserEnvironment) || !Object.isFrozen(desktopEnvironment)) process.exit(1);
 if (!Object.isFrozen(browserCapabilities) || !Object.isFrozen(browserCapabilities.browser) || !Object.isFrozen(browserCapabilities.desktop)) process.exit(1);
@@ -202,7 +251,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-01-platform-ports-evidence.json`, `${JSO
     'all-thirty-three-legacy-native-methods-have-explicit-destination-mappings',
     'atomic-task-3.1-contracts-remain-runtime-neutral',
     'capability-detection-is-owned-by-atomic-task-3.2',
-    'no-production-caller-cutover-to-new-port-adapters-in-atomic-task-3.2'
+    'invoke-client-cutover-is-owned-by-atomic-task-3.3-with-other-adapters-deferred'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -236,6 +285,36 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-02-runtime-capabilities-evidence.json`, 
     'legacy-runtime-availability-derived-from-public-capabilities',
     'no-production-business-module-checks-tauri-internals',
     'existing-native-method-contracts-and-command-fields-remain-unchanged',
-    'invoke-and-runtime-adapter-rewrite-remain-deferred-to-atomic-task-3.3-and-later'
+    'invoke-client-is-owned-by-atomic-task-3.3-and-remaining-adapters-stay-deferred'
+  ]
+}, null, 2)}\n`, 'utf8');
+
+await writeFile(`${OUTPUT_DIRECTORY}/03-03-invoke-client-evidence.json`, `${JSON.stringify({
+  node: 'stage-03/03-03',
+  atomicTask: '3.3',
+  status: 'passed',
+  commit: process.env.GITHUB_SHA || null,
+  runId: process.env.GITHUB_RUN_ID || null,
+  attempt: process.env.GITHUB_RUN_ATTEMPT || null,
+  scope: 'single-measured-tauri-invoke-client',
+  publicEntry: 'src/platform/index.js',
+  implementationFiles: desktopFiles.map(file => `${DESKTOP_DIRECTORY}/${file}`),
+  productionModuleCount: moduleFixture.modules.length,
+  platformModuleCount: platformModules.length,
+  commandDelegationCount: (legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length,
+  sample: {
+    calls: invokeCalls,
+    telemetry: invokeTelemetry,
+    errorIdentityPreserved: capturedInvokeError === invokeError
+  },
+  guarantees: [
+    'single-production-owner-of-tauri-core-invoke-import',
+    'command-name-and-argument-object-pass-through-unchanged',
+    'native-roundtrip-duration-recorded-for-success-and-error',
+    'original-invoke-result-and-error-identity-preserved',
+    'telemetry-failures-cannot-replace-native-semantics',
+    'performance-log-transport-explicitly-suppresses-recursive-telemetry',
+    'legacy-runtime-retains-all-nineteen-command-fields-through-the-public-invoke-client',
+    'dialog-window-filesystem-and-other-adapters-remain-deferred-to-atomic-task-3.4-and-later'
   ]
 }, null, 2)}\n`, 'utf8');

@@ -1,12 +1,15 @@
-import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { confirm as showConfirmDialog, open as showOpenDialog, save as showSaveDialog } from '@tauri-apps/plugin-dialog';
-import { createRuntimeCapabilities, detectPlatformEnvironment } from '../platform/index.js';
+import { createInvokeClient, createRuntimeCapabilities, detectPlatformEnvironment } from '../platform/index.js';
 
 const platformEnvironment = detectPlatformEnvironment(window);
 const capabilities = createRuntimeCapabilities(platformEnvironment, window);
 const isAvailable = capabilities.desktop.invoke;
+const invokeClient = createInvokeClient({
+  now: () => performance.now(),
+  record: (operation, entry) => window.markdownEditorPerf?.record(operation, entry)
+});
 
 if (isAvailable) {
   document.documentElement.classList.add('tauri-shell');
@@ -38,27 +41,6 @@ function bytesToBase64(bytes) {
   return btoa(chunks.join(''));
 }
 
-async function invokeMeasured(operation, args, details = {}) {
-  const started = performance.now();
-  try {
-    const result = await invoke(operation, args);
-    window.markdownEditorPerf?.record(`native.${operation}`, {
-      category: 'native.roundtrip',
-      durationMs: performance.now() - started,
-      details
-    });
-    return result;
-  } catch (error) {
-    window.markdownEditorPerf?.record(`native.${operation}`, {
-      category: 'native.roundtrip',
-      durationMs: performance.now() - started,
-      status: 'error',
-      details: { ...details, error: error?.message || String(error) }
-    });
-    throw error;
-  }
-}
-
 window.markdownEditorNative = {
   isAvailable,
   capabilities,
@@ -66,14 +48,14 @@ window.markdownEditorNative = {
     if (!isAvailable) {
       throw new Error('Tauri runtime is not available');
     }
-    return invokeMeasured('fetch_url', { url }, { inputLength: String(url || '').length });
+    return invokeClient.invoke('fetch_url', { url }, { inputLength: String(url || '').length });
   },
   async openExternalUrl(url) {
     if (!isAvailable) {
       throw new Error('Tauri runtime is not available');
     }
     const value = String(url || '').trim();
-    return invokeMeasured('open_external_url', { url: value }, {
+    return invokeClient.invoke('open_external_url', { url: value }, {
       scheme: value.split(':', 1)[0].toLowerCase(),
       inputLength: value.length
     });
@@ -83,14 +65,14 @@ window.markdownEditorNative = {
       throw new Error('Tauri runtime is not available');
     }
     const extension = String(path || '').split('.').pop()?.toLowerCase() || '';
-    return invokeMeasured('read_dropped_file', { path }, { extension });
+    return invokeClient.invoke('read_dropped_file', { path }, { extension });
   },
   async listTextFileTree(documentPath) {
     if (!isAvailable) {
       throw new Error('Tauri runtime is not available');
     }
     const value = String(documentPath || '').trim();
-    return invokeMeasured('list_text_file_tree', { documentPath: value }, {
+    return invokeClient.invoke('list_text_file_tree', { documentPath: value }, {
       hasDocumentPath: Boolean(value),
       extension: value.split('.').pop()?.toLowerCase() || ''
     });
@@ -100,7 +82,7 @@ window.markdownEditorNative = {
       throw new Error('Tauri runtime is not available');
     }
     const value = String(source || '').trim();
-    return invokeMeasured('read_local_image', {
+    return invokeClient.invoke('read_local_image', {
       source: value,
       documentPath: String(documentPath || '').trim() || null
     }, {
@@ -110,15 +92,15 @@ window.markdownEditorNative = {
   },
   async getInitialFilePath() {
     if (!isAvailable) return null;
-    return invokeMeasured('initial_file_path', {}, {});
+    return invokeClient.invoke('initial_file_path', {}, {});
   },
   async writePerformanceLogs(entries) {
     if (!isAvailable) return '';
-    return invoke('write_performance_logs', { entries });
+    return invokeClient.invoke('write_performance_logs', { entries }, {}, { record: false });
   },
   async saveDocumentState(request) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
-    return invokeMeasured('save_document_state', { request }, {
+    return invokeClient.invoke('save_document_state', { request }, {
       documentId: request?.documentId || '',
       baseVersion: request?.baseVersion || 0,
       nextVersion: request?.nextVersion || 0,
@@ -128,7 +110,7 @@ window.markdownEditorNative = {
   },
   async beginDocumentSnapshotUpload(documentId, uploadId) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
-    return invokeMeasured('begin_document_snapshot_upload', { documentId, uploadId }, {
+    return invokeClient.invoke('begin_document_snapshot_upload', { documentId, uploadId }, {
       documentId,
       uploadId
     });
@@ -136,7 +118,7 @@ window.markdownEditorNative = {
   async appendDocumentSnapshotChunk(documentId, uploadId, chunk, chunkIndex = 0) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
     const content = String(chunk ?? '');
-    return invokeMeasured('append_document_snapshot_chunk', {
+    return invokeClient.invoke('append_document_snapshot_chunk', {
       documentId,
       uploadId,
       chunk: content
@@ -149,7 +131,7 @@ window.markdownEditorNative = {
   },
   async commitDocumentSnapshotUpload(request, uploadId) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
-    return invokeMeasured('commit_document_snapshot_upload', { request, uploadId }, {
+    return invokeClient.invoke('commit_document_snapshot_upload', { request, uploadId }, {
       documentId: request?.documentId || '',
       uploadId,
       baseVersion: request?.baseVersion || 0,
@@ -158,22 +140,22 @@ window.markdownEditorNative = {
   },
   async abortDocumentSnapshotUpload(documentId, uploadId) {
     if (!isAvailable) return;
-    return invokeMeasured('abort_document_snapshot_upload', { documentId, uploadId }, {
+    return invokeClient.invoke('abort_document_snapshot_upload', { documentId, uploadId }, {
       documentId,
       uploadId
     });
   },
   async loadDocumentState(documentId) {
     if (!isAvailable) return null;
-    return invokeMeasured('load_document_state', { documentId }, { documentId });
+    return invokeClient.invoke('load_document_state', { documentId }, { documentId });
   },
   async loadDocumentManifest(documentId) {
     if (!isAvailable) return null;
-    return invokeMeasured('load_document_manifest', { documentId }, { documentId });
+    return invokeClient.invoke('load_document_manifest', { documentId }, { documentId });
   },
   async readDocumentChunk(documentId, byteOffset, maxBytes = 512 * 1024) {
     if (!isAvailable) return null;
-    return invokeMeasured('read_document_chunk', {
+    return invokeClient.invoke('read_document_chunk', {
       documentId,
       byteOffset: Math.max(0, Number(byteOffset) || 0),
       maxBytes: Math.max(16 * 1024, Number(maxBytes) || 512 * 1024)
@@ -181,7 +163,7 @@ window.markdownEditorNative = {
   },
   async searchDocumentState(request) {
     if (!isAvailable) return null;
-    return invokeMeasured('search_document_state', { request }, {
+    return invokeClient.invoke('search_document_state', { request }, {
       documentId: request?.documentId || '',
       queryLength: String(request?.query || '').length,
       from: Number(request?.from) || 0
@@ -189,7 +171,7 @@ window.markdownEditorNative = {
   },
   async deleteDocumentState(documentId) {
     if (!isAvailable) return;
-    return invokeMeasured('delete_document_state', { documentId }, { documentId });
+    return invokeClient.invoke('delete_document_state', { documentId }, { documentId });
   },
   async chooseOpenPath(options = {}) {
     if (!isAvailable) return null;
@@ -262,7 +244,7 @@ window.markdownEditorNative = {
   async writeTextFile(path, content, details = {}) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
     const text = String(content ?? '');
-    return invokeMeasured('write_local_text_file', {
+    return invokeClient.invoke('write_local_text_file', {
       path: String(path || ''),
       content: text
     }, {
@@ -275,7 +257,7 @@ window.markdownEditorNative = {
   async writeBinaryFile(path, content, details = {}) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
     const bytes = content instanceof Uint8Array ? content : new Uint8Array(content || []);
-    return invokeMeasured('write_local_binary_file', {
+    return invokeClient.invoke('write_local_binary_file', {
       path: String(path || ''),
       contentBase64: bytesToBase64(bytes)
     }, {
