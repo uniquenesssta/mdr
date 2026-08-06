@@ -13,7 +13,7 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   ]);
 
   assert.match(workflow, /runs-on: windows-2025/);
-  assert.match(workflow, /webdriverio@9\.30\.0/);
+  assert.match(workflow, /selenium-webdriver@4\.34\.0/);
   assert.match(workflow, /tauri-driver --version 2\.0\.6 --locked/);
   assert.match(workflow, /--no-save --no-package-lock/);
   assert.match(workflow, /upload-artifact@v4/);
@@ -31,13 +31,18 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
     assert.match(runner, new RegExp(contract));
   }
 
+  assert.match(runner, /Builder, By, Capabilities/);
+  assert.match(runner, /setBrowserName\('wry'\)/);
+  assert.match(runner, /--native-driver/);
+  assert.match(runner, /MSEDGEDRIVER_PATH/);
   assert.match(helper, /GetWindowPlacement/);
   assert.match(helper, /GetWindowRect/);
   assert.match(helper, /mouse_event/);
   assert.match(installer, /Microsoft\\EdgeWebView\\Application/);
   assert.match(installer, /msedgedriver\.microsoft\.com/);
+  assert.match(installer, /MSEDGEDRIVER_PATH=/);
 
-  assert.doesNotMatch(packageJson, /webdriverio|tauri-driver/);
+  assert.doesNotMatch(packageJson, /selenium-webdriver|webdriverio|tauri-driver/);
   assert.match(tauriConfig, /"withGlobalTauri": false/);
   assert.doesNotMatch(runner, /browser\.tauri|@wdio\/tauri-plugin/);
 });
