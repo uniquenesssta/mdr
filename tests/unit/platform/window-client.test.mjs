@@ -158,16 +158,14 @@ test('save-before-close remains in the application layer and is absent from the 
   assert.match(eventsSource, /window\.markdownEditorNative\.destroyWindow/);
 });
 
-test('Stage 3 verification runs Atomic Task 3.5 after dialog and before architecture', async () => {
+test('Stage 3 verification keeps Atomic Task 3.5 after dialog and before drag-drop', async () => {
   const workflow = await readFile(
     new URL('../../../.github/workflows/stage-03-atomic.yml', import.meta.url),
     'utf8'
   );
   const dialogIndex = workflow.indexOf('Verify Atomic Task 3.4 dialog client');
   const windowIndex = workflow.indexOf('Verify Atomic Task 3.5 window client');
-  const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(dialogIndex >= 0 && windowIndex > dialogIndex && architectureIndex > windowIndex);
+  const dragDropIndex = workflow.indexOf('Verify Atomic Task 3.6 drag-drop client');
+  assert.ok(dialogIndex >= 0 && windowIndex > dialogIndex && dragDropIndex > windowIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/window-client\.test\.mjs/);
-  assert.match(workflow, /03-05-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[6-9]|Atomic Task 3\.1[0-9]/);
 });

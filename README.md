@@ -2,4 +2,4 @@
 
 Tauri + Rust 桌面 Markdown 编辑器。完整架构与记录见 [docs/README.md](docs/README.md)。
 
-2026-08-07：依赖读取位于父目录：Node `../node_modules`，Vite 缓存位于其下，Cargo target `../.cargo-target/markdown-editor`，Windows 自动化宿主同样外置。Stage 0/1/2/3 与 Windows 原生窗口回归通过。Windows 测试已统一处理 CRLF 与 npm CLI 启动，避免文档和架构门禁误报。
+2026-08-07：依赖继续读取父目录。Atomic 3.6 已新增独立 DragDrop client：统一 Tauri 拖放事件为不可变平台事件并管理幂等退订；文件类型判断仍由应用层负责，旧 `markdownEditorNative.onDragDrop` 兼容形状不变。当前提交待 Stage 3 与全量回归验证。

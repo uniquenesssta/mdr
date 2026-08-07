@@ -1,5 +1,4 @@
-import { getCurrentWebview } from '@tauri-apps/api/webview';
-import { createDialogClient, createInvokeClient, createRuntimeCapabilities, createWindowClient, detectPlatformEnvironment } from '../platform/index.js';
+import { createDialogClient, createDragDropClient, createInvokeClient, createRuntimeCapabilities, createWindowClient, detectPlatformEnvironment } from '../platform/index.js';
 
 const platformEnvironment = detectPlatformEnvironment(window);
 const capabilities = createRuntimeCapabilities(platformEnvironment, window);
@@ -12,6 +11,7 @@ const dialogClient = createDialogClient({
   now: () => performance.now(),
   record: (operation, entry) => window.markdownEditorPerf?.record(operation, entry)
 });
+const dragDropClient = createDragDropClient();
 const windowClient = createWindowClient();
 
 if (isAvailable) {
@@ -212,8 +212,7 @@ window.markdownEditorNative = {
   },
   async onDragDrop(handler) {
     if (!isAvailable) return null;
-    const webview = getCurrentWebview();
-    return webview.onDragDropEvent(handler);
+    return dragDropClient.subscribe(event => handler({ payload: event }));
   },
   async onCloseRequested(handler) {
     if (!isAvailable) return null;
