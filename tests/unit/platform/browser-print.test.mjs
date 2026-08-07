@@ -21,7 +21,7 @@ test('browser print preserves the original browser error identity', () => {
 test('print preparation and after-print restoration remain outside the adapter', async () => {
   const adapterSource = await readFile(new URL('../../../src/platform/browser/browser-print.js', import.meta.url), 'utf8');
   const exportSource = await readFile(new URL('../../../public/app/export.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(adapterSource, /afterprint|restorePreview|export|setTimeout|markdown-body/);
+  assert.doesNotMatch(adapterSource, /afterprint|restorePreview|setTimeout|markdown-body|public\/app\/export/);
   assert.match(exportSource, /afterprint/);
   assert.match(exportSource, /restorePreview/);
 });

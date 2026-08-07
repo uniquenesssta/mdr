@@ -2,7 +2,9 @@
 
 ## Result
 
-Atomic Task 3.10 implementation is complete and awaiting controlled Windows/browser validation. Browser runtime responsibilities are split into six independent adapters; `createPlatform` composition and caller cutover remain intentionally deferred to Atomic Task 3.11.
+Atomic Task 3.10 implementation is complete. Browser runtime responsibilities are split into six independent adapters; `createPlatform` composition and caller cutover remain intentionally deferred to Atomic Task 3.11.
+
+Windows validation on 2026-08-07 passed architecture, Node regression, browser contract, production build, built-app browser regression, Stage 3 evidence generation and npm audit. The Platform unit suite reported 113/114 because the Print boundary test incorrectly treated the ESM `export` keyword as forbidden export-business behavior. The production adapter did not violate the boundary. The test matcher has been corrected and requires one rerun before Atomic 3.10 is marked PASS.
 
 ## Implemented scope
 
@@ -41,10 +43,21 @@ No Rust source, Tauri command, public native compatibility method, dependency, `
 
 ## Verification
 
-Controlled validation is pending. Required verification order is: six Atomic 3.10 unit suites → architecture hard gate → Node regression → browser contract → production build → built-app browser regression → Stage 3 evidence generation → npm audit.
+Actual Windows results before the Print-test repair:
 
-The machine evidence recorder now validates all prior Stage 3 nodes plus the six Browser adapters, explicit FileReader cancellation, download cleanup, fullscreen disposer cleanup and the **172 / 33** inventory counts.
+- Platform unit suite: **113/114**, one false-positive test failure in `browser-print.test.mjs`.
+- `npm run verify:architecture`: **passed**.
+- `npm test`: **42/42 passed**.
+- `npm run test:browser:contract`: **10/10 passed**.
+- `npm run build`: **passed**; existing large-chunk warning only.
+- `npm run test:browser`: **12/12 passed**.
+- `node scripts/stage-03/record-platform-evidence.mjs`: **passed**.
+- `npm audit`: **0 vulnerabilities**.
+
+The false positive was caused by `/afterprint|restorePreview|export|setTimeout|markdown-body/`, where `export` matched the normal ESM declaration `export function createBrowserPrint`. The repaired assertion now forbids only the actual business markers `afterprint`, `restorePreview`, `setTimeout`, `markdown-body` and `public/app/export`.
+
+Required remaining verification: rerun the Platform unit suite and confirm **114/114**. Because the repair changes only the test matcher and not production code, the already-passed architecture, application, browser, build, evidence and audit results remain valid unless the rerun exposes another failure.
 
 ## Remaining risk
 
-The adapters are implemented and exported but are not yet composed into one capability-driven Platform object. Existing classic callers therefore still use their current browser surfaces until Atomic Task 3.11. That deferred integration is the planned next Atomic Task, not an incomplete 3.10 responsibility.
+Atomic 3.10 is not marked PASS until the corrected Platform suite is rerun successfully. The adapters are implemented and exported but are not yet composed into one capability-driven Platform object; existing classic callers therefore still use their current browser surfaces until Atomic Task 3.11.
