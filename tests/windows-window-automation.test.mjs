@@ -76,6 +76,8 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
     'waitForNativeWindow',
     'snapshot.pid === child.pid',
     'resolveTitleBarDragTarget',
+    'window-drag-region',
+    'region.contains(candidate)',
     'bar.contains(candidate)',
     'menuBarMouseDownEvents',
     'dragFromViewportPoint',
@@ -86,9 +88,10 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
 
   assert.match(runner, /withEmbeddedSession/);
   assert.match(runner, /driverProvider: 'embedded'/);
-  assert.match(runner, /Resolved drag point must belong to \.menu-bar/);
+  assert.match(runner, /No hit-testable declared title-bar drag region was found/);
+  assert.match(runner, /Resolved drag point must belong to a declared \.window-drag-region/);
   assert.match(runner, /Title-bar pointer input did not dispatch mousedown inside \.menu-bar/);
-  assert.doesNotMatch(runner, /dragWindow|Builder, By, Capabilities|tauri-driver|MSEDGEDRIVER_PATH/);
+  assert.doesNotMatch(runner, /rect\.right - 180|dragWindow|Builder, By, Capabilities|tauri-driver|MSEDGEDRIVER_PATH/);
 
   assert.match(sessionOwner, /TAURI_WEBDRIVER_PORT/);
   assert.match(sessionOwner, /\/status/);

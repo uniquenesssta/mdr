@@ -64,37 +64,77 @@ async function resolveTitleBarDragTarget(browser) {
   const target = await browser.execute(excludedSelector => {
     const bar = document.querySelector('.menu-bar');
     if (!bar) throw new Error('Menu bar was not found.');
-    const rect = bar.getBoundingClientRect();
-    const y = Math.round(rect.top + rect.height / 2);
 
-    for (let x = Math.round(rect.right - 180); x >= Math.round(rect.left + 180); x -= 20) {
-      const candidate = document.elementFromPoint(x, y);
-      const belongsToBar = Boolean(candidate && (candidate === bar || bar.contains(candidate)));
-      if (!belongsToBar || candidate.closest(excludedSelector)) continue;
+    const regions = Array.from(bar.querySelectorAll('.window-drag-region'));
+    const diagnostics = regions.map((region, regionIndex) => {
+      const rect = region.getBoundingClientRect();
       return {
-        x,
-        y,
-        tagName: candidate.tagName,
-        id: candidate.id || '',
-        className: typeof candidate.className === 'string' ? candidate.className : ''
+        regionIndex,
+        tagName: region.tagName,
+        className: typeof region.className === 'string' ? region.className : '',
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+        area: rect.width * rect.height
       };
+    }).sort((left, right) => right.area - left.area);
+
+    for (const entry of diagnostics) {
+      if (entry.width < 4 || entry.height < 4) continue;
+      const region = regions[entry.regionIndex];
+      const points = [
+        { x: Math.round(entry.left + entry.width / 2), y: Math.round(entry.top + entry.height / 2) },
+        { x: Math.round(entry.left + entry.width * 0.25), y: Math.round(entry.top + entry.height / 2) },
+        { x: Math.round(entry.left + entry.width * 0.75), y: Math.round(entry.top + entry.height / 2) }
+      ];
+
+      for (const point of points) {
+        const candidate = document.elementFromPoint(point.x, point.y);
+        const belongsToRegion = Boolean(candidate && (candidate === region || region.contains(candidate)));
+        const belongsToBar = Boolean(candidate && (candidate === bar || bar.contains(candidate)));
+        if (!belongsToRegion || !belongsToBar || candidate.closest(excludedSelector)) continue;
+        return {
+          ...point,
+          regionIndex: entry.regionIndex,
+          regionTagName: region.tagName,
+          regionClassName: typeof region.className === 'string' ? region.className : '',
+          candidateTagName: candidate.tagName,
+          candidateId: candidate.id || '',
+          candidateClassName: typeof candidate.className === 'string' ? candidate.className : '',
+          regionRect: {
+            left: entry.left,
+            top: entry.top,
+            width: entry.width,
+            height: entry.height
+          },
+          diagnostics
+        };
+      }
     }
-    throw new Error('No safe title-bar drag point was found inside the menu bar.');
+
+    throw new Error(
+      `No hit-testable declared title-bar drag region was found: ${JSON.stringify(diagnostics)}`
+    );
   }, TITLE_BAR_EXCLUDED_SELECTOR);
 
   const validation = await browser.execute((point, excludedSelector) => {
     const bar = document.querySelector('.menu-bar');
+    const regions = bar ? Array.from(bar.querySelectorAll('.window-drag-region')) : [];
+    const region = regions[point.regionIndex];
     const candidate = document.elementFromPoint(point.x, point.y);
     return {
       belongsToBar: Boolean(bar && candidate && (candidate === bar || bar.contains(candidate))),
+      belongsToRegion: Boolean(region && candidate && (candidate === region || region.contains(candidate))),
       excluded: Boolean(candidate?.closest(excludedSelector)),
       tagName: candidate?.tagName || '',
       id: candidate?.id || '',
       className: typeof candidate?.className === 'string' ? candidate.className : ''
     };
-  }, { x: target.x, y: target.y }, TITLE_BAR_EXCLUDED_SELECTOR);
+  }, { x: target.x, y: target.y, regionIndex: target.regionIndex }, TITLE_BAR_EXCLUDED_SELECTOR);
 
   assert.equal(validation.belongsToBar, true, 'Resolved drag point must belong to .menu-bar.');
+  assert.equal(validation.belongsToRegion, true, 'Resolved drag point must belong to a declared .window-drag-region.');
   assert.equal(validation.excluded, false, 'Resolved drag point must not target an excluded control.');
   return { ...target, validation };
 }
