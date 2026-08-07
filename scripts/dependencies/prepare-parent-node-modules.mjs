@@ -84,7 +84,6 @@ async function ensureParentDependencies() {
         '--prefix',
         dependencyRoot,
         '--no-save',
-        '--no-package-lock',
         ...requestedExtras
       ]);
     }
