@@ -11,14 +11,17 @@ on:
       - ready_for_review
     paths:
       - .github/workflows/stage-03-windows-window.yml
+      - .cargo/config.toml
       - package.json
       - package-lock.json
       - public/app/events.js
       - src/platform/desktop/window-client.js
       - src/runtime/tauri.js
       - src-tauri/**
+      - scripts/dependencies/**
       - scripts/stage-03/windows/prepare-embedded-driver-host.ps1
       - tests/e2e/windows/**
+      - tests/dependency-location.test.mjs
       - tests/windows-window-automation.test.mjs
       - README.md
       - docs/README.md
@@ -39,7 +42,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
       RUST_BACKTRACE: '1'
-      MARKDOWN_EDITOR_BINARY: .windows-driver-host/src-tauri/target/debug/markdown-editor.exe
+      MARKDOWN_EDITOR_BINARY: ../.cargo-target/markdown-editor/debug/markdown-editor.exe
 
     steps:
       - name: Checkout branch
@@ -67,14 +70,11 @@ jobs:
           rustc --version
           cargo --version
 
-      - name: Install frontend dependencies
-        run: npm ci
+      - name: Install frontend and pinned transient WebDriver dependencies
+        run: npm run deps:prepare -- --add selenium-webdriver@4.34.0
 
       - name: Verify Windows automation architecture contract
-        run: node --test tests/windows-window-automation.test.mjs
-
-      - name: Install pinned transient WebDriver client
-        run: npm install --no-save --no-package-lock selenium-webdriver@4.34.0
+        run: node --test tests/windows-window-automation.test.mjs tests/dependency-location.test.mjs
 
       - name: Build current frontend
         run: npm run build
@@ -87,28 +87,28 @@ jobs:
         run: ./scripts/stage-03/windows/prepare-embedded-driver-host.ps1
 
       - name: Build isolated embedded WebDriver application
-        run: cargo build --locked --manifest-path .windows-driver-host/src-tauri/Cargo.toml
+        run: cargo build --locked --manifest-path ../.markdown-editor-windows-driver-host/src-tauri/Cargo.toml
 
       - name: Prepare Windows evidence directory
         shell: pwsh
         run: |
           $evidenceDirectory = 'artifacts/stage-03/windows-window'
           New-Item -ItemType Directory -Force -Path $evidenceDirectory | Out-Null
-          Copy-Item '.windows-driver-host/driver-host.json' "$evidenceDirectory/driver-host.json" -Force
+          Copy-Item '../.markdown-editor-windows-driver-host/driver-host.json' "$evidenceDirectory/driver-host.json" -Force
           [pscustomobject]@{
             headSha = '${{ github.event.pull_request.head.sha || github.sha }}'
             runner = '${{ runner.os }}'
             image = '${{ runner.name }}'
             status = 'workflow-started'
             driverProvider = 'embedded-isolated-host'
-            releaseBinary = 'src-tauri/target/release/markdown-editor.exe'
+            releaseBinary = '../.cargo-target/markdown-editor/release/markdown-editor.exe'
             webdriverBinary = $env:MARKDOWN_EDITOR_BINARY
           } | ConvertTo-Json | Set-Content -Path "$evidenceDirectory/workflow-bootstrap.json" -Encoding utf8
 
       - name: Verify automation inputs
         shell: pwsh
         run: |
-          $releaseBinary = 'src-tauri/target/release/markdown-editor.exe'
+          $releaseBinary = '../.cargo-target/markdown-editor/release/markdown-editor.exe'
           if (-not (Test-Path $releaseBinary)) {
             throw "Windows release application binary missing: $releaseBinary"
           }

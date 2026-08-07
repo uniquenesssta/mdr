@@ -33,7 +33,7 @@ jobs:
           node-version: '22'
           cache: npm
       - name: Install frontend dependencies
-        run: npm ci
+        run: npm run deps:prepare
       - name: Verify Stage 2 handoff remains intact
         run: node --test tests/ui/shell-cutover.test.mjs
       - name: Verify Atomic Task 3.1 platform ports

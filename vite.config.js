@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   clearScreen: false,
+  cacheDir: '../node_modules/.vite/markdown-editor',
   server: {
     host: '127.0.0.1',
     port: 16663,

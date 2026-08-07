@@ -32,7 +32,7 @@ jobs:
           node-version: '22'
           cache: npm
       - name: Install frontend dependencies
-        run: npm ci
+        run: npm run deps:prepare
       - name: Verify Stage 1 historical handoff remains intact
         run: node --test tests/stage-01-handoff.test.mjs
       - name: Verify Atomic Task 2.1 frozen DOM inventory

@@ -34,17 +34,16 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(workflow, /runs-on: windows-2025/);
   assert.match(
     workflow,
-    /MARKDOWN_EDITOR_BINARY: \.windows-driver-host\/src-tauri\/target\/debug\/markdown-editor\.exe/
+    /MARKDOWN_EDITOR_BINARY: \.\.\/\.cargo-target\/markdown-editor\/debug\/markdown-editor\.exe/
   );
   assert.match(workflow, /cargo build --release --locked --manifest-path src-tauri\/Cargo\.toml/);
   assert.match(workflow, /prepare-embedded-driver-host\.ps1/);
   assert.match(
     workflow,
-    /cargo build --locked --manifest-path \.windows-driver-host\/src-tauri\/Cargo\.toml/
+    /cargo build --locked --manifest-path \.\.\/\.markdown-editor-windows-driver-host\/src-tauri\/Cargo\.toml/
   );
-  assert.match(workflow, /selenium-webdriver@4\.34\.0/);
+  assert.match(workflow, /npm run deps:prepare -- --add selenium-webdriver@4\.34\.0/);
   assert.match(workflow, /driverProvider = 'embedded-isolated-host'/);
-  assert.match(workflow, /--no-save --no-package-lock/);
   assert.match(workflow, /upload-artifact@v4/);
   assert.match(
     workflow,
@@ -52,13 +51,16 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   );
   assert.doesNotMatch(workflow, /contents: write|INTERNAL CONCURRENCY REPAIR/);
   assert.doesNotMatch(workflow, /tauri-driver|MSEDGEDRIVER|install-edge-driver/);
+  assert.doesNotMatch(workflow, /npm install --no-save --no-package-lock selenium-webdriver/);
 
+  assert.match(hostBuilder, /\[string\]\$HostRoot = '\.\.\\\.markdown-editor-windows-driver-host'/);
   assert.match(hostBuilder, /git -C \$repositoryRoot archive/);
   assert.match(hostBuilder, /Copy-Item.+dist/s);
   assert.match(hostBuilder, /tauri-plugin-wdio-webdriver/);
   assert.match(hostBuilder, /tauri_plugin_wdio_webdriver::init\(\)/);
   assert.match(hostBuilder, /wdio-webdriver:default/);
   assert.match(hostBuilder, /cargo generate-lockfile/);
+  assert.match(hostBuilder, /\.cargo-target\\markdown-editor/);
   assert.match(hostBuilder, /Production Cargo\.toml already contains/);
   assert.match(hostBuilder, /Production capability already exposes/);
   assert.match(hostBuilder, /Properties\.Remove\('devUrl'\)/);

@@ -1,5 +1,5 @@
 param(
-  [string]$HostRoot = '.windows-driver-host'
+  [string]$HostRoot = '..\.markdown-editor-windows-driver-host'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -23,8 +23,10 @@ function Assert-SingleReplacement {
 }
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
-$hostRootPath = Join-Path $repositoryRoot $HostRoot
-$archivePath = Join-Path $repositoryRoot '.windows-driver-host.zip'
+$repositoryParent = Split-Path $repositoryRoot -Parent
+$hostRootPath = [IO.Path]::GetFullPath((Join-Path $repositoryRoot $HostRoot))
+$archivePath = Join-Path $repositoryParent '.markdown-editor-windows-driver-host.zip'
+$cargoTargetPath = Join-Path $repositoryParent '.cargo-target\markdown-editor'
 
 if (Test-Path $hostRootPath) {
   Remove-Item $hostRootPath -Recurse -Force
@@ -96,7 +98,8 @@ version = "1"
   [pscustomobject]@{
     hostRoot = $hostRootPath
     manifest = $manifestPath
-    binary = (Join-Path $hostRootPath 'src-tauri\target\debug\markdown-editor.exe')
+    binary = (Join-Path $cargoTargetPath 'debug\markdown-editor.exe')
+    cargoTarget = $cargoTargetPath
     productionManifestUnchanged = $true
     productionCapabilityUnchanged = $true
     productionConfigUnchanged = $true

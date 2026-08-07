@@ -32,7 +32,7 @@ jobs:
           node-version: '22'
           cache: npm
       - name: Install frontend dependencies
-        run: npm ci
+        run: npm run deps:prepare
       - name: Verify production module ownership fixture
         run: node --test tests/architecture/module-inventory.test.mjs
       - name: Verify minimal composition root

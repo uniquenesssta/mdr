@@ -20,6 +20,7 @@ on:
       - src/**
       - src-tauri/**
       - tests/**
+      - scripts/dependencies/**
       - scripts/stage-00/**
   workflow_dispatch:
 
@@ -93,7 +94,7 @@ jobs:
 
       - name: Install frontend dependencies
         continue-on-error: true
-        run: node scripts/stage-00/run-check.mjs npm-ci npm ci
+        run: node scripts/stage-00/run-check.mjs npm-ci npm run deps:prepare
 
       - name: Run Node test suite
         continue-on-error: true
