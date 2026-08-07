@@ -1,4 +1,8 @@
 import { spawnSync } from 'node:child_process';
+import {
+  prepareNativeWindowInterop,
+  replaceNativeApiCompilation
+} from './native-window-interop.mjs';
 
 const PROCESS_NAME = 'markdown-editor';
 const WINDOW_TITLE = 'Markdown Editor';
@@ -10,9 +14,10 @@ function runPowerShell(script) {
     throw new Error('Windows native window automation requires win32.');
   }
 
+  const preparedScript = replaceNativeApiCompilation(script, nativeApiSource());
   const result = spawnSync(
     'powershell.exe',
-    ['-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', script],
+    ['-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', preparedScript],
     {
       encoding: 'utf8',
       windowsHide: false,
@@ -195,6 +200,10 @@ public static class MarkdownEditorWindowAutomation {
 }
 '@
 `;
+}
+
+if (process.platform === 'win32') {
+  prepareNativeWindowInterop(nativeApiSource());
 }
 
 function processLookupSource() {

@@ -10,6 +10,7 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
     sessionOwner,
     testSurface,
     nativeHelper,
+    nativeInterop,
     packageJson,
     tauriConfig,
     cargoManifest,
@@ -23,6 +24,7 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
     readFile('tests/e2e/windows/embedded-webdriver-session.mjs', 'utf8'),
     readFile('tests/e2e/windows/window-test-surface.mjs', 'utf8'),
     readFile('tests/e2e/windows/native-window-system.mjs', 'utf8'),
+    readFile('tests/e2e/windows/native-window-interop.mjs', 'utf8'),
     readFile('package.json', 'utf8'),
     readFile('src-tauri/tauri.conf.json', 'utf8'),
     readFile('src-tauri/Cargo.toml', 'utf8'),
@@ -131,7 +133,18 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(nativeHelper, /IsWindowVisible/);
   assert.match(nativeHelper, /FindMainWindow/);
   assert.match(nativeHelper, /Markdown Editor/);
+  assert.match(nativeHelper, /prepareNativeWindowInterop\(nativeApiSource\(\)\)/);
+  assert.match(nativeHelper, /replaceNativeApiCompilation\(script, nativeApiSource\(\)\)/);
+  assert.match(nativeHelper, /timeout: 30_000/);
   assert.doesNotMatch(nativeHelper, /MainWindowHandle|mouse_event/);
+
+  assert.match(nativeInterop, /const COMPILE_TIMEOUT_MS = 90_000/);
+  assert.match(nativeInterop, /mkdtempSync\(join\(tmpdir\(\), 'markdown-editor-native-window-'\)\)/);
+  assert.match(nativeInterop, /-OutputAssembly/);
+  assert.match(nativeInterop, /-OutputType Library/);
+  assert.match(nativeInterop, /Add-Type -LiteralPath/);
+  assert.match(nativeInterop, /process\.once\('exit', cleanupInteropArtifacts\)/);
+  assert.match(nativeInterop, /replaceNativeApiCompilation/);
 
   assert.doesNotMatch(cargoManifest, /tauri-plugin-wdio-webdriver/);
   assert.doesNotMatch(cargoLock, /tauri-plugin-wdio-webdriver/);
