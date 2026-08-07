@@ -2,7 +2,7 @@
 
 ## Result
 
-Atomic Task 3.11 implementation is complete and awaiting controlled Windows/browser validation. One capability-driven `createPlatform()` now composes the frozen twelve-Port surface; Atomic Task 3.12 caller cutover and legacy runtime deletion remain intentionally deferred.
+Atomic Task 3.11 is complete and has passed the required Windows/browser validation. One capability-driven `createPlatform()` composes the frozen twelve-Port surface; Atomic Task 3.12 caller cutover and legacy runtime deletion remain intentionally deferred.
 
 ## Implemented scope
 
@@ -11,7 +11,7 @@ Atomic Task 3.11 implementation is complete and awaiting controlled Windows/brow
 - Exported `createPlatform`, `PlatformCapabilityUnavailableError` and `createDesktopPlatform` through `src/platform/index.js`.
 - Added focused `create-platform.test.mjs` and `desktop-platform-contract.test.mjs` suites.
 - Advanced the Stage 3 workflow and prior Atomic ordering guards through 3.11.
-- Registered the two production modules. Current inventory target is **174 production modules / 35 platform modules**.
+- Registered the two production modules. Current inventory is **174 production modules / 35 platform modules**.
 
 ## Capability composition
 
@@ -27,8 +27,8 @@ Unavailable operations never resolve through an empty function or fabricated suc
 
 Atomic 3.11 also closes two same-chain capability mismatches discovered during composition review:
 
-- WebKit-only fullscreen surfaces are now detected consistently with the existing Browser Fullscreen adapter.
-- Browser file-download capability now requires `Blob` in addition to anchor/ObjectURL surfaces, matching what `files.writeText()` and `files.writeBinary()` actually execute.
+- WebKit-only fullscreen surfaces are detected consistently with the existing Browser Fullscreen adapter.
+- Browser file-download capability requires `Blob` in addition to anchor/ObjectURL surfaces, matching what `files.writeText()` and `files.writeBinary()` actually execute.
 
 Both paths have focused capability tests.
 
@@ -36,16 +36,26 @@ Both paths have focused capability tests.
 
 The returned Platform object is immutable and delegates lifecycle ownership to the existing `createPlatformPortSet()`, retaining reverse/idempotent destruction and subscription disposal semantics.
 
-`src/runtime/tauri.js` and all classic/business callers remain unchanged in Atomic 3.11. They continue using the current compatibility facade until Atomic Task 3.12 performs progressive caller replacement and deletes the obsolete facade. No Rust command, DTO, persistence format, public legacy method, dependency, `package.json` or `package-lock.json` is changed here.
+`src/runtime/tauri.js` and all classic/business callers remain unchanged in Atomic 3.11. They continue using the current compatibility facade until Atomic Task 3.12 performs progressive caller replacement and deletes the obsolete facade. No Rust command, DTO, persistence format, public legacy method, dependency, `package.json` or `package-lock.json` changed in 3.11.
 
 ## Evidence and verification
 
-The established Stage 3 evidence recorder keeps all 3.1–3.10 checks, advances current inventory expectations to **174 / 35**, recognizes `desktop-platform.js`, and then invokes a separate `record-create-platform-evidence.mjs`. The new evidence responsibility is intentionally separate instead of adding another Atomic implementation into the existing large Stage 3 recorder.
+The established Stage 3 evidence recorder keeps all 3.1–3.10 checks, advances current inventory expectations to **174 / 35**, recognizes `desktop-platform.js`, and invokes the separate `record-create-platform-evidence.mjs` recorder.
 
-The 3.11 evidence verifies Browser and Desktop composition, explicit unavailable-capability errors, twelve-Port shape, runtime selection, WebKit fullscreen consistency, production registration, legacy-facade retention and the absence of business/feature imports from the composition layer.
+Windows validation on 2026-08-08 passed the complete required sequence:
 
-Controlled validation is pending. Required order: 3.11 focused suites → complete Platform unit regression → architecture hard gate → Node regression → browser contract → production build → built-app browser regression → Stage 3 evidence generation → npm audit.
+- Atomic 3.11 focused suites: **13/13 passed**.
+- Complete Platform unit regression: **129/129 passed**.
+- `npm run verify:architecture`: **passed**.
+- `npm test`: **42/42 passed**.
+- `npm run test:browser:contract`: **10/10 passed**.
+- `npm run build`: **passed** with only the existing Rollup/Vite >500 kB chunk-size warning.
+- `npm run test:browser`: **12/12 passed** against the built application.
+- `node scripts/stage-03/record-platform-evidence.mjs`: **passed** and returned normally.
+- `npm audit`: **0 vulnerabilities**.
+
+The 3.11 evidence covers Browser and Desktop composition, explicit unavailable-capability errors, twelve-Port shape, runtime selection, WebKit fullscreen consistency, production registration, legacy-facade retention and the absence of business/feature imports from the composition layer.
 
 ## Remaining risk
 
-Until Windows validation runs, real desktop integration and complete repository regression remain unverified for this commit. Atomic Task 3.12 must not start until these 3.11 hard checks pass and this record is updated with actual results.
+No hard validation failure remains for Atomic 3.11. A separate manual native Tauri GUI smoke run was not part of this Atomic task's required acceptance command set and was not executed in this validation session. Atomic Task 3.12 may now begin from the validated 3.11 baseline.
