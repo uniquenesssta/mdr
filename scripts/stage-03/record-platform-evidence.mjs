@@ -19,7 +19,10 @@ import {
   createDragDropClient,
   createFileSystemClient,
   createInvokeClient,
+  createLinkClient,
+  createPerformanceLogClient,
   createRuntimeCapabilities,
+  createWebFetchClient,
   createWindowClient,
   detectPlatformEnvironment
 } from '../../src/platform/index.js';
@@ -61,7 +64,8 @@ const expectedPortFiles = Object.freeze([
 const expectedEnvironmentFiles = Object.freeze(['platform-detection.js', 'runtime-capabilities.js']);
 const expectedDesktopFiles = Object.freeze([
   'dialog-client.js', 'document-store-client.js', 'drag-drop-client.js',
-  'file-system-client.js', 'invoke-client.js', 'window-client.js'
+  'file-system-client.js', 'invoke-client.js', 'link-client.js',
+  'performance-log-client.js', 'web-fetch-client.js', 'window-client.js'
 ]);
 
 function createBrowserRuntime() {
@@ -249,6 +253,35 @@ const documentStoreResults = {
   remove: await documentStoreClient.remove('evidence-document')
 };
 
+const webFetchCalls = [];
+const webFetchResult = Object.freeze({ success: true, html: '<p>evidence</p>', final_url: 'https://example.com/' });
+const webFetchClient = createWebFetchClient({
+  invoke: async (operation, args, details, options) => {
+    webFetchCalls.push({ operation, args, details, options });
+    return webFetchResult;
+  }
+});
+const webFetchEvidenceResult = await webFetchClient.fetchUrl('example.com');
+
+const linkCalls = [];
+const linkClient = createLinkClient({
+  invoke: async (operation, args, details, options) => {
+    linkCalls.push({ operation, args, details, options });
+    return undefined;
+  }
+});
+const linkEvidenceResult = await linkClient.openExternal(' HTTPS://example.com/path ');
+
+const performanceLogCalls = [];
+const performanceEntries = Object.freeze([{ operation: 'evidence.operation' }]);
+const performanceLogClient = createPerformanceLogClient({
+  invoke: async (operation, args, details, options) => {
+    performanceLogCalls.push({ operation, args, details, options });
+    return 'logs/performance.jsonl';
+  }
+});
+const performanceLogEvidenceResult = await performanceLogClient.writePerformance(performanceEntries);
+
 const windowCalls = [];
 const windowDisposals = [];
 const evidenceWindow = {
@@ -278,7 +311,7 @@ if (JSON.stringify(PLATFORM_PORT_NAMES) !== JSON.stringify(expectedPortNames)) p
 if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exit(1);
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
 if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
-if (moduleFixture.modules.length !== 163 || platformModules.length !== 24) process.exit(1);
+if (moduleFixture.modules.length !== 166 || platformModules.length !== 27) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -312,22 +345,34 @@ if (!desktopSources['file-system-client.js'].includes("'write_local_binary_file'
 if (!desktopSources['file-system-client.js'].includes('bytesToBase64')) process.exit(1);
 if (/showToast|loadTextContentAsDocument|insertImageMarkdown|newDocument|createDocument|dropped\.kind/.test(desktopSources['file-system-client.js'])) process.exit(1);
 if (/image\/(?:png|jpeg|gif|webp|svg\+xml)/.test(desktopSources['file-system-client.js'])) process.exit(1);
+if (!desktopSources['link-client.js'].includes("'open_external_url'")) process.exit(1);
+if (/SUPPORTED_SCHEMES|javascript:|file:\/\//.test(desktopSources['link-client.js'])) process.exit(1);
+if (!desktopSources['performance-log-client.js'].includes("'write_performance_logs'")) process.exit(1);
+if (!desktopSources['performance-log-client.js'].includes('record: false')) process.exit(1);
+if (/MAX_QUEUE|aggregates|diagnosticStates|flushInProgress|queue\.unshift/.test(desktopSources['performance-log-client.js'])) process.exit(1);
+if (!desktopSources['web-fetch-client.js'].includes("'fetch_url'")) process.exit(1);
+if (/normalize_url|reqwest|redirect\(|status\.is_success|Response body is empty/.test(desktopSources['web-fetch-client.js'])) process.exit(1);
 if (!desktopSources['window-client.js'].includes("@tauri-apps/api/window")) process.exit(1);
 if (!desktopSources['window-client.js'].includes('activeDisposers')) process.exit(1);
 if (legacyRuntimeSource.includes("@tauri-apps/api/core") || legacyRuntimeSource.includes('invokeMeasured')) process.exit(1);
 if (legacyRuntimeSource.includes('@tauri-apps/plugin-dialog') || legacyRuntimeSource.includes('showOpenDialog')) process.exit(1);
 if (legacyRuntimeSource.includes('@tauri-apps/api/webview') || legacyRuntimeSource.includes('getCurrentWebview')) process.exit(1);
 if (legacyRuntimeSource.includes('@tauri-apps/api/window') || legacyRuntimeSource.includes('getCurrentWindow')) process.exit(1);
-if ((legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length !== 3) process.exit(1);
+if ((legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length !== 0) process.exit(1);
 if ((legacyRuntimeSource.match(/dialogClient\.(?:openFile|openDirectory|saveFile|confirm)\(/g) || []).length !== 4) process.exit(1);
 if ((legacyRuntimeSource.match(/documentStoreClient\.(?:save|beginSnapshotUpload|appendSnapshotChunk|commitSnapshotUpload|abortSnapshotUpload|load|loadManifest|readChunk|search|remove)\(/g) || []).length !== 10) process.exit(1);
 if ((legacyRuntimeSource.match(/dragDropClient\.subscribe\(/g) || []).length !== 1) process.exit(1);
 if ((legacyRuntimeSource.match(/fileSystemClient\.(?:readDroppedFile|listTextFileTree|readLocalImage|getInitialFilePath|writeTextFile|writeBinaryFile)\(/g) || []).length !== 6) process.exit(1);
+if ((legacyRuntimeSource.match(/linkClient\.openExternal\(/g) || []).length !== 1) process.exit(1);
+if ((legacyRuntimeSource.match(/performanceLogClient\.writePerformance\(/g) || []).length !== 1) process.exit(1);
+if ((legacyRuntimeSource.match(/webFetchClient\.fetchUrl\(/g) || []).length !== 1) process.exit(1);
 if ((legacyRuntimeSource.match(/windowClient\.(?:subscribeCloseRequest|startDrag|minimize|toggleMaximize|isMaximized|subscribeResize|requestClose|forceClose)\(/g) || []).length !== 8) process.exit(1);
 if (!legacyRuntimeSource.includes('createDocumentStoreClient({ invoke: invokeClient.invoke })')) process.exit(1);
 if (!legacyRuntimeSource.includes('createFileSystemClient({ invoke: invokeClient.invoke })')) process.exit(1);
+if (!legacyRuntimeSource.includes('createLinkClient({ invoke: invokeClient.invoke })')) process.exit(1);
+if (!legacyRuntimeSource.includes('createPerformanceLogClient({ invoke: invokeClient.invoke })')) process.exit(1);
+if (!legacyRuntimeSource.includes('createWebFetchClient({ invoke: invokeClient.invoke })')) process.exit(1);
 if (legacyRuntimeSource.includes('function bytesToBase64')) process.exit(1);
-if (!legacyRuntimeSource.includes("write_performance_logs', { entries }, {}, { record: false }")) process.exit(1);
 if (invokeCalls.length !== 1 || invokeCalls[0].operation !== 'load_document_state' || invokeCalls[0].args !== invokeArgs) process.exit(1);
 if (invokeResult.args !== invokeArgs || capturedInvokeError !== invokeError) process.exit(1);
 if (invokeTelemetry.length !== 2 || invokeTelemetry[0].entry.status === 'error' || invokeTelemetry[1].entry.status !== 'error') process.exit(1);
@@ -365,6 +410,15 @@ if (documentStoreCalls[3].args.request !== documentStoreRequest || documentStore
 if (documentStoreCalls[7].args.byteOffset !== 32 || documentStoreCalls[7].args.maxBytes !== 64 * 1024) process.exit(1);
 if (documentStoreCalls[8].args.request !== documentStoreSearchRequest) process.exit(1);
 if (documentStoreResults.save.operation !== 'save_document_state' || documentStoreResults.remove.operation !== 'delete_document_state') process.exit(1);
+if (webFetchCalls.length !== 1 || webFetchCalls[0].operation !== 'fetch_url') process.exit(1);
+if (webFetchCalls[0].args.url !== 'example.com' || webFetchCalls[0].details.inputLength !== 11) process.exit(1);
+if (webFetchEvidenceResult !== webFetchResult) process.exit(1);
+if (linkCalls.length !== 1 || linkCalls[0].operation !== 'open_external_url') process.exit(1);
+if (linkCalls[0].args.url !== 'HTTPS://example.com/path' || linkCalls[0].details.scheme !== 'https') process.exit(1);
+if (linkEvidenceResult !== undefined) process.exit(1);
+if (performanceLogCalls.length !== 1 || performanceLogCalls[0].operation !== 'write_performance_logs') process.exit(1);
+if (performanceLogCalls[0].args.entries !== performanceEntries || performanceLogCalls[0].options?.record !== false) process.exit(1);
+if (performanceLogEvidenceResult !== 'logs/performance.jsonl') process.exit(1);
 if (!toggledMaximized || !maximized) process.exit(1);
 if (windowCalls.length !== 9 || windowDisposals.join(',') !== 'close,resize') process.exit(1);
 if (windowCalls[5].handler !== resizeHandler || windowCalls[6].handler !== closeHandler) process.exit(1);
@@ -401,7 +455,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-01-platform-ports-evidence.json`, `${JSO
     'all-thirty-three-legacy-native-methods-have-explicit-destination-mappings',
     'atomic-task-3.1-contracts-remain-runtime-neutral',
     'capability-detection-is-owned-by-atomic-task-3.2',
-    'invoke-dialog-window-drag-drop-file-system-and-document-store-client-cutovers-are-owned-by-atomic-tasks-3.3-through-3.8'
+    'desktop-command-cutovers-through-web-link-log-are-owned-by-atomic-tasks-3.3-through-3.9'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -424,7 +478,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-02-runtime-capabilities-evidence.json`, 
     'legacy-runtime-availability-derived-from-public-capabilities',
     'no-production-business-module-checks-tauri-internals',
     'existing-native-method-contracts-and-command-fields-remain-unchanged',
-    'invoke-dialog-window-drag-drop-file-system-and-document-store-clients-are-owned-by-atomic-tasks-3.3-through-3.8'
+    'desktop-command-clients-through-web-link-log-are-owned-by-atomic-tasks-3.3-through-3.9'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -444,8 +498,8 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-03-invoke-client-evidence.json`, `${JSON
     'original-invoke-result-and-error-identity-preserved',
     'telemetry-failures-cannot-replace-native-semantics',
     'performance-log-transport-explicitly-suppresses-recursive-telemetry',
-    'three-legacy-runtime-commands-remain-direct-while-six-file-and-ten-document-store-commands-share-the-invoke-transport-through-clients',
-    'dialog-window-drag-drop-file-system-and-document-store-clients-are-owned-by-atomic-tasks-3.4-through-3.8'
+    'legacy-runtime-has-zero-direct-invoke-calls-after-atomic-task-3.9',
+    'all-current-desktop-command-mappings-use-responsibility-focused-clients'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -468,8 +522,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-04-dialog-client-evidence.json`, `${JSON
     'save-filename-cleaning-default-path-joining-and-extension-completion-remain-compatible',
     'native-dialog-errors-are-rethrown-with-original-identity',
     'dialog-telemetry-failures-cannot-replace-native-results-or-errors',
-    'legacy-runtime-retains-browser-confirm-and-unavailable-null-fallbacks',
-    'web-link-and-log-adapters-remain-deferred'
+    'legacy-runtime-retains-browser-confirm-and-unavailable-null-fallbacks'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -492,8 +545,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-05-window-client-evidence.json`, `${JSON
     'late-subscription-results-are-disposed-after-client-destroy',
     'request-close-preserves-close-request-events-while-force-close-preserves-native-destroy-fallback',
     'native-window-results-and-error-identity-remain-unchanged',
-    'save-before-close-policy-remains-in-the-application-layer',
-    'web-link-and-log-adapters-remain-deferred'
+    'save-before-close-policy-remains-in-the-application-layer'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -516,8 +568,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-06-drag-drop-client-evidence.json`, `${J
     'client-destroy-disposes-active-subscriptions-in-reverse-order',
     'late-subscription-results-are-disposed-after-client-destroy',
     'native-registration-cleanup-and-handler-errors-retain-original-semantics',
-    'legacy-runtime-preserves-the-existing-payload-wrapper-and-unavailable-null-fallback',
-    'web-link-and-log-adapters-remain-deferred'
+    'legacy-runtime-preserves-the-existing-payload-wrapper-and-unavailable-null-fallback'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -539,8 +590,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-07-file-system-client-evidence.json`, `$
     'rust-remains-the-authority-for-native-path-resolution-file-kind-rules-and-image-mime-generation',
     'file-system-client-does-not-create-documents-insert-images-or-show-toasts',
     'native-file-command-results-and-error-identity-remain-unchanged',
-    'legacy-runtime-preserves-six-existing-file-methods-and-runtime-unavailable-fallbacks',
-    'web-link-and-log-adapters-remain-deferred'
+    'legacy-runtime-preserves-six-existing-file-methods-and-runtime-unavailable-fallbacks'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -561,7 +611,38 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-08-document-store-client-evidence.json`,
     'chunk-read-default-and-minimum-byte-normalization-remain-compatible',
     'rust-document-store-results-null-values-and-errors-pass-through-without-client-interpretation',
     'native-document-store-retains-session-version-mismatch-retry-load-cancellation-and-snapshot-policy',
-    'legacy-runtime-preserves-ten-existing-document-store-methods-and-unavailable-runtime-fallbacks',
-    'only-web-link-and-log-direct-invoke-mappings-remain-for-atomic-task-3.9'
+    'legacy-runtime-preserves-ten-existing-document-store-methods-and-unavailable-runtime-fallbacks'
+  ]
+}, null, 2)}\n`, 'utf8');
+
+await writeFile(`${OUTPUT_DIRECTORY}/03-09-web-link-log-clients-evidence.json`, `${JSON.stringify({
+  node: 'stage-03/03-09', atomicTask: '3.9', status: 'passed',
+  commit: process.env.GITHUB_SHA || null, runId: process.env.GITHUB_RUN_ID || null,
+  attempt: process.env.GITHUB_RUN_ATTEMPT || null,
+  scope: 'three-separate-desktop-web-link-and-performance-log-command-adapters',
+  publicEntry: 'src/platform/index.js',
+  implementationFiles: [
+    `${DESKTOP_DIRECTORY}/web-fetch-client.js`,
+    `${DESKTOP_DIRECTORY}/link-client.js`,
+    `${DESKTOP_DIRECTORY}/performance-log-client.js`
+  ],
+  productionModuleCount: moduleFixture.modules.length,
+  platformModuleCount: platformModules.length,
+  directLegacyInvokeCount: (legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length,
+  samples: {
+    webFetch: { calls: webFetchCalls, result: webFetchEvidenceResult },
+    link: { calls: linkCalls, result: linkEvidenceResult },
+    performanceLog: { calls: performanceLogCalls, result: performanceLogEvidenceResult }
+  },
+  guarantees: [
+    'web-link-and-performance-log-commands-have-three-separate-clients-not-one-generic-native-client',
+    'web-fetch-client-preserves-fetch-url-argument-and-native-result-error-semantics',
+    'rust-web-fetch-remains-authority-for-url-normalization-redirects-timeout-http-and-body-validation',
+    'link-client-preserves-legacy-trimming-scheme-and-input-length-telemetry',
+    'rust-external-link-command-remains-authority-for-supported-schemes-and-os-launch',
+    'performance-log-client-passes-the-original-entry-array-and-disables-recursive-invoke-telemetry',
+    'performance-runtime-retains-queue-aggregation-diagnostics-retry-and-flush-policy',
+    'legacy-runtime-preserves-existing-web-link-log-method-names-and-unavailable-runtime-fallbacks',
+    'legacy-runtime-has-zero-direct-invoke-calls-after-the-cutover'
   ]
 }, null, 2)}\n`, 'utf8');

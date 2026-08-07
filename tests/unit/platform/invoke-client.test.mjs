@@ -123,17 +123,16 @@ test('the desktop invoke client is the sole production owner of the Tauri core i
   assert.match(publicEntry, /desktop\/invoke-client\.js/);
 });
 
-test('legacy runtime keeps only Web Link Log direct commands after FileSystem and DocumentStore cutovers', async () => {
+test('legacy runtime has zero direct invoke calls after the Web Link Log cutover', async () => {
   const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  const delegatedCommands = [...source.matchAll(/invokeClient\.invoke\('([^']+)'/g)]
-    .map(match => match[1])
-    .sort();
-  assert.deepEqual(delegatedCommands, ['fetch_url', 'open_external_url', 'write_performance_logs']);
+  assert.equal((source.match(/invokeClient\.invoke\('/g) || []).length, 0);
   assert.doesNotMatch(source, /@tauri-apps\/api\/core|\binvokeMeasured\b/);
   assert.match(source, /createInvokeClient\(/);
   assert.match(source, /createFileSystemClient\(\{ invoke: invokeClient\.invoke \}\)/);
   assert.match(source, /createDocumentStoreClient\(\{ invoke: invokeClient\.invoke \}\)/);
-  assert.match(source, /write_performance_logs[\s\S]*record: false/);
+  assert.match(source, /createWebFetchClient\(\{ invoke: invokeClient\.invoke \}\)/);
+  assert.match(source, /createLinkClient\(\{ invoke: invokeClient\.invoke \}\)/);
+  assert.match(source, /createPerformanceLogClient\(\{ invoke: invokeClient\.invoke \}\)/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.3 before later adapters and architecture', async () => {
@@ -148,9 +147,10 @@ test('Stage 3 verification keeps Atomic Task 3.3 before later adapters and archi
   const dragDropIndex = workflow.indexOf('Verify Atomic Task 3.6 drag-drop client');
   const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
   const documentStoreIndex = workflow.indexOf('Verify Atomic Task 3.8 document-store client');
+  const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && architectureIndex > documentStoreIndex);
+  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && architectureIndex > webLinkLogIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/invoke-client\.test\.mjs/);
-  assert.match(workflow, /03-08-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.9|Atomic Task 3\.1[0-9]/);
+  assert.match(workflow, /03-09-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.1[0-9]/);
 });

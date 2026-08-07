@@ -7,4 +7,7 @@ export { createDocumentStoreClient } from './desktop/document-store-client.js';
 export { createDragDropClient } from './desktop/drag-drop-client.js';
 export { createFileSystemClient } from './desktop/file-system-client.js';
 export { createInvokeClient } from './desktop/invoke-client.js';
+export { createLinkClient } from './desktop/link-client.js';
+export { createPerformanceLogClient } from './desktop/performance-log-client.js';
+export { createWebFetchClient } from './desktop/web-fetch-client.js';
 export { createWindowClient } from './desktop/window-client.js';

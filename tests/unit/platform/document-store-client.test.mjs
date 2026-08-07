@@ -171,7 +171,7 @@ test('legacy runtime delegates all ten document-store commands through the publi
     'documentStoreClient.search(request)',
     'documentStoreClient.remove(documentId)'
   ]) assert.ok(source.includes(delegation), `missing delegation: ${delegation}`);
-  assert.equal((source.match(/invokeClient\.invoke\('/g) || []).length, 3);
+  assert.equal((source.match(/invokeClient\.invoke\('/g) || []).length, 0);
   for (const command of [
     'save_document_state', 'begin_document_snapshot_upload', 'append_document_snapshot_chunk',
     'commit_document_snapshot_upload', 'abort_document_snapshot_upload', 'load_document_state',
@@ -187,9 +187,10 @@ test('DocumentStore client is exported, registered and verified before the Stage
   const workflow = await readFile(new URL('../../../.github/workflows/stage-03-atomic.yml', import.meta.url), 'utf8');
   const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
   const documentStoreIndex = workflow.indexOf('Verify Atomic Task 3.8 document-store client');
+  const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(fileSystemIndex >= 0 && documentStoreIndex > fileSystemIndex && architectureIndex > documentStoreIndex);
+  assert.ok(fileSystemIndex >= 0 && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && architectureIndex > webLinkLogIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/document-store-client\.test\.mjs/);
-  assert.match(workflow, /03-08-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.9|Atomic Task 3\.1[0-9]/);
+  assert.match(workflow, /03-09-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.1[0-9]/);
 });

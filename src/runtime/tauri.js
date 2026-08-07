@@ -1,4 +1,4 @@
-import { createDialogClient, createDocumentStoreClient, createDragDropClient, createFileSystemClient, createInvokeClient, createRuntimeCapabilities, createWindowClient, detectPlatformEnvironment } from '../platform/index.js';
+import { createDialogClient, createDocumentStoreClient, createDragDropClient, createFileSystemClient, createInvokeClient, createLinkClient, createPerformanceLogClient, createRuntimeCapabilities, createWebFetchClient, createWindowClient, detectPlatformEnvironment } from '../platform/index.js';
 
 const platformEnvironment = detectPlatformEnvironment(window);
 const capabilities = createRuntimeCapabilities(platformEnvironment, window);
@@ -14,6 +14,9 @@ const dialogClient = createDialogClient({
 const documentStoreClient = createDocumentStoreClient({ invoke: invokeClient.invoke });
 const dragDropClient = createDragDropClient();
 const fileSystemClient = createFileSystemClient({ invoke: invokeClient.invoke });
+const linkClient = createLinkClient({ invoke: invokeClient.invoke });
+const performanceLogClient = createPerformanceLogClient({ invoke: invokeClient.invoke });
+const webFetchClient = createWebFetchClient({ invoke: invokeClient.invoke });
 const windowClient = createWindowClient();
 
 if (isAvailable) {
@@ -27,17 +30,13 @@ window.markdownEditorNative = {
     if (!isAvailable) {
       throw new Error('Tauri runtime is not available');
     }
-    return invokeClient.invoke('fetch_url', { url }, { inputLength: String(url || '').length });
+    return webFetchClient.fetchUrl(url);
   },
   async openExternalUrl(url) {
     if (!isAvailable) {
       throw new Error('Tauri runtime is not available');
     }
-    const value = String(url || '').trim();
-    return invokeClient.invoke('open_external_url', { url: value }, {
-      scheme: value.split(':', 1)[0].toLowerCase(),
-      inputLength: value.length
-    });
+    return linkClient.openExternal(url);
   },
   async readDroppedFile(path) {
     if (!isAvailable) {
@@ -63,7 +62,7 @@ window.markdownEditorNative = {
   },
   async writePerformanceLogs(entries) {
     if (!isAvailable) return '';
-    return invokeClient.invoke('write_performance_logs', { entries }, {}, { record: false });
+    return performanceLogClient.writePerformance(entries);
   },
   async saveDocumentState(request) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
