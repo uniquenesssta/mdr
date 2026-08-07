@@ -1,4 +1,4 @@
-# Atomic Task 3.11 validation node.
+# Atomic Task 3.12 final Stage 3 validation node.
 name: Stage 3 Atomic Verification
 
 on:
@@ -58,8 +58,10 @@ jobs:
         run: node --test tests/unit/platform/browser-storage.test.mjs tests/unit/platform/browser-file-download.test.mjs tests/unit/platform/browser-clipboard.test.mjs tests/unit/platform/browser-fullscreen.test.mjs tests/unit/platform/browser-print.test.mjs tests/unit/platform/browser-file-reader.test.mjs
       - name: Verify Atomic Task 3.11 createPlatform
         run: node --test tests/unit/platform/desktop-platform-contract.test.mjs tests/unit/platform/create-platform.test.mjs
+      - name: Verify Atomic Task 3.12 final Platform cutover
+        run: node --test tests/unit/platform/classic-platform-port.test.mjs tests/unit/platform/platform-cutover.test.mjs
       - name: Run architecture hard gate
-        run: node scripts/verify-architecture.mjs --output=artifacts/stage-03/03-11-architecture-scan.json
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-03/03-12-architecture-scan.json
       - name: Run existing Node regression suite
         run: npm test
       - name: Run browser interaction contract

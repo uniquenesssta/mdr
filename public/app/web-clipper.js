@@ -1,3 +1,5 @@
+    const webClipperPlatformPort = document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort;
+
     function setClipperHidden(element, hidden) {
       element?.classList.toggle('is-hidden', Boolean(hidden));
     }
@@ -14,7 +16,7 @@
       setClipperStatusTone(document.getElementById('url-status'), 'muted');
       setClipperHidden(document.getElementById('manual-area'), true);
       document.getElementById('manual-html').value = '';
-      document.getElementById('use-local-proxy').checked = Boolean(window.markdownEditorNative?.isAvailable);
+      document.getElementById('use-local-proxy').checked = Boolean(webClipperPlatformPort?.supports('desktop.webFetch'));
       setClipperHidden(document.getElementById('proxy-url'), true);
       toggleProxyInput();
       fetchedHtml = '';
@@ -184,7 +186,7 @@
       const proxyInput = document.getElementById('proxy-url');
       if (!proxyInput) return;
 
-      if (window.markdownEditorNative?.isAvailable) {
+      if (webClipperPlatformPort?.supports('desktop.webFetch')) {
         setClipperHidden(proxyInput, true);
         return;
       }
@@ -193,8 +195,8 @@
     }
 
     async function fetchWithNativeBackend(url) {
-      if (!window.markdownEditorNative?.isAvailable) return null;
-      return window.markdownEditorNative.fetchUrl(url);
+      if (!webClipperPlatformPort?.supports('desktop.webFetch')) return null;
+      return webClipperPlatformPort.call('web', 'fetchText', url);
     }
 
     // 尝试通过 Tauri Rust 后端、本地代理或公共 CORS 代理获取网页
@@ -217,10 +219,10 @@
       fetchedHtml = '';
 
       // 桌面版优先使用 Rust 后端，不再依赖 Python 代理或公网 CORS 服务。
-      if (window.markdownEditorNative?.isAvailable) {
+      if (webClipperPlatformPort?.supports('desktop.webFetch')) {
         try {
           const data = await fetchWithNativeBackend(url);
-          fetchedHtml = data?.html || data?.content || '';
+          fetchedHtml = String(data || '');
           if (!fetchedHtml) throw new Error('Native backend returned empty content');
           status.textContent = t('urlStatusLocalSuccess');
           setClipperStatusTone(status, 'success');

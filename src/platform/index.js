@@ -3,6 +3,7 @@ export * from './ports/index.js';
 export { createPlatform, PlatformCapabilityUnavailableError } from './create-platform.js';
 export { detectPlatformEnvironment, PLATFORM_ENVIRONMENTS } from './environment/platform-detection.js';
 export { createRuntimeCapabilities } from './environment/runtime-capabilities.js';
+export { mountClassicPlatformPort } from './compatibility/classic-platform-port.js';
 export { createBrowserStorage } from './browser/browser-storage.js';
 export { createBrowserFileDownload } from './browser/browser-file-download.js';
 export { createBrowserClipboard } from './browser/browser-clipboard.js';

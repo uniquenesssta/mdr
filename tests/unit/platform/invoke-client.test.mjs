@@ -123,16 +123,15 @@ test('the desktop invoke client is the sole production owner of the Tauri core i
   assert.match(publicEntry, /desktop\/invoke-client\.js/);
 });
 
-test('legacy runtime has zero direct invoke calls after the Web Link Log cutover', async () => {
-  const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  assert.equal((source.match(/invokeClient\.invoke\('/g) || []).length, 0);
-  assert.doesNotMatch(source, /@tauri-apps\/api\/core|\binvokeMeasured\b/);
+test('desktop platform is the only command composition owner after the legacy facade deletion', async () => {
+  const source = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
   assert.match(source, /createInvokeClient\(/);
   assert.match(source, /createFileSystemClient\(\{ invoke: invokeClient\.invoke \}\)/);
   assert.match(source, /createDocumentStoreClient\(\{ invoke: invokeClient\.invoke \}\)/);
   assert.match(source, /createWebFetchClient\(\{ invoke: invokeClient\.invoke \}\)/);
   assert.match(source, /createLinkClient\(\{ invoke: invokeClient\.invoke \}\)/);
   assert.match(source, /createPerformanceLogClient\(\{ invoke: invokeClient\.invoke \}\)/);
+  assert.doesNotMatch(source, /markdownEditorNative|src\/runtime\/tauri/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.3 before later adapters and architecture', async () => {
@@ -150,9 +149,10 @@ test('Stage 3 verification keeps Atomic Task 3.3 before later adapters and archi
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
   const createPlatformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
+  const cutoverIndex = workflow.indexOf('Verify Atomic Task 3.12 final Platform cutover');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && architectureIndex > createPlatformIndex);
+  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && cutoverIndex > createPlatformIndex && architectureIndex > cutoverIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/invoke-client\.test\.mjs/);
-  assert.match(workflow, /03-11-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
+  assert.match(workflow, /03-12-architecture-scan\.json/);
+  assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });

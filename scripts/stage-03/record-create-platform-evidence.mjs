@@ -159,7 +159,8 @@ const platformModules = moduleFixture.modules
   .sort();
 const createPlatformSource = await readFile('src/platform/create-platform.js', 'utf8');
 const desktopPlatformSource = await readFile('src/platform/desktop/desktop-platform.js', 'utf8');
-const legacyRuntimeSource = await readFile('src/runtime/tauri.js', 'utf8');
+const mainSource = await readFile('src/main.js', 'utf8');
+const classicBridgeSource = await readFile('src/platform/compatibility/classic-platform-port.js', 'utf8');
 
 const browserSurface = createBrowserRuntime();
 const browserPlatform = createPlatform({ runtime: browserSurface.runtime });
@@ -194,7 +195,7 @@ const desktopText = await desktopPlatform.files.readText('native.md');
 const desktopWeb = await desktopPlatform.web.fetchText('https://desktop.example');
 await desktopPlatform.clipboard.writeText('browser-webview-clipboard');
 
-if (moduleFixture.modules.length !== 174 || platformModules.length !== 35) process.exit(1);
+if (moduleFixture.modules.length !== 174 || platformModules.length !== 36) process.exit(1);
 if (!platformModules.includes('src/platform/create-platform.js')) process.exit(1);
 if (!platformModules.includes('src/platform/desktop/desktop-platform.js')) process.exit(1);
 if (JSON.stringify(Object.keys(browserPlatform)) !== JSON.stringify(['capabilities', ...PLATFORM_PORT_NAMES, 'destroy'])) process.exit(1);
@@ -216,8 +217,11 @@ if (/public\/app|features\/|markdownEditorNative|showToast|localStorage|document
 if (!createPlatformSource.includes('PlatformCapabilityUnavailableError')) process.exit(1);
 if (!createPlatformSource.includes('createPlatformPortSet')) process.exit(1);
 if (!createPlatformSource.includes('createDesktopPlatform')) process.exit(1);
-if (!legacyRuntimeSource.includes('window.markdownEditorNative = {')) process.exit(1);
-if (!legacyRuntimeSource.includes('createInvokeClient')) process.exit(1);
+if (!mainSource.includes('createPlatform({')) process.exit(1);
+if (!mainSource.includes('mountClassicPlatformPort')) process.exit(1);
+if (/markdownEditorNative|window\.markdownEditorPlatform/.test(mainSource)) process.exit(1);
+if (!classicBridgeSource.includes('call(portName, methodName')) process.exit(1);
+if (!classicBridgeSource.includes('supports(capability)')) process.exit(1);
 
 await mkdir(OUTPUT_DIRECTORY, { recursive: true });
 await writeFile(`${OUTPUT_DIRECTORY}/03-11-create-platform-evidence.json`, `${JSON.stringify({
@@ -267,6 +271,6 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-11-create-platform-evidence.json`, `${JS
     'desktop-files-and-web-results-are-normalized-to-the-frozen-port-contract-without-business-state',
     'webkit-only-fullscreen-is-detected-consistently-with-the-browser-fullscreen-adapter',
     'platform-destroy-is-owned-by-the-existing-port-set-lifecycle',
-    'legacy-runtime-and-business-callers-remain-intact-until-atomic-task-3.12'
+    'atomic-task-3.12-removes-the-legacy-native-facade-and-consumers-use-platform-ports'
   ]
 }, null, 2)}\n`, 'utf8');

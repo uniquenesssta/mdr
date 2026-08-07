@@ -1,6 +1,16 @@
 const MAX_CACHE_CHARACTERS = 32 * 1024 * 1024;
 const imageCache = new Map();
 let cachedCharacters = 0;
+let platformFiles = null;
+let localImageEnabled = false;
+
+export function configureHybridImageSourcePlatform({ files, enabled = false } = {}) {
+  if (!files || typeof files.readImage !== 'function') {
+    throw new TypeError('hybrid image source requires a files port');
+  }
+  platformFiles = files;
+  localImageEnabled = Boolean(enabled);
+}
 
 function isDirectImageSource(source) {
   return /^(?:data:image\/|blob:|https?:\/\/|asset:)/i.test(source);
@@ -54,7 +64,7 @@ export async function resolveHybridImageSource(source) {
   if (isDirectImageSource(original)) return { url: original, kind: 'direct', displaySource: original };
 
   const context = currentDocumentContext();
-  if (!window.markdownEditorNative?.isAvailable || typeof window.markdownEditorNative.readLocalImage !== 'function') {
+  if (!localImageEnabled || !platformFiles) {
     return { url: original, kind: 'relative', displaySource: original };
   }
 
@@ -66,13 +76,13 @@ export async function resolveHybridImageSource(source) {
   }
   if (cached?.status === 'pending') return cached.promise;
 
-  const promise = window.markdownEditorNative.readLocalImage(original, context.filePath || '')
-    .then(result => cacheResolved(key, {
-      url: String(result?.dataUrl || ''),
+  const promise = Promise.resolve(platformFiles.readImage(original, context.filePath || ''))
+    .then(dataUrl => cacheResolved(key, {
+      url: String(dataUrl || ''),
       kind: 'local',
-      resolvedPath: String(result?.path || original),
+      resolvedPath: original,
       displaySource: original,
-      bytes: Number(result?.bytes) || 0
+      bytes: 0
     }))
     .catch(error => {
       imageCache.delete(key);

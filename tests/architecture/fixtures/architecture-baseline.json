@@ -1882,14 +1882,6 @@
       ]
     },
     {
-      "path": "src/runtime/tauri.js",
-      "global": "window.markdownEditorNative",
-      "count": 1,
-      "lines": [
-        59
-      ]
-    },
-    {
       "path": "src/runtime/vendor.js",
       "global": "window.domtoimage",
       "count": 1,

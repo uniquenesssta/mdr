@@ -54,9 +54,11 @@ test('invalid web-fetch client dependencies fail at the adapter boundary', () =>
   assert.throws(() => createWebFetchClient({ invoke: null }), /requires an invoke function/);
 });
 
-test('legacy runtime delegates fetchUrl through the dedicated client', async () => {
-  const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  assert.match(source, /createWebFetchClient\(\{ invoke: invokeClient\.invoke \}\)/);
-  assert.match(source, /return webFetchClient\.fetchUrl\(url\)/);
-  assert.doesNotMatch(source, /invokeClient\.invoke\('fetch_url'/);
+test('desktop platform maps WebPort through the dedicated client and web clipper consumes fetchText', async () => {
+  const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
+  const clipper = await readFile(new URL('../../../public/app/web-clipper.js', import.meta.url), 'utf8');
+  assert.match(desktop, /webFetchClient\.fetchUrl\(url, options\)/);
+  assert.match(clipper, /call\('web', 'fetchText', url\)/);
+  assert.doesNotMatch(clipper, /markdownEditorNative/);
 });
+

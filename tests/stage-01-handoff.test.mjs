@@ -122,7 +122,7 @@ test('Stage 1 historical counts and current package verification entries remain 
   assert.match(extractSection(readme, '## Stage 1 架构交接'), /67 个生产模块/);
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 9);
   assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 184);
-  assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 38);
+  assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 37);
   assert.equal(baseline.trackedGeneratedFiles.length, 4);
   assert.equal(baseline.policy.wildcardExemptions, false);
 

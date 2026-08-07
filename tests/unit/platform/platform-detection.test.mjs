@@ -185,33 +185,26 @@ test('invalid manually assembled environments are rejected', () => {
   );
 });
 
-test('the Tauri sentinel has one production owner and legacy runtime consumes the public entry', async () => {
+test('the Tauri sentinel has one production owner and main consumes createPlatform without native globals', async () => {
   const platformRoot = new URL('../../../src/platform/', import.meta.url);
   const detectionSource = await readFile(new URL('environment/platform-detection.js', platformRoot), 'utf8');
   const capabilitySource = await readFile(new URL('environment/runtime-capabilities.js', platformRoot), 'utf8');
   const platformIndexSource = await readFile(new URL('index.js', platformRoot), 'utf8');
-  const legacyRuntimeSource = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-
-  const moduleFixture = JSON.parse(await readFile(
-    new URL('../../../tests/architecture/fixtures/production-modules.json', import.meta.url),
-    'utf8'
-  ));
+  const mainSource = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  const moduleFixture = JSON.parse(await readFile(new URL('../../../tests/architecture/fixtures/production-modules.json', import.meta.url), 'utf8'));
   const sentinelOwners = [];
   for (const [path] of moduleFixture.modules) {
     const source = await readFile(new URL(`../../../${path}`, import.meta.url), 'utf8');
     if (source.includes('__TAURI_INTERNALS__')) sentinelOwners.push(path);
   }
-
   assert.deepEqual(sentinelOwners, ['src/platform/environment/platform-detection.js']);
   assert.match(detectionSource, /__TAURI_INTERNALS__/);
   assert.doesNotMatch(capabilitySource, /__TAURI_INTERNALS__|@tauri|\binvoke\s*\(/);
   assert.doesNotMatch(capabilitySource, /\bwindow\.|\bdocument\.|\bnavigator\./);
   assert.match(platformIndexSource, /environment\/platform-detection\.js/);
-  assert.match(platformIndexSource, /environment\/runtime-capabilities\.js/);
-  assert.match(legacyRuntimeSource, /from '\.\.\/platform\/index\.js'/);
-  assert.match(legacyRuntimeSource, /createRuntimeCapabilities\(platformEnvironment, window\)/);
-  assert.match(legacyRuntimeSource, /isAvailable = capabilities\.desktop\.invoke/);
-  assert.doesNotMatch(legacyRuntimeSource, /__TAURI_INTERNALS__/);
+  assert.match(mainSource, /createPlatform\(\{/);
+  assert.match(mainSource, /platform\.capabilities/);
+  assert.doesNotMatch(mainSource, /markdownEditorNative|__TAURI_INTERNALS__/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.2 before later platform checks', async () => {
@@ -229,9 +222,10 @@ test('Stage 3 verification keeps Atomic Task 3.2 before later platform checks', 
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
   const createPlatformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
+  const cutoverIndex = workflow.indexOf('Verify Atomic Task 3.12 final Platform cutover');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && architectureIndex > createPlatformIndex);
+  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && cutoverIndex > createPlatformIndex && architectureIndex > cutoverIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/platform-detection\.test\.mjs/);
-  assert.match(workflow, /03-11-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
+  assert.match(workflow, /03-12-architecture-scan\.json/);
+  assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });

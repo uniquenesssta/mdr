@@ -132,8 +132,9 @@ test('Stage 3 verification keeps the 3.1 contract before later platform checks',
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
   const createPlatformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
+  const cutoverIndex = workflow.indexOf('Verify Atomic Task 3.12 final Platform cutover');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(portsIndex >= 0 && detectionIndex > portsIndex && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && architectureIndex > createPlatformIndex);
+  assert.ok(portsIndex >= 0 && detectionIndex > portsIndex && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && cutoverIndex > createPlatformIndex && architectureIndex > cutoverIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/invoke-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/dialog-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/window-client\.test\.mjs/);
@@ -143,43 +144,27 @@ test('Stage 3 verification keeps the 3.1 contract before later platform checks',
   assert.match(workflow, /node --test tests\/unit\/platform\/web-fetch-client\.test\.mjs tests\/unit\/platform\/link-client\.test\.mjs tests\/unit\/platform\/performance-log-client\.test\.mjs/);
   assert.match(workflow, /tests\/unit\/platform\/browser-storage\.test\.mjs/);
   assert.match(workflow, /tests\/unit\/platform\/desktop-platform-contract\.test\.mjs tests\/unit\/platform\/create-platform\.test\.mjs/);
-  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-11-architecture-scan\.json/);
+  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-12-architecture-scan\.json/);
   assert.match(workflow, /scripts\/stage-03\/record-platform-evidence\.mjs/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
+  assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });
 
-test('the frozen legacy capability inventory maps every old native method to declared ports', async () => {
-  const inventory = JSON.parse(await readFile(
-    new URL('./fixtures/platform-port-inventory.json', import.meta.url),
-    'utf8'
-  ));
+test('the frozen legacy capability inventory maps every historical native method to declared ports', async () => {
+  const inventory = JSON.parse(await readFile(new URL('./fixtures/platform-port-inventory.json', import.meta.url), 'utf8'));
   assert.equal(inventory.schemaVersion, 1);
-
-  const legacySource = await readFile(
-    new URL('../../../src/runtime/tauri.js', import.meta.url),
-    'utf8'
-  );
-  const nativeBody = legacySource
-    .split('window.markdownEditorNative = {', 2)[1]
-    .split(/\n};\s*$/, 1)[0];
-  const legacyMethods = [...nativeBody.matchAll(/^  (?:async )?([A-Za-z_$][\w$]*)\s*\(/gm)]
-    .map(match => match[1])
-    .sort();
-  assert.deepEqual(Object.keys(inventory.legacyNativeMethods).sort(), legacyMethods);
-
+  assert.equal(Object.keys(inventory.legacyNativeMethods).length, 33);
   const declaredTargets = new Set();
   for (const [portName, methods] of Object.entries(EXPECTED_PORT_METHODS)) {
     for (const method of methods) declaredTargets.add(`${portName}.${method}`);
   }
-  for (const targetList of [
-    ...Object.values(inventory.legacyNativeMethods),
-    ...Object.values(inventory.browserSurfaces)
-  ]) {
+  for (const targetList of [...Object.values(inventory.legacyNativeMethods), ...Object.values(inventory.browserSurfaces)]) {
     assert.ok(Array.isArray(targetList) && targetList.length > 0);
-    for (const target of targetList) {
-      assert.ok(declaredTargets.has(target), `Unknown platform target: ${target}`);
-    }
+    for (const target of targetList) assert.ok(declaredTargets.has(target), `Unknown platform target: ${target}`);
   }
+  const fixture = JSON.parse(await readFile(new URL('../../../tests/architecture/fixtures/production-modules.json', import.meta.url), 'utf8'));
+  const paths = fixture.modules.map(record => record[0]);
+  assert.ok(!paths.includes('src/runtime/tauri.js'));
+  assert.ok(paths.includes('src/platform/compatibility/classic-platform-port.js'));
 });
 
 test('individual port definitions validate, bind and freeze one exact responsibility', () => {

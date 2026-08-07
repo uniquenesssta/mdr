@@ -77,6 +77,6 @@ test('Stage 3 verification runs Atomic Task 3.10 before createPlatform and archi
   assert.match(workflow, /browser-file-reader\.test\.mjs/);
   assert.match(workflow, /desktop-platform-contract\.test\.mjs/);
   assert.match(workflow, /create-platform\.test\.mjs/);
-  assert.match(workflow, /03-11-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
+  assert.match(workflow, /03-12-architecture-scan\.json/);
+  assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });

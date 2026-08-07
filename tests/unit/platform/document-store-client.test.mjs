@@ -156,27 +156,15 @@ test('Rust document-store structs and commands remain camelCase authorities', as
   }
 });
 
-test('legacy runtime delegates all ten document-store commands through the public client', async () => {
-  const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  assert.match(source, /createDocumentStoreClient\(\{ invoke: invokeClient\.invoke \}\)/);
-  for (const delegation of [
-    'documentStoreClient.save(request)',
-    'documentStoreClient.beginSnapshotUpload(documentId, uploadId)',
-    'documentStoreClient.appendSnapshotChunk(documentId, uploadId, chunk, chunkIndex)',
-    'documentStoreClient.commitSnapshotUpload(request, uploadId)',
-    'documentStoreClient.abortSnapshotUpload(documentId, uploadId)',
-    'documentStoreClient.load(documentId)',
-    'documentStoreClient.loadManifest(documentId)',
-    'documentStoreClient.readChunk(documentId, byteOffset, maxBytes)',
-    'documentStoreClient.search(request)',
-    'documentStoreClient.remove(documentId)'
-  ]) assert.ok(source.includes(delegation), `missing delegation: ${delegation}`);
-  assert.equal((source.match(/invokeClient\.invoke\('/g) || []).length, 0);
-  for (const command of [
-    'save_document_state', 'begin_document_snapshot_upload', 'append_document_snapshot_chunk',
-    'commit_document_snapshot_upload', 'abort_document_snapshot_upload', 'load_document_state',
-    'load_document_manifest', 'read_document_chunk', 'search_document_state', 'delete_document_state'
-  ]) assert.doesNotMatch(source, new RegExp(`invokeClient\\.invoke\\('${command}'`));
+test('desktop platform exposes DocumentStorePort and NativeDocumentStore consumes only frozen port names', async () => {
+  const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
+  const store = await readFile(new URL('../../../src/storage/native-document-store.js', import.meta.url), 'utf8');
+  assert.match(desktop, /createDocumentStoreClient\(\{ invoke: invokeClient\.invoke \}\)/);
+  assert.match(desktop, /documentStore: documentStoreClient/);
+  for (const method of ['save', 'beginSnapshotUpload', 'appendSnapshotChunk', 'commitSnapshotUpload', 'abortSnapshotUpload', 'load', 'loadManifest', 'readChunk', 'search', 'remove']) {
+    assert.match(store, new RegExp(`documentStore\\.?${method}|documentStore\\?\\.${method}`));
+  }
+  assert.doesNotMatch(store, /markdownEditorNative|nativeApi|saveDocumentState|readDocumentChunk/);
 });
 
 test('DocumentStore client is exported, registered and verified before the Stage 3 hard gate', async () => {
@@ -190,9 +178,10 @@ test('DocumentStore client is exported, registered and verified before the Stage
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
   const createPlatformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
+  const cutoverIndex = workflow.indexOf('Verify Atomic Task 3.12 final Platform cutover');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(fileSystemIndex >= 0 && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && architectureIndex > createPlatformIndex);
+  assert.ok(fileSystemIndex >= 0 && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && cutoverIndex > createPlatformIndex && architectureIndex > cutoverIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/document-store-client\.test\.mjs/);
-  assert.match(workflow, /03-11-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
+  assert.match(workflow, /03-12-architecture-scan\.json/);
+  assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });

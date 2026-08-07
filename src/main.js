@@ -1,8 +1,8 @@
 import './styles/index.css';
 import './runtime/vendor.js';
-import './runtime/tauri.js';
-import './runtime/link-preview.js';
-import './runtime/performance.js';
+import { createPlatform, mountClassicPlatformPort } from './platform/index.js';
+import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
+import { configurePerformancePlatform } from './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
 import {
   createDocumentModel,
@@ -19,6 +19,29 @@ import { createSelectionSyncController } from './sync/selection-controller.js';
 import { createMarkdownPresentationApi } from './rendering/presentation-api.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import { createFolderFileTreeController } from './sidebar/folder-file-tree.js';
+import { configureHybridImageSourcePlatform } from './editor/hybrid/image-source.js';
+
+const platform = createPlatform({
+  runtime: window,
+  now: () => performance.now(),
+  record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
+});
+const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
+const compatibilityPlatformPort = mountClassicPlatformPort(compatibilityPlatformHost, platform);
+configureLinkPreviewPlatform({ links: platform.links });
+configurePerformancePlatform({
+  logs: platform.logs,
+  enabled: platform.capabilities.desktop.performanceLogs
+});
+configureHybridImageSourcePlatform({
+  files: platform.files,
+  enabled: platform.capabilities.desktop.fileSystem
+});
+document.documentElement.classList.toggle('tauri-shell', platform.capabilities.isDesktop);
+window.addEventListener('pagehide', () => {
+  compatibilityPlatformPort.destroy();
+  void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
+}, { once: true });
 
 window.markdownEditorSelectionMapping = selectionMappingApi;
 
@@ -67,9 +90,13 @@ async function loadAppModules() {
   window.createVirtualPreviewController = createVirtualPreviewController;
   window.createPreviewEnhancementQueue = createPreviewEnhancementQueue;
   window.markdownEditorTaskScheduler = createTaskScheduler();
-  window.markdownEditorDocumentStore = createNativeDocumentStore();
+  window.markdownEditorDocumentStore = createNativeDocumentStore({
+    documentStore: platform.documentStore,
+    available: platform.capabilities.desktop.documentStore
+  });
   window.markdownEditorFileTree = createFolderFileTreeController({
-    nativeApi: window.markdownEditorNative,
+    files: platform.files,
+    available: platform.capabilities.desktop.fileSystem,
     getCurrentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {},
     openFile: async path => {
       if (typeof window.openFolderTreeFile === 'function') return window.openFolderTreeFile(path);

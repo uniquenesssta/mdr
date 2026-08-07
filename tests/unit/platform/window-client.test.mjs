@@ -133,19 +133,15 @@ test('the desktop window client is the sole production owner of the Tauri window
   assert.match(publicEntry, /desktop\/window-client\.js/);
 });
 
-test('legacy runtime delegates all eight window methods and preserves unavailable fallbacks', async () => {
-  const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /@tauri-apps\/api\/window|getCurrentWindow/);
-  assert.match(source, /createWindowClient\(/);
-  assert.match(source, /return windowClient\.subscribeCloseRequest\(handler\)/);
-  assert.match(source, /return windowClient\.startDrag\(\)/);
-  assert.match(source, /return windowClient\.minimize\(\)/);
-  assert.match(source, /return windowClient\.toggleMaximize\(\)/);
-  assert.match(source, /return windowClient\.isMaximized\(\)/);
-  assert.match(source, /return windowClient\.subscribeResize\(handler\)/);
-  assert.match(source, /return windowClient\.requestClose\(\)/);
-  assert.match(source, /return windowClient\.forceClose\(\)/);
-  assert.match(source, /if \(!isAvailable\) return false;[\s\S]*windowClient\.toggleMaximize/);
+test('desktop platform exposes all WindowPort methods and events consumes the scoped window port', async () => {
+  const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
+  const events = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
+  assert.match(desktop, /createWindowClient\(/);
+  assert.match(desktop, /window: windowClient/);
+  for (const method of ['subscribeCloseRequest', 'startDrag', 'minimize', 'toggleMaximize', 'isMaximized', 'subscribeResize', 'requestClose', 'forceClose']) {
+    assert.match(events, new RegExp(`call\\('window', '${method}'`));
+  }
+  assert.doesNotMatch(events, /markdownEditorNative/);
 });
 
 test('save-before-close remains in the application layer and is absent from the window client', async () => {
@@ -154,8 +150,9 @@ test('save-before-close remains in the application layer and is absent from the 
   assert.doesNotMatch(clientSource, /saveCurrentDocumentState|confirmUserAction|close-save|document/);
   assert.match(eventsSource, /saveCurrentDocumentState\(false, \{ waitForNative: true, forceSnapshot: true \}\)/);
   assert.match(eventsSource, /event\.preventDefault\(\)/);
-  assert.match(eventsSource, /await window\.markdownEditorNative\.closeWindow\(\)/);
-  assert.match(eventsSource, /window\.markdownEditorNative\.destroyWindow/);
+  assert.match(eventsSource, /call\('window', 'requestClose'/);
+  assert.match(eventsSource, /call\('window', 'forceClose'/);
+  assert.doesNotMatch(eventsSource, /markdownEditorNative/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.5 after dialog and before drag-drop', async () => {

@@ -1,3 +1,4 @@
+const corePlatformPort = document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort;
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
@@ -157,7 +158,7 @@ const editor = document.getElementById('editor');
       const menuItem = document.getElementById('recent-files-menu-item');
       if (!menu || !menuItem) return;
       menu.replaceChildren();
-      if (!window.markdownEditorNative?.isAvailable) {
+      if (!corePlatformPort?.supports('desktop.fileSystem')) {
         menuItem.classList.add('disabled');
         const empty = document.createElement('div');
         empty.className = 'menu-item recent-file-empty';
@@ -570,9 +571,9 @@ const editor = document.getElementById('editor');
     }
 
     async function triggerImportFile() {
-      if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.chooseOpenPath === 'function') {
+      if (corePlatformPort?.supports('desktop.dialogs')) {
         try {
-          const path = await window.markdownEditorNative.chooseOpenPath({
+          const path = await corePlatformPort.call('dialogs', 'openFile', {
             title: '打开 Markdown 或文本文件',
             extensions: ['md', 'markdown', 'txt'],
             filterName: 'Markdown 和文本文件'
@@ -870,9 +871,7 @@ const editor = document.getElementById('editor');
     }
 
     async function confirmUserAction(message, options = {}) {
-      if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.confirmAction === 'function') {
-        return window.markdownEditorNative.confirmAction(message, options);
-      }
+      if (corePlatformPort) return corePlatformPort.call('dialogs', 'confirm', message, options);
       return confirm(String(message || ''));
     }
 
@@ -1809,11 +1808,11 @@ const editor = document.getElementById('editor');
     }
 
     async function chooseExportDirectory() {
-      if (!window.markdownEditorNative?.isAvailable || typeof window.markdownEditorNative.chooseDirectoryPath !== 'function') {
+      if (!corePlatformPort?.supports('desktop.dialogs')) {
         showToast('自定义导出路径仅支持桌面版');
         return;
       }
-      const selected = await window.markdownEditorNative.chooseDirectoryPath({
+      const selected = await corePlatformPort.call('dialogs', 'openDirectory', {
         title: '选择默认导出目录',
         defaultPath: document.getElementById('setting-export-directory')?.value || exportDirectory
       });

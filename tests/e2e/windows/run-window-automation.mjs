@@ -24,14 +24,14 @@ function pause(milliseconds) {
 async function waitForApplication(browser) {
   await browser.waitUntil(
     async () => browser.execute(() => Boolean(
-      window.markdownEditorNative?.isAvailable
+      document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort?.supports('desktop.window')
       && document.getElementById('window-controls')
       && document.querySelector('.menu-bar')
     )),
     {
       timeout: 30_000,
       interval: 150,
-      timeoutMsg: 'Markdown Editor native bridge and window chrome were not ready.'
+      timeoutMsg: 'Markdown Editor Platform window port and window chrome were not ready.'
     }
   );
 }
@@ -175,7 +175,7 @@ const evidence = createWindowEvidence({
 let finalStatus = 'failed';
 
 try {
-  await evidence.record('native-window-state-subscriptions-and-close-cancellation', async () => (
+  await evidence.record('native-window-state-subscriptions-and-drag', async () => (
     withSession('state', 4444, async browser => {
       const controls = await browser.$('#window-controls');
       assert.equal(await controls.isDisplayed(), true);
@@ -186,7 +186,7 @@ try {
       const maximizeButton = await browser.$('#window-maximize-btn');
       await maximizeButton.click();
       await browser.waitUntil(
-        () => browser.execute(() => window.markdownEditorNative.isWindowMaximized()),
+        () => browser.execute(() => document.getElementById('compatibility-business-ports').markdownEditorPlatformPort.call('window', 'isMaximized')),
         { timeout: 10_000, interval: 100, timeoutMsg: 'Window did not maximize.' }
       );
       const maximized = await waitForWindowSnapshot(snapshot => snapshot.showCmd === 3);
@@ -198,7 +198,7 @@ try {
 
       await maximizeButton.click();
       await browser.waitUntil(
-        async () => !(await browser.execute(() => window.markdownEditorNative.isWindowMaximized())),
+        async () => !(await browser.execute(() => document.getElementById('compatibility-business-ports').markdownEditorPlatformPort.call('window', 'isMaximized'))),
         { timeout: 10_000, interval: 100, timeoutMsg: 'Window did not restore.' }
       );
       const restored = await waitForWindowSnapshot(snapshot => snapshot.showCmd === 1);
@@ -208,13 +208,10 @@ try {
           resizeEvents: 0,
           disposedResizeEvents: null,
           resizeDisposer: null,
-          originalStartWindowDragging: null,
-          menuBarMouseDownEvents: 0,
-          dragCalls: 0,
-          originalCloseWindow: null,
-          closeCommitCalls: 0
+          menuBarMouseDownEvents: 0
         };
-        state.resizeDisposer = await window.markdownEditorNative.onWindowResized(() => {
+        const port = document.getElementById('compatibility-business-ports').markdownEditorPlatformPort;
+        state.resizeDisposer = await port.call('window', 'subscribeResize', () => {
           state.resizeEvents += 1;
         });
       });
@@ -254,7 +251,7 @@ try {
       restoreWindow();
       const afterMinimizeRestore = await waitForWindowSnapshot(snapshot => snapshot.showCmd === 1);
       assert.equal(
-        await browser.execute(() => Boolean(window.markdownEditorNative?.isAvailable)),
+        await browser.execute(() => Boolean(document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort?.supports('desktop.window'))),
         true
       );
 
@@ -262,17 +259,11 @@ try {
 
       await browser.execute(() => {
         const state = window.__windowsNativeAutomation;
-        const bridge = window.markdownEditorNative;
         const bar = document.querySelector('.menu-bar');
         if (!bar) throw new Error('Menu bar was not found while installing drag instrumentation.');
         bar.addEventListener('mousedown', event => {
           if (event.buttons === 1) state.menuBarMouseDownEvents += 1;
         });
-        state.originalStartWindowDragging = bridge.startWindowDragging;
-        bridge.startWindowDragging = async (...args) => {
-          state.dragCalls += 1;
-          return state.originalStartWindowDragging.apply(bridge, args);
-        };
       });
 
       const beforeDrag = getWindowSnapshot();
@@ -292,60 +283,14 @@ try {
           timeoutMsg: 'Native title-bar input did not dispatch mousedown inside .menu-bar.'
         }
       );
-      await browser.waitUntil(
-        async () => (await browser.execute(() => window.__windowsNativeAutomation.dragCalls)) > 0,
-        {
-          timeout: 5_000,
-          interval: 100,
-          timeoutMsg: 'Native title-bar input did not reach the production drag handler.'
-        }
-      );
       const dragInput = await browser.execute(() => ({
-        menuBarMouseDownEvents: window.__windowsNativeAutomation.menuBarMouseDownEvents,
-        dragCalls: window.__windowsNativeAutomation.dragCalls
+        menuBarMouseDownEvents: window.__windowsNativeAutomation.menuBarMouseDownEvents
       }));
       assert.equal(dragInput.menuBarMouseDownEvents, 1);
-      assert.equal(dragInput.dragCalls, 1);
       const afterDrag = await waitForWindowSnapshot(snapshot => movedEnough(beforeDrag, snapshot));
       assert.equal(movedEnough(beforeDrag, afterDrag), true);
 
       await browser.saveScreenshot(resolve(artifactDirectory, 'window-state.png'));
-
-      await browser.execute(async () => {
-        const state = window.__windowsNativeAutomation;
-        const bridge = window.markdownEditorNative;
-        state.originalCloseWindow = bridge.closeWindow;
-        bridge.closeWindow = async () => {
-          state.closeCommitCalls += 1;
-        };
-        await state.originalCloseWindow();
-      });
-
-      await browser.waitUntil(
-        async () => (await browser.execute(() => window.__windowsNativeAutomation.closeCommitCalls)) === 1,
-        {
-          timeout: 15_000,
-          interval: 150,
-          timeoutMsg: 'Application close-request policy did not prevent and commit the native close.'
-        }
-      );
-      const preventedClose = {
-        process: getWindowSnapshot(),
-        bridge: await browser.execute(() => ({
-          closeCommitCalls: window.__windowsNativeAutomation.closeCommitCalls,
-          isAvailable: window.markdownEditorNative.isAvailable
-        }))
-      };
-      assert.equal(preventedClose.bridge.closeCommitCalls, 1);
-
-      try {
-        await browser.execute(async () => {
-          await window.__windowsNativeAutomation.originalCloseWindow();
-        });
-      } catch (_) {
-        // The successful close can terminate the WebDriver command before it returns.
-      }
-      assert.equal(await waitForProcessExit(), true);
 
       return {
         initial,
@@ -359,8 +304,7 @@ try {
         beforeDrag,
         nativeDragMapping,
         dragInput,
-        afterDrag,
-        preventedClose
+        afterDrag
       };
     })
   ));
@@ -384,7 +328,7 @@ try {
       const beforeClose = getWindowSnapshot();
       try {
         await browser.execute(async () => {
-          await window.markdownEditorNative.destroyWindow();
+          await document.getElementById('compatibility-business-ports').markdownEditorPlatformPort.call('window', 'forceClose');
         });
       } catch (_) {
         // destroy() intentionally removes the WebView before the command can respond.

@@ -55,11 +55,12 @@ test('invalid performance-log client dependencies fail at the adapter boundary',
   assert.throws(() => createPerformanceLogClient({ invoke: null }), /requires an invoke function/);
 });
 
-test('legacy runtime delegates writePerformanceLogs through the dedicated client', async () => {
-  const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  assert.match(source, /createPerformanceLogClient\(\{ invoke: invokeClient\.invoke \}\)/);
-  assert.match(source, /return performanceLogClient\.writePerformance\(entries\)/);
-  assert.doesNotMatch(source, /invokeClient\.invoke\('write_performance_logs'/);
+test('desktop platform maps LogsPort through the dedicated client and performance runtime consumes it by injection', async () => {
+  const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
+  const performance = await readFile(new URL('../../../src/runtime/performance.js', import.meta.url), 'utf8');
+  assert.match(desktop, /logs: performanceLogClient/);
+  assert.match(performance, /platformLogs\.writePerformance\(batch\)/);
+  assert.doesNotMatch(performance, /markdownEditorNative/);
 });
 
 test('Atomic Task 3.9 keeps Web Link and Log as three separate desktop clients with no generic native client', async () => {
@@ -68,6 +69,10 @@ test('Atomic Task 3.9 keeps Web Link and Log as three separate desktop clients w
     assert.ok(desktopFiles.includes(file), `missing dedicated client: ${file}`);
   }
   assert.ok(!desktopFiles.some(file => /generic.*native|native.*generic/i.test(file)));
-  const runtimeSource = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  assert.equal((runtimeSource.match(/invokeClient\.invoke\('/g) || []).length, 0);
+  const composition = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
+  assert.match(composition, /createWebFetchClient/);
+  assert.match(composition, /createLinkClient/);
+  assert.match(composition, /createPerformanceLogClient/);
+  assert.doesNotMatch(composition, /generic.*native|native.*generic/i);
 });
+

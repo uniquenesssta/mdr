@@ -214,16 +214,17 @@ test('the desktop dialog client is the sole production owner of the Tauri dialog
   assert.match(publicEntry, /desktop\/dialog-client\.js/);
 });
 
-test('legacy runtime delegates all four dialog methods while preserving browser fallbacks', async () => {
-  const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /@tauri-apps\/plugin-dialog|showOpenDialog|showSaveDialog|showConfirmDialog/);
-  assert.doesNotMatch(source, /function normalizeSaveFileName|function joinNativePath/);
-  assert.match(source, /createDialogClient\(/);
-  assert.match(source, /return dialogClient\.openFile\(options\)/);
-  assert.match(source, /return dialogClient\.openDirectory\(options\)/);
-  assert.match(source, /return dialogClient\.saveFile\(preferredName, options\)/);
-  assert.match(source, /return dialogClient\.confirm\(message, options\)/);
-  assert.match(source, /if \(!isAvailable\) return window\.confirm\(String\(message \|\| ''\)\)/);
+test('desktop platform exposes the dedicated DialogsPort and classic callers consume it through the scoped bridge', async () => {
+  const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
+  const core = await readFile(new URL('../../../public/app/core.js', import.meta.url), 'utf8');
+  const exportSource = await readFile(new URL('../../../public/app/export.js', import.meta.url), 'utf8');
+  assert.match(desktop, /createDialogClient\(/);
+  assert.match(desktop, /dialogs: dialogClient/);
+  assert.match(core, /call\('dialogs', 'openFile'/);
+  assert.match(core, /call\('dialogs', 'openDirectory'/);
+  assert.match(core, /call\('dialogs', 'confirm'/);
+  assert.match(exportSource, /call\('dialogs', 'saveFile'/);
+  assert.doesNotMatch(core + exportSource, /markdownEditorNative/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.4 after invoke and before later adapters', async () => {
@@ -240,13 +241,14 @@ test('Stage 3 verification keeps Atomic Task 3.4 after invoke and before later a
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
   const createPlatformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
+  const cutoverIndex = workflow.indexOf('Verify Atomic Task 3.12 final Platform cutover');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(invokeIndex >= 0 && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && architectureIndex > createPlatformIndex);
+  assert.ok(invokeIndex >= 0 && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && cutoverIndex > createPlatformIndex && architectureIndex > cutoverIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/dialog-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/window-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/drag-drop-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/file-system-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/document-store-client\.test\.mjs/);
-  assert.match(workflow, /03-11-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
+  assert.match(workflow, /03-12-architecture-scan\.json/);
+  assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });

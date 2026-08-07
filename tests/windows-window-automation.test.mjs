@@ -71,13 +71,14 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(hostBuilder, /productionConfigUnchanged = \$true/);
 
   for (const contract of [
-    'native-window-state-subscriptions-and-close-cancellation',
+    'native-window-state-subscriptions-and-drag',
     'application-close-button-save-and-native-exit',
     'force-close-destroys-native-window',
-    'onWindowResized',
+    'markdownEditorPlatformPort',
+    "call('window', 'subscribeResize'",
+    "call('window', 'isMaximized'",
+    "call('window', 'forceClose'",
     'resizeDisposer',
-    'isWindowMaximized',
-    'destroyWindow',
     'waitForProcessExit',
     'waitForNativeWindow',
     'snapshot.pid === child.pid',
@@ -86,8 +87,7 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
     'elementsFromPoint',
     'menuBarMouseDownEvents',
     'dragWindowFromViewport',
-    'nativeDragMapping',
-    'dragCalls'
+    'nativeDragMapping'
   ]) {
     assert.match(runner, new RegExp(contract.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
@@ -98,6 +98,7 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(runner, /No safe effective hit target was found inside a declared title-bar drag region/);
   assert.match(runner, /Resolved drag point must effectively hit \.menu-bar/);
   assert.match(runner, /Native title-bar input did not dispatch mousedown inside \.menu-bar/);
+  assert.doesNotMatch(runner, /markdownEditorNative|onWindowResized|isWindowMaximized|destroyWindow|dragCalls/);
   assert.doesNotMatch(runner, /rect\.right - 180|dragFromViewportPoint|Builder, By, Capabilities|tauri-driver|MSEDGEDRIVER_PATH/);
 
   assert.match(sessionOwner, /TAURI_WEBDRIVER_PORT/);

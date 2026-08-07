@@ -204,7 +204,7 @@ async function runContractSuite() {
         const {createFolderFileTreeController}=await import(${JSON.stringify(moduleUrl)});
         window.__folderTreeOpened=[];
         window.__folderTreeController=createFolderFileTreeController({
-          nativeApi:{isAvailable:true,async listTextFileTree(){return {
+          files:{async listTextTree(){return {
             rootPath:'F:/Notes',rootName:'Notes',fileCount:3,directoryCount:1,skippedCount:0,truncated:false,
             nodes:[
               {kind:'directory',name:'Archive',path:'F:/Notes/Archive',children:[{kind:'file',name:'old.md',path:'F:/Notes/Archive/old.md'}]},
@@ -212,6 +212,7 @@ async function runContractSuite() {
               {kind:'file',name:'next.txt',path:'F:/Notes/next.txt'}
             ]
           }}},
+          available:true,
           getCurrentContext:()=>({filePath:'F:/Notes/current.md'}),
           openFile:async path=>{window.__folderTreeOpened.push(path);return true;}
         });

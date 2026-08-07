@@ -1,3 +1,5 @@
+    const eventsPlatformPort = document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort;
+
     editor.addEventListener('input', () => {
       ensureCurrentDocumentForEditing();
       if (!editor.virtualEditor) {
@@ -60,9 +62,9 @@
     }
 
     async function refreshWindowChromeState() {
-      if (!window.markdownEditorNative?.isAvailable || typeof window.markdownEditorNative.isWindowMaximized !== 'function') return;
+      if (!eventsPlatformPort?.supports('desktop.window')) return;
       try {
-        applyWindowMaximizedState(await window.markdownEditorNative.isWindowMaximized());
+        applyWindowMaximizedState(await eventsPlatformPort.call('window', 'isMaximized'));
       } catch (error) {
         console.warn('Failed to refresh window state:', error);
       }
@@ -71,7 +73,7 @@
     function setupWindowChrome() {
       const controls = document.getElementById('window-controls');
       if (!controls) return;
-      if (!window.markdownEditorNative?.isAvailable) {
+      if (!eventsPlatformPort?.supports('desktop.window')) {
         controls.hidden = true;
         document.documentElement.classList.remove('tauri-shell');
         return;
@@ -87,10 +89,10 @@
         if (event.target instanceof Element && event.target.closest('.menu-dropdown, .window-controls, button, input, select, textarea, a, [role="button"]')) return;
         try {
           if (event.detail === 2) {
-            const maximized = await window.markdownEditorNative.toggleMaximizeWindow?.();
+            const maximized = await eventsPlatformPort.call('window', 'toggleMaximize');
             applyWindowMaximizedState(maximized);
           } else {
-            await window.markdownEditorNative.startWindowDragging?.();
+            await eventsPlatformPort.call('window', 'startDrag');
           }
         } catch (error) {
           console.warn('Window drag failed:', error);
@@ -99,7 +101,7 @@
 
       minimizeButton?.addEventListener('click', async () => {
         try {
-          await window.markdownEditorNative.minimizeWindow?.();
+          await eventsPlatformPort.call('window', 'minimize');
         } catch (error) {
           showToast(error?.message || String(error));
         }
@@ -107,7 +109,7 @@
 
       maximizeButton?.addEventListener('click', async () => {
         try {
-          const maximized = await window.markdownEditorNative.toggleMaximizeWindow?.();
+          const maximized = await eventsPlatformPort.call('window', 'toggleMaximize');
           applyWindowMaximizedState(maximized);
         } catch (error) {
           showToast(error?.message || String(error));
@@ -134,10 +136,10 @@
         }
       });
 
-      if (typeof window.markdownEditorNative.onWindowResized === 'function') {
-        window.markdownEditorNative.onWindowResized(() => {
+      if (eventsPlatformPort?.supports('desktop.window')) {
+        Promise.resolve(eventsPlatformPort.call('window', 'subscribeResize', () => {
           refreshWindowChromeState();
-        }).catch(error => {
+        })).catch(error => {
           console.warn('Failed to register window resize listener:', error);
         });
       }
@@ -179,7 +181,7 @@
       e.preventDefault();
       dragCounter = 0;
       hideDropOverlay();
-      if (window.markdownEditorNative?.isAvailable) return;
+      if (eventsPlatformPort?.supports('desktop.dragDrop')) return;
       const files = e.dataTransfer.files;
       if (!files.length) return;
       const file = files[0];
@@ -209,16 +211,20 @@
     });
 
     async function handleNativeDroppedPath(path) {
+      const resolvedPath = String(path || '').trim();
+      if (!resolvedPath || !eventsPlatformPort?.supports('desktop.fileSystem')) return false;
+      const name = getFileNameFromPath(resolvedPath);
+      const ext = String(name.split('.').pop() || '').toLowerCase();
       try {
-        const dropped = await window.markdownEditorNative.readDroppedFile(path);
-        if (dropped.kind === 'text') {
-          const resolvedPath = dropped.path || path;
-          const opened = await loadTextContentAsDocument(dropped.name, dropped.content || '', resolvedPath);
-          if (opened) addRecentFile(resolvedPath, dropped.name);
+        if (['md', 'markdown', 'txt'].includes(ext)) {
+          const content = await eventsPlatformPort.call('files', 'readText', resolvedPath);
+          const opened = await loadTextContentAsDocument(name, content || '', resolvedPath);
+          if (opened) addRecentFile(resolvedPath, name);
           return opened;
         }
-        if (dropped.kind === 'image') {
-          insertImageMarkdown(dropped.name, dropped.dataUrl);
+        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
+          const dataUrl = await eventsPlatformPort.call('files', 'readImage', resolvedPath, '');
+          insertImageMarkdown(name, dataUrl);
           showToast(t('toastImageInserted'));
           return true;
         }
@@ -230,21 +236,20 @@
       }
     }
 
-    if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.onDragDrop === 'function') {
-      window.markdownEditorNative.onDragDrop(async (event) => {
-        const payload = event?.payload || {};
-        if (payload.type === 'over') {
+    if (eventsPlatformPort?.supports('desktop.dragDrop')) {
+      Promise.resolve(eventsPlatformPort.call('dragDrop', 'subscribe', async payload => {
+        if (payload?.type === 'over') {
           showDropOverlay();
           return;
         }
-        if (payload.type === 'drop') {
+        if (payload?.type === 'drop') {
           hideDropOverlay();
           const path = Array.isArray(payload.paths) ? payload.paths[0] : null;
           if (path) await handleNativeDroppedPath(path);
           return;
         }
         hideDropOverlay();
-      }).catch((err) => console.warn('Failed to register native drag-drop listener', err));
+      })).catch(err => console.warn('Failed to register native drag-drop listener', err));
     }
 
     let windowCloseCommitted = false;
@@ -253,14 +258,11 @@
     async function commitWindowClose() {
       windowCloseCommitted = true;
       try {
-        if (typeof window.markdownEditorNative.closeWindow === 'function') {
-          await window.markdownEditorNative.closeWindow();
-          return;
-        }
-        await window.markdownEditorNative.destroyWindow?.();
+        await eventsPlatformPort.call('window', 'requestClose');
+        return;
       } catch (closeError) {
         try {
-          await window.markdownEditorNative.destroyWindow?.();
+          await eventsPlatformPort.call('window', 'forceClose');
         } catch (destroyError) {
           windowCloseCommitted = false;
           windowCloseSaving = false;
@@ -276,8 +278,8 @@
       }
     }
 
-    if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.onCloseRequested === 'function') {
-      window.markdownEditorNative.onCloseRequested(async event => {
+    if (eventsPlatformPort?.supports('desktop.window')) {
+      Promise.resolve(eventsPlatformPort.call('window', 'subscribeCloseRequest', async event => {
         if (windowCloseCommitted) return;
         event.preventDefault();
         if (windowCloseSaving) return;
@@ -297,7 +299,7 @@
           });
           if (exitAnyway) await commitWindowClose();
         }
-      }).catch(error => {
+      })).catch(error => {
         console.warn('Failed to register close handler:', error);
         window.markdownEditorPerf?.record?.('window.close-handler-error', {
           category: 'app.lifecycle',
@@ -452,7 +454,9 @@
     updateInlineColorToolAvailability();
     window.__markdownEditorInitPromise = init().then(async () => {
       updateInlineColorToolAvailability();
-      const initialPath = await window.markdownEditorNative?.getInitialFilePath?.();
+      const initialPath = eventsPlatformPort?.supports('desktop.fileSystem')
+        ? await eventsPlatformPort.call('files', 'getInitialPath')
+        : null;
       if (initialPath) await handleNativeDroppedPath(initialPath);
     }).catch(error => {
       console.error('Application initialization failed:', error);

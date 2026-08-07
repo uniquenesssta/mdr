@@ -42,7 +42,6 @@ const BROWSER_DIRECTORY = `${PLATFORM_ROOT}/browser`;
 const DESKTOP_DIRECTORY = `${PLATFORM_ROOT}/desktop`;
 const INVENTORY_PATH = 'tests/unit/platform/fixtures/platform-port-inventory.json';
 const MODULE_FIXTURE_PATH = 'tests/architecture/fixtures/production-modules.json';
-const LEGACY_RUNTIME_PATH = 'src/runtime/tauri.js';
 
 const methodsByPort = Object.freeze({
   storage: STORAGE_PORT_METHODS,
@@ -116,7 +115,8 @@ const browserSources = Object.fromEntries(await Promise.all(
 const desktopSources = Object.fromEntries(await Promise.all(
   desktopFiles.map(async file => [file, await readFile(`${DESKTOP_DIRECTORY}/${file}`, 'utf8')])
 ));
-const legacyRuntimeSource = await readFile(LEGACY_RUNTIME_PATH, 'utf8');
+const desktopPlatformSource = await readFile('src/platform/desktop/desktop-platform.js', 'utf8');
+const mainSource = await readFile('src/main.js', 'utf8');
 const platformModules = moduleFixture.modules
   .filter(record => String(record[0]).startsWith('src/platform/'))
   .map(record => record[0])
@@ -456,7 +456,7 @@ if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exi
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
 if (JSON.stringify(browserFiles) !== JSON.stringify(expectedBrowserFiles)) process.exit(1);
 if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
-if (moduleFixture.modules.length !== 174 || platformModules.length !== 35) process.exit(1);
+if (moduleFixture.modules.length !== 174 || platformModules.length !== 36) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -481,55 +481,15 @@ if (!browserSources['browser-print.js'].includes('windowObject.print')) process.
 if (/afterprint|restorePreview|markdown-body/.test(browserSources['browser-print.js'])) process.exit(1);
 if (!browserSources['browser-file-reader.js'].includes('BROWSER_FILE_READ_CANCELLED')) process.exit(1);
 if (/showToast|newDocument|insertImageMarkdown|loadTextContentAsDocument/.test(browserSources['browser-file-reader.js'])) process.exit(1);
-if (!legacyRuntimeSource.includes("from '../platform/index.js'")) process.exit(1);
-if (!legacyRuntimeSource.includes('isAvailable = capabilities.desktop.invoke')) process.exit(1);
-if (legacyRuntimeSource.includes('__TAURI_INTERNALS__')) process.exit(1);
-if (!desktopSources['invoke-client.js'].includes("@tauri-apps/api/core")) process.exit(1);
-if (!desktopSources['invoke-client.js'].includes('throw error')) process.exit(1);
-if (!desktopSources['dialog-client.js'].includes("@tauri-apps/plugin-dialog")) process.exit(1);
-if (!desktopSources['dialog-client.js'].includes('normalizeSaveFileName')) process.exit(1);
-if (!desktopSources['dialog-client.js'].includes('joinNativePath')) process.exit(1);
-if (!desktopSources['document-store-client.js'].includes("'save_document_state'")) process.exit(1);
-if (!desktopSources['document-store-client.js'].includes("'read_document_chunk'")) process.exit(1);
-if (!desktopSources['document-store-client.js'].includes("'delete_document_state'")) process.exit(1);
-if (/sessions|loadSequence|VERSION_MISMATCH|saveSnapshotInChunks|DOCUMENT_LOAD_CANCELLED/.test(desktopSources['document-store-client.js'])) process.exit(1);
-if (!desktopSources['drag-drop-client.js'].includes("@tauri-apps/api/webview")) process.exit(1);
-if (!desktopSources['drag-drop-client.js'].includes('normalizeDragDropEvent')) process.exit(1);
-if (!desktopSources['drag-drop-client.js'].includes('activeDisposers')) process.exit(1);
-if (/readDroppedFile|dropped\.kind|\.markdown|\.txt|image\//i.test(desktopSources['drag-drop-client.js'])) process.exit(1);
-if (!desktopSources['file-system-client.js'].includes("'read_dropped_file'")) process.exit(1);
-if (!desktopSources['file-system-client.js'].includes("'write_local_binary_file'")) process.exit(1);
-if (!desktopSources['file-system-client.js'].includes('bytesToBase64')) process.exit(1);
-if (/showToast|loadTextContentAsDocument|insertImageMarkdown|newDocument|createDocument|dropped\.kind/.test(desktopSources['file-system-client.js'])) process.exit(1);
-if (/image\/(?:png|jpeg|gif|webp|svg\+xml)/.test(desktopSources['file-system-client.js'])) process.exit(1);
-if (!desktopSources['link-client.js'].includes("'open_external_url'")) process.exit(1);
-if (/SUPPORTED_SCHEMES|javascript:|file:\/\//.test(desktopSources['link-client.js'])) process.exit(1);
-if (!desktopSources['performance-log-client.js'].includes("'write_performance_logs'")) process.exit(1);
-if (!desktopSources['performance-log-client.js'].includes('record: false')) process.exit(1);
-if (/MAX_QUEUE|aggregates|diagnosticStates|flushInProgress|queue\.unshift/.test(desktopSources['performance-log-client.js'])) process.exit(1);
-if (!desktopSources['web-fetch-client.js'].includes("'fetch_url'")) process.exit(1);
-if (/normalize_url|reqwest|redirect\(|status\.is_success|Response body is empty/.test(desktopSources['web-fetch-client.js'])) process.exit(1);
-if (!desktopSources['window-client.js'].includes("@tauri-apps/api/window")) process.exit(1);
-if (!desktopSources['window-client.js'].includes('activeDisposers')) process.exit(1);
-if (legacyRuntimeSource.includes("@tauri-apps/api/core") || legacyRuntimeSource.includes('invokeMeasured')) process.exit(1);
-if (legacyRuntimeSource.includes('@tauri-apps/plugin-dialog') || legacyRuntimeSource.includes('showOpenDialog')) process.exit(1);
-if (legacyRuntimeSource.includes('@tauri-apps/api/webview') || legacyRuntimeSource.includes('getCurrentWebview')) process.exit(1);
-if (legacyRuntimeSource.includes('@tauri-apps/api/window') || legacyRuntimeSource.includes('getCurrentWindow')) process.exit(1);
-if ((legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length !== 0) process.exit(1);
-if ((legacyRuntimeSource.match(/dialogClient\.(?:openFile|openDirectory|saveFile|confirm)\(/g) || []).length !== 4) process.exit(1);
-if ((legacyRuntimeSource.match(/documentStoreClient\.(?:save|beginSnapshotUpload|appendSnapshotChunk|commitSnapshotUpload|abortSnapshotUpload|load|loadManifest|readChunk|search|remove)\(/g) || []).length !== 10) process.exit(1);
-if ((legacyRuntimeSource.match(/dragDropClient\.subscribe\(/g) || []).length !== 1) process.exit(1);
-if ((legacyRuntimeSource.match(/fileSystemClient\.(?:readDroppedFile|listTextFileTree|readLocalImage|getInitialFilePath|writeTextFile|writeBinaryFile)\(/g) || []).length !== 6) process.exit(1);
-if ((legacyRuntimeSource.match(/linkClient\.openExternal\(/g) || []).length !== 1) process.exit(1);
-if ((legacyRuntimeSource.match(/performanceLogClient\.writePerformance\(/g) || []).length !== 1) process.exit(1);
-if ((legacyRuntimeSource.match(/webFetchClient\.fetchUrl\(/g) || []).length !== 1) process.exit(1);
-if ((legacyRuntimeSource.match(/windowClient\.(?:subscribeCloseRequest|startDrag|minimize|toggleMaximize|isMaximized|subscribeResize|requestClose|forceClose)\(/g) || []).length !== 8) process.exit(1);
-if (!legacyRuntimeSource.includes('createDocumentStoreClient({ invoke: invokeClient.invoke })')) process.exit(1);
-if (!legacyRuntimeSource.includes('createFileSystemClient({ invoke: invokeClient.invoke })')) process.exit(1);
-if (!legacyRuntimeSource.includes('createLinkClient({ invoke: invokeClient.invoke })')) process.exit(1);
-if (!legacyRuntimeSource.includes('createPerformanceLogClient({ invoke: invokeClient.invoke })')) process.exit(1);
-if (!legacyRuntimeSource.includes('createWebFetchClient({ invoke: invokeClient.invoke })')) process.exit(1);
-if (legacyRuntimeSource.includes('function bytesToBase64')) process.exit(1);
+if (!desktopPlatformSource.includes('createInvokeClient')) process.exit(1);
+if (!desktopPlatformSource.includes('createFileSystemClient')) process.exit(1);
+if (!desktopPlatformSource.includes('createDocumentStoreClient')) process.exit(1);
+if (!desktopPlatformSource.includes('createWebFetchClient')) process.exit(1);
+if (!desktopPlatformSource.includes('createLinkClient')) process.exit(1);
+if (!desktopPlatformSource.includes('createPerformanceLogClient')) process.exit(1);
+if (!desktopPlatformSource.includes('createWindowClient')) process.exit(1);
+if (!mainSource.includes('createPlatform({') || !mainSource.includes('mountClassicPlatformPort')) process.exit(1);
+if (/markdownEditorNative|window\.markdownEditorPlatform/.test(mainSource)) process.exit(1);
 if (invokeCalls.length !== 1 || invokeCalls[0].operation !== 'load_document_state' || invokeCalls[0].args !== invokeArgs) process.exit(1);
 if (invokeResult.args !== invokeArgs || capturedInvokeError !== invokeError) process.exit(1);
 if (invokeTelemetry.length !== 2 || invokeTelemetry[0].entry.status === 'error' || invokeTelemetry[1].entry.status !== 'error') process.exit(1);
@@ -658,7 +618,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-03-invoke-client-evidence.json`, `${JSON
   scope: 'single-measured-tauri-invoke-client', publicEntry: 'src/platform/index.js',
   implementationFiles: [`${DESKTOP_DIRECTORY}/invoke-client.js`],
   productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
-  commandDelegationCount: (legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length,
+  compositionOwner: 'src/platform/desktop/desktop-platform.js',
   sample: { calls: invokeCalls, telemetry: invokeTelemetry, errorIdentityPreserved: capturedInvokeError === invokeError },
   guarantees: [
     'single-production-owner-of-tauri-core-invoke-import',
@@ -681,7 +641,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-04-dialog-client-evidence.json`, `${JSON
   implementationFiles: [`${DESKTOP_DIRECTORY}/dialog-client.js`],
   productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
   dialogPluginOwners,
-  delegationCount: (legacyRuntimeSource.match(/dialogClient\.(?:openFile|openDirectory|saveFile|confirm)\(/g) || []).length,
+  compositionOwner: 'src/platform/desktop/desktop-platform.js',
   sample: { calls: dialogCalls, results: dialogResults, telemetry: dialogTelemetry },
   guarantees: [
     'single-production-owner-of-tauri-dialog-plugin-import',
@@ -691,7 +651,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-04-dialog-client-evidence.json`, `${JSON
     'save-filename-cleaning-default-path-joining-and-extension-completion-remain-compatible',
     'native-dialog-errors-are-rethrown-with-original-identity',
     'dialog-telemetry-failures-cannot-replace-native-results-or-errors',
-    'legacy-runtime-retains-browser-confirm-and-unavailable-null-fallbacks'
+    'final-platform-callers-preserve-dialog-cancellation-and-browser-confirm-semantics'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -704,7 +664,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-05-window-client-evidence.json`, `${JSON
   implementationFiles: [`${DESKTOP_DIRECTORY}/window-client.js`],
   productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
   windowApiOwners,
-  delegationCount: (legacyRuntimeSource.match(/windowClient\.(?:subscribeCloseRequest|startDrag|minimize|toggleMaximize|isMaximized|subscribeResize|requestClose|forceClose)\(/g) || []).length,
+  compositionOwner: 'src/platform/desktop/desktop-platform.js',
   sample: { calls: windowCalls, disposals: windowDisposals, toggledMaximized, maximized },
   guarantees: [
     'single-production-owner-of-tauri-window-api-import',
@@ -727,7 +687,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-06-drag-drop-client-evidence.json`, `${J
   implementationFiles: [`${DESKTOP_DIRECTORY}/drag-drop-client.js`],
   productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
   webviewApiOwners,
-  delegationCount: (legacyRuntimeSource.match(/dragDropClient\.subscribe\(/g) || []).length,
+  compositionOwner: 'src/platform/desktop/desktop-platform.js',
   sample: { calls: dragDropCalls.length, events: normalizedDragDropEvents, disposals: dragDropDisposals },
   guarantees: [
     'single-production-owner-of-tauri-webview-drag-drop-import',
@@ -737,7 +697,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-06-drag-drop-client-evidence.json`, `${J
     'client-destroy-disposes-active-subscriptions-in-reverse-order',
     'late-subscription-results-are-disposed-after-client-destroy',
     'native-registration-cleanup-and-handler-errors-retain-original-semantics',
-    'legacy-runtime-preserves-the-existing-payload-wrapper-and-unavailable-null-fallback'
+    'final-events-caller-consumes-normalized-drag-drop-platform-events'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -749,7 +709,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-07-file-system-client-evidence.json`, `$
   publicEntry: 'src/platform/index.js',
   implementationFiles: [`${DESKTOP_DIRECTORY}/file-system-client.js`],
   productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
-  delegationCount: (legacyRuntimeSource.match(/fileSystemClient\.(?:readDroppedFile|listTextFileTree|readLocalImage|getInitialFilePath|writeTextFile|writeBinaryFile)\(/g) || []).length,
+  compositionOwner: 'src/platform/desktop/desktop-platform.js',
   sample: { calls: fileSystemCalls, results: fileSystemResults },
   guarantees: [
     'exactly-six-existing-rust-local-file-commands-are-mapped',
@@ -759,7 +719,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-07-file-system-client-evidence.json`, `$
     'rust-remains-the-authority-for-native-path-resolution-file-kind-rules-and-image-mime-generation',
     'file-system-client-does-not-create-documents-insert-images-or-show-toasts',
     'native-file-command-results-and-error-identity-remain-unchanged',
-    'legacy-runtime-preserves-six-existing-file-methods-and-runtime-unavailable-fallbacks'
+    'final-files-port-preserves-six-runtime-neutral-file-responsibilities'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -771,7 +731,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-08-document-store-client-evidence.json`,
   publicEntry: 'src/platform/index.js',
   implementationFiles: [`${DESKTOP_DIRECTORY}/document-store-client.js`],
   productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
-  delegationCount: (legacyRuntimeSource.match(/documentStoreClient\.(?:save|beginSnapshotUpload|appendSnapshotChunk|commitSnapshotUpload|abortSnapshotUpload|load|loadManifest|readChunk|search|remove)\(/g) || []).length,
+  compositionOwner: 'src/platform/desktop/desktop-platform.js',
   sample: { calls: documentStoreCalls, results: documentStoreResults },
   guarantees: [
     'exactly-ten-existing-rust-document-store-commands-are-mapped',
@@ -780,7 +740,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-08-document-store-client-evidence.json`,
     'chunk-read-default-and-minimum-byte-normalization-remain-compatible',
     'rust-document-store-results-null-values-and-errors-pass-through-without-client-interpretation',
     'native-document-store-retains-session-version-mismatch-retry-load-cancellation-and-snapshot-policy',
-    'legacy-runtime-preserves-ten-existing-document-store-methods-and-unavailable-runtime-fallbacks'
+    'final-document-store-port-preserves-ten-versioned-storage-responsibilities'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -797,7 +757,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-09-web-link-log-clients-evidence.json`, 
   ],
   productionModuleCount: moduleFixture.modules.length,
   platformModuleCount: platformModules.length,
-  directLegacyInvokeCount: (legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length,
+  legacyFacadeDeleted: true,
   samples: {
     webFetch: { calls: webFetchCalls, result: webFetchEvidenceResult },
     link: { calls: linkCalls, result: linkEvidenceResult },
@@ -811,8 +771,8 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-09-web-link-log-clients-evidence.json`, 
     'rust-external-link-command-remains-authority-for-supported-schemes-and-os-launch',
     'performance-log-client-passes-the-original-entry-array-and-disables-recursive-invoke-telemetry',
     'performance-runtime-retains-queue-aggregation-diagnostics-retry-and-flush-policy',
-    'legacy-runtime-preserves-existing-web-link-log-method-names-and-unavailable-runtime-fallbacks',
-    'legacy-runtime-has-zero-direct-invoke-calls-after-the-cutover'
+    'final-web-link-log-callers-consume-three-separate-platform-ports',
+    'legacy-runtime-facade-is-deleted-after-the-final-cutover'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -849,3 +809,4 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-10-browser-adapters-evidence.json`, `${J
 }, null, 2)}\n`, 'utf8');
 
 await import('./record-create-platform-evidence.mjs');
+await import('./record-platform-cutover-evidence.mjs');

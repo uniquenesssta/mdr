@@ -49,8 +49,9 @@ function createSession(documentId) {
 }
 
 export class NativeDocumentStore {
-  constructor(nativeApi = window.markdownEditorNative) {
-    this.nativeApi = nativeApi;
+  constructor({ documentStore, available = false } = {}) {
+    this.documentStore = documentStore;
+    this.nativeAvailable = Boolean(available);
     this.sessions = new Map();
     this.activeDocumentId = '';
     this.listeners = new Set();
@@ -74,14 +75,14 @@ export class NativeDocumentStore {
   }
 
   get available() {
-    return Boolean(this.nativeApi?.isAvailable && this.nativeApi?.saveDocumentState);
+    return Boolean(this.nativeAvailable && this.documentStore?.save);
   }
 
   get supportsChunkedSnapshots() {
     return Boolean(
-      this.nativeApi?.beginDocumentSnapshotUpload
-      && this.nativeApi?.appendDocumentSnapshotChunk
-      && this.nativeApi?.commitDocumentSnapshotUpload
+      this.documentStore?.beginSnapshotUpload
+      && this.documentStore?.appendSnapshotChunk
+      && this.documentStore?.commitSnapshotUpload
     );
   }
 
@@ -128,11 +129,11 @@ export class NativeDocumentStore {
       if (loadToken !== this.loadSequence) throw new Error('DOCUMENT_LOAD_CANCELLED');
     };
     const supportsSegmentedLoad = Boolean(
-      this.nativeApi?.loadDocumentManifest
-      && this.nativeApi?.readDocumentChunk
+      this.documentStore?.loadManifest
+      && this.documentStore?.readChunk
     );
     if (!supportsSegmentedLoad) {
-      const loaded = await this.nativeApi.loadDocumentState(documentId);
+      const loaded = await this.documentStore.load(documentId);
       ensureCurrentLoad();
       if (!loaded) return null;
       const session = this.getSession(documentId);
@@ -143,7 +144,7 @@ export class NativeDocumentStore {
 
     this.emit({ state: 'loading-index', documentId, progress: 0 });
     try {
-      const manifest = await this.nativeApi.loadDocumentManifest(documentId);
+      const manifest = await this.documentStore.loadManifest(documentId);
       ensureCurrentLoad();
       if (!manifest) return null;
       this.emit({ state: 'manifest', documentId, progress: 0, manifest });
@@ -151,7 +152,7 @@ export class NativeDocumentStore {
       const totalBytes = Math.max(0, Number(manifest.contentBytes) || 0);
       let byteOffset = 0;
       while (byteOffset < totalBytes) {
-        const chunk = await this.nativeApi.readDocumentChunk(documentId, byteOffset, DOCUMENT_CHUNK_BYTES);
+        const chunk = await this.documentStore.readChunk(documentId, byteOffset, DOCUMENT_CHUNK_BYTES);
         ensureCurrentLoad();
         if (!chunk || Number(chunk.nextByteOffset) <= byteOffset) {
           throw new Error('后台文档分段读取未前进');
@@ -194,13 +195,13 @@ export class NativeDocumentStore {
 
   async saveSnapshotInChunks(session, request, content) {
     const uploadId = `upload_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
-    await this.nativeApi.beginDocumentSnapshotUpload(session.document.id, uploadId);
+    await this.documentStore.beginSnapshotUpload(session.document.id, uploadId);
     try {
       let offset = 0;
       let chunkIndex = 0;
       while (offset < content.length) {
         const end = getSafeSnapshotChunkEnd(content, offset);
-        await this.nativeApi.appendDocumentSnapshotChunk(
+        await this.documentStore.appendSnapshotChunk(
           session.document.id,
           uploadId,
           content.slice(offset, end),
@@ -220,18 +221,18 @@ export class NativeDocumentStore {
         });
         await new Promise(resolve => setTimeout(resolve, 0));
       }
-      return await this.nativeApi.commitDocumentSnapshotUpload(request, uploadId);
+      return await this.documentStore.commitSnapshotUpload(request, uploadId);
     } catch (error) {
       try {
-        await this.nativeApi.abortDocumentSnapshotUpload?.(session.document.id, uploadId);
+        await this.documentStore.abortSnapshotUpload?.(session.document.id, uploadId);
       } catch (_) {}
       throw error;
     }
   }
 
   async search(documentId, query, from = 0, wrap = true) {
-    if (!this.available || !documentId || !query || !this.nativeApi?.searchDocumentState) return null;
-    return this.nativeApi.searchDocumentState({
+    if (!this.available || !documentId || !query || !this.documentStore?.search) return null;
+    return this.documentStore.search({
       documentId,
       query: String(query),
       from: Math.max(0, Number(from) || 0),
@@ -323,7 +324,7 @@ export class NativeDocumentStore {
         try {
           response = useChunkedSnapshot
             ? await this.saveSnapshotInChunks(session, request, snapshotContent)
-            : await this.nativeApi.saveDocumentState(request);
+            : await this.documentStore.save(request);
         } catch (error) {
           const message = error?.message || String(error);
           if (!mustReset && message.includes('VERSION_MISMATCH')) {
@@ -377,10 +378,10 @@ export class NativeDocumentStore {
     this.sessions.delete(documentId);
     if (this.activeDocumentId === documentId) this.activeDocumentId = '';
     if (!this.available || !documentId) return;
-    await this.nativeApi.deleteDocumentState(documentId);
+    await this.documentStore.remove(documentId);
   }
 }
 
-export function createNativeDocumentStore() {
-  return new NativeDocumentStore();
+export function createNativeDocumentStore(options = {}) {
+  return new NativeDocumentStore(options);
 }

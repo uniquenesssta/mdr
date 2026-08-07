@@ -11,6 +11,16 @@ const DEFAULT_DIAGNOSTIC_INTERVAL_MS = 5000;
 let flushInProgress = false;
 let lastFlushError = '';
 let logPath = '';
+let platformLogs = null;
+let platformLogsEnabled = false;
+
+export function configurePerformancePlatform({ logs, enabled = false } = {}) {
+  if (!logs || typeof logs.writePerformance !== 'function') {
+    throw new TypeError('performance runtime requires a logs port');
+  }
+  platformLogs = logs;
+  platformLogsEnabled = Boolean(enabled);
+}
 
 function timestampMs() {
   return Date.now();
@@ -162,11 +172,11 @@ function drainAggregates() {
 }
 
 async function flush() {
-  if (flushInProgress || !queue.length || !window.markdownEditorNative?.isAvailable) return;
+  if (flushInProgress || !queue.length || !platformLogsEnabled || !platformLogs) return;
   flushInProgress = true;
   const batch = queue.splice(0, Math.min(queue.length, 250));
   try {
-    logPath = await window.markdownEditorNative.writePerformanceLogs(batch);
+    logPath = await platformLogs.writePerformance(batch);
     lastFlushError = '';
   } catch (error) {
     queue.unshift(...batch);

@@ -61,9 +61,11 @@ test('invalid link client dependencies fail at the adapter boundary', () => {
   assert.throws(() => createLinkClient({ invoke: null }), /requires an invoke function/);
 });
 
-test('legacy runtime delegates openExternalUrl through the dedicated client', async () => {
-  const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  assert.match(source, /createLinkClient\(\{ invoke: invokeClient\.invoke \}\)/);
-  assert.match(source, /return linkClient\.openExternal\(url\)/);
-  assert.doesNotMatch(source, /invokeClient\.invoke\('open_external_url'/);
+test('desktop platform maps LinksPort through the dedicated client and link preview consumes it by injection', async () => {
+  const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
+  const preview = await readFile(new URL('../../../src/runtime/link-preview.js', import.meta.url), 'utf8');
+  assert.match(desktop, /links: linkClient/);
+  assert.match(preview, /platformLinks\.openExternal\(value\)/);
+  assert.doesNotMatch(preview, /markdownEditorNative|window\.open/);
 });
+

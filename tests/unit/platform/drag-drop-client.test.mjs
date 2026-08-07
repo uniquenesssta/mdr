@@ -160,21 +160,25 @@ test('the drag/drop client is the sole production owner of the Tauri webview imp
   assert.match(publicEntry, /desktop\/drag-drop-client\.js/);
 });
 
-test('legacy runtime delegates drag/drop registration while preserving the compatibility callback shape', async () => {
-  const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /@tauri-apps\/api\/webview|getCurrentWebview/);
-  assert.match(source, /createDragDropClient\(/);
-  assert.match(source, /return dragDropClient\.subscribe\(event => handler\(\{ payload: event \}\)\)/);
-  assert.match(source, /if \(!isAvailable\) return null;[\s\S]*dragDropClient\.subscribe/);
+test('desktop platform exposes DragDropPort directly and events consumes normalized Platform events', async () => {
+  const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
+  const events = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
+  assert.match(desktop, /createDragDropClient\(/);
+  assert.match(desktop, /dragDrop: dragDropClient/);
+  assert.match(events, /call\('dragDrop', 'subscribe'/);
+  assert.match(events, /payload\?\.type === 'over'/);
+  assert.match(events, /payload\?\.type === 'drop'/);
+  assert.doesNotMatch(events, /markdownEditorNative/);
 });
 
 test('file interpretation remains in the application layer, not the DragDrop client', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/drag-drop-client.js', import.meta.url), 'utf8');
   const eventsSource = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(clientSource, /read_dropped_file|readDroppedFile|dropped\.kind|allowedText/);
-  assert.match(eventsSource, /handleNativeDroppedPath/);
-  assert.match(eventsSource, /dropped\.kind === 'text'/);
-  assert.match(eventsSource, /dropped\.kind === 'image'/);
+  assert.doesNotMatch(clientSource, /read_dropped_file|readDroppedFile|allowedText|\.markdown|image\//i);
+  assert.match(eventsSource, /\['md', 'markdown', 'txt'\]/);
+  assert.match(eventsSource, /\['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'\]/);
+  assert.match(eventsSource, /call\('files', 'readText'/);
+  assert.match(eventsSource, /call\('files', 'readImage'/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.6 after window and before later adapters', async () => {
@@ -189,11 +193,12 @@ test('Stage 3 verification keeps Atomic Task 3.6 after window and before later a
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
   const createPlatformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
+  const cutoverIndex = workflow.indexOf('Verify Atomic Task 3.12 final Platform cutover');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(windowIndex >= 0 && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && architectureIndex > createPlatformIndex);
+  assert.ok(windowIndex >= 0 && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && cutoverIndex > createPlatformIndex && architectureIndex > cutoverIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/drag-drop-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/file-system-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/document-store-client\.test\.mjs/);
-  assert.match(workflow, /03-11-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
+  assert.match(workflow, /03-12-architecture-scan\.json/);
+  assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });

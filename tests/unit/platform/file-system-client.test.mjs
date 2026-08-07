@@ -163,8 +163,8 @@ test('the FileSystem client contains command mapping only and does not own docum
 
   assert.doesNotMatch(clientSource, /showToast|loadTextContentAsDocument|insertImageMarkdown|newDocument|createDocument|dropped\.kind/);
   assert.doesNotMatch(clientSource, /image\/png|image\/jpeg|image\/gif|image\/webp|image\/svg\+xml/);
-  assert.match(eventSource, /dropped\.kind === 'text'/);
-  assert.match(eventSource, /dropped\.kind === 'image'/);
+  assert.match(eventSource, /call\('files', 'readText'/);
+  assert.match(eventSource, /call\('files', 'readImage'/);
   assert.match(eventSource, /showToast/);
   assert.match(exportSource, /showToast/);
   assert.match(rustSource, /fn image_mime/);
@@ -172,26 +172,16 @@ test('the FileSystem client contains command mapping only and does not own docum
   assert.match(rustSource, /"svg" => Some\("image\/svg\+xml"\)/);
 });
 
-test('legacy runtime delegates all six file commands through the public FileSystem client', async () => {
-  const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
+test('desktop platform maps the six FilesPort responsibilities through the dedicated FileSystem client', async () => {
+  const source = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
   assert.match(source, /createFileSystemClient\(\{ invoke: invokeClient\.invoke \}\)/);
-  assert.match(source, /return fileSystemClient\.readDroppedFile\(path\)/);
-  assert.match(source, /return fileSystemClient\.listTextFileTree\(documentPath\)/);
-  assert.match(source, /return fileSystemClient\.readLocalImage\(source, documentPath\)/);
-  assert.match(source, /return fileSystemClient\.getInitialFilePath\(\)/);
-  assert.match(source, /return fileSystemClient\.writeTextFile\(path, content, details\)/);
-  assert.match(source, /return fileSystemClient\.writeBinaryFile\(path, content, details\)/);
-  assert.doesNotMatch(source, /function bytesToBase64/);
-  for (const command of [
-    'read_dropped_file',
-    'list_text_file_tree',
-    'read_local_image',
-    'initial_file_path',
-    'write_local_text_file',
-    'write_local_binary_file'
-  ]) {
-    assert.doesNotMatch(source, new RegExp(`invokeClient\\.invoke\\('${command}'`));
-  }
+  assert.match(source, /fileSystemClient\.readDroppedFile\(path\)/);
+  assert.match(source, /fileSystemClient\.listTextFileTree\(documentPath\)/);
+  assert.match(source, /fileSystemClient\.readLocalImage\(source, documentPath\)/);
+  assert.match(source, /fileSystemClient\.getInitialFilePath\(\)/);
+  assert.match(source, /fileSystemClient\.writeTextFile\(path, content, details\)/);
+  assert.match(source, /fileSystemClient\.writeBinaryFile\(path, content, details\)/);
+  assert.doesNotMatch(source, /markdownEditorNative/);
 });
 
 test('FileSystem client is exported through the platform public entry and registered in production ownership', async () => {
@@ -216,10 +206,11 @@ test('Stage 3 verification runs Atomic Task 3.7 after drag-drop and before later
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
   const createPlatformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
+  const cutoverIndex = workflow.indexOf('Verify Atomic Task 3.12 final Platform cutover');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(dragDropIndex >= 0 && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && architectureIndex > createPlatformIndex);
+  assert.ok(dragDropIndex >= 0 && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && cutoverIndex > createPlatformIndex && architectureIndex > cutoverIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/file-system-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/document-store-client\.test\.mjs/);
-  assert.match(workflow, /03-11-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
+  assert.match(workflow, /03-12-architecture-scan\.json/);
+  assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });

@@ -21,6 +21,14 @@ let focusScope = null;
 let visibility = null;
 let focusGeneration = 0;
 const documentEvents = createEventScope();
+let platformLinks = null;
+
+export function configureLinkPreviewPlatform({ links } = {}) {
+  if (!links || typeof links.openExternal !== 'function') {
+    throw new TypeError('link preview requires a links port');
+  }
+  platformLinks = links;
+}
 
 function report(event, details = {}, status = 'ok') {
   window.markdownEditorPerf?.record?.(event, {
@@ -67,13 +75,8 @@ async function openInSystemBrowser(url) {
     inputLength: value.length
   });
 
-  if (window.markdownEditorNative?.isAvailable) {
-    await window.markdownEditorNative.openExternalUrl(value);
-    return;
-  }
-
-  const opened = window.open(value, '_blank', 'noopener,noreferrer');
-  if (!opened) throw new Error('浏览器阻止了链接打开');
+  if (!platformLinks) throw new Error('链接平台能力尚未初始化');
+  await platformLinks.openExternal(value);
 }
 
 function createButton(className, label, title) {

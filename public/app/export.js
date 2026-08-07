@@ -1,3 +1,4 @@
+    const exportPlatformPort = document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort;
     let saveTimer;
     function autoSave() {
       clearTimeout(saveTimer);
@@ -199,10 +200,10 @@
     }
 
     async function exportTextContent(content, preferredName, options) {
-      if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.chooseSavePath === 'function') {
-        const path = await window.markdownEditorNative.chooseSavePath(preferredName, options);
+      if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
+        const path = await exportPlatformPort.call('dialogs', 'saveFile', preferredName, options);
         if (!path) return null;
-        await window.markdownEditorNative.writeTextFile(path, content, { extension: options.extension, reason: 'export' });
+        await exportPlatformPort.call('files', 'writeText', path, content, { extension: options.extension, reason: 'export' });
         return path;
       }
       return false;
@@ -244,8 +245,8 @@
 
     async function saveMarkdownWithPicker(contentFactory, preferredName, snapshotReason = 'save-as-markdown') {
       const normalizedName = normalizeDocumentTitle(preferredName || t('filenameDefault'));
-      if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.chooseSavePath === 'function') {
-        const path = await window.markdownEditorNative.chooseSavePath(normalizedName, {
+      if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
+        const path = await exportPlatformPort.call('dialogs', 'saveFile', normalizedName, {
           title: '另存为 Markdown',
           extension: 'md',
           extensions: ['md', 'markdown'],
@@ -253,7 +254,7 @@
         });
         if (!path) return false;
         const content = typeof contentFactory === 'function' ? await contentFactory() : String(contentFactory ?? '');
-        await window.markdownEditorNative.writeTextFile(path, content, { extension: 'md', reason: snapshotReason });
+        await exportPlatformPort.call('files', 'writeText', path, content, { extension: 'md', reason: snapshotReason });
         return path;
       }
       const content = typeof contentFactory === 'function' ? await contentFactory() : String(contentFactory ?? '');
@@ -290,8 +291,8 @@
         if (!doc) throw new Error('当前没有可保存的文档');
         const content = documentModel?.createSnapshot?.('save-current-file') ?? editor.value;
 
-        if (window.markdownEditorNative?.isAvailable && doc.filePath) {
-          await window.markdownEditorNative.writeTextFile(doc.filePath, content, {
+        if (exportPlatformPort?.supports('desktop.fileSystem') && doc.filePath) {
+          await exportPlatformPort.call('files', 'writeText', doc.filePath, content, {
             extension: doc.title?.split('.').pop() || 'md',
             reason: 'save-current-file'
           });
@@ -786,15 +787,15 @@ ${'</scr' + 'ipt>'}
       name = name.replace(/\.(md|markdown|txt|html|doc)$/i, '') + '.png';
 
       try {
-        if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.chooseSavePath === 'function') {
-          const path = await window.markdownEditorNative.chooseSavePath(name, getExportSaveOptions(
+        if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
+          const path = await exportPlatformPort.call('dialogs', 'saveFile', name, getExportSaveOptions(
             '导出图片',
             'png',
             'PNG 图片',
             ['png']
           ));
           if (!path) return;
-          await window.markdownEditorNative.writeBinaryFile(path, dataUrlToBytes(currentImageDataUrl), { extension: 'png' });
+          await exportPlatformPort.call('files', 'writeBinary', path, dataUrlToBytes(currentImageDataUrl), { extension: 'png' });
         } else {
           const a = document.createElement('a');
           a.href = currentImageDataUrl;

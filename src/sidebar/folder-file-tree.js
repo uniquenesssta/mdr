@@ -89,7 +89,11 @@ export function createFolderFileTreeController(options = {}) {
   const rootLabel = options.rootLabel || document.getElementById('folder-file-tree-root');
   const summary = options.summary || document.getElementById('folder-file-tree-summary');
   const refreshButton = options.refreshButton || document.getElementById('folder-file-tree-refresh');
-  const nativeApi = options.nativeApi || window.markdownEditorNative;
+  const files = options.files || null;
+  const desktopAvailable = Boolean(options.available);
+  if (desktopAvailable && typeof files?.listTextTree !== 'function') {
+    throw new TypeError('folder file tree requires files.listTextTree() when desktop file access is enabled');
+  }
   const getCurrentContext = typeof options.getCurrentContext === 'function'
     ? options.getCurrentContext
     : () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {};
@@ -132,7 +136,7 @@ export function createFolderFileTreeController(options = {}) {
         summary.textContent = parts.join(' · ');
       }
     }
-    if (refreshButton) refreshButton.disabled = loading || !currentDocumentPath || !nativeApi?.isAvailable;
+    if (refreshButton) refreshButton.disabled = loading || !currentDocumentPath || !desktopAvailable;
   }
 
   function setDirectoryExpanded(path, expanded) {
@@ -232,7 +236,7 @@ export function createFolderFileTreeController(options = {}) {
     updateHeader();
     if (!list) return;
     if (!currentTree) {
-      if (!nativeApi?.isAvailable) renderMessage('文件树仅在桌面版中可用');
+      if (!desktopAvailable) renderMessage('文件树仅在桌面版中可用');
       else if (!currentDocumentPath) renderMessage('打开或保存本地 Markdown/TXT 文件后显示同目录文件树');
       else renderMessage('当前文件夹中没有可读取的 Markdown 或 TXT 文件');
       return;
@@ -253,7 +257,7 @@ export function createFolderFileTreeController(options = {}) {
     const documentPath = String(context.filePath || '').trim();
     currentDocumentPath = documentPath;
     const directoryPath = getNativeParentPath(documentPath);
-    if (!nativeApi?.isAvailable || typeof nativeApi.listTextFileTree !== 'function') {
+    if (!desktopAvailable || typeof files?.listTextTree !== 'function') {
       currentTree = null;
       currentDirectoryPath = '';
       renderTree();
@@ -277,7 +281,7 @@ export function createFolderFileTreeController(options = {}) {
     renderMessage('正在读取同目录文件…', 'sidebar-empty folder-tree-loading');
     const startedAt = performance.now();
     try {
-      const result = await nativeApi.listTextFileTree(documentPath);
+      const result = await files.listTextTree(documentPath);
       if (sequence !== loadingSequence) return null;
       currentTree = normalizeFolderFileTreeResult(result);
       currentDirectoryPath = currentTree.rootPath || directoryPath;
