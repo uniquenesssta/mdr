@@ -14,6 +14,7 @@ const binaryPath = resolve(
   process.env.MARKDOWN_EDITOR_BINARY || 'src-tauri/target/debug/markdown-editor.exe'
 );
 const artifactDirectory = resolve('artifacts/stage-03/windows-window');
+const TITLE_BAR_EXCLUDED_SELECTOR = '.menu-dropdown, .window-controls, button, input, select, textarea, a, [role="button"]';
 
 function pause(milliseconds) {
   return new Promise(resolvePromise => setTimeout(resolvePromise, milliseconds));
@@ -57,6 +58,45 @@ async function withSession(label, port, run) {
 function movedEnough(before, after, threshold = 20) {
   return Math.abs(after.left - before.left) >= threshold
     || Math.abs(after.top - before.top) >= threshold;
+}
+
+async function resolveTitleBarDragTarget(browser) {
+  const target = await browser.execute(excludedSelector => {
+    const bar = document.querySelector('.menu-bar');
+    if (!bar) throw new Error('Menu bar was not found.');
+    const rect = bar.getBoundingClientRect();
+    const y = Math.round(rect.top + rect.height / 2);
+
+    for (let x = Math.round(rect.right - 180); x >= Math.round(rect.left + 180); x -= 20) {
+      const candidate = document.elementFromPoint(x, y);
+      const belongsToBar = Boolean(candidate && (candidate === bar || bar.contains(candidate)));
+      if (!belongsToBar || candidate.closest(excludedSelector)) continue;
+      return {
+        x,
+        y,
+        tagName: candidate.tagName,
+        id: candidate.id || '',
+        className: typeof candidate.className === 'string' ? candidate.className : ''
+      };
+    }
+    throw new Error('No safe title-bar drag point was found inside the menu bar.');
+  }, TITLE_BAR_EXCLUDED_SELECTOR);
+
+  const validation = await browser.execute((point, excludedSelector) => {
+    const bar = document.querySelector('.menu-bar');
+    const candidate = document.elementFromPoint(point.x, point.y);
+    return {
+      belongsToBar: Boolean(bar && candidate && (candidate === bar || bar.contains(candidate))),
+      excluded: Boolean(candidate?.closest(excludedSelector)),
+      tagName: candidate?.tagName || '',
+      id: candidate?.id || '',
+      className: typeof candidate?.className === 'string' ? candidate.className : ''
+    };
+  }, { x: target.x, y: target.y }, TITLE_BAR_EXCLUDED_SELECTOR);
+
+  assert.equal(validation.belongsToBar, true, 'Resolved drag point must belong to .menu-bar.');
+  assert.equal(validation.excluded, false, 'Resolved drag point must not target an excluded control.');
+  return { ...target, validation };
 }
 
 const evidence = createWindowEvidence({
@@ -107,6 +147,7 @@ try {
           disposedResizeEvents: null,
           resizeDisposer: null,
           originalStartWindowDragging: null,
+          menuBarMouseDownEvents: 0,
           dragCalls: 0,
           originalCloseWindow: null,
           closeCommitCalls: 0
@@ -155,23 +196,17 @@ try {
         true
       );
 
-      const dragPoint = await browser.execute(() => {
-        const bar = document.querySelector('.menu-bar');
-        if (!bar) throw new Error('Menu bar was not found.');
-        const rect = bar.getBoundingClientRect();
-        const excluded = '.menu-dropdown, .window-controls, button, input, select, textarea, a, [role="button"]';
-        const y = Math.round(rect.top + rect.height / 2);
-
-        for (let x = Math.round(rect.right - 180); x >= Math.round(rect.left + 180); x -= 20) {
-          const target = document.elementFromPoint(x, y);
-          if (target && !target.closest(excluded)) return { x, y };
-        }
-        throw new Error('No safe title-bar drag point was found.');
-      });
+      const dragTarget = await resolveTitleBarDragTarget(browser);
+      const dragPoint = { x: dragTarget.x, y: dragTarget.y };
 
       await browser.execute(() => {
         const state = window.__windowsNativeAutomation;
         const bridge = window.markdownEditorNative;
+        const bar = document.querySelector('.menu-bar');
+        if (!bar) throw new Error('Menu bar was not found while installing drag instrumentation.');
+        bar.addEventListener('mousedown', event => {
+          if (event.buttons === 1) state.menuBarMouseDownEvents += 1;
+        });
         state.originalStartWindowDragging = bridge.startWindowDragging;
         bridge.startWindowDragging = async (...args) => {
           state.dragCalls += 1;
@@ -186,6 +221,14 @@ try {
         durationMs: 500
       });
       await browser.waitUntil(
+        async () => (await browser.execute(() => window.__windowsNativeAutomation.menuBarMouseDownEvents)) > 0,
+        {
+          timeout: 5_000,
+          interval: 100,
+          timeoutMsg: 'Title-bar pointer input did not dispatch mousedown inside .menu-bar.'
+        }
+      );
+      await browser.waitUntil(
         async () => (await browser.execute(() => window.__windowsNativeAutomation.dragCalls)) > 0,
         {
           timeout: 5_000,
@@ -193,8 +236,12 @@ try {
           timeoutMsg: 'Title-bar pointer input did not reach the production drag handler.'
         }
       );
-      const dragCalls = await browser.execute(() => window.__windowsNativeAutomation.dragCalls);
-      assert.equal(dragCalls, 1);
+      const dragInput = await browser.execute(() => ({
+        menuBarMouseDownEvents: window.__windowsNativeAutomation.menuBarMouseDownEvents,
+        dragCalls: window.__windowsNativeAutomation.dragCalls
+      }));
+      assert.equal(dragInput.menuBarMouseDownEvents, 1);
+      assert.equal(dragInput.dragCalls, 1);
       const afterDrag = await waitForWindowSnapshot(snapshot => movedEnough(beforeDrag, snapshot));
       assert.equal(movedEnough(beforeDrag, afterDrag), true);
 
@@ -244,8 +291,9 @@ try {
         resizeAfterDispose,
         minimized,
         afterMinimizeRestore,
+        dragTarget,
         beforeDrag,
-        dragCalls,
+        dragInput,
         afterDrag,
         preventedClose
       };
