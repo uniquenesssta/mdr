@@ -4,5 +4,6 @@ export { detectPlatformEnvironment, PLATFORM_ENVIRONMENTS } from './environment/
 export { createRuntimeCapabilities } from './environment/runtime-capabilities.js';
 export { createDialogClient } from './desktop/dialog-client.js';
 export { createDragDropClient } from './desktop/drag-drop-client.js';
+export { createFileSystemClient } from './desktop/file-system-client.js';
 export { createInvokeClient } from './desktop/invoke-client.js';
 export { createWindowClient } from './desktop/window-client.js';

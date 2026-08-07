@@ -199,9 +199,10 @@ test('Stage 3 verification keeps Atomic Task 3.2 before later platform checks', 
   const dialogIndex = workflow.indexOf('Verify Atomic Task 3.4 dialog client');
   const windowIndex = workflow.indexOf('Verify Atomic Task 3.5 window client');
   const dragDropIndex = workflow.indexOf('Verify Atomic Task 3.6 drag-drop client');
+  const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && architectureIndex > dragDropIndex);
+  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && architectureIndex > fileSystemIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/platform-detection\.test\.mjs/);
-  assert.match(workflow, /03-06-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[7-9]|Atomic Task 3\.1[0-9]/);
+  assert.match(workflow, /03-07-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.[89]|Atomic Task 3\.1[0-9]/);
 });

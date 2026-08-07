@@ -2,4 +2,4 @@
 
 Tauri + Rust 桌面 Markdown 编辑器。完整架构与记录见 [docs/README.md](docs/README.md)。
 
-2026-08-07：Atomic 3.6 DragDrop client 已完成并验收：专项 10/10、架构门禁、Node 42/42、浏览器 10/10 + 12/12、Vite build 与 `npm audit`（0 vulnerabilities）通过。Tauri 拖放归一化与退订已独立，文件类型判断仍在应用层；本任务未修改锁文件。
+2026-08-07：Atomic 3.7 已新增独立 FileSystem client，六个 Rust 文件命令从旧 runtime 直接映射中移出；路径、DroppedFile/图片 MIME、文件树与写入 DTO 语义保持不变，文档创建和 Toast 仍由业务层负责。当前提交待 Stage 3 与全量回归验证。

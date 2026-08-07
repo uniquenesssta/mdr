@@ -1,4 +1,4 @@
-# Atomic Task 3.6 validation node.
+# Atomic Task 3.7 validation node.
 name: Stage 3 Atomic Verification
 
 on:
@@ -48,8 +48,10 @@ jobs:
         run: node --test tests/unit/platform/window-client.test.mjs
       - name: Verify Atomic Task 3.6 drag-drop client
         run: node --test tests/unit/platform/drag-drop-client.test.mjs
+      - name: Verify Atomic Task 3.7 file-system client
+        run: node --test tests/unit/platform/file-system-client.test.mjs
       - name: Run architecture hard gate
-        run: node scripts/verify-architecture.mjs --output=artifacts/stage-03/03-06-architecture-scan.json
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-03/03-07-architecture-scan.json
       - name: Run existing Node regression suite
         run: npm test
       - name: Run browser interaction contract

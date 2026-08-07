@@ -16,6 +16,7 @@ import {
   WINDOW_PORT_METHODS,
   createDialogClient,
   createDragDropClient,
+  createFileSystemClient,
   createInvokeClient,
   createRuntimeCapabilities,
   createWindowClient,
@@ -58,7 +59,7 @@ const expectedPortFiles = Object.freeze([
 ]);
 const expectedEnvironmentFiles = Object.freeze(['platform-detection.js', 'runtime-capabilities.js']);
 const expectedDesktopFiles = Object.freeze([
-  'dialog-client.js', 'drag-drop-client.js', 'invoke-client.js', 'window-client.js'
+  'dialog-client.js', 'drag-drop-client.js', 'file-system-client.js', 'invoke-client.js', 'window-client.js'
 ]);
 
 function createBrowserRuntime() {
@@ -197,6 +198,22 @@ dragDropNativeHandler({
 await dragDropClient.destroy();
 await dragDropDisposer();
 
+const fileSystemCalls = [];
+const fileSystemClient = createFileSystemClient({
+  invoke: async (operation, args, details) => {
+    fileSystemCalls.push({ operation, args, details });
+    return Object.freeze({ operation, args });
+  }
+});
+const fileSystemResults = {
+  dropped: await fileSystemClient.readDroppedFile('/tmp/evidence.md'),
+  tree: await fileSystemClient.listTextFileTree('/tmp/evidence.md'),
+  image: await fileSystemClient.readLocalImage('image.png', '/tmp/evidence.md'),
+  initialPath: await fileSystemClient.getInitialFilePath(),
+  textWrite: await fileSystemClient.writeTextFile('/tmp/evidence.md', 'hello', { extension: 'md', reason: 'evidence' }),
+  binaryWrite: await fileSystemClient.writeBinaryFile('/tmp/evidence.bin', new Uint8Array([1, 2, 3]), { extension: 'bin', reason: 'evidence' })
+};
+
 const windowCalls = [];
 const windowDisposals = [];
 const evidenceWindow = {
@@ -226,7 +243,7 @@ if (JSON.stringify(PLATFORM_PORT_NAMES) !== JSON.stringify(expectedPortNames)) p
 if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exit(1);
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
 if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
-if (moduleFixture.modules.length !== 161 || platformModules.length !== 22) process.exit(1);
+if (moduleFixture.modules.length !== 162 || platformModules.length !== 23) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -251,16 +268,24 @@ if (!desktopSources['drag-drop-client.js'].includes("@tauri-apps/api/webview")) 
 if (!desktopSources['drag-drop-client.js'].includes('normalizeDragDropEvent')) process.exit(1);
 if (!desktopSources['drag-drop-client.js'].includes('activeDisposers')) process.exit(1);
 if (/readDroppedFile|dropped\.kind|\.markdown|\.txt|image\//i.test(desktopSources['drag-drop-client.js'])) process.exit(1);
+if (!desktopSources['file-system-client.js'].includes("'read_dropped_file'")) process.exit(1);
+if (!desktopSources['file-system-client.js'].includes("'write_local_binary_file'")) process.exit(1);
+if (!desktopSources['file-system-client.js'].includes('bytesToBase64')) process.exit(1);
+if (/showToast|loadTextContentAsDocument|insertImageMarkdown|newDocument|createDocument|dropped\.kind/.test(desktopSources['file-system-client.js'])) process.exit(1);
+if (/image\/(?:png|jpeg|gif|webp|svg\+xml)/.test(desktopSources['file-system-client.js'])) process.exit(1);
 if (!desktopSources['window-client.js'].includes("@tauri-apps/api/window")) process.exit(1);
 if (!desktopSources['window-client.js'].includes('activeDisposers')) process.exit(1);
 if (legacyRuntimeSource.includes("@tauri-apps/api/core") || legacyRuntimeSource.includes('invokeMeasured')) process.exit(1);
 if (legacyRuntimeSource.includes('@tauri-apps/plugin-dialog') || legacyRuntimeSource.includes('showOpenDialog')) process.exit(1);
 if (legacyRuntimeSource.includes('@tauri-apps/api/webview') || legacyRuntimeSource.includes('getCurrentWebview')) process.exit(1);
 if (legacyRuntimeSource.includes('@tauri-apps/api/window') || legacyRuntimeSource.includes('getCurrentWindow')) process.exit(1);
-if ((legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length !== 19) process.exit(1);
+if ((legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length !== 13) process.exit(1);
 if ((legacyRuntimeSource.match(/dialogClient\.(?:openFile|openDirectory|saveFile|confirm)\(/g) || []).length !== 4) process.exit(1);
 if ((legacyRuntimeSource.match(/dragDropClient\.subscribe\(/g) || []).length !== 1) process.exit(1);
+if ((legacyRuntimeSource.match(/fileSystemClient\.(?:readDroppedFile|listTextFileTree|readLocalImage|getInitialFilePath|writeTextFile|writeBinaryFile)\(/g) || []).length !== 6) process.exit(1);
 if ((legacyRuntimeSource.match(/windowClient\.(?:subscribeCloseRequest|startDrag|minimize|toggleMaximize|isMaximized|subscribeResize|requestClose|forceClose)\(/g) || []).length !== 8) process.exit(1);
+if (!legacyRuntimeSource.includes('createFileSystemClient({ invoke: invokeClient.invoke })')) process.exit(1);
+if (legacyRuntimeSource.includes('function bytesToBase64')) process.exit(1);
 if (!legacyRuntimeSource.includes("write_performance_logs', { entries }, {}, { record: false }")) process.exit(1);
 if (invokeCalls.length !== 1 || invokeCalls[0].operation !== 'load_document_state' || invokeCalls[0].args !== invokeArgs) process.exit(1);
 if (invokeResult.args !== invokeArgs || capturedInvokeError !== invokeError) process.exit(1);
@@ -274,6 +299,18 @@ if (JSON.stringify(normalizedDragDropEvents) !== JSON.stringify([{
   type: 'drop', paths: ['/tmp/evidence.md'], position: { x: 12, y: 34 }
 }])) process.exit(1);
 if (!Object.isFrozen(normalizedDragDropEvents[0]) || !Object.isFrozen(normalizedDragDropEvents[0].paths) || !Object.isFrozen(normalizedDragDropEvents[0].position)) process.exit(1);
+if (fileSystemCalls.length !== 6) process.exit(1);
+if (fileSystemCalls.map(call => call.operation).join(',') !== [
+  'read_dropped_file', 'list_text_file_tree', 'read_local_image',
+  'initial_file_path', 'write_local_text_file', 'write_local_binary_file'
+].join(',')) process.exit(1);
+if (fileSystemCalls[0].args.path !== '/tmp/evidence.md') process.exit(1);
+if (fileSystemCalls[1].args.documentPath !== '/tmp/evidence.md') process.exit(1);
+if (fileSystemCalls[2].args.documentPath !== '/tmp/evidence.md') process.exit(1);
+if (fileSystemCalls[4].args.content !== 'hello') process.exit(1);
+if (fileSystemCalls[5].args.contentBase64 !== 'AQID') process.exit(1);
+if (fileSystemResults.dropped.operation !== 'read_dropped_file') process.exit(1);
+if (fileSystemResults.binaryWrite.operation !== 'write_local_binary_file') process.exit(1);
 if (!toggledMaximized || !maximized) process.exit(1);
 if (windowCalls.length !== 9 || windowDisposals.join(',') !== 'close,resize') process.exit(1);
 if (windowCalls[5].handler !== resizeHandler || windowCalls[6].handler !== closeHandler) process.exit(1);
@@ -310,7 +347,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-01-platform-ports-evidence.json`, `${JSO
     'all-thirty-three-legacy-native-methods-have-explicit-destination-mappings',
     'atomic-task-3.1-contracts-remain-runtime-neutral',
     'capability-detection-is-owned-by-atomic-task-3.2',
-    'invoke-dialog-window-and-drag-drop-client-cutovers-are-owned-by-atomic-tasks-3.3-through-3.6'
+    'invoke-dialog-window-drag-drop-and-file-system-client-cutovers-are-owned-by-atomic-tasks-3.3-through-3.7'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -333,7 +370,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-02-runtime-capabilities-evidence.json`, 
     'legacy-runtime-availability-derived-from-public-capabilities',
     'no-production-business-module-checks-tauri-internals',
     'existing-native-method-contracts-and-command-fields-remain-unchanged',
-    'invoke-dialog-window-and-drag-drop-clients-are-owned-by-atomic-tasks-3.3-through-3.6'
+    'invoke-dialog-window-drag-drop-and-file-system-clients-are-owned-by-atomic-tasks-3.3-through-3.7'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -353,8 +390,8 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-03-invoke-client-evidence.json`, `${JSON
     'original-invoke-result-and-error-identity-preserved',
     'telemetry-failures-cannot-replace-native-semantics',
     'performance-log-transport-explicitly-suppresses-recursive-telemetry',
-    'legacy-runtime-retains-all-nineteen-command-fields-through-the-public-invoke-client',
-    'dialog-window-and-drag-drop-clients-are-owned-by-atomic-tasks-3.4-through-3.6'
+    'thirteen-legacy-runtime-commands-remain-direct-and-six-file-commands-use-the-same-invoke-transport-through-file-system-client',
+    'dialog-window-drag-drop-and-file-system-clients-are-owned-by-atomic-tasks-3.4-through-3.7'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -378,7 +415,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-04-dialog-client-evidence.json`, `${JSON
     'native-dialog-errors-are-rethrown-with-original-identity',
     'dialog-telemetry-failures-cannot-replace-native-results-or-errors',
     'legacy-runtime-retains-browser-confirm-and-unavailable-null-fallbacks',
-    'filesystem-document-store-web-link-and-log-adapters-remain-deferred'
+    'document-store-web-link-and-log-adapters-remain-deferred'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -402,7 +439,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-05-window-client-evidence.json`, `${JSON
     'request-close-preserves-close-request-events-while-force-close-preserves-native-destroy-fallback',
     'native-window-results-and-error-identity-remain-unchanged',
     'save-before-close-policy-remains-in-the-application-layer',
-    'filesystem-document-store-web-link-and-log-adapters-remain-deferred'
+    'document-store-web-link-and-log-adapters-remain-deferred'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -420,12 +457,35 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-06-drag-drop-client-evidence.json`, `${J
   guarantees: [
     'single-production-owner-of-tauri-webview-drag-drop-import',
     'native-drag-drop-events-normalize-to-immutable-type-paths-and-position-data',
-    'file-extension-mime-and-content-type-interpretation-remain-outside-the-platform-client',
+    'file-extension-mime-and-content-type-interpretation-remain-outside-the-drag-drop-client',
     'subscriptions-return-idempotent-owned-disposers',
     'client-destroy-disposes-active-subscriptions-in-reverse-order',
     'late-subscription-results-are-disposed-after-client-destroy',
     'native-registration-cleanup-and-handler-errors-retain-original-semantics',
     'legacy-runtime-preserves-the-existing-payload-wrapper-and-unavailable-null-fallback',
-    'filesystem-document-store-web-link-and-log-adapters-remain-deferred'
+    'document-store-web-link-and-log-adapters-remain-deferred'
+  ]
+}, null, 2)}\n`, 'utf8');
+
+await writeFile(`${OUTPUT_DIRECTORY}/03-07-file-system-client-evidence.json`, `${JSON.stringify({
+  node: 'stage-03/03-07', atomicTask: '3.7', status: 'passed',
+  commit: process.env.GITHUB_SHA || null, runId: process.env.GITHUB_RUN_ID || null,
+  attempt: process.env.GITHUB_RUN_ATTEMPT || null,
+  scope: 'desktop-local-file-command-mapping-with-rust-owned-path-and-mime-semantics',
+  publicEntry: 'src/platform/index.js',
+  implementationFiles: [`${DESKTOP_DIRECTORY}/file-system-client.js`],
+  productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
+  delegationCount: (legacyRuntimeSource.match(/fileSystemClient\.(?:readDroppedFile|listTextFileTree|readLocalImage|getInitialFilePath|writeTextFile|writeBinaryFile)\(/g) || []).length,
+  sample: { calls: fileSystemCalls, results: fileSystemResults },
+  guarantees: [
+    'exactly-six-existing-rust-local-file-commands-are-mapped',
+    'legacy-path-normalization-command-fields-and-telemetry-details-remain-compatible',
+    'binary-write-transport-keeps-the-existing-base64-encoding',
+    'rust-dropped-file-tree-image-and-write-results-pass-through-without-client-interpretation',
+    'rust-remains-the-authority-for-native-path-resolution-file-kind-rules-and-image-mime-generation',
+    'file-system-client-does-not-create-documents-insert-images-or-show-toasts',
+    'native-file-command-results-and-error-identity-remain-unchanged',
+    'legacy-runtime-preserves-six-existing-file-methods-and-runtime-unavailable-fallbacks',
+    'document-store-web-link-and-log-adapters-remain-deferred'
   ]
 }, null, 2)}\n`, 'utf8');

@@ -177,16 +177,17 @@ test('file interpretation remains in the application layer, not the DragDrop cli
   assert.match(eventsSource, /dropped\.kind === 'image'/);
 });
 
-test('Stage 3 verification runs Atomic Task 3.6 after window and before architecture', async () => {
+test('Stage 3 verification keeps Atomic Task 3.6 after window and before file-system', async () => {
   const workflow = await readFile(
     new URL('../../../.github/workflows/stage-03-atomic.yml', import.meta.url),
     'utf8'
   );
   const windowIndex = workflow.indexOf('Verify Atomic Task 3.5 window client');
   const dragDropIndex = workflow.indexOf('Verify Atomic Task 3.6 drag-drop client');
-  const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(windowIndex >= 0 && dragDropIndex > windowIndex && architectureIndex > dragDropIndex);
+  const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
+  assert.ok(windowIndex >= 0 && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/drag-drop-client\.test\.mjs/);
-  assert.match(workflow, /03-06-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[7-9]|Atomic Task 3\.1[0-9]/);
+  assert.match(workflow, /node --test tests\/unit\/platform\/file-system-client\.test\.mjs/);
+  assert.match(workflow, /03-07-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.[89]|Atomic Task 3\.1[0-9]/);
 });

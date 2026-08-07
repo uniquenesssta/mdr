@@ -123,7 +123,7 @@ test('the desktop invoke client is the sole production owner of the Tauri core i
   assert.match(publicEntry, /desktop\/invoke-client\.js/);
 });
 
-test('legacy runtime delegates all nineteen native commands without changing command strings', async () => {
+test('legacy runtime keeps thirteen direct native commands while file commands move behind FileSystem client', async () => {
   const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
   const expectedCommands = [
     'abort_document_snapshot_upload',
@@ -132,18 +132,12 @@ test('legacy runtime delegates all nineteen native commands without changing com
     'commit_document_snapshot_upload',
     'delete_document_state',
     'fetch_url',
-    'initial_file_path',
-    'list_text_file_tree',
     'load_document_manifest',
     'load_document_state',
     'open_external_url',
     'read_document_chunk',
-    'read_dropped_file',
-    'read_local_image',
     'save_document_state',
     'search_document_state',
-    'write_local_binary_file',
-    'write_local_text_file',
     'write_performance_logs'
   ];
   const delegatedCommands = [...source.matchAll(/invokeClient\.invoke\('([^']+)'/g)]
@@ -152,6 +146,7 @@ test('legacy runtime delegates all nineteen native commands without changing com
   assert.deepEqual(delegatedCommands, expectedCommands);
   assert.doesNotMatch(source, /@tauri-apps\/api\/core|\binvokeMeasured\b/);
   assert.match(source, /createInvokeClient\(/);
+  assert.match(source, /createFileSystemClient\(\{ invoke: invokeClient\.invoke \}\)/);
   assert.match(source, /write_performance_logs[\s\S]*record: false/);
 });
 
@@ -165,9 +160,10 @@ test('Stage 3 verification keeps Atomic Task 3.3 before later adapters and archi
   const dialogIndex = workflow.indexOf('Verify Atomic Task 3.4 dialog client');
   const windowIndex = workflow.indexOf('Verify Atomic Task 3.5 window client');
   const dragDropIndex = workflow.indexOf('Verify Atomic Task 3.6 drag-drop client');
+  const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && architectureIndex > dragDropIndex);
+  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && architectureIndex > fileSystemIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/invoke-client\.test\.mjs/);
-  assert.match(workflow, /03-06-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[7-9]|Atomic Task 3\.1[0-9]/);
+  assert.match(workflow, /03-07-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.[89]|Atomic Task 3\.1[0-9]/);
 });

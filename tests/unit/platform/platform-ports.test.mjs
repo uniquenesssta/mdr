@@ -127,15 +127,17 @@ test('Stage 3 verification keeps the 3.1 contract before later platform checks',
   const dialogIndex = workflow.indexOf('Verify Atomic Task 3.4 dialog client');
   const windowIndex = workflow.indexOf('Verify Atomic Task 3.5 window client');
   const dragDropIndex = workflow.indexOf('Verify Atomic Task 3.6 drag-drop client');
+  const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(portsIndex >= 0 && detectionIndex > portsIndex && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && architectureIndex > dragDropIndex);
+  assert.ok(portsIndex >= 0 && detectionIndex > portsIndex && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && architectureIndex > fileSystemIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/invoke-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/dialog-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/window-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/drag-drop-client\.test\.mjs/);
-  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-06-architecture-scan\.json/);
+  assert.match(workflow, /node --test tests\/unit\/platform\/file-system-client\.test\.mjs/);
+  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-07-architecture-scan\.json/);
   assert.match(workflow, /scripts\/stage-03\/record-platform-evidence\.mjs/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[7-9]|Atomic Task 3\.1[0-9]/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.[89]|Atomic Task 3\.1[0-9]/);
 });
 
 test('the frozen legacy capability inventory maps every old native method to declared ports', async () => {

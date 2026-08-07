@@ -1,4 +1,4 @@
-import { createDialogClient, createDragDropClient, createInvokeClient, createRuntimeCapabilities, createWindowClient, detectPlatformEnvironment } from '../platform/index.js';
+import { createDialogClient, createDragDropClient, createFileSystemClient, createInvokeClient, createRuntimeCapabilities, createWindowClient, detectPlatformEnvironment } from '../platform/index.js';
 
 const platformEnvironment = detectPlatformEnvironment(window);
 const capabilities = createRuntimeCapabilities(platformEnvironment, window);
@@ -12,21 +12,11 @@ const dialogClient = createDialogClient({
   record: (operation, entry) => window.markdownEditorPerf?.record(operation, entry)
 });
 const dragDropClient = createDragDropClient();
+const fileSystemClient = createFileSystemClient({ invoke: invokeClient.invoke });
 const windowClient = createWindowClient();
 
 if (isAvailable) {
   document.documentElement.classList.add('tauri-shell');
-}
-
-
-function bytesToBase64(bytes) {
-  const chunkSize = 32 * 1024;
-  const chunks = [];
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    const chunk = bytes.subarray(offset, Math.min(bytes.length, offset + chunkSize));
-    chunks.push(String.fromCharCode(...chunk));
-  }
-  return btoa(chunks.join(''));
 }
 
 window.markdownEditorNative = {
@@ -52,35 +42,23 @@ window.markdownEditorNative = {
     if (!isAvailable) {
       throw new Error('Tauri runtime is not available');
     }
-    const extension = String(path || '').split('.').pop()?.toLowerCase() || '';
-    return invokeClient.invoke('read_dropped_file', { path }, { extension });
+    return fileSystemClient.readDroppedFile(path);
   },
   async listTextFileTree(documentPath) {
     if (!isAvailable) {
       throw new Error('Tauri runtime is not available');
     }
-    const value = String(documentPath || '').trim();
-    return invokeClient.invoke('list_text_file_tree', { documentPath: value }, {
-      hasDocumentPath: Boolean(value),
-      extension: value.split('.').pop()?.toLowerCase() || ''
-    });
+    return fileSystemClient.listTextFileTree(documentPath);
   },
   async readLocalImage(source, documentPath = '') {
     if (!isAvailable) {
       throw new Error('Tauri runtime is not available');
     }
-    const value = String(source || '').trim();
-    return invokeClient.invoke('read_local_image', {
-      source: value,
-      documentPath: String(documentPath || '').trim() || null
-    }, {
-      sourceLength: value.length,
-      hasDocumentPath: Boolean(String(documentPath || '').trim())
-    });
+    return fileSystemClient.readLocalImage(source, documentPath);
   },
   async getInitialFilePath() {
     if (!isAvailable) return null;
-    return invokeClient.invoke('initial_file_path', {}, {});
+    return fileSystemClient.getInitialFilePath();
   },
   async writePerformanceLogs(entries) {
     if (!isAvailable) return '';
@@ -175,29 +153,11 @@ window.markdownEditorNative = {
   },
   async writeTextFile(path, content, details = {}) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
-    const text = String(content ?? '');
-    return invokeClient.invoke('write_local_text_file', {
-      path: String(path || ''),
-      content: text
-    }, {
-      extension: String(details.extension || 'md'),
-      characters: text.length,
-      fileName: String(path || '').split(/[\\/]/).pop() || '',
-      reason: String(details.reason || '')
-    });
+    return fileSystemClient.writeTextFile(path, content, details);
   },
   async writeBinaryFile(path, content, details = {}) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
-    const bytes = content instanceof Uint8Array ? content : new Uint8Array(content || []);
-    return invokeClient.invoke('write_local_binary_file', {
-      path: String(path || ''),
-      contentBase64: bytesToBase64(bytes)
-    }, {
-      extension: String(details.extension || ''),
-      bytes: bytes.byteLength,
-      fileName: String(path || '').split(/[\\/]/).pop() || '',
-      reason: String(details.reason || '')
-    });
+    return fileSystemClient.writeBinaryFile(path, content, details);
   },
   async saveTextFile(content, preferredName, options = {}) {
     if (!isAvailable) return { cancelled: false, fallback: true };
