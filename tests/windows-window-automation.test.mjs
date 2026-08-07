@@ -8,6 +8,7 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
     hostBuilder,
     runner,
     sessionOwner,
+    testSurface,
     nativeHelper,
     packageJson,
     tauriConfig,
@@ -20,6 +21,7 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
     readFile('scripts/stage-03/windows/prepare-embedded-driver-host.ps1', 'utf8'),
     readFile('tests/e2e/windows/run-window-automation.mjs', 'utf8'),
     readFile('tests/e2e/windows/embedded-webdriver-session.mjs', 'utf8'),
+    readFile('tests/e2e/windows/window-test-surface.mjs', 'utf8'),
     readFile('tests/e2e/windows/native-window-system.mjs', 'utf8'),
     readFile('package.json', 'utf8'),
     readFile('src-tauri/tauri.conf.json', 'utf8'),
@@ -102,7 +104,17 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(sessionOwner, /switchTo\(\)\.window/);
   assert.match(sessionOwner, /isWindowStartupRace/);
   assert.match(sessionOwner, /assertApplicationRunning/);
+  assert.match(sessionOwner, /prepareWindowTestSurface/);
+  assert.match(sessionOwner, /await prepareWindowTestSurface\(browser\)/);
   assert.doesNotMatch(sessionOwner, /dragFromViewportPoint|driver\.actions\(\)|tauri:options|--native-driver|node:net/);
+
+  assert.match(testSurface, /#help-modal/);
+  assert.match(testSurface, /#help-modal \.modal-header button/);
+  assert.match(testSurface, /classList\.contains\('show'\)/);
+  assert.match(testSurface, /closeButton\.click\(\)/);
+  assert.match(testSurface, /browser\.waitUntil/);
+  assert.match(testSurface, /First-run help modal did not close through its normal UI path/);
+  assert.doesNotMatch(testSurface, /localStorage|classList\.remove\('show'\)|markdown-editor:modal-shell-close/);
 
   assert.match(nativeHelper, /GetWindowPlacement/);
   assert.match(nativeHelper, /GetWindowRect/);

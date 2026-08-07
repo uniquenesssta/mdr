@@ -3,6 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import { Builder, By, Capabilities } from 'selenium-webdriver';
+import { prepareWindowTestSurface } from './window-test-surface.mjs';
 
 function pause(milliseconds) {
   return new Promise(resolvePromise => setTimeout(resolvePromise, milliseconds));
@@ -236,7 +237,8 @@ export async function withEmbeddedSession(options, run) {
       process: application.child,
       logPath: application.logPath
     });
-    return await run(browser);
+    const startupSurface = await prepareWindowTestSurface(browser);
+    return await run(browser, startupSurface);
   } finally {
     await closeSession(browser);
     await application.stop();
