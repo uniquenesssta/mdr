@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
 async function readText(path) {
-  return readFile(resolve(ROOT, path), 'utf8');
+  return (await readFile(resolve(ROOT, path), 'utf8')).replace(/\r\n?/g, '\n');
 }
 
 async function readJson(path) {

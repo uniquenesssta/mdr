@@ -10,10 +10,12 @@ test('root README is a concise introduction and detailed history lives in docs/R
     readFile('scripts/stage-00/persist-results.mjs', 'utf8')
   ]);
 
-  assert.match(rootReadme, /^# Markdown Editor/m);
-  assert.match(rootReadme, /\[docs\/README\.md\]\(docs\/README\.md\)/);
-  assert.ok(rootReadme.length >= 120 && rootReadme.length <= 360);
-  assert.doesNotMatch(rootReadme, /stage-\d{2}-node|## Change Log/);
+  const normalizedRootReadme = rootReadme.replace(/\r\n?/g, '\n');
+
+  assert.match(normalizedRootReadme, /^# Markdown Editor/m);
+  assert.match(normalizedRootReadme, /\[docs\/README\.md\]\(docs\/README\.md\)/);
+  assert.ok(normalizedRootReadme.length >= 120 && normalizedRootReadme.length <= 360);
+  assert.doesNotMatch(normalizedRootReadme, /stage-\d{2}-node|## Change Log/);
 
   assert.match(docsReadme, /^# Markdown Editor/m);
   assert.match(docsReadme, /## Change Log/);

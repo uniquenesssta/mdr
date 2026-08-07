@@ -51,17 +51,22 @@ test('architecture package scripts do not depend on builds, artifacts, package i
 });
 
 test('all architecture package scripts execute successfully before any build step', () => {
-  const npmExecutable = process.platform === 'win32' ? 'npm.cmd' : 'npm';
   for (const name of Object.keys(architectureScripts)) {
-    const result = spawnSync(
-      npmExecutable,
-      ['run', '--silent', name, '--', `--root=${repositoryRoot}`],
-      {
-        cwd: repositoryRoot,
-        encoding: 'utf8',
-        env: { ...process.env, NO_COLOR: '1' }
-      }
+    const npmArgs = ['run', '--silent', name, '--', `--root=${repositoryRoot}`];
+    const npmCliPath = process.env.npm_execpath;
+    const executable = npmCliPath ? process.execPath : 'npm';
+    const args = npmCliPath ? [npmCliPath, ...npmArgs] : npmArgs;
+
+    assert.ok(
+      npmCliPath || process.platform !== 'win32',
+      'Windows architecture script verification must run through npm so npm_execpath is available'
     );
+
+    const result = spawnSync(executable, args, {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+      env: { ...process.env, NO_COLOR: '1' }
+    });
     assert.equal(
       result.status,
       0,
