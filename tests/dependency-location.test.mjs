@@ -22,6 +22,9 @@ test('Node dependencies are prepared in the repository parent directory', async 
   assert.match(installer, /const dependencyRoot = resolve\(repositoryRoot, '\.\.'\)/);
   assert.match(installer, /const externalNodeModules = join\(dependencyRoot, 'node_modules'\)/);
   assert.match(installer, /Refusing to use project-local dependencies/);
+  assert.match(installer, /const npmCliPath = process\.env\.npm_execpath/);
+  assert.match(installer, /const executable = npmCliPath \? process\.execPath : 'npm'/);
+  assert.doesNotMatch(installer, /spawnSync\(['"]npm\.cmd['"]/);
 });
 
 test('Vite and Cargo heavy caches are outside the repository root', async () => {

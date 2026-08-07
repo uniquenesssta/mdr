@@ -227,8 +227,16 @@ async function readMarker() {
 }
 
 function runNpm(args) {
-  const npmExecutable = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const result = spawnSync(npmExecutable, args, {
+  const npmCliPath = process.env.npm_execpath;
+  if (!npmCliPath && process.platform === 'win32') {
+    throw new Error(
+      'Windows dependency preparation must be invoked through `npm run deps:prepare` so the active npm CLI can be resolved.'
+    );
+  }
+
+  const executable = npmCliPath ? process.execPath : 'npm';
+  const invocationArgs = npmCliPath ? [npmCliPath, ...args] : args;
+  const result = spawnSync(executable, invocationArgs, {
     cwd: repositoryRoot,
     env: process.env,
     encoding: 'utf8',
