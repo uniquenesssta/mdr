@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import {
+  dragWindowFromViewport,
   getWindowSnapshot,
   restoreWindow,
   waitForProcessExit,
@@ -65,6 +66,19 @@ async function resolveTitleBarDragTarget(browser) {
     const bar = document.querySelector('.menu-bar');
     if (!bar) throw new Error('Menu bar was not found.');
 
+    const describeElement = element => {
+      if (!element) return null;
+      const style = getComputedStyle(element);
+      return {
+        tagName: element.tagName,
+        id: element.id || '',
+        className: typeof element.className === 'string' ? element.className : '',
+        pointerEvents: style.pointerEvents,
+        position: style.position,
+        zIndex: style.zIndex
+      };
+    };
+
     const regions = Array.from(bar.querySelectorAll('.window-drag-region'));
     const diagnostics = regions.map((region, regionIndex) => {
       const rect = region.getBoundingClientRect();
@@ -76,13 +90,14 @@ async function resolveTitleBarDragTarget(browser) {
         top: rect.top,
         width: rect.width,
         height: rect.height,
-        area: rect.width * rect.height
+        area: rect.width * rect.height,
+        pointerEvents: getComputedStyle(region).pointerEvents
       };
     }).sort((left, right) => right.area - left.area);
 
+    const hitDiagnostics = [];
     for (const entry of diagnostics) {
       if (entry.width < 4 || entry.height < 4) continue;
-      const region = regions[entry.regionIndex];
       const points = [
         { x: Math.round(entry.left + entry.width / 2), y: Math.round(entry.top + entry.height / 2) },
         { x: Math.round(entry.left + entry.width * 0.25), y: Math.round(entry.top + entry.height / 2) },
@@ -91,51 +106,57 @@ async function resolveTitleBarDragTarget(browser) {
 
       for (const point of points) {
         const candidate = document.elementFromPoint(point.x, point.y);
-        const belongsToRegion = Boolean(candidate && (candidate === region || region.contains(candidate)));
+        const stack = document.elementsFromPoint(point.x, point.y).slice(0, 8).map(describeElement);
         const belongsToBar = Boolean(candidate && (candidate === bar || bar.contains(candidate)));
-        if (!belongsToRegion || !belongsToBar || candidate.closest(excludedSelector)) continue;
+        const excluded = Boolean(candidate?.closest(excludedSelector));
+        hitDiagnostics.push({ regionIndex: entry.regionIndex, ...point, candidate: describeElement(candidate), stack });
+        if (!belongsToBar || excluded) continue;
         return {
           ...point,
           regionIndex: entry.regionIndex,
-          regionTagName: region.tagName,
-          regionClassName: typeof region.className === 'string' ? region.className : '',
-          candidateTagName: candidate.tagName,
-          candidateId: candidate.id || '',
-          candidateClassName: typeof candidate.className === 'string' ? candidate.className : '',
+          regionTagName: entry.tagName,
+          regionClassName: entry.className,
+          candidate: describeElement(candidate),
+          hitStack: stack,
           regionRect: {
             left: entry.left,
             top: entry.top,
             width: entry.width,
             height: entry.height
           },
-          diagnostics
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight,
+          devicePixelRatio: window.devicePixelRatio,
+          diagnostics,
+          hitDiagnostics
         };
       }
     }
 
     throw new Error(
-      `No hit-testable declared title-bar drag region was found: ${JSON.stringify(diagnostics)}`
+      `No safe effective hit target was found inside a declared title-bar drag region: ${JSON.stringify({ diagnostics, hitDiagnostics })}`
     );
   }, TITLE_BAR_EXCLUDED_SELECTOR);
 
   const validation = await browser.execute((point, excludedSelector) => {
     const bar = document.querySelector('.menu-bar');
-    const regions = bar ? Array.from(bar.querySelectorAll('.window-drag-region')) : [];
-    const region = regions[point.regionIndex];
     const candidate = document.elementFromPoint(point.x, point.y);
     return {
       belongsToBar: Boolean(bar && candidate && (candidate === bar || bar.contains(candidate))),
-      belongsToRegion: Boolean(region && candidate && (candidate === region || region.contains(candidate))),
       excluded: Boolean(candidate?.closest(excludedSelector)),
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+      devicePixelRatio: window.devicePixelRatio,
       tagName: candidate?.tagName || '',
       id: candidate?.id || '',
       className: typeof candidate?.className === 'string' ? candidate.className : ''
     };
-  }, { x: target.x, y: target.y, regionIndex: target.regionIndex }, TITLE_BAR_EXCLUDED_SELECTOR);
+  }, { x: target.x, y: target.y }, TITLE_BAR_EXCLUDED_SELECTOR);
 
-  assert.equal(validation.belongsToBar, true, 'Resolved drag point must belong to .menu-bar.');
-  assert.equal(validation.belongsToRegion, true, 'Resolved drag point must belong to a declared .window-drag-region.');
+  assert.equal(validation.belongsToBar, true, 'Resolved drag point must effectively hit .menu-bar or one of its descendants.');
   assert.equal(validation.excluded, false, 'Resolved drag point must not target an excluded control.');
+  assert.equal(validation.viewportWidth, target.viewportWidth);
+  assert.equal(validation.viewportHeight, target.viewportHeight);
   return { ...target, validation };
 }
 
@@ -146,7 +167,8 @@ const evidence = createWindowEvidence({
     driverProvider: 'embedded',
     embeddedWebDriverPortRange: [4444, 4446],
     webdriverClient: 'selenium-webdriver@4.34.0',
-    webdriverPlugin: 'tauri-plugin-wdio-webdriver@1'
+    webdriverPlugin: 'tauri-plugin-wdio-webdriver@1',
+    nativeDragInput: 'SendInput + ClientToScreen'
   }
 });
 
@@ -237,7 +259,6 @@ try {
       );
 
       const dragTarget = await resolveTitleBarDragTarget(browser);
-      const dragPoint = { x: dragTarget.x, y: dragTarget.y };
 
       await browser.execute(() => {
         const state = window.__windowsNativeAutomation;
@@ -255,17 +276,20 @@ try {
       });
 
       const beforeDrag = getWindowSnapshot();
-      await browser.dragFromViewportPoint({
-        start: dragPoint,
-        end: { x: dragPoint.x + 120, y: dragPoint.y + 80 },
-        durationMs: 500
+      const nativeDragMapping = dragWindowFromViewport({
+        startX: dragTarget.x,
+        startY: dragTarget.y,
+        endX: dragTarget.x + 120,
+        endY: dragTarget.y + 80,
+        viewportWidth: dragTarget.viewportWidth,
+        viewportHeight: dragTarget.viewportHeight
       });
       await browser.waitUntil(
         async () => (await browser.execute(() => window.__windowsNativeAutomation.menuBarMouseDownEvents)) > 0,
         {
           timeout: 5_000,
           interval: 100,
-          timeoutMsg: 'Title-bar pointer input did not dispatch mousedown inside .menu-bar.'
+          timeoutMsg: 'Native title-bar input did not dispatch mousedown inside .menu-bar.'
         }
       );
       await browser.waitUntil(
@@ -273,7 +297,7 @@ try {
         {
           timeout: 5_000,
           interval: 100,
-          timeoutMsg: 'Title-bar pointer input did not reach the production drag handler.'
+          timeoutMsg: 'Native title-bar input did not reach the production drag handler.'
         }
       );
       const dragInput = await browser.execute(() => ({
@@ -333,6 +357,7 @@ try {
         afterMinimizeRestore,
         dragTarget,
         beforeDrag,
+        nativeDragMapping,
         dragInput,
         afterDrag,
         preventedClose

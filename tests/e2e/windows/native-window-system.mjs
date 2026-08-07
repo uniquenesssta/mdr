@@ -61,6 +61,28 @@ public static class MarkdownEditorWindowAutomation {
     public RECT NormalPosition;
   }
 
+  [StructLayout(LayoutKind.Sequential)]
+  public struct MOUSEINPUT {
+    public int dx;
+    public int dy;
+    public uint mouseData;
+    public uint dwFlags;
+    public uint time;
+    public UIntPtr dwExtraInfo;
+  }
+
+  [StructLayout(LayoutKind.Explicit)]
+  public struct INPUTUNION {
+    [FieldOffset(0)]
+    public MOUSEINPUT mouse;
+  }
+
+  [StructLayout(LayoutKind.Sequential)]
+  public struct INPUT {
+    public uint type;
+    public INPUTUNION data;
+  }
+
   [DllImport("user32.dll")]
   public static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lParam);
 
@@ -81,6 +103,12 @@ public static class MarkdownEditorWindowAutomation {
   public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
 
   [DllImport("user32.dll", SetLastError = true)]
+  public static extern bool GetClientRect(IntPtr hWnd, out RECT rect);
+
+  [DllImport("user32.dll", SetLastError = true)]
+  public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+
+  [DllImport("user32.dll", SetLastError = true)]
   public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT placement);
 
   [DllImport("user32.dll")]
@@ -89,11 +117,38 @@ public static class MarkdownEditorWindowAutomation {
   [DllImport("user32.dll")]
   public static extern bool SetForegroundWindow(IntPtr hWnd);
 
+  [DllImport("user32.dll", SetLastError = true)]
+  public static extern bool SetCursorPos(int x, int y);
+
+  [DllImport("user32.dll", SetLastError = true)]
+  public static extern uint SendInput(uint inputCount, INPUT[] inputs, int inputSize);
+
   public static string ReadWindowTitle(IntPtr hWnd) {
     int length = GetWindowTextLength(hWnd);
     var builder = new StringBuilder(Math.Max(length + 1, 2));
     GetWindowText(hWnd, builder, builder.Capacity);
     return builder.ToString();
+  }
+
+  public static void SendMouseButton(uint flags) {
+    var input = new INPUT {
+      type = 0,
+      data = new INPUTUNION {
+        mouse = new MOUSEINPUT {
+          dx = 0,
+          dy = 0,
+          mouseData = 0,
+          dwFlags = flags,
+          time = 0,
+          dwExtraInfo = UIntPtr.Zero
+        }
+      }
+    };
+    var inputs = new[] { input };
+    uint sent = SendInput(1, inputs, Marshal.SizeOf(typeof(INPUT)));
+    if (sent != 1) {
+      throw new InvalidOperationException("SendInput failed with Win32 error " + Marshal.GetLastWin32Error());
+    }
   }
 
   public static IntPtr FindMainWindow(
@@ -168,6 +223,10 @@ if ($windowHandle -eq [IntPtr]::Zero) {
 `;
 }
 
+function assertFiniteNumber(name, value) {
+  if (!Number.isFinite(value)) throw new TypeError(`${name} must be a finite number.`);
+}
+
 export function getWindowSnapshot() {
   const output = runPowerShell(String.raw`
 ${nativeApiSource()}
@@ -205,6 +264,89 @@ ${mainWindowLookupSource()}
 Start-Sleep -Milliseconds 250
 [void][MarkdownEditorWindowAutomation]::SetForegroundWindow($windowHandle)
 `);
+}
+
+export function dragWindowFromViewport({
+  startX,
+  startY,
+  endX,
+  endY,
+  viewportWidth,
+  viewportHeight
+}) {
+  for (const [name, value] of Object.entries({
+    startX,
+    startY,
+    endX,
+    endY,
+    viewportWidth,
+    viewportHeight
+  })) {
+    assertFiniteNumber(name, value);
+  }
+  if (viewportWidth <= 0 || viewportHeight <= 0) {
+    throw new RangeError('viewportWidth and viewportHeight must be positive.');
+  }
+
+  const output = runPowerShell(String.raw`
+${nativeApiSource()}
+${mainWindowLookupSource()}
+$clientRect = New-Object MarkdownEditorWindowAutomation+RECT
+if (-not [MarkdownEditorWindowAutomation]::GetClientRect($windowHandle, [ref]$clientRect)) {
+  throw 'GetClientRect failed.'
+}
+$clientWidth = $clientRect.Right - $clientRect.Left
+$clientHeight = $clientRect.Bottom - $clientRect.Top
+if ($clientWidth -le 0 -or $clientHeight -le 0) {
+  throw 'Markdown Editor client area is empty.'
+}
+$scaleX = $clientWidth / ${viewportWidth}
+$scaleY = $clientHeight / ${viewportHeight}
+$startPoint = New-Object MarkdownEditorWindowAutomation+POINT
+$startPoint.X = [Math]::Round(${startX} * $scaleX)
+$startPoint.Y = [Math]::Round(${startY} * $scaleY)
+$endPoint = New-Object MarkdownEditorWindowAutomation+POINT
+$endPoint.X = [Math]::Round(${endX} * $scaleX)
+$endPoint.Y = [Math]::Round(${endY} * $scaleY)
+if (-not [MarkdownEditorWindowAutomation]::ClientToScreen($windowHandle, [ref]$startPoint)) {
+  throw 'ClientToScreen failed for drag start.'
+}
+if (-not [MarkdownEditorWindowAutomation]::ClientToScreen($windowHandle, [ref]$endPoint)) {
+  throw 'ClientToScreen failed for drag end.'
+}
+[void][MarkdownEditorWindowAutomation]::SetForegroundWindow($windowHandle)
+Start-Sleep -Milliseconds 250
+if (-not [MarkdownEditorWindowAutomation]::SetCursorPos($startPoint.X, $startPoint.Y)) {
+  throw 'SetCursorPos failed for drag start.'
+}
+Start-Sleep -Milliseconds 150
+[MarkdownEditorWindowAutomation]::SendMouseButton(0x0002)
+Start-Sleep -Milliseconds 250
+$steps = 16
+for ($index = 1; $index -le $steps; $index += 1) {
+  $x = [Math]::Round($startPoint.X + (($endPoint.X - $startPoint.X) * $index / $steps))
+  $y = [Math]::Round($startPoint.Y + (($endPoint.Y - $startPoint.Y) * $index / $steps))
+  if (-not [MarkdownEditorWindowAutomation]::SetCursorPos($x, $y)) {
+    throw "SetCursorPos failed during drag at step $index."
+  }
+  Start-Sleep -Milliseconds 40
+}
+[MarkdownEditorWindowAutomation]::SendMouseButton(0x0004)
+Start-Sleep -Milliseconds 350
+[pscustomobject]@{
+  clientWidth = $clientWidth
+  clientHeight = $clientHeight
+  viewportWidth = ${viewportWidth}
+  viewportHeight = ${viewportHeight}
+  scaleX = $scaleX
+  scaleY = $scaleY
+  startScreenX = $startPoint.X
+  startScreenY = $startPoint.Y
+  endScreenX = $endPoint.X
+  endScreenY = $endPoint.Y
+} | ConvertTo-Json -Compress
+`);
+  return JSON.parse(output);
 }
 
 export async function waitForWindowSnapshot(predicate, {
