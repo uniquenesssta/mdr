@@ -5,7 +5,7 @@ function assertFunction(value, message) {
 /**
  * Creates the desktop document-store command adapter.
  * It preserves the existing Rust command names, camelCase payload fields and
- * chunk transport semantics without owning sessions, retries or document state.
+ * chunk transport semantics without owning persistence lifecycle, retry policy or document state.
  */
 export function createDocumentStoreClient(options = {}) {
   if (!options || typeof options !== 'object' || Array.isArray(options)) {

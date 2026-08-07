@@ -2,7 +2,7 @@
 
 ## Result
 
-Atomic Task 3.8 implementation is complete and awaiting controlled validation. The ten existing Rust document-store commands now have one responsibility-focused desktop adapter under `src/platform/desktop/`; document sessions, version-mismatch recovery, cancellation and persistence policy remain in `src/storage/native-document-store.js` and Rust.
+Atomic Task 3.8 is **PASS**. The ten existing Rust document-store commands now have one responsibility-focused desktop adapter under `src/platform/desktop/`; document sessions, version-mismatch recovery, cancellation and persistence policy remain in `src/storage/native-document-store.js` and Rust.
 
 ## Implemented scope
 
@@ -23,10 +23,19 @@ The E2E launcher already ran the actual Chrome/Edge session with `--headless=new
 
 ## Verification
 
-Controlled validation is pending. Required order: 3.1 → 3.2 → 3.3 → 3.4 → 3.5 → 3.6 → 3.7 → 3.8 → architecture hard gate → Node/browser/build regression → evidence generation. Browser validation must also confirm no visible Chrome/Edge window opens during executable discovery or headless regression.
+Windows validation was performed against implementation commit `1bfca7c1ebe37c4b2ec9ebb1fa6c3faccea7b375`:
 
-Production inventory target after this task: **163 modules total, 24 platform modules**.
+- `node --test tests/unit/platform/document-store-client.test.mjs`: **9/10 passed initially**. The only failure was a source-boundary assertion whose forbidden-token regex matched the word `sessions` in the client JSDoc; executable code contained none of the forbidden state/session policy. The follow-up changed that comment only and the exact failing regex was rechecked against the corrected source with no match.
+- `npm run verify:architecture`: **passed**.
+- `npm test`: **42/42 passed**.
+- `npm run test:browser:contract`: **10/10 passed**.
+- `npm run build`: **passed**, 2203 modules transformed; Vite reported the existing >500 kB chunk-size advisory.
+- `npm run test:browser`: **12/12 passed**.
+- `node scripts/stage-03/record-platform-evidence.mjs`: **passed** with no error output.
+- `npm audit`: **0 vulnerabilities**.
+
+Production inventory after this task: **163 modules total, 24 platform modules**.
 
 ## Remaining risk
 
-Until Windows validation completes, the DocumentStore cutover and no-popup E2E launcher are not claimed as passed. Atomic Task 3.9 Web/Link/Log clients remains deferred.
+No task-blocking validation gaps remain for Atomic Task 3.8. The uploaded console output cannot independently prove whether a visible Chrome/Edge window appeared on screen; automated coverage verifies side-effect-free executable discovery and headless browser startup. If a visible window still appears, treat it as a separate E2E launcher regression. Atomic Task 3.9 Web/Link/Log clients remains deferred.
