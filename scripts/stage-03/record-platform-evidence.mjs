@@ -1,6 +1,7 @@
 // Records machine-readable Stage 3 platform-foundation evidence for the verified commit.
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import {
+  BrowserFileReadCancelledError,
   CLIPBOARD_PORT_METHODS,
   DIALOGS_PORT_METHODS,
   DOCUMENT_STORE_PORT_METHODS,
@@ -14,6 +15,12 @@ import {
   STORAGE_PORT_METHODS,
   WEB_PORT_METHODS,
   WINDOW_PORT_METHODS,
+  createBrowserClipboard,
+  createBrowserFileDownload,
+  createBrowserFileReader,
+  createBrowserFullscreen,
+  createBrowserPrint,
+  createBrowserStorage,
   createDialogClient,
   createDocumentStoreClient,
   createDragDropClient,
@@ -31,6 +38,7 @@ const OUTPUT_DIRECTORY = 'artifacts/stage-03';
 const PLATFORM_ROOT = 'src/platform';
 const PORT_DIRECTORY = `${PLATFORM_ROOT}/ports`;
 const ENVIRONMENT_DIRECTORY = `${PLATFORM_ROOT}/environment`;
+const BROWSER_DIRECTORY = `${PLATFORM_ROOT}/browser`;
 const DESKTOP_DIRECTORY = `${PLATFORM_ROOT}/desktop`;
 const INVENTORY_PATH = 'tests/unit/platform/fixtures/platform-port-inventory.json';
 const MODULE_FIXTURE_PATH = 'tests/architecture/fixtures/production-modules.json';
@@ -62,6 +70,10 @@ const expectedPortFiles = Object.freeze([
   'web-port.js', 'window-port.js'
 ]);
 const expectedEnvironmentFiles = Object.freeze(['platform-detection.js', 'runtime-capabilities.js']);
+const expectedBrowserFiles = Object.freeze([
+  'browser-clipboard.js', 'browser-file-download.js', 'browser-file-reader.js',
+  'browser-fullscreen.js', 'browser-print.js', 'browser-storage.js'
+]);
 const expectedDesktopFiles = Object.freeze([
   'dialog-client.js', 'document-store-client.js', 'drag-drop-client.js',
   'file-system-client.js', 'invoke-client.js', 'link-client.js',
@@ -92,10 +104,14 @@ const inventory = JSON.parse(await readFile(INVENTORY_PATH, 'utf8'));
 const moduleFixture = JSON.parse(await readFile(MODULE_FIXTURE_PATH, 'utf8'));
 const portFiles = (await readdir(PORT_DIRECTORY)).sort();
 const environmentFiles = (await readdir(ENVIRONMENT_DIRECTORY)).sort();
+const browserFiles = (await readdir(BROWSER_DIRECTORY)).sort();
 const desktopFiles = (await readdir(DESKTOP_DIRECTORY)).sort();
 const portSources = await Promise.all(portFiles.map(file => readFile(`${PORT_DIRECTORY}/${file}`, 'utf8')));
 const environmentSources = Object.fromEntries(await Promise.all(
   environmentFiles.map(async file => [file, await readFile(`${ENVIRONMENT_DIRECTORY}/${file}`, 'utf8')])
+));
+const browserSources = Object.fromEntries(await Promise.all(
+  browserFiles.map(async file => [file, await readFile(`${BROWSER_DIRECTORY}/${file}`, 'utf8')])
 ));
 const desktopSources = Object.fromEntries(await Promise.all(
   desktopFiles.map(async file => [file, await readFile(`${DESKTOP_DIRECTORY}/${file}`, 'utf8')])
@@ -282,6 +298,134 @@ const performanceLogClient = createPerformanceLogClient({
 });
 const performanceLogEvidenceResult = await performanceLogClient.writePerformance(performanceEntries);
 
+const browserStorageValues = new Map();
+const browserStorageCalls = [];
+const browserStorage = createBrowserStorage({
+  storage: {
+    getItem(key) { browserStorageCalls.push(['get', key]); return browserStorageValues.has(key) ? browserStorageValues.get(key) : null; },
+    setItem(key, value) { browserStorageCalls.push(['set', key, value]); browserStorageValues.set(key, value); },
+    removeItem(key) { browserStorageCalls.push(['remove', key]); browserStorageValues.delete(key); },
+    clear() { browserStorageCalls.push(['clear']); browserStorageValues.clear(); }
+  }
+});
+browserStorage.set('theme', 'dark');
+const browserStoredTheme = browserStorage.get('theme');
+browserStorage.remove('theme');
+browserStorage.set('temporary', 1);
+browserStorage.clear();
+
+const browserDownloadCalls = [];
+const browserDownloadBody = {
+  appendChild(node) { node.parentNode = browserDownloadBody; browserDownloadCalls.push(['append']); },
+  removeChild(node) { node.parentNode = null; browserDownloadCalls.push(['remove']); }
+};
+const browserDownload = createBrowserFileDownload({
+  documentObject: {
+    body: browserDownloadBody,
+    createElement() {
+      return {
+        href: '', download: '', parentNode: null,
+        click() { browserDownloadCalls.push(['click', this.href, this.download]); },
+        remove() { if (this.parentNode) browserDownloadBody.removeChild(this); }
+      };
+    }
+  },
+  urlApi: {
+    createObjectURL(blob) { browserDownloadCalls.push(['createObjectURL', blob]); return 'blob:evidence'; },
+    revokeObjectURL(url) { browserDownloadCalls.push(['revokeObjectURL', url]); }
+  }
+});
+const browserDownloadBlob = Object.freeze({ type: 'text/plain' });
+browserDownload.downloadBlob(browserDownloadBlob, 'evidence.txt');
+
+const browserClipboardCalls = [];
+const browserClipboard = createBrowserClipboard({
+  navigatorObject: {
+    clipboard: {
+      async writeText(value) { browserClipboardCalls.push(value); }
+    }
+  },
+  documentObject: null
+});
+const browserClipboardResult = await browserClipboard.writeText('evidence');
+
+const browserFullscreenCalls = [];
+const browserFullscreenStates = [];
+const browserFullscreenListeners = new Map();
+let browserFullscreenTarget = null;
+const browserFullscreenDocument = {
+  fullscreenEnabled: true,
+  fullscreenElement: null,
+  documentElement: null,
+  async exitFullscreen() {
+    browserFullscreenCalls.push('exit');
+    browserFullscreenDocument.fullscreenElement = null;
+  },
+  addEventListener(type, handler) {
+    browserFullscreenCalls.push(['add', type]);
+    browserFullscreenListeners.set(type, handler);
+  },
+  removeEventListener(type, handler) {
+    browserFullscreenCalls.push(['remove', type]);
+    if (browserFullscreenListeners.get(type) === handler) browserFullscreenListeners.delete(type);
+  }
+};
+browserFullscreenTarget = {
+  async requestFullscreen() {
+    browserFullscreenCalls.push('enter');
+    browserFullscreenDocument.fullscreenElement = browserFullscreenTarget;
+  }
+};
+browserFullscreenDocument.documentElement = browserFullscreenTarget;
+const browserFullscreen = createBrowserFullscreen({ documentObject: browserFullscreenDocument });
+const disposeBrowserFullscreen = browserFullscreen.subscribe(active => browserFullscreenStates.push(active));
+await browserFullscreen.enter();
+browserFullscreenListeners.get('fullscreenchange')();
+await browserFullscreen.exit();
+browserFullscreenListeners.get('webkitfullscreenchange')();
+disposeBrowserFullscreen();
+disposeBrowserFullscreen();
+
+const browserPrintCalls = [];
+const browserPrint = createBrowserPrint({
+  windowObject: {
+    print() { browserPrintCalls.push('print'); return 'printed'; }
+  }
+});
+const browserPrintResult = browserPrint.print();
+
+class EvidenceFileReader {
+  static mode = 'load';
+  constructor() {
+    this.result = null;
+    this.error = null;
+    this.onload = null;
+    this.onerror = null;
+    this.onabort = null;
+  }
+  readAsText(file) {
+    if (EvidenceFileReader.mode === 'abort') return this.onabort?.();
+    this.result = `text:${file.name}`;
+    this.onload?.();
+  }
+  readAsDataURL(file) {
+    if (EvidenceFileReader.mode === 'abort') return this.onabort?.();
+    this.result = `data:${file.name}`;
+    this.onload?.();
+  }
+}
+const browserFileReader = createBrowserFileReader({ FileReaderClass: EvidenceFileReader });
+const browserReadTextResult = await browserFileReader.readText({ name: 'evidence.md' });
+EvidenceFileReader.mode = 'abort';
+let browserReadCancellationCode = null;
+try {
+  await browserFileReader.readDataUrl({ name: 'evidence.png' });
+} catch (error) {
+  if (!(error instanceof BrowserFileReadCancelledError)) throw error;
+  browserReadCancellationCode = error.code;
+}
+EvidenceFileReader.mode = 'load';
+
 const windowCalls = [];
 const windowDisposals = [];
 const evidenceWindow = {
@@ -310,8 +454,9 @@ await windowClient.destroy();
 if (JSON.stringify(PLATFORM_PORT_NAMES) !== JSON.stringify(expectedPortNames)) process.exit(1);
 if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exit(1);
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
+if (JSON.stringify(browserFiles) !== JSON.stringify(expectedBrowserFiles)) process.exit(1);
 if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
-if (moduleFixture.modules.length !== 166 || platformModules.length !== 27) process.exit(1);
+if (moduleFixture.modules.length !== 172 || platformModules.length !== 33) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -324,6 +469,18 @@ if (windowApiOwners.length !== 1 || windowApiOwners[0] !== 'src/platform/desktop
 if (!environmentSources['platform-detection.js'].includes('__TAURI_INTERNALS__')) process.exit(1);
 if (/@tauri|__TAURI|\binvoke\s*\(/.test(environmentSources['runtime-capabilities.js'])) process.exit(1);
 if (/\bwindow\.|\bdocument\.|\bnavigator\./.test(environmentSources['runtime-capabilities.js'])) process.exit(1);
+if (!browserSources['browser-storage.js'].includes('getItem')) process.exit(1);
+if (/JSON\.parse|JSON\.stringify|md_editor_|autosave/.test(browserSources['browser-storage.js'])) process.exit(1);
+if (!browserSources['browser-file-download.js'].includes('createObjectURL') || !browserSources['browser-file-download.js'].includes('revokeObjectURL')) process.exit(1);
+if (/showToast|exportDocument|saveCurrentDocument/.test(browserSources['browser-file-download.js'])) process.exit(1);
+if (!browserSources['browser-clipboard.js'].includes("execCommand('copy')")) process.exit(1);
+if (/showToast|copyContextDocumentTitle/.test(browserSources['browser-clipboard.js'])) process.exit(1);
+if (!browserSources['browser-fullscreen.js'].includes('fullscreenchange') || !browserSources['browser-fullscreen.js'].includes('webkitfullscreenchange')) process.exit(1);
+if (/classList|localStorage|togglePageFullscreen/.test(browserSources['browser-fullscreen.js'])) process.exit(1);
+if (!browserSources['browser-print.js'].includes('windowObject.print')) process.exit(1);
+if (/afterprint|restorePreview|markdown-body/.test(browserSources['browser-print.js'])) process.exit(1);
+if (!browserSources['browser-file-reader.js'].includes('BROWSER_FILE_READ_CANCELLED')) process.exit(1);
+if (/showToast|newDocument|insertImageMarkdown|loadTextContentAsDocument/.test(browserSources['browser-file-reader.js'])) process.exit(1);
 if (!legacyRuntimeSource.includes("from '../platform/index.js'")) process.exit(1);
 if (!legacyRuntimeSource.includes('isAvailable = capabilities.desktop.invoke')) process.exit(1);
 if (legacyRuntimeSource.includes('__TAURI_INTERNALS__')) process.exit(1);
@@ -419,6 +576,16 @@ if (linkEvidenceResult !== undefined) process.exit(1);
 if (performanceLogCalls.length !== 1 || performanceLogCalls[0].operation !== 'write_performance_logs') process.exit(1);
 if (performanceLogCalls[0].args.entries !== performanceEntries || performanceLogCalls[0].options?.record !== false) process.exit(1);
 if (performanceLogEvidenceResult !== 'logs/performance.jsonl') process.exit(1);
+if (browserStoredTheme !== 'dark') process.exit(1);
+if (browserStorageCalls.map(call => call[0]).join(',') !== 'set,get,remove,set,clear') process.exit(1);
+if (browserDownloadCalls.map(call => call[0]).join(',') !== 'createObjectURL,append,click,remove,revokeObjectURL') process.exit(1);
+if (browserDownloadCalls[2][1] !== 'blob:evidence' || browserDownloadCalls[2][2] !== 'evidence.txt') process.exit(1);
+if (browserClipboardResult !== true || browserClipboardCalls.join(',') !== 'evidence') process.exit(1);
+if (browserFullscreenStates.join(',') !== 'true,false') process.exit(1);
+if (browserFullscreenCalls.filter(call => Array.isArray(call) && call[0] === 'remove').length !== 2) process.exit(1);
+if (browserPrintResult !== 'printed' || browserPrintCalls.join(',') !== 'print') process.exit(1);
+if (browserReadTextResult !== 'text:evidence.md') process.exit(1);
+if (browserReadCancellationCode !== 'BROWSER_FILE_READ_CANCELLED') process.exit(1);
 if (!toggledMaximized || !maximized) process.exit(1);
 if (windowCalls.length !== 9 || windowDisposals.join(',') !== 'close,resize') process.exit(1);
 if (windowCalls[5].handler !== resizeHandler || windowCalls[6].handler !== closeHandler) process.exit(1);
@@ -455,7 +622,8 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-01-platform-ports-evidence.json`, `${JSO
     'all-thirty-three-legacy-native-methods-have-explicit-destination-mappings',
     'atomic-task-3.1-contracts-remain-runtime-neutral',
     'capability-detection-is-owned-by-atomic-task-3.2',
-    'desktop-command-cutovers-through-web-link-log-are-owned-by-atomic-tasks-3.3-through-3.9'
+    'desktop-command-cutovers-through-web-link-log-are-owned-by-atomic-tasks-3.3-through-3.9',
+    'browser-runtime-adapters-are-owned-by-atomic-task-3.10'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -478,7 +646,8 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-02-runtime-capabilities-evidence.json`, 
     'legacy-runtime-availability-derived-from-public-capabilities',
     'no-production-business-module-checks-tauri-internals',
     'existing-native-method-contracts-and-command-fields-remain-unchanged',
-    'desktop-command-clients-through-web-link-log-are-owned-by-atomic-tasks-3.3-through-3.9'
+    'desktop-command-clients-through-web-link-log-are-owned-by-atomic-tasks-3.3-through-3.9',
+    'browser-adapter-availability-is-implemented-by-atomic-task-3.10-without-platform-composition'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -644,5 +813,37 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-09-web-link-log-clients-evidence.json`, 
     'performance-runtime-retains-queue-aggregation-diagnostics-retry-and-flush-policy',
     'legacy-runtime-preserves-existing-web-link-log-method-names-and-unavailable-runtime-fallbacks',
     'legacy-runtime-has-zero-direct-invoke-calls-after-the-cutover'
+  ]
+}, null, 2)}\n`, 'utf8');
+
+await writeFile(`${OUTPUT_DIRECTORY}/03-10-browser-adapters-evidence.json`, `${JSON.stringify({
+  node: 'stage-03/03-10', atomicTask: '3.10', status: 'passed',
+  commit: process.env.GITHUB_SHA || null, runId: process.env.GITHUB_RUN_ID || null,
+  attempt: process.env.GITHUB_RUN_ATTEMPT || null,
+  scope: 'six-separate-browser-runtime-adapters-with-explicit-errors-cancellation-and-cleanup',
+  publicEntry: 'src/platform/index.js',
+  implementationFiles: browserFiles.map(file => `${BROWSER_DIRECTORY}/${file}`),
+  productionModuleCount: moduleFixture.modules.length,
+  platformModuleCount: platformModules.length,
+  samples: {
+    storage: { calls: browserStorageCalls, storedTheme: browserStoredTheme },
+    download: { calls: browserDownloadCalls },
+    clipboard: { calls: browserClipboardCalls, result: browserClipboardResult },
+    fullscreen: { calls: browserFullscreenCalls, states: browserFullscreenStates },
+    print: { calls: browserPrintCalls, result: browserPrintResult },
+    fileReader: { textResult: browserReadTextResult, cancellationCode: browserReadCancellationCode }
+  },
+  guarantees: [
+    'local-storage-download-clipboard-fullscreen-print-and-file-reader-have-six-separate-browser-adapters',
+    'browser-storage-preserves-string-and-null-semantics-without-owning-json-or-settings-policy',
+    'download-adapter-owns-temporary-anchor-and-object-url-cleanup-without-export-format-or-filename-policy',
+    'clipboard-prefers-native-write-text-and-uses-exec-command-only-when-native-api-is-unavailable',
+    'clipboard-errors-are-explicit-and-temporary-fallback-dom-is-always-cleaned',
+    'fullscreen-standard-and-webkit-events-share-one-idempotent-subscription-disposer',
+    'fullscreen-adapter-does-not-own-layout-css-or-page-fullscreen-policy',
+    'print-adapter-does-not-own-export-preparation-afterprint-or-preview-restoration',
+    'file-reader-abort-is-an-explicit-browser-file-read-cancelled-error',
+    'file-reader-native-errors-and-synchronous-read-errors-preserve-original-identity',
+    'browser-adapters-are-exported-but-not-yet-composed-into-create-platform-until-atomic-task-3.11'
   ]
 }, null, 2)}\n`, 'utf8');

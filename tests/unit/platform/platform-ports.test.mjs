@@ -130,8 +130,9 @@ test('Stage 3 verification keeps the 3.1 contract before later platform checks',
   const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
   const documentStoreIndex = workflow.indexOf('Verify Atomic Task 3.8 document-store client');
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
+  const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(portsIndex >= 0 && detectionIndex > portsIndex && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && architectureIndex > webLinkLogIndex);
+  assert.ok(portsIndex >= 0 && detectionIndex > portsIndex && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && architectureIndex > browserIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/invoke-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/dialog-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/window-client\.test\.mjs/);
@@ -139,9 +140,10 @@ test('Stage 3 verification keeps the 3.1 contract before later platform checks',
   assert.match(workflow, /node --test tests\/unit\/platform\/file-system-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/document-store-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/web-fetch-client\.test\.mjs tests\/unit\/platform\/link-client\.test\.mjs tests\/unit\/platform\/performance-log-client\.test\.mjs/);
-  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-09-architecture-scan\.json/);
+  assert.match(workflow, /tests\/unit\/platform\/browser-storage\.test\.mjs/);
+  assert.match(workflow, /scripts\/verify-architecture\.mjs --output=artifacts\/stage-03\/03-10-architecture-scan\.json/);
   assert.match(workflow, /scripts\/stage-03\/record-platform-evidence\.mjs/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.1[0-9]/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.11|Atomic Task 3\.12/);
 });
 
 test('the frozen legacy capability inventory maps every old native method to declared ports', async () => {

@@ -188,9 +188,10 @@ test('DocumentStore client is exported, registered and verified before the Stage
   const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
   const documentStoreIndex = workflow.indexOf('Verify Atomic Task 3.8 document-store client');
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
+  const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(fileSystemIndex >= 0 && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && architectureIndex > webLinkLogIndex);
+  assert.ok(fileSystemIndex >= 0 && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && architectureIndex > browserIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/document-store-client\.test\.mjs/);
-  assert.match(workflow, /03-09-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.1[0-9]/);
+  assert.match(workflow, /03-10-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.11|Atomic Task 3\.12/);
 });
