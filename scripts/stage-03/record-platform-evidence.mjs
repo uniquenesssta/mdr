@@ -75,7 +75,7 @@ const expectedBrowserFiles = Object.freeze([
   'browser-fullscreen.js', 'browser-print.js', 'browser-storage.js'
 ]);
 const expectedDesktopFiles = Object.freeze([
-  'dialog-client.js', 'document-store-client.js', 'drag-drop-client.js',
+  'desktop-platform.js', 'dialog-client.js', 'document-store-client.js', 'drag-drop-client.js',
   'file-system-client.js', 'invoke-client.js', 'link-client.js',
   'performance-log-client.js', 'web-fetch-client.js', 'window-client.js'
 ]);
@@ -456,7 +456,7 @@ if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exi
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
 if (JSON.stringify(browserFiles) !== JSON.stringify(expectedBrowserFiles)) process.exit(1);
 if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
-if (moduleFixture.modules.length !== 172 || platformModules.length !== 33) process.exit(1);
+if (moduleFixture.modules.length !== 174 || platformModules.length !== 35) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -847,3 +847,5 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-10-browser-adapters-evidence.json`, `${J
     'browser-adapters-are-exported-but-not-yet-composed-into-create-platform-until-atomic-task-3.11'
   ]
 }, null, 2)}\n`, 'utf8');
+
+await import('./record-create-platform-evidence.mjs');

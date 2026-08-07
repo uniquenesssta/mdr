@@ -215,10 +215,11 @@ test('Stage 3 verification runs Atomic Task 3.7 after drag-drop and before later
   const documentStoreIndex = workflow.indexOf('Verify Atomic Task 3.8 document-store client');
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
+  const createPlatformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(dragDropIndex >= 0 && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && architectureIndex > browserIndex);
+  assert.ok(dragDropIndex >= 0 && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && architectureIndex > createPlatformIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/file-system-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/document-store-client\.test\.mjs/);
-  assert.match(workflow, /03-10-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.11|Atomic Task 3\.12/);
+  assert.match(workflow, /03-11-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
 });

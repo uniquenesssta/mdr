@@ -11,6 +11,7 @@ function createBrowserRuntime(overrides = {}) {
   class Element {}
   Element.prototype.requestFullscreen = async () => {};
   return {
+    Blob: class Blob {},
     localStorage: {
       getItem() {},
       setItem() {},
@@ -117,6 +118,30 @@ test('capabilities are a deeply immutable snapshot separated from runtime behavi
   assert.equal(capabilities.browser.clipboard, true);
 });
 
+test('file download capability requires Blob as well as anchor and object URL surfaces', () => {
+  const runtime = createBrowserRuntime({ Blob: undefined });
+  const capabilities = createRuntimeCapabilities(detectPlatformEnvironment(runtime), runtime);
+  assert.equal(capabilities.browser.fileDownload, false);
+});
+
+test('WebKit-only fullscreen surfaces remain a detected browser capability', () => {
+  class Element {}
+  Element.prototype.webkitRequestFullscreen = async () => {};
+  const runtime = createBrowserRuntime({
+    Element,
+    document: {
+      fullscreenEnabled: false,
+      webkitFullscreenEnabled: true,
+      webkitExitFullscreen() {},
+      addEventListener() {},
+      createElement() {},
+      execCommand() {}
+    }
+  });
+  const capabilities = createRuntimeCapabilities(detectPlatformEnvironment(runtime), runtime);
+  assert.equal(capabilities.browser.fullscreen, true);
+});
+
 test('desktop capabilities derive only from the detected environment while browser probes stay explicit', () => {
   const runtime = createBrowserRuntime({ __TAURI_INTERNALS__: {} });
   const capabilities = createRuntimeCapabilities(detectPlatformEnvironment(runtime), runtime);
@@ -203,9 +228,10 @@ test('Stage 3 verification keeps Atomic Task 3.2 before later platform checks', 
   const documentStoreIndex = workflow.indexOf('Verify Atomic Task 3.8 document-store client');
   const webLinkLogIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
+  const createPlatformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && architectureIndex > browserIndex);
+  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && webLinkLogIndex > documentStoreIndex && browserIndex > webLinkLogIndex && createPlatformIndex > browserIndex && architectureIndex > createPlatformIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/platform-detection\.test\.mjs/);
-  assert.match(workflow, /03-10-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.11|Atomic Task 3\.12/);
+  assert.match(workflow, /03-11-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
 });

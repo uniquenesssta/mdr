@@ -57,6 +57,15 @@ export function createRuntimeCapabilities(environment, runtime = globalThis) {
   const elementConstructor = readMember(runtime, 'Element');
   const elementPrototype = readMember(elementConstructor, 'prototype');
   const isDesktop = environment.isDesktop;
+  const hasFullscreenEvents = hasMethod(documentObject, 'addEventListener');
+  const hasStandardFullscreen = readMember(documentObject, 'fullscreenEnabled') === true
+    && hasMethod(elementPrototype, 'requestFullscreen')
+    && hasMethod(documentObject, 'exitFullscreen')
+    && hasFullscreenEvents;
+  const hasWebkitFullscreen = readMember(documentObject, 'webkitFullscreenEnabled') === true
+    && hasMethod(elementPrototype, 'webkitRequestFullscreen')
+    && hasMethod(documentObject, 'webkitExitFullscreen')
+    && hasFullscreenEvents;
 
   const browser = Object.freeze({
     storage: hasMethod(storageObject, 'getItem')
@@ -64,14 +73,12 @@ export function createRuntimeCapabilities(environment, runtime = globalThis) {
       && hasMethod(storageObject, 'removeItem')
       && hasMethod(storageObject, 'clear'),
     fileRead: hasConstructor(runtime, 'FileReader'),
-    fileDownload: hasMethod(documentObject, 'createElement')
+    fileDownload: hasConstructor(runtime, 'Blob')
+      && hasMethod(documentObject, 'createElement')
       && hasMethod(urlObject, 'createObjectURL')
       && hasMethod(urlObject, 'revokeObjectURL'),
     clipboard: hasMethod(clipboardObject, 'writeText') || hasMethod(documentObject, 'execCommand'),
-    fullscreen: readMember(documentObject, 'fullscreenEnabled') === true
-      && hasMethod(elementPrototype, 'requestFullscreen')
-      && hasMethod(documentObject, 'exitFullscreen')
-      && hasMethod(documentObject, 'addEventListener'),
+    fullscreen: hasStandardFullscreen || hasWebkitFullscreen,
     print: hasMethod(runtime, 'print'),
     webFetch: hasMethod(runtime, 'fetch'),
     externalLinks: hasMethod(runtime, 'open'),

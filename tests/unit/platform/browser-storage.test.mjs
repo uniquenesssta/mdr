@@ -62,18 +62,21 @@ test('browser storage rejects incomplete injected storage surfaces', () => {
   );
 });
 
-test('Stage 3 verification runs Atomic Task 3.10 browser adapters after 3.9 and before architecture', async () => {
+test('Stage 3 verification runs Atomic Task 3.10 before createPlatform and architecture', async () => {
   const workflow = await readFile(new URL('../../../.github/workflows/stage-03-atomic.yml', import.meta.url), 'utf8');
   const previousIndex = workflow.indexOf('Verify Atomic Task 3.9 web link log clients');
   const browserIndex = workflow.indexOf('Verify Atomic Task 3.10 browser adapters');
+  const platformIndex = workflow.indexOf('Verify Atomic Task 3.11 createPlatform');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(previousIndex >= 0 && browserIndex > previousIndex && architectureIndex > browserIndex);
+  assert.ok(previousIndex >= 0 && browserIndex > previousIndex && platformIndex > browserIndex && architectureIndex > platformIndex);
   assert.match(workflow, /browser-storage\.test\.mjs/);
   assert.match(workflow, /browser-file-download\.test\.mjs/);
   assert.match(workflow, /browser-clipboard\.test\.mjs/);
   assert.match(workflow, /browser-fullscreen\.test\.mjs/);
   assert.match(workflow, /browser-print\.test\.mjs/);
   assert.match(workflow, /browser-file-reader\.test\.mjs/);
-  assert.match(workflow, /03-10-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.11|Atomic Task 3\.12/);
+  assert.match(workflow, /desktop-platform-contract\.test\.mjs/);
+  assert.match(workflow, /create-platform\.test\.mjs/);
+  assert.match(workflow, /03-11-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.12/);
 });
