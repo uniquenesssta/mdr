@@ -15,6 +15,7 @@ import {
   WEB_PORT_METHODS,
   WINDOW_PORT_METHODS,
   createDialogClient,
+  createDocumentStoreClient,
   createDragDropClient,
   createFileSystemClient,
   createInvokeClient,
@@ -59,7 +60,8 @@ const expectedPortFiles = Object.freeze([
 ]);
 const expectedEnvironmentFiles = Object.freeze(['platform-detection.js', 'runtime-capabilities.js']);
 const expectedDesktopFiles = Object.freeze([
-  'dialog-client.js', 'drag-drop-client.js', 'file-system-client.js', 'invoke-client.js', 'window-client.js'
+  'dialog-client.js', 'document-store-client.js', 'drag-drop-client.js',
+  'file-system-client.js', 'invoke-client.js', 'window-client.js'
 ]);
 
 function createBrowserRuntime() {
@@ -214,6 +216,39 @@ const fileSystemResults = {
   binaryWrite: await fileSystemClient.writeBinaryFile('/tmp/evidence.bin', new Uint8Array([1, 2, 3]), { extension: 'bin', reason: 'evidence' })
 };
 
+const documentStoreCalls = [];
+const documentStoreClient = createDocumentStoreClient({
+  invoke: async (operation, args, details) => {
+    documentStoreCalls.push({ operation, args, details });
+    return Object.freeze({ operation, args });
+  }
+});
+const documentStoreRequest = Object.freeze({
+  documentId: 'evidence-document',
+  title: 'Evidence',
+  baseVersion: 2,
+  nextVersion: 3,
+  fullContent: null,
+  transactions: Object.freeze([]),
+  updatedAt: 123,
+  forceSnapshot: false
+});
+const documentStoreSearchRequest = Object.freeze({
+  documentId: 'evidence-document', query: 'needle', from: 4, wrap: true
+});
+const documentStoreResults = {
+  save: await documentStoreClient.save(documentStoreRequest),
+  begin: await documentStoreClient.beginSnapshotUpload('evidence-document', 'upload-evidence'),
+  append: await documentStoreClient.appendSnapshotChunk('evidence-document', 'upload-evidence', 'chunk', 1),
+  commit: await documentStoreClient.commitSnapshotUpload(documentStoreRequest, 'upload-evidence'),
+  abort: await documentStoreClient.abortSnapshotUpload('evidence-document', 'upload-evidence'),
+  load: await documentStoreClient.load('evidence-document'),
+  manifest: await documentStoreClient.loadManifest('evidence-document'),
+  chunk: await documentStoreClient.readChunk('evidence-document', 32, 64 * 1024),
+  search: await documentStoreClient.search(documentStoreSearchRequest),
+  remove: await documentStoreClient.remove('evidence-document')
+};
+
 const windowCalls = [];
 const windowDisposals = [];
 const evidenceWindow = {
@@ -243,7 +278,7 @@ if (JSON.stringify(PLATFORM_PORT_NAMES) !== JSON.stringify(expectedPortNames)) p
 if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exit(1);
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
 if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
-if (moduleFixture.modules.length !== 162 || platformModules.length !== 23) process.exit(1);
+if (moduleFixture.modules.length !== 163 || platformModules.length !== 24) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -264,6 +299,10 @@ if (!desktopSources['invoke-client.js'].includes('throw error')) process.exit(1)
 if (!desktopSources['dialog-client.js'].includes("@tauri-apps/plugin-dialog")) process.exit(1);
 if (!desktopSources['dialog-client.js'].includes('normalizeSaveFileName')) process.exit(1);
 if (!desktopSources['dialog-client.js'].includes('joinNativePath')) process.exit(1);
+if (!desktopSources['document-store-client.js'].includes("'save_document_state'")) process.exit(1);
+if (!desktopSources['document-store-client.js'].includes("'read_document_chunk'")) process.exit(1);
+if (!desktopSources['document-store-client.js'].includes("'delete_document_state'")) process.exit(1);
+if (/sessions|loadSequence|VERSION_MISMATCH|saveSnapshotInChunks|DOCUMENT_LOAD_CANCELLED/.test(desktopSources['document-store-client.js'])) process.exit(1);
 if (!desktopSources['drag-drop-client.js'].includes("@tauri-apps/api/webview")) process.exit(1);
 if (!desktopSources['drag-drop-client.js'].includes('normalizeDragDropEvent')) process.exit(1);
 if (!desktopSources['drag-drop-client.js'].includes('activeDisposers')) process.exit(1);
@@ -279,11 +318,13 @@ if (legacyRuntimeSource.includes("@tauri-apps/api/core") || legacyRuntimeSource.
 if (legacyRuntimeSource.includes('@tauri-apps/plugin-dialog') || legacyRuntimeSource.includes('showOpenDialog')) process.exit(1);
 if (legacyRuntimeSource.includes('@tauri-apps/api/webview') || legacyRuntimeSource.includes('getCurrentWebview')) process.exit(1);
 if (legacyRuntimeSource.includes('@tauri-apps/api/window') || legacyRuntimeSource.includes('getCurrentWindow')) process.exit(1);
-if ((legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length !== 13) process.exit(1);
+if ((legacyRuntimeSource.match(/invokeClient\.invoke\('/g) || []).length !== 3) process.exit(1);
 if ((legacyRuntimeSource.match(/dialogClient\.(?:openFile|openDirectory|saveFile|confirm)\(/g) || []).length !== 4) process.exit(1);
+if ((legacyRuntimeSource.match(/documentStoreClient\.(?:save|beginSnapshotUpload|appendSnapshotChunk|commitSnapshotUpload|abortSnapshotUpload|load|loadManifest|readChunk|search|remove)\(/g) || []).length !== 10) process.exit(1);
 if ((legacyRuntimeSource.match(/dragDropClient\.subscribe\(/g) || []).length !== 1) process.exit(1);
 if ((legacyRuntimeSource.match(/fileSystemClient\.(?:readDroppedFile|listTextFileTree|readLocalImage|getInitialFilePath|writeTextFile|writeBinaryFile)\(/g) || []).length !== 6) process.exit(1);
 if ((legacyRuntimeSource.match(/windowClient\.(?:subscribeCloseRequest|startDrag|minimize|toggleMaximize|isMaximized|subscribeResize|requestClose|forceClose)\(/g) || []).length !== 8) process.exit(1);
+if (!legacyRuntimeSource.includes('createDocumentStoreClient({ invoke: invokeClient.invoke })')) process.exit(1);
 if (!legacyRuntimeSource.includes('createFileSystemClient({ invoke: invokeClient.invoke })')) process.exit(1);
 if (legacyRuntimeSource.includes('function bytesToBase64')) process.exit(1);
 if (!legacyRuntimeSource.includes("write_performance_logs', { entries }, {}, { record: false }")) process.exit(1);
@@ -311,6 +352,19 @@ if (fileSystemCalls[4].args.content !== 'hello') process.exit(1);
 if (fileSystemCalls[5].args.contentBase64 !== 'AQID') process.exit(1);
 if (fileSystemResults.dropped.operation !== 'read_dropped_file') process.exit(1);
 if (fileSystemResults.binaryWrite.operation !== 'write_local_binary_file') process.exit(1);
+if (documentStoreCalls.length !== 10) process.exit(1);
+if (documentStoreCalls.map(call => call.operation).join(',') !== [
+  'save_document_state', 'begin_document_snapshot_upload', 'append_document_snapshot_chunk',
+  'commit_document_snapshot_upload', 'abort_document_snapshot_upload', 'load_document_state',
+  'load_document_manifest', 'read_document_chunk', 'search_document_state', 'delete_document_state'
+].join(',')) process.exit(1);
+if (documentStoreCalls[0].args.request !== documentStoreRequest) process.exit(1);
+if (documentStoreCalls[1].args.documentId !== 'evidence-document' || documentStoreCalls[1].args.uploadId !== 'upload-evidence') process.exit(1);
+if (documentStoreCalls[2].args.chunk !== 'chunk' || documentStoreCalls[2].details.chunkIndex !== 1) process.exit(1);
+if (documentStoreCalls[3].args.request !== documentStoreRequest || documentStoreCalls[3].args.uploadId !== 'upload-evidence') process.exit(1);
+if (documentStoreCalls[7].args.byteOffset !== 32 || documentStoreCalls[7].args.maxBytes !== 64 * 1024) process.exit(1);
+if (documentStoreCalls[8].args.request !== documentStoreSearchRequest) process.exit(1);
+if (documentStoreResults.save.operation !== 'save_document_state' || documentStoreResults.remove.operation !== 'delete_document_state') process.exit(1);
 if (!toggledMaximized || !maximized) process.exit(1);
 if (windowCalls.length !== 9 || windowDisposals.join(',') !== 'close,resize') process.exit(1);
 if (windowCalls[5].handler !== resizeHandler || windowCalls[6].handler !== closeHandler) process.exit(1);
@@ -347,7 +401,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-01-platform-ports-evidence.json`, `${JSO
     'all-thirty-three-legacy-native-methods-have-explicit-destination-mappings',
     'atomic-task-3.1-contracts-remain-runtime-neutral',
     'capability-detection-is-owned-by-atomic-task-3.2',
-    'invoke-dialog-window-drag-drop-and-file-system-client-cutovers-are-owned-by-atomic-tasks-3.3-through-3.7'
+    'invoke-dialog-window-drag-drop-file-system-and-document-store-client-cutovers-are-owned-by-atomic-tasks-3.3-through-3.8'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -370,7 +424,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-02-runtime-capabilities-evidence.json`, 
     'legacy-runtime-availability-derived-from-public-capabilities',
     'no-production-business-module-checks-tauri-internals',
     'existing-native-method-contracts-and-command-fields-remain-unchanged',
-    'invoke-dialog-window-drag-drop-and-file-system-clients-are-owned-by-atomic-tasks-3.3-through-3.7'
+    'invoke-dialog-window-drag-drop-file-system-and-document-store-clients-are-owned-by-atomic-tasks-3.3-through-3.8'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -390,8 +444,8 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-03-invoke-client-evidence.json`, `${JSON
     'original-invoke-result-and-error-identity-preserved',
     'telemetry-failures-cannot-replace-native-semantics',
     'performance-log-transport-explicitly-suppresses-recursive-telemetry',
-    'thirteen-legacy-runtime-commands-remain-direct-and-six-file-commands-use-the-same-invoke-transport-through-file-system-client',
-    'dialog-window-drag-drop-and-file-system-clients-are-owned-by-atomic-tasks-3.4-through-3.7'
+    'three-legacy-runtime-commands-remain-direct-while-six-file-and-ten-document-store-commands-share-the-invoke-transport-through-clients',
+    'dialog-window-drag-drop-file-system-and-document-store-clients-are-owned-by-atomic-tasks-3.4-through-3.8'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -415,7 +469,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-04-dialog-client-evidence.json`, `${JSON
     'native-dialog-errors-are-rethrown-with-original-identity',
     'dialog-telemetry-failures-cannot-replace-native-results-or-errors',
     'legacy-runtime-retains-browser-confirm-and-unavailable-null-fallbacks',
-    'document-store-web-link-and-log-adapters-remain-deferred'
+    'web-link-and-log-adapters-remain-deferred'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -439,7 +493,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-05-window-client-evidence.json`, `${JSON
     'request-close-preserves-close-request-events-while-force-close-preserves-native-destroy-fallback',
     'native-window-results-and-error-identity-remain-unchanged',
     'save-before-close-policy-remains-in-the-application-layer',
-    'document-store-web-link-and-log-adapters-remain-deferred'
+    'web-link-and-log-adapters-remain-deferred'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -463,7 +517,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-06-drag-drop-client-evidence.json`, `${J
     'late-subscription-results-are-disposed-after-client-destroy',
     'native-registration-cleanup-and-handler-errors-retain-original-semantics',
     'legacy-runtime-preserves-the-existing-payload-wrapper-and-unavailable-null-fallback',
-    'document-store-web-link-and-log-adapters-remain-deferred'
+    'web-link-and-log-adapters-remain-deferred'
   ]
 }, null, 2)}\n`, 'utf8');
 
@@ -486,6 +540,28 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-07-file-system-client-evidence.json`, `$
     'file-system-client-does-not-create-documents-insert-images-or-show-toasts',
     'native-file-command-results-and-error-identity-remain-unchanged',
     'legacy-runtime-preserves-six-existing-file-methods-and-runtime-unavailable-fallbacks',
-    'document-store-web-link-and-log-adapters-remain-deferred'
+    'web-link-and-log-adapters-remain-deferred'
+  ]
+}, null, 2)}\n`, 'utf8');
+
+await writeFile(`${OUTPUT_DIRECTORY}/03-08-document-store-client-evidence.json`, `${JSON.stringify({
+  node: 'stage-03/03-08', atomicTask: '3.8', status: 'passed',
+  commit: process.env.GITHUB_SHA || null, runId: process.env.GITHUB_RUN_ID || null,
+  attempt: process.env.GITHUB_RUN_ATTEMPT || null,
+  scope: 'desktop-document-store-command-mapping-with-rust-owned-camelcase-dtos-and-storage-owned-session-policy',
+  publicEntry: 'src/platform/index.js',
+  implementationFiles: [`${DESKTOP_DIRECTORY}/document-store-client.js`],
+  productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
+  delegationCount: (legacyRuntimeSource.match(/documentStoreClient\.(?:save|beginSnapshotUpload|appendSnapshotChunk|commitSnapshotUpload|abortSnapshotUpload|load|loadManifest|readChunk|search|remove)\(/g) || []).length,
+  sample: { calls: documentStoreCalls, results: documentStoreResults },
+  guarantees: [
+    'exactly-ten-existing-rust-document-store-commands-are-mapped',
+    'save-search-version-and-snapshot-request-objects-preserve-existing-camelcase-fields',
+    'snapshot-upload-document-id-upload-id-chunk-and-chunk-index-semantics-remain-compatible',
+    'chunk-read-default-and-minimum-byte-normalization-remain-compatible',
+    'rust-document-store-results-null-values-and-errors-pass-through-without-client-interpretation',
+    'native-document-store-retains-session-version-mismatch-retry-load-cancellation-and-snapshot-policy',
+    'legacy-runtime-preserves-ten-existing-document-store-methods-and-unavailable-runtime-fallbacks',
+    'only-web-link-and-log-direct-invoke-mappings-remain-for-atomic-task-3.9'
   ]
 }, null, 2)}\n`, 'utf8');

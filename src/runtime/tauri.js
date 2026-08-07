@@ -1,4 +1,4 @@
-import { createDialogClient, createDragDropClient, createFileSystemClient, createInvokeClient, createRuntimeCapabilities, createWindowClient, detectPlatformEnvironment } from '../platform/index.js';
+import { createDialogClient, createDocumentStoreClient, createDragDropClient, createFileSystemClient, createInvokeClient, createRuntimeCapabilities, createWindowClient, detectPlatformEnvironment } from '../platform/index.js';
 
 const platformEnvironment = detectPlatformEnvironment(window);
 const capabilities = createRuntimeCapabilities(platformEnvironment, window);
@@ -11,6 +11,7 @@ const dialogClient = createDialogClient({
   now: () => performance.now(),
   record: (operation, entry) => window.markdownEditorPerf?.record(operation, entry)
 });
+const documentStoreClient = createDocumentStoreClient({ invoke: invokeClient.invoke });
 const dragDropClient = createDragDropClient();
 const fileSystemClient = createFileSystemClient({ invoke: invokeClient.invoke });
 const windowClient = createWindowClient();
@@ -66,78 +67,43 @@ window.markdownEditorNative = {
   },
   async saveDocumentState(request) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
-    return invokeClient.invoke('save_document_state', { request }, {
-      documentId: request?.documentId || '',
-      baseVersion: request?.baseVersion || 0,
-      nextVersion: request?.nextVersion || 0,
-      transactions: request?.transactions?.length || 0,
-      fullSnapshot: typeof request?.fullContent === 'string'
-    });
+    return documentStoreClient.save(request);
   },
   async beginDocumentSnapshotUpload(documentId, uploadId) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
-    return invokeClient.invoke('begin_document_snapshot_upload', { documentId, uploadId }, {
-      documentId,
-      uploadId
-    });
+    return documentStoreClient.beginSnapshotUpload(documentId, uploadId);
   },
   async appendDocumentSnapshotChunk(documentId, uploadId, chunk, chunkIndex = 0) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
-    const content = String(chunk ?? '');
-    return invokeClient.invoke('append_document_snapshot_chunk', {
-      documentId,
-      uploadId,
-      chunk: content
-    }, {
-      documentId,
-      uploadId,
-      chunkIndex,
-      characters: content.length
-    });
+    return documentStoreClient.appendSnapshotChunk(documentId, uploadId, chunk, chunkIndex);
   },
   async commitDocumentSnapshotUpload(request, uploadId) {
     if (!isAvailable) throw new Error('Tauri runtime is not available');
-    return invokeClient.invoke('commit_document_snapshot_upload', { request, uploadId }, {
-      documentId: request?.documentId || '',
-      uploadId,
-      baseVersion: request?.baseVersion || 0,
-      nextVersion: request?.nextVersion || 0
-    });
+    return documentStoreClient.commitSnapshotUpload(request, uploadId);
   },
   async abortDocumentSnapshotUpload(documentId, uploadId) {
     if (!isAvailable) return;
-    return invokeClient.invoke('abort_document_snapshot_upload', { documentId, uploadId }, {
-      documentId,
-      uploadId
-    });
+    return documentStoreClient.abortSnapshotUpload(documentId, uploadId);
   },
   async loadDocumentState(documentId) {
     if (!isAvailable) return null;
-    return invokeClient.invoke('load_document_state', { documentId }, { documentId });
+    return documentStoreClient.load(documentId);
   },
   async loadDocumentManifest(documentId) {
     if (!isAvailable) return null;
-    return invokeClient.invoke('load_document_manifest', { documentId }, { documentId });
+    return documentStoreClient.loadManifest(documentId);
   },
   async readDocumentChunk(documentId, byteOffset, maxBytes = 512 * 1024) {
     if (!isAvailable) return null;
-    return invokeClient.invoke('read_document_chunk', {
-      documentId,
-      byteOffset: Math.max(0, Number(byteOffset) || 0),
-      maxBytes: Math.max(16 * 1024, Number(maxBytes) || 512 * 1024)
-    }, { documentId, byteOffset, maxBytes });
+    return documentStoreClient.readChunk(documentId, byteOffset, maxBytes);
   },
   async searchDocumentState(request) {
     if (!isAvailable) return null;
-    return invokeClient.invoke('search_document_state', { request }, {
-      documentId: request?.documentId || '',
-      queryLength: String(request?.query || '').length,
-      from: Number(request?.from) || 0
-    });
+    return documentStoreClient.search(request);
   },
   async deleteDocumentState(documentId) {
     if (!isAvailable) return;
-    return invokeClient.invoke('delete_document_state', { documentId }, { documentId });
+    return documentStoreClient.remove(documentId);
   },
   async chooseOpenPath(options = {}) {
     if (!isAvailable) return null;

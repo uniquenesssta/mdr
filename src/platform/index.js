@@ -3,6 +3,7 @@ export * from './ports/index.js';
 export { detectPlatformEnvironment, PLATFORM_ENVIRONMENTS } from './environment/platform-detection.js';
 export { createRuntimeCapabilities } from './environment/runtime-capabilities.js';
 export { createDialogClient } from './desktop/dialog-client.js';
+export { createDocumentStoreClient } from './desktop/document-store-client.js';
 export { createDragDropClient } from './desktop/drag-drop-client.js';
 export { createFileSystemClient } from './desktop/file-system-client.js';
 export { createInvokeClient } from './desktop/invoke-client.js';

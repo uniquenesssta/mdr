@@ -236,12 +236,14 @@ test('Stage 3 verification keeps Atomic Task 3.4 after invoke and before later a
   const windowIndex = workflow.indexOf('Verify Atomic Task 3.5 window client');
   const dragDropIndex = workflow.indexOf('Verify Atomic Task 3.6 drag-drop client');
   const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
+  const documentStoreIndex = workflow.indexOf('Verify Atomic Task 3.8 document-store client');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(invokeIndex >= 0 && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && architectureIndex > fileSystemIndex);
+  assert.ok(invokeIndex >= 0 && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && architectureIndex > documentStoreIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/dialog-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/window-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/drag-drop-client\.test\.mjs/);
   assert.match(workflow, /node --test tests\/unit\/platform\/file-system-client\.test\.mjs/);
-  assert.match(workflow, /03-07-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[89]|Atomic Task 3\.1[0-9]/);
+  assert.match(workflow, /node --test tests\/unit\/platform\/document-store-client\.test\.mjs/);
+  assert.match(workflow, /03-08-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.9|Atomic Task 3\.1[0-9]/);
 });

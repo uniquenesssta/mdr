@@ -7,6 +7,7 @@ const root = new URL('../', import.meta.url);
 test('browser E2E runner stays dependency-free and covers required interactions', async () => {
   const runner = await readFile(new URL('./e2e/run-browser-tests.mjs', import.meta.url), 'utf8');
   const bridge = await readFile(new URL('../src/runtime/e2e-bridge.js', import.meta.url), 'utf8');
+  const browserLauncher = await readFile(new URL('./e2e/lib/cdp-browser.mjs', import.meta.url), 'utf8');
   for (const phrase of [
     'single click keeps a component presented',
     'strict double click opens direct editing',
@@ -23,6 +24,9 @@ test('browser E2E runner stays dependency-free and covers required interactions'
   ]) assert.ok(runner.includes(phrase), `missing browser scenario: ${phrase}`);
   assert.match(runner, /node:assert\/strict/);
   assert.doesNotMatch(runner, /playwright|puppeteer|selenium-webdriver/i);
+  assert.match(browserLauncher, /--headless=new/);
+  assert.match(browserLauncher, /accessSync/);
+  assert.doesNotMatch(browserLauncher, /spawnSync|--version/);
   assert.match(bridge, /loadMarkdown/);
   assert.match(bridge, /getHybridComponentStates/);
 });

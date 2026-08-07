@@ -123,30 +123,16 @@ test('the desktop invoke client is the sole production owner of the Tauri core i
   assert.match(publicEntry, /desktop\/invoke-client\.js/);
 });
 
-test('legacy runtime keeps thirteen direct native commands while file commands move behind FileSystem client', async () => {
+test('legacy runtime keeps only Web Link Log direct commands after FileSystem and DocumentStore cutovers', async () => {
   const source = await readFile(new URL('../../../src/runtime/tauri.js', import.meta.url), 'utf8');
-  const expectedCommands = [
-    'abort_document_snapshot_upload',
-    'append_document_snapshot_chunk',
-    'begin_document_snapshot_upload',
-    'commit_document_snapshot_upload',
-    'delete_document_state',
-    'fetch_url',
-    'load_document_manifest',
-    'load_document_state',
-    'open_external_url',
-    'read_document_chunk',
-    'save_document_state',
-    'search_document_state',
-    'write_performance_logs'
-  ];
   const delegatedCommands = [...source.matchAll(/invokeClient\.invoke\('([^']+)'/g)]
     .map(match => match[1])
     .sort();
-  assert.deepEqual(delegatedCommands, expectedCommands);
+  assert.deepEqual(delegatedCommands, ['fetch_url', 'open_external_url', 'write_performance_logs']);
   assert.doesNotMatch(source, /@tauri-apps\/api\/core|\binvokeMeasured\b/);
   assert.match(source, /createInvokeClient\(/);
   assert.match(source, /createFileSystemClient\(\{ invoke: invokeClient\.invoke \}\)/);
+  assert.match(source, /createDocumentStoreClient\(\{ invoke: invokeClient\.invoke \}\)/);
   assert.match(source, /write_performance_logs[\s\S]*record: false/);
 });
 
@@ -161,9 +147,10 @@ test('Stage 3 verification keeps Atomic Task 3.3 before later adapters and archi
   const windowIndex = workflow.indexOf('Verify Atomic Task 3.5 window client');
   const dragDropIndex = workflow.indexOf('Verify Atomic Task 3.6 drag-drop client');
   const fileSystemIndex = workflow.indexOf('Verify Atomic Task 3.7 file-system client');
+  const documentStoreIndex = workflow.indexOf('Verify Atomic Task 3.8 document-store client');
   const architectureIndex = workflow.indexOf('Run architecture hard gate');
-  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && architectureIndex > fileSystemIndex);
+  assert.ok(detectionIndex >= 0 && invokeIndex > detectionIndex && dialogIndex > invokeIndex && windowIndex > dialogIndex && dragDropIndex > windowIndex && fileSystemIndex > dragDropIndex && documentStoreIndex > fileSystemIndex && architectureIndex > documentStoreIndex);
   assert.match(workflow, /node --test tests\/unit\/platform\/invoke-client\.test\.mjs/);
-  assert.match(workflow, /03-07-architecture-scan\.json/);
-  assert.doesNotMatch(workflow, /Atomic Task 3\.[89]|Atomic Task 3\.1[0-9]/);
+  assert.match(workflow, /03-08-architecture-scan\.json/);
+  assert.doesNotMatch(workflow, /Atomic Task 3\.9|Atomic Task 3\.1[0-9]/);
 });
