@@ -1,6 +1,9 @@
 import { spawnSync } from 'node:child_process';
 
 const PROCESS_NAME = 'markdown-editor';
+const WINDOW_TITLE = 'Markdown Editor';
+const MIN_WINDOW_WIDTH = 600;
+const MIN_WINDOW_HEIGHT = 480;
 
 function runPowerShell(script) {
   if (process.platform !== 'win32') {
@@ -29,8 +32,11 @@ function nativeApiSource() {
 Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 public static class MarkdownEditorWindowAutomation {
+  public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
   [StructLayout(LayoutKind.Sequential)]
   public struct POINT {
     public int X;
@@ -55,6 +61,22 @@ public static class MarkdownEditorWindowAutomation {
     public RECT NormalPosition;
   }
 
+  [DllImport("user32.dll")]
+  public static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lParam);
+
+  [DllImport("user32.dll")]
+  public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+  [DllImport("user32.dll")]
+  [return: MarshalAs(UnmanagedType.Bool)]
+  public static extern bool IsWindowVisible(IntPtr hWnd);
+
+  [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+  public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int maxCount);
+
+  [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+  public static extern int GetWindowTextLength(IntPtr hWnd);
+
   [DllImport("user32.dll", SetLastError = true)]
   public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
 
@@ -72,6 +94,55 @@ public static class MarkdownEditorWindowAutomation {
 
   [DllImport("user32.dll")]
   public static extern void mouse_event(uint flags, uint dx, uint dy, uint data, UIntPtr extraInfo);
+
+  public static string ReadWindowTitle(IntPtr hWnd) {
+    int length = GetWindowTextLength(hWnd);
+    var builder = new StringBuilder(Math.Max(length + 1, 2));
+    GetWindowText(hWnd, builder, builder.Capacity);
+    return builder.ToString();
+  }
+
+  public static IntPtr FindMainWindow(
+    uint processId,
+    string expectedTitle,
+    int minWidth,
+    int minHeight
+  ) {
+    IntPtr titledCandidate = IntPtr.Zero;
+    long titledArea = -1;
+    IntPtr sizedCandidate = IntPtr.Zero;
+    long sizedArea = -1;
+
+    EnumWindows((hWnd, lParam) => {
+      uint windowProcessId;
+      GetWindowThreadProcessId(hWnd, out windowProcessId);
+      if (windowProcessId != processId || !IsWindowVisible(hWnd)) return true;
+
+      RECT rect;
+      if (!GetWindowRect(hWnd, out rect)) return true;
+
+      int width = rect.Right - rect.Left;
+      int height = rect.Bottom - rect.Top;
+      if (width <= 0 || height <= 0) return true;
+
+      long area = (long)width * height;
+      string title = ReadWindowTitle(hWnd);
+
+      if (string.Equals(title, expectedTitle, StringComparison.Ordinal) && area > titledArea) {
+        titledCandidate = hWnd;
+        titledArea = area;
+      }
+
+      if (width >= minWidth && height >= minHeight && area > sizedArea) {
+        sizedCandidate = hWnd;
+        sizedArea = area;
+      }
+
+      return true;
+    }, IntPtr.Zero);
+
+    return titledCandidate != IntPtr.Zero ? titledCandidate : sizedCandidate;
+  }
 }
 '@
 `;
@@ -80,7 +151,6 @@ public static class MarkdownEditorWindowAutomation {
 function processLookupSource() {
   return String.raw`
 $process = Get-Process -Name '${PROCESS_NAME}' -ErrorAction SilentlyContinue |
-  Where-Object { $_.MainWindowHandle -ne 0 } |
   Sort-Object StartTime -Descending |
   Select-Object -First 1
 if ($null -eq $process) {
@@ -89,23 +159,38 @@ if ($null -eq $process) {
 `;
 }
 
+function mainWindowLookupSource() {
+  return String.raw`
+${processLookupSource()}
+$windowHandle = [MarkdownEditorWindowAutomation]::FindMainWindow(
+  [uint32]$process.Id,
+  '${WINDOW_TITLE}',
+  ${MIN_WINDOW_WIDTH},
+  ${MIN_WINDOW_HEIGHT}
+)
+if ($windowHandle -eq [IntPtr]::Zero) {
+  throw 'Markdown Editor main native window was not found for the current process.'
+}
+`;
+}
+
 export function getWindowSnapshot() {
   const output = runPowerShell(String.raw`
 ${nativeApiSource()}
-${processLookupSource()}
+${mainWindowLookupSource()}
 $rect = New-Object MarkdownEditorWindowAutomation+RECT
 $placement = New-Object MarkdownEditorWindowAutomation+WINDOWPLACEMENT
 $placement.Length = [Runtime.InteropServices.Marshal]::SizeOf($placement)
-if (-not [MarkdownEditorWindowAutomation]::GetWindowRect($process.MainWindowHandle, [ref]$rect)) {
+if (-not [MarkdownEditorWindowAutomation]::GetWindowRect($windowHandle, [ref]$rect)) {
   throw 'GetWindowRect failed.'
 }
-if (-not [MarkdownEditorWindowAutomation]::GetWindowPlacement($process.MainWindowHandle, [ref]$placement)) {
+if (-not [MarkdownEditorWindowAutomation]::GetWindowPlacement($windowHandle, [ref]$placement)) {
   throw 'GetWindowPlacement failed.'
 }
 [pscustomobject]@{
   pid = $process.Id
-  handle = [int64]$process.MainWindowHandle
-  title = $process.MainWindowTitle
+  handle = [int64]$windowHandle
+  title = [MarkdownEditorWindowAutomation]::ReadWindowTitle($windowHandle)
   showCmd = $placement.ShowCmd
   left = $rect.Left
   top = $rect.Top
@@ -121,10 +206,10 @@ if (-not [MarkdownEditorWindowAutomation]::GetWindowPlacement($process.MainWindo
 export function restoreWindow() {
   runPowerShell(String.raw`
 ${nativeApiSource()}
-${processLookupSource()}
-[void][MarkdownEditorWindowAutomation]::ShowWindowAsync($process.MainWindowHandle, 9)
+${mainWindowLookupSource()}
+[void][MarkdownEditorWindowAutomation]::ShowWindowAsync($windowHandle, 9)
 Start-Sleep -Milliseconds 250
-[void][MarkdownEditorWindowAutomation]::SetForegroundWindow($process.MainWindowHandle)
+[void][MarkdownEditorWindowAutomation]::SetForegroundWindow($windowHandle)
 `);
 }
 
@@ -135,8 +220,8 @@ export function dragWindow({ startX, startY, endX, endY }) {
 
   runPowerShell(String.raw`
 ${nativeApiSource()}
-${processLookupSource()}
-[void][MarkdownEditorWindowAutomation]::SetForegroundWindow($process.MainWindowHandle)
+${mainWindowLookupSource()}
+[void][MarkdownEditorWindowAutomation]::SetForegroundWindow($windowHandle)
 Start-Sleep -Milliseconds 300
 [void][MarkdownEditorWindowAutomation]::SetCursorPos(${Math.round(startX)}, ${Math.round(startY)})
 Start-Sleep -Milliseconds 150

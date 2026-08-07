@@ -96,6 +96,12 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(nativeHelper, /GetWindowPlacement/);
   assert.match(nativeHelper, /GetWindowRect/);
   assert.match(nativeHelper, /mouse_event/);
+  assert.match(nativeHelper, /EnumWindows/);
+  assert.match(nativeHelper, /GetWindowThreadProcessId/);
+  assert.match(nativeHelper, /IsWindowVisible/);
+  assert.match(nativeHelper, /FindMainWindow/);
+  assert.match(nativeHelper, /Markdown Editor/);
+  assert.doesNotMatch(nativeHelper, /MainWindowHandle/);
 
   assert.doesNotMatch(cargoManifest, /tauri-plugin-wdio-webdriver/);
   assert.doesNotMatch(cargoLock, /tauri-plugin-wdio-webdriver/);
