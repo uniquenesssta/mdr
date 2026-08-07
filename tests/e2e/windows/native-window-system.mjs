@@ -89,12 +89,6 @@ public static class MarkdownEditorWindowAutomation {
   [DllImport("user32.dll")]
   public static extern bool SetForegroundWindow(IntPtr hWnd);
 
-  [DllImport("user32.dll")]
-  public static extern bool SetCursorPos(int x, int y);
-
-  [DllImport("user32.dll")]
-  public static extern void mouse_event(uint flags, uint dx, uint dy, uint data, UIntPtr extraInfo);
-
   public static string ReadWindowTitle(IntPtr hWnd) {
     int length = GetWindowTextLength(hWnd);
     var builder = new StringBuilder(Math.Max(length + 1, 2));
@@ -210,32 +204,6 @@ ${mainWindowLookupSource()}
 [void][MarkdownEditorWindowAutomation]::ShowWindowAsync($windowHandle, 9)
 Start-Sleep -Milliseconds 250
 [void][MarkdownEditorWindowAutomation]::SetForegroundWindow($windowHandle)
-`);
-}
-
-export function dragWindow({ startX, startY, endX, endY }) {
-  for (const [name, value] of Object.entries({ startX, startY, endX, endY })) {
-    if (!Number.isFinite(value)) throw new TypeError(`${name} must be a finite number.`);
-  }
-
-  runPowerShell(String.raw`
-${nativeApiSource()}
-${mainWindowLookupSource()}
-[void][MarkdownEditorWindowAutomation]::SetForegroundWindow($windowHandle)
-Start-Sleep -Milliseconds 300
-[void][MarkdownEditorWindowAutomation]::SetCursorPos(${Math.round(startX)}, ${Math.round(startY)})
-Start-Sleep -Milliseconds 150
-[MarkdownEditorWindowAutomation]::mouse_event(0x0002, 0, 0, 0, [UIntPtr]::Zero)
-Start-Sleep -Milliseconds 200
-$steps = 12
-for ($index = 1; $index -le $steps; $index += 1) {
-  $x = [Math]::Round(${Math.round(startX)} + ((${Math.round(endX)} - ${Math.round(startX)}) * $index / $steps))
-  $y = [Math]::Round(${Math.round(startY)} + ((${Math.round(endY)} - ${Math.round(startY)}) * $index / $steps))
-  [void][MarkdownEditorWindowAutomation]::SetCursorPos($x, $y)
-  Start-Sleep -Milliseconds 35
-}
-[MarkdownEditorWindowAutomation]::mouse_event(0x0004, 0, 0, 0, [UIntPtr]::Zero)
-Start-Sleep -Milliseconds 350
 `);
 }
 

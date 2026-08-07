@@ -82,6 +82,17 @@ async function startApplication({ binaryPath, repositoryRoot, artifactDirectory,
   };
 }
 
+function assertFinitePoint(name, point) {
+  if (!point || typeof point !== 'object') {
+    throw new TypeError(`${name} must be a point object.`);
+  }
+  for (const axis of ['x', 'y']) {
+    if (!Number.isFinite(point[axis])) {
+      throw new TypeError(`${name}.${axis} must be a finite number.`);
+    }
+  }
+}
+
 function createBrowserAdapter(driver) {
   return Object.freeze({
     async $(selector) {
@@ -105,6 +116,28 @@ function createBrowserAdapter(driver) {
         throw new Error(result?.error || 'Browser script execution failed without an error message.');
       }
       return result.value;
+    },
+    async dragFromViewportPoint({ start, end, durationMs = 450 }) {
+      assertFinitePoint('start', start);
+      assertFinitePoint('end', end);
+      if (!Number.isFinite(durationMs) || durationMs < 0) {
+        throw new TypeError('durationMs must be a non-negative finite number.');
+      }
+
+      await driver.actions()
+        .move({
+          x: Math.round(start.x),
+          y: Math.round(start.y),
+          duration: 100
+        })
+        .press()
+        .move({
+          x: Math.round(end.x),
+          y: Math.round(end.y),
+          duration: Math.max(100, Math.round(durationMs))
+        })
+        .release()
+        .perform();
     },
     async waitUntil(predicate, options = {}) {
       const timeout = options.timeout ?? 10_000;

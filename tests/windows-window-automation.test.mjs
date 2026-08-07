@@ -74,14 +74,16 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
     'destroyWindow',
     'waitForProcessExit',
     'waitForNativeWindow',
-    'snapshot.pid === child.pid'
+    'snapshot.pid === child.pid',
+    'dragFromViewportPoint',
+    'dragCalls'
   ]) {
     assert.match(runner, new RegExp(contract.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
 
   assert.match(runner, /withEmbeddedSession/);
   assert.match(runner, /driverProvider: 'embedded'/);
-  assert.doesNotMatch(runner, /Builder, By, Capabilities|tauri-driver|MSEDGEDRIVER_PATH/);
+  assert.doesNotMatch(runner, /dragWindow|Builder, By, Capabilities|tauri-driver|MSEDGEDRIVER_PATH/);
 
   assert.match(sessionOwner, /TAURI_WEBDRIVER_PORT/);
   assert.match(sessionOwner, /\/status/);
@@ -91,17 +93,20 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(sessionOwner, /switchTo\(\)\.window/);
   assert.match(sessionOwner, /isWindowStartupRace/);
   assert.match(sessionOwner, /assertApplicationRunning/);
+  assert.match(sessionOwner, /dragFromViewportPoint/);
+  assert.match(sessionOwner, /driver\.actions\(\)/);
+  assert.match(sessionOwner, /\.press\(\)/);
+  assert.match(sessionOwner, /\.release\(\)/);
   assert.doesNotMatch(sessionOwner, /tauri:options|--native-driver|node:net/);
 
   assert.match(nativeHelper, /GetWindowPlacement/);
   assert.match(nativeHelper, /GetWindowRect/);
-  assert.match(nativeHelper, /mouse_event/);
   assert.match(nativeHelper, /EnumWindows/);
   assert.match(nativeHelper, /GetWindowThreadProcessId/);
   assert.match(nativeHelper, /IsWindowVisible/);
   assert.match(nativeHelper, /FindMainWindow/);
   assert.match(nativeHelper, /Markdown Editor/);
-  assert.doesNotMatch(nativeHelper, /MainWindowHandle/);
+  assert.doesNotMatch(nativeHelper, /MainWindowHandle|SetCursorPos|mouse_event|dragWindow/);
 
   assert.doesNotMatch(cargoManifest, /tauri-plugin-wdio-webdriver/);
   assert.doesNotMatch(cargoLock, /tauri-plugin-wdio-webdriver/);

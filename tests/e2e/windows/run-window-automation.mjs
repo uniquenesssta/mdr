@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import {
-  dragWindow,
   getWindowSnapshot,
   restoreWindow,
   waitForProcessExit,
@@ -107,6 +106,8 @@ try {
           resizeEvents: 0,
           disposedResizeEvents: null,
           resizeDisposer: null,
+          originalStartWindowDragging: null,
+          dragCalls: 0,
           originalCloseWindow: null,
           closeCommitCalls: 0
         };
@@ -168,13 +169,32 @@ try {
         throw new Error('No safe title-bar drag point was found.');
       });
 
-      const beforeDrag = getWindowSnapshot();
-      dragWindow({
-        startX: beforeDrag.left + dragPoint.x,
-        startY: beforeDrag.top + dragPoint.y,
-        endX: beforeDrag.left + dragPoint.x + 120,
-        endY: beforeDrag.top + dragPoint.y + 80
+      await browser.execute(() => {
+        const state = window.__windowsNativeAutomation;
+        const bridge = window.markdownEditorNative;
+        state.originalStartWindowDragging = bridge.startWindowDragging;
+        bridge.startWindowDragging = async (...args) => {
+          state.dragCalls += 1;
+          return state.originalStartWindowDragging.apply(bridge, args);
+        };
       });
+
+      const beforeDrag = getWindowSnapshot();
+      await browser.dragFromViewportPoint({
+        start: dragPoint,
+        end: { x: dragPoint.x + 120, y: dragPoint.y + 80 },
+        durationMs: 500
+      });
+      await browser.waitUntil(
+        async () => (await browser.execute(() => window.__windowsNativeAutomation.dragCalls)) > 0,
+        {
+          timeout: 5_000,
+          interval: 100,
+          timeoutMsg: 'Title-bar pointer input did not reach the production drag handler.'
+        }
+      );
+      const dragCalls = await browser.execute(() => window.__windowsNativeAutomation.dragCalls);
+      assert.equal(dragCalls, 1);
       const afterDrag = await waitForWindowSnapshot(snapshot => movedEnough(beforeDrag, snapshot));
       assert.equal(movedEnough(beforeDrag, afterDrag), true);
 
@@ -225,6 +245,7 @@ try {
         minimized,
         afterMinimizeRestore,
         beforeDrag,
+        dragCalls,
         afterDrag,
         preventedClose
       };
