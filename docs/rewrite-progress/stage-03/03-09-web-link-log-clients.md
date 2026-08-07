@@ -2,7 +2,7 @@
 
 ## Result
 
-Atomic Task 3.9 implementation is complete and awaiting controlled validation. The three remaining native command responsibilities are now separated into dedicated desktop clients; no generic native client was introduced.
+Atomic Task 3.9 is **PASS**. The three remaining native command responsibilities are separated into dedicated desktop clients; no generic native client was introduced, and the legacy compatibility runtime now has zero direct `invokeClient.invoke()` calls.
 
 ## Implemented scope
 
@@ -26,10 +26,19 @@ Existing `window.markdownEditorNative.fetchUrl()`, `openExternalUrl()` and `writ
 
 ## Verification
 
-Controlled validation is pending. Required order: 3.1 → 3.2 → 3.3 → 3.4 → 3.5 → 3.6 → 3.7 → 3.8 → 3.9 → architecture hard gate → Node/browser/build regression → evidence generation.
+Windows validation completed on 2026-08-07 after fast-forwarding `rewrite/modular-rebuild` to Atomic 3.9:
 
-Production inventory target after this task: **166 modules total, 27 platform modules**. The legacy compatibility runtime target is **zero direct `invokeClient.invoke()` calls**.
+- Atomic 3.9 Web / Link / Log client tests: **16/16 passed**.
+- `npm run verify:architecture`: **passed**.
+- `npm test`: **42/42 passed**.
+- `npm run test:browser:contract`: **10/10 passed**.
+- `npm run build`: **passed**, Vite transformed 2206 modules; the existing chunk-size warning for minified chunks above 500 kB remains informational and was not changed by this task.
+- `npm run test:browser`: **12/12 passed**.
+- `node scripts/stage-03/record-platform-evidence.mjs`: **completed successfully** with no error output.
+- `npm audit`: **0 vulnerabilities**.
+
+Production inventory is **166 modules total, 27 platform modules**. The legacy compatibility runtime has **zero direct `invokeClient.invoke()` calls**.
 
 ## Remaining risk
 
-Until Windows validation completes, the three client cutovers and zero-direct-invoke target are not claimed as passed. Atomic Task 3.10 Browser adapters remains deferred.
+No Atomic 3.9 acceptance failure remains. This task did not alter Rust implementations, dependencies or lock files. Atomic Task 3.10 Browser adapters remains deferred and must be executed as a separate Atomic Task.
