@@ -60,16 +60,17 @@ test('Atomic Task 2.3 sprite has one stable definition for every preserved icon 
 });
 
 test('compatibility and dynamic callers reference the external sprite without a second geometry authority', async () => {
-  const [shell, core, events, linkPreview, folderTree, browserTest] = await Promise.all([
+  const [shell, core, events, helpDialog, linkPreview, folderTree, browserTest] = await Promise.all([
     readText('public/compatibility/business-content.html'),
     readText('public/app/core.js'),
     readText('public/app/events.js'),
+    readText('src/features/help/ui/help-dialog-view.js'),
     readText('src/runtime/link-preview.js'),
     readText('src/sidebar/folder-file-tree.js'),
     readText('tests/e2e/run-browser-tests.mjs')
   ]);
   const shellReferences = collectIconReferences(shell);
-  assert.equal(shellReferences.length, 50);
+  assert.equal(shellReferences.length, 48);
   assert.ok(shellReferences.every(record => record.href === `${ICON_SPRITE_URL}#${record.iconId}`));
   assert.ok(shellReferences.every(record => expectedIconIds.includes(record.iconId)));
   assert.doesNotMatch(shell, /<symbol\b|class="icon-sprite"|href="#icon-/i);
@@ -77,6 +78,10 @@ test('compatibility and dynamic callers reference the external sprite without a 
   assert.match(core, /\/assets\/icons\.svg#icon-chevron-right/);
   assert.match(events, /\/assets\/icons\.svg#icon-restore/);
   assert.match(events, /\/assets\/icons\.svg#icon-maximize/);
+  assert.match(helpDialog, /import \{ createIconView \} from '\.\.\/\.\.\/\.\.\/ui\/components\/icon-view\.js'/);
+  assert.match(helpDialog, /createIconView\(documentRef, 'icon-book'/);
+  assert.match(helpDialog, /createIconView\(documentRef, 'icon-close'\)/);
+  assert.doesNotMatch(helpDialog, /<svg\b|<use\b|\/assets\/icons\.svg#icon-/i);
   assert.match(linkPreview, /import \{ createIconView \} from '\.\.\/ui\/components\/icon-view\.js'/);
   assert.match(folderTree, /import \{ createIconView, getIconHref \} from '\.\.\/ui\/components\/icon-view\.js'/);
   assert.doesNotMatch(folderTree, /function createIcon\(/);

@@ -333,7 +333,6 @@ test('ModalShell accepts feature content, validates accessibility options and re
 
 const COMPATIBILITY_MODAL_IDS = [
   'settings-modal',
-  'help-modal',
   'link-modal',
   'url-modal',
   'find-modal',
@@ -348,7 +347,6 @@ function addCompatibilityModal(overlayRoot, id) {
   const { root, panel } = createModal(documentRef, id);
   const controls = {
     'settings-modal': ['select', 'setting-theme'],
-    'help-modal': ['button', 'help-active'],
     'link-modal': ['input', 'link-url-input'],
     'url-modal': ['input', 'url-input'],
     'find-modal': ['input', 'find-input'],
@@ -360,23 +358,18 @@ function addCompatibilityModal(overlayRoot, id) {
   const [tag, controlId] = controls[id];
   const control = documentRef.createElement(tag);
   control.id = controlId;
-  if (id === 'help-modal') {
-    control.setAttribute('data-help-page', 'start');
-    control.classList.add('active');
-  }
   if (id === 'export-image-modal') {
     control.classList.add('ratio-btn', 'active');
   }
   panel.append(control);
   if (id === 'settings-modal') panel.querySelector(`#${id}-title`).id = 'settings-title';
-  if (id === 'help-modal') panel.querySelector(`#${id}-title`).id = 'help-title';
   if (id === 'link-modal') panel.querySelector(`#${id}-title`).id = 'link-modal-title';
   if (id === 'export-progress-modal') panel.querySelector(`#${id}-title`).id = 'export-progress-title';
   overlayRoot.append(root);
   return { root, panel, control };
 }
 
-test('compatibility modal bridge installs one authoritative registry for all nine feature modals', () => {
+test('compatibility modal bridge installs one authoritative registry for the remaining eight compatibility feature modals', () => {
   const documentRef = new FakeDocument();
   const overlayRoot = documentRef.createElement('div');
   overlayRoot.id = 'overlay-root';
@@ -436,6 +429,7 @@ test('compatibility feature callers use the explicit modal event port without ne
     'public/app/web-clipper.js'
   ].map(path => readFile(path, 'utf8')));
   const eventSource = await readFile('public/app/events.js', 'utf8');
+  const helpDialogSource = await readFile('src/features/help/ui/help-dialog-view.js', 'utf8');
 
   assert.match(mountSource, /mountCompatibilityModalShells\(slots\.overlay\)/);
   assert.doesNotMatch(bridgeSource, /windowRef|markdownEditorModalShells|window\.|globalThis\./);
@@ -447,6 +441,9 @@ test('compatibility feature callers use the explicit modal event port without ne
 
   const joined = featureSources.join('\n');
   for (const id of COMPATIBILITY_MODAL_IDS) assert.match(bridgeSource, new RegExp(`id: '${id}'`));
+  assert.doesNotMatch(bridgeSource, /id: 'help-modal'/);
+  assert.match(helpDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'help-modal'/);
+  assert.match(helpDialogSource, /new ModalShell\(root,/);
   assert.doesNotMatch(
     joined,
     /(?:settings|help|link|url|find|export-progress|export-image|image|mermaid)-modal[^\n]*(?:classList\.(?:add|remove)|style\.display)/

@@ -1,9 +1,7 @@
 const coreCompatibilityHost = document.getElementById('compatibility-business-ports');
 const corePlatformPort = coreCompatibilityHost?.markdownEditorPlatformPort;
 const coreI18nPort = coreCompatibilityHost?.markdownEditorI18nPort;
-const coreHelpContent = coreCompatibilityHost?.markdownEditorHelpContent;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
-if (!coreHelpContent) throw new Error('Legacy help content port is unavailable.');
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
@@ -16,7 +14,6 @@ const editor = document.getElementById('editor');
     const STORAGE_KEY = 'md_editor_content';
     const FILENAME_KEY = 'md_editor_filename';
     const THEME_KEY = 'md_editor_theme';
-    const HELP_SHOWN_KEY = 'md_editor_help_shown';
     const RATIO_KEY = 'md_editor_ratio';
     const EDITOR_COLLAPSED_KEY = 'md_editor_editor_collapsed';
     const PREVIEW_COLLAPSED_KEY = 'md_editor_preview_collapsed';
@@ -302,15 +299,7 @@ const editor = document.getElementById('editor');
       localStorage.setItem(LANG_KEY, resolvedLocale);
     }
 
-    function refreshClassicLocalizedState(currentLang = coreI18nPort.locale) {
-      // 4.5 前仅保留尚未迁移的动态 classic 消费者；声明式 DOM 翻译由 Translation Bindings 独占。
-      const helpBody = document.getElementById('help-body');
-      const usesCategorizedHelp = Boolean(helpBody?.querySelector('[data-help-page-panel]'));
-      const helpHtml = coreHelpContent.get(currentLang);
-      if (helpBody && !usesCategorizedHelp && helpHtml) {
-        helpBody.innerHTML = helpHtml;
-      }
-
+    function refreshClassicLocalizedState() {
       updateCollapseBtnLabels();
       updateViewMenuLabel();
       updateStatusBar();
@@ -318,7 +307,7 @@ const editor = document.getElementById('editor');
       scheduleToolbarBoundaryEvaluation?.();
     }
 
-    coreI18nPort.subscribe(event => refreshClassicLocalizedState(event.locale));
+    coreI18nPort.subscribe(() => refreshClassicLocalizedState());
 
     function updateCollapseBtnLabels() {
       const editorBtn = document.getElementById('editor-collapse-btn');

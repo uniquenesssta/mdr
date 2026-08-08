@@ -555,6 +555,47 @@ async function runAppSuite() {
       assert.deepEqual(snapshot.duplicateIds, []);
     });
 
+    await test('application Help feature owns first-run visibility, navigation and scoped lifecycle', async () => {
+      const initial = await browser.page.evaluate(`(()=>{
+        localStorage.removeItem('md_editor_help_shown');
+        const host=document.getElementById('compatibility-business-ports');
+        const port=host?.markdownEditorHelpPort;
+        if(!port)return null;
+        return {
+          opened:port.openFirstRun(),
+          isOpen:port.isOpen(),
+          activePage:port.activePage,
+          globals:{
+            openHelp:typeof window.openHelp,
+            closeHelp:typeof window.closeHelp,
+            switchHelpPage:typeof window.switchHelpPage
+          },
+          shown:localStorage.getItem('md_editor_help_shown')
+        };
+      })()`);
+      assert.ok(initial);
+      assert.equal(initial.opened, true);
+      assert.equal(initial.isOpen, true);
+      assert.equal(initial.activePage, 'start');
+      assert.deepEqual(initial.globals, {openHelp:'undefined',closeHelp:'undefined',switchHelpPage:'undefined'});
+      assert.equal(initial.shown, null);
+      await browser.page.waitFor(() => document.getElementById('help-modal')?.classList.contains('show'), { description: 'Help first-run modal open' });
+      await browser.page.click('#help-modal [data-help-page="files"]');
+      await browser.page.waitFor(() => document.querySelector('#help-modal [data-help-page-panel="files"]'), { description: 'Help files page' });
+      const navigated = await browser.page.evaluate(`(()=>{
+        const port=document.getElementById('compatibility-business-ports')?.markdownEditorHelpPort;
+        return {activePage:port?.activePage,selected:document.querySelector('#help-modal [data-help-page="files"]')?.getAttribute('aria-selected')};
+      })()`);
+      assert.deepEqual(navigated, {activePage:'files',selected:'true'});
+      await browser.page.click('#help-modal .modal-footer button');
+      await browser.page.waitFor(() => !document.getElementById('help-modal')?.classList.contains('show'), { description: 'Help modal close' });
+      const closed = await browser.page.evaluate(`(()=>{
+        const port=document.getElementById('compatibility-business-ports')?.markdownEditorHelpPort;
+        return {shown:localStorage.getItem('md_editor_help_shown'),firstRunAgain:port?.openFirstRun(),isOpen:port?.isOpen()};
+      })()`);
+      assert.deepEqual(closed, {shown:'true',firstRunAgain:false,isOpen:false});
+    });
+
     await test('application theme switch changes visual tokens without changing shell geometry', async () => {
       const result = await browser.page.evaluate(`(async()=>{
         const selectors={

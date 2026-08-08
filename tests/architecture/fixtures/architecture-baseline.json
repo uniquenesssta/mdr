@@ -9,11 +9,6 @@
   },
   "legacyClassicScripts": [
     {
-      "loader": "src/bootstrap/module-entry.js",
-      "script": "public/help-content.js",
-      "count": 1
-    },
-    {
       "loader": "src/main.js",
       "script": "public/app/bootstrap.js",
       "count": 1
@@ -388,16 +383,6 @@
       "lines": [
         789,
         799
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeHelp()",
-      "count": 2,
-      "lines": [
-        589,
-        732
       ]
     },
     {
@@ -957,15 +942,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "openHelp(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        148
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "openImageModal()",
       "count": 1,
       "lines": [
@@ -1267,60 +1243,6 @@
       "count": 1,
       "lines": [
         284
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchHelpPage('about')",
-      "count": 1,
-      "lines": [
-        608
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchHelpPage('files')",
-      "count": 1,
-      "lines": [
-        599
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchHelpPage('markdown')",
-      "count": 1,
-      "lines": [
-        605
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchHelpPage('shortcuts')",
-      "count": 1,
-      "lines": [
-        602
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchHelpPage('start')",
-      "count": 1,
-      "lines": [
-        593
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchHelpPage('views')",
-      "count": 1,
-      "lines": [
-        596
       ]
     },
     {
@@ -1637,6 +1559,15 @@
       "lines": [
         470,
         477
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "closeAppMenus();",
+      "count": 1,
+      "lines": [
+        96
       ]
     }
   ],

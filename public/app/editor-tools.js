@@ -1078,44 +1078,4 @@
       // Optionally update toolbar state here in the future
     }
 
-    // 帮助模态框
-    let activeHelpPage = 'start';
-
-    function switchHelpPage(page) {
-      const availablePages = new Set(['start', 'views', 'files', 'shortcuts', 'markdown', 'about']);
-      const nextPage = availablePages.has(page) ? page : 'start';
-      activeHelpPage = nextPage;
-      document.querySelectorAll('[data-help-page]').forEach(button => {
-        const active = button.dataset.helpPage === nextPage;
-        button.classList.toggle('active', active);
-        button.setAttribute('aria-selected', active ? 'true' : 'false');
-        button.tabIndex = active ? 0 : -1;
-      });
-      document.querySelectorAll('[data-help-page-panel]').forEach(panel => {
-        const active = panel.dataset.helpPagePanel === nextPage;
-        panel.hidden = !active;
-        panel.classList.toggle('active', active);
-      });
-      document.querySelector('.help-content')?.scrollTo?.({ top: 0, behavior: 'auto' });
-    }
-
-    function openHelp(page = activeHelpPage) {
-      switchHelpPage(page);
-      const modal = document.getElementById('help-modal');
-      const request = {
-        options: {
-          initialFocus: document.querySelector('[data-help-page].active'),
-          onClose: () => localStorage.setItem(HELP_SHOWN_KEY, 'true')
-        }
-      };
-      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
-      if (request.error) throw request.error;
-    }
-    function closeHelp() {
-      const modal = document.getElementById('help-modal');
-      const request = { reason: 'feature-close' };
-      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
-      if (request.error) throw request.error;
-    }
-
     // 网页转 Markdown 模态框

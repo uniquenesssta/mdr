@@ -166,12 +166,13 @@ test('refresh continues through binding failures and reports them after remainin
 
 test('production integration has one declarative translation owner and preserves the 114 existing bindings', async () => {
   const { readFile } = await import('node:fs/promises');
-  const [moduleEntry, core, bootstrap, index, markup] = await Promise.all([
+  const [moduleEntry, core, bootstrap, index, markup, helpDialog] = await Promise.all([
     readFile('src/bootstrap/module-entry.js', 'utf8'),
     readFile('public/app/core.js', 'utf8'),
     readFile('public/app/bootstrap.js', 'utf8'),
     readFile('src/i18n/index.js', 'utf8'),
-    readFile('public/compatibility/business-content.html', 'utf8')
+    readFile('public/compatibility/business-content.html', 'utf8'),
+    readFile('src/features/help/ui/help-dialog-view.js', 'utf8')
   ]);
 
   assert.match(index, /translation-bindings\.js/);
@@ -183,10 +184,13 @@ test('production integration has one declarative translation owner and preserves
   assert.doesNotMatch(core, /function applyLanguage\s*\(/);
   assert.doesNotMatch(core, /querySelectorAll\(['"]\[data-i18n/);
   assert.doesNotMatch(core, /document\.documentElement\.lang\s*=/);
-  assert.match(core, /coreI18nPort\.subscribe\(event => refreshClassicLocalizedState\(event\.locale\)\)/);
+  assert.match(core, /coreI18nPort\.subscribe\(\(\) => refreshClassicLocalizedState\(\)\)/);
   assert.match(bootstrap, /refreshClassicLocalizedState\(\)/);
   assert.doesNotMatch(bootstrap, /applyLanguage\(\)/);
 
-  const bindings = markup.match(/\sdata-i18n(?:-title|-placeholder|-alt)?="[^"]+"/g) || [];
-  assert.equal(bindings.length, 114);
+  const markupBindings = markup.match(/\sdata-i18n(?:-title|-placeholder|-alt)?="[^"]+"/g) || [];
+  const helpBindings = helpDialog.match(/['"]data-i18n['"]\s*:\s*['"][^'"]+['"]/g) || [];
+  assert.equal(markupBindings.length, 112);
+  assert.equal(helpBindings.length, 2);
+  assert.equal(markupBindings.length + helpBindings.length, 114);
 });

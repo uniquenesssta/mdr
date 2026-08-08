@@ -2,11 +2,10 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, extname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { runInNewContext } from 'node:vm';
 
 const REGISTRY_PATH = 'src/i18n/locale-registry.js';
 const LOCALE_DIRECTORY = 'src/i18n/locales';
-const HELP_CONTENT_PATH = 'public/help-content.js';
+const HELP_CONTENT_REGISTRY_PATH = 'src/features/help/help-content-registry.js';
 const REFERENCE_ROOTS = ['public', 'src'];
 const REFERENCE_EXTENSIONS = new Set(['.html', '.js', '.mjs']);
 const HTML_TAG_PATTERN = /<(?:a|b|blockquote|br|code|div|em|h[1-6]|li|ol|p|pre|span|strong|table|tbody|td|th|thead|tr|ul)\b/i;
@@ -16,6 +15,7 @@ const LOCALE_END_PATTERN = /^\s{2}\},?\s*$/;
 const KEY_DECLARATION_PATTERN = /^\s{4}(?:(['"])([^'"]+)\1|([A-Za-z_$][\w$]*))\s*:/;
 const SPLIT_KEY_DECLARATION_PATTERN = /^\s{2}"([^"]+)"\s*:/;
 const HTML_REFERENCE_PATTERN = /\bdata-i18n(?:-title|-placeholder|-alt)?\s*=\s*(['"])([^'"]+)\1/g;
+const OBJECT_I18N_ATTRIBUTE_PATTERN = /(['"])(data-i18n(?:-title|-placeholder|-alt)?)\1\s*:\s*(['"])([^'"]+)\3/g;
 const TRANSLATION_CALL_PATTERN = /\bt\s*\(\s*(['"])([^'"]+)\1/g;
 const DIRECT_I18N_DOT_PATTERN = /\bi18n\s*\[[^\]]+\]\s*\.\s*([A-Za-z_$][\w$]*)/g;
 const DIRECT_I18N_BRACKET_PATTERN = /\bi18n\s*\[[^\]]+\]\s*\[\s*(['"])([^'"]+)\1\s*\]/g;
@@ -93,6 +93,7 @@ export function collectLiteralTranslationReferences(source, path) {
   const references = new Map();
   const text = String(source);
   for (const match of text.matchAll(HTML_REFERENCE_PATTERN)) addReference(references, match[2], path, match.index, 'html-binding', text);
+  for (const match of text.matchAll(OBJECT_I18N_ATTRIBUTE_PATTERN)) addReference(references, match[4], path, match.index, 'dom-binding', text);
   for (const match of text.matchAll(TRANSLATION_CALL_PATTERN)) addReference(references, match[2], path, match.index, 't-call', text);
   for (const match of text.matchAll(DIRECT_I18N_DOT_PATTERN)) addReference(references, match[1], path, match.index, 'direct-i18n-property', text);
   for (const match of text.matchAll(DIRECT_I18N_BRACKET_PATTERN)) addReference(references, match[2], path, match.index, 'direct-i18n-property', text);
@@ -151,17 +152,16 @@ async function loadRegistry(root) {
 }
 
 async function loadHelpContent(root, localeOrder) {
-  const source = await readFile(resolve(root, HELP_CONTENT_PATH), 'utf8');
-  const host = { removeAttribute() {} };
-  runInNewContext(source, { document: { getElementById: id => id === 'compatibility-business-ports' ? host : null } }, { timeout: 2_000, filename: HELP_CONTENT_PATH });
-  const api = host.markdownEditorHelpContent;
-  if (!api || typeof api.get !== 'function' || typeof api.hasLocale !== 'function') {
-    throw new Error(`${HELP_CONTENT_PATH} did not mount the expected compatibility API.`);
+  const href = pathToFileURL(resolve(root, HELP_CONTENT_REGISTRY_PATH)).href;
+  const module = await import(`${href}?stage04-help-audit=${Date.now()}`);
+  const registry = module.helpContentRegistry;
+  if (!registry || typeof registry.get !== 'function' || typeof registry.has !== 'function') {
+    throw new Error(`${HELP_CONTENT_REGISTRY_PATH} did not expose the expected Help content registry.`);
   }
   const result = {};
   for (const locale of localeOrder) {
-    if (!api.hasLocale(locale)) throw new Error(`${HELP_CONTENT_PATH} is missing locale ${locale}.`);
-    const value = api.get(locale);
+    if (!registry.has(locale)) throw new Error(`${HELP_CONTENT_REGISTRY_PATH} is missing locale ${locale}.`);
+    const value = registry.get(locale)?.sourceHtml;
     if (typeof value !== 'string' || !HTML_TAG_PATTERN.test(value)) throw new Error(`Help content for ${locale} must remain HTML text.`);
     result[locale] = { length: value.length, sha256: sha256(value) };
   }

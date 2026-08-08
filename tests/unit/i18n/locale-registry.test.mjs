@@ -3,7 +3,6 @@ import { createHash } from 'node:crypto';
 import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runInNewContext } from 'node:vm';
 import test from 'node:test';
 import {
   createLocaleRegistry,
@@ -11,6 +10,7 @@ import {
   LOCALE_IDS
 } from '../../../src/i18n/index.js';
 import { buildLocaleKeyAudit } from '../../../scripts/stage-04/locale-key-audit.mjs';
+import { helpContentRegistry } from '../../../src/features/help/help-content-registry.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const FIXTURE_PATH = new URL('./fixtures/locale-split-compatibility.json', import.meta.url);
@@ -31,14 +31,7 @@ async function readJson(url) {
 }
 
 async function loadHelpContent(localeIds = LOCALE_IDS) {
-  const source = await readFile(resolve(ROOT, 'public/help-content.js'), 'utf8');
-  const host = { removeAttribute() {} };
-  runInNewContext(source, {
-    document: { getElementById: id => id === 'compatibility-business-ports' ? host : null }
-  }, { timeout: 2_000, filename: 'public/help-content.js' });
-  const api = host.markdownEditorHelpContent;
-  assert.ok(api);
-  return Object.fromEntries(localeIds.map(locale => [locale, api.get(locale)]));
+  return Object.fromEntries(localeIds.map(locale => [locale, helpContentRegistry.get(locale).sourceHtml]));
 }
 
 test('Atomic 4.2 exposes ten immutable short-text locale modules with one exact key surface', async () => {
@@ -77,7 +70,7 @@ test('Atomic 4.2 materializes only the historical zh-CN fallback keys and preser
   }
 });
 
-test('Atomic 4.2 keeps help HTML byte-compatible outside every locale module', async () => {
+test('Atomic 4.2 help HTML remains byte-compatible after the Atomic 4.5 Help content migration', async () => {
   const fixture = await readJson(FIXTURE_PATH);
   const help = await loadHelpContent();
   for (const locale of LOCALE_IDS) {
@@ -109,31 +102,31 @@ test('Atomic 4.2 locale registry remains the only short-text data authority afte
   for (const locale of LOCALE_IDS) assert.equal(localeRegistry.has(locale), true);
 });
 
-test('Atomic 4.2 bootstrap and classic core retain explicit locale/help boundaries after 4.3 service extraction', async () => {
-  const [entry, core, index, help] = await Promise.all([
+test('Atomic 4.2 locale data remains isolated from the Atomic 4.5 Help feature', async () => {
+  const [entry, core, index, helpIndex] = await Promise.all([
     readFile(resolve(ROOT, 'src/bootstrap/module-entry.js'), 'utf8'),
     readFile(resolve(ROOT, 'public/app/core.js'), 'utf8'),
     readFile(resolve(ROOT, 'src/i18n/index.js'), 'utf8'),
-    readFile(resolve(ROOT, 'public/help-content.js'), 'utf8')
+    readFile(resolve(ROOT, 'src/features/help/index.js'), 'utf8')
   ]);
   await assert.rejects(access(resolve(ROOT, 'public/i18n.js')));
+  await assert.rejects(access(resolve(ROOT, 'public/help-content.js')));
 
   const serviceIndex = entry.indexOf('createI18nService(localeRegistry)');
-  const mountIndex = entry.indexOf('mountClassicI18nPort(portsHost, i18nService)');
-  const helpIndex = entry.indexOf("loadClassicScript(documentRef, '/help-content.js')");
+  const helpFeatureIndex = entry.indexOf('createHelpFeature({');
+  const bindingsIndex = entry.indexOf('createTranslationBindings(i18nService, ui,');
+  const i18nPortIndex = entry.indexOf('mountClassicI18nPort(portsHost, i18nService)');
   const appIndex = entry.indexOf('await importApplication()');
-  assert.ok(serviceIndex >= 0 && mountIndex > serviceIndex && helpIndex > mountIndex && appIndex > helpIndex);
+  assert.ok(serviceIndex >= 0 && helpFeatureIndex > serviceIndex && bindingsIndex > helpFeatureIndex && i18nPortIndex > bindingsIndex && appIndex > i18nPortIndex);
   assert.match(entry, /i18nPort\?\.destroy\(\)/);
   assert.match(entry, /i18nService\?\.destroy\(\)/);
   assert.match(index, /locale-registry\.js/);
   assert.match(index, /classic-i18n-port\.js/);
+  assert.match(helpIndex, /help-content-registry\.js/);
   assert.match(core, /markdownEditorI18nPort/);
-  assert.match(core, /markdownEditorHelpContent/);
+  assert.doesNotMatch(core, /markdownEditorHelpContent|markdownEditorLocalePort|coreLocalePort/);
   assert.doesNotMatch(core, /\bi18n\s*\[/);
-  assert.doesNotMatch(core, /markdownEditorLocalePort|coreLocalePort/);
   assert.doesNotMatch(core, /window\.markdownEditor(?:Locale|I18n|Help)/);
-  assert.match(help, /compatibility-business-ports/);
-  assert.doesNotMatch(help, /window\.markdownEditor|window\s*\[/);
 });
 
 test('current locale audit reports a complete split registry with separate help content', async () => {

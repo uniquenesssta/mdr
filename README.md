@@ -2,4 +2,4 @@
 
 Tauri + Rust 桌面 Markdown 编辑器。完整架构与历史记录见 [docs/README.md](docs/README.md)。
 
-2026-08-08：Atomic 4.4 PASS：新增 View-scoped Translation Bindings，移除 classic 全局 `[data-i18n*]` 扫描；clean CI：4.1–4.4 各 7/7、Node 42/42、Browser 10/10+12/12、architecture/build/evidence PASS。未改 Rust、依赖或锁；4.5 未开始。
+2026-08-08：Atomic 4.5 已实现模块化 Help Content/Controller，迁移 10 语言长帮助正文、首次显示、导航与独立 ModalShell 生命周期；定向 4.1–4.5 测试 36/36 PASS。完整阶段门禁待 CI 验证；未改 Rust、依赖或锁文件。

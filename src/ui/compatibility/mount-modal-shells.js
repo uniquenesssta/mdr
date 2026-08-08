@@ -6,7 +6,6 @@ export const COMPATIBILITY_MODAL_CLOSE_EVENT = 'markdown-editor:modal-shell-clos
 
 const MODAL_DEFINITIONS = Object.freeze([
   Object.freeze({ id: 'settings-modal', labelledBy: 'settings-title', initialFocus: '#setting-theme' }),
-  Object.freeze({ id: 'help-modal', labelledBy: 'help-title', initialFocus: '[data-help-page].active' }),
   Object.freeze({ id: 'link-modal', labelledBy: 'link-modal-title', initialFocus: '#link-url-input' }),
   Object.freeze({ id: 'url-modal', ariaLabel: '网页转 Markdown', initialFocus: '#url-input' }),
   Object.freeze({ id: 'find-modal', ariaLabel: '查找与替换', initialFocus: '#find-input' }),

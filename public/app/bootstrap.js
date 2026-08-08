@@ -1,3 +1,7 @@
+const bootstrapCompatibilityHost = document.getElementById('compatibility-business-ports');
+const bootstrapHelpPort = bootstrapCompatibilityHost?.markdownEditorHelpPort;
+if (!bootstrapHelpPort) throw new Error('Help compatibility port is unavailable.');
+
     async function init() {
       const savedLang = localStorage.getItem(LANG_KEY);
       if (savedLang) coreI18nPort.setLocale(savedLang);
@@ -90,9 +94,7 @@
         document.body.classList.add('page-fullscreen-active', 'is-page-fullscreen-active');
       }
 
-      if (!localStorage.getItem(HELP_SHOWN_KEY)) {
-        openHelp();
-      }
+      bootstrapHelpPort.openFirstRun();
       refreshClassicLocalizedState();
     }
 
