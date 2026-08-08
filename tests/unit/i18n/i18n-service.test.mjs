@@ -140,7 +140,7 @@ test('Atomic 4.3 production integration keeps service DOM/storage-free and remov
   assert.match(core, /markdownEditorI18nPort/);
   assert.match(core, /return coreI18nPort\.t\(key, \.\.\.args\)/);
   assert.match(core, /coreI18nPort\.setLocale\(lang\)/);
-  assert.match(core, /const currentLang = coreI18nPort\.locale/);
+  assert.match(core, /refreshClassicLocalizedState\(currentLang = coreI18nPort\.locale\)/);
   assert.doesNotMatch(core, /markdownEditorLocalePort|coreLocalePort|getLocale\(|hasLocale\(|let currentLang\s*=/);
 
   assert.match(bootstrap, /if \(savedLang\) coreI18nPort\.setLocale\(savedLang\)/);

@@ -300,29 +300,10 @@ const editor = document.getElementById('editor');
     function setLanguage(lang) {
       const resolvedLocale = coreI18nPort.setLocale(lang);
       localStorage.setItem(LANG_KEY, resolvedLocale);
-      applyLanguage();
     }
 
-    function applyLanguage() {
-      const currentLang = coreI18nPort.locale;
-      document.documentElement.lang = currentLang;
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.dataset.i18n;
-        el.textContent = t(key);
-      });
-      document.querySelectorAll('[data-i18n-title]').forEach(el => {
-        const key = el.dataset.i18nTitle;
-        el.title = t(key);
-      });
-      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.dataset.i18nPlaceholder;
-        el.placeholder = t(key);
-      });
-      document.querySelectorAll('[data-i18n-alt]').forEach(el => {
-        const key = el.dataset.i18nAlt;
-        el.alt = t(key);
-      });
-
+    function refreshClassicLocalizedState(currentLang = coreI18nPort.locale) {
+      // 4.5 前仅保留尚未迁移的动态 classic 消费者；声明式 DOM 翻译由 Translation Bindings 独占。
       const helpBody = document.getElementById('help-body');
       const usesCategorizedHelp = Boolean(helpBody?.querySelector('[data-help-page-panel]'));
       const helpHtml = coreHelpContent.get(currentLang);
@@ -332,12 +313,12 @@ const editor = document.getElementById('editor');
 
       updateCollapseBtnLabels();
       updateViewMenuLabel();
-      const presentationBadge = document.getElementById('editor-presentation-badge');
-      if (presentationBadge) presentationBadge.textContent = t('viewHybrid');
       updateStatusBar();
       updateCount();
       scheduleToolbarBoundaryEvaluation?.();
     }
+
+    coreI18nPort.subscribe(event => refreshClassicLocalizedState(event.locale));
 
     function updateCollapseBtnLabels() {
       const editorBtn = document.getElementById('editor-collapse-btn');

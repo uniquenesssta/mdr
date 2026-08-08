@@ -1,4 +1,4 @@
-# Atomic Task 4.3 I18n Service validation node.
+# Atomic Task 4.4 Translation Bindings validation node.
 name: Stage 4 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  locale-foundation:
-    name: Verify Stage 4 locale foundation
+  translation-bindings:
+    name: Verify Stage 4 translation bindings
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -46,8 +46,10 @@ jobs:
         run: node --test tests/unit/i18n/locale-registry.test.mjs
       - name: Verify Atomic Task 4.3 I18n Service
         run: node --test tests/unit/i18n/i18n-service.test.mjs
+      - name: Verify Atomic Task 4.4 Translation Bindings
+        run: node --test tests/unit/i18n/translation-bindings.test.mjs
       - name: Record current locale audit
-        run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-03-i18n-service-audit.json
+        run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-04-translation-bindings-audit.json
       - name: Run architecture hard gate
         run: npm run verify:architecture
       - name: Run existing Node regression suite
@@ -62,10 +64,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-04/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 4.3 evidence
+      - name: Upload Atomic Task 4.4 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-04-i18n-service-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-04-translation-bindings-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-04
           if-no-files-found: error
           retention-days: 30

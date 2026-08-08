@@ -93,7 +93,7 @@
       if (!localStorage.getItem(HELP_SHOWN_KEY)) {
         openHelp();
       }
-      applyLanguage();
+      refreshClassicLocalizedState();
     }
 
     // 渲染预览。大文档输入时由 schedulePreviewUpdate 合并频繁刷新；

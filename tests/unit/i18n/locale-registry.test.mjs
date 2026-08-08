@@ -153,6 +153,10 @@ test('current locale audit reports a complete split registry with separate help 
   const classicBusinessDynamicCalls = audit.anomalies.dynamicTranslationCalls.filter(record => (
     record.path === 'public/app/core.js' && record.expression !== 'key, ...args'
   ));
-  assert.equal(classicBusinessDynamicCalls.length, 4);
-  assert.ok(audit.anomalies.dynamicTranslationCalls.length >= classicBusinessDynamicCalls.length);
+  const translationBindingCalls = audit.anomalies.dynamicTranslationCalls.filter(record => (
+    record.path === 'src/i18n/translation-bindings.js' && record.expression === 'binding.key'
+  ));
+  assert.equal(classicBusinessDynamicCalls.length, 0);
+  assert.equal(translationBindingCalls.length, 1);
+  assert.ok(audit.anomalies.dynamicTranslationCalls.length >= translationBindingCalls.length);
 });
