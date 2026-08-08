@@ -42,7 +42,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
       RUST_BACKTRACE: '1'
-      MARKDOWN_EDITOR_BINARY: ../.cargo-target/markdown-editor/debug/markdown-editor.exe
+      MARKDOWN_EDITOR_BINARY: ../.cargo-target/markdown-editor-windows-driver-host/debug/markdown-editor.exe
 
     steps:
       - name: Checkout branch
@@ -87,7 +87,7 @@ jobs:
         run: ./scripts/stage-03/windows/prepare-embedded-driver-host.ps1
 
       - name: Build isolated embedded WebDriver application
-        run: cargo build --locked --manifest-path ../.markdown-editor-windows-driver-host/src-tauri/Cargo.toml
+        run: cargo build --locked --target-dir ../.cargo-target/markdown-editor-windows-driver-host --manifest-path ../.markdown-editor-windows-driver-host/src-tauri/Cargo.toml
 
       - name: Prepare Windows evidence directory
         shell: pwsh

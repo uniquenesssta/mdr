@@ -36,13 +36,13 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(workflow, /runs-on: windows-2025/);
   assert.match(
     workflow,
-    /MARKDOWN_EDITOR_BINARY: \.\.\/\.cargo-target\/markdown-editor\/debug\/markdown-editor\.exe/
+    /MARKDOWN_EDITOR_BINARY: \.\.\/\.cargo-target\/markdown-editor-windows-driver-host\/debug\/markdown-editor\.exe/
   );
   assert.match(workflow, /cargo build --release --locked --manifest-path src-tauri\/Cargo\.toml/);
   assert.match(workflow, /prepare-embedded-driver-host\.ps1/);
   assert.match(
     workflow,
-    /cargo build --locked --manifest-path \.\.\/\.markdown-editor-windows-driver-host\/src-tauri\/Cargo\.toml/
+    /cargo build --locked --target-dir \.\.\/\.cargo-target\/markdown-editor-windows-driver-host --manifest-path \.\.\/\.markdown-editor-windows-driver-host\/src-tauri\/Cargo\.toml/
   );
   assert.match(workflow, /npm run deps:prepare -- --add selenium-webdriver@4\.34\.0/);
   assert.match(workflow, /driverProvider = 'embedded-isolated-host'/);
@@ -62,7 +62,11 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(hostBuilder, /tauri_plugin_wdio_webdriver::init\(\)/);
   assert.match(hostBuilder, /wdio-webdriver:default/);
   assert.match(hostBuilder, /cargo generate-lockfile/);
-  assert.match(hostBuilder, /\.cargo-target\\markdown-editor/);
+  assert.match(hostBuilder, /\.cargo-target\\markdown-editor-windows-driver-host/);
+  assert.doesNotMatch(
+    hostBuilder,
+    /\$cargoTargetPath = Join-Path \$repositoryParent '\.cargo-target\\markdown-editor'/
+  );
   assert.match(hostBuilder, /Production Cargo\.toml already contains/);
   assert.match(hostBuilder, /Production capability already exposes/);
   assert.match(hostBuilder, /Properties\.Remove\('devUrl'\)/);

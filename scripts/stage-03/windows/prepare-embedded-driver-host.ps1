@@ -26,7 +26,7 @@ $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 $repositoryParent = Split-Path $repositoryRoot -Parent
 $hostRootPath = [IO.Path]::GetFullPath((Join-Path $repositoryRoot $HostRoot))
 $archivePath = Join-Path $repositoryParent '.markdown-editor-windows-driver-host.zip'
-$cargoTargetPath = Join-Path $repositoryParent '.cargo-target\markdown-editor'
+$cargoTargetPath = Join-Path $repositoryParent '.cargo-target\markdown-editor-windows-driver-host'
 
 if (Test-Path $hostRootPath) {
   Remove-Item $hostRootPath -Recurse -Force

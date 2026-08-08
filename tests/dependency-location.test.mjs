@@ -56,13 +56,25 @@ test('all CI dependency installation paths use the parent dependency preparer', 
   assert.doesNotMatch(windowsWorkflow, /npm install --no-save --no-package-lock selenium-webdriver/);
 });
 
-test('Windows automation host and binaries are resolved from the repository parent', async () => {
+test('Windows automation host and binaries use dedicated repository-parent paths', async () => {
   const [workflow, hostBuilder] = await Promise.all([
     read('.github/workflows/stage-03-windows-window.yml'),
     read('scripts/stage-03/windows/prepare-embedded-driver-host.ps1')
   ]);
   assert.match(workflow, /\.\.\/\.markdown-editor-windows-driver-host\/src-tauri\/Cargo\.toml/);
-  assert.match(workflow, /\.\.\/\.cargo-target\/markdown-editor\/debug\/markdown-editor\.exe/);
+  assert.match(
+    workflow,
+    /\.\.\/\.cargo-target\/markdown-editor-windows-driver-host\/debug\/markdown-editor\.exe/
+  );
+  assert.match(
+    workflow,
+    /--target-dir \.\.\/\.cargo-target\/markdown-editor-windows-driver-host/
+  );
+  assert.match(workflow, /\.\.\/\.cargo-target\/markdown-editor\/release\/markdown-editor\.exe/);
   assert.match(hostBuilder, /\[string\]\$HostRoot = '\.\.\\\.markdown-editor-windows-driver-host'/);
-  assert.match(hostBuilder, /\.cargo-target\\markdown-editor/);
+  assert.match(hostBuilder, /\.cargo-target\\markdown-editor-windows-driver-host/);
+  assert.doesNotMatch(
+    hostBuilder,
+    /\$cargoTargetPath = Join-Path \$repositoryParent '\.cargo-target\\markdown-editor'/
+  );
 });
