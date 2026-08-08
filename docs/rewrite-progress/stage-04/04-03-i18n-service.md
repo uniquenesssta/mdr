@@ -2,7 +2,7 @@
 
 ## 状态
 
-Atomic 4.3 已完成实施，等待 clean implementation commit 的完整 Stage 4 gate 复验。4.4 Translation Bindings 与 4.5 Help Content/Controller 尚未开始。
+Atomic 4.3 **PASS**。clean implementation commit 已完整通过 Stage 4 gate。4.4 Translation Bindings 与 4.5 Help Content/Controller 尚未开始。
 
 ## 任务边界
 
@@ -52,7 +52,7 @@ bridge 只暴露：
 - `setLocale()`
 - `subscribe()`
 
-它不向 `window` / `globalThis` 发布 I18n facade，也不暴露 locale registry 或字典对象。bridge 自己跟踪通过它创建的 subscriptions；destroy 时先取消订阅再卸载 host property，之后所有调用明确失败。
+它不向 `window` / `globalThis` 发布 I18n facade，也不暴露 locale registry 或字典对象。bridge 跟踪通过它创建的 subscriptions；destroy 时先取消订阅再卸载 host property，之后所有调用明确失败。
 
 ### 3. composition root 创建唯一 I18n Service
 
@@ -60,7 +60,7 @@ bridge 只暴露：
 
 1. 创建 App Shell；
 2. 挂载 compatibility business content；
-3. 创建唯一 `I18n Service`；
+3. 创建唯一 I18n Service；
 4. 在 existing hidden ports host 上挂载 classic I18n bridge；
 5. 加载 4.5 前的 legacy help content；
 6. 导入当前 application。
@@ -71,15 +71,15 @@ bridge 只暴露：
 
 `public/app/core.js` 不再保存 `let currentLang`，也不再读取 locale registry / dictionary。
 
-原 `t()` 只保留 classic lexical compatibility 入口，内部一行委托 `coreI18nPort.t(key, ...args)`；fallback 和格式化算法只有 I18n Service 一份权威实现。
+原 `t()` 只保留 classic lexical compatibility 入口，内部委托 `coreI18nPort.t(key, ...args)`；fallback 和格式化算法只有 I18n Service 一份权威实现。
 
-原 `setLanguage()` 现在只承担 4.6 前的设置持久化兼容职责：
+原 `setLanguage()` 当前只承担 4.6 前的设置持久化兼容职责：
 
 1. 调用 `coreI18nPort.setLocale(lang)`；
 2. 将服务返回的 resolved locale 写回既有 `md_editor_language` key；
 3. 调用旧 `applyLanguage()` compatibility binding。
 
-`applyLanguage()` 仍执行 `[data-i18n*]` 全 DOM 扫描，但它不属于 I18n Service，也不拥有 locale 状态；当前 locale 每次从 `coreI18nPort.locale` 获取。该扫描明确留给 Atomic 4.4 删除，4.3 不提前重写 Translation Bindings。
+`applyLanguage()` 仍执行 `[data-i18n*]` 全 DOM 扫描，但它不属于 I18n Service，也不拥有 locale 状态；当前 locale 每次从 `coreI18nPort.locale` 获取。该扫描明确留给 Atomic 4.4 删除，4.3 未提前重写 Translation Bindings。
 
 设置弹窗语言值也改为读取 `coreI18nPort.locale`。
 
@@ -114,7 +114,7 @@ Locale 数据仍只由 4.2 registry 掌权；Service 不直接 import 任一 `lo
 - + `src/i18n/compatibility/classic-i18n-port.js`
 - - `src/i18n/compatibility/classic-locale-port.js`
 
-因此当前生产模块数由 187 更新为 **188**。Stage 1 历史 67 模块事实不修改，仅更新 current inventory 断言。
+当前生产模块数由 187 更新为 **188**。Stage 1 历史 67 模块事实不修改，仅更新 current inventory 断言。
 
 `production-modules.json` 同步记录新的 service/compatibility 职责，并更新 I18n public entry / bootstrap 的当前职责说明。
 
@@ -132,7 +132,7 @@ Locale 数据仍只由 4.2 registry 掌权；Service 不直接 import 任一 `lo
 
 ## 测试
 
-新增 `tests/unit/i18n/i18n-service.test.mjs`，覆盖 7 类契约：
+新增 `tests/unit/i18n/i18n-service.test.mjs`，共 7 项，覆盖：
 
 1. locale state、initial/default/invalid normalization；
 2. `t()` 参数替换、默认 fallback、key fallback；
@@ -142,10 +142,34 @@ Locale 数据仍只由 4.2 registry 掌权；Service 不直接 import 任一 `lo
 6. classic I18n port 的 scope、service delegation、subscription ownership、destroy；
 7. production integration：Service 无 DOM/storage、composition 创建/销毁顺序、core 删除 raw dictionary ownership、saved language 启动回归消失。
 
-4.2 registry test 继续保留数据/兼容性硬门禁，但不再要求已经删除的 raw locale compatibility port；它改为确认 registry 仍是唯一 short-text 数据权威，并确认 4.3 service bridge 不改变 4.2 的 locale/help 边界。
+4.2 registry test 继续保留数据/兼容性硬门禁，但不再要求已经删除的 raw locale compatibility port；它确认 registry 仍是唯一 short-text 数据权威，并确认 4.3 service bridge 不改变 4.2 的 locale/help 边界。
 
-Stage 4 workflow 新增独立 4.3 focused step，同时继续执行 4.1、4.2、locale audit、Architecture、Node、Browser Contract、build 与 Built App Browser 回归。
+实施验证中发现 4.2 audit 测试曾把新增 Service/bridge 的 forwarding `t(key)` 也计入“动态翻译业务调用总数”，使全仓库动态调用从 4 变为 8。修复只将 4.2 断言限定为仍需冻结的 `public/app/core.js` 四条实际动态业务调用；unknown key、placeholder、key-set、help SHA 等硬门禁均未放宽。
 
-## 验证状态
+## 最终验证
 
-当前为实施候选状态。完成临时迁移历史清理后，将压成一笔直接继承 Atomic 4.2 验收提交 `e577c782b4fe37d464b9db6def7291e620780a2f` 的 clean implementation commit，并要求该 commit 完整通过 Stage 4 Atomic Verification。clean commit 全绿前不标记 4.3 PASS，也不进入 4.4。
+clean implementation commit：
+
+`c14722e23c5bc5757b04be3cfd062be2c0442fe2` — `feat(i18n): implement atomic task 4.3 service`
+
+Stage 4 Atomic Verification run `31243072471`：**PASS**。
+
+- Stage 3 handoff：**6/6 PASS**；
+- Atomic 4.1 历史契约：**7/7 PASS**；
+- Atomic 4.2 locale split/registry：**7/7 PASS**；
+- Atomic 4.3 I18n Service：**7/7 PASS**；
+- 当前 locale audit：**PASS**；
+- Architecture：**PASS**；
+- Node regression：**42/42 PASS**；
+- Browser Contract：**10/10 PASS**；
+- Vite build：**PASS**；存在既有 >500 kB chunk advisory；
+- Built App Browser：**12/12 PASS**；
+- evidence artifact：`stage-04-i18n-service-31243072471-1`；
+- artifact ID：`9017628747`；
+- artifact digest：`sha256:b7165c8d2280500ba258ef050ea1643684198999a67b43c2a9926c708d4b2710`。
+
+GitHub runner 的 `deps:prepare` 继续报告 committed dependency baseline 的 4 个既有 advisory（2 moderate、2 high）。4.3 未修改依赖或 lockfile，也未把用户另一工作区的受保护 lockfile 变更带入 Stage 4。
+
+## 结论
+
+Atomic 4.3 已完成并通过全部当前硬门禁。I18n Service 已成为 locale state / translation / fallback / change event 的唯一运行时权威；DOM binding 仍明确留给 4.4，Help 正式模块仍留给 4.5。4.4 尚未开始。
