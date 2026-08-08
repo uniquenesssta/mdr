@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "kind": "stage-04-locale-split-compatibility",
+  "sourceCommit": "24d1db73b9b7ce9ef44024057c06729789495f4b",
+  "localeOrder": [
+    "zh-CN",
+    "zh-TW",
+    "en",
+    "ja",
+    "ko",
+    "es",
+    "fr",
+    "de",
+    "ru",
+    "pt"
+  ],
+  "shortKeyCount": 161,
+  "shortKeysSha256": "0bb2dc664081db57a4cf4bc33b1a29239f7c57164f29afa0fe7068820c2d129d",
+  "originalShortTextSha256ByLocale": {
+    "de": "4258cabfe6125486502f6e8da9042b42a5f24b815c6e24100c9bb8fe9eef1bd5",
+    "en": "acf36423c31ffcb23d63386bd6ba65b8ce4940e328ea027391e0898550c5fd8c",
+    "es": "35fe7f5dc41861c0d7617eab71120f881e4009469c009b3ba80d19e2cef17d47",
+    "fr": "3931a8fafa04a7c769534c4f8cc969b79c96f065a11ed76d46643da7439f07b3",
+    "ja": "ec8c102f876a6ea8b02bfa9dbb6f79c4aaec1479c426a1bd9ff9a10de1b1a2b5",
+    "ko": "17e4d4b615f2192835ed758fc78a1bbe1800a19379ea21d76e01bdb8443588b0",
+    "pt": "4f33b8f43b70eb2df9b4e27e2ff0966b5dad4c0f0c34b599edd5a1e1cd7d6977",
+    "ru": "6527e01f9400e8225c7894e8165a0fbab9b53f9b27fe431e942019a594ac9505",
+    "zh-CN": "d65d4394ec22b096c6986bc0ec9ad82ada2047e18b73cc02b6f7b12cf7618e8b",
+    "zh-TW": "d18e6c5e4e3bac0f27de9768bc06b147fc297e08d419172fe5cfa41f1672da36"
+  },
+  "materializedFallbackKeysByLocale": {
+    "de": [
+      "importFromWeb",
+      "importLocalFile"
+    ],
+    "en": [],
+    "es": [
+      "importFromWeb",
+      "importLocalFile"
+    ],
+    "fr": [
+      "importFromWeb",
+      "importLocalFile"
+    ],
+    "ja": [
+      "importFromWeb",
+      "importLocalFile"
+    ],
+    "ko": [
+      "importFromWeb",
+      "importLocalFile"
+    ],
+    "pt": [
+      "importFromWeb",
+      "importLocalFile"
+    ],
+    "ru": [
+      "importFromWeb",
+      "importLocalFile"
+    ],
+    "zh-CN": [],
+    "zh-TW": [
+      "importFromWeb",
+      "importLocalFile"
+    ]
+  },
+  "splitShortTextSha256ByLocale": {
+    "de": "d3c6b1d4cf94352b681fbef8dc67a1cf3626513bee81b8aceab0d1d28139ea03",
+    "en": "acf36423c31ffcb23d63386bd6ba65b8ce4940e328ea027391e0898550c5fd8c",
+    "es": "fbd36399ee6efdecf606d365640fa579c3fdb8dab31007c77ded236803138496",
+    "fr": "300a62e168b8f67aaaaeca833439389176fdd66123e57f1d24a2d56578decf26",
+    "ja": "67aa61e3c73d020e6c992471054983be28f41d57977eac42c5b81c2a0cf0cc53",
+    "ko": "a7d84aa06396543b5de675cbafc80ba8fe00dcd6b7a5fe517542ec2593ec18b0",
+    "pt": "6a755d54ce326d87e70db01d4caffbded14b601269828f3a1e49611778eaec05",
+    "ru": "858a0c30045019faacd4a52f00ebfc5c61586cc094531685ea2a669a8ffc93a8",
+    "zh-CN": "d65d4394ec22b096c6986bc0ec9ad82ada2047e18b73cc02b6f7b12cf7618e8b",
+    "zh-TW": "f8fc477276c07dedbcd28f5a6e1ad69913a298ec64f421f78ebeee049ed1be3f"
+  },
+  "helpHtmlSha256ByLocale": {
+    "de": "b545c556e3a28a82008cb5f8dab4a00508a4992d561db6d6c83ce1d8e9064799",
+    "en": "cf5c05f74c307ddfd8ec149fb85be83bb717de0aad78d3d235ae496541d937d5",
+    "es": "f775165a4636547fabbcea0a81f266c5fad978f0349d65c17cf1934a98a0b09c",
+    "fr": "3c3fc846b400e6d7c142889b24c128d9cb87fa00721682f32e870eeb7b41f8c2",
+    "ja": "2afc693d685dd454d158f567a05cbbc7c193311149209e3f195be2762551be59",
+    "ko": "1ae5151786ce42a8b9c7e657c8b1ae9a5283cd0949d36f62644ce46824ed3f47",
+    "pt": "ebd5c231777bac066bc976cfdcfa6115eb84459bbce12ffd15a523e42f4cdd10",
+    "ru": "a4e36de0cfcb88036524650486abd445495cff60cfbd119d6e52910a8be993be",
+    "zh-CN": "e0813129e1cdb38e502d589e53c1ed81dc15d4cc93a9cdd34773ab556db0bf0a",
+    "zh-TW": "8de6b82ca60534559aeada10b9f7e41be7d1ab1747e753440c82f4f90a317129"
+  },
+  "compatibility": {
+    "fallbackSource": "zh-CN",
+    "materializedFallbackPreservesVisibleBehavior": true,
+    "helpHtmlExcludedFromLocales": true
+  }
+}

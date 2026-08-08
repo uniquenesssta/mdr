@@ -10,7 +10,7 @@
   "legacyClassicScripts": [
     {
       "loader": "src/bootstrap/module-entry.js",
-      "script": "public/i18n.js",
+      "script": "public/help-content.js",
       "count": 1
     },
     {

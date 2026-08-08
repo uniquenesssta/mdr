@@ -64,6 +64,7 @@ function normalizePublicScriptSource(source) {
   const value = String(source || '').replace(/[?#].*$/, '');
   if (value.startsWith('/app/')) return `public${value}`;
   if (value === '/i18n.js' || value === 'i18n.js') return 'public/i18n.js';
+  if (value === '/help-content.js' || value === 'help-content.js') return 'public/help-content.js';
   if (value.startsWith('/')) return value.slice(1);
   return normalizePath(value);
 }
@@ -89,7 +90,7 @@ export function collectDynamicClassicScripts(path, source) {
   if (!/createElement\(\s*['"]script['"]\s*\)/.test(source)) return [];
   if (!/\.appendChild\(\s*script\s*\)/.test(source)) return [];
   const records = [];
-  const pattern = /(["'])(\/(?:app\/[^"']+\.js|i18n\.js))\1/g;
+  const pattern = /(["'])(\/(?:app\/[^"']+\.js|i18n\.js|help-content\.js))\1/g;
   let match;
   while ((match = pattern.exec(source))) {
     const location = getLineAndColumn(source, match.index);

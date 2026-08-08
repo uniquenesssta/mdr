@@ -1,8 +1,8 @@
 import { createUI } from '../ui/create-ui.js';
 import { createCompatibilityBusinessContentPort } from '../ui/compatibility/index.js';
+import { localeRegistry, mountClassicLocalePort } from '../i18n/index.js';
 
 const COMPATIBILITY_CONTENT_URL = '/compatibility/business-content.html';
-const I18N_SCRIPT_URL = '/i18n.js';
 const starts = new WeakMap();
 
 async function fetchCompatibilityContent(fetchImpl) {
@@ -28,9 +28,10 @@ function loadClassicScript(documentRef, src) {
   });
 }
 
-function destroyStartupResources({ classicScript, contentPort, ui }) {
+function destroyStartupResources({ classicScript, localePort, contentPort, ui }) {
   const errors = [];
   try { classicScript?.remove(); } catch (error) { errors.push(error); }
+  try { localePort?.destroy(); } catch (error) { errors.push(error); }
   try { contentPort?.destroy(); } catch (error) { errors.push(error); }
   try { ui?.destroy(); } catch (error) { errors.push(error); }
   return errors;
@@ -53,16 +54,19 @@ export function startModuleEntry({
 
     let ui = null;
     let contentPort = null;
+    let localePort = null;
     let classicScript = null;
     try {
       ui = createUI(root);
       contentPort = createCompatibilityBusinessContentPort(root, ui);
       const markup = await fetchCompatibilityContent(fetchImpl);
       contentPort.mount(markup);
-      classicScript = await loadClassicScript(documentRef, I18N_SCRIPT_URL);
+      const portsHost = documentRef.getElementById('compatibility-business-ports');
+      localePort = mountClassicLocalePort(portsHost, localeRegistry);
+      classicScript = await loadClassicScript(documentRef, '/help-content.js');
       await importApplication();
     } catch (error) {
-      const cleanupErrors = destroyStartupResources({ classicScript, contentPort, ui });
+      const cleanupErrors = destroyStartupResources({ classicScript, localePort, contentPort, ui });
       starts.delete(documentRef);
       if (!cleanupErrors.length) throw error;
       throw new AggregateError([error, ...cleanupErrors], 'Application startup failed and cleanup was incomplete.');
@@ -73,7 +77,7 @@ export function startModuleEntry({
       destroy() {
         if (destroyed) return;
         destroyed = true;
-        const errors = destroyStartupResources({ classicScript, contentPort, ui });
+        const errors = destroyStartupResources({ classicScript, localePort, contentPort, ui });
         starts.delete(documentRef);
         if (errors.length) throw new AggregateError(errors, 'Application bootstrap cleanup failed.');
       }

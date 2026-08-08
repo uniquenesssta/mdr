@@ -1,10 +1,12 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
-import { dirname, extname, join, relative, resolve } from 'node:path';
+import { dirname, extname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { runInNewContext } from 'node:vm';
 
-const LEGACY_LOCALE_PATH = 'public/i18n.js';
+const REGISTRY_PATH = 'src/i18n/locale-registry.js';
+const LOCALE_DIRECTORY = 'src/i18n/locales';
+const HELP_CONTENT_PATH = 'public/help-content.js';
 const REFERENCE_ROOTS = ['public', 'src'];
 const REFERENCE_EXTENSIONS = new Set(['.html', '.js', '.mjs']);
 const HTML_TAG_PATTERN = /<(?:a|b|blockquote|br|code|div|em|h[1-6]|li|ol|p|pre|span|strong|table|tbody|td|th|thead|tr|ul)\b/i;
@@ -12,6 +14,7 @@ const PLACEHOLDER_PATTERN = /\{(\d+)\}/g;
 const LOCALE_DECLARATION_PATTERN = /^\s{2}(['"])([^'"]+)\1\s*:\s*\{\s*$/;
 const LOCALE_END_PATTERN = /^\s{2}\},?\s*$/;
 const KEY_DECLARATION_PATTERN = /^\s{4}(?:(['"])([^'"]+)\1|([A-Za-z_$][\w$]*))\s*:/;
+const SPLIT_KEY_DECLARATION_PATTERN = /^\s{2}"([^"]+)"\s*:/;
 const HTML_REFERENCE_PATTERN = /\bdata-i18n(?:-title|-placeholder|-alt)?\s*=\s*(['"])([^'"]+)\1/g;
 const TRANSLATION_CALL_PATTERN = /\bt\s*\(\s*(['"])([^'"]+)\1/g;
 const DIRECT_I18N_DOT_PATTERN = /\bi18n\s*\[[^\]]+\]\s*\.\s*([A-Za-z_$][\w$]*)/g;
@@ -27,9 +30,7 @@ function sha256(value) {
 
 export function extractPlaceholderSignature(value) {
   const placeholders = new Set();
-  for (const match of String(value ?? '').matchAll(PLACEHOLDER_PATTERN)) {
-    placeholders.add(Number(match[1]));
-  }
+  for (const match of String(value ?? '').matchAll(PLACEHOLDER_PATTERN)) placeholders.add(Number(match[1]));
   return [...placeholders].sort((left, right) => left - right);
 }
 
@@ -48,31 +49,23 @@ export function parseLocaleDeclarations(source) {
       if (!keyDeclarations.has(currentLocale)) keyDeclarations.set(currentLocale, []);
       continue;
     }
-
     if (!currentLocale) continue;
     if (LOCALE_END_PATTERN.test(line)) {
       currentLocale = null;
       continue;
     }
-
     const keyMatch = line.match(KEY_DECLARATION_PATTERN);
-    if (!keyMatch) continue;
-    keyDeclarations.get(currentLocale).push({
-      key: keyMatch[2] || keyMatch[3],
-      line: index + 1
-    });
+    if (keyMatch) keyDeclarations.get(currentLocale).push({ key: keyMatch[2] || keyMatch[3], line: index + 1 });
   }
 
   const duplicateLocales = [...localeDefinitions.entries()]
     .filter(([, count]) => count > 1)
     .map(([locale, count]) => ({ locale, count }))
     .sort((left, right) => left.locale.localeCompare(right.locale));
-
   const duplicateKeysByLocale = {};
   for (const locale of [...new Set(localeOrder)]) {
-    const declarations = keyDeclarations.get(locale) || [];
     const grouped = new Map();
-    for (const record of declarations) {
+    for (const record of keyDeclarations.get(locale) || []) {
       if (!grouped.has(record.key)) grouped.set(record.key, []);
       grouped.get(record.key).push(record.line);
     }
@@ -82,58 +75,7 @@ export function parseLocaleDeclarations(source) {
       .sort((left, right) => left.key.localeCompare(right.key));
     if (duplicates.length) duplicateKeysByLocale[locale] = duplicates;
   }
-
-  return {
-    localeOrder,
-    duplicateLocales,
-    duplicateKeysByLocale,
-    keyDeclarations
-  };
-}
-
-export function evaluateLegacyLocales(source) {
-  const sandbox = Object.create(null);
-  runInNewContext(
-    `${String(source)}\n;globalThis.__markdownEditorLocaleAudit = i18n;`,
-    sandbox,
-    { timeout: 2_000, filename: LEGACY_LOCALE_PATH }
-  );
-  const locales = sandbox.__markdownEditorLocaleAudit;
-  if (!locales || typeof locales !== 'object' || Array.isArray(locales)) {
-    throw new Error(`${LEGACY_LOCALE_PATH} did not expose an object-shaped locale dictionary.`);
-  }
-  return locales;
-}
-
-async function collectReferenceFiles(root) {
-  const files = ['index.html'];
-
-  async function walk(directory) {
-    const absoluteDirectory = resolve(root, directory);
-    let entries;
-    try {
-      entries = await readdir(absoluteDirectory, { withFileTypes: true });
-    } catch (error) {
-      if (error?.code === 'ENOENT') return;
-      throw error;
-    }
-
-    for (const entry of entries) {
-      const child = join(directory, entry.name);
-      if (entry.isDirectory()) {
-        await walk(child);
-        continue;
-      }
-      if (!entry.isFile()) continue;
-      const normalized = normalizePath(child);
-      if (normalized === LEGACY_LOCALE_PATH) continue;
-      if (!REFERENCE_EXTENSIONS.has(extname(entry.name))) continue;
-      files.push(normalized);
-    }
-  }
-
-  for (const directory of REFERENCE_ROOTS) await walk(directory);
-  return [...new Set(files)].sort();
+  return { localeOrder, duplicateLocales, duplicateKeysByLocale, keyDeclarations };
 }
 
 function lineNumberAt(source, index) {
@@ -144,30 +86,16 @@ function addReference(referenceMap, key, path, index, kind, source) {
   const normalizedKey = String(key || '').trim();
   if (!normalizedKey) return;
   if (!referenceMap.has(normalizedKey)) referenceMap.set(normalizedKey, []);
-  referenceMap.get(normalizedKey).push({
-    path: normalizePath(path),
-    line: lineNumberAt(source, index),
-    kind
-  });
+  referenceMap.get(normalizedKey).push({ path: normalizePath(path), line: lineNumberAt(source, index), kind });
 }
 
 export function collectLiteralTranslationReferences(source, path) {
   const references = new Map();
   const text = String(source);
-
-  for (const match of text.matchAll(HTML_REFERENCE_PATTERN)) {
-    addReference(references, match[2], path, match.index, 'html-binding', text);
-  }
-  for (const match of text.matchAll(TRANSLATION_CALL_PATTERN)) {
-    addReference(references, match[2], path, match.index, 't-call', text);
-  }
-  for (const match of text.matchAll(DIRECT_I18N_DOT_PATTERN)) {
-    addReference(references, match[1], path, match.index, 'direct-i18n-property', text);
-  }
-  for (const match of text.matchAll(DIRECT_I18N_BRACKET_PATTERN)) {
-    addReference(references, match[2], path, match.index, 'direct-i18n-property', text);
-  }
-
+  for (const match of text.matchAll(HTML_REFERENCE_PATTERN)) addReference(references, match[2], path, match.index, 'html-binding', text);
+  for (const match of text.matchAll(TRANSLATION_CALL_PATTERN)) addReference(references, match[2], path, match.index, 't-call', text);
+  for (const match of text.matchAll(DIRECT_I18N_DOT_PATTERN)) addReference(references, match[1], path, match.index, 'direct-i18n-property', text);
+  for (const match of text.matchAll(DIRECT_I18N_BRACKET_PATTERN)) addReference(references, match[2], path, match.index, 'direct-i18n-property', text);
   return references;
 }
 
@@ -187,13 +115,77 @@ function findDynamicTranslationCalls(source, path) {
     if (/function\s+$/.test(before)) continue;
     const argument = match[1].trimStart();
     if (argument.startsWith("'") || argument.startsWith('"')) continue;
-    results.push({
-      path: normalizePath(path),
-      line: lineNumberAt(text, match.index),
-      expression: argument.trim().slice(0, 80)
-    });
+    results.push({ path: normalizePath(path), line: lineNumberAt(text, match.index), expression: argument.trim().slice(0, 80) });
   }
   return results;
+}
+
+async function collectReferenceFiles(root) {
+  const files = ['index.html'];
+  async function walk(directory) {
+    let entries;
+    try {
+      entries = await readdir(resolve(root, directory), { withFileTypes: true });
+    } catch (error) {
+      if (error?.code === 'ENOENT') return;
+      throw error;
+    }
+    for (const entry of entries) {
+      const child = join(directory, entry.name);
+      if (entry.isDirectory()) await walk(child);
+      else if (entry.isFile() && REFERENCE_EXTENSIONS.has(extname(entry.name))) files.push(normalizePath(child));
+    }
+  }
+  for (const directory of REFERENCE_ROOTS) await walk(directory);
+  return [...new Set(files)].sort();
+}
+
+async function loadRegistry(root) {
+  const href = pathToFileURL(resolve(root, REGISTRY_PATH)).href;
+  const module = await import(`${href}?stage04-audit=${Date.now()}`);
+  const registry = module.localeRegistry;
+  if (!registry || !Array.isArray(registry.localeIds) || !Array.isArray(registry.keys)) {
+    throw new Error(`${REGISTRY_PATH} did not expose the expected localeRegistry contract.`);
+  }
+  return registry;
+}
+
+async function loadHelpContent(root, localeOrder) {
+  const source = await readFile(resolve(root, HELP_CONTENT_PATH), 'utf8');
+  const host = { removeAttribute() {} };
+  runInNewContext(source, { document: { getElementById: id => id === 'compatibility-business-ports' ? host : null } }, { timeout: 2_000, filename: HELP_CONTENT_PATH });
+  const api = host.markdownEditorHelpContent;
+  if (!api || typeof api.get !== 'function' || typeof api.hasLocale !== 'function') {
+    throw new Error(`${HELP_CONTENT_PATH} did not mount the expected compatibility API.`);
+  }
+  const result = {};
+  for (const locale of localeOrder) {
+    if (!api.hasLocale(locale)) throw new Error(`${HELP_CONTENT_PATH} is missing locale ${locale}.`);
+    const value = api.get(locale);
+    if (typeof value !== 'string' || !HTML_TAG_PATTERN.test(value)) throw new Error(`Help content for ${locale} must remain HTML text.`);
+    result[locale] = { length: value.length, sha256: sha256(value) };
+  }
+  return result;
+}
+
+async function collectSplitDuplicateKeys(root, localeOrder) {
+  const duplicateKeysByLocale = {};
+  for (const locale of localeOrder) {
+    const source = await readFile(resolve(root, LOCALE_DIRECTORY, `${locale}.js`), 'utf8');
+    const grouped = new Map();
+    for (const [index, line] of source.split(/\r?\n/).entries()) {
+      const match = line.match(SPLIT_KEY_DECLARATION_PATTERN);
+      if (!match) continue;
+      if (!grouped.has(match[1])) grouped.set(match[1], []);
+      grouped.get(match[1]).push(index + 1);
+    }
+    const duplicates = [...grouped.entries()]
+      .filter(([, lines]) => lines.length > 1)
+      .map(([key, lines]) => ({ key, lines }))
+      .sort((left, right) => left.key.localeCompare(right.key));
+    if (duplicates.length) duplicateKeysByLocale[locale] = duplicates;
+  }
+  return duplicateKeysByLocale;
 }
 
 function sortObjectKeys(record) {
@@ -201,121 +193,69 @@ function sortObjectKeys(record) {
 }
 
 export async function buildLocaleKeyAudit({ root = process.cwd() } = {}) {
-  const localeSource = await readFile(resolve(root, LEGACY_LOCALE_PATH), 'utf8');
-  const declarations = parseLocaleDeclarations(localeSource);
-  const locales = evaluateLegacyLocales(localeSource);
-  const localeOrder = declarations.localeOrder.filter((locale, index, list) => list.indexOf(locale) === index);
-  const runtimeLocaleNames = Object.keys(locales);
-
-  if (localeOrder.join('\u0000') !== runtimeLocaleNames.join('\u0000')) {
-    throw new Error('Locale declaration order does not match the evaluated legacy locale dictionary.');
-  }
-
+  const registry = await loadRegistry(root);
+  const localeOrder = [...registry.localeIds];
+  const unionKeys = [...registry.keys].sort();
   const localeKeys = {};
   const placeholderSignatures = {};
-  const htmlContent = {};
-  const union = new Set();
+  const missingKeysByLocale = {};
+  const placeholderMismatches = [];
 
+  const reference = registry.get(registry.defaultLocale);
+  const expectedPlaceholders = Object.fromEntries(unionKeys.map(key => [key, extractPlaceholderSignature(reference[key])]));
   for (const locale of localeOrder) {
-    const dictionary = locales[locale];
-    if (!dictionary || typeof dictionary !== 'object' || Array.isArray(dictionary)) {
-      throw new Error(`Locale ${locale} is not an object-shaped dictionary.`);
-    }
+    const dictionary = registry.get(locale);
     const keys = Object.keys(dictionary).sort();
     localeKeys[locale] = keys;
-    for (const key of keys) union.add(key);
-
-    const placeholders = {};
-    const htmlEntries = [];
-    for (const key of keys) {
-      const value = dictionary[key];
-      if (typeof value !== 'string') {
-        throw new Error(`Locale ${locale} key ${key} is not a string.`);
-      }
-      const signature = extractPlaceholderSignature(value);
-      if (signature.length) placeholders[key] = signature;
-      if (HTML_TAG_PATTERN.test(value)) {
-        htmlEntries.push({ key, length: value.length, sha256: sha256(value) });
-      }
-    }
-    placeholderSignatures[locale] = sortObjectKeys(placeholders);
-    htmlContent[locale] = htmlEntries.sort((left, right) => left.key.localeCompare(right.key));
-  }
-
-  const unionKeys = [...union].sort();
-  const missingKeysByLocale = {};
-  for (const locale of localeOrder) {
-    const keys = new Set(localeKeys[locale]);
-    const missing = unionKeys.filter(key => !keys.has(key));
+    const missing = unionKeys.filter(key => !Object.hasOwn(dictionary, key));
     if (missing.length) missingKeysByLocale[locale] = missing;
+    const signatures = {};
+    for (const key of keys) {
+      const signature = extractPlaceholderSignature(dictionary[key]);
+      if (signature.length) signatures[key] = signature;
+      if (JSON.stringify(signature) !== JSON.stringify(expectedPlaceholders[key])) {
+        placeholderMismatches.push({ locale, key, expected: expectedPlaceholders[key], actual: signature });
+      }
+      if (HTML_TAG_PATTERN.test(dictionary[key])) throw new Error(`Locale ${locale} key ${key} contains HTML content.`);
+    }
+    placeholderSignatures[locale] = sortObjectKeys(signatures);
   }
 
-  const referenceFiles = await collectReferenceFiles(root);
   const references = new Map();
   const dynamicTranslationCalls = [];
-  for (const path of referenceFiles) {
+  for (const path of await collectReferenceFiles(root)) {
     const source = await readFile(resolve(root, path), 'utf8');
     mergeReferenceMaps(references, collectLiteralTranslationReferences(source, path));
-    if (/\.(?:js|mjs)$/.test(path)) {
-      dynamicTranslationCalls.push(...findDynamicTranslationCalls(source, path));
-    }
+    if (/\.(?:js|mjs)$/.test(path)) dynamicTranslationCalls.push(...findDynamicTranslationCalls(source, path));
   }
-
   const referencedKeys = [...references.keys()].sort();
-  const unionKeySet = new Set(unionKeys);
-  const referencedKeySet = new Set(referencedKeys);
-  const unusedKeys = unionKeys.filter(key => !referencedKeySet.has(key));
-  const unknownReferencedKeys = referencedKeys.filter(key => !unionKeySet.has(key));
-
+  const unionSet = new Set(unionKeys);
+  const referencedSet = new Set(referencedKeys);
   const referencesByKey = {};
   for (const key of referencedKeys) {
-    referencesByKey[key] = references.get(key)
-      .sort((left, right) => `${left.path}:${left.line}:${left.kind}`.localeCompare(`${right.path}:${right.line}:${right.kind}`));
-  }
-
-  const placeholderMismatches = [];
-  for (const key of unionKeys) {
-    const signatures = new Map();
-    for (const locale of localeOrder) {
-      if (!(key in locales[locale])) continue;
-      const signature = extractPlaceholderSignature(locales[locale][key]);
-      const signatureKey = JSON.stringify(signature);
-      if (!signatures.has(signatureKey)) signatures.set(signatureKey, []);
-      signatures.get(signatureKey).push(locale);
-    }
-    if (signatures.size <= 1) continue;
-    placeholderMismatches.push({
-      key,
-      variants: [...signatures.entries()]
-        .map(([signature, variantLocales]) => ({
-          placeholders: JSON.parse(signature),
-          locales: variantLocales
-        }))
-        .sort((left, right) => JSON.stringify(left.placeholders).localeCompare(JSON.stringify(right.placeholders)))
-    });
+    referencesByKey[key] = references.get(key).sort((left, right) => `${left.path}:${left.line}:${left.kind}`.localeCompare(`${right.path}:${right.line}:${right.kind}`));
   }
 
   return {
-    schemaVersion: 1,
-    kind: 'stage-04-locale-key-compatibility',
-    source: LEGACY_LOCALE_PATH,
-    auditMode: 'static-literal-production-references',
+    schemaVersion: 2,
+    kind: 'stage-04-split-locale-key-audit',
+    source: REGISTRY_PATH,
+    auditMode: 'split-registry-static-literal-production-references',
     localeOrder,
     localeKeys,
     unionKeys,
     placeholderSignatures,
-    htmlContent,
+    htmlContent: Object.fromEntries(localeOrder.map(locale => [locale, []])),
+    helpContent: await loadHelpContent(root, localeOrder),
     referencesByKey,
     anomalies: {
-      duplicateLocales: declarations.duplicateLocales,
-      duplicateKeysByLocale: declarations.duplicateKeysByLocale,
+      duplicateLocales: [],
+      duplicateKeysByLocale: await collectSplitDuplicateKeys(root, localeOrder),
       missingKeysByLocale: sortObjectKeys(missingKeysByLocale),
       placeholderMismatches,
-      unusedKeys,
-      unknownReferencedKeys,
-      dynamicTranslationCalls: dynamicTranslationCalls.sort((left, right) => (
-        `${left.path}:${left.line}:${left.expression}`.localeCompare(`${right.path}:${right.line}:${right.expression}`)
-      ))
+      unusedKeys: unionKeys.filter(key => !referencedSet.has(key)),
+      unknownReferencedKeys: referencedKeys.filter(key => !unionSet.has(key)),
+      dynamicTranslationCalls: dynamicTranslationCalls.sort((left, right) => `${left.path}:${left.line}:${left.expression}`.localeCompare(`${right.path}:${right.line}:${right.expression}`))
     }
   };
 }
@@ -324,21 +264,16 @@ export function serializeLocaleKeyAudit(audit) {
   return `${JSON.stringify(audit, null, 2)}\n`;
 }
 
-async function writeAudit(path, audit) {
-  const absolutePath = resolve(process.cwd(), path);
-  await mkdir(dirname(absolutePath), { recursive: true });
-  await writeFile(absolutePath, serializeLocaleKeyAudit(audit), 'utf8');
-}
-
 async function main() {
   const outputArgument = process.argv.slice(2).find(argument => argument.startsWith('--output='));
   const output = outputArgument?.slice('--output='.length) || '';
   const audit = await buildLocaleKeyAudit();
-  if (output) await writeAudit(output, audit);
-  else process.stdout.write(serializeLocaleKeyAudit(audit));
+  if (output) {
+    const absolute = resolve(process.cwd(), output);
+    await mkdir(dirname(absolute), { recursive: true });
+    await writeFile(absolute, serializeLocaleKeyAudit(audit), 'utf8');
+  } else process.stdout.write(serializeLocaleKeyAudit(audit));
 }
 
 const entryHref = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : '';
-if (entryHref && import.meta.url === entryHref) {
-  await main();
-}
+if (entryHref && import.meta.url === entryHref) await main();

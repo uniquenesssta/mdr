@@ -1,4 +1,9 @@
-const corePlatformPort = document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort;
+const coreCompatibilityHost = document.getElementById('compatibility-business-ports');
+const corePlatformPort = coreCompatibilityHost?.markdownEditorPlatformPort;
+const coreLocalePort = coreCompatibilityHost?.markdownEditorLocalePort;
+const coreHelpContent = coreCompatibilityHost?.markdownEditorHelpContent;
+if (!coreLocalePort) throw new Error('Locale compatibility port is unavailable.');
+if (!coreHelpContent) throw new Error('Legacy help content port is unavailable.');
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
@@ -290,14 +295,15 @@ const editor = document.getElementById('editor');
     let activeOutlineHeadingId = '';
 
     function t(key, ...args) {
-      const dict = i18n[currentLang] || i18n['zh-CN'];
-      let str = dict[key];
-      if (str === undefined) str = i18n['zh-CN'][key] || key;
+      const fallback = coreLocalePort.getLocale(coreLocalePort.defaultLocale);
+      const dict = coreLocalePort.getLocale(currentLang) || fallback;
+      let str = dict?.[key];
+      if (str === undefined) str = fallback?.[key] || key;
       return args.reduce((s, arg, i) => s.replace(new RegExp('\\{' + i + '\\}', 'g'), String(arg)), str);
     }
 
     function setLanguage(lang) {
-      if (!i18n[lang]) lang = 'zh-CN';
+      if (!coreLocalePort.hasLocale(lang)) lang = coreLocalePort.defaultLocale;
       currentLang = lang;
       localStorage.setItem(LANG_KEY, lang);
       applyLanguage();
@@ -324,8 +330,9 @@ const editor = document.getElementById('editor');
 
       const helpBody = document.getElementById('help-body');
       const usesCategorizedHelp = Boolean(helpBody?.querySelector('[data-help-page-panel]'));
-      if (helpBody && !usesCategorizedHelp && i18n[currentLang] && i18n[currentLang].helpHtml) {
-        helpBody.innerHTML = i18n[currentLang].helpHtml;
+      const helpHtml = coreHelpContent.get(currentLang);
+      if (helpBody && !usesCategorizedHelp && helpHtml) {
+        helpBody.innerHTML = helpHtml;
       }
 
       updateCollapseBtnLabels();

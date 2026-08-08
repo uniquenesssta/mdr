@@ -1,4 +1,4 @@
-# Atomic Task 4.1 locale-key audit validation node.
+# Atomic Task 4.2 locale split validation node.
 name: Stage 4 Atomic Verification
 
 on:
@@ -40,10 +40,12 @@ jobs:
         run: npm run deps:prepare
       - name: Verify Stage 3 handoff remains intact
         run: node --test tests/unit/platform/classic-platform-port.test.mjs tests/unit/platform/platform-cutover.test.mjs
-      - name: Verify Atomic Task 4.1 locale-key compatibility
+      - name: Verify Atomic Task 4.1 historical locale audit contracts
         run: node --test tests/unit/i18n/locale-key-audit.test.mjs
-      - name: Record Atomic Task 4.1 locale-key audit
-        run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-01-locale-key-audit.json
+      - name: Verify Atomic Task 4.2 locale split and registry
+        run: node --test tests/unit/i18n/locale-registry.test.mjs
+      - name: Record Atomic Task 4.2 current locale audit
+        run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-02-locale-split-audit.json
       - name: Run architecture hard gate
         run: npm run verify:architecture
       - name: Run existing Node regression suite
@@ -58,10 +60,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-04/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 4.1 evidence
+      - name: Upload Atomic Task 4.2 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-04-locale-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-04-locale-split-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-04
           if-no-files-found: error
           retention-days: 30
