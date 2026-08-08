@@ -1,0 +1,67 @@
+# Atomic Task 4.1 locale-key audit validation node.
+name: Stage 4 Atomic Verification
+
+on:
+  push:
+    branches:
+      - rewrite/stage-04
+  pull_request:
+    branches:
+      - rewrite/modular-rebuild
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-04-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  locale-foundation:
+    name: Verify Stage 4 locale foundation
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm run deps:prepare
+      - name: Verify Stage 3 handoff remains intact
+        run: node --test tests/unit/platform/classic-platform-port.test.mjs tests/unit/platform/platform-cutover.test.mjs
+      - name: Verify Atomic Task 4.1 locale-key compatibility
+        run: node --test tests/unit/i18n/locale-key-audit.test.mjs
+      - name: Record Atomic Task 4.1 locale-key audit
+        run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-01-locale-key-audit.json
+      - name: Run architecture hard gate
+        run: npm run verify:architecture
+      - name: Run existing Node regression suite
+        run: npm test
+      - name: Run browser interaction contract
+        env:
+          E2E_ARTIFACT_DIR: artifacts/stage-04/browser-contract
+        run: npm run test:browser:contract
+      - name: Build current application
+        run: npm run build
+      - name: Verify built application regression
+        env:
+          E2E_ARTIFACT_DIR: artifacts/stage-04/browser-app
+        run: npm run test:browser
+      - name: Upload Atomic Task 4.1 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-04-locale-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-04
+          if-no-files-found: error
+          retention-days: 30

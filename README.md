@@ -2,4 +2,4 @@
 
 Tauri + Rust 桌面 Markdown 编辑器。完整架构与记录见 [docs/README.md](docs/README.md)。
 
-2026-08-08：Atomic 3.12 / Stage 3 PASS：完成 Platform 最终切换并删除 legacy native facade。用户本地 6/6、135/135、42/42、Browser 10/10+12/12、build/evidence/audit 0 全通过；Stage 3 Atomic 与 Windows Native 全绿，maximize/resize/minimize/Win32 drag/normal close/force close 通过。未改生产 Rust、依赖或锁文件。
+2026-08-08：Atomic 4.1 已在 `rewrite/stage-04` 建立 locale 键审计：冻结 10 个语言、162 个联合键、占位符、`helpHtml` 摘要及已知缺失/重复/静态未使用键兼容夹具；未修改 `public/i18n.js` 或翻译值。初始真实审计已通过，Stage 4 全量回归验证中；4.2 未开始。
