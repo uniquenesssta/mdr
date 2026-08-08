@@ -1,4 +1,4 @@
-# Atomic Task 4.6 Settings Schema validation node.
+# Atomic Task 4.7 Settings Repository validation node.
 name: Stage 4 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  settings-schema:
-    name: Verify Stage 4 Settings Schema
+  settings-repository:
+    name: Verify Stage 4 Settings Repository
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -52,8 +52,10 @@ jobs:
         run: node --test tests/unit/help/help-feature.test.mjs
       - name: Verify Atomic Task 4.6 Settings Schema
         run: node --test tests/unit/settings/settings-schema.test.mjs
+      - name: Verify Atomic Task 4.7 Settings Repository
+        run: node --test tests/unit/settings/settings-repository.test.mjs tests/unit/settings/classic-settings-repository-port.test.mjs
       - name: Record current locale audit
-        run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-06-settings-schema-audit.json
+        run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-07-settings-repository-audit.json
       - name: Run architecture hard gate
         run: npm run verify:architecture
       - name: Run existing Node regression suite
@@ -71,7 +73,7 @@ jobs:
       - name: Upload Atomic Task 4.6 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-04-settings-schema-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-04-settings-repository-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-04
           if-no-files-found: error
           retention-days: 30

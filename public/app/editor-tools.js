@@ -1,3 +1,7 @@
+const editorToolsCompatibilityHost = document.getElementById('compatibility-business-ports');
+const editorToolsSettingsRepositoryPort = editorToolsCompatibilityHost?.markdownEditorSettingsRepositoryPort;
+if (!editorToolsSettingsRepositoryPort) throw new Error('Settings Repository compatibility port is unavailable.');
+
     function toggleTheme() {
       const current = document.body.getAttribute('data-theme');
       setAppTheme(current === 'dark' ? 'light' : 'dark');
@@ -580,7 +584,7 @@
       editor.virtualEditor?.setHybridTableVisualEditing?.(enabled);
       updateTableVisualEditingToggle();
       if (options.persist !== false) {
-        localStorage.setItem(TABLE_VISUAL_EDITING_KEY, enabled ? 'true' : 'false');
+        editorToolsSettingsRepositoryPort.set('tableVisualEditing', enabled);
       }
       if (options.notify !== false) {
         showToast(enabled
@@ -611,7 +615,7 @@
       editor.virtualEditor?.setHybridCodeVisualEditing?.(enabled);
       updateCodeVisualEditingToggle();
       if (options.persist !== false) {
-        localStorage.setItem(CODE_VISUAL_EDITING_KEY, enabled ? 'true' : 'false');
+        editorToolsSettingsRepositoryPort.set('codeVisualEditing', enabled);
       }
       if (options.notify !== false) {
         showToast(enabled
@@ -935,8 +939,7 @@
 
     // 视图布局与全屏
     function getLayoutMode() {
-      const mode = localStorage.getItem(LAYOUT_MODE_KEY) || 'both';
-      return ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
+      return editorToolsSettingsRepositoryPort.get('layoutMode');
     }
 
     function isHybridLayoutMode() {
@@ -971,7 +974,7 @@
       return hybrid;
     }
 
-    function setLayoutMode(mode, animate = document.documentElement.classList.contains('app-ready')) {
+    function setLayoutMode(mode, animate = document.documentElement.classList.contains('app-ready'), persist = true) {
       const previousMode = getLayoutMode();
       const previewWasHidden = previewCollapsed || previousMode === 'hybrid';
       let nextMode = ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
@@ -994,7 +997,7 @@
         resetPane: previousMode !== 'both' && nextMode === 'both'
       });
 
-      localStorage.setItem(LAYOUT_MODE_KEY, nextMode);
+      if (persist) editorToolsSettingsRepositoryPort.set('layoutMode', nextMode);
       localStorage.setItem(EDITOR_COLLAPSED_KEY, editorCollapsed ? 'true' : 'false');
       localStorage.setItem(PREVIEW_COLLAPSED_KEY, previewCollapsed ? 'true' : 'false');
       updateViewMenuLabel();

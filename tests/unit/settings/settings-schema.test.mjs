@@ -58,10 +58,6 @@ async function readText(path) {
   return (await readFile(resolve(ROOT, path), 'utf8')).replace(/\r\n?/g, '\n');
 }
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function assertDeepFrozen(value) {
   if (!value || typeof value !== 'object') return;
   assert.equal(Object.isFrozen(value), true);
@@ -157,32 +153,24 @@ test('Settings serialization preserves legacy string formats and reports missing
   assert.equal(shouldOmitSettingValue(SETTINGS_SCHEMA.theme, 'light'), false);
 });
 
-test('Atomic 4.6 schema mirrors legacy keys instead of renaming persisted user data', async () => {
-  const [core, editorTools] = await Promise.all([
+test('Atomic 4.6 keeps legacy persistence keys schema-owned after Atomic 4.7 repository cutover', async () => {
+  const [core, bootstrap, editorTools] = await Promise.all([
     readText('public/app/core.js'),
+    readText('public/app/bootstrap.js'),
     readText('public/app/editor-tools.js')
   ]);
-  const sourceById = {
-    theme: [core, 'THEME_KEY'], language: [core, 'LANG_KEY'], layoutMode: [core, 'LAYOUT_MODE_KEY'],
-    sidebarVisible: [core, 'SIDEBAR_VISIBLE_KEY'], autoSaveEnabled: [core, 'AUTOSAVE_ENABLED_KEY'],
-    autoSaveDelay: [core, 'AUTOSAVE_DELAY_KEY'], editorFontSize: [core, 'EDITOR_FONT_SIZE_KEY'],
-    editorTextColor: [core, 'EDITOR_TEXT_COLOR_KEY'], activeLineColor: [core, 'ACTIVE_LINE_COLOR_KEY'],
-    exportDirectory: [core, 'EXPORT_DIRECTORY_KEY'], toolbarVisible: [core, 'TOOLBAR_VISIBLE_KEY'],
-    toolbarHiddenItems: [core, 'TOOLBAR_ITEMS_KEY'], previewPerformanceMode: [core, 'PREVIEW_PERFORMANCE_MODE_KEY'],
-    tableVisualEditing: [core, 'TABLE_VISUAL_EDITING_KEY'], codeVisualEditing: [core, 'CODE_VISUAL_EDITING_KEY']
-  };
-
-  for (const [id, [source, constantName]] of Object.entries(sourceById)) {
-    assert.match(source, new RegExp(`const ${constantName} = '${escapeRegExp(EXPECTED_KEYS[id])}';`), id);
-  }
-  assert.match(editorTools, /localStorage\.setItem\(TABLE_VISUAL_EDITING_KEY, enabled \? 'true' : 'false'\)/);
-  assert.match(editorTools, /localStorage\.setItem\(CODE_VISUAL_EDITING_KEY, enabled \? 'true' : 'false'\)/);
+  const classicSource = [core, bootstrap, editorTools].join('\n');
+  for (const key of Object.values(EXPECTED_KEYS)) assert.doesNotMatch(classicSource, new RegExp(key));
+  for (const name of [
+    'THEME_KEY', 'LANG_KEY', 'LAYOUT_MODE_KEY', 'SIDEBAR_VISIBLE_KEY', 'AUTOSAVE_ENABLED_KEY',
+    'AUTOSAVE_DELAY_KEY', 'EDITOR_FONT_SIZE_KEY', 'EDITOR_TEXT_COLOR_KEY', 'ACTIVE_LINE_COLOR_KEY',
+    'EXPORT_DIRECTORY_KEY', 'TOOLBAR_VISIBLE_KEY', 'TOOLBAR_ITEMS_KEY', 'PREVIEW_PERFORMANCE_MODE_KEY',
+    'TABLE_VISUAL_EDITING_KEY', 'CODE_VISUAL_EDITING_KEY'
+  ]) assert.doesNotMatch(classicSource, new RegExp('\\b' + name + '\\b'));
 });
 
-test('Atomic 4.6 keeps Settings domain pure and does not start Repository, Store, UI or Theme work early', async () => {
-  const settingsRoot = (await readdir(resolve(ROOT, 'src/features/settings'))).sort();
+test('Atomic 4.6 Settings domain remains pure while Atomic 4.7 consumes it through later layers', async () => {
   const domainFiles = (await readdir(resolve(ROOT, 'src/features/settings/domain'))).sort();
-  assert.deepEqual(settingsRoot, ['domain', 'index.js']);
   assert.deepEqual(domainFiles, [
     'settings-defaults.js', 'settings-schema.js', 'settings-serialization.js', 'settings-validation.js'
   ]);
@@ -192,5 +180,6 @@ test('Atomic 4.6 keeps Settings domain pure and does not start Repository, Store
     assert.doesNotMatch(source, /\blocalStorage\s*\.|\bsessionStorage\s*\.|\bdocument\s*\.|\bwindow\s*\.|@tauri-apps|createPlatform\s*\(/);
   }
   const publicEntry = await readText('src/features/settings/index.js');
-  assert.doesNotMatch(publicEntry, /from ['"]\.\/(?:application|state|infrastructure|sections|ui)\//);
+  assert.match(publicEntry, /infrastructure\/settings-repository\.js/);
+  assert.doesNotMatch(publicEntry, /from ['"]\.\/(?:application|state|sections|ui)\//);
 });

@@ -1,8 +1,8 @@
 /**
- * Responsibility: Public Stage 4 Settings domain contract; later repository/store/controller layers must consume this entry rather than duplicate schema rules.
- * Imports: Settings domain modules only.
- * Exports: Schema/default/validation/serialization contracts required by Atomic 4.6 and later Settings atomics.
- * State/side effects: Import-only facade; no DOM, storage, platform or lifecycle side effects.
+ * Responsibility: Public Stage 4 Settings contract, exposing domain rules plus the Atomic 4.7 persistence boundary and scoped classic bridge.
+ * Imports: Settings feature modules only.
+ * Exports: Schema/default/validation/serialization, Settings Repository and classic compatibility mount contracts.
+ * State/side effects: Import-only facade; no DOM, storage lookup or lifecycle state.
  */
 export { SETTING_DEFAULTS } from './domain/settings-defaults.js';
 export {
@@ -23,3 +23,9 @@ export {
   serializeSettingValue,
   shouldOmitSettingValue
 } from './domain/settings-serialization.js';
+export {
+  createSettingsRepository,
+  SettingsRepositoryReadError,
+  SettingsRepositoryWriteError
+} from './infrastructure/settings-repository.js';
+export { mountClassicSettingsRepositoryPort } from './compatibility/classic-settings-repository-port.js';

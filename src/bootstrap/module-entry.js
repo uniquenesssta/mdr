@@ -1,6 +1,7 @@
 import { createUI } from '../ui/create-ui.js';
 import { createCompatibilityBusinessContentPort } from '../ui/compatibility/index.js';
 import { createHelpFeature, mountClassicHelpPort } from '../features/help/index.js';
+import { createSettingsRepository, mountClassicSettingsRepositoryPort } from '../features/settings/index.js';
 import { createI18nService, createTranslationBindings, localeRegistry, mountClassicI18nPort } from '../i18n/index.js';
 
 const COMPATIBILITY_CONTENT_URL = '/compatibility/business-content.html';
@@ -14,9 +15,10 @@ async function fetchCompatibilityContent(fetchImpl) {
   return response.text();
 }
 
-function destroyStartupResources({ helpPort, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
+function destroyStartupResources({ helpPort, settingsPort, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
   const errors = [];
   try { helpPort?.destroy(); } catch (error) { errors.push(error); }
+  try { settingsPort?.destroy(); } catch (error) { errors.push(error); }
   try { i18nPort?.destroy(); } catch (error) { errors.push(error); }
   try { translationBindings?.destroy(); } catch (error) { errors.push(error); }
   try { helpController?.destroy(); } catch (error) { errors.push(error); }
@@ -48,6 +50,7 @@ export function startModuleEntry({
     let helpController = null;
     let translationBindings = null;
     let i18nPort = null;
+    let settingsPort = null;
     let helpPort = null;
     try {
       ui = createUI(root);
@@ -66,10 +69,12 @@ export function startModuleEntry({
         documentElement: documentRef.documentElement
       });
       i18nPort = mountClassicI18nPort(portsHost, i18nService);
+      const settingsRepository = createSettingsRepository({ storage });
+      settingsPort = mountClassicSettingsRepositoryPort(portsHost, settingsRepository);
       helpPort = mountClassicHelpPort(portsHost, helpController);
       await importApplication();
     } catch (error) {
-      const cleanupErrors = destroyStartupResources({ helpPort, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+      const cleanupErrors = destroyStartupResources({ helpPort, settingsPort, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
       starts.delete(documentRef);
       if (!cleanupErrors.length) throw error;
       throw new AggregateError([error, ...cleanupErrors], 'Application startup failed and cleanup was incomplete.');
@@ -80,7 +85,7 @@ export function startModuleEntry({
       destroy() {
         if (destroyed) return;
         destroyed = true;
-        const errors = destroyStartupResources({ helpPort, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+        const errors = destroyStartupResources({ helpPort, settingsPort, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
         starts.delete(documentRef);
         if (errors.length) throw new AggregateError(errors, 'Application bootstrap cleanup failed.');
       }

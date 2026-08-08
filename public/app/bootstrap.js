@@ -1,16 +1,19 @@
 const bootstrapCompatibilityHost = document.getElementById('compatibility-business-ports');
 const bootstrapHelpPort = bootstrapCompatibilityHost?.markdownEditorHelpPort;
+const bootstrapSettingsRepositoryPort = bootstrapCompatibilityHost?.markdownEditorSettingsRepositoryPort;
 if (!bootstrapHelpPort) throw new Error('Help compatibility port is unavailable.');
+if (!bootstrapSettingsRepositoryPort) throw new Error('Settings Repository compatibility port is unavailable.');
 
     async function init() {
-      const savedLang = localStorage.getItem(LANG_KEY);
+      const restoredSettings = bootstrapSettingsRepositoryPort.load();
+      const savedLang = restoredSettings.language;
       if (savedLang) coreI18nPort.setLocale(savedLang);
 
       // 每次启动都建立新的会话文档。上次打开的外部路径仅迁移到“最近打开”，
       // 不再先恢复旧正文或文档元数据，避免侧栏历史和后台快照重新进入当前会话。
       editor.value = '';
       filenameInput.value = t('filenameDefault');
-      const theme = localStorage.getItem(THEME_KEY) || 'light';
+      const theme = restoredSettings.theme;
       document.body.setAttribute('data-theme', theme);
 
       if (typeof mermaid !== 'undefined') {
@@ -25,22 +28,22 @@ if (!bootstrapHelpPort) throw new Error('Help compatibility port is unavailable.
         const parsed = parseFloat(savedRatio);
         if (!isNaN(parsed)) editorRatio = parsed;
       }
-      sidebarVisible = localStorage.getItem(SIDEBAR_VISIBLE_KEY) !== 'false';
+      sidebarVisible = restoredSettings.sidebarVisible;
       sidebarWidth = normalizeSidebarWidth(localStorage.getItem(SIDEBAR_WIDTH_KEY) || 248);
       loadRecentFiles();
       renderRecentFilesMenu();
       activeSidebarTab = localStorage.getItem(SIDEBAR_TAB_KEY) || 'docs';
-      autoSaveEnabled = localStorage.getItem(AUTOSAVE_ENABLED_KEY) !== 'false';
-      autoSaveDelay = normalizeAutoSaveDelay(localStorage.getItem(AUTOSAVE_DELAY_KEY) || 500);
-      editorFontSize = parseInt(localStorage.getItem(EDITOR_FONT_SIZE_KEY) || '16', 10) || 16;
-      editorTextColor = normalizeSettingColor(localStorage.getItem(EDITOR_TEXT_COLOR_KEY));
-      activeLineColor = normalizeSettingColor(localStorage.getItem(ACTIVE_LINE_COLOR_KEY));
-      exportDirectory = String(localStorage.getItem(EXPORT_DIRECTORY_KEY) || '').trim();
-      toolbarVisible = localStorage.getItem(TOOLBAR_VISIBLE_KEY) !== 'false';
-      toolbarHiddenItems = parseToolbarHiddenItems(localStorage.getItem(TOOLBAR_ITEMS_KEY));
-      previewPerformanceMode = normalizePreviewPerformanceMode(localStorage.getItem(PREVIEW_PERFORMANCE_MODE_KEY) || 'auto');
-      tableVisualEditingEnabled = localStorage.getItem(TABLE_VISUAL_EDITING_KEY) === 'true';
-      codeVisualEditingEnabled = localStorage.getItem(CODE_VISUAL_EDITING_KEY) === 'true';
+      autoSaveEnabled = restoredSettings.autoSaveEnabled;
+      autoSaveDelay = normalizeAutoSaveDelay(restoredSettings.autoSaveDelay);
+      editorFontSize = restoredSettings.editorFontSize;
+      editorTextColor = restoredSettings.editorTextColor;
+      activeLineColor = restoredSettings.activeLineColor;
+      exportDirectory = restoredSettings.exportDirectory;
+      toolbarVisible = restoredSettings.toolbarVisible;
+      toolbarHiddenItems = new Set(restoredSettings.toolbarHiddenItems);
+      previewPerformanceMode = restoredSettings.previewPerformanceMode;
+      tableVisualEditingEnabled = restoredSettings.tableVisualEditing;
+      codeVisualEditingEnabled = restoredSettings.codeVisualEditing;
       parseOutlineCollapsed();
       applyEditorPreferences();
       applyTableVisualEditingSetting({ persist: false, notify: false });
@@ -75,9 +78,9 @@ if (!bootstrapHelpPort) throw new Error('Help compatibility port is unavailable.
       }
 
       // 恢复用户选择的布局；单视图模式复用同一 CodeMirror 文档状态。
-      const savedLayoutMode = localStorage.getItem(LAYOUT_MODE_KEY);
+      const savedLayoutMode = restoredSettings.layoutMode;
       if (['both', 'hybrid', 'edit', 'preview'].includes(savedLayoutMode)) {
-        setLayoutMode(savedLayoutMode, false);
+        setLayoutMode(savedLayoutMode, false, false);
       } else {
         setLayoutMode('both', false);
       }

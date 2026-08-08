@@ -1,7 +1,9 @@
 const coreCompatibilityHost = document.getElementById('compatibility-business-ports');
 const corePlatformPort = coreCompatibilityHost?.markdownEditorPlatformPort;
 const coreI18nPort = coreCompatibilityHost?.markdownEditorI18nPort;
+const coreSettingsRepositoryPort = coreCompatibilityHost?.markdownEditorSettingsRepositoryPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
+if (!coreSettingsRepositoryPort) throw new Error('Settings Repository compatibility port is unavailable.');
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
@@ -13,31 +15,17 @@ const editor = document.getElementById('editor');
 
     const STORAGE_KEY = 'md_editor_content';
     const FILENAME_KEY = 'md_editor_filename';
-    const THEME_KEY = 'md_editor_theme';
     const RATIO_KEY = 'md_editor_ratio';
     const EDITOR_COLLAPSED_KEY = 'md_editor_editor_collapsed';
     const PREVIEW_COLLAPSED_KEY = 'md_editor_preview_collapsed';
     const PREVIEW_MODE_KEY = 'md_editor_preview_mode';
-    const LANG_KEY = 'md_editor_language';
     const DOCS_KEY = 'md_editor_documents';
     const CURRENT_DOC_KEY = 'md_editor_current_document';
     const EMPTY_DOCUMENTS_KEY = 'md_editor_documents_intentionally_empty';
-    const SIDEBAR_VISIBLE_KEY = 'md_editor_sidebar_visible';
     const SIDEBAR_TAB_KEY = 'md_editor_sidebar_tab';
     const SIDEBAR_WIDTH_KEY = 'md_editor_sidebar_width';
     const RECENT_FILES_KEY = 'md_editor_recent_files';
-    const AUTOSAVE_ENABLED_KEY = 'md_editor_autosave_enabled';
-    const AUTOSAVE_DELAY_KEY = 'md_editor_autosave_delay';
-    const EDITOR_FONT_SIZE_KEY = 'md_editor_editor_font_size';
-    const EDITOR_TEXT_COLOR_KEY = 'md_editor_text_color';
-    const ACTIVE_LINE_COLOR_KEY = 'md_editor_active_line_color';
-    const EXPORT_DIRECTORY_KEY = 'md_editor_export_directory';
-    const TOOLBAR_VISIBLE_KEY = 'md_editor_toolbar_visible';
-    const TOOLBAR_ITEMS_KEY = 'md_editor_toolbar_hidden_items';
     const OUTLINE_COLLAPSED_KEY = 'md_editor_outline_collapsed';
-    const PREVIEW_PERFORMANCE_MODE_KEY = 'md_editor_preview_performance_mode';
-    const TABLE_VISUAL_EDITING_KEY = 'md_editor_table_visual_editing';
-    const CODE_VISUAL_EDITING_KEY = 'md_editor_code_visual_editing';
     const DOCUMENT_INDEX_KEY_PREFIX = 'md_editor_document_index_v1:';
     const MAX_RECENT_FILES = 20;
     const COMPACT_SHELL_WINDOW_WIDTH = 860;
@@ -223,16 +211,6 @@ const editor = document.getElementById('editor');
       return PREVIEW_PERFORMANCE_MODES.has(mode) ? mode : 'auto';
     }
 
-    function parseToolbarHiddenItems(value) {
-      try {
-        const parsed = JSON.parse(String(value || '[]'));
-        if (!Array.isArray(parsed)) return new Set();
-        return new Set(parsed.filter(item => TOOLBAR_ITEM_IDS.has(item)));
-      } catch (_) {
-        return new Set();
-      }
-    }
-
     function resolvePreviewPerformanceMode(sourceLength = editor.textLength, blockCount = 0) {
       const requested = normalizePreviewPerformanceMode(previewPerformanceMode);
       if (requested !== 'auto') return requested;
@@ -296,7 +274,7 @@ const editor = document.getElementById('editor');
 
     function setLanguage(lang) {
       const resolvedLocale = coreI18nPort.setLocale(lang);
-      localStorage.setItem(LANG_KEY, resolvedLocale);
+      coreSettingsRepositoryPort.set('language', resolvedLocale);
     }
 
     function refreshClassicLocalizedState() {
@@ -1473,7 +1451,7 @@ const editor = document.getElementById('editor');
         return;
       }
       sidebarVisible = !sidebarVisible;
-      localStorage.setItem(SIDEBAR_VISIBLE_KEY, sidebarVisible ? 'true' : 'false');
+      coreSettingsRepositoryPort.set('sidebarVisible', sidebarVisible);
       runLayoutTransition(applySidebarVisibility, 'sidebar');
       showToast(sidebarVisible ? '已显示侧边栏' : '已隐藏侧边栏');
     }
@@ -1736,7 +1714,7 @@ const editor = document.getElementById('editor');
     function setAppTheme(theme) {
       const next = theme === 'dark' ? 'dark' : 'light';
       document.body.setAttribute('data-theme', next);
-      localStorage.setItem(THEME_KEY, next);
+      coreSettingsRepositoryPort.set('theme', next);
       if (typeof mermaid !== 'undefined') {
         const mermaidTheme = next === 'dark' ? 'dark' : 'default';
         mermaid.initialize({ startOnLoad: false, theme: mermaidTheme });
@@ -1821,7 +1799,7 @@ const editor = document.getElementById('editor');
     function openSettings(page = activeSettingsPage) {
       document.getElementById('setting-theme').value = document.body.getAttribute('data-theme') || 'light';
       document.getElementById('setting-language').value = coreI18nPort.locale;
-      document.getElementById('setting-layout').value = localStorage.getItem(LAYOUT_MODE_KEY) || 'both';
+      document.getElementById('setting-layout').value = coreSettingsRepositoryPort.get('layoutMode');
       document.getElementById('setting-sidebar-visible').checked = sidebarVisible;
       document.getElementById('setting-autosave-enabled').checked = autoSaveEnabled;
       const autosaveDelaySelect = document.getElementById('setting-autosave-delay');
@@ -1902,20 +1880,18 @@ const editor = document.getElementById('editor');
       setAppTheme(theme);
       setLanguage(lang);
       setLayoutMode(layout, false);
-      localStorage.setItem(SIDEBAR_VISIBLE_KEY, sidebarVisible ? 'true' : 'false');
-      localStorage.setItem(AUTOSAVE_ENABLED_KEY, autoSaveEnabled ? 'true' : 'false');
-      localStorage.setItem(AUTOSAVE_DELAY_KEY, String(autoSaveDelay));
-      localStorage.setItem(EDITOR_FONT_SIZE_KEY, String(editorFontSize));
-      if (editorTextColor) localStorage.setItem(EDITOR_TEXT_COLOR_KEY, editorTextColor);
-      else localStorage.removeItem(EDITOR_TEXT_COLOR_KEY);
-      if (activeLineColor) localStorage.setItem(ACTIVE_LINE_COLOR_KEY, activeLineColor);
-      else localStorage.removeItem(ACTIVE_LINE_COLOR_KEY);
-      if (exportDirectory) localStorage.setItem(EXPORT_DIRECTORY_KEY, exportDirectory);
-      else localStorage.removeItem(EXPORT_DIRECTORY_KEY);
-      localStorage.setItem(TOOLBAR_VISIBLE_KEY, toolbarVisible ? 'true' : 'false');
-      if (toolbarHiddenItems.size) localStorage.setItem(TOOLBAR_ITEMS_KEY, JSON.stringify(Array.from(toolbarHiddenItems)));
-      else localStorage.removeItem(TOOLBAR_ITEMS_KEY);
-      localStorage.setItem(PREVIEW_PERFORMANCE_MODE_KEY, previewPerformanceMode);
+      coreSettingsRepositoryPort.save({
+        sidebarVisible,
+        autoSaveEnabled,
+        autoSaveDelay,
+        editorFontSize,
+        editorTextColor,
+        activeLineColor,
+        exportDirectory,
+        toolbarVisible,
+        toolbarHiddenItems: Array.from(toolbarHiddenItems),
+        previewPerformanceMode
+      });
       applySidebarVisibility();
       applyEditorPreferences();
       updateStatusBar();
@@ -2071,8 +2047,6 @@ const editor = document.getElementById('editor');
         mangle: false
       });
     }
-
-    const LAYOUT_MODE_KEY = 'md_editor_layout_mode';
     const PAGE_FULLSCREEN_KEY = 'md_editor_page_fullscreen';
     const MAX_HISTORY = 100;
     let historyStack = [];
@@ -2081,8 +2055,7 @@ const editor = document.getElementById('editor');
     let historyTimer = null;
 
     function getConfiguredLayoutMode() {
-      const mode = localStorage.getItem(LAYOUT_MODE_KEY) || 'both';
-      return ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
+      return coreSettingsRepositoryPort.get('layoutMode');
     }
 
     function getMainLayoutWidth() {
