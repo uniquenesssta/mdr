@@ -1,8 +1,8 @@
 const coreCompatibilityHost = document.getElementById('compatibility-business-ports');
 const corePlatformPort = coreCompatibilityHost?.markdownEditorPlatformPort;
-const coreLocalePort = coreCompatibilityHost?.markdownEditorLocalePort;
+const coreI18nPort = coreCompatibilityHost?.markdownEditorI18nPort;
 const coreHelpContent = coreCompatibilityHost?.markdownEditorHelpContent;
-if (!coreLocalePort) throw new Error('Locale compatibility port is unavailable.');
+if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreHelpContent) throw new Error('Legacy help content port is unavailable.');
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
@@ -48,7 +48,6 @@ const editor = document.getElementById('editor');
     const WINDOW_RESIZE_SETTLE_MS = 220;
 
     let previewMode = 'preview';
-    let currentLang = 'zh-CN';
     let documents = [];
     let currentDocumentId = null;
     let sidebarVisible = true;
@@ -295,21 +294,17 @@ const editor = document.getElementById('editor');
     let activeOutlineHeadingId = '';
 
     function t(key, ...args) {
-      const fallback = coreLocalePort.getLocale(coreLocalePort.defaultLocale);
-      const dict = coreLocalePort.getLocale(currentLang) || fallback;
-      let str = dict?.[key];
-      if (str === undefined) str = fallback?.[key] || key;
-      return args.reduce((s, arg, i) => s.replace(new RegExp('\\{' + i + '\\}', 'g'), String(arg)), str);
+      return coreI18nPort.t(key, ...args);
     }
 
     function setLanguage(lang) {
-      if (!coreLocalePort.hasLocale(lang)) lang = coreLocalePort.defaultLocale;
-      currentLang = lang;
-      localStorage.setItem(LANG_KEY, lang);
+      const resolvedLocale = coreI18nPort.setLocale(lang);
+      localStorage.setItem(LANG_KEY, resolvedLocale);
       applyLanguage();
     }
 
     function applyLanguage() {
+      const currentLang = coreI18nPort.locale;
       document.documentElement.lang = currentLang;
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.dataset.i18n;
@@ -1855,7 +1850,7 @@ const editor = document.getElementById('editor');
 
     function openSettings(page = activeSettingsPage) {
       document.getElementById('setting-theme').value = document.body.getAttribute('data-theme') || 'light';
-      document.getElementById('setting-language').value = currentLang;
+      document.getElementById('setting-language').value = coreI18nPort.locale;
       document.getElementById('setting-layout').value = localStorage.getItem(LAYOUT_MODE_KEY) || 'both';
       document.getElementById('setting-sidebar-visible').checked = sidebarVisible;
       document.getElementById('setting-autosave-enabled').checked = autoSaveEnabled;

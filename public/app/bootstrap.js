@@ -1,6 +1,6 @@
     async function init() {
       const savedLang = localStorage.getItem(LANG_KEY);
-      if (savedLang && i18n[savedLang]) currentLang = savedLang;
+      if (savedLang) coreI18nPort.setLocale(savedLang);
 
       // 每次启动都建立新的会话文档。上次打开的外部路径仅迁移到“最近打开”，
       // 不再先恢复旧正文或文档元数据，避免侧栏历史和后台快照重新进入当前会话。

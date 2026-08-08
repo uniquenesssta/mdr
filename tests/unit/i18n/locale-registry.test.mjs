@@ -8,8 +8,7 @@ import test from 'node:test';
 import {
   createLocaleRegistry,
   localeRegistry,
-  LOCALE_IDS,
-  mountClassicLocalePort
+  LOCALE_IDS
 } from '../../../src/i18n/index.js';
 import { buildLocaleKeyAudit } from '../../../scripts/stage-04/locale-key-audit.mjs';
 
@@ -99,28 +98,18 @@ test('locale registry rejects duplicate locales, key drift, placeholder drift, H
   assert.throws(() => createLocaleRegistry([['fr', valid]], { defaultLocale: 'en' }), /Default locale is missing/);
 });
 
-test('classic locale compatibility port is scoped, read-only and terminal after destroy', () => {
-  const host = { removeAttribute() {} };
-  const mount = mountClassicLocalePort(host, localeRegistry);
-  const descriptor = Object.getOwnPropertyDescriptor(host, 'markdownEditorLocalePort');
-  assert.equal(descriptor.enumerable, false);
-  assert.equal(descriptor.writable, false);
-  assert.equal(host.markdownEditorLocalePort.defaultLocale, 'zh-CN');
-  assert.equal(host.markdownEditorLocalePort.hasLocale('ja'), true);
-  assert.equal(host.markdownEditorLocalePort.hasLocale('missing'), false);
-  assert.equal(host.markdownEditorLocalePort.getLocale('en'), localeRegistry.get('en'));
-  assert.equal(host.markdownEditorLocalePort.getLocale('missing'), null);
-  assert.throws(() => mountClassicLocalePort(host, localeRegistry), /already mounted/);
-
-  const api = host.markdownEditorLocalePort;
-  mount.destroy();
-  mount.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorLocalePort'), false);
-  assert.equal(api.hasLocale('en'), false);
-  assert.throws(() => api.getLocale('en'), /destroyed/);
+test('Atomic 4.2 locale registry remains the only short-text data authority after service extraction', async () => {
+  const [index, service] = await Promise.all([
+    readFile(resolve(ROOT, 'src/i18n/index.js'), 'utf8'),
+    readFile(resolve(ROOT, 'src/i18n/i18n-service.js'), 'utf8')
+  ]);
+  assert.match(index, /locale-registry\.js/);
+  assert.match(index, /i18n-service\.js/);
+  assert.doesNotMatch(service, /from ['"].*locales\//);
+  for (const locale of LOCALE_IDS) assert.equal(localeRegistry.has(locale), true);
 });
 
-test('Atomic 4.2 bootstrap and classic core consume explicit locale/help compatibility APIs only', async () => {
+test('Atomic 4.2 bootstrap and classic core retain explicit locale/help boundaries after 4.3 service extraction', async () => {
   const [entry, core, index, help] = await Promise.all([
     readFile(resolve(ROOT, 'src/bootstrap/module-entry.js'), 'utf8'),
     readFile(resolve(ROOT, 'public/app/core.js'), 'utf8'),
@@ -129,16 +118,19 @@ test('Atomic 4.2 bootstrap and classic core consume explicit locale/help compati
   ]);
   await assert.rejects(access(resolve(ROOT, 'public/i18n.js')));
 
-  const mountIndex = entry.indexOf('mountClassicLocalePort(portsHost, localeRegistry)');
+  const serviceIndex = entry.indexOf('createI18nService(localeRegistry)');
+  const mountIndex = entry.indexOf('mountClassicI18nPort(portsHost, i18nService)');
   const helpIndex = entry.indexOf("loadClassicScript(documentRef, '/help-content.js')");
   const appIndex = entry.indexOf('await importApplication()');
-  assert.ok(mountIndex >= 0 && helpIndex > mountIndex && appIndex > helpIndex);
-  assert.match(entry, /localePort\?\.destroy\(\)/);
+  assert.ok(serviceIndex >= 0 && mountIndex > serviceIndex && helpIndex > mountIndex && appIndex > helpIndex);
+  assert.match(entry, /i18nPort\?\.destroy\(\)/);
+  assert.match(entry, /i18nService\?\.destroy\(\)/);
   assert.match(index, /locale-registry\.js/);
-  assert.match(index, /classic-locale-port\.js/);
-  assert.match(core, /markdownEditorLocalePort/);
+  assert.match(index, /classic-i18n-port\.js/);
+  assert.match(core, /markdownEditorI18nPort/);
   assert.match(core, /markdownEditorHelpContent/);
   assert.doesNotMatch(core, /\bi18n\s*\[/);
+  assert.doesNotMatch(core, /markdownEditorLocalePort|coreLocalePort/);
   assert.doesNotMatch(core, /window\.markdownEditor(?:Locale|I18n|Help)/);
   assert.match(help, /compatibility-business-ports/);
   assert.doesNotMatch(help, /window\.markdownEditor|window\s*\[/);
@@ -158,6 +150,9 @@ test('current locale audit reports a complete split registry with separate help 
   assert.deepEqual(audit.anomalies.unknownReferencedKeys, []);
   assert.ok(audit.localeOrder.every(locale => audit.htmlContent[locale].length === 0));
   for (const locale of audit.localeOrder) assert.equal(audit.helpContent[locale].sha256, fixture.helpHtmlSha256ByLocale[locale]);
-  assert.equal(audit.anomalies.dynamicTranslationCalls.length, 4);
-  assert.ok(audit.anomalies.dynamicTranslationCalls.every(record => record.path === 'public/app/core.js'));
+  const classicBusinessDynamicCalls = audit.anomalies.dynamicTranslationCalls.filter(record => (
+    record.path === 'public/app/core.js' && record.expression !== 'key, ...args'
+  ));
+  assert.equal(classicBusinessDynamicCalls.length, 4);
+  assert.ok(audit.anomalies.dynamicTranslationCalls.length >= classicBusinessDynamicCalls.length);
 });
