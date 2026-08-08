@@ -1,4 +1,4 @@
-# Atomic Task 4.7 Settings Repository validation node.
+# Atomic Task 4.8 Settings Store validation node.
 name: Stage 4 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  settings-repository:
-    name: Verify Stage 4 Settings Repository
+  settings-store:
+    name: Verify Stage 4 Settings Store
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -53,9 +53,11 @@ jobs:
       - name: Verify Atomic Task 4.6 Settings Schema
         run: node --test tests/unit/settings/settings-schema.test.mjs
       - name: Verify Atomic Task 4.7 Settings Repository
-        run: node --test tests/unit/settings/settings-repository.test.mjs tests/unit/settings/classic-settings-repository-port.test.mjs
+        run: node --test tests/unit/settings/settings-repository.test.mjs
+      - name: Verify Atomic Task 4.8 Settings Store
+        run: node --test tests/unit/settings/settings-store.test.mjs tests/unit/settings/classic-settings-store-port.test.mjs
       - name: Record current locale audit
-        run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-07-settings-repository-audit.json
+        run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-08-settings-store-audit.json
       - name: Run architecture hard gate
         run: npm run verify:architecture
       - name: Run existing Node regression suite
@@ -70,10 +72,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-04/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 4.7 evidence
+      - name: Upload Atomic Task 4.8 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-04-settings-repository-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-04-settings-store-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-04
           if-no-files-found: error
           retention-days: 30
