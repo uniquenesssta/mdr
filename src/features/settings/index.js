@@ -1,8 +1,8 @@
 /**
- * Responsibility: Public Stage 4 Settings contract, exposing domain rules plus the Atomic 4.7 persistence boundary and scoped classic bridge.
+ * Responsibility: Public Stage 4 Settings contract exposing domain rules, persistence, the authoritative Settings Store and scoped classic Store bridge.
  * Imports: Settings feature modules only.
- * Exports: Schema/default/validation/serialization, Settings Repository and classic compatibility mount contracts.
- * State/side effects: Import-only facade; no DOM, storage lookup or lifecycle state.
+ * Exports: Schema/default/validation/serialization, Settings Repository, Settings Store and classic Store compatibility mount contracts.
+ * State/side effects: Import-only facade; no DOM, storage lookup or runtime state ownership.
  */
 export { SETTING_DEFAULTS } from './domain/settings-defaults.js';
 export {
@@ -28,4 +28,5 @@ export {
   SettingsRepositoryReadError,
   SettingsRepositoryWriteError
 } from './infrastructure/settings-repository.js';
-export { mountClassicSettingsRepositoryPort } from './compatibility/classic-settings-repository-port.js';
+export { createSettingsStore } from './state/settings-store.js';
+export { mountClassicSettingsStorePort } from './compatibility/classic-settings-store-port.js';

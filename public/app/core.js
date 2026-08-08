@@ -1,9 +1,9 @@
 const coreCompatibilityHost = document.getElementById('compatibility-business-ports');
 const corePlatformPort = coreCompatibilityHost?.markdownEditorPlatformPort;
 const coreI18nPort = coreCompatibilityHost?.markdownEditorI18nPort;
-const coreSettingsRepositoryPort = coreCompatibilityHost?.markdownEditorSettingsRepositoryPort;
+const coreSettingsStorePort = coreCompatibilityHost?.markdownEditorSettingsStorePort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
-if (!coreSettingsRepositoryPort) throw new Error('Settings Repository compatibility port is unavailable.');
+if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
@@ -272,9 +272,17 @@ const editor = document.getElementById('editor');
       return coreI18nPort.t(key, ...args);
     }
 
-    function setLanguage(lang) {
+    function setLanguage(lang, persist = true) {
+      const previousLocale = coreI18nPort.locale;
       const resolvedLocale = coreI18nPort.setLocale(lang);
-      coreSettingsRepositoryPort.set('language', resolvedLocale);
+      if (!persist) return resolvedLocale;
+      try {
+        coreSettingsStorePort.set('language', resolvedLocale);
+      } catch (error) {
+        if (coreI18nPort.locale !== previousLocale) coreI18nPort.setLocale(previousLocale);
+        throw error;
+      }
+      return resolvedLocale;
     }
 
     function refreshClassicLocalizedState() {
@@ -1450,8 +1458,9 @@ const editor = document.getElementById('editor');
         showToast('当前窗口较窄，侧边栏已自动折叠');
         return;
       }
-      sidebarVisible = !sidebarVisible;
-      coreSettingsRepositoryPort.set('sidebarVisible', sidebarVisible);
+      const nextVisible = !sidebarVisible;
+      coreSettingsStorePort.set('sidebarVisible', nextVisible);
+      sidebarVisible = nextVisible;
       runLayoutTransition(applySidebarVisibility, 'sidebar');
       showToast(sidebarVisible ? '已显示侧边栏' : '已隐藏侧边栏');
     }
@@ -1711,10 +1720,10 @@ const editor = document.getElementById('editor');
       updateActiveOutlineByLine(targetLine);
     }
 
-    function setAppTheme(theme) {
+    function setAppTheme(theme, persist = true) {
       const next = theme === 'dark' ? 'dark' : 'light';
+      if (persist) coreSettingsStorePort.set('theme', next);
       document.body.setAttribute('data-theme', next);
-      coreSettingsRepositoryPort.set('theme', next);
       if (typeof mermaid !== 'undefined') {
         const mermaidTheme = next === 'dark' ? 'dark' : 'default';
         mermaid.initialize({ startOnLoad: false, theme: mermaidTheme });
@@ -1797,43 +1806,49 @@ const editor = document.getElementById('editor');
     }
 
     function openSettings(page = activeSettingsPage) {
-      document.getElementById('setting-theme').value = document.body.getAttribute('data-theme') || 'light';
-      document.getElementById('setting-language').value = coreI18nPort.locale;
-      document.getElementById('setting-layout').value = coreSettingsRepositoryPort.get('layoutMode');
-      document.getElementById('setting-sidebar-visible').checked = sidebarVisible;
-      document.getElementById('setting-autosave-enabled').checked = autoSaveEnabled;
+      const draft = coreSettingsStorePort.openDraft();
+      document.getElementById('setting-theme').value = draft.theme;
+      document.getElementById('setting-language').value = draft.language;
+      document.getElementById('setting-layout').value = draft.layoutMode;
+      document.getElementById('setting-sidebar-visible').checked = draft.sidebarVisible;
+      document.getElementById('setting-autosave-enabled').checked = draft.autoSaveEnabled;
       const autosaveDelaySelect = document.getElementById('setting-autosave-delay');
-      const hasPreset = Array.from(autosaveDelaySelect.options).some(option => option.value === String(autoSaveDelay));
+      const hasPreset = Array.from(autosaveDelaySelect.options).some(option => option.value === String(draft.autoSaveDelay));
       autosaveDelaySelect.value = hasPreset ? String(autoSaveDelay) : 'custom';
-      document.getElementById('setting-autosave-custom-seconds').value = String(autoSaveDelay / 1000);
+      document.getElementById('setting-autosave-custom-seconds').value = String(draft.autoSaveDelay / 1000);
       toggleCustomAutosaveDelay();
-      document.getElementById('setting-editor-font-size').value = String(editorFontSize);
+      document.getElementById('setting-editor-font-size').value = String(draft.editorFontSize);
       const defaults = getSettingsThemeDefaults();
       const textColorInput = document.getElementById('setting-editor-text-color');
       const lineColorInput = document.getElementById('setting-active-line-color');
-      textColorInput.value = editorTextColor || defaults.text;
-      textColorInput.dataset.custom = editorTextColor ? 'true' : 'false';
-      lineColorInput.value = activeLineColor || defaults.line;
-      lineColorInput.dataset.custom = activeLineColor ? 'true' : 'false';
-      document.getElementById('setting-export-directory').value = exportDirectory;
-      document.getElementById('setting-toolbar-visible').checked = toolbarVisible;
+      textColorInput.value = draft.editorTextColor || defaults.text;
+      textColorInput.dataset.custom = draft.editorTextColor ? 'true' : 'false';
+      lineColorInput.value = draft.activeLineColor || defaults.line;
+      lineColorInput.dataset.custom = draft.activeLineColor ? 'true' : 'false';
+      document.getElementById('setting-export-directory').value = draft.exportDirectory;
+      document.getElementById('setting-toolbar-visible').checked = draft.toolbarVisible;
       document.querySelectorAll('[data-toolbar-setting]').forEach(input => {
-        input.checked = !toolbarHiddenItems.has(input.dataset.toolbarSetting);
+        input.checked = !draft.toolbarHiddenItems.includes(input.dataset.toolbarSetting);
       });
-      document.getElementById('setting-preview-performance-mode').value = previewPerformanceMode;
+      document.getElementById('setting-preview-performance-mode').value = draft.previewPerformanceMode;
       switchSettingsPage(page);
       const modal = document.getElementById('settings-modal');
       const request = {
         options: {
           initialFocus: document.querySelector('[data-settings-page].active')
-            || document.getElementById('setting-theme')
+            || document.getElementById('setting-theme'),
+          onClose: () => coreSettingsStorePort.cancelDraft()
         }
       };
       modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
-      if (request.error) throw request.error;
+      if (request.error) {
+        coreSettingsStorePort.cancelDraft();
+        throw request.error;
+      }
     }
 
     function closeSettings() {
+      coreSettingsStorePort.cancelDraft();
       const modal = document.getElementById('settings-modal');
       const request = { reason: 'feature-close' };
       modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
@@ -1851,9 +1866,10 @@ const editor = document.getElementById('editor');
       const theme = document.getElementById('setting-theme').value;
       const lang = document.getElementById('setting-language').value;
       const layout = document.getElementById('setting-layout').value;
-      sidebarVisible = document.getElementById('setting-sidebar-visible').checked;
-      autoSaveEnabled = document.getElementById('setting-autosave-enabled').checked;
+      const nextSidebarVisible = document.getElementById('setting-sidebar-visible').checked;
+      const nextAutoSaveEnabled = document.getElementById('setting-autosave-enabled').checked;
       const autosaveDelayValue = document.getElementById('setting-autosave-delay').value;
+      let nextAutoSaveDelay;
       if (autosaveDelayValue === 'custom') {
         const customInput = document.getElementById('setting-autosave-custom-seconds');
         const seconds = Number(customInput.value);
@@ -1862,36 +1878,59 @@ const editor = document.getElementById('editor');
           customInput.focus();
           return;
         }
-        autoSaveDelay = normalizeAutoSaveDelay(seconds * 1000);
+        nextAutoSaveDelay = normalizeAutoSaveDelay(seconds * 1000);
       } else {
-        autoSaveDelay = normalizeAutoSaveDelay(autosaveDelayValue);
+        nextAutoSaveDelay = normalizeAutoSaveDelay(autosaveDelayValue);
       }
-      editorFontSize = parseInt(document.getElementById('setting-editor-font-size').value, 10) || 16;
+      const nextEditorFontSize = parseInt(document.getElementById('setting-editor-font-size').value, 10) || 16;
       const textColorInput = document.getElementById('setting-editor-text-color');
       const lineColorInput = document.getElementById('setting-active-line-color');
-      editorTextColor = textColorInput.dataset.custom === 'true' ? normalizeSettingColor(textColorInput.value) : '';
-      activeLineColor = lineColorInput.dataset.custom === 'true' ? normalizeSettingColor(lineColorInput.value) : '';
-      exportDirectory = String(document.getElementById('setting-export-directory').value || '').trim();
-      toolbarVisible = document.getElementById('setting-toolbar-visible').checked;
-      toolbarHiddenItems = new Set(Array.from(document.querySelectorAll('[data-toolbar-setting]'))
+      const nextEditorTextColor = textColorInput.dataset.custom === 'true' ? normalizeSettingColor(textColorInput.value) : '';
+      const nextActiveLineColor = lineColorInput.dataset.custom === 'true' ? normalizeSettingColor(lineColorInput.value) : '';
+      const nextExportDirectory = String(document.getElementById('setting-export-directory').value || '').trim();
+      const nextToolbarVisible = document.getElementById('setting-toolbar-visible').checked;
+      const nextToolbarHiddenItems = Array.from(document.querySelectorAll('[data-toolbar-setting]'))
         .filter(input => !input.checked && TOOLBAR_ITEM_IDS.has(input.dataset.toolbarSetting))
-        .map(input => input.dataset.toolbarSetting));
-      previewPerformanceMode = normalizePreviewPerformanceMode(document.getElementById('setting-preview-performance-mode').value);
-      setAppTheme(theme);
-      setLanguage(lang);
-      setLayoutMode(layout, false);
-      coreSettingsRepositoryPort.save({
-        sidebarVisible,
-        autoSaveEnabled,
-        autoSaveDelay,
-        editorFontSize,
-        editorTextColor,
-        activeLineColor,
-        exportDirectory,
-        toolbarVisible,
-        toolbarHiddenItems: Array.from(toolbarHiddenItems),
-        previewPerformanceMode
-      });
+        .map(input => input.dataset.toolbarSetting);
+      const nextPreviewPerformanceMode = normalizePreviewPerformanceMode(document.getElementById('setting-preview-performance-mode').value);
+      const draftChanges = {
+        theme,
+        language: lang,
+        layoutMode: layout,
+        sidebarVisible: nextSidebarVisible,
+        autoSaveEnabled: nextAutoSaveEnabled,
+        autoSaveDelay: nextAutoSaveDelay,
+        editorFontSize: nextEditorFontSize,
+        editorTextColor: nextEditorTextColor,
+        activeLineColor: nextActiveLineColor,
+        exportDirectory: nextExportDirectory,
+        toolbarVisible: nextToolbarVisible,
+        toolbarHiddenItems: nextToolbarHiddenItems,
+        previewPerformanceMode: nextPreviewPerformanceMode
+      };
+
+      let applied;
+      try {
+        coreSettingsStorePort.updateDraft(draftChanges);
+        applied = coreSettingsStorePort.applyDraft();
+      } catch (error) {
+        showToast('设置保存失败：' + (error?.message || String(error)));
+        return;
+      }
+
+      sidebarVisible = applied.sidebarVisible;
+      autoSaveEnabled = applied.autoSaveEnabled;
+      autoSaveDelay = applied.autoSaveDelay;
+      editorFontSize = applied.editorFontSize;
+      editorTextColor = applied.editorTextColor;
+      activeLineColor = applied.activeLineColor;
+      exportDirectory = applied.exportDirectory;
+      toolbarVisible = applied.toolbarVisible;
+      toolbarHiddenItems = new Set(applied.toolbarHiddenItems);
+      previewPerformanceMode = applied.previewPerformanceMode;
+      setAppTheme(applied.theme, false);
+      setLanguage(applied.language, false);
+      setLayoutMode(applied.layoutMode, false, false);
       applySidebarVisibility();
       applyEditorPreferences();
       updateStatusBar();
@@ -2055,7 +2094,7 @@ const editor = document.getElementById('editor');
     let historyTimer = null;
 
     function getConfiguredLayoutMode() {
-      return coreSettingsRepositoryPort.get('layoutMode');
+      return coreSettingsStorePort.get('layoutMode');
     }
 
     function getMainLayoutWidth() {

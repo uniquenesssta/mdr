@@ -169,7 +169,7 @@ test('Atomic 4.6 keeps legacy persistence keys schema-owned after Atomic 4.7 rep
   ]) assert.doesNotMatch(classicSource, new RegExp('\\b' + name + '\\b'));
 });
 
-test('Atomic 4.6 Settings domain remains pure while Atomic 4.7 consumes it through later layers', async () => {
+test('Atomic 4.6 Settings domain remains pure while Atomic 4.8 adds the runtime Store in a later layer', async () => {
   const domainFiles = (await readdir(resolve(ROOT, 'src/features/settings/domain'))).sort();
   assert.deepEqual(domainFiles, [
     'settings-defaults.js', 'settings-schema.js', 'settings-serialization.js', 'settings-validation.js'
@@ -181,5 +181,6 @@ test('Atomic 4.6 Settings domain remains pure while Atomic 4.7 consumes it throu
   }
   const publicEntry = await readText('src/features/settings/index.js');
   assert.match(publicEntry, /infrastructure\/settings-repository\.js/);
-  assert.doesNotMatch(publicEntry, /from ['"]\.\/(?:application|state|sections|ui)\//);
+  assert.match(publicEntry, /state\/settings-store\.js/);
+  assert.doesNotMatch(publicEntry, /from ['"]\.\/(?:application|sections|ui)\//);
 });

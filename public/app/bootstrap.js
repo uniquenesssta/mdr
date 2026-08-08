@@ -1,11 +1,11 @@
 const bootstrapCompatibilityHost = document.getElementById('compatibility-business-ports');
 const bootstrapHelpPort = bootstrapCompatibilityHost?.markdownEditorHelpPort;
-const bootstrapSettingsRepositoryPort = bootstrapCompatibilityHost?.markdownEditorSettingsRepositoryPort;
+const bootstrapSettingsStorePort = bootstrapCompatibilityHost?.markdownEditorSettingsStorePort;
 if (!bootstrapHelpPort) throw new Error('Help compatibility port is unavailable.');
-if (!bootstrapSettingsRepositoryPort) throw new Error('Settings Repository compatibility port is unavailable.');
+if (!bootstrapSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 
     async function init() {
-      const restoredSettings = bootstrapSettingsRepositoryPort.load();
+      const restoredSettings = bootstrapSettingsStorePort.snapshot;
       const savedLang = restoredSettings.language;
       if (savedLang) coreI18nPort.setLocale(savedLang);
 

@@ -596,6 +596,41 @@ async function runAppSuite() {
       assert.deepEqual(closed, {shown:'true',firstRunAgain:false,isOpen:false});
     });
 
+    await test('application Settings Store cancels draft without persisting changes', async () => {
+      const result = await browser.page.evaluate(`(()=>{
+        const host=document.getElementById('compatibility-business-ports');
+        const port=host?.markdownEditorSettingsStorePort;
+        if(!port)throw new Error('Settings Store port unavailable');
+        setAppTheme('light', false);
+        const before={stored:localStorage.getItem('md_editor_theme'),committed:port.get('theme'),body:document.body.getAttribute('data-theme')};
+
+        openSettings();
+        document.getElementById('setting-theme').value='dark';
+        closeSettings();
+        const afterButton={stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};
+
+        openSettings();
+        document.getElementById('setting-theme').value='dark';
+        document.getElementById('settings-modal').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));
+        const afterEscape={stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};
+
+        openSettings();
+        document.getElementById('setting-theme').value='dark';
+        document.getElementById('settings-modal').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true}));
+        const afterBackdrop={stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};
+
+        openSettings();
+        const reopened=document.getElementById('setting-theme').value;
+        closeSettings();
+        return {before,afterButton,afterEscape,afterBackdrop,reopened};
+      })()`);
+      assert.deepEqual(result.before, {stored:null,committed:'light',body:'light'});
+      for (const state of [result.afterButton, result.afterEscape, result.afterBackdrop]) {
+        assert.deepEqual(state, {stored:null,hasDraft:false,body:'light'});
+      }
+      assert.equal(result.reopened, 'light');
+    });
+
     await test('application theme switch changes visual tokens without changing shell geometry', async () => {
       const result = await browser.page.evaluate(`(async()=>{
         const selectors={

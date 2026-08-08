@@ -1,6 +1,6 @@
 const editorToolsCompatibilityHost = document.getElementById('compatibility-business-ports');
-const editorToolsSettingsRepositoryPort = editorToolsCompatibilityHost?.markdownEditorSettingsRepositoryPort;
-if (!editorToolsSettingsRepositoryPort) throw new Error('Settings Repository compatibility port is unavailable.');
+const editorToolsSettingsStorePort = editorToolsCompatibilityHost?.markdownEditorSettingsStorePort;
+if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 
     function toggleTheme() {
       const current = document.body.getAttribute('data-theme');
@@ -584,7 +584,7 @@ if (!editorToolsSettingsRepositoryPort) throw new Error('Settings Repository com
       editor.virtualEditor?.setHybridTableVisualEditing?.(enabled);
       updateTableVisualEditingToggle();
       if (options.persist !== false) {
-        editorToolsSettingsRepositoryPort.set('tableVisualEditing', enabled);
+        editorToolsSettingsStorePort.set('tableVisualEditing', enabled);
       }
       if (options.notify !== false) {
         showToast(enabled
@@ -597,8 +597,15 @@ if (!editorToolsSettingsRepositoryPort) throw new Error('Settings Repository com
     function toggleTableVisualEditing(event) {
       event?.preventDefault?.();
       event?.stopPropagation?.();
-      tableVisualEditingEnabled = !tableVisualEditingEnabled;
-      applyTableVisualEditingSetting();
+      const nextEnabled = !tableVisualEditingEnabled;
+      try {
+        editorToolsSettingsStorePort.set('tableVisualEditing', nextEnabled);
+      } catch (error) {
+        showToast('表格可视化编辑设置保存失败：' + (error?.message || String(error)));
+        return;
+      }
+      tableVisualEditingEnabled = nextEnabled;
+      applyTableVisualEditingSetting({ persist: false });
     }
 
     function updateCodeVisualEditingToggle() {
@@ -615,7 +622,7 @@ if (!editorToolsSettingsRepositoryPort) throw new Error('Settings Repository com
       editor.virtualEditor?.setHybridCodeVisualEditing?.(enabled);
       updateCodeVisualEditingToggle();
       if (options.persist !== false) {
-        editorToolsSettingsRepositoryPort.set('codeVisualEditing', enabled);
+        editorToolsSettingsStorePort.set('codeVisualEditing', enabled);
       }
       if (options.notify !== false) {
         showToast(enabled
@@ -628,8 +635,15 @@ if (!editorToolsSettingsRepositoryPort) throw new Error('Settings Repository com
     function toggleCodeVisualEditing(event) {
       event?.preventDefault?.();
       event?.stopPropagation?.();
-      codeVisualEditingEnabled = !codeVisualEditingEnabled;
-      applyCodeVisualEditingSetting();
+      const nextEnabled = !codeVisualEditingEnabled;
+      try {
+        editorToolsSettingsStorePort.set('codeVisualEditing', nextEnabled);
+      } catch (error) {
+        showToast('代码块可视化编辑设置保存失败：' + (error?.message || String(error)));
+        return;
+      }
+      codeVisualEditingEnabled = nextEnabled;
+      applyCodeVisualEditingSetting({ persist: false });
     }
 
     function insertInlineMath() {
@@ -939,7 +953,7 @@ if (!editorToolsSettingsRepositoryPort) throw new Error('Settings Repository com
 
     // 视图布局与全屏
     function getLayoutMode() {
-      return editorToolsSettingsRepositoryPort.get('layoutMode');
+      return editorToolsSettingsStorePort.get('layoutMode');
     }
 
     function isHybridLayoutMode() {
@@ -979,6 +993,7 @@ if (!editorToolsSettingsRepositoryPort) throw new Error('Settings Repository com
       const previewWasHidden = previewCollapsed || previousMode === 'hybrid';
       let nextMode = ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
       if (nextMode === 'hybrid' && !editor.virtualEditor?.setPresentationMode) nextMode = 'edit';
+      if (persist) editorToolsSettingsStorePort.set('layoutMode', nextMode);
 
       if (nextMode === 'edit' || nextMode === 'hybrid') {
         editorCollapsed = false;
@@ -997,7 +1012,6 @@ if (!editorToolsSettingsRepositoryPort) throw new Error('Settings Repository com
         resetPane: previousMode !== 'both' && nextMode === 'both'
       });
 
-      if (persist) editorToolsSettingsRepositoryPort.set('layoutMode', nextMode);
       localStorage.setItem(EDITOR_COLLAPSED_KEY, editorCollapsed ? 'true' : 'false');
       localStorage.setItem(PREVIEW_COLLAPSED_KEY, previewCollapsed ? 'true' : 'false');
       updateViewMenuLabel();
