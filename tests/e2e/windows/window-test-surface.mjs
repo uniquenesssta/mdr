@@ -1,5 +1,28 @@
 const HELP_MODAL_SELECTOR = '#help-modal';
 const HELP_CLOSE_SELECTOR = '#help-modal .modal-header button';
+const APPLICATION_INIT_PROMISE = '__markdownEditorInitPromise';
+
+async function waitForApplicationInitialization(browser) {
+  await browser.waitUntil(
+    () => browser.execute(key => {
+      const pending = window[key];
+      return Boolean(pending && typeof pending.then === 'function');
+    }, APPLICATION_INIT_PROMISE),
+    {
+      timeout: 10_000,
+      interval: 100,
+      timeoutMsg: 'Application initialization promise did not become available before Windows automation.'
+    }
+  );
+
+  await browser.execute(async key => {
+    const pending = window[key];
+    if (!pending || typeof pending.then !== 'function') {
+      throw new Error('Application initialization promise disappeared before Windows automation.');
+    }
+    await pending;
+  }, APPLICATION_INIT_PROMISE);
+}
 
 async function readHelpSurface(browser) {
   return browser.execute(selector => {
@@ -14,6 +37,8 @@ async function readHelpSurface(browser) {
 }
 
 export async function prepareWindowTestSurface(browser) {
+  await waitForApplicationInitialization(browser);
+
   const before = await readHelpSurface(browser);
   if (!before.open) {
     return {
