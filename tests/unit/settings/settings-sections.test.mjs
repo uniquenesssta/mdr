@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -46,20 +46,20 @@ const EXPECTED = Object.freeze({
     ['previewPerformanceMode', 'select', 'settings-dialog']
   ])
 });
-const LEGACY_DIALOG_MARKERS = Object.freeze({
-  theme: 'id="setting-theme"',
-  language: 'id="setting-language"',
-  layoutMode: 'id="setting-layout"',
-  sidebarVisible: 'id="setting-sidebar-visible"',
-  editorFontSize: 'id="setting-editor-font-size"',
-  editorTextColor: 'id="setting-editor-text-color"',
-  activeLineColor: 'id="setting-active-line-color"',
-  autoSaveEnabled: 'id="setting-autosave-enabled"',
-  autoSaveDelay: 'id="setting-autosave-delay"',
-  exportDirectory: 'id="setting-export-directory"',
-  toolbarVisible: 'id="setting-toolbar-visible"',
-  toolbarHiddenItems: 'id="setting-toolbar-items"',
-  previewPerformanceMode: 'id="setting-preview-performance-mode"'
+const SETTINGS_DIALOG_MARKERS = Object.freeze({
+  theme: "'setting-theme'",
+  language: "'setting-language'",
+  layoutMode: "'setting-layout'",
+  sidebarVisible: "'setting-sidebar-visible'",
+  editorFontSize: "'setting-editor-font-size'",
+  editorTextColor: "'setting-editor-text-color'",
+  activeLineColor: "'setting-active-line-color'",
+  autoSaveEnabled: "'setting-autosave-enabled'",
+  autoSaveDelay: "'setting-autosave-delay'",
+  exportDirectory: "'setting-export-directory'",
+  toolbarVisible: "'setting-toolbar-visible'",
+  toolbarHiddenItems: "'setting-toolbar-items'",
+  previewPerformanceMode: "'setting-preview-performance-mode'"
 });
 const CONTROL_VALIDATION = Object.freeze({
   select: Object.freeze(['enum', 'integer-enum']),
@@ -132,16 +132,34 @@ test('Section descriptors and registry public results are deeply immutable with 
   assert.equal(getSettingsSectionDefinition('unknown'), null);
 });
 
-test('Section descriptors match the current compatibility Settings controls without taking DOM ownership', async () => {
-  const compatibility = await readText('public/compatibility/business-content.html');
-  for (const [settingId, marker] of Object.entries(LEGACY_DIALOG_MARKERS)) {
-    assert.match(compatibility, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), settingId);
+test('Section descriptors remain the field authority consumed by Atomic 4.10 Settings UI without taking DOM ownership', async () => {
+  const [dialog, fieldFactory, autosave, color, directory, compatibility] = await Promise.all([
+    readText('src/features/settings/ui/settings-dialog-view.js'),
+    readText('src/features/settings/ui/settings-field-view.js'),
+    readText('src/features/settings/ui/autosave-field-view.js'),
+    readText('src/features/settings/ui/color-field-view.js'),
+    readText('src/features/settings/ui/directory-field-view.js'),
+    readText('public/compatibility/business-content.html')
+  ]);
+  assert.match(dialog, /listSettingsSectionDefinitions/);
+  assert.ok(dialog.includes('for (const descriptor of section.fields) {'));
+  assert.match(dialog, /descriptor.surface !== 'settings-dialog'/);
+  assert.match(dialog, /createSettingsFieldView/);
+  assert.match(fieldFactory, /descriptor.settingId/);
+  assert.match(fieldFactory, /descriptor.control/);
+  assert.match(fieldFactory, /createAutosaveFieldView/);
+  assert.match(fieldFactory, /createColorFieldView/);
+  assert.match(fieldFactory, /createDirectoryFieldView/);
+  const uiSources = [dialog, fieldFactory, autosave, color, directory].join('\n');
+  for (const [settingId, marker] of Object.entries(SETTINGS_DIALOG_MARKERS)) {
+    assert.ok(uiSources.includes(marker), settingId);
   }
+  assert.doesNotMatch(compatibility, /id="settings-modal"|id="setting-theme"/);
   assert.match(compatibility, /id="table-visual-editing-toggle"/);
   assert.match(compatibility, /id="code-visual-editing-toggle"/);
 });
 
-test('Atomic 4.9 section modules are pure descriptions and do not start Atomic 4.10 Settings UI/application work', async () => {
+test('Atomic 4.9 section modules remain pure descriptions after Atomic 4.10 consumes them through the public Settings feature', async () => {
   const sectionFiles = (await readdir(resolve(ROOT, 'src/features/settings/sections'))).sort();
   assert.deepEqual(sectionFiles, [
     'editor-settings.js', 'general-settings.js', 'performance-settings.js', 'save-settings.js',
@@ -151,10 +169,8 @@ test('Atomic 4.9 section modules are pure descriptions and do not start Atomic 4
     const source = await readText(`src/features/settings/sections/${name}`);
     assert.doesNotMatch(source, /\blocalStorage\s*\.|\bsessionStorage\s*\.|\bdocument\s*\.|\bwindow\s*\.|@tauri-apps|public\/app\/|src\/(?:editor|preview)\//);
   }
-  for (const path of ['src/features/settings/application', 'src/features/settings/ui']) {
-    await assert.rejects(access(resolve(ROOT, path)), error => error?.code === 'ENOENT');
-  }
   const publicEntry = await readText('src/features/settings/index.js');
   assert.match(publicEntry, /sections\/section-registry\.js/);
-  assert.doesNotMatch(publicEntry, /from ['"]\.\/(?:application|ui)\//);
+  assert.match(publicEntry, /create-settings-feature\.js/);
+  assert.match(publicEntry, /application\/settings-controller\.js/);
 });

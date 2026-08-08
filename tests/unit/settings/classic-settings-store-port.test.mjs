@@ -68,8 +68,9 @@ test('Atomic 4.8 production bootstrap keeps Repository internal and mounts Store
   assert.doesNotMatch(source, /mountClassicSettingsRepositoryPort/);
 });
 
-test('Atomic 4.8 classic Settings dialog uses Store draft lifecycle and Cancel/Escape/backdrop converge on zero-write cancel', async () => {
-  const [core, bootstrap, editorTools] = await Promise.all([
+test('Atomic 4.8 Store remains the Settings state authority after Atomic 4.10 migrates dialog ownership', async () => {
+  const [entry, core, bootstrap, editorTools] = await Promise.all([
+    readText('src/bootstrap/module-entry.js'),
     readText('public/app/core.js'),
     readText('public/app/bootstrap.js'),
     readText('public/app/editor-tools.js')
@@ -77,22 +78,19 @@ test('Atomic 4.8 classic Settings dialog uses Store draft lifecycle and Cancel/E
   const classic = [core, bootstrap, editorTools].join('\n');
   assert.doesNotMatch(classic, /markdownEditorSettingsRepositoryPort|Settings Repository compatibility port/);
   assert.match(bootstrap, /const restoredSettings = bootstrapSettingsStorePort\.snapshot;/);
-  assert.match(core, /const draft = coreSettingsStorePort\.openDraft\(\);/);
-  assert.match(core, /onClose: \(\) => coreSettingsStorePort\.cancelDraft\(\)/);
-  assert.match(core, /function closeSettings\(\) \{\n      coreSettingsStorePort\.cancelDraft\(\);/);
-  assert.match(core, /coreSettingsStorePort\.updateDraft\(draftChanges\);/);
-  assert.match(core, /applied = coreSettingsStorePort\.applyDraft\(\);/);
-  assert.match(core, /setAppTheme\(applied\.theme, false\)/);
-  assert.match(core, /setLanguage\(applied\.language, false\)/);
-  assert.match(core, /setLayoutMode\(applied\.layoutMode, false, false\)/);
+  assert.match(entry, /createSettingsStore\(\{/);
+  assert.match(entry, /createSettingsFeature\(\{/);
+  assert.ok(entry.indexOf('createSettingsStore({') < entry.indexOf('createSettingsFeature({'));
+  assert.match(core, /markdown-editor:settings-changed/);
+  assert.doesNotMatch(core, /function\s+(?:openSettings|closeSettings|applySettings)\b/);
   assert.match(editorTools, /editorToolsSettingsStorePort\.set\('layoutMode', nextMode\)/);
   assert.match(editorTools, /editorToolsSettingsStorePort\.set\('tableVisualEditing', nextEnabled\)/);
   assert.match(editorTools, /editorToolsSettingsStorePort\.set\('codeVisualEditing', nextEnabled\)/);
 });
 
-test('Atomic 4.8 retires the Repository compatibility bridge while Atomic 4.9 sections remain isolated from 4.10 application/UI', async () => {
+test('Atomic 4.8 retires the Repository compatibility bridge while Atomic 4.10 adds UI/application beside the unchanged Store boundary', async () => {
   const rootEntries = (await readdir(resolve(ROOT, 'src/features/settings'))).sort();
-  assert.deepEqual(rootEntries, ['compatibility', 'domain', 'index.js', 'infrastructure', 'sections', 'state']);
+  assert.deepEqual(rootEntries, ['application', 'compatibility', 'create-settings-feature.js', 'domain', 'index.js', 'infrastructure', 'sections', 'state', 'ui']);
   assert.deepEqual(
     (await readdir(resolve(ROOT, 'src/features/settings/compatibility'))).sort(),
     ['classic-settings-store-port.js']
@@ -101,5 +99,8 @@ test('Atomic 4.8 retires the Repository compatibility bridge while Atomic 4.9 se
     (await readdir(resolve(ROOT, 'src/features/settings/state'))).sort(),
     ['settings-store.js']
   );
-  for (const absent of ['application', 'ui']) assert.equal(rootEntries.includes(absent), false);
+  assert.deepEqual(
+    (await readdir(resolve(ROOT, 'src/features/settings/application'))).sort(),
+    ['settings-apply-coordinator.js', 'settings-controller.js']
+  );
 });

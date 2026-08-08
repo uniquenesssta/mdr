@@ -301,7 +301,7 @@ async function runContractSuite() {
       assert.equal(result.mounted.shellCount, 1);
       assert.equal(result.mounted.portHostParent, 'overlay-root');
       assert.equal(result.mounted.filePortParent, 'compatibility-business-ports');
-      assert.equal(result.mounted.settingsParent, 'overlay-root');
+      assert.equal(result.mounted.settingsParent, '');
       assert.equal(result.mounted.previousPresent, false);
       assert.equal(result.afterPort.shellCount, 1);
       assert.equal(result.afterPort.settingsPresent, false);
@@ -603,32 +603,105 @@ async function runAppSuite() {
         if(!port)throw new Error('Settings Store port unavailable');
         setAppTheme('light', false);
         const before={stored:localStorage.getItem('md_editor_theme'),committed:port.get('theme'),body:document.body.getAttribute('data-theme')};
+        const open=()=>document.querySelector('[data-settings-open]')?.click();
 
-        openSettings();
+        open();
         document.getElementById('setting-theme').value='dark';
-        closeSettings();
+        document.getElementById('setting-theme').dispatchEvent(new Event('change',{bubbles:true}));
+        document.querySelector('#settings-modal .modal-footer button:not(.primary)')?.click();
         const afterButton={stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};
 
-        openSettings();
+        open();
         document.getElementById('setting-theme').value='dark';
+        document.getElementById('setting-theme').dispatchEvent(new Event('change',{bubbles:true}));
         document.getElementById('settings-modal').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));
         const afterEscape={stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};
 
-        openSettings();
+        open();
         document.getElementById('setting-theme').value='dark';
+        document.getElementById('setting-theme').dispatchEvent(new Event('change',{bubbles:true}));
         document.getElementById('settings-modal').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true}));
         const afterBackdrop={stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};
 
-        openSettings();
+        open();
         const reopened=document.getElementById('setting-theme').value;
-        closeSettings();
-        return {before,afterButton,afterEscape,afterBackdrop,reopened};
+        document.querySelector('#settings-modal .modal-footer button:not(.primary)')?.click();
+        return {before,afterButton,afterEscape,afterBackdrop,reopened,globals:{
+          openSettings:typeof window.openSettings,
+          closeSettings:typeof window.closeSettings,
+          applySettings:typeof window.applySettings,
+          switchSettingsPage:typeof window.switchSettingsPage
+        }};
       })()`);
       assert.deepEqual(result.before, {stored:null,committed:'light',body:'light'});
       for (const state of [result.afterButton, result.afterEscape, result.afterBackdrop]) {
         assert.deepEqual(state, {stored:null,hasDraft:false,body:'light'});
       }
       assert.equal(result.reopened, 'light');
+      assert.deepEqual(result.globals, {
+        openSettings:'undefined',closeSettings:'undefined',applySettings:'undefined',switchSettingsPage:'undefined'
+      });
+    });
+
+    await test('application Settings UI validates and applies one draft without global dialog functions', async () => {
+      await browser.page.evaluate(`document.querySelector('[data-settings-open]')?.click()`);
+      await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings dialog open' });
+      await browser.page.click('#settings-modal [data-settings-page="save"]');
+      await browser.page.waitFor(() => !document.querySelector('#settings-modal [data-settings-page-panel="save"]')?.hidden, { description: 'Settings save page' });
+      const selected = await browser.page.evaluate(`document.querySelector('#settings-modal [data-settings-page="save"]')?.getAttribute('aria-selected')`);
+      assert.equal(selected, 'true');
+
+      await browser.page.evaluate(`(()=>{
+        const select=document.getElementById('setting-autosave-delay');
+        select.value='custom';
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+        const custom=document.getElementById('setting-autosave-custom-seconds');
+        custom.value='0.1';
+        custom.dispatchEvent(new Event('input',{bubbles:true}));
+        document.querySelector('#settings-modal .modal-footer .primary')?.click();
+      })()`);
+      const invalid = await browser.page.evaluate(`(()=>({
+        open:document.getElementById('settings-modal')?.classList.contains('show'),
+        invalid:document.getElementById('setting-autosave-custom-seconds')?.getAttribute('aria-invalid'),
+        feedback:document.getElementById('settings-feedback')?.textContent||''
+      }))()`);
+      assert.equal(invalid.open, true);
+      assert.equal(invalid.invalid, 'true');
+      assert.match(invalid.feedback, /0\.5–3600/);
+
+      await browser.page.evaluate(`(()=>{
+        const custom=document.getElementById('setting-autosave-custom-seconds');
+        custom.value='1.5';
+        custom.dispatchEvent(new Event('input',{bubbles:true}));
+        const theme=document.getElementById('setting-theme');
+        theme.value='dark';
+        theme.dispatchEvent(new Event('change',{bubbles:true}));
+        document.querySelector('#settings-modal .modal-footer .primary')?.click();
+      })()`);
+      await browser.page.waitFor(() => !document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings apply close' });
+      const applied = await browser.page.evaluate(`(()=>{
+        const port=document.getElementById('compatibility-business-ports')?.markdownEditorSettingsStorePort;
+        return {
+          theme:port?.get('theme'),
+          delay:port?.get('autoSaveDelay'),
+          storedTheme:localStorage.getItem('md_editor_theme'),
+          storedDelay:localStorage.getItem('md_editor_autosave_delay'),
+          body:document.body.getAttribute('data-theme')
+        };
+      })()`);
+      assert.deepEqual(applied, {theme:'dark',delay:1500,storedTheme:'dark',storedDelay:'1500',body:'dark'});
+
+      await browser.page.evaluate(`(()=>{
+        document.querySelector('[data-settings-open]')?.click();
+        const theme=document.getElementById('setting-theme');
+        theme.value='light';
+        theme.dispatchEvent(new Event('change',{bubbles:true}));
+        const delay=document.getElementById('setting-autosave-delay');
+        delay.value='500';
+        delay.dispatchEvent(new Event('change',{bubbles:true}));
+        document.querySelector('#settings-modal .modal-footer .primary')?.click();
+      })()`);
+      await browser.page.waitFor(() => document.body.getAttribute('data-theme') === 'light' && !document.getElementById('settings-modal')?.classList.contains('show'));
     });
 
     await test('application theme switch changes visual tokens without changing shell geometry', async () => {
@@ -686,7 +759,7 @@ async function runAppSuite() {
         source.textContent='modal focus source';
         document.body.append(source);
         source.focus();
-        openSettings();
+        document.querySelector('[data-settings-open]')?.click();
       })()`);
       await browser.page.waitFor(() => {
         const root=document.getElementById('settings-modal');
@@ -718,7 +791,7 @@ async function runAppSuite() {
           && document.activeElement?.id === 'modal-shell-focus-source'
       ), { description: 'settings Escape close and focus restoration' });
 
-      await browser.page.evaluate('openSettings()');
+      await browser.page.evaluate("document.querySelector('[data-settings-open]')?.click()");
       await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'));
       await browser.page.evaluate(`(()=>{
         const root=document.getElementById('settings-modal');

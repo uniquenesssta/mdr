@@ -98,24 +98,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
-      "handler": "syncSettingsThemeDefaults()",
-      "count": 1,
-      "lines": [
-        414
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onchange",
-      "handler": "toggleCustomAutosaveDelay()",
-      "count": 1,
-      "lines": [
-        495
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onchange",
       "handler": "toggleProxyInput()",
       "count": 1,
       "lines": [
@@ -296,15 +278,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "applySettings()",
-      "count": 1,
-      "lines": [
-        577
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "cancelActiveExport()",
       "count": 1,
       "lines": [
@@ -314,28 +287,10 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "chooseExportDirectory()",
-      "count": 1,
-      "lines": [
-        511
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "clearDoc(); closeAppMenus();",
       "count": 1,
       "lines": [
         96
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "clearExportDirectory()",
-      "count": 1,
-      "lines": [
-        512
       ]
     },
     {
@@ -413,16 +368,6 @@
       "lines": [
         900,
         913
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeSettings()",
-      "count": 2,
-      "lines": [
-        385,
-        576
       ]
     },
     {
@@ -978,15 +923,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "openSettings(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        67
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "openUrlModal(); closeAppMenus();",
       "count": 1,
       "lines": [
@@ -1063,24 +999,6 @@
       "count": 1,
       "lines": [
         801
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "resetSettingColor('line')",
-      "count": 1,
-      "lines": [
-        478
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "resetSettingColor('text')",
-      "count": 1,
-      "lines": [
-        471
       ]
     },
     {
@@ -1261,51 +1179,6 @@
       "count": 1,
       "lines": [
         868
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchSettingsPage('editor')",
-      "count": 1,
-      "lines": [
-        392
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchSettingsPage('general')",
-      "count": 1,
-      "lines": [
-        389
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchSettingsPage('performance')",
-      "count": 1,
-      "lines": [
-        401
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchSettingsPage('save')",
-      "count": 1,
-      "lines": [
-        395
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchSettingsPage('toolbar')",
-      "count": 1,
-      "lines": [
-        398
       ]
     },
     {
@@ -1549,16 +1422,6 @@
       "count": 1,
       "lines": [
         286
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "oninput",
-      "handler": "markSettingColorCustom(this)",
-      "count": 2,
-      "lines": [
-        470,
-        477
       ]
     },
     {

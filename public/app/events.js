@@ -309,6 +309,9 @@
       });
     }
 
+    // Settings menu trigger preserves the legacy menu-close side effect without inline handlers.
+    document.querySelector('[data-settings-open]')?.addEventListener('click', closeAppMenus);
+
     // 点击外部关闭下拉菜单
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.context-menu')) {
@@ -409,7 +412,6 @@
         else if (key === 's') action = saveCurrentFile;
         else if (key === 'o') action = triggerImportFile;
         else if (key === 'n') action = newDocument;
-        else if (key === ',') action = openSettings;
         else if (key === 'b' && e.shiftKey) action = toggleSidebar;
         else if (!outsideTextControl && key === 'z' && e.shiftKey) action = redo;
         else if (!outsideTextControl && key === 'y') action = redo;

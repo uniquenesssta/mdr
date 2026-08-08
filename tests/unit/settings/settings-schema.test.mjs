@@ -169,7 +169,7 @@ test('Atomic 4.6 keeps legacy persistence keys schema-owned after Atomic 4.7 rep
   ]) assert.doesNotMatch(classicSource, new RegExp('\\b' + name + '\\b'));
 });
 
-test('Atomic 4.6 Settings domain remains pure while later layers add Repository, Store and Atomic 4.9 sections', async () => {
+test('Atomic 4.6 Settings domain remains pure while later layers add Repository, Store, Sections and Atomic 4.10 UI', async () => {
   const domainFiles = (await readdir(resolve(ROOT, 'src/features/settings/domain'))).sort();
   assert.deepEqual(domainFiles, [
     'settings-defaults.js', 'settings-schema.js', 'settings-serialization.js', 'settings-validation.js'
@@ -178,10 +178,14 @@ test('Atomic 4.6 Settings domain remains pure while later layers add Repository,
   for (const path of domainFiles.map(name => `src/features/settings/domain/${name}`)) {
     const source = await readText(path);
     assert.doesNotMatch(source, /\blocalStorage\s*\.|\bsessionStorage\s*\.|\bdocument\s*\.|\bwindow\s*\.|@tauri-apps|createPlatform\s*\(/);
+    assert.doesNotMatch(source, /from ['"]\.\.\/(?:application|ui)\//);
   }
   const publicEntry = await readText('src/features/settings/index.js');
   assert.match(publicEntry, /infrastructure\/settings-repository\.js/);
   assert.match(publicEntry, /state\/settings-store\.js/);
   assert.match(publicEntry, /sections\/section-registry\.js/);
-  assert.doesNotMatch(publicEntry, /from ['"]\.\/(?:application|ui)\//);
+  assert.match(publicEntry, /create-settings-feature\.js/);
+  assert.match(publicEntry, /application\/settings-apply-coordinator\.js/);
+  assert.match(publicEntry, /application\/settings-controller\.js/);
+  assert.doesNotMatch(publicEntry, /from ['"]\.\/ui\//);
 });

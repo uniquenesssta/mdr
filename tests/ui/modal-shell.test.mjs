@@ -332,7 +332,6 @@ test('ModalShell accepts feature content, validates accessibility options and re
 });
 
 const COMPATIBILITY_MODAL_IDS = [
-  'settings-modal',
   'link-modal',
   'url-modal',
   'find-modal',
@@ -346,7 +345,6 @@ function addCompatibilityModal(overlayRoot, id) {
   const documentRef = overlayRoot.ownerDocument;
   const { root, panel } = createModal(documentRef, id);
   const controls = {
-    'settings-modal': ['select', 'setting-theme'],
     'link-modal': ['input', 'link-url-input'],
     'url-modal': ['input', 'url-input'],
     'find-modal': ['input', 'find-input'],
@@ -362,14 +360,13 @@ function addCompatibilityModal(overlayRoot, id) {
     control.classList.add('ratio-btn', 'active');
   }
   panel.append(control);
-  if (id === 'settings-modal') panel.querySelector(`#${id}-title`).id = 'settings-title';
   if (id === 'link-modal') panel.querySelector(`#${id}-title`).id = 'link-modal-title';
   if (id === 'export-progress-modal') panel.querySelector(`#${id}-title`).id = 'export-progress-title';
   overlayRoot.append(root);
   return { root, panel, control };
 }
 
-test('compatibility modal bridge installs one authoritative registry for the remaining eight compatibility feature modals', () => {
+test('compatibility modal bridge installs one authoritative registry for the remaining seven compatibility feature modals', () => {
   const documentRef = new FakeDocument();
   const overlayRoot = documentRef.createElement('div');
   overlayRoot.id = 'overlay-root';
@@ -377,24 +374,14 @@ test('compatibility modal bridge installs one authoritative registry for the rem
   const bridge = mountCompatibilityModalShells(overlayRoot);
 
   assert.throws(() => bridge.open('missing-modal'), /Unknown compatibility modal/);
+  assert.throws(() => bridge.open('settings-modal'), /Unknown compatibility modal/);
 
-  const source = documentRef.createElement('button');
-  source.focus();
-  const openSettings = { options: {} };
-  records.get('settings-modal').root.dispatch(COMPATIBILITY_MODAL_OPEN_EVENT, {
-    target: records.get('settings-modal').root,
-    detail: openSettings
-  });
-  assert.equal(openSettings.error, null);
-  assert.equal(openSettings.result, true);
+  bridge.open('link-modal');
   documentRef.flushFrames();
-  assert.equal(bridge.isOpen('settings-modal'), true);
-  assert.equal(documentRef.activeElement, records.get('settings-modal').control);
-  assert.equal(records.get('settings-modal').panel.getAttribute('aria-labelledby'), 'settings-title');
-  records.get('settings-modal').root.dispatch('keydown', createEvent('Escape'));
+  assert.equal(bridge.isOpen('link-modal'), true);
+  records.get('link-modal').root.dispatch('keydown', createEvent('Escape'));
   documentRef.flushFrames();
-  assert.equal(bridge.isOpen('settings-modal'), false);
-  assert.equal(documentRef.activeElement, source);
+  assert.equal(bridge.isOpen('link-modal'), false);
 
   bridge.open('export-progress-modal');
   documentRef.flushFrames();
@@ -415,7 +402,7 @@ test('compatibility modal bridge installs one authoritative registry for the rem
 
   bridge.destroy();
   bridge.destroy();
-  assert.throws(() => bridge.isOpen('settings-modal'), /destroyed/);
+  assert.throws(() => bridge.isOpen('link-modal'), /destroyed/);
 });
 
 
@@ -423,13 +410,13 @@ test('compatibility feature callers use the explicit modal event port without ne
   const bridgeSource = await readFile('src/ui/compatibility/mount-modal-shells.js', 'utf8');
   const mountSource = await readFile('src/ui/compatibility/business-content-port.js', 'utf8');
   const featureSources = await Promise.all([
-    'public/app/core.js',
     'public/app/editor-tools.js',
     'public/app/export.js',
     'public/app/web-clipper.js'
   ].map(path => readFile(path, 'utf8')));
   const eventSource = await readFile('public/app/events.js', 'utf8');
   const helpDialogSource = await readFile('src/features/help/ui/help-dialog-view.js', 'utf8');
+  const settingsDialogSource = await readFile('src/features/settings/ui/settings-dialog-view.js', 'utf8');
 
   assert.match(mountSource, /mountCompatibilityModalShells\(slots\.overlay\)/);
   assert.doesNotMatch(bridgeSource, /windowRef|markdownEditorModalShells|window\.|globalThis\./);
@@ -441,9 +428,11 @@ test('compatibility feature callers use the explicit modal event port without ne
 
   const joined = featureSources.join('\n');
   for (const id of COMPATIBILITY_MODAL_IDS) assert.match(bridgeSource, new RegExp(`id: '${id}'`));
-  assert.doesNotMatch(bridgeSource, /id: 'help-modal'/);
+  assert.doesNotMatch(bridgeSource, /id: '(?:help|settings)-modal'/);
   assert.match(helpDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'help-modal'/);
   assert.match(helpDialogSource, /new ModalShell\(root,/);
+  assert.match(settingsDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'settings-modal'/);
+  assert.match(settingsDialogSource, /new ModalShell\(root,/);
   assert.doesNotMatch(
     joined,
     /(?:settings|help|link|url|find|export-progress|export-image|image|mermaid)-modal[^\n]*(?:classList\.(?:add|remove)|style\.display)/

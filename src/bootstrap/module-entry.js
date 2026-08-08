@@ -1,7 +1,7 @@
 import { createUI } from '../ui/create-ui.js';
 import { createCompatibilityBusinessContentPort } from '../ui/compatibility/index.js';
 import { createHelpFeature, mountClassicHelpPort } from '../features/help/index.js';
-import { createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort } from '../features/settings/index.js';
+import { createSettingsFeature, createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort } from '../features/settings/index.js';
 import { createI18nService, createTranslationBindings, localeRegistry, mountClassicI18nPort } from '../i18n/index.js';
 
 const COMPATIBILITY_CONTENT_URL = '/compatibility/business-content.html';
@@ -15,9 +15,10 @@ async function fetchCompatibilityContent(fetchImpl) {
   return response.text();
 }
 
-function destroyStartupResources({ helpPort, settingsPort, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
+function destroyStartupResources({ helpPort, settingsController, settingsPort, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
   const errors = [];
   try { helpPort?.destroy(); } catch (error) { errors.push(error); }
+  try { settingsController?.destroy(); } catch (error) { errors.push(error); }
   try { settingsPort?.destroy(); } catch (error) { errors.push(error); }
   try { settingsStore?.destroy(); } catch (error) { errors.push(error); }
   try { i18nPort?.destroy(); } catch (error) { errors.push(error); }
@@ -53,6 +54,7 @@ export function startModuleEntry({
     let i18nPort = null;
     let settingsStore = null;
     let settingsPort = null;
+    let settingsController = null;
     let helpPort = null;
     try {
       ui = createUI(root);
@@ -79,8 +81,25 @@ export function startModuleEntry({
       settingsPort = mountClassicSettingsStorePort(portsHost, settingsStore);
       helpPort = mountClassicHelpPort(portsHost, helpController);
       await importApplication();
+      const settingsPlatform = Object.freeze({
+        supports(capability) {
+          return Boolean(portsHost?.markdownEditorPlatformPort?.supports(capability));
+        },
+        call(...args) {
+          const port = portsHost?.markdownEditorPlatformPort;
+          if (!port) throw new Error('Platform compatibility port is unavailable.');
+          return port.call(...args);
+        }
+      });
+      settingsController = createSettingsFeature({
+        menuRoot: ui.menu,
+        overlayRoot: ui.overlay,
+        documentRef,
+        store: settingsStore,
+        platform: settingsPlatform
+      });
     } catch (error) {
-      const cleanupErrors = destroyStartupResources({ helpPort, settingsPort, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+      const cleanupErrors = destroyStartupResources({ helpPort, settingsController, settingsPort, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
       starts.delete(documentRef);
       if (!cleanupErrors.length) throw error;
       throw new AggregateError([error, ...cleanupErrors], 'Application startup failed and cleanup was incomplete.');
@@ -91,7 +110,7 @@ export function startModuleEntry({
       destroy() {
         if (destroyed) return;
         destroyed = true;
-        const errors = destroyStartupResources({ helpPort, settingsPort, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+        const errors = destroyStartupResources({ helpPort, settingsController, settingsPort, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
         starts.delete(documentRef);
         if (errors.length) throw new AggregateError(errors, 'Application bootstrap cleanup failed.');
       }

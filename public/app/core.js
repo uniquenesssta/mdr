@@ -1402,8 +1402,6 @@ const editor = document.getElementById('editor');
       sidebar.setAttribute('aria-hidden', visible ? 'false' : 'true');
       document.getElementById('sidebar-resizer')?.classList.toggle('hidden', !visible);
       document.getElementById('sidebar-resizer')?.classList.toggle('is-hidden', !visible);
-      const setting = document.getElementById('setting-sidebar-visible');
-      if (setting) setting.checked = sidebarVisible;
       scheduleEditorMetricsRebuild(100);
       invalidatePreviewAnchorMetrics();
     }
@@ -1732,192 +1730,9 @@ const editor = document.getElementById('editor');
       updatePreview();
     }
 
-    function normalizeSettingColor(value) {
-      const color = String(value || '').trim();
-      return /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : '';
-    }
-
-    function getSettingsThemeDefaults() {
-      const selectedTheme = document.getElementById('setting-theme')?.value
-        || document.body.getAttribute('data-theme')
-        || 'light';
-      return selectedTheme === 'dark'
-        ? { text: '#f0f2f7', line: '#252837' }
-        : { text: '#1a1d23', line: '#efedfc' };
-    }
-
-    function markSettingColorCustom(input) {
-      if (input) input.dataset.custom = 'true';
-    }
-
-    function resetSettingColor(kind) {
-      const defaults = getSettingsThemeDefaults();
-      const input = document.getElementById(kind === 'line' ? 'setting-active-line-color' : 'setting-editor-text-color');
-      if (!input) return;
-      input.value = kind === 'line' ? defaults.line : defaults.text;
-      input.dataset.custom = 'false';
-    }
-
-    function syncSettingsThemeDefaults() {
-      const defaults = getSettingsThemeDefaults();
-      const textInput = document.getElementById('setting-editor-text-color');
-      const lineInput = document.getElementById('setting-active-line-color');
-      if (textInput?.dataset.custom !== 'true') textInput.value = defaults.text;
-      if (lineInput?.dataset.custom !== 'true') lineInput.value = defaults.line;
-    }
-
-    async function chooseExportDirectory() {
-      if (!corePlatformPort?.supports('desktop.dialogs')) {
-        showToast('自定义导出路径仅支持桌面版');
-        return;
-      }
-      const selected = await corePlatformPort.call('dialogs', 'openDirectory', {
-        title: '选择默认导出目录',
-        defaultPath: document.getElementById('setting-export-directory')?.value || exportDirectory
-      });
-      if (!selected) return;
-      const input = document.getElementById('setting-export-directory');
-      if (input) input.value = selected;
-    }
-
-    function clearExportDirectory() {
-      const input = document.getElementById('setting-export-directory');
-      if (input) input.value = '';
-    }
-
-    let activeSettingsPage = 'general';
-
-    function switchSettingsPage(page) {
-      const availablePages = new Set(['general', 'editor', 'save', 'toolbar', 'performance']);
-      const nextPage = availablePages.has(page) ? page : 'general';
-      activeSettingsPage = nextPage;
-      document.querySelectorAll('[data-settings-page]').forEach(button => {
-        const active = button.dataset.settingsPage === nextPage;
-        button.classList.toggle('active', active);
-        button.setAttribute('aria-selected', active ? 'true' : 'false');
-        button.tabIndex = active ? 0 : -1;
-      });
-      document.querySelectorAll('[data-settings-page-panel]').forEach(panel => {
-        const active = panel.dataset.settingsPagePanel === nextPage;
-        panel.hidden = !active;
-        panel.classList.toggle('active', active);
-      });
-      document.querySelector('.preferences-content.settings-body')?.scrollTo?.({ top: 0, behavior: 'auto' });
-    }
-
-    function openSettings(page = activeSettingsPage) {
-      const draft = coreSettingsStorePort.openDraft();
-      document.getElementById('setting-theme').value = draft.theme;
-      document.getElementById('setting-language').value = draft.language;
-      document.getElementById('setting-layout').value = draft.layoutMode;
-      document.getElementById('setting-sidebar-visible').checked = draft.sidebarVisible;
-      document.getElementById('setting-autosave-enabled').checked = draft.autoSaveEnabled;
-      const autosaveDelaySelect = document.getElementById('setting-autosave-delay');
-      const hasPreset = Array.from(autosaveDelaySelect.options).some(option => option.value === String(draft.autoSaveDelay));
-      autosaveDelaySelect.value = hasPreset ? String(autoSaveDelay) : 'custom';
-      document.getElementById('setting-autosave-custom-seconds').value = String(draft.autoSaveDelay / 1000);
-      toggleCustomAutosaveDelay();
-      document.getElementById('setting-editor-font-size').value = String(draft.editorFontSize);
-      const defaults = getSettingsThemeDefaults();
-      const textColorInput = document.getElementById('setting-editor-text-color');
-      const lineColorInput = document.getElementById('setting-active-line-color');
-      textColorInput.value = draft.editorTextColor || defaults.text;
-      textColorInput.dataset.custom = draft.editorTextColor ? 'true' : 'false';
-      lineColorInput.value = draft.activeLineColor || defaults.line;
-      lineColorInput.dataset.custom = draft.activeLineColor ? 'true' : 'false';
-      document.getElementById('setting-export-directory').value = draft.exportDirectory;
-      document.getElementById('setting-toolbar-visible').checked = draft.toolbarVisible;
-      document.querySelectorAll('[data-toolbar-setting]').forEach(input => {
-        input.checked = !draft.toolbarHiddenItems.includes(input.dataset.toolbarSetting);
-      });
-      document.getElementById('setting-preview-performance-mode').value = draft.previewPerformanceMode;
-      switchSettingsPage(page);
-      const modal = document.getElementById('settings-modal');
-      const request = {
-        options: {
-          initialFocus: document.querySelector('[data-settings-page].active')
-            || document.getElementById('setting-theme'),
-          onClose: () => coreSettingsStorePort.cancelDraft()
-        }
-      };
-      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
-      if (request.error) {
-        coreSettingsStorePort.cancelDraft();
-        throw request.error;
-      }
-    }
-
-    function closeSettings() {
-      coreSettingsStorePort.cancelDraft();
-      const modal = document.getElementById('settings-modal');
-      const request = { reason: 'feature-close' };
-      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
-      if (request.error) throw request.error;
-    }
-
-    function toggleCustomAutosaveDelay() {
-      const select = document.getElementById('setting-autosave-delay');
-      const customField = document.getElementById('setting-autosave-custom-wrap');
-      if (!select || !customField) return;
-      customField.hidden = select.value !== 'custom';
-    }
-
-    function applySettings() {
-      const theme = document.getElementById('setting-theme').value;
-      const lang = document.getElementById('setting-language').value;
-      const layout = document.getElementById('setting-layout').value;
-      const nextSidebarVisible = document.getElementById('setting-sidebar-visible').checked;
-      const nextAutoSaveEnabled = document.getElementById('setting-autosave-enabled').checked;
-      const autosaveDelayValue = document.getElementById('setting-autosave-delay').value;
-      let nextAutoSaveDelay;
-      if (autosaveDelayValue === 'custom') {
-        const customInput = document.getElementById('setting-autosave-custom-seconds');
-        const seconds = Number(customInput.value);
-        if (!Number.isFinite(seconds) || seconds < AUTOSAVE_MIN_SECONDS || seconds > AUTOSAVE_MAX_SECONDS) {
-          showToast('自动保存间隔请输入 0.5–3600 秒');
-          customInput.focus();
-          return;
-        }
-        nextAutoSaveDelay = normalizeAutoSaveDelay(seconds * 1000);
-      } else {
-        nextAutoSaveDelay = normalizeAutoSaveDelay(autosaveDelayValue);
-      }
-      const nextEditorFontSize = parseInt(document.getElementById('setting-editor-font-size').value, 10) || 16;
-      const textColorInput = document.getElementById('setting-editor-text-color');
-      const lineColorInput = document.getElementById('setting-active-line-color');
-      const nextEditorTextColor = textColorInput.dataset.custom === 'true' ? normalizeSettingColor(textColorInput.value) : '';
-      const nextActiveLineColor = lineColorInput.dataset.custom === 'true' ? normalizeSettingColor(lineColorInput.value) : '';
-      const nextExportDirectory = String(document.getElementById('setting-export-directory').value || '').trim();
-      const nextToolbarVisible = document.getElementById('setting-toolbar-visible').checked;
-      const nextToolbarHiddenItems = Array.from(document.querySelectorAll('[data-toolbar-setting]'))
-        .filter(input => !input.checked && TOOLBAR_ITEM_IDS.has(input.dataset.toolbarSetting))
-        .map(input => input.dataset.toolbarSetting);
-      const nextPreviewPerformanceMode = normalizePreviewPerformanceMode(document.getElementById('setting-preview-performance-mode').value);
-      const draftChanges = {
-        theme,
-        language: lang,
-        layoutMode: layout,
-        sidebarVisible: nextSidebarVisible,
-        autoSaveEnabled: nextAutoSaveEnabled,
-        autoSaveDelay: nextAutoSaveDelay,
-        editorFontSize: nextEditorFontSize,
-        editorTextColor: nextEditorTextColor,
-        activeLineColor: nextActiveLineColor,
-        exportDirectory: nextExportDirectory,
-        toolbarVisible: nextToolbarVisible,
-        toolbarHiddenItems: nextToolbarHiddenItems,
-        previewPerformanceMode: nextPreviewPerformanceMode
-      };
-
-      let applied;
-      try {
-        coreSettingsStorePort.updateDraft(draftChanges);
-        applied = coreSettingsStorePort.applyDraft();
-      } catch (error) {
-        showToast('设置保存失败：' + (error?.message || String(error)));
-        return;
-      }
-
+    document.addEventListener('markdown-editor:settings-changed', event => {
+      const applied = event?.detail?.snapshot;
+      if (!applied || !Array.isArray(event?.detail?.changedIds)) return;
       sidebarVisible = applied.sidebarVisible;
       autoSaveEnabled = applied.autoSaveEnabled;
       autoSaveDelay = applied.autoSaveDelay;
@@ -1935,9 +1750,8 @@ const editor = document.getElementById('editor');
       applyEditorPreferences();
       updateStatusBar();
       autoSave();
-      closeSettings();
       showToast('设置已保存');
-    }
+    });
 
     function evaluateToolbarBoundary() {
       const toolbar = document.querySelector('.editor-toolbar');

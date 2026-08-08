@@ -29,6 +29,12 @@ export {
   SettingsRepositoryWriteError
 } from './infrastructure/settings-repository.js';
 export { createSettingsStore } from './state/settings-store.js';
+export { createSettingsFeature } from './create-settings-feature.js';
+export {
+  SETTINGS_CHANGED_EVENT,
+  createSettingsApplyCoordinator
+} from './application/settings-apply-coordinator.js';
+export { createSettingsController } from './application/settings-controller.js';
 export {
   EDITOR_SETTINGS_SECTION,
   GENERAL_SETTINGS_SECTION,
