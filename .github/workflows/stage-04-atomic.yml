@@ -70,7 +70,7 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-04/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 4.6 evidence
+      - name: Upload Atomic Task 4.7 evidence
         uses: actions/upload-artifact@v4
         with:
           name: stage-04-settings-repository-${{ github.run_id }}-${{ github.run_attempt }}
