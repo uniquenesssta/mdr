@@ -2,7 +2,9 @@
 
 ## Result
 
-Atomic Task 3.12 implementation is complete and awaiting final Windows Stage 3 validation. All production callers have been cut away from the legacy native facade; `src/runtime/tauri.js` is deleted and no production JavaScript module references `window.markdownEditorNative`.
+Atomic Task 3.12 implementation is complete. Local Windows acceptance and the clean-commit Stage 3 Atomic workflow pass, but the separate native Windows window automation is still blocked before session creation, so Atomic 3.12 / Stage 3 are not yet marked final PASS.
+
+All production callers have been cut away from the legacy native facade; `src/runtime/tauri.js` is deleted and no production JavaScript module references `window.markdownEditorNative`.
 
 ## Final architecture
 
@@ -24,12 +26,26 @@ No Rust command, DTO, persistence format, dependency, package metadata or lock f
 
 Historical Stage 3 client tests keep their low-level command, error, cancellation and lifecycle assertions, while former facade-integration assertions now verify the final `desktop-platform/createPlatform` composition and real callers. Focused 3.12 tests verify facade deletion, scoped classic bridging, ESM Port injection and native drag/drop responsibility boundaries.
 
-Stage 3 evidence now targets 174 production modules / 36 platform modules and chains a dedicated `03-12-platform-cutover-evidence.json` recorder. The final recorder rejects any production `markdownEditorNative` owner, Tauri import outside platform desktop adapters, replacement global Platform facade, stale Windows automation dependency or missing 3.12 workflow gate.
+Stage 3 evidence targets 174 production modules / 36 platform modules and chains a dedicated `03-12-platform-cutover-evidence.json` recorder. The final recorder rejects any production `markdownEditorNative` owner, Tauri import outside platform desktop adapters, replacement global Platform facade, stale Windows automation dependency or missing 3.12 workflow gate.
 
 ## Windows automation
 
-The Windows native window automation no longer monkey-patches the deleted facade. It calls the final scoped Platform window port for state/subscription/force-close operations. Native title-bar drag remains verified by a real Win32 window-position change plus the effective menu-bar mousedown target, and the normal application close-button scenario continues to exercise the production save-before-close/native-exit chain.
+The Windows native window automation no longer monkey-patches the deleted facade. It calls the final scoped Platform window port for state/subscription/force-close operations. Native title-bar drag remains intended to be verified by a real Win32 window-position change plus the effective menu-bar mousedown target, and the normal application close-button scenario continues to exercise the production save-before-close/native-exit chain once a WebDriver session is established.
+
+The clean-commit Windows workflow successfully completed dependency preparation, the automation architecture contract, frontend build, the real Windows release build, preparation/build of the isolated embedded WebDriver host, evidence setup and input verification. The actual automation step then failed before behavioral checks started: the native window became available, but the embedded WebDriver session could not be created and reported `No window could be found`. `state-application.log` was empty. The uploaded evidence therefore records the native window lifecycle check as failed before maximize/resize/drag/close assertions were reached.
 
 ## Validation status
 
-Remote guarded transformations have already demonstrated focused cutover tests and a production build, and the migrated complete Platform suite reached 135/135 with architecture and Node 42/42 passing. These are implementation-time checks only. Final browser, evidence and Windows-native validation must run on the clean final 3.12 commit before Stage 3 is marked PASS.
+User-local Windows validation on commit `0209e1301711d46c45120426bcbfba46c6e35a25`:
+
+- Atomic 3.12 focused tests: 6/6 passed.
+- Complete Platform suite: 135/135 passed.
+- `verify:architecture`, `verify:no-legacy-runtime`, `verify:generated-files`, `verify:readme-record`: passed.
+- Node regression: 42/42 passed.
+- Browser contract: 10/10 passed.
+- Vite production build: passed; the existing >500 kB chunk-size advisory remains non-failing.
+- Built-application browser regression: 12/12 passed.
+- `record-platform-evidence.mjs`: completed without error.
+- `npm audit`: 0 vulnerabilities.
+
+The clean-commit Stage 3 Atomic Verification workflow also passed. Remaining hard blocker: Stage 3 Windows Window Automation run `31210498776` failed only at `Run native Windows window automation` because the embedded WebDriver session could not attach to a window. Atomic 3.12 / Stage 3 remain blocked from final PASS until that native automation gate succeeds or the root cause is independently resolved and revalidated.
