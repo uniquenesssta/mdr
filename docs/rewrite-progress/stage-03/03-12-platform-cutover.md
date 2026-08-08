@@ -2,9 +2,7 @@
 
 ## Result
 
-Atomic Task 3.12 implementation is complete. User-local Windows acceptance and the clean-commit Stage 3 Atomic workflow pass. Windows Native validation has progressed through two separately identified automation defects: the embedded WebDriver host build was no longer isolated from the production Cargo target, and after that isolation was restored the session attached successfully but the first-run Help Modal could still race with asynchronous application initialization and cover the title-bar drag surface. The second repair now waits for application initialization before closing the modal through its normal UI path. Atomic 3.12 / Stage 3 remain pending until the real Windows maximize/resize/drag/close rerun succeeds.
-
-All production callers have been cut away from the legacy native facade; `src/runtime/tauri.js` is deleted and no production JavaScript module references `window.markdownEditorNative`.
+Atomic Task 3.12 is **PASS** and Stage 3 is **PASS**. All production callers have been cut away from the legacy native facade; `src/runtime/tauri.js` is deleted and no production JavaScript module references `window.markdownEditorNative`. User-local acceptance, the clean-commit Stage 3 Atomic workflow and the real Windows Native window lifecycle workflow all pass.
 
 ## Final architecture
 
@@ -28,56 +26,64 @@ Historical Stage 3 client tests keep their low-level command, error, cancellatio
 
 Stage 3 evidence targets 174 production modules / 36 platform modules and chains a dedicated `03-12-platform-cutover-evidence.json` recorder. The final recorder rejects any production `markdownEditorNative` owner, Tauri import outside platform desktop adapters, replacement global Platform facade, stale Windows automation dependency or missing 3.12 workflow gate.
 
-## Windows automation
+## Windows automation repairs
 
-The Windows native window automation no longer monkey-patches the deleted facade. It calls the final scoped Platform window port for state/subscription/force-close operations. Native title-bar drag must be verified by a real Win32 window-position change plus the effective menu-bar mousedown target, and the normal application close-button scenario must exercise the production save-before-close/native-exit chain.
+The Windows native window automation no longer monkey-patches the deleted facade. It calls the final scoped Platform window port for state/subscription/force-close operations. Native title-bar drag is verified by a real Win32 window-position change plus the effective menu-bar mousedown target, and the normal application close-button scenario exercises the production save-before-close/native-exit chain.
 
-### Blocker 1 — WebDriver host build isolation
+### Repair 1 — WebDriver host build isolation
 
-The original clean 3.12 Windows Native run `31210498776` successfully completed dependency preparation, the automation architecture contract, frontend build, the real Windows release build, preparation/build of the isolated embedded WebDriver host, evidence setup and input verification. The automation step then failed before behavioral checks started: the native window became available, but the embedded WebDriver session could not be created and reported `No window could be found`; `state-application.log` was empty.
+The original clean 3.12 Windows Native run `31210498776` reached the native window but could not establish an embedded WebDriver session and reported `No window could be found`.
 
-Historical workflow comparison found that the last successful Windows Native run was commit `7bc155b562eb645063152a0ff82ad953a7d83313`. Its isolated WebDriver host used its own Cargo target. The immediately following dependency/cache externalization commit `344c9274b0cdbb376ab5043107d7feb410008534` moved both production and isolated-host builds under the same external target `../.cargo-target/markdown-editor`. The embedded WebDriver session implementation itself was unchanged between the successful commit and the failing code.
+Historical workflow comparison found that the last successful native run before that blocker, commit `7bc155b562eb645063152a0ff82ad953a7d83313`, used a separate Cargo target for the isolated WebDriver host. Dependency/cache externalization commit `344c9274b0cdbb376ab5043107d7feb410008534` had moved both production and isolated-host builds under the same external target.
 
-The repair preserves the external-cache policy while restoring build isolation:
+The repair keeps all heavy targets outside the repository while restoring isolation:
 
-- production Cargo target remains `../.cargo-target/markdown-editor`;
-- isolated WebDriver host builds into `../.cargo-target/markdown-editor-windows-driver-host`;
-- the Windows workflow passes that target explicitly with `--target-dir` so root `.cargo/config.toml` cannot collapse both builds back into one target;
-- `MARKDOWN_EDITOR_BINARY` and generated driver-host evidence point to the dedicated target;
-- dependency-location and Windows automation architecture tests require two distinct repository-parent Cargo targets.
+- production target remains `../.cargo-target/markdown-editor`;
+- isolated WebDriver host uses `../.cargo-target/markdown-editor-windows-driver-host`;
+- workflow host build explicitly passes its own `--target-dir`;
+- `MARKDOWN_EDITOR_BINARY` and driver-host evidence point to the isolated target;
+- static dependency/window automation contracts require the targets to remain distinct.
 
-The clean repair commit `e67546b27c93932efa6ca767fddc4921934b5214` proved this fix materially changed the failure point: the WebDriver session attached successfully and JavaScript executed. Therefore the old `No window could be found` session-creation blocker is resolved. Increasing session timeouts or weakening the native gate was not used.
+Clean repair commit `e67546b27c93932efa6ca767fddc4921934b5214` confirmed the old session blocker was removed: WebDriver attached successfully and JavaScript executed.
 
-### Blocker 2 — first-run Help Modal initialization race
+### Repair 2 — first-run Help Modal initialization race
 
-After session attachment recovered, Windows Native run `31235397046` reached the actual title-bar test and failed because every candidate drag point was covered by `#help-modal.modal-overlay.show` with `pointer-events: auto`, fixed positioning and z-index 200. The automation therefore correctly refused to synthesize a drag through an obstructing modal.
+Once session attachment worked, Windows Native run `31235397046` reached the title-bar behavior test but correctly refused to drag because `#help-modal.modal-overlay.show` covered every valid drag target.
 
-`tests/e2e/windows/window-test-surface.mjs` itself matched the last historically successful version, so the close path had not been deleted. The problem is readiness ordering: the helper previously inspected the Help Modal immediately after the WebDriver session attached. Application startup is asynchronous, and `public/app/events.js` exposes the existing `window.__markdownEditorInitPromise` around `init()`. `public/app/bootstrap.js` opens first-run Help near the end of that `init()` call. The helper could therefore observe the modal as closed, return, and then have initialization open it before the drag scenario.
+The test surface had been checking Help immediately after session attachment, while application `init()` was still asynchronous and opens first-run Help near its end. The repair uses the existing application lifecycle signal rather than a delay or DOM bypass:
 
-The repair keeps the normal UI behavior intact:
-
-- wait until `window.__markdownEditorInitPromise` exists and is promise-like;
+- wait for `window.__markdownEditorInitPromise` to become available;
 - await that exact application initialization promise;
-- only then inspect `#help-modal`;
-- if first-run Help is open, close it through the existing visible header close button and wait for the normal transition to complete;
-- do not mutate localStorage, remove the `.show` class, disable pointer events, dispatch a private close event or add arbitrary sleeps.
+- then inspect first-run Help;
+- when open, use the visible normal close button and wait for the normal close transition;
+- no localStorage mutation, `.show` removal, pointer-event override, private modal event or arbitrary sleep is used.
 
-`tests/windows-window-automation.test.mjs` now locks this ordering by requiring the initialization barrier before the first Help surface read and explicitly bans direct modal-state bypasses and `setTimeout` delays in the test-surface helper.
+`tests/windows-window-automation.test.mjs` locks this ordering and explicitly rejects the bypasses above.
 
-## Validation status
+## Final validation
 
 User-local Windows validation on implementation commit `0209e1301711d46c45120426bcbfba46c6e35a25`:
 
-- Atomic 3.12 focused tests: 6/6 passed.
-- Complete Platform suite: 135/135 passed.
-- `verify:architecture`, `verify:no-legacy-runtime`, `verify:generated-files`, `verify:readme-record`: passed.
-- Node regression: 42/42 passed.
-- Browser contract: 10/10 passed.
-- Vite production build: passed; the existing >500 kB chunk-size advisory remains non-failing.
-- Built-application browser regression: 12/12 passed.
-- `record-platform-evidence.mjs`: completed without error.
-- `npm audit`: 0 vulnerabilities.
+- Atomic 3.12 focused tests: **6/6 passed**.
+- Complete Platform suite: **135/135 passed**.
+- `verify:architecture`, `verify:no-legacy-runtime`, `verify:generated-files`, `verify:readme-record`: **passed**.
+- Node regression: **42/42 passed**.
+- Browser contract: **10/10 passed**.
+- Vite production build: **passed**; the existing >500 kB chunk-size advisory remains non-failing.
+- Built-application browser regression: **12/12 passed**.
+- `record-platform-evidence.mjs`: **passed**.
+- `npm audit`: **0 vulnerabilities**.
 
-Clean repair commit `e67546b27c93932efa6ca767fddc4921934b5214` also passed the complete Stage 3 Atomic Verification workflow. Its Windows Native run confirmed the dedicated-target repair by successfully establishing the WebDriver session, then exposed the Help Modal readiness race described above.
+Final executable repair commit `1921684fd0a402d92a7426994c85765820f9cc0e`:
 
-No production Rust source, production dependency declaration or lock file is changed by either Windows automation repair. The application-initialization barrier is implemented and requires one successful real Windows Native rerun before Atomic 3.12 / Stage 3 can be marked final PASS.
+- Stage 3 Atomic Verification run `31236205911`: **PASS** — all 3.1–3.12 checks, architecture, Node, Browser Contract, build, built-app browser regression and evidence completed successfully.
+- Stage 3 Windows Window Automation run `31236205921`: **PASS**.
+- Windows native static/dependency contracts: **5/5 passed**.
+- real Windows release build: **passed**.
+- isolated embedded WebDriver host build: **passed** using `../.cargo-target/markdown-editor-windows-driver-host`.
+- native scenario `native-window-state-subscriptions-and-drag`: **passed**. Maximize reached `showCmd=3`; restore/minimize state was verified; one resize event was received and no extra event appeared after disposer; Win32 drag moved the window from `(0,0)` to `(120,80)` and the menu bar recorded one mousedown.
+- native scenario `application-close-button-save-and-native-exit`: **passed**, process exited.
+- native scenario `force-close-destroys-native-window`: **passed**, process exited.
+- Windows evidence artifact `stage-03-windows-window-31236205921-1` uploaded successfully with status `passed`.
+
+The two native automation defects were fixed without weakening the gate or changing production Rust, production dependencies or lock files. No remaining Stage 3 hard-validation gap is known. Atomic Task 3.12 and Stage 3 are complete; Stage 4 may start.
