@@ -2,7 +2,7 @@
 
 ## 状态
 
-已完成 4.1 实施，Stage 4 全量回归验收进行中；4.2 未开始。当前任务只冻结旧国际化实现的兼容事实，不修正翻译、不拆 locale、不迁移运行时 I18n。
+Atomic Task 4.1 **PASS**。当前任务只冻结旧国际化实现的兼容事实，不修正翻译、不拆 locale、不迁移运行时 I18n；4.2 未开始。
 
 ## 实施范围
 
@@ -21,9 +21,9 @@
 
 新增 `.github/workflows/stage-04-atomic.yml`，4.1 验收顺序为 Stage 3 handoff、4.1 专项测试、原始审计 evidence、架构门禁、Node 回归、Browser Contract、生产构建、Built App Browser 回归和 evidence 上传。
 
-## 当前审计事实
+## 审计基线
 
-首个真实 GitHub runner 审计 run `31237553339` 已成功生成 evidence：
+真实审计确认：
 
 - locale：10 个：`zh-CN`、`zh-TW`、`en`、`ja`、`ko`、`es`、`fr`、`de`、`ru`、`pt`；
 - 联合键：162 个；
@@ -42,21 +42,26 @@
 - 未创建 `src/i18n/` 生产实现，避免提前实施 4.2/4.3；
 - 未修改设置键、默认值、首次帮助语义、Rust、生产依赖或锁文件。
 
-## 验证状态
+## 最终验证
 
-已完成：
+Clean implementation commit：`45b29c652c9b42aa7b6f13b15b9803ea34d5fe05`。
 
-- GitHub runner 原始审计生成与 artifact 上传：PASS（run `31237553339`）。
+Stage 4 Atomic Verification run `31237882133`：**PASS**。
 
-待完成后才能将 Atomic 4.1 标记 PASS：
+- Stage 3 handoff：**6/6 passed**；
+- Atomic 4.1 专项：**7/7 passed**；
+- locale 原始审计生成：**passed**；
+- `npm run verify:architecture`：**passed**；
+- Node regression：**42/42 passed**；
+- Browser Contract：**10/10 passed**；
+- Vite production build：**passed**，2214 modules transformed；保留既有 >500 kB chunk-size advisory；
+- Built App Browser regression：**12/12 passed**；
+- evidence artifact：`stage-04-locale-audit-31237882133-1`，artifact ID `9016058686`，上传成功。
 
-- 4.1 专项契约测试；
-- Stage 3 handoff；
-- architecture；
-- Node 回归；
-- Browser Contract；
-- Vite build；
-- Built App Browser；
-- 最终 4.1 evidence。
+首个独立原始审计 run `31237553339` 同样成功，用于生成最初兼容基线。
 
-任何硬门禁失败都必须先修复，不进入 4.2。
+## 已知限制 / 非 4.1 变更
+
+4.1 没有修改 `package.json` 或 `package-lock.json`，因此本次 Stage 4 workflow 没有新增 `npm audit` 硬门禁。clean runner 的 `deps:prepare` 安装输出仍报告当前仓库依赖基线存在 4 项 advisory（2 moderate、2 high）；这不是 4.1 引入的变化。用户本地受保护的 lockfile 之前已执行安全更新并得到 `npm audit` 0 vulnerabilities，但该本地 lockfile 内容未由本任务覆盖或提交。
+
+本任务未发现新的运行时、架构或浏览器回归。Atomic 4.1 完成后才允许进入 4.2。
