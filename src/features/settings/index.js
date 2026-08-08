@@ -1,7 +1,7 @@
 /**
- * Responsibility: Public Stage 4 Settings contract exposing domain rules, persistence, the authoritative Settings Store and scoped classic Store bridge.
+ * Responsibility: Public Stage 4 Settings contract exposing domain rules, section descriptors, persistence, the authoritative Settings Store and scoped classic Store bridge.
  * Imports: Settings feature modules only.
- * Exports: Schema/default/validation/serialization, Settings Repository, Settings Store and classic Store compatibility mount contracts.
+ * Exports: Schema/default/validation/serialization, immutable Section Modules, Settings Repository, Settings Store and classic Store compatibility mount contracts.
  * State/side effects: Import-only facade; no DOM, storage lookup or runtime state ownership.
  */
 export { SETTING_DEFAULTS } from './domain/settings-defaults.js';
@@ -29,4 +29,15 @@ export {
   SettingsRepositoryWriteError
 } from './infrastructure/settings-repository.js';
 export { createSettingsStore } from './state/settings-store.js';
+export {
+  EDITOR_SETTINGS_SECTION,
+  GENERAL_SETTINGS_SECTION,
+  PERFORMANCE_SETTINGS_SECTION,
+  SAVE_SETTINGS_SECTION,
+  SETTINGS_SECTION_DEFINITIONS,
+  SETTINGS_SECTION_IDS,
+  TOOLBAR_SETTINGS_SECTION,
+  getSettingsSectionDefinition,
+  listSettingsSectionDefinitions
+} from './sections/section-registry.js';
 export { mountClassicSettingsStorePort } from './compatibility/classic-settings-store-port.js';

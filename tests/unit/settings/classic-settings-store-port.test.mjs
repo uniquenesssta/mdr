@@ -90,9 +90,9 @@ test('Atomic 4.8 classic Settings dialog uses Store draft lifecycle and Cancel/E
   assert.match(editorTools, /editorToolsSettingsStorePort\.set\('codeVisualEditing', nextEnabled\)/);
 });
 
-test('Atomic 4.8 retires the Repository compatibility bridge and does not start 4.9 sections/application/UI early', async () => {
+test('Atomic 4.8 retires the Repository compatibility bridge while Atomic 4.9 sections remain isolated from 4.10 application/UI', async () => {
   const rootEntries = (await readdir(resolve(ROOT, 'src/features/settings'))).sort();
-  assert.deepEqual(rootEntries, ['compatibility', 'domain', 'index.js', 'infrastructure', 'state']);
+  assert.deepEqual(rootEntries, ['compatibility', 'domain', 'index.js', 'infrastructure', 'sections', 'state']);
   assert.deepEqual(
     (await readdir(resolve(ROOT, 'src/features/settings/compatibility'))).sort(),
     ['classic-settings-store-port.js']
@@ -101,5 +101,5 @@ test('Atomic 4.8 retires the Repository compatibility bridge and does not start 
     (await readdir(resolve(ROOT, 'src/features/settings/state'))).sort(),
     ['settings-store.js']
   );
-  for (const absent of ['application', 'sections', 'ui']) assert.equal(rootEntries.includes(absent), false);
+  for (const absent of ['application', 'ui']) assert.equal(rootEntries.includes(absent), false);
 });
