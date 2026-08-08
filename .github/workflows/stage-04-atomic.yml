@@ -62,6 +62,18 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-04/browser-app
         run: npm run test:browser
+      - name: Upload Atomic Task 4.4 source workbench
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-04-source-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .
+            !.git
+            !node_modules
+            !dist
+            !artifacts
+          if-no-files-found: error
+          retention-days: 1
       - name: Upload Atomic Task 4.3 evidence
         uses: actions/upload-artifact@v4
         with:
