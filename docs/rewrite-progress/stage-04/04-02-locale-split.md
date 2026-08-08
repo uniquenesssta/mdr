@@ -2,7 +2,7 @@
 
 ## 状态
 
-Atomic 4.2 已完成实施；候选树完整 Stage 4 gate 已通过，等待压缩为 clean implementation commit 后复验。4.3 尚未开始。
+Atomic 4.2 **PASS**。4.2 clean implementation commit 已完整通过 Stage 4 gate；4.3 尚未开始。
 
 ## 任务边界
 
@@ -150,8 +150,23 @@ Stage 1 历史计数不变，只更新“当前生产模块数”。
 - Built App Browser：12/12 PASS；
 - evidence artifact：`stage-04-locale-split-31240232849-1`，artifact ID `9016775936`，上传成功。
 
-GitHub runner 的 `deps:prepare` 继续报告 committed dependency baseline 的 4 个既有 advisory（2 moderate、2 high）。4.2 未修改依赖或 lockfile；本任务不把用户另一工作区中受保护的 lockfile 变更带入 Stage 4。
+## 最终 clean 验收
 
-## 剩余验收
+正式 implementation commit：`a16ca6e3c8239facce7aca01d93569308251b4e4`，直接继承 4.1 验收提交 `24d1db73b9b7ce9ef44024057c06729789495f4b`，相对基线只有 1 个 Atomic 4.2 提交。
 
-上述验证发生在候选树。当前下一步是把 4.2 临时迁移/修复历史压成一笔直接继承 4.1 验收提交的 clean implementation commit，并要求该 clean commit 再完整通过同一 Stage 4 gate。clean commit 自验通过前不将 4.2 标记最终 PASS，也不进入 4.3。
+Stage 4 clean run `31240400556`：
+
+- Stage 3 handoff：PASS；
+- Atomic 4.1 历史契约：7/7 PASS；
+- Atomic 4.2 专项：7/7 PASS；
+- 当前 4.2 locale audit：PASS；
+- Architecture：PASS；
+- Node regression：42/42 PASS；
+- Browser Contract：10/10 PASS；
+- Vite build：PASS；既有 >500 kB chunk advisory 仍为非失败提示；
+- Built App Browser：12/12 PASS；
+- Atomic 4.2 evidence：上传成功。
+
+GitHub runner 的 `deps:prepare` 继续报告 committed dependency baseline 的 4 个既有 advisory（2 moderate、2 high）。4.2 未修改依赖或 lockfile；本任务未把用户另一工作区中受保护的 lockfile 变更带入 Stage 4。
+
+4.2 无已知硬验证缺口。Atomic Task 4.2 已完成；4.3 只有在用户明确开始后才推进。
