@@ -40,6 +40,25 @@ jobs:
         run: npm run deps:prepare
       - name: Verify dependency audit is clean
         run: npm audit --audit-level=low
+      - name: Verify parent KaTeX font is served by Vite dev
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run dev > /tmp/vite-dev.log 2>&1 &
+          vite_pid=$!
+          cleanup() { kill "$vite_pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:16663/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:16663/ >/dev/null
+          font_path="$(realpath ../node_modules/katex/dist/fonts/KaTeX_Main-Regular.woff2)"
+          curl --path-as-is -fsS "http://127.0.0.1:16663/@fs${font_path}" -o /tmp/katex-font.woff2
+          test -s /tmp/katex-font.woff2
+          ! grep -q 'outside of Vite serving allow list' /tmp/vite-dev.log
+          cleanup
+          trap - EXIT
       - name: Verify Stage 4 handoff remains intact
         run: >-
           node --test
