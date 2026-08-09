@@ -1,22 +1,9 @@
-import { Compartment, Prec } from '@codemirror/state';
-import { EditorView, drawSelection, dropCursor, highlightActiveLine, highlightSpecialChars, keymap, placeholder as editorPlaceholder } from '@codemirror/view';
-import { defaultKeymap, history } from '@codemirror/commands';
-import { deleteMarkupBackward, insertNewlineContinueMarkupCommand, markdown } from '@codemirror/lang-markdown';
-import { GFM } from '@lezer/markdown';
-import { createPrecisePointerSelectionExtension } from './precise-pointer-selection.js';
-import { createCodeMirrorAdapter } from './codemirror/index.js';
-import { getHybridComponentStateSnapshot } from './hybrid/component-state.js';
 import {
-  createHybridMarkdownConfiguration,
-  createHybridMarkdownExtension,
-  getHybridMarkdownStats
-} from './hybrid-markdown.js';
-
-const continueMarkdownMarkup = insertNewlineContinueMarkupCommand({ nonTightLists: false });
-const markdownEditingKeymap = [
-  { key: 'Enter', run: continueMarkdownMarkup },
-  { key: 'Backspace', run: deleteMarkupBackward }
-];
+  createCodeMirrorAdapter,
+  createCodeMirrorExtensionRegistry
+} from './codemirror/index.js';
+import { getHybridComponentStateSnapshot } from './hybrid/component-state.js';
+import { getHybridMarkdownStats } from './hybrid-markdown.js';
 
 function countNonWhitespace(value) {
   let count = 0;
@@ -58,10 +45,8 @@ function createSyntheticEvent(target, type, bubbles = false) {
   return event;
 }
 
-function installTextareaCompatibility(host, adapter, integration, placeholderCompartment) {
+function installTextareaCompatibility(host, adapter, extensionRegistry) {
   let suppressInputEvent = 0;
-  let placeholderValue = host.getAttribute('data-placeholder') || '';
-  let readOnlyValue = false;
   let cachedValue = adapter.getText();
   let valueCacheValid = true;
   const adapterSetDocumentChunks = adapter.setDocumentChunks.bind(adapter);
@@ -111,8 +96,8 @@ function installTextareaCompatibility(host, adapter, integration, placeholderCom
     scrollLeft: { configurable: true, get() { return adapter.getScrollMetrics().left; }, set(value) { adapter.setScrollLeft(value); } },
     scrollHeight: { configurable: true, get() { return adapter.getScrollMetrics().height; } },
     scrollWidth: { configurable: true, get() { return adapter.getScrollMetrics().width; } },
-    placeholder: { configurable: true, get() { return placeholderValue; }, set(value) { placeholderValue = String(value ?? ''); host.setAttribute('data-placeholder', placeholderValue); integration.dispatchEffects(placeholderCompartment.reconfigure(editorPlaceholder(placeholderValue))); } },
-    readOnly: { configurable: true, get() { return readOnlyValue; }, set(value) { readOnlyValue = Boolean(value); adapter.setReadOnly(readOnlyValue); } }
+    placeholder: { configurable: true, get() { return extensionRegistry.snapshot.placeholder; }, set(value) { const nextValue = String(value ?? ''); extensionRegistry.setPlaceholder(nextValue); host.setAttribute('data-placeholder', nextValue); } },
+    readOnly: { configurable: true, get() { return extensionRegistry.snapshot.readOnly; }, set(value) { adapter.setReadOnly(Boolean(value)); } }
   });
 
   host.focus = (options = {}) => adapter.focus(options);
@@ -163,55 +148,24 @@ export function createVirtualEditor(host) {
   host.setAttribute('role', 'textbox');
   host.setAttribute('aria-multiline', 'true');
 
-  const placeholderCompartment = new Compartment();
-  const presentationCompartment = new Compartment();
-  const hybridConfigurationCompartment = new Compartment();
-  const hybridMarkdownExtension = createHybridMarkdownExtension();
-  const hybridPresentationExtension = [
-    hybridMarkdownExtension,
-    EditorView.editorAttributes.of({ class: 'cm-hybrid-mode' })
-  ];
-  let presentationMode = 'source';
-  let hybridTableVisualEditing = false;
-  let hybridCodeVisualEditing = false;
+  const extensionRegistry = createCodeMirrorExtensionRegistry({
+    placeholder: host.getAttribute('data-placeholder') || ''
+  });
   let documentLoadResetPending = false;
   let adapterApi = null;
-
-  const editorExtensions = [
-    highlightSpecialChars(),
-    drawSelection(),
-    dropCursor(),
-    highlightActiveLine(),
-    EditorView.lineWrapping,
-    Prec.high(createPrecisePointerSelectionExtension()),
-    markdown({ extensions: GFM, addKeymap: false }),
-    Prec.high(keymap.of(markdownEditingKeymap)),
-    history({ minDepth: 100, newGroupDelay: 500 }),
-    keymap.of(defaultKeymap.filter(binding => !/^(?:Mod-(?:z|y|s|b|i|u|k|f|o|n)|Shift-Mod-z|Tab)$/i.test(binding.key || ''))),
-    EditorView.contentAttributes.of({
-      spellcheck: 'false',
-      autocapitalize: 'off',
-      autocorrect: 'off',
-      translate: 'no'
-    }),
-    placeholderCompartment.of(editorPlaceholder(host.getAttribute('data-placeholder') || '')),
-    hybridConfigurationCompartment.of(createHybridMarkdownConfiguration({
-      tableVisualEditing: hybridTableVisualEditing,
-      codeVisualEditing: hybridCodeVisualEditing
-    })),
-    presentationCompartment.of([])
-  ];
 
   const { api: codeMirrorApi, integration: codeMirrorIntegration } = createCodeMirrorAdapter({
     parent: host,
     initialValue,
-    extensions: editorExtensions,
+    extensions: extensionRegistry.getExtensions(),
     markProgrammaticScroll(duration) { window.markdownEditorScrollSync?.markProgrammaticScroll?.('editor', duration); },
     suspendScrollSync(duration) { window.markdownEditorScrollSync?.suspend?.(duration); },
     reportError(message, error) { console.error(message, error); }
   });
   adapterApi = codeMirrorApi;
-  const textareaCompatibility = installTextareaCompatibility(host, adapterApi, codeMirrorIntegration, placeholderCompartment);
+  const detachExtensionRegistry = extensionRegistry.attach(codeMirrorIntegration.dispatchEffects);
+  adapterApi.setReadOnly = value => extensionRegistry.setReadOnly(Boolean(value));
+  const textareaCompatibility = installTextareaCompatibility(host, adapterApi, extensionRegistry);
   adapterApi.setDocumentChunks = textareaCompatibility.setDocumentChunks;
   adapterApi.invalidateValueCache = textareaCompatibility.invalidateValueCache;
   Object.defineProperty(adapterApi, 'suppressInputEvent', { configurable: true, get() { return textareaCompatibility.suppressInputEvent; } });
@@ -231,10 +185,10 @@ export function createVirtualEditor(host) {
     if (update.selectionSet) host.dispatchEvent(createSyntheticEvent(host, 'select'));
   });
   function loadDocumentState(content, options = {}) {
-    const length = codeMirrorIntegration.resetDocument(content, { selection: options.selection === 'end' ? 'end' : Number(options.selection), extensions: editorExtensions });
-    const dynamicEffects = [hybridConfigurationCompartment.reconfigure(createHybridMarkdownConfiguration({ tableVisualEditing: hybridTableVisualEditing, codeVisualEditing: hybridCodeVisualEditing }))];
-    if (presentationMode === 'hybrid') dynamicEffects.push(presentationCompartment.reconfigure(hybridPresentationExtension));
-    codeMirrorIntegration.dispatchEffects(dynamicEffects);
+    const length = codeMirrorIntegration.resetDocument(content, {
+      selection: options.selection === 'end' ? 'end' : Number(options.selection),
+      extensions: extensionRegistry.getExtensions()
+    });
     changeJournal.version = 0;
     changeJournal.entries = [];
     changeJournal.nonWhitespaceCount = Number.isFinite(Number(options.nonWhitespaceCount)) ? Math.max(0, Number(options.nonWhitespaceCount) || 0) : countDocumentNonWhitespace(adapterApi);
@@ -291,43 +245,25 @@ export function createVirtualEditor(host) {
       adapterApi.invalidateValueCache();
     },
     setPresentationMode(mode = 'source') {
-      const nextMode = mode === 'hybrid' ? 'hybrid' : 'source';
-      if (presentationMode === nextMode) return false;
-      presentationMode = nextMode;
-      codeMirrorIntegration.dispatchEffects(presentationCompartment.reconfigure(nextMode === 'hybrid' ? hybridPresentationExtension : []));
-      return true;
+      return extensionRegistry.setPresentationMode(mode);
     },
     getPresentationMode() {
-      return presentationMode;
+      return extensionRegistry.snapshot.presentationMode;
     },
     setHybridTableVisualEditing(enabled) {
-      const next = Boolean(enabled);
-      if (hybridTableVisualEditing === next) return false;
-      hybridTableVisualEditing = next;
-      codeMirrorIntegration.dispatchEffects(hybridConfigurationCompartment.reconfigure(createHybridMarkdownConfiguration({
-        tableVisualEditing: hybridTableVisualEditing,
-        codeVisualEditing: hybridCodeVisualEditing
-      })));
-      return true;
+      return extensionRegistry.setHybridTableVisualEditing(enabled);
     },
     getHybridTableVisualEditing() {
-      return hybridTableVisualEditing;
+      return extensionRegistry.snapshot.hybridTableVisualEditing;
     },
     setHybridCodeVisualEditing(enabled) {
-      const next = Boolean(enabled);
-      if (hybridCodeVisualEditing === next) return false;
-      hybridCodeVisualEditing = next;
-      codeMirrorIntegration.dispatchEffects(hybridConfigurationCompartment.reconfigure(createHybridMarkdownConfiguration({
-        tableVisualEditing: hybridTableVisualEditing,
-        codeVisualEditing: hybridCodeVisualEditing
-      })));
-      return true;
+      return extensionRegistry.setHybridCodeVisualEditing(enabled);
     },
     getHybridCodeVisualEditing() {
-      return hybridCodeVisualEditing;
+      return extensionRegistry.snapshot.hybridCodeVisualEditing;
     },
     getPresentationStats() {
-      return presentationMode === 'hybrid'
+      return extensionRegistry.snapshot.presentationMode === 'hybrid'
         ? codeMirrorIntegration.readView(getHybridMarkdownStats)
         : { visibleLines: 0, decoratedLines: 0, headingLines: 0, sourceActiveLines: 0, hiddenMarkers: 0 };
     },
@@ -335,15 +271,7 @@ export function createVirtualEditor(host) {
       return codeMirrorIntegration.readView(getHybridComponentStateSnapshot);
     },
     resetHistory() {
-      codeMirrorIntegration.resetHistory({ extensions: editorExtensions });
-      const dynamicEffects = [
-        hybridConfigurationCompartment.reconfigure(createHybridMarkdownConfiguration({
-          tableVisualEditing: hybridTableVisualEditing,
-          codeVisualEditing: hybridCodeVisualEditing
-        }))
-      ];
-      if (presentationMode === 'hybrid') dynamicEffects.push(presentationCompartment.reconfigure(hybridPresentationExtension));
-      codeMirrorIntegration.dispatchEffects(dynamicEffects);
+      codeMirrorIntegration.resetHistory({ extensions: extensionRegistry.getExtensions() });
       textareaCompatibility.invalidateValueCache();
     }
   });
@@ -361,6 +289,8 @@ export function createVirtualEditor(host) {
     documentChangeListeners.clear();
     host.removeEventListener('input', onCompatibilityInput);
     textareaCompatibility.destroy();
+    detachExtensionRegistry();
+    extensionRegistry.destroy();
     destroyCodeMirrorAdapter();
     if (host.virtualEditor === adapterApi) delete host.virtualEditor;
     host.classList.remove('virtual-editor-host');
