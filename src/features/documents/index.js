@@ -6,3 +6,5 @@ export { normalizeDocumentNativeMetadata } from './domain/document-native-metada
 export { createDocumentRecord, pickDocumentRecordMetadata, updateDocumentRecord } from './domain/document-record.js';
 export { createRecentFileEntry, normalizeRecentFilePath } from './domain/recent-file-entry.js';
 export { mountClassicDocumentDomainPort } from './compatibility/classic-document-domain-port.js';
+export { DOCUMENT_SESSION_CHANGED_EVENT, createDocumentSessionStore } from './state/document-session-store.js';
+export { mountClassicDocumentSessionPort } from './compatibility/classic-document-session-port.js';

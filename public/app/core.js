@@ -3,9 +3,11 @@ const corePlatformPort = coreCompatibilityHost?.markdownEditorPlatformPort;
 const coreI18nPort = coreCompatibilityHost?.markdownEditorI18nPort;
 const coreSettingsStorePort = coreCompatibilityHost?.markdownEditorSettingsStorePort;
 const coreDocumentDomainPort = coreCompatibilityHost?.markdownEditorDocumentDomainPort;
+const coreDocumentSessionPort = coreCompatibilityHost?.markdownEditorDocumentSessionPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
+if (!coreDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
@@ -35,8 +37,9 @@ const editor = document.getElementById('editor');
     const WINDOW_RESIZE_SETTLE_MS = 220;
 
     let previewMode = 'preview';
-    let documents = [];
-    let currentDocumentId = null;
+    const legacyDocumentContentCache = new Map();
+    const getSessionDocuments = () => coreDocumentSessionPort.records;
+    const getActiveDocumentId = () => coreDocumentSessionPort.activeId;
     let sidebarVisible = true;
     let sidebarAutoCollapsed = false;
     let compactShellActive = false;
@@ -336,7 +339,7 @@ const editor = document.getElementById('editor');
     }
 
     window.markdownEditorDocumentStore?.subscribe?.(event => {
-      if (!event || event.documentId !== currentDocumentId) return;
+      if (!event || event.documentId !== getActiveDocumentId()) return;
       if (event.state === 'loading-index') {
         const statusLeft = document.getElementById('status-left');
         if (statusLeft) statusLeft.textContent = '正在读取文档索引…';
@@ -545,7 +548,8 @@ const editor = document.getElementById('editor');
         filePath,
         fallbackTitle: t('filenameDefault')
       });
-      return { ...record, content };
+      legacyDocumentContentCache.set(record.id, String(content ?? ''));
+      return record;
     }
 
     function normalizeDocumentTitle(name) {
@@ -555,28 +559,31 @@ const editor = document.getElementById('editor');
     function loadDocumentsFromStorage() {
       try {
         const parsed = JSON.parse(localStorage.getItem(DOCS_KEY) || '[]');
-        documents = Array.isArray(parsed) ? parsed.filter(doc => doc && doc.id) : [];
+        return Array.isArray(parsed) ? parsed.filter(doc => doc && doc.id) : [];
       } catch (_) {
-        documents = [];
+        return [];
       }
     }
 
     function serializeDocumentsForStorage() {
       const nativeStore = window.markdownEditorDocumentStore;
-      return documents.map(doc => {
-        if (!doc.nativeBacked || !nativeStore?.available) return doc;
+      return getSessionDocuments().map(doc => {
         const stored = { ...doc };
-        delete stored.content;
+        if (doc.nativeBacked && nativeStore?.available) return stored;
+        const content = legacyDocumentContentCache.get(doc.id);
+        if (typeof content === 'string') stored.content = content;
         return stored;
       });
     }
 
     function saveDocumentsToStorage() {
       try {
+        const records = getSessionDocuments();
+        const activeId = getActiveDocumentId();
         localStorage.setItem(DOCS_KEY, JSON.stringify(serializeDocumentsForStorage()));
-        if (documents.length) localStorage.removeItem(EMPTY_DOCUMENTS_KEY);
+        if (records.length) localStorage.removeItem(EMPTY_DOCUMENTS_KEY);
         else localStorage.setItem(EMPTY_DOCUMENTS_KEY, 'true');
-        if (currentDocumentId) localStorage.setItem(CURRENT_DOC_KEY, currentDocumentId);
+        if (activeId) localStorage.setItem(CURRENT_DOC_KEY, activeId);
         else localStorage.removeItem(CURRENT_DOC_KEY);
       } catch (error) {
         console.warn('Document metadata storage failed:', error);
@@ -586,6 +593,7 @@ const editor = document.getElementById('editor');
     async function loadDocumentContent(doc) {
       if (!doc) return { content: '', loaded: null };
       let loaded = null;
+      let record = doc;
       if (doc.nativeBacked && window.markdownEditorDocumentStore?.available) {
         try {
           loaded = await window.markdownEditorDocumentStore.load(doc.id);
@@ -594,27 +602,27 @@ const editor = document.getElementById('editor');
         }
       }
       if (loaded) {
-        if (typeof loaded.content === 'string') doc.content = loaded.content;
-        else if (Array.isArray(loaded.contentChunks)) delete doc.content;
-        Object.assign(doc, coreDocumentDomainPort.updateRecord(doc, {
+        record = coreDocumentSessionPort.updateRecord(doc.id, {
           title: loaded.title || doc.title || t('filenameDefault'),
           updatedAt: Math.max(Number(doc.updatedAt) || 0, Number(loaded.updatedAt) || 0),
+          nativeBacked: true,
           nativeVersion: Number(loaded.version) || 0
-        }, { fallbackTitle: t('filenameDefault') }));
+        }, { fallbackTitle: t('filenameDefault'), reason: 'native-loaded' });
+        legacyDocumentContentCache.delete(doc.id);
         if (loaded.recovered) {
           const message = loaded.recoveryMessage || '检测到未完整写入的数据，已从可用快照恢复';
           setTimeout(() => showToast(message), 0);
           window.markdownEditorPerf?.record('storage.document-recovered', {
             category: 'storage.recovery',
             status: 'recovered',
-            details: { documentId: doc.id, version: doc.nativeVersion, message }
+            details: { documentId: record.id, version: record.nativeVersion, message }
           });
         }
-      } else if (doc.nativeBacked && typeof doc.content !== 'string') {
+      } else if (doc.nativeBacked && !legacyDocumentContentCache.has(doc.id)) {
         throw new Error('无法恢复后台文档快照，为避免覆盖原内容已停止打开');
       }
       return {
-        content: typeof loaded?.content === 'string' ? loaded.content : (doc.content || ''),
+        content: typeof loaded?.content === 'string' ? loaded.content : (legacyDocumentContentCache.get(doc.id) || ''),
         chunks: Array.isArray(loaded?.contentChunks) ? loaded.contentChunks : null,
         loaded
       };
@@ -749,16 +757,15 @@ const editor = document.getElementById('editor');
     }
 
     async function setupDocuments() {
-      loadDocumentsFromStorage();
-      const storedDocuments = documents.slice();
+      const storedDocuments = loadDocumentsFromStorage();
       for (const storedDocument of storedDocuments) {
         if (storedDocument?.filePath) addRecentFile(storedDocument.filePath, storedDocument.title, false);
       }
       renderRecentFilesMenu();
       clearStoredDocumentSession(storedDocuments);
 
-      documents = [];
-      currentDocumentId = '';
+      legacyDocumentContentCache.clear();
+      coreDocumentSessionPort.reset({ reason: 'startup-reset' });
       filenameInput.value = t('filenameDefault');
       activateDocumentRuntime(null, null, '');
       saveDocumentsToStorage();
@@ -770,14 +777,14 @@ const editor = document.getElementById('editor');
         details: {
           discardedDocuments: storedDocuments.length,
           migratedRecentFiles: storedDocuments.filter(item => item?.filePath).length,
-          currentDocumentId,
+          currentDocumentId: getActiveDocumentId() || '',
           emptyWorkspace: true
         }
       });
     }
 
     function getCurrentDocument() {
-      return documents.find(doc => doc.id === currentDocumentId) || null;
+      return coreDocumentSessionPort.getActiveRecord();
     }
 
     window.markdownEditorRuntimeContext = {
@@ -796,8 +803,7 @@ const editor = document.getElementById('editor');
       const current = getCurrentDocument();
       if (current) return current;
       const doc = createDocument(t('filenameDefault'), documentModel?.createSnapshot?.('lazy-document-create') ?? editor.value);
-      documents.unshift(doc);
-      currentDocumentId = doc.id;
+      coreDocumentSessionPort.insertRecord(doc, { index: 0, activate: true, reason: 'lazy-create' });
       filenameInput.value = doc.title;
       documentModel?.adoptDocument?.(doc);
       window.markdownEditorDocumentStore?.activateDocument?.(documentModel || editor, doc, null);
@@ -808,7 +814,7 @@ const editor = document.getElementById('editor');
         durationMs: 0,
         details: { documentId: doc.id, characters: editor.textLength }
       });
-      return doc;
+      return coreDocumentSessionPort.getRecord(doc.id);
     }
 
     async function confirmUserAction(message, options = {}) {
@@ -825,7 +831,7 @@ const editor = document.getElementById('editor');
         details: {
           ...details,
           message,
-          currentDocumentId: currentDocumentId || '',
+          currentDocumentId: getActiveDocumentId() || '',
           runtimeDocumentId: documentModel?.documentId || ''
         }
       });
@@ -836,53 +842,64 @@ const editor = document.getElementById('editor');
       let doc = getCurrentDocument();
       const runtimeDocumentId = String(documentModel?.documentId || '');
       if (runtimeDocumentId && doc?.id !== runtimeDocumentId) {
-        const runtimeDocument = documents.find(item => item.id === runtimeDocumentId);
+        const runtimeDocument = coreDocumentSessionPort.getRecord(runtimeDocumentId);
         if (runtimeDocument) {
           doc = runtimeDocument;
-          currentDocumentId = runtimeDocument.id;
-          localStorage.setItem(CURRENT_DOC_KEY, currentDocumentId);
+          coreDocumentSessionPort.setActive(runtimeDocument.id, { reason: 'runtime-reconciled' });
+          localStorage.setItem(CURRENT_DOC_KEY, runtimeDocument.id);
           window.markdownEditorPerf?.record?.('document.runtime-reconciled', {
             category: 'document.recovery',
             status: 'recovered',
-            details: { documentId: currentDocumentId }
+            details: { documentId: runtimeDocument.id }
           });
         }
       }
       if (!doc) return { native: false };
-      Object.assign(doc, coreDocumentDomainPort.updateRecord(doc, {
+      doc = coreDocumentSessionPort.updateRecord(doc.id, {
         title: filenameInput.value,
         updatedAt: getCurrentTimestamp()
-      }, { fallbackTitle: t('filenameDefault') }));
+      }, { fallbackTitle: t('filenameDefault'), reason: 'save-metadata' });
 
       const nativeStore = window.markdownEditorDocumentStore;
       documentModel?.updateTitle?.(doc.title);
       const contentLength = documentModel?.getTextLength?.() ?? editor.textLength;
       const useNative = nativeStore?.shouldUse?.(doc, contentLength);
       const wasNativeBacked = Boolean(doc.nativeBacked);
-      if (!useNative || !wasNativeBacked) doc.content = documentModel?.createSnapshot?.('document-storage') ?? editor.value;
+      if (!useNative || !wasNativeBacked) {
+        legacyDocumentContentCache.set(doc.id, documentModel?.createSnapshot?.('document-storage') ?? editor.value);
+      }
+
+      const applyNativeSaveResult = result => {
+        if (!result?.native) return result;
+        const current = coreDocumentSessionPort.getRecord(doc.id);
+        if (current) {
+          doc = coreDocumentSessionPort.updateRecord(doc.id, {
+            nativeBacked: true,
+            nativeVersion: Number(result.nativeVersion ?? result.version) || 0
+          }, { fallbackTitle: t('filenameDefault'), reason: 'native-saved' });
+        }
+        legacyDocumentContentCache.delete(doc.id);
+        if (doc.id === getActiveDocumentId()) localStorage.removeItem(STORAGE_KEY);
+        return result;
+      };
+
       let nativeSave = Promise.resolve({ native: false });
       if (useNative) {
         nativeSave = nativeStore.save(documentModel || editor, doc, { forceSnapshot: Boolean(options.forceSnapshot) });
         if (options.waitForNative) {
           try {
-            await nativeSave;
-            if (doc.nativeBacked) {
-              delete doc.content;
-              if (doc.id === currentDocumentId) localStorage.removeItem(STORAGE_KEY);
-            }
-            if (!wasNativeBacked) saveDocumentsToStorage();
+            const result = applyNativeSaveResult(await nativeSave);
+            saveDocumentsToStorage();
+            nativeSave = Promise.resolve(result);
           } catch (error) {
             console.error('Native document save failed:', error);
             throw error;
           }
         } else {
           nativeSave = nativeSave.then(result => {
-            if (doc.nativeBacked) {
-              delete doc.content;
-              if (doc.id === currentDocumentId) localStorage.removeItem(STORAGE_KEY);
-            }
+            const applied = applyNativeSaveResult(result);
             saveDocumentsToStorage();
-            return result;
+            return applied;
           }).catch(error => {
             console.error('Native document save failed:', error);
             return { native: false, error: error?.message || String(error) };
@@ -926,9 +943,9 @@ const editor = document.getElementById('editor');
     async function openFolderTreeFile(path) {
       const normalizedPath = normalizeWorkspaceFilePath(path);
       if (!normalizedPath) return false;
-      const existing = documents.find(item => normalizeWorkspaceFilePath(item?.filePath) === normalizedPath);
+      const existing = getSessionDocuments().find(item => normalizeWorkspaceFilePath(item?.filePath) === normalizedPath);
       if (existing) {
-        if (existing.id !== currentDocumentId) await openDocument(existing.id);
+        if (existing.id !== getActiveDocumentId()) await openDocument(existing.id);
         setSidebarTab('files');
         return true;
       }
@@ -939,23 +956,23 @@ const editor = document.getElementById('editor');
     }
 
     async function openDocument(id) {
-      if (id === currentDocumentId) return;
-      const previousDocumentId = currentDocumentId;
+      if (id === getActiveDocumentId()) return;
+      const previousDocumentId = getActiveDocumentId();
       let activated = false;
       try {
         clearTimeout(saveTimer);
         await saveCurrentDocumentState(false, { waitForNative: true });
-        const doc = documents.find(item => item.id === id);
+        const doc = coreDocumentSessionPort.getRecord(id);
         if (!doc) throw new Error('目标文档不存在或已被删除');
         const restored = await loadDocumentContent(doc);
 
         // 先原子切换正文与编辑器状态，成功后再提交当前文档 ID。
         activateDocumentRuntime(doc, restored.loaded, restored.content);
-        currentDocumentId = doc.id;
+        coreDocumentSessionPort.setActive(doc.id, { reason: 'open' });
         activated = true;
         filenameInput.value = doc.title || t('filenameDefault');
         localStorage.setItem(FILENAME_KEY, filenameInput.value);
-        localStorage.setItem(CURRENT_DOC_KEY, currentDocumentId);
+        localStorage.setItem(CURRENT_DOC_KEY, doc.id);
         resetHistoryForCurrentDocument();
         await resetPreviewPipeline();
         updateCount();
@@ -965,8 +982,12 @@ const editor = document.getElementById('editor');
       } catch (error) {
         if (error?.message === 'DOCUMENT_LOAD_CANCELLED') return;
         if (!activated) {
-          currentDocumentId = previousDocumentId;
-          if (previousDocumentId) localStorage.setItem(CURRENT_DOC_KEY, previousDocumentId);
+          if (previousDocumentId && coreDocumentSessionPort.getRecord(previousDocumentId)) {
+            coreDocumentSessionPort.setActive(previousDocumentId, { reason: 'open-rollback' });
+            localStorage.setItem(CURRENT_DOC_KEY, previousDocumentId);
+          } else {
+            coreDocumentSessionPort.setActive(null, { reason: 'open-rollback' });
+          }
         }
         showToast(recordDocumentOperationError('open', error, { targetDocumentId: id, activated }));
       }
@@ -976,13 +997,12 @@ const editor = document.getElementById('editor');
       try {
         clearTimeout(saveTimer);
         await saveCurrentDocumentState(false, { waitForNative: true });
-        const index = documents.length + 1;
+        const index = getSessionDocuments().length + 1;
         const doc = createDocument('未命名文档-' + index + '.md', '');
         activateDocumentRuntime(doc, null, '');
-        documents.unshift(doc);
-        currentDocumentId = doc.id;
+        coreDocumentSessionPort.insertRecord(doc, { index: 0, activate: true, reason: 'new' });
         filenameInput.value = doc.title;
-        localStorage.setItem(CURRENT_DOC_KEY, currentDocumentId);
+        localStorage.setItem(CURRENT_DOC_KEY, doc.id);
         resetHistoryForCurrentDocument();
         await resetPreviewPipeline();
         updateCount();
@@ -996,23 +1016,25 @@ const editor = document.getElementById('editor');
       }
     }
 
-    async function duplicateDocument(id = currentDocumentId) {
+    async function duplicateDocument(id = getActiveDocumentId()) {
       try {
         await saveCurrentDocumentState(false, { waitForNative: true });
-        const source = documents.find(item => item.id === id) || getCurrentDocument();
+        const source = coreDocumentSessionPort.getRecord(id) || getCurrentDocument();
         if (!source) return;
-        const sourceIsInactiveNative = source.id !== currentDocumentId && source.nativeBacked;
-        const restored = source.id === currentDocumentId
+        const restored = source.id === getActiveDocumentId()
           ? { content: documentModel?.createSnapshot?.('duplicate-document') ?? editor.value }
           : await loadDocumentContent(source);
         const baseName = source.title.replace(/\.(md|markdown|txt)$/i, '');
-        const doc = createDocument(baseName + ' 副本.md', materializeLoadedDocumentContent(restored));
-        if (sourceIsInactiveNative) delete source.content;
-        const sourceIndex = documents.findIndex(item => item.id === source.id);
-        documents.splice(sourceIndex >= 0 ? sourceIndex + 1 : documents.length, 0, doc);
-        currentDocumentId = doc.id;
+        const content = materializeLoadedDocumentContent(restored);
+        const doc = createDocument(baseName + ' 副本.md', content);
+        const sourceIndex = getSessionDocuments().findIndex(item => item.id === source.id);
+        coreDocumentSessionPort.insertRecord(doc, {
+          index: sourceIndex >= 0 ? sourceIndex + 1 : getSessionDocuments().length,
+          activate: true,
+          reason: 'duplicate'
+        });
         filenameInput.value = doc.title;
-        activateDocumentRuntime(doc, null, doc.content);
+        activateDocumentRuntime(doc, null, content);
         resetHistoryForCurrentDocument();
         await resetPreviewPipeline();
         updateCount();
@@ -1025,17 +1047,17 @@ const editor = document.getElementById('editor');
       }
     }
 
-    function renameDocument(id = currentDocumentId) {
-      const doc = documents.find(item => item.id === id) || getCurrentDocument();
+    function renameDocument(id = getActiveDocumentId()) {
+      const doc = coreDocumentSessionPort.getRecord(id) || getCurrentDocument();
       if (!doc) return;
       const nextName = prompt('重命名文档', doc.title || filenameInput.value || t('filenameDefault'));
       if (nextName === null) return;
       const normalized = normalizeDocumentTitle(nextName);
-      Object.assign(doc, coreDocumentDomainPort.updateRecord(doc, {
+      const updated = coreDocumentSessionPort.updateRecord(doc.id, {
         title: normalized,
         updatedAt: getCurrentTimestamp()
-      }, { fallbackTitle: t('filenameDefault') }));
-      if (doc.id === currentDocumentId) {
+      }, { fallbackTitle: t('filenameDefault'), reason: 'rename' });
+      if (updated.id === getActiveDocumentId()) {
         filenameInput.value = normalized;
         documentModel?.updateTitle?.(normalized);
         localStorage.setItem(FILENAME_KEY, normalized);
@@ -1047,12 +1069,12 @@ const editor = document.getElementById('editor');
     }
 
     function renameCurrentDocument() {
-      renameDocument(currentDocumentId);
+      renameDocument(getActiveDocumentId());
     }
 
     function hasUnsavedDocumentChanges(id) {
       if (
-        id !== currentDocumentId
+        id !== getActiveDocumentId()
         || String(documentModel?.documentId || '') !== String(id || '')
         || !documentModel?.dirty
       ) return false;
@@ -1064,22 +1086,23 @@ const editor = document.getElementById('editor');
         event.preventDefault();
         event.stopPropagation();
       }
-      const doc = documents.find(item => item.id === id);
+      const doc = coreDocumentSessionPort.getRecord(id);
       if (!doc) return;
 
       const shouldSaveBeforeClose = hasUnsavedDocumentChanges(id);
       if (shouldSaveBeforeClose) {
         const confirmed = await confirmUserAction('文档「' + doc.title + '」尚未自动保存。是否立即保存并关闭？', {
-          title: '关闭未保存的文档',
+          title: '关闭文档',
           kind: 'warning',
           okLabel: '保存并关闭',
-          cancelLabel: '返回编辑'
+          cancelLabel: '取消'
         });
         if (!confirmed) return;
       }
 
       try {
-        if (currentDocumentId === id) {
+        const closingActive = getActiveDocumentId() === id;
+        if (closingActive) {
           clearTimeout(saveTimer);
           if (shouldSaveBeforeClose) {
             const saved = await saveCurrentFile();
@@ -1088,21 +1111,25 @@ const editor = document.getElementById('editor');
             await saveCurrentDocumentState(false, { waitForNative: true });
           }
         }
-        const index = documents.findIndex(item => item.id === id);
-        documents = documents.filter(item => item.id !== id);
+        const records = getSessionDocuments();
+        const index = records.findIndex(item => item.id === id);
+        const remaining = records.filter(item => item.id !== id);
+        const next = closingActive ? remaining[Math.max(0, Math.min(index, remaining.length - 1))] : null;
+        coreDocumentSessionPort.removeRecord(id, {
+          ...(closingActive ? { activeId: next?.id || null } : {}),
+          reason: 'close'
+        });
+        legacyDocumentContentCache.delete(id);
         await window.markdownEditorDocumentStore?.delete?.(id);
         clearDocumentIndex(id);
-        if (currentDocumentId === id) {
-          const next = documents[Math.max(0, Math.min(index, documents.length - 1))];
+        if (closingActive) {
           if (next) {
-            currentDocumentId = next.id;
             const restored = await loadDocumentContent(next);
             filenameInput.value = next.title || t('filenameDefault');
             activateDocumentRuntime(next, restored.loaded, restored.content);
-            localStorage.setItem(CURRENT_DOC_KEY, currentDocumentId);
+            localStorage.setItem(CURRENT_DOC_KEY, next.id);
             localStorage.setItem(FILENAME_KEY, filenameInput.value);
           } else {
-            currentDocumentId = null;
             filenameInput.value = t('filenameDefault');
             localStorage.removeItem(CURRENT_DOC_KEY);
             localStorage.removeItem(FILENAME_KEY);
@@ -1129,15 +1156,17 @@ const editor = document.getElementById('editor');
     function renderDocumentList() {
       const list = document.getElementById('document-list');
       if (!list) return;
-      if (!documents.length) {
+      const records = getSessionDocuments();
+      const activeId = getActiveDocumentId();
+      if (!records.length) {
         list.innerHTML = '<div class="sidebar-empty">暂无文档</div>';
         window.markdownEditorFileTree?.syncCurrentDocument?.(
           window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.()
         );
         return;
       }
-      list.innerHTML = documents.map(doc => {
-        const active = doc.id === currentDocumentId ? ' active' : '';
+      list.innerHTML = records.map(doc => {
+        const active = doc.id === activeId ? ' active' : '';
         const meta = doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : '';
         return '<div class="document-item' + active + '" onclick="openDocument(\'' + doc.id + '\')" oncontextmenu="openDocumentContextMenu(\'' + doc.id + '\', event)">'
           + '<div class="document-summary"><div class="document-title" title="' + escapeHtml(doc.title || '') + '">' + escapeHtml(doc.title || t('filenameDefault')) + '</div>'
@@ -1183,7 +1212,7 @@ const editor = document.getElementById('editor');
     }
 
     function getContextDocument() {
-      return documents.find(item => item.id === contextDocumentId) || getCurrentDocument();
+      return coreDocumentSessionPort.getRecord(contextDocumentId) || getCurrentDocument();
     }
 
     function openContextDocument() {
@@ -1227,9 +1256,8 @@ const editor = document.getElementById('editor');
     async function exportContextDocument() {
       const doc = getContextDocument();
       if (!doc) return;
-      const releaseContent = doc.id !== currentDocumentId && doc.nativeBacked;
       try {
-        const content = doc.id === currentDocumentId
+        const content = doc.id === getActiveDocumentId()
           ? (documentModel?.createSnapshot?.('context-export') ?? editor.value)
           : materializeLoadedDocumentContent(await loadDocumentContent(doc));
         const name = doc.title || t('filenameDefault');
@@ -1244,18 +1272,15 @@ const editor = document.getElementById('editor');
         showToast('已导出 Markdown');
       } catch (error) {
         showToast(error?.message || String(error));
-      } finally {
-        if (releaseContent) delete doc.content;
       }
     }
 
     async function saveAsContextDocument() {
       const doc = getContextDocument();
       if (!doc) return;
-      const releaseContent = doc.id !== currentDocumentId && doc.nativeBacked;
       try {
         const savedPath = await saveMarkdownWithPicker(async () => {
-          if (doc.id === currentDocumentId) {
+          if (doc.id === getActiveDocumentId()) {
             return documentModel?.createSnapshot?.('context-save-as') ?? editor.value;
           }
           return materializeLoadedDocumentContent(await loadDocumentContent(doc));
@@ -1266,8 +1291,6 @@ const editor = document.getElementById('editor');
         }
       } catch (error) {
         showToast('另存为失败：' + (error?.message || String(error)));
-      } finally {
-        if (releaseContent) delete doc.content;
       }
     }
 

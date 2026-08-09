@@ -1,4 +1,9 @@
-    const exportPlatformPort = document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort;
+    const exportCompatibilityHost = document.getElementById('compatibility-business-ports');
+    const exportPlatformPort = exportCompatibilityHost?.markdownEditorPlatformPort;
+    const exportDocumentDomainPort = exportCompatibilityHost?.markdownEditorDocumentDomainPort;
+    const exportDocumentSessionPort = exportCompatibilityHost?.markdownEditorDocumentSessionPort;
+    if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
+    if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     let saveTimer;
     function autoSave() {
       clearTimeout(saveTimer);
@@ -227,7 +232,7 @@
       try {
         setSaveStatus('saving', '正在手动保存…');
         await saveCurrentDocumentState(true, { waitForNative: true, forceSnapshot: true });
-        const doc = getCurrentDocument();
+        const doc = exportDocumentSessionPort.getActiveRecord();
         if (doc?.nativeBacked && window.markdownEditorDocumentStore?.available) {
           localStorage.removeItem(STORAGE_KEY);
         } else {
@@ -268,17 +273,21 @@
 
     function bindDocumentFilePath(doc, path) {
       if (!doc || typeof path !== 'string' || !path) return;
-      doc.filePath = path;
       const fileName = getFileNameFromPath(path);
-      if (fileName) {
-        doc.title = normalizeDocumentTitle(fileName);
-        if (doc.id === currentDocumentId) {
-          filenameInput.value = doc.title;
-          documentModel?.updateTitle?.(doc.title);
-          localStorage.setItem(FILENAME_KEY, doc.title);
-        }
+      const patch = {
+        filePath: path,
+        updatedAt: getCurrentTimestamp()
+      };
+      if (fileName) patch.title = exportDocumentDomainPort.normalizeTitle(fileName, t('filenameDefault'));
+      const updated = exportDocumentSessionPort.updateRecord(doc.id, patch, {
+        fallbackTitle: t('filenameDefault'),
+        reason: 'bind-file-path'
+      });
+      if (updated.id === exportDocumentSessionPort.activeId && fileName) {
+        filenameInput.value = updated.title;
+        documentModel?.updateTitle?.(updated.title);
+        localStorage.setItem(FILENAME_KEY, updated.title);
       }
-      doc.updatedAt = getCurrentTimestamp();
       saveDocumentsToStorage();
       renderDocumentList();
     }
@@ -287,7 +296,7 @@
       try {
         setSaveStatus('saving', '正在保存文件…');
         await saveCurrentDocumentState(true, { waitForNative: true, forceSnapshot: true });
-        const doc = getCurrentDocument();
+        const doc = exportDocumentSessionPort.getActiveRecord();
         if (!doc) throw new Error('当前没有可保存的文档');
         const content = documentModel?.createSnapshot?.('save-current-file') ?? editor.value;
 
@@ -333,7 +342,7 @@
           'save-as-markdown'
         );
         if (savedPath) {
-          if (typeof savedPath === 'string') bindDocumentFilePath(getCurrentDocument(), savedPath);
+          if (typeof savedPath === 'string') bindDocumentFilePath(exportDocumentSessionPort.getActiveRecord(), savedPath);
           showToast('已另存为 Markdown');
         }
       } catch (error) {
@@ -825,16 +834,20 @@ ${'</scr' + 'ipt>'}
     async function loadTextContentAsDocument(name, content, filePath = '') {
       const source = String(content ?? '');
       const expectedEditorLength = getEditorNormalizedLength(source);
-      const previousDocumentId = currentDocumentId;
-      const previousDocument = getCurrentDocument();
+      const previousDocumentId = exportDocumentSessionPort.activeId;
+      const previousDocument = exportDocumentSessionPort.getActiveRecord();
       let runtimeActivated = false;
       let committed = false;
       try {
         clearTimeout(saveTimer);
         await saveCurrentDocumentState(false, { waitForNative: true });
-        const doc = createDocument(name, source, filePath);
+        const doc = exportDocumentDomainPort.createRecord({
+          title: name || t('filenameDefault'),
+          filePath,
+          fallbackTitle: t('filenameDefault')
+        });
 
-        // 先装载并验证编辑器状态，全部成功后才提交文档列表与当前文档 ID。
+        // 先装载并验证编辑器状态，全部成功后才提交 Session Store。
         activateDocumentRuntime(doc, null, source);
         runtimeActivated = true;
         if (documentModel?.documentId && documentModel.documentId !== doc.id) {
@@ -844,11 +857,10 @@ ${'</scr' + 'ipt>'}
           throw new Error(`导入文档长度校验失败：期望 ${expectedEditorLength}，实际 ${editor.textLength}`);
         }
 
-        documents.unshift(doc);
-        currentDocumentId = doc.id;
+        exportDocumentSessionPort.insertRecord(doc, { index: 0, activate: true, reason: 'import' });
         committed = true;
         filenameInput.value = doc.title;
-        localStorage.setItem(CURRENT_DOC_KEY, currentDocumentId);
+        localStorage.setItem(CURRENT_DOC_KEY, doc.id);
         localStorage.setItem(FILENAME_KEY, filenameInput.value);
         resetHistoryForCurrentDocument();
         await resetPreviewPipeline();
@@ -873,7 +885,7 @@ ${'</scr' + 'ipt>'}
           try {
             const restored = await loadDocumentContent(previousDocument);
             activateDocumentRuntime(previousDocument, restored.loaded, restored.content);
-            currentDocumentId = previousDocumentId;
+            exportDocumentSessionPort.setActive(previousDocumentId, { reason: 'import-rollback' });
             filenameInput.value = previousDocument.title || t('filenameDefault');
             if (previousDocumentId) localStorage.setItem(CURRENT_DOC_KEY, previousDocumentId);
             resetHistoryForCurrentDocument();

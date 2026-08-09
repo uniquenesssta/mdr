@@ -113,10 +113,6 @@ export class NativeDocumentStore {
     if (loaded) {
       session.backendVersion = Math.max(0, Number(loaded.version) || 0);
       session.initialized = true;
-      Object.assign(document, normalizeDocumentNativeMetadata({
-        nativeBacked: true,
-        nativeVersion: session.backendVersion
-      }));
     } else if (!document.nativeBacked) {
       session.backendVersion = 0;
       session.initialized = false;
@@ -265,7 +261,8 @@ export class NativeDocumentStore {
       && targetVersion <= session.lastEditorVersion
       && (document.title || '') === session.lastTitle
     ) {
-      const result = { native: true, version: session.backendVersion, skipped: true };
+      const native = normalizeDocumentNativeMetadata({ nativeBacked: true, nativeVersion: session.backendVersion });
+      const result = { native: true, version: session.backendVersion, ...native, skipped: true };
       this.emit({
         state: 'saved',
         documentId: document.id,
@@ -342,10 +339,10 @@ export class NativeDocumentStore {
         session.lastEditorVersion = editorVersion;
         session.initialized = true;
         session.lastTitle = session.document.title || '';
-        Object.assign(session.document, normalizeDocumentNativeMetadata({
+        const native = normalizeDocumentNativeMetadata({
           nativeBacked: true,
           nativeVersion: session.backendVersion
-        }));
+        });
         session.source?.markPersisted?.(editorVersion, session.backendVersion);
         session.source?.acknowledge?.('storage', editorVersion);
 
@@ -356,7 +353,7 @@ export class NativeDocumentStore {
           else pending.push(waiter);
         }
         session.waiters = pending;
-        completed.forEach(waiter => waiter.resolve({ native: true, ...response }));
+        completed.forEach(waiter => waiter.resolve({ native: true, ...response, ...native }));
         this.emit({
           state: 'saved',
           documentId: session.document.id,

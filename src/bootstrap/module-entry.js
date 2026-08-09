@@ -1,6 +1,6 @@
 import { createUI } from '../ui/create-ui.js';
 import { createCompatibilityBusinessContentPort } from '../ui/compatibility/index.js';
-import { mountClassicDocumentDomainPort } from '../features/documents/index.js';
+import { createDocumentSessionStore, mountClassicDocumentDomainPort, mountClassicDocumentSessionPort } from '../features/documents/index.js';
 import { createHelpFeature, mountClassicHelpPort } from '../features/help/index.js';
 import { SETTINGS_CHANGED_EVENT, createSettingsApplyCoordinator, createSettingsFeature, createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort } from '../features/settings/index.js';
 import { createI18nService, createSettingsLocaleController, createTranslationBindings, localeRegistry, mountClassicI18nPort } from '../i18n/index.js';
@@ -17,10 +17,12 @@ async function fetchCompatibilityContent(fetchImpl) {
   return response.text();
 }
 
-function destroyStartupResources({ helpPort, documentDomainPort, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
+function destroyStartupResources({ helpPort, documentSessionPort, documentDomainPort, documentSessionStore, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
   const errors = [];
   try { helpPort?.destroy(); } catch (error) { errors.push(error); }
+  try { documentSessionPort?.destroy(); } catch (error) { errors.push(error); }
   try { documentDomainPort?.destroy(); } catch (error) { errors.push(error); }
+  try { documentSessionStore?.destroy(); } catch (error) { errors.push(error); }
   try { settingsController?.destroy(); } catch (error) { errors.push(error); }
   try { themeToggleController?.destroy(); } catch (error) { errors.push(error); }
   try { settingsLocaleController?.destroy(); } catch (error) { errors.push(error); }
@@ -68,12 +70,16 @@ export function startModuleEntry({
     let settingsController = null;
     let helpPort = null;
     let documentDomainPort = null;
+    let documentSessionStore = null;
+    let documentSessionPort = null;
     try {
       ui = createUI(root);
       contentPort = createCompatibilityBusinessContentPort(root, ui);
       const markup = await fetchCompatibilityContent(fetchImpl);
       contentPort.mount(markup);
       const portsHost = documentRef.getElementById('compatibility-business-ports');
+      documentSessionStore = createDocumentSessionStore();
+      documentSessionPort = mountClassicDocumentSessionPort(portsHost, documentSessionStore);
       const settingsRepository = createSettingsRepository({ storage });
       settingsStore = createSettingsStore({
         initialSnapshot: settingsRepository.load(),
@@ -135,7 +141,7 @@ export function startModuleEntry({
         platform: settingsPlatform
       });
     } catch (error) {
-      const cleanupErrors = destroyStartupResources({ helpPort, documentDomainPort, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+      const cleanupErrors = destroyStartupResources({ helpPort, documentSessionPort, documentDomainPort, documentSessionStore, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
       starts.delete(documentRef);
       if (!cleanupErrors.length) throw error;
       throw new AggregateError([error, ...cleanupErrors], 'Application startup failed and cleanup was incomplete.');
@@ -146,7 +152,7 @@ export function startModuleEntry({
       destroy() {
         if (destroyed) return;
         destroyed = true;
-        const errors = destroyStartupResources({ helpPort, documentDomainPort, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+        const errors = destroyStartupResources({ helpPort, documentSessionPort, documentDomainPort, documentSessionStore, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
         starts.delete(documentRef);
         if (errors.length) throw new AggregateError(errors, 'Application bootstrap cleanup failed.');
       }

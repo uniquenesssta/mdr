@@ -1,3 +1,5 @@
+    const previewDocumentSessionPort = document.getElementById('compatibility-business-ports')?.markdownEditorDocumentSessionPort;
+    if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     function schedulePreviewUpdate() {
       clearTimeout(previewUpdateTimer);
       const length = editor.textLength;
@@ -545,7 +547,7 @@
     function getVirtualPreviewController() {
       if (!virtualPreviewController && window.createVirtualPreviewController) {
         virtualPreviewController = window.createVirtualPreviewController(preview);
-        virtualPreviewController.setCacheContext?.(currentDocumentId, getPreviewHeightCacheVisualKey());
+        virtualPreviewController.setCacheContext?.(previewDocumentSessionPort.activeId, getPreviewHeightCacheVisualKey());
         window.markdownEditorVirtualPreview = virtualPreviewController;
       }
       return virtualPreviewController;
@@ -961,7 +963,7 @@
             patchResult.blockCount = modelResult.blocks?.length || patchResult.body.children.length;
           } else if (resolved.mode === 'virtual' || resolved.mode === 'chapter') {
             const controller = getVirtualPreviewController();
-            controller.setCacheContext?.(currentDocumentId, getPreviewHeightCacheVisualKey());
+            controller.setCacheContext?.(previewDocumentSessionPort.activeId, getPreviewHeightCacheVisualKey());
             patchResult = controller.update(renderResult, {
               forceAll: forceFullRebuild || previewScopeChanged,
               scope: resolved.mode,
