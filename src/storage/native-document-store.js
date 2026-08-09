@@ -1,3 +1,5 @@
+import { normalizeDocumentNativeMetadata } from '../features/documents/index.js';
+
 const NATIVE_DOCUMENT_THRESHOLD = 100000;
 const DOCUMENT_CHUNK_BYTES = 512 * 1024;
 const SNAPSHOT_UPLOAD_THRESHOLD = 512 * 1024;
@@ -111,8 +113,10 @@ export class NativeDocumentStore {
     if (loaded) {
       session.backendVersion = Math.max(0, Number(loaded.version) || 0);
       session.initialized = true;
-      document.nativeBacked = true;
-      document.nativeVersion = session.backendVersion;
+      Object.assign(document, normalizeDocumentNativeMetadata({
+        nativeBacked: true,
+        nativeVersion: session.backendVersion
+      }));
     } else if (!document.nativeBacked) {
       session.backendVersion = 0;
       session.initialized = false;
@@ -338,8 +342,10 @@ export class NativeDocumentStore {
         session.lastEditorVersion = editorVersion;
         session.initialized = true;
         session.lastTitle = session.document.title || '';
-        session.document.nativeBacked = true;
-        session.document.nativeVersion = session.backendVersion;
+        Object.assign(session.document, normalizeDocumentNativeMetadata({
+          nativeBacked: true,
+          nativeVersion: session.backendVersion
+        }));
         session.source?.markPersisted?.(editorVersion, session.backendVersion);
         session.source?.acknowledge?.('storage', editorVersion);
 

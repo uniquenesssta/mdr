@@ -2,8 +2,10 @@ const coreCompatibilityHost = document.getElementById('compatibility-business-po
 const corePlatformPort = coreCompatibilityHost?.markdownEditorPlatformPort;
 const coreI18nPort = coreCompatibilityHost?.markdownEditorI18nPort;
 const coreSettingsStorePort = coreCompatibilityHost?.markdownEditorSettingsStorePort;
+const coreDocumentDomainPort = coreCompatibilityHost?.markdownEditorDocumentDomainPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
+if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
@@ -83,18 +85,15 @@ const editor = document.getElementById('editor');
       'heading', 'quote', 'lists', 'code', 'link', 'image', 'table', 'find', 'mermaid'
     ]);
 
-    function normalizeRecentFilePath(path) {
-      return String(path || '').trim();
-    }
-
     function loadRecentFiles() {
       try {
         const parsed = JSON.parse(localStorage.getItem(RECENT_FILES_KEY) || '[]');
         recentFiles = Array.isArray(parsed)
-          ? parsed.filter(item => item && normalizeRecentFilePath(item.path)).slice(0, MAX_RECENT_FILES).map(item => ({
-              path: normalizeRecentFilePath(item.path),
-              name: String(item.name || getFileNameFromPath(item.path) || '未命名文件'),
-              openedAt: Number(item.openedAt) || 0
+          ? parsed.filter(item => item && coreDocumentDomainPort.normalizeRecentPath(item.path)).slice(0, MAX_RECENT_FILES).map(item => coreDocumentDomainPort.createRecentFileEntry({
+              path: item.path,
+              name: item.name || getFileNameFromPath(item.path),
+              openedAt: Number(item.openedAt) || 0,
+              fallbackName: '未命名文件'
             }))
           : [];
         saveRecentFiles();
@@ -112,15 +111,16 @@ const editor = document.getElementById('editor');
     }
 
     function addRecentFile(path, name = '', refresh = true) {
-      const normalizedPath = normalizeRecentFilePath(path);
+      const normalizedPath = coreDocumentDomainPort.normalizeRecentPath(path);
       if (!normalizedPath) return;
       const pathKey = normalizedPath.toLocaleLowerCase();
-      recentFiles = recentFiles.filter(item => normalizeRecentFilePath(item.path).toLocaleLowerCase() !== pathKey);
-      recentFiles.unshift({
+      recentFiles = recentFiles.filter(item => coreDocumentDomainPort.normalizeRecentPath(item.path).toLocaleLowerCase() !== pathKey);
+      recentFiles.unshift(coreDocumentDomainPort.createRecentFileEntry({
         path: normalizedPath,
-        name: String(name || getFileNameFromPath(normalizedPath) || '未命名文件'),
-        openedAt: Date.now()
-      });
+        name: name || getFileNameFromPath(normalizedPath),
+        openedAt: Date.now(),
+        fallbackName: '未命名文件'
+      }));
       recentFiles = recentFiles.slice(0, MAX_RECENT_FILES);
       saveRecentFiles();
       if (refresh) renderRecentFilesMenu();
@@ -136,7 +136,7 @@ const editor = document.getElementById('editor');
 
     async function openRecentFile(path) {
       closeAppMenus();
-      const normalizedPath = normalizeRecentFilePath(path);
+      const normalizedPath = coreDocumentDomainPort.normalizeRecentPath(path);
       if (!normalizedPath || typeof handleNativeDroppedPath !== 'function') return;
       const opened = await handleNativeDroppedPath(normalizedPath);
       if (!opened) renderRecentFilesMenu();
@@ -540,22 +540,16 @@ const editor = document.getElementById('editor');
     }
 
     function createDocument(title, content = '', filePath = '') {
-      const now = getCurrentTimestamp();
-      const document = {
-        id: 'doc_' + now + '_' + Math.random().toString(36).slice(2, 8),
-        title: normalizeDocumentTitle(title || t('filenameDefault')),
-        content,
-        createdAt: now,
-        updatedAt: now
-      };
-      if (filePath) document.filePath = String(filePath);
-      return document;
+      const record = coreDocumentDomainPort.createRecord({
+        title: title || t('filenameDefault'),
+        filePath,
+        fallbackTitle: t('filenameDefault')
+      });
+      return { ...record, content };
     }
 
     function normalizeDocumentTitle(name) {
-      name = String(name || '').trim() || t('filenameDefault');
-      if (!/\.(md|markdown|txt)$/i.test(name)) name += '.md';
-      return name;
+      return coreDocumentDomainPort.normalizeTitle(name, t('filenameDefault'));
     }
 
     function loadDocumentsFromStorage() {
@@ -602,9 +596,11 @@ const editor = document.getElementById('editor');
       if (loaded) {
         if (typeof loaded.content === 'string') doc.content = loaded.content;
         else if (Array.isArray(loaded.contentChunks)) delete doc.content;
-        doc.title = loaded.title || doc.title || t('filenameDefault');
-        doc.updatedAt = Math.max(Number(doc.updatedAt) || 0, Number(loaded.updatedAt) || 0);
-        doc.nativeVersion = Number(loaded.version) || 0;
+        Object.assign(doc, coreDocumentDomainPort.updateRecord(doc, {
+          title: loaded.title || doc.title || t('filenameDefault'),
+          updatedAt: Math.max(Number(doc.updatedAt) || 0, Number(loaded.updatedAt) || 0),
+          nativeVersion: Number(loaded.version) || 0
+        }, { fallbackTitle: t('filenameDefault') }));
         if (loaded.recovered) {
           const message = loaded.recoveryMessage || '检测到未完整写入的数据，已从可用快照恢复';
           setTimeout(() => showToast(message), 0);
@@ -853,8 +849,10 @@ const editor = document.getElementById('editor');
         }
       }
       if (!doc) return { native: false };
-      doc.title = normalizeDocumentTitle(filenameInput.value);
-      doc.updatedAt = getCurrentTimestamp();
+      Object.assign(doc, coreDocumentDomainPort.updateRecord(doc, {
+        title: filenameInput.value,
+        updatedAt: getCurrentTimestamp()
+      }, { fallbackTitle: t('filenameDefault') }));
 
       const nativeStore = window.markdownEditorDocumentStore;
       documentModel?.updateTitle?.(doc.title);
@@ -1033,8 +1031,10 @@ const editor = document.getElementById('editor');
       const nextName = prompt('重命名文档', doc.title || filenameInput.value || t('filenameDefault'));
       if (nextName === null) return;
       const normalized = normalizeDocumentTitle(nextName);
-      doc.title = normalized;
-      doc.updatedAt = getCurrentTimestamp();
+      Object.assign(doc, coreDocumentDomainPort.updateRecord(doc, {
+        title: normalized,
+        updatedAt: getCurrentTimestamp()
+      }, { fallbackTitle: t('filenameDefault') }));
       if (doc.id === currentDocumentId) {
         filenameInput.value = normalized;
         documentModel?.updateTitle?.(normalized);
