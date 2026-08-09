@@ -8,3 +8,9 @@ export { createRecentFileEntry, normalizeRecentFilePath } from './domain/recent-
 export { mountClassicDocumentDomainPort } from './compatibility/classic-document-domain-port.js';
 export { DOCUMENT_SESSION_CHANGED_EVENT, createDocumentSessionStore } from './state/document-session-store.js';
 export { mountClassicDocumentSessionPort } from './compatibility/classic-document-session-port.js';
+export { createSessionDocumentRepository } from './infrastructure/session-document-repository.js';
+export { createDocumentOpenCoordinator } from './application/document-open-coordinator.js';
+export { createDocumentCloseCoordinator } from './application/document-close-coordinator.js';
+export { createDocumentTitleController } from './application/document-title-controller.js';
+export { DocumentOperationStaleError, createDocumentSessionController } from './application/document-session-controller.js';
+export { mountClassicDocumentControllerPort } from './compatibility/classic-document-controller-port.js';

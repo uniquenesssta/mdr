@@ -26,7 +26,8 @@ test('browser E2E runner stays dependency-free and covers required interactions'
     'application Settings UI validates and applies one draft without global dialog functions',
     'application language Settings commit updates I18n without legacy globals',
     'temporary compatibility business port mounts and destroys without owning the App Shell',
-    'application shell has no structural overflow or clipped focus across required viewports'
+    'application shell has no structural overflow or clipped focus across required viewports',
+    'application Document Session Controller keeps lifecycle model, session and UI coherent'
   ]) assert.ok(runner.includes(phrase), `missing browser scenario: ${phrase}`);
   assert.match(runner, /node:assert\/strict/);
   assert.doesNotMatch(runner, /playwright|puppeteer|selenium-webdriver/i);

@@ -20,6 +20,11 @@ import { createMarkdownPresentationApi } from './rendering/presentation-api.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import { createFolderFileTreeController } from './sidebar/folder-file-tree.js';
 import { configureHybridImageSourcePlatform } from './editor/hybrid/image-source.js';
+import {
+  createDocumentSessionController,
+  createSessionDocumentRepository,
+  mountClassicDocumentControllerPort
+} from './features/documents/index.js';
 
 const platform = createPlatform({
   runtime: window,
@@ -94,6 +99,36 @@ async function loadAppModules() {
     documentStore: platform.documentStore,
     available: platform.capabilities.desktop.documentStore
   });
+
+  const documentSessionPort = compatibilityPlatformHost?.markdownEditorDocumentSessionPort;
+  if (!documentSessionPort) throw new Error('Document session compatibility port is unavailable.');
+  const documentRepository = createSessionDocumentRepository({
+    storage: window.localStorage,
+    nativeStore: window.markdownEditorDocumentStore,
+    scheduleCleanup(task) {
+      const scheduler = window.markdownEditorTaskScheduler;
+      if (scheduler?.schedule) return scheduler.schedule('document-session-cleanup-' + Date.now(), task, {
+        priority: 'background',
+        timeout: 1200
+      });
+      return setTimeout(task, 0);
+    },
+    reportError(message, error) {
+      console.warn(message, error);
+    }
+  });
+  const documentController = createDocumentSessionController({
+    session: documentSessionPort,
+    model: window.markdownEditorDocumentModel,
+    repository: documentRepository
+  });
+  const documentControllerPort = mountClassicDocumentControllerPort(compatibilityPlatformHost, documentController);
+  window.addEventListener('pagehide', () => {
+    documentControllerPort.destroy();
+    documentController.destroy();
+    documentRepository.destroy();
+  }, { once: true });
+
   window.markdownEditorFileTree = createFolderFileTreeController({
     files: platform.files,
     available: platform.capabilities.desktop.fileSystem,
@@ -105,10 +140,17 @@ async function loadAppModules() {
     }
   });
 
-  for (const src of APP_MODULES) {
-    await loadClassicScript(src);
+  try {
+    for (const src of APP_MODULES) {
+      await loadClassicScript(src);
+    }
+    if (window.__markdownEditorInitPromise) await window.__markdownEditorInitPromise;
+  } catch (error) {
+    documentControllerPort.destroy();
+    documentController.destroy();
+    documentRepository.destroy();
+    throw error;
   }
-  if (window.__markdownEditorInitPromise) await window.__markdownEditorInitPromise;
 }
 
 loadAppModules().then(() => {

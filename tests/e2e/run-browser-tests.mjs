@@ -1012,6 +1012,79 @@ async function runAppSuite() {
       })()`);
     });
 
+    await test('application Document Session Controller keeps lifecycle model, session and UI coherent', async () => {
+      const result = await browser.page.evaluate(`(async()=>{
+        const host=document.getElementById('compatibility-business-ports');
+        const port=host?.markdownEditorDocumentControllerPort;
+        if(!port)throw new Error('Document controller port unavailable');
+        if(typeof applyDocumentLifecycleUi!=='function')throw new Error('Document lifecycle UI adapter unavailable');
+        const metadataOnly=records=>records.every(record=>!['content','contentChunks','body','text','source','markdown'].some(key=>Object.prototype.hasOwnProperty.call(record,key)));
+        const snapshot=()=>({
+          activeId:port.activeId,
+          modelId:String(window.markdownEditorDocumentModel?.documentId||''),
+          title:document.getElementById('filename')?.value||'',
+          body:window.markdownEditorDocumentModel?.createSnapshot?.('atomic-5.3-e2e')||'',
+          recordCount:port.records.length,
+          metadataOnly:metadataOnly(port.records)
+        });
+        port.initializeEmptySession({legacyRecords:port.records});
+        document.getElementById('filename').value='未命名文档.md';
+
+        const alpha=await port.newDocument({title:'Atomic Alpha.md',content:'alpha body',currentTitle:'未命名文档.md',fallbackTitle:'未命名文档.md'});
+        await applyDocumentLifecycleUi(alpha);
+        const alphaState=snapshot();
+
+        const beta=await port.newDocument({title:'Atomic Beta.md',content:'beta body',currentTitle:'Atomic Alpha.md',fallbackTitle:'未命名文档.md'});
+        await applyDocumentLifecycleUi(beta);
+        const betaState=snapshot();
+
+        await openDocument(alpha.record.id);
+        const reopenedAlpha=snapshot();
+
+        const originalPrompt=window.prompt;
+        try{
+          window.prompt=()=> 'Atomic Alpha Renamed';
+          renameDocument(alpha.record.id);
+        }finally{
+          window.prompt=originalPrompt;
+        }
+        const renamedAlpha=snapshot();
+        const savedAlpha=await saveToLocal();
+        if(!savedAlpha)throw new Error('Atomic 5.3 lifecycle fixture failed to save renamed document');
+
+        await closeDocument(alpha.record.id);
+        const afterAlphaClose=snapshot();
+        await closeDocument(beta.record.id);
+        const emptyState=snapshot();
+
+        return {
+          alphaId:alpha.record.id,
+          betaId:beta.record.id,
+          alphaState,betaState,reopenedAlpha,renamedAlpha,afterAlphaClose,emptyState,
+          scopedOnly:typeof window.markdownEditorDocumentControllerPort==='undefined'
+        };
+      })()`);
+      assert.equal(result.scopedOnly, true);
+      assert.deepEqual(result.alphaState, {
+        activeId:result.alphaId,modelId:result.alphaId,title:'Atomic Alpha.md',body:'alpha body',recordCount:1,metadataOnly:true
+      });
+      assert.deepEqual(result.betaState, {
+        activeId:result.betaId,modelId:result.betaId,title:'Atomic Beta.md',body:'beta body',recordCount:2,metadataOnly:true
+      });
+      assert.deepEqual(result.reopenedAlpha, {
+        activeId:result.alphaId,modelId:result.alphaId,title:'Atomic Alpha.md',body:'alpha body',recordCount:2,metadataOnly:true
+      });
+      assert.deepEqual(result.renamedAlpha, {
+        activeId:result.alphaId,modelId:result.alphaId,title:'Atomic Alpha Renamed.md',body:'alpha body',recordCount:2,metadataOnly:true
+      });
+      assert.deepEqual(result.afterAlphaClose, {
+        activeId:result.betaId,modelId:result.betaId,title:'Atomic Beta.md',body:'beta body',recordCount:1,metadataOnly:true
+      });
+      assert.deepEqual(result.emptyState, {
+        activeId:null,modelId:'',title:'未命名文档.md',body:'',recordCount:0,metadataOnly:true
+      });
+    });
+
     await loadAppFixture(browser.page);
     await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]') && document.querySelector('[data-hybrid-block-type="table"]')), { timeoutMs: 10000, description: 'hybrid widgets' });
 

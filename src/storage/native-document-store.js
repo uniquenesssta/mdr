@@ -122,11 +122,12 @@ export class NativeDocumentStore {
     }
   }
 
-  async load(documentId) {
+  async load(documentId, options = {}) {
     if (!this.available || !documentId) return null;
-    const loadToken = ++this.loadSequence;
+    const cancelPrevious = options.cancelPrevious !== false;
+    const loadToken = cancelPrevious ? ++this.loadSequence : null;
     const ensureCurrentLoad = () => {
-      if (loadToken !== this.loadSequence) throw new Error('DOCUMENT_LOAD_CANCELLED');
+      if (cancelPrevious && loadToken !== this.loadSequence) throw new Error('DOCUMENT_LOAD_CANCELLED');
     };
     const supportsSegmentedLoad = Boolean(
       this.documentStore?.loadManifest

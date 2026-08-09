@@ -1,4 +1,7 @@
-    const eventsPlatformPort = document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort;
+    const eventsCompatibilityHost = document.getElementById('compatibility-business-ports');
+    const eventsPlatformPort = eventsCompatibilityHost?.markdownEditorPlatformPort;
+    const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
+    if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
 
     editor.addEventListener('input', () => {
       ensureCurrentDocumentForEditing();
@@ -27,7 +30,7 @@
       else previewSource.value = '';
     });
     filenameInput.addEventListener('input', () => {
-      documentModel?.updateTitle?.(filenameInput.value);
+      eventsDocumentControllerPort.updateActiveTitleDraft(filenameInput.value);
       autoSave();
       setTimeout(renderDocumentList, 550);
     });
@@ -217,8 +220,12 @@
       const ext = String(name.split('.').pop() || '').toLowerCase();
       try {
         if (['md', 'markdown', 'txt'].includes(ext)) {
-          const content = await eventsPlatformPort.call('files', 'readText', resolvedPath);
-          const opened = await loadTextContentAsDocument(name, content || '', resolvedPath);
+          const opened = await loadDocumentFromContentLoader(
+            name,
+            () => eventsPlatformPort.call('files', 'readText', resolvedPath),
+            resolvedPath,
+            { nativePath: resolvedPath }
+          );
           if (opened) addRecentFile(resolvedPath, name);
           return opened;
         }
