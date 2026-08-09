@@ -379,7 +379,7 @@ export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
     this.view = view;
     this.destroyed = false;
-    this.pendingFrame = 0;
+    this.blockDispatchQueued = false;
     this.pendingBlockDecorations = Decoration.none;
     this.pendingBlockSignature = '';
     this.appliedBlockSignature = '';
@@ -392,10 +392,16 @@ export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
   scheduleBlockUpdate(view, blockDecorations, signature) {
     this.pendingBlockDecorations = blockDecorations;
     this.pendingBlockSignature = signature;
-    if (signature === this.appliedBlockSignature || this.pendingFrame) return;
-    this.pendingFrame = requestAnimationFrame(() => {
-      this.pendingFrame = 0;
-      if (this.destroyed || this.pendingBlockSignature === this.appliedBlockSignature) return;
+    if (signature === this.appliedBlockSignature || this.blockDispatchQueued) return;
+    this.blockDispatchQueued = true;
+    queueMicrotask(() => {
+      this.blockDispatchQueued = false;
+      if (this.destroyed
+        || view.destroyed
+        || view.dom?.isConnected === false
+        || this.pendingBlockSignature === this.appliedBlockSignature) {
+        return;
+      }
       const nextSignature = this.pendingBlockSignature;
       const nextDecorations = this.pendingBlockDecorations;
       try {
@@ -452,8 +458,7 @@ export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
 
   destroy() {
     this.destroyed = true;
-    if (this.pendingFrame) cancelAnimationFrame(this.pendingFrame);
-    this.pendingFrame = 0;
+    this.blockDispatchQueued = false;
     clearHybridComponentStates(this.view);
   }
 }, {

@@ -1,4 +1,9 @@
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+
+const PROJECT_ROOT = dirname(fileURLToPath(import.meta.url));
+const PARENT_NODE_MODULES = resolve(PROJECT_ROOT, '..', 'node_modules');
 
 const INITIAL_CHUNK_LIMIT_BYTES = 500_000;
 const ASYNC_CHUNK_LIMIT_BYTES = 700_000;
@@ -66,6 +71,9 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 16663,
     strictPort: true,
+    fs: {
+      allow: [PROJECT_ROOT, PARENT_NODE_MODULES]
+    },
     watch: {
       ignored: ['**/src-tauri/**']
     }

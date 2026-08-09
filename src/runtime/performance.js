@@ -475,7 +475,7 @@ function functionDetails(name) {
     documentDirty: Boolean(documentModel?.dirty),
     documentJournalEntries: documentModel?.journalEntries || 0,
     documentJournalChars: documentModel?.journalChars || 0,
-    editorLines: virtualEditor?.view?.state?.doc?.lines || 0,
+    editorLines: virtualEditor?.getLineCount?.() || 0,
     editorRenderedLines: editor?.querySelectorAll?.('.cm-line')?.length || 0,
     editorPresentationMode: virtualEditor?.getPresentationMode?.() || 'source',
     editorDecoratedLines: presentationStats?.decoratedLines || 0,

@@ -14,6 +14,7 @@ test('browser E2E runner stays dependency-free and covers required interactions'
     'real pointer drag selects only the intended characters',
     'shared Mermaid renderer keeps hybrid and preview SVG normalization identical',
     'application code block placeholder never receives a phantom source highlight',
+    'application Hybrid table pointer input avoids block decoration dispatch races',
     'application Mermaid presentation stays normalized across hybrid and preview layouts',
     'source editing closes on an outside pointer action',
     'layout switching closes active component editing',

@@ -1248,6 +1248,51 @@ async function runAppSuite() {
       await browser.page.waitFor(() => !document.querySelector('[data-hybrid-table-cell-input]'));
     });
 
+    await test('application Hybrid table pointer input avoids block decoration dispatch races', async () => {
+      await loadAppFixture(browser.page);
+      await setAppLayout(browser.page, 'hybrid');
+      await browser.page.evaluate(`(()=>{
+        window.__hybridDispatchRaceErrors=[];
+        window.addEventListener('error',event=>{
+          const message=String(event?.message||event?.error?.message||'');
+          if(/Cannot read properties of null.*dom|block-dispatch-failure/i.test(message)){
+            window.__hybridDispatchRaceErrors.push(message);
+          }
+        });
+        const perf=window.markdownEditorPerf;
+        if(perf&&typeof perf.diagnostic==='function'){
+          const original=perf.diagnostic.bind(perf);
+          perf.diagnostic=(operation,options={})=>{
+            if(operation==='hybrid.block-dispatch-failure'){
+              window.__hybridDispatchRaceErrors.push(String(options?.details?.message||operation));
+            }
+            return original(operation,options);
+          };
+        }
+      })()`);
+      const beforeLength = await browser.page.evaluate('document.getElementById("editor")?.textLength || 0');
+      for (let index = 0; index < 4; index += 1) {
+        await browser.page.click('[data-hybrid-block-type="table"] td');
+        const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
+        await browser.page.clickAt(outside.x + 2, outside.y);
+        await browser.page.evaluate(`(()=>{
+          const editor=document.getElementById('editor');
+          const virtualEditor=editor?.virtualEditor;
+          const selection=virtualEditor?.getSelection?.();
+          if(!virtualEditor||!selection)throw new Error('Virtual editor selection is unavailable');
+          virtualEditor.replaceRange('x',selection.head,selection.head,'end');
+        })()`);
+        await browser.page.evaluate('new Promise(resolve=>queueMicrotask(resolve))');
+      }
+      await browser.page.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(resolve,160))))');
+      const result = await browser.page.evaluate(`(()=>({
+        errors:window.__hybridDispatchRaceErrors||[],
+        textLength:document.getElementById('editor')?.textLength||0
+      }))()`);
+      assert.deepEqual(result.errors, []);
+      assert.equal(result.textLength, beforeLength + 4);
+    });
+
     await test('application Mermaid presentation stays normalized across hybrid and preview layouts', async () => {
       await loadAppFixture(browser.page);
       await setAppLayout(browser.page, 'hybrid');
