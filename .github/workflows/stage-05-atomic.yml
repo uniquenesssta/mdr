@@ -1,4 +1,4 @@
-# Atomic Task 5.1 document-domain validation node.
+# Atomic Task 5.1 document-domain validation node, including preserved legacy metadata tolerance.
 name: Stage 5 Atomic Verification
 
 on:
