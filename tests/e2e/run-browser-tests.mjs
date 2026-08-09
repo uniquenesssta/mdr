@@ -1012,6 +1012,43 @@ async function runAppSuite() {
       })()`);
     });
 
+    await test('application Recent Files Repository enforces limit, case-insensitive dedupe and clear without menu state ownership', async () => {
+      const result = await browser.page.evaluate(`(()=>{
+        const host=document.getElementById('compatibility-business-ports');
+        const port=host?.markdownEditorRecentFilesPort;
+        if(!port)throw new Error('Recent files port unavailable');
+        localStorage.removeItem('md_editor_recent_files');
+        port.load();
+        for(let index=0;index<23;index+=1){
+          const suffix=String(index).padStart(2,'0');
+          port.add('C:/Notes/File-'+suffix+'.md',{name:'File '+suffix,openedAt:index+1});
+        }
+        port.add('c:/notes/FILE-05.md',{name:'Reopened.md',openedAt:999});
+        const entries=port.entries;
+        const serialized=JSON.parse(localStorage.getItem('md_editor_recent_files')||'[]');
+        const snapshot={
+          count:entries.length,
+          first:{...entries[0]},
+          duplicateCount:entries.filter(item=>String(item.path).toLocaleLowerCase()==='c:/notes/file-05.md').length,
+          frozen:Object.isFrozen(entries),
+          serializedCount:serialized.length,
+          serializedKeys:Object.keys(serialized[0]||{}).sort()
+        };
+        port.clear();
+        snapshot.clearedCount=port.entries.length;
+        snapshot.clearedStorage=localStorage.getItem('md_editor_recent_files');
+        return snapshot;
+      })()`);
+      assert.equal(result.count, 20);
+      assert.deepEqual(result.first, { path: 'c:/notes/FILE-05.md', name: 'Reopened.md', openedAt: 999 });
+      assert.equal(result.duplicateCount, 1);
+      assert.equal(result.frozen, true);
+      assert.equal(result.serializedCount, 20);
+      assert.deepEqual(result.serializedKeys, ['name', 'openedAt', 'path']);
+      assert.equal(result.clearedCount, 0);
+      assert.equal(result.clearedStorage, '[]');
+    });
+
     await test('application Document Session Controller keeps lifecycle model, session and UI coherent', async () => {
       const result = await browser.page.evaluate(`(async()=>{
         const host=document.getElementById('compatibility-business-ports');

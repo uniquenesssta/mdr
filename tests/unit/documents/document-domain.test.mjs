@@ -103,16 +103,18 @@ test('Atomic 5.1 classic compatibility port owns only one explicit host property
 });
 
 test('Atomic 5.1 production integration removes classic metadata normalization authority without changing the frozen DocumentModel', async () => {
-  const [core, bootstrap, nativeStore, entry] = await Promise.all([
+  const [core, bootstrap, nativeStore, entry, recentFilesRepository] = await Promise.all([
     readText('public/app/core.js'),
     readText('src/bootstrap/module-entry.js'),
     readText('src/storage/native-document-store.js'),
-    readText('src/features/documents/index.js')
+    readText('src/features/documents/index.js'),
+    readText('src/features/documents/infrastructure/recent-files-repository.js')
   ]);
   assert.match(core, /coreCompatibilityHost\?\.markdownEditorDocumentDomainPort/);
   assert.doesNotMatch(core, /Math\.random\(\)\.toString\(36\)\.slice\(2, 8\)/);
   assert.doesNotMatch(core, /function normalizeRecentFilePath/);
-  assert.match(core, /createRecentFileEntry/);
+  assert.doesNotMatch(core, /createRecentFileEntry/);
+  assert.match(recentFilesRepository, /createRecentFileEntry/);
   assert.match(bootstrap, /mountClassicDocumentDomainPort\(portsHost\)/);
   assert.match(nativeStore, /features\/documents\/index\.js/);
   assert.equal((nativeStore.match(/normalizeDocumentNativeMetadata/g) || []).length, 3);

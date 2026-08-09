@@ -22,8 +22,10 @@ import { createFolderFileTreeController } from './sidebar/folder-file-tree.js';
 import { configureHybridImageSourcePlatform } from './editor/hybrid/image-source.js';
 import {
   createDocumentSessionController,
+  createRecentFilesRepository,
   createSessionDocumentRepository,
-  mountClassicDocumentControllerPort
+  mountClassicDocumentControllerPort,
+  mountClassicRecentFilesPort
 } from './features/documents/index.js';
 
 const platform = createPlatform({
@@ -123,11 +125,30 @@ async function loadAppModules() {
     repository: documentRepository
   });
   const documentControllerPort = mountClassicDocumentControllerPort(compatibilityPlatformHost, documentController);
-  window.addEventListener('pagehide', () => {
+  const recentFilesRepository = createRecentFilesRepository({
+    storage: window.localStorage,
+    reportError(message, error) {
+      console.warn(message, error);
+    }
+  });
+  let recentFilesPort;
+  try {
+    recentFilesPort = mountClassicRecentFilesPort(compatibilityPlatformHost, recentFilesRepository);
+  } catch (error) {
+    recentFilesRepository.destroy();
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
-  }, { once: true });
+    throw error;
+  }
+  const destroyDocumentFeatures = () => {
+    recentFilesPort.destroy();
+    recentFilesRepository.destroy();
+    documentControllerPort.destroy();
+    documentController.destroy();
+    documentRepository.destroy();
+  };
+  window.addEventListener('pagehide', destroyDocumentFeatures, { once: true });
 
   window.markdownEditorFileTree = createFolderFileTreeController({
     files: platform.files,
@@ -146,9 +167,7 @@ async function loadAppModules() {
     }
     if (window.__markdownEditorInitPromise) await window.__markdownEditorInitPromise;
   } catch (error) {
-    documentControllerPort.destroy();
-    documentController.destroy();
-    documentRepository.destroy();
+    destroyDocumentFeatures();
     throw error;
   }
 }

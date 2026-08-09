@@ -5,11 +5,13 @@ const coreSettingsStorePort = coreCompatibilityHost?.markdownEditorSettingsStore
 const coreDocumentDomainPort = coreCompatibilityHost?.markdownEditorDocumentDomainPort;
 const coreDocumentSessionPort = coreCompatibilityHost?.markdownEditorDocumentSessionPort;
 const coreDocumentControllerPort = coreCompatibilityHost?.markdownEditorDocumentControllerPort;
+const coreRecentFilesPort = coreCompatibilityHost?.markdownEditorRecentFilesPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
 if (!coreDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
 if (!coreDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
+if (!coreRecentFilesPort) throw new Error('Recent files compatibility port is unavailable.');
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
@@ -25,10 +27,8 @@ const editor = document.getElementById('editor');
     const PREVIEW_MODE_KEY = 'md_editor_preview_mode';
     const SIDEBAR_TAB_KEY = 'md_editor_sidebar_tab';
     const SIDEBAR_WIDTH_KEY = 'md_editor_sidebar_width';
-    const RECENT_FILES_KEY = 'md_editor_recent_files';
     const OUTLINE_COLLAPSED_KEY = 'md_editor_outline_collapsed';
     const DOCUMENT_INDEX_KEY_PREFIX = 'md_editor_document_index_v1:';
-    const MAX_RECENT_FILES = 20;
     const COMPACT_SHELL_WINDOW_WIDTH = 860;
     const COMPACT_SHELL_EXIT_WIDTH = 900;
     const WINDOW_RESIZE_SETTLE_MS = 220;
@@ -47,7 +47,6 @@ const editor = document.getElementById('editor');
     let windowResizeBurstEvents = 0;
     let activeSidebarTab = 'docs';
     let sidebarWidth = 248;
-    let recentFiles = [];
     let autoSaveEnabled = true;
     let autoSaveDelay = 500;
     let editorFontSize = 16;
@@ -85,49 +84,21 @@ const editor = document.getElementById('editor');
     ]);
 
     function loadRecentFiles() {
-      try {
-        const parsed = JSON.parse(localStorage.getItem(RECENT_FILES_KEY) || '[]');
-        recentFiles = Array.isArray(parsed)
-          ? parsed.filter(item => item && coreDocumentDomainPort.normalizeRecentPath(item.path)).slice(0, MAX_RECENT_FILES).map(item => coreDocumentDomainPort.createRecentFileEntry({
-              path: item.path,
-              name: item.name || getFileNameFromPath(item.path),
-              openedAt: Number(item.openedAt) || 0,
-              fallbackName: '未命名文件'
-            }))
-          : [];
-        saveRecentFiles();
-      } catch (_) {
-        recentFiles = [];
-      }
-    }
-
-    function saveRecentFiles() {
-      try {
-        localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(recentFiles.slice(0, MAX_RECENT_FILES)));
-      } catch (error) {
-        console.warn('Recent file storage failed:', error);
-      }
+      coreRecentFilesPort.load();
     }
 
     function addRecentFile(path, name = '', refresh = true) {
-      const normalizedPath = coreDocumentDomainPort.normalizeRecentPath(path);
-      if (!normalizedPath) return;
-      const pathKey = normalizedPath.toLocaleLowerCase();
-      recentFiles = recentFiles.filter(item => coreDocumentDomainPort.normalizeRecentPath(item.path).toLocaleLowerCase() !== pathKey);
-      recentFiles.unshift(coreDocumentDomainPort.createRecentFileEntry({
-        path: normalizedPath,
-        name: name || getFileNameFromPath(normalizedPath),
-        openedAt: Date.now(),
+      const result = coreRecentFilesPort.add(path, {
+        name,
         fallbackName: '未命名文件'
-      }));
-      recentFiles = recentFiles.slice(0, MAX_RECENT_FILES);
-      saveRecentFiles();
+      });
+      if (!result.added) return false;
       if (refresh) renderRecentFilesMenu();
+      return true;
     }
 
     function clearRecentFiles() {
-      recentFiles = [];
-      saveRecentFiles();
+      coreRecentFilesPort.clear();
       renderRecentFilesMenu();
       closeAppMenus();
       showToast('已清空最近打开记录');
@@ -155,6 +126,7 @@ const editor = document.getElementById('editor');
         return;
       }
       menuItem.classList.remove('disabled');
+      const recentFiles = coreRecentFilesPort.entries;
       if (!recentFiles.length) {
         const empty = document.createElement('div');
         empty.className = 'menu-item recent-file-empty';

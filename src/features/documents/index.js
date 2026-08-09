@@ -14,3 +14,5 @@ export { createDocumentCloseCoordinator } from './application/document-close-coo
 export { createDocumentTitleController } from './application/document-title-controller.js';
 export { DocumentOperationStaleError, createDocumentSessionController } from './application/document-session-controller.js';
 export { mountClassicDocumentControllerPort } from './compatibility/classic-document-controller-port.js';
+export { createRecentFilesRepository } from './infrastructure/recent-files-repository.js';
+export { mountClassicRecentFilesPort } from './compatibility/classic-recent-files-port.js';
