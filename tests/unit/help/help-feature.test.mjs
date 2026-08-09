@@ -230,7 +230,7 @@ test('Atomic 4.5 production integration removes the classic Help authority and w
   ]);
   await assert.rejects(access('public/help-content.js'));
 
-  const serviceIndex = entry.indexOf('createI18nService(localeRegistry)');
+  const serviceIndex = entry.indexOf("createI18nService(localeRegistry, { initialLocale: settingsStore.get('language') })");
   const helpIndex = entry.indexOf('createHelpFeature({');
   const bindingsIndex = entry.indexOf('createTranslationBindings(i18nService, ui,');
   const appIndex = entry.indexOf('await importApplication()');

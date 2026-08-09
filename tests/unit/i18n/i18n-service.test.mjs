@@ -131,7 +131,7 @@ test('Atomic 4.3 production integration keeps service DOM/storage-free and remov
 
   assert.doesNotMatch(serviceSource, /\bdocument\b|\bwindow\b|localStorage|querySelector|querySelectorAll/);
   assert.doesNotMatch(portSource, /getLocale|hasLocale|markdownEditorLocalePort/);
-  assert.match(moduleEntry, /createI18nService\(localeRegistry\)/);
+  assert.match(moduleEntry, /createI18nService\(localeRegistry, \{ initialLocale: settingsStore\.get\('language'\) \}\)/);
   assert.match(moduleEntry, /mountClassicI18nPort\(portsHost, i18nService\)/);
   assert.match(moduleEntry, /i18nPort\?\.destroy\(\)/);
   assert.match(moduleEntry, /i18nService\?\.destroy\(\)/);
@@ -139,11 +139,9 @@ test('Atomic 4.3 production integration keeps service DOM/storage-free and remov
 
   assert.match(core, /markdownEditorI18nPort/);
   assert.match(core, /return coreI18nPort\.t\(key, \.\.\.args\)/);
-  assert.match(core, /coreI18nPort\.setLocale\(lang\)/);
   assert.match(core, /function refreshClassicLocalizedState\(\)/);
   assert.match(core, /coreI18nPort\.subscribe\(\(\) => refreshClassicLocalizedState\(\)\)/);
-  assert.doesNotMatch(core, /markdownEditorLocalePort|coreLocalePort|getLocale\(|hasLocale\(|let currentLang\s*=/);
+  assert.doesNotMatch(core, /markdownEditorLocalePort|coreLocalePort|getLocale\(|hasLocale\(|let currentLang\s*=|function setLanguage\s*\(|coreI18nPort\.setLocale\(/);
 
-  assert.match(bootstrap, /if \(savedLang\) coreI18nPort\.setLocale\(savedLang\)/);
-  assert.doesNotMatch(bootstrap, /i18n\s*\[\s*savedLang\s*\]|currentLang\s*=\s*savedLang/);
+  assert.doesNotMatch(bootstrap, /savedLang|coreI18nPort\.setLocale\(|i18n\s*\[|currentLang\s*=/);
 });

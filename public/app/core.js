@@ -272,19 +272,6 @@ const editor = document.getElementById('editor');
       return coreI18nPort.t(key, ...args);
     }
 
-    function setLanguage(lang, persist = true) {
-      const previousLocale = coreI18nPort.locale;
-      const resolvedLocale = coreI18nPort.setLocale(lang);
-      if (!persist) return resolvedLocale;
-      try {
-        coreSettingsStorePort.set('language', resolvedLocale);
-      } catch (error) {
-        if (coreI18nPort.locale !== previousLocale) coreI18nPort.setLocale(previousLocale);
-        throw error;
-      }
-      return resolvedLocale;
-    }
-
     function refreshClassicLocalizedState() {
       updateCollapseBtnLabels();
       updateViewMenuLabel();
@@ -1731,7 +1718,6 @@ const editor = document.getElementById('editor');
       toolbarVisible = applied.toolbarVisible;
       toolbarHiddenItems = new Set(applied.toolbarHiddenItems);
       previewPerformanceMode = applied.previewPerformanceMode;
-      setLanguage(applied.language, false);
       setLayoutMode(applied.layoutMode, false, false);
       applySidebarVisibility();
       applyEditorPreferences();

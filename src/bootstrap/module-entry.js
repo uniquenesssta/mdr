@@ -2,7 +2,7 @@ import { createUI } from '../ui/create-ui.js';
 import { createCompatibilityBusinessContentPort } from '../ui/compatibility/index.js';
 import { createHelpFeature, mountClassicHelpPort } from '../features/help/index.js';
 import { SETTINGS_CHANGED_EVENT, createSettingsApplyCoordinator, createSettingsFeature, createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort } from '../features/settings/index.js';
-import { createI18nService, createTranslationBindings, localeRegistry, mountClassicI18nPort } from '../i18n/index.js';
+import { createI18nService, createSettingsLocaleController, createTranslationBindings, localeRegistry, mountClassicI18nPort } from '../i18n/index.js';
 import { createThemeService, createThemeToggleController } from '../theme/index.js';
 
 const COMPATIBILITY_CONTENT_URL = '/compatibility/business-content.html';
@@ -16,11 +16,12 @@ async function fetchCompatibilityContent(fetchImpl) {
   return response.text();
 }
 
-function destroyStartupResources({ helpPort, settingsController, themeToggleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
+function destroyStartupResources({ helpPort, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
   const errors = [];
   try { helpPort?.destroy(); } catch (error) { errors.push(error); }
   try { settingsController?.destroy(); } catch (error) { errors.push(error); }
   try { themeToggleController?.destroy(); } catch (error) { errors.push(error); }
+  try { settingsLocaleController?.destroy(); } catch (error) { errors.push(error); }
   try { settingsCommandCoordinator?.destroy(); } catch (error) { errors.push(error); }
   try { settingsPort?.destroy(); } catch (error) { errors.push(error); }
   try { themeService?.destroy(); } catch (error) { errors.push(error); }
@@ -58,6 +59,7 @@ export function startModuleEntry({
     let i18nPort = null;
     let settingsStore = null;
     let settingsCommandCoordinator = null;
+    let settingsLocaleController = null;
     let themeService = null;
     let themeToggleController = null;
     let settingsPort = null;
@@ -69,7 +71,12 @@ export function startModuleEntry({
       const markup = await fetchCompatibilityContent(fetchImpl);
       contentPort.mount(markup);
       const portsHost = documentRef.getElementById('compatibility-business-ports');
-      i18nService = createI18nService(localeRegistry);
+      const settingsRepository = createSettingsRepository({ storage });
+      settingsStore = createSettingsStore({
+        initialSnapshot: settingsRepository.load(),
+        persist: changes => settingsRepository.save(changes)
+      });
+      i18nService = createI18nService(localeRegistry, { initialLocale: settingsStore.get('language') });
       helpController = createHelpFeature({
         menuRoot: ui.menu,
         overlayRoot: ui.overlay,
@@ -80,11 +87,6 @@ export function startModuleEntry({
         documentElement: documentRef.documentElement
       });
       i18nPort = mountClassicI18nPort(portsHost, i18nService);
-      const settingsRepository = createSettingsRepository({ storage });
-      settingsStore = createSettingsStore({
-        initialSnapshot: settingsRepository.load(),
-        persist: changes => settingsRepository.save(changes)
-      });
       const SettingsCustomEvent = documentRef.defaultView?.CustomEvent || globalThis.CustomEvent;
       if (typeof SettingsCustomEvent !== 'function') {
         throw new Error('CustomEvent is unavailable for committed Settings commands.');
@@ -92,6 +94,11 @@ export function startModuleEntry({
       settingsCommandCoordinator = createSettingsApplyCoordinator({
         store: settingsStore,
         publish: event => documentRef.dispatchEvent(new SettingsCustomEvent(SETTINGS_CHANGED_EVENT, { detail: event }))
+      });
+      settingsLocaleController = createSettingsLocaleController({
+        i18n: i18nService,
+        eventTarget: documentRef,
+        eventType: SETTINGS_CHANGED_EVENT
       });
       themeService = createThemeService({
         root: documentRef.body,
@@ -124,7 +131,7 @@ export function startModuleEntry({
         platform: settingsPlatform
       });
     } catch (error) {
-      const cleanupErrors = destroyStartupResources({ helpPort, settingsController, themeToggleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+      const cleanupErrors = destroyStartupResources({ helpPort, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
       starts.delete(documentRef);
       if (!cleanupErrors.length) throw error;
       throw new AggregateError([error, ...cleanupErrors], 'Application startup failed and cleanup was incomplete.');
@@ -135,7 +142,7 @@ export function startModuleEntry({
       destroy() {
         if (destroyed) return;
         destroyed = true;
-        const errors = destroyStartupResources({ helpPort, settingsController, themeToggleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+        const errors = destroyStartupResources({ helpPort, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
         starts.delete(documentRef);
         if (errors.length) throw new AggregateError(errors, 'Application bootstrap cleanup failed.');
       }

@@ -703,6 +703,48 @@ async function runAppSuite() {
       await browser.page.waitFor(() => document.body.getAttribute('data-theme') === 'light' && !document.getElementById('settings-modal')?.classList.contains('show'));
     });
 
+    await test('application language Settings commit updates I18n without legacy globals', async () => {
+      await browser.page.evaluate(`document.querySelector('[data-settings-open]')?.click()`);
+      await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings dialog open for language' });
+      await browser.page.evaluate(`(()=>{
+        const language=document.getElementById('setting-language');
+        if(!language)throw new Error('Language setting unavailable');
+        language.value='en';
+        language.dispatchEvent(new Event('change',{bubbles:true}));
+        document.querySelector('#settings-modal .modal-footer .primary')?.click();
+      })()`);
+      await browser.page.waitFor(() => document.documentElement.lang === 'en' && !document.getElementById('settings-modal')?.classList.contains('show'), { description: 'committed English locale' });
+      const applied = await browser.page.evaluate(`(()=>{
+        const host=document.getElementById('compatibility-business-ports');
+        const port=host?.markdownEditorI18nPort;
+        const store=host?.markdownEditorSettingsStorePort;
+        const editorButton=document.getElementById('editor-collapse-btn');
+        const editorCollapsed=document.querySelector('.editor-pane')?.classList.contains('collapsed');
+        const expectedTitle=port?.t(editorCollapsed?'expandEditor':'collapseEditor');
+        return {
+          locale:port?.locale,
+          committed:store?.get('language'),
+          stored:localStorage.getItem('md_editor_language'),
+          htmlLang:document.documentElement.lang,
+          dynamicMatches:Boolean(editorButton && expectedTitle && editorButton.title===expectedTitle),
+          globals:{i18n:typeof window.i18n,currentLang:typeof window.currentLang,setLanguage:typeof window.setLanguage}
+        };
+      })()`);
+      assert.deepEqual(applied, {
+        locale:'en',committed:'en',stored:'en',htmlLang:'en',dynamicMatches:true,
+        globals:{i18n:'undefined',currentLang:'undefined',setLanguage:'undefined'}
+      });
+
+      await browser.page.evaluate(`(()=>{
+        document.querySelector('[data-settings-open]')?.click();
+        const language=document.getElementById('setting-language');
+        language.value='zh-CN';
+        language.dispatchEvent(new Event('change',{bubbles:true}));
+        document.querySelector('#settings-modal .modal-footer .primary')?.click();
+      })()`);
+      await browser.page.waitFor(() => document.documentElement.lang === 'zh-CN', { description: 'restore zh-CN locale' });
+    });
+
     await test('application theme switch changes visual tokens without changing shell geometry', async () => {
       const result = await browser.page.evaluate(`(async()=>{
         const selectors={

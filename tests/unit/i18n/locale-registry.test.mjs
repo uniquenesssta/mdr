@@ -112,7 +112,7 @@ test('Atomic 4.2 locale data remains isolated from the Atomic 4.5 Help feature',
   await assert.rejects(access(resolve(ROOT, 'public/i18n.js')));
   await assert.rejects(access(resolve(ROOT, 'public/help-content.js')));
 
-  const serviceIndex = entry.indexOf('createI18nService(localeRegistry)');
+  const serviceIndex = entry.indexOf("createI18nService(localeRegistry, { initialLocale: settingsStore.get('language') })");
   const helpFeatureIndex = entry.indexOf('createHelpFeature({');
   const bindingsIndex = entry.indexOf('createTranslationBindings(i18nService, ui,');
   const i18nPortIndex = entry.indexOf('mountClassicI18nPort(portsHost, i18nService)');
