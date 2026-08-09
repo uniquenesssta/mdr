@@ -114,7 +114,7 @@
     function rebuildEditorLineMetrics(force = false) {
       if (editor.virtualEditor) {
         editorMetricContentHeight = Math.max(1, editor.scrollHeight);
-        editorMetricLineHeight = editor.virtualEditor.view.defaultLineHeight || getEditorLineHeight();
+        editorMetricLineHeight = editor.virtualEditor.getDefaultLineHeight?.() || getEditorLineHeight();
         return;
       }
       const style = window.getComputedStyle(editor);
@@ -318,19 +318,18 @@
     function getEditorSelectionViewportRatio(fromIndex, toIndex = fromIndex) {
       const start = Math.max(0, Math.min(fromIndex, toIndex));
       const end = Math.max(start, Math.max(fromIndex, toIndex));
-      const virtualView = editor.virtualEditor?.view;
-      const scrollElement = virtualView?.scrollDOM || editor;
-      if (virtualView?.coordsAtPos) {
-        const startRect = virtualView.coordsAtPos(start, 1);
-        const endRect = virtualView.coordsAtPos(Math.max(start, end - 1), -1);
+      const virtualEditor = editor.virtualEditor;
+      const viewportRect = virtualEditor?.getScrollViewportRect?.();
+      if (viewportRect && virtualEditor?.getPositionCoordinates) {
+        const startRect = virtualEditor.getPositionCoordinates(start, 1);
+        const endRect = virtualEditor.getPositionCoordinates(Math.max(start, end - 1), -1);
         if (startRect || endRect) {
           const first = startRect || endRect;
           const last = endRect || startRect;
-          return getRectViewportRatio(scrollElement, {
-            top: Math.min(first.top, last.top),
-            bottom: Math.max(first.bottom, last.bottom),
-            height: Math.max(1, Math.max(first.bottom, last.bottom) - Math.min(first.top, last.top))
-          });
+          const top = Math.min(first.top, last.top);
+          const bottom = Math.max(first.bottom, last.bottom);
+          const height = Math.max(1, viewportRect.height || editor.clientHeight || 1);
+          return clampSelectionViewportRatio(((top + bottom) / 2 - viewportRect.top) / height, height);
         }
       }
       const middle = start + Math.floor((end - start) / 2);

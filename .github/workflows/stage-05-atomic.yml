@@ -1,4 +1,4 @@
-# Atomic Task 5.4 recent-files-repository validation node.
+# Atomic Task 5.5 CodeMirror Adapter validation node.
 name: Stage 5 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  recent-files-repository:
-    name: Verify Stage 5 Recent Files Repository
+  codemirror-adapter:
+    name: Verify Stage 5 CodeMirror Adapter
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -63,6 +63,8 @@ jobs:
         run: node --test tests/unit/documents/document-session-controller.test.mjs
       - name: Verify Atomic Task 5.4 recent files repository
         run: node --test tests/unit/documents/recent-files-repository.test.mjs
+      - name: Verify Atomic Task 5.5 CodeMirror adapter
+        run: node --test tests/unit/editor/codemirror-adapter.test.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
       - name: Run architecture hard gate
@@ -79,10 +81,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-05/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 5.4 evidence
+      - name: Upload Atomic Task 5.5 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-05-recent-files-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-05-codemirror-adapter-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-05
           if-no-files-found: error
           retention-days: 30

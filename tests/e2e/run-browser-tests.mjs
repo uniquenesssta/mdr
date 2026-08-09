@@ -796,11 +796,11 @@ async function runAppSuite() {
       const before = await browser.page.evaluate(`(()=>{
         const editor=document.getElementById('editor');
         const virtualEditor=editor?.virtualEditor||null;
-        const view=virtualEditor?.view||null;
-        const model=view?.state?.doc||null;
+        const documentText=virtualEditor?.getText?.()??null;
+        const documentVersion=virtualEditor?.getDocumentVersion?.()??null;
         const preview=document.getElementById('preview');
         const previewFirst=preview?.firstElementChild||null;
-        window.__themeToggleIdentity={editor,virtualEditor,view,model,preview,previewFirst};
+        window.__themeToggleIdentity={editor,virtualEditor,documentText,documentVersion,preview,previewFirst};
         return {theme:document.body.getAttribute('data-theme'),trigger:Boolean(document.querySelector('[data-theme-toggle]'))};
       })()`);
       assert.deepEqual(before, {theme:'light',trigger:true});
@@ -815,8 +815,8 @@ async function runAppSuite() {
             stored:localStorage.getItem('md_editor_theme'),
             sameEditor:probe.editor===document.getElementById('editor'),
             sameVirtualEditor:probe.virtualEditor===document.getElementById('editor')?.virtualEditor,
-            sameView:probe.view===document.getElementById('editor')?.virtualEditor?.view,
-            sameModel:probe.model===document.getElementById('editor')?.virtualEditor?.view?.state?.doc,
+            sameDocumentText:probe.documentText===document.getElementById('editor')?.virtualEditor?.getText?.(),
+            sameDocumentVersion:probe.documentVersion===document.getElementById('editor')?.virtualEditor?.getDocumentVersion?.(),
             samePreview:probe.preview===document.getElementById('preview'),
             samePreviewFirst:probe.previewFirst===document.getElementById('preview')?.firstElementChild
           };
@@ -824,9 +824,9 @@ async function runAppSuite() {
       };
 
       const dark = await toggle('dark');
-      assert.deepEqual(dark, {theme:'dark',stored:'dark',sameEditor:true,sameVirtualEditor:true,sameView:true,sameModel:true,samePreview:true,samePreviewFirst:true});
+      assert.deepEqual(dark, {theme:'dark',stored:'dark',sameEditor:true,sameVirtualEditor:true,sameDocumentText:true,sameDocumentVersion:true,samePreview:true,samePreviewFirst:true});
       const light = await toggle('light');
-      assert.deepEqual(light, {theme:'light',stored:'light',sameEditor:true,sameVirtualEditor:true,sameView:true,sameModel:true,samePreview:true,samePreviewFirst:true});
+      assert.deepEqual(light, {theme:'light',stored:'light',sameEditor:true,sameVirtualEditor:true,sameDocumentText:true,sameDocumentVersion:true,samePreview:true,samePreviewFirst:true});
       await browser.page.evaluate('delete window.__themeToggleIdentity');
     });
 
@@ -837,18 +837,18 @@ async function runAppSuite() {
       const before = await browser.page.evaluate(`(()=>{
         const editor=document.getElementById('editor');
         const virtualEditor=editor?.virtualEditor||null;
-        const view=virtualEditor?.view||null;
-        const model=view?.state?.doc||null;
+        const documentText=virtualEditor?.getText?.()??null;
+        const documentVersion=virtualEditor?.getDocumentVersion?.()??null;
         const preview=document.getElementById('preview');
         const previewFirst=preview?.firstElementChild||null;
-        window.__themeServiceIdentity={editor,virtualEditor,view,model,preview,previewFirst};
+        window.__themeServiceIdentity={editor,virtualEditor,documentText,documentVersion,preview,previewFirst};
         return {
           theme:document.body.getAttribute('data-theme'),
-          editor:Boolean(editor),virtualEditor:Boolean(virtualEditor),model:Boolean(model),previewFirst:Boolean(previewFirst),
+          editor:Boolean(editor),virtualEditor:Boolean(virtualEditor),documentReady:typeof documentText==='string'&&Number.isInteger(documentVersion),previewFirst:Boolean(previewFirst),
           legacyThemeGlobal:typeof window.setAppTheme
         };
       })()`);
-      assert.deepEqual(before, {theme:'light',editor:true,virtualEditor:true,model:true,previewFirst:true,legacyThemeGlobal:'undefined'});
+      assert.deepEqual(before, {theme:'light',editor:true,virtualEditor:true,documentReady:true,previewFirst:true,legacyThemeGlobal:'undefined'});
 
       const applyTheme = async theme => {
         await browser.page.evaluate(`(()=>{
@@ -866,8 +866,8 @@ async function runAppSuite() {
             theme:document.body.getAttribute('data-theme'),
             sameEditor:probe.editor===document.getElementById('editor'),
             sameVirtualEditor:probe.virtualEditor===document.getElementById('editor')?.virtualEditor,
-            sameView:probe.view===document.getElementById('editor')?.virtualEditor?.view,
-            sameModel:probe.model===document.getElementById('editor')?.virtualEditor?.view?.state?.doc,
+            sameDocumentText:probe.documentText===document.getElementById('editor')?.virtualEditor?.getText?.(),
+            sameDocumentVersion:probe.documentVersion===document.getElementById('editor')?.virtualEditor?.getDocumentVersion?.(),
             samePreview:probe.preview===document.getElementById('preview'),
             samePreviewFirst:probe.previewFirst===document.getElementById('preview')?.firstElementChild,
             canvas:getComputedStyle(document.body).getPropertyValue('--color-canvas').trim()
@@ -877,12 +877,12 @@ async function runAppSuite() {
 
       const dark = await applyTheme('dark');
       assert.deepEqual(dark, {
-        theme:'dark',sameEditor:true,sameVirtualEditor:true,sameView:true,sameModel:true,
+        theme:'dark',sameEditor:true,sameVirtualEditor:true,sameDocumentText:true,sameDocumentVersion:true,
         samePreview:true,samePreviewFirst:true,canvas:'#0c1017'
       });
       const light = await applyTheme('light');
       assert.deepEqual(light, {
-        theme:'light',sameEditor:true,sameVirtualEditor:true,sameView:true,sameModel:true,
+        theme:'light',sameEditor:true,sameVirtualEditor:true,sameDocumentText:true,sameDocumentVersion:true,
         samePreview:true,samePreviewFirst:true,canvas:'#eef1f5'
       });
       await browser.page.evaluate('delete window.__themeServiceIdentity');
@@ -1193,11 +1193,11 @@ async function runAppSuite() {
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'closed code widget' });
       const trailingPoint = await browser.page.evaluate(`(()=>{
         const editor=document.getElementById('editor');
-        const view=editor?.virtualEditor?.view;
+        const virtualEditor=editor?.virtualEditor;
         const position=editor?.textLength;
-        if(!view||!Number.isInteger(position))return null;
-        editor.virtualEditor.scrollPositionIntoView(position,'auto',0.5);
-        const rect=view.coordsAtPos(position,1)||view.coordsAtPos(position,-1);
+        if(!virtualEditor||!Number.isInteger(position))return null;
+        virtualEditor.scrollPositionIntoView(position,'auto',0.5);
+        const rect=virtualEditor.getPositionCoordinates?.(position,1)||virtualEditor.getPositionCoordinates?.(position,-1);
         if(!rect)return null;
         return {
           x:Math.max(2,rect.left+2),

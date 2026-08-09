@@ -85,13 +85,14 @@ function loadClassicScript(src) {
 async function loadAppModules() {
   const editorHost = document.getElementById('editor');
   if (!editorHost) throw new Error('Editor host is missing');
-  createVirtualEditor(editorHost);
+  const virtualEditor = createVirtualEditor(editorHost);
   const previewHost = document.getElementById('preview');
   if (!previewHost) throw new Error('Preview host is missing');
   window.markdownEditorScrollController = createScrollSyncController(editorHost, previewHost);
   window.markdownEditorScrollSync = window.markdownEditorScrollController.getPublicApi();
   window.markdownEditorSelectionController = createSelectionSyncController(editorHost, previewHost);
-  window.markdownEditorDocumentModel = createDocumentModel(editorHost);
+  const documentModel = createDocumentModel(editorHost);
+  window.markdownEditorDocumentModel = documentModel;
   window.IncrementalPreviewModel = IncrementalPreviewModel;
   window.createPreviewWorkerClient = createPreviewWorkerClient;
   window.createVirtualPreviewController = createVirtualPreviewController;
@@ -139,14 +140,21 @@ async function loadAppModules() {
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    documentModel.destroy();
+    virtualEditor.destroy();
     throw error;
   }
+  let documentFeaturesDestroyed = false;
   const destroyDocumentFeatures = () => {
+    if (documentFeaturesDestroyed) return;
+    documentFeaturesDestroyed = true;
     recentFilesPort.destroy();
     recentFilesRepository.destroy();
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    documentModel.destroy();
+    virtualEditor.destroy();
   };
   window.addEventListener('pagehide', destroyDocumentFeatures, { once: true });
 
