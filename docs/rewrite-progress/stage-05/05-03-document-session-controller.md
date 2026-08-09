@@ -2,10 +2,11 @@
 
 ## 状态
 
-- 当前状态：PASS（正式发布前 clean-runner 将从精确 5.2 基线重新验证本记录对应候选）。
+- 当前状态：PASS。
 - 基线：`d3d529c4b6f35f56577dce787c64c15bf01518dd`（Atomic 5.2 最终 HEAD）。
-- 完整临时候选验证：GitHub Actions run `31309246707`。
-- 受控 clean-runner：`31309523190`。
+- 完整临时候选验证：GitHub Actions run `31309246707`（SUCCESS）。
+- 受控 clean-runner：GitHub Actions run `31309523190`（SUCCESS，从精确 5.2 基线重新物化正式候选并通过 exact-file guard）。
+- 首次正式 Stage 5 CI：GitHub Actions run `31309601484`（SUCCESS；本记录仅修正验证时态，不改变源码、测试或 workflow）。
 - Atomic 5.4 尚未开始。
 
 ## 任务边界
@@ -108,8 +109,10 @@
 
 ## 验证
 
-完整临时候选 run `31309246707` 实际执行并通过：
+受控 clean-runner run `31309523190` 从精确 5.2 HEAD `d3d529c4b6f35f56577dce787c64c15bf01518dd` 重新物化同一正式 20-file 候选，并实际通过：
 
+- exact 20-file candidate guard；
+- dependency/lockfile 与临时 helper/workflow 排除门禁；
 - 5.3 新模块与 classic cutover JavaScript syntax；
 - Stage 4 handoff 全专项；
 - Atomic 5.1 Documents Domain；
@@ -117,13 +120,14 @@
 - Atomic 5.3 Document Session Controller：11/11；
 - frozen DocumentModel blob SHA；
 - `npm run verify:architecture`；
-- 完整 `npm test`；
-- `npm run test:browser:contract`；
+- 完整 `npm test`：42/42；
+- `npm run test:browser:contract`：10/10；
 - `npm run build`；
-- `npm run test:browser`，包含真实 Built App A/B 文档 new → switch → rename → save → close → empty 生命周期一致性检查；
-- `git diff --check`。
+- `npm run test:browser`：19/19，包含真实 Built App A/B 文档 new → switch → rename → save → close → empty 生命周期一致性检查；
+- 验证结束后的第二次 exact-file guard 与 `git diff --check`；
+- 发布前正式分支仍精确等于 5.2 baseline 的远端 SHA 守卫。
 
-正式发布 clean-runner 会从精确 5.2 HEAD 重新物化同一正式文件集合，替换本记录中的 run token 后重复全部门禁，并执行 exact-file guard；该 run 未成功前不得发布。
+clean-runner 全绿后发布 19 个非-workflow 正式文件；随后通过 GitHub 连接器提交已验证的正式 Stage 5 workflow。正式 Stage 5 CI run `31309601484` 在该源码/workflow 状态上再次执行并通过 Stage 4、5.1、5.2、5.3、冻结 DocumentModel、Architecture、Node、Browser Contract、Build、Built App 与 evidence 上传。
 
 ## 架构清单
 
