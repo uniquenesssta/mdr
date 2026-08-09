@@ -1,14 +1,10 @@
 /**
- * Responsibility: Canonicalize native document-store metadata used by document records and storage sessions.
+ * Responsibility: Canonicalize native document-store metadata without narrowing values accepted by the legacy runtime.
  * State/side effects: Pure.
  */
 export function normalizeDocumentNativeMetadata({ nativeBacked = false, nativeVersion = 0 } = {}) {
-  const numericVersion = Number(nativeVersion);
-  const normalizedVersion = Number.isFinite(numericVersion)
-    ? Math.max(0, Math.trunc(numericVersion))
-    : 0;
   return Object.freeze({
     nativeBacked: Boolean(nativeBacked),
-    nativeVersion: normalizedVersion
+    nativeVersion: Number(nativeVersion) || 0
   });
 }

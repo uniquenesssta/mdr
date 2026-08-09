@@ -4,7 +4,7 @@
 
 - 当前状态：PASS。
 - 基线：`49f53665d0a69f085322af7aae982f08d1f1a2fa`（Stage 4 最终 HEAD）。
-- 受控 clean-runner：GitHub Actions run `31302055441`。
+- 最终兼容性复核 clean-runner：GitHub Actions run `31302457206`。
 - Stage 5 已开始；Atomic 5.2 尚未开始。
 
 ## 任务边界
@@ -47,6 +47,10 @@ classic `documents/currentDocumentId` session 状态与正文兼容对象仍保�
 
 `src/document/document-model.js` Git blob SHA 仍为 `d767d9025be05a6f6b87d7cd3527782db1c3303a`，与 Stage 4 基线完全一致。
 
+### 历史持久化兼容性复核
+
+关闭审计确认 Stage 4 的 `loadDocumentsFromStorage()` 仅要求既有 `doc.id` 为 truthy，旧 recent/native/timestamp 路径也没有额外的安全整数、非负数或字符集限制。5.1 最终实现因此只对**新生成**文档 ID 保持安全格式约束，不会重写或拒绝已载入的既有 ID；Document Record 更新允许历史记录缺少 `createdAt`，并保持旧运行态对 `updatedAt`、`nativeVersion`、`openedAt` 数值的宽容转换语义。该修正只解除 5.1 初版新增的过严约束，不扩展旧实现能力，也不修改任何 storage key/字段名。
+
 ## 保持不变
 
 - DocumentModel API、算法、版本、transaction journal、consumer acknowledgement 与正文语义；
@@ -62,6 +66,7 @@ classic `documents/currentDocumentId` session 状态与正文兼容对象仍保�
 
 - 初始 clean worktree / exact Stage 4 baseline 检查；
 - Atomic 5.1 Documents Domain 单元与生产集成专项；
+- 历史 document id、缺失 `createdAt`、fractional/negative recent/native 数值兼容性专项；
 - 冻结 DocumentModel blob SHA 门禁；
 - `npm run verify:architecture`；
 - 完整 `npm test`；

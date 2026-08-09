@@ -9,6 +9,7 @@ import {
   createDocumentRecord,
   createRecentFileEntry,
   mountClassicDocumentDomainPort,
+  normalizeDocumentId,
   normalizeDocumentNativeMetadata,
   normalizeDocumentPath,
   normalizeDocumentTitle,
@@ -19,10 +20,12 @@ import {
 const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const readText = path => readFile(resolve(ROOT, path), 'utf8');
 
-test('Atomic 5.1 creates compatible safe ids and rejects invalid document identities', () => {
+test('Atomic 5.1 creates safe compatible ids while preserving previously accepted persisted identifiers exactly', () => {
   assert.equal(createDocumentId({ now: () => 1234, random: () => 0.5 }), 'doc_1234_i');
   assert.throws(() => createDocumentId({ now: () => -1, random: () => 0.5 }), /timestamp/);
   assert.throws(() => createDocumentId({ now: () => 1, random: () => 1 }), /entropy/);
+  assert.equal(normalizeDocumentId(' legacy id / v1 '), ' legacy id / v1 ');
+  assert.throws(() => normalizeDocumentId(''), /must not be empty/);
 });
 
 test('Atomic 5.1 normalizes title and path without taking body ownership', () => {
@@ -33,7 +36,7 @@ test('Atomic 5.1 normalizes title and path without taking body ownership', () =>
   assert.equal(normalizeRecentFilePath(' C:\\Docs\\a.md '), 'C:\\Docs\\a.md');
 });
 
-test('Atomic 5.1 document records are immutable metadata-only values with canonical timestamps/native metadata', () => {
+test('Atomic 5.1 new document records are immutable metadata-only values with compatible metadata surfaces', () => {
   const record = createDocumentRecord({
     title: 'Alpha',
     filePath: 'C:\\Docs\\alpha.md',
@@ -47,7 +50,7 @@ test('Atomic 5.1 document records are immutable metadata-only values with canoni
     updatedAt: 100,
     filePath: 'C:\\Docs\\alpha.md',
     nativeBacked: true,
-    nativeVersion: 4
+    nativeVersion: 4.9
   });
   assert.equal(Object.isFrozen(record), true);
   assert.equal('content' in record, false);
@@ -56,7 +59,7 @@ test('Atomic 5.1 document records are immutable metadata-only values with canoni
   assert.throws(() => createDocumentRecord({ title: 'x', contentChunks: [] }), /must not contain document body/);
 });
 
-test('Atomic 5.1 record updates preserve identity/creation while rejecting body and identity mutation', () => {
+test('Atomic 5.1 record updates preserve identity and tolerate legacy records that omitted createdAt', () => {
   const record = createDocumentRecord({ id: 'doc_existing', title: 'A.md', createdAt: 10, updatedAt: 10 });
   const updated = updateDocumentRecord(record, { title: 'B', updatedAt: 20, nativeBacked: true, nativeVersion: 2 });
   assert.deepEqual(updated, {
@@ -64,15 +67,25 @@ test('Atomic 5.1 record updates preserve identity/creation while rejecting body 
   });
   assert.throws(() => updateDocumentRecord(record, { id: 'other' }), /immutable/);
   assert.throws(() => updateDocumentRecord(record, { content: 'no' }), /must not contain document body/);
-  assert.throws(() => updateDocumentRecord(record, { updatedAt: 9 }), /must not precede/);
+
+  const legacy = Object.freeze({ id: ' legacy/id ', title: 'Legacy.md', updatedAt: '7' });
+  const legacyUpdated = updateDocumentRecord(legacy, { title: 'Renamed', updatedAt: 5.5 });
+  assert.deepEqual(legacyUpdated, { id: ' legacy/id ', title: 'Renamed.md', updatedAt: 5.5 });
+  assert.equal('createdAt' in legacyUpdated, false);
 });
 
-test('Atomic 5.1 native metadata and recent-file entries preserve current runtime/storage surfaces', () => {
+test('Atomic 5.1 native metadata and recent-file entries preserve legacy numeric tolerance and exact persistence surfaces', () => {
   assert.deepEqual(normalizeDocumentNativeMetadata({ nativeBacked: 1, nativeVersion: 7.8 }), {
-    nativeBacked: true, nativeVersion: 7
+    nativeBacked: true, nativeVersion: 7.8
   });
-  const entry = createRecentFileEntry({ path: ' C:\\Docs\\one.md ', openedAt: 88 });
-  assert.deepEqual(entry, { path: 'C:\\Docs\\one.md', name: 'one.md', openedAt: 88 });
+  assert.deepEqual(normalizeDocumentNativeMetadata({ nativeBacked: false, nativeVersion: -2 }), {
+    nativeBacked: false, nativeVersion: -2
+  });
+  assert.deepEqual(createDocumentRecord({ id: 'legacy', title: 'Legacy.md', updatedAt: 1, nativeBacked: false, nativeVersion: 0 }), {
+    id: 'legacy', title: 'Legacy.md', updatedAt: 1, nativeBacked: false, nativeVersion: 0
+  });
+  const entry = createRecentFileEntry({ path: ' C:\\Docs\\one.md ', openedAt: -4.5 });
+  assert.deepEqual(entry, { path: 'C:\\Docs\\one.md', name: 'one.md', openedAt: -4.5 });
   assert.equal(Object.isFrozen(entry), true);
   assert.throws(() => createRecentFileEntry({ path: '   ' }), /must not be empty/);
 });
