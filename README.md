@@ -2,4 +2,4 @@
 
 Tauri + Rust 桌面 Markdown 编辑器。完整架构与历史记录见 [docs/README.md](docs/README.md)。
 
-2026-08-09：Stage 5 / Atomic 5.5 PASS：CodeMirror Adapter 私有化 state/view，统一文本、事务、选择、焦点、滚动、历史、订阅与销毁；其他 feature 不再访问 raw CodeMirror。5.1–5.5 与全量门禁通过，生产模块 252→254，依赖/锁文件未变。
+2026-08-09：Stage 5 / Atomic 5.6 PASS：CodeMirror Extension Registry 集中基础、Markdown、主题、只读与 Hybrid 扩展槽，运行时变化统一经 Compartment 重配；`virtual-editor` 不再持有扩展装配状态。5.1–5.6 与全量门禁通过，生产模块 254→255，冻结 DocumentModel、依赖与锁文件未变。
