@@ -15,7 +15,7 @@ import {
   markdown
 } from '@codemirror/lang-markdown';
 import { GFM } from '@lezer/markdown';
-import { createPrecisePointerSelectionExtension } from '../precise-pointer-selection.js';
+import { createPrecisePointerSelectionExtension } from '../pointer-selection/precise-pointer-selection.js';
 import {
   createHybridMarkdownConfiguration,
   createHybridMarkdownExtension
