@@ -1,4 +1,4 @@
-# Atomic Task 5.1 document-domain validation node, including preserved legacy metadata tolerance.
+# Atomic Task 5.2 document-session validation node.
 name: Stage 5 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  document-domain:
-    name: Verify Stage 5 Document Domain
+  document-session:
+    name: Verify Stage 5 Document Session
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -57,6 +57,8 @@ jobs:
           tests/ui/themes.test.mjs
       - name: Verify Atomic Task 5.1 document domain
         run: node --test tests/unit/documents/document-domain.test.mjs
+      - name: Verify Atomic Task 5.2 document session store
+        run: node --test tests/unit/documents/document-session-store.test.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
       - name: Run architecture hard gate
@@ -73,10 +75,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-05/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 5.1 evidence
+      - name: Upload Atomic Task 5.2 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-05-document-domain-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-05-document-session-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-05
           if-no-files-found: error
           retention-days: 30
