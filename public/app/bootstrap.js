@@ -13,16 +13,6 @@ if (!bootstrapSettingsStorePort) throw new Error('Settings Store compatibility p
       // 不再先恢复旧正文或文档元数据，避免侧栏历史和后台快照重新进入当前会话。
       editor.value = '';
       filenameInput.value = t('filenameDefault');
-      const theme = restoredSettings.theme;
-      document.body.setAttribute('data-theme', theme);
-
-      if (typeof mermaid !== 'undefined') {
-        mermaid.initialize({
-          startOnLoad: false,
-          theme: theme === 'dark' ? 'dark' : 'default'
-        });
-      }
-
       const savedRatio = localStorage.getItem(RATIO_KEY);
       if (savedRatio !== null) {
         const parsed = parseFloat(savedRatio);

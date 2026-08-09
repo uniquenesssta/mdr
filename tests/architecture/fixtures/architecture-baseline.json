@@ -1355,15 +1355,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "toggleTheme()",
-      "count": 1,
-      "lines": [
-        268
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "toggleViewMenu()",
       "count": 1,
       "lines": [
@@ -1435,14 +1426,6 @@
     }
   ],
   "businessGlobalWrites": [
-    {
-      "path": "public/app/core.js",
-      "global": "window.__markdownEditorMermaidTheme",
-      "count": 1,
-      "lines": [
-        1769
-      ]
-    },
     {
       "path": "public/app/core.js",
       "global": "window.markdownEditorDocumentStatistics",

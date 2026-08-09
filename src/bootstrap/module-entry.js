@@ -1,8 +1,9 @@
 import { createUI } from '../ui/create-ui.js';
 import { createCompatibilityBusinessContentPort } from '../ui/compatibility/index.js';
 import { createHelpFeature, mountClassicHelpPort } from '../features/help/index.js';
-import { createSettingsFeature, createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort } from '../features/settings/index.js';
+import { SETTINGS_CHANGED_EVENT, createSettingsApplyCoordinator, createSettingsFeature, createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort } from '../features/settings/index.js';
 import { createI18nService, createTranslationBindings, localeRegistry, mountClassicI18nPort } from '../i18n/index.js';
+import { createThemeService, createThemeToggleController } from '../theme/index.js';
 
 const COMPATIBILITY_CONTENT_URL = '/compatibility/business-content.html';
 const starts = new WeakMap();
@@ -15,11 +16,14 @@ async function fetchCompatibilityContent(fetchImpl) {
   return response.text();
 }
 
-function destroyStartupResources({ helpPort, settingsController, settingsPort, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
+function destroyStartupResources({ helpPort, settingsController, themeToggleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
   const errors = [];
   try { helpPort?.destroy(); } catch (error) { errors.push(error); }
   try { settingsController?.destroy(); } catch (error) { errors.push(error); }
+  try { themeToggleController?.destroy(); } catch (error) { errors.push(error); }
+  try { settingsCommandCoordinator?.destroy(); } catch (error) { errors.push(error); }
   try { settingsPort?.destroy(); } catch (error) { errors.push(error); }
+  try { themeService?.destroy(); } catch (error) { errors.push(error); }
   try { settingsStore?.destroy(); } catch (error) { errors.push(error); }
   try { i18nPort?.destroy(); } catch (error) { errors.push(error); }
   try { translationBindings?.destroy(); } catch (error) { errors.push(error); }
@@ -53,6 +57,9 @@ export function startModuleEntry({
     let translationBindings = null;
     let i18nPort = null;
     let settingsStore = null;
+    let settingsCommandCoordinator = null;
+    let themeService = null;
+    let themeToggleController = null;
     let settingsPort = null;
     let settingsController = null;
     let helpPort = null;
@@ -78,6 +85,24 @@ export function startModuleEntry({
         initialSnapshot: settingsRepository.load(),
         persist: changes => settingsRepository.save(changes)
       });
+      const SettingsCustomEvent = documentRef.defaultView?.CustomEvent || globalThis.CustomEvent;
+      if (typeof SettingsCustomEvent !== 'function') {
+        throw new Error('CustomEvent is unavailable for committed Settings commands.');
+      }
+      settingsCommandCoordinator = createSettingsApplyCoordinator({
+        store: settingsStore,
+        publish: event => documentRef.dispatchEvent(new SettingsCustomEvent(SETTINGS_CHANGED_EVENT, { detail: event }))
+      });
+      themeService = createThemeService({
+        root: documentRef.body,
+        eventTarget: documentRef,
+        initialSnapshot: settingsStore.snapshot
+      });
+      themeToggleController = createThemeToggleController({
+        trigger: documentRef.querySelector('[data-theme-toggle]'),
+        readTheme: () => settingsStore.get('theme'),
+        commitTheme: theme => settingsCommandCoordinator.commit({ theme }).theme
+      });
       settingsPort = mountClassicSettingsStorePort(portsHost, settingsStore);
       helpPort = mountClassicHelpPort(portsHost, helpController);
       await importApplication();
@@ -99,7 +124,7 @@ export function startModuleEntry({
         platform: settingsPlatform
       });
     } catch (error) {
-      const cleanupErrors = destroyStartupResources({ helpPort, settingsController, settingsPort, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+      const cleanupErrors = destroyStartupResources({ helpPort, settingsController, themeToggleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
       starts.delete(documentRef);
       if (!cleanupErrors.length) throw error;
       throw new AggregateError([error, ...cleanupErrors], 'Application startup failed and cleanup was incomplete.');
@@ -110,7 +135,7 @@ export function startModuleEntry({
       destroy() {
         if (destroyed) return;
         destroyed = true;
-        const errors = destroyStartupResources({ helpPort, settingsController, settingsPort, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+        const errors = destroyStartupResources({ helpPort, settingsController, themeToggleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
         starts.delete(documentRef);
         if (errors.length) throw new AggregateError(errors, 'Application bootstrap cleanup failed.');
       }

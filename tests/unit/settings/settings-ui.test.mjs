@@ -121,9 +121,17 @@ test('Atomic 4.10 Apply Coordinator publishes immutable effective changes only a
   coordinator.applyDraft();
   assert.equal(published.length, 1, 'no-op apply must not publish a false change event');
 
+  const immediate = coordinator.commit({ theme: 'light' });
+  assert.equal(immediate.theme, 'light');
+  assert.equal(writes.length, 2);
+  assert.equal(published.length, 2);
+  assert.deepEqual(published[1].changedIds, ['theme']);
+  assert.deepEqual(published[1].changes, { theme: 'light' });
+
   coordinator.destroy();
   coordinator.destroy();
   assert.throws(() => coordinator.applyDraft(), /destroyed/);
+  assert.throws(() => coordinator.commit({ theme: 'dark' }), /destroyed/);
   store.destroy();
 });
 
@@ -289,7 +297,7 @@ test('Atomic 4.10 controller construction rolls back an already-installed open t
   store.destroy();
 });
 
-test('Atomic 4.10 production integration moves Settings UI ownership out of compatibility markup/core without starting Theme Service', async () => {
+test('Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Service remains bootstrap-owned', async () => {
   const [entry, settingsIndex, core, events, markup, modalBridge, dialog, fieldFactory, navigation, autosave, color, directory] = await Promise.all([
     readFile('src/bootstrap/module-entry.js', 'utf8'),
     readFile('src/features/settings/index.js', 'utf8'),
@@ -344,5 +352,6 @@ test('Atomic 4.10 production integration moves Settings UI ownership out of comp
     'settings-field-view.js',
     'settings-navigation-view.js'
   ]);
-  assert.doesNotMatch(entry + settingsIndex + core, /createThemeService|theme-service\.js/);
+  assert.match(entry, /createThemeService/);
+  assert.doesNotMatch(settingsIndex + core, /createThemeService|theme-service\.js/);
 });

@@ -2,11 +2,6 @@ const editorToolsCompatibilityHost = document.getElementById('compatibility-busi
 const editorToolsSettingsStorePort = editorToolsCompatibilityHost?.markdownEditorSettingsStorePort;
 if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 
-    function toggleTheme() {
-      const current = document.body.getAttribute('data-theme');
-      setAppTheme(current === 'dark' ? 'light' : 'dark');
-    }
-
     // 清空文档
     function clearDoc() {
       if (confirm(t('confirmClear'))) {

@@ -1718,18 +1718,6 @@ const editor = document.getElementById('editor');
       updateActiveOutlineByLine(targetLine);
     }
 
-    function setAppTheme(theme, persist = true) {
-      const next = theme === 'dark' ? 'dark' : 'light';
-      if (persist) coreSettingsStorePort.set('theme', next);
-      document.body.setAttribute('data-theme', next);
-      if (typeof mermaid !== 'undefined') {
-        const mermaidTheme = next === 'dark' ? 'dark' : 'default';
-        mermaid.initialize({ startOnLoad: false, theme: mermaidTheme });
-        window.__markdownEditorMermaidTheme = mermaidTheme;
-      }
-      updatePreview();
-    }
-
     document.addEventListener('markdown-editor:settings-changed', event => {
       const applied = event?.detail?.snapshot;
       if (!applied || !Array.isArray(event?.detail?.changedIds)) return;
@@ -1743,7 +1731,6 @@ const editor = document.getElementById('editor');
       toolbarVisible = applied.toolbarVisible;
       toolbarHiddenItems = new Set(applied.toolbarHiddenItems);
       previewPerformanceMode = applied.previewPerformanceMode;
-      setAppTheme(applied.theme, false);
       setLanguage(applied.language, false);
       setLayoutMode(applied.layoutMode, false, false);
       applySidebarVisibility();

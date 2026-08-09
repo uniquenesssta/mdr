@@ -18,6 +18,8 @@ test('browser E2E runner stays dependency-free and covers required interactions'
     'source editing closes on an outside pointer action',
     'layout switching closes active component editing',
     'application theme switch changes visual tokens without changing shell geometry',
+    'application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview',
+    'application Theme Service applies committed theme without rebuilding editor model or preview',
     'application mounts one App Shell with strict named slots',
     'application Help feature owns first-run visibility, navigation and scoped lifecycle',
     'application Settings Store cancels draft without persisting changes',

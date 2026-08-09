@@ -29,7 +29,7 @@ function freezeSnapshot(snapshot) {
 }
 
 export function createSettingsApplyCoordinator({ store, publish } = {}) {
-  if (!store || typeof store.applyDraft !== 'function' || !store.snapshot) {
+  if (!store || typeof store.applyDraft !== 'function' || typeof store.commit !== 'function' || !store.snapshot) {
     throw new TypeError('Settings Apply Coordinator requires an active Settings Store.');
   }
   if (typeof publish !== 'function') {
@@ -41,31 +41,41 @@ export function createSettingsApplyCoordinator({ store, publish } = {}) {
     if (destroyed) throw new Error('Settings Apply Coordinator has been destroyed.');
   };
 
+  function publishTransition(previousSnapshot, nextSnapshot) {
+    const previous = freezeSnapshot(previousSnapshot);
+    const snapshot = freezeSnapshot(nextSnapshot);
+    const changedIds = Object.freeze(
+      SETTING_IDS.filter(id => !valuesEqual(previous[id], snapshot[id]))
+    );
+    if (changedIds.length) {
+      const changes = Object.freeze(Object.fromEntries(
+        changedIds.map(id => [id, freezeValue(snapshot[id])])
+      ));
+      const impactEvents = Object.freeze([...new Set(
+        changedIds.map(id => getSettingDefinition(id).impactEvent)
+      )]);
+      publish(Object.freeze({
+        type: SETTINGS_CHANGED_EVENT,
+        previous,
+        snapshot,
+        changes,
+        changedIds,
+        impactEvents
+      }));
+    }
+    return snapshot;
+  }
+
   return Object.freeze({
     applyDraft() {
       assertActive();
-      const previous = freezeSnapshot(store.snapshot);
-      const snapshot = freezeSnapshot(store.applyDraft());
-      const changedIds = Object.freeze(
-        SETTING_IDS.filter(id => !valuesEqual(previous[id], snapshot[id]))
-      );
-      if (changedIds.length) {
-        const changes = Object.freeze(Object.fromEntries(
-          changedIds.map(id => [id, freezeValue(snapshot[id])])
-        ));
-        const impactEvents = Object.freeze([...new Set(
-          changedIds.map(id => getSettingDefinition(id).impactEvent)
-        )]);
-        publish(Object.freeze({
-          type: SETTINGS_CHANGED_EVENT,
-          previous,
-          snapshot,
-          changes,
-          changedIds,
-          impactEvents
-        }));
-      }
-      return snapshot;
+      const previous = store.snapshot;
+      return publishTransition(previous, store.applyDraft());
+    },
+    commit(changes) {
+      assertActive();
+      const previous = store.snapshot;
+      return publishTransition(previous, store.commit(changes));
     },
     destroy() {
       destroyed = true;

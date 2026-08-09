@@ -601,7 +601,6 @@ async function runAppSuite() {
         const host=document.getElementById('compatibility-business-ports');
         const port=host?.markdownEditorSettingsStorePort;
         if(!port)throw new Error('Settings Store port unavailable');
-        setAppTheme('light', false);
         const before={stored:localStorage.getItem('md_editor_theme'),committed:port.get('theme'),body:document.body.getAttribute('data-theme')};
         const open=()=>document.querySelector('[data-settings-open]')?.click();
 
@@ -748,6 +747,103 @@ async function runAppSuite() {
       assert.deepEqual(result.dark.geometry, result.light.geometry);
       assert.deepEqual(result.dark.document, result.light.document);
       assert.deepEqual(result.restored, result.light);
+    });
+
+    await test('application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview', async () => {
+      await loadAppFixture(browser.page);
+      const before = await browser.page.evaluate(`(()=>{
+        const editor=document.getElementById('editor');
+        const virtualEditor=editor?.virtualEditor||null;
+        const view=virtualEditor?.view||null;
+        const model=view?.state?.doc||null;
+        const preview=document.getElementById('preview');
+        const previewFirst=preview?.firstElementChild||null;
+        window.__themeToggleIdentity={editor,virtualEditor,view,model,preview,previewFirst};
+        return {theme:document.body.getAttribute('data-theme'),trigger:Boolean(document.querySelector('[data-theme-toggle]'))};
+      })()`);
+      assert.deepEqual(before, {theme:'light',trigger:true});
+
+      const toggle = async expected => {
+        await browser.page.evaluate(`document.querySelector('[data-theme-toggle]').click()`);
+        await browser.page.waitFor(`document.body.getAttribute('data-theme') === ${JSON.stringify(expected)}`, { description: 'Theme Toggle Controller apply ' + expected });
+        return browser.page.evaluate(`(()=>{
+          const probe=window.__themeToggleIdentity;
+          return {
+            theme:document.body.getAttribute('data-theme'),
+            stored:localStorage.getItem('md_editor_theme'),
+            sameEditor:probe.editor===document.getElementById('editor'),
+            sameVirtualEditor:probe.virtualEditor===document.getElementById('editor')?.virtualEditor,
+            sameView:probe.view===document.getElementById('editor')?.virtualEditor?.view,
+            sameModel:probe.model===document.getElementById('editor')?.virtualEditor?.view?.state?.doc,
+            samePreview:probe.preview===document.getElementById('preview'),
+            samePreviewFirst:probe.previewFirst===document.getElementById('preview')?.firstElementChild
+          };
+        })()`);
+      };
+
+      const dark = await toggle('dark');
+      assert.deepEqual(dark, {theme:'dark',stored:'dark',sameEditor:true,sameVirtualEditor:true,sameView:true,sameModel:true,samePreview:true,samePreviewFirst:true});
+      const light = await toggle('light');
+      assert.deepEqual(light, {theme:'light',stored:'light',sameEditor:true,sameVirtualEditor:true,sameView:true,sameModel:true,samePreview:true,samePreviewFirst:true});
+      await browser.page.evaluate('delete window.__themeToggleIdentity');
+    });
+
+    await test('application Theme Service applies committed theme without rebuilding editor model or preview', async () => {
+      await loadAppFixture(browser.page);
+      await setAppLayout(browser.page, 'preview');
+      await browser.page.waitFor(() => Boolean(document.getElementById('preview')?.firstElementChild), { timeoutMs: 10000, description: 'Theme Service preview fixture ready' });
+      const before = await browser.page.evaluate(`(()=>{
+        const editor=document.getElementById('editor');
+        const virtualEditor=editor?.virtualEditor||null;
+        const view=virtualEditor?.view||null;
+        const model=view?.state?.doc||null;
+        const preview=document.getElementById('preview');
+        const previewFirst=preview?.firstElementChild||null;
+        window.__themeServiceIdentity={editor,virtualEditor,view,model,preview,previewFirst};
+        return {
+          theme:document.body.getAttribute('data-theme'),
+          editor:Boolean(editor),virtualEditor:Boolean(virtualEditor),model:Boolean(model),previewFirst:Boolean(previewFirst),
+          legacyThemeGlobal:typeof window.setAppTheme
+        };
+      })()`);
+      assert.deepEqual(before, {theme:'light',editor:true,virtualEditor:true,model:true,previewFirst:true,legacyThemeGlobal:'undefined'});
+
+      const applyTheme = async theme => {
+        await browser.page.evaluate(`(()=>{
+          document.querySelector('[data-settings-open]')?.click();
+          const field=document.getElementById('setting-theme');
+          field.value=${JSON.stringify(theme)};
+          field.dispatchEvent(new Event('change',{bubbles:true}));
+          document.querySelector('#settings-modal .modal-footer .primary')?.click();
+        })()`);
+        const encodedTheme = JSON.stringify(theme);
+        await browser.page.waitFor(`(()=>document.body.getAttribute('data-theme')===${encodedTheme}&&!document.getElementById('settings-modal')?.classList.contains('show'))()`, { description: 'Theme Service apply ' + theme });
+        return browser.page.evaluate(`(()=>{
+          const probe=window.__themeServiceIdentity;
+          return {
+            theme:document.body.getAttribute('data-theme'),
+            sameEditor:probe.editor===document.getElementById('editor'),
+            sameVirtualEditor:probe.virtualEditor===document.getElementById('editor')?.virtualEditor,
+            sameView:probe.view===document.getElementById('editor')?.virtualEditor?.view,
+            sameModel:probe.model===document.getElementById('editor')?.virtualEditor?.view?.state?.doc,
+            samePreview:probe.preview===document.getElementById('preview'),
+            samePreviewFirst:probe.previewFirst===document.getElementById('preview')?.firstElementChild,
+            canvas:getComputedStyle(document.body).getPropertyValue('--color-canvas').trim()
+          };
+        })()`);
+      };
+
+      const dark = await applyTheme('dark');
+      assert.deepEqual(dark, {
+        theme:'dark',sameEditor:true,sameVirtualEditor:true,sameView:true,sameModel:true,
+        samePreview:true,samePreviewFirst:true,canvas:'#0c1017'
+      });
+      const light = await applyTheme('light');
+      assert.deepEqual(light, {
+        theme:'light',sameEditor:true,sameVirtualEditor:true,sameView:true,sameModel:true,
+        samePreview:true,samePreviewFirst:true,canvas:'#eef1f5'
+      });
+      await browser.page.evaluate('delete window.__themeServiceIdentity');
     });
 
     await test('application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy', async () => {

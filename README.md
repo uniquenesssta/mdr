@@ -2,4 +2,4 @@
 
 Tauri + Rust 桌面 Markdown 编辑器。完整架构与历史记录见 [docs/README.md](docs/README.md)。
 
-2026-08-09：Atomic 4.10 PASS：Settings UI 已迁入独立模块，13 项 Dialog 字段由 Section descriptors 驱动；Apply/Cancel、目录、颜色、自动保存及 ModalShell 生命周期已验证，旧静态 Settings Modal/inline handlers 已退出。4.1–4.10、architecture、Node 42/42、Browser Contract 10/10、build、Built App 15/15 全绿；4.11 未开始。
+2026-08-09：Atomic 4.11 PASS：Theme Service 与独立 Theme Toggle Controller 已接管提交态主题切换；旧 classic setAppTheme/toggleTheme 权威退出，主题通过 Settings 提交事件应用到 data-theme，切换不重建 editor/model/preview。4.1–4.11、architecture、Node、Browser Contract、build、Built App 均通过；未改依赖或锁文件，4.12 未开始。
