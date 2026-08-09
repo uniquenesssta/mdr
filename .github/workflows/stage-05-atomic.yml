@@ -1,4 +1,4 @@
-# Atomic Task 5.6 CodeMirror Extension Registry validation node.
+# Atomic Task 5.7 Pointer Selection validation node.
 name: Stage 5 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  extension-registry:
-    name: Verify Stage 5 CodeMirror Extension Registry
+  pointer-selection:
+    name: Verify Stage 5 Pointer Selection
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -88,6 +88,8 @@ jobs:
         run: node --test tests/unit/editor/codemirror-adapter.test.mjs
       - name: Verify Atomic Task 5.6 CodeMirror extension registry
         run: node --test tests/unit/editor/codemirror-extension-registry.test.mjs
+      - name: Verify Atomic Task 5.7 Pointer Selection
+        run: node --test tests/unit/editor/pointer-selection.test.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
       - name: Run architecture hard gate
@@ -104,10 +106,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-05/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 5.6 evidence
+      - name: Upload Atomic Task 5.7 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-05-extension-registry-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-05-pointer-selection-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-05
           if-no-files-found: error
           retention-days: 30
