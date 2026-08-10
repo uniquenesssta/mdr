@@ -1,0 +1,42 @@
+name: CR-02 Evidence Fix
+
+on:
+  push:
+    branches:
+      - agent/cr-02-stage2-ui-validation
+    paths:
+      - .github/workflows/cr-02-evidence-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/cr-02-stage2-ui-validation
+      - name: Align icon evidence with verified Stage 2 contract
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/stage-02/record-ui-foundation-evidence.mjs')
+          source = path.read_text(encoding='utf-8')
+          old = 'shellIconReferences.length !== 50'
+          new = 'shellIconReferences.length !== 47'
+          if source.count(old) != 1:
+              raise SystemExit(f'expected exactly one stale icon-count assertion, found {source.count(old)}')
+          path.write_text(source.replace(old, new), encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- scripts/stage-02/record-ui-foundation-evidence.mjs
+      - name: Commit scoped evidence fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/stage-02/record-ui-foundation-evidence.mjs
+          git commit -m "align Stage 2 icon evidence count"
+          git push origin HEAD:agent/cr-02-stage2-ui-validation
