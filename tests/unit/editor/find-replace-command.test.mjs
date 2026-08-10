@@ -81,7 +81,7 @@ test('find next advances and wraps through the adapter search boundary without c
   assert.equal(editor.sliceCalls.length, 0, 'search must not materialize the full document through sliceText');
 });
 
-test('native large-document search is an optional port and local search is used only when that port fails', async () => {
+test('native large-document search is an optional request-tagged port and local search is used only when that port fails', async () => {
   const editor = createSearchAdapter('alpha beta alpha');
   const command = createFindReplaceCommand(editor.adapter);
   const nativeCalls = [];
@@ -95,7 +95,7 @@ test('native large-document search is an optional port and local search is used 
     onNativeSearchError(error) { nativeErrors.push(error); }
   });
   assert.deepEqual(nativeMatch, { from: 11, to: 16 });
-  assert.deepEqual(nativeCalls, [{ query: 'alpha', from: 0, wrap: true }]);
+  assert.deepEqual(nativeCalls, [{ query: 'alpha', from: 0, wrap: true, requestId: 1 }]);
   assert.equal(editor.findCalls.length, 0, 'successful native search must not duplicate the scan locally');
 
   const expected = new Error('native unavailable');
@@ -106,6 +106,22 @@ test('native large-document search is an optional port and local search is used 
   assert.deepEqual(localMatch, { from: 0, to: 5 });
   assert.equal(nativeErrors.at(-1), expected);
   assert.deepEqual(editor.findCalls.at(-1), { query: 'alpha', from: 16, wrap: true });
+});
+
+test('later operations invalidate stale native search completions before they can advance the shared cursor', async () => {
+  const editor = createSearchAdapter('alpha beta alpha');
+  const command = createFindReplaceCommand(editor.adapter);
+  let resolveFirst;
+  const first = command.findNext('alpha', {
+    nativeSearch: () => new Promise(resolve => { resolveFirst = resolve; })
+  });
+
+  const second = command.findNext('beta');
+  assert.deepEqual(await second, { from: 6, to: 10 });
+  resolveFirst({ from: 11, to: 16 });
+  assert.equal(await first, undefined, 'stale native completion must be discarded');
+
+  assert.deepEqual(await command.findNext('alpha'), { from: 11, to: 16 }, 'cursor must remain owned by the latest completed operation');
 });
 
 test('replace one reads only the selected range, submits one replacement transaction and returns the next match', async () => {
@@ -124,17 +140,23 @@ test('replace one reads only the selected range, submits one replacement transac
   assert.equal(editor.replaceRangeCalls.length, 1, 'a non-matching selection must not mutate text');
 });
 
-test('replace all delegates one bulk transaction and never reads the full document in command code', () => {
+test('replace all delegates one bulk transaction, invalidates pending searches and never reads the full document in command code', async () => {
   const editor = createSearchAdapter('x alpha alpha y');
   const command = createFindReplaceCommand(editor.adapter);
+  let resolvePending;
+  const pending = command.findNext('alpha', {
+    nativeSearch: () => new Promise(resolve => { resolvePending = resolve; })
+  });
 
   assert.equal(command.replaceAll('alpha', 'A'), 2);
+  resolvePending({ from: 2, to: 7 });
+  assert.equal(await pending, undefined);
   assert.equal(editor.text, 'x A A y');
   assert.deepEqual(editor.replaceAllCalls, [{ query: 'alpha', replacement: 'A' }]);
   assert.equal(editor.sliceCalls.length, 0);
 });
 
-test('empty queries are no-ops and destroy clears the cursor lifecycle without destroying the injected adapter', async () => {
+test('empty queries are no-ops and destroy invalidates in-flight results without destroying the injected adapter', async () => {
   const editor = createSearchAdapter('alpha');
   const command = createFindReplaceCommand(editor.adapter);
 
@@ -144,8 +166,14 @@ test('empty queries are no-ops and destroy clears the cursor lifecycle without d
   assert.equal(editor.replaceRangeCalls.length, 0);
   assert.equal(editor.replaceAllCalls.length, 0);
 
+  let resolvePending;
+  const pending = command.findNext('alpha', {
+    nativeSearch: () => new Promise(resolve => { resolvePending = resolve; })
+  });
   command.destroy();
   command.destroy();
+  resolvePending({ from: 0, to: 5 });
+  assert.equal(await pending, undefined, 'destroy must invalidate an in-flight native result');
   assert.throws(() => command.replaceAll('alpha', 'x'), /destroyed/i);
   await assert.rejects(command.findNext('alpha'), /destroyed/i);
   assert.equal(typeof editor.adapter.findText, 'function');
