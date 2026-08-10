@@ -62,3 +62,37 @@
 
 - 剩余 classic 动态 UI 文本仍通过 scoped I18n compatibility port 调用 `t()`；它们是翻译消费者，不拥有 locale 状态。后续 classic feature 迁移时该 compatibility port 可随最后消费者一起删除。
 - 本节点不迁移其它 classic feature，也不提前开始下一阶段。
+
+## CR-04 — Stage 4 Taskbook Conformance（2026-08-10）
+
+### 审计与修复
+
+CR-04 以 `agent/plan` 的 Stage 4 任务书为唯一阶段结构基准，并以正式 `rewrite/stage-05@c6b582d1b2f8addccba7151e42a81ef4a0be56da` 为实施基线。运行职责、稳定公共接口、目标文件清单与既有 Stage 4 行为均已核对；未发现需要改变翻译、Settings、Help 或 Theme 运行语义的功能缺陷。
+
+任务书逐文件检查表要求规划文件明确记录职责、允许/禁止依赖、导出 API、状态/副作用以及生命周期或纯模块性质。新增 `tests/architecture/stage-04-taskbook-conformance.test.mjs` 后，初始审计 run `31362726274` 按预期失败并精确暴露 32 个既存声明缺口：13 个 I18n 文件缺完整模块职责头，17 个 Settings 文件已有职责/依赖/导出/副作用说明但缺明确 Lifecycle 声明，2 个 Theme CSS 文件缺对应职责说明；Help 规划文件与 Settings Navigation 已满足要求。
+
+修复只补齐这些模块契约说明，没有改变任何可执行业务语句。I18n Service、Locale Registry、Translation Bindings 和 10 个 locale 数据文件补齐职责边界；17 个 Settings 文件补齐与真实实现一致的生命周期/纯模块声明；light/dark theme 只补充 token-only 样式职责说明。focused run `31362836418` 通过新增 contract test 与 `git diff --check`。
+
+永久 Stage 4 workflow 新增独立 `Verify Stage 4 taskbook file contracts` 步骤；原有 4.1–4.12、locale audit、architecture、Node、Browser Contract、build、Built App 与 evidence 门禁均保留，未删除、跳过或放宽。
+
+### 验证中发现并修正的问题
+
+首次验证 PR 候选的 Stage 4 run `31363101104` 在 Atomic 4.11 Theme 契约处失败：最初将 CSS 职责注释放在文件第一个 selector 之前，破坏了既有 Stage 2 `themes.test.mjs` 对 `light.css` 必须以 `:root {` 开始的硬结构契约。没有修改或放宽该测试；职责说明被移动到第一个 selector block 内顶部，所有 theme token、selector 和运行行为保持不变。
+
+最终候选 `8e51f1eefd91de4461ce855b86c28bbffba8d81c` 的 Stage 5 run `31363240550` 首次在 Browser Contract 启动 Chromium 时出现 `CDP endpoint did not become ready: fetch failed`；在此之前 Stage 4 handoff、5.1–5.8、冻结 DocumentModel、architecture 和 Node 均已通过。仅重跑同一失败 job，未修改源码或门禁；重跑后 Browser Contract、build、Built App 和 evidence 全部通过，因此该次失败记录为 CI Chromium 启动瞬态故障，不作为代码通过结果隐藏。
+
+### 最终候选验证
+
+同一候选 `8e51f1eefd91de4461ce855b86c28bbffba8d81c` 已完成：
+
+- Stage 0 Baseline Verification `31363240519`：PASS；Node、Browser Contract、Build、Built App、`cargo test --locked`、`cargo check --locked`、extended Tauri Linux build、evidence 与 hard gate 全部成功。
+- Stage 1 Atomic Verification `31363240522`：PASS。
+- Stage 2 Atomic Verification `31363240542`：PASS。
+- Stage 3 Atomic Verification `31363240521`：PASS。
+- Stage 4 Atomic Verification `31363240558`：PASS；4.1–4.12、新增 taskbook file contract、locale audit、architecture、Node、Browser Contract、build、Built App 与 evidence 全部成功。
+- Stage 5 Atomic Verification `31363240550`：失败 job 原样重跑后 PASS。
+- Stage 3 Windows Window Automation `31363240507`：PASS；Windows release build、隔离 WebDriver host build、真实原生窗口自动化与 evidence 全部成功。
+
+### 影响与限制
+
+CR-04 没有修改翻译值、Settings key/default/序列化与持久化格式、Help 内容、Theme token 值、Platform、Rust、冻结模型、生产依赖或 lockfile，也没有开始 Stage 5 后续 Atomic Task。当前执行环境没有可用的用户本地 Git checkout，因此无法替用户确认其电脑工作区中的未提交修改；远端实施通过锁定正式 SHA、隔离分支、净 diff 与 GitHub Actions 完成验证。
