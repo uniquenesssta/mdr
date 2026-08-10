@@ -37,16 +37,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -q 'markdownEditorEditorCommandPort' public/app/editor-tools.js; then
+          if ! grep -q 'markdownEditorEditorCommandPort' public/app/editor-tools.js; then
+            node scripts/stage-05/materialize-atomic-510.mjs
+          fi
+          if grep -q 'editorToolsCommandPort\[method\]' public/app/editor-tools.js; then
+            node scripts/stage-05/repair-atomic-510-list-cutover.mjs
+          fi
+          git diff --check
+          if git diff --quiet -- public/app/editor-tools.js tests/architecture/fixtures/production-modules.json; then
             echo 'Atomic 5.10 classic cutover already materialized.'
             exit 0
           fi
-          node scripts/stage-05/materialize-atomic-510.mjs
-          git diff --check
           git config user.name 'uniquenesssta'
           git config user.email 'uniquenesssta@live.com'
           git add public/app/editor-tools.js tests/architecture/fixtures/production-modules.json
-          git commit -m 'candidate: cut over Atomic 5.10 classic callers'
+          git commit -m 'candidate: finalize Atomic 5.10 classic callers'
           git push origin HEAD:${{ github.head_ref }}
       - uses: actions/setup-node@v4
         with:
