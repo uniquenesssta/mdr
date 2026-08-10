@@ -214,17 +214,21 @@ test('the desktop dialog client is the sole production owner of the Tauri dialog
   assert.match(publicEntry, /desktop\/dialog-client\.js/);
 });
 
-test('desktop platform exposes the dedicated DialogsPort and classic callers consume it through the scoped bridge', async () => {
+test('desktop platform exposes the dedicated DialogsPort and current callers keep dialog ownership behind Platform', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
   const core = await readFile(new URL('../../../public/app/core.js', import.meta.url), 'utf8');
   const exportSource = await readFile(new URL('../../../public/app/export.js', import.meta.url), 'utf8');
+  const settingsController = await readFile(
+    new URL('../../../src/features/settings/application/settings-controller.js', import.meta.url),
+    'utf8'
+  );
   assert.match(desktop, /createDialogClient\(/);
   assert.match(desktop, /dialogs: dialogClient/);
   assert.match(core, /call\('dialogs', 'openFile'/);
-  assert.match(core, /call\('dialogs', 'openDirectory'/);
   assert.match(core, /call\('dialogs', 'confirm'/);
   assert.match(exportSource, /call\('dialogs', 'saveFile'/);
-  assert.doesNotMatch(core + exportSource, /markdownEditorNative/);
+  assert.match(settingsController, /platform\.call\('dialogs', 'openDirectory'/);
+  assert.doesNotMatch(core + exportSource + settingsController, /markdownEditorNative|@tauri-apps\/plugin-dialog/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.4 after invoke and before later adapters', async () => {
