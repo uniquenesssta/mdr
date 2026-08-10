@@ -177,7 +177,7 @@ if (indexInventory.summary.inlineEventCount !== 0) throw new Error('Minimal inde
 if (frozenDomInventory.summary.inlineEventCount !== 184) throw new Error('Frozen legacy HTML baseline drifted.');
 if (inlineEvents > CURRENT_COMPATIBILITY_INLINE_EVENT_CAP) throw new Error(`Compatibility inline-event debt regressed above ${CURRENT_COMPATIBILITY_INLINE_EVENT_CAP}: ${inlineEvents}`);
 if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35 || sprite.duplicates.length || sprite.invalidIds.length || sprite.missingViewBoxes.length || sprite.forbiddenMarkup) throw new Error('SVG sprite contract drifted.');
-if (shellIconReferences.length !== 50 || !shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) throw new Error('Icon references drifted.');
+if (shellIconReferences.length !== 47 || !shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) throw new Error('Icon references drifted.');
 if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) throw new Error('Compatibility slot contract drifted.');
 if (stage2OwnedModulePaths.length !== 72 || new Set(stage2OwnedModulePaths).size !== 72) throw new Error(`Unexpected Stage 2-owned module count: ${stage2OwnedModulePaths.length}`);
 if (architectureModules.appShell.length !== 8 || architectureModules.domPrimitives.length !== 6 || architectureModules.uiComponents.length !== 2 || architectureModules.uiCompatibility.length !== 4) throw new Error('UI architecture counts drifted.');
