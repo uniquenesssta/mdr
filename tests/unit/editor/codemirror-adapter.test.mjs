@@ -251,15 +251,17 @@ test('adapter listener failures are reported without blocking committed state or
   assert.match(reported[0].message, /update listener failed/i);
 });
 
-test('integration state reset keeps raw CodeMirror access private while preserving document reset behavior', () => {
-  const { api, integration } = createAdapter({ initialValue: 'old' });
+test('document reset replaces CodeMirror state and clears transaction history without a second reset-history path', () => {
+  const { api, integration } = createAdapter({ initialValue: 'old', extensions: [history()] });
   assert.equal(Object.hasOwn(api, 'readView'), false);
   assert.equal(Object.hasOwn(api, 'dispatchEffects'), false);
-  assert.equal(integration.resetDocument(['new', '\nvalue'], { selection: 'end', extensions: [] }), 9);
+  api.applyTransaction({ changes: { from: 3, to: 3, insert: '!' }, selection: { anchor: 4 } });
+  assert.equal(api.getText(), 'old!');
+  assert.equal(integration.resetDocument(['new', '\nvalue'], { selection: 'end', extensions: [history()] }), 9);
   assert.equal(api.getText(), 'new\nvalue');
   assert.equal(api.getSelection().anchor, 9);
-  integration.resetHistory({ extensions: [] });
-  assert.equal(api.getText(), 'new\nvalue');
+  assert.equal(api.undo(), false, 'a new document state must not retain the previous document history');
+  assert.equal(Object.hasOwn(integration, 'resetHistory'), false);
 });
 
 test('destroy is idempotent, releases the view, and makes later adapter operations terminal', () => {

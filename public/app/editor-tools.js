@@ -1,8 +1,10 @@
 const editorToolsCompatibilityHost = document.getElementById('compatibility-business-ports');
 const editorToolsSettingsStorePort = editorToolsCompatibilityHost?.markdownEditorSettingsStorePort;
 const editorToolsEditorControllerPort = editorToolsCompatibilityHost?.markdownEditorEditorControllerPort;
+const editorToolsHistoryPort = editorToolsCompatibilityHost?.markdownEditorEditorHistoryPort;
 if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!editorToolsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
+if (!editorToolsHistoryPort) throw new Error('Editor History compatibility port is unavailable.');
 
     // 清空文档
     function clearDoc() {
@@ -14,42 +16,13 @@ if (!editorToolsEditorControllerPort) throw new Error('Editor Controller compati
       }
     }
 
-    // 历史记录
+    // 历史分组、撤销与重做只通过 Stage 5.9 History Adapter。
     function pushHistory() {
-      clearTimeout(historyTimer);
-      if (editor.virtualEditor?.isolateHistory) {
-        editor.virtualEditor.isolateHistory();
-        return;
-      }
-      recordHistory();
-    }
-
-    function recordHistory() {
-      if (editor.virtualEditor) return;
-      const text = editor.value;
-      if (text === lastHistoryText) return;
-      historyStack = historyStack.slice(0, historyIndex + 1);
-      historyStack.push(text);
-      if (historyStack.length > MAX_HISTORY) historyStack.shift();
-      historyIndex = historyStack.length - 1;
-      lastHistoryText = text;
+      editorToolsHistoryPort.isolate();
     }
 
     function undo() {
-      if (editor.virtualEditor?.undo) {
-        if (!editor.virtualEditor.undo()) return;
-        updatePreview();
-        updateCount();
-        autoSave();
-        getActiveEditor().focus();
-        showToast(t('toastUndone'));
-        return;
-      }
-      if (historyIndex <= 0) return;
-      historyIndex--;
-      editorToolsEditorControllerPort.setText(historyStack[historyIndex]);
-      lastHistoryText = editor.value;
-      if (previewMode === 'source') previewSource.value = editor.value;
+      if (!editorToolsHistoryPort.undo()) return;
       updatePreview();
       updateCount();
       autoSave();
@@ -58,20 +31,7 @@ if (!editorToolsEditorControllerPort) throw new Error('Editor Controller compati
     }
 
     function redo() {
-      if (editor.virtualEditor?.redo) {
-        if (!editor.virtualEditor.redo()) return;
-        updatePreview();
-        updateCount();
-        autoSave();
-        getActiveEditor().focus();
-        showToast(t('toastRedone'));
-        return;
-      }
-      if (historyIndex >= historyStack.length - 1) return;
-      historyIndex++;
-      editorToolsEditorControllerPort.setText(historyStack[historyIndex]);
-      lastHistoryText = editor.value;
-      if (previewMode === 'source') previewSource.value = editor.value;
+      if (!editorToolsHistoryPort.redo()) return;
       updatePreview();
       updateCount();
       autoSave();

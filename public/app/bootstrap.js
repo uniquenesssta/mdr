@@ -56,16 +56,6 @@ if (!bootstrapEditorControllerPort) throw new Error('Editor Controller compatibi
       updateCount();
       setPreviewMode(previewMode, true);
 
-      // CodeMirror 使用事务历史；仅旧编辑器兼容路径保留全文快照。
-      if (editor.virtualEditor) {
-        historyStack = [];
-        historyIndex = -1;
-        lastHistoryText = null;
-      } else {
-        historyStack = [editor.value];
-        historyIndex = 0;
-        lastHistoryText = editor.value;
-      }
 
       // 恢复用户选择的布局；单视图模式复用同一 CodeMirror 文档状态。
       const savedLayoutMode = restoredSettings.layoutMode;

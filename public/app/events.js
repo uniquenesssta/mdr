@@ -8,10 +8,6 @@
     eventsEditorControllerPort.subscribeTransactions(transaction => {
       if (!transaction.interactive) return;
       ensureCurrentDocumentForEditing();
-      if (!editor.virtualEditor) {
-        clearTimeout(historyTimer);
-        historyTimer = setTimeout(recordHistory, 400);
-      }
       editorLineIndexText = null;
       editorMetricText = null;
       cachedHeadingSource = null;

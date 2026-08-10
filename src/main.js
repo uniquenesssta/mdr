@@ -6,7 +6,9 @@ import { configurePerformancePlatform } from './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
 import {
   createEditorController,
-  mountClassicEditorControllerPort
+  createEditorHistoryAdapter,
+  mountClassicEditorControllerPort,
+  mountClassicEditorHistoryPort
 } from './features/editor/index.js';
 import {
   createDocumentModel,
@@ -97,15 +99,22 @@ async function loadAppModules() {
   window.markdownEditorSelectionController = createSelectionSyncController(editorHost, previewHost);
   const documentModel = createDocumentModel(editorHost);
   let editorController;
+  let editorHistoryAdapter;
   let editorControllerPort;
+  let editorHistoryPort;
   try {
     editorController = createEditorController({
       model: documentModel,
       adapter: virtualEditor,
       reportError(message, error) { console.error(message, error); }
     });
+    editorHistoryAdapter = createEditorHistoryAdapter({ adapter: virtualEditor });
     editorControllerPort = mountClassicEditorControllerPort(compatibilityPlatformHost, editorController);
+    editorHistoryPort = mountClassicEditorHistoryPort(compatibilityPlatformHost, editorHistoryAdapter);
   } catch (error) {
+    editorHistoryPort?.destroy?.();
+    editorControllerPort?.destroy?.();
+    editorHistoryAdapter?.destroy?.();
     editorController?.destroy?.();
     documentModel.destroy();
     virtualEditor.destroy();
@@ -159,7 +168,9 @@ async function loadAppModules() {
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    editorHistoryPort.destroy();
     editorControllerPort.destroy();
+    editorHistoryAdapter.destroy();
     editorController.destroy();
     documentModel.destroy();
     virtualEditor.destroy();
@@ -174,7 +185,9 @@ async function loadAppModules() {
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    editorHistoryPort.destroy();
     editorControllerPort.destroy();
+    editorHistoryAdapter.destroy();
     editorController.destroy();
     documentModel.destroy();
     virtualEditor.destroy();

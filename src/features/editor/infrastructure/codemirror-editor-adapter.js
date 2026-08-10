@@ -545,16 +545,6 @@ export function createCodeMirrorAdapter({
       }));
       return documentText.length;
     },
-    resetHistory(options = {}) {
-      assertActive();
-      const selection = view.state.selection;
-      const documentText = view.state.doc;
-      view.setState(EditorState.create({
-        doc: documentText,
-        selection,
-        extensions: withAdapterExtension(options.extensions || extensions)
-      }));
-    },
     readView(reader) {
       assertActive();
       if (typeof reader !== 'function') throw new TypeError('CodeMirror adapter readView requires a reader function.');
