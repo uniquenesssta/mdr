@@ -1,4 +1,4 @@
-# Atomic Task 5.8 Editor Controller validation node.
+# Stage 5 completed-scope validation through Atomic 5.8 plus CR-05 taskbook conformance.
 name: Stage 5 Atomic Verification
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   editor-controller:
-    name: Verify Stage 5 Editor Controller
+    name: Verify Stage 5 Through Editor Controller
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -92,6 +92,8 @@ jobs:
         run: node --test tests/unit/editor/pointer-selection.test.mjs
       - name: Verify Atomic Task 5.8 Editor Controller
         run: node --test tests/unit/editor/editor-controller.test.mjs
+      - name: Verify CR-05 Stage 5 editor infrastructure conformance
+        run: node --test tests/architecture/stage-05-editor-infrastructure-conformance.test.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
       - name: Run architecture hard gate
