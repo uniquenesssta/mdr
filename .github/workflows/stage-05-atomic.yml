@@ -1,4 +1,4 @@
-# Stage 5 completed-scope validation through Atomic 5.10 plus CR-05 taskbook conformance.
+# Stage 5 completed-scope validation through Atomic 5.11 plus CR-05 taskbook conformance.
 name: Stage 5 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  editor-basic-commands:
-    name: Verify Stage 5 Through Basic Commands
+  editor-find-replace:
+    name: Verify Stage 5 Through Find Replace
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -102,6 +102,11 @@ jobs:
           node --test
           tests/unit/editor/editor-command-service.test.mjs
           tests/architecture/stage-05-basic-command-boundary.test.mjs
+      - name: Verify Atomic Task 5.11 Find Replace
+        run: >-
+          node --test
+          tests/unit/editor/find-replace-command.test.mjs
+          tests/architecture/stage-05-find-replace-boundary.test.mjs
       - name: Verify CR-05 Stage 5 editor infrastructure conformance
         run: node --test tests/architecture/stage-05-editor-infrastructure-conformance.test.mjs
       - name: Verify frozen DocumentModel remains exact
@@ -120,10 +125,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-05/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 5.10 evidence
+      - name: Upload Atomic Task 5.11 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-05-editor-basic-commands-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-05-editor-find-replace-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-05
           if-no-files-found: error
           retention-days: 30
