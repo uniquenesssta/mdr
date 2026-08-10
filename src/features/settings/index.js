@@ -3,6 +3,7 @@
  * Imports: Settings feature modules only.
  * Exports: Schema/default/validation/serialization, immutable Section Modules, Settings Repository, Settings Store and classic Store compatibility mount contracts.
  * State/side effects: Import-only facade; no DOM, storage lookup or runtime state ownership.
+  * Lifecycle: Import-only public facade; no runtime lifecycle or state ownership.
  */
 export { SETTING_DEFAULTS } from './domain/settings-defaults.js';
 export {

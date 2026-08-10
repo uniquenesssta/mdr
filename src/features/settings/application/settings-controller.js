@@ -3,6 +3,7 @@
  * Imports: Generic DOM event primitives and Settings section registry only; Store, View, Apply Coordinator and platform are injected.
  * Exports: createSettingsController().
  * State/side effects: Owns dialog-session/navigation/request-generation state and scoped listeners; all Settings values remain Store draft/committed state.
+  * Lifecycle: Explicit destroyable controller; destroy releases listeners, draft session, coordinator and View resources.
  */
 import { createEventScope, requireElementRef } from '../../../ui/dom/index.js';
 import { SETTINGS_SECTION_IDS } from '../sections/section-registry.js';

@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Validate and expose the immutable short-text locale dictionaries and their canonical key/placeholder contract.
+ * Imports: Short-text locale data modules only; DOM, Help content, persistence and runtime services are forbidden.
+ * Exports: createLocaleRegistry(), localeRegistry and LOCALE_IDS.
+ * State/side effects: Immutable registry data only; no runtime mutation or side effects.
+ * Lifecycle: Import-only data/validation module; no runtime lifecycle.
+ */
 import zhCN from './locales/zh-CN.js';
 import zhTW from './locales/zh-TW.js';
 import en from './locales/en.js';

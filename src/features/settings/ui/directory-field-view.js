@@ -3,6 +3,7 @@
  * Imports: Generic DOM primitives only.
  * Exports: createDirectoryFieldView().
  * State/side effects: Owns field DOM/listeners and busy presentation only; directory platform calls and Settings draft updates are controller-owned.
+  * Lifecycle: Explicit destroyable field View; destroy releases listeners and owned DOM.
  */
 import { createEventScope, createSafeElement, requireElementRef } from '../../../ui/dom/index.js';
 

@@ -3,6 +3,7 @@
  * Imports: None; validation definitions are injected by the schema.
  * Exports: isValidSettingValue(), assertValidSettingValue(), normalizeSettingValue().
  * State/side effects: Pure functions only; no DOM, storage, platform or lifecycle side effects.
+  * Lifecycle: Pure validation module; no runtime lifecycle or owned state.
  */
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 

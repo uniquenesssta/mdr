@@ -3,6 +3,7 @@
  * Imports: None.
  * Exports: SETTING_DEFAULTS.
  * State/side effects: Frozen data only; no DOM, storage, platform or lifecycle side effects.
+  * Lifecycle: Import-only immutable defaults module; no runtime lifecycle.
  */
 const EMPTY_TOOLBAR_ITEMS = Object.freeze([]);
 

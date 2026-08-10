@@ -3,6 +3,7 @@
  * Imports: Generic DOM primitives only.
  * Exports: createAutosaveFieldView().
  * State/side effects: Owns only field DOM/listeners and transient validation presentation; Settings value changes are emitted to the controller.
+  * Lifecycle: Explicit destroyable field View; destroy releases listeners and owned DOM.
  */
 import { createEventScope, createSafeElement, requireElementRef } from '../../../ui/dom/index.js';
 

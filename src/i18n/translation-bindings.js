@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Bind explicit View text/title/placeholder/alt/aria-label targets to the injected I18n service.
+ * Imports: I18n service and explicit View roots are injected; locale dictionaries, Settings state and persistence are forbidden.
+ * Exports: createTranslationBindings().
+ * State/side effects: Owns only bounded DOM translation updates plus locale/observer subscriptions.
+ * Lifecycle: Explicit destroyable binding set; destroy releases subscriptions/observers before becoming terminal.
+ */
 const VIEW_NAMES = Object.freeze(['menu', 'toolbar', 'sidebar', 'editor', 'preview', 'status', 'overlay']);
 const BINDING_DEFINITIONS = Object.freeze([
   Object.freeze({ datasetKey: 'i18n', kind: 'text' }),

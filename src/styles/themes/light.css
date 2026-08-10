@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Declare light-theme semantic token values only.
+ * Imports: Foundation token semantics through the CSS cascade; component/feature implementation rules are forbidden.
+ * Exports: Light-theme CSS custom-property values consumed by shared styles.
+ * State/side effects: Declarative CSS only; no JavaScript state or persistence.
+ * Lifecycle: Stylesheet-only contract; no runtime lifecycle.
+ */
 :root {
   /* Color roles */
   --color-canvas: #eef1f5;

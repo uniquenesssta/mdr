@@ -3,6 +3,7 @@
  * Imports: Settings section registry, Settings field factory and generic UI primitives only; no Store, platform, persistence or business runtime.
  * Exports: createSettingsDialogView().
  * State/side effects: Owns dialog DOM/listeners and the ordered field View collection; all Settings values remain caller-owned draft state.
+  * Lifecycle: Explicit destroyable View; destroy releases owned field/navigation resources and DOM listeners.
  */
 import { ModalShell } from '../../../ui/components/modal-shell.js';
 import { createIconView } from '../../../ui/components/icon-view.js';

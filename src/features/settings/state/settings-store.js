@@ -3,6 +3,7 @@
  * Imports: Settings domain schema and validation contracts only; persistence is injected.
  * Exports: createSettingsStore().
  * State/side effects: Explicit committed/draft state; persistence occurs only through the injected persist callback on applyDraft()/commit(); no DOM or storage lookup.
+  * Lifecycle: Explicit destroyable Store; destroy discards draft state without persistence and makes operations terminal.
  */
 import { getSettingDefinition, SETTING_IDS } from '../domain/settings-schema.js';
 import { normalizeSettingValue } from '../domain/settings-validation.js';
