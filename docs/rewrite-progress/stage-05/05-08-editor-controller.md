@@ -90,6 +90,10 @@
 
 正式实现提交 `da8c1006e92cc786597c384ae5bd074d9cd43b87` 的 Stage 5 run `31348701732`：**SUCCESS**。所有 5.1–5.8 专项、冻结 DocumentModel、architecture、Node、Browser Contract、build、Built App 及 evidence upload 均完成并通过。
 
+### 文档闭环回归
+
+首个文档闭环提交 `82b69db4ec201e43a7e8c2ae381e32d1a55ee199` 的 run `31348854833` 在 Node regression **43/44** 停止。唯一失败为 `tests/documentation-layout.test.mjs` 要求根 README 必须保留 `[docs/README.md](docs/README.md)` 链接；5.1–5.8 专项、冻结模型和 architecture 在该 run 中均已通过，后续 Browser/Build/Built App 按硬门禁自动跳过。修复只恢复既有文档入口并保留 5.8 验收记录链接，不修改生产源码、不删除或放宽测试；修复后的文档 HEAD 必须重新通过同一正式 workflow 后才可作为最终闭环 HEAD。
+
 ## 环境限制与剩余风险
 
 当前执行环境无法通过本地 Git checkout 访问 GitHub（DNS 解析受阻），因此无法对用户本地工作区执行 `git status --short --branch`，也不能证明用户本地是否存在未提交修改。替代验证采用：正式远端分支精确 SHA 锁定、`force=false` fast-forward 发布、GitHub clean runner 全链验证，以及发布前后远端 HEAD/tree 核对。该限制不影响本次正式远端 commit/CI 结果，但用户本地工作区状态仍需用户本地自行确认。
