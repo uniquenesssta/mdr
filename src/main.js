@@ -5,8 +5,10 @@ import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
 import { configurePerformancePlatform } from './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
 import {
+  createEditorCommandService,
   createEditorController,
   createEditorHistoryAdapter,
+  mountClassicEditorCommandPort,
   mountClassicEditorControllerPort,
   mountClassicEditorHistoryPort
 } from './features/editor/index.js';
@@ -100,8 +102,10 @@ async function loadAppModules() {
   const documentModel = createDocumentModel(editorHost);
   let editorController;
   let editorHistoryAdapter;
+  let editorCommandService;
   let editorControllerPort;
   let editorHistoryPort;
+  let editorCommandPort;
   try {
     editorController = createEditorController({
       model: documentModel,
@@ -109,11 +113,15 @@ async function loadAppModules() {
       reportError(message, error) { console.error(message, error); }
     });
     editorHistoryAdapter = createEditorHistoryAdapter({ adapter: virtualEditor });
+    editorCommandService = createEditorCommandService({ adapter: virtualEditor });
     editorControllerPort = mountClassicEditorControllerPort(compatibilityPlatformHost, editorController);
     editorHistoryPort = mountClassicEditorHistoryPort(compatibilityPlatformHost, editorHistoryAdapter);
+    editorCommandPort = mountClassicEditorCommandPort(compatibilityPlatformHost, editorCommandService);
   } catch (error) {
+    editorCommandPort?.destroy?.();
     editorHistoryPort?.destroy?.();
     editorControllerPort?.destroy?.();
+    editorCommandService?.destroy?.();
     editorHistoryAdapter?.destroy?.();
     editorController?.destroy?.();
     documentModel.destroy();
@@ -168,8 +176,10 @@ async function loadAppModules() {
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    editorCommandPort.destroy();
     editorHistoryPort.destroy();
     editorControllerPort.destroy();
+    editorCommandService.destroy();
     editorHistoryAdapter.destroy();
     editorController.destroy();
     documentModel.destroy();
@@ -185,8 +195,10 @@ async function loadAppModules() {
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    editorCommandPort.destroy();
     editorHistoryPort.destroy();
     editorControllerPort.destroy();
+    editorCommandService.destroy();
     editorHistoryAdapter.destroy();
     editorController.destroy();
     documentModel.destroy();
