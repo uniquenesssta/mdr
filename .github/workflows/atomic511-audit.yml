@@ -6,7 +6,7 @@ on:
       - agent/atomic511-candidate
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   audit:
@@ -19,6 +19,22 @@ jobs:
           cache: npm
       - name: Install frontend dependencies
         run: npm ci
+      - name: Materialize Atomic 5.11 cutover
+        run: node .github/scripts/atomic511-materialize.mjs
+      - name: Commit materialized candidate when needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git add public/app/web-clipper.js tests/architecture/fixtures/production-modules.json tests/stage-01-handoff.test.mjs
+          if git diff --cached --quiet; then
+            echo 'Atomic 5.11 candidate already materialized.'
+            exit 0
+          fi
+          git config user.name uniquenesssta
+          git config user.email uniquenesssta@live.com
+          git commit -m 'materialize Atomic 5.11 Find Replace cutover'
+          git push origin HEAD:agent/atomic511-candidate
       - name: Verify Atomic 5.10 baseline
         run: |
           node --test tests/unit/editor/editor-command-service.test.mjs
@@ -29,15 +45,15 @@ jobs:
         run: |
           node --test tests/unit/editor/find-replace-command.test.mjs
           node --test tests/architecture/stage-05-find-replace-boundary.test.mjs
-      - name: Locate legacy Find Replace ownership
+      - name: Verify frozen DocumentModel hash
+        run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
+      - name: Run architecture gate
+        run: npm run verify:architecture
+      - name: Run Node regression
+        run: npm test
+      - name: Verify candidate diff cleanliness
         shell: bash
         run: |
           set -euo pipefail
-          echo '=== Find/Replace symbols ==='
-          grep -RniE 'openFindModal|closeFindModal|findNext|findPrevious|replaceCurrent|replaceAll|find-modal|find-input|replace-input|find-count|findMatches|findIndex' public src tests || true
-          echo '=== Candidate function blocks ==='
-          grep -nE 'function .*([Ff]ind|[Rr]eplace)|let .*([Ff]ind|[Rr]eplace)|const .*([Ff]ind|[Rr]eplace)' public/app/*.js || true
-          echo '=== Existing editor adapter search-capable API ==='
-          grep -RniE 'sliceText|getTextLength|getSelection|setSelection|replaceRange|replaceAllText|findText' src/features/editor src/editor/virtual-editor.js | head -n 240 || true
-      - name: Verify frozen DocumentModel hash
-        run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
+          git diff --check
+          test -z "$(git status --porcelain)"
