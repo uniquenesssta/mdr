@@ -24,7 +24,9 @@ No Rust command, DTO, persistence format, production dependency, package metadat
 
 Historical Stage 3 client tests keep their low-level command, error, cancellation and lifecycle assertions, while former facade-integration assertions now verify the final `desktop-platform/createPlatform` composition and real callers. Focused 3.12 tests verify facade deletion, scoped classic bridging, ESM Port injection and native drag/drop responsibility boundaries.
 
-Stage 3 evidence targets 174 production modules / 36 platform modules and chains a dedicated `03-12-platform-cutover-evidence.json` recorder. The final recorder rejects any production `markdownEditorNative` owner, Tauri import outside platform desktop adapters, replacement global Platform facade, stale Windows automation dependency or missing 3.12 workflow gate.
+The Stage 3 closeout snapshot contained **174 production modules**, while the Stage 3-owned Platform surface contained **36 modules**. CR-03 clarifies that 174 is historical closeout evidence, not a permanent whole-application module count: later feature stages may add or remove non-Platform modules. The hard Stage 3 structural invariant remains the exact 36-module Platform surface together with its exact directory/file ownership, Port contracts, Tauri-import ownership and no-native-global guarantees. `03-12-platform-cutover-evidence.json` records both the historical Stage 3 count and the current observed production count without making later-stage module growth or cleanup a Stage 3 failure.
+
+The final recorder rejects any production `markdownEditorNative` owner, Tauri import outside platform desktop adapters, replacement global Platform facade, stale Windows automation dependency or missing 3.12 workflow gate.
 
 ## Windows automation repairs
 
@@ -86,4 +88,4 @@ Final executable repair commit `1921684fd0a402d92a7426994c85765820f9cc0e`:
 - native scenario `force-close-destroys-native-window`: **passed**, process exited.
 - Windows evidence artifact `stage-03-windows-window-31236205921-1` uploaded successfully with status `passed`.
 
-The two native automation defects were fixed without weakening the gate or changing production Rust, production dependencies or lock files. No remaining Stage 3 hard-validation gap is known. Atomic Task 3.12 and Stage 3 are complete; Stage 4 may start.
+The two native automation defects were fixed without weakening the gate or changing production Rust, production dependencies or lock files. No remaining Stage 3 hard-validation gap was known at the original 3.12 closeout. CR-03 later reconciles the Stage 3 verification/evidence semantics with completed downstream migrations without changing the Platform runtime contract.
