@@ -61,9 +61,11 @@ test('compatibility asset owns only the remaining unmigrated business content wh
   assert.doesNotMatch(markup, /<html\b|<head\b|<body\b/i);
   assert.deepEqual([...markup.matchAll(/<template\s+data-compat-slot=\"([^\"]+)\">/g)].map(match => match[1]), ['menu', 'toolbar', 'sidebar', 'editor', 'preview', 'status', 'overlay', 'ports']);
   assert.doesNotMatch(markup, /<div class=\"app\">|<nav class=\"menu-bar\"|<div class=\"editor-toolbar\"|<div class=\"workspace\"|<aside class=\"sidebar\"|<div class=\"statusbar\"/);
-  for (const required of ['id="editor"', 'id="preview"', 'id="settings-modal"']) {
+  for (const required of ['id="editor"', 'id="preview"']) {
     assert.match(markup, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
+  assert.match(markup, /\bdata-settings-open\b/);
+  assert.doesNotMatch(markup, /id="settings-modal"/);
   assert.doesNotMatch(markup, /<symbol\b|class="icon-sprite"|href="#icon-/i);
   assert.match(markup, /href="\/assets\/icons\.svg#icon-/i);
 });
