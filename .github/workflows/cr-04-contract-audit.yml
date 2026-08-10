@@ -1,0 +1,21 @@
+name: CR-04 Stage 4 Contract Audit
+
+on:
+  push:
+    branches:
+      - agent/cr-04-stage4-conformance
+
+permissions:
+  contents: read
+
+jobs:
+  taskbook-contract:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Stage 4 taskbook conformance contract
+        run: node --test tests/architecture/stage-04-taskbook-conformance.test.mjs
