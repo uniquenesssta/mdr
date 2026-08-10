@@ -15,7 +15,7 @@ on:
       - reopened
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: stage-05-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}
@@ -32,6 +32,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
+      - name: Materialize isolated Atomic 5.10 classic cutover
+        if: github.event_name == 'pull_request' && github.head_ref == 'agent/atomic510-candidate'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -q 'markdownEditorEditorCommandPort' public/app/editor-tools.js; then
+            echo 'Atomic 5.10 classic cutover already materialized.'
+            exit 0
+          fi
+          node scripts/stage-05/materialize-atomic-510.mjs
+          git diff --check
+          git config user.name 'uniquenesssta'
+          git config user.email 'uniquenesssta@live.com'
+          git add public/app/editor-tools.js tests/architecture/fixtures/production-modules.json
+          git commit -m 'candidate: cut over Atomic 5.10 classic callers'
+          git push origin HEAD:${{ github.head_ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
