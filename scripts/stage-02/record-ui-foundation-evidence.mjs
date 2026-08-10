@@ -11,6 +11,8 @@ import * as domPrimitives from '../../src/ui/dom/index.js';
 await mkdir('artifacts/stage-02', { recursive: true });
 
 const readText = path => readFile(path, 'utf8');
+const frozenDomInventory = JSON.parse(await readText('tests/ui/fixtures/dom-asset-inventory.json'));
+const CURRENT_COMPATIBILITY_INLINE_EVENT_CAP = 158;
 const moduleFixture = JSON.parse(await readText('tests/architecture/fixtures/production-modules.json'));
 const styleRecords = moduleFixture.modules.filter(record => record[0].startsWith('src/styles/'));
 const stylePaths = styleRecords.map(record => record[0]);
@@ -171,9 +173,11 @@ const stage2OwnedModulePaths = Object.freeze([
 ].sort());
 const hasStage3PlatformModules = moduleFixture.modules.some(record => record[0].startsWith('src/platform/'));
 
-if (indexInventory.summary.inlineEventCount !== 0 || inlineEvents !== 184) throw new Error('HTML baseline drifted.');
+if (indexInventory.summary.inlineEventCount !== 0) throw new Error('Minimal index inline-event contract drifted.');
+if (frozenDomInventory.summary.inlineEventCount !== 184) throw new Error('Frozen legacy HTML baseline drifted.');
+if (inlineEvents > CURRENT_COMPATIBILITY_INLINE_EVENT_CAP) throw new Error(`Compatibility inline-event debt regressed above ${CURRENT_COMPATIBILITY_INLINE_EVENT_CAP}: ${inlineEvents}`);
 if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35 || sprite.duplicates.length || sprite.invalidIds.length || sprite.missingViewBoxes.length || sprite.forbiddenMarkup) throw new Error('SVG sprite contract drifted.');
-if (shellIconReferences.length !== 50 || !shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) throw new Error('Icon references drifted.');
+if (shellIconReferences.length !== 47 || !shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) throw new Error('Icon references drifted.');
 if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) throw new Error('Compatibility slot contract drifted.');
 if (stage2OwnedModulePaths.length !== 72 || new Set(stage2OwnedModulePaths).size !== 72) throw new Error(`Unexpected Stage 2-owned module count: ${stage2OwnedModulePaths.length}`);
 if (architectureModules.appShell.length !== 8 || architectureModules.domPrimitives.length !== 6 || architectureModules.uiComponents.length !== 2 || architectureModules.uiCompatibility.length !== 4) throw new Error('UI architecture counts drifted.');
@@ -252,7 +256,13 @@ await record('02-02-minimal-index-evidence.json', {
   scope: 'minimal-index-and-module-entry',
   index: indexInventory.source,
   indexSummary: indexInventory.summary,
-  compatibilityContent: { path: 'public/compatibility/business-content.html', inlineEvents, scriptElements: 0 }
+  compatibilityContent: {
+    path: 'public/compatibility/business-content.html',
+    inlineEvents,
+    inlineEventCap: CURRENT_COMPATIBILITY_INLINE_EVENT_CAP,
+    historicalBaselineInlineEvents: frozenDomInventory.summary.inlineEventCount,
+    scriptElements: 0
+  }
 });
 await record('02-03-svg-sprite-evidence.json', {
   node: 'stage-02/02-03',

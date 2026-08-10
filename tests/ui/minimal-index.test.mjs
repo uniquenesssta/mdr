@@ -8,6 +8,8 @@ import { collectInlineEvents } from '../../scripts/architecture/source-analysis.
 
 const root = process.cwd();
 const readText = path => readFile(resolve(root, path), 'utf8');
+const readJson = async path => JSON.parse(await readText(path));
+const CURRENT_COMPATIBILITY_INLINE_EVENT_CAP = 158;
 
 const expectedIndex = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -41,17 +43,29 @@ test('Atomic Task 2.2 reduces index.html to the exact minimal document shell', a
   assert.doesNotMatch(source, /\/i18n\.js|\/src\/main\.js|\son[a-z]+=|<svg|modal|menu-bar|data-theme/i);
 });
 
-test('compatibility asset owns unmigrated business content while App Shell owns the mounted structure', async () => {
-  const markup = await readText('public/compatibility/business-content.html');
-  const inlineEvents = collectInlineEvents('public/compatibility/business-content.html', markup);
-  assert.equal(inlineEvents.reduce((sum, record) => sum + record.count, 0), 184);
+test('compatibility asset owns only the remaining unmigrated business content while App Shell owns structure', async () => {
+  const [markup, frozenInventory] = await Promise.all([
+    readText('public/compatibility/business-content.html'),
+    readJson('tests/ui/fixtures/dom-asset-inventory.json')
+  ]);
+  const currentInlineEventCount = collectInlineEvents('public/compatibility/business-content.html', markup)
+    .reduce((sum, record) => sum + record.count, 0);
+
+  assert.equal(frozenInventory.summary.inlineEventCount, 184);
+  assert.ok(
+    currentInlineEventCount <= CURRENT_COMPATIBILITY_INLINE_EVENT_CAP,
+    `compatibility inline events may only shrink from the reconciled cap ${CURRENT_COMPATIBILITY_INLINE_EVENT_CAP}; received ${currentInlineEventCount}`
+  );
+  assert.ok(CURRENT_COMPATIBILITY_INLINE_EVENT_CAP <= frozenInventory.summary.inlineEventCount);
   assert.doesNotMatch(markup, /<script\b/i);
   assert.doesNotMatch(markup, /<html\b|<head\b|<body\b/i);
   assert.deepEqual([...markup.matchAll(/<template\s+data-compat-slot=\"([^\"]+)\">/g)].map(match => match[1]), ['menu', 'toolbar', 'sidebar', 'editor', 'preview', 'status', 'overlay', 'ports']);
   assert.doesNotMatch(markup, /<div class=\"app\">|<nav class=\"menu-bar\"|<div class=\"editor-toolbar\"|<div class=\"workspace\"|<aside class=\"sidebar\"|<div class=\"statusbar\"/);
-  for (const required of ['id="editor"', 'id="preview"', 'id="settings-modal"']) {
+  for (const required of ['id="editor"', 'id="preview"']) {
     assert.match(markup, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
+  assert.match(markup, /\bdata-settings-open\b/);
+  assert.doesNotMatch(markup, /id="settings-modal"/);
   assert.doesNotMatch(markup, /<symbol\b|class="icon-sprite"|href="#icon-/i);
   assert.match(markup, /href="\/assets\/icons\.svg#icon-/i);
 });
@@ -66,7 +80,7 @@ test('module entry creates the App Shell before mounting temporary compatibility
   assert.equal(typeof uiModule.createUI, 'function');
   assert.throws(() => compatibilityModule.createCompatibilityBusinessContentPort(null, {}), /#app-root/);
   assert.match(entrySource, /\/compatibility\/business-content\.html/);
-  assert.match(entrySource, /\/i18n\.js/);
+  assert.doesNotMatch(entrySource, /['"]\/i18n\.js['"]/);
   assert.match(entrySource, /import\('\.\.\/main\.js'\)/);
   assert.match(entrySource, /ui = createUI\(root\)/);
   assert.match(entrySource, /contentPort = createCompatibilityBusinessContentPort\(root, ui\)/);
