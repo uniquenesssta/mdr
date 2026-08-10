@@ -2,10 +2,10 @@
 
 ## 状态
 
-- 结果：**PASS（实现候选验证已完成，等待最终文档 HEAD 回归与正式原子发布）**。
+- 结果：**PASS**；正式发布只允许在本文档所在最终 tree 完成 Stage 0–5 + Windows 全链验证后执行。
 - 正式父基线：`b5e847d54e6f28e7d315dd7e0f1b0274e586786b`（CR-05 正式 HEAD）。
 - 实现候选：`7d17cd1de6fd4d7a79075b3fbc4785d867f31e83`。
-- Stage 5 验证：GitHub Actions run `31379668414` — **SUCCESS**。
+- Stage 5 实现候选验证：GitHub Actions run `31379668414` — **SUCCESS**。
 - Evidence：`stage-05-editor-history-adapter-31379668414-1`。
 - Evidence ID：`9059366334`。
 - Evidence digest：`sha256:871c16b8b43334f0a44e8ae14db917e79eda89aaa95a3852ed9f263e37da45f6`。
@@ -128,7 +128,7 @@ run `31379423476`：**SUCCESS**。
 - Built App regression：PASS；
 - diff cleanliness：PASS。
 
-该 runner 初次 clean candidate 中产生一个 `artifacts/stage-05/atomic-509-browser-app/responsive-shell-report.json` 测试输出；发布前 diff audit 将其识别为临时构建/测试产物并删除，没有进入当前正式候选 tree。
+该 runner 初次 clean candidate 中产生一个 `artifacts/stage-05/atomic-509-browser-app/responsive-shell-report.json` 测试输出；发布前 diff audit 将其识别为临时构建/测试产物并删除，没有进入正式候选 tree。
 
 ### 实现候选跨阶段验证
 
@@ -142,8 +142,12 @@ run `31379423476`：**SUCCESS**。
 - Stage 5 Atomic Verification `31379668414`：**SUCCESS**，5.1–5.9、CR-05、Frozen DocumentModel、Architecture、Node、Browser Contract、Build、Built App 与 5.9 evidence 全部通过；
 - Stage 3 Windows Window Automation `31379668423`：**SUCCESS**，真实 Windows 原生窗口自动化直接通过，无重跑。
 
-## 环境限制与下一步
+### 首轮文档 HEAD 硬门禁
+
+首个 README/05-09 文档闭环 HEAD `18e6256e101a82c91aab3f322aa7f78e78d1a5bc` 触发 Stage 0–5 + Windows 后，Stage 1/2/3/4/5 均在共享 Node regression 的 `tests/documentation-layout.test.mjs` 停止。Stage 1 日志确认在失败前 Lifecycle、Architecture、handoff、263-module inventory 均已通过；唯一失败为根 README 超出仓库要求的 120–360 字符长度区间，Node 为 **43/44**。未修改或放宽测试；仅把根 README 收敛为 347 字符，并保留 `docs/README.md` 与 05-09 验收记录链接。该失败不计为通过，修订后的最终文档 HEAD 必须重新执行完整门禁。
+
+## 环境限制与发布约束
 
 当前执行环境没有用户本地 Git checkout，且不能替用户检查其电脑工作区的未提交修改；因此本次远端实施使用精确正式 SHA、隔离分支、clean candidate、GitHub Actions 全链与发布前 tree/HEAD 核对替代本地工作区验证。
 
-本记录提交后，最终文档 HEAD 仍必须重新执行 Stage 0–5 + Windows 全链验证；只有该 HEAD 全部通过，才允许把相同 tree 压成一个以 `b5e847d54e6f28e7d315dd7e0f1b0274e586786b` 为唯一父提交的 Atomic 5.9 正式提交并 fast-forward 到 `rewrite/stage-05`。Atomic 5.10 在此之前保持未开始。
+正式发布仅允许使用最终文档 HEAD 已完整验证的同一 tree，并压成一个以 `b5e847d54e6f28e7d315dd7e0f1b0274e586786b` 为唯一父提交的 Atomic 5.9 正式提交，再以 `force=false` fast-forward 到 `rewrite/stage-05`。Atomic 5.10 在 Atomic 5.9 正式闭环前保持未开始。
