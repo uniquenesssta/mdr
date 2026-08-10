@@ -96,6 +96,7 @@
     }
 
     function applyFindMatch(match, status) {
+      if (match === undefined) return false;
       if (!match) {
         status.textContent = t('statusNoMatch');
         return false;
