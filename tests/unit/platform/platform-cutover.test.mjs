@@ -58,3 +58,18 @@ test('native drag/drop keeps file classification in application code and MIME de
   assert.match(events, /call\('files', 'readImage'/);
   assert.doesNotMatch(events, /data:image\/png|data:image\/jpeg|image_mime/);
 });
+
+test('Stage 3 evidence keeps 174 as historical context while enforcing the exact 36-module Platform surface', async () => {
+  const evidencePaths = [
+    'scripts/stage-03/record-platform-evidence.mjs',
+    'scripts/stage-03/record-create-platform-evidence.mjs',
+    'scripts/stage-03/record-platform-cutover-evidence.mjs'
+  ];
+  for (const path of evidencePaths) {
+    const source = await readFile(new URL('../../../' + path, import.meta.url), 'utf8');
+    assert.match(source, /HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT\s*=\s*174/);
+    assert.match(source, /STAGE_3_PLATFORM_MODULE_COUNT\s*=\s*36/);
+    assert.match(source, /platformModules\.length\s*!==\s*STAGE_3_PLATFORM_MODULE_COUNT/);
+    assert.doesNotMatch(source, /moduleFixture\.modules\.length\s*!==\s*174|fixture\.modules\.length\s*!==\s*174/);
+  }
+});

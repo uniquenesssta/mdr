@@ -42,6 +42,8 @@ const BROWSER_DIRECTORY = `${PLATFORM_ROOT}/browser`;
 const DESKTOP_DIRECTORY = `${PLATFORM_ROOT}/desktop`;
 const INVENTORY_PATH = 'tests/unit/platform/fixtures/platform-port-inventory.json';
 const MODULE_FIXTURE_PATH = 'tests/architecture/fixtures/production-modules.json';
+const HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT = 174;
+const STAGE_3_PLATFORM_MODULE_COUNT = 36;
 
 const methodsByPort = Object.freeze({
   storage: STORAGE_PORT_METHODS,
@@ -456,7 +458,7 @@ if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exi
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
 if (JSON.stringify(browserFiles) !== JSON.stringify(expectedBrowserFiles)) process.exit(1);
 if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
-if (moduleFixture.modules.length !== 174 || platformModules.length !== 36) process.exit(1);
+if (platformModules.length !== STAGE_3_PLATFORM_MODULE_COUNT) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -563,6 +565,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-01-platform-ports-evidence.json`, `${JSO
   portCount: PLATFORM_PORT_NAMES.length,
   ports: Object.fromEntries(PLATFORM_PORT_NAMES.map(name => [name, [...methodsByPort[name]]])),
   implementationFiles: ['src/platform/index.js', ...portFiles.map(file => `${PORT_DIRECTORY}/${file}`)],
+  historicalStage3ProductionModuleCount: HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT,
   productionModuleCount: moduleFixture.modules.length, platformModuleCount: platformModules.length,
   platformModules,
   legacyInventory: {
