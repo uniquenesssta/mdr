@@ -50,8 +50,7 @@ src/                        # 前端源码
     components/             # 菜单、模态框、进度、提示等通用组件
     features/               # 编辑器、预览、导出、混合编辑等功能样式
 public/
-  i18n.js                   # 多语言文本
-  app/                      # 前端功能模块（按职责拆分）
+  app/                      # 尚未迁出的经典前端功能模块（按职责拆分）
     core.js                 # 状态、文档、侧栏、设置与布局
     scroll-sync.js          # 双向滚动与划词定位
     bootstrap.js            # 初始化与状态恢复
@@ -76,7 +75,7 @@ scripts/
 
 ## Stage 1 架构交接
 
-阶段 1 已完成，只交付可执行的架构基础与迁移门禁；阶段 1 交接时阶段 2 尚未开始，不得宣称业务功能已经迁移。阶段 1 清单冻结 67 个生产模块；当前阶段 2 入口已经切换到最小模块入口与唯一兼容 shell，兼容链内部仍继续调用 `src/main.js`、`public/app/*.js` 和 `public/i18n.js`。
+阶段 1 已完成，只交付可执行的架构基础与迁移门禁；阶段 1 交接时阶段 2 尚未开始，不得宣称业务功能已经迁移。阶段 1 清单冻结 67 个生产模块。当前生产链已推进到 Stage 5：Stage 2 的最小模块入口与唯一兼容 shell 继续保持，兼容链内部仍调用 `src/main.js` 与尚未迁出的 `public/app/*.js`；`public/i18n.js` 已在 Stage 4 删除，并由 `src/i18n/` ESM 服务接管。
 
 ### 阶段 2 可依赖的公共架构 API
 
@@ -102,7 +101,7 @@ scripts/
 
 ### 迁移基线与删除候选
 
-当前精确迁移基线锁定 9 个经典脚本、184 个内联事件、38 个业务全局写入和 4 个跟踪运行产物，且不允许通配豁免。`public/app/*.js`、`public/i18n.js` 和旧 `src/main.js` 启动链是后续分阶段迁移与删除候选，不得提前删除；每次移除遗留事实时必须在同一受审变更中同步缩减精确基线并完成回归。
+阶段 1/2 的历史冻结基线记录 9 个经典脚本、184 个内联事件、38 个业务全局写入和 4 个跟踪运行产物，且不允许通配豁免；其中 184 仅属于 Atomic Task 2.1 的不可变历史证据，不代表当前兼容层。当前 `public/compatibility/business-content.html` 的内联事件已降至 158，Stage 2 门禁将 158 作为只允许继续下降、不得回升的兼容债务上限；当前兼容内容的外部 SVG sprite 引用为 47。`public/app/*.js` 与旧 `src/main.js` 启动链仍是后续迁移/删除候选；`public/i18n.js` 已在 Stage 4 删除，禁止恢复经典入口。
 
 ### 验证入口
 
@@ -126,6 +125,8 @@ npm run check
 - 当前完整桌面基线在 Ubuntu 22.04 验证；Windows 原生窗口、文件关联和系统拖放仍需在涉及这些路径的阶段执行真实平台验证。
 
 ## Change Log
+<!-- cross-stage-repair:cr-02 -->
+- 2026-08-10：CR-02（Stage 2 UI Structure Reconciliation）完成。修复 Stage 2 验收与机器证据把历史冻结事实误当作当前运行事实的问题：Atomic Task 2.1 的 184 个内联事件继续作为不可变历史基线保存；当前 compatibility 内联事件以 158 为单向收缩上限，后续只允许减少、不得回升；经典 `/i18n.js` 入口明确禁止恢复，I18n 继续由 Stage 4 的 `src/i18n/` ESM 服务拥有；Settings 模态框继续由 Stage 4 feature 拥有，compatibility 只保留 `data-settings-open` 触发边界；Stage 2 SVG 证据同步到现行 2.3 硬契约的 47 个外部 sprite 引用，同时继续强制 35 个唯一 symbol、合法 ID 与单一几何权威。本 CR 只修改 Stage 2 验收/证据与文档，没有修改生产 UI、模型、Rust、依赖或锁文件。`31357149906` 已通过 Stage 1 handoff、2.1–2.11、architecture、44/44 Node、10/10 browser contract、build、22/22 built application、证据生成与上传；Stage 3 仍在既存 3.4 Dialog 陈旧断言处失败，留给 CR-03，未在 CR-02 跨阶段修复。
 <!-- stage-03-windows-automation:03-05 -->
 - 2026-08-06：阶段 3 Atomic Task 3.5 的 Windows Automated 补充实现完成：新增独立 Windows 2025 门禁，以固定版本 WebdriverIO 和 tauri-driver 驱动真实 WebView2，覆盖最大化/还原、最小化/恢复、resize 订阅与幂等 disposer、标题栏真实拖动、close-request 阻止及保存边界、正常关闭和强制关闭。测试工具仅在 CI 中临时安装，未修改生产依赖、锁文件、Rust、权限或 Tauri 全局 API 配置。原根 README 已完整迁移到 `docs/README.md`，根 README 改为简短项目介绍；架构记录和 Stage 0 持久化入口同步迁移。Windows 实际运行结果将在门禁完成后替换本记录。
 <!-- stage-03-node:03-05 -->
