@@ -3,6 +3,7 @@
  * Imports: Settings Schema metadata only; Store and publisher are injected.
  * Exports: SETTINGS_CHANGED_EVENT and createSettingsApplyCoordinator().
  * State/side effects: Owns no Settings values; persistence remains Store-owned. Publishes only after a successful Store apply and is explicitly destroyable.
+  * Lifecycle: Explicit destroyable coordinator; destroy prevents further commits/publications.
  */
 import { SETTING_IDS, getSettingDefinition } from '../domain/settings-schema.js';
 

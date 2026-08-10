@@ -3,6 +3,7 @@
  * Imports: Frozen settings defaults plus the public locale registry contract.
  * Exports: SETTINGS_SCHEMA, SETTING_IDS, SETTING_SECTIONS, SETTINGS_IMPACT_EVENTS, getSettingDefinition(), listSettingDefinitions().
  * State/side effects: Immutable module-load schema only; no DOM, storage, platform or lifecycle side effects.
+  * Lifecycle: Import-only immutable schema module; no runtime lifecycle.
  */
 import { LOCALE_IDS } from '../../../i18n/index.js';
 import { SETTING_DEFAULTS } from './settings-defaults.js';

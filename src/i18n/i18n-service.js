@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Own the active locale, translation lookup, placeholder formatting, fallback and locale-change subscriptions.
+ * Imports: Locale registry contract is injected; DOM, Settings persistence and platform APIs are forbidden.
+ * Exports: createI18nService().
+ * State/side effects: Owns only locale state and listener membership; it performs no DOM or storage writes.
+ * Lifecycle: Explicit destroyable service; destroy clears listeners and makes stateful operations terminal.
+ */
 function assertRegistry(registry) {
   if (
     !registry

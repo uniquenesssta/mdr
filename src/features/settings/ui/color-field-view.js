@@ -3,6 +3,7 @@
  * Imports: Generic DOM primitives only.
  * Exports: createColorFieldView().
  * State/side effects: Owns only field DOM/listeners and whether the displayed swatch represents an explicit draft value; no runtime theme application.
+  * Lifecycle: Explicit destroyable field View; destroy releases listeners and owned DOM.
  */
 import { createEventScope, createSafeElement, requireElementRef } from '../../../ui/dom/index.js';
 

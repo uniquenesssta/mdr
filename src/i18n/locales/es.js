@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Immutable short-text translations for es.
+ * Imports: None; Help content, DOM, Settings persistence and runtime services are forbidden.
+ * Exports: One frozen short-text locale dictionary.
+ * State/side effects: None; the module contains data only.
+ * Lifecycle: Import-only data module; no runtime lifecycle.
+ */
 export default Object.freeze({
   "autosaveEnabled": "Guardado automático activado",
   "boldTitle": "Negrita Ctrl+B",

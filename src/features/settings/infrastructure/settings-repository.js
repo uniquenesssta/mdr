@@ -3,6 +3,7 @@
  * Imports: Settings domain contracts only; storage is injected.
  * Exports: createSettingsRepository(), SettingsRepositoryReadError, SettingsRepositoryWriteError.
  * State/side effects: Stateless repository instance; storage I/O occurs only inside load()/save(); no DOM, global storage lookup or lifecycle subscription.
+  * Lifecycle: Stateless repository instance; no start/destroy lifecycle is required.
  */
 import { getSettingDefinition, SETTING_IDS } from '../domain/settings-schema.js';
 import {

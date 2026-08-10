@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Immutable short-text translations for ko.
+ * Imports: None; Help content, DOM, Settings persistence and runtime services are forbidden.
+ * Exports: One frozen short-text locale dictionary.
+ * State/side effects: None; the module contains data only.
+ * Lifecycle: Import-only data module; no runtime lifecycle.
+ */
 export default Object.freeze({
   "autosaveEnabled": "자동 저장 사용 중",
   "boldTitle": "굵게 Ctrl+B",

@@ -3,6 +3,7 @@
  * Imports: Settings section contract plus domain section ids only.
  * Exports: TOOLBAR_SETTINGS_SECTION.
  * State/side effects: Import-only immutable descriptor; no DOM, storage, toolbar or business-module calls.
+  * Lifecycle: Import-only immutable section descriptor; no runtime lifecycle.
  */
 import { SETTING_SECTIONS } from '../domain/settings-schema.js';
 import { defineSettingsSection } from './settings-section.js';

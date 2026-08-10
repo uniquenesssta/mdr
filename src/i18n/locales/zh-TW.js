@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Immutable short-text translations for zh-TW.
+ * Imports: None; Help content, DOM, Settings persistence and runtime services are forbidden.
+ * Exports: One frozen short-text locale dictionary.
+ * State/side effects: None; the module contains data only.
+ * Lifecycle: Import-only data module; no runtime lifecycle.
+ */
 export default Object.freeze({
   "autosaveEnabled": "自動儲存已啟用",
   "boldTitle": "粗體 Ctrl+B",
