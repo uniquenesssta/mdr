@@ -81,8 +81,10 @@ scripts/
 ### 阶段 2 可依赖的公共架构 API
 
 - `src/app/create-application.js`：`createApplication(dependencies)`，公开冻结的 `commands`、`events`、`start()` 与 `destroy()`。
-- `src/app/application-lifecycle.js`：`LIFECYCLE_STATES`、`createApplicationLifecycle(participants)`。
-- `src/app/disposer-registry.js`：`DISPOSER_REGISTRY_STATES`、`createDisposerRegistry()`。
+- `src/app/lifecycle/application-lifecycle.js`：`LIFECYCLE_STATES`、`createApplicationLifecycle(participants)`；状态契约为 `created / starting / started / stopping / stopped / failed`。
+- `src/app/lifecycle/startup-sequence.js`：按参与者注册顺序启动，并只把成功启动者写入生命周期拥有的活动栈。
+- `src/app/lifecycle/shutdown-sequence.js`：严格逆序销毁活动参与者，成功项立即移出活动栈，失败项返回生命周期聚合。
+- `src/app/lifecycle/disposer-registry.js`：`DISPOSER_REGISTRY_STATES`、`createDisposerRegistry()`。
 - `src/app/commands/command-ids.js`：`assertCommandId()`、`defineCommandIds()`。
 - `src/app/commands/command-registry.js`：`createCommandRegistry()`、`DuplicateCommandRegistrationError`、`CommandNotRegisteredError`。
 - `src/app/commands/command-bus.js`：`createCommandBus()`。
@@ -92,8 +94,8 @@ scripts/
 
 ### 状态所有权与依赖边界
 
-- `application-lifecycle.js` 唯一拥有应用生命周期状态与活动参与者栈。
-- `disposer-registry.js` 唯一拥有单个模块登记的资源清理状态。
+- `lifecycle/application-lifecycle.js` 唯一拥有应用生命周期状态与活动参与者栈；startup/shutdown sequence 不拥有状态。
+- `lifecycle/disposer-registry.js` 唯一拥有单个模块登记的资源清理状态。
 - `command-registry.js` 唯一拥有命令 ID 到处理器的映射；`command-bus.js` 只负责路由。
 - `event-bus.js` 唯一拥有事件订阅状态，并只发布深层冻结的普通数据快照。
 - Feature 不得反向依赖 `src/app/` 内部；跨 Feature 只能依赖目标 Feature 的公共 `index.js`；Platform 不得导入 Feature；Model Kernel 不得导入高层模块；生产 JavaScript 模块不得形成循环依赖。
@@ -415,3 +417,13 @@ Bidirectional editor/preview scrolling is owned by `src/sync/scroll-controller.j
 ## Selection synchronization controller
 
 Editor/preview text-selection synchronization is owned by `src/sync/selection-controller.js`. It waits for the final WebView selection event, prevents editor/preview feedback loops, remounts the required virtual-preview range, and reapplies the highlight whenever virtual preview nodes are replaced. `src/sync/selection-mapping.js` projects rendered characters back to their exact Markdown source boundaries for headings, lists, inline formatting, links, tables, highlighted code, images, and KaTeX. Cross-block editor selections are rendered as multiple CSS Highlight ranges rather than whole-block approximations, while preview selections map their two DOM boundary points directly to source offsets. A bounded nearby-text search remains only as a compatibility fallback when an unsupported extension cannot be projected.
+
+## CR-01 — Stage 1 Lifecycle Conformance
+
+- 日期：2026-08-10。
+- 修复基线：`rewrite/stage-05@c31e78827224d67b0da01bde3410c27ed14a140c`。
+- 实现：生命周期职责收敛到 `src/app/lifecycle/`；`application-lifecycle.js` 唯一拥有状态机、活动参与者栈、转换 Promise 与上下文；startup/shutdown sequence 分别负责顺序启动与严格逆序清理且不复制状态；Disposer Registry 迁入同一生命周期目录；旧根级 lifecycle/disposer 文件删除且不保留 wrapper。
+- 状态契约：`created / starting / started / stopping / stopped / failed`；保持幂等启动/销毁、启动失败逆序回滚、销毁异常聚合、并发转换串行和失败清理重试。
+- 架构清单：生产模块 260→262；DocumentModel、Rust、`package.json`、`package-lock.json` 与生产依赖未修改。
+- clean validation runner：GitHub Actions `31351876875`。专项 Stage 1 合并验证 27/27 PASS；架构门禁 PASS；Node 44/44 PASS；Browser Contract 10/10 PASS；生产 Build PASS；Built App 22/22 PASS；protected-surface diff 与 `git diff --check` PASS。
+- 本 clean validation runner 未执行 Cargo/Tauri 构建，因为 CR-01 未修改 Rust/Tauri 路径；正式 Stage 1/Stage 5 工作流将在 CR-01 clean commit 上继续作为发布门禁，未通过前不得推进 CR-02。

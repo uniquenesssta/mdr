@@ -1,3 +1,7 @@
+/**
+ * Responsibility: Own registered resource disposers, strict LIFO cleanup, retryable failures
+ * and concurrent disposal serialization for one explicit registry instance.
+ */
 const DISPOSER_REGISTRY_STATES = Object.freeze({
   OPEN: 'open',
   DISPOSING: 'disposing',

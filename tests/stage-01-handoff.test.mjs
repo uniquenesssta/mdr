@@ -24,8 +24,8 @@ function extractSection(markdown, heading) {
 
 const PUBLIC_MODULE_EXPORTS = Object.freeze({
   'src/app/create-application.js': ['createApplication'],
-  'src/app/application-lifecycle.js': ['LIFECYCLE_STATES', 'createApplicationLifecycle'],
-  'src/app/disposer-registry.js': ['DISPOSER_REGISTRY_STATES', 'createDisposerRegistry'],
+  'src/app/lifecycle/application-lifecycle.js': ['LIFECYCLE_STATES', 'createApplicationLifecycle'],
+  'src/app/lifecycle/disposer-registry.js': ['DISPOSER_REGISTRY_STATES', 'createDisposerRegistry'],
   'src/app/commands/command-ids.js': ['assertCommandId', 'defineCommandIds'],
   'src/app/commands/command-registry.js': [
     'CommandNotRegisteredError',
@@ -100,6 +100,13 @@ test('README exposes the exact Stage 1 architecture handoff without claiming fea
   for (const modulePath of [...Object.keys(PUBLIC_MODULE_EXPORTS), 'src/model-kernel/index.js']) {
     assert.match(section, new RegExp(modulePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
+
+  for (const modulePath of [
+    'src/app/lifecycle/startup-sequence.js',
+    'src/app/lifecycle/shutdown-sequence.js'
+  ]) {
+    assert.match(section, new RegExp(modulePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
 });
 
 test('documented Stage 1 public modules expose the exact handoff surface', async () => {
@@ -117,7 +124,7 @@ test('Stage 1 historical counts and current package verification entries remain 
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 260);
+  assert.equal(moduleFixture.modules.length, 262);
   const readme = await readText('docs/README.md');
   assert.match(extractSection(readme, '## Stage 1 架构交接'), /67 个生产模块/);
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 8);

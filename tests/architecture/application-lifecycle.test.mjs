@@ -3,7 +3,9 @@ import test from 'node:test';
 import {
   LIFECYCLE_STATES,
   createApplicationLifecycle
-} from '../../src/app/application-lifecycle.js';
+} from '../../src/app/lifecycle/application-lifecycle.js';
+import { runShutdownSequence } from '../../src/app/lifecycle/shutdown-sequence.js';
+import { runStartupSequence } from '../../src/app/lifecycle/startup-sequence.js';
 import { createApplication } from '../../src/app/create-application.js';
 
 function deferred() {
@@ -40,14 +42,14 @@ test('lifecycle starts in order, destroys in reverse order and supports restart'
   ]);
 
   assert.ok(Object.isFrozen(lifecycle));
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.CREATED);
 
   await lifecycle.start(context);
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.RUNNING);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STARTED);
   await lifecycle.start(context);
   assert.equal(calls.length, 3);
   await lifecycle.destroy(context);
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPED);
   await lifecycle.destroy(context);
   assert.equal(calls.length, 6);
   await lifecycle.start(context);
@@ -104,7 +106,7 @@ test('startup failure rolls back successful participants in reverse order', asyn
   ]);
 
   await assert.rejects(lifecycle.start({ id: 'ctx' }), error => error === failure);
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.CREATED);
   assert.deepEqual(calls, ['start:a:ctx', 'start:b:ctx', 'destroy:a:ctx']);
 });
 
@@ -132,7 +134,7 @@ test('incomplete startup rollback enters failed state and destroy retries remain
   await assert.rejects(lifecycle.start({ id: 'ctx' }), /cleanup is incomplete/);
 
   await lifecycle.destroy({ id: 'ctx' });
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPED);
   assert.equal(rollbackAttempts, 2);
 });
 
@@ -161,7 +163,7 @@ test('shutdown continues in reverse order, aggregates errors and retries only fa
   assert.deepEqual(calls.slice(3), ['destroy:c:ctx', 'destroy:b:ctx', 'destroy:a:ctx']);
 
   await lifecycle.destroy({ id: 'ctx' });
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPED);
   assert.equal(bAttempts, 2);
   assert.equal(calls.at(-1), 'destroy:b:ctx');
 });
@@ -178,7 +180,7 @@ test('destroy requested during startup waits and then releases resources', async
   gate.resolve();
   await Promise.all([startPromise, destroyPromise]);
 
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPED);
   assert.deepEqual(calls, ['start:a:ctx', 'destroy:a:ctx']);
 });
 
@@ -201,7 +203,7 @@ test('start requested during shutdown waits and starts a new lifecycle generatio
   gate.resolve();
   await Promise.all([destroyPromise, restartPromise]);
 
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.RUNNING);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STARTED);
   assert.deepEqual(calls, ['start:a:first', 'destroy:a:first', 'start:a:second']);
   await lifecycle.destroy({ id: 'second' });
 });
@@ -232,8 +234,57 @@ test('lifecycle port integrates with the minimal application composition root', 
   });
 
   await application.start();
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.RUNNING);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STARTED);
   await application.destroy();
-  assert.equal(lifecycle.state, LIFECYCLE_STATES.IDLE);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPED);
   assert.deepEqual(calls, ['start:module:undefined', 'destroy:module:undefined']);
+});
+
+
+test('lifecycle exposes the exact taskbook state contract and destroy-before-start reaches stopped', async () => {
+  assert.deepEqual(Object.values(LIFECYCLE_STATES), [
+    'created', 'starting', 'started', 'stopping', 'stopped', 'failed'
+  ]);
+  const lifecycle = createApplicationLifecycle([]);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.CREATED);
+  await lifecycle.destroy();
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPED);
+  await lifecycle.start();
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STARTED);
+  await lifecycle.destroy();
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPED);
+});
+
+test('startup rollback restores the prior stable state for a failed restart', async () => {
+  let starts = 0;
+  const lifecycle = createApplicationLifecycle([{
+    async start() {
+      starts += 1;
+      if (starts === 2) throw new Error('restart failed');
+    },
+    async destroy() {}
+  }]);
+
+  await lifecycle.start();
+  await lifecycle.destroy();
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPED);
+  await assert.rejects(lifecycle.start(), /restart failed/);
+  assert.equal(lifecycle.state, LIFECYCLE_STATES.STOPPED);
+});
+
+test('startup and shutdown sequence modules are independently testable and preserve caller-owned state', async () => {
+  const calls = [];
+  const active = [];
+  const participants = [participant('a', calls), participant('b', calls)];
+
+  await runStartupSequence(participants, active, { id: 'ctx' });
+  assert.deepEqual(active, participants);
+  assert.deepEqual(calls, ['start:a:ctx', 'start:b:ctx']);
+
+  const errors = await runShutdownSequence(active, { id: 'ctx' });
+  assert.deepEqual(errors, []);
+  assert.deepEqual(active, []);
+  assert.deepEqual(calls, [
+    'start:a:ctx', 'start:b:ctx', 'destroy:b:ctx', 'destroy:a:ctx'
+  ]);
 });

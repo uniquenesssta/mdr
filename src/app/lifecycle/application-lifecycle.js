@@ -1,8 +1,16 @@
+/**
+ * Responsibility: Own the application lifecycle state machine, transition serialization,
+ * participant activation stack and lifecycle context across restartable generations.
+ */
+import { runShutdownSequence } from './shutdown-sequence.js';
+import { runStartupSequence } from './startup-sequence.js';
+
 const LIFECYCLE_STATES = Object.freeze({
-  IDLE: 'idle',
+  CREATED: 'created',
   STARTING: 'starting',
-  RUNNING: 'running',
+  STARTED: 'started',
   STOPPING: 'stopping',
+  STOPPED: 'stopped',
   FAILED: 'failed'
 });
 
@@ -35,26 +43,10 @@ export { LIFECYCLE_STATES };
 
 export function createApplicationLifecycle(participants = []) {
   const orderedParticipants = normalizeParticipants(participants);
-  let state = LIFECYCLE_STATES.IDLE;
+  let state = LIFECYCLE_STATES.CREATED;
   let activeParticipants = [];
   let transitionPromise = null;
   let lastContext;
-
-  async function destroyActiveParticipants(context) {
-    const errors = [];
-
-    for (let index = activeParticipants.length - 1; index >= 0; index -= 1) {
-      const participant = activeParticipants[index];
-      try {
-        await participant.destroy(context);
-        activeParticipants.splice(index, 1);
-      } catch (error) {
-        errors.push(error);
-      }
-    }
-
-    return errors;
-  }
 
   function trackTransition(operation) {
     let transition;
@@ -66,20 +58,18 @@ export function createApplicationLifecycle(participants = []) {
   }
 
   function beginStart(context) {
+    const stableState = state;
     state = LIFECYCLE_STATES.STARTING;
     lastContext = context;
 
     return trackTransition((async () => {
       try {
-        for (const participant of orderedParticipants) {
-          await participant.start(context);
-          activeParticipants.push(participant);
-        }
-        state = LIFECYCLE_STATES.RUNNING;
+        await runStartupSequence(orderedParticipants, activeParticipants, context);
+        state = LIFECYCLE_STATES.STARTED;
       } catch (startError) {
-        const rollbackErrors = await destroyActiveParticipants(context);
+        const rollbackErrors = await runShutdownSequence(activeParticipants, context);
         state = rollbackErrors.length === 0
-          ? LIFECYCLE_STATES.IDLE
+          ? stableState
           : LIFECYCLE_STATES.FAILED;
 
         if (rollbackErrors.length === 0) throw startError;
@@ -97,9 +87,9 @@ export function createApplicationLifecycle(participants = []) {
     lastContext = context ?? lastContext;
 
     return trackTransition((async () => {
-      const errors = await destroyActiveParticipants(lastContext);
+      const errors = await runShutdownSequence(activeParticipants, lastContext);
       state = errors.length === 0
-        ? LIFECYCLE_STATES.IDLE
+        ? LIFECYCLE_STATES.STOPPED
         : LIFECYCLE_STATES.FAILED;
 
       if (errors.length > 0) {
@@ -116,7 +106,7 @@ export function createApplicationLifecycle(participants = []) {
       return state;
     },
     start(context) {
-      if (state === LIFECYCLE_STATES.RUNNING) return Promise.resolve();
+      if (state === LIFECYCLE_STATES.STARTED) return Promise.resolve();
       if (state === LIFECYCLE_STATES.STARTING) return transitionPromise;
       if (state === LIFECYCLE_STATES.STOPPING) {
         return transitionPromise.then(() => lifecycle.start(context));
@@ -129,7 +119,12 @@ export function createApplicationLifecycle(participants = []) {
       return beginStart(context);
     },
     destroy(context) {
-      if (state === LIFECYCLE_STATES.IDLE) return Promise.resolve();
+      if (state === LIFECYCLE_STATES.STOPPED) return Promise.resolve();
+      if (state === LIFECYCLE_STATES.CREATED) {
+        lastContext = context ?? lastContext;
+        state = LIFECYCLE_STATES.STOPPED;
+        return Promise.resolve();
+      }
       if (state === LIFECYCLE_STATES.STOPPING) return transitionPromise;
       if (state === LIFECYCLE_STATES.STARTING) {
         return transitionPromise.then(

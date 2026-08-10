@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 import {
   DISPOSER_REGISTRY_STATES,
   createDisposerRegistry
-} from '../../src/app/disposer-registry.js';
-import { createApplicationLifecycle } from '../../src/app/application-lifecycle.js';
+} from '../../src/app/lifecycle/disposer-registry.js';
+import { createApplicationLifecycle } from '../../src/app/lifecycle/application-lifecycle.js';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 
@@ -176,10 +176,10 @@ test('invalid disposer contracts are rejected without changing registry state', 
 });
 
 test('disposer registry remains platform-free and disconnected from the legacy bootstrap', async () => {
-  const source = await readFile(resolve(root, 'src/app/disposer-registry.js'), 'utf8');
+  const source = await readFile(resolve(root, 'src/app/lifecycle/disposer-registry.js'), 'utf8');
   const legacyBootstrap = await readFile(resolve(root, 'src/main.js'), 'utf8');
   const forbiddenRuntimeAccess = /\b(?:document|window|localStorage|sessionStorage|Worker|SharedWorker|MutationObserver|ResizeObserver|setTimeout|setInterval)\b|@tauri-apps|\binvoke\s*\(/;
 
   assert.doesNotMatch(source, forbiddenRuntimeAccess);
-  assert.doesNotMatch(legacyBootstrap, /(?:import|export)[^;]*app\/disposer-registry\.js|import\([^)]*app\/disposer-registry\.js/);
+  assert.doesNotMatch(legacyBootstrap, /(?:import|export)[^;]*app\/lifecycle\/disposer-registry\.js|import\([^)]*app\/lifecycle\/disposer-registry\.js/);
 });

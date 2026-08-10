@@ -70,7 +70,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts/stage-01
-          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-03-application-lifecycle.json',JSON.stringify({node:'stage-01/01-03',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,states:['idle','starting','running','stopping','failed'],startupOrder:'registration',rollbackOrder:'reverse',shutdownOrder:'reverse'},null,2)+'\n')"
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-03-application-lifecycle.json',JSON.stringify({node:'stage-01/01-03',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,states:['created','starting','started','stopping','stopped','failed'],startupOrder:'registration',rollbackOrder:'reverse',shutdownOrder:'reverse'},null,2)+'\n')"
       - name: Record disposer-registry evidence
         shell: bash
         run: |

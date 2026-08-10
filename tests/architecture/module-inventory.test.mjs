@@ -24,7 +24,10 @@ const ALLOWED_MIGRATIONS = new Set([
   'retain', 'rewrite', 'decompose', 'split-and-remove', 'rewrite-and-remove',
   'remove-after-migration', 'decompose-preserving-contract', 'retain-frozen',
   'rewrite-facade', 'replace-with-composition-root', 'retain-until-final-switch',
-  'split-by-feature'
+  'retain-until-persistence-migration', 'split-by-feature',
+  'remove-with-classic-business-compatibility', 'remove-with-classic-document-callers',
+  'remove-with-classic-editor-callers', 'remove-with-classic-i18n-callers',
+  'remove-with-classic-recent-files-callers', 'remove-with-classic-settings-callers'
 ]);
 
 test('production module ownership fixture covers the exact runtime source surface', async () => {
@@ -66,9 +69,9 @@ test('module inventory collector records imports, exports, listeners, state and 
     assert.match(record.sha256, /^[a-f0-9]{64}$/);
   }
   const main = inventory.modules.find(record => record.path === 'src/main.js');
-  assert.ok(main.detected.imports.includes('./runtime/tauri.js'));
+  assert.ok(main.detected.imports.includes('./platform/index.js'));
   assert.ok(main.detected.globalWrites.length > 0, 'current bootstrap globals must remain visible in the baseline inventory');
   const legacyScripts = inventory.modules.filter(record => record.surface === 'legacy-classic-script');
-  assert.ok(legacyScripts.length >= 9);
+  assert.equal(legacyScripts.length, 8);
   assert.ok(legacyScripts.every(record => record.lifecycle === 'classic-script'));
 });
