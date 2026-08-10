@@ -41,6 +41,13 @@ function createEditorAdapter(initialText = '', initialSelection = { start: 0, en
     getLineEnd(lineNumber) {
       return lineBounds(lineNumber).to;
     },
+    findText(query, from = 0, options = {}) {
+      const needle = String(query ?? '');
+      if (!needle) return null;
+      let index = text.indexOf(needle, Math.max(0, Number(from) || 0));
+      if (index < 0 && options.wrap !== false && Number(from) > 0) index = text.indexOf(needle, 0);
+      return index < 0 ? null : Object.freeze({ from: index, to: index + needle.length });
+    },
     replaceRange(insert, from, to = from, selectionMode = 'preserve') {
       const value = String(insert ?? '');
       const start = Math.max(0, Math.min(text.length, Number(from) || 0));
@@ -51,6 +58,15 @@ function createEditorAdapter(initialText = '', initialSelection = { start: 0, en
       else if (selectionMode === 'start') selection = { start, end: start };
       else selection = { start: start + value.length, end: start + value.length };
       return Object.freeze({ from: start, to: end, insert: value });
+    },
+    replaceAllText(query, replacement) {
+      const needle = String(query ?? '');
+      if (!needle) return 0;
+      const value = String(replacement ?? '');
+      const parts = text.split(needle);
+      const count = Math.max(0, parts.length - 1);
+      if (count) text = parts.join(value);
+      return count;
     }
   };
 
@@ -139,7 +155,7 @@ test('inline/code commands preserve current single-line and multiline insertion 
 
 test('Editor Command Service validates its neutral adapter, propagates editor errors and has an independent terminal lifecycle', () => {
   assert.throws(() => createEditorCommandService(), /adapter/i);
-  assert.throws(() => createEditorCommandService({ adapter: { getSelection() {} } }), /sliceText|line|replaceRange/i);
+  assert.throws(() => createEditorCommandService({ adapter: { getSelection() {} } }), /sliceText|line|replaceRange|findText|replaceAllText/i);
 
   const expected = new Error('replace failed');
   const editor = createEditorAdapter('abc', { start: 0, end: 3 });
@@ -153,18 +169,19 @@ test('Editor Command Service validates its neutral adapter, propagates editor er
   assert.throws(() => healthy.bold(), /destroyed/i);
 });
 
-test('classic Editor Command port is scoped, stateless and forwards only the Atomic 5.10 command surface', () => {
-  const editor = createEditorAdapter('abc', { start: 0, end: 3 });
+test('classic Editor Command port is scoped, stateless and forwards the command surface through Atomic 5.11', async () => {
+  const editor = createEditorAdapter('abc abc', { start: 0, end: 3 });
   const service = createEditorCommandService({ adapter: editor.adapter });
   const host = {};
   const port = mountClassicEditorCommandPort(host, service);
 
   assert.equal(host.markdownEditorEditorCommandPort, port);
   assert.deepEqual(Object.keys(port).sort(), [
-    'bold', 'code', 'destroy', 'heading', 'inlineCode', 'italic', 'orderedList', 'quote', 'strikethrough', 'taskList', 'unorderedList'
+    'bold', 'code', 'destroy', 'findNext', 'heading', 'inlineCode', 'italic', 'orderedList', 'quote', 'replaceAll', 'replaceOne', 'strikethrough', 'taskList', 'unorderedList'
   ]);
   port.bold();
-  assert.equal(editor.text, '**abc**');
+  assert.equal(editor.text, '**abc** abc');
+  assert.deepEqual(await port.findNext('abc'), { from: 2, to: 5 });
   assert.throws(() => mountClassicEditorCommandPort(host, service), /already mounted/i);
 
   port.destroy();
