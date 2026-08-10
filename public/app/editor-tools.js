@@ -335,9 +335,7 @@ if (!editorToolsCommandPort) throw new Error('Editor Command compatibility port 
       autoSave();
       getActiveEditor().focus();
     }
-    function commitBasicListCommand(method) {
-      pushHistory();
-      editorToolsCommandPort[method](t('unordered'));
+    function finishBasicListCommand() {
       syncEditorFromActive();
       updatePreview();
       updateCount();
@@ -346,13 +344,19 @@ if (!editorToolsCommandPort) throw new Error('Editor Command compatibility port 
     }
 
     function formatUnorderedList() {
-      commitBasicListCommand('unorderedList');
+      pushHistory();
+      editorToolsCommandPort.unorderedList(t('unordered'));
+      finishBasicListCommand();
     }
     function formatOrderedList() {
-      commitBasicListCommand('orderedList');
+      pushHistory();
+      editorToolsCommandPort.orderedList(t('unordered'));
+      finishBasicListCommand();
     }
     function formatTaskList() {
-      commitBasicListCommand('taskList');
+      pushHistory();
+      editorToolsCommandPort.taskList(t('unordered'));
+      finishBasicListCommand();
     }
     function insertHeading(level) {
       pushHistory();
