@@ -25,6 +25,10 @@ jobs:
           node --test tests/architecture/stage-05-basic-command-boundary.test.mjs
           node --test tests/unit/editor/editor-history-adapter.test.mjs
           node --test tests/architecture/stage-05-history-authority.test.mjs
+      - name: Verify Atomic 5.11 Find Replace
+        run: |
+          node --test tests/unit/editor/find-replace-command.test.mjs
+          node --test tests/architecture/stage-05-find-replace-boundary.test.mjs
       - name: Locate legacy Find Replace ownership
         shell: bash
         run: |
@@ -33,9 +37,7 @@ jobs:
           grep -RniE 'openFindModal|closeFindModal|findNext|findPrevious|replaceCurrent|replaceAll|find-modal|find-input|replace-input|find-count|findMatches|findIndex' public src tests || true
           echo '=== Candidate function blocks ==='
           grep -nE 'function .*([Ff]ind|[Rr]eplace)|let .*([Ff]ind|[Rr]eplace)|const .*([Ff]ind|[Rr]eplace)' public/app/*.js || true
-          echo '=== Editor full-text reads near Find/Replace ==='
-          grep -nE 'editor\.value|documentModel\?\.getText|getText\(\)|sliceText' public/app/editor-tools.js || true
           echo '=== Existing editor adapter search-capable API ==='
-          grep -RniE 'sliceText|getTextLength|getSelection|setSelection|replaceRange|search|find' src/features/editor src/editor/virtual-editor.js | head -n 240 || true
+          grep -RniE 'sliceText|getTextLength|getSelection|setSelection|replaceRange|replaceAllText|findText' src/features/editor src/editor/virtual-editor.js | head -n 240 || true
       - name: Verify frozen DocumentModel hash
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
