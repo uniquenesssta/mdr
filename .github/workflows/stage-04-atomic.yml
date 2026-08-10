@@ -64,6 +64,8 @@ jobs:
         run: node --test tests/unit/theme/theme-service.test.mjs tests/ui/themes.test.mjs
       - name: Verify Atomic Task 4.12 legacy I18n removal
         run: node --test tests/unit/i18n/settings-locale-controller.test.mjs
+      - name: Verify Stage 4 taskbook file contracts
+        run: node --test tests/architecture/stage-04-taskbook-conformance.test.mjs
       - name: Record current locale audit
         run: node scripts/stage-04/locale-key-audit.mjs --output=artifacts/stage-04/04-12-legacy-i18n-removal-audit.json
       - name: Run architecture hard gate
