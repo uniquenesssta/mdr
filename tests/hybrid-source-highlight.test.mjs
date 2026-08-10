@@ -17,7 +17,7 @@ test('hybrid source highlight wiring keeps code widgets compatible and suppresse
   const registry = await readFile(new URL('../src/editor/hybrid/block-registry.js', import.meta.url), 'utf8');
   const ranges = await readFile(new URL('../src/editor/hybrid/ranges.js', import.meta.url), 'utf8');
   const inline = await readFile(new URL('../src/editor/hybrid/inline-presentation.js', import.meta.url), 'utf8');
-  const pointer = await readFile(new URL('../src/editor/pointer-selection/precise-pointer-selection.js', import.meta.url), 'utf8');
+  const pointer = await readFile(new URL('../src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js', import.meta.url), 'utf8');
 
   assert.doesNotMatch(registry, /isClosedFencedCodeSource/);
   assert.match(ranges, /shouldDecorateSourceActiveLine/);

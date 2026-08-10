@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Provide deterministic pointer correction, drag-boundary, click-range and multi-range selection policy independent of DOM reads.
+ * Imports: May import EditorSelection only; must not import DOM, feature state, document/session or persistence modules.
+ * Exports: shouldCorrectPointerPosition, applyDragBoundaryPolicy, rangeForPointerClick and removeRangeAroundPosition.
+ * State/side effects: None; all results derive from explicit inputs.
+ * Lifecycle: Pure module; no start/destroy lifecycle.
+ */
 import { EditorSelection } from '@codemirror/state';
 
 export function shouldCorrectPointerPosition({

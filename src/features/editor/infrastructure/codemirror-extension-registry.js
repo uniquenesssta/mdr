@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Own CodeMirror Base, Markdown, Theme, Read-only and Hybrid extension slots and runtime reconfiguration state.
+ * Imports: May import CodeMirror/Lezer primitives, sibling pointer-selection infrastructure and the existing Stage 8-bound hybrid facade; must not import document/session/UI/persistence state.
+ * Exports: CODEMIRROR_EXTENSION_SLOT_NAMES and createCodeMirrorExtensionRegistry.
+ * State/side effects: Owns Compartment instances, current extension configuration and one injected effect dispatcher; it does not own application theme or document state.
+ * Lifecycle: Explicit instance lifecycle; attach() owns a detachable dispatcher binding and destroy() is idempotent and terminal.
+ */
 import { Compartment, EditorState, Prec } from '@codemirror/state';
 import {
   EditorView,
@@ -15,11 +22,11 @@ import {
   markdown
 } from '@codemirror/lang-markdown';
 import { GFM } from '@lezer/markdown';
-import { createPrecisePointerSelectionExtension } from '../pointer-selection/precise-pointer-selection.js';
+import { createPrecisePointerSelectionExtension } from './pointer-selection/precise-pointer-selection.js';
 import {
   createHybridMarkdownConfiguration,
   createHybridMarkdownExtension
-} from '../hybrid-markdown.js';
+} from '../../../editor/hybrid-markdown.js';
 
 export const CODEMIRROR_EXTENSION_SLOT_NAMES = Object.freeze([
   'base',

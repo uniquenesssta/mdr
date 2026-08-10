@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Orchestrate precise CodeMirror pointer-selection sessions from sibling geometry readers and pure selection policies.
+ * Imports: May import CodeMirror selection/view primitives plus sibling pointer-selection modules; must not import document/session/persistence or UI feature state.
+ * Exports: resolvePrecisePointerPosition and createPrecisePointerSelectionExtension.
+ * State/side effects: Keeps only per-view diagnostic throttle timestamps in a WeakMap and emits the existing optional performance diagnostic; selection state remains owned by CodeMirror.
+ * Lifecycle: CodeMirror owns each mouse-selection session lifecycle; this module creates extensions and holds no independent application lifecycle.
+ */
 import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import {

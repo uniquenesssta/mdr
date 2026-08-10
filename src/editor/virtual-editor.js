@@ -1,7 +1,7 @@
 import {
   createCodeMirrorAdapter,
   createCodeMirrorExtensionRegistry
-} from './codemirror/index.js';
+} from '../features/editor/index.js';
 import { getHybridComponentStateSnapshot } from './hybrid/component-state.js';
 import { getHybridMarkdownStats } from './hybrid-markdown.js';
 
