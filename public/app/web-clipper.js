@@ -1,4 +1,7 @@
-    const webClipperPlatformPort = document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort;
+    const webClipperCompatibilityHost = document.getElementById('compatibility-business-ports');
+    const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
+    const webClipperEditorControllerPort = webClipperCompatibilityHost?.markdownEditorEditorControllerPort;
+    if (!webClipperEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
 
     function setClipperHidden(element, hidden) {
       element?.classList.toggle('is-hidden', Boolean(hidden));
@@ -169,7 +172,7 @@
         const text = el.value;
         const parts = text.split(query);
         count = Math.max(0, parts.length - 1);
-        if (count) el.value = parts.join(replacement);
+        if (count) webClipperEditorControllerPort.setText(parts.join(replacement));
       }
       if (count > 0) {
         syncEditorFromActive();
@@ -444,7 +447,7 @@
           : !editor.value.trim();
         if (isEmpty) {
           if (documentModel) documentModel.replaceRange(markdown, 0, currentLength, 'end');
-          else editor.value = markdown;
+          else webClipperEditorControllerPort.setText(markdown);
         } else if (documentModel) {
           documentModel.replaceRange('\n\n' + markdown, currentLength, currentLength, 'end');
         } else {

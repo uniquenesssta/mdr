@@ -5,6 +5,10 @@ import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
 import { configurePerformancePlatform } from './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
 import {
+  createEditorController,
+  mountClassicEditorControllerPort
+} from './features/editor/index.js';
+import {
   createDocumentModel,
   IncrementalPreviewModel,
   selectionMappingApi
@@ -92,6 +96,21 @@ async function loadAppModules() {
   window.markdownEditorScrollSync = window.markdownEditorScrollController.getPublicApi();
   window.markdownEditorSelectionController = createSelectionSyncController(editorHost, previewHost);
   const documentModel = createDocumentModel(editorHost);
+  let editorController;
+  let editorControllerPort;
+  try {
+    editorController = createEditorController({
+      model: documentModel,
+      adapter: virtualEditor,
+      reportError(message, error) { console.error(message, error); }
+    });
+    editorControllerPort = mountClassicEditorControllerPort(compatibilityPlatformHost, editorController);
+  } catch (error) {
+    editorController?.destroy?.();
+    documentModel.destroy();
+    virtualEditor.destroy();
+    throw error;
+  }
   window.markdownEditorDocumentModel = documentModel;
   window.IncrementalPreviewModel = IncrementalPreviewModel;
   window.createPreviewWorkerClient = createPreviewWorkerClient;
@@ -140,6 +159,8 @@ async function loadAppModules() {
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    editorControllerPort.destroy();
+    editorController.destroy();
     documentModel.destroy();
     virtualEditor.destroy();
     throw error;
@@ -153,6 +174,8 @@ async function loadAppModules() {
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    editorControllerPort.destroy();
+    editorController.destroy();
     documentModel.destroy();
     virtualEditor.destroy();
   };

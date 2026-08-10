@@ -1,9 +1,12 @@
     const eventsCompatibilityHost = document.getElementById('compatibility-business-ports');
     const eventsPlatformPort = eventsCompatibilityHost?.markdownEditorPlatformPort;
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
+    const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
     if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
+    if (!eventsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
 
-    editor.addEventListener('input', () => {
+    eventsEditorControllerPort.subscribeTransactions(transaction => {
+      if (!transaction.interactive) return;
       ensureCurrentDocumentForEditing();
       if (!editor.virtualEditor) {
         clearTimeout(historyTimer);

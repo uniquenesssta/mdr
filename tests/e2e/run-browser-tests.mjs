@@ -1122,6 +1122,41 @@ async function runAppSuite() {
       });
     });
 
+    await test('application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes', async () => {
+      const result = await browser.page.evaluate(`(()=>{
+        const host=document.getElementById('compatibility-business-ports');
+        const port=host?.markdownEditorEditorControllerPort;
+        const model=window.markdownEditorDocumentModel;
+        const editor=document.getElementById('editor');
+        if(!port||!model||!editor?.virtualEditor)throw new Error('Editor Controller fixture unavailable');
+        const transactions=[];
+        const unsubscribe=port.subscribeTransactions(transaction=>transactions.push(transaction));
+        try{
+          editor.virtualEditor.replaceRange('x',0,0,'end');
+          const interactive={...transactions.at(-1)};
+          const interactiveVersion=model.getDocumentVersion();
+          port.setText('controller body');
+          const programmatic={...transactions.at(-1)};
+          return {
+            count:transactions.length,
+            interactive,
+            interactiveVersion,
+            programmatic,
+            finalVersion:model.getDocumentVersion(),
+            body:model.createSnapshot('atomic-5.8-e2e'),
+            scopedOnly:typeof window.markdownEditorEditorControllerPort==='undefined'
+          };
+        }finally{unsubscribe();}
+      })()`);
+      assert.equal(result.count, 2);
+      assert.equal(result.interactive.interactive, true);
+      assert.equal(result.interactive.version, result.interactiveVersion);
+      assert.equal(result.programmatic.interactive, false);
+      assert.equal(result.programmatic.version, result.finalVersion);
+      assert.equal(result.body, 'controller body');
+      assert.equal(result.scopedOnly, true);
+    });
+
     await loadAppFixture(browser.page);
     await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]') && document.querySelector('[data-hybrid-block-type="table"]')), { timeoutMs: 10000, description: 'hybrid widgets' });
 

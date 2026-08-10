@@ -1,11 +1,13 @@
 const editorToolsCompatibilityHost = document.getElementById('compatibility-business-ports');
 const editorToolsSettingsStorePort = editorToolsCompatibilityHost?.markdownEditorSettingsStorePort;
+const editorToolsEditorControllerPort = editorToolsCompatibilityHost?.markdownEditorEditorControllerPort;
 if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
+if (!editorToolsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
 
     // 清空文档
     function clearDoc() {
       if (confirm(t('confirmClear'))) {
-        editor.value = '';
+        editorToolsEditorControllerPort.setText('');
         updatePreview();
         updateCount();
         saveToLocal();
@@ -45,7 +47,7 @@ if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility
       }
       if (historyIndex <= 0) return;
       historyIndex--;
-      editor.value = historyStack[historyIndex];
+      editorToolsEditorControllerPort.setText(historyStack[historyIndex]);
       lastHistoryText = editor.value;
       if (previewMode === 'source') previewSource.value = editor.value;
       updatePreview();
@@ -67,7 +69,7 @@ if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility
       }
       if (historyIndex >= historyStack.length - 1) return;
       historyIndex++;
-      editor.value = historyStack[historyIndex];
+      editorToolsEditorControllerPort.setText(historyStack[historyIndex]);
       lastHistoryText = editor.value;
       if (previewMode === 'source') previewSource.value = editor.value;
       updatePreview();

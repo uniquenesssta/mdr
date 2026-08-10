@@ -1,15 +1,17 @@
 const bootstrapCompatibilityHost = document.getElementById('compatibility-business-ports');
 const bootstrapHelpPort = bootstrapCompatibilityHost?.markdownEditorHelpPort;
 const bootstrapSettingsStorePort = bootstrapCompatibilityHost?.markdownEditorSettingsStorePort;
+const bootstrapEditorControllerPort = bootstrapCompatibilityHost?.markdownEditorEditorControllerPort;
 if (!bootstrapHelpPort) throw new Error('Help compatibility port is unavailable.');
 if (!bootstrapSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
+if (!bootstrapEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
 
     async function init() {
       const restoredSettings = bootstrapSettingsStorePort.snapshot;
 
       // 每次启动都建立新的会话文档。上次打开的外部路径仅迁移到“最近打开”，
       // 不再先恢复旧正文或文档元数据，避免侧栏历史和后台快照重新进入当前会话。
-      editor.value = '';
+      bootstrapEditorControllerPort.setText('');
       filenameInput.value = t('filenameDefault');
       const savedRatio = localStorage.getItem(RATIO_KEY);
       if (savedRatio !== null) {

@@ -1,4 +1,4 @@
-# Atomic Task 5.7 Pointer Selection validation node.
+# Atomic Task 5.8 Editor Controller validation node.
 name: Stage 5 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pointer-selection:
-    name: Verify Stage 5 Pointer Selection
+  editor-controller:
+    name: Verify Stage 5 Editor Controller
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -90,6 +90,8 @@ jobs:
         run: node --test tests/unit/editor/codemirror-extension-registry.test.mjs
       - name: Verify Atomic Task 5.7 Pointer Selection
         run: node --test tests/unit/editor/pointer-selection.test.mjs
+      - name: Verify Atomic Task 5.8 Editor Controller
+        run: node --test tests/unit/editor/editor-controller.test.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
       - name: Run architecture hard gate
@@ -106,10 +108,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-05/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 5.7 evidence
+      - name: Upload Atomic Task 5.8 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-05-pointer-selection-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-05-editor-controller-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-05
           if-no-files-found: error
           retention-days: 30
