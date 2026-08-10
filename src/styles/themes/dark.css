@@ -1,11 +1,11 @@
-/**
- * Responsibility: Declare dark-theme semantic token values only.
- * Imports: Foundation token semantics through the CSS cascade; component/feature implementation rules are forbidden.
- * Exports: Dark-theme CSS custom-property values consumed by shared styles.
- * State/side effects: Declarative CSS only; no JavaScript state or persistence.
- * Lifecycle: Stylesheet-only contract; no runtime lifecycle.
- */
 [data-theme="dark"] {
+  /**
+   * Responsibility: Declare dark-theme semantic token values only.
+   * Imports: Foundation token semantics through the CSS cascade; component/feature implementation rules are forbidden.
+   * Exports: Dark-theme CSS custom-property values consumed by shared styles.
+   * State/side effects: Declarative CSS only; no JavaScript state or persistence.
+   * Lifecycle: Stylesheet-only contract; no runtime lifecycle.
+   */
   --color-canvas: #0c1017;
   --color-surface-raised: #141922;
   --color-surface-subtle: #1a202b;
