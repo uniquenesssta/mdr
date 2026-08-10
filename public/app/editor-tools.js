@@ -2,9 +2,11 @@ const editorToolsCompatibilityHost = document.getElementById('compatibility-busi
 const editorToolsSettingsStorePort = editorToolsCompatibilityHost?.markdownEditorSettingsStorePort;
 const editorToolsEditorControllerPort = editorToolsCompatibilityHost?.markdownEditorEditorControllerPort;
 const editorToolsHistoryPort = editorToolsCompatibilityHost?.markdownEditorEditorHistoryPort;
+const editorToolsCommandPort = editorToolsCompatibilityHost?.markdownEditorEditorCommandPort;
 if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!editorToolsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
 if (!editorToolsHistoryPort) throw new Error('Editor History compatibility port is unavailable.');
+if (!editorToolsCommandPort) throw new Error('Editor Command compatibility port is unavailable.');
 
     // 清空文档
     function clearDoc() {
@@ -42,11 +44,21 @@ if (!editorToolsHistoryPort) throw new Error('Editor History compatibility port 
     // 工具栏格式化
     function formatBold() {
       pushHistory();
-      wrapSelection('**', '**');
+      editorToolsCommandPort.bold();
+      syncEditorFromActive();
+      updatePreview();
+      updateCount();
+      autoSave();
+      getActiveEditor().focus();
     }
     function formatItalic() {
       pushHistory();
-      wrapSelection('*', '*');
+      editorToolsCommandPort.italic();
+      syncEditorFromActive();
+      updatePreview();
+      updateCount();
+      autoSave();
+      getActiveEditor().focus();
     }
     function formatUnderline() {
       pushHistory();
@@ -54,7 +66,12 @@ if (!editorToolsHistoryPort) throw new Error('Editor History compatibility port 
     }
     function formatStrikethrough() {
       pushHistory();
-      wrapSelection('~~', '~~');
+      editorToolsCommandPort.strikethrough();
+      syncEditorFromActive();
+      updatePreview();
+      updateCount();
+      autoSave();
+      getActiveEditor().focus();
     }
     function formatSubscript() {
       pushHistory();
@@ -66,21 +83,21 @@ if (!editorToolsHistoryPort) throw new Error('Editor History compatibility port 
     }
     function insertCodeRow() {
       pushHistory();
-      wrapSelection('`', '`');
-    }
-    function insertCode() {
-      pushHistory();
-      const el = getActiveEditor();
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const selected = documentModel?.sliceText?.(start, end) ?? el.value.slice(start, end);
-      const insert = selected.includes('\n') ? '```\n' + selected + '\n```' : '`' + selected + '`';
-      el.setRangeText(insert, start, end, 'select');
+      editorToolsCommandPort.inlineCode();
       syncEditorFromActive();
       updatePreview();
       updateCount();
       autoSave();
-      el.focus();
+      getActiveEditor().focus();
+    }
+    function insertCode() {
+      pushHistory();
+      editorToolsCommandPort.code();
+      syncEditorFromActive();
+      updatePreview();
+      updateCount();
+      autoSave();
+      getActiveEditor().focus();
     }
     function wrapSelection(before, after) {
       const el = getActiveEditor();
@@ -311,75 +328,45 @@ if (!editorToolsHistoryPort) throw new Error('Editor History compatibility port 
 
     function formatQuote() {
       pushHistory();
-      const el = getActiveEditor();
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const selected = (documentModel?.sliceText?.(start, end) ?? el.value.slice(start, end)) || t('quote');
-      const quoted = '> ' + selected.replace(/\n/g, '\n> ');
-      el.setRangeText(quoted, start, end, 'select');
+      editorToolsCommandPort.quote(t('quote'));
       syncEditorFromActive();
       updatePreview();
       updateCount();
       autoSave();
-      el.focus();
+      getActiveEditor().focus();
+    }
+    function finishBasicListCommand() {
+      syncEditorFromActive();
+      updatePreview();
+      updateCount();
+      autoSave();
+      getActiveEditor().focus();
     }
 
     function formatUnorderedList() {
-      prefixLines('- ');
+      pushHistory();
+      editorToolsCommandPort.unorderedList(t('unordered'));
+      finishBasicListCommand();
     }
     function formatOrderedList() {
-      prefixLines('1. ');
+      pushHistory();
+      editorToolsCommandPort.orderedList(t('unordered'));
+      finishBasicListCommand();
     }
     function formatTaskList() {
-      prefixLines('- [ ] ');
-    }
-
-    function prefixLines(prefix) {
       pushHistory();
-      const el = getActiveEditor();
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const selected = (documentModel?.sliceText?.(start, end) ?? el.value.slice(start, end)) || t('unordered');
-      const firstLine = documentModel?.getLineNumberAtPosition?.(start)
-        ?? el.virtualEditor?.getLineNumberAtPosition?.(start);
-      const firstLineStart = firstLine
-        ? (documentModel?.getLineStart?.(firstLine) ?? el.virtualEditor?.getLineStart?.(firstLine) ?? 0)
-        : el.value.slice(0, start).lastIndexOf('\n') + 1;
-      const lines = selected.split('\n');
-      const prefixed = lines.map(line => (line ? prefix + line : line)).join('\n');
-      el.setRangeText(prefixed, firstLineStart, end, 'end');
-      syncEditorFromActive();
-      updatePreview();
-      updateCount();
-      autoSave();
-      el.focus();
+      editorToolsCommandPort.taskList(t('unordered'));
+      finishBasicListCommand();
     }
-
     function insertHeading(level) {
       pushHistory();
-      const el = getActiveEditor();
-      const start = el.selectionStart;
-      const lineNumber = documentModel?.getLineNumberAtPosition?.(start)
-        ?? el.virtualEditor?.getLineNumberAtPosition?.(start);
-      const lineStart = lineNumber
-        ? (documentModel?.getLineStart?.(lineNumber) ?? el.virtualEditor?.getLineStart?.(lineNumber) ?? 0)
-        : el.value.slice(0, start).lastIndexOf('\n') + 1;
-      const end = lineNumber
-        ? (documentModel?.getLineEnd?.(lineNumber) ?? el.virtualEditor?.getLineEnd?.(lineNumber) ?? lineStart)
-        : (() => {
-            const lineEnd = el.value.indexOf('\n', lineStart);
-            return lineEnd === -1 ? el.value.length : lineEnd;
-          })();
-      const currentLine = documentModel?.sliceText?.(lineStart, end) ?? el.value.slice(lineStart, end);
-      const newLine = '#'.repeat(level) + ' ' + currentLine.replace(/^#{0,6}\s*/, '');
-      el.setRangeText(newLine, lineStart, end, 'end');
+      editorToolsCommandPort.heading(level);
       syncEditorFromActive();
       updatePreview();
       updateCount();
       autoSave();
-      el.focus();
+      getActiveEditor().focus();
     }
-
     function toggleHeadingMenu() {
       document.getElementById('heading-menu').classList.toggle('show');
     }
