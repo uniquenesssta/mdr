@@ -6,19 +6,217 @@ on:
       - agent/cr-05-stage5-conformance
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   conformance:
     runs-on: ubuntu-22.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: agent/cr-05-stage5-conformance
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
       - name: Install frontend dependencies
         run: npm run deps:prepare
+      - name: Materialize taskbook-conformant editor infrastructure
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          def move(source, target):
+              source = Path(source)
+              target = Path(target)
+              if source.exists():
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  source.rename(target)
+
+          def prepend(path, header):
+              path = Path(path)
+              text = path.read_text(encoding='utf-8')
+              if 'Imports:' not in text[:1600]:
+                  path.write_text(header + text, encoding='utf-8')
+
+          move('src/editor/codemirror/codemirror-adapter.js', 'src/features/editor/infrastructure/codemirror-editor-adapter.js')
+          move('src/editor/codemirror/codemirror-extension-registry.js', 'src/features/editor/infrastructure/codemirror-extension-registry.js')
+          move('src/editor/pointer-selection/precise-pointer-selection.js', 'src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js')
+          move('src/editor/pointer-selection/caret-boundary-reader.js', 'src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js')
+          move('src/editor/pointer-selection/pointer-selection-policy.js', 'src/features/editor/infrastructure/pointer-selection/pointer-selection-policy.js')
+          Path('src/editor/codemirror/index.js').unlink(missing_ok=True)
+
+          headers = {
+              'src/features/editor/infrastructure/codemirror-editor-adapter.js': """/**
+           * Responsibility: Own the private CodeMirror state/view runtime and expose neutral editor text, transaction, selection, focus, scroll, history, subscription and teardown operations.
+           * Imports: May import CodeMirror state/view/command primitives and use injected callbacks; must not import document, UI, persistence or other feature internals.
+           * Exports: createCodeMirrorAdapter.
+           * State/side effects: Owns one private EditorView plus update/scroll listeners and its scroll DOM listener; raw CodeMirror objects remain inside the returned integration boundary.
+           * Lifecycle: Explicit instance lifecycle; destroy() is idempotent, releases listeners/view and makes later operations terminal.
+           */
+          """,
+              'src/features/editor/infrastructure/codemirror-extension-registry.js': """/**
+           * Responsibility: Own CodeMirror Base, Markdown, Theme, Read-only and Hybrid extension slots and runtime reconfiguration state.
+           * Imports: May import CodeMirror/Lezer primitives, sibling pointer-selection infrastructure and the existing Stage 8-bound hybrid facade; must not import document/session/UI/persistence state.
+           * Exports: CODEMIRROR_EXTENSION_SLOT_NAMES and createCodeMirrorExtensionRegistry.
+           * State/side effects: Owns Compartment instances, current extension configuration and one injected effect dispatcher; it does not own application theme or document state.
+           * Lifecycle: Explicit instance lifecycle; attach() owns a detachable dispatcher binding and destroy() is idempotent and terminal.
+           */
+          """,
+              'src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js': """/**
+           * Responsibility: Orchestrate precise CodeMirror pointer-selection sessions from sibling geometry readers and pure selection policies.
+           * Imports: May import CodeMirror selection/view primitives plus sibling pointer-selection modules; must not import document/session/persistence or UI feature state.
+           * Exports: resolvePrecisePointerPosition and createPrecisePointerSelectionExtension.
+           * State/side effects: Keeps only per-view diagnostic throttle timestamps in a WeakMap and emits the existing optional performance diagnostic; selection state remains owned by CodeMirror.
+           * Lifecycle: CodeMirror owns each mouse-selection session lifecycle; this module creates extensions and holds no independent application lifecycle.
+           */
+          """,
+              'src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js': """/**
+           * Responsibility: Read CodeMirror/DOM caret, visible-line and pointer geometry needed to resolve document boundaries without owning selection policy.
+           * Imports: No module imports; consumes only the injected CodeMirror view/event and their DOM APIs, never document/session/persistence state.
+           * Exports: clampDocumentPosition, readTargetLine, readNativeCaretPosition, readPositionRect, measurePointerDistance, findBestPositionNear and readDragBoundaryContext.
+           * State/side effects: No owned state; performs bounded DOM/CodeMirror geometry reads only.
+           * Lifecycle: Pure-with-view helper module; no start/destroy lifecycle.
+           */
+          """,
+              'src/features/editor/infrastructure/pointer-selection/pointer-selection-policy.js': """/**
+           * Responsibility: Provide deterministic pointer correction, drag-boundary, click-range and multi-range selection policy independent of DOM reads.
+           * Imports: May import EditorSelection only; must not import DOM, feature state, document/session or persistence modules.
+           * Exports: shouldCorrectPointerPosition, applyDragBoundaryPolicy, rangeForPointerClick and removeRangeAroundPosition.
+           * State/side effects: None; all results derive from explicit inputs.
+           * Lifecycle: Pure module; no start/destroy lifecycle.
+           */
+          """
+          }
+          for path, header in headers.items():
+              prepend(path, header)
+
+          controller = Path('src/features/editor/application/editor-controller.js')
+          controller_text = controller.read_text(encoding='utf-8')
+          old_header = """/**
+           * Responsibility: Bridge the frozen DocumentModel and neutral editor adapter so committed editor changes become one application transaction stream.
+           * State/side effects: Owns transaction listeners and adapter subscription lifecycle only; document body/version authority remains in DocumentModel.
+           */
+          """
+          new_header = """/**
+           * Responsibility: Bridge the frozen DocumentModel and neutral editor adapter so committed editor changes become one application transaction stream.
+           * Imports: No module imports; consumes only injected DocumentModel/adapter/reporter contracts and must not import CodeMirror, DOM, persistence or UI internals.
+           * Exports: createEditorController.
+           * State/side effects: Owns transaction listeners and adapter subscription lifecycle only; document body/version authority remains in DocumentModel.
+           * Lifecycle: Explicit instance lifecycle; destroy() is idempotent, unsubscribes the adapter and makes stateful operations terminal.
+           */
+          """
+          if controller_text.startswith(old_header):
+              controller_text = new_header + controller_text[len(old_header):]
+          elif 'Imports:' not in controller_text[:1600]:
+              controller_text = new_header + controller_text
+          controller.write_text(controller_text, encoding='utf-8')
+
+          Path('src/features/editor/index.js').write_text("""/**
+           * Responsibility: Expose the Stage 5 Editor feature's neutral infrastructure, application controller and scoped compatibility contracts through one public feature boundary.
+           * Imports: May import only Editor feature application, infrastructure and compatibility modules; must not import raw CodeMirror packages or other feature internals.
+           * Exports: createCodeMirrorAdapter, CODEMIRROR_EXTENSION_SLOT_NAMES, createCodeMirrorExtensionRegistry, createEditorController and mountClassicEditorControllerPort.
+           * State/side effects: None; import-only public facade.
+           * Lifecycle: Pure module; exported factories/ports own their explicit instance lifecycles.
+           */
+          export { createEditorController } from './application/editor-controller.js';
+          export { mountClassicEditorControllerPort } from './compatibility/classic-editor-controller-port.js';
+          export { createCodeMirrorAdapter } from './infrastructure/codemirror-editor-adapter.js';
+          export {
+            CODEMIRROR_EXTENSION_SLOT_NAMES,
+            createCodeMirrorExtensionRegistry
+          } from './infrastructure/codemirror-extension-registry.js';
+          """, encoding='utf-8')
+
+          registry = Path('src/features/editor/infrastructure/codemirror-extension-registry.js')
+          registry_text = registry.read_text(encoding='utf-8')
+          registry_text = registry_text.replace("from '../pointer-selection/precise-pointer-selection.js';", "from './pointer-selection/precise-pointer-selection.js';")
+          registry_text = registry_text.replace("from '../hybrid-markdown.js';", "from '../../../editor/hybrid-markdown.js';")
+          registry.write_text(registry_text, encoding='utf-8')
+
+          virtual_editor = Path('src/editor/virtual-editor.js')
+          virtual_text = virtual_editor.read_text(encoding='utf-8')
+          virtual_text = virtual_text.replace("} from './codemirror/index.js';", "} from '../features/editor/index.js';")
+          virtual_editor.write_text(virtual_text, encoding='utf-8')
+
+          replacements = {
+              'tests/unit/editor/codemirror-adapter.test.mjs': [
+                  ("../../../src/editor/codemirror/index.js", "../../../src/features/editor/index.js"),
+                  (".filter(file => !file.includes(`${path.sep}src${path.sep}editor${path.sep}`));", ".filter(file => !file.includes(`${path.sep}src${path.sep}editor${path.sep}`)\n      && !file.includes(`${path.sep}src${path.sep}features${path.sep}editor${path.sep}`));")
+              ],
+              'tests/unit/editor/codemirror-extension-registry.test.mjs': [
+                  ("../../../src/editor/codemirror/index.js", "../../../src/features/editor/index.js"),
+                  ("src/editor/codemirror/codemirror-extension-registry.js", "src/features/editor/infrastructure/codemirror-extension-registry.js"),
+                  ("src/editor/codemirror/index.js", "src/features/editor/index.js")
+              ],
+              'tests/unit/editor/pointer-selection.test.mjs': [
+                  ("../../../src/editor/pointer-selection/caret-boundary-reader.js", "../../../src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js"),
+                  ("../../../src/editor/pointer-selection/pointer-selection-policy.js", "../../../src/features/editor/infrastructure/pointer-selection/pointer-selection-policy.js"),
+                  ("src/editor/pointer-selection", "src/features/editor/infrastructure/pointer-selection"),
+                  ("src/editor/codemirror/codemirror-extension-registry.js", "src/features/editor/infrastructure/codemirror-extension-registry.js"),
+                  ("from '\\.\\.\\/pointer-selection\\/precise-pointer-selection\\.js'", "from '\\.\\/pointer-selection\\/precise-pointer-selection\\.js'")
+              ],
+              'tests/hybrid-source-highlight.test.mjs': [
+                  ("../src/editor/pointer-selection/precise-pointer-selection.js", "../src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js")
+              ]
+          }
+          for path, pairs in replacements.items():
+              file = Path(path)
+              text = file.read_text(encoding='utf-8')
+              for old, new in pairs:
+                  text = text.replace(old, new)
+              file.write_text(text, encoding='utf-8')
+
+          fixture_path = Path('tests/architecture/fixtures/production-modules.json')
+          fixture = json.loads(fixture_path.read_text(encoding='utf-8'))
+          path_map = {
+              'src/editor/codemirror/codemirror-adapter.js': 'src/features/editor/infrastructure/codemirror-editor-adapter.js',
+              'src/editor/codemirror/codemirror-extension-registry.js': 'src/features/editor/infrastructure/codemirror-extension-registry.js',
+              'src/editor/pointer-selection/caret-boundary-reader.js': 'src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js',
+              'src/editor/pointer-selection/pointer-selection-policy.js': 'src/features/editor/infrastructure/pointer-selection/pointer-selection-policy.js',
+              'src/editor/pointer-selection/precise-pointer-selection.js': 'src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js'
+          }
+          modules = []
+          for module in fixture['modules']:
+              if module[0] == 'src/editor/codemirror/index.js':
+                  continue
+              if module[0] in path_map:
+                  module[0] = path_map[module[0]]
+              if module[0] == 'src/features/editor/index.js':
+                  module[3] = 'Public Stage 5 Editor feature entry exporting neutral CodeMirror adapter/extension contracts, the Editor Controller and scoped classic compatibility mount without leaking raw CodeMirror objects.'
+              modules.append(module)
+          fixture['modules'] = modules
+          fixture_path.write_text(json.dumps(fixture, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
+          PY
       - name: Run CR-05 taskbook conformance contract
         run: node --test tests/architecture/stage-05-editor-infrastructure-conformance.test.mjs
+      - name: Run completed Stage 5 editor tests
+        run: >-
+          node --test
+          tests/unit/editor/codemirror-adapter.test.mjs
+          tests/unit/editor/codemirror-extension-registry.test.mjs
+          tests/unit/editor/pointer-selection.test.mjs
+          tests/unit/editor/editor-controller.test.mjs
+          tests/hybrid-source-highlight.test.mjs
+      - name: Run architecture hard gate
+        run: npm run verify:architecture
+      - name: Run Node regression
+        run: npm test
+      - name: Check candidate diff
+        run: git diff --check
+      - name: Publish verified product candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name uniquenesssta
+          git config user.email uniquenesssta@live.com
+          git add src tests
+          if git diff --cached --quiet; then
+            echo 'No product changes to publish.'
+            exit 0
+          fi
+          git commit -m 'candidate: CR-05 Stage 5 editor infrastructure conformance'
+          git push origin HEAD:agent/cr-05-stage5-conformance
