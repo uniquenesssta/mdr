@@ -2,6 +2,7 @@ import { createInlineFormatCommands } from '../commands/inline-format-commands.j
 import { createBlockFormatCommands } from '../commands/block-format-commands.js';
 import { createListCommands } from '../commands/list-commands.js';
 import { createCodeCommands } from '../commands/code-commands.js';
+import { createFindReplaceCommand } from '../commands/find-replace-command.js';
 
 const REQUIRED_ADAPTER_METHODS = Object.freeze([
   'getSelection',
@@ -9,7 +10,9 @@ const REQUIRED_ADAPTER_METHODS = Object.freeze([
   'getLineNumberAtPosition',
   'getLineStart',
   'getLineEnd',
-  'replaceRange'
+  'replaceRange',
+  'findText',
+  'replaceAllText'
 ]);
 
 function validateAdapter(adapter) {
@@ -24,8 +27,8 @@ function validateAdapter(adapter) {
 }
 
 /**
- * Responsibility: Expose the Atomic 5.10 basic command surface over neutral editor operations.
- * State/side effects: Owns only its terminal lifecycle; text mutation is delegated to command modules.
+ * Responsibility: Expose the Stage 5 command surface through Atomic 5.11 over neutral editor operations.
+ * State/side effects: Owns only its terminal lifecycle; formatting behavior and Find/Replace cursor state stay in responsibility-specific command modules.
  */
 export function createEditorCommandService({ adapter } = {}) {
   validateAdapter(adapter);
@@ -34,6 +37,7 @@ export function createEditorCommandService({ adapter } = {}) {
   const block = createBlockFormatCommands(adapter);
   const list = createListCommands(adapter);
   const codeCommands = createCodeCommands(adapter);
+  const findReplace = createFindReplaceCommand(adapter);
   let destroyed = false;
 
   const assertActive = () => {
@@ -55,9 +59,13 @@ export function createEditorCommandService({ adapter } = {}) {
     taskList: call(list, 'taskList'),
     inlineCode: call(codeCommands, 'inlineCode'),
     code: call(codeCommands, 'code'),
+    findNext: call(findReplace, 'findNext'),
+    replaceOne: call(findReplace, 'replaceOne'),
+    replaceAll: call(findReplace, 'replaceAll'),
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      findReplace.destroy();
     }
   });
 }
