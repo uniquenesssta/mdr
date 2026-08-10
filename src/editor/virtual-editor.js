@@ -151,7 +151,6 @@ export function createVirtualEditor(host) {
   const extensionRegistry = createCodeMirrorExtensionRegistry({
     placeholder: host.getAttribute('data-placeholder') || ''
   });
-  let documentLoadResetPending = false;
   let adapterApi = null;
 
   const { api: codeMirrorApi, integration: codeMirrorIntegration } = createCodeMirrorAdapter({
@@ -193,7 +192,6 @@ export function createVirtualEditor(host) {
     changeJournal.entries = [];
     changeJournal.nonWhitespaceCount = Number.isFinite(Number(options.nonWhitespaceCount)) ? Math.max(0, Number(options.nonWhitespaceCount) || 0) : countDocumentNonWhitespace(adapterApi);
     textareaCompatibility.invalidateValueCache();
-    documentLoadResetPending = true;
     return length;
   }
 
@@ -203,11 +201,6 @@ export function createVirtualEditor(host) {
     },
     loadDocumentChunks(chunks, options = {}) {
       return loadDocumentState(Array.from(chunks || []), options);
-    },
-    consumeDocumentLoadHistoryReset() {
-      const pending = documentLoadResetPending;
-      documentLoadResetPending = false;
-      return pending;
     },
     getDocumentVersion() {
       return changeJournal.version;
@@ -269,10 +262,6 @@ export function createVirtualEditor(host) {
     },
     getHybridComponentStates() {
       return codeMirrorIntegration.readView(getHybridComponentStateSnapshot);
-    },
-    resetHistory() {
-      codeMirrorIntegration.resetHistory({ extensions: extensionRegistry.getExtensions() });
-      textareaCompatibility.invalidateValueCache();
     }
   });
 

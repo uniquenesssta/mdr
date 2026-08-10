@@ -616,7 +616,6 @@ const editor = document.getElementById('editor');
         });
       }
       if (!coreDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
-      resetHistoryForCurrentDocument();
       await resetPreviewPipeline();
       if (!coreDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
       updateCount();
@@ -716,25 +715,6 @@ const editor = document.getElementById('editor');
         if (coreDocumentControllerPort.isStaleError(error)) return { native: false, stale: true };
         throw error;
       }
-    }
-
-    function resetHistoryForCurrentDocument() {
-      if (editor.virtualEditor?.consumeDocumentLoadHistoryReset?.()) {
-        historyStack = [];
-        historyIndex = -1;
-        lastHistoryText = null;
-        return;
-      }
-      if (editor.virtualEditor?.resetHistory) {
-        editor.virtualEditor.resetHistory();
-        historyStack = [];
-        historyIndex = -1;
-        lastHistoryText = null;
-        return;
-      }
-      historyStack = [editor.value];
-      historyIndex = 0;
-      lastHistoryText = editor.value;
     }
 
     function normalizeWorkspaceFilePath(path) {
@@ -1648,11 +1628,6 @@ const editor = document.getElementById('editor');
       });
     }
     const PAGE_FULLSCREEN_KEY = 'md_editor_page_fullscreen';
-    const MAX_HISTORY = 100;
-    let historyStack = [];
-    let historyIndex = -1;
-    let lastHistoryText = null;
-    let historyTimer = null;
 
     function getConfiguredLayoutMode() {
       return coreSettingsStorePort.get('layoutMode');
