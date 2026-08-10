@@ -19,7 +19,7 @@ const FORBIDDEN_FIND_REPLACE_DEPENDENCIES = Object.freeze([
   /\bmarkdownEditorDocumentStore\b/
 ]);
 
-test('Atomic 5.11 places Find/Replace in the planned Editor command module and reserves a native-search port', async () => {
+test('Atomic 5.11 places Find/Replace in the planned Editor command module and reserves a request-tagged native-search port', async () => {
   const [command, service, editorIndex, fixture] = await Promise.all([
     read(FIND_REPLACE_FILE),
     read('src/features/editor/application/editor-command-service.js'),
@@ -33,6 +33,9 @@ test('Atomic 5.11 places Find/Replace in the planned Editor command module and r
   assert.match(command, /replaceAllText\s*\(/, 'replace-all must use one adapter bulk transaction');
   assert.match(command, /nativeSearch/, 'native large-document search must remain available through an explicit port');
   assert.match(command, /onNativeSearchError/, 'native-search fallback errors must be reportable rather than silently swallowed');
+  assert.match(command, /requestGeneration/, 'async search results must be guarded by an owned request generation');
+  assert.match(command, /requestId:\s*generation/, 'native search calls must carry a request identifier');
+  assert.match(command, /isCurrent\s*\(/, 'stale native results must be checked before advancing cursor state');
   assert.doesNotMatch(command, /\.value\b|\.getText\s*\(/, 'Find/Replace must not implicitly materialize the full document');
 
   for (const pattern of FORBIDDEN_FIND_REPLACE_DEPENDENCIES) {
@@ -56,6 +59,7 @@ test('Atomic 5.11 removes Find/Replace business state and full-text fallback fro
   assert.match(clipper, /webClipperEditorCommandPort\.findNext\s*\(/);
   assert.match(clipper, /webClipperEditorCommandPort\.replaceOne\s*\(/);
   assert.match(clipper, /webClipperEditorCommandPort\.replaceAll\s*\(/);
+  assert.match(clipper, /if\s*\(match\s*===\s*undefined\)\s*return\s+false/, 'stale async results must not update classic UI state or selection');
 
   assert.doesNotMatch(clipper, /\blet\s+findIndex\b/, 'classic web clipper must no longer own the Find cursor');
   assert.doesNotMatch(clipper, /documentModel\?\.findText|documentModel\.findText/);
