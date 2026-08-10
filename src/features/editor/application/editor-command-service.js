@@ -28,7 +28,7 @@ function validateAdapter(adapter) {
 
 /**
  * Responsibility: Expose the Stage 5 command surface through Atomic 5.11 over neutral editor operations.
- * Imports: May import only responsibility-specific Editor command modules; must not import UI, persistence, platform or raw CodeMirror packages.
+ * Imports: May import only responsibility-specific Editor command modules and consume the injected neutral adapter contract.
  * Exports: createEditorCommandService.
  * State/side effects: Owns only its terminal lifecycle; formatting behavior and Find/Replace cursor/request state stay in responsibility-specific command modules.
  * Lifecycle: Explicit instance with idempotent destroy(); destroy is terminal and releases owned command-module lifecycle without destroying the injected adapter.
