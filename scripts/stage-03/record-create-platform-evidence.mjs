@@ -7,6 +7,8 @@ import {
 
 const OUTPUT_DIRECTORY = 'artifacts/stage-03';
 const MODULE_FIXTURE_PATH = 'tests/architecture/fixtures/production-modules.json';
+const HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT = 174;
+const STAGE_3_PLATFORM_MODULE_COUNT = 36;
 
 class EvidenceFileReader {
   constructor() {
@@ -195,7 +197,7 @@ const desktopText = await desktopPlatform.files.readText('native.md');
 const desktopWeb = await desktopPlatform.web.fetchText('https://desktop.example');
 await desktopPlatform.clipboard.writeText('browser-webview-clipboard');
 
-if (moduleFixture.modules.length !== 174 || platformModules.length !== 36) process.exit(1);
+if (platformModules.length !== STAGE_3_PLATFORM_MODULE_COUNT) process.exit(1);
 if (!platformModules.includes('src/platform/create-platform.js')) process.exit(1);
 if (!platformModules.includes('src/platform/desktop/desktop-platform.js')) process.exit(1);
 if (JSON.stringify(Object.keys(browserPlatform)) !== JSON.stringify(['capabilities', ...PLATFORM_PORT_NAMES, 'destroy'])) process.exit(1);
@@ -237,6 +239,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-11-create-platform-evidence.json`, `${JS
     'src/platform/create-platform.js',
     'src/platform/desktop/desktop-platform.js'
   ],
+  historicalStage3ProductionModuleCount: HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT,
   productionModuleCount: moduleFixture.modules.length,
   platformModuleCount: platformModules.length,
   samples: {
