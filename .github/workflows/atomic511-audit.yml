@@ -20,7 +20,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
       - name: Materialize Atomic 5.11 cutover
-        run: node .github/scripts/atomic511-materialize.mjs
+        run: |
+          node .github/scripts/atomic511-materialize.mjs
+          node .github/scripts/atomic511-inventory-finalize.mjs
       - name: Commit materialized candidate when needed
         shell: bash
         run: |
