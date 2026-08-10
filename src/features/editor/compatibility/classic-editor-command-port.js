@@ -1,6 +1,6 @@
 /**
- * Responsibility: Expose Atomic 5.10 basic editor commands to remaining classic callers through one scoped host property.
- * State/side effects: Owns only the host property lifecycle; command behavior stays in the injected service.
+ * Responsibility: Expose Stage 5 editor commands through Atomic 5.11 to remaining classic callers via one scoped host property.
+ * State/side effects: Owns only the host property lifecycle; command behavior and Find/Replace cursor state stay in the injected service.
  */
 const PORT_NAME = 'markdownEditorEditorCommandPort';
 const COMMAND_METHODS = Object.freeze([
@@ -13,7 +13,10 @@ const COMMAND_METHODS = Object.freeze([
   'orderedList',
   'taskList',
   'inlineCode',
-  'code'
+  'code',
+  'findNext',
+  'replaceOne',
+  'replaceAll'
 ]);
 
 export function mountClassicEditorCommandPort(host, service) {
@@ -44,6 +47,9 @@ export function mountClassicEditorCommandPort(host, service) {
     taskList: call('taskList'),
     inlineCode: call('inlineCode'),
     code: call('code'),
+    findNext: call('findNext'),
+    replaceOne: call('replaceOne'),
+    replaceAll: call('replaceAll'),
     destroy() {
       if (destroyed) return;
       destroyed = true;
