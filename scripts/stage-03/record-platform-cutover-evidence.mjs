@@ -2,6 +2,8 @@ import { access, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const OUTPUT_DIRECTORY = 'artifacts/stage-03';
+const HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT = 174;
+const STAGE_3_PLATFORM_MODULE_COUNT = 36;
 const fixture = JSON.parse(await readFile('tests/architecture/fixtures/production-modules.json', 'utf8'));
 const productionPaths = fixture.modules.map(record => record[0]);
 const platformModules = productionPaths.filter(path => path.startsWith('src/platform/')).sort();
@@ -48,7 +50,7 @@ const esmCallers = Object.fromEntries(await Promise.all(
 if (!facadeDeleted) process.exit(1);
 if (nativeGlobalOwners.length) process.exit(1);
 if (tauriImportsOutsidePlatform.length) process.exit(1);
-if (fixture.modules.length !== 174 || platformModules.length !== 36) process.exit(1);
+if (platformModules.length !== STAGE_3_PLATFORM_MODULE_COUNT) process.exit(1);
 if (productionPaths.includes('src/runtime/tauri.js')) process.exit(1);
 if (!productionPaths.includes('src/platform/compatibility/classic-platform-port.js')) process.exit(1);
 if (!main.includes('createPlatform({') || !main.includes('mountClassicPlatformPort')) process.exit(1);
@@ -75,6 +77,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-12-platform-cutover-evidence.json`, `${J
   runId: process.env.GITHUB_RUN_ID || null,
   attempt: process.env.GITHUB_RUN_ATTEMPT || null,
   scope: 'final-platform-caller-cutover-and-legacy-native-facade-deletion',
+  historicalStage3ProductionModuleCount: HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT,
   productionModuleCount: fixture.modules.length,
   platformModuleCount: platformModules.length,
   facadeDeleted,
