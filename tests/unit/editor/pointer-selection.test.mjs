@@ -7,13 +7,13 @@ import {
   findBestPositionNear,
   measurePointerDistance,
   readNativeCaretPosition
-} from '../../../src/editor/pointer-selection/caret-boundary-reader.js';
+} from '../../../src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js';
 import {
   applyDragBoundaryPolicy,
   rangeForPointerClick,
   removeRangeAroundPosition,
   shouldCorrectPointerPosition
-} from '../../../src/editor/pointer-selection/pointer-selection-policy.js';
+} from '../../../src/features/editor/infrastructure/pointer-selection/pointer-selection-policy.js';
 
 const repositoryRoot = path.resolve(import.meta.dirname, '../../..');
 
@@ -120,7 +120,7 @@ test('Atomic 5.7 caret reader prefers the standard caret API and maps it through
 
 test('Atomic 5.7 production integration directoryizes pointer selection and leaves Extension Registry as the sole assembler', () => {
   const oldPath = path.join(repositoryRoot, 'src/editor/precise-pointer-selection.js');
-  const pointerRoot = path.join(repositoryRoot, 'src/editor/pointer-selection');
+  const pointerRoot = path.join(repositoryRoot, 'src/features/editor/infrastructure/pointer-selection');
   assert.equal(fs.existsSync(oldPath), false);
   assert.deepEqual(
     fs.readdirSync(pointerRoot).filter(name => name.endsWith('.js')).sort(),
@@ -130,13 +130,13 @@ test('Atomic 5.7 production integration directoryizes pointer selection and leav
   const precise = fs.readFileSync(path.join(pointerRoot, 'precise-pointer-selection.js'), 'utf8');
   const reader = fs.readFileSync(path.join(pointerRoot, 'caret-boundary-reader.js'), 'utf8');
   const policy = fs.readFileSync(path.join(pointerRoot, 'pointer-selection-policy.js'), 'utf8');
-  const registry = fs.readFileSync(path.join(repositoryRoot, 'src/editor/codemirror/codemirror-extension-registry.js'), 'utf8');
+  const registry = fs.readFileSync(path.join(repositoryRoot, 'src/features/editor/infrastructure/codemirror-extension-registry.js'), 'utf8');
 
   assert.match(precise, /from '\.\/caret-boundary-reader\.js'/);
   assert.match(precise, /from '\.\/pointer-selection-policy\.js'/);
   assert.doesNotMatch(reader, /EditorSelection|mouseSelectionStyle|markdownEditorPerf/);
   assert.doesNotMatch(policy, /ownerDocument|elementsFromPoint|caretPositionFromPoint|markdownEditorPerf/);
-  assert.match(registry, /from '\.\.\/pointer-selection\/precise-pointer-selection\.js'/);
+  assert.match(registry, /from '\.\/pointer-selection\/precise-pointer-selection\.js'/);
   assert.equal((registry.match(/createPrecisePointerSelectionExtension\(\)/g) || []).length, 1);
   for (const source of [precise, reader, policy]) {
     assert.doesNotMatch(source, /src\/document|features\/documents|localStorage|window\.markdownEditorDocument/);

@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Own the private CodeMirror state/view runtime and expose neutral editor text, transaction, selection, focus, scroll, history, subscription and teardown operations.
+ * Imports: May import CodeMirror state/view/command primitives and use injected callbacks; must not import document, UI, persistence or other feature internals.
+ * Exports: createCodeMirrorAdapter.
+ * State/side effects: Owns one private EditorView plus update/scroll listeners and its scroll DOM listener; raw CodeMirror objects remain inside the returned integration boundary.
+ * Lifecycle: Explicit instance lifecycle; destroy() is idempotent, releases listeners/view and makes later operations terminal.
+ */
 import { EditorState, Text } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { isolateHistory, redo as redoHistory, undo as undoHistory } from '@codemirror/commands';

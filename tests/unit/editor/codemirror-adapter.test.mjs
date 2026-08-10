@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { history } from '@codemirror/commands';
-import { createCodeMirrorAdapter } from '../../../src/editor/codemirror/index.js';
+import { createCodeMirrorAdapter } from '../../../src/features/editor/index.js';
 
 class FakeScrollDom {
   constructor() {
@@ -300,7 +300,8 @@ test('production integration keeps raw CodeMirror confined to the editor feature
   assert.match(main, /virtualEditor\.destroy\(\)/);
 
   const nonEditorSource = walkJavaScript(path.join(repositoryRoot, 'src'))
-    .filter(file => !file.includes(`${path.sep}src${path.sep}editor${path.sep}`));
+    .filter(file => !file.includes(`${path.sep}src${path.sep}editor${path.sep}`)
+      && !file.includes(`${path.sep}src${path.sep}features${path.sep}editor${path.sep}`));
   const classicSource = walkJavaScript(path.join(repositoryRoot, 'public', 'app'));
   for (const file of [...nonEditorSource, ...classicSource]) {
     const source = fs.readFileSync(file, 'utf8');

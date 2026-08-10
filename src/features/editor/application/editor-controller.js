@@ -1,6 +1,9 @@
 /**
  * Responsibility: Bridge the frozen DocumentModel and neutral editor adapter so committed editor changes become one application transaction stream.
+ * Imports: No module imports; consumes only injected DocumentModel/adapter/reporter contracts and must not import CodeMirror, DOM, persistence or UI internals.
+ * Exports: createEditorController.
  * State/side effects: Owns transaction listeners and adapter subscription lifecycle only; document body/version authority remains in DocumentModel.
+ * Lifecycle: Explicit instance lifecycle; destroy() is idempotent, unsubscribes the adapter and makes stateful operations terminal.
  */
 function freezeChanges(changes) {
   return Object.freeze(Array.from(changes || []).map(change => Object.freeze({

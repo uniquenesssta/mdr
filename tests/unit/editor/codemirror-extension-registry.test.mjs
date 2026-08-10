@@ -6,7 +6,7 @@ import { EditorState, Facet } from '@codemirror/state';
 import {
   CODEMIRROR_EXTENSION_SLOT_NAMES,
   createCodeMirrorExtensionRegistry
-} from '../../../src/editor/codemirror/index.js';
+} from '../../../src/features/editor/index.js';
 import {
   hybridCodeVisualEditingFacet,
   hybridTableVisualEditingFacet
@@ -143,8 +143,8 @@ test('Atomic 5.6 registry destroy is idempotent and makes configuration operatio
 test('Atomic 5.6 production integration removes extension and Compartment ownership from virtual-editor', () => {
   const repositoryRoot = path.resolve(import.meta.dirname, '../../..');
   const virtualEditor = fs.readFileSync(path.join(repositoryRoot, 'src/editor/virtual-editor.js'), 'utf8');
-  const registry = fs.readFileSync(path.join(repositoryRoot, 'src/editor/codemirror/codemirror-extension-registry.js'), 'utf8');
-  const index = fs.readFileSync(path.join(repositoryRoot, 'src/editor/codemirror/index.js'), 'utf8');
+  const registry = fs.readFileSync(path.join(repositoryRoot, 'src/features/editor/infrastructure/codemirror-extension-registry.js'), 'utf8');
+  const index = fs.readFileSync(path.join(repositoryRoot, 'src/features/editor/index.js'), 'utf8');
 
   assert.match(virtualEditor, /createCodeMirrorExtensionRegistry/);
   assert.match(virtualEditor, /extensionRegistry\.attach\(codeMirrorIntegration\.dispatchEffects\)/);

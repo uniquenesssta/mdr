@@ -99,3 +99,53 @@
 当前执行环境无法通过本地 Git checkout 访问 GitHub（DNS 解析受阻），因此无法对用户本地工作区执行 `git status --short --branch`，也不能证明用户本地是否存在未提交修改。替代验证采用：正式远端分支精确 SHA 锁定、`force=false` fast-forward 发布、GitHub clean runner 全链验证，以及发布前后远端 HEAD/tree 核对。该限制不影响本次正式远端 commit/CI 结果，但用户本地工作区状态仍需用户本地自行确认。
 
 进入 5.9 前仍需处理已发现的 Stage 0–5 taskbook conformance audit：特别是 5.5–5.7 已发布 Editor 基础设施目录与 `agent/plan` 目标目录的一致性，不能因 5.8 已 PASS 就自动视为已解决。
+
+## CR-05 — Stage 5 Editor Infrastructure Conformance（2026-08-10）
+
+### 审计基线与复现
+
+CR-05 以 `agent/plan` 的 Stage 5 任务书为结构与职责基准，以正式 `rewrite/stage-05@2df9dee17c852ea5f85c661b47cc4d11c693cbfc` 为实施基线，只处理已经完成的 Atomic 5.5–5.8，不开始 Atomic 5.9，也不提前迁移完整 Hybrid Editor、Preview、后续命令或 Editor UI。
+
+新增永久 `tests/architecture/stage-05-editor-infrastructure-conformance.test.mjs` 后，初始 audit run `31366009746` 按预期失败并复现既有结构债务：5.5 CodeMirror Adapter、5.6 Extension Registry、5.7 Pointer Selection 仍位于 `src/editor/`；旧 `src/editor/codemirror/index.js` 转发 facade 仍存在；`src/features/editor/index.js` 未成为 5.5–5.8 统一公共边界；已完成 Editor 模块的 taskbook 职责/依赖/导出/状态/Lifecycle 说明也不完整。
+
+### 修复结果
+
+已将既有实现按任务书收敛到唯一生产所有权：
+
+- `src/editor/codemirror/codemirror-adapter.js` → `src/features/editor/infrastructure/codemirror-editor-adapter.js`；
+- `src/editor/codemirror/codemirror-extension-registry.js` → `src/features/editor/infrastructure/codemirror-extension-registry.js`；
+- `src/editor/pointer-selection/{precise-pointer-selection,caret-boundary-reader,pointer-selection-policy}.js` → `src/features/editor/infrastructure/pointer-selection/`；
+- 删除 `src/editor/codemirror/index.js`，没有保留 forwarding copy、别名实现或兼容壳；
+- `src/features/editor/index.js` 统一公开中性 Adapter、Extension Registry、Editor Controller 与既有 scoped compatibility mount；
+- `src/editor/virtual-editor.js` 的 5.5/5.6 基础设施消费改经 Editor feature 公共入口；
+- Extension Registry 继续调用既有 `src/editor/hybrid-markdown.js` facade，未把未来 Stage 8 Hybrid Editor 工作提前并入 CR-05；
+- 对已完成 Editor 模块补齐与真实实现一致的 Responsibility / Imports / Exports / State/side effects / Lifecycle 契约；
+- 架构清单和受影响测试切换到新唯一路径。
+
+删除旧 CodeMirror 转发 facade 后，当前 production module fixture 从 262 变为 261；只更新当前模块库存断言，Stage 1 历史“67 个生产模块”证据保持不变。
+
+CR-05 没有修改冻结 `DocumentModel`、用户可观察编辑行为、持久化格式、Settings、Rust/Tauri 公共契约、错误语义、安全策略、生产依赖或 lockfile。Atomic 5.9 History Adapter 仍未开始。
+
+### 验证与失败记录
+
+第一轮 materialization run `31366377596` 中，CR-05 conformance、5.5–5.8/Hybrid 专项和 Architecture 均通过，但完整 Node regression 在当前 production module count `261 !== 262` 停止；候选未发布。该断言随后只从 262 更新为实际 261，没有改写 Stage 1 历史数字，也没有删除或放宽架构门禁。
+
+修正后的 focused run `31366554414`：CR-05 contract **3/3 PASS**；已完成 Editor/Hybrid 专项 **34/34 PASS**；Architecture PASS；Node regression **44/44 PASS**；`git diff --check` PASS。
+
+实现候选 `ad843dc8feed7cfef0f49272000f7e1337e45e07` 的跨阶段验证结果：
+
+- Stage 0 Baseline Verification `31366719716`：PASS；Node、Browser Contract、Build、Built App、`cargo test --locked`、`cargo check --locked`、extended Tauri Linux build、evidence 与 hard gate 全部成功；
+- Stage 1 Atomic Verification `31366719737`：PASS；
+- Stage 2 Atomic Verification `31366719715`：首次在 Browser Contract 启动 Chromium 时出现 `CDP endpoint did not become ready: fetch failed`；2.1–2.11、Architecture 与 Node 已先通过。未修改代码或门禁，只重跑同一失败 job，随后 Browser Contract、Build、Built App 全部 PASS；
+- Stage 3 Atomic Verification `31366719703`：PASS；
+- Stage 4 Atomic Verification `31366719713`：PASS；
+- Stage 5 Atomic Verification `31366719714`：PASS；5.1–5.8、CR-05 永久 conformance gate、冻结 DocumentModel、Architecture、Node、Browser Contract、Build、Built App 与 evidence 全部成功；
+- Stage 3 Windows Window Automation `31366719767`：首次 release build、隔离 WebDriver host build、输入校验全部成功，但真实自动化在 Embedded WebDriver 建立 session 时报告 `No window could be found`，尚未进入 CR-05 Editor 操作断言；失败 evidence 的 `state-application.log` 为空且未发现应用 panic/JS/Rust 错误。未改源码或门禁，仅重跑同一 Windows job 一次，随后真实原生窗口自动化与 evidence 全部 PASS。
+
+上述两类瞬态失败均保留在验证记录中，没有被描述为首轮通过，也没有通过删除、跳过、弱化测试或修改质量门禁处理。
+
+### 剩余边界与环境限制
+
+CR-05 已关闭 5.8 记录中明确留下的 5.5–5.7 taskbook 目录一致性债务。`src/editor/virtual-editor.js` 仍承担尚未轮到的后续拆分职责；`src/editor/hybrid-markdown.js` 仍是未来 Stage 8 Hybrid Editor 迁移链的一部分，因此本 CR 不创建虚假的提前完成状态。Atomic 5.9 仍为未开始。
+
+当前执行环境没有可用的用户本地 Git checkout，且容器侧 GitHub DNS 访问受阻，因此不能替用户确认其电脑工作区中的未提交修改。远端实施通过精确正式 SHA、隔离分支、净 diff、GitHub clean runner 与真实 Windows 自动化完成验证。

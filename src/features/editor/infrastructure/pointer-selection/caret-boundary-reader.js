@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Read CodeMirror/DOM caret, visible-line and pointer geometry needed to resolve document boundaries without owning selection policy.
+ * Imports: No module imports; consumes only the injected CodeMirror view/event and their DOM APIs, never document/session/persistence state.
+ * Exports: clampDocumentPosition, readTargetLine, readNativeCaretPosition, readPositionRect, measurePointerDistance, findBestPositionNear and readDragBoundaryContext.
+ * State/side effects: No owned state; performs bounded DOM/CodeMirror geometry reads only.
+ * Lifecycle: Pure-with-view helper module; no start/destroy lifecycle.
+ */
 const POINTER_EXCLUSION_SELECTOR = [
   '.cm-hybrid-block-widget',
   '.cm-hybrid-inline-math',
