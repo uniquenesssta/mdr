@@ -1,7 +1,9 @@
     const webClipperCompatibilityHost = document.getElementById('compatibility-business-ports');
     const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
     const webClipperEditorControllerPort = webClipperCompatibilityHost?.markdownEditorEditorControllerPort;
+    const webClipperEditorCommandPort = webClipperCompatibilityHost?.markdownEditorEditorCommandPort;
     if (!webClipperEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
+    if (!webClipperEditorCommandPort) throw new Error('Editor Command compatibility port is unavailable.');
 
     function setClipperHidden(element, hidden) {
       element?.classList.toggle('is-hidden', Boolean(hidden));
@@ -40,9 +42,7 @@
       if (request.error) throw request.error;
     }
 
-    // 查找与替换
-    let findIndex = 0;
-
+    // 查找与替换：Atomic 5.11 仅迁移业务命令；现有 modal wrapper 保留至 5.12。
     function openFindModal() {
       const findInput = document.getElementById('find-input');
       const ed = getActiveEditor();
@@ -73,110 +73,90 @@
       if (request.error) throw request.error;
     }
 
-    async function findNext() {
-      const query = document.getElementById('find-input').value;
-      const status = document.getElementById('find-status');
-      const el = getActiveEditor();
-      if (!query) {
-        status.textContent = '';
-        return;
-      }
-      let virtualMatch = null;
+    function createFindSearchOptions(status) {
       const currentDoc = getCurrentDocument?.();
       const nativeStore = window.markdownEditorDocumentStore;
+      const documentLength = documentModel?.getTextLength?.() ?? getActiveEditor().textLength ?? 0;
       const useNativeSearch = Boolean(
         currentDoc?.nativeBacked
         && nativeStore?.search
-        && (documentModel?.getTextLength?.() ?? el.textLength ?? 0) >= ULTRA_LARGE_DOCUMENT_CHARS
+        && documentLength >= ULTRA_LARGE_DOCUMENT_CHARS
       );
-      let nativeSearchCompleted = false;
-      if (useNativeSearch) {
-        status.textContent = '正在后台查找…';
-        try {
+      if (!useNativeSearch) return {};
+      return {
+        async nativeSearch({ query, from, wrap }) {
+          status.textContent = '正在后台查找…';
           await saveCurrentDocumentState(false, { waitForNative: true });
-          virtualMatch = await nativeStore.search(currentDoc.id, query, findIndex, true);
-          nativeSearchCompleted = true;
-        } catch (error) {
+          return nativeStore.search(currentDoc.id, query, from, wrap);
+        },
+        onNativeSearchError(error) {
           console.warn('Native document search fallback:', error);
         }
-      }
-      if (!nativeSearchCompleted) {
-        virtualMatch = documentModel?.findText?.(query, findIndex, { wrap: true })
-          || el.virtualEditor?.findText?.(query, findIndex, { wrap: true });
-      }
-      let pos = virtualMatch?.from ?? -1;
-      if (pos < 0 && !el.virtualEditor) {
-        const text = el.value;
-        pos = text.indexOf(query, findIndex);
-        if (pos === -1) pos = text.indexOf(query, 0);
-      }
-      if (pos === -1) {
+      };
+    }
+
+    function applyFindMatch(match, status) {
+      if (!match) {
         status.textContent = t('statusNoMatch');
-        return;
+        return false;
       }
-      findIndex = virtualMatch?.to ?? pos + query.length;
-      el.setSelectionRange(pos, findIndex);
+      const el = getActiveEditor();
+      el.setSelectionRange(match.from, match.to);
       el.focus();
-      el.virtualEditor?.scrollPositionIntoView?.(pos, 'smooth', 0.45);
+      el.virtualEditor?.scrollPositionIntoView?.(match.from, 'smooth', 0.45);
       if (activeResolvedPreviewMode === 'chapter') {
         updatePreview().then(() => syncEditorSelectionToPreview(true));
       } else {
         requestAnimationFrame(() => syncEditorSelectionToPreview(true));
       }
       status.textContent = t('statusFoundMatch');
+      return true;
     }
 
-    function replaceOne() {
+    async function findNext() {
       const query = document.getElementById('find-input').value;
-      const replacement = document.getElementById('replace-input').value;
       const status = document.getElementById('find-status');
-      const el = getActiveEditor();
       if (!query) {
         status.textContent = '';
         return;
       }
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const selected = documentModel
-        ? documentModel.sliceText(start, end)
-        : el.virtualEditor
-          ? el.virtualEditor.sliceText(start, end)
-          : el.value.slice(start, end);
-      if (selected !== query) {
-        findNext();
+      const match = await webClipperEditorCommandPort.findNext(query, createFindSearchOptions(status));
+      applyFindMatch(match, status);
+    }
+
+    async function replaceOne() {
+      const query = document.getElementById('find-input').value;
+      const replacementText = document.getElementById('replace-input').value;
+      const status = document.getElementById('find-status');
+      if (!query) {
+        status.textContent = '';
         return;
       }
-      el.setRangeText(replacement, start, end, 'end');
-      syncEditorFromActive();
-      findIndex = start + replacement.length;
-      updatePreview();
-      updateCount();
-      autoSave();
-      findNext();
+      const result = await webClipperEditorCommandPort.replaceOne(
+        query,
+        replacementText,
+        createFindSearchOptions(status)
+      );
+      if (result.replaced) {
+        syncEditorFromActive();
+        updatePreview();
+        updateCount();
+        autoSave();
+      }
+      applyFindMatch(result.match, status);
     }
 
     function replaceAll() {
       const query = document.getElementById('find-input').value;
-      const replacement = document.getElementById('replace-input').value;
+      const replacementText = document.getElementById('replace-input').value;
       const status = document.getElementById('find-status');
-      const el = getActiveEditor();
       if (!query) {
         status.textContent = '';
         return;
       }
-      let count = 0;
-      if (documentModel?.replaceAllText || el.virtualEditor?.replaceAllText) {
-        count = documentModel?.replaceAllText?.(query, replacement)
-          ?? el.virtualEditor.replaceAllText(query, replacement);
-      } else {
-        const text = el.value;
-        const parts = text.split(query);
-        count = Math.max(0, parts.length - 1);
-        if (count) webClipperEditorControllerPort.setText(parts.join(replacement));
-      }
+      const count = webClipperEditorCommandPort.replaceAll(query, replacementText);
       if (count > 0) {
         syncEditorFromActive();
-        findIndex = 0;
         updatePreview();
         updateCount();
         autoSave();
