@@ -69,7 +69,6 @@ if (!bootstrapEditorControllerPort) throw new Error('Editor Controller compatibi
       if (!previewCollapsed && !isHybridLayoutMode()) {
         refreshPreviewAfterLayout?.({ forceRender: true, reason: 'startup-layout' });
       }
-      updateViewMenuLabel();
 
       // 恢复页面全屏
       if (localStorage.getItem(PAGE_FULLSCREEN_KEY) === 'true') {

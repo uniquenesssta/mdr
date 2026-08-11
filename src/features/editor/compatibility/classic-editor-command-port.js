@@ -1,12 +1,18 @@
 /**
- * Responsibility: Expose Stage 5 editor commands through Atomic 5.11 to remaining classic callers via one scoped host property.
- * State/side effects: Owns only the host property lifecycle; command behavior and Find/Replace cursor state stay in the injected service.
+ * Responsibility: Expose Stage 5 editor commands through Atomic 5.12 to remaining classic callers via one scoped host property.
+ * State/side effects: Owns only the host property lifecycle; command behavior stays in the injected service.
+ * Lifecycle: Explicit mount with idempotent destroy(); no editor state is copied into the compatibility host.
  */
 const PORT_NAME = 'markdownEditorEditorCommandPort';
 const COMMAND_METHODS = Object.freeze([
   'bold',
   'italic',
+  'underline',
   'strikethrough',
+  'subscript',
+  'superscript',
+  'setColor',
+  'clearColor',
   'heading',
   'quote',
   'unorderedList',
@@ -14,6 +20,12 @@ const COMMAND_METHODS = Object.freeze([
   'taskList',
   'inlineCode',
   'code',
+  'insertLink',
+  'insertImage',
+  'insertTable',
+  'insertInlineMath',
+  'insertBlockMath',
+  'insertMermaid',
   'findNext',
   'replaceOne',
   'replaceAll'
@@ -37,19 +49,7 @@ export function mountClassicEditorCommandPort(host, service) {
   };
 
   const api = Object.freeze({
-    bold: call('bold'),
-    italic: call('italic'),
-    strikethrough: call('strikethrough'),
-    heading: call('heading'),
-    quote: call('quote'),
-    unorderedList: call('unorderedList'),
-    orderedList: call('orderedList'),
-    taskList: call('taskList'),
-    inlineCode: call('inlineCode'),
-    code: call('code'),
-    findNext: call('findNext'),
-    replaceOne: call('replaceOne'),
-    replaceAll: call('replaceAll'),
+    ...Object.fromEntries(COMMAND_METHODS.map(method => [method, call(method)])),
     destroy() {
       if (destroyed) return;
       destroyed = true;

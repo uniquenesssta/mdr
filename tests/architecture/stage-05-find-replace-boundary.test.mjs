@@ -47,19 +47,26 @@ test('Atomic 5.11 places Find/Replace in the planned Editor command module and r
   assert.match(fixture, /src\/features\/editor\/commands\/find-replace-command\.js/);
 });
 
-test('Atomic 5.11 removes Find/Replace business state and full-text fallback from web-clipper while preserving the existing modal wrapper', async () => {
-  const [clipper, port] = await Promise.all([
+test('Atomic 5.11 command authority remains intact after Atomic 5.12 transfers Find/Replace modal ownership to the Editor View', async () => {
+  const [clipper, port, view] = await Promise.all([
     read('public/app/web-clipper.js'),
-    read('src/features/editor/compatibility/classic-editor-command-port.js')
+    read('src/features/editor/compatibility/classic-editor-command-port.js'),
+    read('src/features/editor/ui/find-replace-dialog-view.js')
   ]);
 
-  assert.match(clipper, /function\s+openFindModal\s*\(/, '5.11 must preserve the existing modal wrapper for Atomic 5.12');
-  assert.match(clipper, /function\s+closeFindModal\s*\(/);
-  assert.match(clipper, /markdownEditorEditorCommandPort/);
-  assert.match(clipper, /webClipperEditorCommandPort\.findNext\s*\(/);
-  assert.match(clipper, /webClipperEditorCommandPort\.replaceOne\s*\(/);
-  assert.match(clipper, /webClipperEditorCommandPort\.replaceAll\s*\(/);
-  assert.match(clipper, /if\s*\(match\s*===\s*undefined\)\s*return\s+false/, 'stale async results must not update classic UI state or selection');
+  assert.doesNotMatch(clipper, /function\s+openFindModal\s*\(/, 'Atomic 5.12 must remove the classic Find modal owner');
+  assert.doesNotMatch(clipper, /function\s+closeFindModal\s*\(/);
+  assert.match(clipper, /createFindSearchOptions/, 'native large-document search must remain bridged without moving it into the View');
+  assert.match(clipper, /afterFindMatch/, 'legacy preview synchronization remains an explicit compatibility callback');
+  assert.doesNotMatch(clipper, /webClipperEditorCommandPort\.findNext\s*\(/);
+  assert.doesNotMatch(clipper, /webClipperEditorCommandPort\.replaceOne\s*\(/);
+  assert.doesNotMatch(clipper, /webClipperEditorCommandPort\.replaceAll\s*\(/);
+
+  assert.match(view, /commands\.findNext\s*\(/);
+  assert.match(view, /commands\.replaceOne\s*\(/);
+  assert.match(view, /commands\.replaceAll\s*\(/);
+  assert.match(view, /result\s*===\s*undefined/, 'stale async replacement results must not mutate View state');
+  assert.match(view, /match\s*===\s*undefined/, 'stale async search results must not mutate selection or status');
 
   assert.doesNotMatch(clipper, /\blet\s+findIndex\b/, 'classic web clipper must no longer own the Find cursor');
   assert.doesNotMatch(clipper, /documentModel\?\.findText|documentModel\.findText/);

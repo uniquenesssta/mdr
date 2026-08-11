@@ -7,10 +7,22 @@ import { createVirtualEditor } from './editor/virtual-editor.js';
 import {
   createEditorCommandService,
   createEditorController,
+  createEditorFocusService,
   createEditorHistoryAdapter,
+  createEditorSelectionService,
+  createEditorPaneView,
+  createEditorToolbarView,
+  createFindReplaceDialogView,
+  createImageDialogView,
+  createInlineColorMenuView,
+  createLinkDialogView,
+  createMathDialogView,
+  createMermaidDialogView,
+  createTableDialogView,
   mountClassicEditorCommandPort,
   mountClassicEditorControllerPort,
-  mountClassicEditorHistoryPort
+  mountClassicEditorHistoryPort,
+  mountClassicEditorUiCommandPort
 } from './features/editor/index.js';
 import {
   createDocumentModel,
@@ -29,10 +41,14 @@ import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import { createFolderFileTreeController } from './sidebar/folder-file-tree.js';
 import { configureHybridImageSourcePlatform } from './editor/hybrid/image-source.js';
 import {
+  createDocumentContextMenuView,
+  createDocumentListView,
   createDocumentSessionController,
+  createDocumentTitleView,
   createRecentFilesRepository,
   createSessionDocumentRepository,
   mountClassicDocumentControllerPort,
+  mountClassicDocumentUiCommandPort,
   mountClassicRecentFilesPort
 } from './features/documents/index.js';
 
@@ -59,7 +75,6 @@ window.addEventListener('pagehide', () => {
 }, { once: true });
 
 window.markdownEditorSelectionMapping = selectionMappingApi;
-
 window.markdownEditorPresentation = createMarkdownPresentationApi();
 window.markdownEditorCodeHighlighter = window.markdownEditorPresentation.code;
 window.markdownEditorMath = window.markdownEditorPresentation.math;
@@ -90,6 +105,12 @@ function loadClassicScript(src) {
   });
 }
 
+function requireElement(selector, label) {
+  const element = document.querySelector(selector);
+  if (!element) throw new Error(`${label} is missing.`);
+  return element;
+}
+
 async function loadAppModules() {
   const editorHost = document.getElementById('editor');
   if (!editorHost) throw new Error('Editor host is missing');
@@ -103,9 +124,12 @@ async function loadAppModules() {
   let editorController;
   let editorHistoryAdapter;
   let editorCommandService;
+  let editorSelectionService;
+  let editorFocusService;
   let editorControllerPort;
   let editorHistoryPort;
   let editorCommandPort;
+  let editorUiCommandPort;
   try {
     editorController = createEditorController({
       model: documentModel,
@@ -114,13 +138,19 @@ async function loadAppModules() {
     });
     editorHistoryAdapter = createEditorHistoryAdapter({ adapter: virtualEditor });
     editorCommandService = createEditorCommandService({ adapter: virtualEditor });
+    editorSelectionService = createEditorSelectionService({ adapter: virtualEditor });
+    editorFocusService = createEditorFocusService({ adapter: virtualEditor });
     editorControllerPort = mountClassicEditorControllerPort(compatibilityPlatformHost, editorController);
     editorHistoryPort = mountClassicEditorHistoryPort(compatibilityPlatformHost, editorHistoryAdapter);
     editorCommandPort = mountClassicEditorCommandPort(compatibilityPlatformHost, editorCommandService);
+    editorUiCommandPort = mountClassicEditorUiCommandPort(compatibilityPlatformHost);
   } catch (error) {
+    editorUiCommandPort?.destroy?.();
     editorCommandPort?.destroy?.();
     editorHistoryPort?.destroy?.();
     editorControllerPort?.destroy?.();
+    editorFocusService?.destroy?.();
+    editorSelectionService?.destroy?.();
     editorCommandService?.destroy?.();
     editorHistoryAdapter?.destroy?.();
     editorController?.destroy?.();
@@ -169,16 +199,23 @@ async function loadAppModules() {
     }
   });
   let recentFilesPort;
+  let documentUiCommandPort;
   try {
     recentFilesPort = mountClassicRecentFilesPort(compatibilityPlatformHost, recentFilesRepository);
+    documentUiCommandPort = mountClassicDocumentUiCommandPort(compatibilityPlatformHost);
   } catch (error) {
+    documentUiCommandPort?.destroy?.();
+    recentFilesPort?.destroy?.();
     recentFilesRepository.destroy();
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    editorUiCommandPort.destroy();
     editorCommandPort.destroy();
     editorHistoryPort.destroy();
     editorControllerPort.destroy();
+    editorFocusService.destroy();
+    editorSelectionService.destroy();
     editorCommandService.destroy();
     editorHistoryAdapter.destroy();
     editorController.destroy();
@@ -186,18 +223,40 @@ async function loadAppModules() {
     virtualEditor.destroy();
     throw error;
   }
+
+  const featureViews = [];
+  let unregisterEditorViewCommands = null;
+  let documentEditorViewsDestroyed = false;
+  const destroyDocumentEditorViews = () => {
+    if (documentEditorViewsDestroyed) return;
+    documentEditorViewsDestroyed = true;
+    unregisterEditorViewCommands?.();
+    unregisterEditorViewCommands = null;
+    const errors = [];
+    for (const view of featureViews.reverse()) {
+      try { view?.destroy?.(); } catch (error) { errors.push(error); }
+    }
+    featureViews.length = 0;
+    if (errors.length) console.error('Document/Editor View cleanup failed:', new AggregateError(errors));
+  };
+
   let documentFeaturesDestroyed = false;
   const destroyDocumentFeatures = () => {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
+    destroyDocumentEditorViews();
+    documentUiCommandPort.destroy();
     recentFilesPort.destroy();
     recentFilesRepository.destroy();
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    editorUiCommandPort.destroy();
     editorCommandPort.destroy();
     editorHistoryPort.destroy();
     editorControllerPort.destroy();
+    editorFocusService.destroy();
+    editorSelectionService.destroy();
     editorCommandService.destroy();
     editorHistoryAdapter.destroy();
     editorController.destroy();
@@ -217,10 +276,246 @@ async function loadAppModules() {
     }
   });
 
+  const t = (...args) => {
+    const i18n = compatibilityPlatformHost?.markdownEditorI18nPort;
+    if (i18n?.t) return i18n.t(...args);
+    return String(args[0] || '');
+  };
+
+  let inlineColorView = null;
+  const notify = message => {
+    if (editorUiCommandPort.has('notify')) return editorUiCommandPort.invoke('notify', message);
+    console.warn(message);
+  };
+  const currentLayoutMode = () => editorUiCommandPort.has('getLayoutMode')
+    ? editorUiCommandPort.invoke('getLayoutMode')
+    : 'both';
+  const runMutation = (method, ...args) => {
+    editorHistoryAdapter.isolate();
+    const result = editorCommandService[method](...args);
+    if (currentLayoutMode() !== 'hybrid') editorFocusService.focus({ preventScroll: true });
+    queueMicrotask(() => inlineColorView?.updateAvailability?.());
+    return result;
+  };
+  const executeEditorAction = (action, payload) => {
+    if (action === 'close-app-menus') {
+      if (editorUiCommandPort.has('closeAppMenus')) return editorUiCommandPort.invoke('closeAppMenus');
+      return;
+    }
+    if (action === 'layout') return editorUiCommandPort.invoke('setLayoutMode', payload);
+    if (action === 'page-fullscreen') return editorUiCommandPort.invoke('togglePageFullscreen');
+    if (action === 'system-fullscreen') return editorUiCommandPort.invoke('toggleSystemFullscreen');
+    if (action === 'undo') {
+      const changed = editorHistoryAdapter.undo();
+      if (changed) {
+        editorFocusService.focus({ preventScroll: true });
+        notify(t('toastUndone'));
+      }
+      return changed;
+    }
+    if (action === 'redo') {
+      const changed = editorHistoryAdapter.redo();
+      if (changed) {
+        editorFocusService.focus({ preventScroll: true });
+        notify(t('toastRedone'));
+      }
+      return changed;
+    }
+    const handlers = {
+      bold: () => runMutation('bold'),
+      italic: () => runMutation('italic'),
+      underline: () => runMutation('underline'),
+      strikethrough: () => runMutation('strikethrough'),
+      subscript: () => runMutation('subscript'),
+      superscript: () => runMutation('superscript'),
+      heading: () => runMutation('heading', Number(payload) || 1),
+      quote: () => runMutation('quote', t('quote')),
+      unordered: () => runMutation('unorderedList', t('unordered')),
+      ordered: () => runMutation('orderedList', t('unordered')),
+      task: () => runMutation('taskList', t('unordered')),
+      'inline-code': () => runMutation('inlineCode'),
+      code: () => runMutation('code'),
+      'set-color': () => runMutation('setColor', payload?.kind, payload?.color, {
+        selection: payload?.selection,
+        collapse: Boolean(payload?.collapse)
+      }),
+      'clear-color': () => runMutation('clearColor', payload?.kind, {
+        selection: payload?.selection,
+        collapse: Boolean(payload?.collapse)
+      })
+    };
+    const handler = handlers[action];
+    if (!handler) throw new Error(`Editor UI action is unavailable: ${action}.`);
+    return handler();
+  };
+
+  const mountDocumentEditorViews = () => {
+    const titleView = createDocumentTitleView({
+      input: requireElement('#filename', 'Document title input'),
+      session: documentSessionPort,
+      fallbackTitle: t('filenameDefault') || '未命名文档.md',
+      updateTitleDraft(value) { return documentUiCommandPort.invoke('updateTitleDraft', value); }
+    });
+    featureViews.push(titleView);
+
+    const contextMenuView = createDocumentContextMenuView({
+      documentMenu: requireElement('#document-context-menu', 'Document context menu'),
+      sidebarMenu: requireElement('#sidebar-context-menu', 'Sidebar context menu'),
+      docsPanel: requireElement('#sidebar-docs-panel', 'Documents panel'),
+      commands: { invoke: (action, ...args) => documentUiCommandPort.invoke(action, ...args) }
+    });
+    featureViews.push(contextMenuView);
+
+    const documentListView = createDocumentListView({
+      root: requireElement('#document-list', 'Document list'),
+      session: documentSessionPort,
+      defaultTitle: t('filenameDefault') || '未命名文档',
+      emptyText: '暂无文档',
+      contextMenu: contextMenuView,
+      commands: {
+        open: id => documentUiCommandPort.invoke('openDocument', id),
+        close: id => documentUiCommandPort.invoke('closeDocument', id)
+      }
+    });
+    featureViews.push(documentListView);
+
+    const tableView = createTableDialogView({
+      menu: requireElement('#table-menu', 'Table menu'),
+      grid: requireElement('#table-grid', 'Table grid'),
+      label: requireElement('#table-size-label', 'Table size label'),
+      formatLabel: (rows, columns) => t('tableSizeLabel', rows, columns) || `${rows} 行 × ${columns} 列`,
+      insertTable: (rows, columns) => runMutation('insertTable', rows, columns)
+    });
+    featureViews.push(tableView);
+
+    const mathView = createMathDialogView({
+      insertInline: () => runMutation('insertInlineMath'),
+      insertBlock: () => runMutation('insertBlockMath'),
+      focus: editorFocusService
+    });
+    featureViews.push(mathView);
+
+    const linkView = createLinkDialogView({
+      root: requireElement('#link-modal', 'Link dialog'),
+      selection: editorSelectionService,
+      focus: editorFocusService,
+      defaultUrl: t('promptLinkDefault') || 'https://',
+      fallbackLabel: t('link') || '链接',
+      emptyUrlMessage: t('promptLinkUrl'),
+      notify,
+      insertLink: (url, options) => runMutation('insertLink', url, options)
+    });
+    featureViews.push(linkView);
+
+    const imageView = createImageDialogView({
+      root: requireElement('#image-modal', 'Image dialog'),
+      selection: editorSelectionService,
+      fallbackAlt: t('image') || '图片',
+      notify,
+      messages: {
+        selectFile: t('toastSelectImageFile'),
+        tooLarge: t('toastImageTooLarge'),
+        readFailed: t('toastImageReadFailed'),
+        selectFirst: t('toastSelectImageFirst'),
+        enterUrl: t('toastEnterImageUrl'),
+        previewAlt: t('image')
+      },
+      confirmLargeFile(file) {
+        const sizeMb = (Number(file?.size) / 1024 / 1024).toFixed(1);
+        return window.confirm(t('imageLargeWarning', sizeMb) || `图片大小为 ${sizeMb}MB，继续插入吗？`);
+      },
+      insertImage: (url, options) => runMutation('insertImage', url, options)
+    });
+    featureViews.push(imageView);
+
+    const mermaidView = createMermaidDialogView({
+      root: requireElement('#mermaid-modal', 'Mermaid dialog'),
+      notify,
+      messages: {
+        empty: t('toastMermaidEmpty'),
+        inserted: t('toastMermaidInserted')
+      },
+      insertMermaid: source => runMutation('insertMermaid', source)
+    });
+    featureViews.push(mermaidView);
+
+    const findView = createFindReplaceDialogView({
+      root: requireElement('#find-modal', 'Find/Replace dialog'),
+      selection: editorSelectionService,
+      focus: editorFocusService,
+      labels: {
+        noMatch: t('statusNoMatch'),
+        found: t('statusFoundMatch'),
+        replacedAll: count => t('statusReplacedCount', count)
+      },
+      getSearchOptions({ setStatus }) {
+        if (!editorUiCommandPort.has('getFindSearchOptions')) return {};
+        return editorUiCommandPort.invoke('getFindSearchOptions', setStatus);
+      },
+      onMatch(match) {
+        if (editorUiCommandPort.has('afterFindMatch')) editorUiCommandPort.invoke('afterFindMatch', match);
+      },
+      commands: {
+        findNext: (...args) => editorCommandService.findNext(...args),
+        replaceOne: (...args) => editorCommandService.replaceOne(...args),
+        replaceAll: (...args) => editorCommandService.replaceAll(...args)
+      }
+    });
+    featureViews.push(findView);
+
+    const toolbarRoot = requireElement('[data-ui-slot="toolbar"]', 'Editor toolbar');
+    inlineColorView = createInlineColorMenuView({
+      root: toolbarRoot,
+      selection: editorSelectionService,
+      commands: { execute: executeEditorAction },
+      notify,
+      collapseSelection: () => currentLayoutMode() === 'hybrid'
+    });
+    featureViews.push(inlineColorView);
+
+    const toolbarView = createEditorToolbarView({
+      root: toolbarRoot,
+      commandRoots: [document.querySelector('.menu-bar')],
+      commands: { execute: executeEditorAction },
+      dialogs: { link: linkView, image: imageView, find: findView, mermaid: mermaidView, math: mathView },
+      tableView,
+      getLayoutMode: currentLayoutMode,
+      formatLayoutLabel(mode) {
+        const keys = { both: 'view', hybrid: 'viewHybrid', edit: 'viewEdit', preview: 'viewPreview' };
+        return t(keys[mode] || 'view');
+      }
+    });
+    featureViews.push(toolbarView);
+
+    const editorPaneView = createEditorPaneView({
+      root: requireElement('.editor-pane', 'Editor pane'),
+      editorElement: editorHost,
+      collapse: pane => editorUiCommandPort.invoke('togglePane', pane),
+      onSelectionChange() {
+        inlineColorView.updateAvailability();
+        if (editorUiCommandPort.has('selectionChanged')) editorUiCommandPort.invoke('selectionChanged');
+      }
+    });
+    featureViews.push(editorPaneView);
+
+    unregisterEditorViewCommands = editorUiCommandPort.register({
+      executeEditorAction,
+      openLink: () => linkView.open(),
+      openImage: () => imageView.open(),
+      openFind: replace => findView.open(Boolean(replace)),
+      openMermaid: () => mermaidView.open(),
+      insertTable: (rows, columns) => tableView.insert(rows, columns),
+      insertInlineMath: () => mathView.insertInline(),
+      insertBlockMath: () => mathView.insertBlock(),
+      refreshToolbarLayoutLabel: mode => toolbarView.refreshLayoutLabel(mode)
+    });
+  };
+
   try {
     for (const src of APP_MODULES) {
       await loadClassicScript(src);
     }
+    mountDocumentEditorViews();
     if (window.__markdownEditorInitPromise) await window.__markdownEditorInitPromise;
   } catch (error) {
     destroyDocumentFeatures();

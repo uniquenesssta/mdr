@@ -3,9 +3,12 @@
     const exportDocumentDomainPort = exportCompatibilityHost?.markdownEditorDocumentDomainPort;
     const exportDocumentSessionPort = exportCompatibilityHost?.markdownEditorDocumentSessionPort;
     const exportDocumentControllerPort = exportCompatibilityHost?.markdownEditorDocumentControllerPort;
+    const exportDocumentUiCommandPort = exportCompatibilityHost?.markdownEditorDocumentUiCommandPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
+    if (!exportDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
+    exportDocumentUiCommandPort.register({ importFile: () => triggerImportFile() });
     let saveTimer;
     function autoSave() {
       clearTimeout(saveTimer);

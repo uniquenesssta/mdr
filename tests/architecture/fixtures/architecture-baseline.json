@@ -53,37 +53,10 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
-      "handler": "applyInlineColor('highlight',this.value)",
-      "count": 1,
-      "lines": [
-        219
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onchange",
-      "handler": "applyInlineColor('text',this.value)",
-      "count": 1,
-      "lines": [
-        197
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onchange",
-      "handler": "handleImageFileSelect(this)",
-      "count": 1,
-      "lines": [
-        880
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onchange",
       "handler": "importFile(this)",
       "count": 1,
       "lines": [
-        165
+        516
       ]
     },
     {
@@ -92,7 +65,7 @@
       "handler": "renderExportImagePreview()",
       "count": 1,
       "lines": [
-        842
+        424
       ]
     },
     {
@@ -101,178 +74,7 @@
       "handler": "toggleProxyInput()",
       "count": 1,
       "lines": [
-        766
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onchange",
-      "handler": "updateMermaidTemplate()",
-      "count": 1,
-      "lines": [
-        904
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('highlight','#bae6fd')",
-      "count": 1,
-      "lines": [
-        213
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('highlight','#bbf7d0')",
-      "count": 1,
-      "lines": [
-        212
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('highlight','#ddd6fe')",
-      "count": 1,
-      "lines": [
-        214
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('highlight','#e5e7eb')",
-      "count": 1,
-      "lines": [
-        216
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('highlight','#fbcfe8')",
-      "count": 1,
-      "lines": [
-        215
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('highlight','#fecaca')",
-      "count": 1,
-      "lines": [
-        211
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('highlight','#fed7aa')",
-      "count": 1,
-      "lines": [
-        210
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('highlight','#fff3a3')",
-      "count": 1,
-      "lines": [
-        209
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#0891b2')",
-      "count": 1,
-      "lines": [
-        191
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#16a34a')",
-      "count": 1,
-      "lines": [
-        190
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#1a1d23')",
-      "count": 1,
-      "lines": [
-        185
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#2563eb')",
-      "count": 1,
-      "lines": [
-        192
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#6b7280')",
-      "count": 1,
-      "lines": [
-        186
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#7c3aed')",
-      "count": 1,
-      "lines": [
-        193
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#ca8a04')",
-      "count": 1,
-      "lines": [
-        189
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#db2777')",
-      "count": 1,
-      "lines": [
-        194
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#dc2626')",
-      "count": 1,
-      "lines": [
-        187
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "applyInlineColor('text','#ea580c')",
-      "count": 1,
-      "lines": [
-        188
+        348
       ]
     },
     {
@@ -281,7 +83,7 @@
       "handler": "cancelActiveExport()",
       "count": 1,
       "lines": [
-        821
+        403
       ]
     },
     {
@@ -290,1129 +92,7 @@
       "handler": "clearDoc(); closeAppMenus();",
       "count": 1,
       "lines": [
-        96
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "clearInlineColor('highlight')",
-      "count": 1,
-      "lines": [
-        220
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "clearInlineColor('text')",
-      "count": 1,
-      "lines": [
-        198
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeContextDocument(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        358
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeExportImageModal()",
-      "count": 2,
-      "lines": [
-        830,
-        852
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeFindModal()",
-      "count": 2,
-      "lines": [
-        789,
-        799
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeImageModal()",
-      "count": 2,
-      "lines": [
-        864,
-        889
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeLinkModal()",
-      "count": 2,
-      "lines": [
-        742,
-        749
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeMermaidModal()",
-      "count": 2,
-      "lines": [
-        900,
-        913
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeUrlModal()",
-      "count": 2,
-      "lines": [
-        760,
-        778
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "collapseAllOutline(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        371
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "collapseContextOutlineNode(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        373
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "confirmImageInsert()",
-      "count": 1,
-      "lines": [
-        890
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "confirmLinkInsert()",
-      "count": 1,
-      "lines": [
-        750
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "confirmMermaidInsert()",
-      "count": 1,
-      "lines": [
-        914
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "convertAndInsert()",
-      "count": 1,
-      "lines": [
-        779
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "copyContextDocumentTitle(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        356
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "downloadExportImage()",
-      "count": 1,
-      "lines": [
-        854
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "duplicateContextDocument(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        353
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "duplicateDocument(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        363
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "expandAllOutline(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        370
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "exportContextDocument(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        355
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "exportFile(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        76
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "exportHTML(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        79
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "exportPDF(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        78
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "exportWord(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        77
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "fetchUrl()",
-      "count": 1,
-      "lines": [
-        770
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "findNext()",
-      "count": 1,
-      "lines": [
-        802
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatBold()",
-      "count": 1,
-      "lines": [
-        172
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatBold(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        91
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatItalic()",
-      "count": 1,
-      "lines": [
-        173
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatItalic(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        92
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatOrderedList()",
-      "count": 1,
-      "lines": [
-        239
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatQuote()",
-      "count": 1,
-      "lines": [
-        237
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatStrikethrough()",
-      "count": 1,
-      "lines": [
-        175
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatSubscript()",
-      "count": 1,
-      "lines": [
-        176
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatSuperscript()",
-      "count": 1,
-      "lines": [
-        177
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatTaskList()",
-      "count": 1,
-      "lines": [
-        240
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatUnderline()",
-      "count": 1,
-      "lines": [
-        174
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatUnderline(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        93
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "formatUnorderedList()",
-      "count": 1,
-      "lines": [
-        238
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertBlockMath(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        139
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertCode()",
-      "count": 1,
-      "lines": [
-        243
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertCodeRow()",
-      "count": 1,
-      "lines": [
-        242
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(1); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        117
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(1); closeHeadingMenu();",
-      "count": 1,
-      "lines": [
-        228
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(2); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        118
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(2); closeHeadingMenu();",
-      "count": 1,
-      "lines": [
-        229
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(3); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        119
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(3); closeHeadingMenu();",
-      "count": 1,
-      "lines": [
-        230
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(4); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        120
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(4); closeHeadingMenu();",
-      "count": 1,
-      "lines": [
-        231
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(5); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        121
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(5); closeHeadingMenu();",
-      "count": 1,
-      "lines": [
-        232
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(6); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        122
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertHeading(6); closeHeadingMenu();",
-      "count": 1,
-      "lines": [
-        233
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertInlineMath(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        138
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertLink()",
-      "count": 1,
-      "lines": [
-        244
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertLink(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        125
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertTable(3, 3); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        127
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "newDocument(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        62
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "newDocument(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        362
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openContextDocument(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        351
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openExportImageModal(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        80
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openFindModal()",
-      "count": 1,
-      "lines": [
-        253
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openFindModal(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        94
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openImageModal()",
-      "count": 1,
-      "lines": [
-        245
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openImageModal(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        126
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openMermaidModal()",
-      "count": 1,
-      "lines": [
-        254
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openMermaidModal(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        142
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openUrlModal(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        72
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openUrlModal(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        365
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "redo()",
-      "count": 1,
-      "lines": [
-        170
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "redo(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        89
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "renameContextDocument(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        352
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "renameCurrentDocument(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        66
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "renderExportImagePreview()",
-      "count": 1,
-      "lines": [
-        853
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "replaceAll()",
-      "count": 1,
-      "lines": [
-        800
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "replaceOne()",
-      "count": 1,
-      "lines": [
-        801
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "saveAsContextDocument(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        354
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "saveAsMarkdown(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        65
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "saveCurrentFile(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        64
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('1:1')",
-      "count": 1,
-      "lines": [
-        838
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('16:9')",
-      "count": 1,
-      "lines": [
-        839
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('3:4')",
-      "count": 1,
-      "lines": [
-        837
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('4:5')",
-      "count": 1,
-      "lines": [
-        836
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('9:16')",
-      "count": 1,
-      "lines": [
-        835
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('both'); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        104
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('both'); closeViewMenu();",
-      "count": 1,
-      "lines": [
-        260
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('edit'); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        105
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('edit'); closeViewMenu();",
-      "count": 1,
-      "lines": [
-        262
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('hybrid'); closeViewMenu();",
-      "count": 1,
-      "lines": [
-        261
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('preview'); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        106
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('preview'); closeViewMenu();",
-      "count": 1,
-      "lines": [
-        263
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setSidebarTab('docs')",
-      "count": 1,
-      "lines": [
-        282
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setSidebarTab('files')",
-      "count": 1,
-      "lines": [
-        283
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setSidebarTab('outline')",
-      "count": 1,
-      "lines": [
-        284
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchImageTab('upload')",
-      "count": 1,
-      "lines": [
-        869
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "switchImageTab('url')",
-      "count": 1,
-      "lines": [
-        868
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleAppMenu('app-view-menu')",
-      "count": 1,
-      "lines": [
-        100
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleAppMenu('edit-menu')",
-      "count": 1,
-      "lines": [
-        86
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleAppMenu('file-menu')",
-      "count": 1,
-      "lines": [
-        60
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleAppMenu('help-menu')",
-      "count": 1,
-      "lines": [
-        146
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleAppMenu('insert-menu')",
-      "count": 1,
-      "lines": [
-        113
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleCodeVisualEditing(event)",
-      "count": 1,
-      "lines": [
-        132
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleFullscreen(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        109
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleFullscreen(); closeViewMenu();",
-      "count": 1,
-      "lines": [
-        265
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleHeadingMenu()",
-      "count": 1,
-      "lines": [
-        226
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleInlineColorMenu('highlight')",
-      "count": 1,
-      "lines": [
-        203
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleInlineColorMenu('text')",
-      "count": 1,
-      "lines": [
-        179
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "togglePageFullscreen(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        108
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "togglePageFullscreen(); closeViewMenu();",
-      "count": 1,
-      "lines": [
-        264
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "togglePane('editor')",
-      "count": 1,
-      "lines": [
-        311
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "togglePane('preview')",
-      "count": 1,
-      "lines": [
-        318
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleSidebar()",
-      "count": 1,
-      "lines": [
-        279
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleSidebar(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        102
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleTableMenu()",
-      "count": 1,
-      "lines": [
-        247
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleTableVisualEditing(event)",
-      "count": 1,
-      "lines": [
-        128
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleViewMenu()",
-      "count": 1,
-      "lines": [
-        258
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "triggerImportFile(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        63
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "triggerImportFile(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        364
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "undo()",
-      "count": 1,
-      "lines": [
-        169
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "undo(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        88
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "oncontextmenu",
-      "handler": "openOutlineContextMenu(event)",
-      "count": 1,
-      "lines": [
-        299
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "oncontextmenu",
-      "handler": "openSidebarContextMenu(event)",
-      "count": 1,
-      "lines": [
-        286
+        44
       ]
     },
     {
@@ -1422,6 +102,422 @@
       "count": 1,
       "lines": [
         96
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "closeExportImageModal()",
+      "count": 2,
+      "lines": [
+        412,
+        434
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "closeUrlModal()",
+      "count": 2,
+      "lines": [
+        342,
+        360
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "collapseAllOutline(); closeContextMenus();",
+      "count": 1,
+      "lines": [
+        312
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "collapseContextOutlineNode(); closeContextMenus();",
+      "count": 1,
+      "lines": [
+        314
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "convertAndInsert()",
+      "count": 1,
+      "lines": [
+        361
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "downloadExportImage()",
+      "count": 1,
+      "lines": [
+        436
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "expandAllOutline(); closeContextMenus();",
+      "count": 1,
+      "lines": [
+        311
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "exportFile(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        24
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "exportHTML(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        27
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "exportPDF(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        26
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "exportWord(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        25
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "fetchUrl()",
+      "count": 1,
+      "lines": [
+        352
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "insertTable(3, 3); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        75
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "newDocument(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        10
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "openExportImageModal(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        28
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "openFindModal(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        42
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "openUrlModal(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        20
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "renameCurrentDocument(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        14
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "renderExportImagePreview()",
+      "count": 1,
+      "lines": [
+        435
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "saveAsMarkdown(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        13
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "saveCurrentFile(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        12
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('1:1')",
+      "count": 1,
+      "lines": [
+        420
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('16:9')",
+      "count": 1,
+      "lines": [
+        421
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('3:4')",
+      "count": 1,
+      "lines": [
+        419
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('4:5')",
+      "count": 1,
+      "lines": [
+        418
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('9:16')",
+      "count": 1,
+      "lines": [
+        417
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "setLayoutMode('both'); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        52
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "setLayoutMode('edit'); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        53
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "setLayoutMode('preview'); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        54
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "setSidebarTab('docs')",
+      "count": 1,
+      "lines": [
+        227
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "setSidebarTab('files')",
+      "count": 1,
+      "lines": [
+        228
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "setSidebarTab('outline')",
+      "count": 1,
+      "lines": [
+        229
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('app-view-menu')",
+      "count": 1,
+      "lines": [
+        48
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('edit-menu')",
+      "count": 1,
+      "lines": [
+        34
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('file-menu')",
+      "count": 1,
+      "lines": [
+        8
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('help-menu')",
+      "count": 1,
+      "lines": [
+        94
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('insert-menu')",
+      "count": 1,
+      "lines": [
+        61
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleCodeVisualEditing(event)",
+      "count": 1,
+      "lines": [
+        80
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleFullscreen(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        57
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "togglePageFullscreen(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        56
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "togglePane('preview')",
+      "count": 1,
+      "lines": [
+        261
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleSidebar()",
+      "count": 1,
+      "lines": [
+        224
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleSidebar(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        50
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleTableVisualEditing(event)",
+      "count": 1,
+      "lines": [
+        76
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "triggerImportFile(); closeAppMenus();",
+      "count": 1,
+      "lines": [
+        11
+      ]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "oncontextmenu",
+      "handler": "openOutlineContextMenu(event)",
+      "count": 1,
+      "lines": [
+        244
       ]
     }
   ],

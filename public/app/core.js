@@ -6,12 +6,38 @@ const coreDocumentDomainPort = coreCompatibilityHost?.markdownEditorDocumentDoma
 const coreDocumentSessionPort = coreCompatibilityHost?.markdownEditorDocumentSessionPort;
 const coreDocumentControllerPort = coreCompatibilityHost?.markdownEditorDocumentControllerPort;
 const coreRecentFilesPort = coreCompatibilityHost?.markdownEditorRecentFilesPort;
+const coreDocumentUiCommandPort = coreCompatibilityHost?.markdownEditorDocumentUiCommandPort;
+const coreEditorUiCommandPort = coreCompatibilityHost?.markdownEditorEditorUiCommandPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
 if (!coreDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
 if (!coreDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
 if (!coreRecentFilesPort) throw new Error('Recent files compatibility port is unavailable.');
+if (!coreDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
+if (!coreEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+coreDocumentUiCommandPort.register({
+  openDocument: documentId => openDocument(documentId),
+  closeDocument: documentId => closeDocument(documentId),
+  renameDocument: documentId => renameDocument(documentId),
+  duplicateDocument: documentId => duplicateDocument(documentId),
+  saveAsDocument: documentId => saveAsContextDocument(documentId),
+  exportDocument: documentId => exportContextDocument(documentId),
+  copyDocumentTitle: documentId => copyContextDocumentTitle(documentId),
+  newDocument: () => newDocument(),
+  duplicateActiveDocument: () => duplicateDocument(coreDocumentSessionPort.activeId),
+  updateTitleDraft(value) {
+    const result = coreDocumentControllerPort.updateActiveTitleDraft(value);
+    autoSave();
+    syncCurrentDocumentFileTree();
+    return result;
+  }
+});
+coreEditorUiCommandPort.register({
+  togglePane: pane => togglePane(pane),
+  notify: message => showToast(message),
+  closeAppMenus: () => closeAppMenus()
+});
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
@@ -59,7 +85,6 @@ const editor = document.getElementById('editor');
     let toolbarBoundaryRaf = 0;
     let toolbarBoundaryInitialized = false;
     let toolbarBoundaryWrapped = false;
-    let contextDocumentId = null;
     let contextOutlineId = '';
     let outlineCollapsed = {};
     let previewPerformanceMode = 'auto';
@@ -245,7 +270,7 @@ const editor = document.getElementById('editor');
 
     function refreshClassicLocalizedState() {
       updateCollapseBtnLabels();
-      updateViewMenuLabel();
+      if (coreEditorUiCommandPort.has('refreshToolbarLayoutLabel')) coreEditorUiCommandPort.invoke('refreshToolbarLayoutLabel');
       updateStatusBar();
       updateCount();
       scheduleToolbarBoundaryEvaluation?.();
@@ -619,7 +644,7 @@ const editor = document.getElementById('editor');
       await resetPreviewPipeline();
       if (!coreDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
       updateCount();
-      renderDocumentList();
+      syncCurrentDocumentFileTree();
       return true;
     }
 
@@ -632,7 +657,7 @@ const editor = document.getElementById('editor');
       renderRecentFilesMenu();
       const result = coreDocumentControllerPort.initializeEmptySession({ legacyRecords: storedDocuments });
       filenameInput.value = t('filenameDefault');
-      renderDocumentList();
+      syncCurrentDocumentFileTree();
 
       window.markdownEditorPerf?.record?.('document.session-reset', {
         category: 'document.lifecycle',
@@ -671,7 +696,7 @@ const editor = document.getElementById('editor');
         fallbackTitle: t('filenameDefault')
       });
       filenameInput.value = result.record.title;
-      renderDocumentList();
+      syncCurrentDocumentFileTree();
       window.markdownEditorPerf?.record?.('document.lazy-created', {
         category: 'document.lifecycle',
         durationMs: 0,
@@ -709,7 +734,7 @@ const editor = document.getElementById('editor');
           forceSnapshot: Boolean(options.forceSnapshot),
           snapshotReason: options.snapshotReason || 'document-storage'
         });
-        if (refreshList && coreDocumentControllerPort.isCurrentGeneration(result.generation)) renderDocumentList();
+        if (refreshList && coreDocumentControllerPort.isCurrentGeneration(result.generation)) syncCurrentDocumentFileTree();
         return result.result || { native: Boolean(result.native) };
       } catch (error) {
         if (coreDocumentControllerPort.isStaleError(error)) return { native: false, stale: true };
@@ -806,7 +831,7 @@ const editor = document.getElementById('editor');
           filenameInput.value = result.record.title;
           autoSave();
         }
-        renderDocumentList();
+        syncCurrentDocumentFileTree();
         showToast('已重命名文档');
       } catch (error) {
         if (coreDocumentControllerPort.isStaleError(error)) return;
@@ -865,7 +890,7 @@ const editor = document.getElementById('editor');
           const uiResult = { ...result, record: result.activeRecord || null };
           if (!await applyDocumentLifecycleUi(uiResult, { record: result.activeRecord || null })) return;
         } else {
-          renderDocumentList();
+          syncCurrentDocumentFileTree();
         }
         if (coreDocumentControllerPort.isCurrentGeneration(result.generation)) showToast('已关闭文档');
       } catch (error) {
@@ -879,27 +904,7 @@ const editor = document.getElementById('editor');
       return closeDocument(id, event);
     }
 
-    function renderDocumentList() {
-      const list = document.getElementById('document-list');
-      if (!list) return;
-      const records = getSessionDocuments();
-      const activeId = getActiveDocumentId();
-      if (!records.length) {
-        list.innerHTML = '<div class="sidebar-empty">暂无文档</div>';
-        window.markdownEditorFileTree?.syncCurrentDocument?.(
-          window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.()
-        );
-        return;
-      }
-      list.innerHTML = records.map(doc => {
-        const active = doc.id === activeId ? ' active' : '';
-        const meta = doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : '';
-        return '<div class="document-item' + active + '" onclick="openDocument(\'' + doc.id + '\')" oncontextmenu="openDocumentContextMenu(\'' + doc.id + '\', event)">'
-          + '<div class="document-summary"><div class="document-title" title="' + escapeHtml(doc.title || '') + '">' + escapeHtml(doc.title || t('filenameDefault')) + '</div>'
-          + '<div class="document-meta">' + escapeHtml(meta) + '</div></div>'
-          + '<button type="button" class="document-close" title="关闭文档" aria-label="关闭文档 ' + escapeHtml(doc.title || t('filenameDefault')) + '" onclick="closeDocument(\'' + doc.id + '\', event)">×</button>'
-          + '</div>';
-      }).join('');
+    function syncCurrentDocumentFileTree() {
       window.markdownEditorFileTree?.syncCurrentDocument?.(
         window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.()
       );
@@ -921,48 +926,9 @@ const editor = document.getElementById('editor');
     }
 
     function closeContextMenus() {
-      document.querySelectorAll('.context-menu.show').forEach(menu => {
-        menu.classList.remove('show');
-        menu.style.display = 'none';
-      });
-    }
-
-    function openDocumentContextMenu(id, event) {
-      contextDocumentId = id;
-      showContextMenu(document.getElementById('document-context-menu'), event);
-    }
-
-    function openSidebarContextMenu(event) {
-      if (event.target.closest('.document-item')) return;
-      showContextMenu(document.getElementById('sidebar-context-menu'), event);
-    }
-
-    function getContextDocument() {
-      return coreDocumentSessionPort.getRecord(contextDocumentId) || getCurrentDocument();
-    }
-
-    function openContextDocument() {
-      const doc = getContextDocument();
-      if (doc) openDocument(doc.id);
-    }
-
-    function renameContextDocument() {
-      const doc = getContextDocument();
-      if (doc) renameDocument(doc.id);
-    }
-
-    function duplicateContextDocument() {
-      const doc = getContextDocument();
-      if (doc) duplicateDocument(doc.id);
-    }
-
-    function closeContextDocument() {
-      const doc = getContextDocument();
-      if (doc) closeDocument(doc.id);
-    }
-
-    function deleteContextDocument() {
-      closeContextDocument();
+      const menu = document.getElementById('outline-context-menu');
+      menu?.classList.remove('show');
+      if (menu) menu.style.display = 'none';
     }
 
     function exportMarkdownContent(content, preferredName) {
@@ -979,8 +945,8 @@ const editor = document.getElementById('editor');
       URL.revokeObjectURL(url);
     }
 
-    async function exportContextDocument() {
-      const doc = getContextDocument();
+    async function exportContextDocument(documentId) {
+      const doc = coreDocumentSessionPort.getRecord(documentId) || getCurrentDocument();
       if (!doc) return;
       try {
         const contentResult = doc.id === getActiveDocumentId()
@@ -1004,8 +970,8 @@ const editor = document.getElementById('editor');
       }
     }
 
-    async function saveAsContextDocument() {
-      const doc = getContextDocument();
+    async function saveAsContextDocument(documentId) {
+      const doc = coreDocumentSessionPort.getRecord(documentId) || getCurrentDocument();
       if (!doc) return;
       try {
         const savedPath = await saveMarkdownWithPicker(async () => {
@@ -1025,8 +991,8 @@ const editor = document.getElementById('editor');
       }
     }
 
-    function copyContextDocumentTitle() {
-      const doc = getContextDocument();
+    function copyContextDocumentTitle(documentId) {
+      const doc = coreDocumentSessionPort.getRecord(documentId) || getCurrentDocument();
       if (!doc) return;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(doc.title || '').then(() => showToast('已复制文件名')).catch(() => showToast(doc.title || ''));

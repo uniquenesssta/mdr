@@ -2,8 +2,10 @@
     const eventsPlatformPort = eventsCompatibilityHost?.markdownEditorPlatformPort;
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
     const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
+    const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
     if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
     if (!eventsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
+    if (!eventsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
 
     eventsEditorControllerPort.subscribeTransactions(transaction => {
       if (!transaction.interactive) return;
@@ -17,29 +19,16 @@
       schedulePreviewUpdate();
       scheduleCountUpdate();
       autoSave();
-      updateInlineColorToolAvailability();
-    });
-    editor.addEventListener('select', () => {
-      schedulePreviewFocusUpdate();
-      updateInlineColorToolAvailability();
     });
     previewSource.addEventListener('input', () => {
       // 保留隐藏 textarea 仅作旧环境兼容；虚拟编辑器不复制百万字全文。
       if (!editor.virtualEditor) previewSource.value = editor.value;
       else previewSource.value = '';
     });
-    filenameInput.addEventListener('input', () => {
-      eventsDocumentControllerPort.updateActiveTitleDraft(filenameInput.value);
-      autoSave();
-      setTimeout(renderDocumentList, 550);
+    eventsEditorUiCommandPort.register({
+      selectionChanged: () => schedulePreviewFocusUpdate()
     });
 
-    const linkUrlInput = document.getElementById('link-url-input');
-    linkUrlInput?.addEventListener('keydown', event => {
-      if (event.key !== 'Enter') return;
-      event.preventDefault();
-      confirmLinkInsert();
-    });
 
     function bindCompactPaneActivation(selector, pane) {
       document.querySelector(selector)?.addEventListener('click', event => {
@@ -334,25 +323,6 @@
       if (importDropdown && !importDropdown.contains(e.target)) {
         closeImportMenu();
       }
-      const headingDropdown = document.getElementById('heading-dropdown');
-      if (headingDropdown && !headingDropdown.contains(e.target)) {
-        closeHeadingMenu();
-      }
-      const viewDropdown = document.getElementById('view-dropdown');
-      if (viewDropdown && !viewDropdown.contains(e.target)) {
-        closeViewMenu();
-      }
-      const tableDropdown = document.getElementById('table-dropdown');
-      if (tableDropdown && !tableDropdown.contains(e.target)) {
-        closeTableMenu();
-      }
-      const langDropdown = document.getElementById('lang-dropdown');
-      if (langDropdown && !langDropdown.contains(e.target)) {
-        closeLangMenu();
-      }
-      if (!e.target.closest('.color-dropdown')) {
-        closeInlineColorMenus();
-      }
     });
 
     // 全屏状态监听
@@ -419,20 +389,20 @@
         else if (key === 'o') action = triggerImportFile;
         else if (key === 'n') action = newDocument;
         else if (key === 'b' && e.shiftKey) action = toggleSidebar;
-        else if (!outsideTextControl && key === 'z' && e.shiftKey) action = redo;
-        else if (!outsideTextControl && key === 'y') action = redo;
-        else if (!outsideTextControl && key === 'z') action = undo;
-        else if (!outsideTextControl && key === 'k' && e.shiftKey) action = openImageModal;
-        else if (!outsideTextControl && key === 'b') action = formatBold;
-        else if (!outsideTextControl && key === 'u') action = formatUnderline;
-        else if (!outsideTextControl && key === 'i') action = formatItalic;
-        else if (!outsideTextControl && key === 'k') action = insertLink;
-        else if (!outsideTextControl && key === 'f') action = () => openFindModal(false);
-        else if (!outsideTextControl && key === 'h') action = () => openFindModal(true);
+        else if (!outsideTextControl && key === 'z' && e.shiftKey) action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'redo');
+        else if (!outsideTextControl && key === 'y') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'redo');
+        else if (!outsideTextControl && key === 'z') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'undo');
+        else if (!outsideTextControl && key === 'k' && e.shiftKey) action = () => eventsEditorUiCommandPort.invoke('openImage');
+        else if (!outsideTextControl && key === 'b') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'bold');
+        else if (!outsideTextControl && key === 'u') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'underline');
+        else if (!outsideTextControl && key === 'i') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'italic');
+        else if (!outsideTextControl && key === 'k') action = () => eventsEditorUiCommandPort.invoke('openLink');
+        else if (!outsideTextControl && key === 'f') action = () => eventsEditorUiCommandPort.invoke('openFind', false);
+        else if (!outsideTextControl && key === 'h') action = () => eventsEditorUiCommandPort.invoke('openFind', true);
       } else if (key === 'f2') {
         action = renameCurrentDocument;
       } else if (key === 'f11') {
-        action = togglePageFullscreen;
+        action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'page-fullscreen');
       }
 
       if (action) {
@@ -459,9 +429,7 @@
     // 启动
     setupWindowChrome();
     initializeAppSubmenus();
-    updateInlineColorToolAvailability();
     window.__markdownEditorInitPromise = init().then(async () => {
-      updateInlineColorToolAvailability();
       const initialPath = eventsPlatformPort?.supports('desktop.fileSystem')
         ? await eventsPlatformPort.call('files', 'getInitialPath')
         : null;

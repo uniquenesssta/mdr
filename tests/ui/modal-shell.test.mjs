@@ -410,9 +410,12 @@ test('compatibility feature callers use the explicit modal event port without ne
   const bridgeSource = await readFile('src/ui/compatibility/mount-modal-shells.js', 'utf8');
   const mountSource = await readFile('src/ui/compatibility/business-content-port.js', 'utf8');
   const featureSources = await Promise.all([
-    'public/app/editor-tools.js',
     'public/app/export.js',
-    'public/app/web-clipper.js'
+    'public/app/web-clipper.js',
+    'src/features/editor/ui/link-dialog-view.js',
+    'src/features/editor/ui/find-replace-dialog-view.js',
+    'src/features/editor/ui/image-dialog-view.js',
+    'src/features/editor/ui/mermaid-dialog-view.js'
   ].map(path => readFile(path, 'utf8')));
   const eventSource = await readFile('public/app/events.js', 'utf8');
   const helpDialogSource = await readFile('src/features/help/ui/help-dialog-view.js', 'utf8');

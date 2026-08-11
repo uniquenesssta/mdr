@@ -18,6 +18,12 @@ function createEditorAdapter(initialText = '', initialSelection = { start: 0, en
     return { from, to: from + lines[safeLine - 1].length };
   };
 
+  const setSelection = value => {
+    const anchor = Math.max(0, Number(value?.anchor ?? value?.start) || 0);
+    const head = Math.max(0, Number(value?.head ?? value?.end ?? anchor) || anchor);
+    selection = { start: anchor, end: head };
+  };
+
   const adapter = {
     getSelection() {
       return Object.freeze({
@@ -30,6 +36,9 @@ function createEditorAdapter(initialText = '', initialSelection = { start: 0, en
     },
     sliceText(from = 0, to = text.length) {
       return text.slice(from, to);
+    },
+    getTextLength() {
+      return text.length;
     },
     getLineNumberAtPosition(position) {
       const safe = Math.max(0, Math.min(text.length, Number(position) || 0));
@@ -58,6 +67,17 @@ function createEditorAdapter(initialText = '', initialSelection = { start: 0, en
       else if (selectionMode === 'start') selection = { start, end: start };
       else selection = { start: start + value.length, end: start + value.length };
       return Object.freeze({ from: start, to: end, insert: value });
+    },
+    applyTransaction(spec = {}) {
+      const change = spec.changes || {};
+      const value = String(change.insert ?? '');
+      const start = Math.max(0, Math.min(text.length, Number(change.from) || 0));
+      const end = Math.max(start, Math.min(text.length, Number(change.to ?? start) || 0));
+      transactions.push(Object.freeze({ insert: value, from: start, to: end, selectionMode: 'transaction' }));
+      text = text.slice(0, start) + value + text.slice(end);
+      if (spec.selection) setSelection(spec.selection);
+      else selection = { start: start + value.length, end: start + value.length };
+      return true;
     },
     replaceAllText(query, replacement) {
       const needle = String(query ?? '');
@@ -153,9 +173,9 @@ test('inline/code commands preserve current single-line and multiline insertion 
   assert.deepEqual(block.transactions, [{ insert: '```\na\nb\n```', from: 0, to: 3, selectionMode: 'select' }]);
 });
 
-test('Editor Command Service validates its neutral adapter, propagates editor errors and has an independent terminal lifecycle', () => {
+test('Editor Command Service validates its Atomic 5.12 neutral adapter, propagates editor errors and has an independent terminal lifecycle', () => {
   assert.throws(() => createEditorCommandService(), /adapter/i);
-  assert.throws(() => createEditorCommandService({ adapter: { getSelection() {} } }), /sliceText|line|replaceRange|findText|replaceAllText/i);
+  assert.throws(() => createEditorCommandService({ adapter: { getSelection() {} } }), /sliceText|getTextLength|line|replaceRange|applyTransaction|findText|replaceAllText/i);
 
   const expected = new Error('replace failed');
   const editor = createEditorAdapter('abc', { start: 0, end: 3 });
@@ -169,7 +189,7 @@ test('Editor Command Service validates its neutral adapter, propagates editor er
   assert.throws(() => healthy.bold(), /destroyed/i);
 });
 
-test('classic Editor Command port is scoped, stateless and forwards the command surface through Atomic 5.11', async () => {
+test('classic Editor Command port is scoped, stateless and forwards the exact command surface through Atomic 5.12', async () => {
   const editor = createEditorAdapter('abc abc', { start: 0, end: 3 });
   const service = createEditorCommandService({ adapter: editor.adapter });
   const host = {};
@@ -177,7 +197,9 @@ test('classic Editor Command port is scoped, stateless and forwards the command 
 
   assert.equal(host.markdownEditorEditorCommandPort, port);
   assert.deepEqual(Object.keys(port).sort(), [
-    'bold', 'code', 'destroy', 'findNext', 'heading', 'inlineCode', 'italic', 'orderedList', 'quote', 'replaceAll', 'replaceOne', 'strikethrough', 'taskList', 'unorderedList'
+    'bold', 'clearColor', 'code', 'destroy', 'findNext', 'heading', 'inlineCode', 'insertBlockMath', 'insertImage',
+    'insertInlineMath', 'insertLink', 'insertMermaid', 'insertTable', 'italic', 'orderedList', 'quote', 'replaceAll',
+    'replaceOne', 'setColor', 'strikethrough', 'subscript', 'superscript', 'taskList', 'underline', 'unorderedList'
   ]);
   port.bold();
   assert.equal(editor.text, '**abc** abc');

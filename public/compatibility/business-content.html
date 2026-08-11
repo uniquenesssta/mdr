@@ -33,12 +33,12 @@
       <div class="menu-dropdown" id="edit-menu-dropdown">
         <button class="menu-trigger" onclick="toggleAppMenu('edit-menu')" title="编辑" aria-label="编辑菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-edit"></use></svg><span class="menu-button-label">编辑</span></button>
         <div class="menu-dropdown-list" id="edit-menu">
-          <div class="menu-item" onclick="undo(); closeAppMenus();"><span>撤销</span><kbd>Ctrl+Z</kbd></div>
-          <div class="menu-item" onclick="redo(); closeAppMenus();"><span>重做</span><kbd>Ctrl+Y</kbd></div>
+          <div class="menu-item" data-editor-action="undo"><span>撤销</span><kbd>Ctrl+Z</kbd></div>
+          <div class="menu-item" data-editor-action="redo"><span>重做</span><kbd>Ctrl+Y</kbd></div>
           <div class="menu-separator"></div>
-          <div class="menu-item" onclick="formatBold(); closeAppMenus();"><span>加粗</span><kbd>Ctrl+B</kbd></div>
-          <div class="menu-item" onclick="formatItalic(); closeAppMenus();"><span>斜体</span><kbd>Ctrl+I</kbd></div>
-          <div class="menu-item" onclick="formatUnderline(); closeAppMenus();"><span>下划线</span><kbd>Ctrl+U</kbd></div>
+          <div class="menu-item" data-editor-action="bold"><span>加粗</span><kbd>Ctrl+B</kbd></div>
+          <div class="menu-item" data-editor-action="italic"><span>斜体</span><kbd>Ctrl+I</kbd></div>
+          <div class="menu-item" data-editor-action="underline"><span>下划线</span><kbd>Ctrl+U</kbd></div>
           <div class="menu-item" onclick="openFindModal(); closeAppMenus();"><span>查找 / 替换...</span><kbd>Ctrl+F</kbd></div>
           <div class="menu-separator"></div>
           <div class="menu-item" onclick="clearDoc(); closeAppMenus();"><span>清空当前文档</span></div>
@@ -62,16 +62,16 @@
         <div class="menu-dropdown-list" id="insert-menu">
           <div class="menu-item menu-submenu"><span>标题</span><span class="menu-arrow">›</span>
             <div class="menu-dropdown-list menu-submenu-list">
-              <div class="menu-item" onclick="insertHeading(1); closeAppMenus();"><span>H1 一级标题</span></div>
-              <div class="menu-item" onclick="insertHeading(2); closeAppMenus();"><span>H2 二级标题</span></div>
-              <div class="menu-item" onclick="insertHeading(3); closeAppMenus();"><span>H3 三级标题</span></div>
-              <div class="menu-item" onclick="insertHeading(4); closeAppMenus();"><span>H4 四级标题</span></div>
-              <div class="menu-item" onclick="insertHeading(5); closeAppMenus();"><span>H5 五级标题</span></div>
-              <div class="menu-item" onclick="insertHeading(6); closeAppMenus();"><span>H6 六级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="1"><span>H1 一级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="2"><span>H2 二级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="3"><span>H3 三级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="4"><span>H4 四级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="5"><span>H5 五级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="6"><span>H6 六级标题</span></div>
             </div>
           </div>
-          <div class="menu-item" onclick="insertLink(); closeAppMenus();"><span>链接</span><kbd>Ctrl+K</kbd></div>
-          <div class="menu-item" onclick="openImageModal(); closeAppMenus();"><span>图片...</span><kbd>Ctrl+Shift+K</kbd></div>
+          <div class="menu-item" data-editor-action="open-link"><span>链接</span><kbd>Ctrl+K</kbd></div>
+          <div class="menu-item" data-editor-action="open-image"><span>图片...</span><kbd>Ctrl+Shift+K</kbd></div>
           <div class="menu-item" onclick="insertTable(3, 3); closeAppMenus();"><span>表格 3 × 3</span></div>
           <div class="menu-item menu-switch-item" id="table-visual-editing-toggle" role="menuitemcheckbox" aria-checked="false" onclick="toggleTableVisualEditing(event)">
             <span>表格深度可视化编辑</span>
@@ -83,11 +83,11 @@
           </div>
           <div class="menu-item menu-submenu"><span>数学公式</span><span class="menu-arrow">›</span>
             <div class="menu-dropdown-list menu-submenu-list">
-              <div class="menu-item" onclick="insertInlineMath(); closeAppMenus();"><span>行内公式 $…$</span></div>
-              <div class="menu-item" onclick="insertBlockMath(); closeAppMenus();"><span>块级公式 $$…$$</span></div>
+              <div class="menu-item" data-editor-action="inline-math"><span>行内公式 $…$</span></div>
+              <div class="menu-item" data-editor-action="block-math"><span>块级公式 $$…$$</span></div>
             </div>
           </div>
-          <div class="menu-item" onclick="openMermaidModal(); closeAppMenus();"><span>Mermaid 图表...</span></div>
+          <div class="menu-item" data-editor-action="open-mermaid"><span>Mermaid 图表...</span></div>
         </div>
       </div>
       <div class="menu-dropdown" id="help-menu-dropdown">
@@ -112,103 +112,103 @@
 
 <template data-compat-slot="toolbar">
       <div class="format-group">
-        <button onclick="undo()" data-i18n-title="undoTitle" title="撤销 Ctrl+Z"><svg class="icon"><use href="/assets/icons.svg#icon-undo"></use></svg></button>
-        <button onclick="redo()" data-i18n-title="redoTitle" title="重做 Ctrl+Y / Ctrl+Shift+Z"><svg class="icon"><use href="/assets/icons.svg#icon-redo"></use></svg></button>
+        <button data-editor-action="undo" data-i18n-title="undoTitle" title="撤销 Ctrl+Z"><svg class="icon"><use href="/assets/icons.svg#icon-undo"></use></svg></button>
+        <button data-editor-action="redo" data-i18n-title="redoTitle" title="重做 Ctrl+Y / Ctrl+Shift+Z"><svg class="icon"><use href="/assets/icons.svg#icon-redo"></use></svg></button>
         <span class="divider"></span>
-        <button onclick="formatBold()" data-toolbar-item="bold" data-i18n-title="boldTitle" title="加粗 Ctrl+B"><b>B</b></button>
-        <button onclick="formatItalic()" data-toolbar-item="italic" data-i18n-title="italicTitle" title="斜体 Ctrl+I"><i>I</i></button>
-        <button onclick="formatUnderline()" data-toolbar-item="underline" data-i18n-title="underlineTitle" title="下划线 Ctrl+U"><u>U</u></button>
-        <button onclick="formatStrikethrough()" data-toolbar-item="strikethrough" data-i18n-title="strikethroughTitle" title="删除线"><s>S</s></button>
-        <button onclick="formatSubscript()" data-toolbar-item="script" data-i18n-title="subscriptTitle" title="下标">x₂</button>
-        <button onclick="formatSuperscript()" data-toolbar-item="script" data-i18n-title="superscriptTitle" title="上标">x²</button>
+        <button data-editor-action="bold" data-toolbar-item="bold" data-i18n-title="boldTitle" title="加粗 Ctrl+B"><b>B</b></button>
+        <button data-editor-action="italic" data-toolbar-item="italic" data-i18n-title="italicTitle" title="斜体 Ctrl+I"><i>I</i></button>
+        <button data-editor-action="underline" data-toolbar-item="underline" data-i18n-title="underlineTitle" title="下划线 Ctrl+U"><u>U</u></button>
+        <button data-editor-action="strikethrough" data-toolbar-item="strikethrough" data-i18n-title="strikethroughTitle" title="删除线"><s>S</s></button>
+        <button data-editor-action="subscript" data-toolbar-item="script" data-i18n-title="subscriptTitle" title="下标">x₂</button>
+        <button data-editor-action="superscript" data-toolbar-item="script" data-i18n-title="superscriptTitle" title="上标">x²</button>
         <div class="dropdown color-dropdown" id="text-color-dropdown" data-toolbar-item="textColor">
-          <button type="button" id="text-color-button" class="color-tool-button" onclick="toggleInlineColorMenu('text')" title="文字颜色（请先选择文字）" aria-haspopup="true" aria-expanded="false" disabled>
+          <button type="button" id="text-color-button" class="color-tool-button" data-color-menu-kind="text" title="文字颜色（请先选择文字）" aria-haspopup="true" aria-expanded="false" disabled>
             <span class="color-tool-glyph">A</span><span class="color-tool-indicator" id="text-color-indicator"></span><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg>
           </button>
           <div class="dropdown-menu color-menu" id="text-color-menu">
             <strong>文字颜色</strong>
             <div class="color-swatches" aria-label="文字颜色预设">
-              <button type="button" class="color-swatch c-color-swatch--text-ink" title="黑色" onclick="applyInlineColor('text','#1a1d23')"></button>
-              <button type="button" class="color-swatch c-color-swatch--text-gray" title="灰色" onclick="applyInlineColor('text','#6b7280')"></button>
-              <button type="button" class="color-swatch c-color-swatch--text-red" title="红色" onclick="applyInlineColor('text','#dc2626')"></button>
-              <button type="button" class="color-swatch c-color-swatch--text-orange" title="橙色" onclick="applyInlineColor('text','#ea580c')"></button>
-              <button type="button" class="color-swatch c-color-swatch--text-yellow" title="黄色" onclick="applyInlineColor('text','#ca8a04')"></button>
-              <button type="button" class="color-swatch c-color-swatch--text-green" title="绿色" onclick="applyInlineColor('text','#16a34a')"></button>
-              <button type="button" class="color-swatch c-color-swatch--text-cyan" title="青色" onclick="applyInlineColor('text','#0891b2')"></button>
-              <button type="button" class="color-swatch c-color-swatch--text-blue" title="蓝色" onclick="applyInlineColor('text','#2563eb')"></button>
-              <button type="button" class="color-swatch c-color-swatch--text-purple" title="紫色" onclick="applyInlineColor('text','#7c3aed')"></button>
-              <button type="button" class="color-swatch c-color-swatch--text-pink" title="粉色" onclick="applyInlineColor('text','#db2777')"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-ink" title="黑色" data-inline-color-kind="text" data-inline-color="#1a1d23"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-gray" title="灰色" data-inline-color-kind="text" data-inline-color="#6b7280"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-red" title="红色" data-inline-color-kind="text" data-inline-color="#dc2626"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-orange" title="橙色" data-inline-color-kind="text" data-inline-color="#ea580c"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-yellow" title="黄色" data-inline-color-kind="text" data-inline-color="#ca8a04"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-green" title="绿色" data-inline-color-kind="text" data-inline-color="#16a34a"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-cyan" title="青色" data-inline-color-kind="text" data-inline-color="#0891b2"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-blue" title="蓝色" data-inline-color-kind="text" data-inline-color="#2563eb"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-purple" title="紫色" data-inline-color-kind="text" data-inline-color="#7c3aed"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-pink" title="粉色" data-inline-color-kind="text" data-inline-color="#db2777"></button>
             </div>
             <div class="color-menu-actions">
-              <label class="custom-color-action">自定义<input type="color" id="custom-text-color" value="#2563eb" onchange="applyInlineColor('text',this.value)"></label>
-              <button type="button" onclick="clearInlineColor('text')">清除颜色</button>
+              <label class="custom-color-action">自定义<input type="color" id="custom-text-color" value="#2563eb" data-inline-color-custom="text"></label>
+              <button type="button" data-inline-color-clear="text">清除颜色</button>
             </div>
           </div>
         </div>
         <div class="dropdown color-dropdown" id="highlight-color-dropdown" data-toolbar-item="highlight">
-          <button type="button" id="highlight-color-button" class="color-tool-button" onclick="toggleInlineColorMenu('highlight')" title="文字高亮（请先选择文字）" aria-haspopup="true" aria-expanded="false" disabled>
+          <button type="button" id="highlight-color-button" class="color-tool-button" data-color-menu-kind="highlight" title="文字高亮（请先选择文字）" aria-haspopup="true" aria-expanded="false" disabled>
             <span class="color-tool-glyph color-tool-highlight">A</span><span class="color-tool-indicator" id="highlight-color-indicator"></span><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg>
           </button>
           <div class="dropdown-menu color-menu" id="highlight-color-menu">
             <strong>文字高亮</strong>
             <div class="color-swatches" aria-label="文字高亮预设">
-              <button type="button" class="color-swatch c-color-swatch--highlight-yellow" title="黄色" onclick="applyInlineColor('highlight','#fff3a3')"></button>
-              <button type="button" class="color-swatch c-color-swatch--highlight-orange" title="橙色" onclick="applyInlineColor('highlight','#fed7aa')"></button>
-              <button type="button" class="color-swatch c-color-swatch--highlight-red" title="红色" onclick="applyInlineColor('highlight','#fecaca')"></button>
-              <button type="button" class="color-swatch c-color-swatch--highlight-green" title="绿色" onclick="applyInlineColor('highlight','#bbf7d0')"></button>
-              <button type="button" class="color-swatch c-color-swatch--highlight-blue" title="蓝色" onclick="applyInlineColor('highlight','#bae6fd')"></button>
-              <button type="button" class="color-swatch c-color-swatch--highlight-purple" title="紫色" onclick="applyInlineColor('highlight','#ddd6fe')"></button>
-              <button type="button" class="color-swatch c-color-swatch--highlight-pink" title="粉色" onclick="applyInlineColor('highlight','#fbcfe8')"></button>
-              <button type="button" class="color-swatch c-color-swatch--highlight-gray" title="灰色" onclick="applyInlineColor('highlight','#e5e7eb')"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-yellow" title="黄色" data-inline-color-kind="highlight" data-inline-color="#fff3a3"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-orange" title="橙色" data-inline-color-kind="highlight" data-inline-color="#fed7aa"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-red" title="红色" data-inline-color-kind="highlight" data-inline-color="#fecaca"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-green" title="绿色" data-inline-color-kind="highlight" data-inline-color="#bbf7d0"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-blue" title="蓝色" data-inline-color-kind="highlight" data-inline-color="#bae6fd"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-purple" title="紫色" data-inline-color-kind="highlight" data-inline-color="#ddd6fe"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-pink" title="粉色" data-inline-color-kind="highlight" data-inline-color="#fbcfe8"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-gray" title="灰色" data-inline-color-kind="highlight" data-inline-color="#e5e7eb"></button>
             </div>
             <div class="color-menu-actions">
-              <label class="custom-color-action">自定义<input type="color" id="custom-highlight-color" value="#fff3a3" onchange="applyInlineColor('highlight',this.value)"></label>
-              <button type="button" onclick="clearInlineColor('highlight')">清除高亮</button>
+              <label class="custom-color-action">自定义<input type="color" id="custom-highlight-color" value="#fff3a3" data-inline-color-custom="highlight"></label>
+              <button type="button" data-inline-color-clear="highlight">清除高亮</button>
             </div>
           </div>
         </div>
         <span class="divider"></span>
         <div class="dropdown" id="heading-dropdown" data-toolbar-item="heading">
-          <button onclick="toggleHeadingMenu()" data-i18n-title="heading" title="标题">H <svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg></button>
+          <button data-editor-action="toggle-heading-menu" data-i18n-title="heading" title="标题">H <svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg></button>
           <div class="dropdown-menu" id="heading-menu">
-            <div class="dropdown-item" onclick="insertHeading(1); closeHeadingMenu();" data-i18n="headingH1">H1 一级标题</div>
-            <div class="dropdown-item" onclick="insertHeading(2); closeHeadingMenu();" data-i18n="headingH2">H2 二级标题</div>
-            <div class="dropdown-item" onclick="insertHeading(3); closeHeadingMenu();" data-i18n="headingH3">H3 三级标题</div>
-            <div class="dropdown-item" onclick="insertHeading(4); closeHeadingMenu();" data-i18n="headingH4">H4 四级标题</div>
-            <div class="dropdown-item" onclick="insertHeading(5); closeHeadingMenu();" data-i18n="headingH5">H5 五级标题</div>
-            <div class="dropdown-item" onclick="insertHeading(6); closeHeadingMenu();" data-i18n="headingH6">H6 六级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="1" data-i18n="headingH1">H1 一级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="2" data-i18n="headingH2">H2 二级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="3" data-i18n="headingH3">H3 三级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="4" data-i18n="headingH4">H4 四级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="5" data-i18n="headingH5">H5 五级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="6" data-i18n="headingH6">H6 六级标题</div>
           </div>
         </div>
         <span class="divider"></span>
-        <button onclick="formatQuote()" data-toolbar-item="quote" data-i18n-title="quote" title="引用"><svg class="icon"><use href="/assets/icons.svg#icon-quote"></use></svg> <span data-i18n="quote">引用</span></button>
-        <button onclick="formatUnorderedList()" data-toolbar-item="lists" data-i18n-title="unordered" title="无序列表"><svg class="icon"><use href="/assets/icons.svg#icon-list"></use></svg> <span data-i18n="unordered">无序</span></button>
-        <button onclick="formatOrderedList()" data-toolbar-item="lists" data-i18n-title="ordered" title="有序列表"><svg class="icon"><use href="/assets/icons.svg#icon-list-numbered"></use></svg> <span data-i18n="ordered">有序</span></button>
-        <button onclick="formatTaskList()" data-toolbar-item="lists" data-i18n-title="task" title="任务列表"><svg class="icon"><use href="/assets/icons.svg#icon-task"></use></svg> <span data-i18n="task">任务</span></button>
+        <button data-editor-action="quote" data-toolbar-item="quote" data-i18n-title="quote" title="引用"><svg class="icon"><use href="/assets/icons.svg#icon-quote"></use></svg> <span data-i18n="quote">引用</span></button>
+        <button data-editor-action="unordered" data-toolbar-item="lists" data-i18n-title="unordered" title="无序列表"><svg class="icon"><use href="/assets/icons.svg#icon-list"></use></svg> <span data-i18n="unordered">无序</span></button>
+        <button data-editor-action="ordered" data-toolbar-item="lists" data-i18n-title="ordered" title="有序列表"><svg class="icon"><use href="/assets/icons.svg#icon-list-numbered"></use></svg> <span data-i18n="ordered">有序</span></button>
+        <button data-editor-action="task" data-toolbar-item="lists" data-i18n-title="task" title="任务列表"><svg class="icon"><use href="/assets/icons.svg#icon-task"></use></svg> <span data-i18n="task">任务</span></button>
         <span class="divider"></span>
-        <button onclick="insertCodeRow()" data-toolbar-item="code" data-i18n-title="inlineCode" title="行内代码"><svg class="icon"><use href="/assets/icons.svg#icon-code"></use></svg> <span data-i18n="inlineCode">行内代码</span></button>
-        <button onclick="insertCode()" data-toolbar-item="code" data-i18n-title="codeBlock" title="代码块"><svg class="icon"><use href="/assets/icons.svg#icon-braces"></use></svg></button>
-        <button onclick="insertLink()" data-toolbar-item="link" data-i18n-title="link" title="插入链接 Ctrl+K"><svg class="icon"><use href="/assets/icons.svg#icon-link"></use></svg> <span data-i18n="link">链接</span></button>
-        <button onclick="openImageModal()" data-toolbar-item="image" data-i18n-title="image" title="插入图片 Ctrl+Shift+K"><svg class="icon"><use href="/assets/icons.svg#icon-image"></use></svg> <span data-i18n="image">图片</span></button>
+        <button data-editor-action="inline-code" data-toolbar-item="code" data-i18n-title="inlineCode" title="行内代码"><svg class="icon"><use href="/assets/icons.svg#icon-code"></use></svg> <span data-i18n="inlineCode">行内代码</span></button>
+        <button data-editor-action="code" data-toolbar-item="code" data-i18n-title="codeBlock" title="代码块"><svg class="icon"><use href="/assets/icons.svg#icon-braces"></use></svg></button>
+        <button data-editor-action="open-link" data-toolbar-item="link" data-i18n-title="link" title="插入链接 Ctrl+K"><svg class="icon"><use href="/assets/icons.svg#icon-link"></use></svg> <span data-i18n="link">链接</span></button>
+        <button data-editor-action="open-image" data-toolbar-item="image" data-i18n-title="image" title="插入图片 Ctrl+Shift+K"><svg class="icon"><use href="/assets/icons.svg#icon-image"></use></svg> <span data-i18n="image">图片</span></button>
         <div class="dropdown" id="table-dropdown" data-toolbar-item="table">
-          <button onclick="toggleTableMenu()" data-i18n-title="table" title="插入表格"><svg class="icon"><use href="/assets/icons.svg#icon-table"></use></svg> <span data-i18n="table">表格</span></button>
+          <button data-editor-action="toggle-table" data-i18n-title="table" title="插入表格"><svg class="icon"><use href="/assets/icons.svg#icon-table"></use></svg> <span data-i18n="table">表格</span></button>
           <div class="dropdown-menu table-selector-menu" id="table-menu">
             <div class="table-grid" id="table-grid"></div>
             <div class="table-size-label" id="table-size-label">0 行 × 0 列</div>
           </div>
         </div>
-        <button onclick="openFindModal()" data-toolbar-item="find" data-i18n-title="find" title="查找替换 Ctrl+F"><svg class="icon"><use href="/assets/icons.svg#icon-search"></use></svg> <span data-i18n="find">查找</span></button>
-        <button onclick="openMermaidModal()" data-toolbar-item="mermaid" data-i18n-title="mermaid" title="插入 Mermaid 图表"><svg class="icon"><use href="/assets/icons.svg#icon-mermaid"></use></svg> <span data-i18n="mermaid">Mermaid</span></button>
+        <button data-editor-action="open-find" data-toolbar-item="find" data-i18n-title="find" title="查找替换 Ctrl+F"><svg class="icon"><use href="/assets/icons.svg#icon-search"></use></svg> <span data-i18n="find">查找</span></button>
+        <button data-editor-action="open-mermaid" data-toolbar-item="mermaid" data-i18n-title="mermaid" title="插入 Mermaid 图表"><svg class="icon"><use href="/assets/icons.svg#icon-mermaid"></use></svg> <span data-i18n="mermaid">Mermaid</span></button>
       </div>
       <div class="editor-actions">
         <div class="dropdown" id="view-dropdown">
-          <button onclick="toggleViewMenu()" data-i18n-title="view" title="视图布局"><svg class="icon"><use href="/assets/icons.svg#icon-layout"></use></svg> <span data-i18n="view">视图</span> <svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg></button>
+          <button data-editor-action="toggle-view-menu" data-i18n-title="view" title="视图布局"><svg class="icon"><use href="/assets/icons.svg#icon-layout"></use></svg> <span data-i18n="view">视图</span> <svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg></button>
           <div class="dropdown-menu" id="view-menu">
-            <div class="dropdown-item" onclick="setLayoutMode('both'); closeViewMenu();" data-i18n="viewBoth">编辑 + 预览</div>
-            <div class="dropdown-item" onclick="setLayoutMode('hybrid'); closeViewMenu();" data-i18n="viewHybrid">单视图混合编辑</div>
-            <div class="dropdown-item" onclick="setLayoutMode('edit'); closeViewMenu();" data-i18n="viewEdit">仅编辑</div>
-            <div class="dropdown-item" onclick="setLayoutMode('preview'); closeViewMenu();" data-i18n="viewPreview">仅预览</div>
-            <div class="dropdown-item" onclick="togglePageFullscreen(); closeViewMenu();" data-i18n="pageFullscreen">页面全屏</div>
-            <div class="dropdown-item" onclick="toggleFullscreen(); closeViewMenu();" data-i18n="systemFullscreen">系统全屏</div>
+            <div class="dropdown-item" data-editor-action="layout" data-mode="both" data-i18n="viewBoth">编辑 + 预览</div>
+            <div class="dropdown-item" data-editor-action="layout" data-mode="hybrid" data-i18n="viewHybrid">单视图混合编辑</div>
+            <div class="dropdown-item" data-editor-action="layout" data-mode="edit" data-i18n="viewEdit">仅编辑</div>
+            <div class="dropdown-item" data-editor-action="layout" data-mode="preview" data-i18n="viewPreview">仅预览</div>
+            <div class="dropdown-item" data-editor-action="page-fullscreen" data-i18n="pageFullscreen">页面全屏</div>
+            <div class="dropdown-item" data-editor-action="system-fullscreen" data-i18n="systemFullscreen">系统全屏</div>
           </div>
         </div>
         <button data-theme-toggle data-i18n-title="theme" title="切换主题"><svg class="icon"><use href="/assets/icons.svg#icon-sun"></use></svg> <span data-i18n="theme">主题</span></button>
@@ -228,7 +228,7 @@
           <button id="sidebar-files-tab" onclick="setSidebarTab('files')" title="文件树：当前文件所在文件夹"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-folder"></use></svg><span>文件</span></button>
           <button id="sidebar-outline-tab" onclick="setSidebarTab('outline')"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-list"></use></svg><span>大纲</span></button>
         </div>
-        <section class="sidebar-panel active" id="sidebar-docs-panel" oncontextmenu="openSidebarContextMenu(event)">
+        <section class="sidebar-panel active" id="sidebar-docs-panel" >
           <div class="document-list" id="document-list"></div>
         </section>
         <section class="sidebar-panel sidebar-files-panel" id="sidebar-files-panel">
@@ -251,7 +251,7 @@
             <span class="pane-title" data-i18n="editorPaneTitle">编辑</span>
             <span class="editor-presentation-badge" id="editor-presentation-badge" hidden data-i18n="viewHybrid">单视图混合编辑</span>
             <span data-i18n="editorPaneHint">支持 Markdown 语法</span>
-            <button class="collapse-btn" id="editor-collapse-btn" onclick="togglePane('editor')" title="收起编辑区"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg></button>
+            <button class="collapse-btn" id="editor-collapse-btn" data-editor-pane-action="collapse" title="收起编辑区"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg></button>
           </div>
           <div id="editor" class="virtual-editor-host f-editor-surface" data-i18n-placeholder="editorPlaceholder" data-placeholder="开始输入 Markdown..."></div>
 </template>
@@ -289,21 +289,21 @@
   <div class="toast" id="toast"></div>
 
   <div class="context-menu" id="document-context-menu" role="menu">
-    <button onclick="openContextDocument(); closeContextMenus();">打开</button>
-    <button onclick="renameContextDocument(); closeContextMenus();">重命名...</button>
-    <button onclick="duplicateContextDocument(); closeContextMenus();">复制副本</button>
-    <button onclick="saveAsContextDocument(); closeContextMenus();">另存为...</button>
-    <button onclick="exportContextDocument(); closeContextMenus();">导出 Markdown</button>
-    <button onclick="copyContextDocumentTitle(); closeContextMenus();">复制文件名</button>
+    <button data-document-action="openDocument">打开</button>
+    <button data-document-action="renameDocument">重命名...</button>
+    <button data-document-action="duplicateDocument">复制副本</button>
+    <button data-document-action="saveAsDocument">另存为...</button>
+    <button data-document-action="exportDocument">导出 Markdown</button>
+    <button data-document-action="copyDocumentTitle">复制文件名</button>
     <div class="context-separator"></div>
-    <button onclick="closeContextDocument(); closeContextMenus();">关闭文档</button>
+    <button data-document-action="closeDocument">关闭文档</button>
   </div>
 
   <div class="context-menu" id="sidebar-context-menu" role="menu">
-    <button onclick="newDocument(); closeContextMenus();">新建文档</button>
-    <button onclick="duplicateDocument(); closeContextMenus();">复制当前文档</button>
-    <button onclick="triggerImportFile(); closeContextMenus();">打开文件...</button>
-    <button onclick="openUrlModal(); closeContextMenus();">从网页导入 Markdown...</button>
+    <button data-sidebar-action="newDocument">新建文档</button>
+    <button data-sidebar-action="duplicateActiveDocument">复制当前文档</button>
+    <button data-sidebar-action="importFile">打开文件...</button>
+    <button data-sidebar-action="openWebClipper">从网页导入 Markdown...</button>
   </div>
 
 
@@ -321,15 +321,15 @@
     <div class="modal c-modal c-modal--narrow" role="dialog" aria-modal="true" aria-labelledby="link-modal-title">
       <div class="modal-header">
         <h3 id="link-modal-title"><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-link"></use></svg> <span data-i18n="link">链接</span></h3>
-        <button onclick="closeLinkModal()" aria-label="关闭"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+        <button data-link-action="close" aria-label="关闭"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
       </div>
       <div class="modal-body">
         <label for="link-url-input" data-i18n="promptLinkUrl">请输入链接地址</label>
         <input type="url" id="link-url-input" autocomplete="url" spellcheck="false" placeholder="https://">
       </div>
       <div class="modal-footer">
-        <button onclick="closeLinkModal()" data-i18n="cancel">取消</button>
-        <button onclick="confirmLinkInsert()" class="primary" data-i18n="insert">插入</button>
+        <button data-link-action="close" data-i18n="cancel">取消</button>
+        <button data-link-action="confirm" class="primary" data-i18n="insert">插入</button>
       </div>
     </div>
   </div>
@@ -368,7 +368,7 @@
     <div class="modal c-modal c-modal--narrow">
       <div class="modal-header">
         <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-search"></use></svg> <span data-i18n="findTitle">查找与替换</span></h3>
-        <button onclick="closeFindModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+        <button data-find-action="close"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
       </div>
       <div class="modal-body">
         <label for="find-input" data-i18n="findLabel">查找</label>
@@ -378,10 +378,10 @@
         <div id="find-status" class="c-form-status"></div>
       </div>
       <div class="modal-footer">
-        <button onclick="closeFindModal()" data-i18n="cancel">关闭</button>
-        <button onclick="replaceAll()" data-i18n="replaceAll">全部替换</button>
-        <button onclick="replaceOne()" data-i18n="replaceOne">替换</button>
-        <button onclick="findNext()" class="primary" data-i18n="findNext">查找下一个</button>
+        <button data-find-action="close" data-i18n="cancel">关闭</button>
+        <button data-find-action="replace-all" data-i18n="replaceAll">全部替换</button>
+        <button data-find-action="replace-one" data-i18n="replaceOne">替换</button>
+        <button data-find-action="next" class="primary" data-i18n="findNext">查找下一个</button>
       </div>
     </div>
   </div>
@@ -443,12 +443,12 @@
     <div class="modal c-modal c-modal--medium">
       <div class="modal-header">
         <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-image"></use></svg> <span data-i18n="imageTitle">插入图片</span></h3>
-        <button onclick="closeImageModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+        <button data-image-action="close"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
       </div>
       <div class="modal-body">
         <div class="image-modal-tabs">
-          <button type="button" class="image-tab active" data-tab="url" onclick="switchImageTab('url')" data-i18n="imageTabUrl">链接</button>
-          <button type="button" class="image-tab" data-tab="upload" onclick="switchImageTab('upload')" data-i18n="imageTabUpload">本地上传</button>
+          <button type="button" class="image-tab active" data-tab="url" data-image-tab="url" data-i18n="imageTabUrl">链接</button>
+          <button type="button" class="image-tab" data-tab="upload" data-image-tab="upload" data-i18n="imageTabUpload">本地上传</button>
         </div>
         <div class="image-tab-panel active" id="image-tab-url">
           <label for="image-url-input" data-i18n="imageUrlLabel">图片链接</label>
@@ -459,7 +459,7 @@
         <div class="image-tab-panel" id="image-tab-upload">
           <div class="upload-area" id="image-upload-area">
             <p data-i18n="uploadArea">点击选择或拖拽图片到此处</p>
-            <input type="file" id="image-file-input" accept="image/*" onchange="handleImageFileSelect(this)">
+            <input type="file" id="image-file-input" accept="image/*" >
           </div>
           <div id="image-upload-preview" class="upload-preview"></div>
           <label for="image-upload-alt" data-i18n="imageAltLabel">描述文字</label>
@@ -468,8 +468,8 @@
         <p class="hint" data-i18n="imageHint">本地图片将以 Base64 嵌入文档，文件过大可能影响性能和保存。</p>
       </div>
       <div class="modal-footer">
-        <button onclick="closeImageModal()" data-i18n="cancel">取消</button>
-        <button onclick="confirmImageInsert()" class="primary" data-i18n="insert">插入</button>
+        <button data-image-action="close" data-i18n="cancel">取消</button>
+        <button data-image-action="confirm" class="primary" data-i18n="insert">插入</button>
       </div>
     </div>
   </div>
@@ -479,11 +479,11 @@
     <div class="modal c-modal c-modal--wide">
       <div class="modal-header">
         <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-mermaid"></use></svg> <span data-i18n="mermaidTitle">插入 Mermaid 图表</span></h3>
-        <button onclick="closeMermaidModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+        <button data-mermaid-action="close"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
       </div>
       <div class="modal-body">
         <label for="mermaid-type" data-i18n="mermaidTypeLabel">图表类型</label>
-        <select id="mermaid-type" onchange="updateMermaidTemplate()">
+        <select id="mermaid-type" >
           <option value="mindmap" data-i18n="mermaidTypeMindmap">思维导图</option>
           <option value="flowchart" data-i18n="mermaidTypeFlowchart">流程图</option>
         </select>
@@ -492,8 +492,8 @@
         <p class="hint" data-i18n="mermaidHint">支持 Mermaid 语法，插入后将在预览区自动渲染。</p>
       </div>
       <div class="modal-footer">
-        <button onclick="closeMermaidModal()" data-i18n="cancel">取消</button>
-        <button onclick="confirmMermaidInsert()" class="primary" data-i18n="insert">插入</button>
+        <button data-mermaid-action="close" data-i18n="cancel">取消</button>
+        <button data-mermaid-action="confirm" class="primary" data-i18n="insert">插入</button>
       </div>
     </div>
   </div>

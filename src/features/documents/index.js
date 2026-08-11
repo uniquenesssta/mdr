@@ -1,4 +1,8 @@
-/** Public Stage 5 document-domain contract. */
+/**
+ * Responsibility: Expose the Stage 5 Documents feature through one public domain/application/state/infrastructure/UI boundary.
+ * State/side effects: None; import-only facade.
+ * Lifecycle: Pure module; exported factories and mounts own their explicit lifecycles.
+ */
 export { createDocumentId, normalizeDocumentId } from './domain/document-identity.js';
 export { normalizeDocumentTitle } from './domain/document-title.js';
 export { normalizeDocumentPath } from './domain/document-path.js';
@@ -16,3 +20,8 @@ export { DocumentOperationStaleError, createDocumentSessionController } from './
 export { mountClassicDocumentControllerPort } from './compatibility/classic-document-controller-port.js';
 export { createRecentFilesRepository } from './infrastructure/recent-files-repository.js';
 export { mountClassicRecentFilesPort } from './compatibility/classic-recent-files-port.js';
+export { mountClassicDocumentUiCommandPort } from './compatibility/classic-document-ui-command-port.js';
+export { createDocumentListItemView } from './ui/document-list-item-view.js';
+export { createDocumentListView } from './ui/document-list-view.js';
+export { createDocumentContextMenuView } from './ui/document-context-menu-view.js';
+export { createDocumentTitleView } from './ui/document-title-view.js';

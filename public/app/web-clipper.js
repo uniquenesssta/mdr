@@ -2,8 +2,17 @@
     const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
     const webClipperEditorControllerPort = webClipperCompatibilityHost?.markdownEditorEditorControllerPort;
     const webClipperEditorCommandPort = webClipperCompatibilityHost?.markdownEditorEditorCommandPort;
+    const webClipperEditorUiCommandPort = webClipperCompatibilityHost?.markdownEditorEditorUiCommandPort;
+    const webClipperDocumentUiCommandPort = webClipperCompatibilityHost?.markdownEditorDocumentUiCommandPort;
     if (!webClipperEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
     if (!webClipperEditorCommandPort) throw new Error('Editor Command compatibility port is unavailable.');
+    if (!webClipperEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+    if (!webClipperDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
+    webClipperEditorUiCommandPort.register({
+      getFindSearchOptions: setStatus => createFindSearchOptions(setStatus),
+      afterFindMatch: match => afterFindMatch(match)
+    });
+    webClipperDocumentUiCommandPort.register({ openWebClipper: () => openUrlModal() });
 
     function setClipperHidden(element, hidden) {
       element?.classList.toggle('is-hidden', Boolean(hidden));
@@ -42,38 +51,8 @@
       if (request.error) throw request.error;
     }
 
-    // 查找与替换：Atomic 5.11 仅迁移业务命令；现有 modal wrapper 保留至 5.12。
-    function openFindModal() {
-      const findInput = document.getElementById('find-input');
-      const ed = getActiveEditor();
-      if (ed.selectionStart !== ed.selectionEnd) {
-        findInput.value = documentModel
-          ? documentModel.sliceText(ed.selectionStart, ed.selectionEnd)
-          : ed.virtualEditor
-            ? ed.virtualEditor.sliceText(ed.selectionStart, ed.selectionEnd)
-            : ed.value.slice(ed.selectionStart, ed.selectionEnd);
-      }
-      document.getElementById('find-status').textContent = '';
-      const modal = document.getElementById('find-modal');
-      const request = {
-        options: {
-          initialFocus: findInput,
-          onClose: () => { document.getElementById('find-status').textContent = ''; }
-        }
-      };
-      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
-      if (request.error) throw request.error;
-      requestAnimationFrame(() => findInput.select());
-    }
-
-    function closeFindModal() {
-      const modal = document.getElementById('find-modal');
-      const request = { reason: 'feature-close' };
-      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
-      if (request.error) throw request.error;
-    }
-
-    function createFindSearchOptions(status) {
+    // Atomic 5.12：Find/Replace 对话框已迁移，classic 只保留 native 搜索与预览同步桥。
+    function createFindSearchOptions(setStatus = () => {}) {
       const currentDoc = getCurrentDocument?.();
       const nativeStore = window.markdownEditorDocumentStore;
       const documentLength = documentModel?.getTextLength?.() ?? getActiveEditor().textLength ?? 0;
@@ -85,7 +64,7 @@
       if (!useNativeSearch) return {};
       return {
         async nativeSearch({ query, from, wrap }) {
-          status.textContent = '正在后台查找…';
+          setStatus('正在后台查找…');
           await saveCurrentDocumentState(false, { waitForNative: true });
           return nativeStore.search(currentDoc.id, query, from, wrap);
         },
@@ -95,74 +74,14 @@
       };
     }
 
-    function applyFindMatch(match, status) {
-      if (match === undefined) return false;
-      if (!match) {
-        status.textContent = t('statusNoMatch');
-        return false;
-      }
-      const el = getActiveEditor();
-      el.setSelectionRange(match.from, match.to);
-      el.focus();
-      el.virtualEditor?.scrollPositionIntoView?.(match.from, 'smooth', 0.45);
+    function afterFindMatch(match) {
+      if (!match) return false;
       if (activeResolvedPreviewMode === 'chapter') {
         updatePreview().then(() => syncEditorSelectionToPreview(true));
       } else {
         requestAnimationFrame(() => syncEditorSelectionToPreview(true));
       }
-      status.textContent = t('statusFoundMatch');
       return true;
-    }
-
-    async function findNext() {
-      const query = document.getElementById('find-input').value;
-      const status = document.getElementById('find-status');
-      if (!query) {
-        status.textContent = '';
-        return;
-      }
-      const match = await webClipperEditorCommandPort.findNext(query, createFindSearchOptions(status));
-      applyFindMatch(match, status);
-    }
-
-    async function replaceOne() {
-      const query = document.getElementById('find-input').value;
-      const replacementText = document.getElementById('replace-input').value;
-      const status = document.getElementById('find-status');
-      if (!query) {
-        status.textContent = '';
-        return;
-      }
-      const result = await webClipperEditorCommandPort.replaceOne(
-        query,
-        replacementText,
-        createFindSearchOptions(status)
-      );
-      if (result.replaced) {
-        syncEditorFromActive();
-        updatePreview();
-        updateCount();
-        autoSave();
-      }
-      applyFindMatch(result.match, status);
-    }
-
-    function replaceAll() {
-      const query = document.getElementById('find-input').value;
-      const replacementText = document.getElementById('replace-input').value;
-      const status = document.getElementById('find-status');
-      if (!query) {
-        status.textContent = '';
-        return;
-      }
-      const count = webClipperEditorCommandPort.replaceAll(query, replacementText);
-      if (count > 0) {
-        syncEditorFromActive();
-        updatePreview();
-        updateCount();
-        autoSave();
-      }
-      status.textContent = count > 0 ? t('statusReplacedCount', count) : t('statusNoMatch');
     }
 
     function toggleProxyInput() {
