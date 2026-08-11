@@ -1369,7 +1369,6 @@ const editor = document.getElementById('editor');
         mangle: false
       });
     }
-    const PAGE_FULLSCREEN_KEY = 'md_editor_page_fullscreen';
 
 
     // 平滑双向滚动、预览定位与选择同步

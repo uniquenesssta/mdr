@@ -12,6 +12,8 @@ export { createSplitResizeController, SPLIT_RATIO_STORAGE_KEY, SPLIT_RATIO_MIN, 
 export { createCompactSplitController } from './split/compact-split-controller.js';
 export { createCompactShellController, WINDOW_RESIZE_SETTLE_MS } from './shell/compact-shell-controller.js';
 export { createToolbarBoundaryController } from './toolbar/toolbar-boundary-controller.js';
+export { createPageFullscreenController, PAGE_FULLSCREEN_STORAGE_KEY } from './fullscreen/page-fullscreen-controller.js';
+export { createSystemFullscreenController } from './fullscreen/system-fullscreen-controller.js';
 export {
   RESPONSIVE_BREAKPOINTS,
   RESPONSIVE_MEDIA_QUERIES,

@@ -26,10 +26,12 @@ import {
   createCompactShellController,
   createCompactSplitController,
   createLayoutState,
+  createPageFullscreenController,
   createSidebarLayoutController,
   createSidebarResizeController,
   createSplitPaneController,
   createSplitResizeController,
+  createSystemFullscreenController,
   createToolbarBoundaryController,
   mountClassicLayoutStatePort,
   mountClassicSplitControllerPort
@@ -77,8 +79,14 @@ let splitResizeController = null;
 let splitPaneController = null;
 let compactSplitController = null;
 let toolbarBoundaryController = null;
+let pageFullscreenController = null;
+let systemFullscreenController = null;
 let splitControllerPort = null;
 const destroyLayoutInteractionControllers = () => {
+  systemFullscreenController?.destroy();
+  systemFullscreenController = null;
+  pageFullscreenController?.destroy();
+  pageFullscreenController = null;
   toolbarBoundaryController?.destroy();
   toolbarBoundaryController = null;
   compactShellController?.destroy();
@@ -584,6 +592,23 @@ async function loadAppModules() {
     });
     sidebarLayoutController.start();
     compactShellController.start();
+    pageFullscreenController = createPageFullscreenController({
+      state: layoutState,
+      app: requireElement('.app', 'Application shell'),
+      body: document.body,
+      storage: platform.storage,
+      onGeometryChanged() {
+        scrollController.notifyGeometryChanged();
+        toolbarBoundaryController?.refresh();
+      }
+    });
+    systemFullscreenController = createSystemFullscreenController({
+      state: layoutState,
+      fullscreen: platform.fullscreen,
+      supported: platform.capabilities.browser.fullscreen
+    });
+    pageFullscreenController.start();
+    systemFullscreenController.start();
     const toolbarElement = requireElement('[data-ui-slot="toolbar"]', 'Editor toolbar');
     toolbarBoundaryController = createToolbarBoundaryController({
       toolbar: toolbarElement,
@@ -604,7 +629,31 @@ async function loadAppModules() {
     });
     toolbarBoundaryController.start();
     unregisterLayoutUiCommands = editorUiCommandPort.register({
-      refreshToolbarBoundary: () => toolbarBoundaryController?.refresh()
+      refreshToolbarBoundary: () => toolbarBoundaryController?.refresh(),
+      async togglePageFullscreen() {
+        const result = await pageFullscreenController.toggle();
+        if (result.ok) {
+          notify(result.active
+            ? '专注模式已开启：已隐藏工具栏、侧边栏和状态栏'
+            : '专注模式已关闭');
+        } else {
+          console.warn('Page fullscreen persistence failed:', result.error);
+        }
+        return result;
+      },
+      async toggleSystemFullscreen() {
+        const result = await systemFullscreenController.toggle();
+        if (!result.supported) notify(t('toastNoFullscreenApi'));
+        else if (!result.ok) {
+          console.warn('System fullscreen transition failed:', result.error);
+          layoutFrameHost.markdownEditorPerf?.record?.('layout.system-fullscreen-error', {
+            category: 'ui.layout',
+            durationMs: 0,
+            details: { message: String(result.error?.message || result.error || 'unknown') }
+          });
+        }
+        return result;
+      }
     });
     const editorPaneElement = requireElement('.editor-pane', 'Editor pane');
     const previewPaneElement = requireElement('.preview-pane', 'Preview pane');

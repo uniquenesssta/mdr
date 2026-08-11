@@ -9,9 +9,7 @@ if (!editorToolsLayoutStatePort) throw new Error('Layout State compatibility por
 if (!editorToolsSplitControllerPort) throw new Error('Split Controller compatibility port is unavailable.');
 editorToolsEditorUiCommandPort.register({
   getLayoutMode: () => getLayoutMode(),
-  setLayoutMode: mode => setLayoutMode(mode),
-  togglePageFullscreen: () => togglePageFullscreen(),
-  toggleSystemFullscreen: () => toggleFullscreen()
+  setLayoutMode: mode => setLayoutMode(mode)
 });
 
     function updateTableVisualEditingToggle() {
@@ -284,37 +282,14 @@ editorToolsEditorUiCommandPort.register({
       });
     }
 
+    // Temporary Stage 6 compatibility wrappers for inline menu handlers.
+    // Atomic 6.10 removes these together with the remaining inline menu ownership.
     function togglePageFullscreen() {
-      const app = document.querySelector('.app');
-      app.classList.toggle('page-fullscreen');
-      app.classList.toggle('is-page-fullscreen');
-      const isActive = app.classList.contains('is-page-fullscreen');
-      editorToolsLayoutStatePort.pageFullscreen = isActive;
-      document.body.classList.toggle('page-fullscreen-active', isActive);
-      document.body.classList.toggle('is-page-fullscreen-active', isActive);
-      localStorage.setItem(PAGE_FULLSCREEN_KEY, isActive ? 'true' : 'false');
-      showToast(isActive ? '专注模式已开启：已隐藏工具栏、侧边栏和状态栏' : '专注模式已关闭');
+      return editorToolsEditorUiCommandPort.invoke('togglePageFullscreen');
     }
 
     function toggleFullscreen() {
-      if (!document.fullscreenEnabled && !document.webkitFullscreenEnabled) {
-        showToast(t('toastNoFullscreenApi'));
-        return;
-      }
-      if (document.fullscreenElement || document.webkitFullscreenElement) {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-      } else {
-        const el = document.documentElement;
-        if (el.requestFullscreen) el.requestFullscreen();
-        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      }
-    }
-
-    function onFullscreenChange() {
-      const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-      editorToolsLayoutStatePort.systemFullscreen = isFullscreen;
-      // Optionally update toolbar state here in the future
+      return editorToolsEditorUiCommandPort.invoke('toggleSystemFullscreen');
     }
 
     // 网页转 Markdown 模态框

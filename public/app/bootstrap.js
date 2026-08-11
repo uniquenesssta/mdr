@@ -60,12 +60,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
         refreshPreviewAfterLayout?.({ forceRender: true, reason: 'startup-layout' });
       }
 
-      // 恢复页面全屏
-      if (localStorage.getItem(PAGE_FULLSCREEN_KEY) === 'true') {
-        bootstrapLayoutStatePort.pageFullscreen = true;
-        document.querySelector('.app').classList.add('page-fullscreen', 'is-page-fullscreen');
-        document.body.classList.add('page-fullscreen-active', 'is-page-fullscreen-active');
-      }
 
       bootstrapHelpPort.openFirstRun();
       refreshClassicLocalizedState();

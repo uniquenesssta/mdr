@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.5 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.6 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   compact-shell:
-    name: Verify Stage 6 Through Toolbar Boundary
+    name: Verify Stage 6 Through Fullscreen
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -146,6 +146,12 @@ jobs:
           node --test
           tests/unit/layout/toolbar-boundary-controller.test.mjs
           tests/architecture/stage-06-toolbar-boundary.test.mjs
+      - name: Verify Atomic Task 6.6 Fullscreen
+        run: >-
+          node --test
+          tests/unit/layout/page-fullscreen-controller.test.mjs
+          tests/unit/layout/system-fullscreen-controller.test.mjs
+          tests/architecture/stage-06-fullscreen.test.mjs
       - name: Verify modified classic and browser runners parse
         run: >-
           node --check public/app/preview.js &&
@@ -166,10 +172,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.5 evidence
+      - name: Upload Atomic Task 6.6 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-toolbar-boundary-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-fullscreen-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30

@@ -172,8 +172,10 @@ test('prefixed shell classes are visual authority while legacy classes remain bo
     readText('public/app/core.js'),
     readText('public/app/bootstrap.js'),
     readText('public/app/editor-tools.js'),
+    readText('src/features/layout/fullscreen/page-fullscreen-controller.js'),
     readText('src/runtime/link-preview.js')
   ]);
+  const fullscreenSource = await readText('src/features/layout/fullscreen/page-fullscreen-controller.js');
   const shellSource = shellSources.join('\n');
   for (const contract of [
     "className: 'l-app-shell app'",
@@ -191,7 +193,11 @@ test('prefixed shell classes are visual authority while legacy classes remain bo
   assert.match(coreSource, /classList\.toggle\('is-hidden'/);
   assert.match(coreSource, /classList\.toggle\('is-collapsed'/);
   assert.match(coreSource, /classList\.add\('resizing', 'sidebar-resizing', 'is-resizing', 'is-sidebar-resizing'\)/);
-  assert.match(bootstrapSource, /classList\.add\('page-fullscreen', 'is-page-fullscreen'\)/);
-  assert.match(editorToolsSource, /classList\.toggle\('is-page-fullscreen'\)/);
+  assert.match(fullscreenSource, /classList\.toggle\('page-fullscreen', active\)/);
+  assert.match(fullscreenSource, /classList\.toggle\('is-page-fullscreen', active\)/);
+  assert.match(fullscreenSource, /classList\.toggle\('page-fullscreen-active', active\)/);
+  assert.match(fullscreenSource, /classList\.toggle\('is-page-fullscreen-active', active\)/);
+  assert.doesNotMatch(bootstrapSource, /page-fullscreen-active|is-page-fullscreen/);
+  assert.doesNotMatch(editorToolsSource, /classList\.(?:add|remove|toggle)\('is-page-fullscreen'/);
   assert.match(linkPreviewSource, /classList\.add\('link-preview-open', 'has-link-preview'\)/);
 });

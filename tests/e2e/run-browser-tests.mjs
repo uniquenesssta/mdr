@@ -1255,6 +1255,45 @@ async function runAppSuite() {
       await browser.page.waitFor(() => window.innerWidth === 1440 && window.innerHeight === 1000, { description: 'restore toolbar test viewport' });
     });
 
+    await test('application page fullscreen uses the Stage 6.6 controller without changing command IDs', async () => {
+      await browser.page.setViewport({ width: 1440, height: 1000 });
+      const before = await browser.page.evaluate(`(()=>{
+        const host=document.getElementById('compatibility-business-ports');
+        const port=host?.markdownEditorEditorUiCommandPort;
+        const layout=host?.markdownEditorLayoutStatePort;
+        if(!port||!layout)throw new Error('Atomic 6.6 fullscreen ports unavailable');
+        localStorage.setItem('md_editor_page_fullscreen','false');
+        return {
+          active:layout.pageFullscreen,
+          app:document.querySelector('.app')?.classList.contains('is-page-fullscreen')||false,
+          body:document.body.classList.contains('is-page-fullscreen-active')
+        };
+      })()`);
+      if (before.active) {
+        await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
+      }
+      await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
+      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.pageFullscreen === true, { description: 'page fullscreen enter' });
+      let snapshot = await browser.page.evaluate(`(()=>({
+        state:document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.pageFullscreen,
+        appLegacy:document.querySelector('.app').classList.contains('page-fullscreen'),
+        appCurrent:document.querySelector('.app').classList.contains('is-page-fullscreen'),
+        bodyLegacy:document.body.classList.contains('page-fullscreen-active'),
+        bodyCurrent:document.body.classList.contains('is-page-fullscreen-active'),
+        persisted:localStorage.getItem('md_editor_page_fullscreen')
+      }))()`);
+      assert.deepEqual(snapshot, { state:true, appLegacy:true, appCurrent:true, bodyLegacy:true, bodyCurrent:true, persisted:'true' });
+      await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
+      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.pageFullscreen === false, { description: 'page fullscreen exit' });
+      snapshot = await browser.page.evaluate(`(()=>({
+        state:document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.pageFullscreen,
+        app:document.querySelector('.app').classList.contains('is-page-fullscreen'),
+        body:document.body.classList.contains('is-page-fullscreen-active'),
+        persisted:localStorage.getItem('md_editor_page_fullscreen')
+      }))()`);
+      assert.deepEqual(snapshot, { state:false, app:false, body:false, persisted:'false' });
+    });
+
     await test('application shell has no structural overflow or clipped focus across required viewports', async () => {
       const report = [];
       try {

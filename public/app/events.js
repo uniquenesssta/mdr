@@ -313,9 +313,6 @@
       }
     });
 
-    // 全屏状态监听
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
     // 快捷键
     function isEditorShortcutTarget(target) {
