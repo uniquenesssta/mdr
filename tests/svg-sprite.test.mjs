@@ -60,9 +60,10 @@ test('Atomic Task 2.3 sprite has one stable definition for every preserved icon 
 });
 
 test('compatibility and dynamic callers reference the external sprite without a second geometry authority', async () => {
-  const [shell, core, events, helpDialog, settingsDialog, linkPreview, folderTree, browserTest] = await Promise.all([
+  const [shell, core, splitPane, events, helpDialog, settingsDialog, linkPreview, folderTree, browserTest] = await Promise.all([
     readText('public/compatibility/business-content.html'),
     readText('public/app/core.js'),
+    readText('src/features/layout/split/split-pane-controller.js'),
     readText('public/app/events.js'),
     readText('src/features/help/ui/help-dialog-view.js'),
     readText('src/features/settings/ui/settings-dialog-view.js'),
@@ -75,8 +76,9 @@ test('compatibility and dynamic callers reference the external sprite without a 
   assert.ok(shellReferences.every(record => record.href === `${ICON_SPRITE_URL}#${record.iconId}`));
   assert.ok(shellReferences.every(record => expectedIconIds.includes(record.iconId)));
   assert.doesNotMatch(shell, /<symbol\b|class="icon-sprite"|href="#icon-/i);
-  assert.match(core, /\/assets\/icons\.svg#icon-chevron-left/);
-  assert.match(core, /\/assets\/icons\.svg#icon-chevron-right/);
+  assert.doesNotMatch(core, /\/assets\/icons\.svg#icon-chevron-(?:left|right)/);
+  assert.match(splitPane, /\/assets\/icons\.svg#icon-chevron-left/);
+  assert.match(splitPane, /\/assets\/icons\.svg#icon-chevron-right/);
   assert.match(events, /\/assets\/icons\.svg#icon-restore/);
   assert.match(events, /\/assets\/icons\.svg#icon-maximize/);
   assert.match(helpDialog, /import \{ createIconView \} from '\.\.\/\.\.\/\.\.\/ui\/components\/icon-view\.js'/);

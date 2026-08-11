@@ -1360,6 +1360,62 @@ async function runAppSuite() {
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'source range close' });
     });
 
+    await test('application split controllers drag, collapse and preserve compact hysteresis in the built app', async () => {
+      await browser.page.setViewport({ width: 1440, height: 1000 });
+      await browser.page.waitFor(() => window.innerWidth === 1440, { description: 'wide split viewport' });
+      await browser.page.evaluate(`(()=>{ setLayoutMode('both', false, false); })()`);
+      await browser.page.waitFor(() => {
+        const handle=document.getElementById('resizer');
+        return Boolean(handle && !handle.classList.contains('is-hidden') && handle.getBoundingClientRect().width > 0);
+      }, { description: 'visible split handle' });
+      const before=await browser.page.evaluate(`(()=>{
+        const handle=document.getElementById('resizer'); const rect=handle.getBoundingClientRect();
+        const host=document.getElementById('compatibility-business-ports');
+        return {x:rect.left+rect.width/2,y:rect.top+rect.height/2,ratio:host.markdownEditorLayoutStatePort.editorRatio};
+      })()`);
+      await browser.page.drag({ x: before.x, y: before.y }, { x: before.x + 120, y: before.y }, { steps: 12 });
+      const dragged=await browser.page.evaluate(`(()=>{
+        const host=document.getElementById('compatibility-business-ports');
+        return {
+          ratio:host.markdownEditorLayoutStatePort.editorRatio,
+          stored:Number(localStorage.getItem('md_editor_ratio')),
+          aria:document.getElementById('resizer')?.getAttribute('aria-valuenow')||'',
+          active:host.markdownEditorLayoutStatePort.isResizing
+        };
+      })()`);
+      assert.ok(dragged.ratio > before.ratio);
+      assert.equal(Math.abs(dragged.stored-dragged.ratio) < 0.0001, true);
+      assert.equal(dragged.active, false);
+      assert.ok(Number(dragged.aria) >= 15 && Number(dragged.aria) <= 85);
+
+      await browser.page.click('#preview-collapse-btn');
+      await browser.page.waitFor(() => document.querySelector('.preview-pane')?.classList.contains('is-collapsed'), { description: 'preview collapsed' });
+      let collapsed=await browser.page.evaluate(`(()=>({
+        editor:document.querySelector('.editor-pane')?.classList.contains('is-collapsed'),
+        preview:document.querySelector('.preview-pane')?.classList.contains('is-collapsed'),
+        resizer:document.getElementById('resizer')?.classList.contains('is-hidden')
+      }))()`);
+      assert.deepEqual(collapsed,{editor:false,preview:true,resizer:true});
+      await browser.page.click('#preview-collapse-btn');
+      await browser.page.waitFor(() => !document.querySelector('.preview-pane')?.classList.contains('is-collapsed'), { description: 'preview expanded' });
+
+      await browser.page.evaluate(`(()=>{
+        const main=document.querySelector('.main'); main.style.flex='0 0 710px'; main.style.width='710px';
+      })()`);
+      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactSplitActive === true, { description: 'compact split enter' });
+      await browser.page.evaluate(`(()=>{const main=document.querySelector('.main');main.style.flex='0 0 740px';main.style.width='740px';})()`);
+      await new Promise(resolve => setTimeout(resolve, 80));
+      assert.equal(await browser.page.evaluate("document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.compactSplitActive"), true);
+      await browser.page.evaluate(`(()=>{const main=document.querySelector('.main');main.style.flex='0 0 780px';main.style.width='780px';})()`);
+      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactSplitActive === false, { description: 'compact split hysteresis exit' });
+      collapsed=await browser.page.evaluate(`(()=>({
+        editor:document.querySelector('.editor-pane')?.classList.contains('is-collapsed'),
+        preview:document.querySelector('.preview-pane')?.classList.contains('is-collapsed')
+      }))()`);
+      assert.deepEqual(collapsed,{editor:false,preview:false});
+      await browser.page.evaluate(`(()=>{const main=document.querySelector('.main');main.style.removeProperty('flex');main.style.removeProperty('width');})()`);
+    });
+
     await test('application sidebar resize captures pointer, projects width and persists the final width', async () => {
       await browser.page.setViewport({ width: 1440, height: 1000 });
       await browser.page.waitFor(() => window.innerWidth === 1440 && window.innerHeight === 1000, {

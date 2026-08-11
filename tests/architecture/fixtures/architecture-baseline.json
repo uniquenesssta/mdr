@@ -442,15 +442,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "togglePane('preview')",
-      "count": 1,
-      "lines": [
-        261
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "toggleSidebar()",
       "count": 1,
       "lines": [

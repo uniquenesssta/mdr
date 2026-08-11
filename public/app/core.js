@@ -36,7 +36,6 @@ coreDocumentUiCommandPort.register({
   }
 });
 coreEditorUiCommandPort.register({
-  togglePane: pane => togglePane(pane),
   notify: message => showToast(message),
   closeAppMenus: () => closeAppMenus()
 });
@@ -48,9 +47,6 @@ const editor = document.getElementById('editor');
     const saveHint = document.getElementById('save-hint');
     const toast = document.getElementById('toast');
 
-    const RATIO_KEY = 'md_editor_ratio';
-    const EDITOR_COLLAPSED_KEY = 'md_editor_editor_collapsed';
-    const PREVIEW_COLLAPSED_KEY = 'md_editor_preview_collapsed';
     const PREVIEW_MODE_KEY = 'md_editor_preview_mode';
     const SIDEBAR_TAB_KEY = 'md_editor_sidebar_tab';
     const OUTLINE_COLLAPSED_KEY = 'md_editor_outline_collapsed';
@@ -1016,7 +1012,6 @@ const editor = document.getElementById('editor');
         coreLayoutStatePort.windowResizeBurstStartedAt = 0;
         coreLayoutStatePort.windowResizeBurstEvents = 0;
         scheduleCompactShellEvaluation();
-        scheduleCompactSplitEvaluation();
         scheduleToolbarBoundaryEvaluation();
         window.markdownEditorPerf?.record?.('layout.window-resize-settled', {
           category: 'ui.layout',
@@ -1095,7 +1090,6 @@ const editor = document.getElementById('editor');
       if (changed) {
         closeAppMenus();
         applySidebarVisibility();
-        scheduleCompactSplitEvaluation?.();
         window.markdownEditorPerf?.record?.('layout.compact-shell-change', {
           category: 'ui.layout',
           durationMs: 0,
@@ -1538,13 +1532,6 @@ const editor = document.getElementById('editor');
     }
 
     let fetchedHtml = '';
-    let resizeRect = null;
-    let resizeStartedAt = 0;
-    let resizeMoveEvents = 0;
-    let resizeStartRatio = 0.5;
-    let splitApplyRaf = 0;
-    let compactSplitObserver = null;
-    let compactSplitRaf = 0;
 
     if (typeof marked !== 'undefined') {
       marked.setOptions({
@@ -1556,262 +1543,5 @@ const editor = document.getElementById('editor');
     }
     const PAGE_FULLSCREEN_KEY = 'md_editor_page_fullscreen';
 
-    function getConfiguredLayoutMode() {
-      return coreLayoutStatePort.layoutMode;
-    }
-
-    function getMainLayoutWidth() {
-      const main = document.querySelector('.main');
-      return Math.max(0, main?.getBoundingClientRect?.().width || main?.clientWidth || 0);
-    }
-
-    function shouldUseCompactSplit(mode = getConfiguredLayoutMode()) {
-      const width = getMainLayoutWidth();
-      const threshold = coreLayoutStatePort.getCompactSplitMaxWidth(coreLayoutStatePort.compactSplitActive);
-      return mode === 'both' && width > 0 && width <= threshold;
-    }
-
-    function setCompactSplitClass(active) {
-      document.querySelector('.main')?.classList.toggle('compact-split', Boolean(active));
-      document.querySelector('.main')?.classList.toggle('is-compact-split', Boolean(active));
-    }
-
-    function persistPaneCollapsedState() {
-      localStorage.setItem(EDITOR_COLLAPSED_KEY, coreLayoutStatePort.editorCollapsed ? 'true' : 'false');
-      localStorage.setItem(PREVIEW_COLLAPSED_KEY, coreLayoutStatePort.previewCollapsed ? 'true' : 'false');
-    }
-
-    function commitResponsivePaneState(options = {}) {
-      const commit = () => applyPaneStates(true);
-      if (options.animate === false || isWindowResizeBurstActive()) commit();
-      else runLayoutTransition(commit, 'panes');
-    }
-
-    function reconcileCompactSplitLayout(mode = getConfiguredLayoutMode(), options = {}) {
-      const shouldCompact = shouldUseCompactSplit(mode);
-      const wasCompact = coreLayoutStatePort.compactSplitActive;
-      const previewWasCollapsed = coreLayoutStatePort.previewCollapsed;
-
-      if (!shouldCompact) {
-        coreLayoutStatePort.compactSplitActive = false;
-        setCompactSplitClass(false);
-        if (wasCompact && mode === 'both') {
-          coreLayoutStatePort.editorCollapsed = false;
-          coreLayoutStatePort.previewCollapsed = false;
-          persistPaneCollapsedState();
-          if (options.apply !== false) commitResponsivePaneState(options);
-          refreshPreviewAfterLayout?.({ forceRender: previewWasCollapsed, reason: 'compact-split:exit' });
-        }
-        return false;
-      }
-
-      coreLayoutStatePort.compactSplitActive = true;
-      setCompactSplitClass(true);
-      if (!wasCompact || options.resetPane) coreLayoutStatePort.compactSplitPane = 'editor';
-      const nextEditorCollapsed = coreLayoutStatePort.compactSplitPane !== 'editor';
-      const nextPreviewCollapsed = coreLayoutStatePort.compactSplitPane !== 'preview';
-      const stateChanged = !wasCompact
-        || coreLayoutStatePort.editorCollapsed !== nextEditorCollapsed
-        || coreLayoutStatePort.previewCollapsed !== nextPreviewCollapsed;
-      coreLayoutStatePort.editorCollapsed = nextEditorCollapsed;
-      coreLayoutStatePort.previewCollapsed = nextPreviewCollapsed;
-      if (stateChanged) {
-        persistPaneCollapsedState();
-        if (options.apply !== false) commitResponsivePaneState(options);
-        if (!coreLayoutStatePort.previewCollapsed) {
-          refreshPreviewAfterLayout?.({ forceRender: previewWasCollapsed, reason: 'compact-split:enter' });
-        }
-      }
-      return true;
-    }
-
-    function activateCompactSplitPane(pane, reason = 'pane-click') {
-      if (!coreLayoutStatePort.compactSplitActive || getConfiguredLayoutMode() !== 'both') return false;
-      const nextPane = pane === 'preview' ? 'preview' : 'editor';
-      const previewWasCollapsed = coreLayoutStatePort.previewCollapsed;
-      const alreadyActive = nextPane === 'editor'
-        ? !coreLayoutStatePort.editorCollapsed && coreLayoutStatePort.previewCollapsed
-        : coreLayoutStatePort.editorCollapsed && !coreLayoutStatePort.previewCollapsed;
-      if (alreadyActive) return true;
-      coreLayoutStatePort.compactSplitPane = nextPane;
-      coreLayoutStatePort.editorCollapsed = nextPane !== 'editor';
-      coreLayoutStatePort.previewCollapsed = nextPane !== 'preview';
-      persistPaneCollapsedState();
-      runLayoutTransition(() => applyPaneStates(true), 'panes');
-      if (!coreLayoutStatePort.previewCollapsed) {
-        refreshPreviewAfterLayout?.({ forceRender: previewWasCollapsed, reason: `compact-split:${reason}` });
-      }
-      window.markdownEditorPerf?.record?.('layout.compact-pane-change', {
-        category: 'ui.layout',
-        durationMs: 0,
-        details: { pane: nextPane, mainWidth: Math.round(getMainLayoutWidth()), reason }
-      });
-      return true;
-    }
-
-    function scheduleCompactSplitEvaluation() {
-      if (compactSplitRaf) cancelAnimationFrame(compactSplitRaf);
-      compactSplitRaf = requestAnimationFrame(() => {
-        compactSplitRaf = 0;
-        reconcileCompactSplitLayout(getConfiguredLayoutMode(), { animate: false });
-      });
-    }
-
-    function initializeCompactSplitObserver() {
-      const main = document.querySelector('.main');
-      if (!main || compactSplitObserver) return;
-      if (typeof ResizeObserver === 'function') {
-        compactSplitObserver = new ResizeObserver(scheduleCompactSplitEvaluation);
-        compactSplitObserver.observe(main);
-      } else {
-        window.addEventListener('resize', scheduleCompactSplitEvaluation, { passive: true });
-        compactSplitObserver = { disconnect: () => window.removeEventListener('resize', scheduleCompactSplitEvaluation) };
-      }
-      reconcileCompactSplitLayout(getConfiguredLayoutMode(), { animate: false });
-    }
-
-    function togglePane(pane) {
-      if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) {
-        setLayoutMode(pane === 'editor' ? 'preview' : 'both');
-        return;
-      }
-      if (coreLayoutStatePort.compactSplitActive && getConfiguredLayoutMode() === 'both') {
-        const paneIsCollapsed = pane === 'editor' ? coreLayoutStatePort.editorCollapsed : coreLayoutStatePort.previewCollapsed;
-        const nextPane = paneIsCollapsed ? pane : (pane === 'editor' ? 'preview' : 'editor');
-        activateCompactSplitPane(nextPane, `toggle:${pane}`);
-        return;
-      }
-      const previewWasCollapsed = coreLayoutStatePort.previewCollapsed;
-      if (pane === 'editor') {
-        if (!coreLayoutStatePort.editorCollapsed && coreLayoutStatePort.previewCollapsed) return;
-        coreLayoutStatePort.editorCollapsed = !coreLayoutStatePort.editorCollapsed;
-      } else {
-        if (!coreLayoutStatePort.previewCollapsed && coreLayoutStatePort.editorCollapsed) return;
-        coreLayoutStatePort.previewCollapsed = !coreLayoutStatePort.previewCollapsed;
-      }
-      persistPaneCollapsedState();
-      runLayoutTransition(() => applyPaneStates(true), 'panes');
-      if (!coreLayoutStatePort.previewCollapsed) {
-        refreshPreviewAfterLayout?.({
-          forceRender: previewWasCollapsed,
-          reason: `pane:${pane}`
-        });
-      }
-    }
-
-    function applyPaneStates(immediateLayout = false) {
-      const editorPane = document.querySelector('.editor-pane');
-      const previewPane = document.querySelector('.preview-pane');
-      const resizer = document.getElementById('resizer');
-      editorPane.classList.toggle('collapsed', coreLayoutStatePort.editorCollapsed);
-      editorPane.classList.toggle('is-collapsed', coreLayoutStatePort.editorCollapsed);
-      previewPane.classList.toggle('collapsed', coreLayoutStatePort.previewCollapsed);
-      previewPane.classList.toggle('is-collapsed', coreLayoutStatePort.previewCollapsed);
-      resizer.classList.toggle('hidden', coreLayoutStatePort.editorCollapsed || coreLayoutStatePort.previewCollapsed);
-      resizer.classList.toggle('is-hidden', coreLayoutStatePort.editorCollapsed || coreLayoutStatePort.previewCollapsed);
-
-      const editorBtn = editorPane.querySelector('.collapse-btn');
-      const previewBtn = previewPane.querySelector('.collapse-btn');
-
-      const chevronLeft = '<svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg>';
-      const chevronRight = '<svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-right"></use></svg>';
-      editorBtn.innerHTML = coreLayoutStatePort.editorCollapsed ? chevronRight : chevronLeft;
-      previewBtn.innerHTML = coreLayoutStatePort.previewCollapsed ? chevronLeft : chevronRight;
-
-      updateCollapseBtnLabels();
-
-      applySplit(immediateLayout);
-    }
-
-    function applySplit(immediate = false) {
-      const commit = () => {
-        splitApplyRaf = 0;
-        const started = performance.now();
-        const editorPane = document.querySelector('.editor-pane');
-        const previewPane = document.querySelector('.preview-pane');
-        if (coreLayoutStatePort.editorCollapsed || coreLayoutStatePort.previewCollapsed) {
-          editorPane.style.flex = '';
-          previewPane.style.flex = '';
-        } else {
-          editorPane.style.flex = `0 0 ${coreLayoutStatePort.editorRatio * 100}%`;
-          previewPane.style.flex = '1 1 0';
-        }
-        invalidatePreviewAnchorMetrics();
-        scheduleEditorMetricsRebuild(coreLayoutStatePort.isResizing ? 180 : 90);
-        window.markdownEditorPerf?.record('layout.commit-split', {
-          category: 'ui.layout',
-          durationMs: performance.now() - started,
-          aggregate: true,
-          details: { ratio: Number(coreLayoutStatePort.editorRatio.toFixed(3)), resizing: coreLayoutStatePort.isResizing }
-        });
-      };
-
-      if (immediate) {
-        if (splitApplyRaf) cancelAnimationFrame(splitApplyRaf);
-        commit();
-        return;
-      }
-      if (splitApplyRaf) return;
-      splitApplyRaf = requestAnimationFrame(commit);
-    }
-
-    function startResize(e) {
-      coreLayoutStatePort.isResizing = true;
-      resizeRect = document.querySelector('.main').getBoundingClientRect();
-      resizeStartedAt = performance.now();
-      resizeMoveEvents = 0;
-      resizeStartRatio = coreLayoutStatePort.editorRatio;
-      document.body.classList.add('resizing', 'is-resizing');
-      const resizer = document.getElementById('resizer');
-      resizer.classList.add('dragging', 'is-dragging');
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-      e.preventDefault();
-    }
-
-    function stopResize() {
-      if (!coreLayoutStatePort.isResizing) return;
-      coreLayoutStatePort.isResizing = false;
-      resizeRect = null;
-      localStorage.setItem(RATIO_KEY, coreLayoutStatePort.editorRatio);
-      document.body.classList.remove('resizing', 'is-resizing');
-      const resizer = document.getElementById('resizer');
-      resizer.classList.remove('dragging', 'is-dragging');
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      scheduleEditorMetricsRebuild(40);
-      invalidatePreviewAnchorMetrics();
-      if (resizeMoveEvents > 0) {
-        window.markdownEditorPerf?.record?.('layout.split-resize-burst', {
-          category: 'ui.layout',
-          durationMs: Math.max(0, performance.now() - resizeStartedAt),
-          details: {
-            events: resizeMoveEvents,
-            startRatio: Number(resizeStartRatio.toFixed(4)),
-            endRatio: Number(coreLayoutStatePort.editorRatio.toFixed(4))
-          }
-        });
-      }
-      resizeStartedAt = 0;
-      resizeMoveEvents = 0;
-    }
-
-    function onResizeMove(e) {
-      if (!coreLayoutStatePort.isResizing || !resizeRect) return;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      let ratio = (clientX - resizeRect.left) / resizeRect.width;
-      ratio = Math.max(0.15, Math.min(0.85, ratio));
-      coreLayoutStatePort.editorRatio = ratio;
-      resizeMoveEvents += 1;
-      applySplit();
-    }
-
-    const resizer = document.getElementById('resizer');
-    resizer.addEventListener('mousedown', startResize);
-    resizer.addEventListener('touchstart', startResize, { passive: false });
-    window.addEventListener('mousemove', onResizeMove);
-    window.addEventListener('touchmove', onResizeMove, { passive: false });
-    window.addEventListener('mouseup', stopResize);
-    window.addEventListener('touchend', stopResize);
 
     // 平滑双向滚动、预览定位与选择同步

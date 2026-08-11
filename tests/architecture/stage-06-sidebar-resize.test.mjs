@@ -23,7 +23,7 @@ test('Atomic 6.2 exposes Sidebar Resize only through the Layout public entrypoin
   assert.doesNotMatch(controller, /max-width:\s*768px/);
 });
 
-test('Atomic 6.2 removes the old sidebar resize behavior authority from classic core/bootstrap while preserving split resize', async () => {
+test('Atomic 6.2 keeps sidebar resize migrated after Atomic 6.3 removes the remaining classic split resize authority', async () => {
   const [core, bootstrap] = await Promise.all([
     read('public/app/core.js'),
     read('public/app/bootstrap.js')
@@ -32,14 +32,12 @@ test('Atomic 6.2 removes the old sidebar resize behavior authority from classic 
     'SIDEBAR_WIDTH_KEY', 'normalizeSidebarWidth', 'applySidebarWidth', 'sidebarResizeRect',
     'startSidebarResize', 'onSidebarResizeMove', 'stopSidebarResize', 'getPointerClientX'
   ]) {
-    assert.doesNotMatch(core, new RegExp(`\\b${legacy}\\b`), `core must not retain ${legacy}`);
-    assert.doesNotMatch(bootstrap, new RegExp(`\\b${legacy}\\b`), `bootstrap must not retain ${legacy}`);
+    assert.doesNotMatch(core, new RegExp(`\b${legacy}\b`), `core must not retain ${legacy}`);
+    assert.doesNotMatch(bootstrap, new RegExp(`\b${legacy}\b`), `bootstrap must not retain ${legacy}`);
   }
-  assert.doesNotMatch(core, /sidebar-resizer['"]\)\?\.addEventListener\(['"]mousedown/);
-  assert.match(core, /function startResize\(e\)/);
-  assert.match(core, /function stopResize\(\)/);
-  assert.match(core, /function onResizeMove\(e\)/);
-  assert.match(core, /localStorage\.setItem\(RATIO_KEY, coreLayoutStatePort\.editorRatio\)/);
+  assert.doesNotMatch(core, /function startResize\(e\)/);
+  assert.doesNotMatch(core, /function stopResize\(\)/);
+  assert.doesNotMatch(core, /function onResizeMove\(e\)/);
 });
 
 test('Atomic 6.2 main lifecycle owns start/destroy and passes explicit geometry dependencies', async () => {

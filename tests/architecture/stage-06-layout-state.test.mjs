@@ -55,30 +55,35 @@ test('all migrated classic callers use the scoped LayoutState port and no second
 });
 
 test('responsive layout logic gets every current JS breakpoint from responsive-breakpoints', async () => {
-  const [breakpoints, core] = await Promise.all([
+  const [breakpoints, core, compactSplit] = await Promise.all([
     read('src/features/layout/shell/responsive-breakpoints.js'),
-    read('public/app/core.js')
+    read('public/app/core.js'),
+    read('src/features/layout/split/compact-split-controller.js')
   ]);
   for (const value of [860, 900, 720, 760, 768]) assert.match(breakpoints, new RegExp(`\\b${value}\\b`));
   assert.doesNotMatch(core, /COMPACT_SHELL_WINDOW_WIDTH|COMPACT_SHELL_EXIT_WIDTH|COMPACT_SPLIT_MAIN_WIDTH|COMPACT_SPLIT_EXIT_MAIN_WIDTH/);
   assert.doesNotMatch(core, /max-width:\s*768px/);
   assert.match(core, /getCompactShellMaxWidth/);
-  assert.match(core, /getCompactSplitMaxWidth/);
+  assert.match(compactSplit, /getCompactSplitMaxWidth/);
+  assert.doesNotMatch(core, /getCompactSplitMaxWidth/);
   assert.match(core, /matchesNarrowInteractive/);
 });
 
-test('Stage 6 keeps future split-resize internals in core after Atomic 6.2 moves sidebar resize and preserves Frozen DocumentModel', async () => {
-  const [core, sidebarResize, model] = await Promise.all([
+test('Atomic 6.3 advances the 6.1/6.2 handoff: split authority leaves core while Sidebar and Frozen DocumentModel stay intact', async () => {
+  const [core, sidebarResize, splitResize, compactSplit, model] = await Promise.all([
     read('public/app/core.js'),
     read('src/features/layout/sidebar/sidebar-resize-controller.js'),
+    read('src/features/layout/split/split-resize-controller.js'),
+    read('src/features/layout/split/compact-split-controller.js'),
     read('src/document/document-model.js')
   ]);
-  assert.match(core, /let resizeRect = null;/);
-  assert.match(core, /let resizeStartedAt = 0;/);
-  assert.match(core, /function startResize/);
+  assert.doesNotMatch(core, /let resizeRect = null;|let resizeStartedAt = 0;|function startResize|function onResizeMove|function stopResize/);
   assert.doesNotMatch(core, /let sidebarResizeRect = null;|function startSidebarResize/);
   assert.match(sidebarResize, /setPointerCapture/);
   assert.match(sidebarResize, /releasePointerCapture/);
+  assert.match(splitResize, /setPointerCapture/);
+  assert.match(splitResize, /releasePointerCapture/);
+  assert.match(compactSplit, /getCompactSplitMaxWidth/);
   assert.equal(model.length > 0, true);
   await access('src/features/layout/state/layout-state.js');
 });
@@ -97,12 +102,8 @@ test('Atomic 6.1 migration preserves source object members and persisted Setting
   assert.doesNotMatch(core, /coreSettingsStorePort\.set\(['"]coreLayoutStatePort\./);
 });
 
-test('Atomic 6.1 explicitly removes every migrated layout-state bare reference from the classic split/sidebar layout region', async () => {
+test('Atomic 6.1 layout state remains single-authority after Atomic 6.3 removes the classic split region', async () => {
   const core = await read('public/app/core.js');
-  const marker = '    function getConfiguredLayoutMode() {';
-  const markerIndex = core.indexOf(marker);
-  assert.notEqual(markerIndex, -1);
-  const layoutRegion = core.slice(markerIndex);
   for (const name of [
     'sidebarVisible', 'sidebarAutoCollapsed', 'sidebarWidth',
     'editorCollapsed', 'previewCollapsed', 'editorRatio',
@@ -111,9 +112,10 @@ test('Atomic 6.1 explicitly removes every migrated layout-state bare reference f
     'isResizing', 'isSidebarResizing',
     'windowResizeActiveUntil', 'windowResizeBurstStartedAt', 'windowResizeBurstEvents'
   ]) {
-    const bare = new RegExp(`(?<![\\w.$])\\b${name}\\b`, 'g');
-    assert.doesNotMatch(layoutRegion, bare, `core split/sidebar layout region must not retain bare ${name}`);
+    const declaration = new RegExp(`\b(?:let|var|const)\s+${name}\b`);
+    assert.doesNotMatch(core, declaration, `core must not recreate layout authority ${name}`);
   }
+  assert.doesNotMatch(core, /function (?:startResize|onResizeMove|stopResize|applySplit|applyPaneStates|reconcileCompactSplitLayout|activateCompactSplitPane)/);
 });
 
 test('Atomic 6.1 scroll-sync reads resize activity only from LayoutState', async () => {

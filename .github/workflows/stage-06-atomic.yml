@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.2 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.3 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sidebar-resize:
-    name: Verify Stage 6 Through Sidebar Resize
+  split-controllers:
+    name: Verify Stage 6 Through Split Controllers
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -128,6 +128,13 @@ jobs:
           node --test
           tests/unit/layout/sidebar-resize-controller.test.mjs
           tests/architecture/stage-06-sidebar-resize.test.mjs
+      - name: Verify Atomic Task 6.3 Split Controllers
+        run: >-
+          node --test
+          tests/unit/layout/split-pane-controller.test.mjs
+          tests/unit/layout/split-resize-controller.test.mjs
+          tests/unit/layout/compact-split-controller.test.mjs
+          tests/architecture/stage-06-split-controllers.test.mjs
       - name: Verify modified browser runner parses
         run: node --check tests/e2e/run-browser-tests.mjs
       - name: Verify frozen DocumentModel remains exact
@@ -146,10 +153,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.2 evidence
+      - name: Upload Atomic Task 6.3 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-sidebar-resize-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-split-controllers-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30

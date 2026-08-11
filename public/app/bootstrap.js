@@ -15,11 +15,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
       // 不再先恢复旧正文或文档元数据，避免侧栏历史和后台快照重新进入当前会话。
       bootstrapEditorControllerPort.setText('');
       filenameInput.value = t('filenameDefault');
-      const savedRatio = localStorage.getItem(RATIO_KEY);
-      if (savedRatio !== null) {
-        const parsed = parseFloat(savedRatio);
-        if (!isNaN(parsed)) bootstrapLayoutStatePort.editorRatio = parsed;
-      }
       bootstrapLayoutStatePort.sidebarVisible = restoredSettings.sidebarVisible;
       loadRecentFiles();
       renderRecentFilesMenu();
@@ -44,8 +39,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
       initializeCompactShellLayout?.();
       applySidebarVisibility();
       setSidebarTab(activeSidebarTab);
-      bootstrapLayoutStatePort.editorCollapsed = localStorage.getItem(EDITOR_COLLAPSED_KEY) === 'true';
-      bootstrapLayoutStatePort.previewCollapsed = localStorage.getItem(PREVIEW_COLLAPSED_KEY) === 'true';
       previewMode = 'preview';
       localStorage.setItem(PREVIEW_MODE_KEY, 'preview');
 
@@ -65,7 +58,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
         setLayoutMode('both', false);
       }
       initializePreviewLayoutObserver?.();
-      initializeCompactSplitObserver?.();
       if (!bootstrapLayoutStatePort.previewCollapsed && !isHybridLayoutMode()) {
         refreshPreviewAfterLayout?.({ forceRender: true, reason: 'startup-layout' });
       }

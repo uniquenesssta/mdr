@@ -22,7 +22,15 @@ import {
   mountClassicEditorControllerPort,
   mountClassicEditorUiCommandPort
 } from './features/editor/index.js';
-import { createLayoutState, createSidebarResizeController, mountClassicLayoutStatePort } from './features/layout/index.js';
+import {
+  createCompactSplitController,
+  createLayoutState,
+  createSidebarResizeController,
+  createSplitPaneController,
+  createSplitResizeController,
+  mountClassicLayoutStatePort,
+  mountClassicSplitControllerPort
+} from './features/layout/index.js';
 import {
   createDocumentModel,
   IncrementalPreviewModel,
@@ -60,9 +68,24 @@ const compatibilityPlatformHost = document.getElementById('compatibility-busines
 const layoutState = createLayoutState();
 const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
 let sidebarResizeController = null;
-const destroyLayoutStateFeature = () => {
+let splitResizeController = null;
+let splitPaneController = null;
+let compactSplitController = null;
+let splitControllerPort = null;
+const destroyLayoutInteractionControllers = () => {
+  compactSplitController?.destroy();
+  compactSplitController = null;
+  splitPaneController?.destroy();
+  splitPaneController = null;
+  splitResizeController?.destroy();
+  splitResizeController = null;
   sidebarResizeController?.destroy();
   sidebarResizeController = null;
+};
+const destroyLayoutStateFeature = () => {
+  splitControllerPort?.destroy();
+  splitControllerPort = null;
+  destroyLayoutInteractionControllers();
   layoutStatePort.destroy();
   layoutState.destroy();
 };
@@ -246,8 +269,9 @@ async function loadAppModules() {
   const destroyDocumentFeatures = () => {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
-    sidebarResizeController?.destroy();
-    sidebarResizeController = null;
+    splitControllerPort?.destroy();
+    splitControllerPort = null;
+    destroyLayoutInteractionControllers();
     destroyDocumentEditorViews();
     documentUiCommandPort.destroy();
     recentFilesPort.destroy();
@@ -497,7 +521,7 @@ async function loadAppModules() {
     const editorPaneView = createEditorPaneView({
       root: requireElement('.editor-pane', 'Editor pane'),
       editorElement: editorHost,
-      collapse: pane => editorUiCommandPort.invoke('togglePane', pane),
+      collapse: pane => splitPaneController.togglePane(pane),
       onSelectionChange() {
         inlineColorView.updateAvailability();
         if (editorUiCommandPort.has('selectionChanged')) editorUiCommandPort.invoke('selectionChanged');
@@ -519,6 +543,62 @@ async function loadAppModules() {
   };
 
   try {
+    const layoutFrameHost = document.defaultView;
+    const requestLayoutFrame = callback => layoutFrameHost.requestAnimationFrame(callback);
+    const cancelLayoutFrame = id => layoutFrameHost.cancelAnimationFrame(id);
+    const editorPaneElement = requireElement('.editor-pane', 'Editor pane');
+    const previewPaneElement = requireElement('.preview-pane', 'Preview pane');
+    const splitResizerElement = requireElement('#resizer', 'Split resize handle');
+    splitResizeController = createSplitResizeController({
+      state: layoutState,
+      main: requireElement('.main', 'Main split layout'),
+      editorPane: editorPaneElement,
+      previewPane: previewPaneElement,
+      resizer: splitResizerElement,
+      body: document.body,
+      storage: layoutFrameHost.localStorage,
+      requestFrame: requestLayoutFrame,
+      cancelFrame: cancelLayoutFrame,
+      onGeometryChanged() { scrollController.notifyGeometryChanged(); }
+    });
+    splitPaneController = createSplitPaneController({
+      state: layoutState,
+      editorPane: editorPaneElement,
+      previewPane: previewPaneElement,
+      resizer: splitResizerElement,
+      editorCollapseButton: requireElement('#editor-collapse-btn', 'Editor collapse button'),
+      previewCollapseButton: requireElement('#preview-collapse-btn', 'Preview collapse button'),
+      storage: layoutFrameHost.localStorage,
+      requestLayoutMode(mode) {
+        if (!editorUiCommandPort.has('setLayoutMode')) throw new Error('Layout mode command is unavailable.');
+        editorUiCommandPort.invoke('setLayoutMode', mode);
+      },
+      activateCompactPane: (pane, reason) => compactSplitController?.activatePane(pane, reason) || false,
+      getCollapseLabel(pane, collapsed) {
+        if (pane === 'editor') return t(collapsed ? 'expandEditor' : 'collapseEditor');
+        return t(collapsed ? 'expandPreview' : 'collapsePreview');
+      }
+    });
+    compactSplitController = createCompactSplitController({
+      state: layoutState,
+      main: requireElement('.main', 'Main split layout'),
+      editorPane: editorPaneElement,
+      previewPane: previewPaneElement,
+      paneController: splitPaneController,
+      viewport: layoutFrameHost,
+      createResizeObserver: typeof layoutFrameHost.ResizeObserver === 'function'
+        ? callback => new layoutFrameHost.ResizeObserver(callback)
+        : null,
+      requestFrame: requestLayoutFrame,
+      cancelFrame: cancelLayoutFrame
+    });
+    splitControllerPort = mountClassicSplitControllerPort(compatibilityPlatformHost, {
+      paneController: splitPaneController,
+      compactController: compactSplitController
+    });
+    splitResizeController.start();
+    splitPaneController.start();
+    compactSplitController.start();
     sidebarResizeController = createSidebarResizeController({
       state: layoutState,
       workspace: requireElement('.workspace', 'Workspace'),

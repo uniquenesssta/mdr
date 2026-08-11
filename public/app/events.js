@@ -27,15 +27,6 @@
     });
 
 
-    function bindCompactPaneActivation(selector, pane) {
-      document.querySelector(selector)?.addEventListener('click', event => {
-        if (!eventsLayoutStatePort.compactSplitActive || event.target.closest('.collapse-btn')) return;
-        const isCollapsed = pane === 'editor' ? editorCollapsed : eventsLayoutStatePort.previewCollapsed;
-        if (isCollapsed) activateCompactSplitPane(pane, `collapsed-${pane}-click`);
-      });
-    }
-    bindCompactPaneActivation('.editor-pane', 'editor');
-    bindCompactPaneActivation('.preview-pane', 'preview');
 
     function applyWindowMaximizedState(isMaximized) {
       const maximizeButton = document.getElementById('window-maximize-btn');

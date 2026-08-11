@@ -2,9 +2,11 @@ const editorToolsCompatibilityHost = document.getElementById('compatibility-busi
 const editorToolsSettingsStorePort = editorToolsCompatibilityHost?.markdownEditorSettingsStorePort;
 const editorToolsEditorUiCommandPort = editorToolsCompatibilityHost?.markdownEditorEditorUiCommandPort;
 const editorToolsLayoutStatePort = editorToolsCompatibilityHost?.markdownEditorLayoutStatePort;
+const editorToolsSplitControllerPort = editorToolsCompatibilityHost?.markdownEditorSplitControllerPort;
 if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!editorToolsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
 if (!editorToolsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
+if (!editorToolsSplitControllerPort) throw new Error('Split Controller compatibility port is unavailable.');
 editorToolsEditorUiCommandPort.register({
   getLayoutMode: () => getLayoutMode(),
   setLayoutMode: mode => setLayoutMode(mode),
@@ -241,36 +243,19 @@ editorToolsEditorUiCommandPort.register({
       if (persist) editorToolsSettingsStorePort.set('layoutMode', nextMode);
       editorToolsLayoutStatePort.layoutMode = nextMode;
 
-      if (nextMode === 'edit' || nextMode === 'hybrid') {
-        editorToolsLayoutStatePort.editorCollapsed = false;
-        editorToolsLayoutStatePort.previewCollapsed = true;
-      } else if (nextMode === 'preview') {
-        editorToolsLayoutStatePort.editorCollapsed = true;
-        editorToolsLayoutStatePort.previewCollapsed = false;
-        if (previewMode !== 'preview') setPreviewMode('preview');
-      } else {
-        editorToolsLayoutStatePort.editorCollapsed = false;
-        editorToolsLayoutStatePort.previewCollapsed = false;
-      }
-
-      reconcileCompactSplitLayout?.(nextMode, {
-        apply: false,
-        resetPane: previousMode !== 'both' && nextMode === 'both'
-      });
-
-      localStorage.setItem(EDITOR_COLLAPSED_KEY, editorToolsLayoutStatePort.editorCollapsed ? 'true' : 'false');
-      localStorage.setItem(PREVIEW_COLLAPSED_KEY, editorToolsLayoutStatePort.previewCollapsed ? 'true' : 'false');
       if (editorToolsEditorUiCommandPort.has('refreshToolbarLayoutLabel')) {
         editorToolsEditorUiCommandPort.invoke('refreshToolbarLayoutLabel', nextMode);
       }
 
-      const commit = () => {
-        applyEditorPresentationMode(nextMode);
-        applyPaneStates(true);
-      };
       const involvesHybridMode = previousMode === 'hybrid' || nextMode === 'hybrid';
       const documentLength = documentModel?.getTextLength?.() ?? editor.textLength;
       const shouldAnimate = animate && !involvesHybridMode && documentLength < LARGE_DOCUMENT_CHARS;
+      const commit = () => {
+        applyEditorPresentationMode(nextMode);
+        editorToolsSplitControllerPort.applyMode(nextMode, {
+          resetCompactPane: previousMode !== 'both' && nextMode === 'both'
+        });
+      };
       if (shouldAnimate) runLayoutTransition(commit, 'panes');
       else commit();
 
