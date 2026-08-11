@@ -1,3 +1,5 @@
+    const scrollSyncLayoutStatePort = document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort;
+    if (!scrollSyncLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     const SYNC_VIEWPORT_RATIO = 0.38;
     const SELECTION_VIEWPORT_RATIO = 0.5;
     const SELECTION_SAFE_EDGE_MIN_PX = 32;
@@ -1318,7 +1320,7 @@
         if ((editor.selectionStart || 0) !== (editor.selectionEnd || 0)) {
           controller.scheduleEditor(true, reason, { force: true, frames: 2 });
         }
-      }, isResizing ? 220 : SELECTION_LAYOUT_SETTLE_MS);
+      }, scrollSyncLayoutStatePort.isResizing ? 220 : SELECTION_LAYOUT_SETTLE_MS);
     }
 
     if (typeof ResizeObserver !== 'undefined') {
@@ -1332,7 +1334,7 @@
         lastEditorWidth = width;
         lastEditorHeight = height;
         // 连续拖动分栏时只标记失效，停稳后在空闲帧重建一次。
-        scheduleEditorMetricsRebuild(isResizing ? 180 : 90);
+        scheduleEditorMetricsRebuild(scrollSyncLayoutStatePort.isResizing ? 180 : 90);
         scheduleSelectionLayoutRefresh('editor-geometry-change');
       });
       editorResizeObserver.observe(editor);

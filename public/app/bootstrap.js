@@ -2,9 +2,11 @@ const bootstrapCompatibilityHost = document.getElementById('compatibility-busine
 const bootstrapHelpPort = bootstrapCompatibilityHost?.markdownEditorHelpPort;
 const bootstrapSettingsStorePort = bootstrapCompatibilityHost?.markdownEditorSettingsStorePort;
 const bootstrapEditorControllerPort = bootstrapCompatibilityHost?.markdownEditorEditorControllerPort;
+const bootstrapLayoutStatePort = bootstrapCompatibilityHost?.markdownEditorLayoutStatePort;
 if (!bootstrapHelpPort) throw new Error('Help compatibility port is unavailable.');
 if (!bootstrapSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!bootstrapEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
+if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 
     async function init() {
       const restoredSettings = bootstrapSettingsStorePort.snapshot;
@@ -16,10 +18,10 @@ if (!bootstrapEditorControllerPort) throw new Error('Editor Controller compatibi
       const savedRatio = localStorage.getItem(RATIO_KEY);
       if (savedRatio !== null) {
         const parsed = parseFloat(savedRatio);
-        if (!isNaN(parsed)) editorRatio = parsed;
+        if (!isNaN(parsed)) bootstrapLayoutStatePort.editorRatio = parsed;
       }
-      sidebarVisible = restoredSettings.sidebarVisible;
-      sidebarWidth = normalizeSidebarWidth(localStorage.getItem(SIDEBAR_WIDTH_KEY) || 248);
+      bootstrapLayoutStatePort.sidebarVisible = restoredSettings.sidebarVisible;
+      bootstrapLayoutStatePort.sidebarWidth = normalizeSidebarWidth(localStorage.getItem(SIDEBAR_WIDTH_KEY) || 248);
       loadRecentFiles();
       renderRecentFilesMenu();
       activeSidebarTab = localStorage.getItem(SIDEBAR_TAB_KEY) || 'docs';
@@ -44,8 +46,8 @@ if (!bootstrapEditorControllerPort) throw new Error('Editor Controller compatibi
       initializeCompactShellLayout?.();
       applySidebarVisibility();
       setSidebarTab(activeSidebarTab);
-      editorCollapsed = localStorage.getItem(EDITOR_COLLAPSED_KEY) === 'true';
-      previewCollapsed = localStorage.getItem(PREVIEW_COLLAPSED_KEY) === 'true';
+      bootstrapLayoutStatePort.editorCollapsed = localStorage.getItem(EDITOR_COLLAPSED_KEY) === 'true';
+      bootstrapLayoutStatePort.previewCollapsed = localStorage.getItem(PREVIEW_COLLAPSED_KEY) === 'true';
       previewMode = 'preview';
       localStorage.setItem(PREVIEW_MODE_KEY, 'preview');
 
@@ -66,12 +68,13 @@ if (!bootstrapEditorControllerPort) throw new Error('Editor Controller compatibi
       }
       initializePreviewLayoutObserver?.();
       initializeCompactSplitObserver?.();
-      if (!previewCollapsed && !isHybridLayoutMode()) {
+      if (!bootstrapLayoutStatePort.previewCollapsed && !isHybridLayoutMode()) {
         refreshPreviewAfterLayout?.({ forceRender: true, reason: 'startup-layout' });
       }
 
       // 恢复页面全屏
       if (localStorage.getItem(PAGE_FULLSCREEN_KEY) === 'true') {
+        bootstrapLayoutStatePort.pageFullscreen = true;
         document.querySelector('.app').classList.add('page-fullscreen', 'is-page-fullscreen');
         document.body.classList.add('page-fullscreen-active', 'is-page-fullscreen-active');
       }

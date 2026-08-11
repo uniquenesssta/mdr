@@ -3,9 +3,11 @@
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
     const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
     const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
+    const eventsLayoutStatePort = eventsCompatibilityHost?.markdownEditorLayoutStatePort;
     if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
     if (!eventsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
     if (!eventsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+    if (!eventsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 
     eventsEditorControllerPort.subscribeTransactions(transaction => {
       if (!transaction.interactive) return;
@@ -27,8 +29,8 @@
 
     function bindCompactPaneActivation(selector, pane) {
       document.querySelector(selector)?.addEventListener('click', event => {
-        if (!compactSplitActive || event.target.closest('.collapse-btn')) return;
-        const isCollapsed = pane === 'editor' ? editorCollapsed : previewCollapsed;
+        if (!eventsLayoutStatePort.compactSplitActive || event.target.closest('.collapse-btn')) return;
+        const isCollapsed = pane === 'editor' ? editorCollapsed : eventsLayoutStatePort.previewCollapsed;
         if (isCollapsed) activateCompactSplitPane(pane, `collapsed-${pane}-click`);
       });
     }

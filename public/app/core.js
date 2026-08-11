@@ -8,6 +8,7 @@ const coreDocumentControllerPort = coreCompatibilityHost?.markdownEditorDocument
 const coreRecentFilesPort = coreCompatibilityHost?.markdownEditorRecentFilesPort;
 const coreDocumentUiCommandPort = coreCompatibilityHost?.markdownEditorDocumentUiCommandPort;
 const coreEditorUiCommandPort = coreCompatibilityHost?.markdownEditorEditorUiCommandPort;
+const coreLayoutStatePort = coreCompatibilityHost?.markdownEditorLayoutStatePort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -16,6 +17,7 @@ if (!coreDocumentControllerPort) throw new Error('Document controller compatibil
 if (!coreRecentFilesPort) throw new Error('Recent files compatibility port is unavailable.');
 if (!coreDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
 if (!coreEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+if (!coreLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
   closeDocument: documentId => closeDocument(documentId),
@@ -54,24 +56,14 @@ const editor = document.getElementById('editor');
     const SIDEBAR_WIDTH_KEY = 'md_editor_sidebar_width';
     const OUTLINE_COLLAPSED_KEY = 'md_editor_outline_collapsed';
     const DOCUMENT_INDEX_KEY_PREFIX = 'md_editor_document_index_v1:';
-    const COMPACT_SHELL_WINDOW_WIDTH = 860;
-    const COMPACT_SHELL_EXIT_WIDTH = 900;
     const WINDOW_RESIZE_SETTLE_MS = 220;
 
     let previewMode = 'preview';
     const getSessionDocuments = () => coreDocumentSessionPort.records;
     const getActiveDocumentId = () => coreDocumentSessionPort.activeId;
-    let sidebarVisible = true;
-    let sidebarAutoCollapsed = false;
-    let compactShellActive = false;
     let compactShellRaf = 0;
-    let compactShellInitialized = false;
-    let windowResizeActiveUntil = 0;
     let windowResizeSettleTimer = 0;
-    let windowResizeBurstStartedAt = 0;
-    let windowResizeBurstEvents = 0;
     let activeSidebarTab = 'docs';
-    let sidebarWidth = 248;
     let autoSaveEnabled = true;
     let autoSaveDelay = 500;
     let editorFontSize = 16;
@@ -193,12 +185,12 @@ const editor = document.getElementById('editor');
     }
 
     function applySidebarWidth() {
-      sidebarWidth = normalizeSidebarWidth(sidebarWidth);
-      document.documentElement.style.setProperty('--sidebar-width', sidebarWidth + 'px');
+      coreLayoutStatePort.sidebarWidth = normalizeSidebarWidth(coreLayoutStatePort.sidebarWidth);
+      document.documentElement.style.setProperty('--sidebar-width', coreLayoutStatePort.sidebarWidth + 'px');
       const resizer = document.getElementById('sidebar-resizer');
       resizer?.setAttribute('aria-valuemin', '180');
       resizer?.setAttribute('aria-valuemax', '520');
-      resizer?.setAttribute('aria-valuenow', String(sidebarWidth));
+      resizer?.setAttribute('aria-valuenow', String(coreLayoutStatePort.sidebarWidth));
     }
 
     function normalizePreviewPerformanceMode(value) {
@@ -278,8 +270,8 @@ const editor = document.getElementById('editor');
     function updateCollapseBtnLabels() {
       const editorBtn = document.getElementById('editor-collapse-btn');
       const previewBtn = document.getElementById('preview-collapse-btn');
-      if (editorBtn) editorBtn.title = editorCollapsed ? t('expandEditor') : t('collapseEditor');
-      if (previewBtn) previewBtn.title = previewCollapsed ? t('expandPreview') : t('collapsePreview');
+      if (editorBtn) editorBtn.title = coreLayoutStatePort.editorCollapsed ? t('expandEditor') : t('collapseEditor');
+      if (previewBtn) previewBtn.title = coreLayoutStatePort.previewCollapsed ? t('expandPreview') : t('collapsePreview');
     }
 
     function updateLargeDocumentMode(length = editor.textLength) {
@@ -1015,7 +1007,7 @@ const editor = document.getElementById('editor');
     let activeLayoutTransition = null;
 
     function isWindowResizeBurstActive() {
-      return performance.now() < windowResizeActiveUntil;
+      return performance.now() < coreLayoutStatePort.windowResizeActiveUntil;
     }
 
     function consumeViewTransitionPromise(promise) {
@@ -1031,16 +1023,16 @@ const editor = document.getElementById('editor');
 
     function markWindowResizeActivity() {
       const now = performance.now();
-      if (!windowResizeBurstStartedAt) windowResizeBurstStartedAt = now;
-      windowResizeBurstEvents += 1;
-      windowResizeActiveUntil = now + WINDOW_RESIZE_SETTLE_MS;
+      if (!coreLayoutStatePort.windowResizeBurstStartedAt) coreLayoutStatePort.windowResizeBurstStartedAt = now;
+      coreLayoutStatePort.windowResizeBurstEvents += 1;
+      coreLayoutStatePort.windowResizeActiveUntil = now + WINDOW_RESIZE_SETTLE_MS;
       clearTimeout(windowResizeSettleTimer);
       windowResizeSettleTimer = setTimeout(() => {
-        const durationMs = Math.max(0, performance.now() - windowResizeBurstStartedAt);
-        const events = windowResizeBurstEvents;
-        windowResizeActiveUntil = 0;
-        windowResizeBurstStartedAt = 0;
-        windowResizeBurstEvents = 0;
+        const durationMs = Math.max(0, performance.now() - coreLayoutStatePort.windowResizeBurstStartedAt);
+        const events = coreLayoutStatePort.windowResizeBurstEvents;
+        coreLayoutStatePort.windowResizeActiveUntil = 0;
+        coreLayoutStatePort.windowResizeBurstStartedAt = 0;
+        coreLayoutStatePort.windowResizeBurstEvents = 0;
         scheduleCompactShellEvaluation();
         scheduleCompactSplitEvaluation();
         scheduleToolbarBoundaryEvaluation();
@@ -1062,8 +1054,8 @@ const editor = document.getElementById('editor');
       const canUseViewTransition = typeof document.startViewTransition === 'function'
         && document.documentElement.classList.contains('app-ready')
         && !reduceMotion
-        && !isResizing
-        && !isSidebarResizing
+        && !coreLayoutStatePort.isResizing
+        && !coreLayoutStatePort.isSidebarResizing
         && !isWindowResizeBurstActive();
       if (!canUseViewTransition) {
         commit();
@@ -1094,7 +1086,7 @@ const editor = document.getElementById('editor');
     }
 
     function isSidebarEffectivelyVisible() {
-      return sidebarVisible && !sidebarAutoCollapsed;
+      return coreLayoutStatePort.sidebarVisible && !coreLayoutStatePort.sidebarAutoCollapsed;
     }
 
     function applySidebarVisibility() {
@@ -1111,11 +1103,11 @@ const editor = document.getElementById('editor');
     }
 
     function evaluateCompactShellLayout() {
-      const compactThreshold = compactShellActive ? COMPACT_SHELL_EXIT_WIDTH : COMPACT_SHELL_WINDOW_WIDTH;
+      const compactThreshold = coreLayoutStatePort.getCompactShellMaxWidth(coreLayoutStatePort.compactShellActive);
       const nextCompact = window.innerWidth <= compactThreshold;
-      const changed = nextCompact !== compactShellActive;
-      compactShellActive = nextCompact;
-      sidebarAutoCollapsed = nextCompact;
+      const changed = nextCompact !== coreLayoutStatePort.compactShellActive;
+      coreLayoutStatePort.compactShellActive = nextCompact;
+      coreLayoutStatePort.sidebarAutoCollapsed = nextCompact;
       document.documentElement.classList.toggle('compact-shell', nextCompact);
       document.documentElement.classList.toggle('is-compact-shell', nextCompact);
       if (changed) {
@@ -1128,7 +1120,7 @@ const editor = document.getElementById('editor');
           details: {
             active: nextCompact,
             viewportWidth: window.innerWidth,
-            sidebarAutoCollapsed
+            sidebarAutoCollapsed: coreLayoutStatePort.sidebarAutoCollapsed
           }
         });
       }
@@ -1145,8 +1137,8 @@ const editor = document.getElementById('editor');
     }
 
     function initializeCompactShellLayout() {
-      if (!compactShellInitialized) {
-        compactShellInitialized = true;
+      if (!coreLayoutStatePort.compactShellInitialized) {
+        coreLayoutStatePort.compactShellInitialized = true;
         window.addEventListener('resize', () => {
           markWindowResizeActivity();
           scheduleCompactShellEvaluation();
@@ -1156,15 +1148,15 @@ const editor = document.getElementById('editor');
     }
 
     function toggleSidebar() {
-      if (sidebarAutoCollapsed) {
+      if (coreLayoutStatePort.sidebarAutoCollapsed) {
         showToast('当前窗口较窄，侧边栏已自动折叠');
         return;
       }
-      const nextVisible = !sidebarVisible;
+      const nextVisible = !coreLayoutStatePort.sidebarVisible;
       coreSettingsStorePort.set('sidebarVisible', nextVisible);
-      sidebarVisible = nextVisible;
+      coreLayoutStatePort.sidebarVisible = nextVisible;
       runLayoutTransition(applySidebarVisibility, 'sidebar');
-      showToast(sidebarVisible ? '已显示侧边栏' : '已隐藏侧边栏');
+      showToast(coreLayoutStatePort.sidebarVisible ? '已显示侧边栏' : '已隐藏侧边栏');
     }
 
     function parseOutlineCollapsed() {
@@ -1455,7 +1447,7 @@ const editor = document.getElementById('editor');
         return;
       }
 
-      const mediaWrap = Boolean(window.matchMedia?.('(max-width: 768px)').matches);
+      const mediaWrap = Boolean(coreLayoutStatePort.matchesNarrowInteractive(window.matchMedia?.bind(window)));
       if (!mediaWrap) {
         // Measure the original single-row toolbar, then apply wrapping before the frame paints.
         toolbar.classList.remove('toolbar-boundary-wrap');
@@ -1564,21 +1556,12 @@ const editor = document.getElementById('editor');
     }
 
     let fetchedHtml = '';
-    let editorCollapsed = false;
-    let previewCollapsed = false;
-    let editorRatio = 0.5;
-    let isResizing = false;
     let resizeRect = null;
     let resizeStartedAt = 0;
     let resizeMoveEvents = 0;
     let resizeStartRatio = 0.5;
-    let isSidebarResizing = false;
     let sidebarResizeRect = null;
     let splitApplyRaf = 0;
-    const COMPACT_SPLIT_MAIN_WIDTH = 720;
-    const COMPACT_SPLIT_EXIT_MAIN_WIDTH = 760;
-    let compactSplitActive = false;
-    let compactSplitPane = 'editor';
     let compactSplitObserver = null;
     let compactSplitRaf = 0;
 
@@ -1593,7 +1576,7 @@ const editor = document.getElementById('editor');
     const PAGE_FULLSCREEN_KEY = 'md_editor_page_fullscreen';
 
     function getConfiguredLayoutMode() {
-      return coreSettingsStorePort.get('layoutMode');
+      return coreLayoutStatePort.layoutMode;
     }
 
     function getMainLayoutWidth() {
@@ -1603,7 +1586,7 @@ const editor = document.getElementById('editor');
 
     function shouldUseCompactSplit(mode = getConfiguredLayoutMode()) {
       const width = getMainLayoutWidth();
-      const threshold = compactSplitActive ? COMPACT_SPLIT_EXIT_MAIN_WIDTH : COMPACT_SPLIT_MAIN_WIDTH;
+      const threshold = coreLayoutStatePort.getCompactSplitMaxWidth(coreLayoutStatePort.compactSplitActive);
       return mode === 'both' && width > 0 && width <= threshold;
     }
 
@@ -1613,8 +1596,8 @@ const editor = document.getElementById('editor');
     }
 
     function persistPaneCollapsedState() {
-      localStorage.setItem(EDITOR_COLLAPSED_KEY, editorCollapsed ? 'true' : 'false');
-      localStorage.setItem(PREVIEW_COLLAPSED_KEY, previewCollapsed ? 'true' : 'false');
+      localStorage.setItem(EDITOR_COLLAPSED_KEY, coreLayoutStatePort.editorCollapsed ? 'true' : 'false');
+      localStorage.setItem(PREVIEW_COLLAPSED_KEY, coreLayoutStatePort.previewCollapsed ? 'true' : 'false');
     }
 
     function commitResponsivePaneState(options = {}) {
@@ -1625,15 +1608,15 @@ const editor = document.getElementById('editor');
 
     function reconcileCompactSplitLayout(mode = getConfiguredLayoutMode(), options = {}) {
       const shouldCompact = shouldUseCompactSplit(mode);
-      const wasCompact = compactSplitActive;
-      const previewWasCollapsed = previewCollapsed;
+      const wasCompact = coreLayoutStatePort.compactSplitActive;
+      const previewWasCollapsed = coreLayoutStatePort.previewCollapsed;
 
       if (!shouldCompact) {
-        compactSplitActive = false;
+        coreLayoutStatePort.compactSplitActive = false;
         setCompactSplitClass(false);
         if (wasCompact && mode === 'both') {
-          editorCollapsed = false;
-          previewCollapsed = false;
+          coreLayoutStatePort.editorCollapsed = false;
+          coreLayoutStatePort.previewCollapsed = false;
           persistPaneCollapsedState();
           if (options.apply !== false) commitResponsivePaneState(options);
           refreshPreviewAfterLayout?.({ forceRender: previewWasCollapsed, reason: 'compact-split:exit' });
@@ -1641,20 +1624,20 @@ const editor = document.getElementById('editor');
         return false;
       }
 
-      compactSplitActive = true;
+      coreLayoutStatePort.compactSplitActive = true;
       setCompactSplitClass(true);
-      if (!wasCompact || options.resetPane) compactSplitPane = 'editor';
-      const nextEditorCollapsed = compactSplitPane !== 'editor';
-      const nextPreviewCollapsed = compactSplitPane !== 'preview';
+      if (!wasCompact || options.resetPane) coreLayoutStatePort.compactSplitPane = 'editor';
+      const nextEditorCollapsed = coreLayoutStatePort.compactSplitPane !== 'editor';
+      const nextPreviewCollapsed = coreLayoutStatePort.compactSplitPane !== 'preview';
       const stateChanged = !wasCompact
-        || editorCollapsed !== nextEditorCollapsed
-        || previewCollapsed !== nextPreviewCollapsed;
-      editorCollapsed = nextEditorCollapsed;
-      previewCollapsed = nextPreviewCollapsed;
+        || coreLayoutStatePort.editorCollapsed !== nextEditorCollapsed
+        || coreLayoutStatePort.previewCollapsed !== nextPreviewCollapsed;
+      coreLayoutStatePort.editorCollapsed = nextEditorCollapsed;
+      coreLayoutStatePort.previewCollapsed = nextPreviewCollapsed;
       if (stateChanged) {
         persistPaneCollapsedState();
         if (options.apply !== false) commitResponsivePaneState(options);
-        if (!previewCollapsed) {
+        if (!coreLayoutStatePort.previewCollapsed) {
           refreshPreviewAfterLayout?.({ forceRender: previewWasCollapsed, reason: 'compact-split:enter' });
         }
       }
@@ -1662,19 +1645,19 @@ const editor = document.getElementById('editor');
     }
 
     function activateCompactSplitPane(pane, reason = 'pane-click') {
-      if (!compactSplitActive || getConfiguredLayoutMode() !== 'both') return false;
+      if (!coreLayoutStatePort.compactSplitActive || getConfiguredLayoutMode() !== 'both') return false;
       const nextPane = pane === 'preview' ? 'preview' : 'editor';
-      const previewWasCollapsed = previewCollapsed;
+      const previewWasCollapsed = coreLayoutStatePort.previewCollapsed;
       const alreadyActive = nextPane === 'editor'
-        ? !editorCollapsed && previewCollapsed
-        : editorCollapsed && !previewCollapsed;
+        ? !coreLayoutStatePort.editorCollapsed && coreLayoutStatePort.previewCollapsed
+        : coreLayoutStatePort.editorCollapsed && !coreLayoutStatePort.previewCollapsed;
       if (alreadyActive) return true;
-      compactSplitPane = nextPane;
-      editorCollapsed = nextPane !== 'editor';
-      previewCollapsed = nextPane !== 'preview';
+      coreLayoutStatePort.compactSplitPane = nextPane;
+      coreLayoutStatePort.editorCollapsed = nextPane !== 'editor';
+      coreLayoutStatePort.previewCollapsed = nextPane !== 'preview';
       persistPaneCollapsedState();
       runLayoutTransition(() => applyPaneStates(true), 'panes');
-      if (!previewCollapsed) {
+      if (!coreLayoutStatePort.previewCollapsed) {
         refreshPreviewAfterLayout?.({ forceRender: previewWasCollapsed, reason: `compact-split:${reason}` });
       }
       window.markdownEditorPerf?.record?.('layout.compact-pane-change', {
@@ -1711,23 +1694,23 @@ const editor = document.getElementById('editor');
         setLayoutMode(pane === 'editor' ? 'preview' : 'both');
         return;
       }
-      if (compactSplitActive && getConfiguredLayoutMode() === 'both') {
-        const paneIsCollapsed = pane === 'editor' ? editorCollapsed : previewCollapsed;
+      if (coreLayoutStatePort.compactSplitActive && getConfiguredLayoutMode() === 'both') {
+        const paneIsCollapsed = pane === 'editor' ? coreLayoutStatePort.editorCollapsed : coreLayoutStatePort.previewCollapsed;
         const nextPane = paneIsCollapsed ? pane : (pane === 'editor' ? 'preview' : 'editor');
         activateCompactSplitPane(nextPane, `toggle:${pane}`);
         return;
       }
-      const previewWasCollapsed = previewCollapsed;
+      const previewWasCollapsed = coreLayoutStatePort.previewCollapsed;
       if (pane === 'editor') {
-        if (!editorCollapsed && previewCollapsed) return;
-        editorCollapsed = !editorCollapsed;
+        if (!coreLayoutStatePort.editorCollapsed && coreLayoutStatePort.previewCollapsed) return;
+        coreLayoutStatePort.editorCollapsed = !coreLayoutStatePort.editorCollapsed;
       } else {
-        if (!previewCollapsed && editorCollapsed) return;
-        previewCollapsed = !previewCollapsed;
+        if (!coreLayoutStatePort.previewCollapsed && coreLayoutStatePort.editorCollapsed) return;
+        coreLayoutStatePort.previewCollapsed = !coreLayoutStatePort.previewCollapsed;
       }
       persistPaneCollapsedState();
       runLayoutTransition(() => applyPaneStates(true), 'panes');
-      if (!previewCollapsed) {
+      if (!coreLayoutStatePort.previewCollapsed) {
         refreshPreviewAfterLayout?.({
           forceRender: previewWasCollapsed,
           reason: `pane:${pane}`
@@ -1739,20 +1722,20 @@ const editor = document.getElementById('editor');
       const editorPane = document.querySelector('.editor-pane');
       const previewPane = document.querySelector('.preview-pane');
       const resizer = document.getElementById('resizer');
-      editorPane.classList.toggle('collapsed', editorCollapsed);
-      editorPane.classList.toggle('is-collapsed', editorCollapsed);
-      previewPane.classList.toggle('collapsed', previewCollapsed);
-      previewPane.classList.toggle('is-collapsed', previewCollapsed);
-      resizer.classList.toggle('hidden', editorCollapsed || previewCollapsed);
-      resizer.classList.toggle('is-hidden', editorCollapsed || previewCollapsed);
+      editorPane.classList.toggle('collapsed', coreLayoutStatePort.editorCollapsed);
+      editorPane.classList.toggle('is-collapsed', coreLayoutStatePort.editorCollapsed);
+      previewPane.classList.toggle('collapsed', coreLayoutStatePort.previewCollapsed);
+      previewPane.classList.toggle('is-collapsed', coreLayoutStatePort.previewCollapsed);
+      resizer.classList.toggle('hidden', coreLayoutStatePort.editorCollapsed || coreLayoutStatePort.previewCollapsed);
+      resizer.classList.toggle('is-hidden', coreLayoutStatePort.editorCollapsed || coreLayoutStatePort.previewCollapsed);
 
       const editorBtn = editorPane.querySelector('.collapse-btn');
       const previewBtn = previewPane.querySelector('.collapse-btn');
 
       const chevronLeft = '<svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg>';
       const chevronRight = '<svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-right"></use></svg>';
-      editorBtn.innerHTML = editorCollapsed ? chevronRight : chevronLeft;
-      previewBtn.innerHTML = previewCollapsed ? chevronLeft : chevronRight;
+      editorBtn.innerHTML = coreLayoutStatePort.editorCollapsed ? chevronRight : chevronLeft;
+      previewBtn.innerHTML = coreLayoutStatePort.previewCollapsed ? chevronLeft : chevronRight;
 
       updateCollapseBtnLabels();
 
@@ -1765,20 +1748,20 @@ const editor = document.getElementById('editor');
         const started = performance.now();
         const editorPane = document.querySelector('.editor-pane');
         const previewPane = document.querySelector('.preview-pane');
-        if (editorCollapsed || previewCollapsed) {
+        if (coreLayoutStatePort.editorCollapsed || coreLayoutStatePort.previewCollapsed) {
           editorPane.style.flex = '';
           previewPane.style.flex = '';
         } else {
-          editorPane.style.flex = `0 0 ${editorRatio * 100}%`;
+          editorPane.style.flex = `0 0 ${coreLayoutStatePort.editorRatio * 100}%`;
           previewPane.style.flex = '1 1 0';
         }
         invalidatePreviewAnchorMetrics();
-        scheduleEditorMetricsRebuild(isResizing ? 180 : 90);
+        scheduleEditorMetricsRebuild(coreLayoutStatePort.isResizing ? 180 : 90);
         window.markdownEditorPerf?.record('layout.commit-split', {
           category: 'ui.layout',
           durationMs: performance.now() - started,
           aggregate: true,
-          details: { ratio: Number(editorRatio.toFixed(3)), resizing: isResizing }
+          details: { ratio: Number(coreLayoutStatePort.editorRatio.toFixed(3)), resizing: coreLayoutStatePort.isResizing }
         });
       };
 
@@ -1796,8 +1779,8 @@ const editor = document.getElementById('editor');
     }
 
     function startSidebarResize(event) {
-      if (!isSidebarEffectivelyVisible() || compactShellActive || window.matchMedia?.('(max-width: 768px)').matches) return;
-      isSidebarResizing = true;
+      if (!isSidebarEffectivelyVisible() || coreLayoutStatePort.compactShellActive || coreLayoutStatePort.matchesNarrowInteractive(window.matchMedia?.bind(window))) return;
+      coreLayoutStatePort.isSidebarResizing = true;
       sidebarResizeRect = document.querySelector('.workspace')?.getBoundingClientRect() || null;
       document.body.classList.add('resizing', 'sidebar-resizing', 'is-resizing', 'is-sidebar-resizing');
       document.getElementById('sidebar-resizer')?.classList.add('dragging', 'is-dragging');
@@ -1807,10 +1790,10 @@ const editor = document.getElementById('editor');
     }
 
     function onSidebarResizeMove(event) {
-      if (!isSidebarResizing || !sidebarResizeRect) return;
+      if (!coreLayoutStatePort.isSidebarResizing || !sidebarResizeRect) return;
       const clientX = getPointerClientX(event);
       if (!Number.isFinite(clientX)) return;
-      sidebarWidth = normalizeSidebarWidth(clientX - sidebarResizeRect.left);
+      coreLayoutStatePort.sidebarWidth = normalizeSidebarWidth(clientX - sidebarResizeRect.left);
       applySidebarWidth();
       scheduleEditorMetricsRebuild(180);
       invalidatePreviewAnchorMetrics();
@@ -1818,10 +1801,10 @@ const editor = document.getElementById('editor');
     }
 
     function stopSidebarResize() {
-      if (!isSidebarResizing) return;
-      isSidebarResizing = false;
+      if (!coreLayoutStatePort.isSidebarResizing) return;
+      coreLayoutStatePort.isSidebarResizing = false;
       sidebarResizeRect = null;
-      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth));
+      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(coreLayoutStatePort.sidebarWidth));
       document.body.classList.remove('resizing', 'sidebar-resizing', 'is-resizing', 'is-sidebar-resizing');
       document.getElementById('sidebar-resizer')?.classList.remove('dragging', 'is-dragging');
       document.body.style.cursor = '';
@@ -1831,11 +1814,11 @@ const editor = document.getElementById('editor');
     }
 
     function startResize(e) {
-      isResizing = true;
+      coreLayoutStatePort.isResizing = true;
       resizeRect = document.querySelector('.main').getBoundingClientRect();
       resizeStartedAt = performance.now();
       resizeMoveEvents = 0;
-      resizeStartRatio = editorRatio;
+      resizeStartRatio = coreLayoutStatePort.editorRatio;
       document.body.classList.add('resizing', 'is-resizing');
       const resizer = document.getElementById('resizer');
       resizer.classList.add('dragging', 'is-dragging');
@@ -1845,10 +1828,10 @@ const editor = document.getElementById('editor');
     }
 
     function stopResize() {
-      if (!isResizing) return;
-      isResizing = false;
+      if (!coreLayoutStatePort.isResizing) return;
+      coreLayoutStatePort.isResizing = false;
       resizeRect = null;
-      localStorage.setItem(RATIO_KEY, editorRatio);
+      localStorage.setItem(RATIO_KEY, coreLayoutStatePort.editorRatio);
       document.body.classList.remove('resizing', 'is-resizing');
       const resizer = document.getElementById('resizer');
       resizer.classList.remove('dragging', 'is-dragging');
@@ -1863,7 +1846,7 @@ const editor = document.getElementById('editor');
           details: {
             events: resizeMoveEvents,
             startRatio: Number(resizeStartRatio.toFixed(4)),
-            endRatio: Number(editorRatio.toFixed(4))
+            endRatio: Number(coreLayoutStatePort.editorRatio.toFixed(4))
           }
         });
       }
@@ -1872,11 +1855,11 @@ const editor = document.getElementById('editor');
     }
 
     function onResizeMove(e) {
-      if (!isResizing || !resizeRect) return;
+      if (!coreLayoutStatePort.isResizing || !resizeRect) return;
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       let ratio = (clientX - resizeRect.left) / resizeRect.width;
       ratio = Math.max(0.15, Math.min(0.85, ratio));
-      editorRatio = ratio;
+      coreLayoutStatePort.editorRatio = ratio;
       resizeMoveEvents += 1;
       applySplit();
     }
@@ -1905,9 +1888,9 @@ const editor = document.getElementById('editor');
       stopResize();
     });
     window.addEventListener('resize', () => {
-      const normalized = normalizeSidebarWidth(sidebarWidth);
-      if (normalized !== sidebarWidth) {
-        sidebarWidth = normalized;
+      const normalized = normalizeSidebarWidth(coreLayoutStatePort.sidebarWidth);
+      if (normalized !== coreLayoutStatePort.sidebarWidth) {
+        coreLayoutStatePort.sidebarWidth = normalized;
         applySidebarWidth();
       }
     });

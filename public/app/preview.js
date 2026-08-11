@@ -1,5 +1,8 @@
-    const previewDocumentSessionPort = document.getElementById('compatibility-business-ports')?.markdownEditorDocumentSessionPort;
+    const previewCompatibilityHost = document.getElementById('compatibility-business-ports');
+    const previewDocumentSessionPort = previewCompatibilityHost?.markdownEditorDocumentSessionPort;
+    const previewLayoutStatePort = previewCompatibilityHost?.markdownEditorLayoutStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
+    if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     function schedulePreviewUpdate() {
       clearTimeout(previewUpdateTimer);
       const length = editor.textLength;
@@ -276,7 +279,7 @@
           previewEnhancementIdle = 0;
           if (renderVersion !== previewRenderVersion) return;
           const started = performance.now();
-          if (sidebarVisible && activeSidebarTab === 'outline') renderOutline();
+          if (previewLayoutStatePort.sidebarVisible && activeSidebarTab === 'outline') renderOutline();
           window.markdownEditorSelectionController?.notifyPreviewMounted?.('preview-enhancements');
           // 在空闲阶段预热锚点坐标，避免用户第一次滚动时同步测量全部预览块。
           getPreviewAnchorMetrics();

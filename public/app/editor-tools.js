@@ -1,8 +1,10 @@
 const editorToolsCompatibilityHost = document.getElementById('compatibility-business-ports');
 const editorToolsSettingsStorePort = editorToolsCompatibilityHost?.markdownEditorSettingsStorePort;
 const editorToolsEditorUiCommandPort = editorToolsCompatibilityHost?.markdownEditorEditorUiCommandPort;
+const editorToolsLayoutStatePort = editorToolsCompatibilityHost?.markdownEditorLayoutStatePort;
 if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!editorToolsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+if (!editorToolsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 editorToolsEditorUiCommandPort.register({
   getLayoutMode: () => getLayoutMode(),
   setLayoutMode: mode => setLayoutMode(mode),
@@ -196,7 +198,7 @@ editorToolsEditorUiCommandPort.register({
 
     // 视图布局与全屏
     function getLayoutMode() {
-      return editorToolsSettingsStorePort.get('layoutMode');
+      return editorToolsLayoutStatePort.layoutMode;
     }
 
     function isHybridLayoutMode() {
@@ -233,21 +235,22 @@ editorToolsEditorUiCommandPort.register({
 
     function setLayoutMode(mode, animate = document.documentElement.classList.contains('app-ready'), persist = true) {
       const previousMode = getLayoutMode();
-      const previewWasHidden = previewCollapsed || previousMode === 'hybrid';
+      const previewWasHidden = editorToolsLayoutStatePort.previewCollapsed || previousMode === 'hybrid';
       let nextMode = ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
       if (nextMode === 'hybrid' && !editor.virtualEditor?.setPresentationMode) nextMode = 'edit';
       if (persist) editorToolsSettingsStorePort.set('layoutMode', nextMode);
+      editorToolsLayoutStatePort.layoutMode = nextMode;
 
       if (nextMode === 'edit' || nextMode === 'hybrid') {
-        editorCollapsed = false;
-        previewCollapsed = true;
+        editorToolsLayoutStatePort.editorCollapsed = false;
+        editorToolsLayoutStatePort.previewCollapsed = true;
       } else if (nextMode === 'preview') {
-        editorCollapsed = true;
-        previewCollapsed = false;
+        editorToolsLayoutStatePort.editorCollapsed = true;
+        editorToolsLayoutStatePort.previewCollapsed = false;
         if (previewMode !== 'preview') setPreviewMode('preview');
       } else {
-        editorCollapsed = false;
-        previewCollapsed = false;
+        editorToolsLayoutStatePort.editorCollapsed = false;
+        editorToolsLayoutStatePort.previewCollapsed = false;
       }
 
       reconcileCompactSplitLayout?.(nextMode, {
@@ -255,8 +258,8 @@ editorToolsEditorUiCommandPort.register({
         resetPane: previousMode !== 'both' && nextMode === 'both'
       });
 
-      localStorage.setItem(EDITOR_COLLAPSED_KEY, editorCollapsed ? 'true' : 'false');
-      localStorage.setItem(PREVIEW_COLLAPSED_KEY, previewCollapsed ? 'true' : 'false');
+      localStorage.setItem(EDITOR_COLLAPSED_KEY, editorToolsLayoutStatePort.editorCollapsed ? 'true' : 'false');
+      localStorage.setItem(PREVIEW_COLLAPSED_KEY, editorToolsLayoutStatePort.previewCollapsed ? 'true' : 'false');
       if (editorToolsEditorUiCommandPort.has('refreshToolbarLayoutLabel')) {
         editorToolsEditorUiCommandPort.invoke('refreshToolbarLayoutLabel', nextMode);
       }
@@ -273,7 +276,7 @@ editorToolsEditorUiCommandPort.register({
 
       if (nextMode === 'hybrid') {
         schedulePreviewUpdate();
-      } else if (!previewCollapsed) {
+      } else if (!editorToolsLayoutStatePort.previewCollapsed) {
         const previewBody = preview.querySelector('.markdown-body');
         refreshPreviewAfterLayout?.({
           forceRender: previewWasHidden
@@ -301,6 +304,7 @@ editorToolsEditorUiCommandPort.register({
       app.classList.toggle('page-fullscreen');
       app.classList.toggle('is-page-fullscreen');
       const isActive = app.classList.contains('is-page-fullscreen');
+      editorToolsLayoutStatePort.pageFullscreen = isActive;
       document.body.classList.toggle('page-fullscreen-active', isActive);
       document.body.classList.toggle('is-page-fullscreen-active', isActive);
       localStorage.setItem(PAGE_FULLSCREEN_KEY, isActive ? 'true' : 'false');
@@ -324,6 +328,7 @@ editorToolsEditorUiCommandPort.register({
 
     function onFullscreenChange() {
       const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      editorToolsLayoutStatePort.systemFullscreen = isFullscreen;
       // Optionally update toolbar state here in the future
     }
 

@@ -22,6 +22,7 @@ import {
   mountClassicEditorControllerPort,
   mountClassicEditorUiCommandPort
 } from './features/editor/index.js';
+import { createLayoutState, mountClassicLayoutStatePort } from './features/layout/index.js';
 import {
   createDocumentModel,
   IncrementalPreviewModel,
@@ -56,6 +57,12 @@ const platform = createPlatform({
   record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
 });
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
+const layoutState = createLayoutState();
+const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
+const destroyLayoutStateFeature = () => {
+  layoutStatePort.destroy();
+  layoutState.destroy();
+};
 const compatibilityPlatformPort = mountClassicPlatformPort(compatibilityPlatformHost, platform);
 configureLinkPreviewPlatform({ links: platform.links });
 configurePerformancePlatform({
@@ -68,6 +75,7 @@ configureHybridImageSourcePlatform({
 });
 document.documentElement.classList.toggle('tauri-shell', platform.capabilities.isDesktop);
 window.addEventListener('pagehide', () => {
+  destroyLayoutStateFeature();
   compatibilityPlatformPort.destroy();
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
 }, { once: true });
@@ -526,6 +534,7 @@ loadAppModules().then(() => {
     details: { documentReadyState: document.readyState }
   });
 }).catch((error) => {
+  destroyLayoutStateFeature();
   console.error(error);
   const status = document.getElementById('status');
   if (status) status.textContent = error.message;
