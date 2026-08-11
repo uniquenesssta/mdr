@@ -1028,7 +1028,7 @@
         const badge = document.getElementById('preview-strategy-badge');
         if (badge) badge.hidden = true;
         document.body.dataset.previewPerformanceMode = 'hybrid';
-        if (sidebarVisible && activeSidebarTab === 'outline' && outlineDirty) renderOutline();
+        if (previewLayoutStatePort.sidebarVisible && activeSidebarTab === 'outline' && outlineDirty) renderOutline();
         const presentationStats = editor.virtualEditor?.getPresentationStats?.() || {};
         const expectedDocumentVersion = documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.() ?? 0;
         const indexedDocumentVersion = Number(modelResult?.documentVersion);

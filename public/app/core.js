@@ -51,13 +51,10 @@ const editor = document.getElementById('editor');
     const SIDEBAR_TAB_KEY = 'md_editor_sidebar_tab';
     const OUTLINE_COLLAPSED_KEY = 'md_editor_outline_collapsed';
     const DOCUMENT_INDEX_KEY_PREFIX = 'md_editor_document_index_v1:';
-    const WINDOW_RESIZE_SETTLE_MS = 220;
 
     let previewMode = 'preview';
     const getSessionDocuments = () => coreDocumentSessionPort.records;
     const getActiveDocumentId = () => coreDocumentSessionPort.activeId;
-    let compactShellRaf = 0;
-    let windowResizeSettleTimer = 0;
     let activeSidebarTab = 'docs';
     let autoSaveEnabled = true;
     let autoSaveDelay = 500;
@@ -999,33 +996,6 @@ const editor = document.getElementById('editor');
       consumeViewTransitionPromise(transition.finished);
     }
 
-    function markWindowResizeActivity() {
-      const now = performance.now();
-      if (!coreLayoutStatePort.windowResizeBurstStartedAt) coreLayoutStatePort.windowResizeBurstStartedAt = now;
-      coreLayoutStatePort.windowResizeBurstEvents += 1;
-      coreLayoutStatePort.windowResizeActiveUntil = now + WINDOW_RESIZE_SETTLE_MS;
-      clearTimeout(windowResizeSettleTimer);
-      windowResizeSettleTimer = setTimeout(() => {
-        const durationMs = Math.max(0, performance.now() - coreLayoutStatePort.windowResizeBurstStartedAt);
-        const events = coreLayoutStatePort.windowResizeBurstEvents;
-        coreLayoutStatePort.windowResizeActiveUntil = 0;
-        coreLayoutStatePort.windowResizeBurstStartedAt = 0;
-        coreLayoutStatePort.windowResizeBurstEvents = 0;
-        scheduleCompactShellEvaluation();
-        scheduleToolbarBoundaryEvaluation();
-        window.markdownEditorPerf?.record?.('layout.window-resize-settled', {
-          category: 'ui.layout',
-          durationMs: 0,
-          details: {
-            durationMs: Number(durationMs.toFixed(1)),
-            events,
-            viewportWidth: window.innerWidth,
-            viewportHeight: window.innerHeight
-          }
-        });
-      }, WINDOW_RESIZE_SETTLE_MS);
-    }
-
     function runLayoutTransition(commit, kind = 'layout') {
       const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
       const canUseViewTransition = typeof document.startViewTransition === 'function'
@@ -1062,67 +1032,6 @@ const editor = document.getElementById('editor');
       }
     }
 
-    function isSidebarEffectivelyVisible() {
-      return coreLayoutStatePort.sidebarVisible && !coreLayoutStatePort.sidebarAutoCollapsed;
-    }
-
-    function applySidebarVisibility() {
-      const sidebar = document.getElementById('sidebar');
-      if (!sidebar) return;
-      const visible = isSidebarEffectivelyVisible();
-      sidebar.classList.toggle('hidden', !visible);
-      sidebar.classList.toggle('is-hidden', !visible);
-      sidebar.setAttribute('aria-hidden', visible ? 'false' : 'true');
-      document.getElementById('sidebar-resizer')?.classList.toggle('hidden', !visible);
-      document.getElementById('sidebar-resizer')?.classList.toggle('is-hidden', !visible);
-      scheduleEditorMetricsRebuild(100);
-      invalidatePreviewAnchorMetrics();
-    }
-
-    function evaluateCompactShellLayout() {
-      const compactThreshold = coreLayoutStatePort.getCompactShellMaxWidth(coreLayoutStatePort.compactShellActive);
-      const nextCompact = window.innerWidth <= compactThreshold;
-      const changed = nextCompact !== coreLayoutStatePort.compactShellActive;
-      coreLayoutStatePort.compactShellActive = nextCompact;
-      coreLayoutStatePort.sidebarAutoCollapsed = nextCompact;
-      document.documentElement.classList.toggle('compact-shell', nextCompact);
-      document.documentElement.classList.toggle('is-compact-shell', nextCompact);
-      if (changed) {
-        closeAppMenus();
-        applySidebarVisibility();
-        window.markdownEditorPerf?.record?.('layout.compact-shell-change', {
-          category: 'ui.layout',
-          durationMs: 0,
-          details: {
-            active: nextCompact,
-            viewportWidth: window.innerWidth,
-            sidebarAutoCollapsed: coreLayoutStatePort.sidebarAutoCollapsed
-          }
-        });
-      }
-      return nextCompact;
-    }
-
-    function scheduleCompactShellEvaluation() {
-      closeAppMenus();
-      if (compactShellRaf) cancelAnimationFrame(compactShellRaf);
-      compactShellRaf = requestAnimationFrame(() => {
-        compactShellRaf = 0;
-        evaluateCompactShellLayout();
-      });
-    }
-
-    function initializeCompactShellLayout() {
-      if (!coreLayoutStatePort.compactShellInitialized) {
-        coreLayoutStatePort.compactShellInitialized = true;
-        window.addEventListener('resize', () => {
-          markWindowResizeActivity();
-          scheduleCompactShellEvaluation();
-        }, { passive: true });
-      }
-      evaluateCompactShellLayout();
-    }
-
     function toggleSidebar() {
       if (coreLayoutStatePort.sidebarAutoCollapsed) {
         showToast('当前窗口较窄，侧边栏已自动折叠');
@@ -1130,8 +1039,7 @@ const editor = document.getElementById('editor');
       }
       const nextVisible = !coreLayoutStatePort.sidebarVisible;
       coreSettingsStorePort.set('sidebarVisible', nextVisible);
-      coreLayoutStatePort.sidebarVisible = nextVisible;
-      runLayoutTransition(applySidebarVisibility, 'sidebar');
+      runLayoutTransition(() => { coreLayoutStatePort.sidebarVisible = nextVisible; }, 'sidebar');
       showToast(coreLayoutStatePort.sidebarVisible ? '已显示侧边栏' : '已隐藏侧边栏');
     }
 
@@ -1393,7 +1301,7 @@ const editor = document.getElementById('editor');
     document.addEventListener('markdown-editor:settings-changed', event => {
       const applied = event?.detail?.snapshot;
       if (!applied || !Array.isArray(event?.detail?.changedIds)) return;
-      sidebarVisible = applied.sidebarVisible;
+      coreLayoutStatePort.sidebarVisible = applied.sidebarVisible;
       autoSaveEnabled = applied.autoSaveEnabled;
       autoSaveDelay = applied.autoSaveDelay;
       editorFontSize = applied.editorFontSize;
@@ -1404,7 +1312,6 @@ const editor = document.getElementById('editor');
       toolbarHiddenItems = new Set(applied.toolbarHiddenItems);
       previewPerformanceMode = applied.previewPerformanceMode;
       setLayoutMode(applied.layoutMode, false, false);
-      applySidebarVisibility();
       applyEditorPreferences();
       updateStatusBar();
       autoSave();

@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { readFile } from 'node:fs/promises';
+const read = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
+
+test('Atomic 6.4 exposes Compact Shell and Sidebar Layout only through the Layout public entrypoint', async () => {
+  const [entry, compact, sidebar] = await Promise.all([
+    read('src/features/layout/index.js'),
+    read('src/features/layout/shell/compact-shell-controller.js'),
+    read('src/features/layout/sidebar/sidebar-layout-controller.js')
+  ]);
+  assert.match(entry, /createCompactShellController/);
+  assert.match(entry, /createSidebarLayoutController/);
+  assert.match(compact, /getCompactShellMaxWidth/);
+  assert.match(compact, /WINDOW_RESIZE_SETTLE_MS = 220/);
+  assert.match(compact, /windowActiveUntil/);
+  assert.match(compact, /windowBurstStartedAt/);
+  assert.match(compact, /windowBurstEvents/);
+  assert.match(sidebar, /aria-hidden/);
+  for (const source of [compact, sidebar]) {
+    assert.doesNotMatch(source, /\bwindow\s*(?:\.|\[)/);
+    assert.doesNotMatch(source, /\bdocument\b/);
+    assert.doesNotMatch(source, /\blocalStorage\b/);
+  }
+});
+
+test('Atomic 6.4 removes classic Compact Shell and sidebar projection authority while keeping View Transition burst gating', async () => {
+  const [core, bootstrap] = await Promise.all([read('public/app/core.js'), read('public/app/bootstrap.js')]);
+  for (const legacy of [
+    'WINDOW_RESIZE_SETTLE_MS', 'compactShellRaf', 'windowResizeSettleTimer', 'markWindowResizeActivity',
+    'evaluateCompactShellLayout', 'scheduleCompactShellEvaluation', 'initializeCompactShellLayout',
+    'applySidebarVisibility', 'isSidebarEffectivelyVisible'
+  ]) {
+    assert.doesNotMatch(core, new RegExp(`\\b${legacy}\\b`), `core must not retain ${legacy}`);
+    assert.doesNotMatch(bootstrap, new RegExp(`\\b${legacy}\\b`), `bootstrap must not retain ${legacy}`);
+  }
+  assert.match(core, /function isWindowResizeBurstActive\(\)/);
+  assert.match(core, /performance\.now\(\) < coreLayoutStatePort\.windowResizeActiveUntil/);
+  assert.match(core, /&& !isWindowResizeBurstActive\(\)/);
+  assert.doesNotMatch(core, /(^|\n)\s*sidebarVisible\s*=\s*applied\.sidebarVisible/m);
+  assert.match(core, /coreLayoutStatePort\.sidebarVisible = applied\.sidebarVisible/);
+});
+
+test('Atomic 6.4 main composition owns controller start/destroy with explicit dependencies and does not start 6.5', async () => {
+  const [main, core] = await Promise.all([read('src/main.js'), read('public/app/core.js')]);
+  assert.match(main, /createCompactShellController/);
+  assert.match(main, /createSidebarLayoutController/);
+  assert.match(main, /sidebarLayoutController\.start\(\)/);
+  assert.match(main, /compactShellController\.start\(\)/);
+  assert.match(main, /compactShellController\?\.destroy\(\)/);
+  assert.match(main, /sidebarLayoutController\?\.destroy\(\)/);
+  assert.match(main, /onGeometryChanged\(\) \{ scrollController\.notifyGeometryChanged\(\); \}/);
+  assert.match(main, /setTimer: layoutFrameHost\.setTimeout\.bind\(layoutFrameHost\)/);
+  assert.match(core, /function evaluateToolbarBoundary\(\)/, '6.5 Toolbar Boundary must remain outside Atomic 6.4');
+  assert.match(core, /function initializeToolbarBoundaryLayout\(\)/);
+});
+
+
+test('Atomic 6.4 preview reads sidebar visibility only from the LayoutState compatibility port', async () => {
+  const preview = await read('public/app/preview.js');
+  assert.match(preview, /previewLayoutStatePort\.sidebarVisible/);
+  assert.doesNotMatch(preview, /if\s*\(\s*sidebarVisible\b/);
+});

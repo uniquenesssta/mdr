@@ -36,8 +36,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
       applyCodeVisualEditingSetting({ persist: false, notify: false });
       await setupDocuments();
       updateStatusBar();
-      initializeCompactShellLayout?.();
-      applySidebarVisibility();
       setSidebarTab(activeSidebarTab);
       previewMode = 'preview';
       localStorage.setItem(PREVIEW_MODE_KEY, 'preview');

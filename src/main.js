@@ -23,8 +23,10 @@ import {
   mountClassicEditorUiCommandPort
 } from './features/editor/index.js';
 import {
+  createCompactShellController,
   createCompactSplitController,
   createLayoutState,
+  createSidebarLayoutController,
   createSidebarResizeController,
   createSplitPaneController,
   createSplitResizeController,
@@ -67,12 +69,18 @@ const platform = createPlatform({
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
 const layoutState = createLayoutState();
 const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
+let compactShellController = null;
+let sidebarLayoutController = null;
 let sidebarResizeController = null;
 let splitResizeController = null;
 let splitPaneController = null;
 let compactSplitController = null;
 let splitControllerPort = null;
 const destroyLayoutInteractionControllers = () => {
+  compactShellController?.destroy();
+  compactShellController = null;
+  sidebarLayoutController?.destroy();
+  sidebarLayoutController = null;
   compactSplitController?.destroy();
   compactSplitController = null;
   splitPaneController?.destroy();
@@ -546,6 +554,29 @@ async function loadAppModules() {
     const layoutFrameHost = document.defaultView;
     const requestLayoutFrame = callback => layoutFrameHost.requestAnimationFrame(callback);
     const cancelLayoutFrame = id => layoutFrameHost.cancelAnimationFrame(id);
+    sidebarLayoutController = createSidebarLayoutController({
+      state: layoutState,
+      sidebar: requireElement('#sidebar', 'Sidebar'),
+      resizer: requireElement('#sidebar-resizer', 'Sidebar resize handle'),
+      onGeometryChanged() { scrollController.notifyGeometryChanged(); }
+    });
+    compactShellController = createCompactShellController({
+      state: layoutState,
+      root: document.documentElement,
+      viewport: layoutFrameHost,
+      requestFrame: requestLayoutFrame,
+      cancelFrame: cancelLayoutFrame,
+      setTimer: layoutFrameHost.setTimeout.bind(layoutFrameHost),
+      clearTimer: layoutFrameHost.clearTimeout.bind(layoutFrameHost),
+      now: () => layoutFrameHost.performance.now(),
+      closeMenus() {
+        if (editorUiCommandPort.has('closeAppMenus')) editorUiCommandPort.invoke('closeAppMenus');
+      },
+      onGeometryChanged() { scrollController.notifyGeometryChanged(); },
+      record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); }
+    });
+    sidebarLayoutController.start();
+    compactShellController.start();
     const editorPaneElement = requireElement('.editor-pane', 'Editor pane');
     const previewPaneElement = requireElement('.preview-pane', 'Preview pane');
     const splitResizerElement = requireElement('#resizer', 'Split resize handle');

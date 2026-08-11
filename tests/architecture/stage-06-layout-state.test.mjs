@@ -55,15 +55,17 @@ test('all migrated classic callers use the scoped LayoutState port and no second
 });
 
 test('responsive layout logic gets every current JS breakpoint from responsive-breakpoints', async () => {
-  const [breakpoints, core, compactSplit] = await Promise.all([
+  const [breakpoints, core, compactShell, compactSplit] = await Promise.all([
     read('src/features/layout/shell/responsive-breakpoints.js'),
     read('public/app/core.js'),
+    read('src/features/layout/shell/compact-shell-controller.js'),
     read('src/features/layout/split/compact-split-controller.js')
   ]);
   for (const value of [860, 900, 720, 760, 768]) assert.match(breakpoints, new RegExp(`\\b${value}\\b`));
   assert.doesNotMatch(core, /COMPACT_SHELL_WINDOW_WIDTH|COMPACT_SHELL_EXIT_WIDTH|COMPACT_SPLIT_MAIN_WIDTH|COMPACT_SPLIT_EXIT_MAIN_WIDTH/);
   assert.doesNotMatch(core, /max-width:\s*768px/);
-  assert.match(core, /getCompactShellMaxWidth/);
+  assert.match(compactShell, /getCompactShellMaxWidth/);
+  assert.doesNotMatch(core, /getCompactShellMaxWidth/);
   assert.match(compactSplit, /getCompactSplitMaxWidth/);
   assert.doesNotMatch(core, /getCompactSplitMaxWidth/);
   assert.match(core, /matchesNarrowInteractive/);
@@ -102,7 +104,7 @@ test('Atomic 6.1 migration preserves source object members and persisted Setting
   assert.doesNotMatch(core, /coreSettingsStorePort\.set\(['"]coreLayoutStatePort\./);
 });
 
-test('Atomic 6.1 layout state remains single-authority after Atomic 6.3 removes the classic split region', async () => {
+test('Atomic 6.1 layout state remains single-authority after Atomic 6.4 removes classic compact-shell authority', async () => {
   const core = await read('public/app/core.js');
   for (const name of [
     'sidebarVisible', 'sidebarAutoCollapsed', 'sidebarWidth',

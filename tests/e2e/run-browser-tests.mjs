@@ -1173,6 +1173,24 @@ async function runAppSuite() {
     });
 
 
+    await test('compact shell keeps 860/900 hysteresis and clears resize burst state', async () => {
+      await browser.page.setViewport({ width: 840, height: 700 });
+      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactShellActive === true, { description: 'compact shell enter' });
+      let snapshot = await browser.page.evaluate(`(()=>{const p=document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort;return {active:p.compactShellActive,auto:p.sidebarAutoCollapsed,burst:p.windowResizeActiveUntil,cls:document.documentElement.classList.contains('is-compact-shell')}})()`);
+      assert.deepEqual({ active: snapshot.active, auto: snapshot.auto, cls: snapshot.cls }, { active: true, auto: true, cls: true });
+      await browser.page.setViewport({ width: 880, height: 700 });
+      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.windowResizeActiveUntil > performance.now(), { description: 'window resize burst gate' });
+      await new Promise(resolve => setTimeout(resolve, 80));
+      assert.equal(await browser.page.evaluate("document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.compactShellActive"), true);
+      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.windowResizeActiveUntil === 0, { description: 'window resize burst settled' });
+      snapshot = await browser.page.evaluate(`(()=>{const p=document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort;return {started:p.windowResizeBurstStartedAt,events:p.windowResizeBurstEvents}})()`);
+      assert.deepEqual(snapshot, { started: 0, events: 0 });
+      await browser.page.setViewport({ width: 920, height: 700 });
+      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactShellActive === false, { description: 'compact shell hysteresis exit' });
+      snapshot = await browser.page.evaluate(`(()=>{const p=document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort;return {active:p.compactShellActive,auto:p.sidebarAutoCollapsed,cls:document.documentElement.classList.contains('is-compact-shell')}})()`);
+      assert.deepEqual(snapshot, { active: false, auto: false, cls: false });
+    });
+
     await test('application shell has no structural overflow or clipped focus across required viewports', async () => {
       const report = [];
       try {
