@@ -41,7 +41,7 @@ test('Atomic 6.4 removes classic Compact Shell and sidebar projection authority 
   assert.match(core, /coreLayoutStatePort\.sidebarVisible = applied\.sidebarVisible/);
 });
 
-test('Atomic 6.4 main composition owns controller start/destroy with explicit dependencies and does not start 6.5', async () => {
+test('Atomic 6.4 main composition remains intact after the 6.5 Toolbar Boundary migration', async () => {
   const [main, core] = await Promise.all([read('src/main.js'), read('public/app/core.js')]);
   assert.match(main, /createCompactShellController/);
   assert.match(main, /createSidebarLayoutController/);
@@ -51,8 +51,8 @@ test('Atomic 6.4 main composition owns controller start/destroy with explicit de
   assert.match(main, /sidebarLayoutController\?\.destroy\(\)/);
   assert.match(main, /onGeometryChanged\(\) \{ scrollController\.notifyGeometryChanged\(\); \}/);
   assert.match(main, /setTimer: layoutFrameHost\.setTimeout\.bind\(layoutFrameHost\)/);
-  assert.match(core, /function evaluateToolbarBoundary\(\)/, '6.5 Toolbar Boundary must remain outside Atomic 6.4');
-  assert.match(core, /function initializeToolbarBoundaryLayout\(\)/);
+  assert.doesNotMatch(core, /function evaluateToolbarBoundary\(\)/);
+  assert.doesNotMatch(core, /function initializeToolbarBoundaryLayout\(\)/);
 });
 
 

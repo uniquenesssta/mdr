@@ -55,11 +55,12 @@ test('all migrated classic callers use the scoped LayoutState port and no second
 });
 
 test('responsive layout logic gets every current JS breakpoint from responsive-breakpoints', async () => {
-  const [breakpoints, core, compactShell, compactSplit] = await Promise.all([
+  const [breakpoints, core, compactShell, compactSplit, toolbarBoundary] = await Promise.all([
     read('src/features/layout/shell/responsive-breakpoints.js'),
     read('public/app/core.js'),
     read('src/features/layout/shell/compact-shell-controller.js'),
-    read('src/features/layout/split/compact-split-controller.js')
+    read('src/features/layout/split/compact-split-controller.js'),
+    read('src/features/layout/toolbar/toolbar-boundary-controller.js')
   ]);
   for (const value of [860, 900, 720, 760, 768]) assert.match(breakpoints, new RegExp(`\\b${value}\\b`));
   assert.doesNotMatch(core, /COMPACT_SHELL_WINDOW_WIDTH|COMPACT_SHELL_EXIT_WIDTH|COMPACT_SPLIT_MAIN_WIDTH|COMPACT_SPLIT_EXIT_MAIN_WIDTH/);
@@ -68,7 +69,8 @@ test('responsive layout logic gets every current JS breakpoint from responsive-b
   assert.doesNotMatch(core, /getCompactShellMaxWidth/);
   assert.match(compactSplit, /getCompactSplitMaxWidth/);
   assert.doesNotMatch(core, /getCompactSplitMaxWidth/);
-  assert.match(core, /matchesNarrowInteractive/);
+  assert.match(toolbarBoundary, /matchesNarrowInteractiveLayout/);
+  assert.doesNotMatch(core, /matchesNarrowInteractive/);
 });
 
 test('Atomic 6.3 advances the 6.1/6.2 handoff: split authority leaves core while Sidebar and Frozen DocumentModel stay intact', async () => {

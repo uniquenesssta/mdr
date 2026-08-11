@@ -30,6 +30,7 @@ import {
   createSidebarResizeController,
   createSplitPaneController,
   createSplitResizeController,
+  createToolbarBoundaryController,
   mountClassicLayoutStatePort,
   mountClassicSplitControllerPort
 } from './features/layout/index.js';
@@ -75,8 +76,11 @@ let sidebarResizeController = null;
 let splitResizeController = null;
 let splitPaneController = null;
 let compactSplitController = null;
+let toolbarBoundaryController = null;
 let splitControllerPort = null;
 const destroyLayoutInteractionControllers = () => {
+  toolbarBoundaryController?.destroy();
+  toolbarBoundaryController = null;
   compactShellController?.destroy();
   compactShellController = null;
   sidebarLayoutController?.destroy();
@@ -259,6 +263,7 @@ async function loadAppModules() {
 
   const featureViews = [];
   let unregisterEditorViewCommands = null;
+  let unregisterLayoutUiCommands = null;
   let documentEditorViewsDestroyed = false;
   const destroyDocumentEditorViews = () => {
     if (documentEditorViewsDestroyed) return;
@@ -277,6 +282,8 @@ async function loadAppModules() {
   const destroyDocumentFeatures = () => {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
+    unregisterLayoutUiCommands?.();
+    unregisterLayoutUiCommands = null;
     splitControllerPort?.destroy();
     splitControllerPort = null;
     destroyLayoutInteractionControllers();
@@ -577,6 +584,28 @@ async function loadAppModules() {
     });
     sidebarLayoutController.start();
     compactShellController.start();
+    const toolbarElement = requireElement('[data-ui-slot="toolbar"]', 'Editor toolbar');
+    toolbarBoundaryController = createToolbarBoundaryController({
+      toolbar: toolbarElement,
+      formatGroup: requireElement('[data-ui-slot="toolbar"] .format-group', 'Toolbar format group'),
+      actions: requireElement('[data-ui-slot="toolbar"] .editor-actions', 'Toolbar actions'),
+      matchMedia: typeof layoutFrameHost.matchMedia === 'function'
+        ? layoutFrameHost.matchMedia.bind(layoutFrameHost)
+        : null,
+      getStyle: element => layoutFrameHost.getComputedStyle(element),
+      createResizeObserver: typeof layoutFrameHost.ResizeObserver === 'function'
+        ? callback => new layoutFrameHost.ResizeObserver(callback)
+        : null,
+      resizeTarget: layoutFrameHost,
+      requestFrame: requestLayoutFrame,
+      cancelFrame: cancelLayoutFrame,
+      fontsReady: document.fonts?.ready ?? null,
+      record(operation, entry) { layoutFrameHost.markdownEditorPerf?.record?.(operation, entry); }
+    });
+    toolbarBoundaryController.start();
+    unregisterLayoutUiCommands = editorUiCommandPort.register({
+      refreshToolbarBoundary: () => toolbarBoundaryController?.refresh()
+    });
     const editorPaneElement = requireElement('.editor-pane', 'Editor pane');
     const previewPaneElement = requireElement('.preview-pane', 'Preview pane');
     const splitResizerElement = requireElement('#resizer', 'Split resize handle');

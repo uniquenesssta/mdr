@@ -1191,6 +1191,70 @@ async function runAppSuite() {
       assert.deepEqual(snapshot, { active: false, auto: false, cls: false });
     });
 
+    await test('application toolbar boundary wraps from measured content width without hiding tools', async () => {
+      await browser.page.setViewport({ width: 1800, height: 900 });
+      await browser.page.waitFor(() => window.innerWidth === 1800 && !document.documentElement.classList.contains('is-compact-shell'), { description: 'wide toolbar viewport' });
+      const before = await browser.page.evaluate(`(()=>{
+        const toolbar=document.querySelector('.editor-toolbar');
+        const format=toolbar?.querySelector('.format-group');
+        const actions=toolbar?.querySelector('.editor-actions');
+        if(!toolbar||!format||!actions)throw new Error('Toolbar Boundary fixture unavailable');
+        const style=getComputedStyle(toolbar);
+        const padding=(parseFloat(style.paddingLeft)||0)+(parseFloat(style.paddingRight)||0);
+        const gap=parseFloat(style.columnGap||style.gap)||0;
+        const required=Math.ceil(format.scrollWidth+actions.scrollWidth+gap);
+        const hidden=Array.from(toolbar.querySelectorAll('[data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')]);
+        return {wrapped:toolbar.classList.contains('toolbar-boundary-wrap'),width:toolbar.clientWidth,padding,required,hidden};
+      })()`);
+      assert.equal(before.wrapped, false, JSON.stringify(before));
+      const targetWidth = Math.max(260, Math.min(620, Math.floor(before.required + before.padding - 24)));
+      assert.ok(targetWidth < before.required + before.padding, JSON.stringify({before,targetWidth}));
+      try {
+        await browser.page.evaluate(`(()=>{
+          const target=${JSON.stringify(targetWidth)};
+          const toolbar=document.querySelector('.editor-toolbar');
+          toolbar.style.width=target+'px';
+          toolbar.style.maxWidth=target+'px';
+          toolbar.style.boxSizing='border-box';
+          toolbar.style.alignSelf='flex-start';
+        })()`);
+        await browser.page.waitFor(() => document.querySelector('.editor-toolbar')?.classList.contains('toolbar-boundary-wrap') === true, { description: 'content-width toolbar wrapping' });
+        const wrapped = await browser.page.evaluate(`(()=>{
+          const toolbar=document.querySelector('.editor-toolbar');
+          const format=toolbar.querySelector('.format-group');
+          const actions=toolbar.querySelector('.editor-actions');
+          const formatRect=format.getBoundingClientRect();
+          const actionsRect=actions.getBoundingClientRect();
+          return {
+            width:toolbar.clientWidth,
+            wrapped:toolbar.classList.contains('toolbar-boundary-wrap'),
+            twoRows:actionsRect.top>=formatRect.bottom-1,
+            hidden:Array.from(toolbar.querySelectorAll('[data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')])
+          };
+        })()`);
+        assert.equal(wrapped.wrapped, true, JSON.stringify(wrapped));
+        assert.ok(wrapped.width <= targetWidth + 1, JSON.stringify({wrapped,targetWidth}));
+        assert.equal(wrapped.twoRows, true, JSON.stringify(wrapped));
+        assert.deepEqual(wrapped.hidden, before.hidden, 'responsive boundary must not hide toolbar tools');
+      } finally {
+        await browser.page.evaluate(`(()=>{
+          const toolbar=document.querySelector('.editor-toolbar');
+          if(!toolbar)return;
+          toolbar.style.removeProperty('width');
+          toolbar.style.removeProperty('max-width');
+          toolbar.style.removeProperty('box-sizing');
+          toolbar.style.removeProperty('align-self');
+        })()`);
+      }
+      await browser.page.waitFor(() => document.querySelector('.editor-toolbar')?.classList.contains('toolbar-boundary-wrap') === false, { description: 'wide toolbar unwrap restoration' });
+      const restored = await browser.page.evaluate(`(()=>({
+        hidden:Array.from(document.querySelectorAll('.editor-toolbar [data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')])
+      }))()`);
+      assert.deepEqual(restored.hidden, before.hidden);
+      await browser.page.setViewport({ width: 1440, height: 1000 });
+      await browser.page.waitFor(() => window.innerWidth === 1440 && window.innerHeight === 1000, { description: 'restore toolbar test viewport' });
+    });
+
     await test('application shell has no structural overflow or clipped focus across required viewports', async () => {
       const report = [];
       try {

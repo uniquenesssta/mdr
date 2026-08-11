@@ -183,6 +183,10 @@
   box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent) 26%, transparent);
 }
 
+.l-toolbar-shell.toolbar-boundary-wrap {
+  flex-wrap: wrap;
+}
+
 .l-toolbar-shell.toolbar-boundary-wrap .format-group {
   width: 100%;
   flex: 1 1 100%;

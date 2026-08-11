@@ -11,6 +11,7 @@ export { createSplitPaneController, EDITOR_COLLAPSED_STORAGE_KEY, PREVIEW_COLLAP
 export { createSplitResizeController, SPLIT_RATIO_STORAGE_KEY, SPLIT_RATIO_MIN, SPLIT_RATIO_MAX } from './split/split-resize-controller.js';
 export { createCompactSplitController } from './split/compact-split-controller.js';
 export { createCompactShellController, WINDOW_RESIZE_SETTLE_MS } from './shell/compact-shell-controller.js';
+export { createToolbarBoundaryController } from './toolbar/toolbar-boundary-controller.js';
 export {
   RESPONSIVE_BREAKPOINTS,
   RESPONSIVE_MEDIA_QUERIES,

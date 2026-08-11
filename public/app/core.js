@@ -64,10 +64,6 @@ const editor = document.getElementById('editor');
     let exportDirectory = '';
     let toolbarVisible = true;
     let toolbarHiddenItems = new Set();
-    let toolbarBoundaryObserver = null;
-    let toolbarBoundaryRaf = 0;
-    let toolbarBoundaryInitialized = false;
-    let toolbarBoundaryWrapped = false;
     let contextOutlineId = '';
     let outlineCollapsed = {};
     let previewPerformanceMode = 'auto';
@@ -237,7 +233,7 @@ const editor = document.getElementById('editor');
       if (coreEditorUiCommandPort.has('refreshToolbarLayoutLabel')) coreEditorUiCommandPort.invoke('refreshToolbarLayoutLabel');
       updateStatusBar();
       updateCount();
-      scheduleToolbarBoundaryEvaluation?.();
+      if (coreEditorUiCommandPort.has('refreshToolbarBoundary')) coreEditorUiCommandPort.invoke('refreshToolbarBoundary');
     }
 
     coreI18nPort.subscribe(() => refreshClassicLocalizedState());
@@ -1318,80 +1314,6 @@ const editor = document.getElementById('editor');
       showToast('设置已保存');
     });
 
-    function evaluateToolbarBoundary() {
-      const toolbar = document.querySelector('.editor-toolbar');
-      const formatGroup = toolbar?.querySelector('.format-group');
-      const actions = toolbar?.querySelector('.editor-actions');
-      if (!toolbar || !formatGroup || !actions) return;
-
-      if (toolbar.classList.contains('hidden')) {
-        toolbar.classList.remove('toolbar-boundary-wrap');
-        toolbarBoundaryWrapped = false;
-        return;
-      }
-
-      const mediaWrap = Boolean(coreLayoutStatePort.matchesNarrowInteractive(window.matchMedia?.bind(window)));
-      if (!mediaWrap) {
-        // Measure the original single-row toolbar, then apply wrapping before the frame paints.
-        toolbar.classList.remove('toolbar-boundary-wrap');
-        void toolbar.offsetWidth;
-      }
-
-      const toolbarStyle = getComputedStyle(toolbar);
-      const horizontalPadding = (parseFloat(toolbarStyle.paddingLeft) || 0)
-        + (parseFloat(toolbarStyle.paddingRight) || 0);
-      const columnGap = parseFloat(toolbarStyle.columnGap || toolbarStyle.gap) || 0;
-      const availableWidth = Math.max(0, toolbar.clientWidth - horizontalPadding);
-      const requiredWidth = Math.ceil(formatGroup.scrollWidth + actions.scrollWidth + columnGap);
-      const shouldWrap = mediaWrap || requiredWidth > availableWidth;
-      const previousWrapped = toolbarBoundaryWrapped;
-
-      toolbar.classList.toggle('toolbar-boundary-wrap', shouldWrap);
-      toolbarBoundaryWrapped = shouldWrap;
-
-      if (previousWrapped !== shouldWrap) {
-        window.markdownEditorPerf?.record?.('layout.toolbar-boundary-change', {
-          category: 'ui.layout',
-          durationMs: 0,
-          details: {
-            wrapped: shouldWrap,
-            toolbarWidth: Math.round(toolbar.getBoundingClientRect().width),
-            availableWidth: Math.round(availableWidth),
-            requiredWidth: Math.round(requiredWidth)
-          }
-        });
-      }
-    }
-
-    function scheduleToolbarBoundaryEvaluation() {
-      if (toolbarBoundaryRaf) cancelAnimationFrame(toolbarBoundaryRaf);
-      toolbarBoundaryRaf = requestAnimationFrame(() => {
-        toolbarBoundaryRaf = 0;
-        evaluateToolbarBoundary();
-      });
-    }
-
-    function initializeToolbarBoundaryLayout() {
-      if (toolbarBoundaryInitialized) {
-        scheduleToolbarBoundaryEvaluation();
-        return;
-      }
-      toolbarBoundaryInitialized = true;
-      const toolbar = document.querySelector('.editor-toolbar');
-      const formatGroup = toolbar?.querySelector('.format-group');
-      const actions = toolbar?.querySelector('.editor-actions');
-      if (!toolbar || !formatGroup || !actions) return;
-
-      if (typeof ResizeObserver === 'function') {
-        toolbarBoundaryObserver = new ResizeObserver(scheduleToolbarBoundaryEvaluation);
-        toolbarBoundaryObserver.observe(toolbar);
-      } else {
-        window.addEventListener('resize', scheduleToolbarBoundaryEvaluation, { passive: true });
-      }
-      document.fonts?.ready?.then(scheduleToolbarBoundaryEvaluation).catch?.(() => {});
-      scheduleToolbarBoundaryEvaluation();
-    }
-
     function updateToolbarItemVisibility() {
       document.querySelectorAll('[data-toolbar-item]').forEach(item => {
         item.classList.toggle('toolbar-item-hidden', toolbarHiddenItems.has(item.dataset.toolbarItem));
@@ -1417,7 +1339,7 @@ const editor = document.getElementById('editor');
         }
         hasVisibleItem = true;
       }
-      scheduleToolbarBoundaryEvaluation();
+      if (coreEditorUiCommandPort.has('refreshToolbarBoundary')) coreEditorUiCommandPort.invoke('refreshToolbarBoundary');
     }
 
     function applyEditorPreferences() {
@@ -1432,7 +1354,6 @@ const editor = document.getElementById('editor');
         toolbar.classList.toggle('is-hidden', !toolbarVisible);
       }
       updateToolbarItemVisibility();
-      initializeToolbarBoundaryLayout();
       if (typeof updateInlineColorToolAvailability === 'function') updateInlineColorToolAvailability();
       scheduleEditorMetricsRebuild(80);
       invalidatePreviewAnchorMetrics();
