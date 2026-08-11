@@ -19,9 +19,7 @@ import {
   createMathDialogView,
   createMermaidDialogView,
   createTableDialogView,
-  mountClassicEditorCommandPort,
   mountClassicEditorControllerPort,
-  mountClassicEditorHistoryPort,
   mountClassicEditorUiCommandPort
 } from './features/editor/index.js';
 import {
@@ -127,8 +125,6 @@ async function loadAppModules() {
   let editorSelectionService;
   let editorFocusService;
   let editorControllerPort;
-  let editorHistoryPort;
-  let editorCommandPort;
   let editorUiCommandPort;
   try {
     editorController = createEditorController({
@@ -141,13 +137,9 @@ async function loadAppModules() {
     editorSelectionService = createEditorSelectionService({ adapter: virtualEditor });
     editorFocusService = createEditorFocusService({ adapter: virtualEditor });
     editorControllerPort = mountClassicEditorControllerPort(compatibilityPlatformHost, editorController);
-    editorHistoryPort = mountClassicEditorHistoryPort(compatibilityPlatformHost, editorHistoryAdapter);
-    editorCommandPort = mountClassicEditorCommandPort(compatibilityPlatformHost, editorCommandService);
     editorUiCommandPort = mountClassicEditorUiCommandPort(compatibilityPlatformHost);
   } catch (error) {
     editorUiCommandPort?.destroy?.();
-    editorCommandPort?.destroy?.();
-    editorHistoryPort?.destroy?.();
     editorControllerPort?.destroy?.();
     editorFocusService?.destroy?.();
     editorSelectionService?.destroy?.();
@@ -211,8 +203,6 @@ async function loadAppModules() {
     documentController.destroy();
     documentRepository.destroy();
     editorUiCommandPort.destroy();
-    editorCommandPort.destroy();
-    editorHistoryPort.destroy();
     editorControllerPort.destroy();
     editorFocusService.destroy();
     editorSelectionService.destroy();
@@ -252,8 +242,6 @@ async function loadAppModules() {
     documentController.destroy();
     documentRepository.destroy();
     editorUiCommandPort.destroy();
-    editorCommandPort.destroy();
-    editorHistoryPort.destroy();
     editorControllerPort.destroy();
     editorFocusService.destroy();
     editorSelectionService.destroy();
@@ -301,6 +289,11 @@ async function loadAppModules() {
     if (action === 'close-app-menus') {
       if (editorUiCommandPort.has('closeAppMenus')) return editorUiCommandPort.invoke('closeAppMenus');
       return;
+    }
+    if (action === 'clear') {
+      if (!window.confirm(t('confirmClear'))) return false;
+      editorController.setText('');
+      return true;
     }
     if (action === 'layout') return editorUiCommandPort.invoke('setLayoutMode', payload);
     if (action === 'page-fullscreen') return editorUiCommandPort.invoke('togglePageFullscreen');

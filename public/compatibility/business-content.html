@@ -39,9 +39,9 @@
           <div class="menu-item" data-editor-action="bold"><span>加粗</span><kbd>Ctrl+B</kbd></div>
           <div class="menu-item" data-editor-action="italic"><span>斜体</span><kbd>Ctrl+I</kbd></div>
           <div class="menu-item" data-editor-action="underline"><span>下划线</span><kbd>Ctrl+U</kbd></div>
-          <div class="menu-item" onclick="openFindModal(); closeAppMenus();"><span>查找 / 替换...</span><kbd>Ctrl+F</kbd></div>
+          <div class="menu-item" data-editor-action="open-find"><span>查找 / 替换...</span><kbd>Ctrl+F</kbd></div>
           <div class="menu-separator"></div>
-          <div class="menu-item" onclick="clearDoc(); closeAppMenus();"><span>清空当前文档</span></div>
+          <div class="menu-item" data-editor-action="clear"><span>清空当前文档</span></div>
         </div>
       </div>
       <div class="menu-dropdown" id="view-menu-dropdown">
@@ -72,7 +72,7 @@
           </div>
           <div class="menu-item" data-editor-action="open-link"><span>链接</span><kbd>Ctrl+K</kbd></div>
           <div class="menu-item" data-editor-action="open-image"><span>图片...</span><kbd>Ctrl+Shift+K</kbd></div>
-          <div class="menu-item" onclick="insertTable(3, 3); closeAppMenus();"><span>表格 3 × 3</span></div>
+          <div class="menu-item" data-editor-action="insert-table" data-rows="3" data-cols="3"><span>表格 3 × 3</span></div>
           <div class="menu-item menu-switch-item" id="table-visual-editing-toggle" role="menuitemcheckbox" aria-checked="false" onclick="toggleTableVisualEditing(event)">
             <span>表格深度可视化编辑</span>
             <span class="menu-inline-switch" aria-hidden="true"><span class="menu-inline-switch-track"><span class="menu-inline-switch-thumb"></span></span><span class="menu-inline-switch-state">关</span></span>
@@ -264,7 +264,6 @@
             <span id="word-count">0 字</span>
           </div>
           <div class="preview-content f-preview-surface" id="preview"></div>
-          <textarea id="preview-source" class="preview-source" data-i18n-placeholder="previewSourcePlaceholder" placeholder="在此编辑 Markdown 源码..." spellcheck="false" hidden></textarea>
 </template>
 
 <template data-compat-slot="status">

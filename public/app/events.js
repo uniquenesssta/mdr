@@ -20,11 +20,6 @@
       scheduleCountUpdate();
       autoSave();
     });
-    previewSource.addEventListener('input', () => {
-      // 保留隐藏 textarea 仅作旧环境兼容；虚拟编辑器不复制百万字全文。
-      if (!editor.virtualEditor) previewSource.value = editor.value;
-      else previewSource.value = '';
-    });
     eventsEditorUiCommandPort.register({
       selectionChanged: () => schedulePreviewFocusUpdate()
     });
@@ -331,7 +326,7 @@
 
     // 快捷键
     function isEditorShortcutTarget(target) {
-      return target === previewSource || target === editor || Boolean(editor?.contains?.(target));
+      return target === editor || Boolean(editor?.contains?.(target));
     }
 
     function isTextControlOutsideEditor(target) {
@@ -415,13 +410,9 @@
       if (key === 'tab' && isEditorShortcutTarget(e.target)) {
         e.preventDefault();
         e.stopPropagation();
-        const el = getActiveEditor();
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-        el.setRangeText('    ', start, end, 'end');
-        syncEditorFromActive();
-        updatePreview();
-        updateCount();
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        editor.setRangeText('    ', start, end, 'end');
       }
     }
     document.addEventListener('keydown', handleAppKeydown, true);

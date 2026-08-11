@@ -41,7 +41,6 @@ coreEditorUiCommandPort.register({
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
     const preview = document.getElementById('preview');
-    const previewSource = document.getElementById('preview-source');
     const filenameInput = document.getElementById('filename');
     const wordCount = document.getElementById('word-count');
     const saveHint = document.getElementById('save-hint');
@@ -259,8 +258,6 @@ const editor = document.getElementById('editor');
     let previewBodyResizeTimer = 0;
     let previewAnchorMetricsCache = null;
     let previewAnchorsCache = null;
-    let previewSourceScrollRaf = 0;
-    let pendingPreviewSourceSide = '';
     let activeOutlineRow = null;
     let activeOutlineHeadingId = '';
 

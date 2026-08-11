@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "stage-01-exact-migration-regression-baseline",
-  "sourceCommit": "af6adece0ebf610dcc2cde1e69f18e75675aacd4",
+  "sourceCommit": "502785607f6df255d09d480eaa0f7fee6ebf0440",
   "policy": {
     "exactEntriesOnly": true,
     "wildcardExemptions": false,
@@ -56,7 +56,7 @@
       "handler": "importFile(this)",
       "count": 1,
       "lines": [
-        516
+        515
       ]
     },
     {
@@ -65,7 +65,7 @@
       "handler": "renderExportImagePreview()",
       "count": 1,
       "lines": [
-        424
+        423
       ]
     },
     {
@@ -74,7 +74,7 @@
       "handler": "toggleProxyInput()",
       "count": 1,
       "lines": [
-        348
+        347
       ]
     },
     {
@@ -83,16 +83,7 @@
       "handler": "cancelActiveExport()",
       "count": 1,
       "lines": [
-        403
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "clearDoc(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        44
+        402
       ]
     },
     {
@@ -110,8 +101,8 @@
       "handler": "closeExportImageModal()",
       "count": 2,
       "lines": [
-        412,
-        434
+        411,
+        433
       ]
     },
     {
@@ -120,8 +111,8 @@
       "handler": "closeUrlModal()",
       "count": 2,
       "lines": [
-        342,
-        360
+        341,
+        359
       ]
     },
     {
@@ -130,7 +121,7 @@
       "handler": "collapseAllOutline(); closeContextMenus();",
       "count": 1,
       "lines": [
-        312
+        311
       ]
     },
     {
@@ -139,7 +130,7 @@
       "handler": "collapseContextOutlineNode(); closeContextMenus();",
       "count": 1,
       "lines": [
-        314
+        313
       ]
     },
     {
@@ -148,7 +139,7 @@
       "handler": "convertAndInsert()",
       "count": 1,
       "lines": [
-        361
+        360
       ]
     },
     {
@@ -157,7 +148,7 @@
       "handler": "downloadExportImage()",
       "count": 1,
       "lines": [
-        436
+        435
       ]
     },
     {
@@ -166,7 +157,7 @@
       "handler": "expandAllOutline(); closeContextMenus();",
       "count": 1,
       "lines": [
-        311
+        310
       ]
     },
     {
@@ -211,16 +202,7 @@
       "handler": "fetchUrl()",
       "count": 1,
       "lines": [
-        352
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "insertTable(3, 3); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        75
+        351
       ]
     },
     {
@@ -239,15 +221,6 @@
       "count": 1,
       "lines": [
         28
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "openFindModal(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        42
       ]
     },
     {
@@ -274,7 +247,7 @@
       "handler": "renderExportImagePreview()",
       "count": 1,
       "lines": [
-        435
+        434
       ]
     },
     {
@@ -301,7 +274,7 @@
       "handler": "selectImageRatio('1:1')",
       "count": 1,
       "lines": [
-        420
+        419
       ]
     },
     {
@@ -310,7 +283,7 @@
       "handler": "selectImageRatio('16:9')",
       "count": 1,
       "lines": [
-        421
+        420
       ]
     },
     {
@@ -319,7 +292,7 @@
       "handler": "selectImageRatio('3:4')",
       "count": 1,
       "lines": [
-        419
+        418
       ]
     },
     {
@@ -328,7 +301,7 @@
       "handler": "selectImageRatio('4:5')",
       "count": 1,
       "lines": [
-        418
+        417
       ]
     },
     {
@@ -337,7 +310,7 @@
       "handler": "selectImageRatio('9:16')",
       "count": 1,
       "lines": [
-        417
+        416
       ]
     },
     {
@@ -527,7 +500,7 @@
       "global": "window.markdownEditorDocumentStatistics",
       "count": 1,
       "lines": [
-        690
+        541
       ]
     },
     {
@@ -535,7 +508,7 @@
       "global": "window.markdownEditorRuntimeContext",
       "count": 1,
       "lines": [
-        841
+        676
       ]
     },
     {
@@ -543,7 +516,7 @@
       "global": "window.__markdownEditorInitPromise",
       "count": 1,
       "lines": [
-        461
+        423
       ]
     },
     {
@@ -551,7 +524,7 @@
       "global": "window.markdownEditorPreviewEnhancements",
       "count": 1,
       "lines": [
-        580
+        581
       ]
     },
     {
@@ -559,7 +532,7 @@
       "global": "window.markdownEditorVirtualPreview",
       "count": 1,
       "lines": [
-        550
+        551
       ]
     },
     {
@@ -575,7 +548,7 @@
       "global": "window.showToast",
       "count": 1,
       "lines": [
-        129
+        128
       ]
     },
     {
@@ -583,7 +556,7 @@
       "global": "window.createPreviewEnhancementQueue",
       "count": 1,
       "lines": [
-        68
+        157
       ]
     },
     {
@@ -591,7 +564,7 @@
       "global": "window.createPreviewWorkerClient",
       "count": 1,
       "lines": [
-        66
+        155
       ]
     },
     {
@@ -599,7 +572,7 @@
       "global": "window.createVirtualPreviewController",
       "count": 1,
       "lines": [
-        67
+        156
       ]
     },
     {
@@ -607,7 +580,7 @@
       "global": "window.handleNativeDroppedPath",
       "count": 1,
       "lines": [
-        76
+        262
       ]
     },
     {
@@ -615,7 +588,7 @@
       "global": "window.IncrementalPreviewModel",
       "count": 1,
       "lines": [
-        65
+        154
       ]
     },
     {
@@ -623,7 +596,7 @@
       "global": "window.markdownEditorCodeHighlighter",
       "count": 1,
       "lines": [
-        26
+        77
       ]
     },
     {
@@ -631,7 +604,7 @@
       "global": "window.markdownEditorDocumentModel",
       "count": 1,
       "lines": [
-        64
+        153
       ]
     },
     {
@@ -639,7 +612,7 @@
       "global": "window.markdownEditorDocumentStore",
       "count": 1,
       "lines": [
-        70
+        159
       ]
     },
     {
@@ -647,7 +620,7 @@
       "global": "window.markdownEditorFileTree",
       "count": 1,
       "lines": [
-        71
+        256
       ]
     },
     {
@@ -655,7 +628,7 @@
       "global": "window.markdownEditorMath",
       "count": 1,
       "lines": [
-        27
+        78
       ]
     },
     {
@@ -663,7 +636,7 @@
       "global": "window.markdownEditorPresentation",
       "count": 1,
       "lines": [
-        25
+        76
       ]
     },
     {
@@ -671,7 +644,7 @@
       "global": "window.markdownEditorScrollController",
       "count": 1,
       "lines": [
-        61
+        118
       ]
     },
     {
@@ -679,7 +652,7 @@
       "global": "window.markdownEditorScrollSync",
       "count": 1,
       "lines": [
-        62
+        119
       ]
     },
     {
@@ -687,7 +660,7 @@
       "global": "window.markdownEditorSelectionController",
       "count": 1,
       "lines": [
-        63
+        120
       ]
     },
     {
@@ -695,7 +668,7 @@
       "global": "window.markdownEditorSelectionMapping",
       "count": 1,
       "lines": [
-        23
+        75
       ]
     },
     {
@@ -703,7 +676,7 @@
       "global": "window.markdownEditorTaskScheduler",
       "count": 1,
       "lines": [
-        69
+        158
       ]
     },
     {
@@ -711,7 +684,7 @@
       "global": "window.openFolderTreeFile",
       "count": 1,
       "lines": [
-        75
+        261
       ]
     },
     {
@@ -735,7 +708,7 @@
       "global": "window.markdownEditorLinkPreview",
       "count": 1,
       "lines": [
-        295
+        325
       ]
     },
     {
@@ -743,7 +716,7 @@
       "global": "window.showToast",
       "count": 1,
       "lines": [
-        22
+        42
       ]
     },
     {
@@ -751,7 +724,7 @@
       "global": "window.markdownEditorPerf",
       "count": 1,
       "lines": [
-        623
+        633
       ]
     },
     {

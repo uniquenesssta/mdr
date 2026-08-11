@@ -1,4 +1,4 @@
-/* Responsibility: Markdown preview, source preview and virtualized preview presentation. */
+/* Responsibility: Markdown preview and virtualized preview presentation. */
 
 .preview-content {
       flex: 1;
@@ -29,25 +29,6 @@
       letter-spacing: -0.01em;
 }
 
-/* 预览区源码编辑 */
-.preview-source {
-      flex: 1;
-      width: 100%;
-      padding: 28px var(--space-5xl);
-      border: none;
-      outline: none;
-      resize: none;
-      display: none;
-      font-family: var(--font-family-mono);
-      font-size: var(--font-size-xl);
-      line-height: 1.7;
-      background: var(--color-surface-raised);
-      color: var(--color-editor-text);
-      caret-color: var(--color-accent);
-      tab-size: 4;
-      white-space: pre-wrap;
-      word-break: break-all;
-}
 
 .preview-content h1 { font-size: 2.25em; font-weight: 700; letter-spacing: -0.02em; }
 

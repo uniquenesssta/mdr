@@ -164,7 +164,7 @@ test('refresh continues through binding failures and reports them after remainin
   bindings.destroy();
 });
 
-test('production integration has one declarative translation owner and preserves the 114 existing bindings', async () => {
+test('production integration has one declarative translation owner and preserves the 113 current bindings', async () => {
   const { readFile } = await import('node:fs/promises');
   const [moduleEntry, core, bootstrap, index, markup, helpDialog] = await Promise.all([
     readFile('src/bootstrap/module-entry.js', 'utf8'),
@@ -190,7 +190,7 @@ test('production integration has one declarative translation owner and preserves
 
   const markupBindings = markup.match(/\sdata-i18n(?:-title|-placeholder|-alt)?="[^"]+"/g) || [];
   const helpBindings = helpDialog.match(/['"]data-i18n['"]\s*:\s*['"][^'"]+['"]/g) || [];
-  assert.equal(markupBindings.length, 112);
+  assert.equal(markupBindings.length, 111);
   assert.equal(helpBindings.length, 2);
-  assert.equal(markupBindings.length + helpBindings.length, 114);
+  assert.equal(markupBindings.length + helpBindings.length, 113);
 });

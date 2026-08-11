@@ -1,11 +1,7 @@
     const webClipperCompatibilityHost = document.getElementById('compatibility-business-ports');
     const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
-    const webClipperEditorControllerPort = webClipperCompatibilityHost?.markdownEditorEditorControllerPort;
-    const webClipperEditorCommandPort = webClipperCompatibilityHost?.markdownEditorEditorCommandPort;
     const webClipperEditorUiCommandPort = webClipperCompatibilityHost?.markdownEditorEditorUiCommandPort;
     const webClipperDocumentUiCommandPort = webClipperCompatibilityHost?.markdownEditorDocumentUiCommandPort;
-    if (!webClipperEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
-    if (!webClipperEditorCommandPort) throw new Error('Editor Command compatibility port is unavailable.');
     if (!webClipperEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
     if (!webClipperDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
     webClipperEditorUiCommandPort.register({
@@ -55,7 +51,7 @@
     function createFindSearchOptions(setStatus = () => {}) {
       const currentDoc = getCurrentDocument?.();
       const nativeStore = window.markdownEditorDocumentStore;
-      const documentLength = documentModel?.getTextLength?.() ?? getActiveEditor().textLength ?? 0;
+      const documentLength = documentModel.getTextLength();
       const useNativeSearch = Boolean(
         currentDoc?.nativeBacked
         && nativeStore?.search
@@ -341,21 +337,12 @@
           showToast(t('toastExtractFailed'));
           return;
         }
-        const currentLength = documentModel?.getTextLength?.() ?? editor.textLength;
-        const isEmpty = documentModel
-          ? documentModel.getNonWhitespaceCount() === 0
-          : !editor.value.trim();
+        const currentLength = documentModel.getTextLength();
+        const isEmpty = documentModel.getNonWhitespaceCount() === 0;
         if (isEmpty) {
-          if (documentModel) documentModel.replaceRange(markdown, 0, currentLength, 'end');
-          else webClipperEditorControllerPort.setText(markdown);
-        } else if (documentModel) {
-          documentModel.replaceRange('\n\n' + markdown, currentLength, currentLength, 'end');
+          documentModel.replaceRange(markdown, 0, currentLength, 'end');
         } else {
-          editor.value += '\n\n' + markdown;
-        }
-
-        if (previewMode === 'source') {
-          previewSource.value = editor.virtualEditor ? '' : editor.value;
+          documentModel.replaceRange('\n\n' + markdown, currentLength, currentLength, 'end');
         }
         updatePreview();
         updateCount();

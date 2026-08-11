@@ -1255,11 +1255,6 @@
       // 旧版右侧源码会和左侧编辑区重复，因此这里统一强制为预览模式。
       previewMode = 'preview';
       localStorage.setItem(PREVIEW_MODE_KEY, previewMode);
-      if (previewSource) {
-        // 右侧源码编辑器已停用。虚拟编辑器场景不再复制整篇正文到隐藏 textarea。
-        previewSource.value = editor.virtualEditor ? '' : editor.value;
-        previewSource.hidden = true;
-      }
       preview.hidden = false;
       if (!skipRefresh) {
         updatePreview();

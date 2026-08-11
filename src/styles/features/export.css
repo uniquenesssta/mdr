@@ -3,7 +3,7 @@
 /* 打印 / 导出 PDF */
 @media print {
       .l-menu-bar, .l-toolbar-shell, .l-status-bar, .l-sidebar, .f-editor-pane, .l-pane-resizer, .f-preview-pane .pane-header,
-      .preview-source, .modal-overlay, .toast, .icon-sprite {
+      .modal-overlay, .toast, .icon-sprite {
         display: none !important;
       }
       .f-preview-pane {

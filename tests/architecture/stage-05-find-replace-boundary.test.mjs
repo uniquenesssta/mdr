@@ -47,20 +47,18 @@ test('Atomic 5.11 places Find/Replace in the planned Editor command module and r
   assert.match(fixture, /src\/features\/editor\/commands\/find-replace-command\.js/);
 });
 
-test('Atomic 5.11 command authority remains intact after Atomic 5.12 transfers Find/Replace modal ownership to the Editor View', async () => {
-  const [clipper, port, view] = await Promise.all([
+test('Atomic 5.13 keeps Find/Replace command authority direct after deleting the classic command wrapper', async () => {
+  const [clipper, main, view] = await Promise.all([
     read('public/app/web-clipper.js'),
-    read('src/features/editor/compatibility/classic-editor-command-port.js'),
+    read('src/main.js'),
     read('src/features/editor/ui/find-replace-dialog-view.js')
   ]);
 
   assert.doesNotMatch(clipper, /function\s+openFindModal\s*\(/, 'Atomic 5.12 must remove the classic Find modal owner');
   assert.doesNotMatch(clipper, /function\s+closeFindModal\s*\(/);
-  assert.match(clipper, /createFindSearchOptions/, 'native large-document search must remain bridged without moving it into the View');
-  assert.match(clipper, /afterFindMatch/, 'legacy preview synchronization remains an explicit compatibility callback');
-  assert.doesNotMatch(clipper, /webClipperEditorCommandPort\.findNext\s*\(/);
-  assert.doesNotMatch(clipper, /webClipperEditorCommandPort\.replaceOne\s*\(/);
-  assert.doesNotMatch(clipper, /webClipperEditorCommandPort\.replaceAll\s*\(/);
+  assert.match(clipper, /createFindSearchOptions/, 'native large-document search remains a bounded cross-stage callback');
+  assert.match(clipper, /afterFindMatch/, 'preview synchronization remains a bounded cross-stage callback');
+  assert.doesNotMatch(clipper, /webClipperEditorCommandPort|markdownEditorEditorCommandPort/);
 
   assert.match(view, /commands\.findNext\s*\(/);
   assert.match(view, /commands\.replaceOne\s*\(/);
@@ -76,6 +74,7 @@ test('Atomic 5.11 command authority remains intact after Atomic 5.12 transfers F
   assert.doesNotMatch(clipper, /text\.indexOf\(query|text\.split\(query/, 'classic Find/Replace must not copy the document for fallback search or replace');
 
   for (const method of ['findNext', 'replaceOne', 'replaceAll']) {
-    assert.match(port, new RegExp(`['\"]${method}['\"]|\\b${method}\\b`), `classic Editor Command port must expose ${method}`);
+    assert.match(main, new RegExp(`editorCommandService\\.${method}\\(`), `composition must call the Editor Command Service directly for ${method}`);
   }
+  assert.doesNotMatch(main, /mountClassicEditorCommandPort/);
 });

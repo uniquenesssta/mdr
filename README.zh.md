@@ -40,7 +40,7 @@ public/
     bootstrap.js            # 初始化与状态恢复
     preview.js              # Markdown 预览渲染
     export.js               # 保存、导入与导出
-    editor-tools.js         # 编辑命令、图片、表格与 Mermaid
+    editor-tools.js         # 过渡：布局/全屏、可视编辑开关与 Mermaid 预览增强（后续阶段拆除）
     web-clipper.js          # 网页抓取与 HTML 转 Markdown
     events.js               # 全局事件、拖放与快捷键
 src-tauri/                  # Tauri / Rust 桌面后端

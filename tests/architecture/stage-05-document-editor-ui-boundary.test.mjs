@@ -105,7 +105,7 @@ test('Atomic 5.12 removes document-list rendering and migrated dialog event owne
   assert.match(toolbarView, /refreshLayoutLabel/, 'Toolbar View must own the layout label presentation');
 });
 
-test('Atomic 5.12 composes UI Views through feature public boundaries and does not start 5.13 textarea deletion', async () => {
+test('Atomic 5.12 UI Views remain composed after Atomic 5.13 removes textarea compatibility', async () => {
   const documentsIndex = await read('src/features/documents/index.js');
   const editorIndex = await read('src/features/editor/index.js');
   const main = await read('src/main.js');
@@ -123,5 +123,5 @@ test('Atomic 5.12 composes UI Views through feature public boundaries and does n
     assert.match(editorIndex, new RegExp(name));
     assert.match(main, new RegExp(name));
   }
-  assert.match(html, /id="preview-source"/, 'Atomic 5.13 owns hidden textarea deletion and has not started');
+  assert.doesNotMatch(html, /id="preview-source"/, 'Atomic 5.13 must delete the hidden textarea compatibility path');
 });

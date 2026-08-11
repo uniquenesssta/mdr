@@ -1,9 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  createEditorHistoryAdapter,
-  mountClassicEditorHistoryPort
-} from '../../../src/features/editor/index.js';
+import { createEditorHistoryAdapter } from '../../../src/features/editor/index.js';
 
 function createNeutralAdapter(overrides = {}) {
   const calls = [];
@@ -55,23 +52,11 @@ test('Editor History Adapter destroy is idempotent and terminal without destroyi
   assert.deepEqual(calls, []);
 });
 
-test('classic History port is scoped, stateless, independently destroyable and forwards only history operations', () => {
-  const { adapter, calls } = createNeutralAdapter();
-  const historyAdapter = createEditorHistoryAdapter({ adapter });
-  const host = {};
-  const port = mountClassicEditorHistoryPort(host, historyAdapter);
-
-  assert.equal(host.markdownEditorEditorHistoryPort, port);
-  assert.equal(port.undo(), true);
-  assert.equal(port.redo(), false);
-  assert.equal(port.isolate(), undefined);
-  assert.deepEqual(calls, ['undo', 'redo', 'isolate']);
-  assert.throws(() => mountClassicEditorHistoryPort(host, historyAdapter), /already mounted/i);
-
-  port.destroy();
-  port.destroy();
-  assert.equal(host.markdownEditorEditorHistoryPort, undefined);
-  assert.throws(() => port.undo(), /destroyed/i);
-  assert.equal(historyAdapter.undo(), true, 'port destruction must not destroy the application adapter');
-  historyAdapter.destroy();
+test('Atomic 5.13 removes the classic History port instead of retaining a compatibility facade', async () => {
+  const editorFeature = await import('../../../src/features/editor/index.js');
+  assert.equal(Object.hasOwn(editorFeature, 'mountClassicEditorHistoryPort'), false);
+  await assert.rejects(
+    import('../../../src/features/editor/compatibility/classic-editor-history-port.js'),
+    error => error?.code === 'ERR_MODULE_NOT_FOUND'
+  );
 });

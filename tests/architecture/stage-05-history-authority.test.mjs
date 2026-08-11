@@ -29,7 +29,7 @@ test('Atomic 5.9 removes the classic full-text history authority from every rema
   }
 });
 
-test('Atomic 5.9 routes classic undo/redo/isolation only through the scoped History Adapter port', async () => {
+test('Atomic 5.13 removes the temporary History Adapter wrapper and keeps one direct history authority', async () => {
   const [editorTools, main, editorIndex, historySource, fixture] = await Promise.all([
     read('public/app/editor-tools.js'),
     read('src/main.js'),
@@ -38,19 +38,14 @@ test('Atomic 5.9 routes classic undo/redo/isolation only through the scoped Hist
     read('tests/architecture/fixtures/production-modules.json')
   ]);
 
-  assert.match(editorTools, /markdownEditorEditorHistoryPort/);
-  assert.match(editorTools, /editorToolsHistoryPort\.isolate\(\)/);
-  assert.match(editorTools, /editorToolsHistoryPort\.undo\(\)/);
-  assert.match(editorTools, /editorToolsHistoryPort\.redo\(\)/);
-  assert.doesNotMatch(editorTools, /virtualEditor\?\.(?:undo|redo|isolateHistory|resetHistory|consumeDocumentLoadHistoryReset)/);
-
+  assert.doesNotMatch(editorTools, /markdownEditorEditorHistoryPort|editorToolsHistoryPort|function\s+(?:pushHistory|undo|redo)\s*\(/);
   assert.match(main, /createEditorHistoryAdapter/);
-  assert.match(main, /mountClassicEditorHistoryPort/);
+  assert.doesNotMatch(main, /mountClassicEditorHistoryPort/);
   assert.match(editorIndex, /createEditorHistoryAdapter/);
-  assert.match(editorIndex, /mountClassicEditorHistoryPort/);
+  assert.doesNotMatch(editorIndex, /mountClassicEditorHistoryPort|classic-editor-history-port/);
   assert.doesNotMatch(historySource, /@codemirror\//, 'application history adapter must depend only on the neutral adapter contract');
   assert.match(fixture, /src\/features\/editor\/application\/editor-history-adapter\.js/);
-  assert.match(fixture, /src\/features\/editor\/compatibility\/classic-editor-history-port\.js/);
+  assert.doesNotMatch(fixture, /classic-editor-history-port\.js/);
 });
 
 test('document replacement resets CodeMirror state directly without a second reset-history compatibility path', async () => {

@@ -1,7 +1,7 @@
 /**
- * Responsibility: Expose the Stage 5 Editor feature through one public boundary covering neutral infrastructure, application services, commands, Views and scoped compatibility bridges.
+ * Responsibility: Expose the Stage 5 Editor feature through one public boundary covering neutral infrastructure, application services, commands, Views and only cross-stage scoped compatibility bridges.
  * Imports: Public facade only; consumers do not import Editor internals directly.
- * Exports: Atomic 5.1–5.12 Editor factories and scoped compatibility mounts.
+ * Exports: Atomic 5.1–5.13 Editor factories plus the scoped controller/UI bridges still required by later-stage classic callers.
  * State/side effects: None; import-only public facade.
  * Lifecycle: Pure module; exported factories own explicit instance lifecycles where applicable.
  */
@@ -11,8 +11,6 @@ export { createEditorCommandService } from './application/editor-command-service
 export { createEditorSelectionService } from './application/editor-selection-service.js';
 export { createEditorFocusService } from './application/editor-focus-service.js';
 export { mountClassicEditorControllerPort } from './compatibility/classic-editor-controller-port.js';
-export { mountClassicEditorHistoryPort } from './compatibility/classic-editor-history-port.js';
-export { mountClassicEditorCommandPort } from './compatibility/classic-editor-command-port.js';
 export { mountClassicEditorUiCommandPort } from './compatibility/classic-editor-ui-command-port.js';
 export { createEditorPaneView } from './ui/editor-pane-view.js';
 export { createEditorToolbarView } from './ui/editor-toolbar-view.js';

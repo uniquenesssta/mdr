@@ -49,7 +49,7 @@ test('Atomic 5.10 places each basic formatting responsibility in the planned Edi
   }
 });
 
-test('Atomic 5.10 routes classic basic-format callers through one scoped command port and removes migrated transforms from editor-tools', async () => {
+test('Atomic 5.13 removes the temporary basic-command wrapper while keeping the Editor Command Service authoritative', async () => {
   const [editorTools, main, editorIndex, fixture] = await Promise.all([
     read('public/app/editor-tools.js'),
     read('src/main.js'),
@@ -57,20 +57,17 @@ test('Atomic 5.10 routes classic basic-format callers through one scoped command
     read('tests/architecture/fixtures/production-modules.json')
   ]);
 
-  assert.match(editorTools, /markdownEditorEditorCommandPort/);
-  for (const method of ['bold', 'italic', 'strikethrough', 'heading', 'quote', 'unorderedList', 'orderedList', 'taskList', 'inlineCode', 'code']) {
-    assert.match(editorTools, new RegExp(`editorToolsCommandPort\\.${method}\\(`), `classic caller must route ${method} through the scoped command port`);
+  assert.doesNotMatch(editorTools, /markdownEditorEditorCommandPort|editorToolsCommandPort/);
+  for (const legacy of ['formatBold', 'formatItalic', 'formatStrikethrough', 'insertHeading', 'formatQuote', 'formatUnorderedList', 'formatOrderedList', 'formatTaskList', 'insertCodeRow', 'insertCode']) {
+    assert.doesNotMatch(editorTools, new RegExp(`function\\s+${legacy}\\s*\\(`), `migrated wrapper must be deleted: ${legacy}`);
   }
-  assert.doesNotMatch(editorTools, /function\s+prefixLines\s*\(/, 'legacy list transform must be deleted after migration');
-  assert.doesNotMatch(editorTools, /selected\.includes\('\\n'\)\s*\?\s*'```/, 'legacy code transform must be deleted after migration');
-  assert.doesNotMatch(editorTools, /currentLine\.replace\(\/\^#\{0,6\}/, 'legacy heading transform must be deleted after migration');
-
+  assert.doesNotMatch(editorTools, /function\s+prefixLines\s*\(/);
   assert.match(main, /createEditorCommandService/);
-  assert.match(main, /mountClassicEditorCommandPort/);
+  assert.doesNotMatch(main, /mountClassicEditorCommandPort/);
   assert.match(editorIndex, /createEditorCommandService/);
-  assert.match(editorIndex, /mountClassicEditorCommandPort/);
+  assert.doesNotMatch(editorIndex, /mountClassicEditorCommandPort|classic-editor-command-port/);
   assert.match(fixture, /src\/features\/editor\/application\/editor-command-service\.js/);
-  assert.match(fixture, /src\/features\/editor\/compatibility\/classic-editor-command-port\.js/);
+  assert.doesNotMatch(fixture, /classic-editor-command-port\.js/);
   for (const file of COMMAND_FILES) {
     assert.match(fixture, new RegExp(file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }

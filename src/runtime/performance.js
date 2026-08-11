@@ -254,7 +254,7 @@ function describeElement(element) {
     return cleanString(`hybrid-${type}${position ? `:${position}` : ''}${zone ? `:${zone}` : ''}`, 140);
   }
   if (element.closest('[data-hybrid-inline-math]')) return 'hybrid-inline-math';
-  const editorRoot = element.closest('#editor, #preview, #preview-source');
+  const editorRoot = element.closest('#editor, #preview');
   if (editorRoot) return `${editorRoot.tagName.toLowerCase()}#${editorRoot.id}`;
   const id = element.id ? `#${element.id}` : '';
   const role = element.getAttribute('role');

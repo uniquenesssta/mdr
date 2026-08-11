@@ -1,9 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  createEditorCommandService,
-  mountClassicEditorCommandPort
-} from '../../../src/features/editor/index.js';
+import { createEditorCommandService } from '../../../src/features/editor/index.js';
 
 function createEditorAdapter(initialText = '', initialSelection = { start: 0, end: 0 }) {
   let text = String(initialText);
@@ -189,27 +186,11 @@ test('Editor Command Service validates its Atomic 5.12 neutral adapter, propagat
   assert.throws(() => healthy.bold(), /destroyed/i);
 });
 
-test('classic Editor Command port is scoped, stateless and forwards the exact command surface through Atomic 5.12', async () => {
-  const editor = createEditorAdapter('abc abc', { start: 0, end: 3 });
-  const service = createEditorCommandService({ adapter: editor.adapter });
-  const host = {};
-  const port = mountClassicEditorCommandPort(host, service);
-
-  assert.equal(host.markdownEditorEditorCommandPort, port);
-  assert.deepEqual(Object.keys(port).sort(), [
-    'bold', 'clearColor', 'code', 'destroy', 'findNext', 'heading', 'inlineCode', 'insertBlockMath', 'insertImage',
-    'insertInlineMath', 'insertLink', 'insertMermaid', 'insertTable', 'italic', 'orderedList', 'quote', 'replaceAll',
-    'replaceOne', 'setColor', 'strikethrough', 'subscript', 'superscript', 'taskList', 'underline', 'unorderedList'
-  ]);
-  port.bold();
-  assert.equal(editor.text, '**abc** abc');
-  assert.deepEqual(await port.findNext('abc'), { from: 2, to: 5 });
-  assert.throws(() => mountClassicEditorCommandPort(host, service), /already mounted/i);
-
-  port.destroy();
-  port.destroy();
-  assert.equal(host.markdownEditorEditorCommandPort, undefined);
-  assert.throws(() => port.italic(), /destroyed/i);
-
-  service.destroy();
+test('Atomic 5.13 removes the classic Editor Command port instead of retaining a compatibility facade', async () => {
+  const editorFeature = await import('../../../src/features/editor/index.js');
+  assert.equal(Object.hasOwn(editorFeature, 'mountClassicEditorCommandPort'), false);
+  await assert.rejects(
+    import('../../../src/features/editor/compatibility/classic-editor-command-port.js'),
+    error => error?.code === 'ERR_MODULE_NOT_FOUND'
+  );
 });
