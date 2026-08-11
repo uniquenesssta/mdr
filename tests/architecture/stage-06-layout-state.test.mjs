@@ -67,16 +67,18 @@ test('responsive layout logic gets every current JS breakpoint from responsive-b
   assert.match(core, /matchesNarrowInteractive/);
 });
 
-test('Atomic 6.1 does not move future resize-controller internals or modify Frozen DocumentModel', async () => {
-  const [core, model] = await Promise.all([
+test('Stage 6 keeps future split-resize internals in core after Atomic 6.2 moves sidebar resize and preserves Frozen DocumentModel', async () => {
+  const [core, sidebarResize, model] = await Promise.all([
     read('public/app/core.js'),
+    read('src/features/layout/sidebar/sidebar-resize-controller.js'),
     read('src/document/document-model.js')
   ]);
   assert.match(core, /let resizeRect = null;/);
-  assert.match(core, /let sidebarResizeRect = null;/);
   assert.match(core, /let resizeStartedAt = 0;/);
-  assert.match(core, /function startSidebarResize/);
   assert.match(core, /function startResize/);
+  assert.doesNotMatch(core, /let sidebarResizeRect = null;|function startSidebarResize/);
+  assert.match(sidebarResize, /setPointerCapture/);
+  assert.match(sidebarResize, /releasePointerCapture/);
   assert.equal(model.length > 0, true);
   await access('src/features/layout/state/layout-state.js');
 });

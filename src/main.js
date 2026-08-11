@@ -22,7 +22,7 @@ import {
   mountClassicEditorControllerPort,
   mountClassicEditorUiCommandPort
 } from './features/editor/index.js';
-import { createLayoutState, mountClassicLayoutStatePort } from './features/layout/index.js';
+import { createLayoutState, createSidebarResizeController, mountClassicLayoutStatePort } from './features/layout/index.js';
 import {
   createDocumentModel,
   IncrementalPreviewModel,
@@ -59,7 +59,10 @@ const platform = createPlatform({
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
 const layoutState = createLayoutState();
 const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
+let sidebarResizeController = null;
 const destroyLayoutStateFeature = () => {
+  sidebarResizeController?.destroy();
+  sidebarResizeController = null;
   layoutStatePort.destroy();
   layoutState.destroy();
 };
@@ -123,8 +126,9 @@ async function loadAppModules() {
   const virtualEditor = createVirtualEditor(editorHost);
   const previewHost = document.getElementById('preview');
   if (!previewHost) throw new Error('Preview host is missing');
-  window.markdownEditorScrollController = createScrollSyncController(editorHost, previewHost);
-  window.markdownEditorScrollSync = window.markdownEditorScrollController.getPublicApi();
+  const scrollController = createScrollSyncController(editorHost, previewHost);
+  window.markdownEditorScrollController = scrollController;
+  window.markdownEditorScrollSync = scrollController.getPublicApi();
   window.markdownEditorSelectionController = createSelectionSyncController(editorHost, previewHost);
   const documentModel = createDocumentModel(editorHost);
   let editorController;
@@ -242,6 +246,8 @@ async function loadAppModules() {
   const destroyDocumentFeatures = () => {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
+    sidebarResizeController?.destroy();
+    sidebarResizeController = null;
     destroyDocumentEditorViews();
     documentUiCommandPort.destroy();
     recentFilesPort.destroy();
@@ -513,6 +519,20 @@ async function loadAppModules() {
   };
 
   try {
+    sidebarResizeController = createSidebarResizeController({
+      state: layoutState,
+      workspace: requireElement('.workspace', 'Workspace'),
+      resizer: requireElement('#sidebar-resizer', 'Sidebar resize handle'),
+      root: document.documentElement,
+      body: document.body,
+      storage: window.localStorage,
+      viewport: window,
+      matchMedia: typeof document.defaultView?.matchMedia === 'function'
+        ? document.defaultView.matchMedia.bind(document.defaultView)
+        : null,
+      onGeometryChanged() { scrollController.notifyGeometryChanged(); }
+    });
+    sidebarResizeController.start();
     for (const src of APP_MODULES) {
       await loadClassicScript(src);
     }

@@ -21,7 +21,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
         if (!isNaN(parsed)) bootstrapLayoutStatePort.editorRatio = parsed;
       }
       bootstrapLayoutStatePort.sidebarVisible = restoredSettings.sidebarVisible;
-      bootstrapLayoutStatePort.sidebarWidth = normalizeSidebarWidth(localStorage.getItem(SIDEBAR_WIDTH_KEY) || 248);
       loadRecentFiles();
       renderRecentFilesMenu();
       activeSidebarTab = localStorage.getItem(SIDEBAR_TAB_KEY) || 'docs';
@@ -42,7 +41,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
       applyCodeVisualEditingSetting({ persist: false, notify: false });
       await setupDocuments();
       updateStatusBar();
-      applySidebarWidth();
       initializeCompactShellLayout?.();
       applySidebarVisibility();
       setSidebarTab(activeSidebarTab);

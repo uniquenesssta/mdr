@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.1 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.2 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  layout-state:
-    name: Verify Stage 6 Through Layout State
+  sidebar-resize:
+    name: Verify Stage 6 Through Sidebar Resize
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -123,6 +123,13 @@ jobs:
           tests/unit/layout/layout-state.test.mjs
           tests/unit/layout/classic-layout-state-port.test.mjs
           tests/architecture/stage-06-layout-state.test.mjs
+      - name: Verify Atomic Task 6.2 Sidebar Resize
+        run: >-
+          node --test
+          tests/unit/layout/sidebar-resize-controller.test.mjs
+          tests/architecture/stage-06-sidebar-resize.test.mjs
+      - name: Verify modified browser runner parses
+        run: node --check tests/e2e/run-browser-tests.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
       - name: Run architecture hard gate
@@ -139,10 +146,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.1 evidence
+      - name: Upload Atomic Task 6.2 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-layout-state-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-sidebar-resize-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30

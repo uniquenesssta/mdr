@@ -1360,6 +1360,71 @@ async function runAppSuite() {
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'source range close' });
     });
 
+    await test('application sidebar resize captures pointer, projects width and persists the final width', async () => {
+      await browser.page.setViewport({ width: 1440, height: 1000 });
+      await browser.page.waitFor(() => window.innerWidth === 1440 && window.innerHeight === 1000, {
+        description: 'wide viewport for sidebar resize'
+      });
+      await browser.page.evaluate(`(()=>{
+        const sidebar=document.querySelector('.l-sidebar');
+        if(sidebar?.classList.contains('is-hidden')) toggleSidebar();
+      })()`);
+      await browser.page.waitFor(() => {
+        const handle=document.getElementById('sidebar-resizer');
+        return Boolean(handle && !handle.classList.contains('is-hidden') && handle.getBoundingClientRect().height > 0);
+      }, { description: 'visible sidebar resize handle' });
+      const before = await browser.page.evaluate(`(()=>{
+        const handle=document.getElementById('sidebar-resizer');
+        const rect=handle.getBoundingClientRect();
+        const width=Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width'));
+        return {
+          x:rect.left+Math.max(1,rect.width/2),
+          y:rect.top+Math.max(1,rect.height/2),
+          width,
+          stored:localStorage.getItem('md_editor_sidebar_width')
+        };
+      })()`);
+      assert.ok(Number.isFinite(before.width) && before.width >= 180 && before.width <= 520, JSON.stringify(before));
+      const delta = before.width >= 320 ? -72 : 72;
+      await browser.page.drag(
+        { x: before.x, y: before.y },
+        { x: before.x + delta, y: before.y },
+        { steps: 12 }
+      );
+      await browser.page.evaluate('window.__atomic62SidebarBaselineWidth=' + JSON.stringify(before.width));
+      await browser.page.waitFor(() => {
+        const handle=document.getElementById('sidebar-resizer');
+        const css=Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width'));
+        const stored=Number.parseFloat(localStorage.getItem('md_editor_sidebar_width'));
+        const aria=Number.parseFloat(handle?.getAttribute('aria-valuenow')||'');
+        return Number.isFinite(css) && Number.isFinite(stored) && Number.isFinite(aria)
+          && css===stored && css===aria && Math.abs(css-Number(window.__atomic62SidebarBaselineWidth))>=20
+          && !document.body.classList.contains('sidebar-resizing')
+          && !document.body.classList.contains('is-sidebar-resizing');
+      }, { description: 'persisted sidebar width after pointer drag' });
+      const after = await browser.page.evaluate(`(()=>{
+        const handle=document.getElementById('sidebar-resizer');
+        return {
+          width:Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width')),
+          stored:Number.parseFloat(localStorage.getItem('md_editor_sidebar_width')),
+          aria:Number.parseFloat(handle?.getAttribute('aria-valuenow')||''),
+          dragging:Boolean(handle?.classList.contains('is-dragging')),
+          bodyResizing:document.body.classList.contains('is-sidebar-resizing')
+        };
+      })()`);
+      assert.equal(after.width, after.stored);
+      assert.equal(after.width, after.aria);
+      assert.equal(after.dragging, false);
+      assert.equal(after.bodyResizing, false);
+      assert.ok(after.width >= 180 && after.width <= 520, JSON.stringify(after));
+      await browser.page.evaluate('delete window.__atomic62SidebarBaselineWidth');
+      await browser.page.evaluate(`(()=>{
+        const value=${JSON.stringify(before.stored)};
+        if(value===null) localStorage.removeItem('md_editor_sidebar_width');
+        else localStorage.setItem('md_editor_sidebar_width', value);
+      })()`);
+    });
+
     await test('application pointer drag maps to exact editor characters', async () => {
       await loadAppFixture(browser.page);
       await setAppLayout(browser.page, 'edit');

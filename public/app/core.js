@@ -53,7 +53,6 @@ const editor = document.getElementById('editor');
     const PREVIEW_COLLAPSED_KEY = 'md_editor_preview_collapsed';
     const PREVIEW_MODE_KEY = 'md_editor_preview_mode';
     const SIDEBAR_TAB_KEY = 'md_editor_sidebar_tab';
-    const SIDEBAR_WIDTH_KEY = 'md_editor_sidebar_width';
     const OUTLINE_COLLAPSED_KEY = 'md_editor_outline_collapsed';
     const DOCUMENT_INDEX_KEY_PREFIX = 'md_editor_document_index_v1:';
     const WINDOW_RESIZE_SETTLE_MS = 220;
@@ -174,23 +173,6 @@ const editor = document.getElementById('editor');
         clearRecentFiles();
       });
       menu.appendChild(clear);
-    }
-
-    function normalizeSidebarWidth(value) {
-      const numeric = Number(value);
-      const workspaceWidth = document.querySelector('.workspace')?.clientWidth || window.innerWidth || 1200;
-      const maxWidth = Math.max(240, Math.min(520, workspaceWidth - 360));
-      if (!Number.isFinite(numeric)) return 248;
-      return Math.round(Math.max(180, Math.min(maxWidth, numeric)));
-    }
-
-    function applySidebarWidth() {
-      coreLayoutStatePort.sidebarWidth = normalizeSidebarWidth(coreLayoutStatePort.sidebarWidth);
-      document.documentElement.style.setProperty('--sidebar-width', coreLayoutStatePort.sidebarWidth + 'px');
-      const resizer = document.getElementById('sidebar-resizer');
-      resizer?.setAttribute('aria-valuemin', '180');
-      resizer?.setAttribute('aria-valuemax', '520');
-      resizer?.setAttribute('aria-valuenow', String(coreLayoutStatePort.sidebarWidth));
     }
 
     function normalizePreviewPerformanceMode(value) {
@@ -1560,7 +1542,6 @@ const editor = document.getElementById('editor');
     let resizeStartedAt = 0;
     let resizeMoveEvents = 0;
     let resizeStartRatio = 0.5;
-    let sidebarResizeRect = null;
     let splitApplyRaf = 0;
     let compactSplitObserver = null;
     let compactSplitRaf = 0;
@@ -1774,45 +1755,6 @@ const editor = document.getElementById('editor');
       splitApplyRaf = requestAnimationFrame(commit);
     }
 
-    function getPointerClientX(event) {
-      return event.touches ? event.touches[0]?.clientX : event.clientX;
-    }
-
-    function startSidebarResize(event) {
-      if (!isSidebarEffectivelyVisible() || coreLayoutStatePort.compactShellActive || coreLayoutStatePort.matchesNarrowInteractive(window.matchMedia?.bind(window))) return;
-      coreLayoutStatePort.isSidebarResizing = true;
-      sidebarResizeRect = document.querySelector('.workspace')?.getBoundingClientRect() || null;
-      document.body.classList.add('resizing', 'sidebar-resizing', 'is-resizing', 'is-sidebar-resizing');
-      document.getElementById('sidebar-resizer')?.classList.add('dragging', 'is-dragging');
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-      event.preventDefault();
-    }
-
-    function onSidebarResizeMove(event) {
-      if (!coreLayoutStatePort.isSidebarResizing || !sidebarResizeRect) return;
-      const clientX = getPointerClientX(event);
-      if (!Number.isFinite(clientX)) return;
-      coreLayoutStatePort.sidebarWidth = normalizeSidebarWidth(clientX - sidebarResizeRect.left);
-      applySidebarWidth();
-      scheduleEditorMetricsRebuild(180);
-      invalidatePreviewAnchorMetrics();
-      event.preventDefault();
-    }
-
-    function stopSidebarResize() {
-      if (!coreLayoutStatePort.isSidebarResizing) return;
-      coreLayoutStatePort.isSidebarResizing = false;
-      sidebarResizeRect = null;
-      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(coreLayoutStatePort.sidebarWidth));
-      document.body.classList.remove('resizing', 'sidebar-resizing', 'is-resizing', 'is-sidebar-resizing');
-      document.getElementById('sidebar-resizer')?.classList.remove('dragging', 'is-dragging');
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      scheduleEditorMetricsRebuild(40);
-      invalidatePreviewAnchorMetrics();
-    }
-
     function startResize(e) {
       coreLayoutStatePort.isResizing = true;
       resizeRect = document.querySelector('.main').getBoundingClientRect();
@@ -1864,35 +1806,12 @@ const editor = document.getElementById('editor');
       applySplit();
     }
 
-    const sidebarResizer = document.getElementById('sidebar-resizer');
-    sidebarResizer?.addEventListener('mousedown', startSidebarResize);
-    sidebarResizer?.addEventListener('touchstart', startSidebarResize, { passive: false });
-
     const resizer = document.getElementById('resizer');
     resizer.addEventListener('mousedown', startResize);
     resizer.addEventListener('touchstart', startResize, { passive: false });
-    window.addEventListener('mousemove', event => {
-      onSidebarResizeMove(event);
-      onResizeMove(event);
-    });
-    window.addEventListener('touchmove', event => {
-      onSidebarResizeMove(event);
-      onResizeMove(event);
-    }, { passive: false });
-    window.addEventListener('mouseup', () => {
-      stopSidebarResize();
-      stopResize();
-    });
-    window.addEventListener('touchend', () => {
-      stopSidebarResize();
-      stopResize();
-    });
-    window.addEventListener('resize', () => {
-      const normalized = normalizeSidebarWidth(coreLayoutStatePort.sidebarWidth);
-      if (normalized !== coreLayoutStatePort.sidebarWidth) {
-        coreLayoutStatePort.sidebarWidth = normalized;
-        applySidebarWidth();
-      }
-    });
+    window.addEventListener('mousemove', onResizeMove);
+    window.addEventListener('touchmove', onResizeMove, { passive: false });
+    window.addEventListener('mouseup', stopResize);
+    window.addEventListener('touchend', stopResize);
 
     // 平滑双向滚动、预览定位与选择同步
