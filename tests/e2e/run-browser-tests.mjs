@@ -1294,6 +1294,45 @@ async function runAppSuite() {
       assert.deepEqual(snapshot, { state:false, app:false, body:false, persisted:'false' });
     });
 
+    await test('application sidebar tabs switch one mount region and coordinate child lifecycles', async () => {
+      await loadAppFixture(browser.page);
+      const result = await browser.page.evaluate(`(async()=>{
+        const host=document.getElementById('compatibility-business-ports');
+        const port=host?.markdownEditorSidebarControllerPort;
+        const tree=window.markdownEditorFileTree;
+        if(!port||!tree)throw new Error('Sidebar 6.7 runtime unavailable');
+        const originalActivate=tree.activate;
+        const originalDeactivate=tree.deactivate;
+        const calls=[];
+        tree.activate=(...args)=>{calls.push('files+');return originalActivate.apply(tree,args);};
+        tree.deactivate=(...args)=>{calls.push('files-');return originalDeactivate.apply(tree,args);};
+        const panelState=()=>['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-panel')?.classList.contains('active'));
+        const tabState=()=>['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-tab')?.classList.contains('active'));
+        const docsBefore=document.getElementById('document-list')?.childElementCount??-1;
+        document.getElementById('sidebar-files-tab').click();
+        await Promise.resolve();
+        const files={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab')};
+        document.getElementById('sidebar-outline-tab').click();
+        await Promise.resolve();
+        const outline={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab'),items:document.getElementById('outline-list')?.children.length??0};
+        document.getElementById('sidebar-docs-tab').click();
+        await Promise.resolve();
+        const docs={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab'),count:document.getElementById('document-list')?.childElementCount??-1};
+        tree.activate=originalActivate;
+        tree.deactivate=originalDeactivate;
+        return {files,outline,docs,docsBefore,calls,legacyGlobal:typeof window.setSidebarTab};
+      })()`);
+      assert.deepEqual(result.files, {active:'files',panels:['files'],tabs:['files'],stored:'files'});
+      assert.equal(result.outline.active, 'outline');
+      assert.deepEqual(result.outline.panels, ['outline']);
+      assert.deepEqual(result.outline.tabs, ['outline']);
+      assert.equal(result.outline.stored, 'outline');
+      assert.ok(result.outline.items > 0, 'outline activation should request the existing Outline renderer');
+      assert.deepEqual(result.docs, {active:'docs',panels:['docs'],tabs:['docs'],stored:'docs',count:result.docsBefore});
+      assert.deepEqual(result.calls, ['files+','files-']);
+      assert.equal(result.legacyGlobal, 'undefined');
+    });
+
     await test('application shell has no structural overflow or clipped focus across required viewports', async () => {
       const report = [];
       try {

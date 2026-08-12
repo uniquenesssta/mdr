@@ -18,7 +18,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
       bootstrapLayoutStatePort.sidebarVisible = restoredSettings.sidebarVisible;
       loadRecentFiles();
       renderRecentFilesMenu();
-      activeSidebarTab = localStorage.getItem(SIDEBAR_TAB_KEY) || 'docs';
       autoSaveEnabled = restoredSettings.autoSaveEnabled;
       autoSaveDelay = normalizeAutoSaveDelay(restoredSettings.autoSaveDelay);
       editorFontSize = restoredSettings.editorFontSize;
@@ -36,7 +35,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
       applyCodeVisualEditingSetting({ persist: false, notify: false });
       await setupDocuments();
       updateStatusBar();
-      setSidebarTab(activeSidebarTab);
       previewMode = 'preview';
       localStorage.setItem(PREVIEW_MODE_KEY, 'preview');
 

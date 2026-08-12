@@ -51,6 +51,7 @@ import { createSelectionSyncController } from './sync/selection-controller.js';
 import { createMarkdownPresentationApi } from './rendering/presentation-api.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import { createFolderFileTreeController } from './sidebar/folder-file-tree.js';
+import { createSidebarState, createSidebarTabController, mountClassicSidebarControllerPort } from './features/sidebar/index.js';
 import { configureHybridImageSourcePlatform } from './editor/hybrid/image-source.js';
 import {
   createDocumentContextMenuView,
@@ -272,6 +273,9 @@ async function loadAppModules() {
   const featureViews = [];
   let unregisterEditorViewCommands = null;
   let unregisterLayoutUiCommands = null;
+  let sidebarState = null;
+  let sidebarTabController = null;
+  let sidebarControllerPort = null;
   let documentEditorViewsDestroyed = false;
   const destroyDocumentEditorViews = () => {
     if (documentEditorViewsDestroyed) return;
@@ -292,6 +296,12 @@ async function loadAppModules() {
     documentFeaturesDestroyed = true;
     unregisterLayoutUiCommands?.();
     unregisterLayoutUiCommands = null;
+    sidebarControllerPort?.destroy();
+    sidebarControllerPort = null;
+    sidebarTabController?.destroy();
+    sidebarTabController = null;
+    sidebarState?.destroy();
+    sidebarState = null;
     splitControllerPort?.destroy();
     splitControllerPort = null;
     destroyLayoutInteractionControllers();
@@ -314,7 +324,7 @@ async function loadAppModules() {
   };
   window.addEventListener('pagehide', destroyDocumentFeatures, { once: true });
 
-  window.markdownEditorFileTree = createFolderFileTreeController({
+  const folderFileTreeController = createFolderFileTreeController({
     files: platform.files,
     available: platform.capabilities.desktop.fileSystem,
     getCurrentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {},
@@ -324,6 +334,25 @@ async function loadAppModules() {
       return false;
     }
   });
+  window.markdownEditorFileTree = folderFileTreeController;
+  sidebarState = createSidebarState();
+  sidebarTabController = createSidebarTabController({
+    state: sidebarState,
+    storage: platform.storage,
+    tabs: {
+      docs: requireElement('#sidebar-docs-tab', 'Documents sidebar tab'),
+      files: requireElement('#sidebar-files-tab', 'Files sidebar tab'),
+      outline: requireElement('#sidebar-outline-tab', 'Outline sidebar tab')
+    },
+    panels: {
+      docs: requireElement('#sidebar-docs-panel', 'Documents sidebar panel'),
+      files: requireElement('#sidebar-files-panel', 'Files sidebar panel'),
+      outline: requireElement('#sidebar-outline-panel', 'Outline sidebar panel')
+    },
+    reportError(message, error) { console.warn(message, error); }
+  });
+  sidebarTabController.registerLifecycle('files', folderFileTreeController);
+  sidebarControllerPort = mountClassicSidebarControllerPort(compatibilityPlatformHost, sidebarTabController);
 
   const t = (...args) => {
     const i18n = compatibilityPlatformHost?.markdownEditorI18nPort;
@@ -725,6 +754,7 @@ async function loadAppModules() {
     for (const src of APP_MODULES) {
       await loadClassicScript(src);
     }
+    sidebarTabController.start();
     mountDocumentEditorViews();
     if (window.__markdownEditorInitPromise) await window.__markdownEditorInitPromise;
   } catch (error) {

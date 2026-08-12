@@ -9,6 +9,7 @@ const coreRecentFilesPort = coreCompatibilityHost?.markdownEditorRecentFilesPort
 const coreDocumentUiCommandPort = coreCompatibilityHost?.markdownEditorDocumentUiCommandPort;
 const coreEditorUiCommandPort = coreCompatibilityHost?.markdownEditorEditorUiCommandPort;
 const coreLayoutStatePort = coreCompatibilityHost?.markdownEditorLayoutStatePort;
+const coreSidebarControllerPort = coreCompatibilityHost?.markdownEditorSidebarControllerPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -18,6 +19,7 @@ if (!coreRecentFilesPort) throw new Error('Recent files compatibility port is un
 if (!coreDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
 if (!coreEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
 if (!coreLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
+if (!coreSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
   closeDocument: documentId => closeDocument(documentId),
@@ -48,14 +50,12 @@ const editor = document.getElementById('editor');
     const toast = document.getElementById('toast');
 
     const PREVIEW_MODE_KEY = 'md_editor_preview_mode';
-    const SIDEBAR_TAB_KEY = 'md_editor_sidebar_tab';
     const OUTLINE_COLLAPSED_KEY = 'md_editor_outline_collapsed';
     const DOCUMENT_INDEX_KEY_PREFIX = 'md_editor_document_index_v1:';
 
     let previewMode = 'preview';
     const getSessionDocuments = () => coreDocumentSessionPort.records;
     const getActiveDocumentId = () => coreDocumentSessionPort.activeId;
-    let activeSidebarTab = 'docs';
     let autoSaveEnabled = true;
     let autoSaveDelay = 500;
     let editorFontSize = 16;
@@ -72,6 +72,12 @@ const editor = document.getElementById('editor');
     let cachedHeadings = [];
     let cachedHeadingSource = null;
     let outlineDirty = true;
+    coreSidebarControllerPort.registerLifecycle('outline', {
+      activate() {
+        if (outlineDirty || !cachedHeadings.length) renderOutline();
+      },
+      deactivate() {}
+    });
     let cachedDocumentStatistics = null;
     let selectionSyncLock = false;
     let saveStatusState = 'saved';
@@ -308,7 +314,7 @@ const editor = document.getElementById('editor');
             nonWhitespaceCount: Number(manifest.nonWhitespaceCount) || 0,
             nativeIndex: true
           });
-          if (activeSidebarTab === 'outline') renderOutline();
+          if (coreSidebarControllerPort.isActive('outline')) renderOutline();
         }
         const statusLeft = document.getElementById('status-left');
         if (statusLeft) statusLeft.textContent = '索引已恢复，正在读取正文…';
@@ -587,7 +593,7 @@ const editor = document.getElementById('editor');
           nonWhitespaceCount: Number(loaded.nonWhitespaceCount) || 0,
           nativeIndex: true
         });
-        if (activeSidebarTab === 'outline') renderOutline();
+        if (coreSidebarControllerPort.isActive('outline')) renderOutline();
       } else if (!restoredCachedIndex) {
         updateDocumentStatistics(null);
       }
@@ -714,12 +720,12 @@ const editor = document.getElementById('editor');
       const existing = getSessionDocuments().find(item => normalizeWorkspaceFilePath(item?.filePath) === normalizedPath);
       if (existing) {
         if (existing.id !== getActiveDocumentId()) await openDocument(existing.id);
-        setSidebarTab('files');
+        void coreSidebarControllerPort.select('files');
         return true;
       }
       if (typeof handleNativeDroppedPath !== 'function') return false;
       const opened = await handleNativeDroppedPath(path);
-      if (opened) setSidebarTab('files');
+      if (opened) void coreSidebarControllerPort.select('files');
       return opened;
     }
 
@@ -752,7 +758,7 @@ const editor = document.getElementById('editor');
         });
         if (!await applyDocumentLifecycleUi(result)) return;
         if (!coreDocumentControllerPort.isCurrentGeneration(result.generation)) return;
-        setSidebarTab('docs');
+        void coreSidebarControllerPort.select('docs');
         showToast('已新建文档');
         editor.focus();
       } catch (error) {
@@ -771,7 +777,7 @@ const editor = document.getElementById('editor');
         if (!result.duplicated) return;
         if (!await applyDocumentLifecycleUi(result)) return;
         if (!coreDocumentControllerPort.isCurrentGeneration(result.generation)) return;
-        setSidebarTab('docs');
+        void coreSidebarControllerPort.select('docs');
         showToast('已复制文档');
       } catch (error) {
         if (coreDocumentControllerPort.isStaleError(error)) return;
@@ -959,20 +965,6 @@ const editor = document.getElementById('editor');
       } else {
         showToast(doc.title || '');
       }
-    }
-
-    function setSidebarTab(tab) {
-      activeSidebarTab = ['docs', 'files', 'outline'].includes(tab) ? tab : 'docs';
-      localStorage.setItem(SIDEBAR_TAB_KEY, activeSidebarTab);
-      document.getElementById('sidebar-docs-tab')?.classList.toggle('active', activeSidebarTab === 'docs');
-      document.getElementById('sidebar-files-tab')?.classList.toggle('active', activeSidebarTab === 'files');
-      document.getElementById('sidebar-outline-tab')?.classList.toggle('active', activeSidebarTab === 'outline');
-      document.getElementById('sidebar-docs-panel')?.classList.toggle('active', activeSidebarTab === 'docs');
-      document.getElementById('sidebar-files-panel')?.classList.toggle('active', activeSidebarTab === 'files');
-      document.getElementById('sidebar-outline-panel')?.classList.toggle('active', activeSidebarTab === 'outline');
-      if (activeSidebarTab === 'files') window.markdownEditorFileTree?.activate?.();
-      else window.markdownEditorFileTree?.deactivate?.();
-      if (activeSidebarTab === 'outline' && (outlineDirty || !cachedHeadings.length)) renderOutline();
     }
 
     let activeLayoutTransition = null;

@@ -45,11 +45,12 @@ test('folder file tree keeps supported files, sorts directories first, and norma
   assert.equal(tree.nodes.some(node => node.name === 'ignore.png'), false);
 });
 
-test('folder file tree is wired through the sidebar, runtime bridge, core state, and Rust command', async () => {
-  const [index, main, core, desktopPlatform, rustMain, rustLocal] = await Promise.all([
+test('folder file tree is wired through the Sidebar controller, runtime bridge, core state, and Rust command', async () => {
+  const [index, main, core, sidebarState, desktopPlatform, rustMain, rustLocal] = await Promise.all([
     readFile(new URL('../public/compatibility/business-content.html', import.meta.url), 'utf8'),
     readFile(new URL('../src/main.js', import.meta.url), 'utf8'),
     readFile(new URL('../public/app/core.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/features/sidebar/state/sidebar-state.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8'),
     readFile(new URL('../src-tauri/src/main.rs', import.meta.url), 'utf8'),
     readFile(new URL('../src-tauri/src/local_file.rs', import.meta.url), 'utf8')
@@ -57,7 +58,8 @@ test('folder file tree is wired through the sidebar, runtime bridge, core state,
   assert.match(index, /id="sidebar-files-tab"/);
   assert.match(index, /id="folder-file-tree"/);
   assert.match(main, /createFolderFileTreeController/);
-  assert.match(core, /\['docs', 'files', 'outline'\]/);
+  assert.match(main, /registerLifecycle\('files', folderFileTreeController\)/);
+  assert.match(sidebarState, /\['docs', 'files', 'outline'\]/);
   assert.match(core, /openFolderTreeFile/);
   assert.match(desktopPlatform, /listTextTree/);
   assert.match(desktopPlatform, /fileSystemClient\.listTextFileTree/);

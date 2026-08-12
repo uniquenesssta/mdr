@@ -343,33 +343,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "setSidebarTab('docs')",
-      "count": 1,
-      "lines": [
-        227
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setSidebarTab('files')",
-      "count": 1,
-      "lines": [
-        228
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setSidebarTab('outline')",
-      "count": 1,
-      "lines": [
-        229
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "toggleAppMenu('app-view-menu')",
       "count": 1,
       "lines": [

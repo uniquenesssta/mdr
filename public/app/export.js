@@ -4,10 +4,12 @@
     const exportDocumentSessionPort = exportCompatibilityHost?.markdownEditorDocumentSessionPort;
     const exportDocumentControllerPort = exportCompatibilityHost?.markdownEditorDocumentControllerPort;
     const exportDocumentUiCommandPort = exportCompatibilityHost?.markdownEditorDocumentUiCommandPort;
+    const exportSidebarControllerPort = exportCompatibilityHost?.markdownEditorSidebarControllerPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
     if (!exportDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
+    if (!exportSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
     exportDocumentUiCommandPort.register({ importFile: () => triggerImportFile() });
     let saveTimer;
     function autoSave() {
@@ -857,7 +859,7 @@ ${'</scr' + 'ipt>'}
         if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
         showSaveHint();
         if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
-        setSidebarTab('docs');
+        void exportSidebarControllerPort.select('docs');
         window.markdownEditorPerf?.record?.('document.imported', {
           category: 'document.operation',
           status: 'ok',
