@@ -118,24 +118,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "collapseAllOutline(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        311
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "collapseContextOutlineNode(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        313
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "convertAndInsert()",
       "count": 1,
       "lines": [
@@ -149,15 +131,6 @@
       "count": 1,
       "lines": [
         435
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "expandAllOutline(); closeContextMenus();",
-      "count": 1,
-      "lines": [
-        310
       ]
     },
     {
@@ -446,15 +419,6 @@
       "count": 1,
       "lines": [
         11
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "oncontextmenu",
-      "handler": "openOutlineContextMenu(event)",
-      "count": 1,
-      "lines": [
-        244
       ]
     }
   ],

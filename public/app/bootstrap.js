@@ -29,7 +29,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
       previewPerformanceMode = restoredSettings.previewPerformanceMode;
       tableVisualEditingEnabled = restoredSettings.tableVisualEditing;
       codeVisualEditingEnabled = restoredSettings.codeVisualEditing;
-      parseOutlineCollapsed();
       applyEditorPreferences();
       applyTableVisualEditingSetting({ persist: false, notify: false });
       applyCodeVisualEditingSetting({ persist: false, notify: false });

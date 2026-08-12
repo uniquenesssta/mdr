@@ -1333,6 +1333,96 @@ async function runAppSuite() {
       assert.equal(result.legacyGlobal, 'undefined');
     });
 
+    await test('application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source', async () => {
+      await loadAppFixture(browser.page);
+      const source = '# Root\nroot body\n## Child\nchild body\n### Grand\ngrand body\n# Next\nnext body\n';
+      await browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)},{layout:'both',focusText:'child body'})`);
+      await browser.page.evaluate(`document.getElementById('sidebar-outline-tab').click()`);
+      await browser.page.waitFor(() => {
+        const host=document.getElementById('compatibility-business-ports');
+        return host?.markdownEditorOutlineControllerPort?.snapshot?.headings?.length===4
+          && document.querySelectorAll('#outline-list .outline-node').length===4;
+      }, { description: 'Atomic 6.8 indexed Outline tree' });
+
+      const initial = await browser.page.evaluate(`(()=>{
+        const host=document.getElementById('compatibility-business-ports');
+        const port=host?.markdownEditorOutlineControllerPort;
+        const serialize=node=>({
+          id:node.dataset.outlineId||'',
+          level:Number(node.dataset.outlineLevel||0),
+          text:node.querySelector(':scope > .outline-row .outline-link')?.textContent?.trim()||'',
+          children:Array.from(node.querySelectorAll(':scope > .outline-children > .outline-node')).map(serialize)
+        });
+        const root=document.querySelector('#outline-list > .outline-tree');
+        const editor=document.getElementById('editor');
+        return {
+          tree:Array.from(root?.children||[]).map(serialize),
+          activeText:document.querySelector('#outline-list .outline-row.active .outline-link')?.textContent?.trim()||'',
+          activeLine:editor?.virtualEditor?.getLineNumberAtPosition?.(editor.selectionStart)||0,
+          headings:port?.snapshot?.headings?.map(item=>({id:item.id,level:item.level,text:item.text,line:item.line}))||[],
+          legacy:{
+            renderOutline:typeof window.renderOutline,
+            getMarkdownHeadings:typeof window.getMarkdownHeadings,
+            jumpToLine:typeof window.jumpToLine
+          }
+        };
+      })()`);
+      assert.deepEqual(initial.tree.map(node=>({text:node.text,level:node.level,children:node.children.map(child=>({text:child.text,level:child.level,children:child.children.map(grand=>({text:grand.text,level:grand.level}))}))})), [
+        {text:'Root',level:1,children:[{text:'Child',level:2,children:[{text:'Grand',level:3}]}]},
+        {text:'Next',level:1,children:[]}
+      ]);
+      assert.deepEqual(initial.headings.map(({level,text,line})=>({level,text,line})), [
+        {level:1,text:'Root',line:1},
+        {level:2,text:'Child',line:3},
+        {level:3,text:'Grand',line:5},
+        {level:1,text:'Next',line:7}
+      ]);
+      assert.equal(initial.activeText, 'Child');
+      assert.equal(initial.activeLine, 4);
+      assert.deepEqual(initial.legacy, {renderOutline:'undefined',getMarkdownHeadings:'undefined',jumpToLine:'undefined'});
+
+      const rootId = initial.headings[0].id;
+      await browser.page.evaluate(`(()=>{
+        const id=${JSON.stringify(rootId)};
+        const node=Array.from(document.querySelectorAll('#outline-list .outline-node')).find(item=>item.dataset.outlineId===id);
+        const toggle=node?.querySelector(':scope > .outline-row .outline-toggle');
+        if(!toggle)throw new Error('Atomic 6.8 Root Outline toggle unavailable');
+        toggle.click();
+      })()`);
+      await browser.page.waitFor(() => {
+        const persisted=JSON.parse(localStorage.getItem('md_editor_outline_collapsed')||'{}');
+        const node=document.querySelector('#outline-list > .outline-tree > .outline-node');
+        return Object.values(persisted).some(value=>value===true)
+          && node?.classList.contains('is-collapsed')
+          && node.querySelector(':scope > .outline-children')?.classList.contains('collapsed');
+      }, { description: 'Atomic 6.8 Outline collapse persisted' });
+
+      await browser.page.evaluate(`document.getElementById('sidebar-docs-tab').click()`);
+      await browser.page.evaluate(`document.getElementById('sidebar-outline-tab').click()`);
+      await browser.page.waitFor(() => document.querySelector('#outline-list > .outline-tree > .outline-node')?.classList.contains('is-collapsed')===true, {
+        description: 'Atomic 6.8 Outline collapse restored after lifecycle resume'
+      });
+
+      await browser.page.evaluate(`(()=>{
+        const link=Array.from(document.querySelectorAll('#outline-list .outline-link')).find(item=>item.textContent?.trim()==='Next');
+        if(!link)throw new Error('Atomic 6.8 Next Outline link unavailable');
+        link.click();
+      })()`);
+      await browser.page.waitFor(() => {
+        const editor=document.getElementById('editor');
+        return editor?.virtualEditor?.getLineNumberAtPosition?.(editor.selectionStart)===7
+          && document.querySelector('#outline-list .outline-row.active .outline-link')?.textContent?.trim()==='Next';
+      }, { description: 'Atomic 6.8 Outline heading navigation' });
+      const final = await browser.page.evaluate(`(()=>({
+        line:document.getElementById('editor')?.virtualEditor?.getLineNumberAtPosition?.(document.getElementById('editor')?.selectionStart)||0,
+        active:document.querySelector('#outline-list .outline-row.active .outline-link')?.textContent?.trim()||'',
+        persisted:JSON.parse(localStorage.getItem('md_editor_outline_collapsed')||'{}')
+      }))()`);
+      assert.equal(final.line, 7);
+      assert.equal(final.active, 'Next');
+      assert.equal(final.persisted[rootId], true);
+    });
+
     await test('application shell has no structural overflow or clipped focus across required viewports', async () => {
       const report = [];
       try {

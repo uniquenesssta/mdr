@@ -10,6 +10,7 @@ const coreDocumentUiCommandPort = coreCompatibilityHost?.markdownEditorDocumentU
 const coreEditorUiCommandPort = coreCompatibilityHost?.markdownEditorEditorUiCommandPort;
 const coreLayoutStatePort = coreCompatibilityHost?.markdownEditorLayoutStatePort;
 const coreSidebarControllerPort = coreCompatibilityHost?.markdownEditorSidebarControllerPort;
+const coreOutlineControllerPort = coreCompatibilityHost?.markdownEditorOutlineControllerPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -20,6 +21,7 @@ if (!coreDocumentUiCommandPort) throw new Error('Document UI command compatibili
 if (!coreEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
 if (!coreLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 if (!coreSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
+if (!coreOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
   closeDocument: documentId => closeDocument(documentId),
@@ -39,7 +41,9 @@ coreDocumentUiCommandPort.register({
 });
 coreEditorUiCommandPort.register({
   notify: message => showToast(message),
-  closeAppMenus: () => closeAppMenus()
+  closeAppMenus: () => closeAppMenus(),
+  showContextMenu: (menu, event) => showContextMenu(menu, event),
+  closeContextMenus: () => closeContextMenus()
 });
 const editor = document.getElementById('editor');
     const documentModel = window.markdownEditorDocumentModel;
@@ -50,7 +54,6 @@ const editor = document.getElementById('editor');
     const toast = document.getElementById('toast');
 
     const PREVIEW_MODE_KEY = 'md_editor_preview_mode';
-    const OUTLINE_COLLAPSED_KEY = 'md_editor_outline_collapsed';
     const DOCUMENT_INDEX_KEY_PREFIX = 'md_editor_document_index_v1:';
 
     let previewMode = 'preview';
@@ -64,20 +67,9 @@ const editor = document.getElementById('editor');
     let exportDirectory = '';
     let toolbarVisible = true;
     let toolbarHiddenItems = new Set();
-    let contextOutlineId = '';
-    let outlineCollapsed = {};
     let previewPerformanceMode = 'auto';
     let tableVisualEditingEnabled = false;
     let codeVisualEditingEnabled = false;
-    let cachedHeadings = [];
-    let cachedHeadingSource = null;
-    let outlineDirty = true;
-    coreSidebarControllerPort.registerLifecycle('outline', {
-      activate() {
-        if (outlineDirty || !cachedHeadings.length) renderOutline();
-      },
-      deactivate() {}
-    });
     let cachedDocumentStatistics = null;
     let selectionSyncLock = false;
     let saveStatusState = 'saved';
@@ -305,7 +297,12 @@ const editor = document.getElementById('editor');
       } else if (event.state === 'manifest') {
         const manifest = event.manifest || {};
         if (Array.isArray(manifest.headings)) {
-          updateHeadingCacheFromWorkerIndex(manifest.headings, 0, true);
+          coreOutlineControllerPort.replaceIndex(manifest.headings, {
+            version: 0,
+            documentKey: event.documentId,
+            changedHint: true,
+            reason: 'native-manifest'
+          });
           updateDocumentStatistics({
             characters: Number(manifest.textLength) || 0,
             lines: Number(manifest.lineCount) || 1,
@@ -314,7 +311,6 @@ const editor = document.getElementById('editor');
             nonWhitespaceCount: Number(manifest.nonWhitespaceCount) || 0,
             nativeIndex: true
           });
-          if (coreSidebarControllerPort.isActive('outline')) renderOutline();
         }
         const statusLeft = document.getElementById('status-left');
         if (statusLeft) statusLeft.textContent = '索引已恢复，正在读取正文…';
@@ -531,7 +527,11 @@ const editor = document.getElementById('editor');
         const currentLength = editor.textLength;
         if (Number(parsed.textLength) !== currentLength) return false;
         if (String(parsed.signature || '') !== getDocumentIndexSignature()) return false;
-        updateHeadingCacheFromWorkerIndex(parsed.headings, editor.virtualEditor?.getDocumentVersion?.());
+        coreOutlineControllerPort.replaceIndex(parsed.headings, {
+          version: editor.virtualEditor?.getDocumentVersion?.(),
+          documentKey: doc.id,
+          reason: 'persisted-document-index'
+        });
         updateDocumentStatistics(parsed.statistics);
         return true;
       } catch (_) {
@@ -584,7 +584,12 @@ const editor = document.getElementById('editor');
       filenameInput.value = doc?.title || t('filenameDefault');
       const restoredCachedIndex = restoreDocumentIndex(doc);
       if (Array.isArray(loaded?.headings)) {
-        updateHeadingCacheFromWorkerIndex(loaded.headings, documentModel?.getDocumentVersion?.() ?? 0, true);
+        coreOutlineControllerPort.replaceIndex(loaded.headings, {
+          version: documentModel?.getDocumentVersion?.() ?? 0,
+          documentKey: doc?.id || '',
+          changedHint: true,
+          reason: 'document-load-index'
+        });
         updateDocumentStatistics({
           characters: Number(loaded.textLength) || editor.textLength,
           lines: Number(loaded.lineCount) || editor.lineCount,
@@ -593,7 +598,6 @@ const editor = document.getElementById('editor');
           nonWhitespaceCount: Number(loaded.nonWhitespaceCount) || 0,
           nativeIndex: true
         });
-        if (coreSidebarControllerPort.isActive('outline')) renderOutline();
       } else if (!restoredCachedIndex) {
         updateDocumentStatistics(null);
       }
@@ -1031,259 +1035,10 @@ const editor = document.getElementById('editor');
       showToast(coreLayoutStatePort.sidebarVisible ? '已显示侧边栏' : '已隐藏侧边栏');
     }
 
-    function parseOutlineCollapsed() {
-      try {
-        const parsed = JSON.parse(localStorage.getItem(OUTLINE_COLLAPSED_KEY) || '{}');
-        outlineCollapsed = parsed && typeof parsed === 'object' ? parsed : {};
-      } catch (_) {
-        outlineCollapsed = {};
-      }
-    }
-
-    function saveOutlineCollapsed() {
-      localStorage.setItem(OUTLINE_COLLAPSED_KEY, JSON.stringify(outlineCollapsed));
-    }
-
-    function getHeadingCacheKey(version = documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.()) {
-      return Number.isFinite(version) ? 'version:' + version : null;
-    }
-
-    function createHeadingRecord(lineText, lineNumber) {
-      const match = String(lineText || '').match(/^(#{1,6})\s+(.+?)\s*#*\s*$/);
-      if (!match) return null;
-      const rawText = match[2].trim();
-      const text = stripHeadingMarkdown(rawText);
-      return {
-        id: 'h-' + lineNumber + '-' + match[1].length + '-' + simpleHash(rawText),
-        level: match[1].length,
-        text: text || rawText,
-        line: lineNumber,
-        children: []
-      };
-    }
-
-    function headingsEqual(left, right) {
-      return left.length === right.length && left.every((item, index) => {
-        const next = right[index];
-        return next && item.id === next.id && item.level === next.level && item.line === next.line && item.text === next.text;
-      });
-    }
-
-    function updateHeadingCacheFromPreviewBlocks(blocks, version = documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.()) {
-      if (!Array.isArray(blocks)) return;
-      const headings = [];
-      for (const block of blocks) {
-        if (block.type !== 'heading') continue;
-        const firstLine = String(block.raw || '').split('\n', 1)[0];
-        const heading = createHeadingRecord(firstLine, Math.max(1, Number(block.startLine) || 1));
-        if (heading) headings.push(heading);
-      }
-      const changed = !headingsEqual(cachedHeadings, headings);
-      cachedHeadings = headings;
-      cachedHeadingSource = getHeadingCacheKey(version);
-      if (changed) outlineDirty = true;
-    }
-
-    function updateHeadingCacheFromWorkerIndex(headings, version = documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.(), changedHint = null) {
-      if (!Array.isArray(headings)) return false;
-      if (changedHint === false && cachedHeadings.length) {
-        cachedHeadingSource = getHeadingCacheKey(version);
-        return false;
-      }
-      const normalized = headings.map(item => ({
-        id: String(item.id || ('h-' + item.line + '-' + item.level)),
-        level: Math.max(1, Math.min(6, Number(item.level) || 1)),
-        text: String(item.text || '').trim(),
-        line: Math.max(1, Number(item.line) || 1),
-        children: []
-      }));
-      const changed = changedHint === true || !headingsEqual(cachedHeadings, normalized);
-      cachedHeadings = normalized;
-      cachedHeadingSource = getHeadingCacheKey(version);
-      if (changed) outlineDirty = true;
-      return changed;
-    }
-
-    function getMarkdownHeadings() {
-      const cacheKey = getHeadingCacheKey();
-      if (cacheKey && cachedHeadingSource === cacheKey) return cachedHeadings;
-      const source = documentModel?.createSnapshot?.('outline-fallback') ?? editor.value;
-      const lines = source.split('\n');
-      const headings = [];
-      lines.forEach((line, index) => {
-        const heading = createHeadingRecord(line, index + 1);
-        if (heading) headings.push(heading);
-      });
-      cachedHeadingSource = cacheKey || source;
-      cachedHeadings = headings;
-      return headings;
-    }
-
     function simpleHash(text) {
       let hash = 0;
       for (let i = 0; i < text.length; i++) hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0;
       return Math.abs(hash).toString(36);
-    }
-
-    function stripHeadingMarkdown(text) {
-      return String(text || '')
-        .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-        .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-        .replace(/`([^`]+)`/g, '$1')
-        .replace(/<[^>]+>/g, '')
-        .replace(/(\*\*|__)(.*?)\1/g, '$2')
-        .replace(/(\*|_)(.*?)\1/g, '$2')
-        .replace(/~~(.*?)~~/g, '$1')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    function buildOutlineTree(headings) {
-      const root = { level: 0, children: [] };
-      const stack = [root];
-      headings.forEach(item => {
-        const node = { ...item, children: [] };
-        while (stack.length > 1 && stack[stack.length - 1].level >= node.level) stack.pop();
-        stack[stack.length - 1].children.push(node);
-        stack.push(node);
-      });
-      return root.children;
-    }
-
-    function renderOutline(force = false) {
-      const list = document.getElementById('outline-list');
-      if (!list) return;
-      const wasDirty = outlineDirty;
-      const previousHeadings = cachedHeadings;
-      const nextHeadings = getMarkdownHeadings();
-      const structureUnchanged = headingsEqual(previousHeadings, nextHeadings);
-      cachedHeadings = nextHeadings;
-      outlineDirty = false;
-      if (!force && !wasDirty && structureUnchanged && list.querySelector('.outline-tree')) {
-        updateActiveOutlineByLine(getEditorCursorLine());
-        return;
-      }
-      if (!cachedHeadings.length) {
-        list.innerHTML = '<div class="sidebar-empty">当前文档还没有标题。使用 # 至 ###### 创建标题后会自动生成可折叠大纲。</div>';
-        activeOutlineRow = null;
-        activeOutlineHeadingId = '';
-        return;
-      }
-      const tree = buildOutlineTree(cachedHeadings);
-      list.innerHTML = renderOutlineNodes(tree, true);
-      activeOutlineRow = null;
-      activeOutlineHeadingId = '';
-      updateActiveOutlineByLine(getEditorCursorLine());
-    }
-
-    function renderOutlineNodes(nodes, isRoot = false) {
-      const html = nodes.map(node => {
-        const hasChildren = node.children && node.children.length;
-        const collapsed = !!outlineCollapsed[node.id];
-        const toggle = hasChildren
-          ? '<button class="outline-toggle" aria-label="折叠/展开" onclick="toggleOutlineNode(\'' + node.id + '\', event)">' + (collapsed ? '▸' : '▾') + '</button>'
-          : '<span class="outline-toggle outline-toggle-placeholder"></span>';
-        const children = hasChildren
-          ? '<ul class="outline-children' + (collapsed ? ' collapsed' : '') + '">' + renderOutlineNodes(node.children) + '</ul>'
-          : '';
-        return '<li class="outline-node outline-level-' + node.level + (hasChildren ? ' has-children' : '') + (collapsed ? ' is-collapsed' : '') + '" data-outline-id="' + node.id + '" data-outline-level="' + node.level + '">'
-          + '<div class="outline-row" data-line="' + node.line + '">'
-          + toggle
-          + '<button class="outline-link" data-line="' + node.line + '" title="第 ' + node.line + ' 行" onclick="jumpToLine(' + node.line + ')">' + escapeHtml(node.text) + '</button>'
-          + '</div>'
-          + children
-          + '</li>';
-      }).join('');
-      return isRoot ? '<ul class="outline-tree">' + html + '</ul>' : html;
-    }
-
-    function toggleOutlineNode(id, event) {
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      outlineCollapsed[id] = !outlineCollapsed[id];
-      saveOutlineCollapsed();
-      renderOutline(true);
-    }
-
-    function collectCollapsibleOutlineIds(nodes, output = []) {
-      for (const node of nodes || []) {
-        if (node.children?.length) {
-          output.push(node.id);
-          collectCollapsibleOutlineIds(node.children, output);
-        }
-      }
-      return output;
-    }
-
-    function getCurrentOutlineTree() {
-      return buildOutlineTree(getMarkdownHeadings());
-    }
-
-    function expandAllOutline() {
-      for (const heading of getMarkdownHeadings()) delete outlineCollapsed[heading.id];
-      saveOutlineCollapsed();
-      renderOutline(true);
-    }
-
-    function collapseAllOutline() {
-      const collapsibleIds = collectCollapsibleOutlineIds(getCurrentOutlineTree());
-      for (const id of collapsibleIds) outlineCollapsed[id] = true;
-      saveOutlineCollapsed();
-      renderOutline(true);
-    }
-
-    function openOutlineContextMenu(event) {
-      const node = event?.target?.closest?.('.outline-node');
-      contextOutlineId = node?.dataset?.outlineId || '';
-      const hasChildren = Boolean(node?.classList?.contains('has-children'));
-      const separator = document.getElementById('outline-context-node-separator');
-      const collapseButton = document.getElementById('outline-context-collapse-node');
-      if (separator) separator.hidden = !hasChildren;
-      if (collapseButton) collapseButton.hidden = !hasChildren;
-      showContextMenu(document.getElementById('outline-context-menu'), event);
-    }
-
-    function collapseContextOutlineNode() {
-      if (!contextOutlineId) return;
-      outlineCollapsed[contextOutlineId] = true;
-      saveOutlineCollapsed();
-      renderOutline(true);
-    }
-
-    function updateActiveOutlineByLine(line) {
-      const list = document.getElementById('outline-list');
-      if (!list || !cachedHeadings.length) return;
-      const targetLine = Math.max(1, Number(line) || 1);
-      let low = 0;
-      let high = cachedHeadings.length - 1;
-      while (low < high) {
-        const mid = Math.ceil((low + high) / 2);
-        if (cachedHeadings[mid].line <= targetLine) low = mid;
-        else high = mid - 1;
-      }
-      const active = cachedHeadings[low];
-      if (!active || activeOutlineHeadingId === active.id) return;
-      activeOutlineRow?.classList.remove('active');
-      const row = list.querySelector('.outline-row[data-line="' + active.line + '"]');
-      row?.classList.add('active');
-      activeOutlineRow = row || null;
-      activeOutlineHeadingId = active.id;
-    }
-
-    function jumpToLine(line) {
-      const targetLine = Math.max(1, Number(line) || 1);
-      const position = getLineStartIndex(targetLine);
-      editor.focus({ preventScroll: true });
-      editor.setSelectionRange(position, position);
-      if (editor.virtualEditor?.scrollPositionIntoView) {
-        editor.virtualEditor.scrollPositionIntoView(position, 'auto', 0.5);
-      } else {
-        scrollEditorToLine(targetLine, 'auto', 0.5);
-      }
-      void focusPreviewLine(targetLine, { behavior: 'auto', scroll: true });
-      updateActiveOutlineByLine(targetLine);
     }
 
     document.addEventListener('markdown-editor:settings-changed', event => {

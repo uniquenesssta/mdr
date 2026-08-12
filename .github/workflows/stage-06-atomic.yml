@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.7 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.8 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  compact-shell:
-    name: Verify Stage 6 Through Sidebar Tabs
+  outline:
+    name: Verify Stage 6 Through Outline
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -159,11 +159,24 @@ jobs:
           tests/unit/sidebar/sidebar-tab-controller.test.mjs
           tests/unit/sidebar/classic-sidebar-controller-port.test.mjs
           tests/architecture/stage-06-sidebar-tabs.test.mjs
+      - name: Verify Atomic Task 6.8 Outline
+        run: >-
+          node --test
+          tests/unit/sidebar/outline-tree-builder.test.mjs
+          tests/unit/sidebar/outline-active-heading.test.mjs
+          tests/unit/sidebar/outline-collapse-store.test.mjs
+          tests/unit/sidebar/outline-view.test.mjs
+          tests/unit/sidebar/outline-controller.test.mjs
+          tests/unit/sidebar/classic-outline-controller-port.test.mjs
+          tests/architecture/stage-06-outline.test.mjs
       - name: Verify modified classic and browser runners parse
         run: >-
+          node --check src/main.js &&
           node --check public/app/core.js &&
           node --check public/app/bootstrap.js &&
+          node --check public/app/events.js &&
           node --check public/app/preview.js &&
+          node --check public/app/scroll-sync.js &&
           node --check public/app/export.js &&
           node --check tests/e2e/run-browser-tests.mjs
       - name: Verify frozen DocumentModel remains exact
@@ -182,10 +195,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.7 evidence
+      - name: Upload Atomic Task 6.8 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-sidebar-tabs-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-outline-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30

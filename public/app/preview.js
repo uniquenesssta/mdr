@@ -2,9 +2,16 @@
     const previewDocumentSessionPort = previewCompatibilityHost?.markdownEditorDocumentSessionPort;
     const previewLayoutStatePort = previewCompatibilityHost?.markdownEditorLayoutStatePort;
     const previewSidebarControllerPort = previewCompatibilityHost?.markdownEditorSidebarControllerPort;
+    const previewOutlineControllerPort = previewCompatibilityHost?.markdownEditorOutlineControllerPort;
+    const previewEditorUiCommandPort = previewCompatibilityHost?.markdownEditorEditorUiCommandPort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!previewSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
+    if (!previewOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
+    if (!previewEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+    previewEditorUiCommandPort.register({
+      focusPreviewLineForOutline: (line, options) => focusPreviewLine(line, options)
+    });
     function schedulePreviewUpdate() {
       clearTimeout(previewUpdateTimer);
       const length = editor.textLength;
@@ -281,7 +288,6 @@
           previewEnhancementIdle = 0;
           if (renderVersion !== previewRenderVersion) return;
           const started = performance.now();
-          if (previewLayoutStatePort.sidebarVisible && previewSidebarControllerPort.isActive('outline')) renderOutline();
           window.markdownEditorSelectionController?.notifyPreviewMounted?.('preview-enhancements');
           // 在空闲阶段预热锚点坐标，避免用户第一次滚动时同步测量全部预览块。
           getPreviewAnchorMetrics();
@@ -911,15 +917,23 @@
           getPreviewEnhancementQueue()?.setPriorityRange(activePreviewFocusChapter);
           updateDocumentStatistics(modelResult.statistics);
           const headingVersion = modelResult.documentVersion ?? documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.();
+          const outlineDocumentKey = previewDocumentSessionPort.activeId || '';
           if (Array.isArray(modelResult.headings)) {
-            const headingIndexChanged = updateHeadingCacheFromWorkerIndex(
-              modelResult.headings,
-              headingVersion,
-              modelResult.headingIndexChanged
-            );
-            if (headingIndexChanged) persistCurrentDocumentIndex(modelResult.headings, modelResult.statistics);
-          } else {
-            updateHeadingCacheFromPreviewBlocks(modelResult.blocks, headingVersion);
+            const outlineUpdate = previewOutlineControllerPort.replaceIndex(modelResult.headings, {
+              version: headingVersion,
+              documentKey: outlineDocumentKey,
+              changedHint: modelResult.headingIndexChanged,
+              reason: 'preview-worker-index'
+            });
+            if (outlineUpdate.accepted && outlineUpdate.changed) {
+              persistCurrentDocumentIndex(modelResult.headings, modelResult.statistics);
+            }
+          } else if (Array.isArray(modelResult.blocks)) {
+            previewOutlineControllerPort.replacePreviewBlocks(modelResult.blocks, {
+              version: headingVersion,
+              documentKey: outlineDocumentKey,
+              reason: 'preview-model-index'
+            });
           }
 
           const indexedSourceLength = Number(modelResult.statistics?.characters) || 0;
@@ -1030,7 +1044,6 @@
         const badge = document.getElementById('preview-strategy-badge');
         if (badge) badge.hidden = true;
         document.body.dataset.previewPerformanceMode = 'hybrid';
-        if (previewLayoutStatePort.sidebarVisible && previewSidebarControllerPort.isActive('outline') && outlineDirty) renderOutline();
         const presentationStats = editor.virtualEditor?.getPresentationStats?.() || {};
         const expectedDocumentVersion = documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.() ?? 0;
         const indexedDocumentVersion = Number(modelResult?.documentVersion);

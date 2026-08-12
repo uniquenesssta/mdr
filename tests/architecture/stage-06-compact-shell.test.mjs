@@ -55,9 +55,11 @@ test('Atomic 6.4 main composition remains intact after the 6.5 Toolbar Boundary 
   assert.doesNotMatch(core, /function initializeToolbarBoundaryLayout\(\)/);
 });
 
-
-test('Atomic 6.4 preview reads sidebar visibility only from the LayoutState compatibility port', async () => {
+test('Atomic 6.4 Preview keeps the LayoutState port boundary after Atomic 6.8 moves Outline visibility to its lifecycle owner', async () => {
   const preview = await read('public/app/preview.js');
-  assert.match(preview, /previewLayoutStatePort\.sidebarVisible/);
+  assert.match(preview, /const previewLayoutStatePort = previewCompatibilityHost\?\.markdownEditorLayoutStatePort/);
+  assert.match(preview, /if \(!previewLayoutStatePort\) throw new Error\('Layout State compatibility port is unavailable\.'\)/);
   assert.doesNotMatch(preview, /if\s*\(\s*sidebarVisible\b/);
+  assert.doesNotMatch(preview, /previewLayoutStatePort\.sidebarVisible/);
+  assert.match(preview, /previewOutlineControllerPort/);
 });

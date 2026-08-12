@@ -241,7 +241,7 @@
           </div>
           <div class="folder-file-tree" id="folder-file-tree"></div>
         </section>
-        <section class="sidebar-panel" id="sidebar-outline-panel" oncontextmenu="openOutlineContextMenu(event)">
+        <section class="sidebar-panel" id="sidebar-outline-panel">
           <div class="outline-list" id="outline-list"></div>
         </section>
 </template>
@@ -307,10 +307,10 @@
 
 
   <div class="context-menu" id="outline-context-menu" role="menu">
-    <button onclick="expandAllOutline(); closeContextMenus();">展开全部大纲</button>
-    <button onclick="collapseAllOutline(); closeContextMenus();">折叠全部大纲</button>
+    <button data-outline-context-action="expand-all">展开全部大纲</button>
+    <button data-outline-context-action="collapse-all">折叠全部大纲</button>
     <div class="context-separator" id="outline-context-node-separator" hidden></div>
-    <button id="outline-context-collapse-node" onclick="collapseContextOutlineNode(); closeContextMenus();" hidden>折叠此大纲的所有子集</button>
+    <button id="outline-context-collapse-node" data-outline-context-action="collapse-node" hidden>折叠此大纲的所有子集</button>
   </div>
 
   <!-- 使用帮助模态框 -->

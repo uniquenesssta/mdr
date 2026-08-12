@@ -14,8 +14,6 @@
       ensureCurrentDocumentForEditing();
       editorLineIndexText = null;
       editorMetricText = null;
-      cachedHeadingSource = null;
-      if (!editor.virtualEditor) outlineDirty = true;
       updateLargeDocumentMode();
       scheduleEditorMetricsRebuild(120);
       schedulePreviewUpdate();

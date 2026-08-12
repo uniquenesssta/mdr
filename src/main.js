@@ -51,7 +51,15 @@ import { createSelectionSyncController } from './sync/selection-controller.js';
 import { createMarkdownPresentationApi } from './rendering/presentation-api.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import { createFolderFileTreeController } from './sidebar/folder-file-tree.js';
-import { createSidebarState, createSidebarTabController, mountClassicSidebarControllerPort } from './features/sidebar/index.js';
+import {
+  createOutlineCollapseStore,
+  createOutlineController,
+  createOutlineView,
+  createSidebarState,
+  createSidebarTabController,
+  mountClassicOutlineControllerPort,
+  mountClassicSidebarControllerPort
+} from './features/sidebar/index.js';
 import { configureHybridImageSourcePlatform } from './editor/hybrid/image-source.js';
 import {
   createDocumentContextMenuView,
@@ -276,6 +284,8 @@ async function loadAppModules() {
   let sidebarState = null;
   let sidebarTabController = null;
   let sidebarControllerPort = null;
+  let outlineController = null;
+  let outlineControllerPort = null;
   let documentEditorViewsDestroyed = false;
   const destroyDocumentEditorViews = () => {
     if (documentEditorViewsDestroyed) return;
@@ -298,8 +308,12 @@ async function loadAppModules() {
     unregisterLayoutUiCommands = null;
     sidebarControllerPort?.destroy();
     sidebarControllerPort = null;
+    outlineControllerPort?.destroy();
+    outlineControllerPort = null;
     sidebarTabController?.destroy();
     sidebarTabController = null;
+    outlineController?.destroy();
+    outlineController = null;
     sidebarState?.destroy();
     sidebarState = null;
     splitControllerPort?.destroy();
@@ -352,6 +366,62 @@ async function loadAppModules() {
     reportError(message, error) { console.warn(message, error); }
   });
   sidebarTabController.registerLifecycle('files', folderFileTreeController);
+  const outlineCollapseStore = createOutlineCollapseStore({
+    storage: platform.storage,
+    reportError(message, error) { console.warn(message, error); }
+  });
+  const outlinePanel = requireElement('#sidebar-outline-panel', 'Outline sidebar panel');
+  const outlineList = requireElement('#outline-list', 'Outline list');
+  const outlineContextMenu = requireElement('#outline-context-menu', 'Outline context menu');
+  const outlineView = createOutlineView({
+    documentRef: document,
+    panel: outlinePanel,
+    list: outlineList,
+    contextMenu: outlineContextMenu,
+    contextSeparator: requireElement('#outline-context-node-separator', 'Outline context separator'),
+    contextCollapseNodeButton: requireElement('#outline-context-collapse-node', 'Outline context collapse-node button'),
+    isCollapsed: id => outlineCollapseStore.isCollapsed(id),
+    onToggle: id => { void outlineController?.toggleNode(id); },
+    onNavigate: line => { outlineController?.navigate(line); },
+    onExpandAll: () => { void outlineController?.expandAll(); },
+    onCollapseAll: () => { void outlineController?.collapseAll(); },
+    onCollapseNode: id => { void outlineController?.collapseNode(id); },
+    openContextMenu(event) {
+      if (editorUiCommandPort.has('showContextMenu')) editorUiCommandPort.invoke('showContextMenu', outlineContextMenu, event);
+      else event?.preventDefault?.();
+    },
+    closeContextMenus() {
+      if (editorUiCommandPort.has('closeContextMenus')) editorUiCommandPort.invoke('closeContextMenus');
+    }
+  });
+  outlineController = createOutlineController({
+    view: outlineView,
+    collapseStore: outlineCollapseStore,
+    getActiveLine() {
+      const selection = virtualEditor.getSelection();
+      return virtualEditor.getLineNumberAtPosition(selection.start);
+    },
+    navigateToLine(line) {
+      const targetLine = Math.max(1, Math.floor(Number(line) || 1));
+      const position = virtualEditor.getLineStart(targetLine);
+      virtualEditor.focus({ preventScroll: true });
+      virtualEditor.setSelection(position, position);
+      virtualEditor.scrollPositionIntoView(position, 'auto', 0.5);
+      if (editorUiCommandPort.has('focusPreviewLineForOutline')) {
+        void editorUiCommandPort.invoke('focusPreviewLineForOutline', targetLine, { behavior: 'auto', scroll: true });
+      } else {
+        scrollController.beginUserGesture('editor', 'outline-navigation');
+        scrollController.syncNow('editor');
+      }
+      return true;
+    },
+    now: () => performance.now(),
+    record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+    reportError(message, error) { console.warn(message, error); }
+  });
+  outlineController.start();
+  sidebarTabController.registerLifecycle('outline', outlineController);
+  outlineControllerPort = mountClassicOutlineControllerPort(compatibilityPlatformHost, outlineController);
   sidebarControllerPort = mountClassicSidebarControllerPort(compatibilityPlatformHost, sidebarTabController);
 
   const t = (...args) => {

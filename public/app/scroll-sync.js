@@ -1,5 +1,8 @@
-    const scrollSyncLayoutStatePort = document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort;
+    const scrollSyncCompatibilityHost = document.getElementById('compatibility-business-ports');
+    const scrollSyncLayoutStatePort = scrollSyncCompatibilityHost?.markdownEditorLayoutStatePort;
+    const scrollSyncOutlineControllerPort = scrollSyncCompatibilityHost?.markdownEditorOutlineControllerPort;
     if (!scrollSyncLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
+    if (!scrollSyncOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
     const SYNC_VIEWPORT_RATIO = 0.38;
     const SELECTION_VIEWPORT_RATIO = 0.5;
     const SELECTION_SAFE_EDGE_MIN_PX = 32;
@@ -512,7 +515,7 @@
     }
 
     function syncFromEditorScroll() {
-      updateActiveOutlineByLine(getTopVisibleEditorLine());
+      scrollSyncOutlineControllerPort.updateActiveLine(getTopVisibleEditorLine());
       const focusY = editor.scrollTop + editor.clientHeight * SYNC_VIEWPORT_RATIO;
       const sourceLine = getEditorLineFloatAtY(focusY);
       const previewY = sourceLineToPreviewY(sourceLine);
@@ -520,7 +523,7 @@
     }
 
     function syncFromPreviewScroll() {
-      updateActiveOutlineByLine(getTopVisiblePreviewLine());
+      scrollSyncOutlineControllerPort.updateActiveLine(getTopVisiblePreviewLine());
       const focusY = preview.scrollTop + preview.clientHeight * SYNC_VIEWPORT_RATIO;
       const sourceLine = previewYToSourceLine(focusY);
       const editorY = getEditorYForLineFloat(sourceLine);
@@ -953,7 +956,7 @@
       const cursorLine = editor.virtualEditor
         ? editor.virtualEditor.getLineNumberAtPosition(start)
         : getLineNumberAtIndex(editor.value, start);
-      updateActiveOutlineByLine(cursorLine);
+      scrollSyncOutlineControllerPort.updateActiveLine(cursorLine);
       if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) {
         clearPreviewSelectionHighlights();
         return { status: 'hybrid', selectionLength: Math.max(0, end - start), matchedAnchors: 0 };
@@ -1256,7 +1259,7 @@
         viewportRatio: context.viewportRatio,
         behavior: 'auto'
       });
-      updateActiveOutlineByLine(startLine);
+      scrollSyncOutlineControllerPort.updateActiveLine(startLine);
       setTimeout(() => { selectionSyncLock = false; }, 96);
       return {
         status: 'mapped',
