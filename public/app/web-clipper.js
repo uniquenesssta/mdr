@@ -2,8 +2,10 @@
     const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
     const webClipperEditorUiCommandPort = webClipperCompatibilityHost?.markdownEditorEditorUiCommandPort;
     const webClipperDocumentUiCommandPort = webClipperCompatibilityHost?.markdownEditorDocumentUiCommandPort;
+const webClipperPreviewStatePort = webClipperCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!webClipperEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
     if (!webClipperDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
+if (!webClipperPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     webClipperEditorUiCommandPort.register({
       getFindSearchOptions: setStatus => createFindSearchOptions(setStatus),
       afterFindMatch: match => afterFindMatch(match)
@@ -72,7 +74,7 @@
 
     function afterFindMatch(match) {
       if (!match) return false;
-      if (activeResolvedPreviewMode === 'chapter') {
+      if (webClipperPreviewStatePort.snapshot.mode === 'chapter') {
         updatePreview().then(() => syncEditorSelectionToPreview(true));
       } else {
         requestAnimationFrame(() => syncEditorSelectionToPreview(true));

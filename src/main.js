@@ -86,7 +86,11 @@ import {
   createWindowState,
   mountClassicCloseSavePort
 } from './features/window/index.js';
-import { mountClassicPreviewThresholdsPort } from './features/preview/index.js';
+import {
+  createPreviewState,
+  mountClassicPreviewStatePort,
+  mountClassicPreviewThresholdsPort
+} from './features/preview/index.js';
 
 const platform = createPlatform({
   runtime: window,
@@ -94,6 +98,8 @@ const platform = createPlatform({
   record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
 });
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
+const previewState = createPreviewState();
+const previewStatePort = mountClassicPreviewStatePort(compatibilityPlatformHost, previewState);
 const previewThresholdsPort = mountClassicPreviewThresholdsPort(compatibilityPlatformHost);
 const layoutState = createLayoutState();
 const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
@@ -146,6 +152,8 @@ configureHybridImageSourcePlatform({
 });
 window.addEventListener('pagehide', () => {
   destroyLayoutStateFeature();
+  previewStatePort.destroy();
+  previewState.destroy();
   previewThresholdsPort.destroy();
   compatibilityPlatformPort.destroy();
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));

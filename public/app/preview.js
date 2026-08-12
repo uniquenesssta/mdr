@@ -5,12 +5,14 @@
     const previewOutlineControllerPort = previewCompatibilityHost?.markdownEditorOutlineControllerPort;
     const previewEditorUiCommandPort = previewCompatibilityHost?.markdownEditorEditorUiCommandPort;
     const previewThresholdsPort = previewCompatibilityHost?.markdownEditorPreviewThresholdsPort;
+    const classicPreviewStatePort = previewCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!previewSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
     if (!previewOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
     if (!previewEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
     if (!previewThresholdsPort) throw new Error('Preview Thresholds compatibility port is unavailable.');
+    if (!classicPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
     previewEditorUiCommandPort.register({
       focusPreviewLineForOutline: (line, options) => focusPreviewLine(line, options)
@@ -112,7 +114,9 @@
           }
 
           const body = preview.querySelector('.markdown-body');
+          const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
           const renderRequired = forceRender
+            || !hasStablePreview
             || !body
             || body.classList.contains('preview-loading')
             || body.childElementCount === 0;
@@ -164,8 +168,9 @@
         previewObservedHeight = layout.height;
         if (!layout.visible || (!becameVisible && !sizeChanged)) return;
         const body = preview.querySelector('.markdown-body');
+        const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
         refreshPreviewAfterLayout({
-          forceRender: becameVisible || !body || body.classList.contains('preview-loading'),
+          forceRender: becameVisible || !hasStablePreview || !body || body.classList.contains('preview-loading'),
           reason: becameVisible ? 'preview-became-visible' : 'preview-container-resize'
         });
       });
@@ -182,7 +187,7 @@
         || (editor.textLength < classicPreviewBehaviorThresholds.mode.workerChars && previewPerformanceMode !== 'chapter')
         || previewUpdateTimer) return;
       const line = editor.virtualEditor.getLineNumberAtPosition?.(editor.selectionStart || 0) || 1;
-      const chapter = activePreviewFocusChapter;
+      const chapter = classicPreviewStatePort.snapshot.focusSection;
       if (chapter && line >= chapter.startLine && line <= chapter.endLine) return;
       clearTimeout(previewFocusUpdateTimer);
       previewFocusUpdateTimer = setTimeout(() => {
@@ -198,8 +203,8 @@
       if (controller?.active && typeof controller.containsLineRange === 'function') {
         return controller.containsLineRange(targetLine, targetLine);
       }
-      if (activeResolvedPreviewMode !== 'chapter') return true;
-      const chapter = activePreviewFocusChapter;
+      if (classicPreviewStatePort.snapshot.mode !== 'chapter') return true;
+      const chapter = classicPreviewStatePort.snapshot.focusSection;
       return Boolean(chapter && targetLine >= chapter.startLine && targetLine <= chapter.endLine);
     }
 
@@ -208,7 +213,7 @@
       const behavior = options.behavior === 'smooth' ? 'smooth' : 'auto';
       const shouldScroll = options.scroll !== false;
       const requestVersion = ++previewLineFocusVersion;
-      const needsScopeRefresh = activeResolvedPreviewMode === 'chapter' && !previewScopeContainsLine(targetLine);
+      const needsScopeRefresh = classicPreviewStatePort.snapshot.mode === 'chapter' && !previewScopeContainsLine(targetLine);
 
       if (needsScopeRefresh) {
         clearTimeout(previewFocusUpdateTimer);
@@ -235,7 +240,7 @@
       const controller = window.markdownEditorVirtualPreview;
       if (controller?.active) {
         const anchor = controller.ensureLineVisible?.(targetLine);
-        if (!anchor && activeResolvedPreviewMode === 'chapter') return false;
+        if (!anchor && classicPreviewStatePort.snapshot.mode === 'chapter') return false;
         invalidatePreviewAnchorStructure();
       }
       if (shouldScroll) scrollPreviewToLine(targetLine, behavior, 0.5);
@@ -247,9 +252,14 @@
       previewUpdateTimer = 0;
       clearTimeout(previewFocusUpdateTimer);
       previewFocusUpdateTimer = 0;
-      previewRenderVersion += 1;
+      const suspendedVersion = classicPreviewStatePort.invalidate({
+        mode: 'hybrid',
+        status: 'suspended',
+        clearStable: false,
+        clearError: false
+      });
       cancelScheduledPreviewEnhancements();
-      getPreviewEnhancementQueue()?.begin(previewRenderVersion);
+      getPreviewEnhancementQueue()?.begin(suspendedVersion);
       // 单视图期间保留已窗口化的预览 DOM 与高度索引。
       // 重新切回双栏时可增量复用，避免百万字文档重新挂载全部块。
       if (!virtualPreviewController?.active) {
@@ -276,7 +286,7 @@
       cancelScheduledPreviewEnhancements();
       previewEnhancementRaf = requestAnimationFrame(() => {
         previewEnhancementRaf = 0;
-        if (renderVersion !== previewRenderVersion) return;
+        if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
         const annotationStarted = performance.now();
         if (!sourceAlreadyAnnotated) annotatePreviewSourceLines(sourceText, blockTokens);
         else {
@@ -298,7 +308,7 @@
 
         const finish = () => {
           previewEnhancementIdle = 0;
-          if (renderVersion !== previewRenderVersion) return;
+          if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
           const started = performance.now();
           window.markdownEditorSelectionController?.notifyPreviewMounted?.('preview-enhancements');
           // 在空闲阶段预热锚点坐标，避免用户第一次滚动时同步测量全部预览块。
@@ -550,9 +560,6 @@
     let previewWorkerClient = null;
     let virtualPreviewController = null;
     let previewEnhancementQueue = null;
-    let activeResolvedPreviewMode = 'full';
-    let activePreviewScopeKey = '';
-    let previewWorkerFailureNotified = false;
 
     function getPreviewWorkerClient() {
       if (!previewWorkerClient && window.createPreviewWorkerClient) {
@@ -592,7 +599,7 @@
               const viewportBottom = viewportTop + preview.clientHeight;
               if (bottom >= viewportTop && top <= viewportBottom) return 0;
             }
-            const chapter = activePreviewFocusChapter;
+            const chapter = classicPreviewStatePort.snapshot.focusSection;
             if (chapter && lineRange.end >= chapter.startLine && lineRange.start <= chapter.endLine) return 1;
             return 2;
           },
@@ -692,9 +699,13 @@
     function resetPreviewPipeline() {
       clearTimeout(previewFocusUpdateTimer);
       previewFocusUpdateTimer = 0;
-      activePreviewFocusChapter = null;
-      activeResolvedPreviewMode = 'full';
-      activePreviewScopeKey = '';
+      classicPreviewStatePort.invalidate({
+        mode: 'full',
+        status: 'idle',
+        clearStable: true,
+        clearError: true,
+        focusSection: null
+      });
       previewReferenceDefinitions = '';
       previewPrewarmVersion += 1;
       window.markdownEditorTaskScheduler?.cancelPrefix?.('preview-');
@@ -870,8 +881,11 @@
     async function updatePreview() {
       clearTimeout(previewUpdateTimer);
       previewUpdateTimer = 0;
-      const renderVersion = ++previewRenderVersion;
+      const renderVersion = classicPreviewStatePort.beginRender();
       getPreviewEnhancementQueue()?.begin(renderVersion);
+      let resolvedPreviewMode = classicPreviewStatePort.snapshot.mode;
+      let resolvedPreviewScopeKey = classicPreviewStatePort.snapshot.lastStableResult?.scopeKey || resolvedPreviewMode;
+      let previewFailure = null;
       const sourceLength = Math.max(
         Number(documentModel?.getTextLength?.()) || 0,
         Number(editor.virtualEditor?.getTextLength?.()) || 0,
@@ -918,9 +932,8 @@
           modelResult = await client.update(documentModel || editor, getSourceText, forceFullRebuild, {
             indexOnly: hybridMode
           });
-          if (modelResult?.cancelled || renderVersion !== previewRenderVersion) return;
+          if (modelResult?.cancelled || !classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
           workerDurationMs = modelResult.workerDurationMs || 0;
-          previewWorkerFailureNotified = false;
           blockTokens = modelResult.tokens || [];
           incrementalPreviewModel?.reset();
         } else if (typeof marked !== 'undefined' && typeof marked.lexer === 'function' && window.IncrementalPreviewModel) {
@@ -931,8 +944,9 @@
 
         if (modelResult) {
           previewReferenceDefinitions = String(modelResult.referenceDefinitions || '');
-          activePreviewFocusChapter = modelResult.focusChapter || null;
-          getPreviewEnhancementQueue()?.setPriorityRange(activePreviewFocusChapter);
+          const focusSection = modelResult.focusChapter || null;
+          classicPreviewStatePort.setFocusSection(renderVersion, focusSection);
+          getPreviewEnhancementQueue()?.setPriorityRange(focusSection);
           updateDocumentStatistics(modelResult.statistics);
           const headingVersion = modelResult.documentVersion ?? documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.();
           const outlineDocumentKey = previewDocumentSessionPort.activeId || '';
@@ -960,10 +974,11 @@
           const nextScopeKey = resolved.mode === 'chapter'
             ? (renderResult?.previewScopeKey || 'chapter:document')
             : resolved.mode;
-          const previewScopeChanged = resolved.mode !== activeResolvedPreviewMode || nextScopeKey !== activePreviewScopeKey;
-          const previousScopeKey = activePreviewScopeKey;
-          activeResolvedPreviewMode = resolved.mode;
-          activePreviewScopeKey = nextScopeKey;
+          const previousPreviewState = classicPreviewStatePort.snapshot;
+          const previousScopeKey = previousPreviewState.lastStableResult?.scopeKey || previousPreviewState.mode;
+          const previewScopeChanged = resolved.mode !== previousPreviewState.mode || nextScopeKey !== previousScopeKey;
+          resolvedPreviewMode = resolved.mode;
+          resolvedPreviewScopeKey = nextScopeKey;
           if (previewScopeChanged && resolved.mode === 'chapter' && previousScopeKey && previousScopeKey !== nextScopeKey) {
             window.markdownEditorScrollSync?.markProgrammaticScroll?.('preview', 420);
             window.markdownEditorScrollSync?.suspend?.(320);
@@ -973,7 +988,8 @@
           if (modelResult.reason === 'unchanged' && !forceFullRebuild && !previewScopeChanged) {
             virtualPreviewController?.refreshRenderData?.(renderResult);
             const body = preview.querySelector('.markdown-body');
-            if (body && !body.classList.contains('preview-loading')) {
+            const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
+            if (hasStablePreview && body && !body.classList.contains('preview-loading')) {
               const pendingMermaidRoots = collectPendingMermaidRoots(body);
               patchResult = {
                 body,
@@ -1047,18 +1063,22 @@
         previewWorkerClient?.destroy?.();
         previewWorkerClient = null;
         workerFailed = useWorker;
-        if (workerFailed && !previewWorkerFailureNotified) {
-          previewWorkerFailureNotified = true;
+        previewFailure = {
+          name: error?.name || 'Error',
+          message: error?.message || String(error),
+          source: workerFailed ? 'worker' : 'pipeline'
+        };
+        if (workerFailed && classicPreviewStatePort.snapshot.error?.source !== 'worker') {
           showToast('后台预览暂时不可用，已启用安全降级');
         }
       }
 
-      if (renderVersion !== previewRenderVersion) return;
+      if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
 
       if (hybridMode) {
         cancelScheduledPreviewEnhancements();
-        activeResolvedPreviewMode = 'hybrid';
-        activePreviewScopeKey = 'hybrid';
+        resolvedPreviewMode = 'hybrid';
+        resolvedPreviewScopeKey = 'hybrid';
         const badge = document.getElementById('preview-strategy-badge');
         if (badge) badge.hidden = true;
         document.body.dataset.previewPerformanceMode = 'hybrid';
@@ -1103,6 +1123,25 @@
             }
           });
         }
+        if (workerFailed) {
+          classicPreviewStatePort.commitDegraded(renderVersion, {
+            mode: 'hybrid',
+            error: previewFailure
+          });
+          classicPreviewStatePort.invalidate({
+            mode: 'hybrid',
+            status: 'suspended',
+            clearStable: false,
+            clearError: false
+          });
+        } else {
+          classicPreviewStatePort.invalidate({
+            mode: 'hybrid',
+            status: 'suspended',
+            clearStable: false,
+            clearError: true
+          });
+        }
         window.markdownEditorPerf?.record('render.preview-index-only', {
           category: 'render.pipeline',
           durationMs: performance.now() - renderStarted,
@@ -1123,8 +1162,9 @@
       }
 
       if (!patchResult && workerFailed && sourceLength >= classicPreviewBehaviorThresholds.mode.virtualChars) {
+        const lastStableResult = classicPreviewStatePort.snapshot.lastStableResult;
         const body = preview.querySelector('.markdown-body');
-        if (body && !body.classList.contains('preview-loading')) {
+        if (lastStableResult && body && !body.classList.contains('preview-loading')) {
           patchResult = {
             body,
             changedNodes: [],
@@ -1152,15 +1192,16 @@
             blockCount: 0
           };
         }
-        activeResolvedPreviewMode = resolvePreviewPerformanceMode(sourceLength, patchResult.blockCount);
+        resolvedPreviewMode = resolvePreviewPerformanceMode(sourceLength, patchResult.blockCount);
+        resolvedPreviewScopeKey = lastStableResult?.scopeKey || resolvedPreviewMode;
         sourceAlreadyAnnotated = true;
         skipEnhancements = true;
       }
 
       if (!patchResult) {
         disableVirtualPreview();
-        activeResolvedPreviewMode = 'full';
-        activePreviewScopeKey = 'full';
+        resolvedPreviewMode = 'full';
+        resolvedPreviewScopeKey = 'full';
         const fallbackSource = getSourceText();
         let text = fallbackSource;
         let placeholders = [];
@@ -1210,9 +1251,34 @@
         schedulePreviewEnhancements(sourceText || '', blockTokens, renderVersion, sourceAlreadyAnnotated, sourceLength);
       }
       const virtualStats = virtualPreviewController?.active ? virtualPreviewController.getStats() : null;
-      updatePreviewStrategyBadge(activeResolvedPreviewMode, {
-        blockCount: patchResult.blockCount ?? patchResult.body.children.length,
-        mountedBlocks: virtualStats?.mountedBlocks ?? patchResult.body.children.length
+      const stableBlockCount = patchResult.blockCount ?? patchResult.body.children.length;
+      const stableMountedBlocks = virtualStats?.mountedBlocks ?? patchResult.body.children.length;
+      const stableMetadata = {
+        scopeKey: resolvedPreviewScopeKey || resolvedPreviewMode,
+        renderMode: patchResult.mode || 'dom-keyed',
+        sourceLength,
+        blockCount: stableBlockCount,
+        mountedBlocks: stableMountedBlocks,
+        documentVersion: documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.() ?? 0
+      };
+      if (workerFailed) {
+        const preservePreviousStable = patchResult.mode === 'worker-safe-fallback-stale'
+          || patchResult.mode === 'worker-safe-fallback-paused';
+        classicPreviewStatePort.commitDegraded(renderVersion, {
+          mode: resolvedPreviewMode,
+          ...(preservePreviousStable ? {} : { result: stableMetadata }),
+          error: previewFailure
+        });
+      } else {
+        classicPreviewStatePort.commitStable(renderVersion, {
+          mode: resolvedPreviewMode,
+          result: stableMetadata,
+          clearError: useWorker || classicPreviewStatePort.snapshot.error?.source !== 'worker'
+        });
+      }
+      updatePreviewStrategyBadge(resolvedPreviewMode, {
+        blockCount: stableBlockCount,
+        mountedBlocks: stableMountedBlocks
       });
       window.markdownEditorPerf?.record('render.preview-patch', {
         category: 'render.pipeline',
@@ -1231,7 +1297,7 @@
           virtualized: Boolean(patchResult.virtualized),
           mode: patchResult.mode || 'dom-keyed',
           requestedPreviewMode,
-          resolvedPreviewMode: activeResolvedPreviewMode
+          resolvedPreviewMode
         }
       });
     }

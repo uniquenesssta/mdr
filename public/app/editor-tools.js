@@ -3,10 +3,12 @@ const editorToolsSettingsStorePort = editorToolsCompatibilityHost?.markdownEdito
 const editorToolsEditorUiCommandPort = editorToolsCompatibilityHost?.markdownEditorEditorUiCommandPort;
 const editorToolsLayoutStatePort = editorToolsCompatibilityHost?.markdownEditorLayoutStatePort;
 const editorToolsSplitControllerPort = editorToolsCompatibilityHost?.markdownEditorSplitControllerPort;
+const editorToolsPreviewStatePort = editorToolsCompatibilityHost?.markdownEditorPreviewStatePort;
 if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!editorToolsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
 if (!editorToolsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 if (!editorToolsSplitControllerPort) throw new Error('Split Controller compatibility port is unavailable.');
+if (!editorToolsPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
 editorToolsEditorUiCommandPort.register({
   getLayoutMode: () => getLayoutMode(),
   setLayoutMode: mode => setLayoutMode(mode)
@@ -263,6 +265,7 @@ editorToolsEditorUiCommandPort.register({
         const previewBody = preview.querySelector('.markdown-body');
         refreshPreviewAfterLayout?.({
           forceRender: previewWasHidden
+            || !editorToolsPreviewStatePort.snapshot.lastStableResult
             || !previewBody
             || previewBody.classList.contains('preview-loading')
             || previewBody.childElementCount === 0,
