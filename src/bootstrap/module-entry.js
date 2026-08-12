@@ -2,6 +2,14 @@ import { createUI } from '../ui/create-ui.js';
 import { createCompatibilityBusinessContentPort } from '../ui/compatibility/index.js';
 import { createDocumentSessionStore, mountClassicDocumentDomainPort, mountClassicDocumentSessionPort } from '../features/documents/index.js';
 import { createHelpFeature, mountClassicHelpPort } from '../features/help/index.js';
+import {
+  MENU_COMMAND_IDS,
+  createClassicMenuCommandAdapter,
+  createMenuCommandBindings,
+  createMenuController,
+  createMenuState,
+  createMenuView
+} from '../features/menu/index.js';
 import { SETTINGS_CHANGED_EVENT, createSettingsApplyCoordinator, createSettingsFeature, createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort } from '../features/settings/index.js';
 import { createI18nService, createSettingsLocaleController, createTranslationBindings, localeRegistry, mountClassicI18nPort } from '../i18n/index.js';
 import { createThemeService, createThemeToggleController } from '../theme/index.js';
@@ -17,8 +25,38 @@ async function fetchCompatibilityContent(fetchImpl) {
   return response.text();
 }
 
-function destroyStartupResources({ helpPort, documentSessionPort, documentDomainPort, documentSessionStore, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui }) {
+function destroyStartupResources({
+  unregisterSettingsMenuCommand,
+  unregisterHelpMenuCommand,
+  menuController,
+  classicMenuCommandAdapter,
+  menuCommandBindings,
+  menuState,
+  helpPort,
+  documentSessionPort,
+  documentDomainPort,
+  documentSessionStore,
+  settingsController,
+  themeToggleController,
+  settingsLocaleController,
+  settingsCommandCoordinator,
+  settingsPort,
+  themeService,
+  settingsStore,
+  i18nPort,
+  translationBindings,
+  helpController,
+  i18nService,
+  contentPort,
+  ui
+}) {
   const errors = [];
+  try { unregisterSettingsMenuCommand?.(); } catch (error) { errors.push(error); }
+  try { unregisterHelpMenuCommand?.(); } catch (error) { errors.push(error); }
+  try { menuController?.destroy(); } catch (error) { errors.push(error); }
+  try { classicMenuCommandAdapter?.destroy(); } catch (error) { errors.push(error); }
+  try { menuCommandBindings?.destroy(); } catch (error) { errors.push(error); }
+  try { menuState?.destroy(); } catch (error) { errors.push(error); }
   try { helpPort?.destroy(); } catch (error) { errors.push(error); }
   try { documentSessionPort?.destroy(); } catch (error) { errors.push(error); }
   try { documentDomainPort?.destroy(); } catch (error) { errors.push(error); }
@@ -72,12 +110,34 @@ export function startModuleEntry({
     let documentDomainPort = null;
     let documentSessionStore = null;
     let documentSessionPort = null;
+    let menuState = null;
+    let menuCommandBindings = null;
+    let classicMenuCommandAdapter = null;
+    let menuController = null;
+    let unregisterHelpMenuCommand = null;
+    let unregisterSettingsMenuCommand = null;
     try {
       ui = createUI(root);
       contentPort = createCompatibilityBusinessContentPort(root, ui);
       const markup = await fetchCompatibilityContent(fetchImpl);
       contentPort.mount(markup);
       const portsHost = documentRef.getElementById('compatibility-business-ports');
+      menuState = createMenuState();
+      menuCommandBindings = createMenuCommandBindings();
+      const menuView = createMenuView({ root: ui.menu });
+      classicMenuCommandAdapter = createClassicMenuCommandAdapter({
+        bindings: menuCommandBindings,
+        host: portsHost,
+        globalObject: documentRef.defaultView
+      });
+      classicMenuCommandAdapter.start();
+      menuController = createMenuController({
+        state: menuState,
+        bindings: menuCommandBindings,
+        view: menuView,
+        closeMenus: () => classicMenuCommandAdapter.closeMenus(),
+        reportError(message, error) { console.error(message, error); }
+      });
       documentSessionStore = createDocumentSessionStore();
       documentSessionPort = mountClassicDocumentSessionPort(portsHost, documentSessionStore);
       const settingsRepository = createSettingsRepository({ storage });
@@ -92,6 +152,10 @@ export function startModuleEntry({
         i18n: i18nService,
         storage
       });
+      unregisterHelpMenuCommand = menuCommandBindings.register(
+        MENU_COMMAND_IDS.HELP_OPEN,
+        () => helpController.open()
+      );
       translationBindings = createTranslationBindings(i18nService, ui, {
         documentElement: documentRef.documentElement
       });
@@ -140,8 +204,37 @@ export function startModuleEntry({
         store: settingsStore,
         platform: settingsPlatform
       });
+      unregisterSettingsMenuCommand = menuCommandBindings.register(
+        MENU_COMMAND_IDS.SETTINGS_OPEN,
+        () => settingsController.open()
+      );
+      menuController.start();
     } catch (error) {
-      const cleanupErrors = destroyStartupResources({ helpPort, documentSessionPort, documentDomainPort, documentSessionStore, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+      const cleanupErrors = destroyStartupResources({
+        unregisterSettingsMenuCommand,
+        unregisterHelpMenuCommand,
+        menuController,
+        classicMenuCommandAdapter,
+        menuCommandBindings,
+        menuState,
+        helpPort,
+        documentSessionPort,
+        documentDomainPort,
+        documentSessionStore,
+        settingsController,
+        themeToggleController,
+        settingsLocaleController,
+        settingsCommandCoordinator,
+        settingsPort,
+        themeService,
+        settingsStore,
+        i18nPort,
+        translationBindings,
+        helpController,
+        i18nService,
+        contentPort,
+        ui
+      });
       starts.delete(documentRef);
       if (!cleanupErrors.length) throw error;
       throw new AggregateError([error, ...cleanupErrors], 'Application startup failed and cleanup was incomplete.');
@@ -152,7 +245,31 @@ export function startModuleEntry({
       destroy() {
         if (destroyed) return;
         destroyed = true;
-        const errors = destroyStartupResources({ helpPort, documentSessionPort, documentDomainPort, documentSessionStore, settingsController, themeToggleController, settingsLocaleController, settingsCommandCoordinator, settingsPort, themeService, settingsStore, i18nPort, translationBindings, helpController, i18nService, contentPort, ui });
+        const errors = destroyStartupResources({
+          unregisterSettingsMenuCommand,
+          unregisterHelpMenuCommand,
+          menuController,
+          classicMenuCommandAdapter,
+          menuCommandBindings,
+          menuState,
+          helpPort,
+          documentSessionPort,
+          documentDomainPort,
+          documentSessionStore,
+          settingsController,
+          themeToggleController,
+          settingsLocaleController,
+          settingsCommandCoordinator,
+          settingsPort,
+          themeService,
+          settingsStore,
+          i18nPort,
+          translationBindings,
+          helpController,
+          i18nService,
+          contentPort,
+          ui
+        });
         starts.delete(documentRef);
         if (errors.length) throw new AggregateError(errors, 'Application bootstrap cleanup failed.');
       }

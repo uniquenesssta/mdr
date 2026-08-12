@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.9 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.10 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  folder-tree:
-    name: Verify Stage 6 Through Folder Tree
+  menu-model:
+    name: Verify Stage 6 Through Menu Model
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -181,8 +181,19 @@ jobs:
           tests/architecture/stage-06-folder-tree.test.mjs
           tests/unit/platform/platform-cutover.test.mjs
           tests/svg-sprite.test.mjs
-      - name: Verify modified classic and browser runners parse
+      - name: Verify Atomic Task 6.10 Menu Model
         run: >-
+          node --test
+          tests/unit/menu/menu-state.test.mjs
+          tests/unit/menu/menu-command-bindings.test.mjs
+          tests/unit/menu/menu-view.test.mjs
+          tests/unit/menu/menu-controller.test.mjs
+          tests/unit/menu/classic-menu-command-adapter.test.mjs
+          tests/architecture/stage-06-menu-model.test.mjs
+          tests/stage-06-menu-model.test.mjs
+      - name: Verify modified classic and module runners parse
+        run: >-
+          node --check src/bootstrap/module-entry.js &&
           node --check src/main.js &&
           node --check public/app/core.js &&
           node --check public/app/bootstrap.js &&
@@ -190,6 +201,11 @@ jobs:
           node --check public/app/preview.js &&
           node --check public/app/scroll-sync.js &&
           node --check public/app/export.js &&
+          node --check src/features/menu/menu-command-bindings.js &&
+          node --check src/features/menu/menu-state.js &&
+          node --check src/features/menu/menu-view.js &&
+          node --check src/features/menu/menu-controller.js &&
+          node --check src/features/menu/compatibility/classic-menu-command-adapter.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-controller.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-view.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-node-view.js &&
@@ -210,10 +226,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.9 evidence
+      - name: Upload Atomic Task 6.10 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-folder-tree-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-menu-model-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30
