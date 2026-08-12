@@ -1,3 +1,6 @@
+import { PREVIEW_BEHAVIOR_THRESHOLDS } from '../features/preview/index.js';
+
+const ENHANCEMENT_THRESHOLDS = PREVIEW_BEHAVIOR_THRESHOLDS.scheduling.enhancement;
 let enhancementScheduleId = 0;
 
 function scheduleIdle(callback) {
@@ -5,14 +8,14 @@ function scheduleIdle(callback) {
   if (scheduler?.schedule) {
     const task = scheduler.schedule(`preview-enhancement-${++enhancementScheduleId}`, ({ deadline }) => callback(deadline), {
       priority: 'background',
-      timeout: 180
+      timeout: ENHANCEMENT_THRESHOLDS.idleTimeoutMs
     });
     return { type: 'scheduler', cancel: task.cancel };
   }
   if ('requestIdleCallback' in window) {
-    return { type: 'idle', id: requestIdleCallback(callback, { timeout: 180 }) };
+    return { type: 'idle', id: requestIdleCallback(callback, { timeout: ENHANCEMENT_THRESHOLDS.idleTimeoutMs }) };
   }
-  return { type: 'timeout', id: setTimeout(() => callback({ timeRemaining: () => 8, didTimeout: true }), 16) };
+  return { type: 'timeout', id: setTimeout(() => callback({ timeRemaining: () => 8, didTimeout: true }), ENHANCEMENT_THRESHOLDS.fallbackMs) };
 }
 
 function cancelScheduled(handle) {
@@ -118,7 +121,7 @@ export class PreviewEnhancementQueue {
     try {
       let processed = 0;
       while (this.jobs.length && version === this.version) {
-        if (processed > 0 && !deadline.didTimeout && deadline.timeRemaining() < 3) break;
+        if (processed > 0 && !deadline.didTimeout && deadline.timeRemaining() < ENHANCEMENT_THRESHOLDS.minimumTimeRemainingMs) break;
         const job = this.jobs.shift();
         if (!job || job.version !== this.version) continue;
         if (!job.root.isConnected) continue;

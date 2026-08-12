@@ -4,18 +4,28 @@
     const previewSidebarControllerPort = previewCompatibilityHost?.markdownEditorSidebarControllerPort;
     const previewOutlineControllerPort = previewCompatibilityHost?.markdownEditorOutlineControllerPort;
     const previewEditorUiCommandPort = previewCompatibilityHost?.markdownEditorEditorUiCommandPort;
+    const previewThresholdsPort = previewCompatibilityHost?.markdownEditorPreviewThresholdsPort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!previewSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
     if (!previewOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
     if (!previewEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+    if (!previewThresholdsPort) throw new Error('Preview Thresholds compatibility port is unavailable.');
+    const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
     previewEditorUiCommandPort.register({
       focusPreviewLineForOutline: (line, options) => focusPreviewLine(line, options)
     });
     function schedulePreviewUpdate() {
       clearTimeout(previewUpdateTimer);
       const length = editor.textLength;
-      const delay = length >= ULTRA_LARGE_DOCUMENT_CHARS ? 420 : length >= 100000 ? 120 : length >= 40000 ? 70 : 18;
+      const inputThresholds = classicPreviewBehaviorThresholds.scheduling.input;
+      const delay = length >= classicPreviewBehaviorThresholds.mode.virtualChars
+        ? inputThresholds.virtualMs
+        : length >= classicPreviewBehaviorThresholds.mode.workerChars
+          ? inputThresholds.workerMs
+          : length >= inputThresholds.mediumChars
+            ? inputThresholds.mediumMs
+            : inputThresholds.defaultMs;
       previewUpdateTimer = setTimeout(() => {
         previewUpdateTimer = 0;
         updatePreview();
@@ -28,9 +38,6 @@
     let previewLayoutObserver = null;
     let previewObservedWidth = 0;
     let previewObservedHeight = 0;
-    const PREVIEW_LAYOUT_MAX_ATTEMPTS = 18;
-    const PREVIEW_LAYOUT_STABLE_FRAMES = 2;
-    const MIN_CHAPTER_PREVIEW_BLOCKS = 24;
 
     function getPreviewLayoutState() {
       const previewPane = document.querySelector('.preview-pane');
@@ -85,7 +92,9 @@
           const layout = getPreviewLayoutState();
           attempts += 1;
           if (!layout.visible) {
-            if (attempts < PREVIEW_LAYOUT_MAX_ATTEMPTS) schedule(34);
+            if (attempts < classicPreviewBehaviorThresholds.scheduling.layout.maxAttempts) {
+              schedule(classicPreviewBehaviorThresholds.scheduling.layout.retryMs);
+            }
             return;
           }
 
@@ -96,7 +105,8 @@
             previousWidth = layout.width;
             previousHeight = layout.height;
           }
-          if (stableFrames < PREVIEW_LAYOUT_STABLE_FRAMES && attempts < PREVIEW_LAYOUT_MAX_ATTEMPTS) {
+          if (stableFrames < classicPreviewBehaviorThresholds.scheduling.layout.stableFrames
+            && attempts < classicPreviewBehaviorThresholds.scheduling.layout.maxAttempts) {
             schedule();
             return;
           }
@@ -168,7 +178,9 @@
 
     function schedulePreviewFocusUpdate() {
       if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) return;
-      if (!editor.virtualEditor || (editor.textLength < 100000 && previewPerformanceMode !== 'chapter') || previewUpdateTimer) return;
+      if (!editor.virtualEditor
+        || (editor.textLength < classicPreviewBehaviorThresholds.mode.workerChars && previewPerformanceMode !== 'chapter')
+        || previewUpdateTimer) return;
       const line = editor.virtualEditor.getLineNumberAtPosition?.(editor.selectionStart || 0) || 1;
       const chapter = activePreviewFocusChapter;
       if (chapter && line >= chapter.startLine && line <= chapter.endLine) return;
@@ -176,7 +188,7 @@
       previewFocusUpdateTimer = setTimeout(() => {
         previewFocusUpdateTimer = 0;
         updatePreview();
-      }, 120);
+      }, classicPreviewBehaviorThresholds.scheduling.focusMs);
     }
 
 
@@ -302,16 +314,16 @@
             }
           });
         };
-        if (sourceLength >= LARGE_DOCUMENT_CHARS) {
+        if (sourceLength >= classicPreviewBehaviorThresholds.scheduling.postprocess.deferChars) {
           const scheduler = window.markdownEditorTaskScheduler;
           if (scheduler?.schedule) {
             previewEnhancementIdle = scheduler.schedule('preview-postprocess', ({ signal }) => {
               if (!signal.aborted) finish();
-            }, { priority: 'background', timeout: 260 });
+            }, { priority: 'background', timeout: classicPreviewBehaviorThresholds.scheduling.postprocess.idleTimeoutMs });
           } else if ('requestIdleCallback' in window) {
-            previewEnhancementIdle = requestIdleCallback(finish, { timeout: 260 });
+            previewEnhancementIdle = requestIdleCallback(finish, { timeout: classicPreviewBehaviorThresholds.scheduling.postprocess.idleTimeoutMs });
           } else {
-            previewEnhancementIdle = setTimeout(finish, 32);
+            previewEnhancementIdle = setTimeout(finish, classicPreviewBehaviorThresholds.scheduling.postprocess.fallbackMs);
           }
         } else {
           finish();
@@ -605,11 +617,11 @@
       );
       let startIndex = chapterStartIndex;
       let endIndex = chapterEndIndex;
-      if (endIndex - startIndex < MIN_CHAPTER_PREVIEW_BLOCKS) {
-        const missing = MIN_CHAPTER_PREVIEW_BLOCKS - (endIndex - startIndex);
+      if (endIndex - startIndex < classicPreviewBehaviorThresholds.chapter.minimumBlocks) {
+        const missing = classicPreviewBehaviorThresholds.chapter.minimumBlocks - (endIndex - startIndex);
         startIndex = Math.max(0, startIndex - Math.ceil(missing / 2));
-        endIndex = Math.min(blocks.length, Math.max(chapterEndIndex, startIndex + MIN_CHAPTER_PREVIEW_BLOCKS));
-        startIndex = Math.max(0, Math.min(startIndex, endIndex - MIN_CHAPTER_PREVIEW_BLOCKS));
+        endIndex = Math.min(blocks.length, Math.max(chapterEndIndex, startIndex + classicPreviewBehaviorThresholds.chapter.minimumBlocks));
+        startIndex = Math.max(0, Math.min(startIndex, endIndex - classicPreviewBehaviorThresholds.chapter.minimumBlocks));
       }
       const chapterBlocks = blocks.slice(startIndex, endIndex);
       const chapterIds = new Set(chapterBlocks.map(block => block.id));
@@ -661,7 +673,10 @@
         }
       };
       const scheduler = window.markdownEditorTaskScheduler;
-      if (scheduler?.schedule) scheduler.schedule('preview-prewarm', run, { priority: 'idle', timeout: 700 });
+      if (scheduler?.schedule) scheduler.schedule('preview-prewarm', run, {
+        priority: 'idle',
+        timeout: classicPreviewBehaviorThresholds.scheduling.prewarmTimeoutMs
+      });
       else run();
     }
 
@@ -891,7 +906,10 @@
       let workerFailed = false;
       const requestedPreviewMode = normalizePreviewPerformanceMode(previewPerformanceMode);
       const hybridMode = typeof isHybridLayoutMode === 'function' && isHybridLayoutMode();
-      const useWorker = (hybridMode || sourceLength >= 100000 || requestedPreviewMode === 'virtual' || requestedPreviewMode === 'chapter')
+      const useWorker = (hybridMode
+        || sourceLength >= classicPreviewBehaviorThresholds.mode.workerChars
+        || requestedPreviewMode === 'virtual'
+        || requestedPreviewMode === 'chapter')
         && Boolean(window.createPreviewWorkerClient);
 
       try {
@@ -1104,7 +1122,7 @@
         return;
       }
 
-      if (!patchResult && workerFailed && sourceLength >= ULTRA_LARGE_DOCUMENT_CHARS) {
+      if (!patchResult && workerFailed && sourceLength >= classicPreviewBehaviorThresholds.mode.virtualChars) {
         const body = preview.querySelector('.markdown-body');
         if (body && !body.classList.contains('preview-loading')) {
           patchResult = {

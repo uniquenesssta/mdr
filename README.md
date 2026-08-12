@@ -1,3 +1,5 @@
 # Markdown Editor
 
-Tauri + Rust 桌面 Markdown 编辑器。Atomic 6.14 已完成 Stage 6 销毁验证：Layout/Sidebar/Menu/Window 的 listener、pointer capture、observer、RAF、timer、subscription 在 destroy 后归零；并修复 Compact Split stale ResizeObserver 在销毁后重新申请 RAF。candidate `31606853046` 全链 PASS；Stage 7 未开始。Frozen Model、持久化、Rust、依赖未改。详见 [docs/README.md](docs/README.md)。
+简介：本仓库是模块化重写中的桌面 Markdown 编辑器；范围与权威导航见 [docs/README.md](docs/README.md)。
+
+Atomic 7.1 已完成预览行为阈值冻结：字符、块、调度、虚拟窗口与章节阈值由 `src/features/preview/pipeline/preview-thresholds.js` 单一拥有，classic 与现有 Preview 模块只读消费。完整候选链 PASS；冻结模型、持久化、Rust、依赖未改，Atomic 7.2 尚未开始。

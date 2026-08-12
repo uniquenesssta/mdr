@@ -13,6 +13,7 @@ const coreSidebarControllerPort = coreCompatibilityHost?.markdownEditorSidebarCo
 const coreOutlineControllerPort = coreCompatibilityHost?.markdownEditorOutlineControllerPort;
 const coreFolderTreeControllerPort = coreCompatibilityHost?.markdownEditorFolderTreeControllerPort;
 const coreSubmenuPositionerPort = coreCompatibilityHost?.markdownEditorSubmenuPositionerPort;
+const corePreviewThresholdsPort = coreCompatibilityHost?.markdownEditorPreviewThresholdsPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -26,6 +27,8 @@ if (!coreSidebarControllerPort) throw new Error('Sidebar controller compatibilit
 if (!coreOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
 if (!coreFolderTreeControllerPort) throw new Error('Folder Tree controller compatibility port is unavailable.');
 if (!coreSubmenuPositionerPort) throw new Error('Submenu Positioner compatibility port is unavailable.');
+if (!corePreviewThresholdsPort) throw new Error('Preview Thresholds compatibility port is unavailable.');
+const corePreviewBehaviorThresholds = corePreviewThresholdsPort.snapshot;
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
   closeDocument: documentId => closeDocument(documentId),
@@ -79,9 +82,8 @@ const editor = document.getElementById('editor');
     let selectionSyncLock = false;
     let saveStatusState = 'saved';
     let saveStatusResetTimer = 0;
-    const LARGE_DOCUMENT_CHARS = 80000;
-    const ULTRA_LARGE_DOCUMENT_CHARS = 400000;
-    const VIRTUAL_PREVIEW_BLOCK_THRESHOLD = 1400;
+    const LARGE_DOCUMENT_CHARS = corePreviewBehaviorThresholds.scheduling.postprocess.deferChars;
+    const ULTRA_LARGE_DOCUMENT_CHARS = corePreviewBehaviorThresholds.mode.virtualChars;
     const AUTOSAVE_MIN_SECONDS = 0.5;
     const AUTOSAVE_MAX_SECONDS = 3600;
     const PREVIEW_PERFORMANCE_MODES = new Set(['auto', 'full', 'virtual', 'chapter']);
@@ -106,8 +108,8 @@ const editor = document.getElementById('editor');
     function resolvePreviewPerformanceMode(sourceLength = editor.textLength, blockCount = 0) {
       const requested = normalizePreviewPerformanceMode(previewPerformanceMode);
       if (requested !== 'auto') return requested;
-      if (sourceLength >= 1000000 || blockCount >= 12000) return 'chapter';
-      if (sourceLength >= ULTRA_LARGE_DOCUMENT_CHARS || blockCount >= VIRTUAL_PREVIEW_BLOCK_THRESHOLD) return 'virtual';
+      if (sourceLength >= corePreviewBehaviorThresholds.mode.chapterChars || blockCount >= corePreviewBehaviorThresholds.mode.chapterBlocks) return 'chapter';
+      if (sourceLength >= corePreviewBehaviorThresholds.mode.virtualChars || blockCount >= corePreviewBehaviorThresholds.mode.virtualBlocks) return 'virtual';
       return 'full';
     }
 
@@ -116,7 +118,7 @@ const editor = document.getElementById('editor');
       if (!badge) return;
       const resolved = normalizePreviewPerformanceMode(mode === 'standard' ? 'full' : mode);
       const labels = { full: '完整预览', virtual: '虚拟预览', chapter: '当前章节' };
-      const shouldShow = resolved !== 'full' || previewPerformanceMode !== 'auto' || editor.textLength >= 100000;
+      const shouldShow = resolved !== 'full' || previewPerformanceMode !== 'auto' || editor.textLength >= corePreviewBehaviorThresholds.mode.badgeChars;
       badge.hidden = !shouldShow;
       badge.textContent = labels[resolved] || labels.full;
       badge.dataset.mode = resolved;

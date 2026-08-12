@@ -4,11 +4,11 @@ import {
   protectMarkdownMathSource,
   restoreMarkdownMathSource
 } from '../model-kernel/index.js';
+import { PREVIEW_BEHAVIOR_THRESHOLDS } from '../features/preview/index.js';
 
 marked.setOptions({ breaks: true, gfm: true });
 
-const PRIORITY_BLOCK_LIMIT = 96;
-const PRIORITY_CHAR_LIMIT = 120000;
+const CHAPTER_THRESHOLDS = PREVIEW_BEHAVIOR_THRESHOLDS.chapter;
 
 let source = '';
 let version = 0;
@@ -264,22 +264,22 @@ function renderPriorityBlocks(result, focusChapter, definitions) {
       if (!block) continue;
       requested.add(id);
       changedChars += block.raw.length;
-      if (requested.size >= PRIORITY_BLOCK_LIMIT || changedChars >= PRIORITY_CHAR_LIMIT) break;
+      if (requested.size >= CHAPTER_THRESHOLDS.priorityBlocks || changedChars >= CHAPTER_THRESHOLDS.priorityChars) break;
     }
   }
   if (focusChapter) {
     const chapterStart = Math.max(0, focusChapter.startIndex);
     const chapterEnd = Math.min(blocks.length, focusChapter.endIndex);
     const focusIndex = Math.max(chapterStart, Math.min(chapterEnd - 1, focusChapter.focusIndex));
-    let start = Math.max(chapterStart, focusIndex - Math.floor(PRIORITY_BLOCK_LIMIT / 2));
-    let end = Math.min(chapterEnd, start + PRIORITY_BLOCK_LIMIT);
-    start = Math.max(chapterStart, end - PRIORITY_BLOCK_LIMIT);
+    let start = Math.max(chapterStart, focusIndex - Math.floor(CHAPTER_THRESHOLDS.priorityBlocks / 2));
+    let end = Math.min(chapterEnd, start + CHAPTER_THRESHOLDS.priorityBlocks);
+    start = Math.max(chapterStart, end - CHAPTER_THRESHOLDS.priorityBlocks);
     let chars = 0;
-    for (let index = focusIndex; index < end && chars < PRIORITY_CHAR_LIMIT; index += 1) {
+    for (let index = focusIndex; index < end && chars < CHAPTER_THRESHOLDS.priorityChars; index += 1) {
       requested.add(blocks[index].id);
       chars += blocks[index].raw.length;
     }
-    for (let index = focusIndex - 1; index >= start && chars < PRIORITY_CHAR_LIMIT; index -= 1) {
+    for (let index = focusIndex - 1; index >= start && chars < CHAPTER_THRESHOLDS.priorityChars; index -= 1) {
       requested.add(blocks[index].id);
       chars += blocks[index].raw.length;
     }

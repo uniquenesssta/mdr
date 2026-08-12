@@ -1,7 +1,6 @@
-const DEFAULT_OVERSCAN_PX = 1000;
-const MIN_WINDOW_BLOCKS = 24;
-const MAX_WINDOW_BLOCKS = 180;
-const PREWARM_BLOCK_LIMIT = 96;
+import { PREVIEW_BEHAVIOR_THRESHOLDS } from '../features/preview/index.js';
+
+const VIRTUAL_WINDOW_THRESHOLDS = PREVIEW_BEHAVIOR_THRESHOLDS.virtualWindow;
 const HEIGHT_CACHE_PREFIX = 'md_editor_preview_heights_v1:';
 const HEIGHT_CACHE_LIMIT = 4000;
 const HEIGHT_CACHE_VERSION = 1;
@@ -230,7 +229,8 @@ export class VirtualPreviewController {
   }
 
   shouldUse(blocks, sourceLength) {
-    return sourceLength >= 400000 || blocks.length >= 1400;
+    return sourceLength >= PREVIEW_BEHAVIOR_THRESHOLDS.mode.virtualChars
+      || blocks.length >= PREVIEW_BEHAVIOR_THRESHOLDS.mode.virtualBlocks;
   }
 
   activate() {
@@ -378,17 +378,17 @@ export class VirtualPreviewController {
 
   calculateWindow() {
     if (!this.blocks.length) return { start: 0, end: 0 };
-    const viewportTop = Math.max(0, this.preview.scrollTop - DEFAULT_OVERSCAN_PX);
-    const viewportBottom = this.preview.scrollTop + this.preview.clientHeight + DEFAULT_OVERSCAN_PX;
+    const viewportTop = Math.max(0, this.preview.scrollTop - VIRTUAL_WINDOW_THRESHOLDS.overscanPx);
+    const viewportBottom = this.preview.scrollTop + this.preview.clientHeight + VIRTUAL_WINDOW_THRESHOLDS.overscanPx;
     let start = findIndexAtOffset(this.offsets, viewportTop);
     let end = Math.min(this.blocks.length, findIndexAtOffset(this.offsets, viewportBottom) + 1);
-    if (end - start < MIN_WINDOW_BLOCKS) {
-      const missing = MIN_WINDOW_BLOCKS - (end - start);
+    if (end - start < VIRTUAL_WINDOW_THRESHOLDS.minimumBlocks) {
+      const missing = VIRTUAL_WINDOW_THRESHOLDS.minimumBlocks - (end - start);
       start = Math.max(0, start - Math.ceil(missing / 2));
-      end = Math.min(this.blocks.length, start + MIN_WINDOW_BLOCKS);
-      start = Math.max(0, end - MIN_WINDOW_BLOCKS);
+      end = Math.min(this.blocks.length, start + VIRTUAL_WINDOW_THRESHOLDS.minimumBlocks);
+      start = Math.max(0, end - VIRTUAL_WINDOW_THRESHOLDS.minimumBlocks);
     }
-    if (end - start > MAX_WINDOW_BLOCKS) end = start + MAX_WINDOW_BLOCKS;
+    if (end - start > VIRTUAL_WINDOW_THRESHOLDS.maximumBlocks) end = start + VIRTUAL_WINDOW_THRESHOLDS.maximumBlocks;
     return { start, end };
   }
 
@@ -513,11 +513,11 @@ export class VirtualPreviewController {
     };
 
     if (this.scrollDirection >= 0) {
-      for (let index = range.end; index < this.blocks.length && ids.length < PREWARM_BLOCK_LIMIT; index += 1) append(index);
-      for (let index = range.start - 1; index >= 0 && ids.length < PREWARM_BLOCK_LIMIT; index -= 1) append(index);
+      for (let index = range.end; index < this.blocks.length && ids.length < VIRTUAL_WINDOW_THRESHOLDS.prewarmBlocks; index += 1) append(index);
+      for (let index = range.start - 1; index >= 0 && ids.length < VIRTUAL_WINDOW_THRESHOLDS.prewarmBlocks; index -= 1) append(index);
     } else {
-      for (let index = range.start - 1; index >= 0 && ids.length < PREWARM_BLOCK_LIMIT; index -= 1) append(index);
-      for (let index = range.end; index < this.blocks.length && ids.length < PREWARM_BLOCK_LIMIT; index += 1) append(index);
+      for (let index = range.start - 1; index >= 0 && ids.length < VIRTUAL_WINDOW_THRESHOLDS.prewarmBlocks; index -= 1) append(index);
+      for (let index = range.end; index < this.blocks.length && ids.length < VIRTUAL_WINDOW_THRESHOLDS.prewarmBlocks; index += 1) append(index);
     }
 
     if (!ids.length) return;
@@ -670,12 +670,12 @@ export class VirtualPreviewController {
     if (low < this.range.start || high >= this.range.end) {
       let start;
       let end;
-      if (required >= MAX_WINDOW_BLOCKS) {
+      if (required >= VIRTUAL_WINDOW_THRESHOLDS.maximumBlocks) {
         clipped = true;
         start = low;
-        end = Math.min(this.blocks.length, start + MAX_WINDOW_BLOCKS);
+        end = Math.min(this.blocks.length, start + VIRTUAL_WINDOW_THRESHOLDS.maximumBlocks);
       } else {
-        const targetSize = Math.min(MAX_WINDOW_BLOCKS, Math.max(MIN_WINDOW_BLOCKS, required + 8));
+        const targetSize = Math.min(VIRTUAL_WINDOW_THRESHOLDS.maximumBlocks, Math.max(VIRTUAL_WINDOW_THRESHOLDS.minimumBlocks, required + 8));
         const spare = targetSize - required;
         start = clamp(low - Math.floor(spare / 2), 0, Math.max(0, this.blocks.length - targetSize));
         end = Math.min(this.blocks.length, start + targetSize);
