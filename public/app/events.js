@@ -407,7 +407,6 @@
 
     // 启动
     setupWindowChrome();
-    initializeAppSubmenus();
     window.__markdownEditorInitPromise = init().then(async () => {
       const initialPath = eventsPlatformPort?.supports('desktop.fileSystem')
         ? await eventsPlatformPort.call('files', 'getInitialPath')

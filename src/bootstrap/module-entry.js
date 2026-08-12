@@ -8,7 +8,9 @@ import {
   createMenuCommandBindings,
   createMenuController,
   createMenuState,
-  createMenuView
+  createMenuView,
+  createSubmenuPositioner,
+  mountClassicSubmenuPositionerPort
 } from '../features/menu/index.js';
 import { SETTINGS_CHANGED_EVENT, createSettingsApplyCoordinator, createSettingsFeature, createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort } from '../features/settings/index.js';
 import { createI18nService, createSettingsLocaleController, createTranslationBindings, localeRegistry, mountClassicI18nPort } from '../i18n/index.js';
@@ -30,6 +32,8 @@ function destroyStartupResources({
   unregisterHelpMenuCommand,
   menuController,
   classicMenuCommandAdapter,
+  submenuPositionerPort,
+  submenuPositioner,
   menuCommandBindings,
   menuState,
   helpPort,
@@ -55,6 +59,8 @@ function destroyStartupResources({
   try { unregisterHelpMenuCommand?.(); } catch (error) { errors.push(error); }
   try { menuController?.destroy(); } catch (error) { errors.push(error); }
   try { classicMenuCommandAdapter?.destroy(); } catch (error) { errors.push(error); }
+  try { submenuPositionerPort?.destroy(); } catch (error) { errors.push(error); }
+  try { submenuPositioner?.destroy(); } catch (error) { errors.push(error); }
   try { menuCommandBindings?.destroy(); } catch (error) { errors.push(error); }
   try { menuState?.destroy(); } catch (error) { errors.push(error); }
   try { helpPort?.destroy(); } catch (error) { errors.push(error); }
@@ -114,6 +120,8 @@ export function startModuleEntry({
     let menuCommandBindings = null;
     let classicMenuCommandAdapter = null;
     let menuController = null;
+    let submenuPositioner = null;
+    let submenuPositionerPort = null;
     let unregisterHelpMenuCommand = null;
     let unregisterSettingsMenuCommand = null;
     try {
@@ -122,6 +130,8 @@ export function startModuleEntry({
       const markup = await fetchCompatibilityContent(fetchImpl);
       contentPort.mount(markup);
       const portsHost = documentRef.getElementById('compatibility-business-ports');
+      submenuPositioner = createSubmenuPositioner({ root: ui.menu, runtime: documentRef.defaultView });
+      submenuPositionerPort = mountClassicSubmenuPositionerPort(portsHost, submenuPositioner);
       menuState = createMenuState();
       menuCommandBindings = createMenuCommandBindings();
       const menuView = createMenuView({ root: ui.menu });
@@ -208,6 +218,7 @@ export function startModuleEntry({
         MENU_COMMAND_IDS.SETTINGS_OPEN,
         () => settingsController.open()
       );
+      submenuPositioner.start();
       menuController.start();
     } catch (error) {
       const cleanupErrors = destroyStartupResources({
@@ -215,6 +226,8 @@ export function startModuleEntry({
         unregisterHelpMenuCommand,
         menuController,
         classicMenuCommandAdapter,
+        submenuPositionerPort,
+        submenuPositioner,
         menuCommandBindings,
         menuState,
         helpPort,
@@ -250,6 +263,8 @@ export function startModuleEntry({
           unregisterHelpMenuCommand,
           menuController,
           classicMenuCommandAdapter,
+          submenuPositionerPort,
+          submenuPositioner,
           menuCommandBindings,
           menuState,
           helpPort,

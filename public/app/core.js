@@ -12,6 +12,7 @@ const coreLayoutStatePort = coreCompatibilityHost?.markdownEditorLayoutStatePort
 const coreSidebarControllerPort = coreCompatibilityHost?.markdownEditorSidebarControllerPort;
 const coreOutlineControllerPort = coreCompatibilityHost?.markdownEditorOutlineControllerPort;
 const coreFolderTreeControllerPort = coreCompatibilityHost?.markdownEditorFolderTreeControllerPort;
+const coreSubmenuPositionerPort = coreCompatibilityHost?.markdownEditorSubmenuPositionerPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -24,6 +25,7 @@ if (!coreLayoutStatePort) throw new Error('Layout State compatibility port is un
 if (!coreSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
 if (!coreOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
 if (!coreFolderTreeControllerPort) throw new Error('Folder Tree controller compatibility port is unavailable.');
+if (!coreSubmenuPositionerPort) throw new Error('Submenu Positioner compatibility port is unavailable.');
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
   closeDocument: documentId => closeDocument(documentId),
@@ -376,79 +378,6 @@ const editor = document.getElementById('editor');
       menu.style.removeProperty('top');
     }
 
-    function positionAppSubmenu(submenu, owner) {
-      if (!submenu || !owner) return;
-      const ownerRect = owner.getBoundingClientRect();
-      const margin = 8;
-      const gap = 4;
-
-      // 子菜单必须保持在父菜单项的局部坐标系中。顶层菜单进入动画包含 transform，
-      // 若这里使用 fixed，浏览器会把视口坐标再次叠加到动画容器坐标，造成横向偏移。
-      submenu.style.position = 'absolute';
-      submenu.style.right = 'auto';
-      submenu.style.left = Math.round(ownerRect.width + gap) + 'px';
-      submenu.style.top = '-6px';
-
-      const submenuRect = submenu.getBoundingClientRect();
-      const fitsRight = ownerRect.right + gap + submenuRect.width <= window.innerWidth - margin;
-      const localLeft = fitsRight
-        ? ownerRect.width + gap
-        : -submenuRect.width - gap;
-      const maxViewportTop = Math.max(margin, window.innerHeight - submenuRect.height - margin);
-      const viewportTop = Math.max(margin, Math.min(ownerRect.top - 6, maxViewportTop));
-
-      submenu.style.left = Math.round(localLeft) + 'px';
-      submenu.style.top = Math.round(viewportTop - ownerRect.top) + 'px';
-    }
-
-    function resetAppSubmenuPosition(submenu) {
-      if (!submenu) return;
-      submenu.style.removeProperty('position');
-      submenu.style.removeProperty('left');
-      submenu.style.removeProperty('right');
-      submenu.style.removeProperty('top');
-    }
-
-    function initializeAppSubmenus() {
-      const closeDelayMs = 1000;
-      document.querySelectorAll('.menu-submenu').forEach(owner => {
-        if (owner.dataset.submenuPositioningReady === 'true') return;
-        const submenu = owner.querySelector(':scope > .menu-submenu-list');
-        if (!submenu) return;
-        owner.dataset.submenuPositioningReady = 'true';
-        let closeTimer = 0;
-
-        const cancelClose = () => {
-          if (!closeTimer) return;
-          clearTimeout(closeTimer);
-          closeTimer = 0;
-        };
-        const openSubmenu = () => {
-          if (owner.classList.contains('disabled')) return;
-          cancelClose();
-          owner.classList.add('is-submenu-open');
-          requestAnimationFrame(() => positionAppSubmenu(submenu, owner));
-        };
-        const scheduleClose = () => {
-          cancelClose();
-          closeTimer = window.setTimeout(() => {
-            closeTimer = 0;
-            if (owner.matches(':hover') || submenu.matches(':hover') || owner.contains(document.activeElement)) return;
-            owner.classList.remove('is-submenu-open');
-            resetAppSubmenuPosition(submenu);
-          }, closeDelayMs);
-        };
-
-        owner.__markdownEditorCancelSubmenuClose = cancelClose;
-        owner.addEventListener('pointerenter', openSubmenu);
-        owner.addEventListener('pointerleave', scheduleClose);
-        owner.addEventListener('focusin', openSubmenu);
-        owner.addEventListener('focusout', scheduleClose);
-        submenu.addEventListener('pointerenter', openSubmenu);
-        submenu.addEventListener('pointerleave', scheduleClose);
-      });
-    }
-
     function toggleAppMenu(menuId) {
       const target = document.getElementById(menuId);
       if (!target) return;
@@ -466,11 +395,7 @@ const editor = document.getElementById('editor');
         menu.classList.remove('show');
         resetTopLevelAppMenuPosition(menu);
       });
-      document.querySelectorAll('.menu-submenu').forEach(owner => {
-        owner.__markdownEditorCancelSubmenuClose?.();
-        owner.classList.remove('is-submenu-open');
-      });
-      document.querySelectorAll('.menu-submenu-list').forEach(resetAppSubmenuPosition);
+      coreSubmenuPositionerPort.closeAll();
       document.querySelectorAll('.menu-trigger[aria-expanded="true"]').forEach(button => {
         button.setAttribute('aria-expanded', 'false');
       });

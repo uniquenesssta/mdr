@@ -1,3 +1,3 @@
 # Markdown Editor
 
-Tauri + Rust 桌面 Markdown 编辑器。Atomic 6.10 Menu Model 已完成：菜单声明/状态/命令绑定/Controller/View 按职责拆分，classic 调用隔离在 compatibility adapter；既有菜单行为保持，6.11/6.12 未开始。未改 Frozen DocumentModel、持久化、Rust、依赖。候选全链 6.10、Architecture、Node、Browser Contract、Build、Built App 均 PASS。当前容器无真实本地 worktree，正式以 GitHub Actions 为准。详见 [docs/README.md](docs/README.md)。
+Tauri + Rust 桌面 Markdown 编辑器。Atomic 6.11 已将子菜单几何、延迟关闭与焦点生命周期拆入独立 Positioner，classic 旧实现已删除，仅保留显式 close port；6.12 未开始。候选全链 run `31577907476`：6.11、Chromium、Architecture、Node、Browser、Build、Built App 均 PASS。未改 Frozen DocumentModel、持久化、Rust、依赖；当前容器无真实本地 worktree。详见 [docs/README.md](docs/README.md)。

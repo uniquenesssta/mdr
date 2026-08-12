@@ -28,8 +28,7 @@ test('Atomic 6.10 Menu Model has one public entry and no business calls in model
   assert.doesNotMatch(bootstrap, /features\/menu\/(menu-state|menu-controller|menu-view|menu-command-bindings)\.js/);
 });
 
-test('Atomic 6.10 does not pre-implement 6.11 Submenu Positioner or 6.12 Recent Files Menu', async () => {
-  assert.equal(await exists('src/features/menu/submenu-positioner.js'), false);
+test('Atomic 6.10 MenuView boundary remains intact after 6.11 and 6.12 is not pre-implemented', async () => {
   assert.equal(await exists('src/features/menu/recent-files-menu-controller.js'), false);
   const view = await read('src/features/menu/menu-view.js');
   assert.doesNotMatch(view, /getBoundingClientRect|innerWidth|innerHeight|setTimeout|localStorage|recentFiles|recent-files-menu-controller/);

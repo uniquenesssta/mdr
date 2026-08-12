@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.10 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.11 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  menu-model:
-    name: Verify Stage 6 Through Menu Model
+  submenu-positioner:
+    name: Verify Stage 6 Through Submenu Positioner
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -191,6 +191,15 @@ jobs:
           tests/unit/menu/classic-menu-command-adapter.test.mjs
           tests/architecture/stage-06-menu-model.test.mjs
           tests/stage-06-menu-model.test.mjs
+      - name: Verify Atomic Task 6.11 Submenu Positioner
+        run: >-
+          node --test
+          tests/unit/menu/submenu-positioner.test.mjs
+          tests/unit/menu/classic-submenu-positioner-port.test.mjs
+          tests/architecture/stage-06-submenu-positioner.test.mjs
+          tests/stage-06-submenu-positioner.test.mjs
+      - name: Verify Atomic Task 6.11 real browser geometry and focus
+        run: node tests/e2e/submenu-positioner.test.mjs
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -205,10 +214,13 @@ jobs:
           node --check src/features/menu/menu-state.js &&
           node --check src/features/menu/menu-view.js &&
           node --check src/features/menu/menu-controller.js &&
+          node --check src/features/menu/submenu-positioner.js &&
           node --check src/features/menu/compatibility/classic-menu-command-adapter.js &&
+          node --check src/features/menu/compatibility/classic-submenu-positioner-port.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-controller.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-view.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-node-view.js &&
+          node --check tests/e2e/submenu-positioner.test.mjs &&
           node --check tests/e2e/run-browser-tests.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
@@ -226,10 +238,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.10 evidence
+      - name: Upload Atomic Task 6.11 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-menu-model-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-submenu-positioner-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30
