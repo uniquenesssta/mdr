@@ -15,6 +15,22 @@ function requirePort(host, property, command) {
   return port;
 }
 
+function requireRecentFilesPort(host) {
+  const port = host?.markdownEditorRecentFilesPort;
+  if (!port || typeof port.clear !== 'function') {
+    throw new Error('Menu compatibility command is unavailable: markdownEditorRecentFilesPort.clear.');
+  }
+  return port;
+}
+
+function normalizeRecentPath(host, value) {
+  const port = host?.markdownEditorDocumentDomainPort;
+  if (!port || typeof port.normalizeRecentPath !== 'function') {
+    throw new Error('Menu compatibility command is unavailable: markdownEditorDocumentDomainPort.normalizeRecentPath.');
+  }
+  return port.normalizeRecentPath(value);
+}
+
 export function createClassicMenuCommandAdapter({ bindings, host, globalObject = globalThis }) {
   if (!bindings || typeof bindings.registerMany !== 'function') throw new TypeError('Classic Menu adapter requires MenuCommandBindings.');
   if (!host || typeof host !== 'object') throw new TypeError('Classic Menu adapter requires the compatibility host.');
@@ -39,6 +55,16 @@ export function createClassicMenuCommandAdapter({ bindings, host, globalObject =
     [C.DOCUMENT_SAVE]: () => invokeGlobal('saveCurrentFile'),
     [C.DOCUMENT_SAVE_AS]: () => invokeGlobal('saveAsMarkdown'),
     [C.DOCUMENT_RENAME_ACTIVE]: () => invokeGlobal('renameCurrentDocument'),
+    [C.RECENT_FILE_OPEN]: payload => {
+      const path = normalizeRecentPath(host, payload?.path);
+      if (!path) return false;
+      return invokeGlobal('handleNativeDroppedPath', path);
+    },
+    [C.RECENT_FILES_CLEAR]: () => {
+      const result = requireRecentFilesPort(host).clear();
+      invokeGlobal('showToast', '已清空最近打开记录');
+      return result;
+    },
     [C.IMPORT_WEB]: () => invokeGlobal('openUrlModal'),
     [C.EXPORT_MARKDOWN]: () => invokeGlobal('exportFile'),
     [C.EXPORT_WORD]: () => invokeGlobal('exportWord'),

@@ -69,12 +69,14 @@ import {
   createDocumentListView,
   createDocumentSessionController,
   createDocumentTitleView,
+  createRecentFilesReadSource,
   createRecentFilesRepository,
   createSessionDocumentRepository,
   mountClassicDocumentControllerPort,
   mountClassicDocumentUiCommandPort,
   mountClassicRecentFilesPort
 } from './features/documents/index.js';
+import { createRecentFilesMenuController } from './features/menu/index.js';
 
 const platform = createPlatform({
   runtime: window,
@@ -230,6 +232,8 @@ async function loadAppModules() {
 
   const documentSessionPort = compatibilityPlatformHost?.markdownEditorDocumentSessionPort;
   if (!documentSessionPort) throw new Error('Document session compatibility port is unavailable.');
+  const menuCommandPort = compatibilityPlatformHost?.markdownEditorMenuCommandPort;
+  if (!menuCommandPort) throw new Error('Menu command compatibility port is unavailable.');
   const documentRepository = createSessionDocumentRepository({
     storage: window.localStorage,
     nativeStore: window.markdownEditorDocumentStore,
@@ -257,12 +261,24 @@ async function loadAppModules() {
       console.warn(message, error);
     }
   });
+  recentFilesRepository.load();
+  const recentFilesSource = createRecentFilesReadSource(recentFilesRepository);
   let recentFilesPort;
+  let recentFilesMenuController;
   let documentUiCommandPort;
   try {
     recentFilesPort = mountClassicRecentFilesPort(compatibilityPlatformHost, recentFilesRepository);
     documentUiCommandPort = mountClassicDocumentUiCommandPort(compatibilityPlatformHost);
+    recentFilesMenuController = createRecentFilesMenuController({
+      owner: requireElement('#recent-files-menu-item', 'Recent Files submenu owner'),
+      list: requireElement('#recent-files-menu', 'Recent Files submenu list'),
+      source: recentFilesSource,
+      commands: menuCommandPort,
+      available: platform.capabilities.desktop.fileSystem,
+      reportError(message, error) { console.error(message, error); }
+    });
   } catch (error) {
+    recentFilesMenuController?.destroy?.();
     documentUiCommandPort?.destroy?.();
     recentFilesPort?.destroy?.();
     recentFilesRepository.destroy();
@@ -329,6 +345,8 @@ async function loadAppModules() {
     splitControllerPort = null;
     destroyLayoutInteractionControllers();
     destroyDocumentEditorViews();
+    recentFilesMenuController?.destroy();
+    recentFilesMenuController = null;
     documentUiCommandPort.destroy();
     recentFilesPort.destroy();
     recentFilesRepository.destroy();
@@ -847,6 +865,7 @@ async function loadAppModules() {
     for (const src of APP_MODULES) {
       await loadClassicScript(src);
     }
+    recentFilesMenuController.start();
     sidebarTabController.start();
     mountDocumentEditorViews();
     if (window.__markdownEditorInitPromise) await window.__markdownEditorInitPromise;

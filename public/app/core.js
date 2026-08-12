@@ -90,81 +90,12 @@ const editor = document.getElementById('editor');
       'heading', 'quote', 'lists', 'code', 'link', 'image', 'table', 'find', 'mermaid'
     ]);
 
-    function loadRecentFiles() {
-      coreRecentFilesPort.load();
-    }
-
-    function addRecentFile(path, name = '', refresh = true) {
+    function addRecentFile(path, name = '') {
       const result = coreRecentFilesPort.add(path, {
         name,
         fallbackName: '未命名文件'
       });
-      if (!result.added) return false;
-      if (refresh) renderRecentFilesMenu();
-      return true;
-    }
-
-    function clearRecentFiles() {
-      coreRecentFilesPort.clear();
-      renderRecentFilesMenu();
-      closeAppMenus();
-      showToast('已清空最近打开记录');
-    }
-
-    async function openRecentFile(path) {
-      closeAppMenus();
-      const normalizedPath = coreDocumentDomainPort.normalizeRecentPath(path);
-      if (!normalizedPath || typeof handleNativeDroppedPath !== 'function') return;
-      const opened = await handleNativeDroppedPath(normalizedPath);
-      if (!opened) renderRecentFilesMenu();
-    }
-
-    function renderRecentFilesMenu() {
-      const menu = document.getElementById('recent-files-menu');
-      const menuItem = document.getElementById('recent-files-menu-item');
-      if (!menu || !menuItem) return;
-      menu.replaceChildren();
-      if (!corePlatformPort?.supports('desktop.fileSystem')) {
-        menuItem.classList.add('disabled');
-        const empty = document.createElement('div');
-        empty.className = 'menu-item recent-file-empty';
-        empty.textContent = '桌面版可用';
-        menu.appendChild(empty);
-        return;
-      }
-      menuItem.classList.remove('disabled');
-      const recentFiles = coreRecentFilesPort.entries;
-      if (!recentFiles.length) {
-        const empty = document.createElement('div');
-        empty.className = 'menu-item recent-file-empty';
-        empty.textContent = '暂无记录';
-        menu.appendChild(empty);
-        return;
-      }
-      for (const item of recentFiles) {
-        const button = document.createElement('div');
-        button.className = 'menu-item recent-file-item';
-        button.title = item.path;
-        const label = document.createElement('span');
-        label.textContent = item.name || getFileNameFromPath(item.path);
-        button.appendChild(label);
-        button.addEventListener('click', event => {
-          event.stopPropagation();
-          openRecentFile(item.path);
-        });
-        menu.appendChild(button);
-      }
-      const separator = document.createElement('div');
-      separator.className = 'menu-separator';
-      menu.appendChild(separator);
-      const clear = document.createElement('div');
-      clear.className = 'menu-item';
-      clear.textContent = '清空记录';
-      clear.addEventListener('click', event => {
-        event.stopPropagation();
-        clearRecentFiles();
-      });
-      menu.appendChild(clear);
+      return Boolean(result.added);
     }
 
     function normalizePreviewPerformanceMode(value) {
@@ -549,10 +480,9 @@ const editor = document.getElementById('editor');
     async function setupDocuments() {
       const storedDocuments = coreDocumentControllerPort.getLegacySessionRecords();
       for (const storedDocument of storedDocuments) {
-        if (storedDocument?.filePath) addRecentFile(storedDocument.filePath, storedDocument.title, false);
+        if (storedDocument?.filePath) addRecentFile(storedDocument.filePath, storedDocument.title);
         if (storedDocument?.id) clearDocumentIndex(storedDocument.id);
       }
-      renderRecentFilesMenu();
       const result = coreDocumentControllerPort.initializeEmptySession({ legacyRecords: storedDocuments });
       filenameInput.value = t('filenameDefault');
       syncCurrentDocumentFileTree();

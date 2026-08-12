@@ -29,7 +29,7 @@ test('browser E2E runner stays dependency-free and covers required interactions'
     'temporary compatibility business port mounts and destroys without owning the App Shell',
     'application shell has no structural overflow or clipped focus across required viewports',
     'application Document Session Controller keeps lifecycle model, session and UI coherent',
-    'application Recent Files Repository enforces limit, case-insensitive dedupe and clear without menu state ownership'
+    'application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear'
   ]) assert.ok(runner.includes(phrase), `missing browser scenario: ${phrase}`);
   assert.match(runner, /node:assert\/strict/);
   assert.doesNotMatch(runner, /playwright|puppeteer|selenium-webdriver/i);

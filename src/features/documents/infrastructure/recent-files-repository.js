@@ -1,6 +1,6 @@
 /**
- * Responsibility: Own the bounded recent-file list, case-insensitive path dedupe and legacy Web Storage serialization.
- * State/side effects: Owns only recent-file entries plus storage I/O. Never owns menu DOM, document sessions, editor/model state or platform file I/O.
+ * Responsibility: Own the bounded recent-file list, case-insensitive path dedupe, read-only snapshots/events and legacy Web Storage serialization.
+ * State/side effects: Owns recent-file entries plus storage I/O and synchronous subscriber publication. Never owns menu DOM, document sessions, editor/model state or platform file I/O.
  */
 import { createRecentFileEntry, normalizeRecentFilePath } from '../domain/recent-file-entry.js';
 
@@ -22,6 +22,21 @@ function freezeEntries(entries) {
   return entries.length ? Object.freeze(entries.slice()) : EMPTY_ENTRIES;
 }
 
+function sameEntries(left, right) {
+  return left.length === right.length && left.every((entry, index) => {
+    const other = right[index];
+    return entry === other || (
+      entry?.path === other?.path &&
+      entry?.name === other?.name &&
+      entry?.openedAt === other?.openedAt
+    );
+  });
+}
+
+function createSnapshot(entries, revision) {
+  return Object.freeze({ entries, revision });
+}
+
 export function createRecentFilesRepository({
   storage,
   maxEntries = DEFAULT_MAX_ENTRIES,
@@ -39,6 +54,9 @@ export function createRecentFilesRepository({
 
   let destroyed = false;
   let entries = EMPTY_ENTRIES;
+  let revision = 0;
+  let snapshot = createSnapshot(entries, revision);
+  const listeners = new Set();
 
   const assertActive = () => {
     if (destroyed) throw new Error('Recent files repository has been destroyed.');
@@ -53,6 +71,35 @@ export function createRecentFilesRepository({
       reportError('Recent file storage failed:', error);
       return false;
     }
+  };
+
+  const publish = (reason, previous) => {
+    if (!previous || destroyed) return snapshot;
+    const event = Object.freeze({
+      type: 'documents:recent-files-changed',
+      reason: String(reason || 'update'),
+      previous,
+      snapshot
+    });
+    for (const listener of [...listeners]) {
+      try {
+        listener(event);
+      } catch (error) {
+        reportError('Recent files listener failed:', error);
+      }
+    }
+    return snapshot;
+  };
+
+  const replaceEntries = nextEntries => {
+    assertActive();
+    const frozen = freezeEntries(nextEntries);
+    if (sameEntries(entries, frozen)) return null;
+    const previous = snapshot;
+    entries = frozen;
+    revision += 1;
+    snapshot = createSnapshot(entries, revision);
+    return previous;
   };
 
   const normalizeStoredEntries = value => {
@@ -83,11 +130,13 @@ export function createRecentFilesRepository({
     try {
       parsed = JSON.parse(storage.getItem(RECENT_FILES_KEY) || '[]');
     } catch (_) {
-      entries = EMPTY_ENTRIES;
+      const previous = replaceEntries(EMPTY_ENTRIES);
+      publish('load-failed', previous);
       return Object.freeze({ entries, persisted: false, readFailed: true });
     }
-    entries = freezeEntries(normalizeStoredEntries(parsed));
+    const previous = replaceEntries(normalizeStoredEntries(parsed));
     const persisted = persist();
+    publish('load', previous);
     return Object.freeze({ entries, persisted, readFailed: false });
   };
 
@@ -105,19 +154,25 @@ export function createRecentFilesRepository({
       openedAt: options.openedAt,
       fallbackName: options.fallbackName ?? '未命名文件'
     }, { now }));
-    entries = freezeEntries(next.slice(0, maxEntries));
+    const previous = replaceEntries(next.slice(0, maxEntries));
     const persisted = persist();
+    publish('add', previous);
     return Object.freeze({ added: true, persisted, entries });
   };
 
   const clear = () => {
     assertActive();
-    entries = EMPTY_ENTRIES;
+    const previous = replaceEntries(EMPTY_ENTRIES);
     const persisted = persist();
+    publish('clear', previous);
     return Object.freeze({ cleared: true, persisted, entries });
   };
 
   return Object.freeze({
+    get snapshot() {
+      assertActive();
+      return snapshot;
+    },
     get entries() {
       assertActive();
       return entries;
@@ -129,9 +184,21 @@ export function createRecentFilesRepository({
     load,
     add,
     clear,
+    subscribe(listener) {
+      assertActive();
+      if (typeof listener !== 'function') throw new TypeError('Recent files repository listener must be a function.');
+      listeners.add(listener);
+      let active = true;
+      return () => {
+        if (!active) return;
+        active = false;
+        listeners.delete(listener);
+      };
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      listeners.clear();
       entries = EMPTY_ENTRIES;
     }
   });

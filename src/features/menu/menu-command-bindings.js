@@ -11,6 +11,8 @@ export const MENU_COMMAND_IDS = Object.freeze({
   DOCUMENT_SAVE: 'document.save',
   DOCUMENT_SAVE_AS: 'document.save-as',
   DOCUMENT_RENAME_ACTIVE: 'document.rename-active',
+  RECENT_FILE_OPEN: 'document.open-recent',
+  RECENT_FILES_CLEAR: 'document.clear-recent',
   SETTINGS_OPEN: 'settings.open',
   IMPORT_WEB: 'import.web',
   EXPORT_MARKDOWN: 'export.markdown',

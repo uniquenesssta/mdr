@@ -17,6 +17,7 @@ export { createDocumentOpenCoordinator } from './application/document-open-coord
 export { createDocumentCloseCoordinator } from './application/document-close-coordinator.js';
 export { createDocumentTitleController } from './application/document-title-controller.js';
 export { DocumentOperationStaleError, createDocumentSessionController } from './application/document-session-controller.js';
+export { createRecentFilesReadSource } from './application/recent-files-read-source.js';
 export { mountClassicDocumentControllerPort } from './compatibility/classic-document-controller-port.js';
 export { createRecentFilesRepository } from './infrastructure/recent-files-repository.js';
 export { mountClassicRecentFilesPort } from './compatibility/classic-recent-files-port.js';

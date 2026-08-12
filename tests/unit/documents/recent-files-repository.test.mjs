@@ -49,6 +49,8 @@ test('Atomic 5.4 loads one bounded case-insensitive deduplicated recent-file sna
   assert.equal(repository.entries.filter(item => item.path.toLocaleLowerCase() === 'c:/notes/alpha.md').length, 1);
   assert.ok(Object.isFrozen(repository.entries));
   assert.ok(repository.entries.every(Object.isFrozen));
+  assert.ok(Object.isFrozen(repository.snapshot));
+  assert.equal(repository.snapshot.entries, repository.entries);
   const serialized = JSON.parse(storage.getItem(KEY));
   assert.equal(serialized.length, 20);
   assert.deepEqual(Object.keys(serialized[0]).sort(), ['name', 'openedAt', 'path']);
@@ -134,53 +136,93 @@ test('Atomic 5.4 clear persists an exact empty list while destroy is idempotent 
   assert.throws(() => repository.add('C:/Notes/B.md'), /destroyed/);
   assert.throws(() => repository.clear(), /destroyed/);
   assert.throws(() => repository.entries, /destroyed/);
+  assert.throws(() => repository.snapshot, /destroyed/);
+  assert.throws(() => repository.subscribe(() => {}), /destroyed/);
 });
 
-test('Atomic 5.4 classic port delegates only repository commands and owns one scoped host lifecycle', () => {
+test('Atomic 6.12 repository publishes immutable read-only snapshots only on semantic recent-file changes', () => {
+  const storage = createMemoryStorage();
+  let clock = 10;
+  const listenerErrors = [];
+  const repository = createRecentFilesRepository({
+    storage,
+    now: () => ++clock,
+    reportError(message, error) { listenerErrors.push([message, error.message]); }
+  });
+  const events = [];
+  const unsubscribe = repository.subscribe(event => events.push(event));
+  repository.subscribe(() => { throw new Error('listener-failed'); });
+  repository.load();
+  assert.equal(events.length, 0);
+  repository.add('C:/Notes/A.md', { name: 'A.md' });
+  assert.equal(events.length, 1);
+  assert.equal(events[0].type, 'documents:recent-files-changed');
+  assert.equal(events[0].reason, 'add');
+  assert.equal(events[0].previous.revision, 0);
+  assert.equal(events[0].snapshot.revision, 1);
+  assert.ok(Object.isFrozen(events[0]));
+  assert.ok(Object.isFrozen(events[0].snapshot));
+  assert.ok(Object.isFrozen(events[0].snapshot.entries));
+  repository.clear();
+  assert.equal(events.length, 2);
+  assert.equal(events[1].reason, 'clear');
+  assert.equal(listenerErrors.length, 2);
+  assert.ok(listenerErrors.every(item => item[0] === 'Recent files listener failed:' && item[1] === 'listener-failed'));
+  unsubscribe();
+  repository.add('C:/Notes/B.md', { name: 'B.md' });
+  assert.equal(events.length, 2);
+  repository.destroy();
+});
+
+test('Atomic 6.12 classic port exposes write commands only and owns one scoped host lifecycle', () => {
   const storage = createMemoryStorage();
   const repository = createRecentFilesRepository({ storage, now: () => 3 });
+  repository.load();
   const host = {};
   const port = mountClassicRecentFilesPort(host, repository);
   assert.equal(host.markdownEditorRecentFilesPort, port);
   assert.throws(() => mountClassicRecentFilesPort(host, repository), /already mounted/);
-  port.load();
+  assert.deepEqual(Object.keys(port).sort(), ['add', 'clear', 'destroy']);
+  assert.equal('entries' in port, false);
+  assert.equal('load' in port, false);
   port.add('C:/Notes/A.md', { name: 'A.md' });
-  assert.deepEqual(port.entries[0], { path: 'C:/Notes/A.md', name: 'A.md', openedAt: 3 });
+  assert.deepEqual(repository.entries[0], { path: 'C:/Notes/A.md', name: 'A.md', openedAt: 3 });
   port.clear();
-  assert.deepEqual(port.entries, []);
+  assert.deepEqual(repository.entries, []);
   port.destroy();
   port.destroy();
   assert.equal('markdownEditorRecentFilesPort' in host, false);
-  assert.throws(() => port.load(), /destroyed/);
+  assert.throws(() => port.add('C:/Notes/B.md'), /destroyed/);
   repository.destroy();
 });
 
-test('Atomic 5.4 production integration removes classic recent-file state/persistence authority and keeps menu DOM outside Repository', async () => {
-  const [core, events, main, index, repositorySource, portSource] = await Promise.all([
+test('Atomic 6.12 production integration keeps persistence in Documents and removes classic Recent Files menu read authority', async () => {
+  const [core, bootstrap, events, main, index, repositorySource, portSource, menuController] = await Promise.all([
     readText('public/app/core.js'),
+    readText('public/app/bootstrap.js'),
     readText('public/app/events.js'),
     readText('src/main.js'),
     readText('src/features/documents/index.js'),
     readText('src/features/documents/infrastructure/recent-files-repository.js'),
-    readText('src/features/documents/compatibility/classic-recent-files-port.js')
+    readText('src/features/documents/compatibility/classic-recent-files-port.js'),
+    readText('src/features/menu/recent-files-menu-controller.js')
   ]);
   assert.match(core, /markdownEditorRecentFilesPort/);
-  assert.ok(core.includes('coreRecentFilesPort.load()'));
   assert.ok(core.includes('coreRecentFilesPort.add('));
-  assert.ok(core.includes('coreRecentFilesPort.clear()'));
-  assert.ok(core.includes('coreRecentFilesPort.entries'));
-  assert.doesNotMatch(core, /RECENT_FILES_KEY/);
-  assert.doesNotMatch(core, /MAX_RECENT_FILES/);
-  assert.doesNotMatch(core, /let recentFiless*=/);
-  assert.doesNotMatch(core, /function saveRecentFiles/);
-  assert.match(main, /createRecentFilesRepository/);
-  assert.match(main, /mountClassicRecentFilesPort/);
-  assert.match(index, /recent-files-repository.js/);
-  assert.match(index, /classic-recent-files-port.js/);
-  assert.doesNotMatch(repositorySource, /document\.|window\.|querySelector|createElement/);
-  assert.doesNotMatch(portSource, /window.|querySelector|createElement/);
-  assert.ok(core.includes('if (storedDocument?.filePath) addRecentFile(storedDocument.filePath, storedDocument.title, false)'));
+  assert.doesNotMatch(core, /coreRecentFilesPort\.(load|clear|entries)/);
+  assert.doesNotMatch(core, /function (loadRecentFiles|renderRecentFilesMenu|openRecentFile|clearRecentFiles)\s*\(/);
+  assert.doesNotMatch(bootstrap, /loadRecentFiles\(|renderRecentFilesMenu\(/);
   assert.ok(events.includes('if (opened) addRecentFile(resolvedPath, name)'));
+  assert.match(main, /recentFilesRepository\.load\(\)/);
+  assert.match(main, /createRecentFilesReadSource/);
+  assert.match(main, /createRecentFilesMenuController/);
+  assert.match(index, /recent-files-read-source\.js/);
+  assert.match(index, /recent-files-repository\.js/);
+  assert.match(index, /classic-recent-files-port\.js/);
+  assert.doesNotMatch(repositorySource, /document\.|window\.|querySelector|createElement/);
+  assert.doesNotMatch(portSource, /entries|\.load\(|window\.|querySelector|createElement/);
+  assert.doesNotMatch(menuController, /localStorage|sessionStorage|recent-files-repository|platform\.files|handleNativeDroppedPath/);
+  assert.ok(core.includes('if (storedDocument?.filePath) addRecentFile(storedDocument.filePath, storedDocument.title)'));
   const modelBlob = execFileSync('git', ['hash-object', 'src/document/document-model.js'], { cwd: ROOT, encoding: 'utf8' }).trim();
   assert.equal(modelBlob, 'd767d9025be05a6f6b87d7cd3527782db1c3303a');
 });

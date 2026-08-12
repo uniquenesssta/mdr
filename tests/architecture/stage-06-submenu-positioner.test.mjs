@@ -36,5 +36,7 @@ test('Atomic 6.11 owns submenu geometry outside MenuView and removes the classic
   assert.doesNotMatch(core, /function positionAppSubmenu|function resetAppSubmenuPosition|function initializeAppSubmenus|__markdownEditorCancelSubmenuClose/);
   assert.doesNotMatch(events, /initializeAppSubmenus/);
 
-  await assert.rejects(access('src/features/menu/recent-files-menu-controller.js'));
+  await access('src/features/menu/recent-files-menu-controller.js');
+  const recentFilesController = await readFile('src/features/menu/recent-files-menu-controller.js', 'utf8');
+  assert.doesNotMatch(recentFilesController, /getBoundingClientRect|innerWidth|innerHeight|requestAnimationFrame/);
 });

@@ -1,12 +1,12 @@
 /**
- * Responsibility: Expose RecentFilesRepository to remaining classic startup/menu callers through the existing scoped compatibility host.
- * State/side effects: Owns one host property lifecycle only; recent-file state and persistence remain owned by the injected repository.
+ * Responsibility: Expose only RecentFilesRepository write commands still needed by classic document-open flows.
+ * State/side effects: Owns one host property lifecycle only; recent-file state, reads, subscriptions and persistence remain owned by Documents.
  */
 const PORT_NAME = 'markdownEditorRecentFilesPort';
 
 export function mountClassicRecentFilesPort(host, repository) {
   if (!host || typeof host !== 'object') throw new TypeError('Recent files compatibility host is required.');
-  if (!repository || typeof repository.load !== 'function' || typeof repository.add !== 'function' || typeof repository.clear !== 'function') {
+  if (!repository || typeof repository.add !== 'function' || typeof repository.clear !== 'function') {
     throw new TypeError('Recent files repository is required.');
   }
   if (host[PORT_NAME]) throw new Error('Recent files compatibility port is already mounted.');
@@ -21,11 +21,6 @@ export function mountClassicRecentFilesPort(host, repository) {
   };
 
   const api = Object.freeze({
-    get entries() {
-      assertActive();
-      return repository.entries;
-    },
-    load: call('load'),
     add: call('add'),
     clear: call('clear'),
     destroy() {

@@ -10,6 +10,7 @@ import {
   createMenuState,
   createMenuView,
   createSubmenuPositioner,
+  mountClassicMenuCommandPort,
   mountClassicSubmenuPositionerPort
 } from '../features/menu/index.js';
 import { SETTINGS_CHANGED_EVENT, createSettingsApplyCoordinator, createSettingsFeature, createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort } from '../features/settings/index.js';
@@ -32,6 +33,7 @@ function destroyStartupResources({
   unregisterHelpMenuCommand,
   menuController,
   classicMenuCommandAdapter,
+  menuCommandPort,
   submenuPositionerPort,
   submenuPositioner,
   menuCommandBindings,
@@ -58,6 +60,7 @@ function destroyStartupResources({
   try { unregisterSettingsMenuCommand?.(); } catch (error) { errors.push(error); }
   try { unregisterHelpMenuCommand?.(); } catch (error) { errors.push(error); }
   try { menuController?.destroy(); } catch (error) { errors.push(error); }
+  try { menuCommandPort?.destroy(); } catch (error) { errors.push(error); }
   try { classicMenuCommandAdapter?.destroy(); } catch (error) { errors.push(error); }
   try { submenuPositionerPort?.destroy(); } catch (error) { errors.push(error); }
   try { submenuPositioner?.destroy(); } catch (error) { errors.push(error); }
@@ -119,6 +122,7 @@ export function startModuleEntry({
     let menuState = null;
     let menuCommandBindings = null;
     let classicMenuCommandAdapter = null;
+    let menuCommandPort = null;
     let menuController = null;
     let submenuPositioner = null;
     let submenuPositionerPort = null;
@@ -141,6 +145,10 @@ export function startModuleEntry({
         globalObject: documentRef.defaultView
       });
       classicMenuCommandAdapter.start();
+      menuCommandPort = mountClassicMenuCommandPort(portsHost, menuCommandBindings, {
+        closeMenus: () => classicMenuCommandAdapter.closeMenus(),
+        reportError(message, error) { console.error(message, error); }
+      });
       menuController = createMenuController({
         state: menuState,
         bindings: menuCommandBindings,
@@ -226,6 +234,7 @@ export function startModuleEntry({
         unregisterHelpMenuCommand,
         menuController,
         classicMenuCommandAdapter,
+        menuCommandPort,
         submenuPositionerPort,
         submenuPositioner,
         menuCommandBindings,
@@ -263,6 +272,7 @@ export function startModuleEntry({
           unregisterHelpMenuCommand,
           menuController,
           classicMenuCommandAdapter,
+          menuCommandPort,
           submenuPositionerPort,
           submenuPositioner,
           menuCommandBindings,

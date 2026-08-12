@@ -16,8 +16,6 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
       bootstrapEditorControllerPort.setText('');
       filenameInput.value = t('filenameDefault');
       bootstrapLayoutStatePort.sidebarVisible = restoredSettings.sidebarVisible;
-      loadRecentFiles();
-      renderRecentFilesMenu();
       autoSaveEnabled = restoredSettings.autoSaveEnabled;
       autoSaveDelay = normalizeAutoSaveDelay(restoredSettings.autoSaveDelay);
       editorFontSize = restoredSettings.editorFontSize;

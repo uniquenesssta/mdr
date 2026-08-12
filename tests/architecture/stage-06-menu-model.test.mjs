@@ -28,10 +28,15 @@ test('Atomic 6.10 Menu Model has one public entry and no business calls in model
   assert.doesNotMatch(bootstrap, /features\/menu\/(menu-state|menu-controller|menu-view|menu-command-bindings)\.js/);
 });
 
-test('Atomic 6.10 MenuView boundary remains intact after 6.11 and 6.12 is not pre-implemented', async () => {
-  assert.equal(await exists('src/features/menu/recent-files-menu-controller.js'), false);
-  const view = await read('src/features/menu/menu-view.js');
+test('Atomic 6.10 MenuView boundary remains intact after 6.11 and 6.12', async () => {
+  assert.equal(await exists('src/features/menu/recent-files-menu-controller.js'), true);
+  const [view, recentFiles] = await Promise.all([
+    read('src/features/menu/menu-view.js'),
+    read('src/features/menu/recent-files-menu-controller.js')
+  ]);
   assert.doesNotMatch(view, /getBoundingClientRect|innerWidth|innerHeight|setTimeout|localStorage|recentFiles|recent-files-menu-controller/);
+  assert.match(recentFiles, /createRecentFilesMenuController/);
+  assert.doesNotMatch(recentFiles, /getBoundingClientRect|innerWidth|innerHeight/);
 });
 
 test('Atomic 6.10 classic compatibility is isolated from canonical Menu Model files', async () => {

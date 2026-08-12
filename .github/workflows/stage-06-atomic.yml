@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.11 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.12 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  submenu-positioner:
-    name: Verify Stage 6 Through Submenu Positioner
+  recent-files-menu:
+    name: Verify Stage 6 Through Recent Files Menu
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -200,6 +200,16 @@ jobs:
           tests/stage-06-submenu-positioner.test.mjs
       - name: Verify Atomic Task 6.11 real browser geometry and focus
         run: node tests/e2e/submenu-positioner.test.mjs
+      - name: Verify Atomic Task 6.12 Recent Files Menu
+        run: >-
+          node --test
+          tests/unit/documents/recent-files-read-source.test.mjs
+          tests/unit/menu/recent-files-menu-controller.test.mjs
+          tests/unit/menu/classic-menu-command-port.test.mjs
+          tests/architecture/stage-06-recent-files-menu.test.mjs
+          tests/stage-06-recent-files-menu.test.mjs
+      - name: Verify Atomic Task 6.12 real browser subscription and commands
+        run: node tests/e2e/recent-files-menu.test.mjs
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -210,17 +220,23 @@ jobs:
           node --check public/app/preview.js &&
           node --check public/app/scroll-sync.js &&
           node --check public/app/export.js &&
+          node --check src/features/documents/application/recent-files-read-source.js &&
+          node --check src/features/documents/infrastructure/recent-files-repository.js &&
+          node --check src/features/documents/compatibility/classic-recent-files-port.js &&
           node --check src/features/menu/menu-command-bindings.js &&
           node --check src/features/menu/menu-state.js &&
           node --check src/features/menu/menu-view.js &&
           node --check src/features/menu/menu-controller.js &&
           node --check src/features/menu/submenu-positioner.js &&
+          node --check src/features/menu/recent-files-menu-controller.js &&
           node --check src/features/menu/compatibility/classic-menu-command-adapter.js &&
+          node --check src/features/menu/compatibility/classic-menu-command-port.js &&
           node --check src/features/menu/compatibility/classic-submenu-positioner-port.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-controller.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-view.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-node-view.js &&
           node --check tests/e2e/submenu-positioner.test.mjs &&
+          node --check tests/e2e/recent-files-menu.test.mjs &&
           node --check tests/e2e/run-browser-tests.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
@@ -238,10 +254,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.11 evidence
+      - name: Upload Atomic Task 6.12 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-submenu-positioner-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-recent-files-menu-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30

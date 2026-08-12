@@ -1033,41 +1033,47 @@ async function runAppSuite() {
       })()`);
     });
 
-    await test('application Recent Files Repository enforces limit, case-insensitive dedupe and clear without menu state ownership', async () => {
+    await test('application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear', async () => {
       const result = await browser.page.evaluate(`(()=>{
         const host=document.getElementById('compatibility-business-ports');
         const port=host?.markdownEditorRecentFilesPort;
-        if(!port)throw new Error('Recent files port unavailable');
-        localStorage.removeItem('md_editor_recent_files');
-        port.load();
+        if(!port)throw new Error('Recent files write port unavailable');
+        if(typeof port.load==='function'||'entries' in port)throw new Error('Recent files classic port leaked read authority');
+        port.clear();
         for(let index=0;index<23;index+=1){
           const suffix=String(index).padStart(2,'0');
           port.add('C:/Notes/File-'+suffix+'.md',{name:'File '+suffix,openedAt:index+1});
         }
         port.add('c:/notes/FILE-05.md',{name:'Reopened.md',openedAt:999});
-        const entries=port.entries;
         const serialized=JSON.parse(localStorage.getItem('md_editor_recent_files')||'[]');
+        const menuItems=[...document.querySelectorAll('#recent-files-menu .recent-file-item')];
         const snapshot={
-          count:entries.length,
-          first:{...entries[0]},
-          duplicateCount:entries.filter(item=>String(item.path).toLocaleLowerCase()==='c:/notes/file-05.md').length,
-          frozen:Object.isFrozen(entries),
-          serializedCount:serialized.length,
-          serializedKeys:Object.keys(serialized[0]||{}).sort()
+          writePortKeys:Object.keys(port).sort(),
+          count:serialized.length,
+          first:{...serialized[0]},
+          duplicateCount:serialized.filter(item=>String(item.path).toLocaleLowerCase()==='c:/notes/file-05.md').length,
+          serializedKeys:Object.keys(serialized[0]||{}).sort(),
+          menuCount:menuItems.length,
+          menuDisabled:document.getElementById('recent-files-menu-item')?.getAttribute('aria-disabled')||'',
+          menuText:document.getElementById('recent-files-menu')?.textContent||''
         };
         port.clear();
-        snapshot.clearedCount=port.entries.length;
         snapshot.clearedStorage=localStorage.getItem('md_editor_recent_files');
+        snapshot.clearedMenuText=document.getElementById('recent-files-menu')?.textContent||'';
+        snapshot.clearedMenuItems=document.querySelectorAll('#recent-files-menu .recent-file-item').length;
         return snapshot;
       })()`);
+      assert.deepEqual(result.writePortKeys, ['add', 'clear', 'destroy']);
       assert.equal(result.count, 20);
       assert.deepEqual(result.first, { path: 'c:/notes/FILE-05.md', name: 'Reopened.md', openedAt: 999 });
       assert.equal(result.duplicateCount, 1);
-      assert.equal(result.frozen, true);
-      assert.equal(result.serializedCount, 20);
       assert.deepEqual(result.serializedKeys, ['name', 'openedAt', 'path']);
-      assert.equal(result.clearedCount, 0);
+      assert.equal(result.menuCount, 0);
+      assert.equal(result.menuDisabled, 'true');
+      assert.match(result.menuText, /桌面版可用/);
       assert.equal(result.clearedStorage, '[]');
+      assert.equal(result.clearedMenuItems, 0);
+      assert.match(result.clearedMenuText, /桌面版可用/);
     });
 
     await test('application Document Session Controller keeps lifecycle model, session and UI coherent', async () => {
