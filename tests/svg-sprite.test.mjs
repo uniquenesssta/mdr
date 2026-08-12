@@ -60,11 +60,12 @@ test('Atomic Task 2.3 sprite has one stable definition for every preserved icon 
 });
 
 test('compatibility and dynamic callers reference the external sprite without a second geometry authority', async () => {
-  const [shell, core, splitPane, events, helpDialog, settingsDialog, linkPreview, folderTree, browserTest] = await Promise.all([
+  const [shell, core, splitPane, events, windowControls, helpDialog, settingsDialog, linkPreview, folderTree, browserTest] = await Promise.all([
     readText('public/compatibility/business-content.html'),
     readText('public/app/core.js'),
     readText('src/features/layout/split/split-pane-controller.js'),
     readText('public/app/events.js'),
+    readText('src/features/window/window-controls-view.js'),
     readText('src/features/help/ui/help-dialog-view.js'),
     readText('src/features/settings/ui/settings-dialog-view.js'),
     readText('src/runtime/link-preview.js'),
@@ -79,8 +80,9 @@ test('compatibility and dynamic callers reference the external sprite without a 
   assert.doesNotMatch(core, /\/assets\/icons\.svg#icon-chevron-(?:left|right)/);
   assert.match(splitPane, /\/assets\/icons\.svg#icon-chevron-left/);
   assert.match(splitPane, /\/assets\/icons\.svg#icon-chevron-right/);
-  assert.match(events, /\/assets\/icons\.svg#icon-restore/);
-  assert.match(events, /\/assets\/icons\.svg#icon-maximize/);
+  assert.doesNotMatch(events, /\/assets\/icons\.svg#icon-(?:restore|maximize)/);
+  assert.match(windowControls, /\/assets\/icons\.svg#icon-restore/);
+  assert.match(windowControls, /\/assets\/icons\.svg#icon-maximize/);
   assert.match(helpDialog, /import \{ createIconView \} from '\.\.\/\.\.\/\.\.\/ui\/components\/icon-view\.js'/);
   assert.match(helpDialog, /createIconView\(documentRef, 'icon-book'/);
   assert.match(helpDialog, /createIconView\(documentRef, 'icon-close'\)/);

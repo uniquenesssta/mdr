@@ -3,10 +3,12 @@
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
     const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
     const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
+    const eventsCloseSavePort = eventsCompatibilityHost?.markdownEditorCloseSavePort;
     const eventsLayoutStatePort = eventsCompatibilityHost?.markdownEditorLayoutStatePort;
     if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
     if (!eventsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
     if (!eventsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+    if (!eventsCloseSavePort) throw new Error('CloseSavePort compatibility port is unavailable.');
     if (!eventsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 
     eventsEditorControllerPort.subscribeTransactions(transaction => {
@@ -26,103 +28,21 @@
 
 
 
-    function applyWindowMaximizedState(isMaximized) {
-      const maximizeButton = document.getElementById('window-maximize-btn');
-      if (!maximizeButton) return;
-      const maximizeUse = maximizeButton.querySelector('use');
-      const maximized = Boolean(isMaximized);
-      maximizeButton.dataset.maximized = maximized ? 'true' : 'false';
-      maximizeButton.title = maximized ? '还原窗口' : '最大化';
-      maximizeButton.setAttribute('aria-label', maximized ? '还原窗口' : '最大化');
-      if (maximizeUse) maximizeUse.setAttribute('href', maximized ? '/assets/icons.svg#icon-restore' : '/assets/icons.svg#icon-maximize');
-      document.documentElement.classList.toggle('window-maximized', maximized);
-    }
-
-    async function refreshWindowChromeState() {
-      if (!eventsPlatformPort?.supports('desktop.window')) return;
+    eventsCloseSavePort.register(async () => {
+      clearTimeout(saveTimer);
       try {
-        applyWindowMaximizedState(await eventsPlatformPort.call('window', 'isMaximized'));
+        await saveCurrentDocumentState(false, { waitForNative: true, forceSnapshot: true });
+        return true;
       } catch (error) {
-        console.warn('Failed to refresh window state:', error);
+        const message = recordDocumentOperationError('close-save', error);
+        return Boolean(await confirmUserAction('关闭前保存失败：' + message + '\n\n仍然关闭软件吗？未保存的修改可能丢失。', {
+          title: '关闭前保存失败',
+          kind: 'warning',
+          okLabel: '仍然关闭',
+          cancelLabel: '返回编辑'
+        }));
       }
-    }
-
-    function setupWindowChrome() {
-      const controls = document.getElementById('window-controls');
-      if (!controls) return;
-      if (!eventsPlatformPort?.supports('desktop.window')) {
-        controls.hidden = true;
-        document.documentElement.classList.remove('tauri-shell');
-        return;
-      }
-      controls.hidden = false;
-      const menuBar = document.querySelector('.menu-bar');
-      const minimizeButton = document.getElementById('window-minimize-btn');
-      const maximizeButton = document.getElementById('window-maximize-btn');
-      const closeButton = document.getElementById('window-close-btn');
-
-      menuBar?.addEventListener('mousedown', async event => {
-        if (event.buttons !== 1) return;
-        if (event.target instanceof Element && event.target.closest('.menu-dropdown, .window-controls, button, input, select, textarea, a, [role="button"]')) return;
-        try {
-          if (event.detail === 2) {
-            const maximized = await eventsPlatformPort.call('window', 'toggleMaximize');
-            applyWindowMaximizedState(maximized);
-          } else {
-            await eventsPlatformPort.call('window', 'startDrag');
-          }
-        } catch (error) {
-          console.warn('Window drag failed:', error);
-        }
-      });
-
-      minimizeButton?.addEventListener('click', async () => {
-        try {
-          await eventsPlatformPort.call('window', 'minimize');
-        } catch (error) {
-          showToast(error?.message || String(error));
-        }
-      });
-
-      maximizeButton?.addEventListener('click', async () => {
-        try {
-          const maximized = await eventsPlatformPort.call('window', 'toggleMaximize');
-          applyWindowMaximizedState(maximized);
-        } catch (error) {
-          showToast(error?.message || String(error));
-        }
-      });
-
-      closeButton?.addEventListener('click', async () => {
-        try {
-          if (windowCloseSaving) return;
-          windowCloseSaving = true;
-          clearTimeout(saveTimer);
-          await saveCurrentDocumentState(false, { waitForNative: true, forceSnapshot: true });
-          await commitWindowClose();
-        } catch (error) {
-          windowCloseSaving = false;
-          const message = recordDocumentOperationError('close-save', error);
-          const exitAnyway = await confirmUserAction('关闭前保存失败：' + message + '\n\n仍然关闭软件吗？未保存的修改可能丢失。', {
-            title: '关闭前保存失败',
-            kind: 'warning',
-            okLabel: '仍然关闭',
-            cancelLabel: '返回编辑'
-          });
-          if (exitAnyway) await commitWindowClose();
-        }
-      });
-
-      if (eventsPlatformPort?.supports('desktop.window')) {
-        Promise.resolve(eventsPlatformPort.call('window', 'subscribeResize', () => {
-          refreshWindowChromeState();
-        })).catch(error => {
-          console.warn('Failed to register window resize listener:', error);
-        });
-      }
-
-      refreshWindowChromeState();
-    }
+    });
 
     // 拖放文件打开
     const dropOverlay = document.getElementById('drop-overlay');
@@ -231,63 +151,6 @@
         }
         hideDropOverlay();
       })).catch(err => console.warn('Failed to register native drag-drop listener', err));
-    }
-
-    let windowCloseCommitted = false;
-    let windowCloseSaving = false;
-
-    async function commitWindowClose() {
-      windowCloseCommitted = true;
-      try {
-        await eventsPlatformPort.call('window', 'requestClose');
-        return;
-      } catch (closeError) {
-        try {
-          await eventsPlatformPort.call('window', 'forceClose');
-        } catch (destroyError) {
-          windowCloseCommitted = false;
-          windowCloseSaving = false;
-          const message = destroyError?.message || closeError?.message || String(destroyError || closeError);
-          console.error('Window close failed:', closeError, destroyError);
-          window.markdownEditorPerf?.record?.('window.close-error', {
-            category: 'app.lifecycle',
-            status: 'error',
-            details: { message }
-          });
-          showToast('关闭窗口失败：' + message);
-        }
-      }
-    }
-
-    if (eventsPlatformPort?.supports('desktop.window')) {
-      Promise.resolve(eventsPlatformPort.call('window', 'subscribeCloseRequest', async event => {
-        if (windowCloseCommitted) return;
-        event.preventDefault();
-        if (windowCloseSaving) return;
-        windowCloseSaving = true;
-        clearTimeout(saveTimer);
-        try {
-          await saveCurrentDocumentState(false, { waitForNative: true, forceSnapshot: true });
-          await commitWindowClose();
-        } catch (error) {
-          windowCloseSaving = false;
-          const message = recordDocumentOperationError('close-save', error);
-          const exitAnyway = await confirmUserAction('关闭前保存失败：' + message + '\n\n仍然关闭软件吗？未保存的修改可能丢失。', {
-            title: '关闭前保存失败',
-            kind: 'warning',
-            okLabel: '仍然关闭',
-            cancelLabel: '返回编辑'
-          });
-          if (exitAnyway) await commitWindowClose();
-        }
-      })).catch(error => {
-        console.warn('Failed to register close handler:', error);
-        window.markdownEditorPerf?.record?.('window.close-handler-error', {
-          category: 'app.lifecycle',
-          status: 'error',
-          details: { message: error?.message || String(error) }
-        });
-      });
     }
 
     // Settings menu trigger preserves the legacy menu-close side effect without inline handlers.
@@ -406,7 +269,6 @@
     document.addEventListener('keydown', handleAppKeydown, true);
 
     // 启动
-    setupWindowChrome();
     window.__markdownEditorInitPromise = init().then(async () => {
       const initialPath = eventsPlatformPort?.supports('desktop.fileSystem')
         ? await eventsPlatformPort.call('files', 'getInitialPath')

@@ -77,6 +77,15 @@ import {
   mountClassicRecentFilesPort
 } from './features/documents/index.js';
 import { createRecentFilesMenuController } from './features/menu/index.js';
+import {
+  createCloseSavePort,
+  createWindowCloseController,
+  createWindowController,
+  createWindowControlsView,
+  createWindowDragRegion,
+  createWindowState,
+  mountClassicCloseSavePort
+} from './features/window/index.js';
 
 const platform = createPlatform({
   runtime: window,
@@ -133,7 +142,6 @@ configureHybridImageSourcePlatform({
   files: platform.files,
   enabled: platform.capabilities.desktop.fileSystem
 });
-document.documentElement.classList.toggle('tauri-shell', platform.capabilities.isDesktop);
 window.addEventListener('pagehide', () => {
   destroyLayoutStateFeature();
   compatibilityPlatformPort.destroy();
@@ -307,6 +315,9 @@ async function loadAppModules() {
   let outlineControllerPort = null;
   let folderTreeController = null;
   let folderTreeControllerPort = null;
+  let closeSavePort = null;
+  let classicCloseSavePort = null;
+  let windowController = null;
   let documentEditorViewsDestroyed = false;
   const destroyDocumentEditorViews = () => {
     if (documentEditorViewsDestroyed) return;
@@ -325,6 +336,17 @@ async function loadAppModules() {
   const destroyDocumentFeatures = () => {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
+    if (windowController) {
+      const pendingWindowDestroy = windowController.destroy();
+      if (pendingWindowDestroy && typeof pendingWindowDestroy.catch === 'function') {
+        void pendingWindowDestroy.catch(error => console.error('Window feature cleanup failed:', error));
+      }
+      windowController = null;
+    }
+    classicCloseSavePort?.destroy();
+    classicCloseSavePort = null;
+    closeSavePort?.destroy();
+    closeSavePort = null;
     unregisterLayoutUiCommands?.();
     unregisterLayoutUiCommands = null;
     sidebarControllerPort?.destroy();
@@ -706,6 +728,8 @@ async function loadAppModules() {
   };
 
   try {
+    closeSavePort = createCloseSavePort();
+    classicCloseSavePort = mountClassicCloseSavePort(compatibilityPlatformHost, closeSavePort);
     const layoutFrameHost = document.defaultView;
     const requestLayoutFrame = callback => layoutFrameHost.requestAnimationFrame(callback);
     const cancelLayoutFrame = id => layoutFrameHost.cancelAnimationFrame(id);
@@ -865,6 +889,50 @@ async function loadAppModules() {
     for (const src of APP_MODULES) {
       await loadClassicScript(src);
     }
+    if (!closeSavePort.registered) throw new Error('CloseSavePort application policy is unavailable.');
+    const windowSupported = platform.capabilities.desktop.window;
+    const windowState = createWindowState();
+    let nextWindowController = null;
+    const windowControlsView = createWindowControlsView({
+      state: windowState,
+      root: document.documentElement,
+      controls: requireElement('#window-controls', 'Window controls'),
+      minimizeButton: requireElement('#window-minimize-btn', 'Window minimize button'),
+      maximizeButton: requireElement('#window-maximize-btn', 'Window maximize button'),
+      closeButton: requireElement('#window-close-btn', 'Window close button'),
+      onMinimize: () => nextWindowController.minimize(),
+      onToggleMaximize: () => nextWindowController.toggleMaximize(),
+      onClose: () => nextWindowController.requestClose('control'),
+      reportError(message, error) { console.error(message, error); }
+    });
+    const windowDragRegion = createWindowDragRegion({
+      target: requireElement('.menu-bar', 'Window drag region'),
+      enabled: windowSupported,
+      startDrag: () => nextWindowController.startDrag(),
+      toggleMaximize: () => nextWindowController.toggleMaximize(),
+      reportError(message, error) { console.warn(message, error); }
+    });
+    const windowCloseController = createWindowCloseController({
+      state: windowState,
+      windowPort: platform.window,
+      closeSave: closeSavePort,
+      supported: windowSupported,
+      notify,
+      record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+      reportError(message, error) { console.error(message, error); }
+    });
+    nextWindowController = createWindowController({
+      state: windowState,
+      windowPort: platform.window,
+      controlsView: windowControlsView,
+      dragRegion: windowDragRegion,
+      closeController: windowCloseController,
+      supported: windowSupported,
+      notify,
+      reportError(message, error) { console.warn(message, error); }
+    });
+    windowController = nextWindowController;
+    await windowController.start();
     recentFilesMenuController.start();
     sidebarTabController.start();
     mountDocumentEditorViews();

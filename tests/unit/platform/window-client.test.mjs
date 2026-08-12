@@ -133,26 +133,44 @@ test('the desktop window client is the sole production owner of the Tauri window
   assert.match(publicEntry, /desktop\/window-client\.js/);
 });
 
-test('desktop platform exposes all WindowPort methods and events consumes the scoped window port', async () => {
-  const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
-  const events = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
+test('desktop platform keeps every WindowPort method while Atomic 6.13 Window feature becomes the sole application consumer', async () => {
+  const [desktop, events, main, controller, closeController] = await Promise.all([
+    readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/main.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/features/window/window-controller.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/features/window/window-close-controller.js', import.meta.url), 'utf8')
+  ]);
   assert.match(desktop, /createWindowClient\(/);
   assert.match(desktop, /window: windowClient/);
-  for (const method of ['subscribeCloseRequest', 'startDrag', 'minimize', 'toggleMaximize', 'isMaximized', 'subscribeResize', 'requestClose', 'forceClose']) {
-    assert.match(events, new RegExp(`call\\('window', '${method}'`));
+  for (const method of ['startDrag', 'minimize', 'toggleMaximize', 'isMaximized', 'subscribeResize']) {
+    assert.match(controller, new RegExp(`windowPort\\.${method}`));
   }
+  for (const method of ['subscribeCloseRequest', 'requestClose', 'forceClose']) {
+    assert.match(closeController, new RegExp(`windowPort\\.${method}`));
+  }
+  assert.match(main, /windowPort: platform\.window/);
+  assert.doesNotMatch(events, /call\('window'/);
   assert.doesNotMatch(events, /markdownEditorNative/);
 });
 
-test('save-before-close remains in the application layer and is absent from the window client', async () => {
-  const clientSource = await readFile(new URL('../../../src/platform/desktop/window-client.js', import.meta.url), 'utf8');
-  const eventsSource = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
+test('save-before-close remains in the application CloseSavePort and stays absent from the platform/window orchestration internals', async () => {
+  const [clientSource, eventsSource, closeController, closeSavePort, main] = await Promise.all([
+    readFile(new URL('../../../src/platform/desktop/window-client.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/features/window/window-close-controller.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/features/window/close-save-port.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/main.js', import.meta.url), 'utf8')
+  ]);
   assert.doesNotMatch(clientSource, /saveCurrentDocumentState|confirmUserAction|close-save|document/);
+  assert.match(eventsSource, /eventsCloseSavePort\.register/);
   assert.match(eventsSource, /saveCurrentDocumentState\(false, \{ waitForNative: true, forceSnapshot: true \}\)/);
-  assert.match(eventsSource, /event\.preventDefault\(\)/);
-  assert.match(eventsSource, /call\('window', 'requestClose'/);
-  assert.match(eventsSource, /call\('window', 'forceClose'/);
-  assert.doesNotMatch(eventsSource, /markdownEditorNative/);
+  assert.match(eventsSource, /confirmUserAction\('关闭前保存失败/);
+  assert.match(closeController, /closeSave\.prepareClose\(\)/);
+  assert.match(closeController, /event\?\.preventDefault\?\.\(\)/);
+  assert.doesNotMatch(closeController, /saveCurrentDocumentState|confirmUserAction|localStorage|sessionStorage/);
+  assert.doesNotMatch(closeSavePort, /saveCurrentDocumentState|confirmUserAction|WindowPort|localStorage|sessionStorage/);
+  assert.match(main, /mountClassicCloseSavePort\(compatibilityPlatformHost, closeSavePort\)/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.5 after dialog and before drag-drop', async () => {

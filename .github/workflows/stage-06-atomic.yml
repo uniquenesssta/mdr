@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.12 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.13 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  recent-files-menu:
-    name: Verify Stage 6 Through Recent Files Menu
+  window-controller:
+    name: Verify Stage 6 Through Window Controller
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -210,6 +210,20 @@ jobs:
           tests/stage-06-recent-files-menu.test.mjs
       - name: Verify Atomic Task 6.12 real browser subscription and commands
         run: node tests/e2e/recent-files-menu.test.mjs
+      - name: Verify Atomic Task 6.13 Window Controller
+        run: >-
+          node --test
+          tests/unit/window/window-state.test.mjs
+          tests/unit/window/close-save-port.test.mjs
+          tests/unit/window/window-controls-view.test.mjs
+          tests/unit/window/window-drag-region.test.mjs
+          tests/unit/window/window-close-controller.test.mjs
+          tests/unit/window/window-controller.test.mjs
+          tests/unit/platform/window-client.test.mjs
+          tests/architecture/stage-06-window-controller.test.mjs
+          tests/stage-06-window-controller.test.mjs
+      - name: Verify Atomic Task 6.13 real browser window lifecycle
+        run: node tests/e2e/window-controller.test.mjs
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -235,8 +249,17 @@ jobs:
           node --check src/features/sidebar/folder-tree/folder-tree-controller.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-view.js &&
           node --check src/features/sidebar/folder-tree/folder-tree-node-view.js &&
+          node --check src/features/window/close-save-port.js &&
+          node --check src/features/window/window-state.js &&
+          node --check src/features/window/window-controls-view.js &&
+          node --check src/features/window/window-drag-region.js &&
+          node --check src/features/window/window-close-controller.js &&
+          node --check src/features/window/window-controller.js &&
+          node --check src/features/window/compatibility/classic-close-save-port.js &&
+          node --check src/features/window/index.js &&
           node --check tests/e2e/submenu-positioner.test.mjs &&
           node --check tests/e2e/recent-files-menu.test.mjs &&
+          node --check tests/e2e/window-controller.test.mjs &&
           node --check tests/e2e/run-browser-tests.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
@@ -254,10 +277,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.12 evidence
+      - name: Upload Atomic Task 6.13 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-recent-files-menu-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-window-controller-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30

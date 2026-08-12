@@ -1,11 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
-import { constants } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 
 const ROOT = new URL('../../', import.meta.url);
 const read = path => readFile(new URL(path, ROOT), 'utf8');
-const exists = path => access(new URL(path, ROOT), constants.F_OK).then(() => true, () => false);
 
 test('Atomic 6.12 Recent Files Menu has one dedicated controller behind public Menu/Documents entries', async () => {
   const [menuEntry, documentsEntry, controller, readSource, main, bootstrap] = await Promise.all([
@@ -73,14 +71,17 @@ test('Atomic 6.12 emits stable Menu commands and does not leak Recent Files into
   assert.doesNotMatch(commandPort, /RecentFilesRepository|localStorage|createElement|handleNativeDroppedPath/);
 });
 
-test('Atomic 6.12 owns subscription/listener destroy paths and does not pre-implement Atomic 6.13 Window Controller', async () => {
-  const [controller, main] = await Promise.all([
+test('Atomic 6.12 subscription/listener boundaries remain intact after independent Atomic 6.13 Window migration', async () => {
+  const [controller, main, windowController] = await Promise.all([
     read('src/features/menu/recent-files-menu-controller.js'),
-    read('src/main.js')
+    read('src/main.js'),
+    read('src/features/window/window-controller.js')
   ]);
   assert.match(controller, /unsubscribe = source\.subscribe/);
   assert.match(controller, /dispose\?\.\(\)/);
   assert.match(controller, /removeEventListener\('click'/);
   assert.match(main, /recentFilesMenuController\?\.destroy/);
-  assert.equal(await exists('src/features/window/window-controller.js'), false);
+  assert.match(main, /from '\.\/features\/window\/index\.js'/);
+  assert.doesNotMatch(controller, /WindowState|WindowPort|CloseSavePort|window-controls|window-drag/);
+  assert.doesNotMatch(windowController, /RecentFiles|recentFiles|recent-files/);
 });
