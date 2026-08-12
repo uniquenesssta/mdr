@@ -35,7 +35,7 @@ test('Atomic 6.7 composition still owns tab mount switching while Documents keep
   assert.match(main, /createSidebarState/);
   assert.match(main, /createSidebarTabController/);
   assert.match(main, /mountClassicSidebarControllerPort/);
-  assert.match(main, /registerLifecycle\('files', folderFileTreeController\)/);
+  assert.match(main, /registerLifecycle\('files', folderTreeController\)/);
   assert.match(main, /registerLifecycle\('outline', outlineController\)/);
   assert.match(main, /sidebarTabController\.start\(\)/);
   assert.match(main, /createDocumentListView\(\{[\s\S]*?#document-list/);
@@ -43,14 +43,15 @@ test('Atomic 6.7 composition still owns tab mount switching while Documents keep
   assert.doesNotMatch(tabController, /document-list|DocumentSession|records|heading|folder-file-tree/);
 });
 
-test('Atomic 6.7 remains a tab boundary after 6.8 Outline migration and 6.9 Folder Tree is still not started', async () => {
-  const [outlineController, folderTree] = await Promise.all([
+test('Atomic 6.7 remains a pure tab boundary after independent Outline and Folder Tree migrations', async () => {
+  const [outlineController, folderTreeController, tabController] = await Promise.all([
     read('src/features/sidebar/outline/outline-controller.js'),
-    read('src/sidebar/folder-file-tree.js')
+    read('src/features/sidebar/folder-tree/folder-tree-controller.js'),
+    read('src/features/sidebar/tabs/sidebar-tab-controller.js')
   ]);
   assert.match(outlineController, /createOutlineController/);
-  assert.match(folderTree, /export function createFolderFileTreeController/);
-  await assert.rejects(read('src/features/sidebar/files/folder-tree-controller.js'), /ENOENT/);
+  assert.match(folderTreeController, /createFolderTreeController/);
+  assert.doesNotMatch(tabController, /listTextTree|normalizeFolderTreeResult|expandedDirectories/);
 });
 
 test('Atomic 6.7 Sidebar tab modules avoid direct browser-global authority', async () => {

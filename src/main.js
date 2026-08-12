@@ -50,13 +50,16 @@ import { createScrollSyncController } from './sync/scroll-controller.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
 import { createMarkdownPresentationApi } from './rendering/presentation-api.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
-import { createFolderFileTreeController } from './sidebar/folder-file-tree.js';
 import {
+  createFolderTreeController,
+  createFolderTreeState,
+  createFolderTreeView,
   createOutlineCollapseStore,
   createOutlineController,
   createOutlineView,
   createSidebarState,
   createSidebarTabController,
+  mountClassicFolderTreeControllerPort,
   mountClassicOutlineControllerPort,
   mountClassicSidebarControllerPort
 } from './features/sidebar/index.js';
@@ -286,6 +289,8 @@ async function loadAppModules() {
   let sidebarControllerPort = null;
   let outlineController = null;
   let outlineControllerPort = null;
+  let folderTreeController = null;
+  let folderTreeControllerPort = null;
   let documentEditorViewsDestroyed = false;
   const destroyDocumentEditorViews = () => {
     if (documentEditorViewsDestroyed) return;
@@ -308,12 +313,16 @@ async function loadAppModules() {
     unregisterLayoutUiCommands = null;
     sidebarControllerPort?.destroy();
     sidebarControllerPort = null;
+    folderTreeControllerPort?.destroy();
+    folderTreeControllerPort = null;
     outlineControllerPort?.destroy();
     outlineControllerPort = null;
     sidebarTabController?.destroy();
     sidebarTabController = null;
     outlineController?.destroy();
     outlineController = null;
+    folderTreeController?.destroy();
+    folderTreeController = null;
     sidebarState?.destroy();
     sidebarState = null;
     splitControllerPort?.destroy();
@@ -338,17 +347,31 @@ async function loadAppModules() {
   };
   window.addEventListener('pagehide', destroyDocumentFeatures, { once: true });
 
-  const folderFileTreeController = createFolderFileTreeController({
+  const folderTreeState = createFolderTreeState();
+  const folderTreeView = createFolderTreeView({
+    documentRef: document,
+    panel: requireElement('#sidebar-files-panel', 'Files sidebar panel'),
+    list: requireElement('#folder-file-tree', 'Folder Tree list'),
+    rootLabel: requireElement('#folder-file-tree-root', 'Folder Tree root label'),
+    summary: requireElement('#folder-file-tree-summary', 'Folder Tree summary'),
+    refreshButton: requireElement('#folder-file-tree-refresh', 'Folder Tree refresh button'),
+    available: platform.capabilities.desktop.fileSystem
+  });
+  folderTreeController = createFolderTreeController({
+    state: folderTreeState,
+    view: folderTreeView,
     files: platform.files,
     available: platform.capabilities.desktop.fileSystem,
-    getCurrentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {},
-    openFile: async path => {
-      if (typeof window.openFolderTreeFile === 'function') return window.openFolderTreeFile(path);
-      if (typeof window.handleNativeDroppedPath === 'function') return window.handleNativeDroppedPath(path);
-      return false;
-    }
+    getCurrentContext: () => ({ filePath: documentSessionPort.getActiveRecord()?.filePath || '' }),
+    openFile: path => documentUiCommandPort.has('openFolderTreeFile')
+      ? documentUiCommandPort.invoke('openFolderTreeFile', path)
+      : false,
+    now: () => performance.now(),
+    record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+    reportError(message, error) { console.warn(message, error); }
   });
-  window.markdownEditorFileTree = folderFileTreeController;
+  folderTreeController.start();
+  folderTreeControllerPort = mountClassicFolderTreeControllerPort(compatibilityPlatformHost, folderTreeController);
   sidebarState = createSidebarState();
   sidebarTabController = createSidebarTabController({
     state: sidebarState,
@@ -365,7 +388,7 @@ async function loadAppModules() {
     },
     reportError(message, error) { console.warn(message, error); }
   });
-  sidebarTabController.registerLifecycle('files', folderFileTreeController);
+  sidebarTabController.registerLifecycle('files', folderTreeController);
   const outlineCollapseStore = createOutlineCollapseStore({
     storage: platform.storage,
     reportError(message, error) { console.warn(message, error); }

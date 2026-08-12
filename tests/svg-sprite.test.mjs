@@ -68,7 +68,7 @@ test('compatibility and dynamic callers reference the external sprite without a 
     readText('src/features/help/ui/help-dialog-view.js'),
     readText('src/features/settings/ui/settings-dialog-view.js'),
     readText('src/runtime/link-preview.js'),
-    readText('src/sidebar/folder-file-tree.js'),
+    readText('src/features/sidebar/folder-tree/folder-tree-node-view.js'),
     readText('tests/e2e/run-browser-tests.mjs')
   ]);
   const shellReferences = collectIconReferences(shell);
@@ -89,7 +89,7 @@ test('compatibility and dynamic callers reference the external sprite without a 
   assert.match(settingsDialog, /createIconView\(documentRef, 'icon-close'\)/);
   assert.doesNotMatch(settingsDialog, /<svg\b|<use\b|\/assets\/icons\.svg#icon-/i);
   assert.match(linkPreview, /import \{ createIconView \} from '\.\.\/ui\/components\/icon-view\.js'/);
-  assert.match(folderTree, /import \{ createIconView, getIconHref \} from '\.\.\/ui\/components\/icon-view\.js'/);
+  assert.match(folderTree, /import \{ createIconView, getIconHref \} from '\.\.\/\.\.\/\.\.\/ui\/components\/icon-view\.js'/);
   assert.doesNotMatch(folderTree, /function createIcon\(/);
   assert.doesNotMatch(browserTest, /<symbol\b[^>]*id="icon-/i);
 });

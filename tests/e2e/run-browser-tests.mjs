@@ -192,19 +192,31 @@ async function runContractSuite() {
       assert.equal(result.calls.filter(item => item.type === 'render').length, 2);
     });
 
-    await test('folder file tree renders nested readable files and opens the selected path', async () => {
+    await test('folder file tree renders nested readable files, preserves expansion, opens paths, and destroys listeners', async () => {
       await browser.page.setDocumentContent(`<!doctype html><html><head><base href="${virtualHost.origin}/"></head><body>
         <section id="sidebar-files-panel">
           <strong id="folder-file-tree-root"></strong><small id="folder-file-tree-summary"></small>
           <button id="folder-file-tree-refresh"></button><div id="folder-file-tree"></div>
         </section>
       </body></html>`);
-      const moduleUrl = `${virtualHost.origin}/src/sidebar/folder-file-tree.js`;
+      const moduleUrl = `${virtualHost.origin}/src/features/sidebar/index.js`;
       await browser.page.evaluate(`(async()=>{
-        const {createFolderFileTreeController}=await import(${JSON.stringify(moduleUrl)});
+        const {createFolderTreeState,createFolderTreeView,createFolderTreeController}=await import(${JSON.stringify(moduleUrl)});
         window.__folderTreeOpened=[];
-        window.__folderTreeController=createFolderFileTreeController({
-          files:{async listTextTree(){return {
+        window.__folderTreeReads=0;
+        const state=createFolderTreeState();
+        const view=createFolderTreeView({
+          documentRef:document,
+          panel:document.getElementById('sidebar-files-panel'),
+          list:document.getElementById('folder-file-tree'),
+          rootLabel:document.getElementById('folder-file-tree-root'),
+          summary:document.getElementById('folder-file-tree-summary'),
+          refreshButton:document.getElementById('folder-file-tree-refresh'),
+          available:true
+        });
+        window.__folderTreeController=createFolderTreeController({
+          state,view,
+          files:{async listTextTree(){window.__folderTreeReads++;return {
             rootPath:'F:/Notes',rootName:'Notes',fileCount:3,directoryCount:1,skippedCount:0,truncated:false,
             nodes:[
               {kind:'directory',name:'Archive',path:'F:/Notes/Archive',children:[{kind:'file',name:'old.md',path:'F:/Notes/Archive/old.md'}]},
@@ -216,6 +228,7 @@ async function runContractSuite() {
           getCurrentContext:()=>({filePath:'F:/Notes/current.md'}),
           openFile:async path=>{window.__folderTreeOpened.push(path);return true;}
         });
+        window.__folderTreeController.start();
         await window.__folderTreeController.activate();
       })()`);
       await browser.page.waitFor(() => document.querySelectorAll('.folder-tree-file-row').length === 3, { description: 'folder tree rows' });
@@ -224,17 +237,25 @@ async function runContractSuite() {
         summary:document.getElementById('folder-file-tree-summary').textContent,
         names:Array.from(document.querySelectorAll('.folder-tree-file-row')).map(row=>row.textContent.trim()),
         active:document.querySelector('.folder-tree-file-row.active')?.textContent.trim()||'',
+        expanded:document.querySelector('.folder-tree-directory-row')?.getAttribute('aria-expanded'),
         iconHrefs:Array.from(document.querySelectorAll('.folder-tree-row use')).map(use=>use.getAttribute('href'))
       }))()`);
       assert.equal(snapshot.root, 'Notes');
       assert.match(snapshot.summary, /3 个文件/);
       assert.deepEqual(snapshot.names, ['old.md', 'current.md', 'next.txt']);
       assert.equal(snapshot.active, 'current.md');
+      assert.equal(snapshot.expanded, 'true');
       assert.ok(snapshot.iconHrefs.length >= 4);
       assert.ok(snapshot.iconHrefs.every(href => /^\/assets\/icons\.svg#icon-[a-z0-9-]+$/.test(href)));
+      await browser.page.evaluate(`document.querySelector('.folder-tree-directory-row').click()`);
+      assert.equal(await browser.page.evaluate(`document.querySelector('.folder-tree-directory-row').getAttribute('aria-expanded')`), 'false');
       await browser.page.evaluate(`Array.from(document.querySelectorAll('.folder-tree-file-row')).find(row=>row.textContent.includes('next.txt')).click()`);
       await browser.page.waitFor(() => window.__folderTreeOpened?.length === 1, { description: 'folder tree open callback' });
       assert.equal(await browser.page.evaluate('window.__folderTreeOpened[0]'), 'F:/Notes/next.txt');
+      const readsBeforeDestroy = await browser.page.evaluate('window.__folderTreeReads');
+      await browser.page.evaluate(`window.__folderTreeController.destroy();document.getElementById('folder-file-tree-refresh').click()`);
+      await new Promise(resolve => setTimeout(resolve, 20));
+      assert.equal(await browser.page.evaluate('window.__folderTreeReads'), readsBeforeDestroy);
     });
 
 
@@ -1299,38 +1320,37 @@ async function runAppSuite() {
       const result = await browser.page.evaluate(`(async()=>{
         const host=document.getElementById('compatibility-business-ports');
         const port=host?.markdownEditorSidebarControllerPort;
-        const tree=window.markdownEditorFileTree;
-        if(!port||!tree)throw new Error('Sidebar 6.7 runtime unavailable');
-        const originalActivate=tree.activate;
-        const originalDeactivate=tree.deactivate;
-        const calls=[];
-        tree.activate=(...args)=>{calls.push('files+');return originalActivate.apply(tree,args);};
-        tree.deactivate=(...args)=>{calls.push('files-');return originalDeactivate.apply(tree,args);};
+        const tree=host?.markdownEditorFolderTreeControllerPort;
+        if(!port||!tree)throw new Error('Sidebar/Folder Tree runtime unavailable');
+        const states=[];
         const panelState=()=>['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-panel')?.classList.contains('active'));
         const tabState=()=>['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-tab')?.classList.contains('active'));
         const docsBefore=document.getElementById('document-list')?.childElementCount??-1;
         document.getElementById('sidebar-files-tab').click();
         await Promise.resolve();
-        const files={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab')};
+        states.push(tree.snapshot.active);
+        const files={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab'),treeActive:tree.snapshot.active};
         document.getElementById('sidebar-outline-tab').click();
         await Promise.resolve();
-        const outline={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab'),items:document.getElementById('outline-list')?.children.length??0};
+        states.push(tree.snapshot.active);
+        const outline={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab'),items:document.getElementById('outline-list')?.children.length??0,treeActive:tree.snapshot.active};
         document.getElementById('sidebar-docs-tab').click();
         await Promise.resolve();
         const docs={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab'),count:document.getElementById('document-list')?.childElementCount??-1};
-        tree.activate=originalActivate;
-        tree.deactivate=originalDeactivate;
-        return {files,outline,docs,docsBefore,calls,legacyGlobal:typeof window.setSidebarTab};
+        states.push(tree.snapshot.active);
+        return {files,outline,docs,docsBefore,states,legacyGlobal:typeof window.setSidebarTab,legacyTreeGlobal:typeof window.markdownEditorFileTree};
       })()`);
-      assert.deepEqual(result.files, {active:'files',panels:['files'],tabs:['files'],stored:'files'});
+      assert.deepEqual(result.files, {active:'files',panels:['files'],tabs:['files'],stored:'files',treeActive:true});
       assert.equal(result.outline.active, 'outline');
       assert.deepEqual(result.outline.panels, ['outline']);
       assert.deepEqual(result.outline.tabs, ['outline']);
       assert.equal(result.outline.stored, 'outline');
+      assert.equal(result.outline.treeActive, false);
       assert.ok(result.outline.items > 0, 'outline activation should request the existing Outline renderer');
       assert.deepEqual(result.docs, {active:'docs',panels:['docs'],tabs:['docs'],stored:'docs',count:result.docsBefore});
-      assert.deepEqual(result.calls, ['files+','files-']);
+      assert.deepEqual(result.states, [true, false, false]);
       assert.equal(result.legacyGlobal, 'undefined');
+      assert.equal(result.legacyTreeGlobal, 'undefined');
     });
 
     await test('application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source', async () => {

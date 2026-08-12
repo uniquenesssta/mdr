@@ -4,7 +4,7 @@ import test from 'node:test';
 
 const migratedCallers = [
   'src/main.js', 'src/runtime/link-preview.js', 'src/runtime/performance.js',
-  'src/sidebar/folder-file-tree.js', 'src/storage/native-document-store.js',
+  'src/features/sidebar/folder-tree/folder-tree-controller.js', 'src/storage/native-document-store.js',
   'src/editor/hybrid/image-source.js', 'public/app/core.js', 'public/app/events.js',
   'public/app/export.js', 'public/app/web-clipper.js'
 ];
@@ -36,7 +36,7 @@ test('classic callers use the scoped compatibility host instead of a replacement
 
 test('ESM consumers receive responsibility-focused ports rather than native DTO facade methods', async () => {
   const store = await readFile(new URL('../../../src/storage/native-document-store.js', import.meta.url), 'utf8');
-  const tree = await readFile(new URL('../../../src/sidebar/folder-file-tree.js', import.meta.url), 'utf8');
+  const tree = await readFile(new URL('../../../src/features/sidebar/folder-tree/folder-tree-controller.js', import.meta.url), 'utf8');
   const images = await readFile(new URL('../../../src/editor/hybrid/image-source.js', import.meta.url), 'utf8');
   const performance = await readFile(new URL('../../../src/runtime/performance.js', import.meta.url), 'utf8');
   const links = await readFile(new URL('../../../src/runtime/link-preview.js', import.meta.url), 'utf8');

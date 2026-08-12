@@ -86,8 +86,11 @@ test('Atomic 6.8 Outline view owns DOM/context actions without executable inline
   assert.match(html, /data-outline-context-action="collapse-node"/);
 });
 
-test('Atomic 6.8 composition registers only the Outline lifecycle and does not begin 6.9 Folder Tree', async () => {
-  const [main, folderTree] = await Promise.all([read('src/main.js'), read('src/sidebar/folder-file-tree.js')]);
+test('Atomic 6.8 composition keeps Outline ownership intact after the independent 6.9 Folder Tree migration', async () => {
+  const [main, folderTree] = await Promise.all([
+    read('src/main.js'),
+    read('src/features/sidebar/folder-tree/folder-tree-controller.js')
+  ]);
   assert.match(main, /createOutlineCollapseStore/);
   assert.match(main, /createOutlineView/);
   assert.match(main, /createOutlineController/);
@@ -95,8 +98,8 @@ test('Atomic 6.8 composition registers only the Outline lifecycle and does not b
   assert.match(main, /mountClassicOutlineControllerPort/);
   assert.match(main, /outlineController\.start\(\)/);
   assert.match(main, /outlineController\?\.destroy\(\)/);
-  assert.match(folderTree, /export function createFolderFileTreeController/);
-  await assert.rejects(read('src/features/sidebar/files/folder-tree-controller.js'), /ENOENT/);
+  assert.match(folderTree, /export function createFolderTreeController/);
+  assert.doesNotMatch(folderTree, /heading|OutlineController|outlineCollapse/);
 });
 
 test('Atomic 6.8 production Outline modules have no direct browser-global authority', async () => {

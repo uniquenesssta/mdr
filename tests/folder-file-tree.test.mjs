@@ -5,8 +5,8 @@ import {
   getNativeParentPath,
   isNativePathWithinDirectory,
   isSameNativePath,
-  normalizeFolderFileTreeResult
-} from '../src/sidebar/folder-file-tree.js';
+  normalizeFolderTreeResult
+} from '../src/features/sidebar/index.js';
 
 test('folder file tree normalizes Windows paths and parent directories', () => {
   assert.equal(getNativeParentPath('F:\\Notes\\daily\\today.md'), 'F:\\Notes\\daily');
@@ -18,7 +18,7 @@ test('folder file tree normalizes Windows paths and parent directories', () => {
 });
 
 test('folder file tree keeps supported files, sorts directories first, and normalizes counts', () => {
-  const tree = normalizeFolderFileTreeResult({
+  const tree = normalizeFolderTreeResult({
     rootPath: 'F:\\Notes',
     rootName: 'Notes',
     fileCount: 3,
@@ -57,10 +57,11 @@ test('folder file tree is wired through the Sidebar controller, runtime bridge, 
   ]);
   assert.match(index, /id="sidebar-files-tab"/);
   assert.match(index, /id="folder-file-tree"/);
-  assert.match(main, /createFolderFileTreeController/);
-  assert.match(main, /registerLifecycle\('files', folderFileTreeController\)/);
+  assert.match(main, /createFolderTreeController/);
+  assert.match(main, /registerLifecycle\('files', folderTreeController\)/);
   assert.match(sidebarState, /\['docs', 'files', 'outline'\]/);
   assert.match(core, /openFolderTreeFile/);
+  assert.match(core, /markdownEditorFolderTreeControllerPort/);
   assert.match(desktopPlatform, /listTextTree/);
   assert.match(desktopPlatform, /fileSystemClient\.listTextFileTree/);
   assert.match(rustMain, /local_file::list_text_file_tree/);

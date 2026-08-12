@@ -11,6 +11,7 @@ const coreEditorUiCommandPort = coreCompatibilityHost?.markdownEditorEditorUiCom
 const coreLayoutStatePort = coreCompatibilityHost?.markdownEditorLayoutStatePort;
 const coreSidebarControllerPort = coreCompatibilityHost?.markdownEditorSidebarControllerPort;
 const coreOutlineControllerPort = coreCompatibilityHost?.markdownEditorOutlineControllerPort;
+const coreFolderTreeControllerPort = coreCompatibilityHost?.markdownEditorFolderTreeControllerPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -22,6 +23,7 @@ if (!coreEditorUiCommandPort) throw new Error('Editor UI command compatibility p
 if (!coreLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 if (!coreSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
 if (!coreOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
+if (!coreFolderTreeControllerPort) throw new Error('Folder Tree controller compatibility port is unavailable.');
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
   closeDocument: documentId => closeDocument(documentId),
@@ -32,6 +34,7 @@ coreDocumentUiCommandPort.register({
   copyDocumentTitle: documentId => copyContextDocumentTitle(documentId),
   newDocument: () => newDocument(),
   duplicateActiveDocument: () => duplicateDocument(coreDocumentSessionPort.activeId),
+  openFolderTreeFile: path => openFolderTreeFile(path),
   updateTitleDraft(value) {
     const result = coreDocumentControllerPort.updateActiveTitleDraft(value);
     autoSave();
@@ -718,7 +721,7 @@ const editor = document.getElementById('editor');
       return (/^[a-z]:\//i.test(value) || value.startsWith('//')) ? value.toLocaleLowerCase() : value;
     }
 
-    async function openFolderTreeFile(path) {
+    const openFolderTreeFile = async path => {
       const normalizedPath = normalizeWorkspaceFilePath(path);
       if (!normalizedPath) return false;
       const existing = getSessionDocuments().find(item => normalizeWorkspaceFilePath(item?.filePath) === normalizedPath);
@@ -731,7 +734,7 @@ const editor = document.getElementById('editor');
       const opened = await handleNativeDroppedPath(path);
       if (opened) void coreSidebarControllerPort.select('files');
       return opened;
-    }
+    };
 
     async function openDocument(id) {
       if (id === coreDocumentControllerPort.activeId) return;
@@ -875,9 +878,9 @@ const editor = document.getElementById('editor');
     }
 
     function syncCurrentDocumentFileTree() {
-      window.markdownEditorFileTree?.syncCurrentDocument?.(
-        window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.()
-      );
+      coreFolderTreeControllerPort.syncCurrentDocument({
+        filePath: coreDocumentSessionPort.getActiveRecord()?.filePath || ''
+      });
     }
 
     function showContextMenu(menu, event) {

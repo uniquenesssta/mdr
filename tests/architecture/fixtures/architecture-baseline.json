@@ -505,14 +505,6 @@
     },
     {
       "path": "src/main.js",
-      "global": "window.handleNativeDroppedPath",
-      "count": 1,
-      "lines": [
-        262
-      ]
-    },
-    {
-      "path": "src/main.js",
       "global": "window.IncrementalPreviewModel",
       "count": 1,
       "lines": [
@@ -541,14 +533,6 @@
       "count": 1,
       "lines": [
         159
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.markdownEditorFileTree",
-      "count": 1,
-      "lines": [
-        256
       ]
     },
     {
@@ -605,14 +589,6 @@
       "count": 1,
       "lines": [
         158
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.openFolderTreeFile",
-      "count": 1,
-      "lines": [
-        261
       ]
     },
     {

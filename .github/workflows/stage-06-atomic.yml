@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.8 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.9 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  outline:
-    name: Verify Stage 6 Through Outline
+  folder-tree:
+    name: Verify Stage 6 Through Folder Tree
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -169,6 +169,18 @@ jobs:
           tests/unit/sidebar/outline-controller.test.mjs
           tests/unit/sidebar/classic-outline-controller-port.test.mjs
           tests/architecture/stage-06-outline.test.mjs
+      - name: Verify Atomic Task 6.9 Folder Tree
+        run: >-
+          node --test
+          tests/folder-file-tree.test.mjs
+          tests/unit/sidebar/folder-tree-path-policy.test.mjs
+          tests/unit/sidebar/folder-tree-normalizer.test.mjs
+          tests/unit/sidebar/folder-tree-state.test.mjs
+          tests/unit/sidebar/folder-tree-controller.test.mjs
+          tests/unit/sidebar/classic-folder-tree-controller-port.test.mjs
+          tests/architecture/stage-06-folder-tree.test.mjs
+          tests/unit/platform/platform-cutover.test.mjs
+          tests/svg-sprite.test.mjs
       - name: Verify modified classic and browser runners parse
         run: >-
           node --check src/main.js &&
@@ -178,6 +190,9 @@ jobs:
           node --check public/app/preview.js &&
           node --check public/app/scroll-sync.js &&
           node --check public/app/export.js &&
+          node --check src/features/sidebar/folder-tree/folder-tree-controller.js &&
+          node --check src/features/sidebar/folder-tree/folder-tree-view.js &&
+          node --check src/features/sidebar/folder-tree/folder-tree-node-view.js &&
           node --check tests/e2e/run-browser-tests.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
@@ -195,10 +210,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.8 evidence
+      - name: Upload Atomic Task 6.9 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-outline-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-folder-tree-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30
