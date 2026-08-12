@@ -13,6 +13,7 @@ const coreSidebarControllerPort = coreCompatibilityHost?.markdownEditorSidebarCo
 const coreOutlineControllerPort = coreCompatibilityHost?.markdownEditorOutlineControllerPort;
 const coreFolderTreeControllerPort = coreCompatibilityHost?.markdownEditorFolderTreeControllerPort;
 const coreSubmenuPositionerPort = coreCompatibilityHost?.markdownEditorSubmenuPositionerPort;
+const corePreviewModeResolverPort = coreCompatibilityHost?.markdownEditorPreviewModeResolverPort;
 const corePreviewThresholdsPort = coreCompatibilityHost?.markdownEditorPreviewThresholdsPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
@@ -27,6 +28,7 @@ if (!coreSidebarControllerPort) throw new Error('Sidebar controller compatibilit
 if (!coreOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
 if (!coreFolderTreeControllerPort) throw new Error('Folder Tree controller compatibility port is unavailable.');
 if (!coreSubmenuPositionerPort) throw new Error('Submenu Positioner compatibility port is unavailable.');
+if (!corePreviewModeResolverPort) throw new Error('Preview Mode Resolver compatibility port is unavailable.');
 if (!corePreviewThresholdsPort) throw new Error('Preview Thresholds compatibility port is unavailable.');
 const corePreviewBehaviorThresholds = corePreviewThresholdsPort.snapshot;
 coreDocumentUiCommandPort.register({
@@ -86,7 +88,6 @@ const editor = document.getElementById('editor');
     const ULTRA_LARGE_DOCUMENT_CHARS = corePreviewBehaviorThresholds.mode.virtualChars;
     const AUTOSAVE_MIN_SECONDS = 0.5;
     const AUTOSAVE_MAX_SECONDS = 3600;
-    const PREVIEW_PERFORMANCE_MODES = new Set(['auto', 'full', 'virtual', 'chapter']);
     const TOOLBAR_ITEM_IDS = new Set([
       'bold', 'italic', 'underline', 'strikethrough', 'script', 'textColor', 'highlight',
       'heading', 'quote', 'lists', 'code', 'link', 'image', 'table', 'find', 'mermaid'
@@ -100,23 +101,10 @@ const editor = document.getElementById('editor');
       return Boolean(result.added);
     }
 
-    function normalizePreviewPerformanceMode(value) {
-      const mode = String(value || 'auto');
-      return PREVIEW_PERFORMANCE_MODES.has(mode) ? mode : 'auto';
-    }
-
-    function resolvePreviewPerformanceMode(sourceLength = editor.textLength, blockCount = 0) {
-      const requested = normalizePreviewPerformanceMode(previewPerformanceMode);
-      if (requested !== 'auto') return requested;
-      if (sourceLength >= corePreviewBehaviorThresholds.mode.chapterChars || blockCount >= corePreviewBehaviorThresholds.mode.chapterBlocks) return 'chapter';
-      if (sourceLength >= corePreviewBehaviorThresholds.mode.virtualChars || blockCount >= corePreviewBehaviorThresholds.mode.virtualBlocks) return 'virtual';
-      return 'full';
-    }
-
     function updatePreviewStrategyBadge(mode = 'full', details = {}) {
       const badge = document.getElementById('preview-strategy-badge');
       if (!badge) return;
-      const resolved = normalizePreviewPerformanceMode(mode === 'standard' ? 'full' : mode);
+      const resolved = corePreviewModeResolverPort.normalizeSetting(mode === 'standard' ? 'full' : mode);
       const labels = { full: '完整预览', virtual: '虚拟预览', chapter: '当前章节' };
       const shouldShow = resolved !== 'full' || previewPerformanceMode !== 'auto' || editor.textLength >= corePreviewBehaviorThresholds.mode.badgeChars;
       badge.hidden = !shouldShow;

@@ -88,6 +88,7 @@ import {
 } from './features/window/index.js';
 import {
   createPreviewState,
+  mountClassicPreviewModeResolverPort,
   mountClassicPreviewStatePort,
   mountClassicPreviewThresholdsPort
 } from './features/preview/index.js';
@@ -100,6 +101,7 @@ const platform = createPlatform({
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
 const previewState = createPreviewState();
 const previewStatePort = mountClassicPreviewStatePort(compatibilityPlatformHost, previewState);
+const previewModeResolverPort = mountClassicPreviewModeResolverPort(compatibilityPlatformHost);
 const previewThresholdsPort = mountClassicPreviewThresholdsPort(compatibilityPlatformHost);
 const layoutState = createLayoutState();
 const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
@@ -154,6 +156,7 @@ window.addEventListener('pagehide', () => {
   destroyLayoutStateFeature();
   previewStatePort.destroy();
   previewState.destroy();
+  previewModeResolverPort.destroy();
   previewThresholdsPort.destroy();
   compatibilityPlatformPort.destroy();
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));

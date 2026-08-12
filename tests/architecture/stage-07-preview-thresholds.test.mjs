@@ -12,14 +12,13 @@ test('Atomic 7.1 keeps the preview threshold owner and scoped classic read port 
   const entries = (await readdir(new URL('src/features/preview/', root), { withFileTypes: true }))
     .map(entry => entry.name)
     .sort();
+  const pipelineEntries = (await readdir(new URL('src/features/preview/pipeline/', root))).sort();
 
   assert.ok(entries.includes('index.js'));
   assert.ok(entries.includes('pipeline'));
   assert.ok(entries.includes('compatibility'));
-  assert.deepEqual(
-    (await readdir(new URL('src/features/preview/pipeline/', root))).sort(),
-    ['preview-thresholds.js']
-  );
+  assert.ok(pipelineEntries.includes('preview-thresholds.js'));
+  assert.ok(pipelineEntries.includes('preview-mode-resolver.js'));
   assert.ok(
     (await readdir(new URL('src/features/preview/compatibility/', root))).includes('classic-preview-thresholds-port.js')
   );
@@ -75,7 +74,7 @@ test('Atomic 7.1 removes independent preview mode, window, chapter and worker th
   assert.match(enhancementQueue, /\.\.\/features\/preview\/index\.js/);
 });
 
-test('Atomic 7.1 remains frozen while Atomic 7.2 may add PreviewState but not Atomic 7.3+ owners', async () => {
+test('Atomic 7.1 remains frozen while Atomic 7.2-7.3 may add PreviewState and Mode Resolver but not Atomic 7.4+ owners', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -85,7 +84,6 @@ test('Atomic 7.1 remains frozen while Atomic 7.2 may add PreviewState but not At
   assert.match(featureTree, /preview-state/);
   for (const premature of [
     'preview-controller',
-    'preview-mode-resolver',
     'preview-scheduler',
     'preview-worker-protocol',
     'preview-worker-session',

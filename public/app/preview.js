@@ -4,6 +4,7 @@
     const previewSidebarControllerPort = previewCompatibilityHost?.markdownEditorSidebarControllerPort;
     const previewOutlineControllerPort = previewCompatibilityHost?.markdownEditorOutlineControllerPort;
     const previewEditorUiCommandPort = previewCompatibilityHost?.markdownEditorEditorUiCommandPort;
+    const previewModeResolverPort = previewCompatibilityHost?.markdownEditorPreviewModeResolverPort;
     const previewThresholdsPort = previewCompatibilityHost?.markdownEditorPreviewThresholdsPort;
     const classicPreviewStatePort = previewCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
@@ -11,6 +12,7 @@
     if (!previewSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
     if (!previewOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
     if (!previewEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+    if (!previewModeResolverPort) throw new Error('Preview Mode Resolver compatibility port is unavailable.');
     if (!previewThresholdsPort) throw new Error('Preview Thresholds compatibility port is unavailable.');
     if (!classicPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
@@ -643,7 +645,7 @@
 
     function resolvePreviewRenderResult(result, sourceLength) {
       const blockCount = result?.blocks?.length || 0;
-      const mode = resolvePreviewPerformanceMode(sourceLength, blockCount);
+      const mode = previewModeResolverPort.resolve({ previewPerformanceMode }, sourceLength, blockCount);
       if (mode === 'chapter') {
         return { mode, result: getChapterPreviewResult(result) };
       }
@@ -918,7 +920,7 @@
       let workerDurationMs = 0;
       let modelResult = null;
       let workerFailed = false;
-      const requestedPreviewMode = normalizePreviewPerformanceMode(previewPerformanceMode);
+      const requestedPreviewMode = previewModeResolverPort.normalizeSetting(previewPerformanceMode);
       const hybridMode = typeof isHybridLayoutMode === 'function' && isHybridLayoutMode();
       const useWorker = (hybridMode
         || sourceLength >= classicPreviewBehaviorThresholds.mode.workerChars
@@ -1192,7 +1194,7 @@
             blockCount: 0
           };
         }
-        resolvedPreviewMode = resolvePreviewPerformanceMode(sourceLength, patchResult.blockCount);
+        resolvedPreviewMode = previewModeResolverPort.resolve({ previewPerformanceMode }, sourceLength, patchResult.blockCount);
         resolvedPreviewScopeKey = lastStableResult?.scopeKey || resolvedPreviewMode;
         sourceAlreadyAnnotated = true;
         skipEnhancements = true;
