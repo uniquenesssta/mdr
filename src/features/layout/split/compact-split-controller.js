@@ -101,11 +101,13 @@ export function createCompactSplitController({
   }
 
   function scheduleEvaluation() {
+    if (destroyed) return false;
     if (evaluationFrame) cancelFrame(evaluationFrame);
     evaluationFrame = requestFrame(() => {
       evaluationFrame = 0;
       if (!destroyed) reconcile(snapshot().mode);
     });
+    return true;
   }
 
   function onPaneClick(pane, event) {

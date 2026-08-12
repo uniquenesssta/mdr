@@ -112,7 +112,7 @@ test('Atomic 6.13 composition uses only public Window/Platform entries and keeps
   assert.deepEqual(tauriOwners, ['src/platform/desktop/window-client.js']);
 });
 
-test('Atomic 6.13 owns stale/destroy paths without pre-implementing Atomic 6.14 destroy validation', async () => {
+test('Atomic 6.13 stale/destroy ownership remains local after Atomic 6.14 adds lifecycle validation', async () => {
   const [controller, close, controls, drag, state] = await Promise.all([
     read('src/features/window/window-controller.js'),
     read('src/features/window/window-close-controller.js'),
@@ -132,5 +132,6 @@ test('Atomic 6.13 owns stale/destroy paths without pre-implementing Atomic 6.14 
   assert.match(controls, /removeEventListener\('click'/);
   assert.match(drag, /removeEventListener\('mousedown'/);
   assert.match(state, /listeners\.clear\(\)/);
-  assert.equal(await exists('tests/architecture/stage-06-destroy-validation.test.mjs'), false);
+  assert.equal(await exists('tests/architecture/stage-06-destroy-validation.test.mjs'), true);
+  assert.doesNotMatch(controller, /lifecycle-resource-ledger|stage-06-destroy-validation/);
 });

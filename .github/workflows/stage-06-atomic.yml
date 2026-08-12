@@ -1,4 +1,4 @@
-# Stage 6 completed-scope validation through Atomic 6.13 while preserving the Stage 5 handoff.
+# Stage 6 completed-scope validation through Atomic 6.14 while preserving the Stage 5 handoff.
 name: Stage 6 Atomic Verification
 
 on:
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  window-controller:
-    name: Verify Stage 6 Through Window Controller
+  destroy-validation:
+    name: Verify Stage 6 Through Destroy Validation
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -224,6 +224,14 @@ jobs:
           tests/stage-06-window-controller.test.mjs
       - name: Verify Atomic Task 6.13 real browser window lifecycle
         run: node tests/e2e/window-controller.test.mjs
+      - name: Verify Atomic Task 6.14 Destroy Validation
+        run: >-
+          node --test
+          tests/unit/layout/stage-06-layout-destroy-validation.test.mjs
+          tests/unit/sidebar/stage-06-sidebar-destroy-validation.test.mjs
+          tests/unit/menu/stage-06-menu-destroy-validation.test.mjs
+          tests/unit/window/stage-06-window-destroy-validation.test.mjs
+          tests/architecture/stage-06-destroy-validation.test.mjs
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -237,6 +245,7 @@ jobs:
           node --check src/features/documents/application/recent-files-read-source.js &&
           node --check src/features/documents/infrastructure/recent-files-repository.js &&
           node --check src/features/documents/compatibility/classic-recent-files-port.js &&
+          node --check src/features/layout/split/compact-split-controller.js &&
           node --check src/features/menu/menu-command-bindings.js &&
           node --check src/features/menu/menu-state.js &&
           node --check src/features/menu/menu-view.js &&
@@ -257,6 +266,12 @@ jobs:
           node --check src/features/window/window-controller.js &&
           node --check src/features/window/compatibility/classic-close-save-port.js &&
           node --check src/features/window/index.js &&
+          node --check tests/helpers/lifecycle-resource-ledger.mjs &&
+          node --check tests/unit/layout/stage-06-layout-destroy-validation.test.mjs &&
+          node --check tests/unit/sidebar/stage-06-sidebar-destroy-validation.test.mjs &&
+          node --check tests/unit/menu/stage-06-menu-destroy-validation.test.mjs &&
+          node --check tests/unit/window/stage-06-window-destroy-validation.test.mjs &&
+          node --check tests/architecture/stage-06-destroy-validation.test.mjs &&
           node --check tests/e2e/submenu-positioner.test.mjs &&
           node --check tests/e2e/recent-files-menu.test.mjs &&
           node --check tests/e2e/window-controller.test.mjs &&
@@ -277,10 +292,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-06/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 6.13 evidence
+      - name: Upload Atomic Task 6.14 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-06-window-controller-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-06-destroy-validation-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-06
           if-no-files-found: error
           retention-days: 30
