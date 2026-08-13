@@ -1,9 +1,4 @@
-import {
-  createPreviewWorkerMessage,
-  parsePreviewWorkerMessage
-} from '../features/preview/worker/preview-worker-protocol.js';
-
-const LEGACY_PREVIEW_WORKER_GENERATION = 0;
+import { createPreviewWorkerSession } from '../features/preview/index.js';
 
 function createWorker() {
   return new Worker(new URL('./preview-worker.js', import.meta.url), { type: 'module' });
@@ -47,10 +42,7 @@ function resolvePreviewFocusPosition(source, editor, selection) {
 
 export class PreviewWorkerClient {
   constructor() {
-    this.worker = null;
-    this.workerVersion = 0;
-    this.initialized = false;
-    this.requestId = 0;
+    this.session = createPreviewWorkerSession({ createWorker });
     this.active = null;
     this.pendingUpdate = null;
     this.pendingPrewarm = null;
@@ -61,13 +53,6 @@ export class PreviewWorkerClient {
     this.documentSource = null;
   }
 
-  ensureWorker() {
-    if (this.worker) return;
-    this.worker = createWorker();
-    this.worker.addEventListener('message', event => this.handleMessage(event.data || {}));
-    this.worker.addEventListener('error', error => this.handleFatalError(error));
-  }
-
   update(documentSource, source, forceFull = false, options = {}) {
     const api = resolveDocumentSource(documentSource);
     if (api && this.documentSource !== api) {
@@ -76,7 +61,8 @@ export class PreviewWorkerClient {
     }
     const editor = documentSource?.editor || documentSource;
     const version = api?.getDocumentVersion?.() ?? 0;
-    api?.registerConsumer?.('preview', this.initialized ? this.workerVersion : version);
+    const sessionState = this.session.snapshot;
+    api?.registerConsumer?.('preview', sessionState.initialized ? sessionState.syncedVersion : version);
     const selection = getSourceSelection(api, editor);
     const focusPosition = resolvePreviewFocusPosition(api, editor, selection);
     const focusLine = api?.getLineNumberAtPosition?.(focusPosition) || 1;
@@ -107,14 +93,15 @@ export class PreviewWorkerClient {
 
   prewarmBlocks(ids) {
     const blockIds = normalizeBlockIds(ids);
-    if (!this.initialized || !blockIds.length) {
-      return Promise.resolve({ cancelled: !this.initialized, renderedBlocks: [] });
+    const sessionState = this.session.snapshot;
+    if (!sessionState.initialized || !blockIds.length) {
+      return Promise.resolve({ cancelled: !sessionState.initialized, renderedBlocks: [] });
     }
     return new Promise((resolve, reject) => {
       const request = {
         kind: 'prewarm',
         ids: blockIds,
-        version: this.workerVersion,
+        version: sessionState.syncedVersion,
         resolve,
         reject
       };
@@ -128,80 +115,81 @@ export class PreviewWorkerClient {
   }
 
   startUpdate(request) {
-    this.ensureWorker();
-    const requestId = ++this.requestId;
-    const metadata = {
-      generation: LEGACY_PREVIEW_WORKER_GENERATION,
-      version: request.version,
-      requestId
-    };
+    const sessionState = this.session.snapshot;
     const api = request.documentSource || resolveDocumentSource(request.editor);
+    let type;
     let payload;
-    if (!this.initialized) {
+    if (!sessionState.initialized) {
       const snapshot = typeof api?.createSnapshotPayload === 'function'
         ? api.createSnapshotPayload('preview-worker-reset')
         : { source: request.getSource(), sourceChunks: null };
-      payload = createPreviewWorkerMessage('reset', metadata, {
+      type = 'reset';
+      payload = {
         source: snapshot.source,
         sourceChunks: snapshot.sourceChunks,
         forceFull: request.forceFull,
         indexOnly: request.indexOnly,
         focusLine: request.focusLine
-      });
+      };
     } else {
       const transactions = typeof api?.getChangesSince === 'function'
-        ? api.getChangesSince(this.workerVersion, 'preview')
-        : api?.getDocumentChangesSince?.(this.workerVersion);
+        ? api.getChangesSince(sessionState.syncedVersion, 'preview')
+        : api?.getDocumentChangesSince?.(sessionState.syncedVersion);
       if (!Array.isArray(transactions)) {
         const snapshot = typeof api?.createSnapshotPayload === 'function'
           ? api.createSnapshotPayload('preview-worker-resync')
           : { source: request.getSource(), sourceChunks: null };
-        payload = createPreviewWorkerMessage('reset', metadata, {
+        type = 'reset';
+        payload = {
           source: snapshot.source,
           sourceChunks: snapshot.sourceChunks,
           forceFull: request.forceFull,
           indexOnly: request.indexOnly,
           focusLine: request.focusLine
-        });
+        };
       } else {
-        payload = createPreviewWorkerMessage('transactions', metadata, {
+        type = 'transactions';
+        payload = {
           transactions,
           forceFull: request.forceFull,
           indexOnly: request.indexOnly,
           focusLine: request.focusLine
-        });
+        };
       }
     }
-    this.active = {
+
+    const active = {
       ...request,
-      requestId,
-      generation: metadata.generation,
-      requestType: payload.type
+      wasInitialized: sessionState.initialized,
+      requestType: type
     };
-    this.worker.postMessage(payload);
+    this.active = active;
+    void this.session.request(type, { version: request.version, payload }).then(
+      message => this.handleSessionSuccess(message, active),
+      error => this.handleSessionFailure(error, active)
+    );
   }
 
   startPrewarm(request) {
-    if (!this.initialized || request.version !== this.workerVersion) {
+    const sessionState = this.session.snapshot;
+    if (!sessionState.initialized || request.version !== sessionState.syncedVersion) {
       request.resolve({ cancelled: true, renderedBlocks: [] });
       this.startNext();
       return;
     }
-    this.ensureWorker();
-    const requestId = ++this.requestId;
-    const metadata = {
-      generation: LEGACY_PREVIEW_WORKER_GENERATION,
-      version: request.version,
-      requestId
-    };
-    const payload = createPreviewWorkerMessage('render-window', metadata, { ids: request.ids });
-    this.active = {
+    const active = {
       ...request,
-      requestId,
-      generation: metadata.generation,
-      requestType: payload.type
+      wasInitialized: true,
+      requestType: 'render-window'
     };
-    this.worker.postMessage(payload);
+    this.active = active;
+    void this.session.request('render-window', {
+      version: request.version,
+      payload: { ids: request.ids }
+    }).then(
+      message => this.handleSessionSuccess(message, active),
+      error => this.handleSessionFailure(error, active)
+    );
   }
 
   applyRenderedBlocks(renderedBlocks) {
@@ -214,9 +202,7 @@ export class PreviewWorkerClient {
   }
 
   applyUpdateResult(message, active) {
-    const wasInitialized = this.initialized;
-    this.initialized = true;
-    this.workerVersion = Math.max(0, Number(message.version) || active.version);
+    const workerVersion = this.session.snapshot.syncedVersion;
     const result = message.result || {};
     if (Array.isArray(result.fullBlocks)) {
       this.blocks = result.fullBlocks;
@@ -270,15 +256,15 @@ export class PreviewWorkerClient {
       });
     }
     this.applyRenderedBlocks(result.renderedBlocks);
-    active.documentSource?.acknowledge?.('preview', this.workerVersion);
-    if (!wasInitialized) active.documentSource?.releaseInitialChunks?.();
+    active.documentSource?.acknowledge?.('preview', workerVersion);
+    if (!active.wasInitialized) active.documentSource?.releaseInitialChunks?.();
     return {
       ...result,
       blocks: this.blocks,
       changedIds: new Set(result.changedIds || []),
       removedIds: new Set(result.removedIds || []),
       workerDurationMs: Number(message.durationMs) || 0,
-      documentVersion: this.workerVersion,
+      documentVersion: workerVersion,
       referenceDefinitions: this.referenceDefinitions,
       headings: this.headings,
       statistics: this.statistics,
@@ -286,26 +272,13 @@ export class PreviewWorkerClient {
     };
   }
 
-  handleMessage(rawMessage) {
-    let message;
-    try {
-      message = parsePreviewWorkerMessage(rawMessage);
-    } catch (error) {
-      this.handleFatalError(error);
-      return;
-    }
-
-    const active = this.active;
-    if (
-      !active
-      || message.requestId !== active.requestId
-      || message.generation !== active.generation
-    ) return;
+  handleSessionSuccess(message, active) {
+    if (this.active !== active) return;
     this.active = null;
 
-    const isExpectedAck = message.type === 'ack' && message.acknowledges === active.requestType;
     if (active.kind === 'prewarm') {
-      if (!isExpectedAck || Number(message.version) !== this.workerVersion) {
+      const sessionState = this.session.snapshot;
+      if (!sessionState.initialized || Number(message.version) !== sessionState.syncedVersion) {
         active.resolve({ cancelled: true, renderedBlocks: [] });
       } else {
         const renderedBlocks = this.applyRenderedBlocks(message.renderedBlocks || message.result?.renderedBlocks || []);
@@ -313,21 +286,33 @@ export class PreviewWorkerClient {
           cancelled: false,
           renderedBlocks,
           workerDurationMs: Number(message.durationMs) || 0,
-          documentVersion: this.workerVersion
+          documentVersion: sessionState.syncedVersion
         });
       }
       this.startNext();
       return;
     }
 
-    if (message.type === 'error') {
-      active.reject(new Error(message.message || 'Preview worker failed'));
-      this.resetWorker(false);
-    } else if (!isExpectedAck) {
-      active.reject(new Error('Preview worker protocol response mismatch'));
-      this.resetWorker(false);
-    } else {
-      active.resolve(this.applyUpdateResult(message, active));
+    active.resolve(this.applyUpdateResult(message, active));
+    this.startNext();
+  }
+
+  handleSessionFailure(error, active) {
+    if (this.active !== active) return;
+    this.active = null;
+    const normalized = error instanceof Error ? error : new Error(String(error));
+    active.reject(normalized);
+    this.resetCachedState();
+
+    if (normalized.previewWorkerSessionFault === 'worker') {
+      if (this.pendingUpdate) {
+        this.pendingUpdate.reject(normalized);
+        this.pendingUpdate = null;
+      }
+      if (this.pendingPrewarm) {
+        this.pendingPrewarm.resolve({ cancelled: true, renderedBlocks: [] });
+        this.pendingPrewarm = null;
+      }
     }
     this.startNext();
   }
@@ -347,45 +332,29 @@ export class PreviewWorkerClient {
     }
   }
 
-  handleFatalError(error) {
-    const normalized = error instanceof Error ? error : new Error(String(error));
-    const active = this.active;
-    this.active = null;
-    if (active) active.reject(normalized);
-    if (this.pendingUpdate) {
-      this.pendingUpdate.reject(normalized);
-      this.pendingUpdate = null;
-    }
-    if (this.pendingPrewarm) {
-      this.pendingPrewarm.resolve({ cancelled: true, renderedBlocks: [] });
-      this.pendingPrewarm = null;
-    }
-    this.resetWorker(false);
-  }
-
-  resetWorker(resolvePending = true) {
+  resetCachedState() {
     this.documentSource?.releaseConsumer?.('preview');
-    this.worker?.terminate();
-    this.worker = null;
-    this.initialized = false;
-    this.workerVersion = 0;
     this.blocks = [];
     this.referenceDefinitions = '';
     this.headings = [];
     this.statistics = null;
     this.documentSource = null;
-    if (resolvePending) {
-      if (this.active) this.active.resolve({ cancelled: true });
-      if (this.pendingUpdate) this.pendingUpdate.resolve({ cancelled: true });
-      if (this.pendingPrewarm) this.pendingPrewarm.resolve({ cancelled: true, renderedBlocks: [] });
-      this.active = null;
-      this.pendingUpdate = null;
-      this.pendingPrewarm = null;
-    }
   }
 
   destroy() {
-    this.resetWorker(true);
+    const active = this.active;
+    this.active = null;
+    if (active) {
+      active.resolve(active.kind === 'prewarm'
+        ? { cancelled: true, renderedBlocks: [] }
+        : { cancelled: true });
+    }
+    if (this.pendingUpdate) this.pendingUpdate.resolve({ cancelled: true });
+    if (this.pendingPrewarm) this.pendingPrewarm.resolve({ cancelled: true, renderedBlocks: [] });
+    this.pendingUpdate = null;
+    this.pendingPrewarm = null;
+    this.resetCachedState();
+    this.session.destroy();
   }
 }
 

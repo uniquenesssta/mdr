@@ -1138,7 +1138,7 @@
         return;
       }
 
-      if (!patchResult && workerFailed && sourceLength >= classicPreviewBehaviorThresholds.mode.virtualChars) {
+      if (!patchResult && workerFailed) {
         const lastStableResult = classicPreviewStatePort.snapshot.lastStableResult;
         const body = preview.querySelector('.markdown-body');
         if (lastStableResult && body && !body.classList.contains('preview-loading')) {
@@ -1175,7 +1175,7 @@
         skipEnhancements = true;
       }
 
-      if (!patchResult) {
+      if (!patchResult && !workerFailed) {
         disableVirtualPreview();
         resolvedPreviewMode = 'full';
         resolvedPreviewScopeKey = 'full';

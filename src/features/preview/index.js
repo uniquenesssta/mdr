@@ -13,6 +13,7 @@ export {
   createPreviewWorkerMessage,
   parsePreviewWorkerMessage
 } from './worker/preview-worker-protocol.js';
+export { createPreviewWorkerSession } from './worker/preview-worker-session.js';
 export { mountClassicPreviewModeResolverPort } from './compatibility/classic-preview-mode-resolver-port.js';
 export { mountClassicPreviewSchedulerPort } from './compatibility/classic-preview-scheduler-port.js';
 export { mountClassicPreviewStatePort } from './compatibility/classic-preview-state-port.js';
