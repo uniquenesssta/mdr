@@ -1,3 +1,10 @@
+import {
+  createPreviewWorkerMessage,
+  parsePreviewWorkerMessage
+} from '../features/preview/worker/preview-worker-protocol.js';
+
+const LEGACY_PREVIEW_WORKER_GENERATION = 0;
+
 function createWorker() {
   return new Worker(new URL('./preview-worker.js', import.meta.url), { type: 'module' });
 }
@@ -123,22 +130,24 @@ export class PreviewWorkerClient {
   startUpdate(request) {
     this.ensureWorker();
     const requestId = ++this.requestId;
+    const metadata = {
+      generation: LEGACY_PREVIEW_WORKER_GENERATION,
+      version: request.version,
+      requestId
+    };
     const api = request.documentSource || resolveDocumentSource(request.editor);
     let payload;
     if (!this.initialized) {
       const snapshot = typeof api?.createSnapshotPayload === 'function'
         ? api.createSnapshotPayload('preview-worker-reset')
         : { source: request.getSource(), sourceChunks: null };
-      payload = {
-        type: 'reset',
-        requestId,
+      payload = createPreviewWorkerMessage('reset', metadata, {
         source: snapshot.source,
         sourceChunks: snapshot.sourceChunks,
-        version: request.version,
         forceFull: request.forceFull,
         indexOnly: request.indexOnly,
         focusLine: request.focusLine
-      };
+      });
     } else {
       const transactions = typeof api?.getChangesSince === 'function'
         ? api.getChangesSince(this.workerVersion, 'preview')
@@ -147,29 +156,28 @@ export class PreviewWorkerClient {
         const snapshot = typeof api?.createSnapshotPayload === 'function'
           ? api.createSnapshotPayload('preview-worker-resync')
           : { source: request.getSource(), sourceChunks: null };
-        payload = {
-          type: 'reset',
-          requestId,
+        payload = createPreviewWorkerMessage('reset', metadata, {
           source: snapshot.source,
           sourceChunks: snapshot.sourceChunks,
-          version: request.version,
           forceFull: request.forceFull,
           indexOnly: request.indexOnly,
           focusLine: request.focusLine
-        };
+        });
       } else {
-        payload = {
-          type: 'update',
-          requestId,
+        payload = createPreviewWorkerMessage('transactions', metadata, {
           transactions,
-          version: request.version,
           forceFull: request.forceFull,
           indexOnly: request.indexOnly,
           focusLine: request.focusLine
-        };
+        });
       }
     }
-    this.active = { ...request, requestId };
+    this.active = {
+      ...request,
+      requestId,
+      generation: metadata.generation,
+      requestType: payload.type
+    };
     this.worker.postMessage(payload);
   }
 
@@ -181,13 +189,19 @@ export class PreviewWorkerClient {
     }
     this.ensureWorker();
     const requestId = ++this.requestId;
-    this.active = { ...request, requestId };
-    this.worker.postMessage({
-      type: 'renderBlocks',
-      requestId,
+    const metadata = {
+      generation: LEGACY_PREVIEW_WORKER_GENERATION,
       version: request.version,
-      ids: request.ids
-    });
+      requestId
+    };
+    const payload = createPreviewWorkerMessage('render-window', metadata, { ids: request.ids });
+    this.active = {
+      ...request,
+      requestId,
+      generation: metadata.generation,
+      requestType: payload.type
+    };
+    this.worker.postMessage(payload);
   }
 
   applyRenderedBlocks(renderedBlocks) {
@@ -272,13 +286,26 @@ export class PreviewWorkerClient {
     };
   }
 
-  handleMessage(message) {
+  handleMessage(rawMessage) {
+    let message;
+    try {
+      message = parsePreviewWorkerMessage(rawMessage);
+    } catch (error) {
+      this.handleFatalError(error);
+      return;
+    }
+
     const active = this.active;
-    if (!active || message.requestId !== active.requestId) return;
+    if (
+      !active
+      || message.requestId !== active.requestId
+      || message.generation !== active.generation
+    ) return;
     this.active = null;
 
+    const isExpectedAck = message.type === 'ack' && message.acknowledges === active.requestType;
     if (active.kind === 'prewarm') {
-      if (message.type === 'error' || Number(message.version) !== this.workerVersion) {
+      if (!isExpectedAck || Number(message.version) !== this.workerVersion) {
         active.resolve({ cancelled: true, renderedBlocks: [] });
       } else {
         const renderedBlocks = this.applyRenderedBlocks(message.renderedBlocks || message.result?.renderedBlocks || []);
@@ -295,6 +322,9 @@ export class PreviewWorkerClient {
 
     if (message.type === 'error') {
       active.reject(new Error(message.message || 'Preview worker failed'));
+      this.resetWorker(false);
+    } else if (!isExpectedAck) {
+      active.reject(new Error('Preview worker protocol response mismatch'));
       this.resetWorker(false);
     } else {
       active.resolve(this.applyUpdateResult(message, active));

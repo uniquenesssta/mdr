@@ -5,6 +5,13 @@ import {
   restoreMarkdownMathSource
 } from '../model-kernel/index.js';
 import { PREVIEW_BEHAVIOR_THRESHOLDS } from '../features/preview/index.js';
+import {
+  PREVIEW_WORKER_MESSAGE_TYPES,
+  createPreviewWorkerAck,
+  createPreviewWorkerError,
+  createPreviewWorkerMessage,
+  parsePreviewWorkerMessage
+} from '../features/preview/worker/preview-worker-protocol.js';
 
 marked.setOptions({ breaks: true, gfm: true });
 
@@ -342,26 +349,62 @@ function serializeResult(result, focusLine, indexOnly = false) {
   };
 }
 
+const REQUEST_TYPES = new Set([
+  PREVIEW_WORKER_MESSAGE_TYPES.RESET,
+  PREVIEW_WORKER_MESSAGE_TYPES.TRANSACTIONS,
+  PREVIEW_WORKER_MESSAGE_TYPES.RENDER_WINDOW,
+  PREVIEW_WORKER_MESSAGE_TYPES.FOCUS,
+  PREVIEW_WORKER_MESSAGE_TYPES.CANCEL
+]);
+
+function fallbackEnvelope(message) {
+  const generation = Number.isSafeInteger(message?.generation) && message.generation >= 0
+    ? message.generation
+    : 0;
+  const messageVersion = Number.isSafeInteger(message?.version) && message.version >= 0
+    ? message.version
+    : Math.max(0, version);
+  const requestId = Number.isSafeInteger(message?.requestId) && message.requestId >= 1
+    ? message.requestId
+    : 1;
+  return { generation, version: messageVersion, requestId };
+}
+
+function postProtocolError(rawMessage, error) {
+  const operation = typeof rawMessage?.type === 'string' && rawMessage.type.trim()
+    ? rawMessage.type
+    : 'protocol';
+  self.postMessage(createPreviewWorkerMessage(
+    PREVIEW_WORKER_MESSAGE_TYPES.ERROR,
+    fallbackEnvelope(rawMessage),
+    {
+      operation,
+      code: 'PREVIEW_WORKER_PROTOCOL_ERROR',
+      message: error instanceof Error ? error.message : String(error || 'Preview worker protocol error')
+    }
+  ));
+}
+
 self.onmessage = (event) => {
-  const message = event.data || {};
-  const requestId = message.requestId;
+  const rawMessage = event.data || {};
   const started = performance.now();
+  let message = null;
   try {
-    if (message.type === 'renderBlocks') {
+    message = parsePreviewWorkerMessage(rawMessage);
+
+    if (message.type === PREVIEW_WORKER_MESSAGE_TYPES.RENDER_WINDOW) {
       if (Number(message.version) !== version) {
         throw new Error('Preview worker prewarm version mismatch');
       }
       const renderedBlocks = renderBlocksByIds(previousBlocks, message.ids || [], referenceDefinitions, true);
-      self.postMessage({
-        type: 'prewarm-result',
-        requestId,
-        version,
+      self.postMessage(createPreviewWorkerAck(message, {
         durationMs: performance.now() - started,
         renderedBlocks
-      });
+      }));
       return;
     }
-    if (message.type === 'reset') {
+
+    if (message.type === PREVIEW_WORKER_MESSAGE_TYPES.RESET) {
       source = Array.isArray(message.sourceChunks)
         ? message.sourceChunks.map(chunk => String(chunk ?? '')).join('')
         : String(message.source ?? '');
@@ -373,31 +416,33 @@ self.onmessage = (event) => {
       referenceDefinitions = '';
       sentReferenceDefinitions = '';
       headingByBlockId.clear();
-    } else if (message.type === 'update') {
-      const transactions = Array.isArray(message.transactions) ? message.transactions : [];
-      for (const transaction of transactions) {
+    } else if (message.type === PREVIEW_WORKER_MESSAGE_TYPES.TRANSACTIONS) {
+      for (const transaction of message.transactions) {
         source = applyTransaction(source, transaction);
         version = Math.max(version, Number(transaction.version) || version);
       }
       if (version !== Number(message.version)) {
         throw new Error('Preview worker document version mismatch');
       }
+    } else if (
+      message.type === PREVIEW_WORKER_MESSAGE_TYPES.FOCUS
+      || message.type === PREVIEW_WORKER_MESSAGE_TYPES.CANCEL
+    ) {
+      throw new Error(`Preview worker ${message.type} handling belongs to a later Atomic task`);
+    } else {
+      throw new Error(`Preview worker cannot consume response type: ${message.type}`);
     }
 
     const result = model.update(source, { forceFull: Boolean(message.forceFull) });
-    self.postMessage({
-      type: 'result',
-      requestId,
-      version,
+    self.postMessage(createPreviewWorkerAck(message, {
       durationMs: performance.now() - started,
       result: serializeResult(result, message.focusLine, Boolean(message.indexOnly))
-    });
+    }));
   } catch (error) {
-    self.postMessage({
-      type: 'error',
-      requestId,
-      version,
-      message: error?.message || String(error)
-    });
+    if (message && REQUEST_TYPES.has(message.type)) {
+      self.postMessage(createPreviewWorkerError(message, error, { code: 'PREVIEW_WORKER_REQUEST_FAILED' }));
+      return;
+    }
+    postProtocolError(rawMessage, error);
   }
 };
