@@ -1,0 +1,105 @@
+import assert from 'node:assert/strict';
+import { readFile, readdir } from 'node:fs/promises';
+import test from 'node:test';
+
+const root = new URL('../../', import.meta.url);
+
+async function source(path) {
+  return readFile(new URL(path, root), 'utf8');
+}
+
+test('Atomic 7.4 owns scheduler and cancellation as separate DOM-free pipeline responsibilities', async () => {
+  const entries = (await readdir(new URL('src/features/preview/pipeline/', root))).sort();
+  assert.ok(entries.includes('preview-scheduler.js'));
+  assert.ok(entries.includes('preview-cancellation.js'));
+
+  const scheduler = await source('src/features/preview/pipeline/preview-scheduler.js');
+  const cancellation = await source('src/features/preview/pipeline/preview-cancellation.js');
+
+  assert.match(scheduler, /createPreviewScheduler/);
+  assert.match(scheduler, /'input'/);
+  assert.match(scheduler, /'focus'/);
+  assert.match(scheduler, /'layout'/);
+  assert.match(scheduler, /'enhancement'/);
+  assert.match(scheduler, /task\.commit|commit\(/);
+  assert.match(cancellation, /createPreviewCancellation/);
+  assert.match(cancellation, /isCurrent/);
+  assert.match(cancellation, /commit/);
+
+  for (const text of [scheduler, cancellation]) {
+    assert.doesNotMatch(text, /document\.|localStorage|sessionStorage|new\s+Worker\s*\(/);
+  }
+});
+
+test('Atomic 7.4 composition root mounts one scoped classic scheduler port and destroys scheduler/cancellation', async () => {
+  const main = await source('src/main.js');
+  const entry = await source('src/features/preview/index.js');
+  const port = await source('src/features/preview/compatibility/classic-preview-scheduler-port.js');
+
+  assert.match(entry, /createPreviewCancellation/);
+  assert.match(entry, /createPreviewScheduler/);
+  assert.match(entry, /mountClassicPreviewSchedulerPort/);
+  assert.match(port, /markdownEditorPreviewSchedulerPort/);
+  assert.doesNotMatch(port, /window\.markdownEditorPreviewScheduler/);
+  assert.match(main, /createPreviewCancellation\(\)/);
+  assert.match(main, /createPreviewScheduler/);
+  assert.match(main, /mountClassicPreviewSchedulerPort/);
+  assert.match(main, /previewSchedulerPort\.destroy\(\)/);
+  assert.match(main, /previewScheduler\.destroy\(\)/);
+  assert.match(main, /previewCancellation\.destroy\(\)/);
+});
+
+test('Atomic 7.4 classic preview no longer owns migrated timer RAF or layout sequence authorities', async () => {
+  const core = await source('public/app/core.js');
+  const preview = await source('public/app/preview.js');
+
+  assert.match(preview, /markdownEditorPreviewSchedulerPort/);
+  assert.match(preview, /previewSchedulerPort\.schedule\('input'/);
+  assert.match(preview, /previewSchedulerPort\.schedule\('focus'/);
+  assert.match(preview, /previewSchedulerPort\.schedule\('layout'/);
+  assert.match(preview, /previewSchedulerPort\.schedule\('enhancement'/);
+  assert.match(preview, /previewSchedulerPort\.cancel\('input'\)/);
+  assert.match(preview, /previewSchedulerPort\.cancel\('focus'\)/);
+  assert.match(preview, /previewSchedulerPort\.cancel\('layout'\)/);
+  assert.match(preview, /previewSchedulerPort\.cancel\('enhancement'\)/);
+
+  for (const migrated of [
+    'previewUpdateTimer',
+    'previewFocusUpdateTimer',
+    'previewEnhancementRaf',
+    'previewEnhancementIdle'
+  ]) {
+    assert.doesNotMatch(core, new RegExp(`\\b${migrated}\\b`));
+    assert.doesNotMatch(preview, new RegExp(`\\b${migrated}\\b`));
+  }
+  for (const migrated of ['previewLayoutRefreshFrame', 'previewLayoutRefreshTimer', 'previewLayoutRefreshSequence']) {
+    assert.doesNotMatch(preview, new RegExp(`\\b${migrated}\\b`));
+  }
+
+  // Direct outline/navigation focus request ownership remains for Atomic 7.11 Focus Controller.
+  assert.match(core, /let previewLineFocusVersion = 0/);
+  assert.match(core, /let previewLineFocusTarget = 0/);
+  assert.match(core, /let previewLineFocusPromise = null/);
+});
+
+test('Atomic 7.4 does not enter Worker Protocol, rendering, virtual window, focus controller or enhancement coordinator', async () => {
+  const featureTree = JSON.stringify({
+    root: (await readdir(new URL('src/features/preview/', root))).sort(),
+    application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
+    pipeline: (await readdir(new URL('src/features/preview/pipeline/', root))).sort()
+  });
+
+  for (const premature of [
+    'preview-controller',
+    'preview-worker-protocol',
+    'preview-worker-session',
+    'preview-render-coordinator',
+    'virtual-preview-controller',
+    'preview-layout-stability',
+    'preview-focus-controller',
+    'preview-enhancement-coordinator',
+    'preview-dom-renderer'
+  ]) {
+    assert.doesNotMatch(featureTree, new RegExp(premature));
+  }
+});

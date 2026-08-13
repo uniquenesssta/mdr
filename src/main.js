@@ -87,8 +87,11 @@ import {
   mountClassicCloseSavePort
 } from './features/window/index.js';
 import {
+  createPreviewCancellation,
+  createPreviewScheduler,
   createPreviewState,
   mountClassicPreviewModeResolverPort,
+  mountClassicPreviewSchedulerPort,
   mountClassicPreviewStatePort,
   mountClassicPreviewThresholdsPort
 } from './features/preview/index.js';
@@ -103,6 +106,12 @@ const previewState = createPreviewState();
 const previewStatePort = mountClassicPreviewStatePort(compatibilityPlatformHost, previewState);
 const previewModeResolverPort = mountClassicPreviewModeResolverPort(compatibilityPlatformHost);
 const previewThresholdsPort = mountClassicPreviewThresholdsPort(compatibilityPlatformHost);
+const previewCancellation = createPreviewCancellation();
+const previewScheduler = createPreviewScheduler({
+  cancellation: previewCancellation,
+  getBackgroundScheduler: () => window.markdownEditorTaskScheduler
+});
+const previewSchedulerPort = mountClassicPreviewSchedulerPort(compatibilityPlatformHost, previewScheduler);
 const layoutState = createLayoutState();
 const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
 let compactShellController = null;
@@ -154,6 +163,9 @@ configureHybridImageSourcePlatform({
 });
 window.addEventListener('pagehide', () => {
   destroyLayoutStateFeature();
+  previewSchedulerPort.destroy();
+  previewScheduler.destroy();
+  previewCancellation.destroy();
   previewStatePort.destroy();
   previewState.destroy();
   previewModeResolverPort.destroy();

@@ -85,7 +85,7 @@ test('Atomic 7.2 uses PreviewState stable metadata before DOM when deciding reco
   assert.doesNotMatch(preview, /if \(body && !body\.classList\.contains\('preview-loading'\)\) \{\n\s+patchResult = \{\n\s+body,\n\s+changedNodes: \[\],\n\s+reused:/);
 });
 
-test('Atomic 7.2 remains intact while Atomic 7.3 may add Mode Resolver but not Atomic 7.4+ owners', async () => {
+test('Atomic 7.2 remains intact while Atomic 7.3-7.4 may add Mode Resolver and Scheduler/Cancellation but not Atomic 7.5+ owners', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -94,7 +94,6 @@ test('Atomic 7.2 remains intact while Atomic 7.3 may add Mode Resolver but not A
 
   for (const premature of [
     'preview-controller',
-    'preview-scheduler',
     'preview-worker-protocol',
     'preview-worker-session',
     'preview-render-coordinator',

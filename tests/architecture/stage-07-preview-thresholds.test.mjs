@@ -74,7 +74,7 @@ test('Atomic 7.1 removes independent preview mode, window, chapter and worker th
   assert.match(enhancementQueue, /\.\.\/features\/preview\/index\.js/);
 });
 
-test('Atomic 7.1 remains frozen while Atomic 7.2-7.3 may add PreviewState and Mode Resolver but not Atomic 7.4+ owners', async () => {
+test('Atomic 7.1 remains frozen while Atomic 7.2-7.4 may add PreviewState, Mode Resolver and Scheduler/Cancellation but not Atomic 7.5+ owners', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -84,7 +84,6 @@ test('Atomic 7.1 remains frozen while Atomic 7.2-7.3 may add PreviewState and Mo
   assert.match(featureTree, /preview-state/);
   for (const premature of [
     'preview-controller',
-    'preview-scheduler',
     'preview-worker-protocol',
     'preview-worker-session',
     'preview-render-coordinator',

@@ -128,13 +128,9 @@ const editor = document.getElementById('editor');
         Math.max(AUTOSAVE_MIN_SECONDS * 1000, Math.round(delay))
       );
     }
-    let previewUpdateTimer = 0;
-    let previewFocusUpdateTimer = 0;
     let previewLineFocusVersion = 0;
     let previewLineFocusTarget = 0;
     let previewLineFocusPromise = null;
-    let previewEnhancementRaf = 0;
-    let previewEnhancementIdle = 0;
     let previewRenderTheme = '';
     let previewReferenceDefinitions = '';
     let countUpdateTimer = 0;

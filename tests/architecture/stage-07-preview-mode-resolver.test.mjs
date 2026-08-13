@@ -56,7 +56,7 @@ test('Atomic 7.3 classic callers consume the scoped resolver port and no longer 
   assert.doesNotMatch(preview, /\bresolvePreviewPerformanceMode\b|\bnormalizePreviewPerformanceMode\b/);
 });
 
-test('Atomic 7.3 does not enter Atomic 7.4 or later Preview owners', async () => {
+test('Atomic 7.3 remains intact while Atomic 7.4 may add Scheduler/Cancellation but not Atomic 7.5+ Preview owners', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -65,8 +65,6 @@ test('Atomic 7.3 does not enter Atomic 7.4 or later Preview owners', async () =>
 
   for (const premature of [
     'preview-controller',
-    'preview-scheduler',
-    'preview-cancellation',
     'preview-worker-protocol',
     'preview-worker-session',
     'preview-render-coordinator',

@@ -6,6 +6,7 @@
     const previewEditorUiCommandPort = previewCompatibilityHost?.markdownEditorEditorUiCommandPort;
     const previewModeResolverPort = previewCompatibilityHost?.markdownEditorPreviewModeResolverPort;
     const previewThresholdsPort = previewCompatibilityHost?.markdownEditorPreviewThresholdsPort;
+    const previewSchedulerPort = previewCompatibilityHost?.markdownEditorPreviewSchedulerPort;
     const classicPreviewStatePort = previewCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
@@ -14,13 +15,13 @@
     if (!previewEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
     if (!previewModeResolverPort) throw new Error('Preview Mode Resolver compatibility port is unavailable.');
     if (!previewThresholdsPort) throw new Error('Preview Thresholds compatibility port is unavailable.');
+    if (!previewSchedulerPort) throw new Error('Preview Scheduler compatibility port is unavailable.');
     if (!classicPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
     previewEditorUiCommandPort.register({
       focusPreviewLineForOutline: (line, options) => focusPreviewLine(line, options)
     });
     function schedulePreviewUpdate() {
-      clearTimeout(previewUpdateTimer);
       const length = editor.textLength;
       const inputThresholds = classicPreviewBehaviorThresholds.scheduling.input;
       const delay = length >= classicPreviewBehaviorThresholds.mode.virtualChars
@@ -30,15 +31,9 @@
           : length >= inputThresholds.mediumChars
             ? inputThresholds.mediumMs
             : inputThresholds.defaultMs;
-      previewUpdateTimer = setTimeout(() => {
-        previewUpdateTimer = 0;
-        updatePreview();
-      }, delay);
+      previewSchedulerPort.schedule('input', () => updatePreview(), { kind: 'timeout', delay });
     }
 
-    let previewLayoutRefreshFrame = 0;
-    let previewLayoutRefreshTimer = 0;
-    let previewLayoutRefreshSequence = 0;
     let previewLayoutObserver = null;
     let previewObservedWidth = 0;
     let previewObservedHeight = 0;
@@ -60,76 +55,69 @@
       };
     }
 
-    function refreshPreviewViewportAfterLayout() {
-      window.markdownEditorVirtualPreview?.refreshViewport?.({ forceWindow: true });
-      invalidatePreviewAnchorMetrics();
-      window.markdownEditorScrollController?.notifyGeometryChanged?.('preview');
-      requestAnimationFrame(() => {
+    function refreshPreviewViewportAfterLayout(task) {
+      const refresh = () => {
         window.markdownEditorVirtualPreview?.refreshViewport?.({ forceWindow: true });
         invalidatePreviewAnchorMetrics();
         window.markdownEditorScrollController?.notifyGeometryChanged?.('preview');
-      });
+      };
+      if (!task.commit(refresh)) return;
+      task.schedule(nextTask => nextTask.commit(refresh), { kind: 'frame' });
     }
 
     function refreshPreviewAfterLayout(options = {}) {
       const forceRender = options.forceRender !== false;
       const reason = String(options.reason || 'layout-visible');
-      const sequence = ++previewLayoutRefreshSequence;
       let attempts = 0;
       let stableFrames = 0;
       let previousWidth = -1;
       let previousHeight = -1;
-      cancelAnimationFrame(previewLayoutRefreshFrame);
-      clearTimeout(previewLayoutRefreshTimer);
 
-      const schedule = (delay = 0) => {
-        if (sequence !== previewLayoutRefreshSequence) return;
-        if (delay > 0) {
-          previewLayoutRefreshTimer = setTimeout(() => schedule(), delay);
+      const run = async task => {
+        if (!task.isCurrent()) return;
+        if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) return;
+
+        const layout = getPreviewLayoutState();
+        attempts += 1;
+        if (!layout.visible) {
+          if (attempts < classicPreviewBehaviorThresholds.scheduling.layout.maxAttempts) {
+            task.schedule(run, {
+              kind: 'timeout',
+              delay: classicPreviewBehaviorThresholds.scheduling.layout.retryMs
+            });
+          }
           return;
         }
-        previewLayoutRefreshFrame = requestAnimationFrame(() => {
-          previewLayoutRefreshFrame = 0;
-          if (sequence !== previewLayoutRefreshSequence) return;
-          if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) return;
 
-          const layout = getPreviewLayoutState();
-          attempts += 1;
-          if (!layout.visible) {
-            if (attempts < classicPreviewBehaviorThresholds.scheduling.layout.maxAttempts) {
-              schedule(classicPreviewBehaviorThresholds.scheduling.layout.retryMs);
-            }
-            return;
-          }
+        if (Math.abs(layout.width - previousWidth) <= 1 && Math.abs(layout.height - previousHeight) <= 1) {
+          stableFrames += 1;
+        } else {
+          stableFrames = 0;
+          previousWidth = layout.width;
+          previousHeight = layout.height;
+        }
+        if (stableFrames < classicPreviewBehaviorThresholds.scheduling.layout.stableFrames
+          && attempts < classicPreviewBehaviorThresholds.scheduling.layout.maxAttempts) {
+          task.schedule(run, { kind: 'frame' });
+          return;
+        }
 
-          if (Math.abs(layout.width - previousWidth) <= 1 && Math.abs(layout.height - previousHeight) <= 1) {
-            stableFrames += 1;
-          } else {
-            stableFrames = 0;
-            previousWidth = layout.width;
-            previousHeight = layout.height;
-          }
-          if (stableFrames < classicPreviewBehaviorThresholds.scheduling.layout.stableFrames
-            && attempts < classicPreviewBehaviorThresholds.scheduling.layout.maxAttempts) {
-            schedule();
-            return;
-          }
-
-          const body = preview.querySelector('.markdown-body');
-          const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
-          const renderRequired = forceRender
-            || !hasStablePreview
-            || !body
-            || body.classList.contains('preview-loading')
-            || body.childElementCount === 0;
-          const started = performance.now();
-          const renderPromise = renderRequired ? Promise.resolve(updatePreview()) : Promise.resolve();
-          renderPromise.then(() => {
-            if (sequence !== previewLayoutRefreshSequence) return;
-            refreshPreviewViewportAfterLayout();
-          }, error => {
-            console.warn('Preview layout refresh failed:', error);
-          }).finally(() => {
+        const body = preview.querySelector('.markdown-body');
+        const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
+        const renderRequired = forceRender
+          || !hasStablePreview
+          || !body
+          || body.classList.contains('preview-loading')
+          || body.childElementCount === 0;
+        const started = performance.now();
+        try {
+          if (renderRequired) await Promise.resolve(updatePreview());
+          if (!task.isCurrent()) return;
+          refreshPreviewViewportAfterLayout(task);
+        } catch (error) {
+          task.commit(() => console.warn('Preview layout refresh failed:', error));
+        } finally {
+          task.commit(() => {
             window.markdownEditorPerf?.record('render.preview-layout-refresh', {
               category: 'render.pipeline',
               durationMs: performance.now() - started,
@@ -149,10 +137,10 @@
               }
             });
           });
-        });
+        }
       };
 
-      schedule();
+      previewSchedulerPort.schedule('layout', run, { kind: 'frame' });
     }
 
     function initializePreviewLayoutObserver() {
@@ -187,15 +175,14 @@
       if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) return;
       if (!editor.virtualEditor
         || (editor.textLength < classicPreviewBehaviorThresholds.mode.workerChars && previewPerformanceMode !== 'chapter')
-        || previewUpdateTimer) return;
+        || previewSchedulerPort.hasPending('input')) return;
       const line = editor.virtualEditor.getLineNumberAtPosition?.(editor.selectionStart || 0) || 1;
       const chapter = classicPreviewStatePort.snapshot.focusSection;
       if (chapter && line >= chapter.startLine && line <= chapter.endLine) return;
-      clearTimeout(previewFocusUpdateTimer);
-      previewFocusUpdateTimer = setTimeout(() => {
-        previewFocusUpdateTimer = 0;
-        updatePreview();
-      }, classicPreviewBehaviorThresholds.scheduling.focusMs);
+      previewSchedulerPort.schedule('focus', () => updatePreview(), {
+        kind: 'timeout',
+        delay: classicPreviewBehaviorThresholds.scheduling.focusMs
+      });
     }
 
 
@@ -218,10 +205,8 @@
       const needsScopeRefresh = classicPreviewStatePort.snapshot.mode === 'chapter' && !previewScopeContainsLine(targetLine);
 
       if (needsScopeRefresh) {
-        clearTimeout(previewFocusUpdateTimer);
-        previewFocusUpdateTimer = 0;
-        clearTimeout(previewUpdateTimer);
-        previewUpdateTimer = 0;
+        previewSchedulerPort.cancel('focus');
+        previewSchedulerPort.cancel('input');
 
         let pending = previewLineFocusPromise;
         if (!pending || previewLineFocusTarget !== targetLine) {
@@ -250,10 +235,9 @@
     }
 
     function suspendPreviewForHybridMode() {
-      clearTimeout(previewUpdateTimer);
-      previewUpdateTimer = 0;
-      clearTimeout(previewFocusUpdateTimer);
-      previewFocusUpdateTimer = 0;
+      previewSchedulerPort.cancel('input');
+      previewSchedulerPort.cancel('focus');
+      previewSchedulerPort.cancel('layout');
       const suspendedVersion = classicPreviewStatePort.invalidate({
         mode: 'hybrid',
         status: 'suspended',
@@ -276,48 +260,25 @@
     }
 
     function cancelScheduledPreviewEnhancements() {
-      if (previewEnhancementRaf) cancelAnimationFrame(previewEnhancementRaf);
-      previewEnhancementRaf = 0;
-      if (previewEnhancementIdle?.cancel) previewEnhancementIdle.cancel();
-      else if (previewEnhancementIdle && 'cancelIdleCallback' in window) cancelIdleCallback(previewEnhancementIdle);
-      else if (previewEnhancementIdle) clearTimeout(previewEnhancementIdle);
-      previewEnhancementIdle = 0;
+      previewSchedulerPort.cancel('enhancement');
     }
 
     function schedulePreviewEnhancements(sourceText, blockTokens, renderVersion, sourceAlreadyAnnotated = false, sourceLength = sourceText.length) {
       cancelScheduledPreviewEnhancements();
-      previewEnhancementRaf = requestAnimationFrame(() => {
-        previewEnhancementRaf = 0;
+      previewSchedulerPort.schedule('enhancement', task => {
         if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
         const annotationStarted = performance.now();
-        if (!sourceAlreadyAnnotated) annotatePreviewSourceLines(sourceText, blockTokens);
-        else {
-          previewAnchorsCache = virtualPreviewController?.active
-            ? virtualPreviewController.getMountedAnchors()
-            : Array.from(preview.querySelectorAll('[data-source-line]'));
-          observePreviewBodySize();
-        }
-        window.markdownEditorPerf?.record('render.preview-annotation', {
-          category: 'render.pipeline',
-          durationMs: performance.now() - annotationStarted,
-          aggregate: true,
-          details: {
-            sourceChars: sourceLength,
-            previewBlocks: preview.querySelector('.markdown-body')?.children.length || 0,
-            anchors: previewAnchorsCache?.length || 0
+        const annotationCommitted = task.commit(() => {
+          if (!sourceAlreadyAnnotated) annotatePreviewSourceLines(sourceText, blockTokens);
+          else {
+            previewAnchorsCache = virtualPreviewController?.active
+              ? virtualPreviewController.getMountedAnchors()
+              : Array.from(preview.querySelectorAll('[data-source-line]'));
+            observePreviewBodySize();
           }
-        });
-
-        const finish = () => {
-          previewEnhancementIdle = 0;
-          if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
-          const started = performance.now();
-          window.markdownEditorSelectionController?.notifyPreviewMounted?.('preview-enhancements');
-          // 在空闲阶段预热锚点坐标，避免用户第一次滚动时同步测量全部预览块。
-          getPreviewAnchorMetrics();
-          window.markdownEditorPerf?.record('render.preview-enhancements', {
+          window.markdownEditorPerf?.record('render.preview-annotation', {
             category: 'render.pipeline',
-            durationMs: performance.now() - started,
+            durationMs: performance.now() - annotationStarted,
             aggregate: true,
             details: {
               sourceChars: sourceLength,
@@ -325,22 +286,38 @@
               anchors: previewAnchorsCache?.length || 0
             }
           });
+        });
+        if (!annotationCommitted) return;
+
+        const finish = finishTask => {
+          if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
+          finishTask.commit(() => {
+            const started = performance.now();
+            window.markdownEditorSelectionController?.notifyPreviewMounted?.('preview-enhancements');
+            // 在空闲阶段预热锚点坐标，避免用户第一次滚动时同步测量全部预览块。
+            getPreviewAnchorMetrics();
+            window.markdownEditorPerf?.record('render.preview-enhancements', {
+              category: 'render.pipeline',
+              durationMs: performance.now() - started,
+              aggregate: true,
+              details: {
+                sourceChars: sourceLength,
+                previewBlocks: preview.querySelector('.markdown-body')?.children.length || 0,
+                anchors: previewAnchorsCache?.length || 0
+              }
+            });
+          });
         };
         if (sourceLength >= classicPreviewBehaviorThresholds.scheduling.postprocess.deferChars) {
-          const scheduler = window.markdownEditorTaskScheduler;
-          if (scheduler?.schedule) {
-            previewEnhancementIdle = scheduler.schedule('preview-postprocess', ({ signal }) => {
-              if (!signal.aborted) finish();
-            }, { priority: 'background', timeout: classicPreviewBehaviorThresholds.scheduling.postprocess.idleTimeoutMs });
-          } else if ('requestIdleCallback' in window) {
-            previewEnhancementIdle = requestIdleCallback(finish, { timeout: classicPreviewBehaviorThresholds.scheduling.postprocess.idleTimeoutMs });
-          } else {
-            previewEnhancementIdle = setTimeout(finish, classicPreviewBehaviorThresholds.scheduling.postprocess.fallbackMs);
-          }
+          task.schedule(finish, {
+            kind: 'background',
+            timeout: classicPreviewBehaviorThresholds.scheduling.postprocess.idleTimeoutMs,
+            fallbackMs: classicPreviewBehaviorThresholds.scheduling.postprocess.fallbackMs
+          });
         } else {
-          finish();
+          finish(task);
         }
-      });
+      }, { kind: 'frame' });
     }
 
     function getPreviewNodeRenderKey(node, occurrences) {
@@ -699,8 +676,7 @@
 
 
     function resetPreviewPipeline() {
-      clearTimeout(previewFocusUpdateTimer);
-      previewFocusUpdateTimer = 0;
+      previewSchedulerPort.cancelAll();
       classicPreviewStatePort.invalidate({
         mode: 'full',
         status: 'idle',
@@ -881,8 +857,7 @@
     }
 
     async function updatePreview() {
-      clearTimeout(previewUpdateTimer);
-      previewUpdateTimer = 0;
+      previewSchedulerPort.cancel('input');
       const renderVersion = classicPreviewStatePort.beginRender();
       getPreviewEnhancementQueue()?.begin(renderVersion);
       let resolvedPreviewMode = classicPreviewStatePort.snapshot.mode;
