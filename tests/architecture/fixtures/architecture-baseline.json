@@ -449,14 +449,6 @@
     },
     {
       "path": "public/app/preview.js",
-      "global": "window.markdownEditorPreviewEnhancements",
-      "count": 1,
-      "lines": [
-        581
-      ]
-    },
-    {
-      "path": "public/app/preview.js",
       "global": "window.markdownEditorVirtualPreview",
       "count": 1,
       "lines": [
@@ -477,14 +469,6 @@
       "count": 1,
       "lines": [
         128
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.createPreviewEnhancementQueue",
-      "count": 1,
-      "lines": [
-        157
       ]
     },
     {

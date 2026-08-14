@@ -54,12 +54,13 @@ test('Atomic 7.1 classic callers consume the scoped threshold port without a new
   }
 });
 
-test('Atomic 7.1 removes independent preview mode, window, chapter and worker threshold owners from legacy modules', async () => {
+test('Atomic 7.1 keeps one threshold owner after Atomic 7.12 removes the legacy enhancement queue', async () => {
   const core = await source('public/app/core.js');
   const preview = await source('public/app/preview.js');
   const virtualPreview = await source('src/preview/virtual-preview.js');
   const worker = await source('src/preview/preview-worker.js');
-  const enhancementQueue = await source('src/preview/enhancement-queue.js');
+  const enhancementCoordinator = await source('src/features/preview/pipeline/preview-enhancement-coordinator.js');
+  const main = await source('src/main.js');
 
   assert.doesNotMatch(core, /VIRTUAL_PREVIEW_BLOCK_THRESHOLD|sourceLength\s*>=\s*1000000|blockCount\s*>=\s*12000/);
   assert.doesNotMatch(preview, /PREVIEW_LAYOUT_MAX_ATTEMPTS|PREVIEW_LAYOUT_STABLE_FRAMES|MIN_CHAPTER_PREVIEW_BLOCKS/);
@@ -67,11 +68,12 @@ test('Atomic 7.1 removes independent preview mode, window, chapter and worker th
   assert.doesNotMatch(virtualPreview, /DEFAULT_OVERSCAN_PX|MIN_WINDOW_BLOCKS|MAX_WINDOW_BLOCKS|PREWARM_BLOCK_LIMIT/);
   assert.doesNotMatch(virtualPreview, /sourceLength\s*>=\s*400000\b|blocks\.length\s*>=\s*1400\b/);
   assert.doesNotMatch(worker, /PRIORITY_BLOCK_LIMIT|PRIORITY_CHAR_LIMIT/);
-  assert.doesNotMatch(enhancementQueue, /timeout:\s*180\b|setTimeout\([^\n]*,\s*16\)|timeRemaining\(\)\s*<\s*3\b/);
+  assert.doesNotMatch(enhancementCoordinator, /timeout:\s*180\b|fallbackMs:\s*16\b|minimumTimeRemainingMs:\s*3\b|setTimeout\s*\(/);
 
   assert.match(virtualPreview, /\.\.\/features\/preview\/index\.js/);
   assert.match(worker, /\.\.\/features\/preview\/index\.js/);
-  assert.match(enhancementQueue, /\.\.\/features\/preview\/index\.js/);
+  assert.doesNotMatch(enhancementCoordinator, /PREVIEW_BEHAVIOR_THRESHOLDS|preview-thresholds/);
+  assert.match(main, /thresholds:\s*PREVIEW_BEHAVIOR_THRESHOLDS\.scheduling\.enhancement/);
 });
 
 test('Atomic 7.1 remains frozen while Atomic 7.2-7.4 may add PreviewState, Mode Resolver and Scheduler/Cancellation but not Atomic 7.5+ owners', async () => {

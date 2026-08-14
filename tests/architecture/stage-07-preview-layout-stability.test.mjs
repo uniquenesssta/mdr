@@ -61,5 +61,5 @@ test('Atomic 7.9 permits Atomic 7.10-7.11 Virtual Window and Focus but does not 
     for (const child of await readdir(new URL(`${entry.name}/`, featureRoot))) paths.push(`${entry.name}/${child}`);
   }
   const tree = paths.join('\n');
-  assert.doesNotMatch(tree, /preview-enhancement-coordinator/);
+  assert.match(tree, /preview-enhancement-coordinator/);
 });

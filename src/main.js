@@ -43,7 +43,6 @@ import {
 } from './model-kernel/index.js';
 import { createPreviewWorkerClient } from './preview/preview-worker-client.js';
 import { createVirtualPreviewController } from './preview/virtual-preview.js';
-import { createPreviewEnhancementQueue } from './preview/enhancement-queue.js';
 import { createNativeDocumentStore } from './storage/native-document-store.js';
 import { createTaskScheduler } from './runtime/task-scheduler.js';
 import { createScrollSyncController } from './sync/scroll-controller.js';
@@ -88,6 +87,7 @@ import {
 } from './features/window/index.js';
 import {
   createPreviewCancellation,
+  createPreviewEnhancementCoordinator,
   createPreviewFocusController,
   createPreviewLayoutStability,
   createPreviewRenderCoordinator,
@@ -95,6 +95,7 @@ import {
   createPreviewScheduler,
   createPreviewState,
   PREVIEW_BEHAVIOR_THRESHOLDS,
+  mountClassicPreviewEnhancementCoordinatorPort,
   mountClassicPreviewFocusControllerPort,
   mountClassicPreviewLayoutStabilityPort,
   mountClassicPreviewModeResolverPort,
@@ -121,6 +122,14 @@ const previewScheduler = createPreviewScheduler({
   getBackgroundScheduler: () => window.markdownEditorTaskScheduler
 });
 const previewSchedulerPort = mountClassicPreviewSchedulerPort(compatibilityPlatformHost, previewScheduler);
+const previewEnhancementCoordinator = createPreviewEnhancementCoordinator({
+  scheduler: previewScheduler,
+  thresholds: PREVIEW_BEHAVIOR_THRESHOLDS.scheduling.enhancement
+});
+const previewEnhancementCoordinatorPort = mountClassicPreviewEnhancementCoordinatorPort(
+  compatibilityPlatformHost,
+  previewEnhancementCoordinator
+);
 const previewFocusController = createPreviewFocusController({
   scheduler: previewScheduler,
   focusDelay: PREVIEW_BEHAVIOR_THRESHOLDS.scheduling.focusMs
@@ -201,6 +210,8 @@ window.addEventListener('pagehide', () => {
   previewLayoutStability.destroy();
   previewFocusControllerPort.destroy();
   previewFocusController.destroy();
+  previewEnhancementCoordinatorPort.destroy();
+  previewEnhancementCoordinator.destroy();
   previewRenderCoordinatorPort.destroy();
   previewRenderCoordinator.destroy();
   previewSchedulerPort.destroy();
@@ -298,7 +309,6 @@ async function loadAppModules() {
   window.IncrementalPreviewModel = IncrementalPreviewModel;
   window.createPreviewWorkerClient = createPreviewWorkerClient;
   window.createVirtualPreviewController = createVirtualPreviewController;
-  window.createPreviewEnhancementQueue = createPreviewEnhancementQueue;
   window.markdownEditorTaskScheduler = createTaskScheduler();
   window.markdownEditorDocumentStore = createNativeDocumentStore({
     documentStore: platform.documentStore,

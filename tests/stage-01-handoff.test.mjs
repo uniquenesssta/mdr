@@ -124,12 +124,12 @@ test('Stage 1 historical counts and current package verification entries remain 
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 324);
+  assert.equal(moduleFixture.modules.length, 325);
   const readme = await readText('docs/README.md');
   assert.match(extractSection(readme, '## Stage 1 架构交接'), /67 个生产模块/);
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 8);
   assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 43);
-  assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 33);
+  assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 31);
   assert.equal(baseline.trackedGeneratedFiles.length, 4);
   assert.equal(baseline.policy.wildcardExemptions, false);
 

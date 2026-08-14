@@ -56,7 +56,7 @@ test('Atomic 7.3 classic callers consume the scoped resolver port and no longer 
   assert.doesNotMatch(preview, /\bresolvePreviewPerformanceMode\b|\bnormalizePreviewPerformanceMode\b/);
 });
 
-test('Atomic 7.3 remains intact while later Stage 7 owners may advance through Atomic 7.11 but not 7.12 Enhancement', async () => {
+test('Atomic 7.3 remains intact while later Stage 7 owners may advance through Atomic 7.12 but not 7.13 Recovery', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -69,7 +69,6 @@ test('Atomic 7.3 remains intact while later Stage 7 owners may advance through A
     'preview-worker-session',
     'virtual-preview-controller',
     'preview-dom-renderer',
-    'preview-enhancement-coordinator'
   ]) {
     assert.doesNotMatch(featureTree, new RegExp(premature));
   }

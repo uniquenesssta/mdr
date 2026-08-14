@@ -58,7 +58,6 @@ test('Atomic 7.6 remains intact while Atomic 7.7-7.11 may add Render Coordinator
   }
   const tree = paths.join('\n');
   for (const premature of [
-    'preview-enhancement-coordinator'
   ]) {
     assert.doesNotMatch(tree, new RegExp(premature));
   }

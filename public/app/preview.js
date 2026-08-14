@@ -11,6 +11,7 @@
     const previewRendererPort = previewCompatibilityHost?.markdownEditorPreviewRendererPort;
     const previewLayoutStabilityPort = previewCompatibilityHost?.markdownEditorPreviewLayoutStabilityPort;
     const previewFocusControllerPort = previewCompatibilityHost?.markdownEditorPreviewFocusControllerPort;
+    const previewEnhancementCoordinatorPort = previewCompatibilityHost?.markdownEditorPreviewEnhancementCoordinatorPort;
     const classicPreviewStatePort = previewCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
@@ -24,6 +25,7 @@
     if (!previewRendererPort) throw new Error('Preview Renderer compatibility port is unavailable.');
     if (!previewLayoutStabilityPort) throw new Error('Preview Layout Stability compatibility port is unavailable.');
     if (!previewFocusControllerPort) throw new Error('Preview Focus Controller compatibility port is unavailable.');
+    if (!previewEnhancementCoordinatorPort) throw new Error('Preview Enhancement Coordinator compatibility port is unavailable.');
     if (!classicPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
     previewEditorUiCommandPort.register({
@@ -86,6 +88,49 @@
       scrollToLine: (line, behavior, viewportRatio) => scrollPreviewToLine(line, behavior, viewportRatio)
     });
 
+    previewEnhancementCoordinatorPort.connect({
+      getLineRange(root) {
+        const anchor = root?.closest?.('[data-source-line]') || root;
+        const start = Number(anchor?.dataset?.sourceLine);
+        const end = Number(anchor?.dataset?.sourceEndLine);
+        return {
+          start: Number.isFinite(start) ? start : 1,
+          end: Number.isFinite(end) ? end : (Number.isFinite(start) ? start : 1)
+        };
+      },
+      getPriority(root, lineRange) {
+        const anchor = root?.closest?.('.preview-virtual-block') || root;
+        if (anchor?.isConnected) {
+          const top = anchor.offsetTop;
+          const bottom = top + Math.max(1, anchor.offsetHeight);
+          const viewportTop = preview.scrollTop;
+          const viewportBottom = viewportTop + preview.clientHeight;
+          if (bottom >= viewportTop && top <= viewportBottom) return 0;
+        }
+        const chapter = classicPreviewStatePort.snapshot.focusSection;
+        if (chapter && lineRange.end >= chapter.startLine && lineRange.start <= chapter.endLine) return 1;
+        return 2;
+      },
+      hasMath: root => sourceContainsMath(root?.textContent || ''),
+      hasMermaid: root => Boolean(
+        root?.matches?.('pre') && root.querySelector?.('code.language-mermaid')
+        || root?.querySelector?.('pre code.language-mermaid')
+      ),
+      isConnected: root => Boolean(root?.isConnected),
+      styleRoots(roots) {
+        previewRendererPort.renderTaskLists(roots);
+        previewRendererPort.renderCode(roots);
+      },
+      renderMath: roots => previewRendererPort.renderMath(roots),
+      renderMermaid: (roots, isCancelled) => previewRendererPort.renderMermaid(roots, isCancelled),
+      animate: roots => animatePreviewChanges(roots),
+      onBatchComplete() {
+        invalidatePreviewAnchorMetrics();
+        virtualPreviewController?.scheduleMeasure?.();
+      },
+      isVersionCurrent: version => classicPreviewStatePort.isCurrentVersion(version)
+    });
+
     function schedulePreviewFocusUpdate() {
       if (!editor.virtualEditor) return;
       const line = editor.virtualEditor.getLineNumberAtPosition?.(editor.selectionStart || 0) || 1;
@@ -104,8 +149,7 @@
         clearStable: false,
         clearError: false
       });
-      cancelScheduledPreviewEnhancements();
-      getPreviewEnhancementQueue()?.begin(suspendedVersion);
+      previewEnhancementCoordinatorPort.begin(suspendedVersion);
       // 单视图期间保留已窗口化的预览 DOM 与高度索引。
       // 重新切回双栏时可增量复用，避免百万字文档重新挂载全部块。
       if (!virtualPreviewController?.active) {
@@ -119,16 +163,12 @@
       document.body.dataset.previewPerformanceMode = 'hybrid';
     }
 
-    function cancelScheduledPreviewEnhancements() {
-      previewSchedulerPort.cancel('enhancement');
-    }
-
     function schedulePreviewEnhancements(sourceText, blockTokens, renderVersion, sourceAlreadyAnnotated = false, sourceLength = sourceText.length) {
-      cancelScheduledPreviewEnhancements();
-      previewSchedulerPort.schedule('enhancement', task => {
-        if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
-        const annotationStarted = performance.now();
-        const annotationCommitted = task.commit(() => {
+      previewEnhancementCoordinatorPort.schedulePostprocess({
+        renderVersion,
+        run() {
+          if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
+          const annotationStarted = performance.now();
           if (!sourceAlreadyAnnotated) annotatePreviewSourceLines(sourceText, blockTokens);
           else {
             previewAnchorsCache = virtualPreviewController?.active
@@ -146,38 +186,25 @@
               anchors: previewAnchorsCache?.length || 0
             }
           });
-        });
-        if (!annotationCommitted) return;
-
-        const finish = finishTask => {
+        },
+        finish() {
           if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
-          finishTask.commit(() => {
-            const started = performance.now();
-            window.markdownEditorSelectionController?.notifyPreviewMounted?.('preview-enhancements');
-            // 在空闲阶段预热锚点坐标，避免用户第一次滚动时同步测量全部预览块。
-            getPreviewAnchorMetrics();
-            window.markdownEditorPerf?.record('render.preview-enhancements', {
-              category: 'render.pipeline',
-              durationMs: performance.now() - started,
-              aggregate: true,
-              details: {
-                sourceChars: sourceLength,
-                previewBlocks: preview.querySelector('.markdown-body')?.children.length || 0,
-                anchors: previewAnchorsCache?.length || 0
-              }
-            });
+          const started = performance.now();
+          window.markdownEditorSelectionController?.notifyPreviewMounted?.('preview-enhancements');
+          getPreviewAnchorMetrics();
+          window.markdownEditorPerf?.record('render.preview-enhancements', {
+            category: 'render.pipeline',
+            durationMs: performance.now() - started,
+            aggregate: true,
+            details: {
+              sourceChars: sourceLength,
+              previewBlocks: preview.querySelector('.markdown-body')?.children.length || 0,
+              anchors: previewAnchorsCache?.length || 0
+            }
           });
-        };
-        if (sourceLength >= classicPreviewBehaviorThresholds.scheduling.postprocess.deferChars) {
-          task.schedule(finish, {
-            kind: 'background',
-            timeout: classicPreviewBehaviorThresholds.scheduling.postprocess.idleTimeoutMs,
-            fallbackMs: classicPreviewBehaviorThresholds.scheduling.postprocess.fallbackMs
-          });
-        } else {
-          finish(task);
-        }
-      }, { kind: 'frame' });
+        },
+        deferFinish: sourceLength >= classicPreviewBehaviorThresholds.scheduling.postprocess.deferChars
+      });
     }
 
     function sourceContainsMath(value) {
@@ -196,7 +223,6 @@
     let incrementalPreviewModel = null;
     let previewWorkerClient = null;
     let virtualPreviewController = null;
-    let previewEnhancementQueue = null;
 
     function getPreviewWorkerClient() {
       if (!previewWorkerClient && window.createPreviewWorkerClient) {
@@ -218,39 +244,6 @@
         window.markdownEditorVirtualPreview = virtualPreviewController;
       }
       return virtualPreviewController;
-    }
-
-    function getPreviewEnhancementQueue() {
-      if (!previewEnhancementQueue && window.createPreviewEnhancementQueue) {
-        previewEnhancementQueue = window.createPreviewEnhancementQueue({
-          styleTasks: roots => {
-            previewRendererPort.renderTaskLists(roots);
-            previewRendererPort.renderCode(roots);
-          },
-          renderMath: roots => previewRendererPort.renderMath(roots),
-          renderMermaid: (roots, isCancelled) => previewRendererPort.renderMermaid(roots, isCancelled),
-          animate: nodes => animatePreviewChanges(nodes),
-          getPriority(root, lineRange) {
-            const anchor = root?.closest?.('.preview-virtual-block') || root;
-            if (anchor?.isConnected) {
-              const top = anchor.offsetTop;
-              const bottom = top + Math.max(1, anchor.offsetHeight);
-              const viewportTop = preview.scrollTop;
-              const viewportBottom = viewportTop + preview.clientHeight;
-              if (bottom >= viewportTop && top <= viewportBottom) return 0;
-            }
-            const chapter = classicPreviewStatePort.snapshot.focusSection;
-            if (chapter && lineRange.end >= chapter.startLine && lineRange.start <= chapter.endLine) return 1;
-            return 2;
-          },
-          onBatchComplete() {
-            invalidatePreviewAnchorMetrics();
-            virtualPreviewController?.scheduleMeasure?.();
-          }
-        });
-        window.markdownEditorPreviewEnhancements = previewEnhancementQueue;
-      }
-      return previewEnhancementQueue;
     }
 
     let previewPrewarmVersion = 0;
@@ -316,7 +309,7 @@
       previewWorkerClient?.destroy?.();
       previewWorkerClient = null;
       virtualPreviewController?.deactivate();
-      previewEnhancementQueue?.cancel?.();
+      previewEnhancementCoordinatorPort.cancel();
       preview.replaceChildren();
       observedPreviewBody = null;
       invalidatePreviewAnchorStructure();
@@ -325,17 +318,7 @@
 
     function enhancePreviewNodes(nodes, changedNodes = nodes) {
       if (!nodes?.length) return;
-      const queue = getPreviewEnhancementQueue();
-      if (queue) {
-        queue.enqueue(nodes, changedNodes || []);
-        return;
-      }
-      previewRendererPort.renderTaskLists(nodes);
-      previewRendererPort.renderCode(nodes);
-      previewRendererPort.renderMath(nodes);
-      void previewRendererPort.renderMermaid(nodes);
-      animatePreviewChanges(changedNodes || []);
-      invalidatePreviewAnchorMetrics();
+      previewEnhancementCoordinatorPort.enqueue(nodes, changedNodes || []);
     }
 
     function collectPendingMermaidRoots(body) {
@@ -386,7 +369,7 @@
     async function updatePreview() {
       previewSchedulerPort.cancel('input');
       const renderVersion = classicPreviewStatePort.beginRender();
-      getPreviewEnhancementQueue()?.begin(renderVersion);
+      previewEnhancementCoordinatorPort.begin(renderVersion);
       let resolvedPreviewMode = classicPreviewStatePort.snapshot.mode;
       let resolvedPreviewScopeKey = classicPreviewStatePort.snapshot.lastStableResult?.scopeKey || resolvedPreviewMode;
       let previewFailure = null;
@@ -450,7 +433,7 @@
           previewReferenceDefinitions = String(modelResult.referenceDefinitions || '');
           const focusSection = modelResult.focusChapter || null;
           classicPreviewStatePort.setFocusSection(renderVersion, focusSection);
-          getPreviewEnhancementQueue()?.setPriorityRange(focusSection);
+          previewEnhancementCoordinatorPort.setPriorityRange(focusSection);
           updateDocumentStatistics(modelResult.statistics);
           const headingVersion = modelResult.documentVersion ?? documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.();
           const outlineDocumentKey = previewDocumentSessionPort.activeId || '';
@@ -594,7 +577,7 @@
       if (!classicPreviewStatePort.isCurrentVersion(renderVersion)) return;
 
       if (hybridMode) {
-        cancelScheduledPreviewEnhancements();
+        previewEnhancementCoordinatorPort.cancel();
         resolvedPreviewMode = 'hybrid';
         resolvedPreviewScopeKey = 'hybrid';
         const badge = document.getElementById('preview-strategy-badge');
@@ -811,7 +794,7 @@
           workerDurationMs,
           priorityChapterStart: modelResult?.focusChapter?.startLine || 0,
           priorityChapterEnd: modelResult?.focusChapter?.endLine || 0,
-          enhancementJobs: previewEnhancementQueue?.getStats?.().pending || 0,
+          enhancementJobs: previewEnhancementCoordinatorPort.getStats().pending || 0,
           virtualized: Boolean(patchResult.virtualized),
           mode: patchResult.mode || 'dom-keyed',
           requestedPreviewMode,

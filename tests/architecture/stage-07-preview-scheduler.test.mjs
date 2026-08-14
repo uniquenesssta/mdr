@@ -49,25 +49,29 @@ test('Atomic 7.4 composition root mounts one scoped classic scheduler port and d
   assert.match(main, /previewCancellation\.destroy\(\)/);
 });
 
-test('Atomic 7.4 scheduler remains authoritative while Atomic 7.9 and 7.11 own layout/focus sequencing', async () => {
+test('Atomic 7.4 scheduler remains authoritative while Atomic 7.9, 7.11 and 7.12 own layout/focus/enhancement sequencing', async () => {
   const core = await source('public/app/core.js');
   const preview = await source('public/app/preview.js');
   const layoutStability = await source('src/features/preview/pipeline/preview-layout-stability.js');
   const focusController = await source('src/features/preview/pipeline/preview-focus-controller.js');
+  const enhancementCoordinator = await source('src/features/preview/pipeline/preview-enhancement-coordinator.js');
 
   assert.match(preview, /markdownEditorPreviewSchedulerPort/);
   assert.match(preview, /previewSchedulerPort\.schedule\('input'/);
   assert.doesNotMatch(preview, /previewSchedulerPort\.schedule\('focus'/);
-  assert.match(preview, /previewSchedulerPort\.schedule\('enhancement'/);
+  assert.doesNotMatch(preview, /previewSchedulerPort\.schedule\('enhancement'/);
   assert.match(preview, /previewSchedulerPort\.cancel\('input'\)/);
   assert.doesNotMatch(preview, /previewSchedulerPort\.cancel\('focus'\)/);
-  assert.match(preview, /previewSchedulerPort\.cancel\('enhancement'\)/);
+  assert.doesNotMatch(preview, /previewSchedulerPort\.cancel\('enhancement'\)/);
   assert.match(preview, /previewLayoutStabilityPort\.cancel\(\)/);
   assert.match(focusController, /scheduler\.schedule\('focus'/);
   assert.match(focusController, /scheduler\.cancel\('focus'\)/);
   assert.match(focusController, /scheduler\.cancel\('input'\)/);
   assert.match(layoutStability, /scheduler\.schedule\('layout'/);
   assert.match(layoutStability, /scheduler\.cancel\('layout'\)/);
+  assert.match(enhancementCoordinator, /scheduler\.schedule\('enhancement'/);
+  assert.match(enhancementCoordinator, /scheduler\.cancel\('enhancement'\)/);
+  assert.match(enhancementCoordinator, /scheduler\.hasPending\('input'\)/);
 
   for (const migrated of [
     'previewUpdateTimer',
@@ -83,7 +87,7 @@ test('Atomic 7.4 scheduler remains authoritative while Atomic 7.9 and 7.11 own l
   }
 });
 
-test('Atomic 7.4 remains intact while Atomic 7.5-7.11 may add Worker, Render, Layout Stability, Virtual Window and Focus owners but not 7.12+ owners', async () => {
+test('Atomic 7.4 remains intact while Atomic 7.5-7.12 may add Worker, Render, Layout Stability, Virtual Window, Focus and Enhancement owners but not 7.13+ owners', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -94,7 +98,6 @@ test('Atomic 7.4 remains intact while Atomic 7.5-7.11 may add Worker, Render, La
     'preview-controller',
     'preview-worker-protocol',
     'preview-worker-session',
-    'preview-enhancement-coordinator',
     'preview-dom-renderer'
   ]) {
     assert.doesNotMatch(featureTree, new RegExp(premature));

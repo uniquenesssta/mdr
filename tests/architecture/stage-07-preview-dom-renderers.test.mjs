@@ -60,5 +60,5 @@ test('Atomic 7.8 renderer boundary remains intact while Atomic 7.9-7.11 add layo
     for (const child of await readdir(new URL(`${entry.name}/`, featureRoot))) paths.push(`${entry.name}/${child}`);
   }
   const tree = paths.join('\n');
-  assert.doesNotMatch(tree, /preview-enhancement-coordinator/);
+  assert.match(tree, /preview-enhancement-coordinator/);
 });

@@ -53,5 +53,5 @@ test('Atomic 7.7 permits Atomic 7.9-7.11 Layout Stability, Virtual Window and Fo
     for (const child of await readdir(new URL(`${entry.name}/`, featureRoot))) paths.push(`${entry.name}/${child}`);
   }
   const tree = paths.join('\n');
-  assert.doesNotMatch(tree, /preview-enhancement-coordinator/);
+  assert.match(tree, /preview-enhancement-coordinator/);
 });
