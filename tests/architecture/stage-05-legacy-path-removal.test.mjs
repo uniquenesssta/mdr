@@ -52,12 +52,14 @@ test('Atomic 5.13 deletes migrated command/history wrappers instead of retaining
   assert.doesNotMatch(fixture, /classic-editor-(?:command|history)-port\.js/);
 });
 
-test('Atomic 5.13 preserves later-stage editor-tools responsibilities without starting Stage 6-8 rewrites', async () => {
-  const source = await read('public/app/editor-tools.js');
+test('Atomic 5.13 preserves unresolved later-stage editor-tools responsibilities while verified Stage 7 migrations leave classic ownership', async () => {
+  const [source, mermaidRenderer] = await Promise.all([
+    read('public/app/editor-tools.js'),
+    read('src/features/preview/render/mermaid-renderer.js')
+  ]);
   for (const responsibility of [
     'applyTableVisualEditingSetting',
     'applyCodeVisualEditingSetting',
-    'renderMermaidBlocks',
     'getLayoutMode',
     'setLayoutMode',
     'togglePageFullscreen',
@@ -65,6 +67,9 @@ test('Atomic 5.13 preserves later-stage editor-tools responsibilities without st
   ]) {
     assert.match(source, new RegExp(`function\\s+${responsibility}\\s*\\(`), `later-stage responsibility disappeared: ${responsibility}`);
   }
+  assert.doesNotMatch(source, /function\s+renderMermaidBlocks\s*\(/, 'Atomic 7.8 must not restore classic Mermaid rendering authority');
+  assert.match(mermaidRenderer, /export\s+function\s+createMermaidRenderer\s*\(/);
+  assert.match(mermaidRenderer, /presentation\?\.mermaid/);
 });
 
 test('Atomic 5.13 routes migrated menu actions through declarative Editor View commands', async () => {
