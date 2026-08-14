@@ -46,7 +46,7 @@ test('Atomic 7.5 legacy Worker runtime and Atomic 7.6 session consume the shared
   assert.match(runtime, /requestId/);
 });
 
-test('Atomic 7.5/7.6 remain intact while Atomic 7.7 may add Render Coordinator but not later preview owners', async () => {
+test('Atomic 7.5/7.6 remain intact while Atomic 7.7-7.8 may add Render Coordinator and DOM Renderers but not later preview owners', async () => {
   const featureRoot = new URL('src/features/preview/', root);
   const entries = await readdir(featureRoot, { withFileTypes: true });
   const paths = [];
@@ -63,8 +63,7 @@ test('Atomic 7.5/7.6 remain intact while Atomic 7.7 may add Render Coordinator b
     'virtual-preview-controller',
     'preview-layout-stability',
     'preview-focus-controller',
-    'preview-enhancement-coordinator',
-    'preview-dom-renderer'
+    'preview-enhancement-coordinator'
   ]) {
     assert.doesNotMatch(tree, new RegExp(premature));
   }

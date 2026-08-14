@@ -54,7 +54,6 @@ test('Atomic 7.7 does not enter later preview owners', async () => {
   }
   const tree = paths.join('\n');
   for (const premature of [
-    'preview-dom-renderer',
     'preview-layout-stability',
     'virtual-preview-controller',
     'virtual-window-calculator',

@@ -8,6 +8,7 @@
     const previewThresholdsPort = previewCompatibilityHost?.markdownEditorPreviewThresholdsPort;
     const previewSchedulerPort = previewCompatibilityHost?.markdownEditorPreviewSchedulerPort;
     const previewRenderCoordinatorPort = previewCompatibilityHost?.markdownEditorPreviewRenderCoordinatorPort;
+    const previewRendererPort = previewCompatibilityHost?.markdownEditorPreviewRendererPort;
     const classicPreviewStatePort = previewCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
@@ -18,6 +19,7 @@
     if (!previewThresholdsPort) throw new Error('Preview Thresholds compatibility port is unavailable.');
     if (!previewSchedulerPort) throw new Error('Preview Scheduler compatibility port is unavailable.');
     if (!previewRenderCoordinatorPort) throw new Error('Preview Render Coordinator compatibility port is unavailable.');
+    if (!previewRendererPort) throw new Error('Preview Renderer compatibility port is unavailable.');
     if (!classicPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
     previewEditorUiCommandPort.register({
@@ -322,218 +324,16 @@
       }, { kind: 'frame' });
     }
 
-    function getPreviewNodeRenderKey(node, occurrences) {
-      const markup = node.outerHTML;
-      const base = node.tagName + ':' + markup.length + ':' + simpleHash(markup);
-      const occurrence = occurrences.get(base) || 0;
-      occurrences.set(base, occurrence + 1);
-      return base + ':' + occurrence;
-    }
-
-    function assignPreviewRenderKeys(body) {
-      const occurrences = new Map();
-      Array.from(body.children).forEach(node => {
-        node.dataset.renderKey = getPreviewNodeRenderKey(node, occurrences);
-      });
-    }
-
-    function patchPreviewBody(html, forceFullRebuild = false) {
-      const template = document.createElement('template');
-      template.innerHTML = '<div class="markdown-body">' + html + '</div>';
-      const nextBody = template.content.firstElementChild;
-      assignPreviewRenderKeys(nextBody);
-      const currentBody = preview.querySelector('.markdown-body');
-      if (!currentBody || currentBody.classList.contains('preview-loading')) {
-        preview.replaceChildren(nextBody);
-        observedPreviewBody = null;
-        invalidatePreviewAnchorStructure();
-        return { body: nextBody, changedNodes: Array.from(nextBody.children), reused: 0 };
-      }
-      if (forceFullRebuild) {
-        const changedNodes = Array.from(nextBody.children);
-        currentBody.replaceChildren(...changedNodes);
-        invalidatePreviewAnchorStructure();
-        return { body: currentBody, changedNodes, reused: 0 };
-      }
-
-      const oldChildren = Array.from(currentBody.children);
-      const buckets = new Map();
-      oldChildren.forEach(node => {
-        const key = node.dataset.renderKey || '';
-        if (!key) return;
-        const bucket = buckets.get(key) || [];
-        bucket.push(node);
-        buckets.set(key, bucket);
-      });
-
-      const desiredNodes = [];
-      const changedNodes = [];
-      let reused = 0;
-      Array.from(nextBody.children).forEach(newNode => {
-        const key = newNode.dataset.renderKey || '';
-        const bucket = key ? buckets.get(key) : null;
-        const reusable = bucket?.shift();
-        if (reusable) {
-          desiredNodes.push(reusable);
-          reused += 1;
-        } else {
-          desiredNodes.push(newNode);
-          changedNodes.push(newNode);
-        }
-      });
-
-      if (desiredNodes.length && reused / desiredNodes.length < 0.25) {
-        currentBody.replaceChildren(...desiredNodes);
-      } else {
-        const used = new Set(desiredNodes);
-        let cursor = currentBody.firstChild;
-        desiredNodes.forEach(node => {
-          if (node === cursor) {
-            cursor = cursor.nextSibling;
-            return;
-          }
-          currentBody.insertBefore(node, cursor);
-        });
-        oldChildren.forEach(node => {
-          if (!used.has(node) && node.parentNode === currentBody) node.remove();
-        });
-      }
-      invalidatePreviewAnchorStructure();
-      return { body: currentBody, changedNodes, reused };
-    }
-
     function sourceContainsMath(value) {
       return window.markdownEditorMath?.containsMath?.(value)
         ?? (String(value || '').includes('$') || String(value || '').includes('\\[') || String(value || '').includes('\\('));
     }
 
-    function getMathDelimiters() {
-      return window.markdownEditorMath?.delimiters || [
-        { left: '$$', right: '$$', display: true },
-        { left: '\\[', right: '\\]', display: true },
-        { left: '$', right: '$', display: false },
-        { left: '\\(', right: '\\)', display: false }
-      ];
-    }
-
-    function renderMathInPreviewNodes(nodes) {
-      const mathRenderer = window.markdownEditorPresentation?.math || window.markdownEditorMath;
-      if (!mathRenderer?.renderTree && typeof renderMathInElement === 'undefined') return;
-      nodes.forEach(node => {
-        if (mathRenderer?.renderTree) {
-          mathRenderer.renderTree(node, { delimiters: getMathDelimiters() });
-          return;
-        }
-        renderMathInElement(node, {
-          delimiters: getMathDelimiters(),
-          throwOnError: false
-        });
-      });
-    }
-
-
-    async function copyPreviewCode(text) {
-      const value = String(text ?? '');
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
-        return;
-      }
-      const textarea = document.createElement('textarea');
-      textarea.value = value;
-      textarea.className = 'c-clipboard-buffer';
-      textarea.setAttribute('readonly', '');
-      document.body.appendChild(textarea);
-      textarea.select();
-      const copied = document.execCommand('copy');
-      textarea.remove();
-      if (!copied) throw new Error('无法复制代码');
-    }
-
-    function getPreviewCodeLanguage(code, highlighter) {
-      const languageClass = Array.from(code.classList || []).find(name => name.startsWith('language-')) || '';
-      const language = languageClass.slice('language-'.length) || 'text';
-      return {
-        language,
-        normalized: highlighter.getNormalizedCodeLanguage?.(language) || language.toLowerCase()
-      };
-    }
-
-    function resolvePreviewCodeSourceStart(pre) {
-      const sourceStart = Number(pre.dataset.sourceStartIndex);
-      const sourceEnd = Number(pre.dataset.sourceEndIndex);
-      if (!Number.isFinite(sourceStart) || !Number.isFinite(sourceEnd) || sourceEnd <= sourceStart) return null;
-      const source = documentModel?.sliceText?.(sourceStart, sourceEnd);
-      if (typeof source !== 'string') return null;
-      const firstLineEnd = source.indexOf('\n');
-      if (firstLineEnd < 0) return null;
-      const firstLine = source.slice(0, firstLineEnd);
-      if (!/^\s*(`{3,}|~{3,})/.test(firstLine)) return null;
-      return sourceStart + firstLineEnd + 1;
-    }
-
-    function collectPreviewCodeElements(roots) {
-      const elements = [];
-      const seen = new Set();
-      const add = code => {
-        if (!(code instanceof HTMLElement) || seen.has(code)) return;
-        const pre = code.parentElement;
-        if (!(pre instanceof HTMLPreElement) || pre.dataset.previewCodeEnhanced === 'true') return;
-        seen.add(code);
-        elements.push(code);
-      };
-      Array.from(roots || []).forEach(root => {
-        if (!(root instanceof Element)) return;
-        if (root.matches('pre')) add(root.querySelector(':scope > code'));
-        root.querySelectorAll?.('pre > code').forEach(add);
-      });
-      return elements;
-    }
-
-    function enhancePreviewCodeBlocks(roots) {
-      const highlighter = window.markdownEditorPresentation?.code || window.markdownEditorCodeHighlighter;
-      if (!highlighter?.renderHighlightedCodeRows) return;
-      collectPreviewCodeElements(roots).forEach(code => {
-        const pre = code.parentElement;
-        const { language, normalized } = getPreviewCodeLanguage(code, highlighter);
-        if (!pre || normalized === 'mermaid') return;
-
-        const source = code.textContent || '';
-        const renderResult = highlighter.renderHighlightedCodeRows?.(code, source, language, {
-          variant: 'preview',
-          includeSourceNewlines: true
-        });
-        if (!renderResult) return;
-
-        const copyButton = document.createElement('button');
-        copyButton.type = 'button';
-        copyButton.className = 'preview-code-copy';
-        copyButton.setAttribute('aria-label', '复制代码');
-        copyButton.title = '复制代码';
-        copyButton.addEventListener('mousedown', event => event.preventDefault());
-        copyButton.addEventListener('click', async event => {
-          event.preventDefault();
-          event.stopPropagation();
-          try {
-            await copyPreviewCode(source);
-            showToast('代码已复制');
-          } catch (error) {
-            showToast(error?.message || '复制失败');
-          }
-        });
-
-        code.classList.add('preview-code-body');
-        pre.classList.add('preview-code-widget');
-        pre.dataset.previewCodeEnhanced = 'true';
-        pre.dataset.codeLanguage = normalized || language || 'text';
-        const codeSourceStart = resolvePreviewCodeSourceStart(pre);
-        if (Number.isFinite(codeSourceStart)) pre.dataset.codeSourceStartIndex = String(codeSourceStart);
-        pre.insertBefore(copyButton, code);
-      });
-    }
-
-    function stylePreviewNodes(roots) {
-      styleTaskLists(roots);
-      enhancePreviewCodeBlocks(roots);
+    function commitPreviewDomPatch(result) {
+      if (result?.bodyReplaced) observedPreviewBody = null;
+      invalidatePreviewAnchorStructure();
+      if (Array.isArray(result?.anchors)) previewAnchorsCache = result.anchors;
+      return result;
     }
 
 
@@ -567,9 +367,12 @@
     function getPreviewEnhancementQueue() {
       if (!previewEnhancementQueue && window.createPreviewEnhancementQueue) {
         previewEnhancementQueue = window.createPreviewEnhancementQueue({
-          styleTasks: roots => stylePreviewNodes(roots),
-          renderMath: roots => renderMathInPreviewNodes(roots),
-          renderMermaid: (roots, isCancelled) => renderMermaidBlocks(roots, isCancelled),
+          styleTasks: roots => {
+            previewRendererPort.renderTaskLists(roots);
+            previewRendererPort.renderCode(roots);
+          },
+          renderMath: roots => previewRendererPort.renderMath(roots),
+          renderMermaid: (roots, isCancelled) => previewRendererPort.renderMermaid(roots, isCancelled),
           animate: nodes => animatePreviewChanges(nodes),
           getPriority(root, lineRange) {
             const anchor = root?.closest?.('.preview-virtual-block') || root;
@@ -670,9 +473,10 @@
         queue.enqueue(nodes, changedNodes || []);
         return;
       }
-      stylePreviewNodes(nodes);
-      renderMathInPreviewNodes(nodes);
-      renderMermaidBlocks(nodes);
+      previewRendererPort.renderTaskLists(nodes);
+      previewRendererPort.renderCode(nodes);
+      previewRendererPort.renderMath(nodes);
+      void previewRendererPort.renderMermaid(nodes);
       animatePreviewChanges(changedNodes || []);
       invalidatePreviewAnchorMetrics();
     }
@@ -713,25 +517,6 @@
       return html;
     }
 
-    function createPreviewNodesForBlock(block) {
-      const template = document.createElement('template');
-      template.innerHTML = typeof block.html === 'string' ? block.html : renderMarkdownFragment(block.raw);
-      const nodes = Array.from(template.content.childNodes).map(node => {
-        if (node.nodeType === Node.ELEMENT_NODE) return node;
-        if (!node.textContent?.trim()) return null;
-        const span = document.createElement('span');
-        span.textContent = node.textContent;
-        return span;
-      }).filter(Boolean);
-      if (!nodes.length) return [];
-      nodes.forEach((node, index) => {
-        node.dataset.previewBlockId = block.id;
-        node.dataset.previewNodeIndex = String(index);
-        node.dataset.renderKey = block.id + ':' + index;
-      });
-      return nodes;
-    }
-
     function animatePreviewChanges(nodes) {
       const maxAnimatedNodes = document.body.classList.contains('ultra-large-document') ? 8 : 32;
       if (!nodes.length || nodes.length > maxAnimatedNodes) return;
@@ -739,86 +524,6 @@
         node.classList.add('preview-block-enter');
         node.addEventListener('animationend', () => node.classList.remove('preview-block-enter'), { once: true });
       });
-    }
-
-    function applyPreviewBlockSourceRange(nodes, block) {
-      nodes.forEach(node => {
-        node.dataset.sourceLine = String(block.startLine);
-        node.dataset.sourceEndLine = String(block.endLine);
-        node.dataset.sourceStartIndex = String(block.start);
-        node.dataset.sourceEndIndex = String(block.end);
-      });
-    }
-
-    function patchIncrementalPreview(result, forceAll = false) {
-      let body = preview.querySelector('.markdown-body');
-      if (!body || body.classList.contains('preview-loading')) {
-        body = document.createElement('div');
-        body.className = 'markdown-body';
-        preview.replaceChildren(body);
-        observedPreviewBody = null;
-        forceAll = true;
-      }
-
-      const existingByBlock = new Map();
-      Array.from(body.children).forEach(node => {
-        const id = node.dataset.previewBlockId;
-        if (!id) return;
-        const bucket = existingByBlock.get(id) || [];
-        bucket.push(node);
-        existingByBlock.set(id, bucket);
-      });
-      existingByBlock.forEach(nodes => nodes.sort((a, b) => Number(a.dataset.previewNodeIndex || 0) - Number(b.dataset.previewNodeIndex || 0)));
-
-      const desiredNodes = [];
-      const changedNodes = [];
-      let reused = 0;
-      for (const block of result.blocks) {
-        const existing = existingByBlock.get(block.id) || [];
-        const shouldRender = forceAll || result.changedIds.has(block.id) || !existing.length;
-        const nodes = shouldRender ? createPreviewNodesForBlock(block) : existing;
-        if (shouldRender) changedNodes.push(...nodes);
-        else reused += nodes.length;
-        applyPreviewBlockSourceRange(nodes, block);
-        desiredNodes.push(...nodes);
-      }
-
-      const reuseRatio = desiredNodes.length ? reused / desiredNodes.length : 0;
-      const shouldBulkReplace = forceAll
-        || !result.incremental
-        || !desiredNodes.length
-        || reuseRatio < 0.25;
-
-      if (shouldBulkReplace && body.childNodes.length && reuseRatio < 0.25) {
-        // 文档切换时直接替换整个离屏构建完成的 body。相比在仍连接到页面的
-        // 容器中删除上千个节点，这只触发一次 DOM 提交和一次布局失效。
-        const replacementBody = document.createElement('div');
-        replacementBody.className = 'markdown-body';
-        replacementBody.append(...desiredNodes);
-        preview.replaceChildren(replacementBody);
-        body = replacementBody;
-        observedPreviewBody = null;
-      } else if (shouldBulkReplace) {
-        // 围栏结构变化但仍有较高复用率时，批量重排已有节点。
-        body.replaceChildren(...desiredNodes);
-      } else {
-        const desiredSet = new Set(desiredNodes);
-        let cursor = body.firstChild;
-        desiredNodes.forEach(node => {
-          if (node === cursor) {
-            cursor = cursor.nextSibling;
-            return;
-          }
-          body.insertBefore(node, cursor);
-        });
-        Array.from(body.childNodes).forEach(node => {
-          if (!desiredSet.has(node)) node.remove();
-        });
-      }
-
-      invalidatePreviewAnchorStructure();
-      previewAnchorsCache = desiredNodes.filter(node => node.dataset.sourceLine);
-      return { body, changedNodes, reused, parsedChars: result.parsedChars, mode: result.incremental ? 'incremental' : result.reason };
     }
 
     async function updatePreview() {
@@ -937,8 +642,8 @@
             const mounted = controller.update(result, {
               forceAll: forceRender,
               scope,
-              createNodes: createPreviewNodesForBlock,
-              applySourceRange: applyPreviewBlockSourceRange,
+              createNodes: block => previewRendererPort.createBlockNodes(block, renderMarkdownFragment),
+              applySourceRange: (nodes, block) => previewRendererPort.applyBlockSourceRange(nodes, block),
               onNodesMounted(nodes, mountInfo) {
                 enhancePreviewNodes(nodes, mountInfo.changedNodes);
                 previewAnchorsCache = controller.getMountedAnchors();
@@ -973,7 +678,7 @@
             },
             renderWholeDocument({ renderResult: wholeResult, forceRender }) {
               disableVirtualPreview();
-              const rendered = patchPreviewBody(wholeResult.wholeHtml, forceRender);
+              const rendered = commitPreviewDomPatch(previewRendererPort.patchHtml(wholeResult.wholeHtml, { forceFullRebuild: forceRender }));
               rendered.parsedChars = wholeResult.parsedChars;
               rendered.mode = 'worker-whole-document';
               rendered.blockCount = wholeResult.blocks?.length || rendered.body.children.length;
@@ -989,7 +694,7 @@
             },
             renderIncremental({ renderResult: incrementalResult, forceRender }) {
               disableVirtualPreview();
-              const rendered = patchIncrementalPreview(incrementalResult, forceRender);
+              const rendered = commitPreviewDomPatch(previewRendererPort.patchBlocks(incrementalResult, { forceAll: forceRender, renderFallback: renderMarkdownFragment }));
               rendered.blockCount = incrementalResult.blocks?.length || 0;
               sourceAlreadyAnnotated = true;
               return rendered;
@@ -1187,7 +892,7 @@
           html = '<pre class="f-raw-fallback">' + escapeHtml(fallbackSource) + '</pre>';
         }
         if (placeholders.length) html = restoreMath(html, placeholders);
-        patchResult = patchPreviewBody(html, forceFullRebuild);
+        patchResult = commitPreviewDomPatch(previewRendererPort.patchHtml(html, { forceFullRebuild }));
         patchResult.parsedChars = sourceLength;
         patchResult.mode = 'whole-document';
         patchResult.blockCount = patchResult.body.children.length;
@@ -1271,19 +976,6 @@
       return typeof api?.restoreSource === 'function'
         ? api.restoreSource(html, placeholders)
         : String(html || '');
-    }
-
-    function styleTaskLists(roots = null) {
-      const checkboxes = roots && roots.length
-        ? roots.flatMap(root => [root, ...root.querySelectorAll('input[type="checkbox"]')]).filter(node => node.matches?.('input[type="checkbox"]'))
-        : Array.from(preview.querySelectorAll('input[type="checkbox"]'));
-      checkboxes.forEach(cb => {
-        const li = cb.closest('li');
-        if (!li) return;
-        li.classList.add('task-item');
-        const ul = li.closest('ul, ol');
-        if (ul && ul.tagName === 'UL') ul.classList.add('task-list');
-      });
     }
 
     function escapeHtml(text) {

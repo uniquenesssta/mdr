@@ -89,10 +89,12 @@ import {
 import {
   createPreviewCancellation,
   createPreviewRenderCoordinator,
+  createPreviewRendererPort,
   createPreviewScheduler,
   createPreviewState,
   mountClassicPreviewModeResolverPort,
   mountClassicPreviewRenderCoordinatorPort,
+  mountClassicPreviewRendererPort,
   mountClassicPreviewSchedulerPort,
   mountClassicPreviewStatePort,
   mountClassicPreviewThresholdsPort
@@ -181,7 +183,8 @@ window.addEventListener('pagehide', () => {
 }, { once: true });
 
 window.markdownEditorSelectionMapping = selectionMappingApi;
-window.markdownEditorPresentation = createMarkdownPresentationApi();
+const markdownPresentation = createMarkdownPresentationApi();
+window.markdownEditorPresentation = markdownPresentation;
 window.markdownEditorCodeHighlighter = window.markdownEditorPresentation.code;
 window.markdownEditorMath = window.markdownEditorPresentation.math;
 
@@ -350,6 +353,8 @@ async function loadAppModules() {
   let closeSavePort = null;
   let classicCloseSavePort = null;
   let windowController = null;
+  let previewRenderer = null;
+  let previewRendererPort = null;
   let documentEditorViewsDestroyed = false;
   const destroyDocumentEditorViews = () => {
     if (documentEditorViewsDestroyed) return;
@@ -414,6 +419,10 @@ async function loadAppModules() {
     editorCommandService.destroy();
     editorHistoryAdapter.destroy();
     editorController.destroy();
+    previewRendererPort?.destroy();
+    previewRendererPort = null;
+    previewRenderer?.destroy();
+    previewRenderer = null;
     documentModel.destroy();
     virtualEditor.destroy();
   };
@@ -760,6 +769,17 @@ async function loadAppModules() {
   };
 
   try {
+    previewRenderer = createPreviewRendererPort({
+      root: previewHost,
+      documentRef: document,
+      documentModel,
+      presentation: markdownPresentation,
+      notify,
+      record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+      reportError(message, error) { console.error(message, error); }
+    });
+    previewRenderer.start();
+    previewRendererPort = mountClassicPreviewRendererPort(compatibilityPlatformHost, previewRenderer);
     closeSavePort = createCloseSavePort();
     classicCloseSavePort = mountClassicCloseSavePort(compatibilityPlatformHost, closeSavePort);
     const layoutFrameHost = document.defaultView;

@@ -45,7 +45,7 @@ test('Worker failure never falls through to main-thread whole-document rendering
   assert.match(preview, /if\s*\(!patchResult\s*&&\s*!workerFailed\)\s*\{/);
 });
 
-test('Atomic 7.6 remains intact while Atomic 7.7 may add Render Coordinator but not later preview owners', async () => {
+test('Atomic 7.6 remains intact while Atomic 7.7-7.8 may add Render Coordinator and DOM Renderers but not later preview owners', async () => {
   const featureRoot = new URL('src/features/preview/', root);
   const entries = await readdir(featureRoot, { withFileTypes: true });
   const paths = [];
@@ -61,8 +61,7 @@ test('Atomic 7.6 remains intact while Atomic 7.7 may add Render Coordinator but 
     'virtual-preview-controller',
     'preview-layout-stability',
     'preview-focus-controller',
-    'preview-enhancement-coordinator',
-    'preview-dom-renderer'
+    'preview-enhancement-coordinator'
   ]) {
     assert.doesNotMatch(tree, new RegExp(premature));
   }

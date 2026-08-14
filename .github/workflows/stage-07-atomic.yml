@@ -1,4 +1,4 @@
-# Stage 7 completed-scope validation through Atomic 7.7 while preserving the complete Stage 6 handoff.
+# Stage 7 completed-scope validation through Atomic 7.8 while preserving the complete Stage 6 handoff.
 name: Stage 7 Atomic Verification
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   preview-scheduler-cancellation:
-    name: Verify Stage 7 Through Atomic 7.7 Render Coordinator
+    name: Verify Stage 7 Through Atomic 7.8 DOM Renderers
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -273,6 +273,15 @@ jobs:
           tests/unit/preview/preview-render-coordinator.test.mjs
           tests/unit/preview/classic-preview-render-coordinator-port.test.mjs
           tests/architecture/stage-07-preview-render-coordinator.test.mjs
+      - name: Verify Atomic Task 7.8 DOM Renderers
+        run: >-
+          node --test
+          tests/unit/preview/preview-block-view.test.mjs
+          tests/unit/preview/preview-dom-renderer.test.mjs
+          tests/unit/preview/preview-specialized-renderers.test.mjs
+          tests/unit/preview/preview-renderer-port.test.mjs
+          tests/unit/preview/classic-preview-renderer-port.test.mjs
+          tests/architecture/stage-07-preview-dom-renderers.test.mjs
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -315,6 +324,13 @@ jobs:
           node --check src/features/preview/pipeline/preview-cancellation.js &&
           node --check src/features/preview/pipeline/preview-scheduler.js &&
           node --check src/features/preview/pipeline/preview-render-coordinator.js &&
+          node --check src/features/preview/render/preview-block-view.js &&
+          node --check src/features/preview/render/preview-dom-renderer.js &&
+          node --check src/features/preview/render/task-list-renderer.js &&
+          node --check src/features/preview/render/code-renderer.js &&
+          node --check src/features/preview/render/math-renderer.js &&
+          node --check src/features/preview/render/mermaid-renderer.js &&
+          node --check src/features/preview/render/preview-renderer-port.js &&
           node --check src/features/preview/worker/preview-worker-protocol.js &&
           node --check src/features/preview/worker/preview-worker-session.js &&
           node --check src/features/preview/compatibility/classic-preview-mode-resolver-port.js &&
@@ -322,6 +338,7 @@ jobs:
           node --check src/features/preview/compatibility/classic-preview-thresholds-port.js &&
           node --check src/features/preview/compatibility/classic-preview-scheduler-port.js &&
           node --check src/features/preview/compatibility/classic-preview-render-coordinator-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-renderer-port.js &&
           node --check src/features/preview/index.js &&
           node --check src/preview/virtual-preview.js &&
           node --check src/preview/preview-worker-client.js &&
@@ -340,6 +357,11 @@ jobs:
           node --check tests/unit/preview/preview-worker-session.test.mjs &&
           node --check tests/unit/preview/preview-render-coordinator.test.mjs &&
           node --check tests/unit/preview/classic-preview-render-coordinator-port.test.mjs &&
+          node --check tests/unit/preview/preview-block-view.test.mjs &&
+          node --check tests/unit/preview/preview-dom-renderer.test.mjs &&
+          node --check tests/unit/preview/preview-specialized-renderers.test.mjs &&
+          node --check tests/unit/preview/preview-renderer-port.test.mjs &&
+          node --check tests/unit/preview/classic-preview-renderer-port.test.mjs &&
           node --check tests/architecture/stage-07-preview-thresholds.test.mjs &&
           node --check tests/architecture/stage-07-preview-state.test.mjs &&
           node --check tests/architecture/stage-07-preview-mode-resolver.test.mjs &&
@@ -347,6 +369,7 @@ jobs:
           node --check tests/architecture/stage-07-preview-worker-protocol.test.mjs &&
           node --check tests/architecture/stage-07-preview-worker-session.test.mjs &&
           node --check tests/architecture/stage-07-preview-render-coordinator.test.mjs &&
+          node --check tests/architecture/stage-07-preview-dom-renderers.test.mjs &&
           node --check tests/helpers/lifecycle-resource-ledger.mjs &&
           node --check tests/unit/layout/stage-06-layout-destroy-validation.test.mjs &&
           node --check tests/unit/sidebar/stage-06-sidebar-destroy-validation.test.mjs &&
@@ -373,10 +396,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-07/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 7.7 evidence
+      - name: Upload Atomic Task 7.8 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-07-preview-render-coordinator-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-07-preview-dom-renderers-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-07
           if-no-files-found: error
           retention-days: 30

@@ -20,3 +20,11 @@ export { mountClassicPreviewRenderCoordinatorPort } from './compatibility/classi
 export { mountClassicPreviewSchedulerPort } from './compatibility/classic-preview-scheduler-port.js';
 export { mountClassicPreviewStatePort } from './compatibility/classic-preview-state-port.js';
 export { mountClassicPreviewThresholdsPort } from './compatibility/classic-preview-thresholds-port.js';
+export { createPreviewBlockView } from './render/preview-block-view.js';
+export { createPreviewDomRenderer } from './render/preview-dom-renderer.js';
+export { createTaskListRenderer } from './render/task-list-renderer.js';
+export { createCodeRenderer } from './render/code-renderer.js';
+export { createMathRenderer } from './render/math-renderer.js';
+export { createMermaidRenderer } from './render/mermaid-renderer.js';
+export { createPreviewRendererPort } from './render/preview-renderer-port.js';
+export { mountClassicPreviewRendererPort } from './compatibility/classic-preview-renderer-port.js';
