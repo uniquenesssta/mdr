@@ -2,4 +2,4 @@
 
 简介：模块化重写中的桌面 Markdown 编辑器；详见 [docs/README.md](docs/README.md)。
 
-Atomic 7.8 DOM Renderers 完成：body/block、task、code、math、Mermaid 拆分并统一经 PreviewRendererPort/共享 presentation；renderer 不拥有布局/同步/virtual-window。验证：7.8 25/25、Stage 7 87/87、Node 48/48、browser 10/10、built-app 29/29、build/architecture/Frozen/audit PASS。接口/持久化/Rust/依赖未变；7.9 未开始。
+Atomic 7.9 Layout Stability 完成：预览可见性、稳定尺寸帧、有限重试与 geometry 通知独立到 PreviewLayoutStability，隐藏面板恢复首屏不空白；7.10 未开始。验证：7.9 13/13+browser、Stage 7 100/100、Node 48/48、browser 10/10、built-app 29/29、build/architecture/Frozen/audit PASS。接口/持久化/Rust/依赖未变。

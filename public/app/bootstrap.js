@@ -3,10 +3,12 @@ const bootstrapHelpPort = bootstrapCompatibilityHost?.markdownEditorHelpPort;
 const bootstrapSettingsStorePort = bootstrapCompatibilityHost?.markdownEditorSettingsStorePort;
 const bootstrapEditorControllerPort = bootstrapCompatibilityHost?.markdownEditorEditorControllerPort;
 const bootstrapLayoutStatePort = bootstrapCompatibilityHost?.markdownEditorLayoutStatePort;
+const bootstrapPreviewLayoutStabilityPort = bootstrapCompatibilityHost?.markdownEditorPreviewLayoutStabilityPort;
 if (!bootstrapHelpPort) throw new Error('Help compatibility port is unavailable.');
 if (!bootstrapSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!bootstrapEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
 if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
+if (!bootstrapPreviewLayoutStabilityPort) throw new Error('Preview Layout Stability compatibility port is unavailable.');
 
     async function init() {
       const restoredSettings = bootstrapSettingsStorePort.snapshot;
@@ -50,9 +52,9 @@ if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port 
       } else {
         setLayoutMode('both', false);
       }
-      initializePreviewLayoutObserver?.();
+      bootstrapPreviewLayoutStabilityPort.start();
       if (!bootstrapLayoutStatePort.previewCollapsed && !isHybridLayoutMode()) {
-        refreshPreviewAfterLayout?.({ forceRender: true, reason: 'startup-layout' });
+        bootstrapPreviewLayoutStabilityPort.requestRefresh({ forceRender: true, reason: 'startup-layout' });
       }
 
 

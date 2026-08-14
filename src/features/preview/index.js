@@ -2,6 +2,7 @@ export { createPreviewState } from './application/preview-state.js';
 export { createPreviewCancellation } from './pipeline/preview-cancellation.js';
 export { createPreviewScheduler } from './pipeline/preview-scheduler.js';
 export { createPreviewRenderCoordinator } from './pipeline/preview-render-coordinator.js';
+export { createPreviewLayoutStability } from './pipeline/preview-layout-stability.js';
 export {
   normalizePreviewModeSetting,
   resolvePreviewMode
@@ -17,6 +18,7 @@ export {
 export { createPreviewWorkerSession } from './worker/preview-worker-session.js';
 export { mountClassicPreviewModeResolverPort } from './compatibility/classic-preview-mode-resolver-port.js';
 export { mountClassicPreviewRenderCoordinatorPort } from './compatibility/classic-preview-render-coordinator-port.js';
+export { mountClassicPreviewLayoutStabilityPort } from './compatibility/classic-preview-layout-stability-port.js';
 export { mountClassicPreviewSchedulerPort } from './compatibility/classic-preview-scheduler-port.js';
 export { mountClassicPreviewStatePort } from './compatibility/classic-preview-state-port.js';
 export { mountClassicPreviewThresholdsPort } from './compatibility/classic-preview-thresholds-port.js';

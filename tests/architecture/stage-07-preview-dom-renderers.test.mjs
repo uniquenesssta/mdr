@@ -61,7 +61,6 @@ test('Atomic 7.8 removes classic renderer authority while retaining orchestratio
   }
   const tree = paths.join('\n');
   for (const premature of [
-    'preview-layout-stability',
     'preview-focus-controller',
     'preview-enhancement-coordinator',
     'virtual-window-calculator',

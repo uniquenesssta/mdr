@@ -88,10 +88,13 @@ import {
 } from './features/window/index.js';
 import {
   createPreviewCancellation,
+  createPreviewLayoutStability,
   createPreviewRenderCoordinator,
   createPreviewRendererPort,
   createPreviewScheduler,
   createPreviewState,
+  PREVIEW_BEHAVIOR_THRESHOLDS,
+  mountClassicPreviewLayoutStabilityPort,
   mountClassicPreviewModeResolverPort,
   mountClassicPreviewRenderCoordinatorPort,
   mountClassicPreviewRendererPort,
@@ -118,6 +121,24 @@ const previewScheduler = createPreviewScheduler({
 const previewSchedulerPort = mountClassicPreviewSchedulerPort(compatibilityPlatformHost, previewScheduler);
 const previewRenderCoordinator = createPreviewRenderCoordinator();
 const previewRenderCoordinatorPort = mountClassicPreviewRenderCoordinatorPort(compatibilityPlatformHost, previewRenderCoordinator);
+const previewLayoutRoot = document.getElementById('preview');
+const previewLayoutPane = document.querySelector('.preview-pane');
+const previewLayoutFrameHost = document.defaultView;
+if (!previewLayoutRoot) throw new Error('Preview host is missing.');
+if (!previewLayoutPane) throw new Error('Preview pane is missing.');
+const previewLayoutStability = createPreviewLayoutStability({
+  root: previewLayoutRoot,
+  pane: previewLayoutPane,
+  scheduler: previewScheduler,
+  thresholds: PREVIEW_BEHAVIOR_THRESHOLDS.scheduling.layout,
+  createResizeObserver: typeof previewLayoutFrameHost?.ResizeObserver === 'function'
+    ? callback => new previewLayoutFrameHost.ResizeObserver(callback)
+    : null,
+  now: () => previewLayoutFrameHost?.performance?.now?.() ?? performance.now(),
+  record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+  reportError(message, error) { console.warn(message, error); }
+});
+const previewLayoutStabilityPort = mountClassicPreviewLayoutStabilityPort(compatibilityPlatformHost, previewLayoutStability);
 const layoutState = createLayoutState();
 const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
 let compactShellController = null;
@@ -169,6 +190,8 @@ configureHybridImageSourcePlatform({
 });
 window.addEventListener('pagehide', () => {
   destroyLayoutStateFeature();
+  previewLayoutStabilityPort.destroy();
+  previewLayoutStability.destroy();
   previewRenderCoordinatorPort.destroy();
   previewRenderCoordinator.destroy();
   previewSchedulerPort.destroy();

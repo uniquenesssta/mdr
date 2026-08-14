@@ -49,19 +49,23 @@ test('Atomic 7.4 composition root mounts one scoped classic scheduler port and d
   assert.match(main, /previewCancellation\.destroy\(\)/);
 });
 
-test('Atomic 7.4 classic preview no longer owns migrated timer RAF or layout sequence authorities', async () => {
+test('Atomic 7.4 scheduler remains authoritative while Atomic 7.9 owns layout-stability sequencing', async () => {
   const core = await source('public/app/core.js');
   const preview = await source('public/app/preview.js');
+  const layoutStability = await source('src/features/preview/pipeline/preview-layout-stability.js');
 
   assert.match(preview, /markdownEditorPreviewSchedulerPort/);
   assert.match(preview, /previewSchedulerPort\.schedule\('input'/);
   assert.match(preview, /previewSchedulerPort\.schedule\('focus'/);
-  assert.match(preview, /previewSchedulerPort\.schedule\('layout'/);
+  assert.doesNotMatch(preview, /previewSchedulerPort\.schedule\('layout'/);
   assert.match(preview, /previewSchedulerPort\.schedule\('enhancement'/);
   assert.match(preview, /previewSchedulerPort\.cancel\('input'\)/);
   assert.match(preview, /previewSchedulerPort\.cancel\('focus'\)/);
-  assert.match(preview, /previewSchedulerPort\.cancel\('layout'\)/);
+  assert.doesNotMatch(preview, /previewSchedulerPort\.cancel\('layout'\)/);
   assert.match(preview, /previewSchedulerPort\.cancel\('enhancement'\)/);
+  assert.match(preview, /previewLayoutStabilityPort\.cancel\(\)/);
+  assert.match(layoutStability, /scheduler\.schedule\('layout'/);
+  assert.match(layoutStability, /scheduler\.cancel\('layout'\)/);
 
   for (const migrated of [
     'previewUpdateTimer',
@@ -82,7 +86,7 @@ test('Atomic 7.4 classic preview no longer owns migrated timer RAF or layout seq
   assert.match(core, /let previewLineFocusPromise = null/);
 });
 
-test('Atomic 7.4 does not enter Worker Protocol, rendering, virtual window, focus controller or enhancement coordinator', async () => {
+test('Atomic 7.4 remains intact while Atomic 7.5-7.9 may add Worker, Render and Layout Stability owners but not 7.10+ owners', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -94,7 +98,6 @@ test('Atomic 7.4 does not enter Worker Protocol, rendering, virtual window, focu
     'preview-worker-protocol',
     'preview-worker-session',
     'virtual-preview-controller',
-    'preview-layout-stability',
     'preview-focus-controller',
     'preview-enhancement-coordinator',
     'preview-dom-renderer'

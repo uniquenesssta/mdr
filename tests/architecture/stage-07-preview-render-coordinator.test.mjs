@@ -43,7 +43,7 @@ test('Atomic 7.7 classic preview delegates model-result strategy and chapter sli
   assert.doesNotMatch(preview, /function\s+resolvePreviewRenderResult\s*\(/);
 });
 
-test('Atomic 7.7 does not enter later preview owners', async () => {
+test('Atomic 7.7 permits Atomic 7.9 Layout Stability but does not enter 7.10+ preview owners', async () => {
   const featureRoot = new URL('src/features/preview/', root);
   const entries = await readdir(featureRoot, { withFileTypes: true });
   const paths = [];
@@ -54,7 +54,6 @@ test('Atomic 7.7 does not enter later preview owners', async () => {
   }
   const tree = paths.join('\n');
   for (const premature of [
-    'preview-layout-stability',
     'virtual-preview-controller',
     'virtual-window-calculator',
     'preview-focus-controller',

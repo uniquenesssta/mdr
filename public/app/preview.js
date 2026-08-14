@@ -9,6 +9,7 @@
     const previewSchedulerPort = previewCompatibilityHost?.markdownEditorPreviewSchedulerPort;
     const previewRenderCoordinatorPort = previewCompatibilityHost?.markdownEditorPreviewRenderCoordinatorPort;
     const previewRendererPort = previewCompatibilityHost?.markdownEditorPreviewRendererPort;
+    const previewLayoutStabilityPort = previewCompatibilityHost?.markdownEditorPreviewLayoutStabilityPort;
     const classicPreviewStatePort = previewCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
@@ -20,6 +21,7 @@
     if (!previewSchedulerPort) throw new Error('Preview Scheduler compatibility port is unavailable.');
     if (!previewRenderCoordinatorPort) throw new Error('Preview Render Coordinator compatibility port is unavailable.');
     if (!previewRendererPort) throw new Error('Preview Renderer compatibility port is unavailable.');
+    if (!previewLayoutStabilityPort) throw new Error('Preview Layout Stability compatibility port is unavailable.');
     if (!classicPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
     previewEditorUiCommandPort.register({
@@ -38,142 +40,30 @@
       previewSchedulerPort.schedule('input', () => updatePreview(), { kind: 'timeout', delay });
     }
 
-    let previewLayoutObserver = null;
-    let previewObservedWidth = 0;
-    let previewObservedHeight = 0;
 
-    function getPreviewLayoutState() {
-      const previewPane = document.querySelector('.preview-pane');
-      const width = Math.round(preview.clientWidth || 0);
-      const height = Math.round(preview.clientHeight || 0);
-      return {
-        previewPane,
-        width,
-        height,
-        visible: Boolean(
-          previewPane
-          && !previewPane.classList.contains('collapsed')
-          && width > 0
-          && height > 0
-        )
-      };
-    }
-
-    function refreshPreviewViewportAfterLayout(task) {
-      const refresh = () => {
-        window.markdownEditorVirtualPreview?.refreshViewport?.({ forceWindow: true });
-        invalidatePreviewAnchorMetrics();
-        window.markdownEditorScrollController?.notifyGeometryChanged?.('preview');
-      };
-      if (!task.commit(refresh)) return;
-      task.schedule(nextTask => nextTask.commit(refresh), { kind: 'frame' });
-    }
-
-    function refreshPreviewAfterLayout(options = {}) {
-      const forceRender = options.forceRender !== false;
-      const reason = String(options.reason || 'layout-visible');
-      let attempts = 0;
-      let stableFrames = 0;
-      let previousWidth = -1;
-      let previousHeight = -1;
-
-      const run = async task => {
-        if (!task.isCurrent()) return;
-        if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) return;
-
-        const layout = getPreviewLayoutState();
-        attempts += 1;
-        if (!layout.visible) {
-          if (attempts < classicPreviewBehaviorThresholds.scheduling.layout.maxAttempts) {
-            task.schedule(run, {
-              kind: 'timeout',
-              delay: classicPreviewBehaviorThresholds.scheduling.layout.retryMs
-            });
-          }
-          return;
-        }
-
-        if (Math.abs(layout.width - previousWidth) <= 1 && Math.abs(layout.height - previousHeight) <= 1) {
-          stableFrames += 1;
-        } else {
-          stableFrames = 0;
-          previousWidth = layout.width;
-          previousHeight = layout.height;
-        }
-        if (stableFrames < classicPreviewBehaviorThresholds.scheduling.layout.stableFrames
-          && attempts < classicPreviewBehaviorThresholds.scheduling.layout.maxAttempts) {
-          task.schedule(run, { kind: 'frame' });
-          return;
-        }
-
+    previewLayoutStabilityPort.connect({
+      isSuspended: () => typeof isHybridLayoutMode === 'function' && isHybridLayoutMode(),
+      hasStablePreview: () => Boolean(classicPreviewStatePort.snapshot.lastStableResult),
+      inspectRenderTarget() {
         const body = preview.querySelector('.markdown-body');
-        const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
-        const renderRequired = forceRender
-          || !hasStablePreview
-          || !body
-          || body.classList.contains('preview-loading')
-          || body.childElementCount === 0;
-        const started = performance.now();
-        try {
-          if (renderRequired) await Promise.resolve(updatePreview());
-          if (!task.isCurrent()) return;
-          refreshPreviewViewportAfterLayout(task);
-        } catch (error) {
-          task.commit(() => console.warn('Preview layout refresh failed:', error));
-        } finally {
-          task.commit(() => {
-            window.markdownEditorPerf?.record('render.preview-layout-refresh', {
-              category: 'render.pipeline',
-              durationMs: performance.now() - started,
-              aggregate: true,
-              details: {
-                reason,
-                forceRender,
-                renderRequired,
-                attempts,
-                stableFrames,
-                width: layout.width,
-                height: layout.height,
-                previewBlocks: window.markdownEditorVirtualPreview?.getStats?.().blocks
-                  || preview.querySelector('.markdown-body')?.children.length
-                  || 0,
-                mountedBlocks: window.markdownEditorVirtualPreview?.getStats?.().mountedBlocks || 0
-              }
-            });
-          });
-        }
-      };
-
-      previewSchedulerPort.schedule('layout', run, { kind: 'frame' });
-    }
-
-    function initializePreviewLayoutObserver() {
-      if (previewLayoutObserver || typeof ResizeObserver !== 'function') return;
-      const previewPane = document.querySelector('.preview-pane');
-      previewLayoutObserver = new ResizeObserver(() => {
-        if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) return;
-        const layout = getPreviewLayoutState();
-        const becameVisible = layout.visible && (previewObservedWidth <= 0 || previewObservedHeight <= 0);
-        const sizeChanged = layout.visible && (
-          Math.abs(layout.width - previewObservedWidth) > 1
-          || Math.abs(layout.height - previewObservedHeight) > 1
-        );
-        previewObservedWidth = layout.width;
-        previewObservedHeight = layout.height;
-        if (!layout.visible || (!becameVisible && !sizeChanged)) return;
-        const body = preview.querySelector('.markdown-body');
-        const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
-        refreshPreviewAfterLayout({
-          forceRender: becameVisible || !hasStablePreview || !body || body.classList.contains('preview-loading'),
-          reason: becameVisible ? 'preview-became-visible' : 'preview-container-resize'
-        });
-      });
-      if (previewPane) previewLayoutObserver.observe(previewPane);
-      previewLayoutObserver.observe(preview);
-      const initial = getPreviewLayoutState();
-      previewObservedWidth = initial.width;
-      previewObservedHeight = initial.height;
-    }
+        return {
+          present: Boolean(body),
+          loading: Boolean(body?.classList.contains('preview-loading')),
+          empty: !body || body.childElementCount === 0
+        };
+      },
+      render: () => updatePreview(),
+      refreshViewport: () => virtualPreviewController?.refreshViewport?.({ forceWindow: true }),
+      invalidateGeometry: () => invalidatePreviewAnchorMetrics(),
+      notifyGeometryChanged: reason => window.markdownEditorScrollController?.notifyGeometryChanged?.(reason),
+      getStats() {
+        const virtualStats = virtualPreviewController?.getStats?.();
+        return {
+          previewBlocks: virtualStats?.blocks || preview.querySelector('.markdown-body')?.children.length || 0,
+          mountedBlocks: virtualStats?.mountedBlocks || 0
+        };
+      }
+    });
 
     function schedulePreviewFocusUpdate() {
       if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) return;
@@ -241,7 +131,7 @@
     function suspendPreviewForHybridMode() {
       previewSchedulerPort.cancel('input');
       previewSchedulerPort.cancel('focus');
-      previewSchedulerPort.cancel('layout');
+      previewLayoutStabilityPort.cancel();
       const suspendedVersion = classicPreviewStatePort.invalidate({
         mode: 'hybrid',
         status: 'suspended',

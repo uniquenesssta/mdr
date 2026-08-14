@@ -4,11 +4,13 @@ const editorToolsEditorUiCommandPort = editorToolsCompatibilityHost?.markdownEdi
 const editorToolsLayoutStatePort = editorToolsCompatibilityHost?.markdownEditorLayoutStatePort;
 const editorToolsSplitControllerPort = editorToolsCompatibilityHost?.markdownEditorSplitControllerPort;
 const editorToolsPreviewStatePort = editorToolsCompatibilityHost?.markdownEditorPreviewStatePort;
+const editorToolsPreviewLayoutStabilityPort = editorToolsCompatibilityHost?.markdownEditorPreviewLayoutStabilityPort;
 if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!editorToolsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
 if (!editorToolsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 if (!editorToolsSplitControllerPort) throw new Error('Split Controller compatibility port is unavailable.');
 if (!editorToolsPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
+if (!editorToolsPreviewLayoutStabilityPort) throw new Error('Preview Layout Stability compatibility port is unavailable.');
 editorToolsEditorUiCommandPort.register({
   getLayoutMode: () => getLayoutMode(),
   setLayoutMode: mode => setLayoutMode(mode)
@@ -155,7 +157,7 @@ editorToolsEditorUiCommandPort.register({
         schedulePreviewUpdate();
       } else if (!editorToolsLayoutStatePort.previewCollapsed) {
         const previewBody = preview.querySelector('.markdown-body');
-        refreshPreviewAfterLayout?.({
+        editorToolsPreviewLayoutStabilityPort.requestRefresh({
           forceRender: previewWasHidden
             || !editorToolsPreviewStatePort.snapshot.lastStableResult
             || !previewBody
