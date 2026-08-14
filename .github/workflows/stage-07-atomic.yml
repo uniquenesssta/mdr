@@ -1,4 +1,4 @@
-# Stage 7 completed-scope validation through Atomic 7.6 while preserving the complete Stage 6 handoff.
+# Stage 7 completed-scope validation through Atomic 7.7 while preserving the complete Stage 6 handoff.
 name: Stage 7 Atomic Verification
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   preview-scheduler-cancellation:
-    name: Verify Stage 7 Through Atomic 7.6 Worker Session
+    name: Verify Stage 7 Through Atomic 7.7 Render Coordinator
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -267,6 +267,12 @@ jobs:
           node --test
           tests/unit/preview/preview-worker-session.test.mjs
           tests/architecture/stage-07-preview-worker-session.test.mjs
+      - name: Verify Atomic Task 7.7 Render Coordinator
+        run: >-
+          node --test
+          tests/unit/preview/preview-render-coordinator.test.mjs
+          tests/unit/preview/classic-preview-render-coordinator-port.test.mjs
+          tests/architecture/stage-07-preview-render-coordinator.test.mjs
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -308,12 +314,14 @@ jobs:
           node --check src/features/preview/pipeline/preview-thresholds.js &&
           node --check src/features/preview/pipeline/preview-cancellation.js &&
           node --check src/features/preview/pipeline/preview-scheduler.js &&
+          node --check src/features/preview/pipeline/preview-render-coordinator.js &&
           node --check src/features/preview/worker/preview-worker-protocol.js &&
           node --check src/features/preview/worker/preview-worker-session.js &&
           node --check src/features/preview/compatibility/classic-preview-mode-resolver-port.js &&
           node --check src/features/preview/compatibility/classic-preview-state-port.js &&
           node --check src/features/preview/compatibility/classic-preview-thresholds-port.js &&
           node --check src/features/preview/compatibility/classic-preview-scheduler-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-render-coordinator-port.js &&
           node --check src/features/preview/index.js &&
           node --check src/preview/virtual-preview.js &&
           node --check src/preview/preview-worker-client.js &&
@@ -330,12 +338,15 @@ jobs:
           node --check tests/unit/preview/classic-preview-scheduler-port.test.mjs &&
           node --check tests/unit/preview/preview-worker-protocol.test.mjs &&
           node --check tests/unit/preview/preview-worker-session.test.mjs &&
+          node --check tests/unit/preview/preview-render-coordinator.test.mjs &&
+          node --check tests/unit/preview/classic-preview-render-coordinator-port.test.mjs &&
           node --check tests/architecture/stage-07-preview-thresholds.test.mjs &&
           node --check tests/architecture/stage-07-preview-state.test.mjs &&
           node --check tests/architecture/stage-07-preview-mode-resolver.test.mjs &&
           node --check tests/architecture/stage-07-preview-scheduler.test.mjs &&
           node --check tests/architecture/stage-07-preview-worker-protocol.test.mjs &&
           node --check tests/architecture/stage-07-preview-worker-session.test.mjs &&
+          node --check tests/architecture/stage-07-preview-render-coordinator.test.mjs &&
           node --check tests/helpers/lifecycle-resource-ledger.mjs &&
           node --check tests/unit/layout/stage-06-layout-destroy-validation.test.mjs &&
           node --check tests/unit/sidebar/stage-06-sidebar-destroy-validation.test.mjs &&
@@ -362,10 +373,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-07/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 7.6 evidence
+      - name: Upload Atomic Task 7.7 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-07-preview-worker-session-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-07-preview-render-coordinator-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-07
           if-no-files-found: error
           retention-days: 30

@@ -7,6 +7,7 @@
     const previewModeResolverPort = previewCompatibilityHost?.markdownEditorPreviewModeResolverPort;
     const previewThresholdsPort = previewCompatibilityHost?.markdownEditorPreviewThresholdsPort;
     const previewSchedulerPort = previewCompatibilityHost?.markdownEditorPreviewSchedulerPort;
+    const previewRenderCoordinatorPort = previewCompatibilityHost?.markdownEditorPreviewRenderCoordinatorPort;
     const classicPreviewStatePort = previewCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
@@ -16,6 +17,7 @@
     if (!previewModeResolverPort) throw new Error('Preview Mode Resolver compatibility port is unavailable.');
     if (!previewThresholdsPort) throw new Error('Preview Thresholds compatibility port is unavailable.');
     if (!previewSchedulerPort) throw new Error('Preview Scheduler compatibility port is unavailable.');
+    if (!previewRenderCoordinatorPort) throw new Error('Preview Render Coordinator compatibility port is unavailable.');
     if (!classicPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
     previewEditorUiCommandPort.register({
@@ -592,43 +594,6 @@
       return previewEnhancementQueue;
     }
 
-    function getChapterPreviewResult(result) {
-      const chapter = result?.focusChapter;
-      const blocks = result?.blocks || [];
-      if (!chapter || !blocks.length) return result;
-      const chapterStartIndex = Math.max(0, Math.min(blocks.length - 1, Number(chapter.startIndex) || 0));
-      const chapterEndIndex = Math.max(
-        chapterStartIndex + 1,
-        Math.min(blocks.length, Number(chapter.endIndex) || blocks.length)
-      );
-      let startIndex = chapterStartIndex;
-      let endIndex = chapterEndIndex;
-      if (endIndex - startIndex < classicPreviewBehaviorThresholds.chapter.minimumBlocks) {
-        const missing = classicPreviewBehaviorThresholds.chapter.minimumBlocks - (endIndex - startIndex);
-        startIndex = Math.max(0, startIndex - Math.ceil(missing / 2));
-        endIndex = Math.min(blocks.length, Math.max(chapterEndIndex, startIndex + classicPreviewBehaviorThresholds.chapter.minimumBlocks));
-        startIndex = Math.max(0, Math.min(startIndex, endIndex - classicPreviewBehaviorThresholds.chapter.minimumBlocks));
-      }
-      const chapterBlocks = blocks.slice(startIndex, endIndex);
-      const chapterIds = new Set(chapterBlocks.map(block => block.id));
-      return {
-        ...result,
-        blocks: chapterBlocks,
-        changedIds: new Set([...(result.changedIds || [])].filter(id => chapterIds.has(id))),
-        removedIds: new Set(result.removedIds || []),
-        previewScopeKey: `chapter:${chapter.headingId || chapter.startLine || chapterStartIndex}:${chapter.endLine || chapterEndIndex}:${startIndex}-${endIndex}`
-      };
-    }
-
-    function resolvePreviewRenderResult(result, sourceLength) {
-      const blockCount = result?.blocks?.length || 0;
-      const mode = previewModeResolverPort.resolve({ previewPerformanceMode }, sourceLength, blockCount);
-      if (mode === 'chapter') {
-        return { mode, result: getChapterPreviewResult(result) };
-      }
-      return { mode, result };
-    }
-
     let previewPrewarmVersion = 0;
 
     function prewarmPreviewBlocks(ids) {
@@ -946,57 +911,32 @@
           }
 
           const indexedSourceLength = Number(modelResult.statistics?.characters) || 0;
-          const resolved = resolvePreviewRenderResult(modelResult, Math.max(sourceLength, indexedSourceLength));
-          const renderResult = resolved.result;
-          const nextScopeKey = resolved.mode === 'chapter'
-            ? (renderResult?.previewScopeKey || 'chapter:document')
-            : resolved.mode;
           const previousPreviewState = classicPreviewStatePort.snapshot;
           const previousScopeKey = previousPreviewState.lastStableResult?.scopeKey || previousPreviewState.mode;
-          const previewScopeChanged = resolved.mode !== previousPreviewState.mode || nextScopeKey !== previousScopeKey;
-          resolvedPreviewMode = resolved.mode;
-          resolvedPreviewScopeKey = nextScopeKey;
-          if (previewScopeChanged && resolved.mode === 'chapter' && previousScopeKey && previousScopeKey !== nextScopeKey) {
+          const renderPlan = previewRenderCoordinatorPort.createPlan({
+            modelResult,
+            sourceLength: Math.max(sourceLength, indexedSourceLength),
+            previewPerformanceMode,
+            previousMode: previousPreviewState.mode,
+            previousScopeKey,
+            forceFullRebuild
+          });
+          const renderResult = renderPlan.renderResult;
+          const previewScopeChanged = renderPlan.scopeChanged;
+          resolvedPreviewMode = renderPlan.mode;
+          resolvedPreviewScopeKey = renderPlan.scopeKey;
+          if (previewScopeChanged && resolvedPreviewMode === 'chapter' && previousScopeKey && previousScopeKey !== resolvedPreviewScopeKey) {
             window.markdownEditorScrollSync?.markProgrammaticScroll?.('preview', 420);
             window.markdownEditorScrollSync?.suspend?.(320);
             preview.scrollTop = 0;
           }
 
-          if (modelResult.reason === 'unchanged' && !forceFullRebuild && !previewScopeChanged) {
-            virtualPreviewController?.refreshRenderData?.(renderResult);
-            const body = preview.querySelector('.markdown-body');
-            const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
-            if (hasStablePreview && body && !body.classList.contains('preview-loading')) {
-              const pendingMermaidRoots = collectPendingMermaidRoots(body);
-              patchResult = {
-                body,
-                changedNodes: pendingMermaidRoots,
-                reused: virtualPreviewController?.active
-                  ? virtualPreviewController.getStats().mountedBlocks
-                  : body.children.length,
-                parsedChars: 0,
-                mode: pendingMermaidRoots.length ? 'unchanged-enhancement-retry' : 'unchanged',
-                virtualized: Boolean(virtualPreviewController?.active),
-                blockCount: renderResult.blocks?.length || 0
-              };
-              sourceAlreadyAnnotated = true;
-              // A Mermaid job may be cancelled when the user switches layouts while
-              // the async renderer is running. The Markdown model is still unchanged,
-              // but the connected <pre> remains pending and must be enqueued again.
-              skipEnhancements = pendingMermaidRoots.length === 0;
-            }
-          } else if (modelResult.wholeDocument && modelResult.wholeHtml && resolved.mode === 'full') {
-            disableVirtualPreview();
-            patchResult = patchPreviewBody(modelResult.wholeHtml, forceFullRebuild || previewScopeChanged);
-            patchResult.parsedChars = modelResult.parsedChars;
-            patchResult.mode = 'worker-whole-document';
-            patchResult.blockCount = modelResult.blocks?.length || patchResult.body.children.length;
-          } else if (resolved.mode === 'virtual' || resolved.mode === 'chapter') {
+          const mountCoordinatedVirtualResult = (result, scope, forceRender) => {
             const controller = getVirtualPreviewController();
             controller.setCacheContext?.(previewDocumentSessionPort.activeId, getPreviewHeightCacheVisualKey());
-            patchResult = controller.update(renderResult, {
-              forceAll: forceFullRebuild || previewScopeChanged,
-              scope: resolved.mode,
+            const mounted = controller.update(result, {
+              forceAll: forceRender,
+              scope,
               createNodes: createPreviewNodesForBlock,
               applySourceRange: applyPreviewBlockSourceRange,
               onNodesMounted(nodes, mountInfo) {
@@ -1006,16 +946,55 @@
               },
               onPrewarmNeeded: prewarmPreviewBlocks
             });
-            patchResult.mode = resolved.mode === 'chapter'
-              ? 'worker-chapter-preview'
-              : patchResult.mode;
             sourceAlreadyAnnotated = true;
-          } else {
-            disableVirtualPreview();
-            patchResult = patchIncrementalPreview(renderResult, forceFullRebuild || previewScopeChanged);
-            patchResult.blockCount = renderResult.blocks?.length || 0;
-            sourceAlreadyAnnotated = true;
-          }
+            return mounted;
+          };
+
+          patchResult = previewRenderCoordinatorPort.execute(renderPlan, {
+            reuseStable({ renderResult: reusableResult }) {
+              virtualPreviewController?.refreshRenderData?.(reusableResult);
+              const body = preview.querySelector('.markdown-body');
+              const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
+              if (!hasStablePreview || !body || body.classList.contains('preview-loading')) return null;
+              const pendingMermaidRoots = collectPendingMermaidRoots(body);
+              sourceAlreadyAnnotated = true;
+              skipEnhancements = pendingMermaidRoots.length === 0;
+              return {
+                body,
+                changedNodes: pendingMermaidRoots,
+                reused: virtualPreviewController?.active
+                  ? virtualPreviewController.getStats().mountedBlocks
+                  : body.children.length,
+                parsedChars: 0,
+                mode: pendingMermaidRoots.length ? 'unchanged-enhancement-retry' : 'unchanged',
+                virtualized: Boolean(virtualPreviewController?.active),
+                blockCount: reusableResult.blocks?.length || 0
+              };
+            },
+            renderWholeDocument({ renderResult: wholeResult, forceRender }) {
+              disableVirtualPreview();
+              const rendered = patchPreviewBody(wholeResult.wholeHtml, forceRender);
+              rendered.parsedChars = wholeResult.parsedChars;
+              rendered.mode = 'worker-whole-document';
+              rendered.blockCount = wholeResult.blocks?.length || rendered.body.children.length;
+              return rendered;
+            },
+            mountVirtual({ renderResult: virtualResult, forceRender }) {
+              return mountCoordinatedVirtualResult(virtualResult, 'virtual', forceRender);
+            },
+            mountChapter({ renderResult: chapterResult, forceRender }) {
+              const rendered = mountCoordinatedVirtualResult(chapterResult, 'chapter', forceRender);
+              rendered.mode = 'worker-chapter-preview';
+              return rendered;
+            },
+            renderIncremental({ renderResult: incrementalResult, forceRender }) {
+              disableVirtualPreview();
+              const rendered = patchIncrementalPreview(incrementalResult, forceRender);
+              rendered.blockCount = incrementalResult.blocks?.length || 0;
+              sourceAlreadyAnnotated = true;
+              return rendered;
+            }
+          });
         }
       } catch (error) {
         console.warn('Incremental preview fallback:', error);

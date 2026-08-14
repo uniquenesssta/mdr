@@ -96,7 +96,6 @@ test('Atomic 7.2 remains intact while Atomic 7.3-7.4 may add Mode Resolver and S
     'preview-controller',
     'preview-worker-protocol',
     'preview-worker-session',
-    'preview-render-coordinator',
     'virtual-preview-controller',
     'preview-focus-controller',
     'preview-dom-renderer'

@@ -67,7 +67,6 @@ test('Atomic 7.3 remains intact while Atomic 7.4 may add Scheduler/Cancellation 
     'preview-controller',
     'preview-worker-protocol',
     'preview-worker-session',
-    'preview-render-coordinator',
     'virtual-preview-controller',
     'preview-focus-controller',
     'preview-dom-renderer'

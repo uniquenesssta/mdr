@@ -88,9 +88,11 @@ import {
 } from './features/window/index.js';
 import {
   createPreviewCancellation,
+  createPreviewRenderCoordinator,
   createPreviewScheduler,
   createPreviewState,
   mountClassicPreviewModeResolverPort,
+  mountClassicPreviewRenderCoordinatorPort,
   mountClassicPreviewSchedulerPort,
   mountClassicPreviewStatePort,
   mountClassicPreviewThresholdsPort
@@ -112,6 +114,8 @@ const previewScheduler = createPreviewScheduler({
   getBackgroundScheduler: () => window.markdownEditorTaskScheduler
 });
 const previewSchedulerPort = mountClassicPreviewSchedulerPort(compatibilityPlatformHost, previewScheduler);
+const previewRenderCoordinator = createPreviewRenderCoordinator();
+const previewRenderCoordinatorPort = mountClassicPreviewRenderCoordinatorPort(compatibilityPlatformHost, previewRenderCoordinator);
 const layoutState = createLayoutState();
 const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
 let compactShellController = null;
@@ -163,6 +167,8 @@ configureHybridImageSourcePlatform({
 });
 window.addEventListener('pagehide', () => {
   destroyLayoutStateFeature();
+  previewRenderCoordinatorPort.destroy();
+  previewRenderCoordinator.destroy();
   previewSchedulerPort.destroy();
   previewScheduler.destroy();
   previewCancellation.destroy();

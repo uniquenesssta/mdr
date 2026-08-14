@@ -86,7 +86,6 @@ test('Atomic 7.1 remains frozen while Atomic 7.2-7.4 may add PreviewState, Mode 
     'preview-controller',
     'preview-worker-protocol',
     'preview-worker-session',
-    'preview-render-coordinator',
     'virtual-preview-controller'
   ]) {
     assert.doesNotMatch(featureTree, new RegExp(premature));

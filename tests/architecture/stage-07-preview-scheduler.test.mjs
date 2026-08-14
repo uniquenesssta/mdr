@@ -93,7 +93,6 @@ test('Atomic 7.4 does not enter Worker Protocol, rendering, virtual window, focu
     'preview-controller',
     'preview-worker-protocol',
     'preview-worker-session',
-    'preview-render-coordinator',
     'virtual-preview-controller',
     'preview-layout-stability',
     'preview-focus-controller',
