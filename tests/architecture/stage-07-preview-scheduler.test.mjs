@@ -49,21 +49,23 @@ test('Atomic 7.4 composition root mounts one scoped classic scheduler port and d
   assert.match(main, /previewCancellation\.destroy\(\)/);
 });
 
-test('Atomic 7.4 scheduler remains authoritative while Atomic 7.9 owns layout-stability sequencing', async () => {
+test('Atomic 7.4 scheduler remains authoritative while Atomic 7.9 and 7.11 own layout/focus sequencing', async () => {
   const core = await source('public/app/core.js');
   const preview = await source('public/app/preview.js');
   const layoutStability = await source('src/features/preview/pipeline/preview-layout-stability.js');
+  const focusController = await source('src/features/preview/pipeline/preview-focus-controller.js');
 
   assert.match(preview, /markdownEditorPreviewSchedulerPort/);
   assert.match(preview, /previewSchedulerPort\.schedule\('input'/);
-  assert.match(preview, /previewSchedulerPort\.schedule\('focus'/);
-  assert.doesNotMatch(preview, /previewSchedulerPort\.schedule\('layout'/);
+  assert.doesNotMatch(preview, /previewSchedulerPort\.schedule\('focus'/);
   assert.match(preview, /previewSchedulerPort\.schedule\('enhancement'/);
   assert.match(preview, /previewSchedulerPort\.cancel\('input'\)/);
-  assert.match(preview, /previewSchedulerPort\.cancel\('focus'\)/);
-  assert.doesNotMatch(preview, /previewSchedulerPort\.cancel\('layout'\)/);
+  assert.doesNotMatch(preview, /previewSchedulerPort\.cancel\('focus'\)/);
   assert.match(preview, /previewSchedulerPort\.cancel\('enhancement'\)/);
   assert.match(preview, /previewLayoutStabilityPort\.cancel\(\)/);
+  assert.match(focusController, /scheduler\.schedule\('focus'/);
+  assert.match(focusController, /scheduler\.cancel\('focus'\)/);
+  assert.match(focusController, /scheduler\.cancel\('input'\)/);
   assert.match(layoutStability, /scheduler\.schedule\('layout'/);
   assert.match(layoutStability, /scheduler\.cancel\('layout'\)/);
 
@@ -71,22 +73,17 @@ test('Atomic 7.4 scheduler remains authoritative while Atomic 7.9 owns layout-st
     'previewUpdateTimer',
     'previewFocusUpdateTimer',
     'previewEnhancementRaf',
-    'previewEnhancementIdle'
+    'previewEnhancementIdle',
+    'previewLineFocusVersion',
+    'previewLineFocusTarget',
+    'previewLineFocusPromise'
   ]) {
-    assert.doesNotMatch(core, new RegExp(`\\b${migrated}\\b`));
-    assert.doesNotMatch(preview, new RegExp(`\\b${migrated}\\b`));
+    assert.doesNotMatch(core, new RegExp(`\b${migrated}\b`));
+    assert.doesNotMatch(preview, new RegExp(`\b${migrated}\b`));
   }
-  for (const migrated of ['previewLayoutRefreshFrame', 'previewLayoutRefreshTimer', 'previewLayoutRefreshSequence']) {
-    assert.doesNotMatch(preview, new RegExp(`\\b${migrated}\\b`));
-  }
-
-  // Direct outline/navigation focus request ownership remains for Atomic 7.11 Focus Controller.
-  assert.match(core, /let previewLineFocusVersion = 0/);
-  assert.match(core, /let previewLineFocusTarget = 0/);
-  assert.match(core, /let previewLineFocusPromise = null/);
 });
 
-test('Atomic 7.4 remains intact while Atomic 7.5-7.10 may add Worker, Render, Layout Stability and Virtual Window owners but not 7.11+ owners', async () => {
+test('Atomic 7.4 remains intact while Atomic 7.5-7.11 may add Worker, Render, Layout Stability, Virtual Window and Focus owners but not 7.12+ owners', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -97,7 +94,6 @@ test('Atomic 7.4 remains intact while Atomic 7.5-7.10 may add Worker, Render, La
     'preview-controller',
     'preview-worker-protocol',
     'preview-worker-session',
-    'preview-focus-controller',
     'preview-enhancement-coordinator',
     'preview-dom-renderer'
   ]) {

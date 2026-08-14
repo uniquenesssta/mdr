@@ -10,6 +10,7 @@
     const previewRenderCoordinatorPort = previewCompatibilityHost?.markdownEditorPreviewRenderCoordinatorPort;
     const previewRendererPort = previewCompatibilityHost?.markdownEditorPreviewRendererPort;
     const previewLayoutStabilityPort = previewCompatibilityHost?.markdownEditorPreviewLayoutStabilityPort;
+    const previewFocusControllerPort = previewCompatibilityHost?.markdownEditorPreviewFocusControllerPort;
     const classicPreviewStatePort = previewCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
@@ -22,10 +23,11 @@
     if (!previewRenderCoordinatorPort) throw new Error('Preview Render Coordinator compatibility port is unavailable.');
     if (!previewRendererPort) throw new Error('Preview Renderer compatibility port is unavailable.');
     if (!previewLayoutStabilityPort) throw new Error('Preview Layout Stability compatibility port is unavailable.');
+    if (!previewFocusControllerPort) throw new Error('Preview Focus Controller compatibility port is unavailable.');
     if (!classicPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
     previewEditorUiCommandPort.register({
-      focusPreviewLineForOutline: (line, options) => focusPreviewLine(line, options)
+      focusPreviewLineForOutline: (line, options) => previewFocusControllerPort.focusLine(line, options)
     });
     function schedulePreviewUpdate() {
       const length = editor.textLength;
@@ -65,72 +67,36 @@
       }
     });
 
+
+    previewFocusControllerPort.connect({
+      isSuspended: () => typeof isHybridLayoutMode === 'function' && isHybridLayoutMode(),
+      isCursorTrackingEligible: () => Boolean(
+        editor.virtualEditor
+        && (editor.textLength >= classicPreviewBehaviorThresholds.mode.workerChars || previewPerformanceMode === 'chapter')
+      ),
+      getFocusSection: () => classicPreviewStatePort.snapshot.focusSection,
+      getMode: () => classicPreviewStatePort.snapshot.mode,
+      isVirtualWindowActive: () => Boolean(window.markdownEditorVirtualPreview?.active),
+      virtualWindowContainsLine: line => Boolean(
+        window.markdownEditorVirtualPreview?.containsLineRange?.(line, line)
+      ),
+      refreshPreview: () => updatePreview(),
+      ensureLineVisible: line => window.markdownEditorVirtualPreview?.ensureLineVisible?.(line) || null,
+      invalidateAnchors: () => invalidatePreviewAnchorStructure(),
+      scrollToLine: (line, behavior, viewportRatio) => scrollPreviewToLine(line, behavior, viewportRatio)
+    });
+
     function schedulePreviewFocusUpdate() {
-      if (typeof isHybridLayoutMode === 'function' && isHybridLayoutMode()) return;
-      if (!editor.virtualEditor
-        || (editor.textLength < classicPreviewBehaviorThresholds.mode.workerChars && previewPerformanceMode !== 'chapter')
-        || previewSchedulerPort.hasPending('input')) return;
+      if (!editor.virtualEditor) return;
       const line = editor.virtualEditor.getLineNumberAtPosition?.(editor.selectionStart || 0) || 1;
-      const chapter = classicPreviewStatePort.snapshot.focusSection;
-      if (chapter && line >= chapter.startLine && line <= chapter.endLine) return;
-      previewSchedulerPort.schedule('focus', () => updatePreview(), {
-        kind: 'timeout',
-        delay: classicPreviewBehaviorThresholds.scheduling.focusMs
-      });
+      previewFocusControllerPort.scheduleCursorFocus(line);
     }
 
 
-    function previewScopeContainsLine(line) {
-      const targetLine = Math.max(1, Number(line) || 1);
-      const controller = window.markdownEditorVirtualPreview;
-      if (controller?.active && typeof controller.containsLineRange === 'function') {
-        return controller.containsLineRange(targetLine, targetLine);
-      }
-      if (classicPreviewStatePort.snapshot.mode !== 'chapter') return true;
-      const chapter = classicPreviewStatePort.snapshot.focusSection;
-      return Boolean(chapter && targetLine >= chapter.startLine && targetLine <= chapter.endLine);
-    }
-
-    async function focusPreviewLine(line, options = {}) {
-      const targetLine = Math.max(1, Number(line) || 1);
-      const behavior = options.behavior === 'smooth' ? 'smooth' : 'auto';
-      const shouldScroll = options.scroll !== false;
-      const requestVersion = ++previewLineFocusVersion;
-      const needsScopeRefresh = classicPreviewStatePort.snapshot.mode === 'chapter' && !previewScopeContainsLine(targetLine);
-
-      if (needsScopeRefresh) {
-        previewSchedulerPort.cancel('focus');
-        previewSchedulerPort.cancel('input');
-
-        let pending = previewLineFocusPromise;
-        if (!pending || previewLineFocusTarget !== targetLine) {
-          previewLineFocusTarget = targetLine;
-          pending = Promise.resolve(updatePreview());
-          previewLineFocusPromise = pending;
-          pending.finally(() => {
-            if (previewLineFocusPromise === pending) {
-              previewLineFocusPromise = null;
-              previewLineFocusTarget = 0;
-            }
-          });
-        }
-        await pending;
-        if (requestVersion !== previewLineFocusVersion) return false;
-      }
-
-      const controller = window.markdownEditorVirtualPreview;
-      if (controller?.active) {
-        const anchor = controller.ensureLineVisible?.(targetLine);
-        if (!anchor && classicPreviewStatePort.snapshot.mode === 'chapter') return false;
-        invalidatePreviewAnchorStructure();
-      }
-      if (shouldScroll) scrollPreviewToLine(targetLine, behavior, 0.5);
-      return true;
-    }
 
     function suspendPreviewForHybridMode() {
       previewSchedulerPort.cancel('input');
-      previewSchedulerPort.cancel('focus');
+      previewFocusControllerPort.cancel();
       previewLayoutStabilityPort.cancel();
       const suspendedVersion = classicPreviewStatePort.invalidate({
         mode: 'hybrid',
@@ -335,6 +301,7 @@
 
     function resetPreviewPipeline() {
       previewSchedulerPort.cancelAll();
+      previewFocusControllerPort.cancel();
       classicPreviewStatePort.invalidate({
         mode: 'full',
         status: 'idle',

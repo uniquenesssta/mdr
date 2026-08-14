@@ -1,4 +1,4 @@
-# Stage 7 completed-scope validation through Atomic 7.10 while preserving the complete Stage 6 handoff.
+# Stage 7 completed-scope validation through Atomic 7.11 while preserving the complete Stage 6 handoff.
 name: Stage 7 Atomic Verification
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   preview-scheduler-cancellation:
-    name: Verify Stage 7 Through Atomic 7.10 Virtual Window
+    name: Verify Stage 7 Through Atomic 7.11 Focus Controller
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -300,6 +300,14 @@ jobs:
           tests/architecture/stage-07-preview-virtual-window.test.mjs
       - name: Verify Atomic Task 7.10 real browser windowing and height correction
         run: node tests/e2e/preview-virtual-window.test.mjs
+      - name: Verify Atomic Task 7.11 Focus Controller
+        run: >-
+          node --test
+          tests/unit/preview/preview-focus-controller.test.mjs
+          tests/unit/preview/classic-preview-focus-controller-port.test.mjs
+          tests/architecture/stage-07-preview-focus-controller.test.mjs
+      - name: Verify Atomic Task 7.11 real browser stale-focus rejection
+        run: node tests/e2e/preview-focus-controller.test.mjs
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -343,6 +351,8 @@ jobs:
           node --check src/features/preview/pipeline/preview-scheduler.js &&
           node --check src/features/preview/pipeline/preview-render-coordinator.js &&
           node --check src/features/preview/pipeline/preview-layout-stability.js &&
+          node --check src/features/preview/pipeline/preview-focus-controller.js &&
+          node --check src/features/preview/compatibility/classic-preview-focus-controller-port.js &&
           node --check src/features/preview/render/virtual-window/virtual-window-model.js &&
           node --check src/features/preview/render/virtual-window/height-cache.js &&
           node --check src/features/preview/render/virtual-window/spacer-view.js &&
@@ -430,7 +440,7 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-07/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 7.10 evidence
+      - name: Upload Atomic Task 7.11 evidence
         uses: actions/upload-artifact@v4
         with:
           name: stage-07-preview-virtual-window-${{ github.run_id }}-${{ github.run_attempt }}

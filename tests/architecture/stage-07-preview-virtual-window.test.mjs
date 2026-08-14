@@ -56,10 +56,11 @@ test('Atomic 7.10 turns the legacy VirtualPreview module into a browser capabili
   ]) assert.doesNotMatch(legacy, new RegExp(migrated));
 });
 
-test('Atomic 7.10 keeps 7.11 Focus and later Enhancement ownership out of the new Virtual Window modules', async () => {
+test('Atomic 7.10 keeps Focus and Enhancement ownership out of Virtual Window modules while permitting the Atomic 7.11 Focus owner elsewhere', async () => {
   const bodies = await Promise.all(virtualFiles.map(file => source(`src/features/preview/render/virtual-window/${file}`)));
   const combined = bodies.join('\n');
   assert.doesNotMatch(combined, /preview-focus-controller|preview-enhancement-coordinator|scrollPreviewToLine|focusSection|markdownEditorScrollSync/);
   const featureTree = JSON.stringify(await readdir(new URL('src/features/preview/', root), { recursive: true }));
-  assert.doesNotMatch(featureTree, /preview-focus-controller|preview-enhancement-coordinator/);
+  assert.match(featureTree, /preview-focus-controller/);
+  assert.doesNotMatch(featureTree, /preview-enhancement-coordinator/);
 });

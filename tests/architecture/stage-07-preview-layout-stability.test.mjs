@@ -51,7 +51,7 @@ test('Atomic 7.9 removes classic layout-stability authority and routes startup/l
   assert.doesNotMatch(editorTools, /refreshPreviewAfterLayout/);
 });
 
-test('Atomic 7.9 permits Atomic 7.10 Virtual Window but does not enter Focus or Enhancement Coordinator ownership', async () => {
+test('Atomic 7.9 permits Atomic 7.10-7.11 Virtual Window and Focus but does not enter Enhancement Coordinator ownership', async () => {
   const featureRoot = new URL('src/features/preview/', root);
   const entries = await readdir(featureRoot, { withFileTypes: true });
   const paths = [];
@@ -61,7 +61,5 @@ test('Atomic 7.9 permits Atomic 7.10 Virtual Window but does not enter Focus or 
     for (const child of await readdir(new URL(`${entry.name}/`, featureRoot))) paths.push(`${entry.name}/${child}`);
   }
   const tree = paths.join('\n');
-  for (const premature of [
-    'preview-focus-controller', 'preview-enhancement-coordinator'
-  ]) assert.doesNotMatch(tree, new RegExp(premature));
+  assert.doesNotMatch(tree, /preview-enhancement-coordinator/);
 });

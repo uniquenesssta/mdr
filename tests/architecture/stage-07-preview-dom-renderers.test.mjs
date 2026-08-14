@@ -41,7 +41,7 @@ test('Atomic 7.8 composition root mounts one shared PreviewRendererPort and owns
   assert.match(compatibility, /markdownEditorPreviewRendererPort/);
 });
 
-test('Atomic 7.8 renderer boundary remains intact while Atomic 7.9-7.10 add layout and virtual-window owners', async () => {
+test('Atomic 7.8 renderer boundary remains intact while Atomic 7.9-7.11 add layout, virtual-window and focus owners', async () => {
   const preview = await source('public/app/preview.js');
   const editorTools = await source('public/app/editor-tools.js');
   assert.match(preview, /markdownEditorPreviewRendererPort/);
@@ -60,8 +60,5 @@ test('Atomic 7.8 renderer boundary remains intact while Atomic 7.9-7.10 add layo
     for (const child of await readdir(new URL(`${entry.name}/`, featureRoot))) paths.push(`${entry.name}/${child}`);
   }
   const tree = paths.join('\n');
-  for (const premature of [
-    'preview-focus-controller',
-    'preview-enhancement-coordinator'
-  ]) assert.doesNotMatch(tree, new RegExp(premature));
+  assert.doesNotMatch(tree, /preview-enhancement-coordinator/);
 });

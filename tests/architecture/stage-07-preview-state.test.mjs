@@ -70,8 +70,8 @@ test('Atomic 7.2 removes migrated classic Preview runtime state authorities', as
 
   // Settings still owns the user's requested auto/full/virtual/chapter preference.
   assert.match(core, /let previewPerformanceMode = 'auto'/);
-  // Focus request cancellation is Atomic 7.11, not PreviewState render generation.
-  assert.match(core, /let previewLineFocusVersion = 0/);
+  // Atomic 7.11 owns focus request cancellation separately from PreviewState render generation.
+  assert.doesNotMatch(core, /previewLineFocusVersion|previewLineFocusTarget|previewLineFocusPromise/);
 });
 
 test('Atomic 7.2 uses PreviewState stable metadata before DOM when deciding recovery or rerender', async () => {
@@ -85,7 +85,7 @@ test('Atomic 7.2 uses PreviewState stable metadata before DOM when deciding reco
   assert.doesNotMatch(preview, /if \(body && !body\.classList\.contains\('preview-loading'\)\) \{\n\s+patchResult = \{\n\s+body,\n\s+changedNodes: \[\],\n\s+reused:/);
 });
 
-test('Atomic 7.2 remains intact while Atomic 7.3-7.4 may add Mode Resolver and Scheduler/Cancellation but not Atomic 7.5+ owners', async () => {
+test('Atomic 7.2 remains intact while later Stage 7 owners may advance through Atomic 7.11 but not 7.12 Enhancement', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -97,8 +97,8 @@ test('Atomic 7.2 remains intact while Atomic 7.3-7.4 may add Mode Resolver and S
     'preview-worker-protocol',
     'preview-worker-session',
     'virtual-preview-controller',
-    'preview-focus-controller',
-    'preview-dom-renderer'
+    'preview-dom-renderer',
+    'preview-enhancement-coordinator'
   ]) {
     assert.doesNotMatch(featureTree, new RegExp(premature));
   }

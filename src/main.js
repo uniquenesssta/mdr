@@ -88,12 +88,14 @@ import {
 } from './features/window/index.js';
 import {
   createPreviewCancellation,
+  createPreviewFocusController,
   createPreviewLayoutStability,
   createPreviewRenderCoordinator,
   createPreviewRendererPort,
   createPreviewScheduler,
   createPreviewState,
   PREVIEW_BEHAVIOR_THRESHOLDS,
+  mountClassicPreviewFocusControllerPort,
   mountClassicPreviewLayoutStabilityPort,
   mountClassicPreviewModeResolverPort,
   mountClassicPreviewRenderCoordinatorPort,
@@ -119,6 +121,11 @@ const previewScheduler = createPreviewScheduler({
   getBackgroundScheduler: () => window.markdownEditorTaskScheduler
 });
 const previewSchedulerPort = mountClassicPreviewSchedulerPort(compatibilityPlatformHost, previewScheduler);
+const previewFocusController = createPreviewFocusController({
+  scheduler: previewScheduler,
+  focusDelay: PREVIEW_BEHAVIOR_THRESHOLDS.scheduling.focusMs
+});
+const previewFocusControllerPort = mountClassicPreviewFocusControllerPort(compatibilityPlatformHost, previewFocusController);
 const previewRenderCoordinator = createPreviewRenderCoordinator();
 const previewRenderCoordinatorPort = mountClassicPreviewRenderCoordinatorPort(compatibilityPlatformHost, previewRenderCoordinator);
 const previewLayoutRoot = document.getElementById('preview');
@@ -192,6 +199,8 @@ window.addEventListener('pagehide', () => {
   destroyLayoutStateFeature();
   previewLayoutStabilityPort.destroy();
   previewLayoutStability.destroy();
+  previewFocusControllerPort.destroy();
+  previewFocusController.destroy();
   previewRenderCoordinatorPort.destroy();
   previewRenderCoordinator.destroy();
   previewSchedulerPort.destroy();

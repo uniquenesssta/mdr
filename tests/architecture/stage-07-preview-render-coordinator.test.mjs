@@ -43,7 +43,7 @@ test('Atomic 7.7 classic preview delegates model-result strategy and chapter sli
   assert.doesNotMatch(preview, /function\s+resolvePreviewRenderResult\s*\(/);
 });
 
-test('Atomic 7.7 permits Atomic 7.9-7.10 Layout Stability and Virtual Window but does not enter 7.11+ preview owners', async () => {
+test('Atomic 7.7 permits Atomic 7.9-7.11 Layout Stability, Virtual Window and Focus but does not enter 7.12+ preview owners', async () => {
   const featureRoot = new URL('src/features/preview/', root);
   const entries = await readdir(featureRoot, { withFileTypes: true });
   const paths = [];
@@ -53,8 +53,5 @@ test('Atomic 7.7 permits Atomic 7.9-7.10 Layout Stability and Virtual Window but
     for (const child of await readdir(new URL(`${entry.name}/`, featureRoot))) paths.push(`${entry.name}/${child}`);
   }
   const tree = paths.join('\n');
-  for (const premature of [
-    'preview-focus-controller',
-    'preview-enhancement-coordinator'
-  ]) assert.doesNotMatch(tree, new RegExp(premature));
+  assert.doesNotMatch(tree, /preview-enhancement-coordinator/);
 });
