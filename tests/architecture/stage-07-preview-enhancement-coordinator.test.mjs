@@ -60,8 +60,13 @@ test('Atomic 7.12 keeps task/code/math/Mermaid rendering authority in specialize
   assert.doesNotMatch(coordinator, /createTaskListRenderer|createCodeRenderer|createMathRenderer|createMermaidRenderer|innerHTML|replaceChildren/);
 });
 
-test('Atomic 7.12 advances only Enhancement coordination and does not enter Atomic 7.13 Recovery View', async () => {
-  const tree = JSON.stringify(await readdir(new URL('src/features/preview/', root), { recursive: true }));
-  assert.match(tree, /preview-enhancement-coordinator/);
-  assert.doesNotMatch(tree, /preview-recovery|recovery-view/);
+test('Atomic 7.12 Enhancement ownership remains isolated after Atomic 7.13 adds Recovery View', async () => {
+  const [tree, coordinator] = await Promise.all([
+    readdir(new URL('src/features/preview/', root), { recursive: true }),
+    source('src/features/preview/pipeline/preview-enhancement-coordinator.js')
+  ]);
+  const inventory = JSON.stringify(tree);
+  assert.match(inventory, /preview-enhancement-coordinator/);
+  assert.match(inventory, /preview-recovery-view/);
+  assert.doesNotMatch(coordinator, /preview-recovery|recovery-view|preview-loading/);
 });

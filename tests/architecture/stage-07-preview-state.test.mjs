@@ -74,24 +74,33 @@ test('Atomic 7.2 removes migrated classic Preview runtime state authorities', as
   assert.doesNotMatch(core, /previewLineFocusVersion|previewLineFocusTarget|previewLineFocusPromise/);
 });
 
-test('Atomic 7.2 uses PreviewState stable metadata before DOM when deciding recovery or rerender', async () => {
+test('Atomic 7.2 stable metadata remains authoritative before Atomic 7.13 Recovery View presentation checks', async () => {
   const preview = await source('public/app/preview.js');
   const editorTools = await source('public/app/editor-tools.js');
 
-  assert.match(preview, /const lastStableResult = classicPreviewStatePort\.snapshot\.lastStableResult;/);
-  assert.match(preview, /if \(lastStableResult && body && !body\.classList\.contains\('preview-loading'\)\)/);
+  const stableRead = preview.indexOf('const lastStableResult = classicPreviewStatePort.snapshot.lastStableResult;');
+  const recoveryInspect = preview.indexOf('const recoveryTarget = previewRecoveryViewPort.inspect();', stableRead);
+  const recoveryCall = preview.indexOf('previewRecoveryViewPort.recover({ preserveStable })', recoveryInspect);
+  assert.ok(stableRead >= 0);
+  assert.ok(recoveryInspect > stableRead);
+  assert.ok(recoveryCall > recoveryInspect);
+  assert.match(preview, /const preserveStable = Boolean\(lastStableResult && recoveryTarget\.present && !recoveryTarget\.recovery\)/);
   assert.match(preview, /const hasStablePreview = Boolean\(classicPreviewStatePort\.snapshot\.lastStableResult\)/);
   assert.match(editorTools, /editorToolsPreviewStatePort\.snapshot\.lastStableResult/);
-  assert.doesNotMatch(preview, /if \(body && !body\.classList\.contains\('preview-loading'\)\) \{\n\s+patchResult = \{\n\s+body,\n\s+changedNodes: \[\],\n\s+reused:/);
+  assert.doesNotMatch(preview, /if \(lastStableResult && body && !body\.classList\.contains\('preview-loading'\)\)/);
 });
 
-test('Atomic 7.2 remains intact while later Stage 7 owners may advance through Atomic 7.12 but not 7.13 Recovery', async () => {
+test('Atomic 7.2 state ownership remains intact after Atomic 7.13 adds Recovery View without entering 7.14', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
-    pipeline: (await readdir(new URL('src/features/preview/pipeline/', root))).sort()
+    pipeline: (await readdir(new URL('src/features/preview/pipeline/', root))).sort(),
+    ui: (await readdir(new URL('src/features/preview/ui/', root))).sort()
   });
+  const state = await source('src/features/preview/application/preview-state.js');
 
+  assert.match(featureTree, /preview-recovery-view/);
+  assert.doesNotMatch(state, /preview-recovery-view|preview-loading|markdownEditorPreviewRecoveryViewPort/);
   for (const premature of [
     'preview-controller',
     'preview-worker-protocol',

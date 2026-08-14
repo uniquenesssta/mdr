@@ -1,4 +1,4 @@
-# Stage 7 completed-scope validation through Atomic 7.12 while preserving the complete Stage 6 handoff.
+# Stage 7 completed-scope validation through Atomic 7.13 while preserving the complete Stage 6 handoff.
 name: Stage 7 Atomic Verification
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   preview-scheduler-cancellation:
-    name: Verify Stage 7 Through Atomic 7.12 Enhancement Coordinator
+    name: Verify Stage 7 Through Atomic 7.13 Recovery View
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -316,6 +316,14 @@ jobs:
           tests/architecture/stage-07-preview-enhancement-coordinator.test.mjs
       - name: Verify Atomic Task 7.12 real browser input yielding and priority
         run: node tests/e2e/preview-enhancement-coordinator.test.mjs
+      - name: Verify Atomic Task 7.13 Recovery View
+        run: >-
+          node --test
+          tests/unit/preview/preview-recovery-view.test.mjs
+          tests/unit/preview/classic-preview-recovery-view-port.test.mjs
+          tests/architecture/stage-07-preview-recovery-view.test.mjs
+      - name: Verify Atomic Task 7.13 real browser stable/error recovery
+        run: node tests/e2e/preview-recovery-view.test.mjs
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -363,6 +371,8 @@ jobs:
           node --check src/features/preview/pipeline/preview-enhancement-coordinator.js &&
           node --check src/features/preview/compatibility/classic-preview-focus-controller-port.js &&
           node --check src/features/preview/compatibility/classic-preview-enhancement-coordinator-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-recovery-view-port.js &&
+          node --check src/features/preview/ui/preview-recovery-view.js &&
           node --check src/features/preview/render/virtual-window/virtual-window-model.js &&
           node --check src/features/preview/render/virtual-window/height-cache.js &&
           node --check src/features/preview/render/virtual-window/spacer-view.js &&
@@ -423,12 +433,16 @@ jobs:
           node --check tests/architecture/stage-07-preview-virtual-window.test.mjs &&
           node --check tests/architecture/stage-07-preview-focus-controller.test.mjs &&
           node --check tests/architecture/stage-07-preview-enhancement-coordinator.test.mjs &&
+          node --check tests/architecture/stage-07-preview-recovery-view.test.mjs &&
           node --check tests/unit/preview/preview-focus-controller.test.mjs &&
           node --check tests/unit/preview/classic-preview-focus-controller-port.test.mjs &&
           node --check tests/unit/preview/preview-enhancement-coordinator.test.mjs &&
           node --check tests/unit/preview/classic-preview-enhancement-coordinator-port.test.mjs &&
+          node --check tests/unit/preview/preview-recovery-view.test.mjs &&
+          node --check tests/unit/preview/classic-preview-recovery-view-port.test.mjs &&
           node --check tests/e2e/preview-focus-controller.test.mjs &&
           node --check tests/e2e/preview-enhancement-coordinator.test.mjs &&
+          node --check tests/e2e/preview-recovery-view.test.mjs &&
           node --check tests/helpers/lifecycle-resource-ledger.mjs &&
           node --check tests/unit/layout/stage-06-layout-destroy-validation.test.mjs &&
           node --check tests/unit/sidebar/stage-06-sidebar-destroy-validation.test.mjs &&
@@ -457,10 +471,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-07/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 7.12 evidence
+      - name: Upload Atomic Task 7.13 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-07-preview-enhancement-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-07-preview-recovery-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-07
           if-no-files-found: error
           retention-days: 30

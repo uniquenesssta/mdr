@@ -12,6 +12,7 @@
     const previewLayoutStabilityPort = previewCompatibilityHost?.markdownEditorPreviewLayoutStabilityPort;
     const previewFocusControllerPort = previewCompatibilityHost?.markdownEditorPreviewFocusControllerPort;
     const previewEnhancementCoordinatorPort = previewCompatibilityHost?.markdownEditorPreviewEnhancementCoordinatorPort;
+    const previewRecoveryViewPort = previewCompatibilityHost?.markdownEditorPreviewRecoveryViewPort;
     const classicPreviewStatePort = previewCompatibilityHost?.markdownEditorPreviewStatePort;
     if (!previewDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!previewLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
@@ -26,6 +27,7 @@
     if (!previewLayoutStabilityPort) throw new Error('Preview Layout Stability compatibility port is unavailable.');
     if (!previewFocusControllerPort) throw new Error('Preview Focus Controller compatibility port is unavailable.');
     if (!previewEnhancementCoordinatorPort) throw new Error('Preview Enhancement Coordinator compatibility port is unavailable.');
+    if (!previewRecoveryViewPort) throw new Error('Preview Recovery View compatibility port is unavailable.');
     if (!classicPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
     const classicPreviewBehaviorThresholds = previewThresholdsPort.snapshot;
     previewEditorUiCommandPort.register({
@@ -49,11 +51,11 @@
       isSuspended: () => typeof isHybridLayoutMode === 'function' && isHybridLayoutMode(),
       hasStablePreview: () => Boolean(classicPreviewStatePort.snapshot.lastStableResult),
       inspectRenderTarget() {
-        const body = preview.querySelector('.markdown-body');
+        const target = previewRecoveryViewPort.inspect();
         return {
-          present: Boolean(body),
-          loading: Boolean(body?.classList.contains('preview-loading')),
-          empty: !body || body.childElementCount === 0
+          present: target.present,
+          loading: target.recovery,
+          empty: target.empty
         };
       },
       render: () => updatePreview(),
@@ -500,7 +502,8 @@
               virtualPreviewController?.refreshRenderData?.(reusableResult);
               const body = preview.querySelector('.markdown-body');
               const hasStablePreview = Boolean(classicPreviewStatePort.snapshot.lastStableResult);
-              if (!hasStablePreview || !body || body.classList.contains('preview-loading')) return null;
+              const recoveryTarget = previewRecoveryViewPort.inspect();
+              if (!hasStablePreview || !body || recoveryTarget.recovery) return null;
               const pendingMermaidRoots = collectPendingMermaidRoots(body);
               sourceAlreadyAnnotated = true;
               skipEnhancements = pendingMermaidRoots.length === 0;
@@ -664,35 +667,24 @@
 
       if (!patchResult && workerFailed) {
         const lastStableResult = classicPreviewStatePort.snapshot.lastStableResult;
-        const body = preview.querySelector('.markdown-body');
-        if (lastStableResult && body && !body.classList.contains('preview-loading')) {
-          patchResult = {
-            body,
-            changedNodes: [],
-            reused: virtualPreviewController?.active
-              ? virtualPreviewController.getStats().mountedBlocks
-              : body.children.length,
-            parsedChars: 0,
-            mode: 'worker-safe-fallback-stale',
-            virtualized: Boolean(virtualPreviewController?.active),
-            blockCount: virtualPreviewController?.getStats?.().blocks || body.children.length
-          };
-        } else {
-          disableVirtualPreview();
-          const fallbackBody = document.createElement('div');
-          fallbackBody.className = 'markdown-body preview-loading';
-          fallbackBody.textContent = '后台预览恢复中，编辑内容与自动保存不受影响…';
-          preview.replaceChildren(fallbackBody);
-          patchResult = {
-            body: fallbackBody,
-            changedNodes: [],
-            reused: 0,
-            parsedChars: 0,
-            mode: 'worker-safe-fallback-paused',
-            virtualized: false,
-            blockCount: 0
-          };
-        }
+        const recoveryTarget = previewRecoveryViewPort.inspect();
+        const preserveStable = Boolean(lastStableResult && recoveryTarget.present && !recoveryTarget.recovery);
+        if (!preserveStable) disableVirtualPreview();
+        const recovery = previewRecoveryViewPort.recover({ preserveStable });
+        const body = recovery.body;
+        patchResult = {
+          body,
+          changedNodes: [],
+          reused: recovery.preserved
+            ? (virtualPreviewController?.active ? virtualPreviewController.getStats().mountedBlocks : body.children.length)
+            : 0,
+          parsedChars: 0,
+          mode: recovery.preserved ? 'worker-safe-fallback-stale' : 'worker-safe-fallback-paused',
+          virtualized: recovery.preserved && Boolean(virtualPreviewController?.active),
+          blockCount: recovery.preserved
+            ? (virtualPreviewController?.getStats?.().blocks || body.children.length)
+            : 0
+        };
         resolvedPreviewMode = previewModeResolverPort.resolve({ previewPerformanceMode }, sourceLength, patchResult.blockCount);
         resolvedPreviewScopeKey = lastStableResult?.scopeKey || resolvedPreviewMode;
         sourceAlreadyAnnotated = true;
@@ -700,42 +692,71 @@
       }
 
       if (!patchResult && !workerFailed) {
-        disableVirtualPreview();
-        resolvedPreviewMode = 'full';
-        resolvedPreviewScopeKey = 'full';
-        const fallbackSource = getSourceText();
-        let text = fallbackSource;
-        let placeholders = [];
-        const hasMath = Boolean(window.markdownEditorPresentation?.math?.renderTree || typeof renderMathInElement !== 'undefined') && sourceContainsMath(fallbackSource);
-        if (hasMath) {
-          const protectedMath = protectMath(text);
-          text = protectedMath.text;
-          placeholders = protectedMath.placeholders;
-        }
-
-        let html = '';
-        if (typeof marked !== 'undefined') {
-          try {
-            const tokenTree = typeof marked.lexer === 'function' ? marked.lexer(text) : null;
-            if (tokenTree && typeof marked.parser === 'function') {
-              blockTokens = hasMath ? [] : collectMarkedBlockTokens(tokenTree);
-              html = marked.parser(tokenTree);
-            } else {
-              html = marked.parse(text);
-            }
-          } catch (error) {
-            console.error('Markdown render error:', error);
-            html = '<pre class="f-raw-fallback">' + escapeHtml(fallbackSource) + '</pre>';
-            blockTokens = [];
+        const lastStableResult = classicPreviewStatePort.snapshot.lastStableResult;
+        const recoveryTargetBeforeRender = previewRecoveryViewPort.inspect();
+        const hadStablePreview = Boolean(lastStableResult && recoveryTargetBeforeRender.present && !recoveryTargetBeforeRender.recovery);
+        try {
+          disableVirtualPreview();
+          resolvedPreviewMode = 'full';
+          resolvedPreviewScopeKey = 'full';
+          const fallbackSource = getSourceText();
+          let text = fallbackSource;
+          let placeholders = [];
+          const hasMath = Boolean(window.markdownEditorPresentation?.math?.renderTree || typeof renderMathInElement !== 'undefined') && sourceContainsMath(fallbackSource);
+          if (hasMath) {
+            const protectedMath = protectMath(text);
+            text = protectedMath.text;
+            placeholders = protectedMath.placeholders;
           }
-        } else {
-          html = '<pre class="f-raw-fallback">' + escapeHtml(fallbackSource) + '</pre>';
+
+          let html = '';
+          if (typeof marked !== 'undefined') {
+            try {
+              const tokenTree = typeof marked.lexer === 'function' ? marked.lexer(text) : null;
+              if (tokenTree && typeof marked.parser === 'function') {
+                blockTokens = hasMath ? [] : collectMarkedBlockTokens(tokenTree);
+                html = marked.parser(tokenTree);
+              } else {
+                html = marked.parse(text);
+              }
+            } catch (error) {
+              console.error('Markdown render error:', error);
+              html = '<pre class="f-raw-fallback">' + escapeHtml(fallbackSource) + '</pre>';
+              blockTokens = [];
+            }
+          } else {
+            html = '<pre class="f-raw-fallback">' + escapeHtml(fallbackSource) + '</pre>';
+          }
+          if (placeholders.length) html = restoreMath(html, placeholders);
+          patchResult = commitPreviewDomPatch(previewRendererPort.patchHtml(html, { forceFullRebuild }));
+          patchResult.parsedChars = sourceLength;
+          patchResult.mode = 'whole-document';
+          patchResult.blockCount = patchResult.body.children.length;
+          previewFailure = null;
+        } catch (error) {
+          console.error('Preview safe render fallback failed:', error);
+          previewFailure = {
+            name: error?.name || 'Error',
+            message: error?.message || String(error),
+            source: 'render'
+          };
+          const recoveryTarget = previewRecoveryViewPort.inspect();
+          const preserveStable = Boolean(hadStablePreview && recoveryTarget.present && !recoveryTarget.recovery);
+          const recovery = previewRecoveryViewPort.recover({ preserveStable });
+          patchResult = {
+            body: recovery.body,
+            changedNodes: [],
+            reused: recovery.preserved ? recovery.body.children.length : 0,
+            parsedChars: 0,
+            mode: recovery.preserved ? 'render-safe-fallback-stale' : 'render-safe-fallback-paused',
+            virtualized: false,
+            blockCount: recovery.preserved ? recovery.body.children.length : 0
+          };
+          resolvedPreviewMode = classicPreviewStatePort.snapshot.mode || 'full';
+          resolvedPreviewScopeKey = lastStableResult?.scopeKey || resolvedPreviewMode;
+          sourceAlreadyAnnotated = true;
+          skipEnhancements = true;
         }
-        if (placeholders.length) html = restoreMath(html, placeholders);
-        patchResult = commitPreviewDomPatch(previewRendererPort.patchHtml(html, { forceFullRebuild }));
-        patchResult.parsedChars = sourceLength;
-        patchResult.mode = 'whole-document';
-        patchResult.blockCount = patchResult.body.children.length;
       }
 
       const retryingPendingEnhancements = patchResult.mode === 'unchanged-enhancement-retry';
@@ -770,6 +791,18 @@
           ...(preservePreviousStable ? {} : { result: stableMetadata }),
           error: previewFailure
         });
+      } else if (previewFailure) {
+        if (patchResult.mode === 'render-safe-fallback-stale') {
+          classicPreviewStatePort.commitDegraded(renderVersion, {
+            mode: resolvedPreviewMode,
+            error: previewFailure
+          });
+        } else {
+          classicPreviewStatePort.failRender(renderVersion, {
+            mode: resolvedPreviewMode,
+            error: previewFailure
+          });
+        }
       } else {
         classicPreviewStatePort.commitStable(renderVersion, {
           mode: resolvedPreviewMode,

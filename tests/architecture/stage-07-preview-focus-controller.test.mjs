@@ -50,13 +50,13 @@ test('Atomic 7.11 composition root mounts one scoped Focus port and classic prev
   assert.doesNotMatch(core, /previewLineFocusVersion|previewLineFocusTarget|previewLineFocusPromise/);
 });
 
-test('Atomic 7.11 leaves Virtual Window ownership intact and permits Atomic 7.12 Enhancement Coordinator without moving enhancement ownership into Focus', async () => {
+test('Atomic 7.11 Focus ownership remains isolated after 7.12 Enhancement and 7.13 Recovery View', async () => {
   const virtual = await source('src/features/preview/render/virtual-window/virtual-window-controller.js');
   const focus = await source('src/features/preview/pipeline/preview-focus-controller.js');
   assert.match(virtual, /ensureLineVisible/);
-  assert.doesNotMatch(virtual, /preview-focus-controller|preview-enhancement-coordinator|requestGeneration/);
-  assert.doesNotMatch(focus, /preview-enhancement-coordinator|renderMath|renderMermaid|enhancement/);
+  assert.doesNotMatch(virtual, /preview-focus-controller|preview-enhancement-coordinator|preview-recovery-view|requestGeneration/);
+  assert.doesNotMatch(focus, /preview-enhancement-coordinator|preview-recovery-view|renderMath|renderMermaid|enhancement|recovery/);
   const tree = JSON.stringify(await readdir(new URL('src/features/preview/', root), { recursive: true }));
   assert.match(tree, /preview-enhancement-coordinator/);
-  assert.doesNotMatch(tree, /preview-recovery|recovery-view/);
+  assert.match(tree, /preview-recovery-view/);
 });

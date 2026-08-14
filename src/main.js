@@ -92,6 +92,7 @@ import {
   createPreviewLayoutStability,
   createPreviewRenderCoordinator,
   createPreviewRendererPort,
+  createPreviewRecoveryView,
   createPreviewScheduler,
   createPreviewState,
   PREVIEW_BEHAVIOR_THRESHOLDS,
@@ -101,6 +102,7 @@ import {
   mountClassicPreviewModeResolverPort,
   mountClassicPreviewRenderCoordinatorPort,
   mountClassicPreviewRendererPort,
+  mountClassicPreviewRecoveryViewPort,
   mountClassicPreviewSchedulerPort,
   mountClassicPreviewStatePort,
   mountClassicPreviewThresholdsPort
@@ -142,6 +144,14 @@ const previewLayoutPane = document.querySelector('.preview-pane');
 const previewLayoutFrameHost = document.defaultView;
 if (!previewLayoutRoot) throw new Error('Preview host is missing.');
 if (!previewLayoutPane) throw new Error('Preview pane is missing.');
+const previewRecoveryView = createPreviewRecoveryView({
+  root: previewLayoutRoot,
+  documentRef: document
+});
+const previewRecoveryViewPort = mountClassicPreviewRecoveryViewPort(
+  compatibilityPlatformHost,
+  previewRecoveryView
+);
 const previewLayoutStability = createPreviewLayoutStability({
   root: previewLayoutRoot,
   pane: previewLayoutPane,
@@ -208,6 +218,8 @@ window.addEventListener('pagehide', () => {
   destroyLayoutStateFeature();
   previewLayoutStabilityPort.destroy();
   previewLayoutStability.destroy();
+  previewRecoveryViewPort.destroy();
+  previewRecoveryView.destroy();
   previewFocusControllerPort.destroy();
   previewFocusController.destroy();
   previewEnhancementCoordinatorPort.destroy();
