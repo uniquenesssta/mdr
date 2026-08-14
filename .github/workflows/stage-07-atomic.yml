@@ -1,4 +1,4 @@
-# Stage 7 completed-scope validation through Atomic 7.9 while preserving the complete Stage 6 handoff.
+# Stage 7 completed-scope validation through Atomic 7.10 while preserving the complete Stage 6 handoff.
 name: Stage 7 Atomic Verification
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   preview-scheduler-cancellation:
-    name: Verify Stage 7 Through Atomic 7.9 Layout Stability
+    name: Verify Stage 7 Through Atomic 7.10 Virtual Window
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -290,6 +290,16 @@ jobs:
           tests/architecture/stage-07-preview-layout-stability.test.mjs
       - name: Verify Atomic Task 7.9 real browser visibility and geometry
         run: node tests/e2e/preview-layout-stability.test.mjs
+      - name: Verify Atomic Task 7.10 Virtual Window
+        run: >-
+          node --test
+          tests/unit/preview/virtual-window-model.test.mjs
+          tests/unit/preview/height-cache.test.mjs
+          tests/unit/preview/spacer-view.test.mjs
+          tests/unit/preview/virtual-window-controller.test.mjs
+          tests/architecture/stage-07-preview-virtual-window.test.mjs
+      - name: Verify Atomic Task 7.10 real browser windowing and height correction
+        run: node tests/e2e/preview-virtual-window.test.mjs
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -333,6 +343,10 @@ jobs:
           node --check src/features/preview/pipeline/preview-scheduler.js &&
           node --check src/features/preview/pipeline/preview-render-coordinator.js &&
           node --check src/features/preview/pipeline/preview-layout-stability.js &&
+          node --check src/features/preview/render/virtual-window/virtual-window-model.js &&
+          node --check src/features/preview/render/virtual-window/height-cache.js &&
+          node --check src/features/preview/render/virtual-window/spacer-view.js &&
+          node --check src/features/preview/render/virtual-window/virtual-window-controller.js &&
           node --check src/features/preview/render/preview-block-view.js &&
           node --check src/features/preview/render/preview-dom-renderer.js &&
           node --check src/features/preview/render/task-list-renderer.js &&
@@ -374,6 +388,10 @@ jobs:
           node --check tests/unit/preview/classic-preview-renderer-port.test.mjs &&
           node --check tests/unit/preview/preview-layout-stability.test.mjs &&
           node --check tests/unit/preview/classic-preview-layout-stability-port.test.mjs &&
+          node --check tests/unit/preview/virtual-window-model.test.mjs &&
+          node --check tests/unit/preview/height-cache.test.mjs &&
+          node --check tests/unit/preview/spacer-view.test.mjs &&
+          node --check tests/unit/preview/virtual-window-controller.test.mjs &&
           node --check tests/architecture/stage-07-preview-thresholds.test.mjs &&
           node --check tests/architecture/stage-07-preview-state.test.mjs &&
           node --check tests/architecture/stage-07-preview-mode-resolver.test.mjs &&
@@ -383,6 +401,7 @@ jobs:
           node --check tests/architecture/stage-07-preview-render-coordinator.test.mjs &&
           node --check tests/architecture/stage-07-preview-dom-renderers.test.mjs &&
           node --check tests/architecture/stage-07-preview-layout-stability.test.mjs &&
+          node --check tests/architecture/stage-07-preview-virtual-window.test.mjs &&
           node --check tests/helpers/lifecycle-resource-ledger.mjs &&
           node --check tests/unit/layout/stage-06-layout-destroy-validation.test.mjs &&
           node --check tests/unit/sidebar/stage-06-sidebar-destroy-validation.test.mjs &&
@@ -393,6 +412,7 @@ jobs:
           node --check tests/e2e/recent-files-menu.test.mjs &&
           node --check tests/e2e/window-controller.test.mjs &&
           node --check tests/e2e/preview-layout-stability.test.mjs &&
+          node --check tests/e2e/preview-virtual-window.test.mjs &&
           node --check tests/e2e/run-browser-tests.mjs
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
@@ -410,10 +430,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-07/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 7.9 evidence
+      - name: Upload Atomic Task 7.10 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-07-preview-layout-stability-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-07-preview-virtual-window-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-07
           if-no-files-found: error
           retention-days: 30

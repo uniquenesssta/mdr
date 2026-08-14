@@ -41,7 +41,7 @@ test('Atomic 7.8 composition root mounts one shared PreviewRendererPort and owns
   assert.match(compatibility, /markdownEditorPreviewRendererPort/);
 });
 
-test('Atomic 7.8 removes classic renderer authority while retaining orchestration and later-stage boundaries', async () => {
+test('Atomic 7.8 renderer boundary remains intact while Atomic 7.9-7.10 add layout and virtual-window owners', async () => {
   const preview = await source('public/app/preview.js');
   const editorTools = await source('public/app/editor-tools.js');
   assert.match(preview, /markdownEditorPreviewRendererPort/);
@@ -62,10 +62,6 @@ test('Atomic 7.8 removes classic renderer authority while retaining orchestratio
   const tree = paths.join('\n');
   for (const premature of [
     'preview-focus-controller',
-    'preview-enhancement-coordinator',
-    'virtual-window-calculator',
-    'virtual-height-index',
-    'virtual-height-cache',
-    'virtual-block-mounter'
+    'preview-enhancement-coordinator'
   ]) assert.doesNotMatch(tree, new RegExp(premature));
 });

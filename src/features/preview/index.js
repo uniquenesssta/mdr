@@ -29,4 +29,8 @@ export { createCodeRenderer } from './render/code-renderer.js';
 export { createMathRenderer } from './render/math-renderer.js';
 export { createMermaidRenderer } from './render/mermaid-renderer.js';
 export { createPreviewRendererPort } from './render/preview-renderer-port.js';
+export { VirtualWindowController, createVirtualWindowController } from './render/virtual-window/virtual-window-controller.js';
+export { createVirtualWindowModel } from './render/virtual-window/virtual-window-model.js';
+export { createVirtualHeightCache, estimateVirtualBlockHeight } from './render/virtual-window/height-cache.js';
+export { createVirtualSpacerView } from './render/virtual-window/spacer-view.js';
 export { mountClassicPreviewRendererPort } from './compatibility/classic-preview-renderer-port.js';

@@ -86,7 +86,7 @@ test('Atomic 7.4 scheduler remains authoritative while Atomic 7.9 owns layout-st
   assert.match(core, /let previewLineFocusPromise = null/);
 });
 
-test('Atomic 7.4 remains intact while Atomic 7.5-7.9 may add Worker, Render and Layout Stability owners but not 7.10+ owners', async () => {
+test('Atomic 7.4 remains intact while Atomic 7.5-7.10 may add Worker, Render, Layout Stability and Virtual Window owners but not 7.11+ owners', async () => {
   const featureTree = JSON.stringify({
     root: (await readdir(new URL('src/features/preview/', root))).sort(),
     application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
@@ -97,7 +97,6 @@ test('Atomic 7.4 remains intact while Atomic 7.5-7.9 may add Worker, Render and 
     'preview-controller',
     'preview-worker-protocol',
     'preview-worker-session',
-    'virtual-preview-controller',
     'preview-focus-controller',
     'preview-enhancement-coordinator',
     'preview-dom-renderer'
