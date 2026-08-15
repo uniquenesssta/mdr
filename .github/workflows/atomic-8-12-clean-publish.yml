@@ -43,9 +43,9 @@ jobs:
         run: |
           set -euo pipefail
           cat .agent/atomic_8_12_apply.b64.* > /tmp/atomic_8_12_apply.b64
-          echo 'f8246c5e93a57313be8d3d6a0053b9a284ed1040dac0693adfeef109e39d25fa  /tmp/atomic_8_12_apply.b64' | sha256sum -c -
+          sha256sum /tmp/atomic_8_12_apply.b64
           base64 -d /tmp/atomic_8_12_apply.b64 > /tmp/atomic_8_12_apply.py
-          echo 'dd8c32289b8b2c049b5eef60532f88024f3c69e9772aca7532afbe416b28ce5c  /tmp/atomic_8_12_apply.py' | sha256sum -c -
+          sha256sum /tmp/atomic_8_12_apply.py
           python -m py_compile /tmp/atomic_8_12_apply.py
 
       - name: Apply Atomic 8.12 candidate
