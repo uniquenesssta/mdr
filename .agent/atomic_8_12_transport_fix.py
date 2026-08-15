@@ -72,4 +72,8 @@ for contract_path in [
         encoding='utf-8',
     )
 
+# The actual current top-level Node regression count after adding Atomic 8.12
+# behavior coverage is 131. Keep README factual rather than pre-declaring 130.
+replace_literal_once('README.md', 'Node 130/130', 'Node 131/131')
+
 print('Atomic 8.12 transport alignment applied')
