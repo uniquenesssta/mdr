@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import re
 
 
@@ -72,8 +73,24 @@ for contract_path in [
         encoding='utf-8',
     )
 
-# The actual current top-level Node regression count after adding Atomic 8.12
-# behavior coverage is 131. Keep README factual rather than pre-declaring 130.
-replace_literal_once('README.md', 'Node 130/130', 'Node 131/131')
+# Atomic 8.12 removes the legacy Mermaid owner from widgets.js. That owner was
+# the only remaining writer responsible for this tracked business-global row.
+# Record the explicit migration by removing exactly that obsolete baseline row;
+# do not weaken the architecture checker or touch unrelated global contracts.
+baseline_path = Path('tests/architecture/fixtures/architecture-baseline.json')
+baseline = json.loads(baseline_path.read_text(encoding='utf-8'))
+business_globals = baseline.get('contract', {}).get('businessGlobals')
+if not isinstance(business_globals, list):
+    raise SystemExit('architecture baseline businessGlobals list missing')
+matching = [
+    row for row in business_globals
+    if row.get('path') == 'src/editor/hybrid/widgets.js'
+    and row.get('global') == 'window.showToast'
+    and row.get('count') == 1
+]
+if len(matching) != 1:
+    raise SystemExit(f'expected one obsolete widgets.js window.showToast baseline row, found {len(matching)}')
+baseline['contract']['businessGlobals'] = [row for row in business_globals if row is not matching[0]]
+baseline_path.write_text(json.dumps(baseline, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 
 print('Atomic 8.12 transport alignment applied')
