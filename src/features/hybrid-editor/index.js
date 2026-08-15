@@ -67,3 +67,16 @@ export {
   bindWidgetSourceAction,
   openWidgetSource
 } from './widgets/shared/widget-source-action.js';
+
+
+export {
+  createHybridPrefixWidgetType
+} from './widgets/prefix/prefix-widget.js';
+
+export {
+  createTaskCheckboxWidgetType
+} from './widgets/prefix/task-checkbox-widget.js';
+
+export {
+  createHorizontalRuleWidgetType
+} from './widgets/horizontal-rule/horizontal-rule-widget.js';

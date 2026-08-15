@@ -53,7 +53,7 @@ test('Atomic 8.5 keeps every block widget on the shared idempotent destroy path'
 test('Atomic 8.5 lifecycle boundary remains intact after Atomic 8.6 Shared Widget UI extraction', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 343);
+  assert.equal(inventory.modules.length, 346);
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-lifecycle.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js'));
   assert.ok(!paths.includes('src/editor/hybrid/widget-lifecycle.js'));

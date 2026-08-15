@@ -50,17 +50,15 @@ test('Atomic 8.6 toolbar and source primitives replace only shared DOM/action me
   assert.equal((widgets.match(/bindWidgetSourceAction\(/g) || []).length, 7);
   assert.ok((widgets.match(/createWidgetButton\(/g) || []).length >= 8);
   assert.doesNotMatch(widgets, /document\.createElement\(['"]header['"]\)/);
-  assert.match(widgets, /class HybridPrefixWidget|class CodeBlockWidget|class TableBlockWidget|class ImageBlockWidget/);
+  for (const local of ['CodeBlockWidget', 'TableBlockWidget', 'ImageBlockWidget']) assert.match(widgets, new RegExp(`class ${local}`), local);
+  assert.doesNotMatch(widgets, /class HybridPrefixWidget|class HorizontalRuleWidget/);
 });
 
-test('Atomic 8.6 production inventory advances exactly four modules and does not start Atomic 8.7 Prefix or HR migration', async () => {
+test('Atomic 8.6 Shared Widget UI boundary remains intact after Atomic 8.7 Prefix / HR migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 343);
+  assert.equal(inventory.modules.length, 346);
   for (const path of sharedPaths) assert.ok(paths.includes(path), path);
-  for (const pending of [
-    'src/features/hybrid-editor/widgets/prefix/prefix-widget.js',
-    'src/features/hybrid-editor/widgets/prefix/task-checkbox-widget.js',
-    'src/features/hybrid-editor/widgets/horizontal-rule/horizontal-rule-widget.js'
-  ]) await assert.rejects(access(file(pending)), pending);
+  const shared = await Promise.all(sharedPaths.map(path => text(path)));
+  assert.doesNotMatch(shared.join('\n'), /HybridPrefixWidget|TaskCheckboxWidget|HorizontalRuleWidget/);
 });

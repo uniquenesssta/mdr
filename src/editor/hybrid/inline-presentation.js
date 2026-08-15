@@ -1,6 +1,15 @@
-import { Decoration } from '@codemirror/view';
+import { Decoration, WidgetType } from '@codemirror/view';
 import { marked } from 'marked';
-import { HybridPrefixWidget, HorizontalRuleWidget, InlineMathWidget } from './widgets.js';
+import { InlineMathWidget } from './widgets.js';
+import {
+  createHorizontalRuleWidgetType,
+  createHybridPrefixWidgetType,
+  createTaskCheckboxWidgetType
+} from '../../features/hybrid-editor/index.js';
+
+const HybridPrefixWidget = createHybridPrefixWidgetType(WidgetType);
+const TaskCheckboxWidget = createTaskCheckboxWidgetType(WidgetType);
+const HorizontalRuleWidget = createHorizontalRuleWidgetType(WidgetType);
 import {
   collectInlineMathRanges,
   collectVisibleLines,
@@ -806,7 +815,7 @@ export function buildInlinePresentation(view, tree, editableRanges, blockRanges,
         line.from + contentOffset + task[1].length,
         line.from + contentOffset + task[0].length,
         Decoration.replace({
-          widget: new HybridPrefixWidget('task', {
+          widget: new TaskCheckboxWidget({
             checked: task[3].toLowerCase() === 'x',
             markerFrom
           })
