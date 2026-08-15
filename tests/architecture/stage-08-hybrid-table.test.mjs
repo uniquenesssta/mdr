@@ -84,16 +84,17 @@ test('Atomic 8.9 preserves Session/source/lifecycle ownership and leaves the fro
   assert.doesNotMatch(widget + editor, /parseTableRow/);
 });
 
-test('Atomic 8.9 inventory advances to 355 modules without starting Atomic 8.10 Image migration', async () => {
+test('Atomic 8.9 Table ownership remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 355);
+  assert.equal(inventory.modules.length, 358);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of tablePaths) assert.equal(paths.has(path), true, path);
   for (const imagePath of [
     'src/features/hybrid-editor/widgets/image/image-widget.js',
     'src/features/hybrid-editor/widgets/image/image-error-view.js'
-  ]) {
-    assert.equal(paths.has(imagePath), false, imagePath);
-    await assert.rejects(access(file(imagePath)), undefined, imagePath);
-  }
+  ]) assert.equal(paths.has(imagePath), true, imagePath);
+  for (const mathPath of [
+    'src/features/hybrid-editor/widgets/math/inline-math-widget.js',
+    'src/features/hybrid-editor/widgets/math/block-math-widget.js'
+  ]) await assert.rejects(access(file(mathPath)), undefined, mathPath);
 });

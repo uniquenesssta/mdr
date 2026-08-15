@@ -45,13 +45,15 @@ test('component widgets are wired to the shared runtime coordinator', async () =
   const widgets = await readFile(new URL('../src/editor/hybrid/widgets.js', import.meta.url), 'utf8');
   const codeBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/code-block/code-block-widget.js', import.meta.url), 'utf8');
   const tableBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/table/table-widget.js', import.meta.url), 'utf8');
+  const imageBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/image/image-widget.js', import.meta.url), 'utf8');
   const controller = await readFile(new URL('../src/editor/hybrid/controller.js', import.meta.url), 'utf8');
   const sourceEditorPort = await readFile(new URL('../src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js', import.meta.url), 'utf8');
 
   const componentSources = new Map([
     ['code', codeBlock],
     ['table', tableBlock],
-    ...['mermaid', 'math', 'html', 'image'].map(type => [type, widgets])
+    ['image', imageBlock],
+    ...['mermaid', 'math', 'html'].map(type => [type, widgets])
   ]);
   for (const type of ['code', 'mermaid', 'table', 'math', 'html', 'image']) {
     assert.match(

@@ -11,6 +11,7 @@ import { buildInlinePresentation } from './inline-presentation.js';
 import {
   createCodeBlockWidgetType,
   createTableBlockWidgetType,
+  createImageBlockWidgetType,
   createHybridSourceEditController,
   destroyHybridComponentSession,
   getClassicHybridSourceEditControllerPort,
@@ -25,7 +26,6 @@ import {
 } from '../../features/hybrid-editor/compatibility/codemirror-source-editor-port.js';
 import {
   HtmlBlockWidget,
-  ImageBlockWidget,
   MathBlockWidget,
   MermaidBlockWidget
 } from './widgets.js';
@@ -159,6 +159,8 @@ const TableBlockWidget = createTableBlockWidgetType(WidgetType, {
   recordInteraction: recordTableInteraction,
   reportEditFailure: reportTableCellEditFailure
 });
+
+const ImageBlockWidget = createImageBlockWidgetType(WidgetType);
 
 function recordSourceEditingClose(details = {}) {
   globalThis.window?.markdownEditorPerf?.record?.('hybrid.source-edit-close', {

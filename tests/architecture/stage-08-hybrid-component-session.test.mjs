@@ -49,7 +49,7 @@ test('Atomic 8.2 Session lifecycle remains authoritative after Atomic 8.3 Activa
 test('Atomic 8.2 production inventory records the facade and sole Session state owner', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 355);
+  assert.equal(inventory.modules.length, 358);
   assert.ok(paths.includes('src/features/hybrid-editor/index.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/state/hybrid-component-session.js'));
   assert.ok(!paths.includes('src/editor/hybrid/component-state.js'));

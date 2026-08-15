@@ -46,8 +46,9 @@ test('Atomic 8.5 keeps remaining legacy widgets plus migrated Code Block and Tab
   const widgets = await text('src/editor/hybrid/widgets.js');
   const codeBlock = await text('src/features/hybrid-editor/widgets/code-block/code-block-widget.js');
   const tableBlock = await text('src/features/hybrid-editor/widgets/table/table-widget.js');
+  const imageBlock = await text('src/features/hybrid-editor/widgets/image/image-widget.js');
   const destroyCalls = widgets.match(/destroy\(dom\)\s*\{\s*destroyBlockLifecycle\(dom\);\s*\}/g) || [];
-  assert.equal(destroyCalls.length, 4);
+  assert.equal(destroyCalls.length, 3);
   assert.match(widgets, /function destroyBlockLifecycle\(element\)/);
   assert.match(widgets, /destroyHybridWidgetLifecycle\(element\)/);
   assert.match(codeBlock, /section\.__markdownEditorCodeBlockCleanup = \(\) => \{/);
@@ -57,12 +58,16 @@ test('Atomic 8.5 keeps remaining legacy widgets plus migrated Code Block and Tab
   assert.match(tableBlock, /if \(cleaned\) return;\s*cleaned = true;/);
   assert.match(tableBlock, /__markdownEditorDestroyTableCell/);
   assert.match(tableBlock, /destroy\(dom\) \{[\s\S]*dom\?\.__markdownEditorTableBlockCleanup\?\.\(\);[\s\S]*destroyHybridWidgetLifecycle\(dom\);/);
+  assert.match(imageBlock, /figure\.__markdownEditorImageBlockCleanup = \(\) => \{/);
+  assert.match(imageBlock, /if \(cleaned\) return;\s*cleaned = true;/);
+  assert.match(imageBlock, /loadVersion\.destroy\(\)/);
+  assert.match(imageBlock, /destroy\(dom\) \{[\s\S]*dom\?\.__markdownEditorImageBlockCleanup\?\.\(\);[\s\S]*destroyHybridWidgetLifecycle\(dom\);/);
 });
 
-test('Atomic 8.5 lifecycle boundary remains intact after Atomic 8.9 Table migration', async () => {
+test('Atomic 8.5 lifecycle boundary remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 355);
+  assert.equal(inventory.modules.length, 358);
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-lifecycle.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js'));
   assert.ok(!paths.includes('src/editor/hybrid/widget-lifecycle.js'));

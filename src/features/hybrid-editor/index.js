@@ -103,3 +103,14 @@ export {
 export {
   createTableBlockWidgetType
 } from './widgets/table/table-widget.js';
+
+
+export {
+  configureHybridImageSourcePlatform,
+  invalidateHybridImageSource,
+  resolveHybridImageSource
+} from './image/image-source-resolver.js';
+
+export {
+  createImageBlockWidgetType
+} from './widgets/image/image-widget.js';

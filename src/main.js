@@ -59,7 +59,7 @@ import {
   mountClassicOutlineControllerPort,
   mountClassicSidebarControllerPort
 } from './features/sidebar/index.js';
-import { configureHybridImageSourcePlatform } from './editor/hybrid/image-source.js';
+import { configureHybridImageSourcePlatform } from './features/hybrid-editor/index.js';
 import {
   createDocumentContextMenuView,
   createDocumentListView,
@@ -221,7 +221,8 @@ configurePerformancePlatform({
 });
 configureHybridImageSourcePlatform({
   files: platform.files,
-  enabled: platform.capabilities.desktop.fileSystem
+  enabled: platform.capabilities.desktop.fileSystem,
+  getDocumentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {}
 });
 window.addEventListener('pagehide', () => {
   destroyLayoutStateFeature();
