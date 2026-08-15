@@ -1,6 +1,9 @@
 import { marked } from 'marked';
-import { highlightCode, getNormalizedCodeLanguage } from '../../../../editor/hybrid/code-highlighter.js';
-import { renderHighlightedCodeRows } from '../../../../editor/hybrid/code-presentation.js';
+import {
+  getNormalizedCodeLanguage,
+  highlightCode,
+  renderHighlightedCodeRows
+} from '../../../hybrid-editor/index.js';
 import { createMathPresentationApi } from './math-presentation.js';
 import { createMermaidPresentationApi } from './mermaid-presentation.js';
 

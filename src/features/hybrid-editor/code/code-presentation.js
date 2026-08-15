@@ -1,3 +1,8 @@
+/**
+ * Atomic 8.8 code row DOM projection shared by Hybrid and Preview presentation.
+ * Allowed imports: sibling pure code highlighter only. Forbidden imports: CodeMirror, model-kernel and application state.
+ * API: renderHighlightedCodeRows(). State: none. Side effects: replaces children of the supplied container. Lifecycle: pure view build.
+ */
 import { getNormalizedCodeLanguage, highlightCode } from './code-highlighter.js';
 
 function appendToken(documentRef, parent, token, extraTokenClass = '') {

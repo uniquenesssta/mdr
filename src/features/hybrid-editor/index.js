@@ -80,3 +80,21 @@ export {
 export {
   createHorizontalRuleWidgetType
 } from './widgets/horizontal-rule/horizontal-rule-widget.js';
+
+
+export {
+  getNormalizedCodeLanguage,
+  highlightCode
+} from './code/code-highlighter.js';
+
+export {
+  renderHighlightedCodeRows
+} from './code/code-presentation.js';
+
+export {
+  createCodeBlockDirectEditor
+} from './widgets/code-block/code-block-direct-editor.js';
+
+export {
+  createCodeBlockWidgetType
+} from './widgets/code-block/code-block-widget.js';

@@ -1,7 +1,5 @@
 import { isolateHistory } from '@codemirror/commands';
 import { EditorView, WidgetType } from '@codemirror/view';
-import { getNormalizedCodeLanguage } from './code-highlighter.js';
-import { renderHighlightedCodeRows } from './code-presentation.js';
 import { renderMathFormula } from '../../features/preview/render/presentation/math-presentation.js';
 import { getMermaidTheme, renderMermaidDiagram } from '../../features/preview/render/presentation/mermaid-presentation.js';
 import { resolveHybridImageSource, invalidateHybridImageSource } from './image-source.js';
@@ -16,6 +14,7 @@ import {
   scheduleHybridWidgetGeometry,
   closeHybridComponent,
   createHybridComponentKey,
+  createCodeBlockDirectEditor,
   createWidgetActionGroup,
   createWidgetButton,
   createWidgetToolbar,
@@ -70,7 +69,7 @@ function destroyBlockLifecycle(element) {
   destroyHybridWidgetLifecycle(element);
 }
 
-function reportCodeBlockEditFailure(error, details = {}) {
+function reportLegacyFencedEditorFailure(error, details = {}) {
   globalThis.window?.markdownEditorPerf?.diagnostic?.('hybrid.code-edit-failure', {
     category: 'editor.hybrid',
     status: 'error',
@@ -83,399 +82,6 @@ function reportCodeBlockEditFailure(error, details = {}) {
   });
   showToast(error?.message || '代码块写回失败');
 }
-
-function getLongestFenceRun(code, character) {
-  let longest = 0;
-  const pattern = character === '`' ? /^\s*(`+)/ : /^\s*(~+)/;
-  for (const line of String(code || '').split('\n')) {
-    const run = line.match(pattern)?.[1]?.length || 0;
-    longest = Math.max(longest, run);
-  }
-  return longest;
-}
-
-function buildCodeBlockWriteback(descriptor, code) {
-  const value = String(code ?? '');
-  if (descriptor.writebackMode === 'indented') {
-    return value.split('\n').map(line => line ? `    ${line}` : '').join('\n');
-  }
-  const character = descriptor.fenceCharacter === '~' ? '~' : '`';
-  const fenceLength = Math.max(3, Number(descriptor.fenceLength) || 3, getLongestFenceRun(value, character) + 1);
-  const fence = character.repeat(fenceLength);
-  const info = String(descriptor.infoRaw || '').trim();
-  return `${fence}${info}\n${value}${value.endsWith('\n') ? '' : '\n'}${fence}`;
-}
-
-function getTextOffsetWithin(root, node, offset) {
-  if (!root || !node || !root.contains(node)) return 0;
-  try {
-    const range = document.createRange();
-    range.selectNodeContents(root);
-    range.setEnd(node, offset);
-    return range.toString().length;
-  } catch (_) {
-    return 0;
-  }
-}
-
-function resolveCodePointerOffset(body, event, code) {
-  const target = event.target instanceof Element ? event.target : null;
-  const row = target?.closest?.('.cm-hybrid-code-row');
-  if (!row || !body.contains(row)) return 0;
-  const rowStart = Math.max(0, Number(row.dataset.codeOffsetStart) || 0);
-  const line = row.querySelector('.cm-hybrid-code-line');
-  if (!line) return clamp(rowStart, 0, String(code || '').length);
-
-  let caretNode = null;
-  let caretOffset = 0;
-  const caretPosition = document.caretPositionFromPoint?.(event.clientX, event.clientY);
-  if (caretPosition?.offsetNode) {
-    caretNode = caretPosition.offsetNode;
-    caretOffset = caretPosition.offset;
-  } else {
-    const caretRange = document.caretRangeFromPoint?.(event.clientX, event.clientY);
-    if (caretRange) {
-      caretNode = caretRange.startContainer;
-      caretOffset = caretRange.startOffset;
-    }
-  }
-  const lineOffset = caretNode && line.contains(caretNode)
-    ? getTextOffsetWithin(line, caretNode, caretOffset)
-    : 0;
-  return clamp(rowStart + lineOffset, 0, String(code || '').length);
-}
-
-function createCodePresentationBody(code, language) {
-  const body = document.createElement('div');
-  body.className = 'markdown-code-body cm-hybrid-code-body';
-  body.dataset.language = getNormalizedCodeLanguage(language);
-  renderHighlightedCodeRows(body, code, language, { variant: 'hybrid' });
-  return body;
-}
-
-function createEditableCodeArea(view, descriptor, openSource, options = {}) {
-  const textarea = document.createElement('textarea');
-  textarea.className = 'cm-hybrid-code-editor';
-  textarea.value = String(descriptor.code || '');
-  textarea.dataset.hybridCodeEditor = 'true';
-  textarea.spellcheck = false;
-  textarea.autocomplete = 'off';
-  textarea.setAttribute('aria-label', `${descriptor.language || '无语言'}代码块内容`);
-  textarea.title = '正在直接编辑代码；点击代码块右上角“编辑源码”可编辑 Markdown 源码';
-  textarea.rows = Math.max(3, Math.min(18, textarea.value.split('\n').length + 1));
-
-  const originalValue = textarea.value;
-  let cancelled = false;
-  let committed = false;
-  let closed = false;
-  let removeOutsidePointerListener = () => {};
-
-  const close = result => {
-    if (closed) return;
-    closed = true;
-    removeOutsidePointerListener();
-    removeOutsidePointerListener = () => {};
-    options.onClose?.(result);
-  };
-
-  const commit = () => {
-    if (committed || cancelled) return false;
-    if (textarea.value === originalValue) return false;
-    committed = true;
-    const documentLength = view.state.doc.length;
-    const from = Number(descriptor.from);
-    const to = Number(descriptor.to);
-    if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to <= from || to > documentLength) {
-      reportCodeBlockEditFailure(new Error('代码块范围已经失效'), { from, to, documentLength });
-      return false;
-    }
-    try {
-      const insert = buildCodeBlockWriteback(descriptor, textarea.value);
-      view.dispatch({
-        changes: { from, to, insert },
-        annotations: isolateHistory.of('full')
-      });
-      if (descriptor.writebackMode === 'indented') {
-        return {
-          from,
-          to: from + insert.length,
-          editFrom: from,
-          editTo: from + insert.length,
-          preferredPosition: from
-        };
-      }
-      const openingEnd = insert.indexOf('\n');
-      const contentFrom = from + Math.max(0, openingEnd + 1);
-      return {
-        from,
-        to: from + insert.length,
-        editFrom: contentFrom,
-        editTo: contentFrom + textarea.value.length,
-        preferredPosition: contentFrom
-      };
-    } catch (error) {
-      reportCodeBlockEditFailure(error, { from, to, language: descriptor.language || 'text' });
-      return false;
-    }
-  };
-
-  textarea.__markdownEditorCommitCodeBlock = commit;
-  textarea.addEventListener('mousedown', event => event.stopPropagation());
-  textarea.addEventListener('click', event => event.stopPropagation());
-  textarea.addEventListener('input', event => {
-    event.stopPropagation();
-    textarea.rows = Math.max(3, Math.min(18, textarea.value.split('\n').length + 1));
-  });
-  textarea.addEventListener('dblclick', event => event.stopPropagation());
-  textarea.addEventListener('blur', () => {
-    const result = commit();
-    close({
-      reason: cancelled ? 'cancelled' : result ? 'committed' : 'unchanged',
-      value: textarea.value,
-      descriptor: result || null
-    });
-  });
-  removeOutsidePointerListener = bindOutsidePointerClosure(view, textarea, () => {
-    const result = commit();
-    close({
-      reason: cancelled ? 'cancelled' : result ? 'committed' : 'pointer-outside',
-      value: textarea.value,
-      descriptor: result || null
-    });
-  }, {
-    isActive: () => !closed && textarea.isConnected
-  });
-
-  textarea.addEventListener('keydown', event => {
-    event.stopPropagation();
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      cancelled = true;
-      textarea.value = originalValue;
-      textarea.blur();
-      return;
-    }
-    if (event.key === 'Tab') {
-      event.preventDefault();
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      textarea.setRangeText('\t', start, end, 'end');
-      textarea.dispatchEvent(new Event('input', { bubbles: false }));
-      return;
-    }
-    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-      event.preventDefault();
-      const result = commit();
-      close({
-        reason: result ? 'committed' : 'unchanged',
-        value: textarea.value,
-        descriptor: result || null
-      });
-    }
-  });
-  return textarea;
-}
-
-export class CodeBlockWidget extends WidgetType {
-  constructor(descriptor, options = {}) {
-    super();
-    this.from = descriptor.from;
-    this.to = descriptor.to;
-    this.editFrom = descriptor.contentFrom ?? descriptor.from;
-    this.editTo = descriptor.contentTo ?? this.editFrom;
-    this.language = String(descriptor.language || '');
-    this.code = String(descriptor.code || '');
-    this.writebackMode = descriptor.writebackMode || 'fenced';
-    this.fenceCharacter = descriptor.fenceCharacter || '`';
-    this.fenceLength = descriptor.fenceLength || 3;
-    this.infoRaw = String(descriptor.infoRaw || '');
-    this.fingerprint = descriptor.fingerprint || '';
-    this.visualEditing = Boolean(options.visualEditing);
-  }
-
-  eq(other) {
-    return other.from === this.from
-      && other.to === this.to
-      && other.editFrom === this.editFrom
-      && other.editTo === this.editTo
-      && other.language === this.language
-      && other.code === this.code
-      && other.fingerprint === this.fingerprint
-      && other.visualEditing === this.visualEditing;
-  }
-
-  toDOM(view) {
-    const section = document.createElement('section');
-    section.className = 'cm-hybrid-block-widget cm-hybrid-code-widget';
-    section.classList.toggle('is-code-editing-enabled', this.visualEditing);
-    section.dataset.hybridBlockType = 'code';
-    section.dataset.hybridCodeFrom = String(this.from);
-    const editDescriptor = {
-      componentType: 'code',
-      from: this.from,
-      to: this.to,
-      editFrom: this.editFrom,
-      editTo: this.editTo,
-      preferredPosition: this.editFrom
-    };
-    bindWidgetSourceAction(section, view, editDescriptor, {
-      sourceKeys: [],
-      title: '双击直接编辑代码；点击“编辑源码”编辑 Markdown 源码',
-      exclude: event => this.visualEditing
-        && event.target instanceof Element
-        && Boolean(event.target.closest('.cm-hybrid-code-body')),
-      onOpen: (trigger, gesture = {}) => recordHybridInteraction('hybrid.code-source-open', {
-        codeFrom: this.from,
-        trigger,
-        intervalMs: gesture.intervalMs ?? null,
-        distancePx: gesture.distancePx ?? null
-      })
-    });
-
-    const openCodeSource = (activeEditor = null) => {
-      const anchorRect = section.getBoundingClientRect();
-      const committedDescriptor = activeEditor?.__markdownEditorCommitCodeBlock?.();
-      requestAnimationFrame(() => {
-        openWidgetSource(view, { ...(committedDescriptor || editDescriptor), componentType: 'code' }, {
-          getBoundingClientRect: () => anchorRect
-        });
-      });
-    };
-
-    const header = createWidgetToolbar({ doubleZone: 'code-toolbar' });
-    const languageGroup = document.createElement('span');
-    languageGroup.className = 'cm-hybrid-code-label-group';
-    const language = document.createElement('span');
-    language.className = 'cm-hybrid-code-language';
-    language.textContent = getNormalizedCodeLanguage(this.language) || 'text';
-    languageGroup.appendChild(language);
-    if (this.visualEditing) {
-      const badge = document.createElement('span');
-      badge.className = 'cm-hybrid-code-editing-badge';
-      badge.textContent = '双击编辑';
-      languageGroup.appendChild(badge);
-    }
-    header.appendChild(languageGroup);
-
-    const actions = createWidgetActionGroup();
-    actions.appendChild(createWidgetButton('复制', 'cm-hybrid-widget-action', async () => {
-      try {
-        const activeEditor = section.querySelector('[data-hybrid-code-editor]');
-        await copyText(activeEditor instanceof HTMLTextAreaElement ? activeEditor.value : this.code);
-        showToast('代码已复制');
-      } catch (error) {
-        showToast(error?.message || '复制失败');
-      }
-    }));
-    actions.appendChild(createWidgetButton('编辑源码', 'cm-hybrid-widget-action', () => {
-      const activeEditor = section.querySelector('[data-hybrid-code-editor]');
-      recordHybridInteraction('hybrid.code-source-open', {
-        codeFrom: this.from,
-        trigger: 'button'
-      });
-      openCodeSource(activeEditor instanceof HTMLTextAreaElement ? activeEditor : null);
-    }));
-    header.appendChild(actions);
-    section.appendChild(header);
-
-    const createPresentation = (codeValue = this.code) => {
-      const body = createCodePresentationBody(codeValue, this.language);
-      body.dataset.hybridDoubleZone = 'code-body';
-      if (!this.visualEditing) return body;
-      body.classList.add('is-direct-edit-trigger');
-      body.tabIndex = 0;
-      body.title = '双击直接编辑代码；点击“编辑源码”编辑 Markdown 源码';
-      body.setAttribute('aria-label', `${this.language || '无语言'}代码块，双击直接编辑`);
-      bindStrictDoubleActivation(body, (event, gesture) => {
-        recordHybridInteraction('hybrid.code-direct-edit-open', {
-          codeFrom: this.from,
-          trigger: 'doubleclick',
-          line: Number(event.target?.closest?.('[data-line-number]')?.getAttribute?.('data-line-number')) || null,
-          intervalMs: gesture.intervalMs,
-          distancePx: gesture.distancePx
-        });
-        activateDirectEditor(resolveCodePointerOffset(body, event, this.code));
-      }, {
-        exclude: event => event.target instanceof Element
-          && Boolean(event.target.closest('button, a, input, textarea, select')),
-        getTargetKey: event => event.target?.closest?.('[data-line-number]')?.getAttribute?.('data-line-number')
-          ? `code-line:${event.target.closest('[data-line-number]').getAttribute('data-line-number')}`
-          : 'code-body'
-      });
-      return body;
-    };
-
-    const componentKey = createHybridComponentKey('code', this.from);
-    let unregisterDirectCloser = () => {};
-    const restorePresentation = (activeEditor, codeValue = this.code, reason = 'direct-closed') => {
-      unregisterDirectCloser();
-      unregisterDirectCloser = () => {};
-      closeHybridComponent(view, componentKey, reason, { componentType: 'code' }, HYBRID_COMPONENT_MODES.DIRECT);
-      if (!activeEditor?.isConnected || !section.contains(activeEditor)) return;
-      const body = createPresentation(codeValue);
-      activeEditor.replaceWith(body);
-      section.classList.remove('is-code-editor-active');
-      requestAnimationFrame(() => scheduleHybridWidgetGeometry(view, 'code-direct-edit-closed'));
-    };
-
-    const activateDirectEditor = (selectionOffset = 0) => {
-      if (!this.visualEditing || section.querySelector('[data-hybrid-code-editor]')) return;
-      const body = section.querySelector('.cm-hybrid-code-body');
-      if (!(body instanceof HTMLElement)) return;
-      transitionHybridComponent(view, {
-        key: componentKey,
-        type: 'code',
-        from: this.from,
-        mode: HYBRID_COMPONENT_MODES.DIRECT,
-        reason: 'doubleclick'
-      });
-      let editor = null;
-      editor = createEditableCodeArea(view, {
-        from: this.from,
-        to: this.to,
-        language: this.language,
-        code: this.code,
-        writebackMode: this.writebackMode,
-        fenceCharacter: this.fenceCharacter,
-        fenceLength: this.fenceLength,
-        infoRaw: this.infoRaw
-      }, openCodeSource, {
-        onClose: result => {
-          recordHybridInteraction('hybrid.code-direct-edit-close', {
-            codeFrom: this.from,
-            reason: result?.reason || 'unknown'
-          });
-          restorePresentation(editor, result?.value ?? this.code, result?.reason || 'direct-closed');
-        }
-      });
-      unregisterDirectCloser = registerHybridComponentCloser(view, componentKey, () => {
-        if (editor?.isConnected) editor.blur();
-      });
-      body.replaceWith(editor);
-      section.classList.add('is-code-editor-active');
-      const caret = clamp(selectionOffset, 0, editor.value.length);
-      requestAnimationFrame(() => {
-        if (!editor.isConnected) return;
-        editor.focus({ preventScroll: true });
-        editor.setSelectionRange(caret, caret);
-        scheduleHybridWidgetGeometry(view, 'code-direct-edit-opened');
-      });
-    };
-
-    section.appendChild(createPresentation());
-    attachBlockLifecycle(section, view, 'code');
-    return section;
-  }
-
-  destroy(dom) {
-    destroyBlockLifecycle(dom);
-  }
-
-  ignoreEvent() {
-    return true;
-  }
-}
-
 
 function reportMermaidRenderFailure(error, details = {}) {
   globalThis.window?.markdownEditorPerf?.diagnostic?.('hybrid.mermaid-render-failure', {
@@ -723,7 +329,7 @@ export class MermaidBlockWidget extends WidgetType {
       });
       renderState.serial += 1;
       let editor = null;
-      editor = createEditableCodeArea(view, {
+      editor = createCodeBlockDirectEditor(view, {
         from: this.from,
         to: this.to,
         language: 'mermaid',
@@ -732,7 +338,9 @@ export class MermaidBlockWidget extends WidgetType {
         fenceCharacter: this.fenceCharacter,
         fenceLength: this.fenceLength,
         infoRaw: this.infoRaw || 'mermaid'
-      }, openMermaidSource, {
+      }, {
+        createHistoryAnnotation: () => isolateHistory.of('full'),
+        onFailure: reportLegacyFencedEditorFailure,
         onClose: result => {
           recordHybridInteraction('hybrid.mermaid-direct-edit-close', {
             sourceFrom: this.from,

@@ -43,16 +43,25 @@ test('every visual component follows the same presentation/source lifecycle', as
 
 test('component widgets are wired to the shared runtime coordinator', async () => {
   const widgets = await readFile(new URL('../src/editor/hybrid/widgets.js', import.meta.url), 'utf8');
+  const codeBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/code-block/code-block-widget.js', import.meta.url), 'utf8');
   const controller = await readFile(new URL('../src/editor/hybrid/controller.js', import.meta.url), 'utf8');
   const sourceEditorPort = await readFile(new URL('../src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js', import.meta.url), 'utf8');
 
+  const componentSources = new Map([
+    ['code', codeBlock],
+    ...['mermaid', 'table', 'math', 'html', 'image'].map(type => [type, widgets])
+  ]);
   for (const type of ['code', 'mermaid', 'table', 'math', 'html', 'image']) {
-    assert.match(widgets, new RegExp(`componentType:\\s*['\"]${type}['\"]`), `${type} is missing a source-edit component type`);
+    assert.match(
+      componentSources.get(type),
+      new RegExp(String.raw`componentType:\s*['"]${type}['"]`),
+      `${type} is missing a source-edit component type`
+    );
   }
   for (const type of ['code', 'mermaid', 'table']) {
     assert.match(
-      widgets,
-      new RegExp(`type:\\s*['\"]${type}['\"][\\s\\S]{0,180}mode:\\s*HYBRID_COMPONENT_MODES\\.DIRECT`),
+      componentSources.get(type),
+      new RegExp(String.raw`type:\s*['"]${type}['"][\s\S]{0,180}mode:\s*HYBRID_COMPONENT_MODES\.DIRECT`),
       `${type} is missing direct-edit state coordination`
     );
   }

@@ -51,20 +51,18 @@ test('Atomic 8.7 inline presentation consumes migrated widgets through the publi
   assert.doesNotMatch(inline, /features\/hybrid-editor\/widgets\//);
 });
 
-test('Atomic 8.7 removes legacy Prefix, Task Checkbox and HR authority without starting Code Block migration', async () => {
+test('Atomic 8.7 Prefix, Task Checkbox and HR authority remains removed after Atomic 8.8', async () => {
   const legacy = await read('src/editor/hybrid/widgets.js');
   assert.doesNotMatch(legacy, /class HybridPrefixWidget/);
   assert.doesNotMatch(legacy, /class HorizontalRuleWidget/);
   assert.doesNotMatch(legacy, /cm-hybrid-task-box|cm-hybrid-list-prefix|cm-hybrid-horizontal-rule/);
   assert.doesNotMatch(legacy, /markerFrom/);
 
-  await assert.rejects(fs.access(path.join(ROOT, 'src/features/hybrid-editor/widgets/code-block/code-block-widget.js')));
-  await assert.rejects(fs.access(path.join(ROOT, 'src/features/hybrid-editor/widgets/code-block/code-block-direct-editor.js')));
 });
 
 test('Atomic 8.7 production inventory advances by exactly three responsibility-specific modules', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 346);
+  assert.equal(inventory.modules.length, 350);
   const paths = new Set(inventory.modules.map(item => item[0]));
   for (const expected of [
     'src/features/hybrid-editor/widgets/prefix/prefix-widget.js',

@@ -1,12 +1,14 @@
+import { isolateHistory } from '@codemirror/commands';
 import { syntaxTree } from '@codemirror/language';
 import { Facet, StateEffect, StateField } from '@codemirror/state';
-import { Decoration, EditorView, ViewPlugin } from '@codemirror/view';
+import { Decoration, EditorView, ViewPlugin, WidgetType } from '@codemirror/view';
 import {
   collectHybridBlocks,
   getEditableRanges
 } from '../../model-kernel/index.js';
 import { buildInlinePresentation } from './inline-presentation.js';
 import {
+  createCodeBlockWidgetType,
   createHybridSourceEditController,
   destroyHybridComponentSession,
   getClassicHybridSourceEditControllerPort,
@@ -20,7 +22,6 @@ import {
   revealHybridSourceRangeEffect
 } from '../../features/hybrid-editor/compatibility/codemirror-source-editor-port.js';
 import {
-  CodeBlockWidget,
   HtmlBlockWidget,
   ImageBlockWidget,
   MathBlockWidget,
@@ -93,6 +94,38 @@ function getViewDiagnosticDetails(view) {
     hasFocus: Boolean(view?.hasFocus)
   };
 }
+
+function recordCodeBlockInteraction(operation, details = {}) {
+  globalThis.window?.markdownEditorPerf?.record?.(operation, {
+    category: 'editor.hybrid',
+    details
+  });
+}
+
+function showCodeBlockToast(message) {
+  if (typeof globalThis.window?.showToast === 'function') {
+    globalThis.window.showToast(String(message || ''));
+  }
+}
+
+function reportCodeBlockEditFailure(error, details = {}) {
+  reportHybridDiagnostic('hybrid.code-edit-failure', {
+    status: 'error',
+    dedupeKey: `hybrid.code-edit-failure:${error?.name || 'Error'}`,
+    details: {
+      ...details,
+      message: error?.message || String(error || '代码块写回失败')
+    }
+  });
+  showCodeBlockToast(error?.message || '代码块写回失败');
+}
+
+const CodeBlockWidget = createCodeBlockWidgetType(WidgetType, {
+  createHistoryAnnotation: () => isolateHistory.of('full'),
+  recordInteraction: recordCodeBlockInteraction,
+  notify: showCodeBlockToast,
+  reportEditFailure: reportCodeBlockEditFailure
+});
 
 function recordSourceEditingClose(details = {}) {
   globalThis.window?.markdownEditorPerf?.record?.('hybrid.source-edit-close', {

@@ -1,3 +1,8 @@
+/**
+ * Atomic 8.8 code syntax presentation model.
+ * Allowed imports: none. Forbidden imports: CodeMirror, DOM, model-kernel and application globals.
+ * API: highlightCode(), getNormalizedCodeLanguage(). State/side effects: none. Lifecycle: pure.
+ */
 const LANGUAGE_ALIASES = new Map([
   ['javascript', 'js'], ['jsx', 'js'], ['typescript', 'ts'], ['tsx', 'ts'],
   ['python', 'py'], ['shell', 'sh'], ['bash', 'sh'], ['zsh', 'sh'],
