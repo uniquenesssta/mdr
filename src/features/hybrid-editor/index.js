@@ -47,3 +47,23 @@ export {
   destroyHybridWidgetGeometryScheduler,
   scheduleHybridWidgetGeometry
 } from './lifecycle/widget-geometry-scheduler.js';
+
+export {
+  createWidgetButton
+} from './widgets/shared/widget-button.js';
+
+export {
+  createWidgetActionGroup,
+  createWidgetToolbar
+} from './widgets/shared/widget-toolbar.js';
+
+export {
+  WIDGET_INTERACTIVE_SELECTOR,
+  bindWidgetFocusPolicy,
+  isWidgetInteractiveTarget
+} from './widgets/shared/widget-focus-policy.js';
+
+export {
+  bindWidgetSourceAction,
+  openWidgetSource
+} from './widgets/shared/widget-source-action.js';

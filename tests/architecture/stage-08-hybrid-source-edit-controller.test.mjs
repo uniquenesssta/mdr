@@ -32,18 +32,20 @@ test('Atomic 8.4 application owner is implementation/DOM-free and editor actions
 
 test('Atomic 8.4 removes source range and outside-pointer close authority from legacy widgets/controller/Activation', async () => {
   const widgets = await text('src/editor/hybrid/widgets.js');
+  const sourceAction = await text('src/features/hybrid-editor/widgets/shared/widget-source-action.js');
   const legacyController = await text('src/editor/hybrid/controller.js');
   const outside = await text('src/features/hybrid-editor/activation/outside-pointer-closure.js');
   assert.doesNotMatch(widgets, /activeHybridSourceRanges|setActiveHybridSourceRange|getActiveHybridSourceRange|clearActiveHybridSourceRange|revealHybridSourceRangeEffect/);
   assert.doesNotMatch(widgets, /scrollIntoView\(|view\.state\.doc\.length[\s\S]{0,1200}source-opened/);
-  assert.match(widgets, /getClassicHybridSourceEditControllerPort\(view\)/);
+  assert.doesNotMatch(widgets, /getClassicHybridSourceEditControllerPort\(view\)/);
+  assert.match(sourceAction, /getClassicHybridSourceEditControllerPort\(view\)/);
   assert.doesNotMatch(legacyController, /mapActiveSourceRange|selectionIntersectsRange|closeActiveSourceFromPointer|clearActiveHybridSourceRange|getActiveHybridSourceRange|setActiveHybridSourceRange/);
   assert.match(legacyController, /createHybridSourceEditController/);
   assert.match(legacyController, /createCodeMirrorSourceEditorPort/);
   assert.doesNotMatch(outside, /closeActiveSourceFromPointer|posAtCoords|view\.dispatch|contentDOM/);
 });
 
-test('Atomic 8.4 source-edit boundary remains intact after Atomic 8.5 lifecycle migration', async () => {
+test('Atomic 8.4 source-edit boundary remains intact after Atomic 8.6 Shared Widget UI extraction', async () => {
   await access(file('src/features/hybrid-editor/application/hybrid-source-edit-controller.js'));
   await access(file('src/features/hybrid-editor/lifecycle/widget-lifecycle.js'));
   await access(file('src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js'));
@@ -53,7 +55,7 @@ test('Atomic 8.4 source-edit boundary remains intact after Atomic 8.5 lifecycle 
 test('Atomic 8.4 production inventory records the new responsibility boundaries', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 339);
+  assert.equal(inventory.modules.length, 343);
   for (const path of [
     'src/features/hybrid-editor/application/hybrid-source-edit-controller.js',
     'src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js',

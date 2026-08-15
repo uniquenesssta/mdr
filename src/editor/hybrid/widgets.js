@@ -9,35 +9,23 @@ import { encodeTableCell } from '../../model-kernel/index.js';
 import {
   HYBRID_COMPONENT_MODES,
   bindOutsidePointerClosure,
-  bindSourceActivation,
+  bindWidgetSourceAction,
   bindStrictDoubleActivation,
   attachHybridWidgetLifecycle,
   destroyHybridWidgetLifecycle,
   scheduleHybridWidgetGeometry,
   closeHybridComponent,
   createHybridComponentKey,
-  getClassicHybridSourceEditControllerPort,
+  createWidgetActionGroup,
+  createWidgetButton,
+  createWidgetToolbar,
+  openWidgetSource,
   registerHybridComponentCloser,
   transitionHybridComponent
 } from '../../features/hybrid-editor/index.js';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value) || 0));
-}
-
-function editSourceBlock(view, descriptor, anchorElement = null) {
-  const sourceEditPort = getClassicHybridSourceEditControllerPort(view);
-  if (!sourceEditPort) throw new Error('Hybrid Source Edit Controller unavailable');
-  const componentType = String(descriptor?.componentType
-    || (anchorElement instanceof Element
-      ? anchorElement.closest('[data-hybrid-block-type]')?.getAttribute('data-hybrid-block-type')
-      : '')
-    || 'block');
-  const rect = anchorElement?.getBoundingClientRect?.();
-  const anchorRect = rect
-    ? { top: Number(rect.top) || 0, height: Number(rect.height) || 0 }
-    : null;
-  return sourceEditPort.open({ ...descriptor, componentType }, { anchorRect });
 }
 
 async function copyText(value) {
@@ -66,53 +54,6 @@ function recordHybridInteraction(operation, details = {}) {
     category: 'editor.hybrid',
     details
   });
-}
-
-function enableBlockSourceEditing(element, view, descriptor, options = {}) {
-  element.title = options.title || '双击编辑 Markdown 源码';
-  element.tabIndex = 0;
-
-  // A single click must never leave CodeMirror's stale caret as the keyboard target.
-  // Focus the visual component itself while preserving normal text selection and
-  // keeping the strict double-activation listener responsible for edit entry.
-  element.addEventListener('click', event => {
-    if (event.defaultPrevented || event.button !== 0 || Number(event.detail) !== 1) return;
-    if (event.target instanceof Element
-      && event.target.closest('button, a, input, textarea, select')) return;
-    element.focus({ preventScroll: true });
-  });
-
-  bindStrictDoubleActivation(element, (event, gesture) => {
-    options.onOpen?.('doubleclick', gesture);
-    editSourceBlock(view, descriptor, element);
-  }, {
-    exclude: event => {
-      if (event.target instanceof Element && event.target.closest('button, a, input, textarea, select')) return true;
-      return Boolean(options.exclude?.(event));
-    },
-    getTargetKey: event => options.getTargetKey?.(event)
-      || event.target?.closest?.('[data-hybrid-double-zone]')?.getAttribute?.('data-hybrid-double-zone')
-      || 'source-root'
-  });
-  bindSourceActivation(element, () => {
-    editSourceBlock(view, descriptor, element);
-  }, {
-    sourceKeys: options.sourceKeys
-  });
-}
-
-function createWidgetButton(label, className, onClick) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = className;
-  button.textContent = label;
-  button.addEventListener('mousedown', event => event.preventDefault());
-  button.addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
-    onClick(event);
-  });
-  return button;
 }
 
 function attachBlockLifecycle(element, view, type, extraCleanup = null) {
@@ -441,7 +382,7 @@ export class CodeBlockWidget extends WidgetType {
       editTo: this.editTo,
       preferredPosition: this.editFrom
     };
-    enableBlockSourceEditing(section, view, editDescriptor, {
+    bindWidgetSourceAction(section, view, editDescriptor, {
       sourceKeys: [],
       title: '双击直接编辑代码；点击“编辑源码”编辑 Markdown 源码',
       exclude: event => this.visualEditing
@@ -459,15 +400,13 @@ export class CodeBlockWidget extends WidgetType {
       const anchorRect = section.getBoundingClientRect();
       const committedDescriptor = activeEditor?.__markdownEditorCommitCodeBlock?.();
       requestAnimationFrame(() => {
-        editSourceBlock(view, { ...(committedDescriptor || editDescriptor), componentType: 'code' }, {
+        openWidgetSource(view, { ...(committedDescriptor || editDescriptor), componentType: 'code' }, {
           getBoundingClientRect: () => anchorRect
         });
       });
     };
 
-    const header = document.createElement('header');
-    header.className = 'cm-hybrid-block-toolbar';
-    header.dataset.hybridDoubleZone = 'code-toolbar';
+    const header = createWidgetToolbar({ doubleZone: 'code-toolbar' });
     const languageGroup = document.createElement('span');
     languageGroup.className = 'cm-hybrid-code-label-group';
     const language = document.createElement('span');
@@ -482,8 +421,7 @@ export class CodeBlockWidget extends WidgetType {
     }
     header.appendChild(languageGroup);
 
-    const actions = document.createElement('span');
-    actions.className = 'cm-hybrid-block-actions';
+    const actions = createWidgetActionGroup();
     actions.appendChild(createWidgetButton('复制', 'cm-hybrid-widget-action', async () => {
       try {
         const activeEditor = section.querySelector('[data-hybrid-code-editor]');
@@ -722,7 +660,7 @@ export class MermaidBlockWidget extends WidgetType {
       editTo: this.editTo,
       preferredPosition: this.editFrom
     };
-    enableBlockSourceEditing(section, view, editDescriptor, {
+    bindWidgetSourceAction(section, view, editDescriptor, {
       sourceKeys: [],
       title: this.visualEditing
         ? '双击直接编辑 Mermaid；点击“编辑源码”编辑 Markdown 源码'
@@ -742,15 +680,13 @@ export class MermaidBlockWidget extends WidgetType {
       const anchorRect = section.getBoundingClientRect();
       const committedDescriptor = activeEditor?.__markdownEditorCommitCodeBlock?.();
       requestAnimationFrame(() => {
-        editSourceBlock(view, { ...(committedDescriptor || editDescriptor), componentType: 'mermaid' }, {
+        openWidgetSource(view, { ...(committedDescriptor || editDescriptor), componentType: 'mermaid' }, {
           getBoundingClientRect: () => anchorRect
         });
       });
     };
 
-    const header = document.createElement('header');
-    header.className = 'cm-hybrid-block-toolbar';
-    header.dataset.hybridDoubleZone = 'mermaid-toolbar';
+    const header = createWidgetToolbar({ doubleZone: 'mermaid-toolbar' });
     const labelGroup = document.createElement('span');
     labelGroup.className = 'cm-hybrid-code-label-group';
     const label = document.createElement('span');
@@ -765,8 +701,7 @@ export class MermaidBlockWidget extends WidgetType {
     }
     header.appendChild(labelGroup);
 
-    const actions = document.createElement('span');
-    actions.className = 'cm-hybrid-block-actions';
+    const actions = createWidgetActionGroup();
     actions.appendChild(createWidgetButton('复制源码', 'cm-hybrid-widget-action', async () => {
       try {
         const activeEditor = section.querySelector('[data-hybrid-code-editor]');
@@ -955,7 +890,7 @@ export class InlineMathWidget extends WidgetType {
     span.dataset.hybridInlineMath = 'true';
     span.dataset.hybridMathFrom = String(this.from);
     renderMathInto(span, this.formula, false);
-    enableBlockSourceEditing(span, view, {
+    bindWidgetSourceAction(span, view, {
       from: this.from,
       to: this.to,
       editFrom: this.contentFrom,
@@ -1017,7 +952,7 @@ export class MathBlockWidget extends WidgetType {
       editTo: this.contentTo,
       preferredPosition: this.contentFrom
     };
-    enableBlockSourceEditing(section, view, editDescriptor, {
+    bindWidgetSourceAction(section, view, editDescriptor, {
       sourceKeys: [],
       title: '双击编辑 LaTeX 源码；也可点击“编辑源码”',
       onOpen: (trigger, gesture = {}) => recordHybridInteraction('hybrid.math-source-open', {
@@ -1029,9 +964,7 @@ export class MathBlockWidget extends WidgetType {
       })
     });
 
-    const toolbar = document.createElement('header');
-    toolbar.className = 'cm-hybrid-block-toolbar';
-    toolbar.dataset.hybridDoubleZone = 'math-toolbar';
+    const toolbar = createWidgetToolbar({ doubleZone: 'math-toolbar' });
     const label = document.createElement('span');
     label.textContent = 'LaTeX 块级公式';
     toolbar.appendChild(label);
@@ -1041,7 +974,7 @@ export class MathBlockWidget extends WidgetType {
         displayMode: true,
         trigger: 'button'
       });
-      editSourceBlock(view, editDescriptor, section);
+      openWidgetSource(view, editDescriptor, section);
     }));
     section.appendChild(toolbar);
 
@@ -1097,7 +1030,7 @@ export class HtmlBlockWidget extends WidgetType {
       editTo: this.to,
       preferredPosition: this.from
     };
-    enableBlockSourceEditing(section, view, editDescriptor, {
+    bindWidgetSourceAction(section, view, editDescriptor, {
       sourceKeys: [],
       title: '双击编辑 HTML 源码；也可点击“编辑源码”',
       exclude: event => event.target instanceof Element
@@ -1110,9 +1043,7 @@ export class HtmlBlockWidget extends WidgetType {
       })
     });
 
-    const toolbar = document.createElement('header');
-    toolbar.className = 'cm-hybrid-block-toolbar';
-    toolbar.dataset.hybridDoubleZone = 'html-toolbar';
+    const toolbar = createWidgetToolbar({ doubleZone: 'html-toolbar' });
     const label = document.createElement('span');
     label.textContent = 'HTML';
     toolbar.appendChild(label);
@@ -1121,7 +1052,7 @@ export class HtmlBlockWidget extends WidgetType {
         htmlFrom: this.from,
         trigger: 'button'
       });
-      editSourceBlock(view, editDescriptor, section);
+      openWidgetSource(view, editDescriptor, section);
     }));
     section.appendChild(toolbar);
 
@@ -1377,7 +1308,7 @@ export class TableBlockWidget extends WidgetType {
       editTo: this.editFrom,
       preferredPosition: this.editFrom
     };
-    enableBlockSourceEditing(section, view, editDescriptor, {
+    bindWidgetSourceAction(section, view, editDescriptor, {
       sourceKeys: [],
       title: this.visualEditing
         ? '双击单元格直接编辑；点击“编辑源码”编辑 Markdown 源码'
@@ -1400,15 +1331,16 @@ export class TableBlockWidget extends WidgetType {
         trigger
       });
       requestAnimationFrame(() => {
-        editSourceBlock(view, editDescriptor, {
+        openWidgetSource(view, editDescriptor, {
           getBoundingClientRect: () => anchorRect
         });
       });
     };
 
-    const toolbar = document.createElement('header');
-    toolbar.className = 'cm-hybrid-block-toolbar cm-hybrid-table-toolbar';
-    toolbar.dataset.hybridDoubleZone = 'table-toolbar';
+    const toolbar = createWidgetToolbar({
+      className: 'cm-hybrid-table-toolbar',
+      doubleZone: 'table-toolbar'
+    });
     const labelGroup = document.createElement('div');
     labelGroup.className = 'cm-hybrid-table-label-group';
     const label = document.createElement('span');
@@ -1614,17 +1546,16 @@ export class ImageBlockWidget extends WidgetType {
       editTo: this.urlTo,
       preferredPosition: this.urlFrom
     };
-    enableBlockSourceEditing(figure, view, editDescriptor);
+    bindWidgetSourceAction(figure, view, editDescriptor);
 
-    const toolbar = document.createElement('header');
-    toolbar.className = 'cm-hybrid-block-toolbar cm-hybrid-image-toolbar';
+    const toolbar = createWidgetToolbar({ className: 'cm-hybrid-image-toolbar' });
     const labelGroup = document.createElement('span');
     labelGroup.className = 'cm-hybrid-image-label';
     const label = document.createElement('span');
     label.textContent = this.alt || '图片';
     labelGroup.appendChild(label);
     toolbar.appendChild(labelGroup);
-    toolbar.appendChild(createWidgetButton('编辑源码', 'cm-hybrid-widget-action', () => editSourceBlock(view, editDescriptor, figure)));
+    toolbar.appendChild(createWidgetButton('编辑源码', 'cm-hybrid-widget-action', () => openWidgetSource(view, editDescriptor, figure)));
     figure.appendChild(toolbar);
 
     const frame = document.createElement('div');

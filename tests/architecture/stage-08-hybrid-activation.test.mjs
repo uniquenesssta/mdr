@@ -22,10 +22,13 @@ test('Atomic 8.3 has three explicit Activation owners and removes the legacy dou
 
 test('Atomic 8.3 production callers use the Hybrid Editor public entry and widgets own no document pointerdown listener', async () => {
   const widgets = await text('src/editor/hybrid/widgets.js');
+  const sourceAction = await text('src/features/hybrid-editor/widgets/shared/widget-source-action.js');
   const controller = await text('src/editor/hybrid/controller.js');
   assert.match(widgets, /features\/hybrid-editor\/index\.js/);
   assert.match(widgets, /bindStrictDoubleActivation/);
-  assert.match(widgets, /bindSourceActivation/);
+  assert.doesNotMatch(widgets, /bindSourceActivation/);
+  assert.match(sourceAction, /bindStrictDoubleActivation/);
+  assert.match(sourceAction, /bindSourceActivation/);
   assert.match(widgets, /bindOutsidePointerClosure/);
   assert.doesNotMatch(widgets, /double-activation\.js|features\/hybrid-editor\/activation\//);
   assert.doesNotMatch(widgets, /document\.addEventListener\(['"]pointerdown|document\.removeEventListener\(['"]pointerdown/);
@@ -43,13 +46,15 @@ test('Atomic 8.3 Session owns document listener disposer lifecycle without a sec
   assert.equal((session.match(/this\.current = null/g) || []).length >= 1, true);
 });
 
-test('Atomic 8.3 Activation boundary remains intact after Atomic 8.4 and production inventory advances', async () => {
+test('Atomic 8.3 Activation boundary remains intact after Atomic 8.6 Shared Widget UI extraction', async () => {
   await access(file('src/features/hybrid-editor/application/hybrid-source-edit-controller.js'));
   const widgets = await text('src/editor/hybrid/widgets.js');
-  assert.match(widgets, /function editSourceBlock\(view, descriptor, anchorElement = null\)/);
+  const sourceAction = await text('src/features/hybrid-editor/widgets/shared/widget-source-action.js');
+  assert.doesNotMatch(widgets, /function editSourceBlock\(/);
+  assert.match(sourceAction, /export function openWidgetSource\(/);
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 339);
+  assert.equal(inventory.modules.length, 343);
   assert.ok(!paths.includes('src/editor/hybrid/double-activation.js'));
   for (const path of [
     'src/features/hybrid-editor/activation/strict-double-activation.js',

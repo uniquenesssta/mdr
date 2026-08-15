@@ -50,17 +50,17 @@ test('Atomic 8.5 keeps every block widget on the shared idempotent destroy path'
   assert.match(widgets, /destroyHybridWidgetLifecycle\(element\)/);
 });
 
-test('Atomic 8.5 inventory advances exactly one net module and does not start Atomic 8.6 Shared Widget UI', async () => {
+test('Atomic 8.5 lifecycle boundary remains intact after Atomic 8.6 Shared Widget UI extraction', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 339);
+  assert.equal(inventory.modules.length, 343);
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-lifecycle.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js'));
   assert.ok(!paths.includes('src/editor/hybrid/widget-lifecycle.js'));
-  for (const pending of [
+  for (const shared of [
     'src/features/hybrid-editor/widgets/shared/widget-button.js',
     'src/features/hybrid-editor/widgets/shared/widget-toolbar.js',
     'src/features/hybrid-editor/widgets/shared/widget-focus-policy.js',
     'src/features/hybrid-editor/widgets/shared/widget-source-action.js'
-  ]) await assert.rejects(access(file(pending)), pending);
+  ]) await access(file(shared));
 });
