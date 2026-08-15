@@ -11,13 +11,14 @@ import {
   destroyHybridComponentSession,
   getClassicHybridSourceEditControllerPort,
   getHybridComponentSession,
-  mountClassicHybridSourceEditControllerPort
+  mountClassicHybridSourceEditControllerPort,
+  destroyHybridWidgetGeometryScheduler,
+  scheduleHybridWidgetGeometry
 } from '../../features/hybrid-editor/index.js';
 import {
   createCodeMirrorSourceEditorPort,
   revealHybridSourceRangeEffect
 } from '../../features/hybrid-editor/compatibility/codemirror-source-editor-port.js';
-import { scheduleHybridWidgetGeometry } from './widget-lifecycle.js';
 import {
   CodeBlockWidget,
   HtmlBlockWidget,
@@ -429,6 +430,7 @@ export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
     this.sourceEditPortMount?.destroy();
     this.sourceEditController?.destroy();
     this.sourceEditorPort?.destroy();
+    destroyHybridWidgetGeometryScheduler(this.view);
     destroyHybridComponentSession(this.view);
   }
 }, {

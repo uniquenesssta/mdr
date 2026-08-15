@@ -49,7 +49,7 @@ test('Atomic 8.3 Activation boundary remains intact after Atomic 8.4 and product
   assert.match(widgets, /function editSourceBlock\(view, descriptor, anchorElement = null\)/);
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 338);
+  assert.equal(inventory.modules.length, 339);
   assert.ok(!paths.includes('src/editor/hybrid/double-activation.js'));
   for (const path of [
     'src/features/hybrid-editor/activation/strict-double-activation.js',

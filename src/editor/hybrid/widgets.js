@@ -11,17 +11,15 @@ import {
   bindOutsidePointerClosure,
   bindSourceActivation,
   bindStrictDoubleActivation,
+  attachHybridWidgetLifecycle,
+  destroyHybridWidgetLifecycle,
+  scheduleHybridWidgetGeometry,
   closeHybridComponent,
   createHybridComponentKey,
   getClassicHybridSourceEditControllerPort,
   registerHybridComponentCloser,
   transitionHybridComponent
 } from '../../features/hybrid-editor/index.js';
-import {
-  attachHybridWidgetLifecycle,
-  destroyHybridWidgetLifecycle,
-  scheduleHybridWidgetGeometry
-} from './widget-lifecycle.js';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value) || 0));

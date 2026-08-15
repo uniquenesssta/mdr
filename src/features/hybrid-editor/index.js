@@ -37,3 +37,13 @@ export {
   getClassicHybridSourceEditControllerPort,
   mountClassicHybridSourceEditControllerPort
 } from './compatibility/classic-hybrid-source-edit-controller-port.js';
+
+export {
+  attachHybridWidgetLifecycle,
+  destroyHybridWidgetLifecycle
+} from './lifecycle/widget-lifecycle.js';
+
+export {
+  destroyHybridWidgetGeometryScheduler,
+  scheduleHybridWidgetGeometry
+} from './lifecycle/widget-geometry-scheduler.js';

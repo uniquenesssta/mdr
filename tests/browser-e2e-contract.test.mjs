@@ -62,7 +62,8 @@ test('hybrid widgets keep geometry explicit while document pointer listeners are
     readFile(new URL('../src/features/hybrid-editor/state/hybrid-component-session.js', import.meta.url), 'utf8')
   ]);
   assert.match(widgets, /scheduleHybridWidgetGeometry/);
-  assert.match(widgets, /from '\.\/widget-lifecycle\.js'/);
+  assert.doesNotMatch(widgets, /from ['"]\.\/widget-lifecycle\.js['"]/);
+  assert.match(widgets, /from ['"]\.\.\/\.\.\/features\/hybrid-editor\/index\.js['"]/);
   assert.match(widgets, /bindOutsidePointerClosure/);
   assert.doesNotMatch(widgets, /document\.addEventListener\('pointerdown'/);
   assert.doesNotMatch(widgets, /document\.removeEventListener\('pointerdown'/);
