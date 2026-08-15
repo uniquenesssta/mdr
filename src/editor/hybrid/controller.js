@@ -9,11 +9,13 @@ import {
 } from '../../model-kernel/index.js';
 import { buildInlinePresentation } from './inline-presentation.js';
 import { renderMathFormula } from '../../features/preview/render/presentation/math-presentation.js';
+import { getMermaidTheme, renderMermaidDiagram } from '../../features/preview/render/presentation/mermaid-presentation.js';
 import {
   createCodeBlockWidgetType,
   createTableBlockWidgetType,
   createImageBlockWidgetType,
   createMathBlockWidgetType,
+  createMermaidBlockWidgetType,
   createHybridSourceEditController,
   destroyHybridComponentSession,
   getClassicHybridSourceEditControllerPort,
@@ -26,10 +28,7 @@ import {
   createCodeMirrorSourceEditorPort,
   revealHybridSourceRangeEffect
 } from '../../features/hybrid-editor/compatibility/codemirror-source-editor-port.js';
-import {
-  HtmlBlockWidget,
-  MermaidBlockWidget
-} from './widgets.js';
+import { HtmlBlockWidget } from './widgets.js';
 
 const setHybridBlockDecorations = StateEffect.define();
 
@@ -185,6 +184,53 @@ const MathBlockWidget = createMathBlockWidgetType(WidgetType, {
   renderFormula: renderMathFormula,
   recordInteraction: recordMathInteraction,
   reportRenderFailure: reportMathRenderFailure
+});
+
+
+function recordMermaidInteraction(operation, details = {}) {
+  globalThis.window?.markdownEditorPerf?.record?.(operation, {
+    category: 'editor.hybrid',
+    details
+  });
+}
+
+function showMermaidToast(message) {
+  if (typeof globalThis.window?.showToast === 'function') {
+    globalThis.window.showToast(String(message || ''));
+  }
+}
+
+function reportMermaidRenderFailure(error, details = {}) {
+  reportHybridDiagnostic('hybrid.mermaid-render-failure', {
+    status: 'warning',
+    dedupeKey: `hybrid.mermaid-render-failure:${error?.name || 'Error'}`,
+    details: {
+      ...details,
+      message: error?.message || String(error || 'Mermaid 图表渲染失败')
+    }
+  });
+}
+
+function reportMermaidEditFailure(error, details = {}) {
+  reportHybridDiagnostic('hybrid.code-edit-failure', {
+    status: 'error',
+    dedupeKey: `hybrid.code-edit-failure:${error?.name || 'Error'}`,
+    details: {
+      ...details,
+      message: error?.message || String(error || '代码块写回失败')
+    }
+  });
+  showMermaidToast(error?.message || '代码块写回失败');
+}
+
+const MermaidBlockWidget = createMermaidBlockWidgetType(WidgetType, {
+  renderDiagram: renderMermaidDiagram,
+  getTheme: getMermaidTheme,
+  createHistoryAnnotation: () => isolateHistory.of('full'),
+  recordInteraction: recordMermaidInteraction,
+  notify: showMermaidToast,
+  reportRenderFailure: reportMermaidRenderFailure,
+  reportEditFailure: reportMermaidEditFailure
 });
 
 function recordSourceEditingClose(details = {}) {

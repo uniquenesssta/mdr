@@ -123,3 +123,7 @@ export {
 export {
   createMathBlockWidgetType
 } from './widgets/math/block-math-widget.js';
+
+export {
+  createMermaidBlockWidgetType
+} from './widgets/mermaid/mermaid-widget.js';

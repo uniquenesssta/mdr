@@ -64,8 +64,9 @@ test('Atomic 8.8 removes legacy Code Block authority and composes CodeMirror cap
     text('src/editor/hybrid/widgets.js'), text('src/editor/hybrid/controller.js')
   ]);
   assert.doesNotMatch(widgets, /class CodeBlockWidget|function buildCodeBlockWriteback|function createEditableCodeArea|resolveCodePointerOffset|createCodePresentationBody/);
-  assert.match(widgets, /createCodeBlockDirectEditor/);
-  assert.match(widgets, /reportLegacyFencedEditorFailure/);
+  assert.doesNotMatch(widgets, /createCodeBlockDirectEditor|reportLegacyFencedEditorFailure/);
+  const mermaidWidget = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
+  assert.match(mermaidWidget, /createCodeBlockDirectEditor/);
   assert.match(controller, /createCodeBlockWidgetType/);
   assert.match(controller, /const CodeBlockWidget = createCodeBlockWidgetType\(WidgetType/);
   assert.match(controller, /createHistoryAnnotation: \(\) => isolateHistory\.of\('full'\)/);
@@ -74,20 +75,20 @@ test('Atomic 8.8 removes legacy Code Block authority and composes CodeMirror cap
   await assert.rejects(access(file('src/editor/hybrid/code-presentation.js')));
 });
 
-test('Atomic 8.8 switches Preview and the transitional Mermaid direct editor through the Hybrid Editor public entry', async () => {
-  const [previewApi, widgets] = await Promise.all([
+test('Atomic 8.8 keeps Preview on the public code presentation and gives migrated Mermaid one canonical fenced direct-editor implementation', async () => {
+  const [previewApi, mermaidWidget] = await Promise.all([
     text('src/features/preview/render/presentation/presentation-api.js'),
-    text('src/editor/hybrid/widgets.js')
+    text('src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js')
   ]);
   assert.match(previewApi, /from '\.\.\/\.\.\/\.\.\/hybrid-editor\/index\.js'/);
   assert.doesNotMatch(previewApi, /editor\/hybrid\/code-(?:highlighter|presentation)/);
-  assert.match(widgets, /createCodeBlockDirectEditor[\s\S]*from '\.\.\/\.\.\/features\/hybrid-editor\/index\.js'/);
-  assert.doesNotMatch(widgets, /features\/hybrid-editor\/widgets\/code-block\//);
+  assert.match(mermaidWidget, /from '\.\.\/code-block\/code-block-direct-editor\.js'/);
+  assert.doesNotMatch(mermaidWidget, /editor\/hybrid\/code-(?:highlighter|presentation)/);
 });
 
 test('Atomic 8.8 Code Block ownership remains intact after Atomic 8.9 Table migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 360);
+  assert.equal(inventory.modules.length, 363);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of targetPaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/code-highlighter.js'), false);

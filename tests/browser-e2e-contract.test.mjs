@@ -56,19 +56,23 @@ test('E2E fixture loading follows the application document lifecycle', async () 
 });
 
 test('hybrid widgets keep geometry explicit while document pointer listeners are Session-owned', async () => {
-  const [widgets, tableCellEditor, outsidePointer, session] = await Promise.all([
+  const [widgets, mermaidWidget, tableCellEditor, outsidePointer, session] = await Promise.all([
     readFile(new URL('../src/editor/hybrid/widgets.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/features/hybrid-editor/widgets/table/table-cell-editor.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/features/hybrid-editor/activation/outside-pointer-closure.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/features/hybrid-editor/state/hybrid-component-session.js', import.meta.url), 'utf8')
   ]);
-  assert.match(widgets, /scheduleHybridWidgetGeometry/);
+  assert.doesNotMatch(widgets, /scheduleHybridWidgetGeometry/);
+  assert.match(mermaidWidget, /scheduleHybridWidgetGeometry/);
   assert.doesNotMatch(widgets, /from ['"]\.\/widget-lifecycle\.js['"]/);
   assert.match(widgets, /from ['"]\.\.\/\.\.\/features\/hybrid-editor\/index\.js['"]/);
   assert.doesNotMatch(widgets, /bindOutsidePointerClosure/);
   assert.match(tableCellEditor, /bindOutsidePointerClosure/);
   assert.doesNotMatch(widgets, /document\.addEventListener\('pointerdown'/);
   assert.doesNotMatch(widgets, /document\.removeEventListener\('pointerdown'/);
+  assert.doesNotMatch(mermaidWidget, /document\.addEventListener\('pointerdown'/);
+  assert.doesNotMatch(mermaidWidget, /document\.removeEventListener\('pointerdown'/);
   assert.doesNotMatch(tableCellEditor, /document\.addEventListener\('pointerdown'/);
   assert.doesNotMatch(tableCellEditor, /document\.removeEventListener\('pointerdown'/);
   assert.match(outsidePointer, /session\.registerDocumentListener/);

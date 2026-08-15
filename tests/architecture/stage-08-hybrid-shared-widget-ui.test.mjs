@@ -32,25 +32,32 @@ test('Atomic 8.6 shared primitives contain no component-type policy or state own
   assert.doesNotMatch(sourceAction, /switch\s*\(|componentType\s*===|componentType\s*!==/);
 });
 
-test('Atomic 8.6 legacy widgets consume Shared Widget UI only through the Hybrid Editor public entry', async () => {
+test('Atomic 8.6 remaining legacy HTML consumes Shared Widget UI only through the Hybrid Editor public entry', async () => {
   const widgets = await text('src/editor/hybrid/widgets.js');
   assert.match(widgets, /features\/hybrid-editor\/index\.js/);
   for (const symbol of [
-    'createWidgetButton', 'createWidgetToolbar', 'createWidgetActionGroup',
-    'bindWidgetSourceAction', 'openWidgetSource'
+    'createWidgetButton', 'createWidgetToolbar', 'bindWidgetSourceAction', 'openWidgetSource'
   ]) assert.match(widgets, new RegExp(symbol), symbol);
+  assert.doesNotMatch(widgets, /createWidgetActionGroup/);
   assert.doesNotMatch(widgets, /features\/hybrid-editor\/widgets\/shared\//);
   assert.doesNotMatch(widgets, /function createWidgetButton|function editSourceBlock|function enableBlockSourceEditing/);
 });
 
-test('Atomic 8.6 toolbar and source primitives replace only shared DOM/action mechanics while component-specific content remains local', async () => {
+test('Atomic 8.6 toolbar and source primitives remain shared after Atomic 8.12 Mermaid extraction', async () => {
   const widgets = await text('src/editor/hybrid/widgets.js');
-  assert.equal((widgets.match(/(?:const header|const toolbar) = createWidgetToolbar\(/g) || []).length, 2);
-  assert.equal((widgets.match(/createWidgetActionGroup\(/g) || []).length, 1);
-  assert.equal((widgets.match(/bindWidgetSourceAction\(/g) || []).length, 2);
-  assert.ok((widgets.match(/createWidgetButton\(/g) || []).length >= 3);
+  const mermaidActions = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-actions.js');
+  const mermaidWidget = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
+  assert.equal((widgets.match(/(?:const header|const toolbar) = createWidgetToolbar\(/g) || []).length, 1);
+  assert.equal((widgets.match(/createWidgetActionGroup\(/g) || []).length, 0);
+  assert.equal((widgets.match(/bindWidgetSourceAction\(/g) || []).length, 1);
+  assert.ok((widgets.match(/createWidgetButton\(/g) || []).length >= 1);
+  assert.match(mermaidActions, /createWidgetToolbar/);
+  assert.match(mermaidActions, /createWidgetActionGroup/);
+  assert.match(mermaidActions, /createWidgetButton/);
+  assert.match(mermaidWidget, /bindWidgetSourceAction/);
+  assert.match(mermaidWidget, /openWidgetSource/);
   assert.doesNotMatch(widgets, /document\.createElement\(['"]header['"]\)/);
-  assert.doesNotMatch(widgets, /class ImageBlockWidget|class InlineMathWidget|class MathBlockWidget/);
+  assert.doesNotMatch(widgets, /class ImageBlockWidget|class InlineMathWidget|class MathBlockWidget|class MermaidBlockWidget/);
   const imageWidget = await text('src/features/hybrid-editor/widgets/image/image-widget.js');
   for (const symbol of ['createWidgetButton', 'createWidgetToolbar', 'bindWidgetSourceAction', 'openWidgetSource']) {
     assert.match(imageWidget, new RegExp(symbol), symbol);
@@ -62,7 +69,7 @@ test('Atomic 8.6 toolbar and source primitives replace only shared DOM/action me
 test('Atomic 8.6 Shared Widget UI boundary remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 360);
+  assert.equal(inventory.modules.length, 363);
   for (const path of sharedPaths) assert.ok(paths.includes(path), path);
   const shared = await Promise.all(sharedPaths.map(path => text(path)));
   assert.doesNotMatch(shared.join('\n'), /HybridPrefixWidget|TaskCheckboxWidget|HorizontalRuleWidget/);
