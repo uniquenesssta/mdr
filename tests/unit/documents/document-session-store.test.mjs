@@ -139,10 +139,10 @@ test('Atomic 5.2 NativeDocumentStore accepts frozen records and returns native m
 });
 
 test('Atomic 5.2 production integration removes classic session-state authority and keeps the frozen DocumentModel exact', async () => {
-  const [core, exportModule, preview, bootstrap, nativeStore, entry] = await Promise.all([
+  const [core, exportModule, previewEngine, bootstrap, nativeStore, entry] = await Promise.all([
     readText('public/app/core.js'),
     readText('public/app/export.js'),
-    readText('public/app/preview.js'),
+    readText('src/features/preview/pipeline/preview-render-engine.js'),
     readText('src/bootstrap/module-entry.js'),
     readText('src/storage/native-document-store.js'),
     readText('src/features/documents/index.js')
@@ -152,15 +152,16 @@ test('Atomic 5.2 production integration removes classic session-state authority 
   assert.match(core, /markdownEditorDocumentSessionPort/);
   assert.match(exportModule, /markdownEditorDocumentSessionPort/);
   assert.doesNotMatch(exportModule, /\bcurrentDocumentId\b|\bdocuments\b/);
-  assert.match(preview, /markdownEditorDocumentSessionPort/);
-  assert.doesNotMatch(preview, /\bcurrentDocumentId\b/);
+  assert.match(previewEngine, /\bdocumentSession\b/);
+  assert.match(previewEngine, /documentSession\?\.activeId/);
+  assert.doesNotMatch(previewEngine, /markdownEditorDocumentSessionPort|\bcurrentDocumentId\b/);
   assert.match(bootstrap, /createDocumentSessionStore\(\)/);
   assert.match(bootstrap, /mountClassicDocumentSessionPort\(portsHost, documentSessionStore\)/);
   assert.doesNotMatch(nativeStore, /Object\.assign\((?:session\.)?document/);
   assert.match(nativeStore, /nativeVersion: session\.backendVersion/);
   assert.match(entry, /document-session-store\.js/);
   assert.match(entry, /classic-document-session-port\.js/);
-  const globals = core + '\n' + exportModule + '\n' + preview + '\n' + bootstrap;
+  const globals = core + '\n' + exportModule + '\n' + previewEngine + '\n' + bootstrap;
   assert.doesNotMatch(globals, /window\.markdownEditorDocumentSession/);
   const frozenHash = execFileSync('git', ['hash-object', 'src/document/document-model.js'], { cwd: ROOT, encoding: 'utf8' }).trim();
   assert.equal(frozenHash, 'd767d9025be05a6f6b87d7cd3527782db1c3303a');

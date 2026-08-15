@@ -31,27 +31,31 @@ test('Atomic 6.1 creates the public Layout feature and one scoped state owner be
   assert.ok(main.indexOf('mountClassicLayoutStatePort') < main.indexOf('for (const src of APP_MODULES)'));
 });
 
-test('all migrated classic callers use the scoped LayoutState port and no second lexical state center remains', async () => {
-  const paths = [
+test('all migrated classic callers use the scoped LayoutState port while Atomic 7.14 Preview uses direct LayoutState injection without a second state center', async () => {
+  const classicPaths = [
     'public/app/core.js',
     'public/app/bootstrap.js',
     'public/app/editor-tools.js',
     'public/app/events.js',
-    'public/app/preview.js',
     'public/app/scroll-sync.js'
   ];
-  const sources = await Promise.all(paths.map(read));
-  for (const [index, source] of sources.entries()) {
-    assert.match(source, /markdownEditorLayoutStatePort/, `${paths[index]} must depend on LayoutState port`);
+  const [classicSources, previewController] = await Promise.all([
+    Promise.all(classicPaths.map(read)),
+    read('src/features/preview/application/preview-controller.js')
+  ]);
+  for (const [index, source] of classicSources.entries()) {
+    assert.match(source, /markdownEditorLayoutStatePort/, `${classicPaths[index]} must depend on LayoutState port`);
   }
+  assert.match(previewController, /const isHybrid = \(\) => layoutState\.snapshot\.mode === 'hybrid'/);
+  assert.doesNotMatch(previewController, /markdownEditorLayoutStatePort/);
   for (const name of migratedStateDeclarations) {
-    const declaration = new RegExp(`\\b(?:let|var|const)\\s+${name}\\b`);
-    for (const [index, source] of sources.entries()) {
-      assert.doesNotMatch(source, declaration, `${paths[index]} must not redeclare ${name}`);
+    const declaration = new RegExp(`\b(?:let|var|const)\s+${name}\b`);
+    for (const [index, source] of [...classicSources, previewController].entries()) {
+      assert.doesNotMatch(source, declaration, `${index < classicPaths.length ? classicPaths[index] : 'PreviewController'} must not redeclare ${name}`);
     }
   }
-  assert.doesNotMatch(sources[0], /coreSettingsStorePort\.get\(['"]layoutMode['"]\)/);
-  assert.doesNotMatch(sources[2], /editorToolsSettingsStorePort\.get\(['"]layoutMode['"]\)/);
+  assert.doesNotMatch(classicSources[0], /coreSettingsStorePort\.get\(['"]layoutMode['"]\)/);
+  assert.doesNotMatch(classicSources[2], /editorToolsSettingsStorePort\.get\(['"]layoutMode['"]\)/);
 });
 
 test('responsive layout logic gets every current JS breakpoint from responsive-breakpoints', async () => {

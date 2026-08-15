@@ -55,11 +55,15 @@ test('Atomic 6.4 main composition remains intact after the 6.5 Toolbar Boundary 
   assert.doesNotMatch(core, /function initializeToolbarBoundaryLayout\(\)/);
 });
 
-test('Atomic 6.4 Preview keeps the LayoutState port boundary after Atomic 6.8 moves Outline visibility to its lifecycle owner', async () => {
-  const preview = await read('public/app/preview.js');
-  assert.match(preview, /const previewLayoutStatePort = previewCompatibilityHost\?\.markdownEditorLayoutStatePort/);
-  assert.match(preview, /if \(!previewLayoutStatePort\) throw new Error\('Layout State compatibility port is unavailable\.'\)/);
-  assert.doesNotMatch(preview, /if\s*\(\s*sidebarVisible\b/);
-  assert.doesNotMatch(preview, /previewLayoutStatePort\.sidebarVisible/);
-  assert.match(preview, /previewOutlineControllerPort/);
+test('Atomic 6.4 Preview keeps LayoutState and Outline boundaries after Atomic 7.14 removes the classic Preview script', async () => {
+  const [previewController, renderEngine] = await Promise.all([
+    read('src/features/preview/application/preview-controller.js'),
+    read('src/features/preview/pipeline/preview-render-engine.js')
+  ]);
+  assert.match(previewController, /layoutState\.snapshot\.mode/);
+  assert.match(previewController, /const isHybrid = \(\) => layoutState\.snapshot\.mode === 'hybrid'/);
+  assert.doesNotMatch(previewController, /markdownEditorLayoutStatePort|sidebarVisible/);
+  assert.match(renderEngine, /outline\?\.replaceIndex/);
+  assert.match(renderEngine, /outline\?\.replacePreviewBlocks/);
+  assert.doesNotMatch(renderEngine, /previewOutlineControllerPort/);
 });

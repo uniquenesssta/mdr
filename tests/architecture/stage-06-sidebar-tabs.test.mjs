@@ -14,18 +14,21 @@ test('Atomic 6.7 exposes Sidebar state/tab/compatibility through the public Side
   assert.match(index, /mountClassicSidebarControllerPort/);
 });
 
-test('Atomic 6.7 keeps classic tab state, persistence, projection and inline click authority removed', async () => {
-  const [core, bootstrap, preview, html] = await Promise.all([
-    read('public/app/core.js'), read('public/app/bootstrap.js'), read('public/app/preview.js'), read('public/compatibility/business-content.html')
+test('Atomic 6.7 keeps classic tab state, persistence and inline click authority removed after Atomic 7.14 Preview deletion', async () => {
+  const [core, bootstrap, previewController, html] = await Promise.all([
+    read('public/app/core.js'),
+    read('public/app/bootstrap.js'),
+    read('src/features/preview/application/preview-controller.js'),
+    read('public/compatibility/business-content.html')
   ]);
-  for (const source of [core, bootstrap, preview]) {
-    assert.doesNotMatch(source, /\bactiveSidebarTab\b/);
-    assert.doesNotMatch(source, /\bSIDEBAR_TAB_KEY\b/);
+  for (const source of [core, bootstrap, previewController]) {
+    assert.doesNotMatch(source, /activeSidebarTab/);
+    assert.doesNotMatch(source, /SIDEBAR_TAB_KEY/);
   }
   assert.doesNotMatch(core, /function\s+setSidebarTab\s*\(/);
   assert.doesNotMatch(html, /onclick="setSidebarTab\(/);
   assert.match(core, /markdownEditorSidebarControllerPort/);
-  assert.match(preview, /markdownEditorSidebarControllerPort/);
+  assert.doesNotMatch(previewController, /markdownEditorSidebarControllerPort/);
 });
 
 test('Atomic 6.7 composition still owns tab mount switching while Documents keeps document-list ownership', async () => {

@@ -143,10 +143,10 @@ test('stable compatibility presentation has no inline style authority', async ()
   assert.doesNotMatch(exportSource, /getElementById\('export-image-preview'\)[\s\S]{0,120}\.style\.display/);
 
   const stableStyleSources = await Promise.all([
-    'public/app/preview.js',
+    'src/features/preview/render/preview-markdown-renderer.js',
     'public/app/export.js',
-    'src/preview/preview-worker.js',
-    'src/rendering/mermaid-presentation.js',
+    'src/features/preview/worker/preview-worker.js',
+    'src/features/preview/render/presentation/mermaid-presentation.js',
     'src/editor/hybrid/widgets.js'
   ].map(readText));
   const combinedStableSources = stableStyleSources.join('\n');
@@ -159,7 +159,16 @@ test('stable compatibility presentation has no inline style authority', async ()
 });
 
 test('prefixed shell classes are visual authority while legacy classes remain bounded compatibility hooks', async () => {
-  const [shellSources, coreSource, bootstrapSource, editorToolsSource, linkPreviewSource] = await Promise.all([
+  const [
+    shellSources,
+    sidebarLayoutSource,
+    splitPaneSource,
+    sidebarResizeSource,
+    bootstrapSource,
+    editorToolsSource,
+    fullscreenSource,
+    linkPreviewSource
+  ] = await Promise.all([
     Promise.all([
       'src/ui/shell/app-shell-view.js',
       'src/ui/shell/menu-bar-shell.js',
@@ -169,13 +178,14 @@ test('prefixed shell classes are visual authority while legacy classes remain bo
       'src/ui/shell/status-bar-shell.js',
       'src/ui/shell/overlay-root.js'
     ].map(readText)),
-    readText('public/app/core.js'),
+    readText('src/features/layout/sidebar/sidebar-layout-controller.js'),
+    readText('src/features/layout/split/split-pane-controller.js'),
+    readText('src/features/layout/sidebar/sidebar-resize-controller.js'),
     readText('public/app/bootstrap.js'),
     readText('public/app/editor-tools.js'),
     readText('src/features/layout/fullscreen/page-fullscreen-controller.js'),
     readText('src/runtime/link-preview.js')
   ]);
-  const fullscreenSource = await readText('src/features/layout/fullscreen/page-fullscreen-controller.js');
   const shellSource = shellSources.join('\n');
   for (const contract of [
     "className: 'l-app-shell app'",
@@ -190,9 +200,13 @@ test('prefixed shell classes are visual authority while legacy classes remain bo
     "className: 'l-overlay-root overlay-root'"
   ]) assert.match(shellSource, new RegExp(contract.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
-  assert.match(coreSource, /classList\.toggle\('is-hidden'/);
-  assert.match(coreSource, /classList\.toggle\('is-collapsed'/);
-  assert.match(coreSource, /classList\.add\('resizing', 'sidebar-resizing', 'is-resizing', 'is-sidebar-resizing'\)/);
+  assert.match(sidebarLayoutSource, /sidebar\.classList\.toggle\('is-hidden'/);
+  assert.match(splitPaneSource, /editorPane\.classList\?\.toggle\('is-collapsed'/);
+  assert.match(splitPaneSource, /previewPane\.classList\?\.toggle\('is-collapsed'/);
+  assert.match(sidebarResizeSource, /body\.classList\.toggle\('resizing'/);
+  assert.match(sidebarResizeSource, /body\.classList\.toggle\('sidebar-resizing'/);
+  assert.match(sidebarResizeSource, /body\.classList\.toggle\('is-resizing'/);
+  assert.match(sidebarResizeSource, /body\.classList\.toggle\('is-sidebar-resizing'/);
   assert.match(fullscreenSource, /classList\.toggle\('page-fullscreen', active\)/);
   assert.match(fullscreenSource, /classList\.toggle\('is-page-fullscreen', active\)/);
   assert.match(fullscreenSource, /classList\.toggle\('page-fullscreen-active', active\)/);

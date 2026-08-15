@@ -11,24 +11,23 @@ const classicSyntaxPaths = [
   'public/app/core.js',
   'public/app/editor-tools.js',
   'public/app/events.js',
-  'public/app/preview.js',
   'public/app/web-clipper.js'
 ];
 const awaitableSource = Object.fromEntries(await Promise.all(classicSyntaxPaths.map(async path => [path, await read(path)])));
 
 test('Atomic 5.13 removes hidden textarea compatibility from production callers and presentation', async () => {
-  const [html, core, events, preview, clipper, performance, previewCss, exportCss] = await Promise.all([
+  const [html, core, events, previewEngine, clipper, performance, previewCss, exportCss] = await Promise.all([
     read('public/compatibility/business-content.html'),
     read('public/app/core.js'),
     read('public/app/events.js'),
-    read('public/app/preview.js'),
+    read('src/features/preview/pipeline/preview-render-engine.js'),
     read('public/app/web-clipper.js'),
     read('src/runtime/performance.js'),
     read('src/styles/features/preview.css'),
     read('src/styles/features/export.css')
   ]);
   assert.doesNotMatch(html, /id="preview-source"|class="preview-source"/);
-  for (const [name, source] of Object.entries({ core, events, preview, clipper })) {
+  for (const [name, source] of Object.entries({ core, events, previewEngine, clipper })) {
     assert.doesNotMatch(source, /\bpreviewSource\b|preview-source/, `${name} retains hidden textarea compatibility`);
   }
   assert.doesNotMatch(performance, /#preview-source/);
@@ -99,7 +98,6 @@ test('Atomic 5.13 modified classic scripts remain parseable before browser execu
     'public/app/core.js',
     'public/app/editor-tools.js',
     'public/app/events.js',
-    'public/app/preview.js',
     'public/app/web-clipper.js'
   ]) {
     assert.doesNotThrow(() => new Script(awaitableSource[path] || '', { filename: path }));

@@ -35,7 +35,7 @@ test('Atomic 6.8 consumes model/preview heading indexes and never reparses the f
   const [controller, builder, previewWorker] = await Promise.all([
     read('src/features/sidebar/outline/outline-controller.js'),
     read('src/features/sidebar/outline/outline-tree-builder.js'),
-    read('src/preview/preview-worker.js')
+    read('src/features/preview/worker/preview-worker.js')
   ]);
   assert.match(previewWorker, /updateHeadingIndex/);
   assert.match(previewWorker, /headingPatch/);
@@ -47,13 +47,13 @@ test('Atomic 6.8 consumes model/preview heading indexes and never reparses the f
   assert.doesNotMatch(controller, /marked\.lexer|split\(['"]\\n['"]\)/);
 });
 
-test('Atomic 6.8 removes classic Outline state/render/parser authority and routes all remaining callers through the compatibility port', async () => {
-  const [core, bootstrap, events, preview, scroll] = await Promise.all([
+test('Atomic 6.8 removes classic Outline state/render/parser authority while Atomic 7.14 Preview consumes Outline through direct injection', async () => {
+  const [core, bootstrap, events, renderEngine, scroll] = await Promise.all([
     read('public/app/core.js'), read('public/app/bootstrap.js'), read('public/app/events.js'),
-    read('public/app/preview.js'), read('public/app/scroll-sync.js')
+    read('src/features/preview/pipeline/preview-render-engine.js'), read('public/app/scroll-sync.js')
   ]);
   for (const legacy of [
-    /\boutlineDirty\b/, /\bcachedHeadings\b/, /\bcachedHeadingSource\b/, /\boutlineCollapsed\b/,
+    /outlineDirty/, /cachedHeadings/, /cachedHeadingSource/, /outlineCollapsed/,
     /function\s+renderOutline\s*\(/, /function\s+getMarkdownHeadings\s*\(/,
     /function\s+updateActiveOutlineByLine\s*\(/, /function\s+jumpToLine\s*\(/
   ]) assert.doesNotMatch(core, legacy);
@@ -61,11 +61,11 @@ test('Atomic 6.8 removes classic Outline state/render/parser authority and route
   assert.doesNotMatch(bootstrap, /parseOutlineCollapsed/);
   assert.doesNotMatch(events, /outlineDirty|cachedHeadingSource/);
   assert.match(core, /coreOutlineControllerPort\.replaceIndex/);
-  assert.match(preview, /previewOutlineControllerPort\.replaceIndex/);
-  assert.match(preview, /previewOutlineControllerPort\.replacePreviewBlocks/);
-  assert.doesNotMatch(preview, /\brenderOutline\s*\(/);
+  assert.match(renderEngine, /outline\?\.replaceIndex/);
+  assert.match(renderEngine, /outline\?\.replacePreviewBlocks/);
+  assert.doesNotMatch(renderEngine, /renderOutline\s*\(|previewOutlineControllerPort/);
   assert.match(scroll, /scrollSyncOutlineControllerPort\.updateActiveLine/);
-  assert.doesNotMatch(scroll, /\bupdateActiveOutlineByLine\s*\(/);
+  assert.doesNotMatch(scroll, /updateActiveOutlineByLine\s*\(/);
   assert.match(core, /function\s+persistCurrentDocumentIndex\s*\(/);
 });
 
