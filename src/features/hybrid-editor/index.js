@@ -25,6 +25,15 @@ export {
 } from './activation/source-activation.js';
 
 export {
-  bindOutsidePointerClosure,
-  closeActiveSourceFromPointer
+  bindOutsidePointerClosure
 } from './activation/outside-pointer-closure.js';
+
+export {
+  HybridSourceEditController,
+  createHybridSourceEditController
+} from './application/hybrid-source-edit-controller.js';
+
+export {
+  getClassicHybridSourceEditControllerPort,
+  mountClassicHybridSourceEditControllerPort
+} from './compatibility/classic-hybrid-source-edit-controller-port.js';

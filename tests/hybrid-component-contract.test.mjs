@@ -44,6 +44,7 @@ test('every visual component follows the same presentation/source lifecycle', as
 test('component widgets are wired to the shared runtime coordinator', async () => {
   const widgets = await readFile(new URL('../src/editor/hybrid/widgets.js', import.meta.url), 'utf8');
   const controller = await readFile(new URL('../src/editor/hybrid/controller.js', import.meta.url), 'utf8');
+  const sourceEditorPort = await readFile(new URL('../src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js', import.meta.url), 'utf8');
 
   for (const type of ['code', 'mermaid', 'table', 'math', 'html', 'image']) {
     assert.match(widgets, new RegExp(`componentType:\\s*['\"]${type}['\"]`), `${type} is missing a source-edit component type`);
@@ -56,6 +57,7 @@ test('component widgets are wired to the shared runtime coordinator', async () =
     );
   }
 
-  assert.match(controller, /range\s*=\s*\{\s*\.\.\.range,/, 'source range metadata must survive document changes');
+  assert.match(sourceEditorPort, /mapped\s*=\s*\{\s*\.\.\.mapped,/, 'source range metadata must survive document changes');
+  assert.match(sourceEditorPort, /transaction\.changes\.mapPos\(mapped\.from, -1\)/, 'source range positions must map through document changes');
   assert.match(controller, /destroyHybridComponentSession\(this\.view\)/, 'component session must be destroyed with the editor view');
 });

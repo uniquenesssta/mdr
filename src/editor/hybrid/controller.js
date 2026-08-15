@@ -7,22 +7,24 @@ import {
 } from '../../model-kernel/index.js';
 import { buildInlinePresentation } from './inline-presentation.js';
 import {
-  closeActiveSourceFromPointer,
+  createHybridSourceEditController,
   destroyHybridComponentSession,
-  getHybridComponentSession
+  getClassicHybridSourceEditControllerPort,
+  getHybridComponentSession,
+  mountClassicHybridSourceEditControllerPort
 } from '../../features/hybrid-editor/index.js';
+import {
+  createCodeMirrorSourceEditorPort,
+  revealHybridSourceRangeEffect
+} from '../../features/hybrid-editor/compatibility/codemirror-source-editor-port.js';
 import { scheduleHybridWidgetGeometry } from './widget-lifecycle.js';
 import {
   CodeBlockWidget,
-  clearActiveHybridSourceRange,
-  getActiveHybridSourceRange,
   HtmlBlockWidget,
   ImageBlockWidget,
   MathBlockWidget,
   MermaidBlockWidget,
-  setActiveHybridSourceRange,
-  TableBlockWidget,
-  revealHybridSourceRangeEffect
+  TableBlockWidget
 } from './widgets.js';
 
 const setHybridBlockDecorations = StateEffect.define();
@@ -91,33 +93,11 @@ function getViewDiagnosticDetails(view) {
   };
 }
 
-function selectionIntersectsRange(selection, range) {
-  if (!selection || !range) return false;
-  const from = Math.min(selection.anchor, selection.head);
-  const to = Math.max(selection.anchor, selection.head);
-  return to >= range.from && from <= range.to;
-}
-
 function recordSourceEditingClose(details = {}) {
   globalThis.window?.markdownEditorPerf?.record?.('hybrid.source-edit-close', {
     category: 'editor.hybrid',
     details
   });
-}
-
-function mapActiveSourceRange(update) {
-  let range = getActiveHybridSourceRange(update.view);
-  if (!range || !update.docChanged) return range;
-  for (const transaction of update.transactions) {
-    if (!transaction.docChanged) continue;
-    range = {
-      ...range,
-      from: transaction.changes.mapPos(range.from, -1),
-      to: transaction.changes.mapPos(range.to, 1)
-    };
-  }
-  setActiveHybridSourceRange(update.view, range);
-  return range;
 }
 
 const hybridBlockDecorationField = StateField.define({
@@ -255,7 +235,7 @@ export function buildHybridMarkdownDecorations(view) {
   try {
     const tree = syntaxTree(view.state);
     const editableRanges = getEditableRanges(view, tree);
-    const activeSourceRange = getActiveHybridSourceRange(view);
+    const activeSourceRange = getClassicHybridSourceEditControllerPort(view)?.getActiveRange() || null;
     const protectedSourceRanges = activeSourceRange ? [activeSourceRange] : [];
     const blocks = validateHybridBlocks(view, collectHybridBlocks(view, tree, protectedSourceRanges));
     const blockRanges = blocks.map(block => getBlockPresentationRange(view, block));
@@ -356,7 +336,25 @@ export function buildHybridMarkdownDecorations(view) {
 export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
     this.view = view;
-    getHybridComponentSession(view, { onTransition: recordHybridComponentTransition });
+    const hybridSession = getHybridComponentSession(view, { onTransition: recordHybridComponentTransition });
+    this.sourceEditorPort = createCodeMirrorSourceEditorPort(view, {
+      markProgrammaticScroll: (surface, durationMs) => {
+        globalThis.window?.markdownEditorScrollSync?.markProgrammaticScroll?.(surface, durationMs);
+      }
+    });
+    this.sourceEditController = createHybridSourceEditController({
+      editorPort: this.sourceEditorPort,
+      session: hybridSession,
+      requestFrame: callback => {
+        const requestFrame = globalThis.requestAnimationFrame;
+        if (typeof requestFrame === 'function') return requestFrame(callback);
+        callback();
+        return null;
+      },
+      scheduleGeometry: reason => scheduleHybridWidgetGeometry(view, reason),
+      recordClose: recordSourceEditingClose
+    });
+    this.sourceEditPortMount = mountClassicHybridSourceEditControllerPort(view, this.sourceEditController);
     this.destroyed = false;
     this.blockDispatchQueued = false;
     this.pendingBlockDecorations = Decoration.none;
@@ -401,17 +399,7 @@ export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
   }
 
   update(update) {
-    const activeSourceRange = mapActiveSourceRange(update);
-    if (activeSourceRange
-      && update.selectionSet
-      && !selectionIntersectsRange(update.state.selection.main, activeSourceRange)) {
-      clearActiveHybridSourceRange(update.view, 'selection-left', { trigger: 'selection-left' });
-      recordSourceEditingClose({
-        trigger: 'selection-left',
-        sourceFrom: activeSourceRange.from,
-        sourceTo: activeSourceRange.to
-      });
-    }
+    this.sourceEditController.handleEditorUpdate(update);
     const blockEffectOnly = update.transactions.some(transaction =>
       transaction.effects.some(effect => effect.is(setHybridBlockDecorations))
     );
@@ -438,6 +426,9 @@ export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
   destroy() {
     this.destroyed = true;
     this.blockDispatchQueued = false;
+    this.sourceEditPortMount?.destroy();
+    this.sourceEditController?.destroy();
+    this.sourceEditorPort?.destroy();
     destroyHybridComponentSession(this.view);
   }
 }, {
@@ -453,12 +444,16 @@ export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
         event.stopPropagation();
         return true;
       }
-      const activeSourceRange = getActiveHybridSourceRange(view);
-      if (!activeSourceRange) return false;
-      return closeActiveSourceFromPointer(view, event, activeSourceRange, {
-        closeSource: (reason, details) => clearActiveHybridSourceRange(view, reason, details),
-        recordClose: recordSourceEditingClose,
-        scheduleGeometry: reason => scheduleHybridWidgetGeometry(view, reason)
+      const sourceEditPort = getClassicHybridSourceEditControllerPort(view);
+      if (!sourceEditPort?.getActiveRange()) return false;
+      return sourceEditPort.closeFromPointer({
+        button: event.button,
+        x: event.clientX,
+        y: event.clientY,
+        targetIsEditorLine: event.target instanceof Element
+          && Boolean(event.target.closest('.cm-line')),
+        preventDefault: () => event.preventDefault(),
+        stopPropagation: () => event.stopPropagation()
       });
     },
     click(event) {

@@ -1,7 +1,7 @@
 /**
  * Atomic 8.3 outside-pointer closure owner.
  * Owns outside-pointer recognition plus Session-owned document-listener registration.
- * Commit/writeback, source-range ownership and editor transaction policy are injected capabilities.
+ * Source-range close and editor transaction policy belong to Atomic 8.4 Source Edit Controller.
  */
 
 import { getHybridComponentSession } from '../state/hybrid-component-session.js';
@@ -40,50 +40,4 @@ export function bindOutsidePointerClosure(view, element, onOutsidePointer, optio
     handlePointerDown,
     options.capture ?? true
   );
-}
-
-export function closeActiveSourceFromPointer(view, event, range, options = {}) {
-  if (!view || !range || event?.button !== 0) return false;
-  const clickedPosition = view.posAtCoords({ x: event.clientX, y: event.clientY });
-  const target = event.target?.closest ? event.target : null;
-  const clickedSourceLine = Boolean(target?.closest?.('.cm-line'))
-    && Number.isInteger(clickedPosition)
-    && clickedPosition >= range.from
-    && clickedPosition <= range.to;
-  if (clickedSourceLine) return false;
-
-  let fallbackPosition = Number.isInteger(clickedPosition) ? clickedPosition : null;
-  if (fallbackPosition !== null
-    && fallbackPosition >= range.from
-    && fallbackPosition <= range.to) {
-    fallbackPosition = null;
-  }
-  if (fallbackPosition === null) {
-    if (range.to < view.state.doc.length) fallbackPosition = range.to + 1;
-    else if (range.from > 0) fallbackPosition = range.from - 1;
-  }
-
-  // Preserve the frozen immediate-close rule: the source range must disappear during
-  // pointerdown before CodeMirror resolves the same pointer against changed geometry.
-  options.closeSource?.('pointer-outside-source', { trigger: 'pointer-outside-source' });
-  event.preventDefault();
-  event.stopPropagation();
-  if (fallbackPosition !== null) {
-    view.dispatch({ selection: { anchor: fallbackPosition } });
-  } else {
-    view.contentDOM.blur();
-  }
-  options.recordClose?.({
-    trigger: 'pointer-outside-source',
-    sourceFrom: range.from,
-    sourceTo: range.to,
-    fallbackPosition,
-    immediate: true
-  });
-
-  const refreshGeometry = () => options.scheduleGeometry?.('source-closed-immediate');
-  const requestFrame = options.requestAnimationFrame || globalThis.requestAnimationFrame;
-  if (typeof requestFrame === 'function') requestFrame(refreshGeometry);
-  else refreshGeometry();
-  return true;
 }

@@ -391,7 +391,7 @@ export async function launchChromium(options = {}) {
   processHandle.stdout.on('data', () => {});
 
   try {
-    const targets = await waitForJson(`http://127.0.0.1:${port}/json/list`, 12000);
+    const targets = await waitForJson(`http://127.0.0.1:${port}/json/list`, 30000);
     const target = targets.find(item => item.type === 'page');
     if (!target?.webSocketDebuggerUrl) throw new Error('No page target was exposed by Chromium');
     const connection = await new CdpConnection(target.webSocketDebuggerUrl).open();

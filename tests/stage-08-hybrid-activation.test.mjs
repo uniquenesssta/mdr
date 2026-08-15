@@ -5,7 +5,6 @@ import {
   HybridComponentSession,
   bindOutsidePointerClosure,
   bindSourceActivation,
-  closeActiveSourceFromPointer,
   getHybridComponentSession
 } from '../src/features/hybrid-editor/index.js';
 
@@ -140,55 +139,3 @@ function pointerEvent(target = null) {
     stopPropagation() { this.stopped = true; }
   };
 }
-
-test('Atomic 8.3 source outside-pointer closure keeps a pointer on a source line inside the range open', () => {
-  const view = sourceView({ position: 15 });
-  const event = pointerEvent({ closest: selector => selector === '.cm-line' ? {} : null });
-  let closes = 0;
-  const closed = closeActiveSourceFromPointer(view, event, { from: 10, to: 20 }, {
-    closeSource: () => { closes += 1; }
-  });
-  assert.equal(closed, false);
-  assert.equal(closes, 0);
-  assert.equal(event.prevented, false);
-});
-
-test('Atomic 8.3 source outside-pointer closure is immediate, preserves reason and moves selection outside range', () => {
-  const view = sourceView({ position: 50 });
-  const event = pointerEvent({ closest: () => null });
-  const closes = [];
-  const records = [];
-  const geometry = [];
-  const frames = [];
-  const closed = closeActiveSourceFromPointer(view, event, { from: 10, to: 20 }, {
-    closeSource: (reason, details) => closes.push([reason, details]),
-    recordClose: details => records.push(details),
-    scheduleGeometry: reason => geometry.push(reason),
-    requestAnimationFrame: callback => frames.push(callback)
-  });
-  assert.equal(closed, true);
-  assert.deepEqual(closes, [['pointer-outside-source', { trigger: 'pointer-outside-source' }]]);
-  assert.equal(event.prevented, true);
-  assert.equal(event.stopped, true);
-  assert.deepEqual(view.dispatches, [{ selection: { anchor: 50 } }]);
-  assert.equal(records[0].immediate, true);
-  assert.deepEqual(geometry, []);
-  frames[0]();
-  assert.deepEqual(geometry, ['source-closed-immediate']);
-});
-
-test('Atomic 8.3 source outside-pointer closure falls back beyond the source range or blurs at a full-document range', () => {
-  const first = sourceView({ docLength: 100, position: 15 });
-  closeActiveSourceFromPointer(first, pointerEvent({ closest: () => null }), { from: 10, to: 20 }, {
-    closeSource: () => {},
-    requestAnimationFrame: callback => callback()
-  });
-  assert.deepEqual(first.dispatches, [{ selection: { anchor: 21 } }]);
-
-  const whole = sourceView({ docLength: 20, position: 15 });
-  closeActiveSourceFromPointer(whole, pointerEvent({ closest: () => null }), { from: 0, to: 20 }, {
-    closeSource: () => {},
-    requestAnimationFrame: callback => callback()
-  });
-  assert.equal(whole.blurred, 1);
-});

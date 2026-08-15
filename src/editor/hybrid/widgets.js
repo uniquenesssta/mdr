@@ -1,5 +1,4 @@
 import { isolateHistory } from '@codemirror/commands';
-import { StateEffect } from '@codemirror/state';
 import { EditorView, WidgetType } from '@codemirror/view';
 import { getNormalizedCodeLanguage } from './code-highlighter.js';
 import { renderHighlightedCodeRows } from './code-presentation.js';
@@ -14,6 +13,7 @@ import {
   bindStrictDoubleActivation,
   closeHybridComponent,
   createHybridComponentKey,
+  getClassicHybridSourceEditControllerPort,
   registerHybridComponentCloser,
   transitionHybridComponent
 } from '../../features/hybrid-editor/index.js';
@@ -27,86 +27,19 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value) || 0));
 }
 
-export const revealHybridSourceRangeEffect = StateEffect.define();
-const activeHybridSourceRanges = new WeakMap();
-
-export function setActiveHybridSourceRange(view, range) {
-  if (!view) return;
-  const from = Math.max(0, Number(range?.from) || 0);
-  const to = Math.max(from + 1, Number(range?.to) || from + 1);
-  activeHybridSourceRanges.set(view, {
-    ...range,
-    from,
-    to,
-    componentType: String(range?.componentType || 'block'),
-    componentKey: String(range?.componentKey || createHybridComponentKey(range?.componentType || 'block', from))
-  });
-}
-
-export function getActiveHybridSourceRange(view) {
-  const range = view ? activeHybridSourceRanges.get(view) : null;
-  if (!range) return null;
-  const from = Math.max(0, Number(range.from) || 0);
-  const to = Math.max(from + 1, Number(range.to) || from + 1);
-  return { ...range, from, to };
-}
-
-export function clearActiveHybridSourceRange(view, reason = 'source-closed', details = {}) {
-  if (!view) return;
-  const range = activeHybridSourceRanges.get(view);
-  activeHybridSourceRanges.delete(view);
-  if (range?.componentKey) {
-    closeHybridComponent(view, range.componentKey, reason, details, HYBRID_COMPONENT_MODES.SOURCE);
-  }
-}
-
 function editSourceBlock(view, descriptor, anchorElement = null) {
-  const documentLength = view.state.doc.length;
-  const blockFrom = clamp(descriptor?.from, 0, documentLength);
-  const blockTo = clamp(descriptor?.to ?? blockFrom, blockFrom, documentLength);
-  const from = clamp(descriptor?.editFrom ?? blockFrom, blockFrom, blockTo);
-  const to = clamp(descriptor?.editTo ?? from, from, blockTo);
-  const position = clamp(descriptor?.preferredPosition ?? from, from, Math.max(from, to));
-  const scrollRect = view.scrollDOM.getBoundingClientRect();
-  const anchorRect = anchorElement?.getBoundingClientRect?.();
-  const availableHeight = Math.max(80, view.scrollDOM.clientHeight || scrollRect.height || 0);
-  const relativeTop = anchorRect ? anchorRect.top - scrollRect.top : availableHeight * 0.35;
-  const yMargin = clamp(relativeTop, 12, Math.max(12, availableHeight - 56));
-
+  const sourceEditPort = getClassicHybridSourceEditControllerPort(view);
+  if (!sourceEditPort) throw new Error('Hybrid Source Edit Controller unavailable');
   const componentType = String(descriptor?.componentType
     || (anchorElement instanceof Element
       ? anchorElement.closest('[data-hybrid-block-type]')?.getAttribute('data-hybrid-block-type')
       : '')
     || 'block');
-  const componentKey = createHybridComponentKey(componentType, blockFrom);
-  transitionHybridComponent(view, {
-    key: componentKey,
-    type: componentType,
-    from: blockFrom,
-    mode: HYBRID_COMPONENT_MODES.SOURCE,
-    reason: String(descriptor?.sourceTrigger || 'source-open'),
-    details: { sourceFrom: blockFrom, sourceTo: blockTo }
-  });
-
-  window.markdownEditorScrollSync?.markProgrammaticScroll?.('editor', 420);
-  setActiveHybridSourceRange(view, {
-    from: blockFrom,
-    to: Math.max(blockFrom + 1, blockTo),
-    componentType,
-    componentKey
-  });
-  view.focus();
-  view.dispatch({
-    selection: { anchor: from, head: to },
-    effects: [
-      revealHybridSourceRangeEffect.of({
-        from: blockFrom,
-        to: Math.max(blockFrom + 1, blockTo)
-      }),
-      EditorView.scrollIntoView(position, { y: 'start', yMargin })
-    ]
-  });
-  requestAnimationFrame(() => scheduleHybridWidgetGeometry(view, 'source-opened'));
+  const rect = anchorElement?.getBoundingClientRect?.();
+  const anchorRect = rect
+    ? { top: Number(rect.top) || 0, height: Number(rect.height) || 0 }
+    : null;
+  return sourceEditPort.open({ ...descriptor, componentType }, { anchorRect });
 }
 
 async function copyText(value) {

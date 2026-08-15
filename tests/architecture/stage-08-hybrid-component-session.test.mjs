@@ -43,13 +43,13 @@ test('Atomic 8.2 Session lifecycle remains authoritative after Atomic 8.3 Activa
   await access(file('src/features/hybrid-editor/activation/strict-double-activation.js'));
   await access(file('src/features/hybrid-editor/activation/source-activation.js'));
   await access(file('src/features/hybrid-editor/activation/outside-pointer-closure.js'));
-  await assert.rejects(access(file('src/features/hybrid-editor/application/hybrid-source-edit-controller.js')));
+  await access(file('src/features/hybrid-editor/application/hybrid-source-edit-controller.js'));
 });
 
 test('Atomic 8.2 production inventory records the facade and sole Session state owner', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 335);
+  assert.equal(inventory.modules.length, 338);
   assert.ok(paths.includes('src/features/hybrid-editor/index.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/state/hybrid-component-session.js'));
   assert.ok(!paths.includes('src/editor/hybrid/component-state.js'));

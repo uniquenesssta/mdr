@@ -29,7 +29,8 @@ test('Atomic 8.3 production callers use the Hybrid Editor public entry and widge
   assert.match(widgets, /bindOutsidePointerClosure/);
   assert.doesNotMatch(widgets, /double-activation\.js|features\/hybrid-editor\/activation\//);
   assert.doesNotMatch(widgets, /document\.addEventListener\(['"]pointerdown|document\.removeEventListener\(['"]pointerdown/);
-  assert.match(controller, /closeActiveSourceFromPointer/);
+  assert.doesNotMatch(controller, /closeActiveSourceFromPointer/);
+  assert.match(controller, /createHybridSourceEditController/);
   assert.doesNotMatch(controller, /features\/hybrid-editor\/activation\//);
 });
 
@@ -42,13 +43,13 @@ test('Atomic 8.3 Session owns document listener disposer lifecycle without a sec
   assert.equal((session.match(/this\.current = null/g) || []).length >= 1, true);
 });
 
-test('Atomic 8.3 preserves the 8.4 boundary and production inventory', async () => {
-  await assert.rejects(access(file('src/features/hybrid-editor/application/hybrid-source-edit-controller.js')));
+test('Atomic 8.3 Activation boundary remains intact after Atomic 8.4 and production inventory advances', async () => {
+  await access(file('src/features/hybrid-editor/application/hybrid-source-edit-controller.js'));
   const widgets = await text('src/editor/hybrid/widgets.js');
   assert.match(widgets, /function editSourceBlock\(view, descriptor, anchorElement = null\)/);
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 335);
+  assert.equal(inventory.modules.length, 338);
   assert.ok(!paths.includes('src/editor/hybrid/double-activation.js'));
   for (const path of [
     'src/features/hybrid-editor/activation/strict-double-activation.js',
