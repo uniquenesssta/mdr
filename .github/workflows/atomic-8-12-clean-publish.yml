@@ -108,8 +108,8 @@ jobs:
         run: |
           set -euo pipefail
           npm test | tee /tmp/node-regression.tap
-          grep -q '# tests 130' /tmp/node-regression.tap
-          grep -q '# pass 130' /tmp/node-regression.tap
+          grep -q '# tests 131' /tmp/node-regression.tap
+          grep -q '# pass 131' /tmp/node-regression.tap
           grep -q '# fail 0' /tmp/node-regression.tap
 
       - name: Architecture hard gate
@@ -146,7 +146,7 @@ jobs:
           grep -q 'Atomic 8.12' README.md
           grep -q '13/13' README.md
           grep -q 'Stage 8 140/140' README.md
-          grep -q 'Node 130/130' README.md
+          grep -q 'Node 131/131' README.md
 
       - name: Commit validated candidate on isolated branch
         shell: bash
