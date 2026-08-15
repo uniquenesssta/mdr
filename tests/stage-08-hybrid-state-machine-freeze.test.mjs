@@ -3,16 +3,16 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
   HYBRID_COMPONENT_MODES,
-  HybridComponentStateMachine,
+  HybridComponentSession,
   clearHybridComponentStates,
   closeHybridComponent,
   createHybridComponentKey,
   getHybridComponentState,
-  getHybridComponentStateMachine,
+  getHybridComponentSession,
   getHybridComponentStateSnapshot,
   registerHybridComponentCloser,
   transitionHybridComponent
-} from '../src/editor/hybrid/component-state.js';
+} from '../src/features/hybrid-editor/index.js';
 import {
   STRICT_DOUBLE_ACTIVATION_DISTANCE_PX,
   STRICT_DOUBLE_ACTIVATION_INTERVAL_MS,
@@ -65,7 +65,7 @@ test('Atomic 8.1 freezes the exact presented/direct/source mode vocabulary and r
     DIRECT: 'direct',
     SOURCE: 'source'
   });
-  const machine = new HybridComponentStateMachine();
+  const machine = new HybridComponentSession();
   assert.throws(
     () => machine.transition({ type: 'code', from: 10, mode: 'editing' }),
     /Unsupported hybrid component mode: editing/
@@ -75,7 +75,7 @@ test('Atomic 8.1 freezes the exact presented/direct/source mode vocabulary and r
 
 test('Atomic 8.1 freezes same-component presented/direct/source transitions, reasons and monotonic revisions', () => {
   let now = 100;
-  const machine = new HybridComponentStateMachine({ now: () => ++now });
+  const machine = new HybridComponentSession({ now: () => ++now });
   const key = createHybridComponentKey('Mermaid', 42);
 
   const direct = machine.transition({
@@ -111,7 +111,7 @@ test('Atomic 8.1 freezes same-component presented/direct/source transitions, rea
 
 test('Atomic 8.1 freezes cross-component mutual exclusion and superseded metadata', () => {
   const transitions = [];
-  const machine = new HybridComponentStateMachine({ onTransition: event => transitions.push(event.current) });
+  const machine = new HybridComponentSession({ onTransition: event => transitions.push(event.current) });
   machine.transition({ type: 'code', from: 10, mode: HYBRID_COMPONENT_MODES.DIRECT, reason: 'doubleclick' });
   machine.transition({ type: 'table', from: 80, mode: HYBRID_COMPONENT_MODES.SOURCE, reason: 'source-button' });
 
@@ -138,7 +138,7 @@ test('Atomic 8.1 freezes runtime closer ordering before a different component be
     reason: 'doubleclick'
   });
   registerHybridComponentCloser(view, 'code:10', event => {
-    observations.push({ event, active: getHybridComponentStateMachine(view).getActive() });
+    observations.push({ event, active: getHybridComponentSession(view).getActive() });
     closeHybridComponent(
       view,
       'code:10',
@@ -300,7 +300,7 @@ test('Atomic 8.1 freezes click-sequence reset and delayed second-click activatio
 });
 
 test('Atomic 8.1 freezes snapshots as detached read models rather than writable state authority', () => {
-  const machine = new HybridComponentStateMachine();
+  const machine = new HybridComponentSession();
   machine.transition({
     type: 'code',
     from: 10,

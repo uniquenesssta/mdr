@@ -2,7 +2,7 @@ import {
   createCodeMirrorAdapter,
   createCodeMirrorExtensionRegistry
 } from '../features/editor/index.js';
-import { getHybridComponentStateSnapshot } from './hybrid/component-state.js';
+import { getHybridComponentStateSnapshot } from '../features/hybrid-editor/index.js';
 import { getHybridMarkdownStats } from './hybrid-markdown.js';
 
 function countNonWhitespace(value) {

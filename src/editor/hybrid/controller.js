@@ -6,7 +6,10 @@ import {
   getEditableRanges
 } from '../../model-kernel/index.js';
 import { buildInlinePresentation } from './inline-presentation.js';
-import { clearHybridComponentStates } from './component-state.js';
+import {
+  destroyHybridComponentSession,
+  getHybridComponentSession
+} from '../../features/hybrid-editor/index.js';
 import { scheduleHybridWidgetGeometry } from './widget-lifecycle.js';
 import {
   CodeBlockWidget,
@@ -49,6 +52,23 @@ const EMPTY_HYBRID_STATS = Object.freeze({
   htmlBlocks: 0,
   htmlFallbackBlocks: 0
 });
+
+function recordHybridComponentTransition({ previous, current }) {
+  globalThis.window?.markdownEditorPerf?.record?.('hybrid.component-state-transition', {
+    category: 'editor.hybrid',
+    details: {
+      key: current.key,
+      componentType: current.type,
+      componentFrom: current.from,
+      previousMode: previous?.mode || null,
+      mode: current.mode,
+      reason: current.reason,
+      revision: current.revision,
+      version: current.version,
+      ...current.details
+    }
+  });
+}
 
 function reportHybridDiagnostic(operation, options = {}) {
   globalThis.window?.markdownEditorPerf?.diagnostic?.(operation, {
@@ -378,6 +398,7 @@ export function buildHybridMarkdownDecorations(view) {
 export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
     this.view = view;
+    getHybridComponentSession(view, { onTransition: recordHybridComponentTransition });
     this.destroyed = false;
     this.blockDispatchQueued = false;
     this.pendingBlockDecorations = Decoration.none;
@@ -459,7 +480,7 @@ export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
   destroy() {
     this.destroyed = true;
     this.blockDispatchQueued = false;
-    clearHybridComponentStates(this.view);
+    destroyHybridComponentSession(this.view);
   }
 }, {
   decorations: value => value.decorations,

@@ -3,15 +3,15 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
   HYBRID_COMPONENT_MODES,
-  HybridComponentStateMachine,
+  HybridComponentSession,
   createHybridComponentKey
-} from '../src/editor/hybrid/component-state.js';
+} from '../src/features/hybrid-editor/index.js';
 
 const contractUrl = new URL('./fixtures/hybrid-component-contract.json', import.meta.url);
 
 test('every visual component follows the same presentation/source lifecycle', async () => {
   const contract = JSON.parse(await readFile(contractUrl, 'utf8'));
-  const machine = new HybridComponentStateMachine();
+  const machine = new HybridComponentSession();
 
   for (let index = 0; index < contract.length; index += 1) {
     const component = contract[index];
@@ -57,5 +57,5 @@ test('component widgets are wired to the shared runtime coordinator', async () =
   }
 
   assert.match(controller, /range\s*=\s*\{\s*\.\.\.range,/, 'source range metadata must survive document changes');
-  assert.match(controller, /clearHybridComponentStates\(this\.view\)/, 'component state must be cleared with the editor view');
+  assert.match(controller, /destroyHybridComponentSession\(this\.view\)/, 'component session must be destroyed with the editor view');
 });

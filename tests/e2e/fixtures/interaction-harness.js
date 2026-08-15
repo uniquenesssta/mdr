@@ -2,16 +2,16 @@ import {
   HYBRID_COMPONENT_MODES,
   clearHybridComponentStates,
   createHybridComponentKey,
-  getHybridComponentStateMachine,
+  getHybridComponentSession,
   registerHybridComponentCloser,
   transitionHybridComponent,
   closeHybridComponent
-} from '../../../src/editor/hybrid/component-state.js';
+} from '../../../src/features/hybrid-editor/index.js';
 import { bindStrictDoubleActivation } from '../../../src/editor/hybrid/double-activation.js';
 import { clearMermaidRenderCache, renderMermaidDiagram } from '../../../src/features/preview/render/presentation/mermaid-presentation.js';
 
 const view = {};
-const machine = getHybridComponentStateMachine(view);
+const session = getHybridComponentSession(view);
 const cleanup = [];
 const logElement = document.getElementById('event-log');
 const events = [];
@@ -20,7 +20,7 @@ let layout = 'hybrid';
 function record(type, details={}) { events.push({type,details,at:performance.now()}); logElement.textContent=events.slice(-30).map(e=>`${e.type} ${JSON.stringify(e.details)}`).join('\n'); }
 function componentElement(type){ return document.querySelector(`[data-component="${type}"]`); }
 function render(type){
-  const element=componentElement(type); const state=machine.get(createHybridComponentKey(type,0)); const mode=state?.mode||'presented';
+  const element=componentElement(type); const state=session.get(createHybridComponentKey(type,0)); const mode=state?.mode||'presented';
   element.dataset.mode=mode;
   const existing=element.querySelector('textarea');
   if(mode==='presented'){
@@ -35,25 +35,26 @@ function close(type, reason='outside'){
   closeHybridComponent(view,createHybridComponentKey(type,0),reason,{componentType:type}); render(type); record('close',{type,reason});
 }
 function open(type,mode,reason){
-  transitionHybridComponent(view,{key:createHybridComponentKey(type,0),type,from:0,mode,reason});
+  const key=createHybridComponentKey(type,0);
+  transitionHybridComponent(view,{key,type,from:0,mode,reason});
+  cleanup.push(registerHybridComponentCloser(view,key,({reason='superseded'}={})=>close(type,reason)));
   for(const item of ['code','table','math']) render(item);
   record('open',{type,mode,reason});
 }
 for(const type of ['code','table','math']){
-  machine.transition({type,from:0,mode:HYBRID_COMPONENT_MODES.PRESENTED,reason:'initial'}); render(type);
+  session.transition({type,from:0,mode:HYBRID_COMPONENT_MODES.PRESENTED,reason:'initial'}); render(type);
   const key=createHybridComponentKey(type,0);
-  cleanup.push(registerHybridComponentCloser(view,key,({reason='superseded'}={})=>close(type,reason)));
   const element=componentElement(type); const body=element.querySelector('.component-body');
   if(type!=='math') cleanup.push(bindStrictDoubleActivation(body,()=>open(type,HYBRID_COMPONENT_MODES.DIRECT,'doubleclick'),{getTargetKey:e=>`${type}:${e.target.closest('[data-double-zone]')?.dataset.doubleZone||'body'}`}));
   else cleanup.push(bindStrictDoubleActivation(body,()=>open(type,HYBRID_COMPONENT_MODES.SOURCE,'doubleclick'),{getTargetKey:()=>`${type}:formula`}));
   element.querySelector('[data-source]').addEventListener('click',event=>{event.stopPropagation();open(type,HYBRID_COMPONENT_MODES.SOURCE,'button');});
 }
-document.querySelector('.outside').addEventListener('pointerdown',()=>{ const active=machine.getActive(); if(active) close(active.type,'pointer-outside'); });
-document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{ const active=machine.getActive(); if(active) close(active.type,'layout-change'); layout=button.dataset.view; record('layout',{layout}); }));
+document.querySelector('.outside').addEventListener('pointerdown',()=>{ const active=session.getActive(); if(active) close(active.type,'pointer-outside'); });
+document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{ const active=session.getActive(); if(active) close(active.type,'layout-change'); layout=button.dataset.view; record('layout',{layout}); }));
 
 window.__interactionHarness=Object.freeze({
   ready:true,
-  snapshot(){ return {layout,states:machine.snapshot(),active:machine.getActive(),events:[...events],selection:String(getSelection()?.toString()||'')}; },
+  snapshot(){ return {layout,states:session.snapshot(),active:session.getActive(),events:[...events],selection:String(getSelection()?.toString()||'')}; },
   reset(){ for(const type of ['code','table','math']) close(type,'reset'); events.length=0; layout='hybrid'; getSelection()?.removeAllRanges(); return true; },
   async renderMermaidParity(theme='default'){
     document.body.setAttribute('data-theme',theme==='dark'?'dark':'light');

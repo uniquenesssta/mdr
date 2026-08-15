@@ -14,7 +14,7 @@ import {
   createHybridComponentKey,
   registerHybridComponentCloser,
   transitionHybridComponent
-} from './component-state.js';
+} from '../../features/hybrid-editor/index.js';
 import {
   attachHybridWidgetLifecycle,
   destroyHybridWidgetLifecycle,
