@@ -2,10 +2,10 @@
     const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
     const webClipperEditorUiCommandPort = webClipperCompatibilityHost?.markdownEditorEditorUiCommandPort;
     const webClipperDocumentUiCommandPort = webClipperCompatibilityHost?.markdownEditorDocumentUiCommandPort;
-const webClipperPreviewStatePort = webClipperCompatibilityHost?.markdownEditorPreviewStatePort;
+const webClipperPreviewCommandPort = webClipperCompatibilityHost?.markdownEditorPreviewCommandPort;
     if (!webClipperEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
     if (!webClipperDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
-if (!webClipperPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
+if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
     webClipperEditorUiCommandPort.register({
       getFindSearchOptions: setStatus => createFindSearchOptions(setStatus),
       afterFindMatch: match => afterFindMatch(match)
@@ -74,8 +74,8 @@ if (!webClipperPreviewStatePort) throw new Error('Preview State compatibility po
 
     function afterFindMatch(match) {
       if (!match) return false;
-      if (webClipperPreviewStatePort.snapshot.mode === 'chapter') {
-        updatePreview().then(() => syncEditorSelectionToPreview(true));
+      if (webClipperPreviewCommandPort.snapshot.mode === 'chapter') {
+        webClipperPreviewCommandPort.update().then(() => syncEditorSelectionToPreview(true));
       } else {
         requestAnimationFrame(() => syncEditorSelectionToPreview(true));
       }
@@ -346,8 +346,8 @@ if (!webClipperPreviewStatePort) throw new Error('Preview State compatibility po
         } else {
           documentModel.replaceRange('\n\n' + markdown, currentLength, currentLength, 'end');
         }
-        updatePreview();
-        updateCount();
+        webClipperPreviewCommandPort.update();
+        webClipperPreviewCommandPort.updateCount();
         saveToLocal();
         closeUrlModal();
         showToast(t('toastInsertedMd'));

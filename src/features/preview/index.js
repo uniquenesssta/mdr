@@ -40,3 +40,14 @@ export { createVirtualHeightCache, estimateVirtualBlockHeight } from './render/v
 export { createVirtualSpacerView } from './render/virtual-window/spacer-view.js';
 export { mountClassicPreviewRendererPort } from './compatibility/classic-preview-renderer-port.js';
 export { mountClassicPreviewRecoveryViewPort } from './compatibility/classic-preview-recovery-view-port.js';
+
+export { createPreviewController } from './application/preview-controller.js';
+export { mountPreviewCommandHandler } from './application/preview-command-handler.js';
+export { createPreviewRenderEngine } from './pipeline/preview-render-engine.js';
+export { createPreviewMarkdownRenderer, collectMarkedBlockTokens } from './render/preview-markdown-renderer.js';
+export { createMarkdownPresentationApi } from './render/presentation/presentation-api.js';
+export { createMathPresentationApi, renderMathFormula, renderMathTree } from './render/presentation/math-presentation.js';
+export { createMermaidPresentationApi, renderMermaidDiagram, getMermaidTheme } from './render/presentation/mermaid-presentation.js';
+export { createPreviewWorkerClient, PreviewWorkerClient } from './worker/preview-worker-client.js';
+export { createVirtualPreviewController, VirtualPreviewController } from './virtual/virtual-preview-controller.js';
+export { mountClassicPreviewPresentationPort } from './compatibility/classic-preview-presentation-port.js';

@@ -4,15 +4,11 @@ import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
 const source = path => readFile(new URL(path, root), 'utf8');
+async function exists(path) { try { await access(new URL(path, root)); return true; } catch { return false; } }
 
-async function exists(path) {
-  try { await access(new URL(path, root)); return true; } catch { return false; }
-}
-
-test('Atomic 7.13 creates the taskbook Preview Recovery View and one scoped classic bridge', async () => {
+test('Atomic 7.13 keeps the taskbook Preview Recovery View and scoped classic bridge', async () => {
   const [entry, view, port] = await Promise.all([
-    source('src/features/preview/index.js'),
-    source('src/features/preview/ui/preview-recovery-view.js'),
+    source('src/features/preview/index.js'), source('src/features/preview/ui/preview-recovery-view.js'),
     source('src/features/preview/compatibility/classic-preview-recovery-view-port.js')
   ]);
   assert.match(entry, /createPreviewRecoveryView/);
@@ -29,31 +25,33 @@ test('Atomic 7.13 Recovery View owns recovery DOM only and never edits document 
   assert.doesNotMatch(view, /window\.|localStorage|sessionStorage|DocumentModel|previewState|beginRender|commitStable|commitDegraded|failRender|editor\.|setText|replaceRange|Worker/);
 });
 
-test('Atomic 7.13 composition mounts and destroys one Recovery View while classic preview delegates recovery presentation', async () => {
-  const [main, preview] = await Promise.all([source('src/main.js'), source('public/app/preview.js')]);
+test('Atomic 7.13 composition owns Recovery View while Atomic 7.14 RenderEngine delegates recovery presentation', async () => {
+  const [main, engine] = await Promise.all([source('src/main.js'), source('src/features/preview/pipeline/preview-render-engine.js')]);
   assert.match(main, /createPreviewRecoveryView\(\{/);
   assert.match(main, /mountClassicPreviewRecoveryViewPort\(\s*compatibilityPlatformHost,\s*previewRecoveryView\s*\)/);
   assert.match(main, /previewRecoveryViewPort\.destroy\(\)/);
   assert.match(main, /previewRecoveryView\.destroy\(\)/);
-  assert.match(preview, /markdownEditorPreviewRecoveryViewPort/);
-  assert.match(preview, /previewRecoveryViewPort\.recover\(/);
-  assert.match(preview, /previewRecoveryViewPort\.inspect\(/);
-  assert.doesNotMatch(preview, /createElement\('div'\)[\s\S]{0,240}preview-loading/);
-  assert.doesNotMatch(preview, /后台预览恢复中，编辑内容与自动保存不受影响/);
+  assert.match(engine, /recoveryView\.recover\(/);
+  assert.match(engine, /recoveryView\.inspect\(/);
+  assert.doesNotMatch(engine, /createElement\('div'\)[\s\S]{0,240}preview-loading/);
+  assert.doesNotMatch(engine, /后台预览恢复中，编辑内容与自动保存不受影响/);
 });
 
 test('Atomic 7.13 routes exhausted render fallback through degraded/error state without clearing the editor', async () => {
-  const preview = await source('public/app/preview.js');
-  assert.match(preview, /source:\s*'render'/);
-  assert.match(preview, /render-safe-fallback-stale/);
-  assert.match(preview, /render-safe-fallback-paused/);
-  assert.match(preview, /classicPreviewStatePort\.failRender\(/);
-  assert.doesNotMatch(preview, /editor\.(?:value|textContent)\s*=\s*['"]{0,1}/);
+  const engine = await source('src/features/preview/pipeline/preview-render-engine.js');
+  assert.match(engine, /safeError\(error, 'render'\)/);
+  assert.match(engine, /render-safe-fallback-stale/);
+  assert.match(engine, /render-safe-fallback-paused/);
+  assert.match(engine, /state\.failRender\(/);
+  assert.doesNotMatch(engine, /editor\.(?:value|textContent)\s*=\s*['"]{0,1}/);
 });
 
-test('Atomic 7.13 advances Recovery View only and does not start Atomic 7.14 legacy preview deletion', async () => {
+test('Atomic 7.13 Recovery View remains intact after Atomic 7.14 deletes the legacy preview pipeline', async () => {
   const tree = JSON.stringify(await readdir(new URL('src/features/preview/', root), { recursive: true }));
   assert.match(tree, /preview-recovery-view/);
-  assert.equal(await exists('public/app/preview.js'), true);
-  assert.equal(await exists('src/features/preview/application/preview-controller.js'), false);
+  assert.match(tree, /preview-controller/);
+  assert.match(tree, /preview-render-engine/);
+  assert.equal(await exists('public/app/preview.js'), false);
+  assert.equal(await exists('src/preview/preview-worker-client.js'), false);
+  assert.equal(await exists('src/preview/virtual-preview.js'), false);
 });

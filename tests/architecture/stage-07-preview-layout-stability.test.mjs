@@ -5,21 +5,19 @@ import test from 'node:test';
 const root = new URL('../../', import.meta.url);
 const source = path => readFile(new URL(path, root), 'utf8');
 
-test('Atomic 7.9 introduces one Preview Layout Stability owner for visibility, stable-size retries and geometry notifications', async () => {
-  const layout = await source('src/features/preview/pipeline/preview-layout-stability.js');
-  const entry = await source('src/features/preview/index.js');
+test('Atomic 7.9 keeps one Preview Layout Stability owner for visibility, stable-size retries and geometry notifications', async () => {
+  const [layout, entry] = await Promise.all([
+    source('src/features/preview/pipeline/preview-layout-stability.js'), source('src/features/preview/index.js')
+  ]);
   assert.match(entry, /createPreviewLayoutStability/);
-  for (const token of ['maxAttempts', 'stableFrames', 'retryMs', 'visible', 'preview-became-visible', 'preview-container-resize', 'notifyGeometryChanged']) {
-    assert.match(layout, new RegExp(token));
-  }
+  for (const token of ['maxAttempts','stableFrames','retryMs','visible','preview-became-visible','preview-container-resize','notifyGeometryChanged']) assert.match(layout, new RegExp(token));
   assert.doesNotMatch(layout, /window\.|document\.|localStorage|sessionStorage|markdownEditorVirtualPreview|markdownEditorScroll|virtual-window|focusSection|ensureLineVisible/);
   assert.doesNotMatch(layout, /new\s+ResizeObserver\s*\(/);
 });
 
-test('Atomic 7.9 composition root mounts and destroys one scoped layout stability port with frozen Stage 7 thresholds', async () => {
+test('Atomic 7.9 composition root owns and destroys one scoped layout stability port with frozen Stage 7 thresholds', async () => {
   const [main, entry, port] = await Promise.all([
-    source('src/main.js'),
-    source('src/features/preview/index.js'),
+    source('src/main.js'), source('src/features/preview/index.js'),
     source('src/features/preview/compatibility/classic-preview-layout-stability-port.js')
   ]);
   assert.match(entry, /mountClassicPreviewLayoutStabilityPort/);
@@ -31,35 +29,23 @@ test('Atomic 7.9 composition root mounts and destroys one scoped layout stabilit
   assert.match(port, /markdownEditorPreviewLayoutStabilityPort/);
 });
 
-test('Atomic 7.9 removes classic layout-stability authority and routes startup/layout transitions through the scoped port', async () => {
-  const [preview, bootstrap, editorTools] = await Promise.all([
-    source('public/app/preview.js'),
-    source('public/app/bootstrap.js'),
-    source('public/app/editor-tools.js')
+test('Atomic 7.9 layout-stability authority moves into PreviewController while classic callers use the command facade', async () => {
+  const [controller, bootstrap, editorTools] = await Promise.all([
+    source('src/features/preview/application/preview-controller.js'), source('public/app/bootstrap.js'), source('public/app/editor-tools.js')
   ]);
-  assert.match(preview, /markdownEditorPreviewLayoutStabilityPort/);
-  assert.match(preview, /previewLayoutStabilityPort\.connect\(\{/);
-  assert.match(preview, /previewLayoutStabilityPort\.cancel\(\)/);
-  for (const legacy of [
-    'getPreviewLayoutState', 'refreshPreviewViewportAfterLayout', 'refreshPreviewAfterLayout', 'initializePreviewLayoutObserver'
-  ]) assert.doesNotMatch(preview, new RegExp(`function\\s+${legacy}\\s*\\(`));
-  assert.doesNotMatch(preview, /previewLayoutObserver|previewObservedWidth|previewObservedHeight/);
-  assert.match(bootstrap, /bootstrapPreviewLayoutStabilityPort\.start\(\)/);
-  assert.match(bootstrap, /bootstrapPreviewLayoutStabilityPort\.requestRefresh\(/);
-  assert.doesNotMatch(bootstrap, /initializePreviewLayoutObserver|refreshPreviewAfterLayout/);
-  assert.match(editorTools, /editorToolsPreviewLayoutStabilityPort\.requestRefresh\(/);
-  assert.doesNotMatch(editorTools, /refreshPreviewAfterLayout/);
+  assert.match(controller, /layoutStability\.connect\(\{/);
+  assert.match(controller, /layoutStability\.start\(\)/);
+  assert.match(controller, /layoutStability\.cancel\(\)/);
+  assert.match(controller, /layoutStability\.requestRefresh/);
+  assert.match(bootstrap, /bootstrapPreviewCommandPort\.requestLayoutRefresh\(/);
+  assert.match(editorTools, /editorToolsPreviewCommandPort\.requestLayoutRefresh\(/);
+  for (const text of [controller, bootstrap, editorTools]) assert.doesNotMatch(text, /initializePreviewLayoutObserver|refreshPreviewAfterLayout/);
 });
 
-test('Atomic 7.9 permits Atomic 7.10-7.11 Virtual Window and Focus but does not enter Enhancement Coordinator ownership', async () => {
-  const featureRoot = new URL('src/features/preview/', root);
-  const entries = await readdir(featureRoot, { withFileTypes: true });
-  const paths = [];
-  for (const entry of entries) {
-    paths.push(entry.name);
-    if (!entry.isDirectory()) continue;
-    for (const child of await readdir(new URL(`${entry.name}/`, featureRoot))) paths.push(`${entry.name}/${child}`);
-  }
-  const tree = paths.join('\n');
+test('Atomic 7.9 stays isolated from Virtual Window, Focus, Enhancement and Atomic 7.14 orchestration', async () => {
+  const layout = await source('src/features/preview/pipeline/preview-layout-stability.js');
+  assert.doesNotMatch(layout, /preview-controller|preview-render-engine|preview-focus-controller|preview-enhancement-coordinator|virtual-window/);
+  const tree = JSON.stringify(await readdir(new URL('src/features/preview/', root), { recursive: true }));
+  assert.match(tree, /preview-render-engine/);
   assert.match(tree, /preview-enhancement-coordinator/);
 });

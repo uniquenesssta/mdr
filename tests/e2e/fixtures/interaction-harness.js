@@ -8,7 +8,7 @@ import {
   closeHybridComponent
 } from '../../../src/editor/hybrid/component-state.js';
 import { bindStrictDoubleActivation } from '../../../src/editor/hybrid/double-activation.js';
-import { clearMermaidRenderCache, renderMermaidDiagram } from '../../../src/rendering/mermaid-presentation.js';
+import { clearMermaidRenderCache, renderMermaidDiagram } from '../../../src/features/preview/render/presentation/mermaid-presentation.js';
 
 const view = {};
 const machine = getHybridComponentStateMachine(view);

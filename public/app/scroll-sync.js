@@ -1,8 +1,14 @@
     const scrollSyncCompatibilityHost = document.getElementById('compatibility-business-ports');
     const scrollSyncLayoutStatePort = scrollSyncCompatibilityHost?.markdownEditorLayoutStatePort;
     const scrollSyncOutlineControllerPort = scrollSyncCompatibilityHost?.markdownEditorOutlineControllerPort;
+    const scrollSyncEditorUiCommandPort = scrollSyncCompatibilityHost?.markdownEditorEditorUiCommandPort;
+    const scrollSyncPreviewCommandPort = scrollSyncCompatibilityHost?.markdownEditorPreviewCommandPort;
+    const scrollSyncPresentationPort = scrollSyncCompatibilityHost?.markdownEditorPresentationPort;
     if (!scrollSyncLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!scrollSyncOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
+    if (!scrollSyncEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+    if (!scrollSyncPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
+    if (!scrollSyncPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
     const SYNC_VIEWPORT_RATIO = 0.38;
     const SELECTION_VIEWPORT_RATIO = 0.5;
     const SELECTION_SAFE_EDGE_MIN_PX = 32;
@@ -366,8 +372,8 @@
     }
 
     function getPreviewAnchors() {
-      if (window.markdownEditorVirtualPreview?.active) {
-        previewAnchorsCache = window.markdownEditorVirtualPreview.getMountedAnchors();
+      if (scrollSyncPreviewCommandPort.virtual.active) {
+        previewAnchorsCache = scrollSyncPreviewCommandPort.virtual.getMountedAnchors();
         return previewAnchorsCache;
       }
       if (previewAnchorsCache) return previewAnchorsCache;
@@ -386,7 +392,7 @@
 
     function observePreviewBodySize() {
       if (typeof ResizeObserver === 'undefined') return;
-      if (window.markdownEditorVirtualPreview?.active) {
+      if (scrollSyncPreviewCommandPort.virtual.active) {
         previewBodyResizeObserver?.disconnect();
         observedPreviewBody = null;
         return;
@@ -411,8 +417,8 @@
 
     function getPreviewAnchorMetrics() {
       if (previewAnchorMetricsCache) return previewAnchorMetricsCache;
-      if (window.markdownEditorVirtualPreview?.active) {
-        previewAnchorMetricsCache = window.markdownEditorVirtualPreview.getMetrics() || [];
+      if (scrollSyncPreviewCommandPort.virtual.active) {
+        previewAnchorMetricsCache = scrollSyncPreviewCommandPort.virtual.getMetrics() || [];
         return previewAnchorMetricsCache;
       }
       const body = preview.querySelector('.markdown-body');
@@ -449,8 +455,8 @@
     }
 
     function sourceLineToPreviewY(lineFloat) {
-      if (window.markdownEditorVirtualPreview?.active && typeof window.markdownEditorVirtualPreview.getContentYForLine === 'function') {
-        return window.markdownEditorVirtualPreview.getContentYForLine(lineFloat);
+      if (scrollSyncPreviewCommandPort.virtual.active && typeof scrollSyncPreviewCommandPort.virtual.getContentYForLine === 'function') {
+        return scrollSyncPreviewCommandPort.virtual.getContentYForLine(lineFloat);
       }
       const metrics = getPreviewAnchorMetrics();
       if (!metrics.length) return 0;
@@ -470,8 +476,8 @@
     }
 
     function previewYToSourceLine(contentY) {
-      if (window.markdownEditorVirtualPreview?.active && typeof window.markdownEditorVirtualPreview.getLineForContentY === 'function') {
-        return window.markdownEditorVirtualPreview.getLineForContentY(contentY);
+      if (scrollSyncPreviewCommandPort.virtual.active && typeof scrollSyncPreviewCommandPort.virtual.getLineForContentY === 'function') {
+        return scrollSyncPreviewCommandPort.virtual.getLineForContentY(contentY);
       }
       const metrics = getPreviewAnchorMetrics();
       if (!metrics.length) return 1;
@@ -559,7 +565,7 @@
       let tokens = Array.isArray(providedTokens) ? providedTokens : [];
       if (!tokens.length) {
         try {
-          tokens = typeof marked !== 'undefined' && marked.lexer ? collectMarkedBlockTokens(marked.lexer(text)) : [];
+          tokens = collectMarkedBlockTokens(scrollSyncPresentationPort.markdown.lexer(text));
         } catch (_) {
           tokens = [];
         }
@@ -867,7 +873,7 @@
       clearPreviewSelectionHighlights();
       const from = Math.min(startLine, endLine);
       const to = Math.max(startLine, endLine);
-      const virtualController = window.markdownEditorVirtualPreview;
+      const virtualController = scrollSyncPreviewCommandPort.virtual;
       const targetViewportRatio = clampSelectionViewportRatio(options.viewportRatio, preview.clientHeight);
       if (virtualController?.active) {
         const inCurrentScope = virtualController.containsLineRange?.(from, to) !== false;
@@ -1370,3 +1376,30 @@
     });
 
     // 初始化：恢复内容、文件名、主题
+
+    scrollSyncEditorUiCommandPort.register({
+      preparePreviewEditorMetrics() {
+        if (editor.virtualEditor) scheduleEditorMetricsRebuild(100);
+        else {
+          const currentSource = documentModel?.createSnapshot?.('preview-metrics-source') ?? editor.value;
+          if (editorMetricText !== currentSource) {
+            editorLineIndexText = null;
+            editorMetricText = null;
+            scheduleEditorMetricsRebuild(100);
+          }
+        }
+      },
+      invalidatePreviewAnchorMetrics: () => invalidatePreviewAnchorMetrics(),
+      invalidatePreviewAnchorStructure: () => invalidatePreviewAnchorStructure(),
+      annotatePreviewSourceLines: (source, tokens) => annotatePreviewSourceLines(source, tokens),
+      refreshPreviewAnchorStructure() {
+        previewAnchorsCache = scrollSyncPreviewCommandPort.virtual.active
+          ? scrollSyncPreviewCommandPort.virtual.getMountedAnchors()
+          : Array.from(preview.querySelectorAll('[data-source-line]'));
+        observePreviewBodySize();
+        return previewAnchorsCache;
+      },
+      getPreviewAnchorMetrics: () => getPreviewAnchorMetrics(),
+      getPreviewAnchorCount: () => getPreviewAnchors().length,
+      scrollPreviewToLine: (line, behavior, viewportRatio) => scrollPreviewToLine(line, behavior, viewportRatio)
+    });

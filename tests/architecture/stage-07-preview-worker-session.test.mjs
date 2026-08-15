@@ -3,28 +3,22 @@ import { readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
+const source = path => readFile(new URL(path, root), 'utf8');
 
-async function source(path) {
-  return readFile(new URL(path, root), 'utf8');
-}
-
-test('Atomic 7.6 introduces exactly one Worker Session owner beside the protocol', async () => {
-  const workerEntries = (await readdir(new URL('src/features/preview/worker/', root))).sort();
-  assert.deepEqual(workerEntries, ['preview-worker-protocol.js', 'preview-worker-session.js']);
-
-  const session = await source('src/features/preview/worker/preview-worker-session.js');
-  const entry = await source('src/features/preview/index.js');
+test('Atomic 7.6 keeps one Worker Session owner beside canonical protocol/client/runtime modules', async () => {
+  const entries = (await readdir(new URL('src/features/preview/worker/', root))).sort();
+  for (const file of ['preview-worker-protocol.js','preview-worker-session.js','preview-worker-client.js','preview-worker.js']) assert.ok(entries.includes(file));
+  const [session, entry] = await Promise.all([
+    source('src/features/preview/worker/preview-worker-session.js'), source('src/features/preview/index.js')
+  ]);
   assert.match(entry, /preview-worker-session\.js/);
   assert.match(session, /preview-worker-protocol\.js/);
-  assert.match(session, /generation/);
-  assert.match(session, /syncedVersion/);
-  assert.match(session, /requestId/);
-  assert.match(session, /restart/);
+  for (const token of ['generation','syncedVersion','requestId','restart']) assert.match(session, new RegExp(token));
   assert.doesNotMatch(session, /document\.|localStorage|sessionStorage|marked|markdown-body|querySelector|createElement/);
 });
 
-test('legacy Worker client delegates session state and response correlation to Worker Session', async () => {
-  const client = await source('src/preview/preview-worker-client.js');
+test('canonical Worker client delegates session state and response correlation to Atomic 7.6 Worker Session', async () => {
+  const client = await source('src/features/preview/worker/preview-worker-client.js');
   assert.match(client, /createPreviewWorkerSession/);
   assert.doesNotMatch(client, /this\.workerVersion\s*=/);
   assert.doesNotMatch(client, /this\.initialized\s*=/);
@@ -35,30 +29,16 @@ test('legacy Worker client delegates session state and response correlation to W
   assert.doesNotMatch(client, /addEventListener\(['\"]error['\"]/);
 });
 
-test('Worker failure never falls through to main-thread whole-document rendering', async () => {
-  const preview = await source('public/app/preview.js');
-  assert.match(preview, /if\s*\(!patchResult\s*&&\s*workerFailed\)\s*\{/);
-  assert.doesNotMatch(
-    preview,
-    /if\s*\(!patchResult\s*&&\s*workerFailed\s*&&\s*sourceLength\s*>=\s*classicPreviewBehaviorThresholds\.mode\.virtualChars\)/
-  );
-  assert.match(preview, /if\s*\(!patchResult\s*&&\s*!workerFailed\)\s*\{/);
+test('Worker failure still never falls through to main-thread whole-document rendering after Atomic 7.14', async () => {
+  const engine = await source('src/features/preview/pipeline/preview-render-engine.js');
+  assert.match(engine, /if\s*\(!patchResult\s*&&\s*workerFailed\)\s*\{/);
+  assert.match(engine, /if\s*\(!patchResult\s*&&\s*!workerFailed\)\s*\{/);
+  const workerFallback = engine.indexOf('if (!patchResult && workerFailed)');
+  const mainFallback = engine.indexOf('if (!patchResult && !workerFailed)');
+  assert.ok(workerFallback >= 0 && mainFallback > workerFallback);
 });
 
-test('Atomic 7.6 remains intact while Atomic 7.7-7.11 may add Render Coordinator, DOM Renderers, Layout Stability, Virtual Window and Focus but not later preview owners', async () => {
-  const featureRoot = new URL('src/features/preview/', root);
-  const entries = await readdir(featureRoot, { withFileTypes: true });
-  const paths = [];
-  for (const entry of entries) {
-    paths.push(entry.name);
-    if (!entry.isDirectory()) continue;
-    for (const child of await readdir(new URL(`${entry.name}/`, featureRoot))) {
-      paths.push(`${entry.name}/${child}`);
-    }
-  }
-  const tree = paths.join('\n');
-  for (const premature of [
-  ]) {
-    assert.doesNotMatch(tree, new RegExp(premature));
-  }
+test('Atomic 7.6 session remains DOM-free after Atomic 7.14 moves Worker runtime ownership', async () => {
+  const session = await source('src/features/preview/worker/preview-worker-session.js');
+  assert.doesNotMatch(session, /preview-controller|preview-render-engine|document\.|querySelector|createElement/);
 });

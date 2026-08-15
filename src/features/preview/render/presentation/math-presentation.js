@@ -4,7 +4,7 @@ import {
   containsMarkdownMath,
   protectMarkdownMathSource,
   restoreMarkdownMathSource
-} from '../model-kernel/index.js';
+} from '../../../../model-kernel/index.js';
 
 export const katexEngine = katex;
 export const autoRenderMathInElement = renderMathInElement;

@@ -1,5 +1,8 @@
 const MERMAID_CACHE_LIMIT = 32;
 const mermaidRenderCache = new Map();
+let mermaidPromise = null;
+let initializedRenderer = null;
+let initializedTheme = null;
 let renderSerial = 0;
 
 function readCache(key) {
@@ -27,13 +30,29 @@ export function getMermaidTheme(root = globalThis.document?.body) {
 }
 
 export async function loadMermaidRenderer() {
+  // Compatibility input only: consume an already-loaded Mermaid capability without
+  // publishing or owning it. Production bundling still resolves the canonical import.
   const existing = globalThis.window?.mermaid;
-  if (existing) return existing;
-  const loader = globalThis.window?.markdownEditorVendors?.loadMermaid;
-  if (typeof loader !== 'function') throw new Error('Mermaid 渲染器不可用');
-  const renderer = await loader();
+  if (existing && typeof existing.render === 'function') return existing;
+
+  if (!mermaidPromise) {
+    mermaidPromise = import('mermaid')
+      .then(module => module.default || module)
+      .catch(error => {
+        mermaidPromise = null;
+        throw error;
+      });
+  }
+  const renderer = await mermaidPromise;
   if (!renderer || typeof renderer.render !== 'function') throw new Error('Mermaid 渲染器不可用');
   return renderer;
+}
+
+function initializeMermaidRenderer(renderer, theme) {
+  if (initializedRenderer === renderer && initializedTheme === theme) return;
+  renderer.initialize({ startOnLoad: false, theme });
+  initializedRenderer = renderer;
+  initializedTheme = theme;
 }
 
 export function normalizeMermaidSvg(container, options = {}) {
@@ -76,11 +95,7 @@ export async function renderMermaidDiagram(container, source, options = {}) {
 
   const renderer = await loadMermaidRenderer();
   if (isCancelled()) return { status: 'cancelled', theme, cached: false };
-  if (globalThis.window.__markdownEditorMermaidTheme !== theme) {
-    renderer.initialize({ startOnLoad: false, theme });
-    globalThis.window.__markdownEditorMermaidTheme = theme;
-  }
-
+  initializeMermaidRenderer(renderer, theme);
   const prefix = String(options.renderIdPrefix || 'markdown-editor-mermaid');
   const renderId = `${prefix}-${Date.now().toString(36)}-${++renderSerial}`;
   const result = await renderer.render(renderId, sourceText);

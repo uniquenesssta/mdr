@@ -1,4 +1,4 @@
-import { createPreviewWorkerSession } from '../features/preview/index.js';
+import { createPreviewWorkerSession } from './preview-worker-session.js';
 
 function createWorker() {
   return new Worker(new URL('./preview-worker.js', import.meta.url), { type: 'module' });

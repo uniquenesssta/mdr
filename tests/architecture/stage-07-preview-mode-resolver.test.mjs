@@ -3,16 +3,12 @@ import { readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
+const source = path => readFile(new URL(path, root), 'utf8');
 
-async function source(path) {
-  return readFile(new URL(path, root), 'utf8');
-}
-
-test('Atomic 7.3 Mode Resolver is a dedicated pure pipeline owner', async () => {
-  const pipelineEntries = (await readdir(new URL('src/features/preview/pipeline/', root))).sort();
-  assert.ok(pipelineEntries.includes('preview-mode-resolver.js'));
-  assert.ok(pipelineEntries.includes('preview-thresholds.js'));
-
+test('Atomic 7.3 Mode Resolver remains a dedicated pure pipeline owner', async () => {
+  const entries = (await readdir(new URL('src/features/preview/pipeline/', root))).sort();
+  assert.ok(entries.includes('preview-mode-resolver.js'));
+  assert.ok(entries.includes('preview-thresholds.js'));
   const resolver = await source('src/features/preview/pipeline/preview-mode-resolver.js');
   assert.match(resolver, /from '\.\/preview-thresholds\.js'/);
   assert.match(resolver, /normalizePreviewModeSetting/);
@@ -30,46 +26,34 @@ test('Atomic 7.3 preserves manual override before automatic character or block t
   assert.ok(manual >= 0 && chapter > manual && virtual > manual);
 });
 
-test('Atomic 7.3 classic callers consume the scoped resolver port and no longer own resolver logic', async () => {
-  const main = await source('src/main.js');
-  const core = await source('public/app/core.js');
-  const preview = await source('public/app/preview.js');
-  const publicEntry = await source('src/features/preview/index.js');
-  const port = await source('src/features/preview/compatibility/classic-preview-mode-resolver-port.js');
-
-  assert.match(publicEntry, /normalizePreviewModeSetting/);
-  assert.match(publicEntry, /resolvePreviewMode/);
-  assert.match(publicEntry, /mountClassicPreviewModeResolverPort/);
+test('Atomic 7.3 remains the only mode policy after Atomic 7.14 removes classic preview resolver logic', async () => {
+  const [main, core, entry, port, handler, engine] = await Promise.all([
+    source('src/main.js'), source('public/app/core.js'), source('src/features/preview/index.js'),
+    source('src/features/preview/compatibility/classic-preview-mode-resolver-port.js'),
+    source('src/features/preview/application/preview-command-handler.js'),
+    source('src/features/preview/pipeline/preview-render-engine.js')
+  ]);
+  assert.match(entry, /normalizePreviewModeSetting/);
+  assert.match(entry, /resolvePreviewMode/);
   assert.match(port, /markdownEditorPreviewModeResolverPort/);
   assert.doesNotMatch(port, /window\.markdownEditorPreviewModeResolver/);
-
   assert.match(main, /mountClassicPreviewModeResolverPort/);
   assert.match(main, /previewModeResolverPort\.destroy\(\)/);
-  assert.match(core, /markdownEditorPreviewModeResolverPort/);
-  assert.match(core, /corePreviewModeResolverPort\.normalizeSetting/);
-  assert.match(preview, /markdownEditorPreviewModeResolverPort/);
-  assert.match(preview, /previewModeResolverPort\.normalizeSetting/);
-  assert.match(preview, /previewModeResolverPort\.resolve/);
-
-  assert.doesNotMatch(core, /function normalizePreviewPerformanceMode/);
-  assert.doesNotMatch(core, /function resolvePreviewPerformanceMode/);
-  assert.doesNotMatch(preview, /\bresolvePreviewPerformanceMode\b|\bnormalizePreviewPerformanceMode\b/);
+  assert.match(core, /corePreviewCommandPort\.normalizePerformanceMode/);
+  assert.match(handler, /normalizePreviewModeSetting/);
+  assert.match(handler, /resolvePreviewMode/);
+  assert.match(engine, /normalizePreviewModeSetting/);
+  assert.match(engine, /resolvePreviewMode/);
+  assert.doesNotMatch(core, /function normalizePreviewPerformanceMode|function resolvePreviewPerformanceMode/);
 });
 
-test('Atomic 7.3 remains intact while later Stage 7 owners may advance through Atomic 7.12 but not 7.13 Recovery', async () => {
-  const featureTree = JSON.stringify({
-    root: (await readdir(new URL('src/features/preview/', root))).sort(),
-    application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
-    pipeline: (await readdir(new URL('src/features/preview/pipeline/', root))).sort()
-  });
-
-  for (const premature of [
-    'preview-controller',
-    'preview-worker-protocol',
-    'preview-worker-session',
-    'virtual-preview-controller',
-    'preview-dom-renderer',
-  ]) {
-    assert.doesNotMatch(featureTree, new RegExp(premature));
-  }
+test('Atomic 7.3 policy remains pure while Atomic 7.14 Controller and RenderEngine consume it', async () => {
+  const [resolver, handler, engine] = await Promise.all([
+    source('src/features/preview/pipeline/preview-mode-resolver.js'),
+    source('src/features/preview/application/preview-command-handler.js'),
+    source('src/features/preview/pipeline/preview-render-engine.js')
+  ]);
+  assert.doesNotMatch(resolver, /preview-controller|preview-render-engine|preview-command-handler/);
+  assert.match(handler, /resolvePreviewMode/);
+  assert.match(engine, /resolvePreviewMode/);
 });

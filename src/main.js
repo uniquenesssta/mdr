@@ -1,8 +1,7 @@
 import './styles/index.css';
-import './runtime/vendor.js';
 import { createPlatform, mountClassicPlatformPort } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
-import { configurePerformancePlatform } from './runtime/performance.js';
+import { configurePerformancePlatform, configurePerformanceRuntimeStats } from './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
 import {
   createEditorCommandService,
@@ -38,16 +37,14 @@ import {
 } from './features/layout/index.js';
 import {
   createDocumentModel,
-  IncrementalPreviewModel,
   selectionMappingApi
 } from './model-kernel/index.js';
-import { createPreviewWorkerClient } from './preview/preview-worker-client.js';
-import { createVirtualPreviewController } from './preview/virtual-preview.js';
 import { createNativeDocumentStore } from './storage/native-document-store.js';
-import { createTaskScheduler } from './runtime/task-scheduler.js';
+import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
+import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
+import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createScrollSyncController } from './sync/scroll-controller.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
-import { createMarkdownPresentationApi } from './rendering/presentation-api.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {
   createFolderTreeController,
@@ -87,15 +84,23 @@ import {
 } from './features/window/index.js';
 import {
   createPreviewCancellation,
+  createMarkdownPresentationApi,
+  createPreviewController,
   createPreviewEnhancementCoordinator,
   createPreviewFocusController,
   createPreviewLayoutStability,
   createPreviewRenderCoordinator,
+  createPreviewRenderEngine,
   createPreviewRendererPort,
+  createPreviewMarkdownRenderer,
   createPreviewRecoveryView,
   createPreviewScheduler,
   createPreviewState,
+  createPreviewWorkerClient,
+  createVirtualPreviewController,
   PREVIEW_BEHAVIOR_THRESHOLDS,
+  mountPreviewCommandHandler,
+  mountClassicPreviewPresentationPort,
   mountClassicPreviewEnhancementCoordinatorPort,
   mountClassicPreviewFocusControllerPort,
   mountClassicPreviewLayoutStabilityPort,
@@ -114,6 +119,10 @@ const platform = createPlatform({
   record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
 });
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
+const backgroundTaskScheduler = createTaskScheduler({ runtime: window });
+const backgroundTaskSchedulerPort = mountClassicTaskSchedulerPort(compatibilityPlatformHost, backgroundTaskScheduler);
+const markdownPresentation = createMarkdownPresentationApi();
+const previewPresentationPort = mountClassicPreviewPresentationPort(compatibilityPlatformHost, markdownPresentation, { loadDomToImage });
 const previewState = createPreviewState();
 const previewStatePort = mountClassicPreviewStatePort(compatibilityPlatformHost, previewState);
 const previewModeResolverPort = mountClassicPreviewModeResolverPort(compatibilityPlatformHost);
@@ -121,7 +130,7 @@ const previewThresholdsPort = mountClassicPreviewThresholdsPort(compatibilityPla
 const previewCancellation = createPreviewCancellation();
 const previewScheduler = createPreviewScheduler({
   cancellation: previewCancellation,
-  getBackgroundScheduler: () => window.markdownEditorTaskScheduler
+  getBackgroundScheduler: () => backgroundTaskScheduler
 });
 const previewSchedulerPort = mountClassicPreviewSchedulerPort(compatibilityPlatformHost, previewScheduler);
 const previewEnhancementCoordinator = createPreviewEnhancementCoordinator({
@@ -233,15 +242,15 @@ window.addEventListener('pagehide', () => {
   previewState.destroy();
   previewModeResolverPort.destroy();
   previewThresholdsPort.destroy();
+  previewPresentationPort.destroy();
+  backgroundTaskSchedulerPort.destroy();
+  backgroundTaskScheduler.destroy();
   compatibilityPlatformPort.destroy();
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
 }, { once: true });
 
+
 window.markdownEditorSelectionMapping = selectionMappingApi;
-const markdownPresentation = createMarkdownPresentationApi();
-window.markdownEditorPresentation = markdownPresentation;
-window.markdownEditorCodeHighlighter = window.markdownEditorPresentation.code;
-window.markdownEditorMath = window.markdownEditorPresentation.math;
 
 if (typeof document.startViewTransition === 'function') {
   document.documentElement.classList.add('view-transitions-supported');
@@ -251,7 +260,6 @@ const APP_MODULES = [
   '/app/core.js',
   '/app/scroll-sync.js',
   '/app/bootstrap.js',
-  '/app/preview.js',
   '/app/export.js',
   '/app/editor-tools.js',
   '/app/web-clipper.js',
@@ -318,10 +326,6 @@ async function loadAppModules() {
     throw error;
   }
   window.markdownEditorDocumentModel = documentModel;
-  window.IncrementalPreviewModel = IncrementalPreviewModel;
-  window.createPreviewWorkerClient = createPreviewWorkerClient;
-  window.createVirtualPreviewController = createVirtualPreviewController;
-  window.markdownEditorTaskScheduler = createTaskScheduler();
   window.markdownEditorDocumentStore = createNativeDocumentStore({
     documentStore: platform.documentStore,
     available: platform.capabilities.desktop.documentStore
@@ -335,8 +339,7 @@ async function loadAppModules() {
     storage: window.localStorage,
     nativeStore: window.markdownEditorDocumentStore,
     scheduleCleanup(task) {
-      const scheduler = window.markdownEditorTaskScheduler;
-      if (scheduler?.schedule) return scheduler.schedule('document-session-cleanup-' + Date.now(), task, {
+      if (backgroundTaskScheduler?.schedule) return backgroundTaskScheduler.schedule('document-session-cleanup-' + Date.now(), task, {
         priority: 'background',
         timeout: 1200
       });
@@ -409,6 +412,11 @@ async function loadAppModules() {
   let windowController = null;
   let previewRenderer = null;
   let previewRendererPort = null;
+  let previewMarkdownRenderer = null;
+  let previewRenderEngine = null;
+  let previewController = null;
+  let previewCommandHandler = null;
+  let unregisterPreviewEditorCommands = null;
   let documentEditorViewsDestroyed = false;
   const destroyDocumentEditorViews = () => {
     if (documentEditorViewsDestroyed) return;
@@ -473,6 +481,14 @@ async function loadAppModules() {
     editorCommandService.destroy();
     editorHistoryAdapter.destroy();
     editorController.destroy();
+    unregisterPreviewEditorCommands?.();
+    unregisterPreviewEditorCommands = null;
+    previewCommandHandler?.destroy();
+    previewCommandHandler = null;
+    previewController?.destroy();
+    previewController = null;
+    previewRenderEngine = null;
+    previewMarkdownRenderer = null;
     previewRendererPort?.destroy();
     previewRendererPort = null;
     previewRenderer?.destroy();
@@ -834,6 +850,116 @@ async function loadAppModules() {
     });
     previewRenderer.start();
     previewRendererPort = mountClassicPreviewRendererPort(compatibilityPlatformHost, previewRenderer);
+    const previewShell = Object.freeze({
+      getPreviewPerformanceMode() {
+        if (!editorUiCommandPort.has('getPreviewRuntimeSettings')) return 'auto';
+        return editorUiCommandPort.invoke('getPreviewRuntimeSettings')?.previewPerformanceMode || 'auto';
+      },
+      getEditorFontSize() {
+        if (!editorUiCommandPort.has('getPreviewRuntimeSettings')) return 16;
+        return editorUiCommandPort.invoke('getPreviewRuntimeSettings')?.editorFontSize || 16;
+      },
+      updatePreviewStrategyBadge(mode, stats) {
+        if (editorUiCommandPort.has('updatePreviewStrategyBadge')) editorUiCommandPort.invoke('updatePreviewStrategyBadge', mode, stats);
+      },
+      updateDocumentStatistics(statistics) {
+        if (editorUiCommandPort.has('updateDocumentStatistics')) editorUiCommandPort.invoke('updateDocumentStatistics', statistics);
+      },
+      persistCurrentDocumentIndex(headings, statistics) {
+        if (editorUiCommandPort.has('persistCurrentDocumentIndex')) editorUiCommandPort.invoke('persistCurrentDocumentIndex', headings, statistics);
+      },
+      preparePreviewEditorMetrics() {
+        if (editorUiCommandPort.has('preparePreviewEditorMetrics')) editorUiCommandPort.invoke('preparePreviewEditorMetrics');
+      },
+      invalidatePreviewAnchorMetrics() {
+        if (editorUiCommandPort.has('invalidatePreviewAnchorMetrics')) editorUiCommandPort.invoke('invalidatePreviewAnchorMetrics');
+      },
+      invalidatePreviewAnchorStructure() {
+        if (editorUiCommandPort.has('invalidatePreviewAnchorStructure')) editorUiCommandPort.invoke('invalidatePreviewAnchorStructure');
+      },
+      annotatePreviewSourceLines(source, tokens) {
+        if (editorUiCommandPort.has('annotatePreviewSourceLines')) return editorUiCommandPort.invoke('annotatePreviewSourceLines', source, tokens);
+        return null;
+      },
+      refreshPreviewAnchorStructure() {
+        if (editorUiCommandPort.has('refreshPreviewAnchorStructure')) return editorUiCommandPort.invoke('refreshPreviewAnchorStructure');
+        return null;
+      },
+      getPreviewAnchorMetrics() {
+        return editorUiCommandPort.has('getPreviewAnchorMetrics') ? editorUiCommandPort.invoke('getPreviewAnchorMetrics') : [];
+      },
+      getPreviewAnchorCount() {
+        return editorUiCommandPort.has('getPreviewAnchorCount') ? editorUiCommandPort.invoke('getPreviewAnchorCount') : 0;
+      },
+      scrollPreviewToLine(line, behavior, ratio) {
+        if (editorUiCommandPort.has('scrollPreviewToLine')) return editorUiCommandPort.invoke('scrollPreviewToLine', line, behavior, ratio);
+        return false;
+      },
+      requestAutoSave() {
+        if (editorUiCommandPort.has('requestAutoSave')) return editorUiCommandPort.invoke('requestAutoSave');
+        return false;
+      },
+      translate(key, ...args) { return t(key, ...args); }
+    });
+    previewMarkdownRenderer = createPreviewMarkdownRenderer({
+      documentRef: document,
+      presentation: markdownPresentation,
+      reportError(message, error) { console.warn(message, error); }
+    });
+    previewRenderEngine = createPreviewRenderEngine({
+      root: previewHost,
+      editor: editorHost,
+      documentModel,
+      documentSession: documentSessionPort,
+      outline: outlineControllerPort,
+      state: previewState,
+      scheduler: previewScheduler,
+      renderCoordinator: previewRenderCoordinator,
+      renderer: previewRenderer,
+      enhancementCoordinator: previewEnhancementCoordinator,
+      recoveryView: previewRecoveryView,
+      markdownRenderer: previewMarkdownRenderer,
+      createWorkerClient: createPreviewWorkerClient,
+      createVirtualController: createVirtualPreviewController,
+      backgroundScheduler: backgroundTaskScheduler,
+      shell: previewShell,
+      layoutState,
+      selectionController: window.markdownEditorSelectionController,
+      scrollController,
+      notify,
+      record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+      diagnostic(operation, entry) { window.markdownEditorPerf?.diagnostic?.(operation, entry); }
+    });
+    previewController = createPreviewController({
+      root: previewHost,
+      editor: editorHost,
+      documentModel,
+      layoutState,
+      state: previewState,
+      scheduler: previewScheduler,
+      layoutStability: previewLayoutStability,
+      focusController: previewFocusController,
+      enhancementCoordinator: previewEnhancementCoordinator,
+      renderer: previewRenderer,
+      recoveryView: previewRecoveryView,
+      renderEngine: previewRenderEngine,
+      presentation: markdownPresentation,
+      shell: previewShell,
+      scrollController,
+      storage: window.localStorage
+    });
+    previewController.start();
+    previewCommandHandler = mountPreviewCommandHandler(compatibilityPlatformHost, previewController);
+    unregisterPreviewEditorCommands = editorUiCommandPort.register({
+      focusPreviewLineForOutline: (line, options) => previewController.focusLine(line, options)
+    });
+    window.markdownEditorSelectionController.configure({
+      isPreviewVirtualized: () => previewController.isVirtualActive()
+    });
+    configurePerformanceRuntimeStats(() => ({
+      virtualPreview: previewController?.getVirtualStats?.() || null,
+      backgroundTasks: backgroundTaskScheduler.getStats().pending
+    }));
     closeSavePort = createCloseSavePort();
     classicCloseSavePort = mountClassicCloseSavePort(compatibilityPlatformHost, closeSavePort);
     const layoutFrameHost = document.defaultView;

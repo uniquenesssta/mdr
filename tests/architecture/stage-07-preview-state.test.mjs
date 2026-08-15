@@ -3,33 +3,30 @@ import { readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
+const source = path => readFile(new URL(path, root), 'utf8');
 
-async function source(path) {
-  return readFile(new URL(path, root), 'utf8');
-}
-
-test('Atomic 7.2 PreviewState is a dedicated DOM-free application state owner', async () => {
+test('Atomic 7.2 PreviewState remains a dedicated DOM-free application state owner', async () => {
   const applicationEntries = (await readdir(new URL('src/features/preview/application/', root))).sort();
-  assert.deepEqual(applicationEntries, ['preview-state.js']);
-
+  assert.ok(applicationEntries.includes('preview-state.js'));
+  assert.ok(applicationEntries.includes('preview-controller.js'));
+  assert.ok(applicationEntries.includes('preview-command-handler.js'));
   const state = await source('src/features/preview/application/preview-state.js');
   assert.doesNotMatch(state, /^import\s/m);
   assert.doesNotMatch(state, /\bwindow\b|\bdocument\b|localStorage|sessionStorage|requestAnimationFrame|setTimeout|Worker\s*\(/);
-  for (const field of ['mode', 'version', 'status', 'lastStableResult', 'focusSection', 'error']) {
-    assert.match(state, new RegExp(`\\b${field}\\b`));
-  }
+  for (const field of ['mode', 'version', 'status', 'lastStableResult', 'focusSection', 'error']) assert.match(state, new RegExp(`\\b${field}\\b`));
   assert.match(state, /const STABLE_RESULT_FIELDS = new Set\(\[/);
   assert.match(state, /rejectUnknownFields\(result, STABLE_RESULT_FIELDS, 'Preview stable result'\)/);
   assert.match(state, /Preview State is destroyed/);
 });
 
-test('Atomic 7.2 exposes one scoped compatibility view of the canonical state and destroys it from composition root', async () => {
-  const publicEntry = await source('src/features/preview/index.js');
-  const port = await source('src/features/preview/compatibility/classic-preview-state-port.js');
-  const main = await source('src/main.js');
-
-  assert.match(publicEntry, /createPreviewState/);
-  assert.match(publicEntry, /mountClassicPreviewStatePort/);
+test('Atomic 7.2 exposes one scoped compatibility view of canonical state and destroys it from composition root', async () => {
+  const [entry, port, main] = await Promise.all([
+    source('src/features/preview/index.js'),
+    source('src/features/preview/compatibility/classic-preview-state-port.js'),
+    source('src/main.js')
+  ]);
+  assert.match(entry, /createPreviewState/);
+  assert.match(entry, /mountClassicPreviewStatePort/);
   assert.match(port, /markdownEditorPreviewStatePort/);
   assert.doesNotMatch(port, /window\.markdownEditorPreviewState/);
   assert.match(port, /return state\.snapshot/);
@@ -41,73 +38,46 @@ test('Atomic 7.2 exposes one scoped compatibility view of the canonical state an
   assert.doesNotMatch(main, /window\.markdownEditorPreviewState/);
 });
 
-test('Atomic 7.2 removes migrated classic Preview runtime state authorities', async () => {
-  const core = await source('public/app/core.js');
-  const preview = await source('public/app/preview.js');
-  const webClipper = await source('public/app/web-clipper.js');
-  const editorTools = await source('public/app/editor-tools.js');
-
-  for (const migrated of [
-    'previewRenderVersion',
-    'activeResolvedPreviewMode',
-    'activePreviewScopeKey',
-    'activePreviewFocusChapter',
-    'previewWorkerFailureNotified'
-  ]) {
+test('Atomic 7.2 state mutations remain in PreviewState while Atomic 7.14 orchestration delegates to it', async () => {
+  const [core, engine, handler, webClipper, editorTools] = await Promise.all([
+    source('public/app/core.js'),
+    source('src/features/preview/pipeline/preview-render-engine.js'),
+    source('src/features/preview/application/preview-command-handler.js'),
+    source('public/app/web-clipper.js'),
+    source('public/app/editor-tools.js')
+  ]);
+  for (const migrated of ['previewRenderVersion','activeResolvedPreviewMode','activePreviewScopeKey','activePreviewFocusChapter','previewWorkerFailureNotified']) {
     assert.doesNotMatch(core, new RegExp(`\\b${migrated}\\b`));
-    assert.doesNotMatch(preview, new RegExp(`\\b${migrated}\\b`));
+    assert.doesNotMatch(handler, new RegExp(`\\b${migrated}\\b`));
   }
-
-  assert.match(preview, /const classicPreviewStatePort = previewCompatibilityHost\?\.markdownEditorPreviewStatePort/);
-  assert.match(preview, /classicPreviewStatePort\.beginRender\(\)/);
-  assert.match(preview, /classicPreviewStatePort\.isCurrentVersion\(renderVersion\)/);
-  assert.match(preview, /classicPreviewStatePort\.snapshot\.focusSection/);
-  assert.match(preview, /classicPreviewStatePort\.snapshot\.lastStableResult/);
-  assert.match(preview, /classicPreviewStatePort\.commitStable/);
-  assert.match(preview, /classicPreviewStatePort\.commitDegraded/);
-  assert.match(webClipper, /webClipperPreviewStatePort\.snapshot\.mode/);
-  assert.match(editorTools, /editorToolsPreviewStatePort\.snapshot\.lastStableResult/);
-
-  // Settings still owns the user's requested auto/full/virtual/chapter preference.
+  for (const method of ['beginRender','isCurrentVersion','commitStable','commitDegraded','failRender']) assert.match(engine, new RegExp(`state\\.${method}`));
+  assert.match(handler, /get snapshot\(\)[\s\S]*controller\.getStateSnapshot\(\)/);
+  assert.match(webClipper, /webClipperPreviewCommandPort\.snapshot\.mode/);
+  assert.match(editorTools, /editorToolsPreviewCommandPort\.snapshot\.lastStableResult/);
   assert.match(core, /let previewPerformanceMode = 'auto'/);
-  // Atomic 7.11 owns focus request cancellation separately from PreviewState render generation.
   assert.doesNotMatch(core, /previewLineFocusVersion|previewLineFocusTarget|previewLineFocusPromise/);
 });
 
-test('Atomic 7.2 stable metadata remains authoritative before Atomic 7.13 Recovery View presentation checks', async () => {
-  const preview = await source('public/app/preview.js');
-  const editorTools = await source('public/app/editor-tools.js');
-
-  const stableRead = preview.indexOf('const lastStableResult = classicPreviewStatePort.snapshot.lastStableResult;');
-  const recoveryInspect = preview.indexOf('const recoveryTarget = previewRecoveryViewPort.inspect();', stableRead);
-  const recoveryCall = preview.indexOf('previewRecoveryViewPort.recover({ preserveStable })', recoveryInspect);
+test('Atomic 7.2 stable metadata remains authoritative before Recovery View presentation checks after Atomic 7.14', async () => {
+  const [engine, editorTools] = await Promise.all([
+    source('src/features/preview/pipeline/preview-render-engine.js'),
+    source('public/app/editor-tools.js')
+  ]);
+  const stableRead = engine.indexOf('const lastStable = state.snapshot.lastStableResult;');
+  const recoveryInspect = engine.indexOf('recoveryView.inspect()', stableRead);
+  const recoveryCall = engine.indexOf('recoveryView.recover({ preserveStable })', recoveryInspect);
   assert.ok(stableRead >= 0);
   assert.ok(recoveryInspect > stableRead);
   assert.ok(recoveryCall > recoveryInspect);
-  assert.match(preview, /const preserveStable = Boolean\(lastStableResult && recoveryTarget\.present && !recoveryTarget\.recovery\)/);
-  assert.match(preview, /const hasStablePreview = Boolean\(classicPreviewStatePort\.snapshot\.lastStableResult\)/);
-  assert.match(editorTools, /editorToolsPreviewStatePort\.snapshot\.lastStableResult/);
-  assert.doesNotMatch(preview, /if \(lastStableResult && body && !body\.classList\.contains\('preview-loading'\)\)/);
+  assert.match(engine, /const preserveStable = Boolean\(lastStable && target\.present && !target\.recovery\)/);
+  assert.match(editorTools, /editorToolsPreviewCommandPort\.snapshot\.lastStableResult/);
 });
 
-test('Atomic 7.2 state ownership remains intact after Atomic 7.13 adds Recovery View without entering 7.14', async () => {
-  const featureTree = JSON.stringify({
-    root: (await readdir(new URL('src/features/preview/', root))).sort(),
-    application: (await readdir(new URL('src/features/preview/application/', root))).sort(),
-    pipeline: (await readdir(new URL('src/features/preview/pipeline/', root))).sort(),
-    ui: (await readdir(new URL('src/features/preview/ui/', root))).sort()
-  });
+test('Atomic 7.2 state owner stays independent of Atomic 7.13 Recovery View and Atomic 7.14 Controller', async () => {
   const state = await source('src/features/preview/application/preview-state.js');
-
-  assert.match(featureTree, /preview-recovery-view/);
-  assert.doesNotMatch(state, /preview-recovery-view|preview-loading|markdownEditorPreviewRecoveryViewPort/);
-  for (const premature of [
-    'preview-controller',
-    'preview-worker-protocol',
-    'preview-worker-session',
-    'virtual-preview-controller',
-    'preview-dom-renderer',
-  ]) {
-    assert.doesNotMatch(featureTree, new RegExp(premature));
-  }
+  const tree = JSON.stringify(await readdir(new URL('src/features/preview/', root), { recursive: true }));
+  assert.match(tree, /preview-recovery-view/);
+  assert.match(tree, /preview-controller/);
+  assert.match(tree, /preview-render-engine/);
+  assert.doesNotMatch(state, /preview-recovery-view|preview-loading|preview-controller|preview-render-engine|markdownEditorPreview/);
 });

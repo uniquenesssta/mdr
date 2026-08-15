@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "stage-01-exact-migration-regression-baseline",
-  "sourceCommit": "502785607f6df255d09d480eaa0f7fee6ebf0440",
+  "sourceCommit": "65ae0b7219cb9baae1152693eb5cfcf9ff184226",
   "policy": {
     "exactEntriesOnly": true,
     "wildcardExemptions": false,
@@ -31,11 +31,6 @@
     {
       "loader": "src/main.js",
       "script": "public/app/export.js",
-      "count": 1
-    },
-    {
-      "loader": "src/main.js",
-      "script": "public/app/preview.js",
       "count": 1
     },
     {
@@ -428,7 +423,7 @@
       "global": "window.markdownEditorDocumentStatistics",
       "count": 1,
       "lines": [
-        541
+        346
       ]
     },
     {
@@ -436,7 +431,7 @@
       "global": "window.markdownEditorRuntimeContext",
       "count": 1,
       "lines": [
-        676
+        488
       ]
     },
     {
@@ -444,15 +439,7 @@
       "global": "window.__markdownEditorInitPromise",
       "count": 1,
       "lines": [
-        423
-      ]
-    },
-    {
-      "path": "public/app/preview.js",
-      "global": "window.markdownEditorVirtualPreview",
-      "count": 1,
-      "lines": [
-        551
+        274
       ]
     },
     {
@@ -473,42 +460,10 @@
     },
     {
       "path": "src/main.js",
-      "global": "window.createPreviewWorkerClient",
-      "count": 1,
-      "lines": [
-        155
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.createVirtualPreviewController",
-      "count": 1,
-      "lines": [
-        156
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.IncrementalPreviewModel",
-      "count": 1,
-      "lines": [
-        154
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.markdownEditorCodeHighlighter",
-      "count": 1,
-      "lines": [
-        77
-      ]
-    },
-    {
-      "path": "src/main.js",
       "global": "window.markdownEditorDocumentModel",
       "count": 1,
       "lines": [
-        153
+        328
       ]
     },
     {
@@ -516,23 +471,7 @@
       "global": "window.markdownEditorDocumentStore",
       "count": 1,
       "lines": [
-        159
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.markdownEditorMath",
-      "count": 1,
-      "lines": [
-        78
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.markdownEditorPresentation",
-      "count": 1,
-      "lines": [
-        76
+        329
       ]
     },
     {
@@ -540,7 +479,7 @@
       "global": "window.markdownEditorScrollController",
       "count": 1,
       "lines": [
-        118
+        293
       ]
     },
     {
@@ -548,7 +487,7 @@
       "global": "window.markdownEditorScrollSync",
       "count": 1,
       "lines": [
-        119
+        294
       ]
     },
     {
@@ -556,7 +495,7 @@
       "global": "window.markdownEditorSelectionController",
       "count": 1,
       "lines": [
-        120
+        295
       ]
     },
     {
@@ -564,23 +503,7 @@
       "global": "window.markdownEditorSelectionMapping",
       "count": 1,
       "lines": [
-        75
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.markdownEditorTaskScheduler",
-      "count": 1,
-      "lines": [
-        158
-      ]
-    },
-    {
-      "path": "src/rendering/mermaid-presentation.js",
-      "global": "window.__markdownEditorMermaidTheme",
-      "count": 1,
-      "lines": [
-        81
+        253
       ]
     },
     {
@@ -612,63 +535,7 @@
       "global": "window.markdownEditorPerf",
       "count": 1,
       "lines": [
-        633
-      ]
-    },
-    {
-      "path": "src/runtime/vendor.js",
-      "global": "window.domtoimage",
-      "count": 1,
-      "lines": [
-        36
-      ]
-    },
-    {
-      "path": "src/runtime/vendor.js",
-      "global": "window.katex",
-      "count": 1,
-      "lines": [
-        50
-      ]
-    },
-    {
-      "path": "src/runtime/vendor.js",
-      "global": "window.markdownEditorMath",
-      "count": 1,
-      "lines": [
-        52
-      ]
-    },
-    {
-      "path": "src/runtime/vendor.js",
-      "global": "window.markdownEditorVendors",
-      "count": 1,
-      "lines": [
-        53
-      ]
-    },
-    {
-      "path": "src/runtime/vendor.js",
-      "global": "window.marked",
-      "count": 1,
-      "lines": [
-        49
-      ]
-    },
-    {
-      "path": "src/runtime/vendor.js",
-      "global": "window.mermaid",
-      "count": 1,
-      "lines": [
-        20
-      ]
-    },
-    {
-      "path": "src/runtime/vendor.js",
-      "global": "window.renderMathInElement",
-      "count": 1,
-      "lines": [
-        51
+        640
       ]
     }
   ],

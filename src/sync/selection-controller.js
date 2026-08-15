@@ -257,7 +257,7 @@ export class SelectionSyncController {
       result: status,
       selectionLength: Number(result?.selectionLength) || 0,
       matchedAnchors: Number(result?.matchedAnchors) || 0,
-      virtualized: Boolean(window.markdownEditorVirtualPreview?.active),
+      virtualized: Boolean(this.callbacks.isPreviewVirtualized?.()),
       previewRevision: this.previewRevision,
       sourceViewportRatio: Number.isFinite(result?.sourceViewportRatio)
         ? Number(result.sourceViewportRatio.toFixed(3))

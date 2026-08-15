@@ -5,11 +5,13 @@
     const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
     const eventsCloseSavePort = eventsCompatibilityHost?.markdownEditorCloseSavePort;
     const eventsLayoutStatePort = eventsCompatibilityHost?.markdownEditorLayoutStatePort;
+    const eventsPreviewCommandPort = eventsCompatibilityHost?.markdownEditorPreviewCommandPort;
     if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
     if (!eventsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
     if (!eventsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
     if (!eventsCloseSavePort) throw new Error('CloseSavePort compatibility port is unavailable.');
     if (!eventsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
+    if (!eventsPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
 
     eventsEditorControllerPort.subscribeTransactions(transaction => {
       if (!transaction.interactive) return;
@@ -18,12 +20,12 @@
       editorMetricText = null;
       updateLargeDocumentMode();
       scheduleEditorMetricsRebuild(120);
-      schedulePreviewUpdate();
-      scheduleCountUpdate();
+      eventsPreviewCommandPort.scheduleUpdate();
+      eventsPreviewCommandPort.scheduleCountUpdate();
       autoSave();
     });
     eventsEditorUiCommandPort.register({
-      selectionChanged: () => schedulePreviewFocusUpdate()
+      selectionChanged: () => eventsPreviewCommandPort.scheduleFocusUpdate()
     });
 
 

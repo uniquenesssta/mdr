@@ -13,8 +13,8 @@ const coreSidebarControllerPort = coreCompatibilityHost?.markdownEditorSidebarCo
 const coreOutlineControllerPort = coreCompatibilityHost?.markdownEditorOutlineControllerPort;
 const coreFolderTreeControllerPort = coreCompatibilityHost?.markdownEditorFolderTreeControllerPort;
 const coreSubmenuPositionerPort = coreCompatibilityHost?.markdownEditorSubmenuPositionerPort;
-const corePreviewModeResolverPort = coreCompatibilityHost?.markdownEditorPreviewModeResolverPort;
-const corePreviewThresholdsPort = coreCompatibilityHost?.markdownEditorPreviewThresholdsPort;
+const corePreviewCommandPort = coreCompatibilityHost?.markdownEditorPreviewCommandPort;
+const coreTaskSchedulerPort = coreCompatibilityHost?.markdownEditorTaskSchedulerPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -28,9 +28,9 @@ if (!coreSidebarControllerPort) throw new Error('Sidebar controller compatibilit
 if (!coreOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
 if (!coreFolderTreeControllerPort) throw new Error('Folder Tree controller compatibility port is unavailable.');
 if (!coreSubmenuPositionerPort) throw new Error('Submenu Positioner compatibility port is unavailable.');
-if (!corePreviewModeResolverPort) throw new Error('Preview Mode Resolver compatibility port is unavailable.');
-if (!corePreviewThresholdsPort) throw new Error('Preview Thresholds compatibility port is unavailable.');
-const corePreviewBehaviorThresholds = corePreviewThresholdsPort.snapshot;
+if (!corePreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
+if (!coreTaskSchedulerPort) throw new Error('Task Scheduler compatibility port is unavailable.');
+const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
   closeDocument: documentId => closeDocument(documentId),
@@ -104,7 +104,7 @@ const editor = document.getElementById('editor');
     function updatePreviewStrategyBadge(mode = 'full', details = {}) {
       const badge = document.getElementById('preview-strategy-badge');
       if (!badge) return;
-      const resolved = corePreviewModeResolverPort.normalizeSetting(mode === 'standard' ? 'full' : mode);
+      const resolved = corePreviewCommandPort.normalizePerformanceMode(mode === 'standard' ? 'full' : mode);
       const labels = { full: '完整预览', virtual: '虚拟预览', chapter: '当前章节' };
       const shouldShow = resolved !== 'full' || previewPerformanceMode !== 'auto' || editor.textLength >= corePreviewBehaviorThresholds.mode.badgeChars;
       badge.hidden = !shouldShow;
@@ -147,7 +147,7 @@ const editor = document.getElementById('editor');
       updateCollapseBtnLabels();
       if (coreEditorUiCommandPort.has('refreshToolbarLayoutLabel')) coreEditorUiCommandPort.invoke('refreshToolbarLayoutLabel');
       updateStatusBar();
-      updateCount();
+      corePreviewCommandPort.updateCount();
       if (coreEditorUiCommandPort.has('refreshToolbarBoundary')) coreEditorUiCommandPort.invoke('refreshToolbarBoundary');
     }
 
@@ -403,13 +403,13 @@ const editor = document.getElementById('editor');
           console.debug('Document index cache skipped:', error?.message || error);
         }
       };
-      const scheduler = window.markdownEditorTaskScheduler;
+      const scheduler = coreTaskSchedulerPort;
       if (scheduler?.schedule) scheduler.schedule('document-index-' + doc.id, save, { priority: 'idle', timeout: 1000 });
       else setTimeout(save, 0);
     }
 
     function clearDocumentIndex(documentId) {
-      window.markdownEditorTaskScheduler?.cancel?.('document-index-' + documentId);
+      coreTaskSchedulerPort?.cancel?.('document-index-' + documentId);
       try {
         localStorage.removeItem(getDocumentIndexStorageKey(documentId));
       } catch (_) {}
@@ -451,9 +451,9 @@ const editor = document.getElementById('editor');
         });
       }
       if (!coreDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
-      await resetPreviewPipeline();
+      await corePreviewCommandPort.reset();
       if (!coreDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
-      updateCount();
+      corePreviewCommandPort.updateCount();
       syncCurrentDocumentFileTree();
       return true;
     }
@@ -942,19 +942,17 @@ const editor = document.getElementById('editor');
       updateToolbarItemVisibility();
       if (typeof updateInlineColorToolAvailability === 'function') updateInlineColorToolAvailability();
       scheduleEditorMetricsRebuild(80);
-      invalidatePreviewAnchorMetrics();
+      if (coreEditorUiCommandPort.has('invalidatePreviewAnchorMetrics')) coreEditorUiCommandPort.invoke('invalidatePreviewAnchorMetrics');
     }
 
     let fetchedHtml = '';
 
-    if (typeof marked !== 'undefined') {
-      marked.setOptions({
-        breaks: true,
-        gfm: true,
-        headerIds: false,
-        mangle: false
-      });
-    }
 
+    coreEditorUiCommandPort.register({
+      getPreviewRuntimeSettings: () => ({ previewPerformanceMode, editorFontSize }),
+      updatePreviewStrategyBadge: (mode, stats) => updatePreviewStrategyBadge(mode, stats),
+      updateDocumentStatistics: statistics => updateDocumentStatistics(statistics),
+      persistCurrentDocumentIndex: (headings, statistics) => persistCurrentDocumentIndex(headings, statistics)
+    });
 
     // 平滑双向滚动、预览定位与选择同步

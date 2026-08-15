@@ -3,15 +3,15 @@ import {
   IncrementalPreviewModel,
   protectMarkdownMathSource,
   restoreMarkdownMathSource
-} from '../model-kernel/index.js';
-import { PREVIEW_BEHAVIOR_THRESHOLDS } from '../features/preview/index.js';
+} from '../../../model-kernel/index.js';
+import { PREVIEW_BEHAVIOR_THRESHOLDS } from '../pipeline/preview-thresholds.js';
 import {
   PREVIEW_WORKER_MESSAGE_TYPES,
   createPreviewWorkerAck,
   createPreviewWorkerError,
   createPreviewWorkerMessage,
   parsePreviewWorkerMessage
-} from '../features/preview/worker/preview-worker-protocol.js';
+} from './preview-worker-protocol.js';
 
 marked.setOptions({ breaks: true, gfm: true });
 
@@ -370,11 +370,11 @@ function fallbackEnvelope(message) {
   return { generation, version: messageVersion, requestId };
 }
 
-function postProtocolError(rawMessage, error) {
+function postProtocolError(scope, rawMessage, error) {
   const operation = typeof rawMessage?.type === 'string' && rawMessage.type.trim()
     ? rawMessage.type
     : 'protocol';
-  self.postMessage(createPreviewWorkerMessage(
+  scope.postMessage(createPreviewWorkerMessage(
     PREVIEW_WORKER_MESSAGE_TYPES.ERROR,
     fallbackEnvelope(rawMessage),
     {
@@ -385,7 +385,9 @@ function postProtocolError(rawMessage, error) {
   ));
 }
 
-self.onmessage = (event) => {
+export function startPreviewWorker(scope) {
+  if (!scope || typeof scope.postMessage !== 'function') throw new TypeError('Preview worker requires a Worker-like scope.');
+  scope.onmessage = (event) => {
   const rawMessage = event.data || {};
   const started = performance.now();
   let message = null;
@@ -397,7 +399,7 @@ self.onmessage = (event) => {
         throw new Error('Preview worker prewarm version mismatch');
       }
       const renderedBlocks = renderBlocksByIds(previousBlocks, message.ids || [], referenceDefinitions, true);
-      self.postMessage(createPreviewWorkerAck(message, {
+      scope.postMessage(createPreviewWorkerAck(message, {
         durationMs: performance.now() - started,
         renderedBlocks
       }));
@@ -434,15 +436,25 @@ self.onmessage = (event) => {
     }
 
     const result = model.update(source, { forceFull: Boolean(message.forceFull) });
-    self.postMessage(createPreviewWorkerAck(message, {
+    scope.postMessage(createPreviewWorkerAck(message, {
       durationMs: performance.now() - started,
       result: serializeResult(result, message.focusLine, Boolean(message.indexOnly))
     }));
   } catch (error) {
     if (message && REQUEST_TYPES.has(message.type)) {
-      self.postMessage(createPreviewWorkerError(message, error, { code: 'PREVIEW_WORKER_REQUEST_FAILED' }));
+      scope.postMessage(createPreviewWorkerError(message, error, { code: 'PREVIEW_WORKER_REQUEST_FAILED' }));
       return;
     }
-    postProtocolError(rawMessage, error);
+    postProtocolError(scope, rawMessage, error);
   }
-};
+  };
+  return Object.freeze({
+    destroy() {
+      if (scope.onmessage) scope.onmessage = null;
+    }
+  });
+}
+
+if (typeof WorkerGlobalScope !== 'undefined' && globalThis instanceof WorkerGlobalScope) {
+  startPreviewWorker(globalThis);
+}

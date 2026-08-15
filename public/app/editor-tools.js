@@ -3,14 +3,12 @@ const editorToolsSettingsStorePort = editorToolsCompatibilityHost?.markdownEdito
 const editorToolsEditorUiCommandPort = editorToolsCompatibilityHost?.markdownEditorEditorUiCommandPort;
 const editorToolsLayoutStatePort = editorToolsCompatibilityHost?.markdownEditorLayoutStatePort;
 const editorToolsSplitControllerPort = editorToolsCompatibilityHost?.markdownEditorSplitControllerPort;
-const editorToolsPreviewStatePort = editorToolsCompatibilityHost?.markdownEditorPreviewStatePort;
-const editorToolsPreviewLayoutStabilityPort = editorToolsCompatibilityHost?.markdownEditorPreviewLayoutStabilityPort;
+const editorToolsPreviewCommandPort = editorToolsCompatibilityHost?.markdownEditorPreviewCommandPort;
 if (!editorToolsSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!editorToolsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
 if (!editorToolsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
 if (!editorToolsSplitControllerPort) throw new Error('Split Controller compatibility port is unavailable.');
-if (!editorToolsPreviewStatePort) throw new Error('Preview State compatibility port is unavailable.');
-if (!editorToolsPreviewLayoutStabilityPort) throw new Error('Preview Layout Stability compatibility port is unavailable.');
+if (!editorToolsPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
 editorToolsEditorUiCommandPort.register({
   getLayoutMode: () => getLayoutMode(),
   setLayoutMode: mode => setLayoutMode(mode)
@@ -125,7 +123,7 @@ editorToolsEditorUiCommandPort.register({
         badge.hidden = !hybrid;
         badge.textContent = t('viewHybrid');
       }
-      if (hybrid) suspendPreviewForHybridMode?.();
+      if (hybrid) editorToolsPreviewCommandPort.suspendForHybridMode();
       return hybrid;
     }
 
@@ -154,12 +152,12 @@ editorToolsEditorUiCommandPort.register({
       else commit();
 
       if (nextMode === 'hybrid') {
-        schedulePreviewUpdate();
+        editorToolsPreviewCommandPort.scheduleUpdate();
       } else if (!editorToolsLayoutStatePort.previewCollapsed) {
         const previewBody = preview.querySelector('.markdown-body');
-        editorToolsPreviewLayoutStabilityPort.requestRefresh({
+        editorToolsPreviewCommandPort.requestLayoutRefresh({
           forceRender: previewWasHidden
-            || !editorToolsPreviewStatePort.snapshot.lastStableResult
+            || !editorToolsPreviewCommandPort.snapshot.lastStableResult
             || !previewBody
             || previewBody.classList.contains('preview-loading')
             || previewBody.childElementCount === 0,

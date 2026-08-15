@@ -3,12 +3,12 @@ const bootstrapHelpPort = bootstrapCompatibilityHost?.markdownEditorHelpPort;
 const bootstrapSettingsStorePort = bootstrapCompatibilityHost?.markdownEditorSettingsStorePort;
 const bootstrapEditorControllerPort = bootstrapCompatibilityHost?.markdownEditorEditorControllerPort;
 const bootstrapLayoutStatePort = bootstrapCompatibilityHost?.markdownEditorLayoutStatePort;
-const bootstrapPreviewLayoutStabilityPort = bootstrapCompatibilityHost?.markdownEditorPreviewLayoutStabilityPort;
+const bootstrapPreviewCommandPort = bootstrapCompatibilityHost?.markdownEditorPreviewCommandPort;
 if (!bootstrapHelpPort) throw new Error('Help compatibility port is unavailable.');
 if (!bootstrapSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!bootstrapEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
 if (!bootstrapLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
-if (!bootstrapPreviewLayoutStabilityPort) throw new Error('Preview Layout Stability compatibility port is unavailable.');
+if (!bootstrapPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
 
     async function init() {
       const restoredSettings = bootstrapSettingsStorePort.snapshot;
@@ -34,15 +34,14 @@ if (!bootstrapPreviewLayoutStabilityPort) throw new Error('Preview Layout Stabil
       applyCodeVisualEditingSetting({ persist: false, notify: false });
       await setupDocuments();
       updateStatusBar();
-      previewMode = 'preview';
-      localStorage.setItem(PREVIEW_MODE_KEY, 'preview');
+      localStorage.setItem('md_editor_preview_mode', 'preview');
 
       updateLargeDocumentMode();
       if (editor.textLength >= LARGE_DOCUMENT_CHARS) {
         preview.innerHTML = '<div class="markdown-body preview-loading">正在生成实时预览…</div>';
       }
-      updateCount();
-      setPreviewMode(previewMode, true);
+      bootstrapPreviewCommandPort.updateCount();
+      bootstrapPreviewCommandPort.setViewMode('preview', true);
 
 
       // 恢复用户选择的布局；单视图模式复用同一 CodeMirror 文档状态。
@@ -52,9 +51,8 @@ if (!bootstrapPreviewLayoutStabilityPort) throw new Error('Preview Layout Stabil
       } else {
         setLayoutMode('both', false);
       }
-      bootstrapPreviewLayoutStabilityPort.start();
       if (!bootstrapLayoutStatePort.previewCollapsed && !isHybridLayoutMode()) {
-        bootstrapPreviewLayoutStabilityPort.requestRefresh({ forceRender: true, reason: 'startup-layout' });
+        bootstrapPreviewCommandPort.requestLayoutRefresh({ forceRender: true, reason: 'startup-layout' });
       }
 
 

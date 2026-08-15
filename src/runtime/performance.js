@@ -13,6 +13,12 @@ let lastFlushError = '';
 let logPath = '';
 let platformLogs = null;
 let platformLogsEnabled = false;
+let runtimeStatsProvider = () => ({});
+
+export function configurePerformanceRuntimeStats(provider) {
+  if (typeof provider !== 'function') throw new TypeError('performance runtime stats provider must be a function');
+  runtimeStatsProvider = provider;
+}
 
 export function configurePerformancePlatform({ logs, enabled = false } = {}) {
   if (!logs || typeof logs.writePerformance !== 'function') {
@@ -463,7 +469,8 @@ function functionDetails(name) {
   const previewBody = preview?.querySelector?.('.markdown-body');
   const virtualEditor = editor?.virtualEditor;
   const viewport = virtualEditor?.getVisibleRange?.();
-  const virtualPreview = window.markdownEditorVirtualPreview?.getStats?.();
+  const runtimeStats = runtimeStatsProvider() || {};
+  const virtualPreview = runtimeStats.virtualPreview || null;
   const documentStatistics = window.markdownEditorDocumentStatistics || null;
   const documentModel = window.markdownEditorDocumentModel?.getState?.() || null;
   const presentationStats = virtualEditor?.getPresentationStats?.() || null;
@@ -499,7 +506,7 @@ function functionDetails(name) {
     previewVirtualized: Boolean(virtualPreview?.active),
     previewMeasuredHeights: virtualPreview?.measuredHeights || 0,
     previewCachedHeights: virtualPreview?.cachedHeights || 0,
-    backgroundTasks: window.markdownEditorTaskScheduler?.getStats?.().pending || 0,
+    backgroundTasks: Number(runtimeStats.backgroundTasks) || 0,
     previewAnchors: preview?.querySelectorAll?.('[data-source-line]')?.length || 0
   };
 }

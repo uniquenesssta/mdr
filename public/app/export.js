@@ -5,11 +5,15 @@
     const exportDocumentControllerPort = exportCompatibilityHost?.markdownEditorDocumentControllerPort;
     const exportDocumentUiCommandPort = exportCompatibilityHost?.markdownEditorDocumentUiCommandPort;
     const exportSidebarControllerPort = exportCompatibilityHost?.markdownEditorSidebarControllerPort;
+    const exportPreviewCommandPort = exportCompatibilityHost?.markdownEditorPreviewCommandPort;
+    const exportPresentationPort = exportCompatibilityHost?.markdownEditorPresentationPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
     if (!exportDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
     if (!exportSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
+    if (!exportPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
+    if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
     exportDocumentUiCommandPort.register({ importFile: () => triggerImportFile() });
     let saveTimer;
     function autoSave() {
@@ -146,12 +150,12 @@
       task?.throwIfCancelled();
       const source = documentModel?.createSnapshot?.('full-preview-export') ?? editor.value;
       try {
-        if (typeof marked !== 'undefined') {
-          const mathApi = window.markdownEditorMath;
+        if (Boolean(exportPresentationPort.markdown?.parse)) {
+          const mathApi = exportPresentationPort.math;
           const protectedMath = typeof mathApi?.protectSource === 'function'
             ? mathApi.protectSource(source, 'EXPORT_MATH')
             : { text: source, placeholders: [] };
-          const rendered = marked.parse(protectedMath.text);
+          const rendered = exportPresentationPort.markdown.parse(protectedMath.text);
           body.innerHTML = typeof mathApi?.restoreSource === 'function'
             ? mathApi.restoreSource(rendered, protectedMath.placeholders)
             : rendered;
@@ -175,16 +179,16 @@
         task?.throwIfCancelled();
         const batch = children.slice(start, start + batchSize);
         styleTaskLists(batch);
-        const mathRenderer = window.markdownEditorPresentation?.math || window.markdownEditorMath;
-        if (mathRenderer?.renderTree || typeof renderMathInElement !== 'undefined') {
+        const mathRenderer = exportPresentationPort.math;
+        if (mathRenderer?.renderTree || Boolean(exportPresentationPort.math?.renderTree)) {
           batch.forEach(node => {
             if (!(mathRenderer?.containsMath?.(node.textContent) ?? node.textContent?.includes('$'))) return;
             if (mathRenderer?.renderTree) {
               mathRenderer.renderTree(node, { delimiters: mathRenderer.delimiters });
               return;
             }
-            renderMathInElement(node, {
-              delimiters: window.markdownEditorMath?.delimiters,
+            exportPresentationPort.math.renderTree(node, {
+              delimiters: exportPresentationPort.math.delimiters,
               throwOnError: false
             });
           });
@@ -510,7 +514,7 @@ ${bodyHtml}
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js">${'</scr' + 'ipt>'}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    if (typeof renderMathInElement !== 'undefined') {
+    if (Boolean(exportPresentationPort.math?.renderTree)) {
       renderMathInElement(document.body, {
         delimiters: [
           { left: '$$', right: '$$', display: true },
@@ -559,21 +563,20 @@ ${'</scr' + 'ipt>'}
     async function exportPDF() {
       const task = beginExportTask('正在准备 PDF');
       if (!task) return;
-      const wasSource = previewMode === 'source';
-      if (wasSource) setPreviewMode('preview');
+      const wasSource = exportPreviewCommandPort.getViewMode() === 'source';
+      if (wasSource) exportPreviewCommandPort.setViewMode('preview');
       const restorePreview = () => {
-        resetPreviewPipeline();
-        if (wasSource) setPreviewMode('source');
+        exportPreviewCommandPort.reset();
+        if (wasSource) exportPreviewCommandPort.setViewMode('source');
       };
       let replacedPreview = false;
       try {
-        virtualPreviewController?.deactivate();
+        exportPreviewCommandPort.deactivateVirtual();
         const fullBody = await createFullPreviewBodyForExport(task);
         task.throwIfCancelled();
         preview.replaceChildren(fullBody);
         replacedPreview = true;
         observedPreviewBody = null;
-        invalidatePreviewAnchorStructure();
         await enhanceFullPreviewForExport(fullBody, task);
         task.throwIfCancelled();
         task.update(100, 'PDF 内容已准备完成');
@@ -637,8 +640,8 @@ ${'</scr' + 'ipt>'}
     );
 
     function openExportImageModal() {
-      if (previewMode !== 'preview') {
-        setPreviewMode('preview');
+      if (exportPreviewCommandPort.getViewMode() !== 'preview') {
+        exportPreviewCommandPort.setViewMode('preview');
       }
       document.getElementById('image-crop-fit').checked = false;
       selectImageRatio(currentImageRatio);
@@ -698,15 +701,16 @@ ${'</scr' + 'ipt>'}
       if (!task) return;
       let clone = null;
       try {
-        if (typeof domtoimage === 'undefined') {
+        let domToImageApi = null;
+        if (!domToImageApi) {
           task.update(5, '正在加载图片导出模块…');
           try {
-            await window.markdownEditorVendors?.loadDomToImage?.();
+            domToImageApi = await exportPresentationPort.loadDomToImage();
           } catch (error) {
             console.error('Image export library load error:', error);
           }
         }
-        if (typeof domtoimage === 'undefined') {
+        if (!domToImageApi) {
           showToast(t('toastImageLibMissing'));
           return;
         }
@@ -767,7 +771,7 @@ ${'</scr' + 'ipt>'}
         stage.style.height = captureHeight + 'px';
         task.update(96, '正在生成 PNG，此阶段完成前不能立即取消…');
         task.setCancelable(false);
-        const dataUrl = await domtoimage.toPng(clone, {
+        const dataUrl = await domToImageApi.toPng(clone, {
           width: preset.width,
           height: captureHeight,
           bgcolor: getComputedStyle(clone).backgroundColor || '#ffffff',
@@ -907,3 +911,5 @@ ${'</scr' + 'ipt>'}
     }
 
     // 切换主题
+
+    exportCompatibilityHost.markdownEditorEditorUiCommandPort?.register?.({ requestAutoSave: () => autoSave() });

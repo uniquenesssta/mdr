@@ -1,4 +1,4 @@
-# Stage 7 completed-scope validation through Atomic 7.13 while preserving the complete Stage 6 handoff.
+# Stage 7 completed-scope validation through Atomic 7.14 while preserving the complete Stage 6 handoff.
 name: Stage 7 Atomic Verification
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   preview-scheduler-cancellation:
-    name: Verify Stage 7 Through Atomic 7.13 Recovery View
+    name: Verify Stage 7 Through Atomic 7.14 Legacy Preview Deletion
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
@@ -324,6 +324,19 @@ jobs:
           tests/architecture/stage-07-preview-recovery-view.test.mjs
       - name: Verify Atomic Task 7.13 real browser stable/error recovery
         run: node tests/e2e/preview-recovery-view.test.mjs
+      - name: Verify Atomic Task 7.14 Legacy Preview Deletion
+        run: >-
+          node --test
+          tests/unit/preview/preview-controller-command-handler.test.mjs
+          tests/unit/preview/preview-render-engine.test.mjs
+          tests/architecture/stage-07-preview-legacy-deletion.test.mjs
+      - name: Verify Stage 7 cumulative contracts through Atomic 7.14
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            $(find tests/unit/preview -type f -name '*.test.mjs' | sort) \
+            $(find tests/architecture -type f -name 'stage-07-*.test.mjs' | sort)
       - name: Verify modified classic and module runners parse
         run: >-
           node --check src/bootstrap/module-entry.js &&
@@ -331,7 +344,6 @@ jobs:
           node --check public/app/core.js &&
           node --check public/app/bootstrap.js &&
           node --check public/app/events.js &&
-          node --check public/app/preview.js &&
           node --check public/app/editor-tools.js &&
           node --check public/app/web-clipper.js &&
           node --check public/app/scroll-sync.js &&
@@ -394,9 +406,24 @@ jobs:
           node --check src/features/preview/compatibility/classic-preview-renderer-port.js &&
           node --check src/features/preview/compatibility/classic-preview-layout-stability-port.js &&
           node --check src/features/preview/index.js &&
-          node --check src/preview/virtual-preview.js &&
-          node --check src/preview/preview-worker-client.js &&
-          node --check src/preview/preview-worker.js &&
+          node --check src/features/preview/application/preview-controller.js &&
+          node --check src/features/preview/application/preview-command-handler.js &&
+          node --check src/features/preview/pipeline/preview-render-engine.js &&
+          node --check src/features/preview/render/preview-markdown-renderer.js &&
+          node --check src/features/preview/render/presentation/math-presentation.js &&
+          node --check src/features/preview/render/presentation/mermaid-presentation.js &&
+          node --check src/features/preview/render/presentation/presentation-api.js &&
+          node --check src/features/preview/virtual/virtual-preview-controller.js &&
+          node --check src/features/preview/worker/preview-worker-client.js &&
+          node --check src/features/preview/worker/preview-worker.js &&
+          node --check src/features/preview/compatibility/classic-preview-presentation-port.js &&
+          node --check src/shared/scheduling/task-scheduler.js &&
+          node --check src/shared/scheduling/classic-task-scheduler-port.js &&
+          node --check src/shared/vendor/capability-loader.js &&
+          node --check tests/unit/preview/preview-controller-command-handler.test.mjs &&
+          node --check tests/unit/preview/preview-render-engine.test.mjs &&
+          node --check tests/architecture/stage-07-preview-legacy-deletion.test.mjs &&
+          node --check tests/e2e/fixtures/interaction-harness.js &&
           node --check tests/unit/preview/preview-thresholds.test.mjs &&
           node --check tests/unit/preview/classic-preview-thresholds-port.test.mjs &&
           node --check tests/unit/preview/preview-state.test.mjs &&
@@ -455,6 +482,20 @@ jobs:
           node --check tests/e2e/preview-layout-stability.test.mjs &&
           node --check tests/e2e/preview-virtual-window.test.mjs &&
           node --check tests/e2e/run-browser-tests.mjs
+      - name: Verify Atomic Task 7.14 legacy Preview paths are absent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e public/app/preview.js
+          test ! -e src/preview/preview-worker-client.js
+          test ! -e src/preview/preview-worker.js
+          test ! -e src/preview/virtual-preview.js
+          test -z "$(find src/rendering -type f -print -quit 2>/dev/null || true)"
+          test ! -e src/runtime/task-scheduler.js
+          test ! -e src/runtime/vendor.js
+          test -e src/preview/incremental-preview.js
+          test -e src/preview/math-source.js
+          ! grep -R -n -E "window\.markdownEditorVirtualPreview|window\.markdownEditorTaskScheduler|window\.createPreviewWorkerClient|window\.createVirtualPreviewController|window\.markdownEditorPresentation[[:space:]]*=|window\.markdownEditorMath[[:space:]]*=" src public --include='*.js'
       - name: Verify frozen DocumentModel remains exact
         run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
       - name: Run architecture hard gate
@@ -471,10 +512,10 @@ jobs:
         env:
           E2E_ARTIFACT_DIR: artifacts/stage-07/browser-app
         run: npm run test:browser
-      - name: Upload Atomic Task 7.13 evidence
+      - name: Upload Atomic Task 7.14 evidence
         uses: actions/upload-artifact@v4
         with:
-          name: stage-07-preview-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          name: stage-07-preview-legacy-deletion-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/stage-07
           if-no-files-found: error
           retention-days: 30
