@@ -79,18 +79,18 @@ for contract_path in [
 # do not weaken the architecture checker or touch unrelated global contracts.
 baseline_path = Path('tests/architecture/fixtures/architecture-baseline.json')
 baseline = json.loads(baseline_path.read_text(encoding='utf-8'))
-business_globals = baseline.get('contract', {}).get('businessGlobals')
+business_globals = baseline.get('businessGlobalWrites')
 if not isinstance(business_globals, list):
-    raise SystemExit('architecture baseline businessGlobals list missing')
-matching = [
-    row for row in business_globals
+    raise SystemExit('architecture baseline businessGlobalWrites list missing')
+matching_indexes = [
+    index for index, row in enumerate(business_globals)
     if row.get('path') == 'src/editor/hybrid/widgets.js'
     and row.get('global') == 'window.showToast'
     and row.get('count') == 1
 ]
-if len(matching) != 1:
-    raise SystemExit(f'expected one obsolete widgets.js window.showToast baseline row, found {len(matching)}')
-baseline['contract']['businessGlobals'] = [row for row in business_globals if row is not matching[0]]
-baseline_path.write_text(json.dumps(baseline, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+if len(matching_indexes) != 1:
+    raise SystemExit(f'expected one obsolete widgets.js window.showToast baseline row, found {len(matching_indexes)}')
+del business_globals[matching_indexes[0]]
+baseline_path.write_text(json.dumps(baseline, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 print('Atomic 8.12 transport alignment applied')
