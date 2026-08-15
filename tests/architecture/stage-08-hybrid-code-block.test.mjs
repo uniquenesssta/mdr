@@ -85,20 +85,12 @@ test('Atomic 8.8 switches Preview and the transitional Mermaid direct editor thr
   assert.doesNotMatch(widgets, /features\/hybrid-editor\/widgets\/code-block\//);
 });
 
-test('Atomic 8.8 inventory advances to 350 modules without starting Atomic 8.9 Table migration', async () => {
+test('Atomic 8.8 Code Block ownership remains intact after Atomic 8.9 Table migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 350);
+  assert.equal(inventory.modules.length, 355);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of targetPaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/code-highlighter.js'), false);
   assert.equal(paths.has('src/editor/hybrid/code-presentation.js'), false);
-  for (const tablePath of [
-    'src/features/hybrid-editor/widgets/table/table-widget.js',
-    'src/features/hybrid-editor/widgets/table/table-view.js',
-    'src/features/hybrid-editor/widgets/table/table-cell-editor.js',
-    'src/features/hybrid-editor/widgets/table/table-keyboard-navigation.js',
-    'src/features/hybrid-editor/widgets/table/table-writeback.js'
-  ]) {
-    await assert.rejects(access(file(tablePath)), undefined, tablePath);
-  }
+  assert.equal(paths.has('src/features/hybrid-editor/widgets/table/table-widget.js'), true);
 });

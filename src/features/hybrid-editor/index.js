@@ -98,3 +98,8 @@ export {
 export {
   createCodeBlockWidgetType
 } from './widgets/code-block/code-block-widget.js';
+
+
+export {
+  createTableBlockWidgetType
+} from './widgets/table/table-widget.js';

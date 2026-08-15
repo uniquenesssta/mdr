@@ -45,20 +45,20 @@ test('Atomic 8.6 legacy widgets consume Shared Widget UI only through the Hybrid
 
 test('Atomic 8.6 toolbar and source primitives replace only shared DOM/action mechanics while component-specific content remains local', async () => {
   const widgets = await text('src/editor/hybrid/widgets.js');
-  assert.equal((widgets.match(/(?:const header|const toolbar) = createWidgetToolbar\(/g) || []).length, 5);
+  assert.equal((widgets.match(/(?:const header|const toolbar) = createWidgetToolbar\(/g) || []).length, 4);
   assert.equal((widgets.match(/createWidgetActionGroup\(/g) || []).length, 1);
-  assert.equal((widgets.match(/bindWidgetSourceAction\(/g) || []).length, 6);
-  assert.ok((widgets.match(/createWidgetButton\(/g) || []).length >= 6);
+  assert.equal((widgets.match(/bindWidgetSourceAction\(/g) || []).length, 5);
+  assert.ok((widgets.match(/createWidgetButton\(/g) || []).length >= 5);
   assert.doesNotMatch(widgets, /document\.createElement\(['"]header['"]\)/);
-  for (const local of ['TableBlockWidget', 'ImageBlockWidget']) assert.match(widgets, new RegExp(`class ${local}`), local);
-  assert.doesNotMatch(widgets, /class CodeBlockWidget/);
+  assert.match(widgets, /class ImageBlockWidget/);
+  assert.doesNotMatch(widgets, /class CodeBlockWidget|class TableBlockWidget/);
   assert.doesNotMatch(widgets, /class HybridPrefixWidget|class HorizontalRuleWidget/);
 });
 
-test('Atomic 8.6 Shared Widget UI boundary remains intact after Atomic 8.8 Code Block migration', async () => {
+test('Atomic 8.6 Shared Widget UI boundary remains intact after Atomic 8.9 Table migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 350);
+  assert.equal(inventory.modules.length, 355);
   for (const path of sharedPaths) assert.ok(paths.includes(path), path);
   const shared = await Promise.all(sharedPaths.map(path => text(path)));
   assert.doesNotMatch(shared.join('\n'), /HybridPrefixWidget|TaskCheckboxWidget|HorizontalRuleWidget/);

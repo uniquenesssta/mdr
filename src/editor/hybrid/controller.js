@@ -4,11 +4,13 @@ import { Facet, StateEffect, StateField } from '@codemirror/state';
 import { Decoration, EditorView, ViewPlugin, WidgetType } from '@codemirror/view';
 import {
   collectHybridBlocks,
+  encodeTableCell,
   getEditableRanges
 } from '../../model-kernel/index.js';
 import { buildInlinePresentation } from './inline-presentation.js';
 import {
   createCodeBlockWidgetType,
+  createTableBlockWidgetType,
   createHybridSourceEditController,
   destroyHybridComponentSession,
   getClassicHybridSourceEditControllerPort,
@@ -25,8 +27,7 @@ import {
   HtmlBlockWidget,
   ImageBlockWidget,
   MathBlockWidget,
-  MermaidBlockWidget,
-  TableBlockWidget
+  MermaidBlockWidget
 } from './widgets.js';
 
 const setHybridBlockDecorations = StateEffect.define();
@@ -125,6 +126,38 @@ const CodeBlockWidget = createCodeBlockWidgetType(WidgetType, {
   recordInteraction: recordCodeBlockInteraction,
   notify: showCodeBlockToast,
   reportEditFailure: reportCodeBlockEditFailure
+});
+
+function recordTableInteraction(operation, details = {}) {
+  globalThis.window?.markdownEditorPerf?.record?.(operation, {
+    category: 'editor.hybrid',
+    details
+  });
+}
+
+function showTableToast(message) {
+  if (typeof globalThis.window?.showToast === 'function') {
+    globalThis.window.showToast(String(message || ''));
+  }
+}
+
+function reportTableCellEditFailure(error, details = {}) {
+  reportHybridDiagnostic('hybrid.table-cell-edit-failure', {
+    status: 'error',
+    dedupeKey: `hybrid.table-cell-edit-failure:${error?.name || 'Error'}`,
+    details: {
+      ...details,
+      message: error?.message || String(error || '表格单元格写回失败')
+    }
+  });
+  showTableToast(error?.message || '表格单元格写回失败');
+}
+
+const TableBlockWidget = createTableBlockWidgetType(WidgetType, {
+  encodeTableCell,
+  createHistoryAnnotation: () => isolateHistory.of('full'),
+  recordInteraction: recordTableInteraction,
+  reportEditFailure: reportTableCellEditFailure
 });
 
 function recordSourceEditingClose(details = {}) {

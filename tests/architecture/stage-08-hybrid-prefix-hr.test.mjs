@@ -62,7 +62,7 @@ test('Atomic 8.7 Prefix, Task Checkbox and HR authority remains removed after At
 
 test('Atomic 8.7 production inventory advances by exactly three responsibility-specific modules', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 350);
+  assert.equal(inventory.modules.length, 355);
   const paths = new Set(inventory.modules.map(item => item[0]));
   for (const expected of [
     'src/features/hybrid-editor/widgets/prefix/prefix-widget.js',

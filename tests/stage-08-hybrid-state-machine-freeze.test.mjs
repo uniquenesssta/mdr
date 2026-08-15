@@ -21,6 +21,7 @@ import {
 const widgetsUrl = new URL('../src/editor/hybrid/widgets.js', import.meta.url);
 const controllerUrl = new URL('../src/editor/hybrid/controller.js', import.meta.url);
 const sourceEditControllerUrl = new URL('../src/features/hybrid-editor/application/hybrid-source-edit-controller.js', import.meta.url);
+const tableCellEditorUrl = new URL('../src/features/hybrid-editor/widgets/table/table-cell-editor.js', import.meta.url);
 
 function click({
   detail = 1,
@@ -202,14 +203,16 @@ test('Atomic 8.1 freezes stale delayed-close rejection with expectedMode', () =>
 });
 
 test('Atomic 8.1 freezes current runtime close-reason producers', async () => {
-  const [widgets, controller, sourceEditController] = await Promise.all([
+  const [widgets, tableCellEditor, controller, sourceEditController] = await Promise.all([
     readFile(widgetsUrl, 'utf8'),
+    readFile(tableCellEditorUrl, 'utf8'),
     readFile(controllerUrl, 'utf8'),
     readFile(sourceEditControllerUrl, 'utf8')
   ]);
+  const directCloseSources = `${widgets}\n${tableCellEditor}`;
 
   for (const reason of ['cancelled', 'committed', 'unchanged', 'pointer-outside']) {
-    assert.match(widgets, new RegExp(`reason:\\s*[^\\n]{0,160}['\"]${reason}['\"]|['\"]${reason}['\"]`), `missing direct close reason: ${reason}`);
+    assert.match(directCloseSources, new RegExp(`reason:\\s*[^\\n]{0,160}['\"]${reason}['\"]|['\"]${reason}['\"]`), `missing direct close reason: ${reason}`);
   }
   assert.match(sourceEditController, /this\.close\('pointer-outside-source'/);
   assert.match(sourceEditController, /trigger: 'pointer-outside-source'/);
