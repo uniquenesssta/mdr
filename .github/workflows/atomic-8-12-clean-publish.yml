@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   verify-candidate:
-    if: ${{ !contains(github.event.head_commit.message, 'test: validate Atomic 8.12 candidate') }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout runner branch
@@ -143,7 +142,7 @@ jobs:
           grep -q 'Stage 8 140/140' README.md
           grep -q 'Node 130/130' README.md
 
-      - name: Commit validated candidate on runner branch
+      - name: Commit validated candidate on isolated branch
         shell: bash
         run: |
           set -euo pipefail
@@ -151,4 +150,4 @@ jobs:
           git config user.email atomic-runner@users.noreply.github.com
           git add -A
           git commit -m 'test: validate Atomic 8.12 candidate'
-          git push origin HEAD:agent/atomic-8.12-runner
+          git push --force origin HEAD:agent/atomic-8.12-validated
