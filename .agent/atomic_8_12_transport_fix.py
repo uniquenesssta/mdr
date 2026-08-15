@@ -24,7 +24,7 @@ replace_once(
 replace_once(
     'tests/architecture/stage-08-hybrid-mermaid.test.mjs',
     r"assert\.doesNotMatch\(controller, /MermaidBlockWidget\[\\s\\S\]\*from '\\\.\\/widgets\\\.js'/\);",
-    r"assert.doesNotMatch(controller, /import\\s*\\{[^}]*MermaidBlockWidget[^}]*\\}\\s*from '\\.\\/widgets\\.js'/);",
+    r"assert.doesNotMatch(controller, /import\s*\{[^}]*MermaidBlockWidget[^}]*\}\s*from '\.\/widgets\.js'/);",
 )
 
 print('Atomic 8.12 transport alignment applied')
