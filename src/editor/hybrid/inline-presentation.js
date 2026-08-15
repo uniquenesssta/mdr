@@ -1,15 +1,42 @@
 import { Decoration, WidgetType } from '@codemirror/view';
 import { marked } from 'marked';
-import { InlineMathWidget } from './widgets.js';
+import { renderMathFormula } from '../../features/preview/render/presentation/math-presentation.js';
 import {
   createHorizontalRuleWidgetType,
   createHybridPrefixWidgetType,
+  createInlineMathWidgetType,
   createTaskCheckboxWidgetType
 } from '../../features/hybrid-editor/index.js';
 
 const HybridPrefixWidget = createHybridPrefixWidgetType(WidgetType);
 const TaskCheckboxWidget = createTaskCheckboxWidgetType(WidgetType);
 const HorizontalRuleWidget = createHorizontalRuleWidgetType(WidgetType);
+
+function recordInlineMathInteraction(operation, details = {}) {
+  globalThis.window?.markdownEditorPerf?.record?.(operation, {
+    category: 'editor.hybrid',
+    details
+  });
+}
+
+function reportInlineMathRenderFailure(error, details = {}) {
+  globalThis.window?.markdownEditorPerf?.diagnostic?.('hybrid.math-render-failure', {
+    category: 'editor.hybrid',
+    status: 'warning',
+    dedupeKey: `hybrid.math-render-failure:${error?.name || 'ParseError'}`,
+    minIntervalMs: 5000,
+    details: {
+      ...details,
+      message: error?.message || String(error || '公式渲染失败')
+    }
+  });
+}
+
+const InlineMathWidget = createInlineMathWidgetType(WidgetType, {
+  renderFormula: renderMathFormula,
+  recordInteraction: recordInlineMathInteraction,
+  reportRenderFailure: reportInlineMathRenderFailure
+});
 import {
   collectInlineMathRanges,
   collectVisibleLines,

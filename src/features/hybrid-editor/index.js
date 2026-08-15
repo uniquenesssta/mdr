@@ -114,3 +114,12 @@ export {
 export {
   createImageBlockWidgetType
 } from './widgets/image/image-widget.js';
+
+
+export {
+  createInlineMathWidgetType
+} from './widgets/math/inline-math-widget.js';
+
+export {
+  createMathBlockWidgetType
+} from './widgets/math/block-math-widget.js';

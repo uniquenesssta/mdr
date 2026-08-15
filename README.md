@@ -2,4 +2,4 @@
 
 简介：模块化重写中的桌面 Markdown 编辑器；详见 [docs/README.md](docs/README.md)。
 
-Atomic 8.10：Image 已拆为 source resolver、cache、error/retry view 与 Widget 生命周期；异步加载按组件 version 拒绝过时结果，旧 image-source/Image Widget 权威实现已删，8.11 Math 未开始。验证：8.10 13/13，Stage 8 115/115，Node 117/117，Architecture/Browser/Build/Built-app PASS，audit 0；接口、Rust、冻结模型、生产依赖不变。
+Atomic 8.11：Math 已拆为独立 Inline/Block Widget，并复用既有 Preview Math presentation API；$ / \( 与 $$ / \[ 分隔符语义保持不变，源码范围与显式销毁路径有测试，旧 Math 权威实现已删，8.12 Mermaid 未开始。验证：8.11 12/12，Stage 8 127/127，Node 123/123，Architecture/Browser/Build/Built-app PASS，audit 0；接口、Rust、冻结模型、生产依赖不变。

@@ -79,17 +79,22 @@ test('Atomic 8.10 removes legacy Image authority and composes platform plus Widg
   assert.doesNotMatch(controller, /ImageBlockWidget,[\s\S]*from '\.\/widgets\.js'/);
 });
 
-test('Atomic 8.10 inventory advances to 358 modules without starting Atomic 8.11 Math migration', async () => {
+test('Atomic 8.10 Image ownership remains intact after Atomic 8.11 Math migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 358);
+  assert.equal(inventory.modules.length, 360);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of imagePaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/image-source.js'), false);
   for (const mathPath of [
     'src/features/hybrid-editor/widgets/math/inline-math-widget.js',
     'src/features/hybrid-editor/widgets/math/block-math-widget.js'
+  ]) assert.equal(paths.has(mathPath), true, mathPath);
+  for (const mermaidPath of [
+    'src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js',
+    'src/features/hybrid-editor/widgets/mermaid/mermaid-render-state.js',
+    'src/features/hybrid-editor/widgets/mermaid/mermaid-actions.js'
   ]) {
-    assert.equal(paths.has(mathPath), false, mathPath);
-    await assert.rejects(access(file(mathPath)), undefined, mathPath);
+    assert.equal(paths.has(mermaidPath), false, mermaidPath);
+    await assert.rejects(access(file(mermaidPath)), undefined, mermaidPath);
   }
 });

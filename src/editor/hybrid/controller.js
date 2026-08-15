@@ -8,10 +8,12 @@ import {
   getEditableRanges
 } from '../../model-kernel/index.js';
 import { buildInlinePresentation } from './inline-presentation.js';
+import { renderMathFormula } from '../../features/preview/render/presentation/math-presentation.js';
 import {
   createCodeBlockWidgetType,
   createTableBlockWidgetType,
   createImageBlockWidgetType,
+  createMathBlockWidgetType,
   createHybridSourceEditController,
   destroyHybridComponentSession,
   getClassicHybridSourceEditControllerPort,
@@ -26,7 +28,6 @@ import {
 } from '../../features/hybrid-editor/compatibility/codemirror-source-editor-port.js';
 import {
   HtmlBlockWidget,
-  MathBlockWidget,
   MermaidBlockWidget
 } from './widgets.js';
 
@@ -161,6 +162,30 @@ const TableBlockWidget = createTableBlockWidgetType(WidgetType, {
 });
 
 const ImageBlockWidget = createImageBlockWidgetType(WidgetType);
+
+function recordMathInteraction(operation, details = {}) {
+  globalThis.window?.markdownEditorPerf?.record?.(operation, {
+    category: 'editor.hybrid',
+    details
+  });
+}
+
+function reportMathRenderFailure(error, details = {}) {
+  reportHybridDiagnostic('hybrid.math-render-failure', {
+    status: 'warning',
+    dedupeKey: `hybrid.math-render-failure:${error?.name || 'ParseError'}`,
+    details: {
+      ...details,
+      message: error?.message || String(error || '公式渲染失败')
+    }
+  });
+}
+
+const MathBlockWidget = createMathBlockWidgetType(WidgetType, {
+  renderFormula: renderMathFormula,
+  recordInteraction: recordMathInteraction,
+  reportRenderFailure: reportMathRenderFailure
+});
 
 function recordSourceEditingClose(details = {}) {
   globalThis.window?.markdownEditorPerf?.record?.('hybrid.source-edit-close', {

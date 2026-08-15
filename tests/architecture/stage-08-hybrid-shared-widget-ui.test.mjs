@@ -45,12 +45,12 @@ test('Atomic 8.6 legacy widgets consume Shared Widget UI only through the Hybrid
 
 test('Atomic 8.6 toolbar and source primitives replace only shared DOM/action mechanics while component-specific content remains local', async () => {
   const widgets = await text('src/editor/hybrid/widgets.js');
-  assert.equal((widgets.match(/(?:const header|const toolbar) = createWidgetToolbar\(/g) || []).length, 3);
+  assert.equal((widgets.match(/(?:const header|const toolbar) = createWidgetToolbar\(/g) || []).length, 2);
   assert.equal((widgets.match(/createWidgetActionGroup\(/g) || []).length, 1);
-  assert.equal((widgets.match(/bindWidgetSourceAction\(/g) || []).length, 4);
-  assert.ok((widgets.match(/createWidgetButton\(/g) || []).length >= 4);
+  assert.equal((widgets.match(/bindWidgetSourceAction\(/g) || []).length, 2);
+  assert.ok((widgets.match(/createWidgetButton\(/g) || []).length >= 3);
   assert.doesNotMatch(widgets, /document\.createElement\(['"]header['"]\)/);
-  assert.doesNotMatch(widgets, /class ImageBlockWidget/);
+  assert.doesNotMatch(widgets, /class ImageBlockWidget|class InlineMathWidget|class MathBlockWidget/);
   const imageWidget = await text('src/features/hybrid-editor/widgets/image/image-widget.js');
   for (const symbol of ['createWidgetButton', 'createWidgetToolbar', 'bindWidgetSourceAction', 'openWidgetSource']) {
     assert.match(imageWidget, new RegExp(symbol), symbol);
@@ -62,7 +62,7 @@ test('Atomic 8.6 toolbar and source primitives replace only shared DOM/action me
 test('Atomic 8.6 Shared Widget UI boundary remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 358);
+  assert.equal(inventory.modules.length, 360);
   for (const path of sharedPaths) assert.ok(paths.includes(path), path);
   const shared = await Promise.all(sharedPaths.map(path => text(path)));
   assert.doesNotMatch(shared.join('\n'), /HybridPrefixWidget|TaskCheckboxWidget|HorizontalRuleWidget/);

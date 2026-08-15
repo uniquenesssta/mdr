@@ -87,7 +87,7 @@ test('Atomic 8.8 switches Preview and the transitional Mermaid direct editor thr
 
 test('Atomic 8.8 Code Block ownership remains intact after Atomic 8.9 Table migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 358);
+  assert.equal(inventory.modules.length, 360);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of targetPaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/code-highlighter.js'), false);
