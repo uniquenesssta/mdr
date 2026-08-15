@@ -22,17 +22,23 @@ test('application composes one canonical presentation API into Preview without p
 
 test('hybrid and Preview Mermaid rendering use the canonical Preview presentation renderer', async () => {
   const widgets = await source('../src/editor/hybrid/widgets.js');
+  const controller = await source('../src/editor/hybrid/controller.js');
+  const mermaidWidget = await source('../src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
   const previewRenderer = await source('../src/features/preview/render/mermaid-renderer.js');
   const previewController = await source('../src/features/preview/application/preview-controller.js');
   const previewTools = await source('../public/app/editor-tools.js');
   const renderer = await source('../src/features/preview/render/presentation/mermaid-presentation.js');
-  assert.match(widgets, /features\/preview\/render\/presentation\/mermaid-presentation\.js/);
-  assert.match(widgets, /renderMermaidDiagram/);
+  assert.match(controller, /features\/preview\/render\/presentation\/mermaid-presentation\.js/);
+  assert.match(controller, /renderMermaidDiagram/);
+  assert.match(controller, /getMermaidTheme/);
+  assert.match(mermaidWidget, /renderDiagram/);
+  assert.doesNotMatch(mermaidWidget, /features\/preview\/|renderMermaidDiagram|getMermaidTheme/);
+  assert.doesNotMatch(widgets, /features\/preview\/render\/presentation\/mermaid-presentation\.js|renderMermaidDiagram|getMermaidTheme/);
   assert.match(previewRenderer, /presentation\?\.mermaid/);
   assert.match(previewRenderer, /mermaid\.renderDiagram/);
   assert.match(previewController, /renderer\.renderMermaid/);
   assert.doesNotMatch(previewTools, /renderMermaidBlocks|collectMermaidCodeBlocks|reportMermaidFailure/);
-  assert.doesNotMatch(widgets, /mermaidApi\.render|\.mermaid\.render/);
+  assert.doesNotMatch(mermaidWidget, /mermaidApi\.render|\.mermaid\.render/);
   assert.doesNotMatch(previewRenderer, /mermaidApi\.render/);
   assert.match(renderer, /normalizeMermaidSvg/);
   assert.match(renderer, /renderMermaidDiagram/);

@@ -84,9 +84,9 @@ test('Atomic 8.9 preserves Session/source/lifecycle ownership and leaves the fro
   assert.doesNotMatch(widget + editor, /parseTableRow/);
 });
 
-test('Atomic 8.9 Table ownership remains intact after Atomic 8.11 Math migration', async () => {
+test('Atomic 8.9 Table ownership remains intact after Atomic 8.12 Mermaid migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 360);
+  assert.equal(inventory.modules.length, 363);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of tablePaths) assert.equal(paths.has(path), true, path);
   for (const imagePath of [
@@ -102,7 +102,7 @@ test('Atomic 8.9 Table ownership remains intact after Atomic 8.11 Math migration
     'src/features/hybrid-editor/widgets/mermaid/mermaid-render-state.js',
     'src/features/hybrid-editor/widgets/mermaid/mermaid-actions.js'
   ]) {
-    assert.equal(paths.has(mermaidPath), false, mermaidPath);
-    await assert.rejects(access(file(mermaidPath)), undefined, mermaidPath);
+    assert.equal(paths.has(mermaidPath), true, mermaidPath);
+    await access(file(mermaidPath));
   }
 });

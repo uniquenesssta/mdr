@@ -42,15 +42,16 @@ test('Atomic 8.5 legacy editor callers depend on the Hybrid Editor public entry 
   assert.doesNotMatch(controller, /from ['"]\.\/widget-lifecycle\.js['"]/);
 });
 
-test('Atomic 8.5 keeps remaining legacy widgets plus migrated Code Block and Table on shared idempotent destroy paths', async () => {
+test('Atomic 8.5 keeps remaining legacy HTML plus migrated component widgets on shared idempotent destroy paths', async () => {
   const widgets = await text('src/editor/hybrid/widgets.js');
   const codeBlock = await text('src/features/hybrid-editor/widgets/code-block/code-block-widget.js');
   const tableBlock = await text('src/features/hybrid-editor/widgets/table/table-widget.js');
   const imageBlock = await text('src/features/hybrid-editor/widgets/image/image-widget.js');
   const inlineMath = await text('src/features/hybrid-editor/widgets/math/inline-math-widget.js');
   const blockMath = await text('src/features/hybrid-editor/widgets/math/block-math-widget.js');
+  const mermaidBlock = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
   const destroyCalls = widgets.match(/destroy\(dom\)\s*\{\s*destroyBlockLifecycle\(dom\);\s*\}/g) || [];
-  assert.equal(destroyCalls.length, 2);
+  assert.equal(destroyCalls.length, 1);
   assert.match(widgets, /function destroyBlockLifecycle\(element\)/);
   assert.match(widgets, /destroyHybridWidgetLifecycle\(element\)/);
   assert.match(codeBlock, /section\.__markdownEditorCodeBlockCleanup = \(\) => \{/);
@@ -68,12 +69,16 @@ test('Atomic 8.5 keeps remaining legacy widgets plus migrated Code Block and Tab
   assert.match(inlineMath, /destroy\(dom\) \{[\s\S]*__markdownEditorInlineMathCleanup/);
   assert.match(blockMath, /__markdownEditorMathBlockCleanup/);
   assert.match(blockMath, /destroy\(dom\) \{[\s\S]*__markdownEditorMathBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
+  assert.match(mermaidBlock, /__markdownEditorMermaidBlockCleanup/);
+  assert.match(mermaidBlock, /renderState\.destroy\(\)/);
+  assert.match(mermaidBlock, /themeObserver\?\.disconnect\(\)/);
+  assert.match(mermaidBlock, /destroy\(dom\) \{[\s\S]*__markdownEditorMermaidBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
 });
 
 test('Atomic 8.5 lifecycle boundary remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 360);
+  assert.equal(inventory.modules.length, 363);
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-lifecycle.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js'));
   assert.ok(!paths.includes('src/editor/hybrid/widget-lifecycle.js'));
