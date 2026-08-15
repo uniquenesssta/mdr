@@ -36,23 +36,29 @@ test('Atomic 8.7 migrated widgets have narrow responsibility boundaries and no s
   assert.match(hr, /createHorizontalRuleWidgetType\(WidgetType\)/);
 });
 
-test('Atomic 8.7 Prefix and HR presentation ownership remains intact after Atomic 8.11 Inline Math migration', async () => {
-  const [inline, legacy] = await Promise.all([
-    read('src/editor/hybrid/inline-presentation.js'),
+test('Atomic 8.7 Prefix and HR presentation ownership remains intact through Atomic 8.14 Inline Presentation migration', async () => {
+  const [inline, listPresentation, controller, legacy] = await Promise.all([
+    read('src/features/hybrid-editor/presentation/inline-presentation-coordinator.js'),
+    read('src/features/hybrid-editor/presentation/list-presentation.js'),
+    read('src/editor/hybrid/controller.js'),
     read('src/features/hybrid-editor/widgets/html/html-block-widget.js')
   ]);
   assert.doesNotMatch(inline, /import \{ InlineMathWidget \} from '\.\/widgets\.js';/);
-  assert.match(inline, /createHorizontalRuleWidgetType,[\s\S]*createHybridPrefixWidgetType,[\s\S]*createInlineMathWidgetType,[\s\S]*createTaskCheckboxWidgetType[\s\S]*from '\.\.\/\.\.\/features\/hybrid-editor\/index\.js';/);
-  assert.match(inline, /import \{ Decoration, WidgetType \} from '@codemirror\/view';/);
+  assert.match(inline, /createHorizontalRuleWidgetType[\s\S]*from '\.\.\/widgets\/horizontal-rule\/horizontal-rule-widget\.js';/);
+  assert.match(inline, /createInlineMathWidgetType[\s\S]*from '\.\.\/widgets\/math\/inline-math-widget\.js';/);
+  assert.match(inline, /createHybridPrefixWidgetType[\s\S]*from '\.\.\/widgets\/prefix\/prefix-widget\.js';/);
+  assert.match(inline, /createTaskCheckboxWidgetType[\s\S]*from '\.\.\/widgets\/prefix\/task-checkbox-widget\.js';/);
+  assert.doesNotMatch(inline, /from '@codemirror\/view'/);
   assert.match(inline, /const HybridPrefixWidget = createHybridPrefixWidgetType\(WidgetType\);/);
   assert.match(inline, /const TaskCheckboxWidget = createTaskCheckboxWidgetType\(WidgetType\);/);
   assert.match(inline, /const HorizontalRuleWidget = createHorizontalRuleWidgetType\(WidgetType\);/);
   assert.match(inline, /const InlineMathWidget = createInlineMathWidgetType\(WidgetType,/);
-  assert.match(inline, /new TaskCheckboxWidget\(\{\s*checked: task\[3\]\.toLowerCase\(\) === 'x',\s*markerFrom\s*\}\)/s);
-  assert.match(inline, /new HybridPrefixWidget\('bullet', \{ label: '•' \}\)/);
-  assert.match(inline, /new HybridPrefixWidget\('ordered', \{ label: ordered\[2\] \}\)/);
+  assert.match(listPresentation, /new TaskCheckboxWidget\(\{\s*checked: task\[3\]\.toLowerCase\(\) === 'x',\s*markerFrom\s*\}\)/s);
+  assert.match(listPresentation, /new HybridPrefixWidget\('bullet', \{ label: '•' \}\)/);
+  assert.match(listPresentation, /new HybridPrefixWidget\('ordered', \{ label: ordered\[2\] \}\)/);
   assert.match(inline, /new HorizontalRuleWidget\(\)/);
-  assert.doesNotMatch(inline, /features\/hybrid-editor\/widgets\//);
+  assert.match(controller, /createInlinePresentationCoordinator/);
+  assert.doesNotMatch(controller, /createHorizontalRuleWidgetType|createHybridPrefixWidgetType|createInlineMathWidgetType|createTaskCheckboxWidgetType/);
   assert.doesNotMatch(legacy, /class InlineMathWidget/);
 });
 
@@ -64,9 +70,9 @@ test('Atomic 8.7 Prefix, Task Checkbox and HR authority remains removed after At
   assert.doesNotMatch(legacy, /markerFrom/);
 });
 
-test('Atomic 8.7 production inventory keeps the three responsibility-specific Prefix/HR modules after Atomic 8.11', async () => {
+test('Atomic 8.7 production inventory keeps the three responsibility-specific Prefix/HR modules after Atomic 8.14', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 364);
+  assert.equal(inventory.modules.length, 370);
   const paths = new Set(inventory.modules.map(item => item[0]));
   for (const expected of [
     'src/features/hybrid-editor/widgets/prefix/prefix-widget.js',

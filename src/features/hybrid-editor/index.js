@@ -131,3 +131,7 @@ export {
 export {
   createHtmlBlockWidgetType
 } from './widgets/html/html-block-widget.js';
+
+export {
+  createInlinePresentationCoordinator
+} from './presentation/inline-presentation-coordinator.js';

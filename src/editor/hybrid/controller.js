@@ -2,12 +2,18 @@ import { isolateHistory } from '@codemirror/commands';
 import { syntaxTree } from '@codemirror/language';
 import { Facet, StateEffect, StateField } from '@codemirror/state';
 import { Decoration, EditorView, ViewPlugin, WidgetType } from '@codemirror/view';
+import { marked } from 'marked';
 import {
   collectHybridBlocks,
+  collectInlineMathRanges,
+  collectVisibleLines,
   encodeTableCell,
-  getEditableRanges
+  getEditableRanges,
+  intersectsRanges,
+  intersectsRevealRanges,
+  overlapsRanges,
+  shouldDecorateSourceActiveLine
 } from '../../model-kernel/index.js';
-import { buildInlinePresentation } from './inline-presentation.js';
 import { renderMathFormula } from '../../features/preview/render/presentation/math-presentation.js';
 import { getMermaidTheme, renderMermaidDiagram } from '../../features/preview/render/presentation/mermaid-presentation.js';
 import {
@@ -17,6 +23,7 @@ import {
   createMathBlockWidgetType,
   createMermaidBlockWidgetType,
   createHtmlBlockWidgetType,
+  createInlinePresentationCoordinator,
   createHybridSourceEditController,
   destroyHybridComponentSession,
   getClassicHybridSourceEditControllerPort,
@@ -186,6 +193,20 @@ const MathBlockWidget = createMathBlockWidgetType(WidgetType, {
   reportRenderFailure: reportMathRenderFailure
 });
 
+const buildInlinePresentation = createInlinePresentationCoordinator({
+  Decoration,
+  WidgetType,
+  lexInline: source => marked.Lexer.lexInline(source),
+  renderFormula: renderMathFormula,
+  recordMathInteraction,
+  reportMathRenderFailure,
+  collectInlineMathRanges,
+  collectVisibleLines,
+  intersectsRanges,
+  intersectsRevealRanges,
+  overlapsRanges,
+  shouldDecorateSourceActiveLine
+});
 
 function recordMermaidInteraction(operation, details = {}) {
   globalThis.window?.markdownEditorPerf?.record?.(operation, {

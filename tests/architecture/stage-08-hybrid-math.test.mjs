@@ -46,20 +46,22 @@ test('Atomic 8.11 keeps inline and block delimiter/source semantics separate whi
   assert.doesNotMatch(inline + block, /katex|renderMathFormula/);
 });
 
-test('Atomic 8.11 removes legacy Math authority and composes Preview presentation plus WidgetType only at editor integration boundaries', async () => {
-  const [widgets, controller, inlinePresentation] = await Promise.all([
+test('Atomic 8.11 Math ownership remains intact through the Atomic 8.14 presentation boundary', async () => {
+  const [htmlWidget, controller, inlinePresentation] = await Promise.all([
     text('src/features/hybrid-editor/widgets/html/html-block-widget.js'),
     text('src/editor/hybrid/controller.js'),
-    text('src/editor/hybrid/inline-presentation.js')
+    text('src/features/hybrid-editor/presentation/inline-presentation-coordinator.js')
   ]);
-  assert.doesNotMatch(widgets, /class InlineMathWidget|class MathBlockWidget|function renderMathInto|reportMathRenderFailure/);
-  assert.doesNotMatch(widgets, /math-presentation\.js/);
+  assert.doesNotMatch(htmlWidget, /class InlineMathWidget|class MathBlockWidget|function renderMathInto|reportMathRenderFailure/);
+  assert.doesNotMatch(htmlWidget, /math-presentation\.js/);
   assert.match(controller, /createMathBlockWidgetType/);
   assert.match(controller, /renderMathFormula[\s\S]*math-presentation\.js/);
   assert.match(controller, /const MathBlockWidget = createMathBlockWidgetType\(WidgetType/);
+  assert.match(controller, /createInlinePresentationCoordinator\(\{[\s\S]*renderFormula:\s*renderMathFormula/);
   assert.doesNotMatch(controller, /MathBlockWidget,[\s\S]*from '\.\/widgets\.js'/);
   assert.match(inlinePresentation, /createInlineMathWidgetType/);
-  assert.match(inlinePresentation, /renderMathFormula[\s\S]*math-presentation\.js/);
+  assert.match(inlinePresentation, /renderFormula/);
+  assert.doesNotMatch(inlinePresentation, /features\/preview\/|renderMathFormula|math-presentation\.js/);
   assert.doesNotMatch(inlinePresentation, /InlineMathWidget[\s\S]*from '\.\/widgets\.js'/);
 });
 
@@ -76,9 +78,9 @@ test('Atomic 8.11 gives both Math variants explicit source-action cleanup and bl
   assert.match(block, /destroy\(dom\) \{[\s\S]*__markdownEditorMathBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
 });
 
-test('Atomic 8.11 Math ownership remains intact after Atomic 8.12 Mermaid migration', async () => {
+test('Atomic 8.11 Math ownership remains intact after Atomic 8.14 Inline Presentation migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 364);
+  assert.equal(inventory.modules.length, 370);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of mathPaths) assert.equal(paths.has(path), true, path);
   for (const mermaidPath of [

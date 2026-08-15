@@ -48,17 +48,17 @@ test('hybrid and Preview Mermaid rendering use the canonical Preview presentatio
 test('hybrid Preview and export math rendering use the canonical math presentation contract without vendor globals', async () => {
   const htmlWidget = await source('../src/features/hybrid-editor/widgets/html/html-block-widget.js');
   const controller = await source('../src/editor/hybrid/controller.js');
-  const inlinePresentation = await source('../src/editor/hybrid/inline-presentation.js');
+  const inlinePresentation = await source('../src/features/hybrid-editor/presentation/inline-presentation-coordinator.js');
   const inlineMathWidget = await source('../src/features/hybrid-editor/widgets/math/inline-math-widget.js');
   const blockMathWidget = await source('../src/features/hybrid-editor/widgets/math/block-math-widget.js');
   const previewRenderer = await source('../src/features/preview/render/math-renderer.js');
   const previewController = await source('../src/features/preview/application/preview-controller.js');
   const exportSource = await source('../public/app/export.js');
   const math = await source('../src/features/preview/render/presentation/math-presentation.js');
-  for (const integration of [controller, inlinePresentation]) {
-    assert.match(integration, /features\/preview\/render\/presentation\/math-presentation\.js/);
-    assert.match(integration, /renderMathFormula/);
-  }
+  assert.match(controller, /features\/preview\/render\/presentation\/math-presentation\.js/);
+  assert.match(controller, /renderMathFormula/);
+  assert.doesNotMatch(inlinePresentation, /features\/preview\/|renderMathFormula/);
+  assert.match(inlinePresentation, /renderFormula/);
   assert.doesNotMatch(htmlWidget, /features\/preview\/render\/presentation\/math-presentation\.js|renderMathFormula/);
   assert.doesNotMatch(inlineMathWidget + blockMathWidget, /features\/preview\/|renderMathFormula|katex\.render/);
   assert.match(inlineMathWidget + blockMathWidget, /renderFormula/);
