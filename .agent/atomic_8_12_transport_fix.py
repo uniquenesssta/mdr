@@ -93,4 +93,13 @@ if len(matching_indexes) != 1:
 del business_globals[matching_indexes[0]]
 baseline_path.write_text(json.dumps(baseline, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
+# Stage 1 keeps its historical record, but the current architecture assertions
+# intentionally track the present baseline fixture. Atomic 8.12 removes one
+# explicit business-global writer, so update only that current count.
+replace_literal_once(
+    'tests/stage-01-handoff.test.mjs',
+    "assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 15);",
+    "assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 14);",
+)
+
 print('Atomic 8.12 transport alignment applied')
