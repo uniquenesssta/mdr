@@ -34,21 +34,22 @@ test('Atomic 8.2 production callers depend on the Hybrid Editor public entry onl
   }
 });
 
-test('Atomic 8.2 controller owns Session lifecycle configuration and destruction without moving Activation', async () => {
+test('Atomic 8.2 Session lifecycle remains authoritative after Atomic 8.3 Activation migration', async () => {
   const controller = await text('src/editor/hybrid/controller.js');
   assert.match(controller, /getHybridComponentSession\(view, \{ onTransition: recordHybridComponentTransition \}\)/);
   assert.match(controller, /destroyHybridComponentSession\(this\.view\)/);
   assert.doesNotMatch(controller, /clearHybridComponentStates\(this\.view\)/);
-  await access(file('src/editor/hybrid/double-activation.js'));
-  await assert.rejects(access(file('src/features/hybrid-editor/activation/strict-double-activation.js')));
-  await assert.rejects(access(file('src/features/hybrid-editor/activation/source-activation.js')));
-  await assert.rejects(access(file('src/features/hybrid-editor/activation/outside-pointer-closure.js')));
+  await assert.rejects(access(file('src/editor/hybrid/double-activation.js')));
+  await access(file('src/features/hybrid-editor/activation/strict-double-activation.js'));
+  await access(file('src/features/hybrid-editor/activation/source-activation.js'));
+  await access(file('src/features/hybrid-editor/activation/outside-pointer-closure.js'));
+  await assert.rejects(access(file('src/features/hybrid-editor/application/hybrid-source-edit-controller.js')));
 });
 
 test('Atomic 8.2 production inventory records the facade and sole Session state owner', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 333);
+  assert.equal(inventory.modules.length, 335);
   assert.ok(paths.includes('src/features/hybrid-editor/index.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/state/hybrid-component-session.js'));
   assert.ok(!paths.includes('src/editor/hybrid/component-state.js'));

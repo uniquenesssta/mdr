@@ -55,12 +55,20 @@ test('E2E fixture loading follows the application document lifecycle', async () 
   assert.doesNotMatch(bridge, /dispatchEditorInput/);
 });
 
-test('hybrid widgets keep geometry and outside-pointer lifecycle wiring explicit', async () => {
-  const widgets = await readFile(new URL('../src/editor/hybrid/widgets.js', import.meta.url), 'utf8');
+test('hybrid widgets keep geometry explicit while document pointer listeners are Session-owned', async () => {
+  const [widgets, outsidePointer, session] = await Promise.all([
+    readFile(new URL('../src/editor/hybrid/widgets.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/features/hybrid-editor/activation/outside-pointer-closure.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/features/hybrid-editor/state/hybrid-component-session.js', import.meta.url), 'utf8')
+  ]);
   assert.match(widgets, /scheduleHybridWidgetGeometry/);
   assert.match(widgets, /from '\.\/widget-lifecycle\.js'/);
-  assert.ok((widgets.match(/document\.addEventListener\('pointerdown', handleOutsidePointer, true\)/g) || []).length >= 2);
-  assert.ok((widgets.match(/document\.removeEventListener\('pointerdown', handleOutsidePointer, true\)/g) || []).length >= 2);
+  assert.match(widgets, /bindOutsidePointerClosure/);
+  assert.doesNotMatch(widgets, /document\.addEventListener\('pointerdown'/);
+  assert.doesNotMatch(widgets, /document\.removeEventListener\('pointerdown'/);
+  assert.match(outsidePointer, /session\.registerDocumentListener/);
+  assert.match(session, /registerDocumentListener\(target, type, listener, options\)/);
+  assert.match(session, /#disposeDocumentListeners\(\)/);
 });
 
 test('local full-application E2E refuses stale build output', async () => {

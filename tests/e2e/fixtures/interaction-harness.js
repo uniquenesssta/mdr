@@ -5,9 +5,9 @@ import {
   getHybridComponentSession,
   registerHybridComponentCloser,
   transitionHybridComponent,
-  closeHybridComponent
+  closeHybridComponent,
+  bindStrictDoubleActivation
 } from '../../../src/features/hybrid-editor/index.js';
-import { bindStrictDoubleActivation } from '../../../src/editor/hybrid/double-activation.js';
 import { clearMermaidRenderCache, renderMermaidDiagram } from '../../../src/features/preview/render/presentation/mermaid-presentation.js';
 
 const view = {};

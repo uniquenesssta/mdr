@@ -1,3 +1,8 @@
+/**
+ * Atomic 8.3 strict double-activation owner.
+ * Owns only same-target click-sequence recognition and per-element listener cleanup.
+ * It does not own HybridComponentSession state, source ranges, editor transactions or widget DOM.
+ */
 export const STRICT_DOUBLE_ACTIVATION_INTERVAL_MS = 420;
 export const STRICT_DOUBLE_ACTIVATION_DISTANCE_PX = 8;
 

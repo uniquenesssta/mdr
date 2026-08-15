@@ -2,4 +2,4 @@
 
 简介：模块化重写中的桌面 Markdown 编辑器；详见 [docs/README.md](docs/README.md)。
 
-Atomic 8.2 Component Session 完成：交互组件 key/type/mode/version/closer 已收敛到单一 Session 权威，旧 component-state 已删除，生产调用者统一经 Hybrid Editor 公共入口；8.3 未开始。验证：8.2+冻结契约 30/30、Node 67/67、browser contract/built-app browser/build/architecture/Frozen/audit PASS。持久化/Rust/依赖未变。
+Atomic 8.3 Activation 完成：严格双击、键盘源码激活、外部 pointer 关闭已拆分为独立模块，document pointer 监听器清理由 Component Session 统一持有；8.4 未开始。验证：8.3+冻结契约 42/42、Node 75/75、browser contract 10/10、built-app browser 29/29、build/architecture/Frozen/audit PASS。持久化/Rust/依赖未变。

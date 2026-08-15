@@ -5,11 +5,13 @@ import { getNormalizedCodeLanguage } from './code-highlighter.js';
 import { renderHighlightedCodeRows } from './code-presentation.js';
 import { renderMathFormula } from '../../features/preview/render/presentation/math-presentation.js';
 import { getMermaidTheme, renderMermaidDiagram } from '../../features/preview/render/presentation/mermaid-presentation.js';
-import { bindStrictDoubleActivation } from './double-activation.js';
 import { resolveHybridImageSource, invalidateHybridImageSource } from './image-source.js';
 import { encodeTableCell } from '../../model-kernel/index.js';
 import {
   HYBRID_COMPONENT_MODES,
+  bindOutsidePointerClosure,
+  bindSourceActivation,
+  bindStrictDoubleActivation,
   closeHybridComponent,
   createHybridComponentKey,
   registerHybridComponentCloser,
@@ -161,12 +163,10 @@ function enableBlockSourceEditing(element, view, descriptor, options = {}) {
       || event.target?.closest?.('[data-hybrid-double-zone]')?.getAttribute?.('data-hybrid-double-zone')
       || 'source-root'
   });
-  const sourceKeys = new Set(options.sourceKeys || ['Enter', 'F2']);
-  element.addEventListener('keydown', event => {
-    if (!sourceKeys.has(event.key)) return;
-    if (event.target instanceof Element && event.target.closest('button, a, input, textarea, select')) return;
-    event.preventDefault();
+  bindSourceActivation(element, () => {
     editSourceBlock(view, descriptor, element);
+  }, {
+    sourceKeys: options.sourceKeys
   });
 }
 
@@ -427,19 +427,16 @@ function createEditableCodeArea(view, descriptor, openSource, options = {}) {
       descriptor: result || null
     });
   });
-  const handleOutsidePointer = event => {
-    if (closed || !textarea.isConnected) return;
-    const target = event.target;
-    if (target === textarea || (target instanceof Node && textarea.contains(target))) return;
+  removeOutsidePointerListener = bindOutsidePointerClosure(view, textarea, () => {
     const result = commit();
     close({
       reason: cancelled ? 'cancelled' : result ? 'committed' : 'pointer-outside',
       value: textarea.value,
       descriptor: result || null
     });
-  };
-  document.addEventListener('pointerdown', handleOutsidePointer, true);
-  removeOutsidePointerListener = () => document.removeEventListener('pointerdown', handleOutsidePointer, true);
+  }, {
+    isActive: () => !closed && textarea.isConnected
+  });
 
   textarea.addEventListener('keydown', event => {
     event.stopPropagation();
@@ -1348,18 +1345,15 @@ function createEditableTableCellInput(view, descriptor) {
   input.addEventListener('click', event => event.stopPropagation());
   input.addEventListener('dblclick', event => event.stopPropagation());
   input.addEventListener('input', event => event.stopPropagation());
-  const handleOutsidePointer = event => {
-    if (closed || !input.isConnected) return;
-    const target = event.target;
-    if (target === input || (target instanceof Node && input.contains(target))) return;
+  removeOutsidePointerListener = bindOutsidePointerClosure(view, input, () => {
     const changed = commit(requestedFocusKey);
     close({
       reason: cancelled ? 'cancelled' : changed ? 'committed' : 'pointer-outside',
       value: input.value
     });
-  };
-  document.addEventListener('pointerdown', handleOutsidePointer, true);
-  removeOutsidePointerListener = () => document.removeEventListener('pointerdown', handleOutsidePointer, true);
+  }, {
+    isActive: () => !closed && input.isConnected
+  });
 
   input.addEventListener('blur', event => {
     const related = event.relatedTarget instanceof HTMLElement

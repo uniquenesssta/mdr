@@ -38,6 +38,7 @@ export class HybridComponentSession {
     this.current = null;
     this.version = 0;
     this.closerBinding = null;
+    this.documentListenerDisposers = new Set();
     this.destroyed = false;
   }
 
@@ -156,8 +157,26 @@ export class HybridComponentSession {
     };
   }
 
+  registerDocumentListener(target, type, listener, options) {
+    this.#assertAlive();
+    if (!target?.addEventListener || !target?.removeEventListener || typeof listener !== 'function') {
+      throw new TypeError('HybridComponentSession document listener requires a valid target and listener');
+    }
+    target.addEventListener(type, listener, options);
+    let active = true;
+    const dispose = () => {
+      if (!active) return;
+      active = false;
+      target.removeEventListener(type, listener, options);
+      this.documentListenerDisposers.delete(dispose);
+    };
+    this.documentListenerDisposers.add(dispose);
+    return dispose;
+  }
+
   clear() {
     this.#assertAlive();
+    this.#disposeDocumentListeners();
     this.records.clear();
     this.current = null;
     this.closerBinding = null;
@@ -166,10 +185,16 @@ export class HybridComponentSession {
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true;
+    this.#disposeDocumentListeners();
     this.records.clear();
     this.current = null;
     this.closerBinding = null;
     this.onTransition = null;
+  }
+
+  #disposeDocumentListeners() {
+    for (const dispose of [...this.documentListenerDisposers]) dispose();
+    this.documentListenerDisposers.clear();
   }
 
   #assertAlive() {

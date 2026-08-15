@@ -11,17 +11,16 @@ import {
   getHybridComponentSession,
   getHybridComponentStateSnapshot,
   registerHybridComponentCloser,
-  transitionHybridComponent
-} from '../src/features/hybrid-editor/index.js';
-import {
+  transitionHybridComponent,
   STRICT_DOUBLE_ACTIVATION_DISTANCE_PX,
   STRICT_DOUBLE_ACTIVATION_INTERVAL_MS,
   bindStrictDoubleActivation,
   evaluateStrictDoubleActivation
-} from '../src/editor/hybrid/double-activation.js';
+} from '../src/features/hybrid-editor/index.js';
 
 const widgetsUrl = new URL('../src/editor/hybrid/widgets.js', import.meta.url);
 const controllerUrl = new URL('../src/editor/hybrid/controller.js', import.meta.url);
+const outsidePointerUrl = new URL('../src/features/hybrid-editor/activation/outside-pointer-closure.js', import.meta.url);
 
 function click({
   detail = 1,
@@ -203,17 +202,19 @@ test('Atomic 8.1 freezes stale delayed-close rejection with expectedMode', () =>
 });
 
 test('Atomic 8.1 freezes current runtime close-reason producers', async () => {
-  const [widgets, controller] = await Promise.all([
+  const [widgets, controller, outsidePointer] = await Promise.all([
     readFile(widgetsUrl, 'utf8'),
-    readFile(controllerUrl, 'utf8')
+    readFile(controllerUrl, 'utf8'),
+    readFile(outsidePointerUrl, 'utf8')
   ]);
 
   for (const reason of ['cancelled', 'committed', 'unchanged', 'pointer-outside']) {
     assert.match(widgets, new RegExp(`reason:\\s*[^\\n]{0,160}['\"]${reason}['\"]|['\"]${reason}['\"]`), `missing direct close reason: ${reason}`);
   }
-  assert.match(controller, /clearActiveHybridSourceRange\(view, 'pointer-outside-source'/);
+  assert.match(outsidePointer, /closeSource\?\.\('pointer-outside-source'/);
+  assert.match(outsidePointer, /trigger: 'pointer-outside-source'/);
+  assert.match(controller, /closeActiveSourceFromPointer\(view, event, activeSourceRange/);
   assert.match(controller, /clearActiveHybridSourceRange\(update\.view, 'selection-left'/);
-  assert.match(controller, /trigger: 'pointer-outside-source'/);
   assert.match(controller, /trigger: 'selection-left'/);
 });
 

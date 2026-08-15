@@ -7,6 +7,7 @@ import {
 } from '../../model-kernel/index.js';
 import { buildInlinePresentation } from './inline-presentation.js';
 import {
+  closeActiveSourceFromPointer,
   destroyHybridComponentSession,
   getHybridComponentSession
 } from '../../features/hybrid-editor/index.js';
@@ -117,49 +118,6 @@ function mapActiveSourceRange(update) {
   }
   setActiveHybridSourceRange(update.view, range);
   return range;
-}
-
-function closeActiveSourceFromPointer(view, event, range) {
-  const clickedPosition = view.posAtCoords({ x: event.clientX, y: event.clientY });
-  const target = event.target instanceof Element ? event.target : null;
-  const clickedSourceLine = Boolean(target?.closest?.('.cm-line'))
-    && Number.isInteger(clickedPosition)
-    && clickedPosition >= range.from
-    && clickedPosition <= range.to;
-  if (clickedSourceLine) return false;
-
-  let fallbackPosition = Number.isInteger(clickedPosition) ? clickedPosition : null;
-  if (fallbackPosition !== null
-    && fallbackPosition >= range.from
-    && fallbackPosition <= range.to) {
-    fallbackPosition = null;
-  }
-  if (fallbackPosition === null) {
-    if (range.to < view.state.doc.length) fallbackPosition = range.to + 1;
-    else if (range.from > 0) fallbackPosition = range.from - 1;
-  }
-
-  // Close the explicit source range during pointerdown, before CodeMirror resolves
-  // the same pointer against a layout that is about to change from source to widget.
-  // Deferring this to requestAnimationFrame caused one stale editable frame and could
-  // place the caret back inside the just-closed Mermaid block.
-  clearActiveHybridSourceRange(view, 'pointer-outside-source', { trigger: 'pointer-outside-source' });
-  event.preventDefault();
-  event.stopPropagation();
-  if (fallbackPosition !== null) {
-    view.dispatch({ selection: { anchor: fallbackPosition } });
-  } else {
-    view.contentDOM.blur();
-  }
-  recordSourceEditingClose({
-    trigger: 'pointer-outside-source',
-    sourceFrom: range.from,
-    sourceTo: range.to,
-    fallbackPosition,
-    immediate: true
-  });
-  requestAnimationFrame(() => scheduleHybridWidgetGeometry(view, 'source-closed-immediate'));
-  return true;
 }
 
 const hybridBlockDecorationField = StateField.define({
@@ -497,7 +455,11 @@ export const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
       }
       const activeSourceRange = getActiveHybridSourceRange(view);
       if (!activeSourceRange) return false;
-      return closeActiveSourceFromPointer(view, event, activeSourceRange);
+      return closeActiveSourceFromPointer(view, event, activeSourceRange, {
+        closeSource: (reason, details) => clearActiveHybridSourceRange(view, reason, details),
+        recordClose: recordSourceEditingClose,
+        scheduleGeometry: reason => scheduleHybridWidgetGeometry(view, reason)
+      });
     },
     click(event) {
       const element = event.target instanceof Element
