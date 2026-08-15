@@ -31,54 +31,42 @@ test('Atomic 8.5 separates element observation from the geometry side-effect que
   assert.doesNotMatch(scheduler, /new ResizeObserverCtor|elementLifecycles/);
 });
 
-test('Atomic 8.5 legacy editor callers depend on the Hybrid Editor public entry only', async () => {
-  const widgets = await text('src/editor/hybrid/widgets.js');
+test('Atomic 8.5 editor callers keep lifecycle ownership behind the Hybrid Editor boundary after HTML migration', async () => {
+  const widgets = await text('src/features/hybrid-editor/widgets/html/html-block-widget.js');
   const controller = await text('src/editor/hybrid/controller.js');
   assert.doesNotMatch(widgets, /from ['"]\.\/widget-lifecycle\.js['"]/);
-  assert.doesNotMatch(widgets, /features\/hybrid-editor\/lifecycle\//);
+  assert.match(widgets, /lifecycle\/widget-lifecycle\.js/);
   assert.match(widgets, /attachHybridWidgetLifecycle/);
   assert.match(widgets, /destroyHybridWidgetLifecycle/);
   assert.match(controller, /destroyHybridWidgetGeometryScheduler\(this\.view\)/);
   assert.doesNotMatch(controller, /from ['"]\.\/widget-lifecycle\.js['"]/);
 });
 
-test('Atomic 8.5 keeps remaining legacy HTML plus migrated component widgets on shared idempotent destroy paths', async () => {
-  const widgets = await text('src/editor/hybrid/widgets.js');
+test('Atomic 8.5 keeps migrated HTML and component widgets on shared idempotent destroy paths', async () => {
+  const htmlBlock = await text('src/features/hybrid-editor/widgets/html/html-block-widget.js');
   const codeBlock = await text('src/features/hybrid-editor/widgets/code-block/code-block-widget.js');
   const tableBlock = await text('src/features/hybrid-editor/widgets/table/table-widget.js');
   const imageBlock = await text('src/features/hybrid-editor/widgets/image/image-widget.js');
   const inlineMath = await text('src/features/hybrid-editor/widgets/math/inline-math-widget.js');
   const blockMath = await text('src/features/hybrid-editor/widgets/math/block-math-widget.js');
   const mermaidBlock = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
-  const destroyCalls = widgets.match(/destroy\(dom\)\s*\{\s*destroyBlockLifecycle\(dom\);\s*\}/g) || [];
-  assert.equal(destroyCalls.length, 1);
-  assert.match(widgets, /function destroyBlockLifecycle\(element\)/);
-  assert.match(widgets, /destroyHybridWidgetLifecycle\(element\)/);
-  assert.match(codeBlock, /section\.__markdownEditorCodeBlockCleanup = \(\) => \{/);
-  assert.match(codeBlock, /if \(cleaned\) return;\s*cleaned = true;/);
-  assert.match(codeBlock, /destroy\(dom\) \{[\s\S]*dom\?\.__markdownEditorCodeBlockCleanup\?\.\(\);[\s\S]*destroyHybridWidgetLifecycle\(dom\);/);
-  assert.match(tableBlock, /section\.__markdownEditorTableBlockCleanup = \(\) => \{/);
-  assert.match(tableBlock, /if \(cleaned\) return;\s*cleaned = true;/);
-  assert.match(tableBlock, /__markdownEditorDestroyTableCell/);
-  assert.match(tableBlock, /destroy\(dom\) \{[\s\S]*dom\?\.__markdownEditorTableBlockCleanup\?\.\(\);[\s\S]*destroyHybridWidgetLifecycle\(dom\);/);
-  assert.match(imageBlock, /figure\.__markdownEditorImageBlockCleanup = \(\) => \{/);
-  assert.match(imageBlock, /if \(cleaned\) return;\s*cleaned = true;/);
-  assert.match(imageBlock, /loadVersion\.destroy\(\)/);
-  assert.match(imageBlock, /destroy\(dom\) \{[\s\S]*dom\?\.__markdownEditorImageBlockCleanup\?\.\(\);[\s\S]*destroyHybridWidgetLifecycle\(dom\);/);
+  assert.match(htmlBlock, /__markdownEditorHtmlBlockCleanup/);
+  assert.match(htmlBlock, /if \(cleaned\) return;\s*cleaned = true;/);
+  assert.match(htmlBlock, /disposeSourceAction\(\)/);
+  assert.match(htmlBlock, /destroy\(dom\) \{[\s\S]*__markdownEditorHtmlBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
+  assert.match(codeBlock, /__markdownEditorCodeBlockCleanup/);
+  assert.match(tableBlock, /__markdownEditorTableBlockCleanup/);
+  assert.match(imageBlock, /__markdownEditorImageBlockCleanup/);
   assert.match(inlineMath, /__markdownEditorInlineMathCleanup/);
-  assert.match(inlineMath, /destroy\(dom\) \{[\s\S]*__markdownEditorInlineMathCleanup/);
   assert.match(blockMath, /__markdownEditorMathBlockCleanup/);
-  assert.match(blockMath, /destroy\(dom\) \{[\s\S]*__markdownEditorMathBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
   assert.match(mermaidBlock, /__markdownEditorMermaidBlockCleanup/);
-  assert.match(mermaidBlock, /renderState\.destroy\(\)/);
-  assert.match(mermaidBlock, /themeObserver\?\.disconnect\(\)/);
-  assert.match(mermaidBlock, /destroy\(dom\) \{[\s\S]*__markdownEditorMermaidBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
+  await assert.rejects(access(file('src/editor/hybrid/widgets.js')));
 });
 
 test('Atomic 8.5 lifecycle boundary remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 363);
+  assert.equal(inventory.modules.length, 364);
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-lifecycle.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js'));
   assert.ok(!paths.includes('src/editor/hybrid/widget-lifecycle.js'));

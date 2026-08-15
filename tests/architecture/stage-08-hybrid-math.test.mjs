@@ -48,7 +48,7 @@ test('Atomic 8.11 keeps inline and block delimiter/source semantics separate whi
 
 test('Atomic 8.11 removes legacy Math authority and composes Preview presentation plus WidgetType only at editor integration boundaries', async () => {
   const [widgets, controller, inlinePresentation] = await Promise.all([
-    text('src/editor/hybrid/widgets.js'),
+    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'),
     text('src/editor/hybrid/controller.js'),
     text('src/editor/hybrid/inline-presentation.js')
   ]);
@@ -78,7 +78,7 @@ test('Atomic 8.11 gives both Math variants explicit source-action cleanup and bl
 
 test('Atomic 8.11 Math ownership remains intact after Atomic 8.12 Mermaid migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 363);
+  assert.equal(inventory.modules.length, 364);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of mathPaths) assert.equal(paths.has(path), true, path);
   for (const mermaidPath of [

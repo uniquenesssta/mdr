@@ -32,44 +32,38 @@ test('Atomic 8.6 shared primitives contain no component-type policy or state own
   assert.doesNotMatch(sourceAction, /switch\s*\(|componentType\s*===|componentType\s*!==/);
 });
 
-test('Atomic 8.6 remaining legacy HTML consumes Shared Widget UI only through the Hybrid Editor public entry', async () => {
-  const widgets = await text('src/editor/hybrid/widgets.js');
-  assert.match(widgets, /features\/hybrid-editor\/index\.js/);
-  for (const symbol of [
-    'createWidgetButton', 'createWidgetToolbar', 'bindWidgetSourceAction', 'openWidgetSource'
-  ]) assert.match(widgets, new RegExp(symbol), symbol);
-  assert.doesNotMatch(widgets, /createWidgetActionGroup/);
-  assert.doesNotMatch(widgets, /features\/hybrid-editor\/widgets\/shared\//);
-  assert.doesNotMatch(widgets, /function createWidgetButton|function editSourceBlock|function enableBlockSourceEditing/);
+test('Atomic 8.6 migrated HTML consumes Shared Widget UI without duplicating shared primitives', async () => {
+  const widget = await text('src/features/hybrid-editor/widgets/html/html-block-widget.js');
+  const view = await text('src/features/hybrid-editor/widgets/html/html-block-view.js');
+  assert.match(widget, /bindWidgetSourceAction/);
+  assert.match(widget, /openWidgetSource/);
+  assert.match(view, /createWidgetButton/);
+  assert.match(view, /createWidgetToolbar/);
+  assert.doesNotMatch(widget + view, /function createWidgetButton|function editSourceBlock|function enableBlockSourceEditing/);
+  assert.doesNotMatch(widget + view, /features\/hybrid-editor\/index\.js/);
 });
 
-test('Atomic 8.6 toolbar and source primitives remain shared after Atomic 8.12 Mermaid extraction', async () => {
-  const widgets = await text('src/editor/hybrid/widgets.js');
+test('Atomic 8.6 toolbar and source primitives remain shared after Atomic 8.13 HTML extraction', async () => {
+  const htmlView = await text('src/features/hybrid-editor/widgets/html/html-block-view.js');
+  const htmlWidget = await text('src/features/hybrid-editor/widgets/html/html-block-widget.js');
   const mermaidActions = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-actions.js');
   const mermaidWidget = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
-  assert.equal((widgets.match(/(?:const header|const toolbar) = createWidgetToolbar\(/g) || []).length, 1);
-  assert.equal((widgets.match(/createWidgetActionGroup\(/g) || []).length, 0);
-  assert.equal((widgets.match(/bindWidgetSourceAction\(/g) || []).length, 1);
-  assert.ok((widgets.match(/createWidgetButton\(/g) || []).length >= 1);
+  assert.match(htmlView, /createWidgetToolbar/);
+  assert.match(htmlView, /createWidgetButton/);
+  assert.match(htmlWidget, /bindWidgetSourceAction/);
+  assert.match(htmlWidget, /openWidgetSource/);
   assert.match(mermaidActions, /createWidgetToolbar/);
   assert.match(mermaidActions, /createWidgetActionGroup/);
   assert.match(mermaidActions, /createWidgetButton/);
   assert.match(mermaidWidget, /bindWidgetSourceAction/);
   assert.match(mermaidWidget, /openWidgetSource/);
-  assert.doesNotMatch(widgets, /document\.createElement\(['"]header['"]\)/);
-  assert.doesNotMatch(widgets, /class ImageBlockWidget|class InlineMathWidget|class MathBlockWidget|class MermaidBlockWidget/);
-  const imageWidget = await text('src/features/hybrid-editor/widgets/image/image-widget.js');
-  for (const symbol of ['createWidgetButton', 'createWidgetToolbar', 'bindWidgetSourceAction', 'openWidgetSource']) {
-    assert.match(imageWidget, new RegExp(symbol), symbol);
-  }
-  assert.doesNotMatch(widgets, /class CodeBlockWidget|class TableBlockWidget/);
-  assert.doesNotMatch(widgets, /class HybridPrefixWidget|class HorizontalRuleWidget/);
+  await assert.rejects(access(file('src/editor/hybrid/widgets.js')));
 });
 
 test('Atomic 8.6 Shared Widget UI boundary remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 363);
+  assert.equal(inventory.modules.length, 364);
   for (const path of sharedPaths) assert.ok(paths.includes(path), path);
   const shared = await Promise.all(sharedPaths.map(path => text(path)));
   assert.doesNotMatch(shared.join('\n'), /HybridPrefixWidget|TaskCheckboxWidget|HorizontalRuleWidget/);

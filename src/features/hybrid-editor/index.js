@@ -127,3 +127,7 @@ export {
 export {
   createMermaidBlockWidgetType
 } from './widgets/mermaid/mermaid-widget.js';
+
+export {
+  createHtmlBlockWidgetType
+} from './widgets/html/html-block-widget.js';

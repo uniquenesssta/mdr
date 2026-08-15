@@ -42,7 +42,7 @@ test('every visual component follows the same presentation/source lifecycle', as
 });
 
 test('component widgets are wired to the shared runtime coordinator', async () => {
-  const widgets = await readFile(new URL('../src/editor/hybrid/widgets.js', import.meta.url), 'utf8');
+  const htmlBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/html/html-block-widget.js', import.meta.url), 'utf8');
   const codeBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/code-block/code-block-widget.js', import.meta.url), 'utf8');
   const tableBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/table/table-widget.js', import.meta.url), 'utf8');
   const imageBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/image/image-widget.js', import.meta.url), 'utf8');
@@ -57,7 +57,7 @@ test('component widgets are wired to the shared runtime coordinator', async () =
     ['image', imageBlock],
     ['math', mathBlock],
     ['mermaid', mermaidBlock],
-    ['html', widgets]
+    ['html', htmlBlock]
   ]);
   for (const type of ['code', 'mermaid', 'table', 'math', 'html', 'image']) {
     assert.match(

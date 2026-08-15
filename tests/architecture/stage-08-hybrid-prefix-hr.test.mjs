@@ -39,7 +39,7 @@ test('Atomic 8.7 migrated widgets have narrow responsibility boundaries and no s
 test('Atomic 8.7 Prefix and HR presentation ownership remains intact after Atomic 8.11 Inline Math migration', async () => {
   const [inline, legacy] = await Promise.all([
     read('src/editor/hybrid/inline-presentation.js'),
-    read('src/editor/hybrid/widgets.js')
+    read('src/features/hybrid-editor/widgets/html/html-block-widget.js')
   ]);
   assert.doesNotMatch(inline, /import \{ InlineMathWidget \} from '\.\/widgets\.js';/);
   assert.match(inline, /createHorizontalRuleWidgetType,[\s\S]*createHybridPrefixWidgetType,[\s\S]*createInlineMathWidgetType,[\s\S]*createTaskCheckboxWidgetType[\s\S]*from '\.\.\/\.\.\/features\/hybrid-editor\/index\.js';/);
@@ -57,7 +57,7 @@ test('Atomic 8.7 Prefix and HR presentation ownership remains intact after Atomi
 });
 
 test('Atomic 8.7 Prefix, Task Checkbox and HR authority remains removed after Atomic 8.8', async () => {
-  const legacy = await read('src/editor/hybrid/widgets.js');
+  const legacy = await read('src/features/hybrid-editor/widgets/html/html-block-widget.js');
   assert.doesNotMatch(legacy, /class HybridPrefixWidget/);
   assert.doesNotMatch(legacy, /class HorizontalRuleWidget/);
   assert.doesNotMatch(legacy, /cm-hybrid-task-box|cm-hybrid-list-prefix|cm-hybrid-horizontal-rule/);
@@ -66,7 +66,7 @@ test('Atomic 8.7 Prefix, Task Checkbox and HR authority remains removed after At
 
 test('Atomic 8.7 production inventory keeps the three responsibility-specific Prefix/HR modules after Atomic 8.11', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 363);
+  assert.equal(inventory.modules.length, 364);
   const paths = new Set(inventory.modules.map(item => item[0]));
   for (const expected of [
     'src/features/hybrid-editor/widgets/prefix/prefix-widget.js',

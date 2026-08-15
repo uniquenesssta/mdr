@@ -21,7 +21,7 @@ test('application composes one canonical presentation API into Preview without p
 });
 
 test('hybrid and Preview Mermaid rendering use the canonical Preview presentation renderer', async () => {
-  const widgets = await source('../src/editor/hybrid/widgets.js');
+  const htmlWidget = await source('../src/features/hybrid-editor/widgets/html/html-block-widget.js');
   const controller = await source('../src/editor/hybrid/controller.js');
   const mermaidWidget = await source('../src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
   const previewRenderer = await source('../src/features/preview/render/mermaid-renderer.js');
@@ -33,7 +33,7 @@ test('hybrid and Preview Mermaid rendering use the canonical Preview presentatio
   assert.match(controller, /getMermaidTheme/);
   assert.match(mermaidWidget, /renderDiagram/);
   assert.doesNotMatch(mermaidWidget, /features\/preview\/|renderMermaidDiagram|getMermaidTheme/);
-  assert.doesNotMatch(widgets, /features\/preview\/render\/presentation\/mermaid-presentation\.js|renderMermaidDiagram|getMermaidTheme/);
+  assert.doesNotMatch(htmlWidget, /features\/preview\/render\/presentation\/mermaid-presentation\.js|renderMermaidDiagram|getMermaidTheme/);
   assert.match(previewRenderer, /presentation\?\.mermaid/);
   assert.match(previewRenderer, /mermaid\.renderDiagram/);
   assert.match(previewController, /renderer\.renderMermaid/);
@@ -46,7 +46,7 @@ test('hybrid and Preview Mermaid rendering use the canonical Preview presentatio
 });
 
 test('hybrid Preview and export math rendering use the canonical math presentation contract without vendor globals', async () => {
-  const widgets = await source('../src/editor/hybrid/widgets.js');
+  const htmlWidget = await source('../src/features/hybrid-editor/widgets/html/html-block-widget.js');
   const controller = await source('../src/editor/hybrid/controller.js');
   const inlinePresentation = await source('../src/editor/hybrid/inline-presentation.js');
   const inlineMathWidget = await source('../src/features/hybrid-editor/widgets/math/inline-math-widget.js');
@@ -59,7 +59,7 @@ test('hybrid Preview and export math rendering use the canonical math presentati
     assert.match(integration, /features\/preview\/render\/presentation\/math-presentation\.js/);
     assert.match(integration, /renderMathFormula/);
   }
-  assert.doesNotMatch(widgets, /features\/preview\/render\/presentation\/math-presentation\.js|renderMathFormula/);
+  assert.doesNotMatch(htmlWidget, /features\/preview\/render\/presentation\/math-presentation\.js|renderMathFormula/);
   assert.doesNotMatch(inlineMathWidget + blockMathWidget, /features\/preview\/|renderMathFormula|katex\.render/);
   assert.match(inlineMathWidget + blockMathWidget, /renderFormula/);
   assert.match(previewRenderer, /presentation\?\.math/);
@@ -68,7 +68,7 @@ test('hybrid Preview and export math rendering use the canonical math presentati
   assert.match(exportSource, /exportPresentationPort\.math/);
   assert.match(math, /MARKDOWN_MATH_DELIMITERS/);
   assert.match(math, /renderMathTree/);
-  assert.doesNotMatch(controller + inlinePresentation + widgets, /katex\.render/);
+  assert.doesNotMatch(controller + inlinePresentation + htmlWidget, /katex\.render/);
   assert.doesNotMatch(math, /window\.katex|window\.renderMathInElement|window\.markdownEditorMath/);
 });
 

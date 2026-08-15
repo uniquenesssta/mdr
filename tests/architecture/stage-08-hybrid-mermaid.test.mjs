@@ -68,7 +68,7 @@ test('Atomic 8.12 separates Mermaid actions from render state and widget orchest
 
 test('Atomic 8.12 removes legacy Mermaid authority and composes Preview presentation plus WidgetType only at the editor integration boundary', async () => {
   const [widgets, controller] = await Promise.all([
-    text('src/editor/hybrid/widgets.js'),
+    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'),
     text('src/editor/hybrid/controller.js')
   ]);
   assert.doesNotMatch(widgets, /class MermaidBlockWidget|renderHybridMermaid|reportMermaidRenderFailure|createMermaidStatus/);
@@ -80,7 +80,7 @@ test('Atomic 8.12 removes legacy Mermaid authority and composes Preview presenta
   assert.doesNotMatch(controller, /import\s*\{[^}]*MermaidBlockWidget[^}]*\}\s*from '\.\/widgets\.js'/);
 });
 
-test('Atomic 8.12 Mermaid teardown is explicit, inventory advances to 363, and Atomic 8.13 HTML has not started', async () => {
+test('Atomic 8.12 Mermaid ownership remains intact after Atomic 8.13 HTML migration', async () => {
   const widget = await text(mermaidPaths[0]);
   assert.match(widget, /__markdownEditorMermaidBlockCleanup/);
   assert.match(widget, /if \(cleaned\) return;\s*cleaned = true;/);
@@ -89,14 +89,14 @@ test('Atomic 8.12 Mermaid teardown is explicit, inventory advances to 363, and A
   assert.match(widget, /__markdownEditorDestroyCodeBlock/);
   assert.match(widget, /destroy\(dom\) \{[\s\S]*__markdownEditorMermaidBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 363);
+  assert.equal(inventory.modules.length, 364);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of mermaidPaths) assert.equal(paths.has(path), true, path);
   for (const htmlPath of [
     'src/features/hybrid-editor/widgets/html/html-block-widget.js',
     'src/features/hybrid-editor/widgets/html/html-block-view.js'
   ]) {
-    assert.equal(paths.has(htmlPath), false, htmlPath);
-    await assert.rejects(access(file(htmlPath)), undefined, htmlPath);
+    assert.equal(paths.has(htmlPath), true, htmlPath);
+    await access(file(htmlPath));
   }
 });

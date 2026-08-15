@@ -31,7 +31,7 @@ test('Atomic 8.4 application owner is implementation/DOM-free and editor actions
 });
 
 test('Atomic 8.4 removes source range and outside-pointer close authority from legacy widgets/controller/Activation', async () => {
-  const widgets = await text('src/editor/hybrid/widgets.js');
+  const widgets = await text('src/features/hybrid-editor/widgets/html/html-block-widget.js');
   const sourceAction = await text('src/features/hybrid-editor/widgets/shared/widget-source-action.js');
   const legacyController = await text('src/editor/hybrid/controller.js');
   const outside = await text('src/features/hybrid-editor/activation/outside-pointer-closure.js');
@@ -55,7 +55,7 @@ test('Atomic 8.4 source-edit boundary remains intact after Atomic 8.6 Shared Wid
 test('Atomic 8.4 production inventory records the new responsibility boundaries', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 363);
+  assert.equal(inventory.modules.length, 364);
   for (const path of [
     'src/features/hybrid-editor/application/hybrid-source-edit-controller.js',
     'src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js',

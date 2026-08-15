@@ -23,10 +23,10 @@ test('Atomic 8.2 has one public Component Session owner and removes the legacy s
 
 test('Atomic 8.2 production callers depend on the Hybrid Editor public entry only', async () => {
   const callers = {
-    'src/editor/hybrid/widgets.js': '../../features/hybrid-editor/index.js',
     'src/editor/hybrid/controller.js': '../../features/hybrid-editor/index.js',
     'src/editor/virtual-editor.js': '../features/hybrid-editor/index.js'
   };
+  await access(file('src/features/hybrid-editor/widgets/html/html-block-widget.js'));
   for (const [path, publicEntry] of Object.entries(callers)) {
     const source = await text(path);
     assert.match(source, new RegExp(publicEntry.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
@@ -49,7 +49,7 @@ test('Atomic 8.2 Session lifecycle remains authoritative after Atomic 8.3 Activa
 test('Atomic 8.2 production inventory records the facade and sole Session state owner', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 363);
+  assert.equal(inventory.modules.length, 364);
   assert.ok(paths.includes('src/features/hybrid-editor/index.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/state/hybrid-component-session.js'));
   assert.ok(!paths.includes('src/editor/hybrid/component-state.js'));

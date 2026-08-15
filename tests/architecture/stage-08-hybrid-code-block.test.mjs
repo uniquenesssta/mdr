@@ -61,7 +61,7 @@ test('Atomic 8.8 separates view, direct-edit fence/writeback, actions and widget
 
 test('Atomic 8.8 removes legacy Code Block authority and composes CodeMirror capabilities only in the editor controller', async () => {
   const [widgets, controller] = await Promise.all([
-    text('src/editor/hybrid/widgets.js'), text('src/editor/hybrid/controller.js')
+    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'), text('src/editor/hybrid/controller.js')
   ]);
   assert.doesNotMatch(widgets, /class CodeBlockWidget|function buildCodeBlockWriteback|function createEditableCodeArea|resolveCodePointerOffset|createCodePresentationBody/);
   assert.doesNotMatch(widgets, /createCodeBlockDirectEditor|reportLegacyFencedEditorFailure/);
@@ -88,7 +88,7 @@ test('Atomic 8.8 keeps Preview on the public code presentation and gives migrate
 
 test('Atomic 8.8 Code Block ownership remains intact after Atomic 8.9 Table migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 363);
+  assert.equal(inventory.modules.length, 364);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of targetPaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/code-highlighter.js'), false);

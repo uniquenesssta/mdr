@@ -67,7 +67,7 @@ test('Atomic 8.10 async image completion validates the current component version
 
 test('Atomic 8.10 removes legacy Image authority and composes platform plus WidgetType only through the Hybrid Editor public entry', async () => {
   const [main, controller, widgets] = await Promise.all([
-    text('src/main.js'), text('src/editor/hybrid/controller.js'), text('src/editor/hybrid/widgets.js')
+    text('src/main.js'), text('src/editor/hybrid/controller.js'), text('src/features/hybrid-editor/widgets/html/html-block-widget.js')
   ]);
   await assert.rejects(access(file('src/editor/hybrid/image-source.js')));
   assert.doesNotMatch(widgets, /class ImageBlockWidget|resolveHybridImageSource|invalidateHybridImageSource|cm-hybrid-image-error/);
@@ -81,7 +81,7 @@ test('Atomic 8.10 removes legacy Image authority and composes platform plus Widg
 
 test('Atomic 8.10 Image ownership remains intact after Atomic 8.12 Mermaid migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 363);
+  assert.equal(inventory.modules.length, 364);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of imagePaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/image-source.js'), false);

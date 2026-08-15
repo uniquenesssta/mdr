@@ -16,6 +16,7 @@ import {
   createImageBlockWidgetType,
   createMathBlockWidgetType,
   createMermaidBlockWidgetType,
+  createHtmlBlockWidgetType,
   createHybridSourceEditController,
   destroyHybridComponentSession,
   getClassicHybridSourceEditControllerPort,
@@ -28,7 +29,6 @@ import {
   createCodeMirrorSourceEditorPort,
   revealHybridSourceRangeEffect
 } from '../../features/hybrid-editor/compatibility/codemirror-source-editor-port.js';
-import { HtmlBlockWidget } from './widgets.js';
 
 const setHybridBlockDecorations = StateEffect.define();
 
@@ -231,6 +231,18 @@ const MermaidBlockWidget = createMermaidBlockWidgetType(WidgetType, {
   notify: showMermaidToast,
   reportRenderFailure: reportMermaidRenderFailure,
   reportEditFailure: reportMermaidEditFailure
+});
+
+
+function recordHtmlInteraction(operation, details = {}) {
+  globalThis.window?.markdownEditorPerf?.record?.(operation, {
+    category: 'editor.hybrid',
+    details
+  });
+}
+
+const HtmlBlockWidget = createHtmlBlockWidgetType(WidgetType, {
+  recordInteraction: recordHtmlInteraction
 });
 
 function recordSourceEditingClose(details = {}) {
