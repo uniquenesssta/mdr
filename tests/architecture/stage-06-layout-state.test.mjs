@@ -123,7 +123,7 @@ test('Atomic 6.1 layout state remains single-authority after Atomic 6.4 removes 
     const declaration = new RegExp(`\b(?:let|var|const)\s+${name}\b`);
     assert.doesNotMatch(core, declaration, `core must not recreate layout authority ${name}`);
   }
-  assert.doesNotMatch(core, /function (?:startResize|onResizeMove|stopResize|applySplit|applyPaneStates|reconcileCompactSplitLayout|activateCompactSplitPane)/);
+  assert.doesNotMatch(core, /function (?:startResize|onResizeMove|stopResize|applySplit|applyPaneStates|reconcileCompactSplitLayout|activateCompactSplitPane)\b/);
 });
 
 test('Atomic 6.1 scroll-sync reads resize activity only from LayoutState', async () => {

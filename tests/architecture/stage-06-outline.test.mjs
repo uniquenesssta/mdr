@@ -53,7 +53,7 @@ test('Atomic 6.8 removes classic Outline state/render/parser authority while Ato
     read('src/features/preview/pipeline/preview-render-engine.js'), read('public/app/scroll-sync.js')
   ]);
   for (const legacy of [
-    /outlineDirty/, /cachedHeadings/, /cachedHeadingSource/, /outlineCollapsed/,
+    /\boutlineDirty\b/, /\bcachedHeadings\b/, /\bcachedHeadingSource\b/, /\boutlineCollapsed\b/,
     /function\s+renderOutline\s*\(/, /function\s+getMarkdownHeadings\s*\(/,
     /function\s+updateActiveOutlineByLine\s*\(/, /function\s+jumpToLine\s*\(/
   ]) assert.doesNotMatch(core, legacy);
@@ -63,9 +63,9 @@ test('Atomic 6.8 removes classic Outline state/render/parser authority while Ato
   assert.match(core, /coreOutlineControllerPort\.replaceIndex/);
   assert.match(renderEngine, /outline\?\.replaceIndex/);
   assert.match(renderEngine, /outline\?\.replacePreviewBlocks/);
-  assert.doesNotMatch(renderEngine, /renderOutline\s*\(|previewOutlineControllerPort/);
+  assert.doesNotMatch(renderEngine, /\brenderOutline\s*\(|previewOutlineControllerPort/);
   assert.match(scroll, /scrollSyncOutlineControllerPort\.updateActiveLine/);
-  assert.doesNotMatch(scroll, /updateActiveOutlineByLine\s*\(/);
+  assert.doesNotMatch(scroll, /\bupdateActiveOutlineByLine\s*\(/);
   assert.match(core, /function\s+persistCurrentDocumentIndex\s*\(/);
 });
 

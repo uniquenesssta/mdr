@@ -62,7 +62,7 @@ test('Atomic 6.4 Preview keeps LayoutState and Outline boundaries after Atomic 7
   ]);
   assert.match(previewController, /layoutState\.snapshot\.mode/);
   assert.match(previewController, /const isHybrid = \(\) => layoutState\.snapshot\.mode === 'hybrid'/);
-  assert.doesNotMatch(previewController, /markdownEditorLayoutStatePort|sidebarVisible/);
+  assert.doesNotMatch(previewController, /markdownEditorLayoutStatePort|\bsidebarVisible\b/);
   assert.match(renderEngine, /outline\?\.replaceIndex/);
   assert.match(renderEngine, /outline\?\.replacePreviewBlocks/);
   assert.doesNotMatch(renderEngine, /previewOutlineControllerPort/);

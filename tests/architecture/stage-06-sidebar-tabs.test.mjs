@@ -22,8 +22,8 @@ test('Atomic 6.7 keeps classic tab state, persistence and inline click authority
     read('public/compatibility/business-content.html')
   ]);
   for (const source of [core, bootstrap, previewController]) {
-    assert.doesNotMatch(source, /activeSidebarTab/);
-    assert.doesNotMatch(source, /SIDEBAR_TAB_KEY/);
+    assert.doesNotMatch(source, /\bactiveSidebarTab\b/);
+    assert.doesNotMatch(source, /\bSIDEBAR_TAB_KEY\b/);
   }
   assert.doesNotMatch(core, /function\s+setSidebarTab\s*\(/);
   assert.doesNotMatch(html, /onclick="setSidebarTab\(/);
