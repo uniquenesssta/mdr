@@ -47,9 +47,14 @@ jobs:
           base64 -d /tmp/atomic_8_12_apply.b64 > /tmp/atomic_8_12_apply.py
           sha256sum /tmp/atomic_8_12_apply.py
           python -m py_compile /tmp/atomic_8_12_apply.py
+          python -m py_compile .agent/atomic_8_12_transport_fix.py
 
       - name: Apply Atomic 8.12 candidate
-        run: python /tmp/atomic_8_12_apply.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          python /tmp/atomic_8_12_apply.py
+          python .agent/atomic_8_12_transport_fix.py
 
       - name: Candidate diff integrity
         shell: bash
@@ -62,6 +67,7 @@ jobs:
           grep -q 'createMermaidBlockWidgetType' src/editor/hybrid/controller.js
           grep -q 'renderMermaidDiagram' src/editor/hybrid/controller.js
           grep -q 'getMermaidTheme' src/editor/hybrid/controller.js
+          grep -q 'Mermaid 图表渲染失败' src/editor/hybrid/controller.js
           test -e src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js
           test -e src/features/hybrid-editor/widgets/mermaid/mermaid-render-state.js
           test -e src/features/hybrid-editor/widgets/mermaid/mermaid-actions.js
@@ -129,7 +135,7 @@ jobs:
           test ! -e src/features/hybrid-editor/widgets/html/html-block-view.js
           while IFS= read -r path; do
             case "$path" in
-              .agent/atomic_8_12_apply.b64.*|.github/workflows/atomic-8-12-clean-publish.yml|README.md|src/editor/hybrid/controller.js|src/editor/hybrid/widgets.js|src/features/hybrid-editor/index.js|src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js|src/features/hybrid-editor/widgets/mermaid/mermaid-render-state.js|src/features/hybrid-editor/widgets/mermaid/mermaid-actions.js|tests/architecture/fixtures/production-modules.json|tests/architecture/stage-08-*.test.mjs|tests/browser-e2e-contract.test.mjs|tests/hybrid-component-contract.test.mjs|tests/presentation-renderer-contract.test.mjs|tests/stage-01-handoff.test.mjs|tests/stage-08-hybrid-state-machine-freeze.test.mjs|tests/stage-08-hybrid-mermaid.test.mjs)
+              .agent/atomic_8_12_apply.b64.*|.agent/atomic_8_12_transport_fix.py|.github/workflows/atomic-8-12-clean-publish.yml|README.md|src/editor/hybrid/controller.js|src/editor/hybrid/widgets.js|src/features/hybrid-editor/index.js|src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js|src/features/hybrid-editor/widgets/mermaid/mermaid-render-state.js|src/features/hybrid-editor/widgets/mermaid/mermaid-actions.js|tests/architecture/fixtures/production-modules.json|tests/architecture/stage-08-*.test.mjs|tests/browser-e2e-contract.test.mjs|tests/hybrid-component-contract.test.mjs|tests/presentation-renderer-contract.test.mjs|tests/stage-01-handoff.test.mjs|tests/stage-08-hybrid-state-machine-freeze.test.mjs|tests/stage-08-hybrid-mermaid.test.mjs)
                 ;;
               *)
                 echo "Unexpected Atomic 8.12 path: $path" >&2
