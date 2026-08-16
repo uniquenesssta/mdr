@@ -7,10 +7,6 @@ const ROOT = resolve(new URL('../..', import.meta.url).pathname);
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 
-const LATER_FILES = [
-  'src/features/sync/selection/selection-sync-controller.js',
-];
-
 test('R9-02 creates one canonical ScrollSourceOwnership module and public factory', async () => {
   const source = await read('src/features/sync/scroll/scroll-source-ownership.js');
   const index = await read('src/features/sync/index.js');
@@ -48,21 +44,24 @@ test('R9-02 controller delegates source authority and retains only orchestration
   assert.doesNotMatch(controller, /this\.sequence\s*=/);
 });
 
-test('R9-02 source ownership remains intact after R9-06 Geometry Session extraction', async () => {
+test('R9-02 source ownership remains intact in final Stage 9 topology', async () => {
   await access(file('src/features/sync/scroll/editor-scroll-mapper.js'));
   await access(file('src/features/sync/scroll/scroll-geometry-session.js'));
-  for (const path of LATER_FILES) await assert.rejects(access(file(path)), path);
-  await access(file('src/sync/selection-controller.js'));
+  await access(file('src/features/sync/selection/selection-sync-controller.js'));
+  await assert.rejects(access(file('src/sync/selection-controller.js')));
   await access(file('src/sync/selection-mapping.js'));
 });
 
-test('R9-02 keeps the classic scroll aggregate behind the controller compatibility surface only', async () => {
-  const legacy = await read('public/app/scroll-sync.js');
-  assert.match(legacy, /window\.markdownEditorScrollController/);
-  assert.doesNotMatch(legacy, /ScrollSourceOwnership|createScrollSourceOwnership|scroll-source-ownership/);
+test('R9-02 final composition has one source owner inside Scroll Controller and no classic or window source authority', async () => {
+  const controller = await read('src/features/sync/scroll/scroll-sync-controller.js');
+  const main = await read('src/main.js');
+  assert.match(controller, /this\.sourceOwnership = createScrollSourceOwnership/);
+  assert.doesNotMatch(main, /ScrollSourceOwnership|createScrollSourceOwnership/);
+  assert.doesNotMatch(main, /window\.markdownEditorScrollController|window\.markdownEditorScrollSync/);
+  await assert.rejects(access(file('public/app/scroll-sync.js')));
 });
 
-test('R9-02 inventory records one source owner and current package cardinality', async () => {
+test('R9-02 inventory records one source owner and final Stage 9 cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
   assert.equal(inventory.modules.length, 381);
