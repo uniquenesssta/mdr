@@ -1,43 +1,71 @@
 /**
- * Responsibility: Preserve the R9-01 scroll behavior contract while orchestrating element input, source-owned eligibility, target writes, compensation and cancellable frame publication.
- * Imports: Scroll source ownership only; geometry mapping and selection mapping remain later Stage 9 responsibilities.
+ * Responsibility: Orchestrate authenticated scroll-source events into mapper callbacks and cancellable target writes while preserving the frozen R9-01 behavior surface.
+ * Imports: Scroll source ownership only; editor/preview mappers and Geometry Session remain later Stage 9 responsibilities.
  * Exports: ScrollSyncController and createScrollSyncController.
- * State/side effects: Owns element listeners, callbacks, queued source/target/geometry frames, pending target writes and target/geometry statistics; source identity/windows/sequence belong only to ScrollSourceOwnership.
- * Lifecycle: Explicit instance lifecycle; destroy() removes listeners, cancels queued animation frames and destroys only internally-created source ownership.
+ * State/side effects: Owns element listeners, mapper callback bindings, two cancellable RAF slots, pending target/source work and runtime statistics; source identity/windows/sequence remain solely in ScrollSourceOwnership.
+ * Lifecycle: Explicit instance lifecycle; destroy() removes listeners, invalidates queued work, cancels every owned RAF and destroys only internally-created source ownership.
  */
 
 import { createScrollSourceOwnership } from './scroll-source-ownership.js';
 
 const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
 const SIDE_NAMES = new Set(['editor', 'preview']);
+const FRAME_NAMES = new Set(['source', 'target']);
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value) || 0));
+}
+
+function resolveFrameCapability(options, optionName, globalName) {
+  const explicit = options[optionName];
+  const candidate = explicit ?? globalThis[globalName];
+  if (typeof candidate !== 'function') {
+    throw new Error(`ScrollSyncController requires a ${optionName} capability`);
+  }
+  return explicit ? explicit : candidate.bind(globalThis);
+}
+
+function assertSourceOwnership(sourceOwnership) {
+  const required = [
+    'beginUserGesture',
+    'touchSource',
+    'markProgrammaticScroll',
+    'suspend',
+    'isProgrammatic',
+    'isSuspended',
+    'isSource',
+    'getSourceSide',
+    'classify',
+    'nextSequence',
+    'getState'
+  ];
+  if (!sourceOwnership || required.some(name => typeof sourceOwnership[name] !== 'function')) {
+    throw new Error('ScrollSyncController requires a ScrollSourceOwnership capability');
+  }
 }
 
 export class ScrollSyncController {
   constructor(editor, preview, options = {}) {
     if (!editor || !preview) throw new Error('ScrollSyncController requires editor and preview elements');
     const sourceOwnership = options.sourceOwnership || createScrollSourceOwnership();
-    if (!sourceOwnership
-      || typeof sourceOwnership.beginUserGesture !== 'function'
-      || typeof sourceOwnership.markProgrammaticScroll !== 'function'
-      || typeof sourceOwnership.suspend !== 'function'
-      || typeof sourceOwnership.getState !== 'function') {
-      throw new Error('ScrollSyncController requires a ScrollSourceOwnership capability');
-    }
+    assertSourceOwnership(sourceOwnership);
+
     this.elements = { editor, preview };
     this.sourceOwnership = sourceOwnership;
     this.ownsSourceOwnership = !options.sourceOwnership;
-    this.callbacks = {
+    this.frameRuntime = {
+      request: resolveFrameCapability(options, 'requestFrame', 'requestAnimationFrame'),
+      cancel: resolveFrameCapability(options, 'cancelFrame', 'cancelAnimationFrame')
+    };
+    this.mapperCallbacks = {
       editor: null,
       preview: null
     };
+    this.frames = { source: null, target: null };
+    this.frameVersions = { source: 0, target: 0 };
     this.pendingSourceSide = '';
-    this.sourceFrame = 0;
+    this.pendingGeometryResync = false;
     this.pendingTarget = null;
-    this.targetFrame = 0;
-    this.geometryFrame = 0;
     this.stats = {
       targetWrites: 0,
       ignoredTargetEvents: 0,
@@ -78,14 +106,42 @@ export class ScrollSyncController {
 
   configure(callbacks = {}) {
     if (this.destroyed) return;
-    this.callbacks.editor = typeof callbacks.syncFromEditor === 'function' ? callbacks.syncFromEditor : null;
-    this.callbacks.preview = typeof callbacks.syncFromPreview === 'function' ? callbacks.syncFromPreview : null;
+    this.mapperCallbacks.editor = typeof callbacks.syncFromEditor === 'function' ? callbacks.syncFromEditor : null;
+    this.mapperCallbacks.preview = typeof callbacks.syncFromPreview === 'function' ? callbacks.syncFromPreview : null;
+  }
+
+  queueFrame(name, publish) {
+    if (this.destroyed || !FRAME_NAMES.has(name) || this.frames[name] !== null) return false;
+    const version = ++this.frameVersions[name];
+    const frameId = this.frameRuntime.request(() => {
+      if (this.destroyed || this.frameVersions[name] !== version) return;
+      this.frames[name] = null;
+      publish();
+    });
+    this.frames[name] = frameId;
+    return true;
+  }
+
+  cancelQueuedFrame(name) {
+    if (!FRAME_NAMES.has(name)) return;
+    const frameId = this.frames[name];
+    this.frameVersions[name] += 1;
+    this.frames[name] = null;
+    if (frameId !== null) this.frameRuntime.cancel(frameId);
+  }
+
+  cancelSourceSync() {
+    this.pendingSourceSide = '';
+    this.pendingGeometryResync = false;
+    this.cancelQueuedFrame('source');
   }
 
   beginUserGesture(side, reason = 'user') {
     if (this.destroyed || !SIDE_NAMES.has(side)) return;
     const result = this.sourceOwnership.beginUserGesture(side, reason);
-    if (result?.sourceChanged) this.cancelTarget(side);
+    if (!result?.sourceChanged) return;
+    this.cancelSourceSync();
+    this.cancelTarget(side);
   }
 
   handleScroll(side) {
@@ -95,7 +151,6 @@ export class ScrollSyncController {
       return;
     }
     if (this.sourceOwnership.isSuspended()) return;
-
     if (!this.sourceOwnership.isSource(side)) {
       this.stats.ignoredTargetEvents += 1;
       return;
@@ -105,46 +160,47 @@ export class ScrollSyncController {
     this.scheduleSourceSync(side);
   }
 
-  scheduleSourceSync(side) {
-    if (this.destroyed) return;
+  scheduleSourceSync(side, { geometry = false } = {}) {
+    if (this.destroyed || !SIDE_NAMES.has(side)) return false;
     this.pendingSourceSide = side;
-    if (this.sourceFrame) return;
-    this.sourceFrame = requestAnimationFrame(() => {
-      this.sourceFrame = 0;
-      if (this.destroyed) return;
-      const pendingSide = this.pendingSourceSide;
-      this.pendingSourceSide = '';
-      if (!pendingSide
-        || !this.sourceOwnership.isSource(pendingSide)
-        || this.sourceOwnership.isSuspended()) return;
-      this.callbacks[pendingSide]?.();
-    });
+    if (geometry) this.pendingGeometryResync = true;
+    if (this.frames.source !== null) return true;
+    return this.queueFrame('source', () => this.flushSourceSync());
+  }
+
+  flushSourceSync() {
+    const side = this.pendingSourceSide;
+    const geometry = this.pendingGeometryResync;
+    this.pendingSourceSide = '';
+    this.pendingGeometryResync = false;
+    if (!side || !this.sourceOwnership.isSource(side) || this.sourceOwnership.isSuspended()) return;
+    if (geometry) this.stats.geometryResyncs += 1;
+    this.mapperCallbacks[side]?.();
   }
 
   scheduleTarget(side, top, options = {}) {
-    if (this.destroyed || !SIDE_NAMES.has(side)) return;
+    if (this.destroyed || !SIDE_NAMES.has(side)) return false;
     const element = this.elements[side];
     const maxScroll = Math.max(0, element.scrollHeight - element.clientHeight);
-    const targetTop = clamp(top, 0, maxScroll);
     this.pendingTarget = {
       side,
-      top: targetTop,
+      top: clamp(top, 0, maxScroll),
       reason: String(options.reason || 'linked-scroll'),
       settleMs: Math.max(120, Number(options.settleMs) || 700),
       sequence: this.sourceOwnership.nextSequence()
     };
-    if (this.targetFrame) return;
-    this.targetFrame = requestAnimationFrame(() => {
-      this.targetFrame = 0;
-      if (this.destroyed) return;
-      const target = this.pendingTarget;
-      this.pendingTarget = null;
-      if (!target) return;
-      this.applyScrollTop(target.side, target.top, {
-        reason: target.reason,
-        behavior: 'auto',
-        settleMs: target.settleMs
-      });
+    if (this.frames.target !== null) return true;
+    return this.queueFrame('target', () => this.flushTargetWrite());
+  }
+
+  flushTargetWrite() {
+    const target = this.pendingTarget;
+    this.pendingTarget = null;
+    if (!target) return;
+    this.applyScrollTop(target.side, target.top, {
+      reason: target.reason,
+      behavior: 'auto',
+      settleMs: target.settleMs
     });
   }
 
@@ -192,15 +248,9 @@ export class ScrollSyncController {
 
   notifyGeometryChanged(side = '') {
     if (this.destroyed || (side && !SIDE_NAMES.has(side))) return;
-    if (this.geometryFrame) return;
-    this.geometryFrame = requestAnimationFrame(() => {
-      this.geometryFrame = 0;
-      if (this.destroyed || this.sourceOwnership.isSuspended()) return;
-      const sourceSide = this.sourceOwnership.getSourceSide();
-      if (!sourceSide) return;
-      this.stats.geometryResyncs += 1;
-      this.callbacks[sourceSide]?.();
-    });
+    const sourceSide = this.sourceOwnership.getSourceSide();
+    if (!sourceSide) return;
+    this.scheduleSourceSync(sourceSide, { geometry: true });
   }
 
   markProgrammaticScroll(side, duration = 700) {
@@ -216,15 +266,12 @@ export class ScrollSyncController {
   cancelTarget(side = '') {
     if (this.destroyed) return;
     if (this.pendingTarget && (!side || this.pendingTarget.side === side)) this.pendingTarget = null;
-    if (!this.pendingTarget && this.targetFrame) {
-      cancelAnimationFrame(this.targetFrame);
-      this.targetFrame = 0;
-    }
+    if (!this.pendingTarget && this.frames.target !== null) this.cancelQueuedFrame('target');
   }
 
   syncNow(side = this.sourceOwnership.getSourceSide()) {
     if (this.destroyed || !SIDE_NAMES.has(side)) return;
-    this.callbacks[side]?.();
+    this.mapperCallbacks[side]?.();
   }
 
   getSideForElement(target) {
@@ -265,17 +312,14 @@ export class ScrollSyncController {
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true;
-    cancelAnimationFrame(this.sourceFrame);
-    cancelAnimationFrame(this.targetFrame);
-    cancelAnimationFrame(this.geometryFrame);
-    this.sourceFrame = 0;
-    this.targetFrame = 0;
-    this.geometryFrame = 0;
+    this.cancelQueuedFrame('source');
+    this.cancelQueuedFrame('target');
     this.pendingSourceSide = '';
+    this.pendingGeometryResync = false;
     this.pendingTarget = null;
     this.disposers.splice(0).forEach(dispose => dispose());
-    this.callbacks.editor = null;
-    this.callbacks.preview = null;
+    this.mapperCallbacks.editor = null;
+    this.mapperCallbacks.preview = null;
     if (this.ownsSourceOwnership) this.sourceOwnership.destroy?.();
   }
 }

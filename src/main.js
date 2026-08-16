@@ -290,7 +290,10 @@ async function loadAppModules() {
   const virtualEditor = createVirtualEditor(editorHost);
   const previewHost = document.getElementById('preview');
   if (!previewHost) throw new Error('Preview host is missing');
-  const scrollController = createScrollSyncController(editorHost, previewHost);
+  const scrollController = createScrollSyncController(editorHost, previewHost, {
+    requestFrame: callback => window.requestAnimationFrame(callback),
+    cancelFrame: frameId => window.cancelAnimationFrame(frameId)
+  });
   window.markdownEditorScrollController = scrollController;
   window.markdownEditorScrollSync = scrollController.getPublicApi();
   window.markdownEditorSelectionController = createSelectionSyncController(editorHost, previewHost);
