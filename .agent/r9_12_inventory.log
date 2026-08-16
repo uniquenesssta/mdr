@@ -16,12 +16,8 @@ tests/stage-09-scroll-controller.test.mjs:177:    h.controller.configure({ syncF
 tests/stage-09-scroll-controller.test.mjs:203:    h.controller.configure({ syncFromEditor: () => { calls += 1; } });
 tests/stage-09-scroll-controller.test.mjs:216:  h.controller.configure({ syncFromEditor: () => { calls += 1; } });
 tests/stage-09-scroll-geometry-session.test.mjs:192:    controller.configure({ syncFromEditor: () => { editorCalls += 1; } });
-tests/stage-09-selection-feedback-guard.test.mjs:4:import { createSelectionSyncController } from '../src/sync/selection-controller.js';
-tests/stage-09-selection-feedback-guard.test.mjs:166:test('R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement', () => {
-tests/stage-09-selection-feedback-guard.test.mjs:177:  const controller = createSelectionSyncController(editor, preview, {
-tests/stage-09-selection-feedback-guard.test.mjs:183:  }).configure({ syncPreviewToEditor: () => ({ status: 'mapped', selectionLength: 4 }) });
-tests/stage-09-selection-feedback-guard.test.mjs:201:test('R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates', () => {
-tests/stage-09-selection-feedback-guard.test.mjs:207:  const controller = createSelectionSyncController(editor, preview, {
+tests/stage-09-selection-feedback-guard.test.mjs:103:test('R9-08 final SelectionSyncController uses the shared Guard to reject editor feedback during preview settlement', () => {
+tests/stage-09-selection-feedback-guard.test.mjs:125:test('R9-08 final SelectionSyncController exposes applyingSide/previewRevision from Guard state instead of owning duplicates', () => {
 tests/stage-09-selection-retry-scheduler.test.mjs:4:import { createSelectionSyncController } from '../src/sync/selection-controller.js';
 tests/stage-09-selection-retry-scheduler.test.mjs:163:test('R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks', () => {
 tests/stage-09-selection-retry-scheduler.test.mjs:172:  const controller = createSelectionSyncController(new FakeTarget(), new FakeTarget(), {
