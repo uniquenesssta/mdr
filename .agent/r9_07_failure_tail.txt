@@ -1,0 +1,220 @@
+  type: 'test'
+  ...
+1..200
+# tests 200
+# suites 0
+# pass 200
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 10048.089777
+
+> markdown-editor@1.0.0 verify:architecture
+> node scripts/verify-architecture.mjs
+
+[verify-architecture] passed.
+
+> markdown-editor@1.0.0 test:browser:contract
+> node tests/e2e/run-browser-tests.mjs --contract
+
+Browser artifacts: /tmp/markdown-editor-e2e-artifacts-nhx0B8
+ok - single click keeps a component presented (20ms)
+ok - strict double click opens direct editing on the same logical target (106ms)
+ok - fast clicks across components never count as a double click (8ms)
+ok - opening another component closes the previous interactive component (181ms)
+ok - source editing closes on an outside pointer action (11ms)
+ok - layout switching closes active component editing (94ms)
+ok - real pointer drag selects only the intended characters (300ms)
+ok - shared Mermaid renderer keeps hybrid and preview SVG normalization identical (3ms)
+ok - folder file tree renders nested readable files, preserves expansion, opens paths, and destroys listeners (175ms)
+ok - temporary compatibility business port mounts and destroys without owning the App Shell (63ms)
+
+Browser tests: 10, passed: 10, failed: 0
+
+> markdown-editor@1.0.0 build
+> vite build
+
+[36mvite v7.3.6 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 2462 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[2massets/[22m[32mpreview-worker-C00UZeW-.js                [39m[1m[2m 57.77 kB[22m[1m[22m
+[2mdist/[22m[2massets/[22m[35mmain-Bkm9gdT0.css                         [39m[1m[2m113.51 kB[22m[1m[22m[2m │ gzip:  18.04 kB[22m
+[2mdist/[22m[2massets/[22m[36mchannel-B3FmXgGG.js                       [39m[1m[2m  0.11 kB[22m[1m[22m[2m │ gzip:   0.13 kB[22m
+[2mdist/[22m[2massets/[22m[36m_commonjsHelpers-CqkleIqs.js              [39m[1m[2m  0.12 kB[22m[1m[22m[2m │ gzip:   0.13 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-2Q5K7J3B-DiPHbpBG.js                [39m[1m[2m  0.19 kB[22m[1m[22m[2m │ gzip:   0.16 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-JWPE2WC7-CSc3LSmo.js                [39m[1m[2m  0.23 kB[22m[1m[22m[2m │ gzip:   0.17 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-XXDRQBXY--EZrGE0X.js                [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-5VM5RSS4-B9gM-cj-.js                [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-KBJHAD2P-C5KEQY61.js                [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[2massets/[22m[36mstateDiagram-v2-UEYNNEHI-DDZc8jxT.js      [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[2massets/[22m[36mclassDiagram-JCYQIIEL-_yw-Ye-O.js         [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[2massets/[22m[36mclassDiagram-v2-OCEON4UE-_yw-Ye-O.js      [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[2massets/[22m[36mswimlanesDiagram-ULZ7WXOC-CM_HcL0n.js     [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+[2mdist/[22m[2massets/[22m[36minfoDiagram-6WML65LV-D7pfknGW.js          [39m[1m[2m  0.73 kB[22m[1m[22m[2m │ gzip:   0.47 kB[22m
+[2mdist/[22m[2massets/[22m[36msizeCapture-X5ZJPWSS-CSYyI7sC.js          [39m[1m[2m  1.08 kB[22m[1m[22m[2m │ gzip:   0.60 kB[22m
+[2mdist/[22m[2massets/[22m[36mrailroadDiagram-AXF67PYL-RiUyyIV1.js      [39m[1m[2m  1.75 kB[22m[1m[22m[2m │ gzip:   0.83 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-2GRJ4B5K-CWlYRJ1D.js                [39m[1m[2m  1.92 kB[22m[1m[22m[2m │ gzip:   0.85 kB[22m
+[2mdist/[22m[2massets/[22m[36mabnfDiagram-N423BO3Z-B8HB82ZQ.js          [39m[1m[2m  1.96 kB[22m[1m[22m[2m │ gzip:   0.96 kB[22m
+[2mdist/[22m[2massets/[22m[36mpegDiagram-VL7TDLO6-BxkhPnOF.js           [39m[1m[2m  2.10 kB[22m[1m[22m[2m │ gzip:   0.99 kB[22m
+[2mdist/[22m[2massets/[22m[36mebnfDiagram-BXEA7PRR-CDKKEhLV.js          [39m[1m[2m  2.15 kB[22m[1m[22m[2m │ gzip:   0.95 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-LBJQPF4R-BklubDPC.js              [39m[1m[2m  4.35 kB[22m[1m[22m[2m │ gzip:   1.91 kB[22m
+[2mdist/[22m[2massets/[22m[36mmap-DxJ2ADlA.js                           [39m[1m[2m  5.07 kB[22m[1m[22m[2m │ gzip:   2.07 kB[22m
+[2mdist/[22m[2massets/[22m[36mpieDiagram-7S7Q4E2Y-DhWCL0YG.js           [39m[1m[2m  5.20 kB[22m[1m[22m[2m │ gzip:   2.21 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-UB23O5K3-CuYTWBrf.js              [39m[1m[2m  6.23 kB[22m[1m[22m[2m │ gzip:   2.70 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-RYQCIY6F-CCqykGmg.js                [39m[1m[2m  7.08 kB[22m[1m[22m[2m │ gzip:   2.72 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-7IWD3JNH-ET62rYzH.js              [39m[1m[2m  8.48 kB[22m[1m[22m[2m │ gzip:   3.79 kB[22m
+[2mdist/[22m[2massets/[22m[36mdagre-VZM6K2ZE-Cw5DA2Qh.js                [39m[1m[2m  8.71 kB[22m[1m[22m[2m │ gzip:   3.38 kB[22m
+[2mdist/[22m[2massets/[22m[36mcynefinDiagram-MW4NZA55-CJD9LMYQ.js       [39m[1m[2m 10.24 kB[22m[1m[22m[2m │ gzip:   3.70 kB[22m
+[2mdist/[22m[2massets/[22m[36mstateDiagram-OKZ733FA-CubCvYrB.js         [39m[1m[2m 10.57 kB[22m[1m[22m[2m │ gzip:   3.73 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-B4RE2ZJO-Bp9rAFJt.js              [39m[1m[2m 10.87 kB[22m[1m[22m[2m │ gzip:   4.21 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-Q27KOJAE-Cj2OCptf.js              [39m[1m[2m 11.23 kB[22m[1m[22m[2m │ gzip:   3.99 kB[22m
+[2mdist/[22m[2massets/[22m[36msankeyDiagram-W5VNT64P-BZhm4MDD.js        [39m[1m[2m 14.71 kB[22m[1m[22m[2m │ gzip:   5.78 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-6Q2QTUOP-C1tNczfX.js                [39m[1m[2m 15.74 kB[22m[1m[22m[2m │ gzip:   4.41 kB[22m
+[2mdist/[22m[2massets/[22m[36mishikawaDiagram-WSZJBQD7-CFl5YBYE.js      [39m[1m[2m 17.62 kB[22m[1m[22m[2m │ gzip:   6.72 kB[22m
+[2mdist/[22m[2massets/[22m[36mtauri-vendor-XBdbr-Xi.js                  [39m[1m[2m 18.87 kB[22m[1m[22m[2m │ gzip:   4.41 kB[22m
+[2mdist/[22m[2massets/[22m[36mkanban-definition-27J2QSJJ-MUmLapz4.js    [39m[1m[2m 20.43 kB[22m[1m[22m[2m │ gzip:   7.28 kB[22m
+[2mdist/[22m[2massets/[22m[36mmindmap-definition-FAOFIHXS-B4NNi7Sa.js   [39m[1m[2m 23.32 kB[22m[1m[22m[2m │ gzip:   7.90 kB[22m
+[2mdist/[22m[2massets/[22m[36mjourneyDiagram-NVQOT4AX-HVm4fK0D.js       [39m[1m[2m 23.69 kB[22m[1m[22m[2m │ gzip:   8.41 kB[22m
+[2mdist/[22m[2massets/[22m[36mgraph-DOmOIIwC.js                         [39m[1m[2m 23.92 kB[22m[1m[22m[2m │ gzip:   8.32 kB[22m
+[2mdist/[22m[2massets/[22m[36mwardleyDiagram-T6FBY63Y-O_2pcO55.js       [39m[1m[2m 25.65 kB[22m[1m[22m[2m │ gzip:   6.86 kB[22m
+[2mdist/[22m[2massets/[22m[36mdom-to-image-more.min-BXQn33xy.js         [39m[1m[2m 26.82 kB[22m[1m[22m[2m │ gzip:   9.95 kB[22m
+[2mdist/[22m[2massets/[22m[36merDiagram-JOGREHBK-CFSc-bEv.js            [39m[1m[2m 27.25 kB[22m[1m[22m[2m │ gzip:   9.50 kB[22m
+[2mdist/[22m[2massets/[22m[36msanitizer-vendor-P3vI1IgJ.js              [39m[1m[2m 28.97 kB[22m[1m[22m[2m │ gzip:  10.86 kB[22m
+[2mdist/[22m[2massets/[22m[36mgitGraphDiagram-DS77QQ5N-CQFBzD_p.js      [39m[1m[2m 29.57 kB[22m[1m[22m[2m │ gzip:   8.77 kB[22m
+[2mdist/[22m[2massets/[22m[36mtimeline-definition-Z64GVDOM-CFSR77YY.js  [39m[1m[2m 30.95 kB[22m[1m[22m[2m │ gzip:  10.21 kB[22m
+[2mdist/[22m[2massets/[22m[36mlayout-D-LzfAck.js                        [39m[1m[2m 31.00 kB[22m[1m[22m[2m │ gzip:  11.19 kB[22m
+[2mdist/[22m[2massets/[22m[36mrequirementDiagram-LRYGKXZP-4I01_0q_.js   [39m[1m[2m 31.15 kB[22m[1m[22m[2m │ gzip:   9.82 kB[22m
+[2mdist/[22m[2massets/[22m[36mquadrantDiagram-CIZ2JOQS-BCJHNn2V.js      [39m[1m[2m 34.06 kB[22m[1m[22m[2m │ gzip:  10.00 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-5RXB4S5H-CmmMCj7K.js                [39m[1m[2m 38.20 kB[22m[1m[22m[2m │ gzip:  12.57 kB[22m
+[2mdist/[22m[2massets/[22m[36mmarked-vendor-CI_8tgDI.js                 [39m[1m[2m 39.90 kB[22m[1m[22m[2m │ gzip:  12.26 kB[22m
+[2mdist/[22m[2massets/[22m[36mxychartDiagram-ELKLHX3M-Ck4pAxol.js       [39m[1m[2m 40.70 kB[22m[1m[22m[2m │ gzip:  11.57 kB[22m
+[2mdist/[22m[2massets/[22m[36mvennDiagram-T6HMQDX7-BOmTPEPW.js          [39m[1m[2m 42.11 kB[22m[1m[22m[2m │ gzip:  15.78 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-GF5L2VYU-3QyGFKTg.js                [39m[1m[2m 49.26 kB[22m[1m[22m[2m │ gzip:  15.78 kB[22m
+[2mdist/[22m[2massets/[22m[36mganttDiagram-PKOTCBZU-BNHJgdU8.js         [39m[1m[2m 49.90 kB[22m[1m[22m[2m │ gzip:  17.06 kB[22m
+[2mdist/[22m[2massets/[22m[36mflowDiagram-UKHOOZJN-wt7cmoJu.js          [39m[1m[2m 60.80 kB[22m[1m[22m[2m │ gzip:  19.55 kB[22m
+[2mdist/[22m[2massets/[22m[36mc4Diagram-5PPSVZJV-CmL54ygb.js            [39m[1m[2m 70.10 kB[22m[1m[22m[2m │ gzip:  19.71 kB[22m
+[2mdist/[22m[2massets/[22m[36mblockDiagram-VBNYF7ZC-B44Cvdgy.js         [39m[1m[2m 73.89 kB[22m[1m[22m[2m │ gzip:  21.33 kB[22m
+[2mdist/[22m[2massets/[22m[36mcose-bilkent-JH36ORCC-C_RIj_jN.js         [39m[1m[2m 81.85 kB[22m[1m[22m[2m │ gzip:  22.55 kB[22m
+[2mdist/[22m[2massets/[22m[36md3-vendor-BwgkbwHS.js                     [39m[1m[2m106.87 kB[22m[1m[22m[2m │ gzip:  33.60 kB[22m
+[2mdist/[22m[2massets/[22m[36msequenceDiagram-SI44F4Z6-CDvKscHY.js      [39m[1m[2m117.11 kB[22m[1m[22m[2m │ gzip:  31.22 kB[22m
+[2mdist/[22m[2massets/[22m[36mswimlanes-SLNWSIFB-DvXndtbM.js            [39m[1m[2m119.08 kB[22m[1m[22m[2m │ gzip:  43.73 kB[22m
+[2mdist/[22m[2massets/[22m[36marchitectureDiagram-T3A2C74G-D_W798BN.js  [39m[1m[2m151.98 kB[22m[1m[22m[2m │ gzip:  43.22 kB[22m
+[2mdist/[22m[2massets/[22m[36mlezer-vendor-CkkNh79t.js                  [39m[1m[2m204.33 kB[22m[1m[22m[2m │ gzip:  75.49 kB[22m
+[2mdist/[22m[2massets/[22m[36mindex-BWYonBU6.js                         [39m[1m[2m230.53 kB[22m[1m[22m[2m │ gzip:  71.36 kB[22m
+[2mdist/[22m[2massets/[22m[36mkatex-vendor-D6GyzdOI.js                  [39m[1m[2m264.00 kB[22m[1m[22m[2m │ gzip:  78.55 kB[22m
+[2mdist/[22m[2massets/[22m[36mcodemirror-vendor-BftvSVBz.js             [39m[1m[2m304.19 kB[22m[1m[22m[2m │ gzip: 100.86 kB[22m
+[2mdist/[22m[2massets/[22m[36mcytoscape.esm-D3_iZ_3b.js                 [39m[1m[2m442.92 kB[22m[1m[22m[2m │ gzip: 141.93 kB[22m
+[2mdist/[22m[2massets/[22m[36mmermaid.core-XG_SpeC0.js                  [39m[1m[2m497.70 kB[22m[1m[22m[2m │ gzip: 110.13 kB[22m
+[2mdist/[22m[2massets/[22m[36mmain-CiGi4TCH.js                          [39m[1m[2m536.82 kB[22m[1m[22m[2m │ gzip: 151.94 kB[22m
+[2mdist/[22m[2massets/[22m[36mcynefin-VYW2F7L2-BEsxgcvi.js              [39m[1m[2m688.17 kB[22m[1m[22m[2m │ gzip: 154.20 kB[22m
+[32m✓ built in 11.59s[39m
+Built-app attempt 1
+
+> markdown-editor@1.0.0 test:browser
+> node tests/e2e/run-browser-tests.mjs --app
+
+Browser artifacts: /tmp/markdown-editor-e2e-artifacts-N7iTwQ
+ok - application mounts one App Shell with strict named slots (2ms)
+ok - application Help feature owns first-run visibility, navigation and scoped lifecycle (87ms)
+ok - application Settings Store cancels draft without persisting changes (27ms)
+ok - application Settings UI validates and applies one draft without global dialog functions (119ms)
+ok - application language Settings commit updates I18n without legacy globals (99ms)
+ok - application theme switch changes visual tokens without changing shell geometry (146ms)
+ok - application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview (1272ms)
+ok - application Theme Service applies committed theme without rebuilding editor model or preview (953ms)
+ok - application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy (864ms)
+ok - application link preview uses scoped focus and cancels stale close completion (354ms)
+ok - application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear (4ms)
+ok - application Document Session Controller keeps lifecycle model, session and UI coherent (30ms)
+ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (19ms)
+ok - application switches deterministically across every layout mode (835ms)
+ok - compact shell keeps 860/900 hysteresis and clears resize burst state (334ms)
+ok - application toolbar boundary wraps from measured content width without hiding tools (165ms)
+ok - application page fullscreen uses the Stage 6.6 controller without changing command IDs (36ms)
+ok - application sidebar tabs switch one mount region and coordinate child lifecycles (764ms)
+ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1483ms)
+ok - application shell has no structural overflow or clipped focus across required viewports (5165ms)
+ok - application code block placeholder never receives a phantom source highlight (727ms)
+ok - application code block ignores single click and opens on strict double click (878ms)
+ok - application keeps only one direct editor active (959ms)
+ok - application Hybrid table pointer input avoids block decoration dispatch races (1314ms)
+ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1323ms)
+ok - application source edit exits when pointer moves outside the source range (942ms)
+ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (631ms)
+ok - application sidebar resize captures pointer, projects width and persists the final width (406ms)
+ok - application pointer drag maps to exact editor characters (1637ms)
+
+Browser tests: 29, passed: 29, failed: 0
+Built-app attempt 2
+
+> markdown-editor@1.0.0 test:browser
+> node tests/e2e/run-browser-tests.mjs --app
+
+Browser artifacts: /tmp/markdown-editor-e2e-artifacts-rcQWMm
+ok - application mounts one App Shell with strict named slots (3ms)
+ok - application Help feature owns first-run visibility, navigation and scoped lifecycle (102ms)
+ok - application Settings Store cancels draft without persisting changes (25ms)
+ok - application Settings UI validates and applies one draft without global dialog functions (170ms)
+ok - application language Settings commit updates I18n without legacy globals (100ms)
+ok - application theme switch changes visual tokens without changing shell geometry (272ms)
+ok - application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview (1135ms)
+ok - application Theme Service applies committed theme without rebuilding editor model or preview (940ms)
+ok - application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy (863ms)
+ok - application link preview uses scoped focus and cancels stale close completion (316ms)
+ok - application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear (3ms)
+ok - application Document Session Controller keeps lifecycle model, session and UI coherent (27ms)
+ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (19ms)
+ok - application switches deterministically across every layout mode (834ms)
+ok - compact shell keeps 860/900 hysteresis and clears resize burst state (335ms)
+ok - application toolbar boundary wraps from measured content width without hiding tools (170ms)
+ok - application page fullscreen uses the Stage 6.6 controller without changing command IDs (30ms)
+ok - application sidebar tabs switch one mount region and coordinate child lifecycles (748ms)
+ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1483ms)
+ok - application shell has no structural overflow or clipped focus across required viewports (5114ms)
+ok - application code block placeholder never receives a phantom source highlight (743ms)
+ok - application code block ignores single click and opens on strict double click (861ms)
+ok - application keeps only one direct editor active (948ms)
+ok - application Hybrid table pointer input avoids block decoration dispatch races (1275ms)
+ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1324ms)
+ok - application source edit exits when pointer moves outside the source range (959ms)
+ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (612ms)
+ok - application sidebar resize captures pointer, projects width and persists the final width (274ms)
+ok - application pointer drag maps to exact editor characters (1655ms)
+
+Browser tests: 29, passed: 29, failed: 0
+TAP version 13
+# Subtest: root README is a concise introduction and detailed history lives in docs/README.md
+not ok 1 - root README is a concise introduction and detailed history lives in docs/README.md
+  ---
+  duration_ms: 10.15551
+  type: 'test'
+  location: '/home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:5:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(normalizedRootReadme.length >= 120 && normalizedRootReadme.length <= 360)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:17:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 62.937428
