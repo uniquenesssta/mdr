@@ -1,0 +1,485 @@
+=== MATCHED FAILURE CONTEXT ===
+163-  ...
+164-# Subtest: R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks
+165-ok 15 - R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks
+166-  ---
+167-  duration_ms: 2.275349
+168-  type: 'test'
+169-  ...
+170-# Subtest: R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler
+171-ok 16 - R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler
+172-  ---
+173-  duration_ms: 2.277452
+174-  type: 'test'
+175-  ...
+176-1..16
+177-# tests 16
+178-# suites 0
+179-# pass 16
+180-# fail 0
+181-# cancelled 0
+182-# skipped 0
+183-# todo 0
+184-# duration_ms 100.147776
+185-TAP version 13
+186-# Subtest: R9-09 creates canonical SelectionHighlightSession and exports it only through the Sync public entry
+187:not ok 1 - R9-09 creates canonical SelectionHighlightSession and exports it only through the Sync public entry
+188-  ---
+189-  duration_ms: 8.089038
+190-  type: 'test'
+191-  location: '/home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-highlight-session.test.mjs:13:1'
+192:  failureType: 'testCodeFailure'
+193-  error: |-
+194-    The input did not match the regular expression /R9-09/. Input:
+195-    
+196-    '/**\n' +
+197-      ' * Responsibility: Public Stage 9 synchronization contract. R9-01 through R9-10 owners remain frozen; R9-11 integrates frozen selection mapping exclusively through model-kernel composition while R9-12 legacy-measurement removal remains pending.\n' +
+198-      ' * Imports: Public synchronization modules only; frozen model-kernel contracts are injected by composition and are not re-exported here.\n' +
+199-      ' * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard, Highlight Session and Retry Scheduler classes/factories.\n' +
+200-      ' * State/side effects: None; import-only facade.\n' +
+201-      ' * Lifecycle: None.\n' +
+202-      ' */\n' +
+203-      '\n' +
+204-      'export {\n' +
+205-      '  ScrollSyncController,\n' +
+206-      '  createScrollSyncController\n' +
+207-      "} from './scroll/scroll-sync-controller.js';\n" +
+208-      'export {\n' +
+209-      '  ScrollSourceOwnership,\n' +
+210-      '  createScrollSourceOwnership\n' +
+211-      "} from './scroll/scroll-source-ownership.js';\n" +
+212-      'export {\n' +
+213-      '  EditorScrollMapper,\n' +
+214-      '  createEditorScrollMapper\n' +
+215-      "} from './scroll/editor-scroll-mapper.js';\n" +
+216-      'export {\n' +
+217-      '  PreviewScrollMapper,\n' +
+218-      '  createPreviewScrollMapper\n' +
+219-      "} from './scroll/preview-scroll-mapper.js';\n" +
+220-      'export {\n' +
+221-      '  ScrollGeometrySession,\n' +
+222-      '  createScrollGeometrySession\n' +
+223-      "} from './scroll/scroll-geometry-session.js';\n" +
+224-      'export {\n' +
+225-      '  EditorSelectionReader,\n' +
+226-      '  createEditorSelectionReader\n' +
+227-      "} from './selection/editor-selection-reader.js';\n" +
+228-      'export {\n' +
+229-      '  PreviewSelectionReader,\n' +
+230-      '  createPreviewSelectionReader\n' +
+231-      "} from './selection/preview-selection-reader.js';\n" +
+232-      'export {\n' +
+233-      '  SelectionFeedbackGuard,\n' +
+234-      '  createSelectionFeedbackGuard\n' +
+235-      "} from './selection/selection-feedback-guard.js';\n" +
+236-      'export {\n' +
+237-      '  SelectionHighlightSession,\n' +
+238-      '  createSelectionHighlightSession\n' +
+239-      "} from './selection/selection-highlight-session.js';\n" +
+240-      'export {\n' +
+241-      '  SelectionRetryScheduler,\n' +
+242-      '  createSelectionRetryScheduler\n' +
+243-      "} from './selection/selection-retry-scheduler.js';\n"
+244-    
+245:  code: 'ERR_ASSERTION'
+246:  name: 'AssertionError'
+247-  expected:
+248-  actual: |-
+249-    /**
+250-     * Responsibility: Public Stage 9 synchronization contract. R9-01 through R9-10 owners remain frozen; R9-11 integrates frozen selection mapping exclusively through model-kernel composition while R9-12 legacy-measurement removal remains pending.
+251-     * Imports: Public synchronization modules only; frozen model-kernel contracts are injected by composition and are not re-exported here.
+252-     * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard, Highlight Session and Retry Scheduler classes/factories.
+253-     * State/side effects: None; import-only facade.
+254-     * Lifecycle: None.
+255-     */
+256-    
+257-    export {
+258-      ScrollSyncController,
+259-      createScrollSyncController
+260-    } from './scroll/scroll-sync-controller.js';
+261-    export {
+262-      ScrollSourceOwnership,
+263-      createScrollSourceOwnership
+264-    } from './scroll/scroll-source-ownership.js';
+265-    export {
+266-      EditorScrollMapper,
+267-      createEditorScrollMapper
+268-    } from './scroll/editor-scroll-mapper.js';
+269-    export {
+270-      PreviewScrollMapper,
+271-      createPreviewScrollMapper
+272-    } from './scroll/preview-scroll-mapper.js';
+273-    export {
+274-      ScrollGeometrySession,
+275-      createScrollGeometrySession
+276-    } from './scroll/scroll-geometry-session.js';
+277-    export {
+278-      EditorSelectionReader,
+279-      createEditorSelectionReader
+280-    } from './selection/editor-selection-reader.js';
+281-    export {
+282-      PreviewSelectionReader,
+283-      createPreviewSelectionReader
+284-    } from './selection/preview-selection-reader.js';
+285-    export {
+286-      SelectionFeedbackGuard,
+287-      createSelectionFeedbackGuard
+288-    } from './selection/selection-feedback-guard.js';
+289-    export {
+290-      SelectionHighlightSession,
+291-      createSelectionHighlightSession
+292-    } from './selection/selection-highlight-session.js';
+293-    export {
+294-      SelectionRetryScheduler,
+--
+374-  type: 'test'
+375-  ...
+376-# Subtest: R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
+377-ok 14 - R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
+378-  ---
+379-  duration_ms: 0.432975
+380-  type: 'test'
+381-  ...
+382-# Subtest: R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
+383-ok 15 - R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
+384-  ---
+385-  duration_ms: 0.254969
+386-  type: 'test'
+387-  ...
+388-# Subtest: R9-09 Highlight Session destroy clears every effect and is terminal idempotent
+389-ok 16 - R9-09 Highlight Session destroy clears every effect and is terminal idempotent
+390-  ---
+391-  duration_ms: 0.64451
+392-  type: 'test'
+393-  ...
+394-1..16
+395-# tests 16
+396-# suites 0
+397-# pass 15
+398:# fail 1
+399-# cancelled 0
+400-# skipped 0
+401-# todo 0
+402-# duration_ms 93.159622
+
+=== VALIDATION TAIL ===
+  duration_ms: 7.114932
+  type: 'test'
+  ...
+# Subtest: R9-10 Retry Scheduler owns only bounded frame generation version and cancellation state without mapping DOM feedback highlight or scroll policy
+ok 2 - R9-10 Retry Scheduler owns only bounded frame generation version and cancellation state without mapping DOM feedback highlight or scroll policy
+  ---
+  duration_ms: 2.494475
+  type: 'test'
+  ...
+# Subtest: R9-10 legacy SelectionSyncController delegates retry scheduling and no longer owns retry count or retry RAF state
+ok 3 - R9-10 legacy SelectionSyncController delegates retry scheduling and no longer owns retry count or retry RAF state
+  ---
+  duration_ms: 2.897206
+  type: 'test'
+  ...
+# Subtest: R9-10 retry orchestration is requested only for recoverable pending results and classic mapping no longer owns retry limits
+ok 4 - R9-10 retry orchestration is requested only for recoverable pending results and classic mapping no longer owns retry limits
+  ---
+  duration_ms: 2.053639
+  type: 'test'
+  ...
+# Subtest: R9-10 composition creates one Scheduler from explicit frame capabilities injects it and destroys it without a compatibility/global retry owner
+ok 5 - R9-10 composition creates one Scheduler from explicit frame capabilities injects it and destroys it without a compatibility/global retry owner
+  ---
+  duration_ms: 1.327187
+  type: 'test'
+  ...
+# Subtest: R9-10 stale replacement lifecycle is explicit and old callbacks are invalidated before work executes
+ok 6 - R9-10 stale replacement lifecycle is explicit and old callbacks are invalidated before work executes
+  ---
+  duration_ms: 0.960906
+  type: 'test'
+  ...
+# Subtest: R9-10 keeps frozen selection mapping and later final Selection controller migration untouched
+ok 7 - R9-10 keeps frozen selection mapping and later final Selection controller migration untouched
+  ---
+  duration_ms: 5.048971
+  type: 'test'
+  ...
+# Subtest: R9-10 production inventory records one Retry Scheduler owner and cardinality 381
+ok 8 - R9-10 production inventory records one Retry Scheduler owner and cardinality 381
+  ---
+  duration_ms: 2.157484
+  type: 'test'
+  ...
+# Subtest: R9-10 Retry Scheduler requires explicit frame capabilities and versioned retry jobs
+ok 9 - R9-10 Retry Scheduler requires explicit frame capabilities and versioned retry jobs
+  ---
+  duration_ms: 2.567995
+  type: 'test'
+  ...
+# Subtest: R9-10 Retry Scheduler owns one next-frame recoverable attempt and publishes immutable attempt context
+ok 10 - R9-10 Retry Scheduler owns one next-frame recoverable attempt and publishes immutable attempt context
+  ---
+  duration_ms: 1.499243
+  type: 'test'
+  ...
+# Subtest: R9-10 Retry Scheduler enforces the bounded retry count without Controller-owned attempt state
+ok 11 - R9-10 Retry Scheduler enforces the bounded retry count without Controller-owned attempt state
+  ---
+  duration_ms: 0.474206
+  type: 'test'
+  ...
+# Subtest: R9-10 Retry Scheduler automatically replaces an older retry and forced stale callbacks cannot execute
+ok 12 - R9-10 Retry Scheduler automatically replaces an older retry and forced stale callbacks cannot execute
+  ---
+  duration_ms: 0.41593
+  type: 'test'
+  ...
+# Subtest: R9-10 Retry Scheduler drops a pending retry when the caller version changes without a replacement request
+ok 13 - R9-10 Retry Scheduler drops a pending retry when the caller version changes without a replacement request
+  ---
+  duration_ms: 0.43678
+  type: 'test'
+  ...
+# Subtest: R9-10 Retry Scheduler cancel/destroy invalidate pending work and remain terminal/idempotent
+ok 14 - R9-10 Retry Scheduler cancel/destroy invalidate pending work and remain terminal/idempotent
+  ---
+  duration_ms: 0.51665
+  type: 'test'
+  ...
+# Subtest: R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks
+ok 15 - R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks
+  ---
+  duration_ms: 2.275349
+  type: 'test'
+  ...
+# Subtest: R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler
+ok 16 - R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler
+  ---
+  duration_ms: 2.277452
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 100.147776
+TAP version 13
+# Subtest: R9-09 creates canonical SelectionHighlightSession and exports it only through the Sync public entry
+not ok 1 - R9-09 creates canonical SelectionHighlightSession and exports it only through the Sync public entry
+  ---
+  duration_ms: 8.089038
+  type: 'test'
+  location: '/home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-highlight-session.test.mjs:13:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /R9-09/. Input:
+    
+    '/**\n' +
+      ' * Responsibility: Public Stage 9 synchronization contract. R9-01 through R9-10 owners remain frozen; R9-11 integrates frozen selection mapping exclusively through model-kernel composition while R9-12 legacy-measurement removal remains pending.\n' +
+      ' * Imports: Public synchronization modules only; frozen model-kernel contracts are injected by composition and are not re-exported here.\n' +
+      ' * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard, Highlight Session and Retry Scheduler classes/factories.\n' +
+      ' * State/side effects: None; import-only facade.\n' +
+      ' * Lifecycle: None.\n' +
+      ' */\n' +
+      '\n' +
+      'export {\n' +
+      '  ScrollSyncController,\n' +
+      '  createScrollSyncController\n' +
+      "} from './scroll/scroll-sync-controller.js';\n" +
+      'export {\n' +
+      '  ScrollSourceOwnership,\n' +
+      '  createScrollSourceOwnership\n' +
+      "} from './scroll/scroll-source-ownership.js';\n" +
+      'export {\n' +
+      '  EditorScrollMapper,\n' +
+      '  createEditorScrollMapper\n' +
+      "} from './scroll/editor-scroll-mapper.js';\n" +
+      'export {\n' +
+      '  PreviewScrollMapper,\n' +
+      '  createPreviewScrollMapper\n' +
+      "} from './scroll/preview-scroll-mapper.js';\n" +
+      'export {\n' +
+      '  ScrollGeometrySession,\n' +
+      '  createScrollGeometrySession\n' +
+      "} from './scroll/scroll-geometry-session.js';\n" +
+      'export {\n' +
+      '  EditorSelectionReader,\n' +
+      '  createEditorSelectionReader\n' +
+      "} from './selection/editor-selection-reader.js';\n" +
+      'export {\n' +
+      '  PreviewSelectionReader,\n' +
+      '  createPreviewSelectionReader\n' +
+      "} from './selection/preview-selection-reader.js';\n" +
+      'export {\n' +
+      '  SelectionFeedbackGuard,\n' +
+      '  createSelectionFeedbackGuard\n' +
+      "} from './selection/selection-feedback-guard.js';\n" +
+      'export {\n' +
+      '  SelectionHighlightSession,\n' +
+      '  createSelectionHighlightSession\n' +
+      "} from './selection/selection-highlight-session.js';\n" +
+      'export {\n' +
+      '  SelectionRetryScheduler,\n' +
+      '  createSelectionRetryScheduler\n' +
+      "} from './selection/selection-retry-scheduler.js';\n"
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    /**
+     * Responsibility: Public Stage 9 synchronization contract. R9-01 through R9-10 owners remain frozen; R9-11 integrates frozen selection mapping exclusively through model-kernel composition while R9-12 legacy-measurement removal remains pending.
+     * Imports: Public synchronization modules only; frozen model-kernel contracts are injected by composition and are not re-exported here.
+     * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard, Highlight Session and Retry Scheduler classes/factories.
+     * State/side effects: None; import-only facade.
+     * Lifecycle: None.
+     */
+    
+    export {
+      ScrollSyncController,
+      createScrollSyncController
+    } from './scroll/scroll-sync-controller.js';
+    export {
+      ScrollSourceOwnership,
+      createScrollSourceOwnership
+    } from './scroll/scroll-source-ownership.js';
+    export {
+      EditorScrollMapper,
+      createEditorScrollMapper
+    } from './scroll/editor-scroll-mapper.js';
+    export {
+      PreviewScrollMapper,
+      createPreviewScrollMapper
+    } from './scroll/preview-scroll-mapper.js';
+    export {
+      ScrollGeometrySession,
+      createScrollGeometrySession
+    } from './scroll/scroll-geometry-session.js';
+    export {
+      EditorSelectionReader,
+      createEditorSelectionReader
+    } from './selection/editor-selection-reader.js';
+    export {
+      PreviewSelectionReader,
+      createPreviewSelectionReader
+    } from './selection/preview-selection-reader.js';
+    export {
+      SelectionFeedbackGuard,
+      createSelectionFeedbackGuard
+    } from './selection/selection-feedback-guard.js';
+    export {
+      SelectionHighlightSession,
+      createSelectionHighlightSession
+    } from './selection/selection-highlight-session.js';
+    export {
+      SelectionRetryScheduler,
+      createSelectionRetryScheduler
+    } from './selection/selection-retry-scheduler.js';
+    
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-highlight-session.test.mjs:16:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: R9-09 Highlight Session owns highlight effects/remount intent only and contains no mapping feedback retry scroll or event authority
+ok 2 - R9-09 Highlight Session owns highlight effects/remount intent only and contains no mapping feedback retry scroll or event authority
+  ---
+  duration_ms: 2.581545
+  type: 'test'
+  ...
+# Subtest: R9-09 classic selection mapping only builds plans and delegates all CSS/class/text highlight effects to the scoped Session
+ok 3 - R9-09 classic selection mapping only builds plans and delegates all CSS/class/text highlight effects to the scoped Session
+  ---
+  duration_ms: 3.554534
+  type: 'test'
+  ...
+# Subtest: R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
+ok 4 - R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
+  ---
+  duration_ms: 2.147028
+  type: 'test'
+  ...
+# Subtest: R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
+ok 5 - R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
+  ---
+  duration_ms: 1.237323
+  type: 'test'
+  ...
+# Subtest: R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
+ok 6 - R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
+  ---
+  duration_ms: 2.489128
+  type: 'test'
+  ...
+# Subtest: R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-11+
+ok 7 - R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-11+
+  ---
+  duration_ms: 1.491502
+  type: 'test'
+  ...
+# Subtest: R9-09 production inventory records one Highlight Session responsibility and cardinality 381 after R9-10 inventory growth
+ok 8 - R9-09 production inventory records one Highlight Session responsibility and cardinality 381 after R9-10 inventory growth
+  ---
+  duration_ms: 2.030275
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session owns CSS Highlight multi-Range publication and exact range state
+ok 9 - R9-09 Highlight Session owns CSS Highlight multi-Range publication and exact range state
+  ---
+  duration_ms: 2.579102
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session replaces old CSS ranges and atomic classes through one authority
+ok 10 - R9-09 Highlight Session replaces old CSS ranges and atomic classes through one authority
+  ---
+  duration_ms: 0.411303
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session provides the legacy single-text fallback when CSS Highlight is unavailable and clear restores text
+ok 11 - R9-09 Highlight Session provides the legacy single-text fallback when CSS Highlight is unavailable and clear restores text
+  ---
+  duration_ms: 0.567225
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session rejects unsupported multi-Range fallback and ranges outside preview without side effects
+ok 12 - R9-09 Highlight Session rejects unsupported multi-Range fallback and ranges outside preview without side effects
+  ---
+  duration_ms: 0.319636
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session restores fresh ranges and atomic elements after virtual remount without retry scheduling
+ok 13 - R9-09 Highlight Session restores fresh ranges and atomic elements after virtual remount without retry scheduling
+  ---
+  duration_ms: 0.450852
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
+ok 14 - R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
+  ---
+  duration_ms: 0.432975
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
+ok 15 - R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
+  ---
+  duration_ms: 0.254969
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session destroy clears every effect and is terminal idempotent
+ok 16 - R9-09 Highlight Session destroy clears every effect and is terminal idempotent
+  ---
+  duration_ms: 0.64451
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 15
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 93.159622
