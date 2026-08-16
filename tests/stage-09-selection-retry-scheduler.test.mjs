@@ -1,25 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSelectionRetryScheduler } from '../src/features/sync/index.js';
-import { createSelectionSyncController } from '../src/sync/selection-controller.js';
-
-function createFrames() {
-  let nextId = 1;
-  const callbacks = new Map();
-  const active = new Set();
-  return {
-    request(callback) { const id = nextId++; callbacks.set(id, callback); active.add(id); return id; },
-    cancel(id) { active.delete(id); },
-    activeIds() { return [...active]; },
-    activeCount() { return active.size; },
-    flush(id = this.activeIds()[0]) {
-      if (!id || !active.has(id)) return;
-      active.delete(id);
-      callbacks.get(id)?.();
-    },
-    force(id) { callbacks.get(id)?.(); }
-  };
-}
+import { createFinalSelectionController, createFrames } from './helpers/stage-09-selection-controller-harness.mjs';
 
 function createGuard() {
   let revision = 0;
@@ -32,44 +14,6 @@ function createGuard() {
     getRevision() { return revision; },
     getState() { return { source: '', revision }; }
   };
-}
-
-function createPreviewReader(snapshot = null) {
-  return {
-    read: () => snapshot,
-    subscribe() { return () => {}; },
-    start() {},
-    stop() {}
-  };
-}
-
-function installGlobals(frames = createFrames()) {
-  const previous = new Map();
-  const values = {
-    requestAnimationFrame: callback => frames.request(callback),
-    cancelAnimationFrame: id => frames.cancel(id),
-    performance: { now: () => 100 },
-    document: { addEventListener() {}, removeEventListener() {} },
-    window: {
-      markdownEditorDocumentModel: { getState: () => ({ version: 7 }) },
-      markdownEditorPerf: { record() {}, diagnostic() {} }
-    }
-  };
-  for (const [key, value] of Object.entries(values)) {
-    previous.set(key, Object.prototype.hasOwnProperty.call(globalThis, key) ? globalThis[key] : undefined);
-    globalThis[key] = value;
-  }
-  return () => {
-    for (const [key, value] of previous) {
-      if (value === undefined) delete globalThis[key];
-      else globalThis[key] = value;
-    }
-  };
-}
-
-class FakeTarget {
-  addEventListener() {}
-  removeEventListener() {}
 }
 
 test('R9-10 Retry Scheduler requires explicit frame capabilities and versioned retry jobs', () => {
@@ -160,65 +104,57 @@ test('R9-10 Retry Scheduler cancel/destroy invalidate pending work and remain te
   assert.throws(() => scheduler.schedule({ version: 1, getVersion: () => 1, run() {} }), /destroyed/);
 });
 
-test('R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks', () => {
+test('R9-10 final SelectionSyncController delegates only recoverable pending editor results with makeEditorKey version checks', () => {
   const frames = createFrames();
-  const restore = installGlobals(frames);
   const scheduled = [];
-  let syncResult = { status: 'pending', selectionLength: 4 };
   const retryScheduler = {
     cancel() {},
     schedule(options) { scheduled.push(options); return true; }
   };
-  const controller = createSelectionSyncController(new FakeTarget(), new FakeTarget(), {
-    editorSelectionReader: { read: () => ({ from: 2, to: 6, isCollapsed: false }) },
-    previewSelectionReader: createPreviewReader(),
+  let virtualPending = true;
+  const { controller } = createFinalSelectionController({
+    frames,
     feedbackGuard: createGuard(),
-    highlightSession: { restore() { return false; }, clear() {} },
-    retryScheduler
-  }).configure({ syncEditorToPreview: () => syncResult });
-  try {
-    controller.runEditor(false, 'test', true, 0);
-    assert.equal(scheduled.length, 1);
-    assert.equal(scheduled[0].version, '7:2:6:0');
-    assert.equal(scheduled[0].getVersion(), '7:2:6:0');
-    syncResult = { status: 'mapping-failed', selectionLength: 4 };
-    controller.runEditor(false, 'test-failed', true, 0);
-    assert.equal(scheduled.length, 1);
-  } finally {
-    controller.stop();
-    restore();
-  }
+    retryScheduler,
+    getPreviewVirtual: () => virtualPending ? {
+      active: true,
+      containsLineRange: () => false,
+      hasLineRangeMounted: () => false
+    } : null
+  });
+  controller.runEditor(false, 'test', true, 0);
+  assert.equal(scheduled.length, 1);
+  assert.equal(scheduled[0].version, '7:2:6:0');
+  assert.equal(scheduled[0].getVersion(), '7:2:6:0');
+  virtualPending = false;
+  controller.runEditor(false, 'test-failed', true, 0);
+  assert.equal(scheduled.length, 1);
+  controller.destroy();
 });
 
-test('R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler', () => {
+test('R9-10 final SelectionSyncController fresh scheduling clear and stop cancel old retries while attempts remain Scheduler-owned', () => {
   const frames = createFrames();
-  const restore = installGlobals(frames);
   let cancels = 0;
   const scheduled = [];
-  let attempts = [];
   const retryScheduler = {
     cancel() { cancels += 1; },
     schedule(options) { scheduled.push(options); return true; }
   };
-  const controller = createSelectionSyncController(new FakeTarget(), new FakeTarget(), {
-    editorSelectionReader: { read: () => ({ from: 1, to: 3, isCollapsed: false }) },
-    previewSelectionReader: createPreviewReader(),
+  const { controller } = createFinalSelectionController({
+    frames,
     feedbackGuard: createGuard(),
-    highlightSession: { restore() { return false; }, clear() {} },
-    retryScheduler
-  }).configure({ syncEditorToPreview: ({ attempt }) => { attempts.push(attempt); return { status: attempt ? 'exact' : 'pending' }; } });
-  try {
-    controller.start();
-    controller.scheduleEditor(false, 'fresh');
-    assert.equal(cancels, 1);
-    frames.flush();
-    assert.equal(scheduled.length, 1);
-    scheduled[0].run({ attempt: 1 });
-    assert.deepEqual(attempts, [0, 1]);
-    controller.clear();
-    controller.stop();
-    assert.equal(cancels, 3);
-  } finally {
-    restore();
-  }
+    retryScheduler,
+    getPreviewVirtual: () => ({ active: true, containsLineRange: () => false, hasLineRangeMounted: () => false })
+  });
+  controller.start();
+  controller.scheduleEditor(false, 'fresh');
+  assert.equal(cancels, 1);
+  frames.flush();
+  assert.equal(scheduled.length, 1);
+  scheduled[0].run({ attempt: 1 });
+  assert.equal(scheduled.length, 2);
+  controller.clear();
+  controller.stop();
+  assert.equal(cancels, 4);
+  controller.destroy();
 });
