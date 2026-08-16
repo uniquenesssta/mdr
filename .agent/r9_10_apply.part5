@@ -1,0 +1,5 @@
+replace_once(
+    controller_path,
+    "  stop() {\n    if (!this.started) return;\n    this.started = false;\n    cancelAnimationFrame(this.editorFrame);\n    cancelAnimationFrame(this.previewFrame);\n    this.retryScheduler.cancel();",
+    "  stop() {\n    this.retryScheduler.cancel();\n    if (!this.started) return;\n    this.started = false;\n    cancelAnimationFrame(this.editorFrame);\n    cancelAnimationFrame(this.previewFrame);"
+)
