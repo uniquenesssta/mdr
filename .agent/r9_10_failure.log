@@ -1,486 +1,424 @@
 === MATCHED FAILURE CONTEXT ===
-5-  run `npm fund` for details
-6-
-7-found 0 vulnerabilities
-8-found 0 vulnerabilities
-9-TAP version 13
-10-# Subtest: R9-10 creates canonical SelectionRetryScheduler and exports it only through the Sync public entry
-11-ok 1 - R9-10 creates canonical SelectionRetryScheduler and exports it only through the Sync public entry
-12-  ---
-13-  duration_ms: 6.414168
-14-  type: 'test'
-15-  ...
-16-# Subtest: R9-10 Retry Scheduler owns only bounded frame generation version and cancellation state without mapping DOM feedback highlight or scroll policy
-17-ok 2 - R9-10 Retry Scheduler owns only bounded frame generation version and cancellation state without mapping DOM feedback highlight or scroll policy
-18-  ---
-19-  duration_ms: 1.230968
-20-  type: 'test'
-21-  ...
-22-# Subtest: R9-10 legacy SelectionSyncController delegates retry scheduling and no longer owns retry count or retry RAF state
-23-ok 3 - R9-10 legacy SelectionSyncController delegates retry scheduling and no longer owns retry count or retry RAF state
-24-  ---
-25-  duration_ms: 2.043795
-26-  type: 'test'
-27-  ...
-28-# Subtest: R9-10 retry orchestration is requested only for recoverable pending results and classic mapping no longer owns retry limits
-29:not ok 4 - R9-10 retry orchestration is requested only for recoverable pending results and classic mapping no longer owns retry limits
-30-  ---
-31-  duration_ms: 3.66673
-32-  type: 'test'
-33-  location: '/home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-retry-scheduler.test.mjs:40:1'
-34:  failureType: 'testCodeFailure'
-35-  error: |-
-36-    The input was expected to not match the regular expression /status === 'mapping-failed'.*retryScheduler/s. Input:
-37-    
-38-    'function nextFrame(callback) {\n' +
-39-      '  return requestAnimationFrame(() => callback());\n' +
-40-      '}\n' +
-41-      '\n' +
-42-      'const REQUIRED_FEEDBACK_METHODS = [\n' +
-43-      "  'begin',\n" +
-44-      "  'shouldIgnore',\n" +
-45-      "  'advanceRevision',\n" +
-46-      "  'release',\n" +
-47-      "  'reset',\n" +
-48-      "  'getRevision',\n" +
-49-      "  'getState'\n" +
-50-      '];\n' +
-51-      "const REQUIRED_HIGHLIGHT_METHODS = ['restore', 'clear'];\n" +
-52-      "const REQUIRED_RETRY_METHODS = ['schedule', 'cancel'];\n" +
-53-      '\n' +
-54-      'export class SelectionSyncController {\n' +
-55-      '  constructor(editor, preview, { editorSelectionReader, previewSelectionReader, feedbackGuard, highlightSession, retryScheduler } = {}) {\n' +
-56-      "    if (!editorSelectionReader || typeof editorSelectionReader.read !== 'function') {\n" +
-57-      "      throw new TypeError('SelectionSyncController requires EditorSelectionReader');\n" +
-58-      '    }\n' +
-59-      '    if (!previewSelectionReader\n' +
-60-      "      || typeof previewSelectionReader.read !== 'function'\n" +
-61-      "      || typeof previewSelectionReader.subscribe !== 'function'\n" +
-62-      "      || typeof previewSelectionReader.start !== 'function'\n" +
-63-      "      || typeof previewSelectionReader.stop !== 'function') {\n" +
-64-      "      throw new TypeError('SelectionSyncController requires PreviewSelectionReader');\n" +
-65-      '    }\n' +
-66-      "    if (!feedbackGuard || REQUIRED_FEEDBACK_METHODS.some(method => typeof feedbackGuard[method] !== 'function')) {\n" +
-67-      "      throw new TypeError('SelectionSyncController requires SelectionFeedbackGuard');\n" +
-68-      '    }\n' +
-69-      "    if (!highlightSession || REQUIRED_HIGHLIGHT_METHODS.some(method => typeof highlightSession[method] !== 'function')) {\n" +
-70-      "      throw new TypeError('SelectionSyncController requires SelectionHighlightSession');\n" +
-71-      '    }\n' +
-72-      "    if (!retryScheduler || REQUIRED_RETRY_METHODS.some(method => typeof retryScheduler[method] !== 'function')) {\n" +
-73-      "      throw new TypeError('SelectionSyncController requires SelectionRetryScheduler');\n" +
-74-      '    }\n' +
-75-      '    this.editor = editor;\n' +
-76-      '    this.preview = preview;\n' +
-77-      '    this.editorSelectionReader = editorSelectionReader;\n' +
-78-      '    this.previewSelectionReader = previewSelectionReader;\n' +
-79-      '    this.feedbackGuard = feedbackGuard;\n' +
-80-      '    this.highlightSession = highlightSession;\n' +
-81-      '    this.retryScheduler = retryScheduler;\n' +
-82-      '    this.previewSelectionDisposer = null;\n' +
+2225-ok 26 - hybrid source highlight wiring keeps code widgets compatible and suppresses false pointer warnings
+2226-  ---
+2227-  duration_ms: 10.149068
+2228-  type: 'test'
+2229-  ...
+2230-# Subtest: existing package script commands retain their exact semantics
+2231-ok 27 - existing package script commands retain their exact semantics
+2232-  ---
+2233-  duration_ms: 1.145203
+2234-  type: 'test'
+2235-  ...
+2236-# Subtest: architecture package scripts map directly to committed local entrypoints
+2237-ok 28 - architecture package scripts map directly to committed local entrypoints
+2238-  ---
+2239-  duration_ms: 8.342407
+2240-  type: 'test'
+2241-  ...
+2242-# Subtest: architecture package scripts do not depend on builds, artifacts, package installation, or networking
+2243-ok 29 - architecture package scripts do not depend on builds, artifacts, package installation, or networking
+2244-  ---
+2245-  duration_ms: 1.375313
+2246-  type: 'test'
+2247-  ...
+2248-# Subtest: all architecture package scripts execute successfully before any build step
+2249:not ok 30 - all architecture package scripts execute successfully before any build step
+2250-  ---
+2251-  duration_ms: 9619.151229
+2252-  type: 'test'
+2253-  location: '/home/runner/work/mdr/mdr/tests/package-scripts.test.mjs:53:1'
+2254:  failureType: 'testCodeFailure'
+2255-  error: |-
+2256-    verify:architecture failed
+2257-    stdout:
+2258-    
+2259-    stderr:
+2260-    [verify-architecture] tracked-generated-file-regression .agent/r9_10_failure.log - New generated or runtime output is tracked by Git.
+2261-    [verify-architecture] failed with 1 architecture violation(s).
+2262-    
+2263-    
+2264-    1 !== 0
+2265-    
+2266:  code: 'ERR_ASSERTION'
+2267:  name: 'AssertionError'
+2268-  expected: 0
+2269-  actual: 1
+2270-  operator: 'strictEqual'
+2271-  stack: |-
+2272-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/package-scripts.test.mjs:70:12)
+2273-    Test.runInAsyncScope (node:async_hooks:214:14)
+2274-    Test.run (node:internal/test_runner/test:1047:25)
+2275-    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+2276-    Test.postRun (node:internal/test_runner/test:1173:19)
+2277-    Test.run (node:internal/test_runner/test:1101:12)
+2278-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+2279-  ...
+2280-# Subtest: application composes one canonical presentation API into Preview without publishing presentation globals
+2281-ok 31 - application composes one canonical presentation API into Preview without publishing presentation globals
+2282-  ---
+2283-  duration_ms: 7.374537
+2284-  type: 'test'
+2285-  ...
+2286-# Subtest: hybrid and Preview Mermaid rendering use the canonical Preview presentation renderer
+2287-ok 32 - hybrid and Preview Mermaid rendering use the canonical Preview presentation renderer
+2288-  ---
+2289-  duration_ms: 4.727225
+2290-  type: 'test'
+2291-  ...
+2292-# Subtest: hybrid Preview and export math rendering use the canonical math presentation contract without vendor globals
+2293-ok 33 - hybrid Preview and export math rendering use the canonical math presentation contract without vendor globals
+2294-  ---
+2295-  duration_ms: 4.328869
+2296-  type: 'test'
+2297-  ...
+2298-# Subtest: Preview code enhancement delegates to the shared code presentation through Code Renderer
+2299-ok 34 - Preview code enhancement delegates to the shared code presentation through Code Renderer
+2300-  ---
+2301-  duration_ms: 2.264146
+2302-  type: 'test'
+2303-  ...
+2304-# Subtest: README exposes the exact Stage 1 architecture handoff without claiming feature migration
+2305-ok 35 - README exposes the exact Stage 1 architecture handoff without claiming feature migration
+2306-  ---
+2307-  duration_ms: 9.310679
+2308-  type: 'test'
+2309-  ...
+2310-# Subtest: documented Stage 1 public modules expose the exact handoff surface
+2311-ok 36 - documented Stage 1 public modules expose the exact handoff surface
+2312-  ---
+2313-  duration_ms: 30.650238
+2314-  type: 'test'
+2315-  ...
 --
-261-      "    if (result?.status === 'mapping-failed') this.stats.mappingFailures += 1;\n" +
-262-      "    this.recordResult('preview-to-editor', reason, result);\n" +
-263-      '  }\n' +
-264-      '\n' +
-265-      "  notifyPreviewMounted(reason = 'preview-mounted') {\n" +
-266-      '    this.feedbackGuard.advanceRevision();\n' +
-267-      '    this.highlightSession.restore();\n' +
-268-      "    if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return;\n" +
-269-      '    const editorSelection = this.editorSelectionReader.read();\n' +
-270-      '    if (!editorSelection || editorSelection.isCollapsed) return;\n' +
-271-      '    this.stats.previewRefreshes += 1;\n' +
-272-      '    const shouldRealign = performance.now() < this.editorAlignmentUntil;\n' +
-273-      '    this.scheduleEditor(shouldRealign, reason, { force: true, frames: 1, extendAlignment: false });\n' +
-274-      '  }\n' +
-275-      '\n' +
-276-      "  notifyPreviewReplaced(reason = 'preview-replaced') {\n" +
-277-      '    this.notifyPreviewMounted(reason);\n' +
-278-      '  }\n' +
-279-      '\n' +
-280-      "  notifyEditorGeometry(reason = 'editor-geometry') {\n" +
-281-      "    if (this.feedbackGuard.shouldIgnore('editor')) return;\n" +
-282-      '    this.stats.editorGeometryRefreshes += 1;\n' +
-283-      '    const previewSelection = this.p'... 2783 more characters
-284-    
-285:  code: 'ERR_ASSERTION'
-286:  name: 'AssertionError'
-287-  expected:
-288-  actual: |-
-289-    function nextFrame(callback) {
-290-      return requestAnimationFrame(() => callback());
-291-    }
-292-    
-293-    const REQUIRED_FEEDBACK_METHODS = [
-294-      'begin',
-295-      'shouldIgnore',
-296-      'advanceRevision',
-297-      'release',
-298-      'reset',
-299-      'getRevision',
-300-      'getState'
-301-    ];
-302-    const REQUIRED_HIGHLIGHT_METHODS = ['restore', 'clear'];
-303-    const REQUIRED_RETRY_METHODS = ['schedule', 'cancel'];
-304-    
-305-    export class SelectionSyncController {
-306-      constructor(editor, preview, { editorSelectionReader, previewSelectionReader, feedbackGuard, highlightSession, retryScheduler } = {}) {
-307-        if (!editorSelectionReader || typeof editorSelectionReader.read !== 'function') {
-308-          throw new TypeError('SelectionSyncController requires EditorSelectionReader');
-309-        }
-310-        if (!previewSelectionReader
-311-          || typeof previewSelectionReader.read !== 'function'
-312-          || typeof previewSelectionReader.subscribe !== 'function'
-313-          || typeof previewSelectionReader.start !== 'function'
-314-          || typeof previewSelectionReader.stop !== 'function') {
-315-          throw new TypeError('SelectionSyncController requires PreviewSelectionReader');
-316-        }
-317-        if (!feedbackGuard || REQUIRED_FEEDBACK_METHODS.some(method => typeof feedbackGuard[method] !== 'function')) {
-318-          throw new TypeError('SelectionSyncController requires SelectionFeedbackGuard');
-319-        }
-320-        if (!highlightSession || REQUIRED_HIGHLIGHT_METHODS.some(method => typeof highlightSession[method] !== 'function')) {
-321-          throw new TypeError('SelectionSyncController requires SelectionHighlightSession');
-322-        }
-323-        if (!retryScheduler || REQUIRED_RETRY_METHODS.some(method => typeof retryScheduler[method] !== 'function')) {
-324-          throw new TypeError('SelectionSyncController requires SelectionRetryScheduler');
-325-        }
-326-        this.editor = editor;
-327-        this.preview = preview;
-328-        this.editorSelectionReader = editorSelectionReader;
-329-        this.previewSelectionReader = previewSelectionReader;
-330-        this.feedbackGuard = feedbackGuard;
-331-        this.highlightSession = highlightSession;
-332-        this.retryScheduler = retryScheduler;
-333-        this.previewSelectionDisposer = null;
-334-        this.callbacks = {};
---
-674-  type: 'test'
-675-  ...
-676-# Subtest: R9-10 Retry Scheduler cancel/destroy invalidate pending work and remain terminal/idempotent
-677-ok 14 - R9-10 Retry Scheduler cancel/destroy invalidate pending work and remain terminal/idempotent
-678-  ---
-679-  duration_ms: 0.259901
-680-  type: 'test'
-681-  ...
-682-# Subtest: R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks
-683-ok 15 - R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks
-684-  ---
-685-  duration_ms: 2.354846
-686-  type: 'test'
-687-  ...
-688-# Subtest: R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler
-689-ok 16 - R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler
-690-  ---
-691-  duration_ms: 0.720866
-692-  type: 'test'
-693-  ...
-694-1..16
-695-# tests 16
-696-# suites 0
-697-# pass 15
-698:# fail 1
-699-# cancelled 0
-700-# skipped 0
-701-# todo 0
-702-# duration_ms 92.764398
+3424-  type: 'test'
+3425-  ...
+3426-# Subtest: Vite dev server permits only the repository and intentional parent dependency directory
+3427-ok 222 - Vite dev server permits only the repository and intentional parent dependency directory
+3428-  ---
+3429-  duration_ms: 1.356758
+3430-  type: 'test'
+3431-  ...
+3432-# Subtest: production bundle budgets remain stricter for startup chunks than lazy vendor chunks
+3433-ok 223 - production bundle budgets remain stricter for startup chunks than lazy vendor chunks
+3434-  ---
+3435-  duration_ms: 0.198651
+3436-  type: 'test'
+3437-  ...
+3438-# Subtest: Windows native window workflow is pinned, isolated and evidence-producing
+3439-ok 224 - Windows native window workflow is pinned, isolated and evidence-producing
+3440-  ---
+3441-  duration_ms: 14.321805
+3442-  type: 'test'
+3443-  ...
+3444-1..224
+3445-# tests 224
+3446-# suites 0
+3447-# pass 223
+3448:# fail 1
+3449-# cancelled 0
+3450-# skipped 0
+3451-# todo 0
+3452-# duration_ms 9970.91147
 
 === VALIDATION TAIL ===
-      stop() {
-        this.retryScheduler.cancel();
-        if (!this.started) return;
-        this.started = false;
-        cancelAnimationFrame(this.editorFrame);
-        cancelAnimationFrame(this.previewFrame);
-        this.feedbackGuard.reset();
-        this.editor.removeEventListener('select', this.onEditorSelect);
-        this.editor.removeEventListener('keyup', this.onEditorKeyUp);
-        this.editor.removeEventListener('pointerdown', this.onEditorPointerDown, true);
-        this.preview.removeEventListener('keyup', this.onPreviewKeyUp);
-        document.removeEventListener('pointerup', this.onDocumentPointerUp, true);
-        document.removeEventListener('pointercancel', this.onDocumentPointerUp, true);
-        this.previewSelectionReader.stop();
-        this.previewSelectionDisposer?.();
-        this.previewSelectionDisposer = null;
-      }
-    
-      makeEditorKey(selection = this.editorSelectionReader.read()) {
-        const from = Number(selection?.from) || 0;
-        const to = Math.max(from, Number(selection?.to) || 0);
-        const documentVersion = window.markdownEditorDocumentModel?.getState?.().version || 0;
-        return `${documentVersion}:${from}:${to}:${this.feedbackGuard.getRevision()}`;
-      }
-    
-      scheduleEditor(shouldScroll = false, reason = 'editor-selection', options = {}) {
-        if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) {
-          this.stats.ignoredFeedbackEvents += 1;
-          return;
-        }
-        this.stats.editorRequests += 1;
-        if (shouldScroll && options.extendAlignment !== false) this.editorAlignmentUntil = performance.now() + 1400;
-        const force = Boolean(options.force);
-        const frames = Math.max(1, Number(options.frames) || 1);
-        this.retryScheduler.cancel();
-        cancelAnimationFrame(this.editorFrame);
-        let remaining = frames;
-        const run = () => {
-          if (--remaining > 0) {
-            this.editorFrame = nextFrame(run);
-            return;
-          }
-          this.editorFrame = 0;
-          this.runEditor(shouldScroll, reason, force, 0);
-        };
-        this.editorFrame = nextFrame(run);
-      }
-    
-      runEditor(shouldScroll, reason, force, attempt) {
-        if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) return;
-        const selection = this.editorSelectionReader.read();
-        const key = this.makeEditorKey(selection);
-        if (!force && key === this.lastEditorKey) return;
-        const feedbackToken = this.feedbackGuard.begin('editor');
-        let result = null;
-        try {
-          result = this.callbacks.syncEditorToPreview?.({ shouldScroll, reason, attempt, selection }) || { status: 'unconfigured' };
-          this.lastEditorKey = key;
-        } finally {
-          this.feedbackGuard.release(feedbackToken, 32);
-        }
-        this.recordResult('editor-to-preview', reason, result);
-        if (result?.status === 'pending') {
-          const scheduled = this.retryScheduler.schedule({
-            version: key,
-            getVersion: () => this.makeEditorKey(),
-            run: ({ attempt: retryAttempt }) => {
-              this.runEditor(shouldScroll, `${reason}-retry`, true, retryAttempt);
-            }
-          });
-          if (scheduled) this.stats.pendingRetries += 1;
-        }
-      }
-    
-      schedulePreview(reason = 'preview-selection', options = {}) {
-        if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) {
-          this.stats.ignoredFeedbackEvents += 1;
-          return;
-        }
-        this.stats.previewRequests += 1;
-        const force = Boolean(options.force);
-        const frames = Math.max(1, Number(options.frames) || 1);
-        cancelAnimationFrame(this.previewFrame);
-        let remaining = frames;
-        const run = () => {
-          if (--remaining > 0) {
-            this.previewFrame = nextFrame(run);
-            return;
-          }
-          this.previewFrame = 0;
-          this.runPreview(reason, force);
-        };
-        this.previewFrame = nextFrame(run);
-      }
-    
-      runPreview(reason, force, snapshot = null, snapshotProvided = false) {
-        if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return;
-        const selection = snapshotProvided ? snapshot : this.previewSelectionReader.read();
-        if (!selection) return;
-        const key = `${selection.text || ''}:${selection.anchorOffset || 0}:${selection.focusOffset || 0}`;
-        if (!force && key === this.lastPreviewKey) return;
-        const feedbackToken = this.feedbackGuard.begin('preview');
-        let result = null;
-        try {
-          result = this.callbacks.syncPreviewToEditor?.({ reason, selection }) || { status: 'unconfigured' };
-          if (result?.status === 'mapped') this.lastPreviewKey = key;
-        } finally {
-          this.feedbackGuard.release(feedbackToken, 96);
-        }
-        if (result?.status === 'mapping-failed') this.stats.mappingFailures += 1;
-        this.recordResult('preview-to-editor', reason, result);
-      }
-    
-      notifyPreviewMounted(reason = 'preview-mounted') {
-        this.feedbackGuard.advanceRevision();
-        this.highlightSession.restore();
-        if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return;
-        const editorSelection = this.editorSelectionReader.read();
-        if (!editorSelection || editorSelection.isCollapsed) return;
-        this.stats.previewRefreshes += 1;
-        const shouldRealign = performance.now() < this.editorAlignmentUntil;
-        this.scheduleEditor(shouldRealign, reason, { force: true, frames: 1, extendAlignment: false });
-      }
-    
-      notifyPreviewReplaced(reason = 'preview-replaced') {
-        this.notifyPreviewMounted(reason);
-      }
-    
-      notifyEditorGeometry(reason = 'editor-geometry') {
-        if (this.feedbackGuard.shouldIgnore('editor')) return;
-        this.stats.editorGeometryRefreshes += 1;
-        const previewSelection = this.previewSelectionReader.read();
-        if (previewSelection) {
-          this.schedulePreview(reason, { force: true, frames: 2 });
-          return;
-        }
-        const editorSelection = this.editorSelectionReader.read();
-        if (editorSelection && !editorSelection.isCollapsed) {
-          this.scheduleEditor(true, reason, { force: true, frames: 2, extendAlignment: false });
-        }
-      }
-    
-      clear() {
-        this.lastEditorKey = '';
-        this.lastPreviewKey = '';
-        this.retryScheduler.cancel();
-        this.highlightSession.clear();
-        this.callbacks.clearPreview?.();
-      }
-    
-      recordResult(direction, reason, result = {}) {
-        const status = result?.status || 'unknown';
-        if (status === 'hybrid' || status === 'cleared' || status === 'locked') return;
-        const details = {
-          direction,
-          reason,
-          result: status,
-          selectionLength: Number(result?.selectionLength) || 0,
-          matchedAnchors: Number(result?.matchedAnchors) || 0,
-          virtualized: Boolean(this.callbacks.isPreviewVirtualized?.()),
-          previewRevision: this.feedbackGuard.getRevision(),
-          sourceViewportRatio: Number.isFinite(result?.sourceViewportRatio)
-            ? Number(result.sourceViewportRatio.toFixed(3))
-            : null,
-          targetViewportRatio: Number.isFinite(result?.targetViewportRatio)
-            ? Number(result.targetViewportRatio.toFixed(3))
-            : null,
-          mappingMode: result?.mappingMode || null,
-          mappingCoverage: Number.isFinite(result?.mappingCoverage)
-            ? Number(result.mappingCoverage.toFixed(3))
-            : null,
-          mappedCharacters: Number(result?.mappedCharacters) || 0,
-          exactMapping: Boolean(result?.exactMapping),
-          sourceStart: Number.isFinite(result?.sourceStart) ? result.sourceStart : null,
-          sourceEnd: Number.isFinite(result?.sourceEnd) ? result.sourceEnd : null
-        };
-        const noteworthy = status === 'mapping-failed'
-          || status === 'pending'
-          || status === 'unconfigured'
-          || status === 'blocks-clipped';
-        if (noteworthy) {
-          window.markdownEditorPerf?.diagnostic?.('selection.sync-anomaly', {
-            category: 'sync.selection',
-            status: 'warning',
-            dedupeKey: `selection:${direction}:${status}`,
-            minIntervalMs: 4000,
-            details
-          });
-          return;
-        }
-        window.markdownEditorPerf?.record('selection.sync-result', {
-          category: 'sync.selection',
-          status: 'ok',
-          aggregate: true,
-          details
-        });
-      }
-    
-      getState() {
-        const feedback = this.feedbackGuard.getState();
-        return {
-          started: this.started,
-          applyingSide: feedback.source,
-          previewRevision: feedback.revision,
-          ...this.stats
-        };
-      }
-    }
-    
-    export function createSelectionSyncController(editor, preview, options = {}) {
-      return new SelectionSyncController(editor, preview, options);
-    }
-    
-  operator: 'doesNotMatch'
-  stack: |-
-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-retry-scheduler.test.mjs:44:10)
-    async Test.run (node:internal/test_runner/test:1054:7)
-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
-  ...
-# Subtest: R9-10 composition creates one Scheduler from explicit frame capabilities injects it and destroys it without a compatibility/global retry owner
-ok 5 - R9-10 composition creates one Scheduler from explicit frame capabilities injects it and destroys it without a compatibility/global retry owner
-  ---
-  duration_ms: 4.219371
+  duration_ms: 0.344034
   type: 'test'
   ...
-# Subtest: R9-10 stale replacement lifecycle is explicit and old callbacks are invalidated before work executes
-ok 6 - R9-10 stale replacement lifecycle is explicit and old callbacks are invalidated before work executes
+# Subtest: R9-06 rejected or cancelled recalibration never increments geometryResyncs
+ok 177 - R9-06 rejected or cancelled recalibration never increments geometryResyncs
   ---
-  duration_ms: 1.583183
+  duration_ms: 0.202709
   type: 'test'
   ...
-# Subtest: R9-10 keeps frozen selection mapping and later final Selection controller migration untouched
-ok 7 - R9-10 keeps frozen selection mapping and later final Selection controller migration untouched
+# Subtest: R9-06 compensation writes only the requested target and resynchronizes from the existing source
+ok 178 - R9-06 compensation writes only the requested target and resynchronizes from the existing source
   ---
-  duration_ms: 4.268069
+  duration_ms: 0.365594
   type: 'test'
   ...
-# Subtest: R9-10 production inventory records one Retry Scheduler owner and cardinality 381
-ok 8 - R9-10 production inventory records one Retry Scheduler owner and cardinality 381
+# Subtest: R9-06 ScrollSyncController compatibility API delegates geometry without creating a feedback source
+ok 179 - R9-06 ScrollSyncController compatibility API delegates geometry without creating a feedback source
   ---
-  duration_ms: 2.322597
+  duration_ms: 1.164118
+  type: 'test'
+  ...
+# Subtest: R9-06 destroy is terminal and idempotent for pending geometry work
+ok 180 - R9-06 destroy is terminal and idempotent for pending geometry work
+  ---
+  duration_ms: 0.2406
+  type: 'test'
+  ...
+# Subtest: R9-02 source owner starts neutral and exposes the preserved source-state projection only
+ok 181 - R9-02 source owner starts neutral and exposes the preserved source-state projection only
+  ---
+  duration_ms: 2.259147
+  type: 'test'
+  ...
+# Subtest: R9-02 user gestures own side reason time and switch count without duplicate same-side switches
+ok 182 - R9-02 user gestures own side reason time and switch count without duplicate same-side switches
+  ---
+  duration_ms: 0.47547
+  type: 'test'
+  ...
+# Subtest: R9-02 programmatic windows preserve the 120ms minimum and user input clears its own side window
+ok 183 - R9-02 programmatic windows preserve the 120ms minimum and user input clears its own side window
+  ---
+  duration_ms: 0.297135
+  type: 'test'
+  ...
+# Subtest: R9-02 suspension extends monotonically and expires without changing source identity
+ok 184 - R9-02 suspension extends monotonically and expires without changing source identity
+  ---
+  duration_ms: 0.249507
+  type: 'test'
+  ...
+# Subtest: R9-02 target classification never lets passive or programmatic sides mutate source ownership
+ok 185 - R9-02 target classification never lets passive or programmatic sides mutate source ownership
+  ---
+  duration_ms: 0.334375
+  type: 'test'
+  ...
+# Subtest: R9-02 sequence allocation is monotonic and destroy is terminal and idempotent
+ok 186 - R9-02 sequence allocation is monotonic and destroy is terminal and idempotent
+  ---
+  duration_ms: 0.218679
+  type: 'test'
+  ...
+# Subtest: R9-02 scroll controller delegates source state to an injected owner and does not destroy external ownership
+ok 187 - R9-02 scroll controller delegates source state to an injected owner and does not destroy external ownership
+  ---
+  duration_ms: 1.326482
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard begins immutable sequence/source/revision transactions and validates sources
+ok 188 - R9-08 Feedback Guard begins immutable sequence/source/revision transactions and validates sources
+  ---
+  duration_ms: 2.803635
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard blocks opposite-side feedback and optional same-source reentrancy without one boolean lock
+ok 189 - R9-08 Feedback Guard blocks opposite-side feedback and optional same-source reentrancy without one boolean lock
+  ---
+  duration_ms: 0.292567
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
+ok 190 - R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
+  ---
+  duration_ms: 0.354453
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
+ok 191 - R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
+  ---
+  duration_ms: 0.565108
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
+ok 192 - R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
+  ---
+  duration_ms: 0.524541
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
+ok 193 - R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
+  ---
+  duration_ms: 0.31527
+  type: 'test'
+  ...
+# Subtest: R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
+ok 194 - R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
+  ---
+  duration_ms: 3.862185
+  type: 'test'
+  ...
+# Subtest: R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
+ok 195 - R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
+  ---
+  duration_ms: 0.394298
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session owns CSS Highlight multi-Range publication and exact range state
+ok 196 - R9-09 Highlight Session owns CSS Highlight multi-Range publication and exact range state
+  ---
+  duration_ms: 2.155913
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session replaces old CSS ranges and atomic classes through one authority
+ok 197 - R9-09 Highlight Session replaces old CSS ranges and atomic classes through one authority
+  ---
+  duration_ms: 0.329887
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session provides the legacy single-text fallback when CSS Highlight is unavailable and clear restores text
+ok 198 - R9-09 Highlight Session provides the legacy single-text fallback when CSS Highlight is unavailable and clear restores text
+  ---
+  duration_ms: 0.546913
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session rejects unsupported multi-Range fallback and ranges outside preview without side effects
+ok 199 - R9-09 Highlight Session rejects unsupported multi-Range fallback and ranges outside preview without side effects
+  ---
+  duration_ms: 0.263363
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session restores fresh ranges and atomic elements after virtual remount without retry scheduling
+ok 200 - R9-09 Highlight Session restores fresh ranges and atomic elements after virtual remount without retry scheduling
+  ---
+  duration_ms: 0.381103
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
+ok 201 - R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
+  ---
+  duration_ms: 0.42761
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
+ok 202 - R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
+  ---
+  duration_ms: 0.218218
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session destroy clears every effect and is terminal idempotent
+ok 203 - R9-09 Highlight Session destroy clears every effect and is terminal idempotent
+  ---
+  duration_ms: 0.568123
+  type: 'test'
+  ...
+# Subtest: R9-07 EditorSelectionReader requires neutral editor selection capability and returns immutable normalized final boundaries
+ok 204 - R9-07 EditorSelectionReader requires neutral editor selection capability and returns immutable normalized final boundaries
+  ---
+  duration_ms: 2.842137
+  type: 'test'
+  ...
+# Subtest: R9-07 EditorSelectionReader normalizes invalid/collapsed offsets without document or DOM reads
+ok 205 - R9-07 EditorSelectionReader normalizes invalid/collapsed offsets without document or DOM reads
+  ---
+  duration_ms: 0.34197
+  type: 'test'
+  ...
+# Subtest: R9-07 PreviewSelectionReader rejects missing collapsed blank and outside-preview selections
+ok 206 - R9-07 PreviewSelectionReader rejects missing collapsed blank and outside-preview selections
+  ---
+  duration_ms: 0.895706
+  type: 'test'
+  ...
+# Subtest: R9-07 PreviewSelectionReader returns immutable final boundary snapshot with a cloned stable range
+ok 207 - R9-07 PreviewSelectionReader returns immutable final boundary snapshot with a cloned stable range
+  ---
+  duration_ms: 0.45429
+  type: 'test'
+  ...
+# Subtest: R9-07 PreviewSelectionReader waits through pointer selection and publishes one two-frame final snapshot on pointerup
+ok 208 - R9-07 PreviewSelectionReader waits through pointer selection and publishes one two-frame final snapshot on pointerup
+  ---
+  duration_ms: 0.961329
+  type: 'test'
+  ...
+# Subtest: R9-07 PreviewSelectionReader coalesces stable selectionchange work and stale cancelled callbacks cannot publish
+ok 209 - R9-07 PreviewSelectionReader coalesces stable selectionchange work and stale cancelled callbacks cannot publish
+  ---
+  duration_ms: 0.556231
+  type: 'test'
+  ...
+# Subtest: R9-07 PreviewSelectionReader stop/destroy remove every listener cancel pending work and remain terminal/idempotent
+ok 210 - R9-07 PreviewSelectionReader stop/destroy remove every listener cancel pending work and remain terminal/idempotent
+  ---
+  duration_ms: 0.548386
   type: 'test'
   ...
 # Subtest: R9-10 Retry Scheduler requires explicit frame capabilities and versioned retry jobs
-ok 9 - R9-10 Retry Scheduler requires explicit frame capabilities and versioned retry jobs
+ok 211 - R9-10 Retry Scheduler requires explicit frame capabilities and versioned retry jobs
   ---
-  duration_ms: 1.955761
+  duration_ms: 2.386004
   type: 'test'
   ...
 # Subtest: R9-10 Retry Scheduler owns one next-frame recoverable attempt and publishes immutable attempt context
-ok 10 - R9-10 Retry Scheduler owns one next-frame recoverable attempt and publishes immutable attempt context
+ok 212 - R9-10 Retry Scheduler owns one next-frame recoverable attempt and publishes immutable attempt context
   ---
-  duration_ms: 1.376812
+  duration_ms: 1.407263
   type: 'test'
   ...
 # Subtest: R9-10 Retry Scheduler enforces the bounded retry count without Controller-owned attempt state
-ok 11 - R9-10 Retry Scheduler enforces the bounded retry count without Controller-owned attempt state
+ok 213 - R9-10 Retry Scheduler enforces the bounded retry count without Controller-owned attempt state
   ---
-  duration_ms: 0.421638
+  duration_ms: 0.579253
   type: 'test'
   ...
 # Subtest: R9-10 Retry Scheduler automatically replaces an older retry and forced stale callbacks cannot execute
-ok 12 - R9-10 Retry Scheduler automatically replaces an older retry and forced stale callbacks cannot execute
+ok 214 - R9-10 Retry Scheduler automatically replaces an older retry and forced stale callbacks cannot execute
   ---
-  duration_ms: 0.316642
+  duration_ms: 0.498553
   type: 'test'
   ...
 # Subtest: R9-10 Retry Scheduler drops a pending retry when the caller version changes without a replacement request
-ok 13 - R9-10 Retry Scheduler drops a pending retry when the caller version changes without a replacement request
+ok 215 - R9-10 Retry Scheduler drops a pending retry when the caller version changes without a replacement request
   ---
-  duration_ms: 0.264003
+  duration_ms: 0.404306
   type: 'test'
   ...
 # Subtest: R9-10 Retry Scheduler cancel/destroy invalidate pending work and remain terminal/idempotent
-ok 14 - R9-10 Retry Scheduler cancel/destroy invalidate pending work and remain terminal/idempotent
+ok 216 - R9-10 Retry Scheduler cancel/destroy invalidate pending work and remain terminal/idempotent
   ---
-  duration_ms: 0.259901
+  duration_ms: 0.469148
   type: 'test'
   ...
 # Subtest: R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks
-ok 15 - R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks
+ok 217 - R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks
   ---
-  duration_ms: 2.354846
+  duration_ms: 4.440729
   type: 'test'
   ...
 # Subtest: R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler
-ok 16 - R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler
+ok 218 - R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler
   ---
-  duration_ms: 0.720866
+  duration_ms: 1.02658
   type: 'test'
   ...
-1..16
-# tests 16
+# Subtest: Atomic Task 2.3 sprite has one stable definition for every preserved icon ID
+ok 219 - Atomic Task 2.3 sprite has one stable definition for every preserved icon ID
+  ---
+  duration_ms: 8.800384
+  type: 'test'
+  ...
+# Subtest: compatibility and dynamic callers reference the external sprite without a second geometry authority
+ok 220 - compatibility and dynamic callers reference the external sprite without a second geometry authority
+  ---
+  duration_ms: 7.528355
+  type: 'test'
+  ...
+# Subtest: icon-view is a pure generic renderer with decorative and labelled accessibility modes
+ok 221 - icon-view is a pure generic renderer with decorative and labelled accessibility modes
+  ---
+  duration_ms: 1.072887
+  type: 'test'
+  ...
+# Subtest: Vite dev server permits only the repository and intentional parent dependency directory
+ok 222 - Vite dev server permits only the repository and intentional parent dependency directory
+  ---
+  duration_ms: 1.356758
+  type: 'test'
+  ...
+# Subtest: production bundle budgets remain stricter for startup chunks than lazy vendor chunks
+ok 223 - production bundle budgets remain stricter for startup chunks than lazy vendor chunks
+  ---
+  duration_ms: 0.198651
+  type: 'test'
+  ...
+# Subtest: Windows native window workflow is pinned, isolated and evidence-producing
+ok 224 - Windows native window workflow is pinned, isolated and evidence-producing
+  ---
+  duration_ms: 14.321805
+  type: 'test'
+  ...
+1..224
+# tests 224
 # suites 0
-# pass 15
+# pass 223
 # fail 1
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 92.764398
+# duration_ms 9970.91147
