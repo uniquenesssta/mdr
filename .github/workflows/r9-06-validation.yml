@@ -19,4 +19,6 @@ jobs:
           fetch-depth: 0
       - name: Validate and publish clean R9-06 candidate
         shell: bash
-        run: bash .agent/r9_06_validate.sh
+        run: |
+          python .agent/r9_06_apply_fix.py
+          bash .agent/r9_06_validate.sh
