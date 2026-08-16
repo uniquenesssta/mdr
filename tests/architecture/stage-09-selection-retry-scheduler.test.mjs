@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 const ROOT = resolve(new URL('../..', import.meta.url).pathname);
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
+const controllerPath = 'src/features/sync/selection/selection-sync-controller.js';
 
 test('R9-10 creates canonical SelectionRetryScheduler and exports it only through the Sync public entry', async () => {
   const index = await read('src/features/sync/index.js');
@@ -27,26 +28,23 @@ test('R9-10 Retry Scheduler owns only bounded frame generation version and cance
   assert.doesNotMatch(source, /document\.|window\.|globalThis\.|selectionMapping|markdownEditorDocumentModel|editorSelectionReader|previewSelectionReader|feedbackGuard|SelectionHighlightSession|CSS\.highlights|scrollTo|addEventListener|setTimeout/);
 });
 
-test('R9-10 legacy SelectionSyncController delegates retry scheduling and no longer owns retry count or retry RAF state', async () => {
-  const controller = await read('src/sync/selection-controller.js');
+test('R9-10 final SelectionSyncController delegates retry scheduling and owns no retry count or retry RAF state', async () => {
+  const controller = await read(controllerPath);
   assert.match(controller, /SelectionSyncController requires SelectionRetryScheduler/);
   assert.match(controller, /this\.retryScheduler\.schedule\(\{/);
   assert.match(controller, /version: key/);
   assert.match(controller, /getVersion: \(\) => this\.makeEditorKey\(\)/);
   assert.match(controller, /this\.retryScheduler\.cancel\(\)/);
-  assert.doesNotMatch(controller, /DEFAULT_MAX_RETRIES|result\.maxRetries|attempt <|this\.editorFrame = nextFrame\(\(\) => \{\s*this\.editorFrame = 0;\s*this\.runEditor/s);
+  assert.doesNotMatch(controller, /DEFAULT_MAX_RETRIES|result\.maxRetries|attempt <|retryCount|retryFrame/);
 });
 
-test('R9-10 retry orchestration is requested only for recoverable pending results and classic mapping no longer owns retry limits', async () => {
-  const controller = await read('src/sync/selection-controller.js');
-  const legacy = await read('public/app/scroll-sync.js');
+test('R9-10 retry orchestration remains limited to recoverable pending results after classic mapping removal', async () => {
+  const controller = await read(controllerPath);
   assert.match(controller, /if \(result\?\.status === 'pending'\)/);
   const runEditorBlock = controller.slice(controller.indexOf('  runEditor('), controller.indexOf('  schedulePreview('));
   assert.match(runEditorBlock, /retryScheduler\.schedule/);
   assert.doesNotMatch(runEditorBlock, /mapping-failed/);
-  assert.doesNotMatch(legacy, /maxRetries/);
-  assert.match(legacy, /status: 'pending'/);
-  assert.match(legacy, /status: virtualController\?\.active && !matchingAnchors\.length \? 'pending' : 'mapping-failed'/);
+  await assert.rejects(access(file('public/app/scroll-sync.js')));
 });
 
 test('R9-10 composition creates one Scheduler from explicit frame capabilities injects it and destroys it without a compatibility/global retry owner', async () => {
@@ -69,9 +67,9 @@ test('R9-10 stale replacement lifecycle is explicit and old callbacks are invali
   assert.match(scheduler, /destroy\(\)/);
 });
 
-test('R9-10 keeps frozen selection mapping and later final Selection controller migration untouched', async () => {
+test('R9-10 prior specialist owners and frozen selection mapping remain separate from the final controller migration', async () => {
   await access(file('src/sync/selection-mapping.js'));
-  await assert.rejects(access(file('src/features/sync/selection/selection-sync-controller.js')));
+  await access(file(controllerPath));
   const mapping = await read('src/sync/selection-mapping.js');
   assert.doesNotMatch(mapping, /R9-10/);
   const highlight = await read('src/features/sync/selection/selection-highlight-session.js');
@@ -80,10 +78,11 @@ test('R9-10 keeps frozen selection mapping and later final Selection controller 
   assert.doesNotMatch(feedback, /SelectionRetryScheduler|retryScheduler/);
 });
 
-test('R9-10 production inventory records one Retry Scheduler owner and cardinality 381', async () => {
+test('R9-10 production inventory records one Retry Scheduler owner and final controller remains a distinct orchestration owner', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
   assert.equal(inventory.modules.length, 381);
   assert.equal(records.get('src/features/sync/selection/selection-retry-scheduler.js')?.[4], 'selection-retry-scheduler-lifecycle');
-  assert.match(records.get('src/sync/selection-controller.js')?.[3] || '', /R9-10 Retry Scheduler/);
+  assert.equal(records.get(controllerPath)?.[4], 'selection-sync-controller-orchestration');
+  assert.equal(records.has('src/sync/selection-controller.js'), false);
 });
