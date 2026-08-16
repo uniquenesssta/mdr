@@ -7,7 +7,6 @@ const ROOT = resolve(new URL('../..', import.meta.url).pathname);
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 const LATER_FILES = [
-  'src/features/sync/scroll/scroll-geometry-session.js',
   'src/features/sync/selection/selection-sync-controller.js',
   'src/features/sync/selection/editor-selection-reader.js',
   'src/features/sync/selection/preview-selection-reader.js',
@@ -71,8 +70,9 @@ test('R9-04 removes legacy Canvas/textarea editor metric authority and delegates
   assert.match(core, /coreEditorUiCommandPort\.invoke\('preparePreviewEditorMetrics'\)/);
 });
 
-test('R9-04 remains intact after R9-05 Preview Mapper extraction without advancing Geometry Session or Selection', async () => {
+test('R9-04 remains intact after R9-06 Geometry Session extraction without advancing Selection', async () => {
   await access(file('src/features/sync/scroll/preview-scroll-mapper.js'));
+  await access(file('src/features/sync/scroll/scroll-geometry-session.js'));
   for (const path of LATER_FILES) await assert.rejects(access(file(path)), path);
   await access(file('src/sync/selection-controller.js'));
   await access(file('src/sync/selection-mapping.js'));
@@ -85,7 +85,7 @@ test('R9-04 remains intact after R9-05 Preview Mapper extraction without advanci
 test('R9-04 inventory records one editor mapper and current package cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 375);
+  assert.equal(inventory.modules.length, 376);
   assert.equal(records.has('src/features/sync/scroll/editor-scroll-mapper.js'), true);
   assert.equal(records.get('src/features/sync/scroll/editor-scroll-mapper.js')[4], 'editor-scroll-mapper-lifecycle');
   assert.equal(records.has('src/features/sync/scroll/preview-scroll-mapper.js'), true);

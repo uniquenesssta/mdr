@@ -7,7 +7,6 @@ const ROOT = resolve(new URL('../..', import.meta.url).pathname);
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 const LATER_FILES = [
-  'src/features/sync/scroll/scroll-geometry-session.js',
   'src/features/sync/selection/selection-sync-controller.js',
   'src/features/sync/selection/editor-selection-reader.js',
   'src/features/sync/selection/preview-selection-reader.js',
@@ -81,7 +80,8 @@ test('R9-05 classic annotation and refresh paths update mapper-owned anchors rat
   assert.match(legacy, /invalidatePreviewAnchorStructure: \(\) => invalidatePreviewAnchorStructure\(\)/);
 });
 
-test('R9-05 leaves Geometry Session and Selection Atomics untouched', async () => {
+test('R9-05 remains intact after R9-06 Geometry Session extraction without advancing Selection', async () => {
+  await access(file('src/features/sync/scroll/scroll-geometry-session.js'));
   for (const path of LATER_FILES) await assert.rejects(access(file(path)), path);
   await access(file('src/features/sync/scroll/editor-scroll-mapper.js'));
   await access(file('src/sync/selection-controller.js'));
@@ -91,7 +91,7 @@ test('R9-05 leaves Geometry Session and Selection Atomics untouched', async () =
 test('R9-05 inventory records preview mapper and current package cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 375);
+  assert.equal(inventory.modules.length, 376);
   assert.equal(records.has('src/features/sync/scroll/editor-scroll-mapper.js'), true);
   assert.equal(records.has('src/features/sync/scroll/preview-scroll-mapper.js'), true);
   assert.equal(records.get('src/features/sync/scroll/preview-scroll-mapper.js')[4], 'preview-scroll-mapper-geometry-cache');

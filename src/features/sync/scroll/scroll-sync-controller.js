@@ -1,12 +1,13 @@
 /**
  * Responsibility: Orchestrate authenticated scroll-source events into mapper callbacks and cancellable target writes while preserving the frozen R9-01 behavior surface.
- * Imports: Scroll source ownership only; editor/preview mappers and Geometry Session remain later Stage 9 responsibilities.
+ * Imports: Scroll source ownership plus the R9-06 Geometry Session; editor/preview geometry remains owned by dedicated mappers.
  * Exports: ScrollSyncController and createScrollSyncController.
- * State/side effects: Owns element listeners, mapper callback bindings, two cancellable RAF slots, pending target/source work and runtime statistics; source identity/windows/sequence remain solely in ScrollSourceOwnership.
- * Lifecycle: Explicit instance lifecycle; destroy() removes listeners, invalidates queued work, cancels every owned RAF and destroys only internally-created source ownership.
+ * State/side effects: Owns element listeners, mapper callback bindings, two cancellable RAF slots, pending target/source work and target/runtime statistics; source and geometry state are delegated to their dedicated owners.
+ * Lifecycle: Explicit instance lifecycle; destroy() removes listeners, invalidates queued work, cancels every owned RAF and destroys internally-created source/geometry owners.
  */
 
 import { createScrollSourceOwnership } from './scroll-source-ownership.js';
+import { createScrollGeometrySession } from './scroll-geometry-session.js';
 
 const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
 const SIDE_NAMES = new Set(['editor', 'preview']);
@@ -64,18 +65,22 @@ export class ScrollSyncController {
     this.frames = { source: null, target: null };
     this.frameVersions = { source: 0, target: 0 };
     this.pendingSourceSide = '';
-    this.pendingGeometryResync = false;
     this.pendingTarget = null;
     this.stats = {
       targetWrites: 0,
       ignoredTargetEvents: 0,
-      geometryResyncs: 0,
       lastTargetSide: '',
       lastTargetTop: 0,
       lastTargetDelta: 0
     };
     this.disposers = [];
     this.destroyed = false;
+    this.geometrySession = createScrollGeometrySession({
+      sourceOwnership: this.sourceOwnership,
+      readScrollTop: side => this.elements[side].scrollTop,
+      applyScrollTop: (side, top, geometryOptions) => this.applyScrollTop(side, top, geometryOptions),
+      scheduleSourceSync: side => this.scheduleSourceSync(side)
+    });
     this.installListeners();
   }
 
@@ -132,7 +137,7 @@ export class ScrollSyncController {
 
   cancelSourceSync() {
     this.pendingSourceSide = '';
-    this.pendingGeometryResync = false;
+    this.geometrySession.cancelPending();
     this.cancelQueuedFrame('source');
   }
 
@@ -160,21 +165,19 @@ export class ScrollSyncController {
     this.scheduleSourceSync(side);
   }
 
-  scheduleSourceSync(side, { geometry = false } = {}) {
+  scheduleSourceSync(side) {
     if (this.destroyed || !SIDE_NAMES.has(side)) return false;
     this.pendingSourceSide = side;
-    if (geometry) this.pendingGeometryResync = true;
     if (this.frames.source !== null) return true;
     return this.queueFrame('source', () => this.flushSourceSync());
   }
 
   flushSourceSync() {
     const side = this.pendingSourceSide;
-    const geometry = this.pendingGeometryResync;
     this.pendingSourceSide = '';
-    this.pendingGeometryResync = false;
-    if (!side || !this.sourceOwnership.isSource(side) || this.sourceOwnership.isSuspended()) return;
-    if (geometry) this.stats.geometryResyncs += 1;
+    const published = Boolean(side && this.sourceOwnership.isSource(side) && !this.sourceOwnership.isSuspended());
+    this.geometrySession.settleSourceSync(side, { published });
+    if (!published) return;
     this.mapperCallbacks[side]?.();
   }
 
@@ -236,21 +239,13 @@ export class ScrollSyncController {
   }
 
   compensate(side, delta, reason = 'geometry-compensation') {
-    if (this.destroyed || !SIDE_NAMES.has(side) || !Number.isFinite(delta) || Math.abs(delta) < 0.5) return false;
-    const changed = this.applyScrollTop(side, this.elements[side].scrollTop + delta, {
-      reason,
-      behavior: 'auto',
-      settleMs: 900
-    });
-    if (changed) this.notifyGeometryChanged(side);
-    return changed;
+    if (this.destroyed) return false;
+    return this.geometrySession.compensate(side, delta, reason);
   }
 
   notifyGeometryChanged(side = '') {
-    if (this.destroyed || (side && !SIDE_NAMES.has(side))) return;
-    const sourceSide = this.sourceOwnership.getSourceSide();
-    if (!sourceSide) return;
-    this.scheduleSourceSync(sourceSide, { geometry: true });
+    if (this.destroyed) return false;
+    return this.geometrySession.notifyGeometryChanged(side);
   }
 
   markProgrammaticScroll(side, duration = 700) {
@@ -290,6 +285,7 @@ export class ScrollSyncController {
   getState() {
     return {
       ...this.sourceOwnership.getState(),
+      ...this.geometrySession.getState(),
       pendingTargetSide: this.pendingTarget?.side || '',
       ...this.stats
     };
@@ -315,11 +311,12 @@ export class ScrollSyncController {
     this.cancelQueuedFrame('source');
     this.cancelQueuedFrame('target');
     this.pendingSourceSide = '';
-    this.pendingGeometryResync = false;
+    this.geometrySession.cancelPending();
     this.pendingTarget = null;
     this.disposers.splice(0).forEach(dispose => dispose());
     this.mapperCallbacks.editor = null;
     this.mapperCallbacks.preview = null;
+    this.geometrySession.destroy();
     if (this.ownsSourceOwnership) this.sourceOwnership.destroy?.();
   }
 }

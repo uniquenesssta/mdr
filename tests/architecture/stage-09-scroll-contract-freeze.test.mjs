@@ -8,7 +8,6 @@ const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 
 const PLANNED_LATER_FILES = [
-  'src/features/sync/scroll/scroll-geometry-session.js',
   'src/features/sync/selection/selection-sync-controller.js',
   'src/features/sync/selection/editor-selection-reader.js',
   'src/features/sync/selection/preview-selection-reader.js',
@@ -41,9 +40,10 @@ test('R9-01 production caller remains on the public Sync entry without changing 
   await access(file('src/sync/selection-mapping.js'));
 });
 
-test('R9-01 and R9-02 contracts remain intact after the R9-04 Editor Mapper boundary is added', async () => {
+test('R9-01 and R9-02 contracts remain intact after the R9-06 Geometry Session boundary is added', async () => {
   await access(file('src/features/sync/scroll/scroll-source-ownership.js'));
   await access(file('src/features/sync/scroll/editor-scroll-mapper.js'));
+  await access(file('src/features/sync/scroll/scroll-geometry-session.js'));
   for (const path of PLANNED_LATER_FILES) await assert.rejects(access(file(path)), path);
 });
 
@@ -64,7 +64,7 @@ test('R9-01 legacy browser aggregate remains a compatibility client of the froze
 test('current inventory records public Sync, controller and source owner without restoring obsolete scroll controller', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const paths = new Set(inventory.modules.map(record => record[0]));
-  assert.equal(inventory.modules.length, 375);
+  assert.equal(inventory.modules.length, 376);
   assert.equal(paths.has('src/features/sync/index.js'), true);
   assert.equal(paths.has('src/features/sync/scroll/scroll-sync-controller.js'), true);
   assert.equal(paths.has('src/features/sync/scroll/scroll-source-ownership.js'), true);
