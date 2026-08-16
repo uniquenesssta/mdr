@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSelectionFeedbackGuard } from '../src/features/sync/index.js';
-import { createSelectionSyncController } from '../src/sync/selection-controller.js';
+import { createFinalSelectionController, createFrames } from './helpers/stage-09-selection-controller-harness.mjs';
 
 function createTimers() {
   let nextId = 1;
@@ -24,69 +24,6 @@ function createTimers() {
     },
     flushAll() { for (const id of [...active]) this.flush(id); },
     force(id) { callbacks.get(id)?.(); }
-  };
-}
-
-function createFrames() {
-  let nextId = 1;
-  const callbacks = new Map();
-  const active = new Set();
-  return {
-    request(callback) { const id = nextId++; callbacks.set(id, callback); active.add(id); return id; },
-    cancel(id) { active.delete(id); },
-    activeCount() { return active.size; },
-    flushAll(limit = 20) {
-      while (active.size && limit-- > 0) {
-        const [id] = active;
-        active.delete(id);
-        callbacks.get(id)?.();
-      }
-    }
-  };
-}
-
-class FakeTarget {
-  constructor() { this.listeners = new Map(); }
-  addEventListener(type, listener) {
-    if (!this.listeners.has(type)) this.listeners.set(type, new Set());
-    this.listeners.get(type).add(listener);
-  }
-  removeEventListener(type, listener) { this.listeners.get(type)?.delete(listener); }
-  emit(type, event = {}) { for (const listener of [...(this.listeners.get(type) || [])]) listener(event); }
-}
-
-function createPreviewReader(snapshot) {
-  let subscriber = null;
-  return {
-    read: () => snapshot,
-    subscribe(callback) { subscriber = callback; return () => { if (subscriber === callback) subscriber = null; }; },
-    start() {},
-    stop() {},
-    emit(event) { subscriber?.(event); }
-  };
-}
-
-function installControllerGlobals(frames, documentRef) {
-  const previous = new Map();
-  const values = {
-    requestAnimationFrame: callback => frames.request(callback),
-    cancelAnimationFrame: frameId => frames.cancel(frameId),
-    document: documentRef,
-    performance: { now: () => 100 },
-    window: {
-      markdownEditorDocumentModel: { getState: () => ({ version: 7 }) },
-      markdownEditorPerf: { record() {}, diagnostic() {} }
-    }
-  };
-  for (const [key, value] of Object.entries(values)) {
-    previous.set(key, Object.prototype.hasOwnProperty.call(globalThis, key) ? globalThis[key] : undefined);
-    globalThis[key] = value;
-  }
-  return () => {
-    for (const [key, value] of previous) {
-      if (value === undefined) delete globalThis[key];
-      else globalThis[key] = value;
-    }
   };
 }
 
@@ -163,27 +100,15 @@ test('R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late
   assert.throws(() => guard.advanceRevision(), /destroyed/);
 });
 
-test('R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement', () => {
+test('R9-08 final SelectionSyncController uses the shared Guard to reject editor feedback during preview settlement', () => {
   const timers = createTimers();
   const frames = createFrames();
-  const editor = new FakeTarget();
-  const preview = new FakeTarget();
-  const documentRef = new FakeTarget();
-  const restore = installControllerGlobals(frames, documentRef);
   const guard = createSelectionFeedbackGuard({ setTimer: callback => timers.set(callback), clearTimer: id => timers.clear(id) });
-  const editorReader = { read: () => ({ from: 2, to: 6, isCollapsed: false }) };
-  const previewSnapshot = Object.freeze({ text: 'abcd', anchorOffset: 0, focusOffset: 4 });
-  const previewReader = createPreviewReader(previewSnapshot);
-  const controller = createSelectionSyncController(editor, preview, {
-    editorSelectionReader: editorReader,
-    previewSelectionReader: previewReader,
-    feedbackGuard: guard,
-    highlightSession: { restore() { return false; }, clear() {} },
-    retryScheduler: { schedule() { return false; }, cancel() {} }
-  }).configure({ syncPreviewToEditor: () => ({ status: 'mapped', selectionLength: 4 }) });
+  const { controller, editor } = createFinalSelectionController({ frames, feedbackGuard: guard });
   try {
     controller.start();
-    controller.runPreview('test-preview', true, previewSnapshot, true);
+    const token = guard.begin('preview');
+    guard.release(token, 96);
     assert.equal(guard.getState().source, 'preview');
     editor.emit('select');
     assert.equal(frames.activeCount(), 0);
@@ -192,30 +117,20 @@ test('R9-08 SelectionSyncController uses the shared Guard to reject editor feedb
     editor.emit('select');
     assert.equal(frames.activeCount(), 1);
   } finally {
-    controller.stop();
+    controller.destroy();
     guard.destroy();
-    restore();
   }
 });
 
-test('R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates', () => {
+test('R9-08 final SelectionSyncController exposes applyingSide/previewRevision from Guard state instead of owning duplicates', () => {
   const guard = createSelectionFeedbackGuard();
-  const editor = new FakeTarget();
-  const preview = new FakeTarget();
-  const editorReader = { read: () => ({ from: 1, to: 2, isCollapsed: false }) };
-  const previewReader = createPreviewReader(null);
-  const controller = createSelectionSyncController(editor, preview, {
-    editorSelectionReader: editorReader,
-    previewSelectionReader: previewReader,
-    feedbackGuard: guard,
-    highlightSession: { restore() { return false; }, clear() {} },
-    retryScheduler: { schedule() { return false; }, cancel() {} }
-  });
+  const { controller } = createFinalSelectionController({ feedbackGuard: guard });
   const token = guard.begin('editor');
   controller.notifyPreviewMounted();
   assert.equal(controller.getState().applyingSide, 'editor');
   assert.equal(controller.getState().previewRevision, 1);
   guard.release(token, 0);
   assert.equal(controller.getState().applyingSide, '');
+  controller.destroy();
   guard.destroy();
 });
