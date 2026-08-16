@@ -7,10 +7,6 @@ const ROOT = resolve(new URL('../..', import.meta.url).pathname);
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 
-const SELECTION_LATER_FILES = [
-  'src/features/sync/selection/selection-sync-controller.js',
-];
-
 test('R9-06 creates one canonical ScrollGeometrySession and exposes it only through the Sync public entry', async () => {
   const session = await read('src/features/sync/scroll/scroll-geometry-session.js');
   const index = await read('src/features/sync/index.js');
@@ -55,28 +51,28 @@ test('R9-06 preserves the frozen R9-01 public geometry API and runtime-stat proj
   assert.match(controller, /syncNow/);
 });
 
-test('R9-06 current layout preview and classic geometry producers still route through the controller compatibility surface', async () => {
+test('R9-06 final composition routes preview editor and Hybrid geometry producers through Scroll Controller explicitly', async () => {
   const main = await read('src/main.js');
-  const legacy = await read('public/app/scroll-sync.js');
+  const hybrid = await read('src/features/hybrid-editor/runtime/hybrid-sync-capabilities.js');
   assert.match(main, /onGeometryChanged: \(\) => scrollController\.notifyGeometryChanged\('preview'\)/);
-  assert.match(main, /onGeometryChanged\(\) \{ scrollController\.notifyGeometryChanged\(\); \}/);
-  assert.match(legacy, /scrollController\.notifyGeometryChanged\('editor'\)/);
-  assert.match(legacy, /scrollController\.notifyGeometryChanged\('preview'\)/);
-  assert.match(legacy, /scrollController\.notifyGeometryChanged\(\)/);
+  assert.match(main, /preparePreviewEditorMetrics: \(\) => scrollController\.notifyGeometryChanged\('editor'\)/);
+  assert.match(main, /notifyScrollGeometry: surface => scrollController\.notifyGeometryChanged\(surface\)/);
+  assert.match(hybrid, /notifyScrollGeometry/);
   assert.doesNotMatch(main, /\.\/features\/sync\/scroll\/scroll-geometry-session\.js/);
+  await assert.rejects(access(file('public/app/scroll-sync.js')));
 });
 
-test('R9-06 leaves Editor Preview mapper authority intact and does not advance Selection Atomics', async () => {
+test('R9-06 keeps mapper and frozen mapping ownership separate after final Selection orchestration arrives', async () => {
   await access(file('src/features/sync/scroll/editor-scroll-mapper.js'));
   await access(file('src/features/sync/scroll/preview-scroll-mapper.js'));
-  for (const path of SELECTION_LATER_FILES) await assert.rejects(access(file(path)), path);
-  await access(file('src/sync/selection-controller.js'));
+  await access(file('src/features/sync/selection/selection-sync-controller.js'));
+  await assert.rejects(access(file('src/sync/selection-controller.js')));
   await access(file('src/sync/selection-mapping.js'));
   const frozenMapping = await read('src/sync/selection-mapping.js');
   assert.doesNotMatch(frozenMapping, /R9-06/);
 });
 
-test('R9-06 inventory records one geometry owner and current package cardinality', async () => {
+test('R9-06 inventory records one geometry owner and final Stage 9 cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
   assert.equal(inventory.modules.length, 381);
