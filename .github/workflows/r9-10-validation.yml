@@ -28,6 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -f .agent/r9_10_failure.log
+          python .agent/r9_10_prepare_fix.py
           set +e
           bash .agent/r9_10_validate.sh 2>&1 | tee /tmp/r9-10-validation.log
           status=${PIPESTATUS[0]}
