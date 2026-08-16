@@ -1,0 +1,42 @@
+name: R9-12 candidate integration
+
+on:
+  push:
+    branches:
+      - agent/r9-12-runner
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Apply and test R9-12 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          rm -rf .agent/__pycache__
+          PYTHONDONTWRITEBYTECODE=1 python .agent/r9_12_apply.py
+          rm -rf .agent/__pycache__
+          git diff --check
+          node --test tests/stage-09-final-sync-legacy-removal.test.mjs tests/architecture/stage-09-final-sync-legacy-removal.test.mjs | tee /tmp/r9-12-targeted.tap
+          grep -q '# tests 16' /tmp/r9-12-targeted.tap
+          grep -q '# pass 16' /tmp/r9-12-targeted.tap
+          grep -q '# fail 0' /tmp/r9-12-targeted.tap
+          npm run build
+          git add README.md public src tests
+          GIT_AUTHOR_NAME='atomic-runner' GIT_AUTHOR_EMAIL='atomic-runner@users.noreply.github.com' \
+          GIT_COMMITTER_NAME='atomic-runner' GIT_COMMITTER_EMAIL='atomic-runner@users.noreply.github.com' \
+            git commit -m 'refactor: integrate R9-12 candidate [skip ci]'
+          git push origin HEAD:refs/heads/agent/r9-12-runner
