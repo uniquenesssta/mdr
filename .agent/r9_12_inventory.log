@@ -25,7 +25,7 @@ tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:18:  assert.match
 tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:19:  assert.match(facade, /createSelectionSyncController/);
 tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:30:  assert.match(main, /createSelectionSyncController/);
 tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:55:test('R9-12 final SelectionSyncController consumes frozen mapping API only through injected capability and never imports/copies the algorithm', async () => {
-tests/architecture/stage-09-scroll-contract-freeze.test.mjs:33:  assert.match(main, /createSelectionSyncController \} from ['"]\.\/sync\/selection-controller\.js['"]/);
+tests/architecture/stage-09-scroll-contract-freeze.test.mjs:29:  assert.match(main, /createSelectionSyncController/);
 tests/architecture/stage-09-selection-feedback-guard.test.mjs:31:test('R9-08 final SelectionSyncController consumes the Guard and owns no applying-side release or preview revision duplicates', async () => {
 tests/architecture/stage-09-selection-highlight-session.test.mjs:58:test('R9-09 virtual remount recovery is delegated by final SelectionSyncController without Session-owned retry scheduling', async () => {
 tests/architecture/stage-09-selection-readers.test.mjs:45:test('R9-07 final SelectionSyncController consumes Readers and owns no raw selection boundaries or preview stabilization listeners', async () => {
