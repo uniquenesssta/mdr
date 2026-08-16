@@ -61,6 +61,8 @@
     if (!scrollController) throw new Error('Scroll controller is not initialized');
     const editorScrollMapper = scrollSyncCompatibilityHost?.markdownEditorEditorScrollMapper;
     if (!editorScrollMapper) throw new Error('Editor scroll mapper is not initialized');
+    const previewScrollMapper = scrollSyncCompatibilityHost?.markdownEditorPreviewScrollMapper;
+    if (!previewScrollMapper) throw new Error('Preview scroll mapper is not initialized');
 
     function getLineStartIndex(line) {
       return editorScrollMapper.getLineRange(line).start;
@@ -170,126 +172,35 @@
     }
 
     function getPreviewAnchors() {
-      if (scrollSyncPreviewCommandPort.virtual.active) {
-        previewAnchorsCache = scrollSyncPreviewCommandPort.virtual.getMountedAnchors();
-        return previewAnchorsCache;
-      }
-      if (previewAnchorsCache) return previewAnchorsCache;
-      previewAnchorsCache = Array.from(preview.querySelectorAll('[data-source-line]'));
-      return previewAnchorsCache;
+      return previewScrollMapper.getAnchors();
     }
 
     function invalidatePreviewAnchorMetrics() {
-      previewAnchorMetricsCache = null;
+      previewScrollMapper.invalidateMetrics();
     }
 
     function invalidatePreviewAnchorStructure() {
-      previewAnchorsCache = null;
-      previewAnchorMetricsCache = null;
+      previewScrollMapper.invalidateStructure();
     }
 
     function observePreviewBodySize() {
-      if (typeof ResizeObserver === 'undefined') return;
-      if (scrollSyncPreviewCommandPort.virtual.active) {
-        previewBodyResizeObserver?.disconnect();
-        observedPreviewBody = null;
-        return;
-      }
-      const body = preview.querySelector('.markdown-body');
-      if (!body) return;
-      if (!previewBodyResizeObserver) {
-        previewBodyResizeObserver = new ResizeObserver(() => {
-          clearTimeout(previewBodyResizeTimer);
-          previewBodyResizeTimer = setTimeout(() => {
-            previewBodyResizeTimer = 0;
-            invalidatePreviewAnchorMetrics();
-            scrollController.notifyGeometryChanged('preview');
-          }, 64);
-        });
-      }
-      if (observedPreviewBody === body) return;
-      previewBodyResizeObserver.disconnect();
-      previewBodyResizeObserver.observe(body);
-      observedPreviewBody = body;
+      previewScrollMapper.observeBodySize();
     }
 
     function getPreviewAnchorMetrics() {
-      if (previewAnchorMetricsCache) return previewAnchorMetricsCache;
-      if (scrollSyncPreviewCommandPort.virtual.active) {
-        previewAnchorMetricsCache = scrollSyncPreviewCommandPort.virtual.getMetrics() || [];
-        return previewAnchorMetricsCache;
-      }
-      const body = preview.querySelector('.markdown-body');
-      if (!body) return [];
-      const bodyTop = body.offsetTop;
-      previewAnchorMetricsCache = getPreviewAnchors().map(anchor => {
-        const top = bodyTop + anchor.offsetTop;
-        return {
-          anchor,
-          startLine: Number(anchor.dataset.sourceLine || 1),
-          endLine: Number(anchor.dataset.sourceEndLine || anchor.dataset.sourceLine || 1),
-          top,
-          bottom: top + Math.max(1, anchor.offsetHeight)
-        };
-      });
-      return previewAnchorMetricsCache;
-    }
-
-    function findLastMetricIndex(metrics, value, field) {
-      let low = 0;
-      let high = metrics.length - 1;
-      while (low < high) {
-        const mid = Math.ceil((low + high) / 2);
-        if (metrics[mid][field] <= value) low = mid;
-        else high = mid - 1;
-      }
-      return low;
+      return previewScrollMapper.getMetrics();
     }
 
     function findPreviewAnchor(line) {
-      const metrics = getPreviewAnchorMetrics();
-      if (!metrics.length) return null;
-      return metrics[findLastMetricIndex(metrics, Math.max(1, Number(line) || 1), 'startLine')]?.anchor || metrics[0].anchor;
+      return previewScrollMapper.findAnchor(line);
     }
 
     function sourceLineToPreviewY(lineFloat) {
-      if (scrollSyncPreviewCommandPort.virtual.active && typeof scrollSyncPreviewCommandPort.virtual.getContentYForLine === 'function') {
-        return scrollSyncPreviewCommandPort.virtual.getContentYForLine(lineFloat);
-      }
-      const metrics = getPreviewAnchorMetrics();
-      if (!metrics.length) return 0;
-      const line = Math.max(1, lineFloat);
-      if (line <= metrics[0].startLine) return metrics[0].top;
-      const index = findLastMetricIndex(metrics, line, 'startLine');
-      const current = metrics[index];
-      const next = metrics[index + 1];
-      if (line <= current.endLine + 0.999 || !next) {
-        const span = Math.max(1, current.endLine - current.startLine + 1);
-        const fraction = Math.max(0, Math.min(1, (line - current.startLine) / span));
-        return current.top + (current.bottom - current.top) * fraction;
-      }
-      const gapLines = Math.max(1, next.startLine - current.endLine);
-      const fraction = Math.max(0, Math.min(1, (line - current.endLine) / gapLines));
-      return current.bottom + (next.top - current.bottom) * fraction;
+      return previewScrollMapper.getContentYForLine(lineFloat);
     }
 
     function previewYToSourceLine(contentY) {
-      if (scrollSyncPreviewCommandPort.virtual.active && typeof scrollSyncPreviewCommandPort.virtual.getLineForContentY === 'function') {
-        return scrollSyncPreviewCommandPort.virtual.getLineForContentY(contentY);
-      }
-      const metrics = getPreviewAnchorMetrics();
-      if (!metrics.length) return 1;
-      const y = Math.max(0, contentY);
-      if (y <= metrics[0].top) return metrics[0].startLine;
-      const index = findLastMetricIndex(metrics, y, 'top');
-      const current = metrics[index];
-      const next = metrics[index + 1];
-      if (y <= current.bottom || !next) {
-        const fraction = Math.max(0, Math.min(1, (y - current.top) / Math.max(1, current.bottom - current.top)));
-        return current.startLine + fraction * Math.max(1, current.endLine - current.startLine + 1);
-      }
-      const fraction = Math.max(0, Math.min(1, (y - current.bottom) / Math.max(1, next.top - current.bottom)));
-      return current.endLine + fraction * Math.max(1, next.startLine - current.endLine);
+      return previewScrollMapper.getLineForContentY(contentY);
     }
 
     function scrollPreviewContentYIntoView(contentY, behavior = 'auto', viewportRatio = SELECTION_VIEWPORT_RATIO) {
@@ -375,7 +286,7 @@
           child.dataset.sourceStartIndex = String(getLineStartIndex(index + 1));
           child.dataset.sourceEndIndex = String(getLineEndIndex(index + 1));
         });
-        previewAnchorsCache = children;
+        previewScrollMapper.replaceAnchors(children);
         observePreviewBodySize();
         return;
       }
@@ -403,7 +314,7 @@
         child.dataset.sourceStartIndex = String(fallbackIndex);
         child.dataset.sourceEndIndex = String(fallbackIndex);
       }
-      previewAnchorsCache = children;
+      previewScrollMapper.replaceAnchors(children);
       observePreviewBodySize();
     }
 
@@ -1181,13 +1092,7 @@
       invalidatePreviewAnchorMetrics: () => invalidatePreviewAnchorMetrics(),
       invalidatePreviewAnchorStructure: () => invalidatePreviewAnchorStructure(),
       annotatePreviewSourceLines: (source, tokens) => annotatePreviewSourceLines(source, tokens),
-      refreshPreviewAnchorStructure() {
-        previewAnchorsCache = scrollSyncPreviewCommandPort.virtual.active
-          ? scrollSyncPreviewCommandPort.virtual.getMountedAnchors()
-          : Array.from(preview.querySelectorAll('[data-source-line]'));
-        observePreviewBodySize();
-        return previewAnchorsCache;
-      },
+      refreshPreviewAnchorStructure: () => previewScrollMapper.refreshStructure(),
       getPreviewAnchorMetrics: () => getPreviewAnchorMetrics(),
       getPreviewAnchorCount: () => getPreviewAnchors().length,
       scrollPreviewToLine: (line, behavior, viewportRatio) => scrollPreviewToLine(line, behavior, viewportRatio)

@@ -7,7 +7,6 @@ const ROOT = resolve(new URL('../..', import.meta.url).pathname);
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 const LATER_FILES = [
-  'src/features/sync/scroll/preview-scroll-mapper.js',
   'src/features/sync/scroll/scroll-geometry-session.js',
   'src/features/sync/selection/selection-sync-controller.js',
   'src/features/sync/selection/editor-selection-reader.js',
@@ -48,7 +47,7 @@ test('R9-04 mapper composes frozen model line ranges with neutral CodeMirror geo
 
 test('R9-04 application composition injects editor/model capabilities through the public Sync factory and owns mapper teardown', async () => {
   const main = await read('src/main.js');
-  assert.match(main, /createEditorScrollMapper, createScrollSyncController \} from ['"]\.\/features\/sync\/index\.js['"]/);
+  assert.match(main, /createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController \} from ['"]\.\/features\/sync\/index\.js['"]/);
   assert.match(main, /createEditorScrollMapper\(\{ editorApi: virtualEditor, model: documentModel \}\)/);
   assert.match(main, /compatibilityPlatformHost\.markdownEditorEditorScrollMapper = editorScrollMapper/);
   assert.match(main, /delete compatibilityPlatformHost\.markdownEditorEditorScrollMapper/);
@@ -72,7 +71,8 @@ test('R9-04 removes legacy Canvas/textarea editor metric authority and delegates
   assert.match(core, /coreEditorUiCommandPort\.invoke\('preparePreviewEditorMetrics'\)/);
 });
 
-test('R9-04 does not advance Preview Mapper Geometry Session or Selection migration', async () => {
+test('R9-04 remains intact after R9-05 Preview Mapper extraction without advancing Geometry Session or Selection', async () => {
+  await access(file('src/features/sync/scroll/preview-scroll-mapper.js'));
   for (const path of LATER_FILES) await assert.rejects(access(file(path)), path);
   await access(file('src/sync/selection-controller.js'));
   await access(file('src/sync/selection-mapping.js'));
@@ -85,8 +85,8 @@ test('R9-04 does not advance Preview Mapper Geometry Session or Selection migrat
 test('R9-04 inventory records one editor mapper and current package cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 374);
+  assert.equal(inventory.modules.length, 375);
   assert.equal(records.has('src/features/sync/scroll/editor-scroll-mapper.js'), true);
   assert.equal(records.get('src/features/sync/scroll/editor-scroll-mapper.js')[4], 'editor-scroll-mapper-lifecycle');
-  assert.equal(records.has('src/features/sync/scroll/preview-scroll-mapper.js'), false);
+  assert.equal(records.has('src/features/sync/scroll/preview-scroll-mapper.js'), true);
 });

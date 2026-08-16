@@ -43,7 +43,7 @@ import { createNativeDocumentStore } from './storage/native-document-store.js';
 import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
-import { createEditorScrollMapper, createScrollSyncController } from './features/sync/index.js';
+import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {
@@ -438,6 +438,14 @@ async function loadAppModules() {
   let previewRenderEngine = null;
   let previewController = null;
   let previewCommandHandler = null;
+  let previewScrollMapper = null;
+  const destroyPreviewScrollMapper = () => {
+    if (compatibilityPlatformHost?.markdownEditorPreviewScrollMapper === previewScrollMapper) {
+      delete compatibilityPlatformHost.markdownEditorPreviewScrollMapper;
+    }
+    previewScrollMapper?.destroy();
+    previewScrollMapper = null;
+  };
   let unregisterPreviewEditorCommands = null;
   let documentEditorViewsDestroyed = false;
   const destroyDocumentEditorViews = () => {
@@ -503,6 +511,7 @@ async function loadAppModules() {
     editorCommandService.destroy();
     editorHistoryAdapter.destroy();
     editorController.destroy();
+    destroyPreviewScrollMapper();
     unregisterPreviewEditorCommands?.();
     unregisterPreviewEditorCommands = null;
     previewCommandHandler?.destroy();
@@ -973,6 +982,19 @@ async function loadAppModules() {
     });
     previewController.start();
     previewCommandHandler = mountPreviewCommandHandler(compatibilityPlatformHost, previewController);
+    const previewView = previewHost.ownerDocument?.defaultView;
+    const PreviewResizeObserver = previewView?.ResizeObserver;
+    previewScrollMapper = createPreviewScrollMapper({
+      previewElement: previewHost,
+      virtualApi: previewCommandHandler.port.virtual,
+      createResizeObserver: typeof PreviewResizeObserver === 'function'
+        ? callback => new PreviewResizeObserver(callback)
+        : null,
+      setTimer: previewView.setTimeout.bind(previewView),
+      clearTimer: previewView.clearTimeout.bind(previewView),
+      onGeometryChanged: () => scrollController.notifyGeometryChanged('preview')
+    });
+    if (compatibilityPlatformHost) compatibilityPlatformHost.markdownEditorPreviewScrollMapper = previewScrollMapper;
     unregisterPreviewEditorCommands = editorUiCommandPort.register({
       focusPreviewLineForOutline: (line, options) => previewController.focusLine(line, options)
     });

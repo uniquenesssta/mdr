@@ -131,11 +131,6 @@ const editor = document.getElementById('editor');
     let previewRenderTheme = '';
     let previewReferenceDefinitions = '';
     let countUpdateTimer = 0;
-    let previewBodyResizeObserver = null;
-    let observedPreviewBody = null;
-    let previewBodyResizeTimer = 0;
-    let previewAnchorMetricsCache = null;
-    let previewAnchorsCache = null;
     let activeOutlineRow = null;
     let activeOutlineHeadingId = '';
 

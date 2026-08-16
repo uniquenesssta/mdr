@@ -57,7 +57,7 @@ test('Atomic 8.3 Activation boundary remains intact after Atomic 8.6 Shared Widg
   assert.match(sourceAction, /export function openWidgetSource\(/);
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 374);
+  assert.equal(inventory.modules.length, 375);
   assert.ok(!paths.includes('src/editor/hybrid/double-activation.js'));
   for (const path of [
     'src/features/hybrid-editor/activation/strict-double-activation.js',
