@@ -59,7 +59,23 @@ old_required = " 'tests/architecture/stage-09-frozen-selection-mapping-integrati
 new_required = " 'tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs',\n 'tests/architecture/stage-08-hybrid-editor-controller.test.mjs',\n 'tests/stage-01-handoff.test.mjs'\n}"
 if validate.count(old_required) != 1:
     raise SystemExit('R9-11 required-scope marker missing')
-validate_path.write_text(validate.replace(old_required, new_required, 1), encoding='utf-8')
+validate = validate.replace(old_required, new_required, 1)
+
+old_changed = """changed=set(subprocess.check_output(['git','diff','--name-only',baseline],text=True).splitlines())
+extra=changed-allowed
+if extra:
+    raise SystemExit(f'Unexpected R9-11 path: {sorted(extra)}')
+required={"""
+new_changed = """changed=set(subprocess.check_output(['git','diff','--name-only',baseline],text=True).splitlines())
+changed.update(subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines())
+extra=changed-allowed
+if extra:
+    raise SystemExit(f'Unexpected R9-11 path: {sorted(extra)}')
+required={"""
+if validate.count(old_changed) != 1:
+    raise SystemExit('R9-11 scope worktree marker missing')
+validate = validate.replace(old_changed, new_changed, 1)
+validate_path.write_text(validate, encoding='utf-8')
 PY
 rm -f "$self"
 bash .agent/r9_11_validate.sh
