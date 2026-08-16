@@ -8,6 +8,7 @@
     const previewSelectionReader = scrollSyncCompatibilityHost?.markdownEditorPreviewSelectionReader;
     const selectionFeedbackGuard = scrollSyncCompatibilityHost?.markdownEditorSelectionFeedbackGuard;
     const selectionHighlightSession = scrollSyncCompatibilityHost?.markdownEditorSelectionHighlightSession;
+    const frozenSelectionMapping = scrollSyncCompatibilityHost?.markdownEditorSelectionMapping;
     if (!scrollSyncLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!scrollSyncOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
     if (!scrollSyncEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
@@ -17,6 +18,7 @@
     if (!previewSelectionReader) throw new Error('Preview Selection Reader compatibility capability is unavailable.');
     if (!selectionFeedbackGuard) throw new Error('Selection Feedback Guard compatibility capability is unavailable.');
     if (!selectionHighlightSession) throw new Error('Selection Highlight Session compatibility capability is unavailable.');
+    if (!frozenSelectionMapping) throw new Error('Frozen Selection Mapping compatibility capability is unavailable.');
     const SYNC_VIEWPORT_RATIO = 0.38;
     const SELECTION_VIEWPORT_RATIO = 0.5;
     const SELECTION_SAFE_EDGE_MIN_PX = 32;
@@ -462,8 +464,7 @@
     }
 
     function highlightMappedSourceRangeInPreview(fromLine, toLine, sourceStartIndex, sourceEndIndex) {
-      const mapping = window.markdownEditorSelectionMapping;
-      if (!mapping?.createPreviewRangesForSourceSelection
+      if (!frozenSelectionMapping?.createPreviewRangesForSourceSelection
         || !Number.isFinite(sourceStartIndex)
         || !Number.isFinite(sourceEndIndex)
         || sourceEndIndex <= sourceStartIndex) return null;
@@ -489,7 +490,7 @@
         const source = documentModel?.sliceText?.(anchorRange.sourceStart, anchorRange.sourceEnd)
           ?? editor.virtualEditor?.sliceText?.(anchorRange.sourceStart, anchorRange.sourceEnd)
           ?? editor.value.slice(anchorRange.sourceStart, anchorRange.sourceEnd);
-        const result = mapping.createPreviewRangesForSourceSelection(
+        const result = frozenSelectionMapping.createPreviewRangesForSourceSelection(
           anchor,
           source,
           anchorRange.sourceStart,
@@ -739,13 +740,12 @@
     }
 
     function mapPreviewPointToExactSource(anchor, node, offset, affinity) {
-      const mapping = window.markdownEditorSelectionMapping;
       const anchorRange = getPreviewAnchorSourceRange(anchor);
-      if (!mapping?.mapPreviewDomPointToSource || !anchorRange) return null;
+      if (!frozenSelectionMapping?.mapPreviewDomPointToSource || !anchorRange) return null;
       const source = documentModel?.sliceText?.(anchorRange.sourceStart, anchorRange.sourceEnd)
         ?? editor.virtualEditor?.sliceText?.(anchorRange.sourceStart, anchorRange.sourceEnd)
         ?? editor.value.slice(anchorRange.sourceStart, anchorRange.sourceEnd);
-      return mapping.mapPreviewDomPointToSource(
+      return frozenSelectionMapping.mapPreviewDomPointToSource(
         anchor,
         source,
         anchorRange.sourceStart,

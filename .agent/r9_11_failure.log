@@ -1,5 +1,0 @@
-=== MATCHED FAILURE CONTEXT ===
-1:runner contains unexpected pre-apply paths: ['.agent/r9_11_prepare_cleanup.sh']
-
-=== VALIDATION TAIL ===
-runner contains unexpected pre-apply paths: ['.agent/r9_11_prepare_cleanup.sh']

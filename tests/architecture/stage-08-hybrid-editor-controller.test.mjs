@@ -82,5 +82,5 @@ test('Atomic 8.15 removes the obsolete legacy-controller business-global baselin
   const baseline = JSON.parse(await read('tests/architecture/fixtures/architecture-baseline.json'));
   assert.equal(baseline.businessGlobalWrites.some(record => record.path === 'src/editor/hybrid/controller.js'), false);
   assert.equal(baseline.businessGlobalWrites.some(record => record.path === 'src/editor/hybrid-markdown.js'), false);
-  assert.equal(baseline.businessGlobalWrites.length, 13);
+  assert.equal(baseline.businessGlobalWrites.length, 12);
 });

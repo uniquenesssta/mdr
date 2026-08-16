@@ -248,11 +248,13 @@ window.addEventListener('pagehide', () => {
   backgroundTaskSchedulerPort.destroy();
   backgroundTaskScheduler.destroy();
   compatibilityPlatformPort.destroy();
+  if (compatibilityPlatformHost?.markdownEditorSelectionMapping === selectionMappingApi) {
+    delete compatibilityPlatformHost.markdownEditorSelectionMapping;
+  }
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
 }, { once: true });
 
-
-window.markdownEditorSelectionMapping = selectionMappingApi;
+if (compatibilityPlatformHost) compatibilityPlatformHost.markdownEditorSelectionMapping = selectionMappingApi;
 
 if (typeof document.startViewTransition === 'function') {
   document.documentElement.classList.add('view-transitions-supported');
