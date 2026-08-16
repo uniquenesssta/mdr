@@ -49,7 +49,7 @@ test('Atomic 8.11 keeps inline and block delimiter/source semantics separate whi
 test('Atomic 8.11 Math ownership remains intact through the Atomic 8.14 presentation boundary', async () => {
   const [htmlWidget, controller, inlinePresentation] = await Promise.all([
     text('src/features/hybrid-editor/widgets/html/html-block-widget.js'),
-    text('src/editor/hybrid/controller.js'),
+    text('src/editor/hybrid-markdown.js'),
     text('src/features/hybrid-editor/presentation/inline-presentation-coordinator.js')
   ]);
   assert.doesNotMatch(htmlWidget, /class InlineMathWidget|class MathBlockWidget|function renderMathInto|reportMathRenderFailure/);
@@ -80,7 +80,7 @@ test('Atomic 8.11 gives both Math variants explicit source-action cleanup and bl
 
 test('Atomic 8.11 Math ownership remains intact after Atomic 8.14 Inline Presentation migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 370);
+  assert.equal(inventory.modules.length, 371);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of mathPaths) assert.equal(paths.has(path), true, path);
   for (const mermaidPath of [

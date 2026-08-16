@@ -57,17 +57,19 @@ test('Atomic 8.9 separates Table view, cell editor, keyboard navigation and writ
   assert.match(widget, /registerHybridComponentCloser/);
 });
 
-test('Atomic 8.9 removes legacy Table authority and composes WidgetType, frozen encoder and history only in the editor controller', async () => {
-  const [widgets, controller] = await Promise.all([
-    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'), text('src/editor/hybrid/controller.js')
+test('Atomic 8.9 keeps Table authority migrated and composes WidgetType, frozen encoder and history only in the final editor facade', async () => {
+  const [widgets, facade] = await Promise.all([
+    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'), text('src/editor/hybrid-markdown.js')
   ]);
   assert.doesNotMatch(widgets, /class TableBlockWidget|function createEditableTableCellInput|function getTableCellTargetKey|function scheduleTableCellEdit|reportTableCellEditFailure/);
   assert.doesNotMatch(widgets, /encodeTableCell/);
-  assert.match(controller, /createTableBlockWidgetType/);
-  assert.match(controller, /const TableBlockWidget = createTableBlockWidgetType\(WidgetType/);
-  assert.match(controller, /encodeTableCell/);
-  assert.match(controller, /createHistoryAnnotation: \(\) => isolateHistory\.of\('full'\)/);
-  assert.doesNotMatch(controller, /TableBlockWidget[\s\S]{0,80}from '\.\/widgets\.js'/);
+  assert.match(facade, /createTableBlockWidgetType/);
+  assert.match(facade, /const TableBlockWidget = createTableBlockWidgetType\(WidgetType/);
+  assert.match(facade, /encodeTableCell/);
+  assert.match(facade, /createHistoryAnnotation: \(\) => isolateHistory\.of\('full'\)/);
+  assert.match(facade, /from '\.\.\/features\/hybrid-editor\/index\.js'/);
+  assert.doesNotMatch(facade, /features\/hybrid-editor\/widgets\/table\//);
+  await assert.rejects(access(file('src/editor/hybrid/controller.js')));
 });
 
 test('Atomic 8.9 preserves Session/source/lifecycle ownership and leaves the frozen Table model untouched by the feature graph', async () => {
@@ -86,7 +88,7 @@ test('Atomic 8.9 preserves Session/source/lifecycle ownership and leaves the fro
 
 test('Atomic 8.9 Table ownership remains intact after Atomic 8.12 Mermaid migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 370);
+  assert.equal(inventory.modules.length, 371);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of tablePaths) assert.equal(paths.has(path), true, path);
   for (const imagePath of [

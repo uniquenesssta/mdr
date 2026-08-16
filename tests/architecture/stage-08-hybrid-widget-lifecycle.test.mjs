@@ -31,15 +31,19 @@ test('Atomic 8.5 separates element observation from the geometry side-effect que
   assert.doesNotMatch(scheduler, /new ResizeObserverCtor|elementLifecycles/);
 });
 
-test('Atomic 8.5 editor callers keep lifecycle ownership behind the Hybrid Editor boundary after HTML migration', async () => {
+test('Atomic 8.5 lifecycle ownership remains behind the Hybrid boundary after the final Atomic 8.15 controller migration', async () => {
   const widgets = await text('src/features/hybrid-editor/widgets/html/html-block-widget.js');
-  const controller = await text('src/editor/hybrid/controller.js');
+  const facade = await text('src/editor/hybrid-markdown.js');
+  const application = await text('src/features/hybrid-editor/application/hybrid-editor-controller.js');
   assert.doesNotMatch(widgets, /from ['"]\.\/widget-lifecycle\.js['"]/);
   assert.match(widgets, /lifecycle\/widget-lifecycle\.js/);
   assert.match(widgets, /attachHybridWidgetLifecycle/);
   assert.match(widgets, /destroyHybridWidgetLifecycle/);
-  assert.match(controller, /destroyHybridWidgetGeometryScheduler\(this\.view\)/);
-  assert.doesNotMatch(controller, /from ['"]\.\/widget-lifecycle\.js['"]/);
+  assert.match(facade, /destroyHybridWidgetGeometryScheduler\(view\)/);
+  assert.match(application, /this\.destroyGeometry\(\)/);
+  assert.doesNotMatch(facade, /lifecycle\/widget-(?:lifecycle|geometry-scheduler)\.js/);
+  assert.doesNotMatch(application, /requestAnimationFrame|setTimeout|ResizeObserver/);
+  await assert.rejects(access(file('src/editor/hybrid/controller.js')));
 });
 
 test('Atomic 8.5 keeps migrated HTML and component widgets on shared idempotent destroy paths', async () => {
@@ -66,7 +70,7 @@ test('Atomic 8.5 keeps migrated HTML and component widgets on shared idempotent 
 test('Atomic 8.5 lifecycle boundary remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 370);
+  assert.equal(inventory.modules.length, 371);
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-lifecycle.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js'));
   assert.ok(!paths.includes('src/editor/hybrid/widget-lifecycle.js'));

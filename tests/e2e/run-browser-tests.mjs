@@ -1672,6 +1672,7 @@ async function runAppSuite() {
         resizer:document.getElementById('resizer')?.classList.contains('is-hidden')
       }))()`);
       assert.deepEqual(collapsed,{editor:false,preview:true,resizer:true});
+      await browser.page.waitForElementStable('#preview-collapse-btn', { description: 'preview collapse button after collapse' });
       await browser.page.click('#preview-collapse-btn');
       await browser.page.waitFor(() => !document.querySelector('.preview-pane')?.classList.contains('is-collapsed'), { description: 'preview expanded' });
 

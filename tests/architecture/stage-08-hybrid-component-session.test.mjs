@@ -21,9 +21,9 @@ test('Atomic 8.2 has one public Component Session owner and removes the legacy s
   await assert.rejects(access(file('src/editor/hybrid/component-state.js')));
 });
 
-test('Atomic 8.2 production callers depend on the Hybrid Editor public entry only', async () => {
+test('Atomic 8.2 production callers depend on the Hybrid Editor public entry only after the final Atomic 8.15 migration', async () => {
   const callers = {
-    'src/editor/hybrid/controller.js': '../../features/hybrid-editor/index.js',
+    'src/editor/hybrid-markdown.js': '../features/hybrid-editor/index.js',
     'src/editor/virtual-editor.js': '../features/hybrid-editor/index.js'
   };
   await access(file('src/features/hybrid-editor/widgets/html/html-block-widget.js'));
@@ -32,13 +32,16 @@ test('Atomic 8.2 production callers depend on the Hybrid Editor public entry onl
     assert.match(source, new RegExp(publicEntry.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     assert.doesNotMatch(source, /component-state\.js|hybrid-component-session\.js/);
   }
+  await assert.rejects(access(file('src/editor/hybrid/controller.js')));
 });
 
-test('Atomic 8.2 Session lifecycle remains authoritative after Atomic 8.3 Activation migration', async () => {
-  const controller = await text('src/editor/hybrid/controller.js');
-  assert.match(controller, /getHybridComponentSession\(view, \{ onTransition: recordHybridComponentTransition \}\)/);
-  assert.match(controller, /destroyHybridComponentSession\(this\.view\)/);
-  assert.doesNotMatch(controller, /clearHybridComponentStates\(this\.view\)/);
+test('Atomic 8.2 Session lifecycle remains authoritative through the Atomic 8.15 application boundary', async () => {
+  const facade = await text('src/editor/hybrid-markdown.js');
+  const application = await text('src/features/hybrid-editor/application/hybrid-editor-controller.js');
+  assert.match(facade, /getHybridComponentSession\(view, \{ onTransition: recordHybridComponentTransition \}\)/);
+  assert.match(facade, /destroySession: \(\) => destroyHybridComponentSession\(view\)/);
+  assert.match(application, /this\.destroySession\(\)/);
+  assert.doesNotMatch(facade + application, /clearHybridComponentStates\(/);
   await assert.rejects(access(file('src/editor/hybrid/double-activation.js')));
   await access(file('src/features/hybrid-editor/activation/strict-double-activation.js'));
   await access(file('src/features/hybrid-editor/activation/source-activation.js'));
@@ -49,7 +52,7 @@ test('Atomic 8.2 Session lifecycle remains authoritative after Atomic 8.3 Activa
 test('Atomic 8.2 production inventory records the facade and sole Session state owner', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 370);
+  assert.equal(inventory.modules.length, 371);
   assert.ok(paths.includes('src/features/hybrid-editor/index.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/state/hybrid-component-session.js'));
   assert.ok(!paths.includes('src/editor/hybrid/component-state.js'));

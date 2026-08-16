@@ -288,6 +288,45 @@ export class CdpPage {
     return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   }
 
+  async waitForElementStable(selector, options = {}) {
+    const timeoutMs = Math.max(100, Number(options.timeoutMs) || 2500);
+    const intervalMs = Math.max(10, Number(options.intervalMs) || 40);
+    const stableSamples = Math.max(2, Math.round(Number(options.stableSamples) || 4));
+    const toleranceValue = Number(options.tolerancePx);
+    const tolerancePx = Number.isFinite(toleranceValue) ? Math.max(0, toleranceValue) : 0.25;
+    const description = options.description || selector;
+    const encoded = JSON.stringify(selector);
+    const started = Date.now();
+    let previous = null;
+    let stableCount = 0;
+    let lastRect = null;
+
+    while (Date.now() - started < timeoutMs) {
+      const rect = await this.elementRect(selector);
+      lastRect = rect;
+      const hittable = await this.evaluate(`(() => {
+        const element = document.querySelector(${encoded});
+        if (!element) return false;
+        const rect = element.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return false;
+        const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        return Boolean(hit && (hit === element || element.contains(hit)));
+      })()`);
+      const stable = Boolean(previous && hittable && ['x', 'y', 'width', 'height'].every(
+        key => Math.abs(rect[key] - previous[key]) <= tolerancePx
+      ));
+      stableCount = stable ? stableCount + 1 : (hittable ? 1 : 0);
+      if (stableCount >= stableSamples) return rect;
+      previous = rect;
+      await new Promise(resolvePromise => setTimeout(resolvePromise, intervalMs));
+    }
+
+    const detail = lastRect
+      ? ` (${lastRect.x.toFixed(2)},${lastRect.y.toFixed(2)} ${lastRect.width.toFixed(2)}x${lastRect.height.toFixed(2)})`
+      : '';
+    throw new Error(`Timed out waiting for stable element geometry: ${description}${detail}`);
+  }
+
   async click(selector, options = {}) {
     const point = await this.elementCenter(selector);
     await this.clickAt(point.x, point.y, options);

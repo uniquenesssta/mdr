@@ -34,6 +34,16 @@ export {
 } from './application/hybrid-source-edit-controller.js';
 
 export {
+  HybridDecorationCoordinator,
+  createHybridDecorationCoordinator
+} from './application/hybrid-decoration-coordinator.js';
+
+export {
+  HybridEditorController,
+  createHybridEditorController
+} from './application/hybrid-editor-controller.js';
+
+export {
   getClassicHybridSourceEditControllerPort,
   mountClassicHybridSourceEditControllerPort
 } from './compatibility/classic-hybrid-source-edit-controller-port.js';

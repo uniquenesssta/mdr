@@ -53,7 +53,7 @@ test('Atomic 8.14 Hybrid public entry exposes only the coordinator across the pr
 });
 
 test('Atomic 8.14 controller is the sole editor integration boundary for inline presentation capabilities', async () => {
-  const controller = await read('src/editor/hybrid/controller.js');
+  const controller = await read('src/editor/hybrid-markdown.js');
   assert.doesNotMatch(controller, /\.\/inline-presentation\.js/);
   assert.match(controller, /createInlinePresentationCoordinator\(\{/);
   assert.match(controller, /Decoration,[\s\S]*WidgetType,[\s\S]*marked\.Lexer\.lexInline/);
@@ -88,12 +88,14 @@ test('Atomic 8.14 leaf files retain one named presentation responsibility each',
 test('Atomic 8.14 production inventory replaces one aggregate with seven presentation records', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const paths = new Set(inventory.modules.map(record => record[0]));
-  assert.equal(inventory.modules.length, 370);
+  assert.equal(inventory.modules.length, 371);
   assert.equal(paths.has('src/editor/hybrid/inline-presentation.js'), false);
   for (const path of PRESENTATION_FILES) assert.equal(paths.has(path), true, path);
 });
 
-test('Atomic 8.14 does not advance the Stage 8.15 final legacy-controller deletion', async () => {
-  await access(file('src/editor/hybrid/controller.js'));
+test('Atomic 8.14 presentation ownership remains intact after the Stage 8.15 final controller deletion', async () => {
+  await assert.rejects(access(file('src/editor/hybrid/controller.js')));
   await access(file('src/editor/hybrid-markdown.js'));
+  await access(file('src/features/hybrid-editor/application/hybrid-decoration-coordinator.js'));
+  await access(file('src/features/hybrid-editor/application/hybrid-editor-controller.js'));
 });

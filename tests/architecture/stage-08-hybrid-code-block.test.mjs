@@ -59,18 +59,20 @@ test('Atomic 8.8 separates view, direct-edit fence/writeback, actions and widget
   assert.doesNotMatch(widget, /function buildCodeBlockWriteback|navigator\.clipboard|renderHighlightedCodeRows/);
 });
 
-test('Atomic 8.8 removes legacy Code Block authority and composes CodeMirror capabilities only in the editor controller', async () => {
-  const [widgets, controller] = await Promise.all([
-    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'), text('src/editor/hybrid/controller.js')
+test('Atomic 8.8 keeps Code Block authority migrated and composes CodeMirror capabilities only in the final editor facade', async () => {
+  const [widgets, facade] = await Promise.all([
+    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'), text('src/editor/hybrid-markdown.js')
   ]);
   assert.doesNotMatch(widgets, /class CodeBlockWidget|function buildCodeBlockWriteback|function createEditableCodeArea|resolveCodePointerOffset|createCodePresentationBody/);
   assert.doesNotMatch(widgets, /createCodeBlockDirectEditor|reportLegacyFencedEditorFailure/);
   const mermaidWidget = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
   assert.match(mermaidWidget, /createCodeBlockDirectEditor/);
-  assert.match(controller, /createCodeBlockWidgetType/);
-  assert.match(controller, /const CodeBlockWidget = createCodeBlockWidgetType\(WidgetType/);
-  assert.match(controller, /createHistoryAnnotation: \(\) => isolateHistory\.of\('full'\)/);
-  assert.doesNotMatch(controller, /CodeBlockWidget,[\s\S]*from '\.\/widgets\.js'/);
+  assert.match(facade, /createCodeBlockWidgetType/);
+  assert.match(facade, /const CodeBlockWidget = createCodeBlockWidgetType\(WidgetType/);
+  assert.match(facade, /createHistoryAnnotation: \(\) => isolateHistory\.of\('full'\)/);
+  assert.match(facade, /from '\.\.\/features\/hybrid-editor\/index\.js'/);
+  assert.doesNotMatch(facade, /features\/hybrid-editor\/widgets\/code-block\//);
+  await assert.rejects(access(file('src/editor/hybrid/controller.js')));
   await assert.rejects(access(file('src/editor/hybrid/code-highlighter.js')));
   await assert.rejects(access(file('src/editor/hybrid/code-presentation.js')));
 });
@@ -88,7 +90,7 @@ test('Atomic 8.8 keeps Preview on the public code presentation and gives migrate
 
 test('Atomic 8.8 Code Block ownership remains intact after Atomic 8.9 Table migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 370);
+  assert.equal(inventory.modules.length, 371);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of targetPaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/code-highlighter.js'), false);

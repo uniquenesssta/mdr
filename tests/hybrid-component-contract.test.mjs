@@ -48,7 +48,8 @@ test('component widgets are wired to the shared runtime coordinator', async () =
   const imageBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/image/image-widget.js', import.meta.url), 'utf8');
   const mathBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/math/block-math-widget.js', import.meta.url), 'utf8');
   const mermaidBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js', import.meta.url), 'utf8');
-  const controller = await readFile(new URL('../src/editor/hybrid/controller.js', import.meta.url), 'utf8');
+  const controller = await readFile(new URL('../src/editor/hybrid-markdown.js', import.meta.url), 'utf8');
+  const applicationController = await readFile(new URL('../src/features/hybrid-editor/application/hybrid-editor-controller.js', import.meta.url), 'utf8');
   const sourceEditorPort = await readFile(new URL('../src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js', import.meta.url), 'utf8');
 
   const componentSources = new Map([
@@ -76,5 +77,7 @@ test('component widgets are wired to the shared runtime coordinator', async () =
 
   assert.match(sourceEditorPort, /mapped\s*=\s*\{\s*\.\.\.mapped,/, 'source range metadata must survive document changes');
   assert.match(sourceEditorPort, /transaction\.changes\.mapPos\(mapped\.from, -1\)/, 'source range positions must map through document changes');
-  assert.match(controller, /destroyHybridComponentSession\(this\.view\)/, 'component session must be destroyed with the editor view');
+  assert.match(controller, /destroySession: \(\) => destroyHybridComponentSession\(view\)/, 'component session destroy must be injected at the CodeMirror integration boundary');
+  assert.match(controller, /destroy\(\) \{[\s\S]{0,120}this\.controller\.destroy\(\)/, 'ViewPlugin destroy must delegate to the Hybrid application controller');
+  assert.match(applicationController, /this\.destroySession\(\)/, 'Hybrid application destroy must release the shared component session');
 });

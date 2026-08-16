@@ -443,14 +443,6 @@
       ]
     },
     {
-      "path": "src/editor/hybrid/controller.js",
-      "global": "window.showToast",
-      "count": 1,
-      "lines": [
-        271
-      ]
-    },
-    {
       "path": "src/main.js",
       "global": "window.markdownEditorDocumentModel",
       "count": 1,

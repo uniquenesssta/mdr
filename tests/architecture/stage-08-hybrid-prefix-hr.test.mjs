@@ -40,7 +40,7 @@ test('Atomic 8.7 Prefix and HR presentation ownership remains intact through Ato
   const [inline, listPresentation, controller, legacy] = await Promise.all([
     read('src/features/hybrid-editor/presentation/inline-presentation-coordinator.js'),
     read('src/features/hybrid-editor/presentation/list-presentation.js'),
-    read('src/editor/hybrid/controller.js'),
+    read('src/editor/hybrid-markdown.js'),
     read('src/features/hybrid-editor/widgets/html/html-block-widget.js')
   ]);
   assert.doesNotMatch(inline, /import \{ InlineMathWidget \} from '\.\/widgets\.js';/);
@@ -72,7 +72,7 @@ test('Atomic 8.7 Prefix, Task Checkbox and HR authority remains removed after At
 
 test('Atomic 8.7 production inventory keeps the three responsibility-specific Prefix/HR modules after Atomic 8.14', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 370);
+  assert.equal(inventory.modules.length, 371);
   const paths = new Set(inventory.modules.map(item => item[0]));
   for (const expected of [
     'src/features/hybrid-editor/widgets/prefix/prefix-widget.js',

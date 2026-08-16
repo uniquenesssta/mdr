@@ -69,7 +69,7 @@ test('Atomic 8.12 separates Mermaid actions from render state and widget orchest
 test('Atomic 8.12 removes legacy Mermaid authority and composes Preview presentation plus WidgetType only at the editor integration boundary', async () => {
   const [widgets, controller] = await Promise.all([
     text('src/features/hybrid-editor/widgets/html/html-block-widget.js'),
-    text('src/editor/hybrid/controller.js')
+    text('src/editor/hybrid-markdown.js')
   ]);
   assert.doesNotMatch(widgets, /class MermaidBlockWidget|renderHybridMermaid|reportMermaidRenderFailure|createMermaidStatus/);
   assert.doesNotMatch(widgets, /mermaid-presentation\.js|renderMermaidDiagram|getMermaidTheme/);
@@ -89,7 +89,7 @@ test('Atomic 8.12 Mermaid ownership remains intact after Atomic 8.13 HTML migrat
   assert.match(widget, /__markdownEditorDestroyCodeBlock/);
   assert.match(widget, /destroy\(dom\) \{[\s\S]*__markdownEditorMermaidBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 370);
+  assert.equal(inventory.modules.length, 371);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of mermaidPaths) assert.equal(paths.has(path), true, path);
   for (const htmlPath of [

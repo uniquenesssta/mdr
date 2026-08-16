@@ -54,20 +54,22 @@ test('Atomic 8.13 HTML Widget owns SOURCE delegation and explicit idempotent cle
   assert.doesNotMatch(widget, /bindStrictDoubleActivation|bindSourceActivation|getClassicHybridSourceEditControllerPort/);
 });
 
-test('Atomic 8.13 removes legacy HTML authority and composes HTML through the Hybrid Editor public entry', async () => {
+test('Atomic 8.13 keeps legacy HTML authority removed and composes HTML through the final Hybrid editor facade', async () => {
   await assert.rejects(access(file('src/editor/hybrid/widgets.js')));
-  const controller = await text('src/editor/hybrid/controller.js');
-  assert.match(controller, /createHtmlBlockWidgetType/);
-  assert.match(controller, /const HtmlBlockWidget = createHtmlBlockWidgetType\(WidgetType/);
-  assert.match(controller, /recordHtmlInteraction/);
-  assert.doesNotMatch(controller, /from ['"]\.\/widgets\.js['"]/);
-  assert.doesNotMatch(controller, /class HtmlBlockWidget|template\.innerHTML/);
+  await assert.rejects(access(file('src/editor/hybrid/controller.js')));
+  const facade = await text('src/editor/hybrid-markdown.js');
+  assert.match(facade, /createHtmlBlockWidgetType/);
+  assert.match(facade, /const HtmlBlockWidget = createHtmlBlockWidgetType\(WidgetType/);
+  assert.match(facade, /recordInteraction/);
+  assert.match(facade, /from '\.\.\/features\/hybrid-editor\/index\.js'/);
+  assert.doesNotMatch(facade, /features\/hybrid-editor\/widgets\/html\//);
+  assert.doesNotMatch(facade, /class HtmlBlockWidget|template\.innerHTML/);
 });
 
 test('Atomic 8.13 inventory records the two HTML responsibilities and removes the legacy aggregate', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = new Set(inventory.modules.map(row => row[0]));
-  assert.equal(inventory.modules.length, 370);
+  assert.equal(inventory.modules.length, 371);
   for (const path of htmlPaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/widgets.js'), false);
   const view = inventory.modules.find(row => row[0] === htmlPaths[1]);

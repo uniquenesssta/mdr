@@ -10,7 +10,7 @@ import {
 import {
   hybridCodeVisualEditingFacet,
   hybridTableVisualEditingFacet
-} from '../../../src/editor/hybrid/controller.js';
+} from '../../../src/editor/hybrid-markdown.js';
 
 function createStateHarness(registry, doc = 'alpha') {
   let state = EditorState.create({ doc, extensions: registry.getExtensions() });

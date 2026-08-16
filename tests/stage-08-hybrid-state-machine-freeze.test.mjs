@@ -19,7 +19,7 @@ import {
 } from '../src/features/hybrid-editor/index.js';
 
 const codeBlockDirectEditorUrl = new URL('../src/features/hybrid-editor/widgets/code-block/code-block-direct-editor.js', import.meta.url);
-const controllerUrl = new URL('../src/editor/hybrid/controller.js', import.meta.url);
+const controllerUrl = new URL('../src/editor/hybrid-markdown.js', import.meta.url);
 const sourceEditControllerUrl = new URL('../src/features/hybrid-editor/application/hybrid-source-edit-controller.js', import.meta.url);
 const tableCellEditorUrl = new URL('../src/features/hybrid-editor/widgets/table/table-cell-editor.js', import.meta.url);
 
@@ -202,11 +202,12 @@ test('Atomic 8.1 freezes stale delayed-close rejection with expectedMode', () =>
   clearHybridComponentStates(view);
 });
 
-test('Atomic 8.1 freezes current runtime close-reason producers', async () => {
-  const [codeBlockDirectEditor, tableCellEditor, controller, sourceEditController] = await Promise.all([
+test('Atomic 8.1 freezes current runtime close-reason producers through the final Atomic 8.15 application boundary', async () => {
+  const [codeBlockDirectEditor, tableCellEditor, facade, applicationController, sourceEditController] = await Promise.all([
     readFile(codeBlockDirectEditorUrl, 'utf8'),
     readFile(tableCellEditorUrl, 'utf8'),
     readFile(controllerUrl, 'utf8'),
+    readFile(new URL('../src/features/hybrid-editor/application/hybrid-editor-controller.js', import.meta.url), 'utf8'),
     readFile(sourceEditControllerUrl, 'utf8')
   ]);
   const directCloseSources = `${codeBlockDirectEditor}\n${tableCellEditor}`;
@@ -216,7 +217,8 @@ test('Atomic 8.1 freezes current runtime close-reason producers', async () => {
   }
   assert.match(sourceEditController, /this\.close\('pointer-outside-source'/);
   assert.match(sourceEditController, /trigger: 'pointer-outside-source'/);
-  assert.match(controller, /sourceEditPort\.closeFromPointer\(/);
+  assert.match(applicationController, /sourceEditController\.closeFromPointer\(pointer\)/);
+  assert.match(facade, /controller\?\.closeSourceFromPointer\(/);
   assert.match(sourceEditController, /this\.close\('selection-left'/);
   assert.match(sourceEditController, /trigger: 'selection-left'/);
 });
