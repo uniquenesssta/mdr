@@ -76,6 +76,12 @@ vreplacement = vmarker + """        text = text.replace(
 """
 if vmarker not in validator:
     raise SystemExit('R9-09 validator normalization marker missing')
-validate_path.write_text(validator.replace(vmarker, vreplacement, 1), encoding='utf-8')
+validator = validator.replace(vmarker, vreplacement, 1)
+old_readme = "R9-09：SelectionHighlightSession 接管 CSS Highlight 多 Range、原子/文本 fallback、remount 恢复与 clear/destroy；R9-10+ 未启动。验证：R9-09 16/16；R9-08 16/16；R9-07 15/15；R9-06 14/14；R9-05 16/16；R9-04 14/14；R9-03~R9-01 13/13；Stage8 179/179；Node ${node_tests}/${node_pass}；Architecture/Build PASS；Browser 10/10；Built-app 29/29×2；audit 0。"
+new_readme = "R9-09：SelectionHighlightSession接管CSS多Range、原子/文本fallback、remount恢复及clear/destroy；R9-10+未启动。验证：R9-09/R9-08 16/16，R9-07 15/15，R9-06 14/14，R9-05 16/16，R9-04 14/14，R9-03~R9-01 13/13，Stage8 179/179，Node ${node_tests}/${node_pass}，Architecture/Build PASS，Browser 10/10，Built-app 29/29×2，audit 0。"
+if old_readme not in validator:
+    raise SystemExit('R9-09 README template marker missing')
+validator = validator.replace(old_readme, new_readme, 1)
+validate_path.write_text(validator, encoding='utf-8')
 
 Path(__file__).unlink()
