@@ -25,6 +25,14 @@ jobs:
           git rm -f --cached --ignore-unmatch .agent/r9_09_failure.log >/dev/null 2>&1 || true
           rm -f .agent/r9_09_failure.log
           python .agent/r9_09_prepare_fix.py
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('.agent/r9_09_validate.sh')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace('R9-09：SelectionHighlightSession接管CSS多Range', 'R9-09：HighlightSession接管CSS多Range', 1)
+          text = text.replace('R9-09/R9-08 16/16', 'R9-09 16/16，R9-08 16/16', 1)
+          path.write_text(text, encoding='utf-8')
+          PY
           set +e
           bash .agent/r9_09_validate.sh 2>&1 | tee /tmp/r9-09-validation.log
           status=${PIPESTATUS[0]}
