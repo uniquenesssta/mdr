@@ -35,7 +35,6 @@ grep -q 'class SelectionFeedbackGuard' src/features/sync/selection/selection-fee
 grep -q 'createSelectionFeedbackGuard' src/features/sync/index.js
 grep -q 'R9-08' src/features/sync/index.js
 
-# Exact R9-08 ownership gates.
 grep -q 'this.sequence' src/features/sync/selection/selection-feedback-guard.js
 grep -q 'this.source' src/features/sync/selection/selection-feedback-guard.js
 grep -q 'this.revision' src/features/sync/selection/selection-feedback-guard.js
@@ -53,7 +52,6 @@ grep -q 'feedbackGuard: selectionFeedbackGuard' src/main.js
 grep -q 'selectionFeedbackGuard.destroy()' src/main.js
 ! grep -q 'window.markdownEditorSelectionFeedbackGuard' src/main.js
 
-# Later Atomics must remain absent.
 for path in \
   src/features/sync/selection/selection-sync-controller.js \
   src/features/sync/selection/selection-highlight-session.js \
@@ -61,7 +59,6 @@ for path in \
   test ! -e "$path"
 done
 
-# R9-08 must not alter dependencies, frozen model/mapping, prior scroll owners, or R9-07 Readers.
 test -z "$(git diff --name-only "$baseline" -- \
   package.json package-lock.json src-tauri \
   src/document/document-model.js \
@@ -235,14 +232,16 @@ for path in \
 done
 ! find . -path './.git' -prune -o -name '__pycache__' -print | grep -q .
 
-# Restore the permanent workflow exactly to R9-07, remove every temporary R9-08 validation artifact, and publish only the clean candidate.
+# Restore the permanent workflow exactly to R9-07, remove every temporary R9-08 validation artifact, and stage those deletions so the final tree cannot inherit runner-only files.
 git checkout "$baseline" -- "$workflow_path"
-rm -f .agent/r9_08_apply.py .agent/r9_08_validate.sh .agent/r9_08_failure.log
+rm -f .agent/r9_08_apply.py .agent/r9_08_prepare_fix.py .agent/r9_08_validate.sh .agent/r9_08_failure.log
+git add -A -- .agent "$workflow_path"
 ! find . -path './.git' -prune -o -name '__pycache__' -print | grep -q .
 git diff --check
 
-# No temporary runner/workflow changes may survive the final diff.
+# Both the worktree and staged final tree must match the R9-07 baseline for runner-only paths.
 test -z "$(git diff --name-only "$baseline" -- .agent .github/workflows)"
+test -z "$(git diff --cached --name-only "$baseline" -- .agent .github/workflows)"
 
 git add README.md public/app/core.js public/app/scroll-sync.js src/features/sync/index.js \
   src/features/sync/selection/selection-feedback-guard.js src/main.js src/sync/selection-controller.js \
