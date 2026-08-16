@@ -88,7 +88,7 @@ test('Atomic 8.9 preserves Session/source/lifecycle ownership and leaves the fro
 
 test('Atomic 8.9 Table ownership remains intact after Atomic 8.12 Mermaid migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 373);
+  assert.equal(inventory.modules.length, 374);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of tablePaths) assert.equal(paths.has(path), true, path);
   for (const imagePath of [

@@ -43,7 +43,7 @@ import { createNativeDocumentStore } from './storage/native-document-store.js';
 import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
-import { createScrollSyncController } from './features/sync/index.js';
+import { createEditorScrollMapper, createScrollSyncController } from './features/sync/index.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {
@@ -298,6 +298,22 @@ async function loadAppModules() {
   window.markdownEditorScrollSync = scrollController.getPublicApi();
   window.markdownEditorSelectionController = createSelectionSyncController(editorHost, previewHost);
   const documentModel = createDocumentModel(editorHost);
+  let editorScrollMapper = null;
+  try {
+    editorScrollMapper = createEditorScrollMapper({ editorApi: virtualEditor, model: documentModel });
+    if (compatibilityPlatformHost) compatibilityPlatformHost.markdownEditorEditorScrollMapper = editorScrollMapper;
+  } catch (error) {
+    documentModel.destroy();
+    virtualEditor.destroy();
+    throw error;
+  }
+  const destroyEditorScrollMapper = () => {
+    if (compatibilityPlatformHost?.markdownEditorEditorScrollMapper === editorScrollMapper) {
+      delete compatibilityPlatformHost.markdownEditorEditorScrollMapper;
+    }
+    editorScrollMapper?.destroy();
+    editorScrollMapper = null;
+  };
   let editorController;
   let editorHistoryAdapter;
   let editorCommandService;
@@ -325,6 +341,7 @@ async function loadAppModules() {
     editorCommandService?.destroy?.();
     editorHistoryAdapter?.destroy?.();
     editorController?.destroy?.();
+    destroyEditorScrollMapper();
     documentModel.destroy();
     virtualEditor.destroy();
     throw error;
@@ -396,6 +413,7 @@ async function loadAppModules() {
     editorCommandService.destroy();
     editorHistoryAdapter.destroy();
     editorController.destroy();
+    destroyEditorScrollMapper();
     documentModel.destroy();
     virtualEditor.destroy();
     throw error;
@@ -497,6 +515,7 @@ async function loadAppModules() {
     previewRendererPort = null;
     previewRenderer?.destroy();
     previewRenderer = null;
+    destroyEditorScrollMapper();
     documentModel.destroy();
     virtualEditor.destroy();
   };

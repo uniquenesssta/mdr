@@ -59,243 +59,41 @@
     }
     const scrollController = window.markdownEditorScrollController;
     if (!scrollController) throw new Error('Scroll controller is not initialized');
-    // CodeMirror 使用自身的虚拟行几何；以下 Canvas 索引仅作为旧式文本控件的兼容回退。
-    // 避免为每一行创建隐藏 DOM 标记，防止大文档和布局变化时阻塞主线程。
-    let editorLineIndexText = null;
-    let editorMetricText = null;
-    let editorMetricSignature = '';
-    let editorMetricLines = [''];
-    let editorLineStarts = [0];
-    let editorLineRows = [1];
-    let editorVisualOffsets = [0, 1];
-    let editorMetricTotalRows = 1;
-    let editorMetricContentHeight = 1;
-    let editorMetricPaddingTop = 0;
-    let editorMetricPaddingBottom = 0;
-    let editorMetricContentWidth = 1;
-    let editorMetricLineHeight = 24;
-    let editorMetricTimer = 0;
-    let editorMeasureCanvas = null;
-    let editorMeasureContext = null;
-
-    function getEditorLineHeight() {
-      const style = window.getComputedStyle(editor);
-      return parseFloat(style.lineHeight) || Math.max(24, (parseFloat(style.fontSize) || 16) * 1.8);
-    }
-
-    function getEditorMeasureContext(style) {
-      if (!editorMeasureCanvas) editorMeasureCanvas = document.createElement('canvas');
-      if (!editorMeasureContext) editorMeasureContext = editorMeasureCanvas.getContext('2d');
-      if (!editorMeasureContext) return null;
-      editorMeasureContext.font = [
-        style.fontStyle || 'normal',
-        style.fontVariant || 'normal',
-        style.fontWeight || '400',
-        style.fontSize || '16px',
-        style.fontFamily || 'monospace'
-      ].join(' ');
-      editorMeasureContext.letterSpacing = style.letterSpacing || '0px';
-      return editorMeasureContext;
-    }
-
-    function measureVisualRows(line, context, contentWidth) {
-      if (!line) return 1;
-      const expanded = line.includes('\t') ? line.replace(/\t/g, '    ') : line;
-      if (!context) return Math.max(1, Math.ceil(expanded.length / Math.max(1, contentWidth / 8)));
-      const width = context.measureText(expanded).width;
-      return Math.max(1, Math.ceil((width + 1) / Math.max(1, contentWidth)));
-    }
-
-    function ensureEditorLineIndex() {
-      const text = editor.value;
-      if (editorLineIndexText === text) return;
-      const lines = text.split('\n');
-      if (!lines.length) lines.push('');
-      const starts = new Array(lines.length);
-      let offset = 0;
-      for (let index = 0; index < lines.length; index++) {
-        starts[index] = offset;
-        offset += lines[index].length + (index < lines.length - 1 ? 1 : 0);
-      }
-      editorLineIndexText = text;
-      editorMetricLines = lines;
-      editorLineStarts = starts;
-    }
-
-    function rebuildEditorLineMetrics(force = false) {
-      if (editor.virtualEditor) {
-        editorMetricContentHeight = Math.max(1, editor.scrollHeight);
-        editorMetricLineHeight = editor.virtualEditor.getDefaultLineHeight?.() || getEditorLineHeight();
-        return;
-      }
-      const style = window.getComputedStyle(editor);
-      const paddingLeft = parseFloat(style.paddingLeft) || 0;
-      const paddingRight = parseFloat(style.paddingRight) || 0;
-      const contentWidth = Math.max(24, editor.clientWidth - paddingLeft - paddingRight);
-      const signature = [
-        Math.round(contentWidth),
-        style.fontFamily,
-        style.fontSize,
-        style.fontWeight,
-        style.fontStyle,
-        style.lineHeight,
-        style.letterSpacing,
-        style.wordBreak,
-        style.overflowWrap,
-        style.tabSize
-      ].join('|');
-      const text = editor.value;
-      if (!force && editorMetricText === text && editorMetricSignature === signature) return;
-
-      const context = getEditorMeasureContext(style);
-      ensureEditorLineIndex();
-      const lines = editorMetricLines;
-      const rows = new Array(lines.length);
-      const offsets = new Array(lines.length + 1);
-      let visualOffset = 0;
-      offsets[0] = 0;
-
-      for (let index = 0; index < lines.length; index++) {
-        const visualRows = measureVisualRows(lines[index], context, contentWidth);
-        rows[index] = visualRows;
-        visualOffset += visualRows;
-        offsets[index + 1] = visualOffset;
-      }
-
-      editorMetricText = text;
-      editorMetricSignature = signature;
-      editorLineRows = rows;
-      editorVisualOffsets = offsets;
-      editorMetricTotalRows = Math.max(1, visualOffset);
-      editorMetricPaddingTop = parseFloat(style.paddingTop) || 0;
-      editorMetricPaddingBottom = parseFloat(style.paddingBottom) || 0;
-      editorMetricContentWidth = contentWidth;
-      editorMetricLineHeight = getEditorLineHeight();
-      // textarea.scrollHeight 是浏览器实际换行后的总高度；视觉行索引只负责分配相对位置。
-      editorMetricContentHeight = Math.max(1, editor.scrollHeight);
-    }
-
-    function invalidateEditorLineMetrics() {
-      editorMetricSignature = '';
-    }
-
-    function scheduleEditorMetricsRebuild(delay = 100) {
-      invalidateEditorLineMetrics();
-      clearTimeout(editorMetricTimer);
-      editorMetricTimer = setTimeout(() => {
-        editorMetricTimer = 0;
-        const run = () => {
-          rebuildEditorLineMetrics();
-          scrollController.notifyGeometryChanged('editor');
-        };
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(run, { timeout: 220 });
-        } else {
-          run();
-        }
-      }, delay);
-    }
-
-    function findEditorLineIndexAtTextIndex(index) {
-      if (editor.virtualEditor) return editor.virtualEditor.getLineNumberAtPosition(index) - 1;
-      ensureEditorLineIndex();
-      const safeIndex = Math.max(0, Math.min(index, editorLineIndexText.length));
-      let low = 0;
-      let high = editorLineStarts.length - 1;
-      while (low < high) {
-        const mid = Math.ceil((low + high) / 2);
-        if (editorLineStarts[mid] <= safeIndex) low = mid;
-        else high = mid - 1;
-      }
-      return low;
-    }
+    const editorScrollMapper = scrollSyncCompatibilityHost?.markdownEditorEditorScrollMapper;
+    if (!editorScrollMapper) throw new Error('Editor scroll mapper is not initialized');
 
     function getLineStartIndex(line) {
-      if (editor.virtualEditor) return editor.virtualEditor.getLineStart(line);
-      ensureEditorLineIndex();
-      const index = Math.max(0, Math.min(editorLineStarts.length - 1, Number(line || 1) - 1));
-      return editorLineStarts[index] || 0;
+      return editorScrollMapper.getLineRange(line).start;
     }
 
     function getLineEndIndex(line) {
-      if (editor.virtualEditor) return editor.virtualEditor.getLineEnd(line);
-      ensureEditorLineIndex();
-      const index = Math.max(0, Math.min(editorMetricLines.length - 1, Number(line || 1) - 1));
-      return (editorLineStarts[index] || 0) + (editorMetricLines[index] || '').length;
+      return editorScrollMapper.getLineRange(line).end;
     }
 
     function getLineNumberAtIndex(text, index) {
-      if (editor.virtualEditor && text.length === editor.textLength) {
-        return editor.virtualEditor.getLineNumberAtPosition(index);
-      }
-      if (text === editor.value) return findEditorLineIndexAtTextIndex(index) + 1;
-      return text.slice(0, Math.max(0, index)).split('\n').length;
+      const source = String(text ?? '');
+      const safeIndex = Math.max(0, Math.min(source.length, Number(index) || 0));
+      return source.slice(0, safeIndex).split('\n').length;
     }
 
     function getEditorCursorLine() {
-      if (editor.virtualEditor) return editor.virtualEditor.getLineNumberAtPosition(editor.selectionStart || 0);
-      return getLineNumberAtIndex(editor.value, editor.selectionStart || 0);
-    }
-
-    function getEditorHeightScale() {
-      rebuildEditorLineMetrics();
-      const usableHeight = Math.max(
-        editorMetricLineHeight,
-        editorMetricContentHeight - editorMetricPaddingTop - editorMetricPaddingBottom
-      );
-      return usableHeight / Math.max(1, editorMetricTotalRows);
+      return editorScrollMapper.getCursorLine();
     }
 
     function getEditorLineFloatAtY(contentY) {
-      if (editor.virtualEditor) return editor.virtualEditor.getLineAtHeight(contentY);
-      rebuildEditorLineMetrics();
-      const rowScale = getEditorHeightScale();
-      const rowY = Math.max(
-        0,
-        Math.min(editorMetricTotalRows - 0.001, (contentY - editorMetricPaddingTop) / Math.max(0.001, rowScale))
-      );
-      let low = 0;
-      let high = editorLineRows.length - 1;
-      while (low < high) {
-        const mid = Math.ceil((low + high) / 2);
-        if (editorVisualOffsets[mid] <= rowY) low = mid;
-        else high = mid - 1;
-      }
-      const index = low;
-      const start = editorVisualOffsets[index] || 0;
-      const rows = Math.max(1, editorLineRows[index] || 1);
-      return index + 1 + Math.max(0, Math.min(0.999, (rowY - start) / rows));
+      return editorScrollMapper.getLineAtContentY(contentY);
     }
 
     function getEditorYForLineFloat(lineFloat) {
-      if (editor.virtualEditor) return editor.virtualEditor.getHeightForLine(lineFloat);
-      rebuildEditorLineMetrics();
-      const maxLine = Math.max(1, editorLineRows.length);
-      const clamped = Math.max(1, Math.min(lineFloat, maxLine + 0.999));
-      const index = Math.min(maxLine - 1, Math.floor(clamped) - 1);
-      const fraction = Math.max(0, Math.min(0.999, clamped - Math.floor(clamped)));
-      const row = (editorVisualOffsets[index] || 0) + (editorLineRows[index] || 1) * fraction;
-      return editorMetricPaddingTop + row * getEditorHeightScale();
+      return editorScrollMapper.getContentYForLine(lineFloat);
     }
 
     function measureEditorIndexY(index) {
-      if (editor.virtualEditor) return editor.virtualEditor.getHeightForPosition(index);
-      rebuildEditorLineMetrics();
-      const lineIndex = findEditorLineIndexAtTextIndex(index);
-      const lineStart = editorLineStarts[lineIndex] || 0;
-      const prefix = editor.value.slice(lineStart, Math.max(lineStart, index));
-      const style = window.getComputedStyle(editor);
-      const context = getEditorMeasureContext(style);
-      const expanded = prefix.includes('\t') ? prefix.replace(/\t/g, '    ') : prefix;
-      const prefixWidth = context ? context.measureText(expanded).width : expanded.length * 8;
-      const lineRows = Math.max(1, editorLineRows[lineIndex] || 1);
-      const rowWithinLine = Math.min(lineRows - 0.5, Math.floor(prefixWidth / Math.max(1, editorMetricContentWidth)) + 0.5);
-      const row = (editorVisualOffsets[lineIndex] || 0) + Math.max(0.5, rowWithinLine);
-      return editorMetricPaddingTop + row * getEditorHeightScale();
+      return editorScrollMapper.getContentYForPosition(index);
     }
 
     function getTopVisibleEditorLine() {
-      return Math.max(1, Math.floor(getEditorLineFloatAtY(editor.scrollTop + 8)));
+      return editorScrollMapper.getTopVisibleLine(8);
     }
 
     function getMaxScroll(element) {
@@ -1342,8 +1140,7 @@
         if (!geometryChanged) return;
         lastEditorWidth = width;
         lastEditorHeight = height;
-        // 连续拖动分栏时只标记失效，停稳后在空闲帧重建一次。
-        scheduleEditorMetricsRebuild(scrollSyncLayoutStatePort.isResizing ? 180 : 90);
+        scrollController.notifyGeometryChanged('editor');
         scheduleSelectionLayoutRefresh('editor-geometry-change');
       });
       editorResizeObserver.observe(editor);
@@ -1368,7 +1165,7 @@
       clearTimeout(windowResizeTimer);
       windowResizeTimer = setTimeout(() => {
         windowResizeTimer = 0;
-        scheduleEditorMetricsRebuild(0);
+        scrollController.notifyGeometryChanged('editor');
         invalidatePreviewAnchorMetrics();
         scrollController.notifyGeometryChanged();
         scheduleSelectionLayoutRefresh('window-geometry-change');
@@ -1379,15 +1176,7 @@
 
     scrollSyncEditorUiCommandPort.register({
       preparePreviewEditorMetrics() {
-        if (editor.virtualEditor) scheduleEditorMetricsRebuild(100);
-        else {
-          const currentSource = documentModel?.createSnapshot?.('preview-metrics-source') ?? editor.value;
-          if (editorMetricText !== currentSource) {
-            editorLineIndexText = null;
-            editorMetricText = null;
-            scheduleEditorMetricsRebuild(100);
-          }
-        }
+        scrollController.notifyGeometryChanged('editor');
       },
       invalidatePreviewAnchorMetrics: () => invalidatePreviewAnchorMetrics(),
       invalidatePreviewAnchorStructure: () => invalidatePreviewAnchorStructure(),

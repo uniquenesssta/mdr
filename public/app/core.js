@@ -941,7 +941,7 @@ const editor = document.getElementById('editor');
       }
       updateToolbarItemVisibility();
       if (typeof updateInlineColorToolAvailability === 'function') updateInlineColorToolAvailability();
-      scheduleEditorMetricsRebuild(80);
+      if (coreEditorUiCommandPort.has('preparePreviewEditorMetrics')) coreEditorUiCommandPort.invoke('preparePreviewEditorMetrics');
       if (coreEditorUiCommandPort.has('invalidatePreviewAnchorMetrics')) coreEditorUiCommandPort.invoke('invalidatePreviewAnchorMetrics');
     }
 

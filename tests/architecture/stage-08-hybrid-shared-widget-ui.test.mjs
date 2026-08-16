@@ -63,7 +63,7 @@ test('Atomic 8.6 toolbar and source primitives remain shared after Atomic 8.13 H
 test('Atomic 8.6 Shared Widget UI boundary remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 373);
+  assert.equal(inventory.modules.length, 374);
   for (const path of sharedPaths) assert.ok(paths.includes(path), path);
   const shared = await Promise.all(sharedPaths.map(path => text(path)));
   assert.doesNotMatch(shared.join('\n'), /HybridPrefixWidget|TaskCheckboxWidget|HorizontalRuleWidget/);

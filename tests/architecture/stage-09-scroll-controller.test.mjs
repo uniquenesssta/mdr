@@ -8,7 +8,6 @@ const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 
 const LATER_FILES = [
-  'src/features/sync/scroll/editor-scroll-mapper.js',
   'src/features/sync/scroll/preview-scroll-mapper.js',
   'src/features/sync/scroll/scroll-geometry-session.js',
   'src/features/sync/selection/selection-sync-controller.js',
@@ -30,8 +29,9 @@ test('R9-03 Scroll Controller owns only source and target cancellable RAF slots'
   assert.doesNotMatch(controller, /cancelAnimationFrame\s*\(/);
 });
 
-test('R9-03 controller is mapper-orchestration plus target-write logic without implementing later mappers', async () => {
+test('R9-03 controller remains mapper-orchestration plus target-write logic after R9-04 Editor Mapper extraction', async () => {
   const controller = await read('src/features/sync/scroll/scroll-sync-controller.js');
+  await access(file('src/features/sync/scroll/editor-scroll-mapper.js'));
   assert.match(controller, /this\.mapperCallbacks/);
   assert.match(controller, /scheduleSourceSync/);
   assert.match(controller, /flushSourceSync/);
@@ -71,7 +71,7 @@ test('R9-03 preserves the public Sync surface and keeps the classic aggregate be
   assert.match(index, /createScrollSyncController/);
   assert.match(index, /ScrollSourceOwnership/);
   assert.match(index, /createScrollSourceOwnership/);
-  assert.match(index, /R9-03/);
+  assert.match(index, /R9-04/);
   assert.match(legacy, /const scrollController = window\.markdownEditorScrollController/);
   assert.doesNotMatch(legacy, /scroll-source-ownership|ScrollSourceOwnership/);
 });
@@ -79,7 +79,7 @@ test('R9-03 preserves the public Sync surface and keeps the classic aggregate be
 test('R9-03 keeps production-module cardinality stable because no new production responsibility is introduced', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 373);
+  assert.equal(inventory.modules.length, 374);
   assert.equal(records.has('src/features/sync/scroll/scroll-sync-controller.js'), true);
   assert.equal(records.get('src/features/sync/scroll/scroll-sync-controller.js')[4], 'scroll-sync-runtime');
   assert.equal(records.has('src/features/sync/scroll/scroll-source-ownership.js'), true);
