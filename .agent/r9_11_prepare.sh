@@ -44,6 +44,12 @@ validate = validate.replace(old_apply, new_apply, 1)
 validate = validate.replace("test \"$node_tests\" = '234'", "test \"$node_tests\" = '228'", 1)
 validate = validate.replace("test \"$node_pass\" = '234'", "test \"$node_pass\" = '228'", 1)
 
+old_readme = """R9-11：frozen selection mapping仅由model-kernel提供并以scoped capability注入旧同步层；移除window mapping全局，算法/接口未改，R9-12未启动。验证：R9-11 10/10；R9-10~R9-08 16/16；R9-07 15/15；R9-06 14/14；R9-05 16/16；R9-04 14/14；R9-03~R9-01 13/13；Stage8 179/179；Node ${node_tests}/${node_pass}；Architecture/Build PASS；Browser 10/10；Built-app 29/29×2；audit 0。"""
+new_readme = """R9-11：frozen selection mapping 仅经 model-kernel 注入 scoped 能力；移除 window mapping 全局，算法/接口未改，R9-12 未启动。验证：R9-11 10/10；R9-10~01 回归全 PASS；Stage8 179/179；Node ${node_tests}/${node_pass}；Architecture/Build PASS；Browser 10/10；Built-app 29/29×2；audit 0。"""
+if validate.count(old_readme) != 1:
+    raise SystemExit('R9-11 README marker missing')
+validate = validate.replace(old_readme, new_readme, 1)
+
 old_scope = " 'tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs',\n '.agent/r9_11_apply.py',"
 new_scope = " 'tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs',\n 'tests/architecture/stage-08-hybrid-editor-controller.test.mjs',\n 'tests/stage-01-handoff.test.mjs',\n '.agent/r9_11_apply.py',"
 if validate.count(old_scope) != 1:
