@@ -30,5 +30,5 @@ tests/architecture/stage-09-selection-feedback-guard.test.mjs:33:test('R9-08 leg
 tests/architecture/stage-09-selection-highlight-session.test.mjs:62:test('R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling', async () => {
 tests/architecture/stage-09-selection-readers.test.mjs:47:test('R9-07 legacy SelectionSyncController consumes Readers and no longer owns raw selection boundaries or preview stabilization listeners', async () => {
 tests/architecture/stage-09-selection-readers.test.mjs:66:  assert.match(main, /createSelectionSyncController\(editorHost, previewHost, \{/);
-tests/architecture/stage-09-selection-retry-scheduler.test.mjs:30:test('R9-10 legacy SelectionSyncController delegates retry scheduling and no longer owns retry count or retry RAF state', async () => {
-tests/architecture/stage-09-selection-retry-scheduler.test.mjs:32:  assert.match(controller, /SelectionSyncController requires SelectionRetryScheduler/);
+tests/architecture/stage-09-selection-retry-scheduler.test.mjs:31:test('R9-10 final SelectionSyncController delegates retry scheduling and owns no retry count or retry RAF state', async () => {
+tests/architecture/stage-09-selection-retry-scheduler.test.mjs:33:  assert.match(controller, /SelectionSyncController requires SelectionRetryScheduler/);
