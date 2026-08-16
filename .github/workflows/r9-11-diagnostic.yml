@@ -1,0 +1,29 @@
+name: R9-11 mapping diagnostic
+
+on:
+  push:
+    branches:
+      - agent/r9-11-runner
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Inspect R9-11 baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== STATUS ==='
+          git status --short --branch
+          echo '=== HEAD ==='
+          git rev-parse HEAD
+          echo '=== DIRECT SELECTION MAPPING REFERENCES ==='
+          git grep -n -E 'markdownEditorSelectionMapping|selectionMappingApi|createPreviewRangesForSourceSelection|mapPreviewDomPointToSource|createMarkdownSourceProjection|createPreviewDomProjection|getSelectionMappingDiagnostics' -- ':!src/sync/selection-mapping.js' ':!src/model-kernel/index.js' || true
+          echo '=== DIRECT IMPORTS OF FROZEN IMPLEMENTATION ==='
+          git grep -n -E "from ['\"][^'\"]*sync/selection-mapping\.js['\"]" -- '*.js' '*.mjs' || true
+          echo '=== SYNC / MODEL-KERNEL FILES ==='
+          find src/features/sync src/model-kernel src/sync -maxdepth 3 -type f | sort
