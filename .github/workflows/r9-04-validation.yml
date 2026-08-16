@@ -17,6 +17,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Patch concise README validator
+        shell: bash
+        run: PYTHONDONTWRITEBYTECODE=1 python .agent/r9_04_readme_validator_fix.py
       - name: Validate and publish clean R9-04 candidate
         shell: bash
         run: bash .agent/r9_04_validate_final.sh
