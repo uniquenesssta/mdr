@@ -37,6 +37,11 @@ text = text.replace(
     "        'tests/stage-01-handoff.test.mjs',\n        'tests/stage-09-selection-feedback-guard.test.mjs',\n",
     1,
 )
+old_facade = " * Responsibility: Public Stage 9 synchronization contract. Prior Stage 9 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.\\n"
+new_facade = " * Responsibility: Public Stage 9 synchronization contract. R9-01, R9-02, R9-03, R9-04, R9-05, R9-06, R9-07 and R9-08 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.\\n"
+if old_facade not in text:
+    raise SystemExit('R9-09 facade traceability marker missing')
+text = text.replace(old_facade, new_facade, 1)
 marker = """        if path.endswith('stage-09-selection-feedback-guard.test.mjs'):
             text = text.replace('does not advance R9-09+', 'does not advance R9-10+')
             text = text.replace('cardinality 379', 'cardinality 380 after R9-09 inventory growth')
