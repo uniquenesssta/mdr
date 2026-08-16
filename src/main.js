@@ -44,7 +44,7 @@ import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
-import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession } from './features/sync/index.js';
+import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler } from './features/sync/index.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {
@@ -318,6 +318,10 @@ async function loadAppModules() {
     setTimer: (callback, delay) => window.setTimeout(callback, delay),
     clearTimer: timerId => window.clearTimeout(timerId)
   });
+  const selectionRetryScheduler = createSelectionRetryScheduler({
+    requestFrame: callback => window.requestAnimationFrame(callback),
+    cancelFrame: frameId => window.cancelAnimationFrame(frameId)
+  });
   if (compatibilityPlatformHost) {
     compatibilityPlatformHost.markdownEditorEditorSelectionReader = editorSelectionReader;
     compatibilityPlatformHost.markdownEditorPreviewSelectionReader = previewSelectionReader;
@@ -328,7 +332,8 @@ async function loadAppModules() {
     editorSelectionReader,
     previewSelectionReader,
     feedbackGuard: selectionFeedbackGuard,
-    highlightSession: selectionHighlightSession
+    highlightSession: selectionHighlightSession,
+    retryScheduler: selectionRetryScheduler
   });
   window.markdownEditorSelectionController = selectionController;
   const destroySelectionReaders = () => {
@@ -345,6 +350,7 @@ async function loadAppModules() {
     if (compatibilityPlatformHost?.markdownEditorSelectionHighlightSession === selectionHighlightSession) {
       delete compatibilityPlatformHost.markdownEditorSelectionHighlightSession;
     }
+    selectionRetryScheduler.destroy();
     selectionHighlightSession.destroy();
     selectionFeedbackGuard.destroy();
     previewSelectionReader.destroy();

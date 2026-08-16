@@ -8,7 +8,6 @@ const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 const LATER_SELECTION_FILES = [
   'src/features/sync/selection/selection-sync-controller.js',
-  'src/features/sync/selection/selection-retry-scheduler.js'
 ];
 
 test('R9-09 creates canonical SelectionHighlightSession and exports it only through the Sync public entry', async () => {
@@ -69,7 +68,7 @@ test('R9-09 virtual remount recovery is delegated by SelectionSyncController wit
   assert.doesNotMatch(session, /MAX_RETRIES|setTimer|scheduleFrame|scheduleRetry|retryCount|retryTimer/);
 });
 
-test('R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+', async () => {
+test('R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-11+', async () => {
   await access(file('src/features/sync/selection/editor-selection-reader.js'));
   await access(file('src/features/sync/selection/preview-selection-reader.js'));
   await access(file('src/features/sync/selection/selection-feedback-guard.js'));
@@ -77,9 +76,9 @@ test('R9-09 keeps prior owners and frozen mapping untouched and does not advance
   for (const path of LATER_SELECTION_FILES) await assert.rejects(access(file(path)), path);
 });
 
-test('R9-09 production inventory records one Highlight Session responsibility and cardinality 380', async () => {
+test('R9-09 production inventory records one Highlight Session responsibility and cardinality 381 after R9-10 inventory growth', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 380);
+  assert.equal(inventory.modules.length, 381);
   assert.equal(records.get('src/features/sync/selection/selection-highlight-session.js')?.[4], 'selection-highlight-session-lifecycle');
 });

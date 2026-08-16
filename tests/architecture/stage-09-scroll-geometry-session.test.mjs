@@ -9,7 +9,6 @@ const read = path => readFile(file(path), 'utf8');
 
 const SELECTION_LATER_FILES = [
   'src/features/sync/selection/selection-sync-controller.js',
-  'src/features/sync/selection/selection-retry-scheduler.js',
 ];
 
 test('R9-06 creates one canonical ScrollGeometrySession and exposes it only through the Sync public entry', async () => {
@@ -80,7 +79,7 @@ test('R9-06 leaves Editor Preview mapper authority intact and does not advance S
 test('R9-06 inventory records one geometry owner and current package cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 380);
+  assert.equal(inventory.modules.length, 381);
   assert.equal(records.has('src/features/sync/scroll/scroll-geometry-session.js'), true);
   assert.equal(records.get('src/features/sync/scroll/scroll-geometry-session.js')[4], 'scroll-geometry-session');
   assert.equal(records.get('src/features/sync/scroll/scroll-sync-controller.js')[4], 'scroll-sync-runtime');

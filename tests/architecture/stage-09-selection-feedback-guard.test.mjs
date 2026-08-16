@@ -8,7 +8,6 @@ const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 const LATER_SELECTION_FILES = [
   'src/features/sync/selection/selection-sync-controller.js',
-  'src/features/sync/selection/selection-retry-scheduler.js'
 ];
 
 test('R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry', async () => {
@@ -63,7 +62,7 @@ test('R9-08 composition creates exactly one Guard injects it into Controller and
   assert.doesNotMatch(main, /\.\/features\/sync\/selection\/selection-feedback-guard\.js/);
 });
 
-test('R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-10+', async () => {
+test('R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-11+', async () => {
   await access(file('src/features/sync/scroll/scroll-source-ownership.js'));
   await access(file('src/features/sync/scroll/scroll-sync-controller.js'));
   await access(file('src/features/sync/scroll/editor-scroll-mapper.js'));
@@ -80,7 +79,7 @@ test('R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched 
 test('R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 380);
+  assert.equal(inventory.modules.length, 381);
   assert.equal(records.get('src/features/sync/selection/selection-feedback-guard.js')?.[4], 'selection-feedback-guard-lifecycle');
 });
 

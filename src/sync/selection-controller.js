@@ -1,5 +1,3 @@
-const DEFAULT_MAX_RETRIES = 3;
-
 function nextFrame(callback) {
   return requestAnimationFrame(() => callback());
 }
@@ -14,9 +12,10 @@ const REQUIRED_FEEDBACK_METHODS = [
   'getState'
 ];
 const REQUIRED_HIGHLIGHT_METHODS = ['restore', 'clear'];
+const REQUIRED_RETRY_METHODS = ['schedule', 'cancel'];
 
 export class SelectionSyncController {
-  constructor(editor, preview, { editorSelectionReader, previewSelectionReader, feedbackGuard, highlightSession } = {}) {
+  constructor(editor, preview, { editorSelectionReader, previewSelectionReader, feedbackGuard, highlightSession, retryScheduler } = {}) {
     if (!editorSelectionReader || typeof editorSelectionReader.read !== 'function') {
       throw new TypeError('SelectionSyncController requires EditorSelectionReader');
     }
@@ -33,12 +32,16 @@ export class SelectionSyncController {
     if (!highlightSession || REQUIRED_HIGHLIGHT_METHODS.some(method => typeof highlightSession[method] !== 'function')) {
       throw new TypeError('SelectionSyncController requires SelectionHighlightSession');
     }
+    if (!retryScheduler || REQUIRED_RETRY_METHODS.some(method => typeof retryScheduler[method] !== 'function')) {
+      throw new TypeError('SelectionSyncController requires SelectionRetryScheduler');
+    }
     this.editor = editor;
     this.preview = preview;
     this.editorSelectionReader = editorSelectionReader;
     this.previewSelectionReader = previewSelectionReader;
     this.feedbackGuard = feedbackGuard;
     this.highlightSession = highlightSession;
+    this.retryScheduler = retryScheduler;
     this.previewSelectionDisposer = null;
     this.callbacks = {};
     this.started = false;
@@ -110,6 +113,7 @@ export class SelectionSyncController {
   }
 
   stop() {
+    this.retryScheduler.cancel();
     if (!this.started) return;
     this.started = false;
     cancelAnimationFrame(this.editorFrame);
@@ -142,6 +146,7 @@ export class SelectionSyncController {
     if (shouldScroll && options.extendAlignment !== false) this.editorAlignmentUntil = performance.now() + 1400;
     const force = Boolean(options.force);
     const frames = Math.max(1, Number(options.frames) || 1);
+    this.retryScheduler.cancel();
     cancelAnimationFrame(this.editorFrame);
     let remaining = frames;
     const run = () => {
@@ -169,12 +174,15 @@ export class SelectionSyncController {
       this.feedbackGuard.release(feedbackToken, 32);
     }
     this.recordResult('editor-to-preview', reason, result);
-    if (result?.status === 'pending' && attempt < (result.maxRetries ?? DEFAULT_MAX_RETRIES)) {
-      this.stats.pendingRetries += 1;
-      this.editorFrame = nextFrame(() => {
-        this.editorFrame = 0;
-        this.runEditor(shouldScroll, `${reason}-retry`, true, attempt + 1);
+    if (result?.status === 'pending') {
+      const scheduled = this.retryScheduler.schedule({
+        version: key,
+        getVersion: () => this.makeEditorKey(),
+        run: ({ attempt: retryAttempt }) => {
+          this.runEditor(shouldScroll, `${reason}-retry`, true, retryAttempt);
+        }
       });
+      if (scheduled) this.stats.pendingRetries += 1;
     }
   }
 
@@ -249,6 +257,7 @@ export class SelectionSyncController {
   clear() {
     this.lastEditorKey = '';
     this.lastPreviewKey = '';
+    this.retryScheduler.cancel();
     this.highlightSession.clear();
     this.callbacks.clearPreview?.();
   }

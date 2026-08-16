@@ -70,7 +70,7 @@ test('Atomic 8.5 keeps migrated HTML and component widgets on shared idempotent 
 test('Atomic 8.5 lifecycle boundary remains intact after Atomic 8.10 Image migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 380);
+  assert.equal(inventory.modules.length, 381);
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-lifecycle.js'));
   assert.ok(paths.includes('src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js'));
   assert.ok(!paths.includes('src/editor/hybrid/widget-lifecycle.js'));

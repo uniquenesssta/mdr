@@ -1,3 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createSelectionRetryScheduler } from '../src/features/sync/index.js';
 import { createSelectionSyncController } from '../src/sync/selection-controller.js';
 
 function createFrames() {
@@ -158,3 +161,64 @@ test('R9-10 Retry Scheduler cancel/destroy invalidate pending work and remain te
 });
 
 test('R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks', () => {
+  const frames = createFrames();
+  const restore = installGlobals(frames);
+  const scheduled = [];
+  let syncResult = { status: 'pending', selectionLength: 4 };
+  const retryScheduler = {
+    cancel() {},
+    schedule(options) { scheduled.push(options); return true; }
+  };
+  const controller = createSelectionSyncController(new FakeTarget(), new FakeTarget(), {
+    editorSelectionReader: { read: () => ({ from: 2, to: 6, isCollapsed: false }) },
+    previewSelectionReader: createPreviewReader(),
+    feedbackGuard: createGuard(),
+    highlightSession: { restore() { return false; }, clear() {} },
+    retryScheduler
+  }).configure({ syncEditorToPreview: () => syncResult });
+  try {
+    controller.runEditor(false, 'test', true, 0);
+    assert.equal(scheduled.length, 1);
+    assert.equal(scheduled[0].version, '7:2:6:0');
+    assert.equal(scheduled[0].getVersion(), '7:2:6:0');
+    syncResult = { status: 'mapping-failed', selectionLength: 4 };
+    controller.runEditor(false, 'test-failed', true, 0);
+    assert.equal(scheduled.length, 1);
+  } finally {
+    controller.stop();
+    restore();
+  }
+});
+
+test('R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler', () => {
+  const frames = createFrames();
+  const restore = installGlobals(frames);
+  let cancels = 0;
+  const scheduled = [];
+  let attempts = [];
+  const retryScheduler = {
+    cancel() { cancels += 1; },
+    schedule(options) { scheduled.push(options); return true; }
+  };
+  const controller = createSelectionSyncController(new FakeTarget(), new FakeTarget(), {
+    editorSelectionReader: { read: () => ({ from: 1, to: 3, isCollapsed: false }) },
+    previewSelectionReader: createPreviewReader(),
+    feedbackGuard: createGuard(),
+    highlightSession: { restore() { return false; }, clear() {} },
+    retryScheduler
+  }).configure({ syncEditorToPreview: ({ attempt }) => { attempts.push(attempt); return { status: attempt ? 'exact' : 'pending' }; } });
+  try {
+    controller.start();
+    controller.scheduleEditor(false, 'fresh');
+    assert.equal(cancels, 1);
+    frames.flush();
+    assert.equal(scheduled.length, 1);
+    scheduled[0].run({ attempt: 1 });
+    assert.deepEqual(attempts, [0, 1]);
+    controller.clear();
+    controller.stop();
+    assert.equal(cancels, 3);
+  } finally {
+    restore();
+  }
+});

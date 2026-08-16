@@ -586,7 +586,6 @@
             status: 'pending',
             selectionLength: String(selectedText || '').length,
             matchedAnchors: 0,
-            maxRetries: 3,
             targetViewportRatio
           };
         }
@@ -653,7 +652,6 @@
         status: virtualController?.active && !matchingAnchors.length ? 'pending' : 'mapping-failed',
         selectionLength,
         matchedAnchors: matchingAnchors.length,
-        maxRetries: 3,
         targetViewportRatio
       };
     }

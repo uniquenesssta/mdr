@@ -8,7 +8,6 @@ const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 const LATER_SELECTION_FILES = [
   'src/features/sync/selection/selection-sync-controller.js',
-  'src/features/sync/selection/selection-retry-scheduler.js',
 ];
 
 test('R9-07 creates exactly the two canonical Selection Readers and exports them only through the Sync public entry', async () => {
@@ -98,7 +97,7 @@ test('R9-07 keeps frozen mapping and prior scroll owners untouched and does not 
 test('R9-07 production inventory records exactly two Reader responsibilities and cardinality 378', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 380);
+  assert.equal(inventory.modules.length, 381);
   assert.equal(records.get('src/features/sync/selection/editor-selection-reader.js')?.[4], 'editor-selection-reader-lifecycle');
   assert.equal(records.get('src/features/sync/selection/preview-selection-reader.js')?.[4], 'preview-selection-stability-session');
 });

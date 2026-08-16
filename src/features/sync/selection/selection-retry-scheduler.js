@@ -1,32 +1,4 @@
-from pathlib import Path
-import json
-
-BASELINE = '6899fda36270a2092d9fab796e37c05f41846717'
-RETRY_PATH = 'src/features/sync/selection/selection-retry-scheduler.js'
-
-
-def read(path):
-    return Path(path).read_text(encoding='utf-8')
-
-
-def write(path, content):
-    target = Path(path)
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(content, encoding='utf-8')
-
-
-def replace_once(path, old, new):
-    text = read(path)
-    count = text.count(old)
-    if count != 1:
-        raise SystemExit(f'{path}: expected one marker, found {count}: {old[:80]!r}')
-    write(path, text.replace(old, new, 1))
-
-
-if Path(RETRY_PATH).exists():
-    raise SystemExit('R9-10 target already exists before candidate materialization')
-
-scheduler = r'''/**
+/**
  * Responsibility: Authoritative R9-10 bounded retry scheduling for recoverable selection synchronization work.
  * Imports: Injected animation-frame capabilities and caller-supplied version reader only.
  * Exports: SelectionRetryScheduler and factory.
@@ -158,3 +130,33 @@ export class SelectionRetryScheduler {
 
   destroy() {
     if (this.destroyed) return;
+    this.cancel();
+    this.destroyed = true;
+    this.requestFrame = null;
+    this.cancelFrame = null;
+  }
+
+  cancelPending() {
+    if (!this.pending) return false;
+    const frameId = this.frameId;
+    this.pending = null;
+    this.frameId = null;
+    if (frameId !== null) this.cancelFrame(frameId);
+    this.cancelled += 1;
+    return true;
+  }
+
+  invalidateSeries() {
+    this.generation += 1;
+    this.version = null;
+    this.attempts = 0;
+  }
+
+  assertUsable() {
+    if (this.destroyed) throw new Error('SelectionRetryScheduler is destroyed');
+  }
+}
+
+export function createSelectionRetryScheduler(options = {}) {
+  return new SelectionRetryScheduler(options);
+}

@@ -1,68 +1,4 @@
-  const frames = createFrames();
-  const restore = installGlobals(frames);
-  const scheduled = [];
-  let syncResult = { status: 'pending', selectionLength: 4 };
-  const retryScheduler = {
-    cancel() {},
-    schedule(options) { scheduled.push(options); return true; }
-  };
-  const controller = createSelectionSyncController(new FakeTarget(), new FakeTarget(), {
-    editorSelectionReader: { read: () => ({ from: 2, to: 6, isCollapsed: false }) },
-    previewSelectionReader: createPreviewReader(),
-    feedbackGuard: createGuard(),
-    highlightSession: { restore() { return false; }, clear() {} },
-    retryScheduler
-  }).configure({ syncEditorToPreview: () => syncResult });
-  try {
-    controller.runEditor(false, 'test', true, 0);
-    assert.equal(scheduled.length, 1);
-    assert.equal(scheduled[0].version, '7:2:6:0');
-    assert.equal(scheduled[0].getVersion(), '7:2:6:0');
-    syncResult = { status: 'mapping-failed', selectionLength: 4 };
-    controller.runEditor(false, 'test-failed', true, 0);
-    assert.equal(scheduled.length, 1);
-  } finally {
-    controller.stop();
-    restore();
-  }
-});
-
-test('R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler', () => {
-  const frames = createFrames();
-  const restore = installGlobals(frames);
-  let cancels = 0;
-  const scheduled = [];
-  let attempts = [];
-  const retryScheduler = {
-    cancel() { cancels += 1; },
-    schedule(options) { scheduled.push(options); return true; }
-  };
-  const controller = createSelectionSyncController(new FakeTarget(), new FakeTarget(), {
-    editorSelectionReader: { read: () => ({ from: 1, to: 3, isCollapsed: false }) },
-    previewSelectionReader: createPreviewReader(),
-    feedbackGuard: createGuard(),
-    highlightSession: { restore() { return false; }, clear() {} },
-    retryScheduler
-  }).configure({ syncEditorToPreview: ({ attempt }) => { attempts.push(attempt); return { status: attempt ? 'exact' : 'pending' }; } });
-  try {
-    controller.start();
-    controller.scheduleEditor(false, 'fresh');
-    assert.equal(cancels, 1);
-    frames.flush();
-    assert.equal(scheduled.length, 1);
-    scheduled[0].run({ attempt: 1 });
-    assert.deepEqual(attempts, [0, 1]);
-    controller.clear();
-    controller.stop();
-    assert.equal(cancels, 3);
-  } finally {
-    restore();
-  }
-});
-'''
-write('tests/stage-09-selection-retry-scheduler.test.mjs', behavior)
-
-architecture = r'''import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -105,7 +41,9 @@ test('R9-10 retry orchestration is requested only for recoverable pending result
   const controller = await read('src/sync/selection-controller.js');
   const legacy = await read('public/app/scroll-sync.js');
   assert.match(controller, /if \(result\?\.status === 'pending'\)/);
-  assert.doesNotMatch(controller, /status === 'mapping-failed'.*retryScheduler/s);
+  const runEditorBlock = controller.slice(controller.indexOf('  runEditor('), controller.indexOf('  schedulePreview('));
+  assert.match(runEditorBlock, /retryScheduler\.schedule/);
+  assert.doesNotMatch(runEditorBlock, /mapping-failed/);
   assert.doesNotMatch(legacy, /maxRetries/);
   assert.match(legacy, /status: 'pending'/);
   assert.match(legacy, /status: virtualController\?\.active && !matchingAnchors\.length \? 'pending' : 'mapping-failed'/);
@@ -149,14 +87,3 @@ test('R9-10 production inventory records one Retry Scheduler owner and cardinali
   assert.equal(records.get('src/features/sync/selection/selection-retry-scheduler.js')?.[4], 'selection-retry-scheduler-lifecycle');
   assert.match(records.get('src/sync/selection-controller.js')?.[3] || '', /R9-10 Retry Scheduler/);
 });
-'''
-write('tests/architecture/stage-09-selection-retry-scheduler.test.mjs', architecture)
-
-# R9-09 historical architecture title/wiring now acknowledges R9-10 while still protecting R9-11+.
-r909 = Path('tests/architecture/stage-09-selection-highlight-session.test.mjs')
-text = r909.read_text(encoding='utf-8')
-text = text.replace('does not advance R9-11+', 'does not advance R9-11+')
-text = text.replace('cardinality 380', 'cardinality 381 after R9-10 inventory growth')
-r909.write_text(text, encoding='utf-8')
-
-# Keep facade/inventory descriptions aligned with the completed responsibility boundary.

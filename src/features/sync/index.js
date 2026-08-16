@@ -1,7 +1,7 @@
 /**
- * Responsibility: Public Stage 9 synchronization contract. R9-01, R9-02, R9-03, R9-04, R9-05, R9-06, R9-07 and R9-08 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.
+ * Responsibility: Public Stage 9 synchronization contract. R9-01, R9-02, R9-03, R9-04, R9-05, R9-06, R9-07, R9-08 and R9-09 owners remain frozen while R9-10 adds the canonical SelectionRetryScheduler; R9-11+ mapping/final migration remains unmigrated.
  * Imports: Public synchronization modules only.
- * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard and the R9-09 Highlight Session classes/factories.
+ * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard, Highlight Session and the R9-10 Retry Scheduler classes/factories.
  * State/side effects: None; import-only facade.
  * Lifecycle: None.
  */
@@ -42,3 +42,7 @@ export {
   SelectionHighlightSession,
   createSelectionHighlightSession
 } from './selection/selection-highlight-session.js';
+export {
+  SelectionRetryScheduler,
+  createSelectionRetryScheduler
+} from './selection/selection-retry-scheduler.js';
