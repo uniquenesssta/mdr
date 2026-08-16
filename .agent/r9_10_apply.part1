@@ -1,0 +1,160 @@
+from pathlib import Path
+import json
+
+BASELINE = '6899fda36270a2092d9fab796e37c05f41846717'
+RETRY_PATH = 'src/features/sync/selection/selection-retry-scheduler.js'
+
+
+def read(path):
+    return Path(path).read_text(encoding='utf-8')
+
+
+def write(path, content):
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(content, encoding='utf-8')
+
+
+def replace_once(path, old, new):
+    text = read(path)
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f'{path}: expected one marker, found {count}: {old[:80]!r}')
+    write(path, text.replace(old, new, 1))
+
+
+if Path(RETRY_PATH).exists():
+    raise SystemExit('R9-10 target already exists before candidate materialization')
+
+scheduler = r'''/**
+ * Responsibility: Authoritative R9-10 bounded retry scheduling for recoverable selection synchronization work.
+ * Imports: Injected animation-frame capabilities and caller-supplied version reader only.
+ * Exports: SelectionRetryScheduler and factory.
+ * State/side effects: Owns one pending retry frame, retry generation/version, bounded attempt count and stale/cancel statistics.
+ * Lifecycle: Explicit cancel/destroy; replaced, stale and destroyed callbacks cannot execute work.
+ */
+
+const DEFAULT_MAX_RETRIES = 3;
+
+function normalizeMaxRetries(value, fallback = DEFAULT_MAX_RETRIES) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.max(0, Math.floor(numeric));
+}
+
+function assertVersion(version) {
+  if (version === null || version === undefined) {
+    throw new TypeError('SelectionRetryScheduler requires a version token');
+  }
+}
+
+export class SelectionRetryScheduler {
+  constructor({ requestFrame, cancelFrame, maxRetries = DEFAULT_MAX_RETRIES } = {}) {
+    if (typeof requestFrame !== 'function' || typeof cancelFrame !== 'function') {
+      throw new TypeError('SelectionRetryScheduler requires requestFrame/cancelFrame capabilities');
+    }
+    this.requestFrame = requestFrame;
+    this.cancelFrame = cancelFrame;
+    this.maxRetries = normalizeMaxRetries(maxRetries);
+    this.generation = 0;
+    this.version = null;
+    this.attempts = 0;
+    this.pending = null;
+    this.frameId = null;
+    this.scheduled = 0;
+    this.executed = 0;
+    this.cancelled = 0;
+    this.stale = 0;
+    this.destroyed = false;
+  }
+
+  schedule({ version, getVersion, run, maxRetries = this.maxRetries } = {}) {
+    this.assertUsable();
+    assertVersion(version);
+    if (typeof getVersion !== 'function' || typeof run !== 'function') {
+      throw new TypeError('SelectionRetryScheduler requires getVersion/run capabilities');
+    }
+
+    const retryLimit = normalizeMaxRetries(maxRetries, this.maxRetries);
+    this.cancelPending();
+    if (!Object.is(this.version, version)) {
+      this.generation += 1;
+      this.version = version;
+      this.attempts = 0;
+    }
+    if (this.attempts >= retryLimit) return false;
+
+    const pending = Object.freeze({
+      generation: this.generation,
+      version,
+      attempt: this.attempts + 1,
+      maxRetries: retryLimit,
+      getVersion,
+      run
+    });
+    this.attempts = pending.attempt;
+    this.pending = pending;
+    try {
+      this.frameId = this.requestFrame(() => this.flush(pending));
+    } catch (error) {
+      this.pending = null;
+      this.frameId = null;
+      this.invalidateSeries();
+      throw error;
+    }
+    this.scheduled += 1;
+    return true;
+  }
+
+  flush(pending) {
+    if (this.destroyed || this.pending !== pending) return;
+    this.pending = null;
+    this.frameId = null;
+    if (pending.generation !== this.generation || !Object.is(pending.version, this.version)) return;
+
+    let currentVersion;
+    try {
+      currentVersion = pending.getVersion();
+    } catch (error) {
+      this.invalidateSeries();
+      throw error;
+    }
+    if (!Object.is(currentVersion, pending.version)) {
+      this.stale += 1;
+      this.invalidateSeries();
+      return;
+    }
+
+    this.executed += 1;
+    pending.run(Object.freeze({
+      generation: pending.generation,
+      version: pending.version,
+      attempt: pending.attempt,
+      maxRetries: pending.maxRetries
+    }));
+  }
+
+  cancel() {
+    if (this.destroyed) return;
+    this.cancelPending();
+    this.invalidateSeries();
+  }
+
+  getState() {
+    return Object.freeze({
+      generation: this.generation,
+      version: this.version,
+      attempts: this.attempts,
+      maxRetries: this.maxRetries,
+      pending: Boolean(this.pending),
+      pendingAttempt: this.pending?.attempt || 0,
+      scheduled: this.scheduled,
+      executed: this.executed,
+      cancelled: this.cancelled,
+      stale: this.stale,
+      destroyed: this.destroyed
+    });
+  }
+
+  destroy() {
+    if (this.destroyed) return;
