@@ -24,6 +24,36 @@ jobs:
           set -euo pipefail
           git rm -f --cached --ignore-unmatch .agent/r9_09_failure.log >/dev/null 2>&1 || true
           rm -f .agent/r9_09_failure.log
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('.agent/r9_09_apply.py')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace(
+              "return subprocess.check_output(['git', 'show', f'{BASELINE}:{path}'], text=True)",
+              "return subprocess.check_output(['git', 'show', f'{BASELINE}:{path}'], text=True, stderr=subprocess.DEVNULL)",
+              1
+          )
+          old = """  replaceChild(next, previous) {
+              const index = this.children.indexOf(previous);
+              if (index < 0) throw new Error('missing child');
+              previous.parentNode = null;
+              next.parentNode = this;
+              this.children.splice(index, 1, next);
+            }
+            normalize() {"""
+          new = """  replaceChild(next, previous) {
+              const index = this.children.indexOf(previous);
+              if (index < 0) throw new Error('missing child');
+              previous.parentNode = null;
+              next.parentNode = this;
+              this.children.splice(index, 1, next);
+            }
+            replaceWith(next) { this.parentNode?.replaceChild(next, this); }
+            normalize() {"""
+          if old not in text:
+              raise SystemExit('R9-09 FakeElement patch marker missing')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
           set +e
           bash .agent/r9_09_validate.sh 2>&1 | tee /tmp/r9-09-validation.log
           status=${PIPESTATUS[0]}
