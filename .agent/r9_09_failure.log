@@ -1,193 +1,193 @@
 === MATCHED FAILURE CONTEXT ===
-139-ok 3 - R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
-140-  ---
-141-  duration_ms: 0.237716
-142-  type: 'test'
-143-  ...
-144-# Subtest: R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
-145-ok 4 - R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
-146-  ---
-147-  duration_ms: 0.381071
-148-  type: 'test'
-149-  ...
-150-# Subtest: R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
-151-ok 5 - R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
-152-  ---
-153-  duration_ms: 0.326088
-154-  type: 'test'
-155-  ...
-156-# Subtest: R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
-157-ok 6 - R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
-158-  ---
-159-  duration_ms: 0.196415
-160-  type: 'test'
 161-  ...
 162-# Subtest: R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
-163:not ok 7 - R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
+163-ok 7 - R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
 164-  ---
-165-  duration_ms: 1.180178
+165-  duration_ms: 1.926378
 166-  type: 'test'
-167-  location: '/home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:166:1'
-168:  failureType: 'testCodeFailure'
-169-  error: 'SelectionSyncController requires SelectionHighlightSession'
-170:  code: 'ERR_TEST_FAILURE'
-171-  name: 'TypeError'
-172-  stack: |-
-173-    new SelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:34:13)
-174-    createSelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:316:10)
-175-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:177:22)
-176-    Test.runInAsyncScope (node:async_hooks:214:14)
-177-    Test.run (node:internal/test_runner/test:1047:25)
-178-    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
-179-    Test.postRun (node:internal/test_runner/test:1173:19)
-180-    Test.run (node:internal/test_runner/test:1101:12)
-181-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
-182-  ...
-183-# Subtest: R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
-184:not ok 8 - R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
-185-  ---
-186-  duration_ms: 0.197355
-187-  type: 'test'
-188-  location: '/home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:199:1'
-189:  failureType: 'testCodeFailure'
-190-  error: 'SelectionSyncController requires SelectionHighlightSession'
-191:  code: 'ERR_TEST_FAILURE'
-192-  name: 'TypeError'
-193-  stack: |-
-194-    new SelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:34:13)
-195-    createSelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:316:10)
-196-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:205:22)
-197-    Test.runInAsyncScope (node:async_hooks:214:14)
-198-    Test.run (node:internal/test_runner/test:1047:25)
-199-    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
-200-    Test.postRun (node:internal/test_runner/test:1173:19)
-201-    Test.run (node:internal/test_runner/test:1101:12)
-202-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
-203-  ...
-204-1..8
-205-# tests 8
-206-# suites 0
-207-# pass 6
-208:# fail 2
-209-# cancelled 0
-210-# skipped 0
-211-# todo 0
-212-# duration_ms 74.371414
+167-  ...
+168-# Subtest: R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
+169-ok 8 - R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
+170-  ---
+171-  duration_ms: 1.05452
+172-  type: 'test'
+173-  ...
+174-1..8
+175-# tests 8
+176-# suites 0
+177-# pass 8
+178-# fail 0
+179-# cancelled 0
+180-# skipped 0
+181-# todo 0
+182-# duration_ms 79.604005
+183-TAP version 13
+184-# Subtest: R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry
+185:not ok 1 - R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry
+186-  ---
+187-  duration_ms: 8.522763
+188-  type: 'test'
+189-  location: '/home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-feedback-guard.test.mjs:14:1'
+190:  failureType: 'testCodeFailure'
+191-  error: |-
+192-    The input did not match the regular expression /R9-08/. Input:
+193-    
+194-    '/**\n' +
+195-      ' * Responsibility: Public Stage 9 synchronization contract. Prior Stage 9 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.\n' +
+196-      ' * Imports: Public synchronization modules only.\n' +
+197-      ' * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard and the R9-09 Highlight Session classes/factories.\n' +
+198-      ' * State/side effects: None; import-only facade.\n' +
+199-      ' * Lifecycle: None.\n' +
+200-      ' */\n' +
+201-      '\n' +
+202-      'export {\n' +
+203-      '  ScrollSyncController,\n' +
+204-      '  createScrollSyncController\n' +
+205-      "} from './scroll/scroll-sync-controller.js';\n" +
+206-      'export {\n' +
+207-      '  ScrollSourceOwnership,\n' +
+208-      '  createScrollSourceOwnership\n' +
+209-      "} from './scroll/scroll-source-ownership.js';\n" +
+210-      'export {\n' +
+211-      '  EditorScrollMapper,\n' +
+212-      '  createEditorScrollMapper\n' +
+213-      "} from './scroll/editor-scroll-mapper.js';\n" +
+214-      'export {\n' +
+215-      '  PreviewScrollMapper,\n' +
+216-      '  createPreviewScrollMapper\n' +
+217-      "} from './scroll/preview-scroll-mapper.js';\n" +
+218-      'export {\n' +
+219-      '  ScrollGeometrySession,\n' +
+220-      '  createScrollGeometrySession\n' +
+221-      "} from './scroll/scroll-geometry-session.js';\n" +
+222-      'export {\n' +
+223-      '  EditorSelectionReader,\n' +
+224-      '  createEditorSelectionReader\n' +
+225-      "} from './selection/editor-selection-reader.js';\n" +
+226-      'export {\n' +
+227-      '  PreviewSelectionReader,\n' +
+228-      '  createPreviewSelectionReader\n' +
+229-      "} from './selection/preview-selection-reader.js';\n" +
+230-      'export {\n' +
+231-      '  SelectionFeedbackGuard,\n' +
+232-      '  createSelectionFeedbackGuard\n' +
+233-      "} from './selection/selection-feedback-guard.js';\n" +
+234-      'export {\n' +
+235-      '  SelectionHighlightSession,\n' +
+236-      '  createSelectionHighlightSession\n' +
+237-      "} from './selection/selection-highlight-session.js';\n"
+238-    
+239:  code: 'ERR_ASSERTION'
+240:  name: 'AssertionError'
+241-  expected:
+242-  actual: |-
+243-    /**
+244-     * Responsibility: Public Stage 9 synchronization contract. Prior Stage 9 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.
+245-     * Imports: Public synchronization modules only.
+246-     * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard and the R9-09 Highlight Session classes/factories.
+247-     * State/side effects: None; import-only facade.
+248-     * Lifecycle: None.
+249-     */
+250-    
+251-    export {
+252-      ScrollSyncController,
+253-      createScrollSyncController
+254-    } from './scroll/scroll-sync-controller.js';
+255-    export {
+256-      ScrollSourceOwnership,
+257-      createScrollSourceOwnership
+258-    } from './scroll/scroll-source-ownership.js';
+259-    export {
+260-      EditorScrollMapper,
+261-      createEditorScrollMapper
+262-    } from './scroll/editor-scroll-mapper.js';
+263-    export {
+264-      PreviewScrollMapper,
+265-      createPreviewScrollMapper
+266-    } from './scroll/preview-scroll-mapper.js';
+267-    export {
+268-      ScrollGeometrySession,
+269-      createScrollGeometrySession
+270-    } from './scroll/scroll-geometry-session.js';
+271-    export {
+272-      EditorSelectionReader,
+273-      createEditorSelectionReader
+274-    } from './selection/editor-selection-reader.js';
+275-    export {
+276-      PreviewSelectionReader,
+277-      createPreviewSelectionReader
+278-    } from './selection/preview-selection-reader.js';
+279-    export {
+280-      SelectionFeedbackGuard,
+281-      createSelectionFeedbackGuard
+282-    } from './selection/selection-feedback-guard.js';
+283-    export {
+284-      SelectionHighlightSession,
+285-      createSelectionHighlightSession
+286-    } from './selection/selection-highlight-session.js';
+287-    
+288-  operator: 'match'
+--
+316-  type: 'test'
+317-  ...
+318-# Subtest: R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-10+
+319-ok 6 - R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-10+
+320-  ---
+321-  duration_ms: 3.028498
+322-  type: 'test'
+323-  ...
+324-# Subtest: R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth
+325-ok 7 - R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth
+326-  ---
+327-  duration_ms: 2.046894
+328-  type: 'test'
+329-  ...
+330-# Subtest: R9-08 keeps Reader ownership separate from feedback policy and leaves later Selection modules absent
+331-ok 8 - R9-08 keeps Reader ownership separate from feedback policy and leaves later Selection modules absent
+332-  ---
+333-  duration_ms: 2.312051
+334-  type: 'test'
+335-  ...
+336-1..8
+337-# tests 8
+338-# suites 0
+339-# pass 7
+340:# fail 1
+341-# cancelled 0
+342-# skipped 0
+343-# todo 0
+344-# duration_ms 83.034055
 
 === VALIDATION TAIL ===
-
-added 153 packages, and audited 154 packages in 5s
-
-11 packages are looking for funding
-  run `npm fund` for details
-
-found 0 vulnerabilities
-found 0 vulnerabilities
-TAP version 13
-# Subtest: R9-09 Highlight Session owns CSS Highlight multi-Range publication and exact range state
-ok 1 - R9-09 Highlight Session owns CSS Highlight multi-Range publication and exact range state
-  ---
-  duration_ms: 2.037132
-  type: 'test'
-  ...
-# Subtest: R9-09 Highlight Session replaces old CSS ranges and atomic classes through one authority
-ok 2 - R9-09 Highlight Session replaces old CSS ranges and atomic classes through one authority
-  ---
-  duration_ms: 0.298827
-  type: 'test'
-  ...
-# Subtest: R9-09 Highlight Session provides the legacy single-text fallback when CSS Highlight is unavailable and clear restores text
-ok 3 - R9-09 Highlight Session provides the legacy single-text fallback when CSS Highlight is unavailable and clear restores text
-  ---
-  duration_ms: 0.501632
-  type: 'test'
-  ...
-# Subtest: R9-09 Highlight Session rejects unsupported multi-Range fallback and ranges outside preview without side effects
-ok 4 - R9-09 Highlight Session rejects unsupported multi-Range fallback and ranges outside preview without side effects
-  ---
-  duration_ms: 0.244056
-  type: 'test'
-  ...
-# Subtest: R9-09 Highlight Session restores fresh ranges and atomic elements after virtual remount without retry scheduling
-ok 5 - R9-09 Highlight Session restores fresh ranges and atomic elements after virtual remount without retry scheduling
-  ---
-  duration_ms: 0.391056
-  type: 'test'
-  ...
-# Subtest: R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
-ok 6 - R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
-  ---
-  duration_ms: 0.332167
-  type: 'test'
-  ...
-# Subtest: R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
-ok 7 - R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
-  ---
-  duration_ms: 0.205838
-  type: 'test'
-  ...
-# Subtest: R9-09 Highlight Session destroy clears every effect and is terminal idempotent
-ok 8 - R9-09 Highlight Session destroy clears every effect and is terminal idempotent
-  ---
-  duration_ms: 0.517245
-  type: 'test'
-  ...
-1..8
-# tests 8
-# suites 0
-# pass 8
-# fail 0
-# cancelled 0
-# skipped 0
-# todo 0
-# duration_ms 74.468029
-TAP version 13
-# Subtest: R9-09 creates canonical SelectionHighlightSession and exports it only through the Sync public entry
-ok 1 - R9-09 creates canonical SelectionHighlightSession and exports it only through the Sync public entry
-  ---
-  duration_ms: 5.955321
-  type: 'test'
-  ...
-# Subtest: R9-09 Highlight Session owns highlight effects/remount intent only and contains no mapping feedback retry scroll or event authority
-ok 2 - R9-09 Highlight Session owns highlight effects/remount intent only and contains no mapping feedback retry scroll or event authority
-  ---
-  duration_ms: 1.035181
-  type: 'test'
-  ...
-# Subtest: R9-09 classic selection mapping only builds plans and delegates all CSS/class/text highlight effects to the scoped Session
-ok 3 - R9-09 classic selection mapping only builds plans and delegates all CSS/class/text highlight effects to the scoped Session
-  ---
-  duration_ms: 2.999803
-  type: 'test'
   ...
 # Subtest: R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
 ok 4 - R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
   ---
-  duration_ms: 1.847147
+  duration_ms: 1.954963
   type: 'test'
   ...
 # Subtest: R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
 ok 5 - R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
   ---
-  duration_ms: 0.999537
+  duration_ms: 1.401418
   type: 'test'
   ...
 # Subtest: R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
 ok 6 - R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
   ---
-  duration_ms: 2.246195
+  duration_ms: 2.581863
   type: 'test'
   ...
 # Subtest: R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
 ok 7 - R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
   ---
-  duration_ms: 1.670583
+  duration_ms: 1.597645
   type: 'test'
   ...
 # Subtest: R9-09 production inventory records one Highlight Session responsibility and cardinality 380
 ok 8 - R9-09 production inventory records one Highlight Session responsibility and cardinality 380
   ---
-  duration_ms: 1.640142
+  duration_ms: 1.724682
   type: 'test'
   ...
 1..8
@@ -198,92 +198,224 @@ ok 8 - R9-09 production inventory records one Highlight Session responsibility a
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 73.92722
+# duration_ms 75.970498
 TAP version 13
 # Subtest: R9-08 Feedback Guard begins immutable sequence/source/revision transactions and validates sources
 ok 1 - R9-08 Feedback Guard begins immutable sequence/source/revision transactions and validates sources
   ---
-  duration_ms: 1.863571
+  duration_ms: 1.987093
   type: 'test'
   ...
 # Subtest: R9-08 Feedback Guard blocks opposite-side feedback and optional same-source reentrancy without one boolean lock
 ok 2 - R9-08 Feedback Guard blocks opposite-side feedback and optional same-source reentrancy without one boolean lock
   ---
-  duration_ms: 0.189163
+  duration_ms: 0.198461
   type: 'test'
   ...
 # Subtest: R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
 ok 3 - R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
   ---
-  duration_ms: 0.237716
+  duration_ms: 0.256168
   type: 'test'
   ...
 # Subtest: R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
 ok 4 - R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
   ---
-  duration_ms: 0.381071
+  duration_ms: 0.356566
   type: 'test'
   ...
 # Subtest: R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
 ok 5 - R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
   ---
-  duration_ms: 0.326088
+  duration_ms: 0.362167
   type: 'test'
   ...
 # Subtest: R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
 ok 6 - R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
   ---
-  duration_ms: 0.196415
+  duration_ms: 0.215523
   type: 'test'
   ...
 # Subtest: R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
-not ok 7 - R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
+ok 7 - R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
   ---
-  duration_ms: 1.180178
+  duration_ms: 1.926378
   type: 'test'
-  location: '/home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:166:1'
-  failureType: 'testCodeFailure'
-  error: 'SelectionSyncController requires SelectionHighlightSession'
-  code: 'ERR_TEST_FAILURE'
-  name: 'TypeError'
-  stack: |-
-    new SelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:34:13)
-    createSelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:316:10)
-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:177:22)
-    Test.runInAsyncScope (node:async_hooks:214:14)
-    Test.run (node:internal/test_runner/test:1047:25)
-    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
-    Test.postRun (node:internal/test_runner/test:1173:19)
-    Test.run (node:internal/test_runner/test:1101:12)
-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
 # Subtest: R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
-not ok 8 - R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
+ok 8 - R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
   ---
-  duration_ms: 0.197355
+  duration_ms: 1.05452
   type: 'test'
-  location: '/home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:199:1'
-  failureType: 'testCodeFailure'
-  error: 'SelectionSyncController requires SelectionHighlightSession'
-  code: 'ERR_TEST_FAILURE'
-  name: 'TypeError'
-  stack: |-
-    new SelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:34:13)
-    createSelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:316:10)
-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:205:22)
-    Test.runInAsyncScope (node:async_hooks:214:14)
-    Test.run (node:internal/test_runner/test:1047:25)
-    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
-    Test.postRun (node:internal/test_runner/test:1173:19)
-    Test.run (node:internal/test_runner/test:1101:12)
-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
   ...
 1..8
 # tests 8
 # suites 0
-# pass 6
-# fail 2
+# pass 8
+# fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 74.371414
+# duration_ms 79.604005
+TAP version 13
+# Subtest: R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry
+not ok 1 - R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry
+  ---
+  duration_ms: 8.522763
+  type: 'test'
+  location: '/home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-feedback-guard.test.mjs:14:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /R9-08/. Input:
+    
+    '/**\n' +
+      ' * Responsibility: Public Stage 9 synchronization contract. Prior Stage 9 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.\n' +
+      ' * Imports: Public synchronization modules only.\n' +
+      ' * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard and the R9-09 Highlight Session classes/factories.\n' +
+      ' * State/side effects: None; import-only facade.\n' +
+      ' * Lifecycle: None.\n' +
+      ' */\n' +
+      '\n' +
+      'export {\n' +
+      '  ScrollSyncController,\n' +
+      '  createScrollSyncController\n' +
+      "} from './scroll/scroll-sync-controller.js';\n" +
+      'export {\n' +
+      '  ScrollSourceOwnership,\n' +
+      '  createScrollSourceOwnership\n' +
+      "} from './scroll/scroll-source-ownership.js';\n" +
+      'export {\n' +
+      '  EditorScrollMapper,\n' +
+      '  createEditorScrollMapper\n' +
+      "} from './scroll/editor-scroll-mapper.js';\n" +
+      'export {\n' +
+      '  PreviewScrollMapper,\n' +
+      '  createPreviewScrollMapper\n' +
+      "} from './scroll/preview-scroll-mapper.js';\n" +
+      'export {\n' +
+      '  ScrollGeometrySession,\n' +
+      '  createScrollGeometrySession\n' +
+      "} from './scroll/scroll-geometry-session.js';\n" +
+      'export {\n' +
+      '  EditorSelectionReader,\n' +
+      '  createEditorSelectionReader\n' +
+      "} from './selection/editor-selection-reader.js';\n" +
+      'export {\n' +
+      '  PreviewSelectionReader,\n' +
+      '  createPreviewSelectionReader\n' +
+      "} from './selection/preview-selection-reader.js';\n" +
+      'export {\n' +
+      '  SelectionFeedbackGuard,\n' +
+      '  createSelectionFeedbackGuard\n' +
+      "} from './selection/selection-feedback-guard.js';\n" +
+      'export {\n' +
+      '  SelectionHighlightSession,\n' +
+      '  createSelectionHighlightSession\n' +
+      "} from './selection/selection-highlight-session.js';\n"
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    /**
+     * Responsibility: Public Stage 9 synchronization contract. Prior Stage 9 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.
+     * Imports: Public synchronization modules only.
+     * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard and the R9-09 Highlight Session classes/factories.
+     * State/side effects: None; import-only facade.
+     * Lifecycle: None.
+     */
+    
+    export {
+      ScrollSyncController,
+      createScrollSyncController
+    } from './scroll/scroll-sync-controller.js';
+    export {
+      ScrollSourceOwnership,
+      createScrollSourceOwnership
+    } from './scroll/scroll-source-ownership.js';
+    export {
+      EditorScrollMapper,
+      createEditorScrollMapper
+    } from './scroll/editor-scroll-mapper.js';
+    export {
+      PreviewScrollMapper,
+      createPreviewScrollMapper
+    } from './scroll/preview-scroll-mapper.js';
+    export {
+      ScrollGeometrySession,
+      createScrollGeometrySession
+    } from './scroll/scroll-geometry-session.js';
+    export {
+      EditorSelectionReader,
+      createEditorSelectionReader
+    } from './selection/editor-selection-reader.js';
+    export {
+      PreviewSelectionReader,
+      createPreviewSelectionReader
+    } from './selection/preview-selection-reader.js';
+    export {
+      SelectionFeedbackGuard,
+      createSelectionFeedbackGuard
+    } from './selection/selection-feedback-guard.js';
+    export {
+      SelectionHighlightSession,
+      createSelectionHighlightSession
+    } from './selection/selection-highlight-session.js';
+    
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-feedback-guard.test.mjs:17:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: R9-08 Feedback Guard owns sequence source revision and release lifecycle without DOM mapping highlight retry or scroll policy
+ok 2 - R9-08 Feedback Guard owns sequence source revision and release lifecycle without DOM mapping highlight retry or scroll policy
+  ---
+  duration_ms: 2.294667
+  type: 'test'
+  ...
+# Subtest: R9-08 legacy SelectionSyncController consumes the Guard and no longer owns applying-side release or preview revision duplicates
+ok 3 - R9-08 legacy SelectionSyncController consumes the Guard and no longer owns applying-side release or preview revision duplicates
+  ---
+  duration_ms: 2.841697
+  type: 'test'
+  ...
+# Subtest: R9-08 classic selection compatibility consumes the scoped Guard and deletes the cross-file selectionSyncLock authority
+ok 4 - R9-08 classic selection compatibility consumes the scoped Guard and deletes the cross-file selectionSyncLock authority
+  ---
+  duration_ms: 1.898055
+  type: 'test'
+  ...
+# Subtest: R9-08 composition creates exactly one Guard injects it into Controller and scoped compatibility then destroys it
+ok 5 - R9-08 composition creates exactly one Guard injects it into Controller and scoped compatibility then destroys it
+  ---
+  duration_ms: 2.268539
+  type: 'test'
+  ...
+# Subtest: R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-10+
+ok 6 - R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-10+
+  ---
+  duration_ms: 3.028498
+  type: 'test'
+  ...
+# Subtest: R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth
+ok 7 - R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth
+  ---
+  duration_ms: 2.046894
+  type: 'test'
+  ...
+# Subtest: R9-08 keeps Reader ownership separate from feedback policy and leaves later Selection modules absent
+ok 8 - R9-08 keeps Reader ownership separate from feedback policy and leaves later Selection modules absent
+  ---
+  duration_ms: 2.312051
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 7
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 83.034055
