@@ -1,7 +1,7 @@
 /**
- * Responsibility: Public Stage 9 synchronization contract. R9-06 adds ScrollGeometrySession beside the Scroll Controller, sole source owner, R9-04 EditorScrollMapper and R9-05 PreviewScrollMapper; selection responsibilities remain later Atomic Tasks.
+ * Responsibility: Public Stage 9 synchronization contract. R9-04 EditorScrollMapper, R9-05 PreviewScrollMapper and R9-06 ScrollGeometrySession remain frozen while R9-07 adds EditorSelectionReader and PreviewSelectionReader; later selection policy remains unmigrated.
  * Imports: Public synchronization modules only.
- * Exports: Scroll controller, source ownership, editor/preview mappers and geometry session classes/factories.
+ * Exports: Scroll controller, source ownership, editor/preview mappers, geometry session and R9-07 selection reader classes/factories.
  * State/side effects: None; import-only facade.
  * Lifecycle: None.
  */
@@ -26,3 +26,11 @@ export {
   ScrollGeometrySession,
   createScrollGeometrySession
 } from './scroll/scroll-geometry-session.js';
+export {
+  EditorSelectionReader,
+  createEditorSelectionReader
+} from './selection/editor-selection-reader.js';
+export {
+  PreviewSelectionReader,
+  createPreviewSelectionReader
+} from './selection/preview-selection-reader.js';

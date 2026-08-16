@@ -4,22 +4,27 @@ function nextFrame(callback) {
   return requestAnimationFrame(() => callback());
 }
 
-function selectionInside(preview) {
-  const selection = window.getSelection?.();
-  if (!selection || selection.isCollapsed || !selection.toString().trim()) return false;
-  return Boolean(preview.contains(selection.anchorNode) && preview.contains(selection.focusNode));
-}
-
 export class SelectionSyncController {
-  constructor(editor, preview) {
+  constructor(editor, preview, { editorSelectionReader, previewSelectionReader } = {}) {
+    if (!editorSelectionReader || typeof editorSelectionReader.read !== 'function') {
+      throw new TypeError('SelectionSyncController requires EditorSelectionReader');
+    }
+    if (!previewSelectionReader
+      || typeof previewSelectionReader.read !== 'function'
+      || typeof previewSelectionReader.subscribe !== 'function'
+      || typeof previewSelectionReader.start !== 'function'
+      || typeof previewSelectionReader.stop !== 'function') {
+      throw new TypeError('SelectionSyncController requires PreviewSelectionReader');
+    }
     this.editor = editor;
     this.preview = preview;
+    this.editorSelectionReader = editorSelectionReader;
+    this.previewSelectionReader = previewSelectionReader;
+    this.previewSelectionDisposer = null;
     this.callbacks = {};
     this.started = false;
     this.applyingSide = '';
     this.editorPointerActive = false;
-    this.previewPointerActive = false;
-    this.previewSelectionDirty = false;
     this.editorFrame = 0;
     this.previewFrame = 0;
     this.releaseTimer = 0;
@@ -39,37 +44,26 @@ export class SelectionSyncController {
 
     this.onEditorSelect = () => this.scheduleEditor(false, 'editor-select');
     this.onEditorKeyUp = event => {
-      const hasSelection = (this.editor.selectionStart || 0) !== (this.editor.selectionEnd || 0);
+      const selection = this.editorSelectionReader.read();
+      const hasSelection = Boolean(selection && !selection.isCollapsed);
       if (event.shiftKey || hasSelection) this.scheduleEditor(Boolean(event.shiftKey), 'editor-keyup');
     };
     this.onEditorPointerDown = () => {
       this.editorPointerActive = true;
-    };
-    this.onPreviewPointerDown = () => {
-      this.previewPointerActive = true;
-      this.previewSelectionDirty = false;
     };
     this.onDocumentPointerUp = () => {
       if (this.editorPointerActive) {
         this.editorPointerActive = false;
         this.scheduleEditor(true, 'editor-pointerup', { force: true, frames: 1 });
       }
-      if (this.previewPointerActive) {
-        this.previewPointerActive = false;
-        this.schedulePreview('preview-pointerup', { force: true, frames: 2 });
-      }
     };
-    this.onDocumentSelectionChange = () => {
+    this.onStablePreviewSelection = ({ reason = 'preview-selection', force = false, snapshot = null } = {}) => {
       if (this.applyingSide) {
         this.stats.ignoredFeedbackEvents += 1;
         return;
       }
-      if (!selectionInside(this.preview)) return;
-      if (this.previewPointerActive) {
-        this.previewSelectionDirty = true;
-        return;
-      }
-      this.schedulePreview('document-selectionchange', { frames: 1 });
+      this.stats.previewRequests += 1;
+      this.runPreview(reason, Boolean(force), snapshot, true);
     };
     this.onPreviewKeyUp = () => this.schedulePreview('preview-keyup', { force: true, frames: 1 });
   }
@@ -81,15 +75,21 @@ export class SelectionSyncController {
 
   start() {
     if (this.started) return this;
+    const disposePreviewSelection = this.previewSelectionReader.subscribe(this.onStablePreviewSelection);
+    try {
+      this.previewSelectionReader.start();
+    } catch (error) {
+      disposePreviewSelection();
+      throw error;
+    }
+    this.previewSelectionDisposer = disposePreviewSelection;
     this.started = true;
     this.editor.addEventListener('select', this.onEditorSelect);
     this.editor.addEventListener('keyup', this.onEditorKeyUp);
     this.editor.addEventListener('pointerdown', this.onEditorPointerDown, true);
-    this.preview.addEventListener('pointerdown', this.onPreviewPointerDown, true);
     this.preview.addEventListener('keyup', this.onPreviewKeyUp);
     document.addEventListener('pointerup', this.onDocumentPointerUp, true);
     document.addEventListener('pointercancel', this.onDocumentPointerUp, true);
-    document.addEventListener('selectionchange', this.onDocumentSelectionChange);
     return this;
   }
 
@@ -103,16 +103,17 @@ export class SelectionSyncController {
     this.editor.removeEventListener('select', this.onEditorSelect);
     this.editor.removeEventListener('keyup', this.onEditorKeyUp);
     this.editor.removeEventListener('pointerdown', this.onEditorPointerDown, true);
-    this.preview.removeEventListener('pointerdown', this.onPreviewPointerDown, true);
     this.preview.removeEventListener('keyup', this.onPreviewKeyUp);
     document.removeEventListener('pointerup', this.onDocumentPointerUp, true);
     document.removeEventListener('pointercancel', this.onDocumentPointerUp, true);
-    document.removeEventListener('selectionchange', this.onDocumentSelectionChange);
+    this.previewSelectionReader.stop();
+    this.previewSelectionDisposer?.();
+    this.previewSelectionDisposer = null;
   }
 
-  makeEditorKey() {
-    const from = Math.min(this.editor.selectionStart || 0, this.editor.selectionEnd || 0);
-    const to = Math.max(this.editor.selectionStart || 0, this.editor.selectionEnd || 0);
+  makeEditorKey(selection = this.editorSelectionReader.read()) {
+    const from = Number(selection?.from) || 0;
+    const to = Math.max(from, Number(selection?.to) || 0);
     const documentVersion = window.markdownEditorDocumentModel?.getState?.().version || 0;
     return `${documentVersion}:${from}:${to}:${this.previewRevision}`;
   }
@@ -141,12 +142,13 @@ export class SelectionSyncController {
 
   runEditor(shouldScroll, reason, force, attempt) {
     if (this.applyingSide === 'preview') return;
-    const key = this.makeEditorKey();
+    const selection = this.editorSelectionReader.read();
+    const key = this.makeEditorKey(selection);
     if (!force && key === this.lastEditorKey) return;
     this.applyingSide = 'editor';
     let result = null;
     try {
-      result = this.callbacks.syncEditorToPreview?.({ shouldScroll, reason, attempt }) || { status: 'unconfigured' };
+      result = this.callbacks.syncEditorToPreview?.({ shouldScroll, reason, attempt, selection }) || { status: 'unconfigured' };
       this.lastEditorKey = key;
     } finally {
       this.releaseApplyingSide();
@@ -182,15 +184,16 @@ export class SelectionSyncController {
     this.previewFrame = nextFrame(run);
   }
 
-  runPreview(reason, force) {
-    if (this.applyingSide === 'editor' || !selectionInside(this.preview)) return;
-    const selection = window.getSelection();
-    const key = `${selection?.toString() || ''}:${selection?.anchorOffset || 0}:${selection?.focusOffset || 0}`;
+  runPreview(reason, force, snapshot = null, snapshotProvided = false) {
+    if (this.applyingSide === 'editor') return;
+    const selection = snapshotProvided ? snapshot : this.previewSelectionReader.read();
+    if (!selection) return;
+    const key = `${selection.text || ''}:${selection.anchorOffset || 0}:${selection.focusOffset || 0}`;
     if (!force && key === this.lastPreviewKey) return;
     this.applyingSide = 'preview';
     let result = null;
     try {
-      result = this.callbacks.syncPreviewToEditor?.({ reason }) || { status: 'unconfigured' };
+      result = this.callbacks.syncPreviewToEditor?.({ reason, selection }) || { status: 'unconfigured' };
       if (result?.status === 'mapped') this.lastPreviewKey = key;
     } finally {
       this.releaseApplyingSide(96);
@@ -209,9 +212,8 @@ export class SelectionSyncController {
   notifyPreviewMounted(reason = 'preview-mounted') {
     this.previewRevision += 1;
     if (this.applyingSide === 'editor') return;
-    const from = Math.min(this.editor.selectionStart || 0, this.editor.selectionEnd || 0);
-    const to = Math.max(this.editor.selectionStart || 0, this.editor.selectionEnd || 0);
-    if (from === to) return;
+    const editorSelection = this.editorSelectionReader.read();
+    if (!editorSelection || editorSelection.isCollapsed) return;
     this.stats.previewRefreshes += 1;
     const shouldRealign = performance.now() < this.editorAlignmentUntil;
     this.scheduleEditor(shouldRealign, reason, { force: true, frames: 1, extendAlignment: false });
@@ -224,20 +226,13 @@ export class SelectionSyncController {
   notifyEditorGeometry(reason = 'editor-geometry') {
     if (this.applyingSide) return;
     this.stats.editorGeometryRefreshes += 1;
-    const previewSelection = window.getSelection?.();
-    const previewSelectionActive = Boolean(
-      previewSelection
-      && !previewSelection.isCollapsed
-      && this.preview.contains(previewSelection.anchorNode)
-      && this.preview.contains(previewSelection.focusNode)
-    );
-    if (previewSelectionActive) {
+    const previewSelection = this.previewSelectionReader.read();
+    if (previewSelection) {
       this.schedulePreview(reason, { force: true, frames: 2 });
       return;
     }
-    const from = Math.min(this.editor.selectionStart || 0, this.editor.selectionEnd || 0);
-    const to = Math.max(this.editor.selectionStart || 0, this.editor.selectionEnd || 0);
-    if (from !== to) {
+    const editorSelection = this.editorSelectionReader.read();
+    if (editorSelection && !editorSelection.isCollapsed) {
       this.scheduleEditor(true, reason, { force: true, frames: 2, extendAlignment: false });
     }
   }
@@ -306,6 +301,6 @@ export class SelectionSyncController {
   }
 }
 
-export function createSelectionSyncController(editor, preview) {
-  return new SelectionSyncController(editor, preview);
+export function createSelectionSyncController(editor, preview, options = {}) {
+  return new SelectionSyncController(editor, preview, options);
 }

@@ -44,6 +44,7 @@ import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
+import { createEditorSelectionReader, createPreviewSelectionReader } from './features/sync/index.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {
@@ -296,7 +297,37 @@ async function loadAppModules() {
   });
   window.markdownEditorScrollController = scrollController;
   window.markdownEditorScrollSync = scrollController.getPublicApi();
-  window.markdownEditorSelectionController = createSelectionSyncController(editorHost, previewHost);
+  const editorSelectionReader = createEditorSelectionReader({ editorApi: virtualEditor });
+  const previewSelectionDocument = previewHost.ownerDocument;
+  const previewSelectionView = previewSelectionDocument?.defaultView;
+  const previewSelectionReader = createPreviewSelectionReader({
+    previewElement: previewHost,
+    documentRef: previewSelectionDocument,
+    getSelection: () => previewSelectionView?.getSelection?.() || null,
+    requestFrame: callback => window.requestAnimationFrame(callback),
+    cancelFrame: frameId => window.cancelAnimationFrame(frameId)
+  });
+  if (compatibilityPlatformHost) {
+    compatibilityPlatformHost.markdownEditorEditorSelectionReader = editorSelectionReader;
+    compatibilityPlatformHost.markdownEditorPreviewSelectionReader = previewSelectionReader;
+  }
+  const selectionController = createSelectionSyncController(editorHost, previewHost, {
+    editorSelectionReader,
+    previewSelectionReader
+  });
+  window.markdownEditorSelectionController = selectionController;
+  const destroySelectionReaders = () => {
+    selectionController.stop();
+    if (compatibilityPlatformHost?.markdownEditorEditorSelectionReader === editorSelectionReader) {
+      delete compatibilityPlatformHost.markdownEditorEditorSelectionReader;
+    }
+    if (compatibilityPlatformHost?.markdownEditorPreviewSelectionReader === previewSelectionReader) {
+      delete compatibilityPlatformHost.markdownEditorPreviewSelectionReader;
+    }
+    previewSelectionReader.destroy();
+    editorSelectionReader.destroy();
+  };
+  window.addEventListener('pagehide', destroySelectionReaders, { once: true });
   const documentModel = createDocumentModel(editorHost);
   let editorScrollMapper = null;
   try {

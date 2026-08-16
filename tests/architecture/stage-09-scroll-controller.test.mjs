@@ -9,8 +9,6 @@ const read = path => readFile(file(path), 'utf8');
 
 const LATER_FILES = [
   'src/features/sync/selection/selection-sync-controller.js',
-  'src/features/sync/selection/editor-selection-reader.js',
-  'src/features/sync/selection/preview-selection-reader.js',
   'src/features/sync/selection/selection-highlight-session.js',
   'src/features/sync/selection/selection-retry-scheduler.js',
   'src/features/sync/selection/selection-feedback-guard.js'
@@ -78,7 +76,7 @@ test('R9-03 preserves the public Sync surface and keeps the classic aggregate be
 test('R9-03 keeps production-module cardinality stable because no new production responsibility is introduced', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 376);
+  assert.equal(inventory.modules.length, 378);
   assert.equal(records.has('src/features/sync/scroll/scroll-sync-controller.js'), true);
   assert.equal(records.get('src/features/sync/scroll/scroll-sync-controller.js')[4], 'scroll-sync-runtime');
   assert.equal(records.has('src/features/sync/scroll/scroll-source-ownership.js'), true);

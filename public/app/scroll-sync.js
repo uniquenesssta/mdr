@@ -4,11 +4,15 @@
     const scrollSyncEditorUiCommandPort = scrollSyncCompatibilityHost?.markdownEditorEditorUiCommandPort;
     const scrollSyncPreviewCommandPort = scrollSyncCompatibilityHost?.markdownEditorPreviewCommandPort;
     const scrollSyncPresentationPort = scrollSyncCompatibilityHost?.markdownEditorPresentationPort;
+    const editorSelectionReader = scrollSyncCompatibilityHost?.markdownEditorEditorSelectionReader;
+    const previewSelectionReader = scrollSyncCompatibilityHost?.markdownEditorPreviewSelectionReader;
     if (!scrollSyncLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!scrollSyncOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
     if (!scrollSyncEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
     if (!scrollSyncPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
     if (!scrollSyncPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
+    if (!editorSelectionReader) throw new Error('Editor Selection Reader compatibility capability is unavailable.');
+    if (!previewSelectionReader) throw new Error('Preview Selection Reader compatibility capability is unavailable.');
     const SYNC_VIEWPORT_RATIO = 0.38;
     const SELECTION_VIEWPORT_RATIO = 0.5;
     const SELECTION_SAFE_EDGE_MIN_PX = 32;
@@ -664,10 +668,11 @@
       };
     }
 
-    function syncEditorSelectionToPreview(shouldScroll = false, reason = 'editor-selection') {
+    function syncEditorSelectionToPreview(shouldScroll = false, reason = 'editor-selection', selectionSnapshot = null) {
       if (selectionSyncLock) return { status: 'locked', selectionLength: 0, matchedAnchors: 0 };
-      const start = editor.selectionStart || 0;
-      const end = editor.selectionEnd || 0;
+      const editorSelection = selectionSnapshot || editorSelectionReader.read();
+      const start = editorSelection?.from || 0;
+      const end = editorSelection?.to || 0;
       const cursorLine = editor.virtualEditor
         ? editor.virtualEditor.getLineNumberAtPosition(start)
         : getLineNumberAtIndex(editor.value, start);
@@ -760,11 +765,11 @@
       );
     }
 
-    function getPreviewSelectionContext() {
-      const selection = window.getSelection();
-      if (!selection || selection.isCollapsed || !selection.toString().trim()) return null;
-      if (!preview.contains(selection.anchorNode) || !preview.contains(selection.focusNode)) return null;
-      const range = selection.getRangeAt(0);
+    function getPreviewSelectionContext(selectionSnapshot = previewSelectionReader.read()) {
+      const selection = selectionSnapshot;
+      if (!selection) return null;
+      const range = selection.range;
+      if (!range) return null;
       const selectionRect = getRangeViewportRect(range);
       const viewportRatio = getRectViewportRatio(preview, selectionRect);
       const startAnchor = closestPreviewSourceAnchor(range.startContainer);
@@ -788,7 +793,7 @@
         'end'
       );
       return {
-        text: selection.toString(),
+        text: selection.text,
         range,
         startAnchor,
         endAnchor,
@@ -946,8 +951,8 @@
       return best;
     }
 
-    function syncPreviewSelectionToEditor(reason = 'preview-selection') {
-      const context = getPreviewSelectionContext();
+    function syncPreviewSelectionToEditor(reason = 'preview-selection', selectionSnapshot = null) {
+      const context = getPreviewSelectionContext(selectionSnapshot || previewSelectionReader.read());
       if (!context) return { status: 'no-selection', selectionLength: 0, matchedAnchors: 0 };
       const range = findMarkdownRangeForPreviewSelection(context);
       if (!range) {
@@ -1007,8 +1012,8 @@
     const selectionController = window.markdownEditorSelectionController;
     if (!selectionController) throw new Error('Selection controller is not initialized');
     selectionController.configure({
-      syncEditorToPreview: ({ shouldScroll, reason }) => syncEditorSelectionToPreview(shouldScroll, reason),
-      syncPreviewToEditor: ({ reason }) => syncPreviewSelectionToEditor(reason),
+      syncEditorToPreview: ({ shouldScroll, reason, selection }) => syncEditorSelectionToPreview(shouldScroll, reason, selection),
+      syncPreviewToEditor: ({ reason, selection }) => syncPreviewSelectionToEditor(reason, selection),
       clearPreview: clearPreviewSelectionHighlights
     }).start();
 
@@ -1024,18 +1029,13 @@
         selectionLayoutTimer = 0;
         const controller = window.markdownEditorSelectionController;
         if (!controller) return;
-        const previewSelection = window.getSelection?.();
-        const previewSelectionActive = Boolean(
-          previewSelection
-          && !previewSelection.isCollapsed
-          && preview.contains(previewSelection.anchorNode)
-          && preview.contains(previewSelection.focusNode)
-        );
-        if (previewSelectionActive) {
+        const previewSelection = previewSelectionReader.read();
+        if (previewSelection) {
           controller.schedulePreview(reason, { force: true, frames: 2 });
           return;
         }
-        if ((editor.selectionStart || 0) !== (editor.selectionEnd || 0)) {
+        const editorSelection = editorSelectionReader.read();
+        if (editorSelection && !editorSelection.isCollapsed) {
           controller.scheduleEditor(true, reason, { force: true, frames: 2 });
         }
       }, scrollSyncLayoutStatePort.isResizing ? 220 : SELECTION_LAYOUT_SETTLE_MS);
