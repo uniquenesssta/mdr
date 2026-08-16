@@ -1,421 +1,317 @@
 === MATCHED FAILURE CONTEXT ===
-161-  ...
-162-# Subtest: R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
-163-ok 7 - R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
-164-  ---
-165-  duration_ms: 1.926378
-166-  type: 'test'
-167-  ...
-168-# Subtest: R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
-169-ok 8 - R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
-170-  ---
-171-  duration_ms: 1.05452
-172-  type: 'test'
-173-  ...
-174-1..8
-175-# tests 8
-176-# suites 0
-177-# pass 8
-178-# fail 0
-179-# cancelled 0
-180-# skipped 0
-181-# todo 0
-182-# duration_ms 79.604005
-183-TAP version 13
-184-# Subtest: R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry
-185:not ok 1 - R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry
-186-  ---
-187-  duration_ms: 8.522763
-188-  type: 'test'
-189-  location: '/home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-feedback-guard.test.mjs:14:1'
-190:  failureType: 'testCodeFailure'
-191-  error: |-
-192-    The input did not match the regular expression /R9-08/. Input:
-193-    
-194-    '/**\n' +
-195-      ' * Responsibility: Public Stage 9 synchronization contract. Prior Stage 9 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.\n' +
-196-      ' * Imports: Public synchronization modules only.\n' +
-197-      ' * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard and the R9-09 Highlight Session classes/factories.\n' +
-198-      ' * State/side effects: None; import-only facade.\n' +
-199-      ' * Lifecycle: None.\n' +
-200-      ' */\n' +
-201-      '\n' +
-202-      'export {\n' +
-203-      '  ScrollSyncController,\n' +
-204-      '  createScrollSyncController\n' +
-205-      "} from './scroll/scroll-sync-controller.js';\n" +
-206-      'export {\n' +
-207-      '  ScrollSourceOwnership,\n' +
-208-      '  createScrollSourceOwnership\n' +
-209-      "} from './scroll/scroll-source-ownership.js';\n" +
-210-      'export {\n' +
-211-      '  EditorScrollMapper,\n' +
-212-      '  createEditorScrollMapper\n' +
-213-      "} from './scroll/editor-scroll-mapper.js';\n" +
-214-      'export {\n' +
-215-      '  PreviewScrollMapper,\n' +
-216-      '  createPreviewScrollMapper\n' +
-217-      "} from './scroll/preview-scroll-mapper.js';\n" +
-218-      'export {\n' +
-219-      '  ScrollGeometrySession,\n' +
-220-      '  createScrollGeometrySession\n' +
-221-      "} from './scroll/scroll-geometry-session.js';\n" +
-222-      'export {\n' +
-223-      '  EditorSelectionReader,\n' +
-224-      '  createEditorSelectionReader\n' +
-225-      "} from './selection/editor-selection-reader.js';\n" +
-226-      'export {\n' +
-227-      '  PreviewSelectionReader,\n' +
-228-      '  createPreviewSelectionReader\n' +
-229-      "} from './selection/preview-selection-reader.js';\n" +
-230-      'export {\n' +
-231-      '  SelectionFeedbackGuard,\n' +
-232-      '  createSelectionFeedbackGuard\n' +
-233-      "} from './selection/selection-feedback-guard.js';\n" +
-234-      'export {\n' +
-235-      '  SelectionHighlightSession,\n' +
-236-      '  createSelectionHighlightSession\n' +
-237-      "} from './selection/selection-highlight-session.js';\n"
-238-    
-239:  code: 'ERR_ASSERTION'
-240:  name: 'AssertionError'
-241-  expected:
-242-  actual: |-
-243-    /**
-244-     * Responsibility: Public Stage 9 synchronization contract. Prior Stage 9 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.
-245-     * Imports: Public synchronization modules only.
-246-     * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard and the R9-09 Highlight Session classes/factories.
-247-     * State/side effects: None; import-only facade.
-248-     * Lifecycle: None.
-249-     */
-250-    
-251-    export {
-252-      ScrollSyncController,
-253-      createScrollSyncController
-254-    } from './scroll/scroll-sync-controller.js';
-255-    export {
-256-      ScrollSourceOwnership,
-257-      createScrollSourceOwnership
-258-    } from './scroll/scroll-source-ownership.js';
-259-    export {
-260-      EditorScrollMapper,
-261-      createEditorScrollMapper
-262-    } from './scroll/editor-scroll-mapper.js';
-263-    export {
-264-      PreviewScrollMapper,
-265-      createPreviewScrollMapper
-266-    } from './scroll/preview-scroll-mapper.js';
-267-    export {
-268-      ScrollGeometrySession,
-269-      createScrollGeometrySession
-270-    } from './scroll/scroll-geometry-session.js';
-271-    export {
-272-      EditorSelectionReader,
-273-      createEditorSelectionReader
-274-    } from './selection/editor-selection-reader.js';
-275-    export {
-276-      PreviewSelectionReader,
-277-      createPreviewSelectionReader
-278-    } from './selection/preview-selection-reader.js';
-279-    export {
-280-      SelectionFeedbackGuard,
-281-      createSelectionFeedbackGuard
-282-    } from './selection/selection-feedback-guard.js';
-283-    export {
-284-      SelectionHighlightSession,
-285-      createSelectionHighlightSession
-286-    } from './selection/selection-highlight-session.js';
-287-    
-288-  operator: 'match'
---
-316-  type: 'test'
-317-  ...
-318-# Subtest: R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-10+
-319-ok 6 - R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-10+
-320-  ---
-321-  duration_ms: 3.028498
-322-  type: 'test'
-323-  ...
-324-# Subtest: R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth
-325-ok 7 - R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth
-326-  ---
-327-  duration_ms: 2.046894
-328-  type: 'test'
-329-  ...
-330-# Subtest: R9-08 keeps Reader ownership separate from feedback policy and leaves later Selection modules absent
-331-ok 8 - R9-08 keeps Reader ownership separate from feedback policy and leaves later Selection modules absent
-332-  ---
-333-  duration_ms: 2.312051
-334-  type: 'test'
-335-  ...
-336-1..8
-337-# tests 8
-338-# suites 0
-339-# pass 7
-340:# fail 1
-341-# cancelled 0
-342-# skipped 0
-343-# todo 0
-344-# duration_ms 83.034055
+3518-ok - application link preview uses scoped focus and cancels stale close completion (323ms)
+3519-ok - application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear (3ms)
+3520-ok - application Document Session Controller keeps lifecycle model, session and UI coherent (31ms)
+3521-ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (21ms)
+3522-ok - application switches deterministically across every layout mode (853ms)
+3523-ok - compact shell keeps 860/900 hysteresis and clears resize burst state (335ms)
+3524-ok - application toolbar boundary wraps from measured content width without hiding tools (130ms)
+3525-ok - application page fullscreen uses the Stage 6.6 controller without changing command IDs (36ms)
+3526-ok - application sidebar tabs switch one mount region and coordinate child lifecycles (831ms)
+3527-ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1549ms)
+3528-ok - application shell has no structural overflow or clipped focus across required viewports (5182ms)
+3529-ok - application code block placeholder never receives a phantom source highlight (760ms)
+3530-ok - application code block ignores single click and opens on strict double click (931ms)
+3531-ok - application keeps only one direct editor active (1005ms)
+3532-ok - application Hybrid table pointer input avoids block decoration dispatch races (1447ms)
+3533-ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1375ms)
+3534-ok - application source edit exits when pointer moves outside the source range (1010ms)
+3535-ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (650ms)
+3536-ok - application sidebar resize captures pointer, projects width and persists the final width (323ms)
+3537-ok - application pointer drag maps to exact editor characters (1649ms)
+3538-
+3539-Browser tests: 29, passed: 29, failed: 0
+3540-TAP version 13
+3541-# Subtest: root README is a concise introduction and detailed history lives in docs/README.md
+3542:not ok 1 - root README is a concise introduction and detailed history lives in docs/README.md
+3543-  ---
+3544-  duration_ms: 10.488475
+3545-  type: 'test'
+3546-  location: '/home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:5:1'
+3547:  failureType: 'testCodeFailure'
+3548-  error: |-
+3549-    The expression evaluated to a falsy value:
+3550-    
+3551-      assert.ok(normalizedRootReadme.length >= 120 && normalizedRootReadme.length <= 360)
+3552-    
+3553:  code: 'ERR_ASSERTION'
+3554:  name: 'AssertionError'
+3555-  expected: true
+3556-  actual: false
+3557-  operator: '=='
+3558-  stack: |-
+3559-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:17:10)
+3560-    async Test.run (node:internal/test_runner/test:1054:7)
+3561-    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+3562-  ...
+3563-1..1
+3564-# tests 1
+3565-# suites 0
+3566-# pass 0
+3567:# fail 1
+3568-# cancelled 0
+3569-# skipped 0
+3570-# todo 0
+3571-# duration_ms 64.969776
 
 === VALIDATION TAIL ===
-  ...
-# Subtest: R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
-ok 4 - R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
+# Subtest: R9-07 PreviewSelectionReader stop/destroy remove every listener cancel pending work and remain terminal/idempotent
+ok 210 - R9-07 PreviewSelectionReader stop/destroy remove every listener cancel pending work and remain terminal/idempotent
   ---
-  duration_ms: 1.954963
+  duration_ms: 0.394106
   type: 'test'
   ...
-# Subtest: R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
-ok 5 - R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
+# Subtest: Atomic Task 2.3 sprite has one stable definition for every preserved icon ID
+ok 211 - Atomic Task 2.3 sprite has one stable definition for every preserved icon ID
   ---
-  duration_ms: 1.401418
+  duration_ms: 9.879215
   type: 'test'
   ...
-# Subtest: R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
-ok 6 - R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
+# Subtest: compatibility and dynamic callers reference the external sprite without a second geometry authority
+ok 212 - compatibility and dynamic callers reference the external sprite without a second geometry authority
   ---
-  duration_ms: 2.581863
+  duration_ms: 8.441881
   type: 'test'
   ...
-# Subtest: R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
-ok 7 - R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
+# Subtest: icon-view is a pure generic renderer with decorative and labelled accessibility modes
+ok 213 - icon-view is a pure generic renderer with decorative and labelled accessibility modes
   ---
-  duration_ms: 1.597645
+  duration_ms: 1.276393
   type: 'test'
   ...
-# Subtest: R9-09 production inventory records one Highlight Session responsibility and cardinality 380
-ok 8 - R9-09 production inventory records one Highlight Session responsibility and cardinality 380
+# Subtest: Vite dev server permits only the repository and intentional parent dependency directory
+ok 214 - Vite dev server permits only the repository and intentional parent dependency directory
   ---
-  duration_ms: 1.724682
+  duration_ms: 1.388963
   type: 'test'
   ...
-1..8
-# tests 8
+# Subtest: production bundle budgets remain stricter for startup chunks than lazy vendor chunks
+ok 215 - production bundle budgets remain stricter for startup chunks than lazy vendor chunks
+  ---
+  duration_ms: 0.206185
+  type: 'test'
+  ...
+# Subtest: Windows native window workflow is pinned, isolated and evidence-producing
+ok 216 - Windows native window workflow is pinned, isolated and evidence-producing
+  ---
+  duration_ms: 12.676317
+  type: 'test'
+  ...
+1..216
+# tests 216
 # suites 0
-# pass 8
+# pass 216
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 75.970498
+# duration_ms 10851.713469
+
+> markdown-editor@1.0.0 verify:architecture
+> node scripts/verify-architecture.mjs
+
+[verify-architecture] passed.
+
+> markdown-editor@1.0.0 test:browser:contract
+> node tests/e2e/run-browser-tests.mjs --contract
+
+Browser artifacts: /tmp/markdown-editor-e2e-artifacts-brKCh5
+ok - single click keeps a component presented (20ms)
+ok - strict double click opens direct editing on the same logical target (114ms)
+ok - fast clicks across components never count as a double click (12ms)
+ok - opening another component closes the previous interactive component (185ms)
+ok - source editing closes on an outside pointer action (15ms)
+ok - layout switching closes active component editing (95ms)
+ok - real pointer drag selects only the intended characters (292ms)
+ok - shared Mermaid renderer keeps hybrid and preview SVG normalization identical (4ms)
+ok - folder file tree renders nested readable files, preserves expansion, opens paths, and destroys listeners (199ms)
+ok - temporary compatibility business port mounts and destroys without owning the App Shell (65ms)
+
+Browser tests: 10, passed: 10, failed: 0
+
+> markdown-editor@1.0.0 build
+> vite build
+
+[36mvite v7.3.6 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 2464 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                                       [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[2massets/[22m[32mpreview-worker-C00UZeW-.js                [39m[1m[2m 57.77 kB[22m[1m[22m
+[2mdist/[22m[2massets/[22m[35mmain-Bkm9gdT0.css                         [39m[1m[2m113.51 kB[22m[1m[22m[2m │ gzip:  18.04 kB[22m
+[2mdist/[22m[2massets/[22m[36mchannel-Caa_JJqe.js                       [39m[1m[2m  0.11 kB[22m[1m[22m[2m │ gzip:   0.13 kB[22m
+[2mdist/[22m[2massets/[22m[36m_commonjsHelpers-CqkleIqs.js              [39m[1m[2m  0.12 kB[22m[1m[22m[2m │ gzip:   0.13 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-2Q5K7J3B-BvBCaOon.js                [39m[1m[2m  0.19 kB[22m[1m[22m[2m │ gzip:   0.16 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-JWPE2WC7-BNtdM7C8.js                [39m[1m[2m  0.23 kB[22m[1m[22m[2m │ gzip:   0.17 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-XXDRQBXY-DctihOrD.js                [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-5VM5RSS4-D96Pdkac.js                [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-KBJHAD2P-B72ssKVd.js                [39m[1m[2m  0.51 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[2massets/[22m[36mstateDiagram-v2-UEYNNEHI-Be09SSsK.js      [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2mdist/[22m[2massets/[22m[36mclassDiagram-JCYQIIEL-LANGP9Pw.js         [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[2massets/[22m[36mclassDiagram-v2-OCEON4UE-LANGP9Pw.js      [39m[1m[2m  0.61 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[2massets/[22m[36mswimlanesDiagram-ULZ7WXOC-BvLqw8DP.js     [39m[1m[2m  0.69 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+[2mdist/[22m[2massets/[22m[36minfoDiagram-6WML65LV-B3sRLSnp.js          [39m[1m[2m  0.73 kB[22m[1m[22m[2m │ gzip:   0.48 kB[22m
+[2mdist/[22m[2massets/[22m[36msizeCapture-X5ZJPWSS-zcLDKlrt.js          [39m[1m[2m  1.08 kB[22m[1m[22m[2m │ gzip:   0.60 kB[22m
+[2mdist/[22m[2massets/[22m[36mrailroadDiagram-AXF67PYL-BF75pu8K.js      [39m[1m[2m  1.75 kB[22m[1m[22m[2m │ gzip:   0.83 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-2GRJ4B5K-DuvzFD3h.js                [39m[1m[2m  1.92 kB[22m[1m[22m[2m │ gzip:   0.85 kB[22m
+[2mdist/[22m[2massets/[22m[36mabnfDiagram-N423BO3Z-CbdF24u5.js          [39m[1m[2m  1.96 kB[22m[1m[22m[2m │ gzip:   0.96 kB[22m
+[2mdist/[22m[2massets/[22m[36mpegDiagram-VL7TDLO6-5_fTIedI.js           [39m[1m[2m  2.10 kB[22m[1m[22m[2m │ gzip:   1.00 kB[22m
+[2mdist/[22m[2massets/[22m[36mebnfDiagram-BXEA7PRR-D6BYI8Iq.js          [39m[1m[2m  2.15 kB[22m[1m[22m[2m │ gzip:   0.95 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-LBJQPF4R-D1tGIr_5.js              [39m[1m[2m  4.35 kB[22m[1m[22m[2m │ gzip:   1.91 kB[22m
+[2mdist/[22m[2massets/[22m[36mmap-DxJ2ADlA.js                           [39m[1m[2m  5.07 kB[22m[1m[22m[2m │ gzip:   2.07 kB[22m
+[2mdist/[22m[2massets/[22m[36mpieDiagram-7S7Q4E2Y-Coab1V0L.js           [39m[1m[2m  5.20 kB[22m[1m[22m[2m │ gzip:   2.21 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-UB23O5K3-PihkhB_o.js              [39m[1m[2m  6.23 kB[22m[1m[22m[2m │ gzip:   2.70 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-RYQCIY6F-Dqymlfmf.js                [39m[1m[2m  7.08 kB[22m[1m[22m[2m │ gzip:   2.72 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-7IWD3JNH-H--yQwri.js              [39m[1m[2m  8.48 kB[22m[1m[22m[2m │ gzip:   3.79 kB[22m
+[2mdist/[22m[2massets/[22m[36mdagre-VZM6K2ZE-BdbC6hK1.js                [39m[1m[2m  8.71 kB[22m[1m[22m[2m │ gzip:   3.38 kB[22m
+[2mdist/[22m[2massets/[22m[36mcynefinDiagram-MW4NZA55-CcbhfXfJ.js       [39m[1m[2m 10.24 kB[22m[1m[22m[2m │ gzip:   3.70 kB[22m
+[2mdist/[22m[2massets/[22m[36mstateDiagram-OKZ733FA-BYIKzUL2.js         [39m[1m[2m 10.57 kB[22m[1m[22m[2m │ gzip:   3.72 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-B4RE2ZJO-4DsZ982s.js              [39m[1m[2m 10.87 kB[22m[1m[22m[2m │ gzip:   4.21 kB[22m
+[2mdist/[22m[2massets/[22m[36mdiagram-Q27KOJAE-CAYx0R4u.js              [39m[1m[2m 11.23 kB[22m[1m[22m[2m │ gzip:   3.98 kB[22m
+[2mdist/[22m[2massets/[22m[36msankeyDiagram-W5VNT64P-BF0sxfHX.js        [39m[1m[2m 14.71 kB[22m[1m[22m[2m │ gzip:   5.78 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-6Q2QTUOP-DbMtk4Jd.js                [39m[1m[2m 15.74 kB[22m[1m[22m[2m │ gzip:   4.41 kB[22m
+[2mdist/[22m[2massets/[22m[36mishikawaDiagram-WSZJBQD7-DFtmYxp5.js      [39m[1m[2m 17.62 kB[22m[1m[22m[2m │ gzip:   6.71 kB[22m
+[2mdist/[22m[2massets/[22m[36mtauri-vendor-XBdbr-Xi.js                  [39m[1m[2m 18.87 kB[22m[1m[22m[2m │ gzip:   4.41 kB[22m
+[2mdist/[22m[2massets/[22m[36mkanban-definition-27J2QSJJ-6htZucyM.js    [39m[1m[2m 20.43 kB[22m[1m[22m[2m │ gzip:   7.28 kB[22m
+[2mdist/[22m[2massets/[22m[36mmindmap-definition-FAOFIHXS-B07hlPGN.js   [39m[1m[2m 23.32 kB[22m[1m[22m[2m │ gzip:   7.90 kB[22m
+[2mdist/[22m[2massets/[22m[36mjourneyDiagram-NVQOT4AX-g-R_io39.js       [39m[1m[2m 23.69 kB[22m[1m[22m[2m │ gzip:   8.41 kB[22m
+[2mdist/[22m[2massets/[22m[36mgraph-DOmOIIwC.js                         [39m[1m[2m 23.92 kB[22m[1m[22m[2m │ gzip:   8.32 kB[22m
+[2mdist/[22m[2massets/[22m[36mwardleyDiagram-T6FBY63Y-qHn3eFtv.js       [39m[1m[2m 25.65 kB[22m[1m[22m[2m │ gzip:   6.86 kB[22m
+[2mdist/[22m[2massets/[22m[36mdom-to-image-more.min-BXQn33xy.js         [39m[1m[2m 26.82 kB[22m[1m[22m[2m │ gzip:   9.95 kB[22m
+[2mdist/[22m[2massets/[22m[36merDiagram-JOGREHBK-BTGelMcf.js            [39m[1m[2m 27.25 kB[22m[1m[22m[2m │ gzip:   9.49 kB[22m
+[2mdist/[22m[2massets/[22m[36msanitizer-vendor-P3vI1IgJ.js              [39m[1m[2m 28.97 kB[22m[1m[22m[2m │ gzip:  10.86 kB[22m
+[2mdist/[22m[2massets/[22m[36mgitGraphDiagram-DS77QQ5N-CGAYP826.js      [39m[1m[2m 29.57 kB[22m[1m[22m[2m │ gzip:   8.77 kB[22m
+[2mdist/[22m[2massets/[22m[36mtimeline-definition-Z64GVDOM-C-mY9JwE.js  [39m[1m[2m 30.95 kB[22m[1m[22m[2m │ gzip:  10.21 kB[22m
+[2mdist/[22m[2massets/[22m[36mlayout-D-LzfAck.js                        [39m[1m[2m 31.00 kB[22m[1m[22m[2m │ gzip:  11.19 kB[22m
+[2mdist/[22m[2massets/[22m[36mrequirementDiagram-LRYGKXZP-DD4FeEyE.js   [39m[1m[2m 31.15 kB[22m[1m[22m[2m │ gzip:   9.82 kB[22m
+[2mdist/[22m[2massets/[22m[36mquadrantDiagram-CIZ2JOQS-CsvOTDZu.js      [39m[1m[2m 34.06 kB[22m[1m[22m[2m │ gzip:  10.00 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-5RXB4S5H-C5egI-37.js                [39m[1m[2m 38.20 kB[22m[1m[22m[2m │ gzip:  12.57 kB[22m
+[2mdist/[22m[2massets/[22m[36mmarked-vendor-CI_8tgDI.js                 [39m[1m[2m 39.90 kB[22m[1m[22m[2m │ gzip:  12.26 kB[22m
+[2mdist/[22m[2massets/[22m[36mxychartDiagram-ELKLHX3M-DJg57EK3.js       [39m[1m[2m 40.70 kB[22m[1m[22m[2m │ gzip:  11.57 kB[22m
+[2mdist/[22m[2massets/[22m[36mvennDiagram-T6HMQDX7-BzdFO3q0.js          [39m[1m[2m 42.11 kB[22m[1m[22m[2m │ gzip:  15.77 kB[22m
+[2mdist/[22m[2massets/[22m[36mchunk-GF5L2VYU-set_ytHg.js                [39m[1m[2m 49.26 kB[22m[1m[22m[2m │ gzip:  15.78 kB[22m
+[2mdist/[22m[2massets/[22m[36mganttDiagram-PKOTCBZU-Uu9CLmKt.js         [39m[1m[2m 49.90 kB[22m[1m[22m[2m │ gzip:  17.06 kB[22m
+[2mdist/[22m[2massets/[22m[36mflowDiagram-UKHOOZJN-DYG4s0qR.js          [39m[1m[2m 60.80 kB[22m[1m[22m[2m │ gzip:  19.55 kB[22m
+[2mdist/[22m[2massets/[22m[36mc4Diagram-5PPSVZJV-BHv_Zib9.js            [39m[1m[2m 70.10 kB[22m[1m[22m[2m │ gzip:  19.70 kB[22m
+[2mdist/[22m[2massets/[22m[36mblockDiagram-VBNYF7ZC-DtOMuzuJ.js         [39m[1m[2m 73.89 kB[22m[1m[22m[2m │ gzip:  21.32 kB[22m
+[2mdist/[22m[2massets/[22m[36mcose-bilkent-JH36ORCC-CZaE2L1L.js         [39m[1m[2m 81.85 kB[22m[1m[22m[2m │ gzip:  22.55 kB[22m
+[2mdist/[22m[2massets/[22m[36md3-vendor-BwgkbwHS.js                     [39m[1m[2m106.87 kB[22m[1m[22m[2m │ gzip:  33.60 kB[22m
+[2mdist/[22m[2massets/[22m[36msequenceDiagram-SI44F4Z6-Bk2xSxHN.js      [39m[1m[2m117.11 kB[22m[1m[22m[2m │ gzip:  31.21 kB[22m
+[2mdist/[22m[2massets/[22m[36mswimlanes-SLNWSIFB-DHWRrtZq.js            [39m[1m[2m119.08 kB[22m[1m[22m[2m │ gzip:  43.73 kB[22m
+[2mdist/[22m[2massets/[22m[36marchitectureDiagram-T3A2C74G-BUQnFzTf.js  [39m[1m[2m151.98 kB[22m[1m[22m[2m │ gzip:  43.22 kB[22m
+[2mdist/[22m[2massets/[22m[36mlezer-vendor-CkkNh79t.js                  [39m[1m[2m204.33 kB[22m[1m[22m[2m │ gzip:  75.49 kB[22m
+[2mdist/[22m[2massets/[22m[36mindex-Czu9Nyns.js                         [39m[1m[2m230.53 kB[22m[1m[22m[2m │ gzip:  71.35 kB[22m
+[2mdist/[22m[2massets/[22m[36mkatex-vendor-D6GyzdOI.js                  [39m[1m[2m264.00 kB[22m[1m[22m[2m │ gzip:  78.55 kB[22m
+[2mdist/[22m[2massets/[22m[36mcodemirror-vendor-BftvSVBz.js             [39m[1m[2m304.19 kB[22m[1m[22m[2m │ gzip: 100.86 kB[22m
+[2mdist/[22m[2massets/[22m[36mcytoscape.esm-D3_iZ_3b.js                 [39m[1m[2m442.92 kB[22m[1m[22m[2m │ gzip: 141.93 kB[22m
+[2mdist/[22m[2massets/[22m[36mmermaid.core-B1C8rAYh.js                  [39m[1m[2m497.70 kB[22m[1m[22m[2m │ gzip: 110.12 kB[22m
+[2mdist/[22m[2massets/[22m[36mmain-bktrCxf7.js                          [39m[1m[2m544.95 kB[22m[1m[22m[2m │ gzip: 153.93 kB[22m
+[2mdist/[22m[2massets/[22m[36mcynefin-VYW2F7L2-C5nJVcn-.js              [39m[1m[2m688.17 kB[22m[1m[22m[2m │ gzip: 154.20 kB[22m
+[32m✓ built in 11.63s[39m
+Built-app attempt 1
+
+> markdown-editor@1.0.0 test:browser
+> node tests/e2e/run-browser-tests.mjs --app
+
+Browser artifacts: /tmp/markdown-editor-e2e-artifacts-XjiqK5
+ok - application mounts one App Shell with strict named slots (2ms)
+ok - application Help feature owns first-run visibility, navigation and scoped lifecycle (89ms)
+ok - application Settings Store cancels draft without persisting changes (26ms)
+ok - application Settings UI validates and applies one draft without global dialog functions (166ms)
+ok - application language Settings commit updates I18n without legacy globals (82ms)
+ok - application theme switch changes visual tokens without changing shell geometry (219ms)
+ok - application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview (1284ms)
+ok - application Theme Service applies committed theme without rebuilding editor model or preview (952ms)
+ok - application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy (839ms)
+ok - application link preview uses scoped focus and cancels stale close completion (288ms)
+ok - application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear (3ms)
+ok - application Document Session Controller keeps lifecycle model, session and UI coherent (34ms)
+ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (18ms)
+ok - application switches deterministically across every layout mode (852ms)
+ok - compact shell keeps 860/900 hysteresis and clears resize burst state (334ms)
+ok - application toolbar boundary wraps from measured content width without hiding tools (163ms)
+ok - application page fullscreen uses the Stage 6.6 controller without changing command IDs (37ms)
+ok - application sidebar tabs switch one mount region and coordinate child lifecycles (782ms)
+ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1532ms)
+ok - application shell has no structural overflow or clipped focus across required viewports (5198ms)
+ok - application code block placeholder never receives a phantom source highlight (776ms)
+ok - application code block ignores single click and opens on strict double click (931ms)
+ok - application keeps only one direct editor active (952ms)
+ok - application Hybrid table pointer input avoids block decoration dispatch races (1309ms)
+ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1466ms)
+ok - application source edit exits when pointer moves outside the source range (1059ms)
+ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (634ms)
+ok - application sidebar resize captures pointer, projects width and persists the final width (284ms)
+ok - application pointer drag maps to exact editor characters (1622ms)
+
+Browser tests: 29, passed: 29, failed: 0
+Built-app attempt 2
+
+> markdown-editor@1.0.0 test:browser
+> node tests/e2e/run-browser-tests.mjs --app
+
+Browser artifacts: /tmp/markdown-editor-e2e-artifacts-ugbbhk
+ok - application mounts one App Shell with strict named slots (2ms)
+ok - application Help feature owns first-run visibility, navigation and scoped lifecycle (71ms)
+ok - application Settings Store cancels draft without persisting changes (21ms)
+ok - application Settings UI validates and applies one draft without global dialog functions (130ms)
+ok - application language Settings commit updates I18n without legacy globals (101ms)
+ok - application theme switch changes visual tokens without changing shell geometry (223ms)
+ok - application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview (1156ms)
+ok - application Theme Service applies committed theme without rebuilding editor model or preview (986ms)
+ok - application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy (772ms)
+ok - application link preview uses scoped focus and cancels stale close completion (323ms)
+ok - application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear (3ms)
+ok - application Document Session Controller keeps lifecycle model, session and UI coherent (31ms)
+ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (21ms)
+ok - application switches deterministically across every layout mode (853ms)
+ok - compact shell keeps 860/900 hysteresis and clears resize burst state (335ms)
+ok - application toolbar boundary wraps from measured content width without hiding tools (130ms)
+ok - application page fullscreen uses the Stage 6.6 controller without changing command IDs (36ms)
+ok - application sidebar tabs switch one mount region and coordinate child lifecycles (831ms)
+ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1549ms)
+ok - application shell has no structural overflow or clipped focus across required viewports (5182ms)
+ok - application code block placeholder never receives a phantom source highlight (760ms)
+ok - application code block ignores single click and opens on strict double click (931ms)
+ok - application keeps only one direct editor active (1005ms)
+ok - application Hybrid table pointer input avoids block decoration dispatch races (1447ms)
+ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1375ms)
+ok - application source edit exits when pointer moves outside the source range (1010ms)
+ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (650ms)
+ok - application sidebar resize captures pointer, projects width and persists the final width (323ms)
+ok - application pointer drag maps to exact editor characters (1649ms)
+
+Browser tests: 29, passed: 29, failed: 0
 TAP version 13
-# Subtest: R9-08 Feedback Guard begins immutable sequence/source/revision transactions and validates sources
-ok 1 - R9-08 Feedback Guard begins immutable sequence/source/revision transactions and validates sources
+# Subtest: root README is a concise introduction and detailed history lives in docs/README.md
+not ok 1 - root README is a concise introduction and detailed history lives in docs/README.md
   ---
-  duration_ms: 1.987093
+  duration_ms: 10.488475
   type: 'test'
-  ...
-# Subtest: R9-08 Feedback Guard blocks opposite-side feedback and optional same-source reentrancy without one boolean lock
-ok 2 - R9-08 Feedback Guard blocks opposite-side feedback and optional same-source reentrancy without one boolean lock
-  ---
-  duration_ms: 0.198461
-  type: 'test'
-  ...
-# Subtest: R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
-ok 3 - R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
-  ---
-  duration_ms: 0.256168
-  type: 'test'
-  ...
-# Subtest: R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
-ok 4 - R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
-  ---
-  duration_ms: 0.356566
-  type: 'test'
-  ...
-# Subtest: R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
-ok 5 - R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
-  ---
-  duration_ms: 0.362167
-  type: 'test'
-  ...
-# Subtest: R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
-ok 6 - R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
-  ---
-  duration_ms: 0.215523
-  type: 'test'
-  ...
-# Subtest: R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
-ok 7 - R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
-  ---
-  duration_ms: 1.926378
-  type: 'test'
-  ...
-# Subtest: R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
-ok 8 - R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
-  ---
-  duration_ms: 1.05452
-  type: 'test'
-  ...
-1..8
-# tests 8
-# suites 0
-# pass 8
-# fail 0
-# cancelled 0
-# skipped 0
-# todo 0
-# duration_ms 79.604005
-TAP version 13
-# Subtest: R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry
-not ok 1 - R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry
-  ---
-  duration_ms: 8.522763
-  type: 'test'
-  location: '/home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-feedback-guard.test.mjs:14:1'
+  location: '/home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:5:1'
   failureType: 'testCodeFailure'
   error: |-
-    The input did not match the regular expression /R9-08/. Input:
+    The expression evaluated to a falsy value:
     
-    '/**\n' +
-      ' * Responsibility: Public Stage 9 synchronization contract. Prior Stage 9 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.\n' +
-      ' * Imports: Public synchronization modules only.\n' +
-      ' * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard and the R9-09 Highlight Session classes/factories.\n' +
-      ' * State/side effects: None; import-only facade.\n' +
-      ' * Lifecycle: None.\n' +
-      ' */\n' +
-      '\n' +
-      'export {\n' +
-      '  ScrollSyncController,\n' +
-      '  createScrollSyncController\n' +
-      "} from './scroll/scroll-sync-controller.js';\n" +
-      'export {\n' +
-      '  ScrollSourceOwnership,\n' +
-      '  createScrollSourceOwnership\n' +
-      "} from './scroll/scroll-source-ownership.js';\n" +
-      'export {\n' +
-      '  EditorScrollMapper,\n' +
-      '  createEditorScrollMapper\n' +
-      "} from './scroll/editor-scroll-mapper.js';\n" +
-      'export {\n' +
-      '  PreviewScrollMapper,\n' +
-      '  createPreviewScrollMapper\n' +
-      "} from './scroll/preview-scroll-mapper.js';\n" +
-      'export {\n' +
-      '  ScrollGeometrySession,\n' +
-      '  createScrollGeometrySession\n' +
-      "} from './scroll/scroll-geometry-session.js';\n" +
-      'export {\n' +
-      '  EditorSelectionReader,\n' +
-      '  createEditorSelectionReader\n' +
-      "} from './selection/editor-selection-reader.js';\n" +
-      'export {\n' +
-      '  PreviewSelectionReader,\n' +
-      '  createPreviewSelectionReader\n' +
-      "} from './selection/preview-selection-reader.js';\n" +
-      'export {\n' +
-      '  SelectionFeedbackGuard,\n' +
-      '  createSelectionFeedbackGuard\n' +
-      "} from './selection/selection-feedback-guard.js';\n" +
-      'export {\n' +
-      '  SelectionHighlightSession,\n' +
-      '  createSelectionHighlightSession\n' +
-      "} from './selection/selection-highlight-session.js';\n"
+      assert.ok(normalizedRootReadme.length >= 120 && normalizedRootReadme.length <= 360)
     
   code: 'ERR_ASSERTION'
   name: 'AssertionError'
-  expected:
-  actual: |-
-    /**
-     * Responsibility: Public Stage 9 synchronization contract. Prior Stage 9 owners remain frozen while R9-09 adds the canonical SelectionHighlightSession; R9-10+ selection policy remains unmigrated.
-     * Imports: Public synchronization modules only.
-     * Exports: Scroll owners/mappers/geometry, Selection Readers, Feedback Guard and the R9-09 Highlight Session classes/factories.
-     * State/side effects: None; import-only facade.
-     * Lifecycle: None.
-     */
-    
-    export {
-      ScrollSyncController,
-      createScrollSyncController
-    } from './scroll/scroll-sync-controller.js';
-    export {
-      ScrollSourceOwnership,
-      createScrollSourceOwnership
-    } from './scroll/scroll-source-ownership.js';
-    export {
-      EditorScrollMapper,
-      createEditorScrollMapper
-    } from './scroll/editor-scroll-mapper.js';
-    export {
-      PreviewScrollMapper,
-      createPreviewScrollMapper
-    } from './scroll/preview-scroll-mapper.js';
-    export {
-      ScrollGeometrySession,
-      createScrollGeometrySession
-    } from './scroll/scroll-geometry-session.js';
-    export {
-      EditorSelectionReader,
-      createEditorSelectionReader
-    } from './selection/editor-selection-reader.js';
-    export {
-      PreviewSelectionReader,
-      createPreviewSelectionReader
-    } from './selection/preview-selection-reader.js';
-    export {
-      SelectionFeedbackGuard,
-      createSelectionFeedbackGuard
-    } from './selection/selection-feedback-guard.js';
-    export {
-      SelectionHighlightSession,
-      createSelectionHighlightSession
-    } from './selection/selection-highlight-session.js';
-    
-  operator: 'match'
+  expected: true
+  actual: false
+  operator: '=='
   stack: |-
-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-feedback-guard.test.mjs:17:10)
+    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:17:10)
     async Test.run (node:internal/test_runner/test:1054:7)
     async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
   ...
-# Subtest: R9-08 Feedback Guard owns sequence source revision and release lifecycle without DOM mapping highlight retry or scroll policy
-ok 2 - R9-08 Feedback Guard owns sequence source revision and release lifecycle without DOM mapping highlight retry or scroll policy
-  ---
-  duration_ms: 2.294667
-  type: 'test'
-  ...
-# Subtest: R9-08 legacy SelectionSyncController consumes the Guard and no longer owns applying-side release or preview revision duplicates
-ok 3 - R9-08 legacy SelectionSyncController consumes the Guard and no longer owns applying-side release or preview revision duplicates
-  ---
-  duration_ms: 2.841697
-  type: 'test'
-  ...
-# Subtest: R9-08 classic selection compatibility consumes the scoped Guard and deletes the cross-file selectionSyncLock authority
-ok 4 - R9-08 classic selection compatibility consumes the scoped Guard and deletes the cross-file selectionSyncLock authority
-  ---
-  duration_ms: 1.898055
-  type: 'test'
-  ...
-# Subtest: R9-08 composition creates exactly one Guard injects it into Controller and scoped compatibility then destroys it
-ok 5 - R9-08 composition creates exactly one Guard injects it into Controller and scoped compatibility then destroys it
-  ---
-  duration_ms: 2.268539
-  type: 'test'
-  ...
-# Subtest: R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-10+
-ok 6 - R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-10+
-  ---
-  duration_ms: 3.028498
-  type: 'test'
-  ...
-# Subtest: R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth
-ok 7 - R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth
-  ---
-  duration_ms: 2.046894
-  type: 'test'
-  ...
-# Subtest: R9-08 keeps Reader ownership separate from feedback policy and leaves later Selection modules absent
-ok 8 - R9-08 keeps Reader ownership separate from feedback policy and leaves later Selection modules absent
-  ---
-  duration_ms: 2.312051
-  type: 'test'
-  ...
-1..8
-# tests 8
+1..1
+# tests 1
 # suites 0
-# pass 7
+# pass 0
 # fail 1
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 83.034055
+# duration_ms 64.969776
