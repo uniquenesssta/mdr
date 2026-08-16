@@ -7,6 +7,7 @@
     const editorSelectionReader = scrollSyncCompatibilityHost?.markdownEditorEditorSelectionReader;
     const previewSelectionReader = scrollSyncCompatibilityHost?.markdownEditorPreviewSelectionReader;
     const selectionFeedbackGuard = scrollSyncCompatibilityHost?.markdownEditorSelectionFeedbackGuard;
+    const selectionHighlightSession = scrollSyncCompatibilityHost?.markdownEditorSelectionHighlightSession;
     if (!scrollSyncLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!scrollSyncOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
     if (!scrollSyncEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
@@ -15,6 +16,7 @@
     if (!editorSelectionReader) throw new Error('Editor Selection Reader compatibility capability is unavailable.');
     if (!previewSelectionReader) throw new Error('Preview Selection Reader compatibility capability is unavailable.');
     if (!selectionFeedbackGuard) throw new Error('Selection Feedback Guard compatibility capability is unavailable.');
+    if (!selectionHighlightSession) throw new Error('Selection Highlight Session compatibility capability is unavailable.');
     const SYNC_VIEWPORT_RATIO = 0.38;
     const SELECTION_VIEWPORT_RATIO = 0.5;
     const SELECTION_SAFE_EDGE_MIN_PX = 32;
@@ -325,15 +327,7 @@
     }
 
     function clearPreviewSelectionHighlights() {
-      if (window.CSS?.highlights) CSS.highlights.delete('preview-selection-sync');
-      preview.querySelectorAll('.preview-source-highlight').forEach(el => el.classList.remove('preview-source-highlight'));
-      preview.querySelectorAll('.preview-atomic-selection-highlight')
-        .forEach(el => el.classList.remove('preview-atomic-selection-highlight'));
-      preview.querySelectorAll('.preview-text-highlight').forEach(span => {
-        const text = document.createTextNode(span.textContent || '');
-        span.replaceWith(text);
-        text.parentNode?.normalize();
-      });
+      selectionHighlightSession.clear();
     }
 
     function normalizeSearchText(value) {
@@ -443,24 +437,8 @@
           const range = createRangeFromNormalizedMatch(entry.anchor, candidate, entry.preferredOffsetRatio);
           if (!range) continue;
           const visibleRect = getRangeViewportRect(range);
-          if (window.CSS?.highlights && typeof Highlight !== 'undefined') {
-            CSS.highlights.set('preview-selection-sync', new Highlight(range));
-            if (!visibleRect) {
-              CSS.highlights.delete('preview-selection-sync');
-              continue;
-            }
-          } else if (range.startContainer === range.endContainer && range.startContainer.nodeType === Node.TEXT_NODE) {
-            const node = range.startContainer;
-            const after = node.splitText(range.startOffset);
-            const tail = after.splitText(range.endOffset - range.startOffset);
-            const mark = document.createElement('span');
-            mark.className = 'preview-text-highlight';
-            mark.textContent = after.nodeValue;
-            after.replaceWith(mark);
-            void tail;
-            return { range: document.createRange(), element: mark, rect: mark.getBoundingClientRect() };
-          }
-          return { range, element: entry.anchor, rect: visibleRect || range.getBoundingClientRect() };
+          if (!visibleRect) continue;
+          return { ranges: [range], atomicElements: [], range, element: entry.anchor, rect: visibleRect };
         }
       }
       return null;
@@ -552,14 +530,9 @@
         return null;
       }
 
-      if (ranges.length && window.CSS?.highlights && typeof Highlight !== 'undefined') {
-        CSS.highlights.set('preview-selection-sync', new Highlight(...ranges));
-      } else if (ranges.length) {
-        return null;
-      }
-      atomicElements.forEach(element => element.classList.add('preview-atomic-selection-highlight'));
       return {
         ranges,
+        atomicElements: [...atomicElements],
         rect: getCombinedRangeViewportRect(ranges),
         element: mappedAnchors.values().next().value || candidates[0],
         matchedAnchors: mappedAnchors.size,
@@ -571,9 +544,9 @@
       };
     }
 
-    function highlightTextInPreviewRange(selectedText, fromLine, toLine, sourceStartIndex = null, sourceEndIndex = null) {
+    function buildPreviewHighlightPlan(selectedText, fromLine, toLine, sourceStartIndex = null, sourceEndIndex = null) {
       const mapped = highlightMappedSourceRangeInPreview(fromLine, toLine, sourceStartIndex, sourceEndIndex);
-      if (mapped) return mapped;
+      if (mapped && selectionHighlightSession.canPresent(mapped)) return mapped;
       const fallback = highlightTextFallbackInPreviewRange(
         selectedText,
         fromLine,
@@ -581,7 +554,22 @@
         sourceStartIndex,
         sourceEndIndex
       );
-      return fallback ? { ...fallback, matchedAnchors: 1, mappingMode: 'text-search' } : null;
+      if (!fallback || !selectionHighlightSession.canPresent(fallback)) return null;
+      return { ...fallback, matchedAnchors: 1, mappingMode: 'text-search' };
+    }
+
+    function highlightTextInPreviewRange(selectedText, fromLine, toLine, sourceStartIndex = null, sourceEndIndex = null) {
+      const createPlan = () => buildPreviewHighlightPlan(
+        selectedText,
+        fromLine,
+        toLine,
+        sourceStartIndex,
+        sourceEndIndex
+      );
+      const plan = createPlan();
+      if (!plan) return null;
+      if (!selectionHighlightSession.show(plan, { restore: createPlan })) return null;
+      return plan;
     }
 
     function highlightPreviewLines(startLine, endLine, shouldScroll = true, selectedText = '', options = {}) {
@@ -1018,8 +1006,7 @@
     if (!selectionController) throw new Error('Selection controller is not initialized');
     selectionController.configure({
       syncEditorToPreview: ({ shouldScroll, reason, selection }) => syncEditorSelectionToPreview(shouldScroll, reason, selection),
-      syncPreviewToEditor: ({ reason, selection }) => syncPreviewSelectionToEditor(reason, selection),
-      clearPreview: clearPreviewSelectionHighlights
+      syncPreviewToEditor: ({ reason, selection }) => syncPreviewSelectionToEditor(reason, selection)
     }).start();
 
     Object.assign(window, {

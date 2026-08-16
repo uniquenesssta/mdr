@@ -44,7 +44,7 @@ import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
-import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard } from './features/sync/index.js';
+import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession } from './features/sync/index.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {
@@ -307,6 +307,13 @@ async function loadAppModules() {
     requestFrame: callback => window.requestAnimationFrame(callback),
     cancelFrame: frameId => window.cancelAnimationFrame(frameId)
   });
+  const selectionHighlightSession = createSelectionHighlightSession({
+    previewElement: previewHost,
+    documentRef: previewSelectionDocument,
+    highlightRegistry: previewSelectionView?.CSS?.highlights ?? null,
+    HighlightCtor: typeof previewSelectionView?.Highlight === 'function' ? previewSelectionView.Highlight : null,
+    reportError: (message, error) => console.warn(message, error)
+  });
   const selectionFeedbackGuard = createSelectionFeedbackGuard({
     setTimer: (callback, delay) => window.setTimeout(callback, delay),
     clearTimer: timerId => window.clearTimeout(timerId)
@@ -315,11 +322,13 @@ async function loadAppModules() {
     compatibilityPlatformHost.markdownEditorEditorSelectionReader = editorSelectionReader;
     compatibilityPlatformHost.markdownEditorPreviewSelectionReader = previewSelectionReader;
     compatibilityPlatformHost.markdownEditorSelectionFeedbackGuard = selectionFeedbackGuard;
+    compatibilityPlatformHost.markdownEditorSelectionHighlightSession = selectionHighlightSession;
   }
   const selectionController = createSelectionSyncController(editorHost, previewHost, {
     editorSelectionReader,
     previewSelectionReader,
-    feedbackGuard: selectionFeedbackGuard
+    feedbackGuard: selectionFeedbackGuard,
+    highlightSession: selectionHighlightSession
   });
   window.markdownEditorSelectionController = selectionController;
   const destroySelectionReaders = () => {
@@ -333,6 +342,10 @@ async function loadAppModules() {
     if (compatibilityPlatformHost?.markdownEditorSelectionFeedbackGuard === selectionFeedbackGuard) {
       delete compatibilityPlatformHost.markdownEditorSelectionFeedbackGuard;
     }
+    if (compatibilityPlatformHost?.markdownEditorSelectionHighlightSession === selectionHighlightSession) {
+      delete compatibilityPlatformHost.markdownEditorSelectionHighlightSession;
+    }
+    selectionHighlightSession.destroy();
     selectionFeedbackGuard.destroy();
     previewSelectionReader.destroy();
     editorSelectionReader.destroy();

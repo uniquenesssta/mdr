@@ -61,7 +61,7 @@ test('Atomic 8.4 source-edit boundary remains intact after Atomic 8.6 Shared Wid
 test('Atomic 8.4 production inventory records the new responsibility boundaries', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = inventory.modules.map(item => item[0]);
-  assert.equal(inventory.modules.length, 379);
+  assert.equal(inventory.modules.length, 380);
   for (const path of [
     'src/features/hybrid-editor/application/hybrid-source-edit-controller.js',
     'src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js',

@@ -81,7 +81,7 @@ test('Atomic 8.10 removes legacy Image authority and composes platform plus Widg
 
 test('Atomic 8.10 Image ownership remains intact after Atomic 8.12 Mermaid migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 379);
+  assert.equal(inventory.modules.length, 380);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of imagePaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/image-source.js'), false);

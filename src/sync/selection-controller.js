@@ -13,9 +13,10 @@ const REQUIRED_FEEDBACK_METHODS = [
   'getRevision',
   'getState'
 ];
+const REQUIRED_HIGHLIGHT_METHODS = ['restore', 'clear'];
 
 export class SelectionSyncController {
-  constructor(editor, preview, { editorSelectionReader, previewSelectionReader, feedbackGuard } = {}) {
+  constructor(editor, preview, { editorSelectionReader, previewSelectionReader, feedbackGuard, highlightSession } = {}) {
     if (!editorSelectionReader || typeof editorSelectionReader.read !== 'function') {
       throw new TypeError('SelectionSyncController requires EditorSelectionReader');
     }
@@ -29,11 +30,15 @@ export class SelectionSyncController {
     if (!feedbackGuard || REQUIRED_FEEDBACK_METHODS.some(method => typeof feedbackGuard[method] !== 'function')) {
       throw new TypeError('SelectionSyncController requires SelectionFeedbackGuard');
     }
+    if (!highlightSession || REQUIRED_HIGHLIGHT_METHODS.some(method => typeof highlightSession[method] !== 'function')) {
+      throw new TypeError('SelectionSyncController requires SelectionHighlightSession');
+    }
     this.editor = editor;
     this.preview = preview;
     this.editorSelectionReader = editorSelectionReader;
     this.previewSelectionReader = previewSelectionReader;
     this.feedbackGuard = feedbackGuard;
+    this.highlightSession = highlightSession;
     this.previewSelectionDisposer = null;
     this.callbacks = {};
     this.started = false;
@@ -214,6 +219,7 @@ export class SelectionSyncController {
 
   notifyPreviewMounted(reason = 'preview-mounted') {
     this.feedbackGuard.advanceRevision();
+    this.highlightSession.restore();
     if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return;
     const editorSelection = this.editorSelectionReader.read();
     if (!editorSelection || editorSelection.isCollapsed) return;
@@ -243,6 +249,7 @@ export class SelectionSyncController {
   clear() {
     this.lastEditorKey = '';
     this.lastPreviewKey = '';
+    this.highlightSession.clear();
     this.callbacks.clearPreview?.();
   }
 

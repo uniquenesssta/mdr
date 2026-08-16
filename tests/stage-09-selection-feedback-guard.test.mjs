@@ -177,7 +177,8 @@ test('R9-08 SelectionSyncController uses the shared Guard to reject editor feedb
   const controller = createSelectionSyncController(editor, preview, {
     editorSelectionReader: editorReader,
     previewSelectionReader: previewReader,
-    feedbackGuard: guard
+    feedbackGuard: guard,
+    highlightSession: { restore() { return false; }, clear() {} }
   }).configure({ syncPreviewToEditor: () => ({ status: 'mapped', selectionLength: 4 }) });
   try {
     controller.start();
@@ -205,7 +206,8 @@ test('R9-08 SelectionSyncController exposes compatibility applyingSide/previewRe
   const controller = createSelectionSyncController(editor, preview, {
     editorSelectionReader: editorReader,
     previewSelectionReader: previewReader,
-    feedbackGuard: guard
+    feedbackGuard: guard,
+    highlightSession: { restore() { return false; }, clear() {} }
   });
   const token = guard.begin('editor');
   controller.notifyPreviewMounted();

@@ -1,56 +1,521 @@
-name: R9-09 authoritative validation
+# Stage 7 completed-scope validation through Atomic 7.14 while preserving the complete Stage 6 handoff.
+name: Stage 7 Atomic Verification
 
 on:
   push:
     branches:
-      - agent/r9-09-runner
-  workflow_dispatch:
+      - rewrite/stage-07
+  pull_request:
+    branches:
+      - rewrite/modular-rebuild
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: stage-07-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
-  validate-r9-09:
-    runs-on: ubuntu-24.04
+  preview-scheduler-cancellation:
+    name: Verify Stage 7 Through Atomic 7.14 Legacy Preview Deletion
+    runs-on: ubuntu-22.04
     timeout-minutes: 35
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
     steps:
-      - name: Checkout runner branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: Validate and publish clean R9-09 candidate
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm run deps:prepare
+      - name: Verify dependency audit is clean
+        run: npm audit --audit-level=low
+      - name: Verify parent KaTeX font is served by Vite dev
         shell: bash
         run: |
           set -euo pipefail
-          git rm -f --cached --ignore-unmatch .agent/r9_09_failure.log >/dev/null 2>&1 || true
-          rm -f .agent/r9_09_failure.log
-          python .agent/r9_09_prepare_fix.py
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('.agent/r9_09_validate.sh')
-          text = path.read_text(encoding='utf-8')
-          text = text.replace('R9-09：SelectionHighlightSession接管CSS多Range', 'R9-09：HighlightSession接管CSS多Range', 1)
-          text = text.replace('R9-09/R9-08 16/16', 'R9-09 16/16，R9-08 16/16', 1)
-          path.write_text(text, encoding='utf-8')
-          PY
-          set +e
-          bash .agent/r9_09_validate.sh 2>&1 | tee /tmp/r9-09-validation.log
-          status=${PIPESTATUS[0]}
-          set -e
-          if [ "$status" -ne 0 ]; then
-            mkdir -p .agent
-            {
-              echo '=== MATCHED FAILURE CONTEXT ==='
-              grep -n -B 24 -A 48 -E '^not ok|failureType:|AssertionError|ERR_[A-Z_]+|^# fail [1-9]|RuntimeError|Traceback|Error:' /tmp/r9-09-validation.log || true
-              echo
-              echo '=== VALIDATION TAIL ==='
-              tail -n 260 /tmp/r9-09-validation.log
-            } > .agent/r9_09_failure.log
-            git reset
-            git add -f .agent/r9_09_failure.log
-            GIT_AUTHOR_NAME='atomic-runner' GIT_AUTHOR_EMAIL='atomic-runner@users.noreply.github.com' \
-            GIT_COMMITTER_NAME='atomic-runner' GIT_COMMITTER_EMAIL='atomic-runner@users.noreply.github.com' \
-              git commit -m 'ci: capture R9-09 terminal validation failure [skip ci]'
-            git push origin HEAD:refs/heads/agent/r9-09-runner
-            exit "$status"
-          fi
+          npm run dev > /tmp/vite-dev.log 2>&1 &
+          vite_pid=$!
+          cleanup() { kill "$vite_pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:16663/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:16663/ >/dev/null
+          font_path="$(realpath ../node_modules/katex/dist/fonts/KaTeX_Main-Regular.woff2)"
+          curl --path-as-is -fsS "http://127.0.0.1:16663/@fs${font_path}" -o /tmp/katex-font.woff2
+          test -s /tmp/katex-font.woff2
+          ! grep -q 'outside of Vite serving allow list' /tmp/vite-dev.log
+          cleanup
+          trap - EXIT
+      - name: Verify Stage 4 handoff remains intact
+        run: >-
+          node --test
+          tests/unit/i18n/locale-key-audit.test.mjs
+          tests/unit/i18n/locale-registry.test.mjs
+          tests/unit/i18n/i18n-service.test.mjs
+          tests/unit/i18n/translation-bindings.test.mjs
+          tests/unit/i18n/settings-locale-controller.test.mjs
+          tests/unit/help/help-feature.test.mjs
+          tests/unit/settings/settings-schema.test.mjs
+          tests/unit/settings/settings-repository.test.mjs
+          tests/unit/settings/settings-store.test.mjs
+          tests/unit/settings/classic-settings-store-port.test.mjs
+          tests/unit/settings/settings-sections.test.mjs
+          tests/unit/settings/settings-ui.test.mjs
+          tests/unit/theme/theme-service.test.mjs
+          tests/ui/themes.test.mjs
+      - name: Verify Atomic Task 5.1 document domain
+        run: node --test tests/unit/documents/document-domain.test.mjs
+      - name: Verify Atomic Task 5.2 document session store
+        run: node --test tests/unit/documents/document-session-store.test.mjs
+      - name: Verify Atomic Task 5.3 document session controller
+        run: node --test tests/unit/documents/document-session-controller.test.mjs
+      - name: Verify Atomic Task 5.4 recent files repository
+        run: node --test tests/unit/documents/recent-files-repository.test.mjs
+      - name: Verify Atomic Task 5.5 CodeMirror adapter
+        run: node --test tests/unit/editor/codemirror-adapter.test.mjs
+      - name: Verify Atomic Task 5.6 CodeMirror extension registry
+        run: node --test tests/unit/editor/codemirror-extension-registry.test.mjs
+      - name: Verify Atomic Task 5.7 Pointer Selection
+        run: node --test tests/unit/editor/pointer-selection.test.mjs
+      - name: Verify Atomic Task 5.8 Editor Controller
+        run: node --test tests/unit/editor/editor-controller.test.mjs
+      - name: Verify Atomic Task 5.9 History Adapter
+        run: >-
+          node --test
+          tests/unit/editor/editor-history-adapter.test.mjs
+          tests/architecture/stage-05-history-authority.test.mjs
+      - name: Verify Atomic Task 5.10 Basic Commands
+        run: >-
+          node --test
+          tests/unit/editor/editor-command-service.test.mjs
+          tests/architecture/stage-05-basic-command-boundary.test.mjs
+      - name: Verify Atomic Task 5.11 Find Replace
+        run: >-
+          node --test
+          tests/unit/editor/find-replace-command.test.mjs
+          tests/architecture/stage-05-find-replace-boundary.test.mjs
+      - name: Verify Atomic Task 5.12 Document Editor UI
+        run: >-
+          node --test
+          tests/unit/editor/editor-ui-foundation.test.mjs
+          tests/unit/documents/document-ui.test.mjs
+          tests/architecture/stage-05-document-editor-ui-boundary.test.mjs
+      - name: Verify Atomic Task 5.13 Legacy Path Removal
+        run: node --test tests/architecture/stage-05-legacy-path-removal.test.mjs
+      - name: Verify CR-05 Stage 5 editor infrastructure conformance
+        run: node --test tests/architecture/stage-05-editor-infrastructure-conformance.test.mjs
+      - name: Verify Atomic Task 6.1 Layout State
+        run: >-
+          node --test
+          tests/unit/layout/layout-state.test.mjs
+          tests/unit/layout/classic-layout-state-port.test.mjs
+          tests/architecture/stage-06-layout-state.test.mjs
+      - name: Verify Atomic Task 6.2 Sidebar Resize
+        run: >-
+          node --test
+          tests/unit/layout/sidebar-resize-controller.test.mjs
+          tests/architecture/stage-06-sidebar-resize.test.mjs
+      - name: Verify Atomic Task 6.3 Split Controllers
+        run: >-
+          node --test
+          tests/unit/layout/split-pane-controller.test.mjs
+          tests/unit/layout/split-resize-controller.test.mjs
+          tests/unit/layout/compact-split-controller.test.mjs
+          tests/architecture/stage-06-split-controllers.test.mjs
+      - name: Verify Atomic Task 6.4 Compact Shell
+        run: >-
+          node --test
+          tests/unit/layout/sidebar-layout-controller.test.mjs
+          tests/unit/layout/compact-shell-controller.test.mjs
+          tests/architecture/stage-06-compact-shell.test.mjs
+      - name: Verify Atomic Task 6.5 Toolbar Boundary
+        run: >-
+          node --test
+          tests/unit/layout/toolbar-boundary-controller.test.mjs
+          tests/architecture/stage-06-toolbar-boundary.test.mjs
+      - name: Verify Atomic Task 6.6 Fullscreen
+        run: >-
+          node --test
+          tests/unit/layout/page-fullscreen-controller.test.mjs
+          tests/unit/layout/system-fullscreen-controller.test.mjs
+          tests/architecture/stage-06-fullscreen.test.mjs
+      - name: Verify Atomic Task 6.7 Sidebar Tabs
+        run: >-
+          node --test
+          tests/unit/sidebar/sidebar-state.test.mjs
+          tests/unit/sidebar/sidebar-tab-controller.test.mjs
+          tests/unit/sidebar/classic-sidebar-controller-port.test.mjs
+          tests/architecture/stage-06-sidebar-tabs.test.mjs
+      - name: Verify Atomic Task 6.8 Outline
+        run: >-
+          node --test
+          tests/unit/sidebar/outline-tree-builder.test.mjs
+          tests/unit/sidebar/outline-active-heading.test.mjs
+          tests/unit/sidebar/outline-collapse-store.test.mjs
+          tests/unit/sidebar/outline-view.test.mjs
+          tests/unit/sidebar/outline-controller.test.mjs
+          tests/unit/sidebar/classic-outline-controller-port.test.mjs
+          tests/architecture/stage-06-outline.test.mjs
+      - name: Verify Atomic Task 6.9 Folder Tree
+        run: >-
+          node --test
+          tests/folder-file-tree.test.mjs
+          tests/unit/sidebar/folder-tree-path-policy.test.mjs
+          tests/unit/sidebar/folder-tree-normalizer.test.mjs
+          tests/unit/sidebar/folder-tree-state.test.mjs
+          tests/unit/sidebar/folder-tree-controller.test.mjs
+          tests/unit/sidebar/classic-folder-tree-controller-port.test.mjs
+          tests/architecture/stage-06-folder-tree.test.mjs
+          tests/unit/platform/platform-cutover.test.mjs
+          tests/svg-sprite.test.mjs
+      - name: Verify Atomic Task 6.10 Menu Model
+        run: >-
+          node --test
+          tests/unit/menu/menu-state.test.mjs
+          tests/unit/menu/menu-command-bindings.test.mjs
+          tests/unit/menu/menu-view.test.mjs
+          tests/unit/menu/menu-controller.test.mjs
+          tests/unit/menu/classic-menu-command-adapter.test.mjs
+          tests/architecture/stage-06-menu-model.test.mjs
+          tests/stage-06-menu-model.test.mjs
+      - name: Verify Atomic Task 6.11 Submenu Positioner
+        run: >-
+          node --test
+          tests/unit/menu/submenu-positioner.test.mjs
+          tests/unit/menu/classic-submenu-positioner-port.test.mjs
+          tests/architecture/stage-06-submenu-positioner.test.mjs
+          tests/stage-06-submenu-positioner.test.mjs
+      - name: Verify Atomic Task 6.11 real browser geometry and focus
+        run: node tests/e2e/submenu-positioner.test.mjs
+      - name: Verify Atomic Task 6.12 Recent Files Menu
+        run: >-
+          node --test
+          tests/unit/documents/recent-files-read-source.test.mjs
+          tests/unit/menu/recent-files-menu-controller.test.mjs
+          tests/unit/menu/classic-menu-command-port.test.mjs
+          tests/architecture/stage-06-recent-files-menu.test.mjs
+          tests/stage-06-recent-files-menu.test.mjs
+      - name: Verify Atomic Task 6.12 real browser subscription and commands
+        run: node tests/e2e/recent-files-menu.test.mjs
+      - name: Verify Atomic Task 6.13 Window Controller
+        run: >-
+          node --test
+          tests/unit/window/window-state.test.mjs
+          tests/unit/window/close-save-port.test.mjs
+          tests/unit/window/window-controls-view.test.mjs
+          tests/unit/window/window-drag-region.test.mjs
+          tests/unit/window/window-close-controller.test.mjs
+          tests/unit/window/window-controller.test.mjs
+          tests/unit/platform/window-client.test.mjs
+          tests/architecture/stage-06-window-controller.test.mjs
+          tests/stage-06-window-controller.test.mjs
+      - name: Verify Atomic Task 6.13 real browser window lifecycle
+        run: node tests/e2e/window-controller.test.mjs
+      - name: Verify Atomic Task 6.14 Destroy Validation
+        run: >-
+          node --test
+          tests/unit/layout/stage-06-layout-destroy-validation.test.mjs
+          tests/unit/sidebar/stage-06-sidebar-destroy-validation.test.mjs
+          tests/unit/menu/stage-06-menu-destroy-validation.test.mjs
+          tests/unit/window/stage-06-window-destroy-validation.test.mjs
+          tests/architecture/stage-06-destroy-validation.test.mjs
+      - name: Verify Atomic Task 7.1 Preview Behavior Thresholds
+        run: >-
+          node --test
+          tests/unit/preview/preview-thresholds.test.mjs
+          tests/unit/preview/classic-preview-thresholds-port.test.mjs
+          tests/architecture/stage-07-preview-thresholds.test.mjs
+      - name: Verify Atomic Task 7.2 Preview State
+        run: >-
+          node --test
+          tests/unit/preview/preview-state.test.mjs
+          tests/unit/preview/classic-preview-state-port.test.mjs
+          tests/architecture/stage-07-preview-state.test.mjs
+      - name: Verify Atomic Task 7.3 Preview Mode Resolver
+        run: >-
+          node --test
+          tests/unit/preview/preview-mode-resolver.test.mjs
+          tests/unit/preview/classic-preview-mode-resolver-port.test.mjs
+          tests/architecture/stage-07-preview-mode-resolver.test.mjs
+      - name: Verify Atomic Task 7.4 Preview Scheduler/Cancellation
+        run: >-
+          node --test
+          tests/unit/preview/preview-cancellation.test.mjs
+          tests/unit/preview/preview-scheduler.test.mjs
+          tests/unit/preview/classic-preview-scheduler-port.test.mjs
+          tests/architecture/stage-07-preview-scheduler.test.mjs
+      - name: Verify Atomic Task 7.5 Worker Protocol
+        run: >-
+          node --test
+          tests/unit/preview/preview-worker-protocol.test.mjs
+          tests/architecture/stage-07-preview-worker-protocol.test.mjs
+      - name: Verify Atomic Task 7.6 Worker Session
+        run: >-
+          node --test
+          tests/unit/preview/preview-worker-session.test.mjs
+          tests/architecture/stage-07-preview-worker-session.test.mjs
+      - name: Verify Atomic Task 7.7 Render Coordinator
+        run: >-
+          node --test
+          tests/unit/preview/preview-render-coordinator.test.mjs
+          tests/unit/preview/classic-preview-render-coordinator-port.test.mjs
+          tests/architecture/stage-07-preview-render-coordinator.test.mjs
+      - name: Verify Atomic Task 7.8 DOM Renderers
+        run: >-
+          node --test
+          tests/unit/preview/preview-block-view.test.mjs
+          tests/unit/preview/preview-dom-renderer.test.mjs
+          tests/unit/preview/preview-specialized-renderers.test.mjs
+          tests/unit/preview/preview-renderer-port.test.mjs
+          tests/unit/preview/classic-preview-renderer-port.test.mjs
+          tests/architecture/stage-07-preview-dom-renderers.test.mjs
+      - name: Verify Atomic Task 7.9 Layout Stability
+        run: >-
+          node --test
+          tests/unit/preview/preview-layout-stability.test.mjs
+          tests/unit/preview/classic-preview-layout-stability-port.test.mjs
+          tests/architecture/stage-07-preview-layout-stability.test.mjs
+      - name: Verify Atomic Task 7.9 real browser visibility and geometry
+        run: node tests/e2e/preview-layout-stability.test.mjs
+      - name: Verify Atomic Task 7.10 Virtual Window
+        run: >-
+          node --test
+          tests/unit/preview/virtual-window-model.test.mjs
+          tests/unit/preview/height-cache.test.mjs
+          tests/unit/preview/spacer-view.test.mjs
+          tests/unit/preview/virtual-window-controller.test.mjs
+          tests/architecture/stage-07-preview-virtual-window.test.mjs
+      - name: Verify Atomic Task 7.10 real browser windowing and height correction
+        run: node tests/e2e/preview-virtual-window.test.mjs
+      - name: Verify Atomic Task 7.11 Focus Controller
+        run: >-
+          node --test
+          tests/unit/preview/preview-focus-controller.test.mjs
+          tests/unit/preview/classic-preview-focus-controller-port.test.mjs
+          tests/architecture/stage-07-preview-focus-controller.test.mjs
+      - name: Verify Atomic Task 7.11 real browser stale-focus rejection
+        run: node tests/e2e/preview-focus-controller.test.mjs
+      - name: Verify Atomic Task 7.12 Enhancement Coordinator
+        run: >-
+          node --test
+          tests/unit/preview/preview-enhancement-coordinator.test.mjs
+          tests/unit/preview/classic-preview-enhancement-coordinator-port.test.mjs
+          tests/architecture/stage-07-preview-enhancement-coordinator.test.mjs
+      - name: Verify Atomic Task 7.12 real browser input yielding and priority
+        run: node tests/e2e/preview-enhancement-coordinator.test.mjs
+      - name: Verify Atomic Task 7.13 Recovery View
+        run: >-
+          node --test
+          tests/unit/preview/preview-recovery-view.test.mjs
+          tests/unit/preview/classic-preview-recovery-view-port.test.mjs
+          tests/architecture/stage-07-preview-recovery-view.test.mjs
+      - name: Verify Atomic Task 7.13 real browser stable/error recovery
+        run: node tests/e2e/preview-recovery-view.test.mjs
+      - name: Verify Atomic Task 7.14 Legacy Preview Deletion
+        run: >-
+          node --test
+          tests/unit/preview/preview-controller-command-handler.test.mjs
+          tests/unit/preview/preview-render-engine.test.mjs
+          tests/architecture/stage-07-preview-legacy-deletion.test.mjs
+      - name: Verify Stage 7 cumulative contracts through Atomic 7.14
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            $(find tests/unit/preview -type f -name '*.test.mjs' | sort) \
+            $(find tests/architecture -type f -name 'stage-07-*.test.mjs' | sort)
+      - name: Verify modified classic and module runners parse
+        run: >-
+          node --check src/bootstrap/module-entry.js &&
+          node --check src/main.js &&
+          node --check public/app/core.js &&
+          node --check public/app/bootstrap.js &&
+          node --check public/app/events.js &&
+          node --check public/app/editor-tools.js &&
+          node --check public/app/web-clipper.js &&
+          node --check public/app/scroll-sync.js &&
+          node --check public/app/export.js &&
+          node --check src/features/documents/application/recent-files-read-source.js &&
+          node --check src/features/documents/infrastructure/recent-files-repository.js &&
+          node --check src/features/documents/compatibility/classic-recent-files-port.js &&
+          node --check src/features/layout/split/compact-split-controller.js &&
+          node --check src/features/menu/menu-command-bindings.js &&
+          node --check src/features/menu/menu-state.js &&
+          node --check src/features/menu/menu-view.js &&
+          node --check src/features/menu/menu-controller.js &&
+          node --check src/features/menu/submenu-positioner.js &&
+          node --check src/features/menu/recent-files-menu-controller.js &&
+          node --check src/features/menu/compatibility/classic-menu-command-adapter.js &&
+          node --check src/features/menu/compatibility/classic-menu-command-port.js &&
+          node --check src/features/menu/compatibility/classic-submenu-positioner-port.js &&
+          node --check src/features/sidebar/folder-tree/folder-tree-controller.js &&
+          node --check src/features/sidebar/folder-tree/folder-tree-view.js &&
+          node --check src/features/sidebar/folder-tree/folder-tree-node-view.js &&
+          node --check src/features/window/close-save-port.js &&
+          node --check src/features/window/window-state.js &&
+          node --check src/features/window/window-controls-view.js &&
+          node --check src/features/window/window-drag-region.js &&
+          node --check src/features/window/window-close-controller.js &&
+          node --check src/features/window/window-controller.js &&
+          node --check src/features/window/compatibility/classic-close-save-port.js &&
+          node --check src/features/window/index.js &&
+          node --check src/features/preview/application/preview-state.js &&
+          node --check src/features/preview/pipeline/preview-mode-resolver.js &&
+          node --check src/features/preview/pipeline/preview-thresholds.js &&
+          node --check src/features/preview/pipeline/preview-cancellation.js &&
+          node --check src/features/preview/pipeline/preview-scheduler.js &&
+          node --check src/features/preview/pipeline/preview-render-coordinator.js &&
+          node --check src/features/preview/pipeline/preview-layout-stability.js &&
+          node --check src/features/preview/pipeline/preview-focus-controller.js &&
+          node --check src/features/preview/pipeline/preview-enhancement-coordinator.js &&
+          node --check src/features/preview/compatibility/classic-preview-focus-controller-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-enhancement-coordinator-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-recovery-view-port.js &&
+          node --check src/features/preview/ui/preview-recovery-view.js &&
+          node --check src/features/preview/render/virtual-window/virtual-window-model.js &&
+          node --check src/features/preview/render/virtual-window/height-cache.js &&
+          node --check src/features/preview/render/virtual-window/spacer-view.js &&
+          node --check src/features/preview/render/virtual-window/virtual-window-controller.js &&
+          node --check src/features/preview/render/preview-block-view.js &&
+          node --check src/features/preview/render/preview-dom-renderer.js &&
+          node --check src/features/preview/render/task-list-renderer.js &&
+          node --check src/features/preview/render/code-renderer.js &&
+          node --check src/features/preview/render/math-renderer.js &&
+          node --check src/features/preview/render/mermaid-renderer.js &&
+          node --check src/features/preview/render/preview-renderer-port.js &&
+          node --check src/features/preview/worker/preview-worker-protocol.js &&
+          node --check src/features/preview/worker/preview-worker-session.js &&
+          node --check src/features/preview/compatibility/classic-preview-mode-resolver-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-state-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-thresholds-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-scheduler-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-render-coordinator-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-renderer-port.js &&
+          node --check src/features/preview/compatibility/classic-preview-layout-stability-port.js &&
+          node --check src/features/preview/index.js &&
+          node --check src/features/preview/application/preview-controller.js &&
+          node --check src/features/preview/application/preview-command-handler.js &&
+          node --check src/features/preview/pipeline/preview-render-engine.js &&
+          node --check src/features/preview/render/preview-markdown-renderer.js &&
+          node --check src/features/preview/render/presentation/math-presentation.js &&
+          node --check src/features/preview/render/presentation/mermaid-presentation.js &&
+          node --check src/features/preview/render/presentation/presentation-api.js &&
+          node --check src/features/preview/virtual/virtual-preview-controller.js &&
+          node --check src/features/preview/worker/preview-worker-client.js &&
+          node --check src/features/preview/worker/preview-worker.js &&
+          node --check src/features/preview/compatibility/classic-preview-presentation-port.js &&
+          node --check src/shared/scheduling/task-scheduler.js &&
+          node --check src/shared/scheduling/classic-task-scheduler-port.js &&
+          node --check src/shared/vendor/capability-loader.js &&
+          node --check tests/unit/preview/preview-controller-command-handler.test.mjs &&
+          node --check tests/unit/preview/preview-render-engine.test.mjs &&
+          node --check tests/architecture/stage-07-preview-legacy-deletion.test.mjs &&
+          node --check tests/e2e/fixtures/interaction-harness.js &&
+          node --check tests/unit/preview/preview-thresholds.test.mjs &&
+          node --check tests/unit/preview/classic-preview-thresholds-port.test.mjs &&
+          node --check tests/unit/preview/preview-state.test.mjs &&
+          node --check tests/unit/preview/classic-preview-state-port.test.mjs &&
+          node --check tests/unit/preview/preview-mode-resolver.test.mjs &&
+          node --check tests/unit/preview/classic-preview-mode-resolver-port.test.mjs &&
+          node --check tests/unit/preview/preview-cancellation.test.mjs &&
+          node --check tests/unit/preview/preview-scheduler.test.mjs &&
+          node --check tests/unit/preview/classic-preview-scheduler-port.test.mjs &&
+          node --check tests/unit/preview/preview-worker-protocol.test.mjs &&
+          node --check tests/unit/preview/preview-worker-session.test.mjs &&
+          node --check tests/unit/preview/preview-render-coordinator.test.mjs &&
+          node --check tests/unit/preview/classic-preview-render-coordinator-port.test.mjs &&
+          node --check tests/unit/preview/preview-block-view.test.mjs &&
+          node --check tests/unit/preview/preview-dom-renderer.test.mjs &&
+          node --check tests/unit/preview/preview-specialized-renderers.test.mjs &&
+          node --check tests/unit/preview/preview-renderer-port.test.mjs &&
+          node --check tests/unit/preview/classic-preview-renderer-port.test.mjs &&
+          node --check tests/unit/preview/preview-layout-stability.test.mjs &&
+          node --check tests/unit/preview/classic-preview-layout-stability-port.test.mjs &&
+          node --check tests/unit/preview/virtual-window-model.test.mjs &&
+          node --check tests/unit/preview/height-cache.test.mjs &&
+          node --check tests/unit/preview/spacer-view.test.mjs &&
+          node --check tests/unit/preview/virtual-window-controller.test.mjs &&
+          node --check tests/architecture/stage-07-preview-thresholds.test.mjs &&
+          node --check tests/architecture/stage-07-preview-state.test.mjs &&
+          node --check tests/architecture/stage-07-preview-mode-resolver.test.mjs &&
+          node --check tests/architecture/stage-07-preview-scheduler.test.mjs &&
+          node --check tests/architecture/stage-07-preview-worker-protocol.test.mjs &&
+          node --check tests/architecture/stage-07-preview-worker-session.test.mjs &&
+          node --check tests/architecture/stage-07-preview-render-coordinator.test.mjs &&
+          node --check tests/architecture/stage-07-preview-dom-renderers.test.mjs &&
+          node --check tests/architecture/stage-07-preview-layout-stability.test.mjs &&
+          node --check tests/architecture/stage-07-preview-virtual-window.test.mjs &&
+          node --check tests/architecture/stage-07-preview-focus-controller.test.mjs &&
+          node --check tests/architecture/stage-07-preview-enhancement-coordinator.test.mjs &&
+          node --check tests/architecture/stage-07-preview-recovery-view.test.mjs &&
+          node --check tests/unit/preview/preview-focus-controller.test.mjs &&
+          node --check tests/unit/preview/classic-preview-focus-controller-port.test.mjs &&
+          node --check tests/unit/preview/preview-enhancement-coordinator.test.mjs &&
+          node --check tests/unit/preview/classic-preview-enhancement-coordinator-port.test.mjs &&
+          node --check tests/unit/preview/preview-recovery-view.test.mjs &&
+          node --check tests/unit/preview/classic-preview-recovery-view-port.test.mjs &&
+          node --check tests/e2e/preview-focus-controller.test.mjs &&
+          node --check tests/e2e/preview-enhancement-coordinator.test.mjs &&
+          node --check tests/e2e/preview-recovery-view.test.mjs &&
+          node --check tests/helpers/lifecycle-resource-ledger.mjs &&
+          node --check tests/unit/layout/stage-06-layout-destroy-validation.test.mjs &&
+          node --check tests/unit/sidebar/stage-06-sidebar-destroy-validation.test.mjs &&
+          node --check tests/unit/menu/stage-06-menu-destroy-validation.test.mjs &&
+          node --check tests/unit/window/stage-06-window-destroy-validation.test.mjs &&
+          node --check tests/architecture/stage-06-destroy-validation.test.mjs &&
+          node --check tests/e2e/submenu-positioner.test.mjs &&
+          node --check tests/e2e/recent-files-menu.test.mjs &&
+          node --check tests/e2e/window-controller.test.mjs &&
+          node --check tests/e2e/preview-layout-stability.test.mjs &&
+          node --check tests/e2e/preview-virtual-window.test.mjs &&
+          node --check tests/e2e/run-browser-tests.mjs
+      - name: Verify Atomic Task 7.14 legacy Preview paths are absent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e public/app/preview.js
+          test ! -e src/preview/preview-worker-client.js
+          test ! -e src/preview/preview-worker.js
+          test ! -e src/preview/virtual-preview.js
+          test -z "$(find src/rendering -type f -print -quit 2>/dev/null || true)"
+          test ! -e src/runtime/task-scheduler.js
+          test ! -e src/runtime/vendor.js
+          test -e src/preview/incremental-preview.js
+          test -e src/preview/math-source.js
+          ! grep -R -n -E "window\.markdownEditorVirtualPreview|window\.markdownEditorTaskScheduler|window\.createPreviewWorkerClient|window\.createVirtualPreviewController|window\.markdownEditorPresentation[[:space:]]*=|window\.markdownEditorMath[[:space:]]*=" src public --include='*.js'
+      - name: Verify frozen DocumentModel remains exact
+        run: test "$(git hash-object src/document/document-model.js)" = "d767d9025be05a6f6b87d7cd3527782db1c3303a"
+      - name: Run architecture hard gate
+        run: npm run verify:architecture
+      - name: Run existing Node regression suite
+        run: npm test
+      - name: Run browser interaction contract
+        env:
+          E2E_ARTIFACT_DIR: artifacts/stage-07/browser-contract
+        run: npm run test:browser:contract
+      - name: Build current application
+        run: npm run build
+      - name: Verify built application regression
+        env:
+          E2E_ARTIFACT_DIR: artifacts/stage-07/browser-app
+        run: npm run test:browser
+      - name: Upload Atomic Task 7.14 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-07-preview-legacy-deletion-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-07
+          if-no-files-found: error
+          retention-days: 30
