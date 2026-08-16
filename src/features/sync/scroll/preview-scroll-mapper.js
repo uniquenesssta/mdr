@@ -1,8 +1,8 @@
 /**
- * Responsibility: Map preview source lines to preview content geometry using either virtual height-index capabilities or rendered source anchors, without querying editor internals or owning scroll-source/target writes.
- * Imports: None; consumes an injected preview element, Preview virtual geometry capability and optional ResizeObserver/timer capabilities.
+ * Responsibility: Map preview source lines to preview content geometry and own exact source-range annotation for rendered preview blocks, using either virtual height-index capabilities or rendered source anchors.
+ * Imports: None; consumes injected preview DOM/virtual geometry and render-produced block/token metadata only. Never queries editor internals or reparses Markdown.
  * Exports: PreviewScrollMapper and createPreviewScrollMapper.
- * State/side effects: Owns only preview anchor/metric caches, preview-body observation and its debounce timer; reports geometry invalidation through an injected callback.
+ * State/side effects: Owns preview anchor/metric caches, source-range annotation, preview-body observation and its debounce timer; reports geometry invalidation through an injected callback.
  * Lifecycle: Explicit instance lifecycle; destroy() disconnects observation, clears timers/caches and makes later reads terminal.
  */
 
@@ -26,6 +26,56 @@ function findLastMetricIndex(metrics, value, field) {
     else high = mid - 1;
   }
   return low;
+}
+
+function countNewlines(value, start = 0, end = String(value || '').length) {
+  const text = String(value || '');
+  const from = Math.max(0, Number(start) || 0);
+  const to = Math.min(text.length, Math.max(from, Number(end) || 0));
+  let count = 0;
+  for (let index = from; index < to; index += 1) {
+    if (text.charCodeAt(index) === 10) count += 1;
+  }
+  return count;
+}
+
+function trimTrailingNewlineCount(value) {
+  const text = String(value || '');
+  let end = text.length;
+  while (end > 0 && text.charCodeAt(end - 1) === 10) end -= 1;
+  return countNewlines(text, 0, end);
+}
+
+function normalizeBlockRange(block) {
+  const start = Number(block?.start ?? block?.sourceStartIndex);
+  const end = Number(block?.end ?? block?.sourceEndIndex);
+  const startLine = Number(block?.startLine ?? block?.sourceLine);
+  const endLine = Number(block?.endLine ?? block?.sourceEndLine ?? startLine);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
+  if (!Number.isFinite(startLine) || !Number.isFinite(endLine)) return null;
+  return {
+    start: Math.max(0, Math.trunc(start)),
+    end: Math.max(Math.trunc(start) + 1, Math.trunc(end)),
+    startLine: Math.max(1, Math.trunc(startLine)),
+    endLine: Math.max(Math.max(1, Math.trunc(startLine)), Math.trunc(endLine))
+  };
+}
+
+function clearSourceRange(element) {
+  if (!element?.dataset) return;
+  delete element.dataset.sourceLine;
+  delete element.dataset.sourceEndLine;
+  delete element.dataset.sourceStartIndex;
+  delete element.dataset.sourceEndIndex;
+}
+
+function applySourceRange(element, range) {
+  if (!element?.dataset || !range) return false;
+  element.dataset.sourceLine = String(range.startLine);
+  element.dataset.sourceEndLine = String(range.endLine);
+  element.dataset.sourceStartIndex = String(range.start);
+  element.dataset.sourceEndIndex = String(range.end);
+  return true;
 }
 
 export class PreviewScrollMapper {
@@ -81,7 +131,57 @@ export class PreviewScrollMapper {
   replaceAnchors(anchors) {
     this.assertActive();
     this.anchorsCache = Array.from(anchors || []);
+    this.metricsCache = null;
     return this.anchorsCache;
+  }
+
+  annotateSourceLines(sourceText, tokens = [], blocks = []) {
+    this.assertActive();
+    if (this.isVirtualActive()) return this.refreshStructure();
+    const body = this.previewElement.querySelector('.markdown-body');
+    if (!body) {
+      this.invalidateStructure();
+      return [];
+    }
+    const children = Array.from(body.children || []);
+    for (const child of children) clearSourceRange(child);
+    const anchors = [];
+    const source = String(sourceText || '');
+    const blockRanges = Array.from(blocks || [], normalizeBlockRange).filter(Boolean);
+
+    if (blockRanges.length) {
+      const count = Math.min(children.length, blockRanges.length);
+      for (let index = 0; index < count; index += 1) {
+        if (applySourceRange(children[index], blockRanges[index])) anchors.push(children[index]);
+      }
+    } else {
+      let cursor = 0;
+      let line = 1;
+      let childIndex = 0;
+      for (const token of Array.from(tokens || [])) {
+        if (childIndex >= children.length) break;
+        const raw = String(token?.raw || '');
+        if (!raw || token?.type === 'space' || token?.type === 'def') continue;
+        const start = source.indexOf(raw, cursor);
+        if (start < cursor) continue;
+        line += countNewlines(source, cursor, start);
+        const end = Math.min(source.length, start + raw.length);
+        const range = {
+          start,
+          end,
+          startLine: line,
+          endLine: line + trimTrailingNewlineCount(raw)
+        };
+        if (end > start && applySourceRange(children[childIndex], range)) anchors.push(children[childIndex]);
+        line += countNewlines(source, start, end);
+        cursor = end;
+        childIndex += 1;
+      }
+    }
+
+    this.replaceAnchors(anchors);
+    this.observeBodySize();
+    return anchors;
   }
 
   invalidateMetrics() {
@@ -128,6 +228,7 @@ export class PreviewScrollMapper {
     this.anchorsCache = this.isVirtualActive()
       ? (this.virtualApi.getMountedAnchors() || [])
       : Array.from(this.previewElement.querySelectorAll('[data-source-line]'));
+    this.metricsCache = null;
     this.observeBodySize();
     return this.anchorsCache;
   }
