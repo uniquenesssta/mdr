@@ -1,4 +1,4 @@
-# R9-10 runner revision 3
+# R9-10 runner revision 4
 name: R9-10 authoritative validation
 
 on:
@@ -28,6 +28,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          git rm -f --cached --ignore-unmatch .agent/r9_10_failure.log >/dev/null 2>&1 || true
           rm -f .agent/r9_10_failure.log
           python .agent/r9_10_prepare_fix.py
           set +e
