@@ -6,9 +6,7 @@ import { resolve } from 'node:path';
 const ROOT = resolve(new URL('../..', import.meta.url).pathname);
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
-const LATER_SELECTION_FILES = [
-  'src/features/sync/selection/selection-sync-controller.js',
-];
+const controllerPath = 'src/features/sync/selection/selection-sync-controller.js';
 
 test('R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry', async () => {
   const index = await read('src/features/sync/index.js');
@@ -30,8 +28,8 @@ test('R9-08 Feedback Guard owns sequence source revision and release lifecycle w
   assert.doesNotMatch(source, /selectionSyncLock|applyingSide|feedbackLocked|isFeedbackLocked/);
 });
 
-test('R9-08 legacy SelectionSyncController consumes the Guard and no longer owns applying-side release or preview revision duplicates', async () => {
-  const controller = await read('src/sync/selection-controller.js');
+test('R9-08 final SelectionSyncController consumes the Guard and owns no applying-side release or preview revision duplicates', async () => {
+  const controller = await read(controllerPath);
   assert.match(controller, /feedbackGuard\.begin\('editor'\)/);
   assert.match(controller, /feedbackGuard\.begin\('preview'\)/);
   assert.match(controller, /feedbackGuard\.shouldIgnore/);
@@ -41,28 +39,26 @@ test('R9-08 legacy SelectionSyncController consumes the Guard and no longer owns
   assert.doesNotMatch(controller, /this\.applyingSide\s*=|this\.releaseTimer\s*=|this\.previewRevision\s*=/);
 });
 
-test('R9-08 classic selection compatibility consumes the scoped Guard and deletes the cross-file selectionSyncLock authority', async () => {
+test('R9-08 legacy selectionSyncLock authority remains deleted after classic scroll-sync removal', async () => {
   const core = await read('public/app/core.js');
-  const legacy = await read('public/app/scroll-sync.js');
-  assert.match(legacy, /markdownEditorSelectionFeedbackGuard/);
-  assert.match(legacy, /selectionFeedbackGuard\.shouldIgnore\('editor'/);
-  assert.match(legacy, /selectionFeedbackGuard\.shouldIgnore\('preview'/);
+  const controller = await read(controllerPath);
   assert.doesNotMatch(core, /selectionSyncLock/);
-  assert.doesNotMatch(legacy, /selectionSyncLock/);
+  assert.doesNotMatch(controller, /selectionSyncLock/);
+  await assert.rejects(access(file('public/app/scroll-sync.js')));
 });
 
-test('R9-08 composition creates exactly one Guard injects it into Controller and scoped compatibility then destroys it', async () => {
+test('R9-08 composition creates exactly one Guard injects it directly into final Controller and destroys it', async () => {
   const main = await read('src/main.js');
   assert.match(main, /createSelectionFeedbackGuard/);
   assert.match(main, /const selectionFeedbackGuard = createSelectionFeedbackGuard\(\{/);
-  assert.match(main, /markdownEditorSelectionFeedbackGuard = selectionFeedbackGuard/);
   assert.match(main, /feedbackGuard: selectionFeedbackGuard/);
   assert.match(main, /selectionFeedbackGuard\.destroy\(\)/);
+  assert.doesNotMatch(main, /markdownEditorSelectionFeedbackGuard = selectionFeedbackGuard/);
   assert.doesNotMatch(main, /window\.markdownEditorSelectionFeedbackGuard/);
   assert.doesNotMatch(main, /\.\/features\/sync\/selection\/selection-feedback-guard\.js/);
 });
 
-test('R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched and does not advance R9-11+', async () => {
+test('R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners separate from the final Controller', async () => {
   await access(file('src/features/sync/scroll/scroll-source-ownership.js'));
   await access(file('src/features/sync/scroll/scroll-sync-controller.js'));
   await access(file('src/features/sync/scroll/editor-scroll-mapper.js'));
@@ -70,23 +66,23 @@ test('R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners untouched 
   await access(file('src/features/sync/scroll/scroll-geometry-session.js'));
   await access(file('src/features/sync/selection/editor-selection-reader.js'));
   await access(file('src/features/sync/selection/preview-selection-reader.js'));
+  await access(file(controllerPath));
   await access(file('src/sync/selection-mapping.js'));
-  for (const path of LATER_SELECTION_FILES) await assert.rejects(access(file(path)), path);
   const mapping = await read('src/sync/selection-mapping.js');
   assert.doesNotMatch(mapping, /R9-08/);
 });
 
-test('R9-08 production inventory records one Feedback Guard responsibility and cardinality 380 after R9-09 inventory growth', async () => {
+test('R9-08 production inventory records one Feedback Guard responsibility and final Stage 9 cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
   assert.equal(inventory.modules.length, 381);
   assert.equal(records.get('src/features/sync/selection/selection-feedback-guard.js')?.[4], 'selection-feedback-guard-lifecycle');
 });
 
-test('R9-08 keeps Reader ownership separate from feedback policy and leaves later Selection modules absent', async () => {
+test('R9-08 keeps Reader ownership separate from feedback policy after final Selection Controller migration', async () => {
   const editorReader = await read('src/features/sync/selection/editor-selection-reader.js');
   const previewReader = await read('src/features/sync/selection/preview-selection-reader.js');
   assert.doesNotMatch(editorReader, /SelectionFeedbackGuard|feedbackGuard/);
   assert.doesNotMatch(previewReader, /SelectionFeedbackGuard|feedbackGuard/);
-  for (const path of LATER_SELECTION_FILES) await assert.rejects(access(file(path)), path);
+  await access(file(controllerPath));
 });
