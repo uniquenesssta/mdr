@@ -1,4 +1,4 @@
-name: R9-07 selection read diagnostic
+name: R9-07 authoritative validation
 
 on:
   push:
@@ -7,21 +7,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  validate-r9-07:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout runner branch
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Inspect selection read ownership
+      - name: Validate and publish clean R9-07 candidate
         shell: bash
-        run: |
-          echo '--- selection-controller raw reads ---'
-          grep -nE 'selectionStart|selectionEnd|window\.getSelection|selectionchange|previewPointerActive|previewSelectionDirty' src/sync/selection-controller.js || true
-          echo '--- classic scroll-sync raw reads ---'
-          grep -nE 'selectionStart|selectionEnd|window\.getSelection|document\.getSelection' public/app/scroll-sync.js || true
-          echo '--- selection controller callers ---'
-          grep -RInE 'createSelectionSyncController|markdownEditorSelectionController' src public tests --exclude-dir=node_modules || true
+        run: bash .agent/r9_07_validate.sh
