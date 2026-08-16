@@ -6,4 +6,11 @@ old = "R9-05 / Stage 9：PreviewScrollMapper 已接管源码行↔预览 content
 new = "R9-05 / Stage 9：PreviewScrollMapper接管源码行↔预览Y及缓存/resize；虚拟仅读height index，不读editor；Geometry/Selection未启，行为不变。验证：R9-05 16/16，R9-04 14/14，R9-03/R9-02/R9-01 13/13，Stage 8 179/179，Node ${node_tests}/${node_pass}，Architecture/Build PASS，Browser contract 10/10，Built-app 29/29×2 PASS，audit 0。"
 if text.count(old) != 1:
     raise RuntimeError(f'R9-05 README record: expected one match, found {text.count(old)}')
-path.write_text(text.replace(old, new, 1), encoding='utf-8')
+text = text.replace(old, new, 1)
+old_checks = """grep -q 'R9-03 13/13' README.md
+grep -q 'R9-02 13/13' README.md
+grep -q 'R9-01 13/13' README.md"""
+new_checks = """grep -q 'R9-03/R9-02/R9-01 13/13' README.md"""
+if text.count(old_checks) != 1:
+    raise RuntimeError(f'R9-05 concise README checks: expected one match, found {text.count(old_checks)}')
+path.write_text(text.replace(old_checks, new_checks, 1), encoding='utf-8')
