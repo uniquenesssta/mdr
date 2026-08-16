@@ -116,7 +116,10 @@ function installTextareaCompatibility(host, adapter, extensionRegistry) {
   };
 }
 
-export function createVirtualEditor(host) {
+export function createVirtualEditor(host, { scrollSync = null } = {}) {
+  if (scrollSync !== null && (typeof scrollSync.markProgrammaticScroll !== 'function' || typeof scrollSync.suspend !== 'function')) {
+    throw new TypeError('Virtual Editor scrollSync requires markProgrammaticScroll/suspend');
+  }
   if (!host || host.virtualEditor) return host?.virtualEditor || null;
 
   const initialValue = host.textContent || '';
@@ -157,8 +160,8 @@ export function createVirtualEditor(host) {
     parent: host,
     initialValue,
     extensions: extensionRegistry.getExtensions(),
-    markProgrammaticScroll(duration) { window.markdownEditorScrollSync?.markProgrammaticScroll?.('editor', duration); },
-    suspendScrollSync(duration) { window.markdownEditorScrollSync?.suspend?.(duration); },
+    markProgrammaticScroll(duration) { scrollSync?.markProgrammaticScroll?.('editor', duration); },
+    suspendScrollSync(duration) { scrollSync?.suspend?.(duration); },
     reportError(message, error) { console.error(message, error); }
   });
   adapterApi = codeMirrorApi;

@@ -75,9 +75,17 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
     function afterFindMatch(match) {
       if (!match) return false;
       if (webClipperPreviewCommandPort.snapshot.mode === 'chapter') {
-        webClipperPreviewCommandPort.update().then(() => syncEditorSelectionToPreview(true));
+        webClipperPreviewCommandPort.update().then(() => {
+          if (webClipperEditorUiCommandPort.has('syncEditorSelectionToPreview')) {
+            webClipperEditorUiCommandPort.invoke('syncEditorSelectionToPreview', true, 'find-match');
+          }
+        });
       } else {
-        requestAnimationFrame(() => syncEditorSelectionToPreview(true));
+        requestAnimationFrame(() => {
+          if (webClipperEditorUiCommandPort.has('syncEditorSelectionToPreview')) {
+            webClipperEditorUiCommandPort.invoke('syncEditorSelectionToPreview', true, 'find-match');
+          }
+        });
       }
       return true;
     }

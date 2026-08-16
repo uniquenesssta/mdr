@@ -32,6 +32,7 @@ import {
   createHybridSourceEditController,
   createImageBlockWidgetType,
   createInlinePresentationCoordinator,
+  getHybridSyncCapabilities,
   createMathBlockWidgetType,
   createMermaidBlockWidgetType,
   createTableBlockWidgetType,
@@ -264,7 +265,7 @@ const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
     const hybridSession = getHybridComponentSession(view, { onTransition: recordHybridComponentTransition });
     const sourceEditorPort = createCodeMirrorSourceEditorPort(view, {
       markProgrammaticScroll: (surface, durationMs) => {
-        globalThis.window?.markdownEditorScrollSync?.markProgrammaticScroll?.(surface, durationMs);
+        getHybridSyncCapabilities()?.markProgrammaticScroll(surface, durationMs);
       }
     });
     const sourceEditController = createHybridSourceEditController({

@@ -1,3 +1,5 @@
+import { getHybridSyncCapabilities } from '../runtime/hybrid-sync-capabilities.js';
+
 /**
  * Atomic 8.5 Widget Geometry Scheduler.
  * Owns the per-editor animation-frame/settle queue and geometry refresh side effects.
@@ -21,8 +23,9 @@ function runGeometryRefresh(view, reason) {
   const runtimeWindow = resolveRuntimeWindow(view);
   view.requestMeasure();
   runtimeWindow?.scheduleEditorMetricsRebuild?.(40);
-  runtimeWindow?.markdownEditorScrollSync?.notifyGeometryChanged?.('editor');
-  runtimeWindow?.markdownEditorSelectionController?.notifyEditorGeometry?.(`hybrid-widget:${reason}`);
+  const sync = getHybridSyncCapabilities();
+  sync?.notifyScrollGeometry('editor');
+  sync?.notifySelectionGeometry(`hybrid-widget:${reason}`);
   runtimeWindow?.markdownEditorPerf?.record?.('hybrid.widget-geometry', {
     category: 'editor.hybrid',
     aggregate: true,

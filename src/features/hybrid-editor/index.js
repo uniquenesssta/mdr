@@ -145,3 +145,5 @@ export {
 export {
   createInlinePresentationCoordinator
 } from './presentation/inline-presentation-coordinator.js';
+
+export { configureHybridSyncCapabilities, getHybridSyncCapabilities } from './runtime/hybrid-sync-capabilities.js';

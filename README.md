@@ -2,4 +2,4 @@
 
 简介：模块化重写中的桌面 Markdown 编辑器；详见 [docs/README.md](docs/README.md)。
 
-R9-11：frozen selection mapping 仅经 model-kernel 注入 scoped 能力；移除 window mapping 全局，算法/接口未改，R9-12 未启动。验证：R9-11 10/10；R9-10~01 回归全 PASS；Stage8 179/179；Node 228/228；Architecture/Build PASS；Browser 10/10；Built-app 29/29×2；audit 0。
+R9-12：删除 classic scroll-sync 与旧 Selection Controller；最终 Sync 仅用模块化 Mapper/Controller、frozen mapping 和显式能力，移除文本搜索/全文 editor.value fallback 与 Sync window globals。验证待权威 CI 完成后记录。

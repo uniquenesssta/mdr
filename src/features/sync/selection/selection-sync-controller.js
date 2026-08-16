@@ -148,7 +148,7 @@ export class SelectionSyncController {
     this.scrollController = scrollController;
     this.documentRef = documentRef;
     this.requestFrame = requestFrame;
-    this.cancelFrame = cancelFrame;
+    this.cancelScheduledFrameRequest = cancelFrame;
     this.now = now;
     this.isHybridLayout = isHybridLayout;
     this.updateActiveLine = updateActiveLine;
@@ -165,6 +165,7 @@ export class SelectionSyncController {
     this.lastEditorKey = '';
     this.lastPreviewKey = '';
     this.editorAlignmentUntil = 0;
+    this.finalFeedbackState = null;
     this.stats = {
       editorRequests: 0,
       previewRequests: 0,
@@ -231,14 +232,6 @@ export class SelectionSyncController {
     return this;
   }
 
-  cancelFrame(side) {
-    const property = side === 'editor' ? 'editorFrame' : 'previewFrame';
-    const versionProperty = side === 'editor' ? 'editorFrameVersion' : 'previewFrameVersion';
-    this[versionProperty] += 1;
-    if (this[property]) this.cancelFrame(this[property]);
-    this[property] = 0;
-  }
-
   stop() {
     if (this.destroyed) return;
     this.retryScheduler.cancel();
@@ -265,7 +258,7 @@ export class SelectionSyncController {
     this[versionProperty] += 1;
     const id = this[property];
     this[property] = 0;
-    if (id) this.cancelFrame(id);
+    if (id) this.cancelScheduledFrameRequest(id);
   }
 
   scheduleFrameChain(side, frames, publish) {
@@ -658,7 +651,7 @@ export class SelectionSyncController {
   }
 
   getState() {
-    const feedback = this.feedbackGuard.getState();
+    const feedback = this.feedbackGuard?.getState?.() || this.finalFeedbackState || { source: '', revision: 0 };
     return {
       started: this.started,
       destroyed: this.destroyed,
@@ -671,6 +664,7 @@ export class SelectionSyncController {
   destroy() {
     if (this.destroyed) return;
     this.stop();
+    this.finalFeedbackState = this.feedbackGuard.getState();
     this.destroyed = true;
     this.retryScheduler.cancel();
     this.highlightSession.clear();
@@ -691,7 +685,7 @@ export class SelectionSyncController {
     this.scrollController = null;
     this.documentRef = null;
     this.requestFrame = null;
-    this.cancelFrame = null;
+    this.cancelScheduledFrameRequest = null;
     this.now = null;
     this.isHybridLayout = null;
     this.updateActiveLine = null;

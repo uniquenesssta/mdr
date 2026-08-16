@@ -44,8 +44,7 @@ import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
-import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler } from './features/sync/index.js';
-import { createSelectionSyncController } from './sync/selection-controller.js';
+import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler, createSelectionSyncController } from './features/sync/index.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {
   createFolderTreeController,
@@ -60,7 +59,7 @@ import {
   mountClassicOutlineControllerPort,
   mountClassicSidebarControllerPort
 } from './features/sidebar/index.js';
-import { configureHybridImageSourcePlatform } from './features/hybrid-editor/index.js';
+import { configureHybridImageSourcePlatform, configureHybridSyncCapabilities } from './features/hybrid-editor/index.js';
 import {
   createDocumentContextMenuView,
   createDocumentListView,
@@ -248,13 +247,8 @@ window.addEventListener('pagehide', () => {
   backgroundTaskSchedulerPort.destroy();
   backgroundTaskScheduler.destroy();
   compatibilityPlatformPort.destroy();
-  if (compatibilityPlatformHost?.markdownEditorSelectionMapping === selectionMappingApi) {
-    delete compatibilityPlatformHost.markdownEditorSelectionMapping;
-  }
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
 }, { once: true });
-
-if (compatibilityPlatformHost) compatibilityPlatformHost.markdownEditorSelectionMapping = selectionMappingApi;
 
 if (typeof document.startViewTransition === 'function') {
   document.documentElement.classList.add('view-transitions-supported');
@@ -262,7 +256,6 @@ if (typeof document.startViewTransition === 'function') {
 
 const APP_MODULES = [
   '/app/core.js',
-  '/app/scroll-sync.js',
   '/app/bootstrap.js',
   '/app/export.js',
   '/app/editor-tools.js',
@@ -290,15 +283,13 @@ function requireElement(selector, label) {
 async function loadAppModules() {
   const editorHost = document.getElementById('editor');
   if (!editorHost) throw new Error('Editor host is missing');
-  const virtualEditor = createVirtualEditor(editorHost);
   const previewHost = document.getElementById('preview');
   if (!previewHost) throw new Error('Preview host is missing');
   const scrollController = createScrollSyncController(editorHost, previewHost, {
     requestFrame: callback => window.requestAnimationFrame(callback),
     cancelFrame: frameId => window.cancelAnimationFrame(frameId)
   });
-  window.markdownEditorScrollController = scrollController;
-  window.markdownEditorScrollSync = scrollController.getPublicApi();
+  const virtualEditor = createVirtualEditor(editorHost, { scrollSync: scrollController.getPublicApi() });
   const editorSelectionReader = createEditorSelectionReader({ editorApi: virtualEditor });
   const previewSelectionDocument = previewHost.ownerDocument;
   const previewSelectionView = previewSelectionDocument?.defaultView;
@@ -324,41 +315,21 @@ async function loadAppModules() {
     requestFrame: callback => window.requestAnimationFrame(callback),
     cancelFrame: frameId => window.cancelAnimationFrame(frameId)
   });
-  if (compatibilityPlatformHost) {
-    compatibilityPlatformHost.markdownEditorEditorSelectionReader = editorSelectionReader;
-    compatibilityPlatformHost.markdownEditorPreviewSelectionReader = previewSelectionReader;
-    compatibilityPlatformHost.markdownEditorSelectionFeedbackGuard = selectionFeedbackGuard;
-    compatibilityPlatformHost.markdownEditorSelectionHighlightSession = selectionHighlightSession;
-  }
-  const selectionController = createSelectionSyncController(editorHost, previewHost, {
-    editorSelectionReader,
-    previewSelectionReader,
-    feedbackGuard: selectionFeedbackGuard,
-    highlightSession: selectionHighlightSession,
-    retryScheduler: selectionRetryScheduler
-  });
-  window.markdownEditorSelectionController = selectionController;
-  const destroySelectionReaders = () => {
-    selectionController.stop();
-    if (compatibilityPlatformHost?.markdownEditorEditorSelectionReader === editorSelectionReader) {
-      delete compatibilityPlatformHost.markdownEditorEditorSelectionReader;
-    }
-    if (compatibilityPlatformHost?.markdownEditorPreviewSelectionReader === previewSelectionReader) {
-      delete compatibilityPlatformHost.markdownEditorPreviewSelectionReader;
-    }
-    if (compatibilityPlatformHost?.markdownEditorSelectionFeedbackGuard === selectionFeedbackGuard) {
-      delete compatibilityPlatformHost.markdownEditorSelectionFeedbackGuard;
-    }
-    if (compatibilityPlatformHost?.markdownEditorSelectionHighlightSession === selectionHighlightSession) {
-      delete compatibilityPlatformHost.markdownEditorSelectionHighlightSession;
-    }
+  let selectionController = null;
+  let selectionSyncDestroyed = false;
+  const destroySelectionSync = () => {
+    if (selectionSyncDestroyed) return;
+    selectionSyncDestroyed = true;
+    configureHybridSyncCapabilities(null);
+    selectionController?.destroy();
+    selectionController = null;
     selectionRetryScheduler.destroy();
     selectionHighlightSession.destroy();
     selectionFeedbackGuard.destroy();
     previewSelectionReader.destroy();
     editorSelectionReader.destroy();
   };
-  window.addEventListener('pagehide', destroySelectionReaders, { once: true });
+  window.addEventListener('pagehide', destroySelectionSync, { once: true });
   const documentModel = createDocumentModel(editorHost);
   let editorScrollMapper = null;
   try {
@@ -527,6 +498,7 @@ async function loadAppModules() {
   const destroyDocumentFeatures = () => {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
+    destroySelectionSync();
     if (windowController) {
       const pendingWindowDestroy = windowController.destroy();
       if (pendingWindowDestroy && typeof pendingWindowDestroy.catch === 'function') {
@@ -932,6 +904,53 @@ async function loadAppModules() {
     });
   };
 
+  const previewVirtualGeometry = Object.freeze({
+    get active() { return Boolean(previewCommandHandler?.port?.virtual?.active); },
+    getMountedAnchors: () => previewCommandHandler?.port?.virtual?.getMountedAnchors?.() || [],
+    getMetrics: () => previewCommandHandler?.port?.virtual?.getMetrics?.() || [],
+    getContentYForLine: line => previewCommandHandler?.port?.virtual?.getContentYForLine?.(line) ?? null,
+    getLineForContentY: y => previewCommandHandler?.port?.virtual?.getLineForContentY?.(y) ?? null,
+    containsLineRange: (from, to) => previewCommandHandler?.port?.virtual?.containsLineRange?.(from, to) ?? true,
+    hasLineRangeMounted: (from, to) => previewCommandHandler?.port?.virtual?.hasLineRangeMounted?.(from, to) ?? true,
+    ensureLineRangeVisible: (from, to) => previewCommandHandler?.port?.virtual?.ensureLineRangeVisible?.(from, to) ?? null,
+    ensureLineVisible: line => previewCommandHandler?.port?.virtual?.ensureLineVisible?.(line) ?? null
+  });
+  const previewView = previewHost.ownerDocument?.defaultView;
+  const PreviewResizeObserver = previewView?.ResizeObserver;
+  previewScrollMapper = createPreviewScrollMapper({
+    previewElement: previewHost,
+    virtualApi: previewVirtualGeometry,
+    createResizeObserver: typeof PreviewResizeObserver === 'function'
+      ? callback => new PreviewResizeObserver(callback)
+      : null,
+    setTimer: previewView.setTimeout.bind(previewView),
+    clearTimer: previewView.clearTimeout.bind(previewView),
+    onGeometryChanged: () => scrollController.notifyGeometryChanged('preview')
+  });
+  selectionController = createSelectionSyncController(editorHost, previewHost, {
+    editorApi: virtualEditor,
+    documentModel,
+    editorMapper: editorScrollMapper,
+    getPreviewMapper: () => previewScrollMapper,
+    getPreviewVirtual: () => previewVirtualGeometry,
+    focusPreviewLine: (line, options) => previewController?.focusLine?.(line, options) || false,
+    editorSelectionReader,
+    previewSelectionReader,
+    feedbackGuard: selectionFeedbackGuard,
+    highlightSession: selectionHighlightSession,
+    retryScheduler: selectionRetryScheduler,
+    selectionMapping: selectionMappingApi,
+    scrollController,
+    documentRef: document,
+    requestFrame: callback => window.requestAnimationFrame(callback),
+    cancelFrame: id => window.cancelAnimationFrame(id),
+    now: () => performance.now(),
+    isHybridLayout: () => layoutState.snapshot.mode === 'hybrid',
+    updateActiveLine: line => outlineController?.updateActiveLine?.(line),
+    record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry),
+    diagnostic: (operation, entry) => window.markdownEditorPerf?.diagnostic?.(operation, entry)
+  });
+
   try {
     previewRenderer = createPreviewRendererPort({
       root: previewHost,
@@ -971,8 +990,8 @@ async function loadAppModules() {
       invalidatePreviewAnchorStructure() {
         if (editorUiCommandPort.has('invalidatePreviewAnchorStructure')) editorUiCommandPort.invoke('invalidatePreviewAnchorStructure');
       },
-      annotatePreviewSourceLines(source, tokens) {
-        if (editorUiCommandPort.has('annotatePreviewSourceLines')) return editorUiCommandPort.invoke('annotatePreviewSourceLines', source, tokens);
+      annotatePreviewSourceLines(source, tokens, blocks) {
+        if (editorUiCommandPort.has('annotatePreviewSourceLines')) return editorUiCommandPort.invoke('annotatePreviewSourceLines', source, tokens, blocks);
         return null;
       },
       refreshPreviewAnchorStructure() {
@@ -1018,7 +1037,7 @@ async function loadAppModules() {
       backgroundScheduler: backgroundTaskScheduler,
       shell: previewShell,
       layoutState,
-      selectionController: window.markdownEditorSelectionController,
+      selectionController,
       scrollController,
       notify,
       record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
@@ -1044,26 +1063,53 @@ async function loadAppModules() {
     });
     previewController.start();
     previewCommandHandler = mountPreviewCommandHandler(compatibilityPlatformHost, previewController);
-    const previewView = previewHost.ownerDocument?.defaultView;
-    const PreviewResizeObserver = previewView?.ResizeObserver;
-    previewScrollMapper = createPreviewScrollMapper({
-      previewElement: previewHost,
-      virtualApi: previewCommandHandler.port.virtual,
-      createResizeObserver: typeof PreviewResizeObserver === 'function'
-        ? callback => new PreviewResizeObserver(callback)
-        : null,
-      setTimer: previewView.setTimeout.bind(previewView),
-      clearTimer: previewView.clearTimeout.bind(previewView),
-      onGeometryChanged: () => scrollController.notifyGeometryChanged('preview')
-    });
-    if (compatibilityPlatformHost) compatibilityPlatformHost.markdownEditorPreviewScrollMapper = previewScrollMapper;
+    const scrollPreviewToLine = (line, behavior = 'auto', viewportRatio = 0.38) => {
+      const ratio = Math.max(0.05, Math.min(0.95, Number(viewportRatio) || 0.38));
+      const contentY = previewScrollMapper.getContentYForLine(line);
+      return scrollController.scrollTo('preview', contentY - previewHost.clientHeight * ratio, {
+        behavior,
+        reason: 'preview-line-navigation',
+        suspendMs: behavior === 'smooth' ? 420 : 180,
+        settleMs: behavior === 'smooth' ? 900 : 700
+      });
+    };
     unregisterPreviewEditorCommands = editorUiCommandPort.register({
-      focusPreviewLineForOutline: (line, options) => previewController.focusLine(line, options)
+      focusPreviewLineForOutline: (line, options) => previewController.focusLine(line, options),
+      preparePreviewEditorMetrics: () => scrollController.notifyGeometryChanged('editor'),
+      invalidatePreviewAnchorMetrics: () => previewScrollMapper.invalidateMetrics(),
+      invalidatePreviewAnchorStructure: () => previewScrollMapper.invalidateStructure(),
+      annotatePreviewSourceLines: (source, tokens, blocks) => previewScrollMapper.annotateSourceLines(source, tokens, blocks),
+      refreshPreviewAnchorStructure: () => previewScrollMapper.refreshStructure(),
+      getPreviewAnchorMetrics: () => previewScrollMapper.getMetrics(),
+      getPreviewAnchorCount: () => previewScrollMapper.getAnchorCount(),
+      scrollPreviewToLine,
+      syncEditorSelectionToPreview: (shouldScroll = false, reason = 'compatibility') => selectionController.syncEditorToPreview(shouldScroll, reason)
     });
-    window.markdownEditorSelectionController.configure({
-      isPreviewVirtualized: () => previewController.isVirtualActive()
+    scrollController.configure({
+      syncFromEditor: () => {
+        const contentY = editorHost.scrollTop + editorHost.clientHeight * 0.38;
+        const sourceLine = editorScrollMapper.getLineAtContentY(contentY);
+        const targetY = previewScrollMapper.getContentYForLine(sourceLine);
+        scrollController.scheduleTarget('preview', targetY - previewHost.clientHeight * 0.38, { reason: 'linked-scroll' });
+        outlineController?.updateActiveLine?.(Math.max(1, Math.floor(sourceLine)));
+      },
+      syncFromPreview: () => {
+        const sourceLine = previewScrollMapper.getLineForContentY(previewHost.scrollTop + previewHost.clientHeight * 0.38);
+        const targetY = editorScrollMapper.getContentYForLine(sourceLine);
+        scrollController.scheduleTarget('editor', targetY - editorHost.clientHeight * 0.38, { reason: 'linked-scroll' });
+        outlineController?.updateActiveLine?.(Math.max(1, Math.floor(sourceLine)));
+      }
     });
+    configureHybridSyncCapabilities({
+      markProgrammaticScroll: (surface, durationMs) => scrollController.markProgrammaticScroll(surface, durationMs),
+      notifyScrollGeometry: surface => scrollController.notifyGeometryChanged(surface),
+      notifySelectionGeometry: reason => selectionController.notifyEditorGeometry(reason)
+    });
+    selectionController.start();
     configurePerformanceRuntimeStats(() => ({
+      classifyScrollTarget: target => scrollController.classifyScrollTarget(target),
+      scrollSync: scrollController.getState(),
+      selectionSync: selectionController?.getState?.() || null,
       virtualPreview: previewController?.getVirtualStats?.() || null,
       backgroundTasks: backgroundTaskScheduler.getStats().pending
     }));

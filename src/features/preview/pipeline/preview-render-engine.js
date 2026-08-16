@@ -173,7 +173,7 @@ export function createPreviewRenderEngine(options = {}) {
       run() {
         if (!state.isCurrentVersion(renderVersion)) return;
         const started = clock();
-        if (!sourceAlreadyAnnotated) shell.annotatePreviewSourceLines?.(sourceText, blockTokens);
+        if (!sourceAlreadyAnnotated) shell.annotatePreviewSourceLines?.(sourceText, blockTokens, blockRanges);
         else shell.refreshPreviewAnchorStructure?.();
         emit('render.preview-annotation', {
           category: 'render.pipeline',
@@ -224,7 +224,6 @@ export function createPreviewRenderEngine(options = {}) {
       if (sourceText === null) sourceText = documentModel.createSnapshot?.('preview-full-source') ?? editor.value;
       return sourceText;
     };
-    shell.preparePreviewEditorMetrics?.();
 
     const currentTheme = root.ownerDocument?.body?.getAttribute('data-theme') || 'light';
     const forceFullRebuild = renderTheme !== '' && renderTheme !== currentTheme;

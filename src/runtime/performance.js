@@ -330,7 +330,7 @@ function installInteractionTracking() {
     // CodeMirror 的原生滚动会转发为编辑器宿主事件，忽略内部 scroller，
     // 避免同一次滚动在日志中出现两条完全相同的 burst。
     if (target.classList.contains('cm-scroller') && target.closest('.virtual-editor-host')) return;
-    const scrollClassification = window.markdownEditorScrollController?.classifyScrollTarget?.(target) || null;
+    const scrollClassification = runtimeStatsProvider()?.classifyScrollTarget?.(target) || null;
     // 目标侧联动滚动和虚拟高度补偿不是用户交互，不计入交互 burst。
     // 否则日志会把一次编辑器滚动误报为编辑器、预览两次滚动。
     if (scrollClassification && scrollClassification.origin !== 'user') return;
@@ -442,8 +442,9 @@ function installErrorTracking() {
 function functionDetails(name) {
   const editor = document.getElementById('editor');
   const preview = document.getElementById('preview');
+  const runtimeStats = runtimeStatsProvider() || {};
   if (name.includes('Scroll')) {
-    const syncState = window.markdownEditorScrollController?.getState?.() || null;
+    const syncState = runtimeStats.scrollSync || null;
     return {
       editorScrollTop: Math.round(editor?.scrollTop || 0),
       previewScrollTop: Math.round(preview?.scrollTop || 0),
@@ -456,7 +457,7 @@ function functionDetails(name) {
     };
   }
   if (name.includes('Selection')) {
-    const selectionState = window.markdownEditorSelectionController?.getState?.() || null;
+    const selectionState = runtimeStats.selectionSync || null;
     return {
       selectionLength: Math.max(0, (editor?.selectionEnd || 0) - (editor?.selectionStart || 0)),
       selectionApplyingSide: selectionState?.applyingSide || '',
@@ -469,7 +470,6 @@ function functionDetails(name) {
   const previewBody = preview?.querySelector?.('.markdown-body');
   const virtualEditor = editor?.virtualEditor;
   const viewport = virtualEditor?.getVisibleRange?.();
-  const runtimeStats = runtimeStatsProvider() || {};
   const virtualPreview = runtimeStats.virtualPreview || null;
   const documentStatistics = window.markdownEditorDocumentStatistics || null;
   const documentModel = window.markdownEditorDocumentModel?.getState?.() || null;
@@ -535,18 +535,6 @@ function installLegacyInstrumentation() {
       ['updatePreview', true],
       ['renderMermaidBlocks', true],
       ['renderOutline', true],
-      ['annotatePreviewSourceLines', true],
-      ['rebuildEditorLineMetrics', true],
-      ['getPreviewAnchorMetrics', true]
-    ],
-    'sync.scroll': [
-      ['syncFromEditorScroll', true],
-      ['syncFromPreviewScroll', true],
-      ['scheduleSyncedScroll', true],
-      ['scheduleSourceScrollSync', true]
-    ],
-    'sync.selection': [
-      ['highlightPreviewLines', true]
     ],
     'document.operation': [
       ['setupDocuments', false],
@@ -610,8 +598,9 @@ function installLegacyInstrumentation() {
 
 function recordRuntimeSnapshot() {
   const memory = performance.memory;
-  const scrollState = window.markdownEditorScrollController?.getState?.() || null;
-  const selectionState = window.markdownEditorSelectionController?.getState?.() || null;
+  const runtimeStats = runtimeStatsProvider() || {};
+  const scrollState = runtimeStats.scrollSync || null;
+  const selectionState = runtimeStats.selectionSync || null;
   record('runtime.snapshot', {
     category: 'runtime.performance',
     details: {
