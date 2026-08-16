@@ -124,7 +124,7 @@ test('Stage 1 historical counts and current package verification entries remain 
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 372);
+  assert.equal(moduleFixture.modules.length, 373);
   const readme = await readText('docs/README.md');
   assert.match(extractSection(readme, '## Stage 1 架构交接'), /67 个生产模块/);
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 7);

@@ -80,7 +80,7 @@ test('Atomic 8.11 gives both Math variants explicit source-action cleanup and bl
 
 test('Atomic 8.11 Math ownership remains intact after Atomic 8.14 Inline Presentation migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 372);
+  assert.equal(inventory.modules.length, 373);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of mathPaths) assert.equal(paths.has(path), true, path);
   for (const mermaidPath of [

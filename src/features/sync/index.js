@@ -1,7 +1,7 @@
 /**
- * Responsibility: Public Stage 9 synchronization contract. R9-01 exposes only the frozen scroll controller; source-ownership extraction, geometry mapping and selection synchronization remain later Atomic Tasks.
+ * Responsibility: Public Stage 9 synchronization contract. R9-02 exposes the frozen scroll controller plus the sole source-ownership state owner; geometry and selection responsibilities remain later Atomic Tasks.
  * Imports: Public synchronization modules only.
- * Exports: R9-01 scroll controller class and factory.
+ * Exports: Scroll controller and source ownership classes/factories.
  * State/side effects: None; import-only facade.
  * Lifecycle: None.
  */
@@ -10,3 +10,7 @@ export {
   ScrollSyncController,
   createScrollSyncController
 } from './scroll/scroll-sync-controller.js';
+export {
+  ScrollSourceOwnership,
+  createScrollSourceOwnership
+} from './scroll/scroll-source-ownership.js';
