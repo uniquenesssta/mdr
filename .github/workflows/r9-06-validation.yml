@@ -1,0 +1,22 @@
+name: R9-06 authoritative validation
+
+on:
+  push:
+    branches:
+      - agent/r9-06-runner
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate-r9-06:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout runner branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate and publish clean R9-06 candidate
+        shell: bash
+        run: bash .agent/r9_06_validate.sh
