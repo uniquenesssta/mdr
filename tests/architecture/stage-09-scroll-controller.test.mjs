@@ -7,10 +7,6 @@ const ROOT = resolve(new URL('../..', import.meta.url).pathname);
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 
-const LATER_FILES = [
-  'src/features/sync/selection/selection-sync-controller.js',
-];
-
 test('R9-03 Scroll Controller owns only source and target cancellable RAF slots', async () => {
   const controller = await read('src/features/sync/scroll/scroll-sync-controller.js');
   assert.match(controller, /this\.frames = \{ source: null, target: null \}/);
@@ -22,7 +18,7 @@ test('R9-03 Scroll Controller owns only source and target cancellable RAF slots'
   assert.doesNotMatch(controller, /cancelAnimationFrame\s*\(/);
 });
 
-test('R9-03 controller remains mapper-orchestration plus target-write logic after R9-06 Geometry Session extraction', async () => {
+test('R9-03 controller remains mapper-orchestration plus target-write logic after Geometry Session extraction', async () => {
   const controller = await read('src/features/sync/scroll/scroll-sync-controller.js');
   await access(file('src/features/sync/scroll/editor-scroll-mapper.js'));
   await access(file('src/features/sync/scroll/scroll-geometry-session.js'));
@@ -32,8 +28,7 @@ test('R9-03 controller remains mapper-orchestration plus target-write logic afte
   assert.match(controller, /scheduleTarget/);
   assert.match(controller, /flushTargetWrite/);
   assert.match(controller, /applyScrollTop/);
-  assert.doesNotMatch(controller, /selectionMapping|CodeMirror|virtual height index|querySelector|createElement|canvas|getContext/);
-  for (const path of LATER_FILES) await assert.rejects(access(file(path)), path);
+  assert.doesNotMatch(controller, /selectionMapping|CodeMirror|querySelector|createElement|canvas|getContext/);
 });
 
 test('R9-03 keeps ScrollSourceOwnership as the sole owner of source identity windows suspension and sequence', async () => {
@@ -54,23 +49,26 @@ test('R9-03 application composition injects browser RAF capabilities through the
   assert.match(main, /createScrollSyncController\(editorHost, previewHost, \{/);
   assert.match(main, /requestFrame: callback => window\.requestAnimationFrame\(callback\)/);
   assert.match(main, /cancelFrame: frameId => window\.cancelAnimationFrame\(frameId\)/);
-  assert.match(main, /createScrollSyncController \} from ['"]\.\/features\/sync\/index\.js['"]/);
+  assert.match(main, /createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController/);
   assert.doesNotMatch(main, /\.\/features\/sync\/scroll\/scroll-sync-controller\.js/);
 });
 
-test('R9-03 preserves the public Sync surface and keeps the classic aggregate behind it', async () => {
+test('R9-03 public Sync surface remains canonical and final composition configures mapper callbacks directly without classic aggregate', async () => {
   const index = await read('src/features/sync/index.js');
-  const legacy = await read('public/app/scroll-sync.js');
+  const main = await read('src/main.js');
   assert.match(index, /ScrollSyncController/);
   assert.match(index, /createScrollSyncController/);
   assert.match(index, /ScrollSourceOwnership/);
   assert.match(index, /createScrollSourceOwnership/);
   assert.match(index, /R9-06/);
-  assert.match(legacy, /const scrollController = window\.markdownEditorScrollController/);
-  assert.doesNotMatch(legacy, /scroll-source-ownership|ScrollSourceOwnership/);
+  assert.match(main, /scrollController\.configure\(\{/);
+  assert.match(main, /editorScrollMapper\.getLineAtContentY/);
+  assert.match(main, /previewScrollMapper\.getLineForContentY/);
+  assert.doesNotMatch(main, /window\.markdownEditorScrollController|window\.markdownEditorScrollSync/);
+  await assert.rejects(access(file('public/app/scroll-sync.js')));
 });
 
-test('R9-03 keeps production-module cardinality stable because no new production responsibility is introduced', async () => {
+test('R9-03 inventory records the canonical controller and source owner in final Stage 9 topology', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
   assert.equal(inventory.modules.length, 381);
