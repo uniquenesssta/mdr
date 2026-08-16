@@ -1,0 +1,36 @@
+name: R9-12 historical regression
+
+on:
+  push:
+    branches:
+      - agent/r9-12-runner
+  workflow_dispatch:
+
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: R9-11 through R9-01 and Stage 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            tests/stage-09-frozen-selection-mapping-integration.test.mjs tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs \
+            tests/stage-09-selection-retry-scheduler.test.mjs tests/architecture/stage-09-selection-retry-scheduler.test.mjs \
+            tests/stage-09-selection-highlight-session.test.mjs tests/architecture/stage-09-selection-highlight-session.test.mjs \
+            tests/stage-09-selection-feedback-guard.test.mjs tests/architecture/stage-09-selection-feedback-guard.test.mjs \
+            tests/stage-09-selection-readers.test.mjs tests/architecture/stage-09-selection-readers.test.mjs \
+            tests/stage-09-scroll-geometry-session.test.mjs tests/architecture/stage-09-scroll-geometry-session.test.mjs \
+            tests/stage-09-preview-scroll-mapper.test.mjs tests/architecture/stage-09-preview-scroll-mapper.test.mjs \
+            tests/stage-09-editor-scroll-mapper.test.mjs tests/architecture/stage-09-editor-scroll-mapper.test.mjs \
+            tests/stage-09-scroll-controller.test.mjs tests/architecture/stage-09-scroll-controller.test.mjs \
+            tests/stage-09-scroll-source-ownership.test.mjs tests/architecture/stage-09-scroll-source-ownership.test.mjs \
+            tests/stage-09-scroll-contract-freeze.test.mjs tests/architecture/stage-09-scroll-contract-freeze.test.mjs
+          node --test tests/stage-08*.test.mjs tests/architecture/stage-08*.test.mjs
