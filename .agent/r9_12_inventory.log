@@ -1,138 +1,43 @@
-=== SYNC GLOBAL CONSUMERS ===
-src/main.js:251:  if (compatibilityPlatformHost?.markdownEditorSelectionMapping === selectionMappingApi) {
-src/main.js:252:    delete compatibilityPlatformHost.markdownEditorSelectionMapping;
-src/main.js:257:if (compatibilityPlatformHost) compatibilityPlatformHost.markdownEditorSelectionMapping = selectionMappingApi;
-src/main.js:300:  window.markdownEditorScrollController = scrollController;
-src/main.js:301:  window.markdownEditorScrollSync = scrollController.getPublicApi();
-src/main.js:340:  window.markdownEditorSelectionController = selectionController;
-src/main.js:1021:      selectionController: window.markdownEditorSelectionController,
-src/main.js:1063:    window.markdownEditorSelectionController.configure({
-src/editor/virtual-editor.js:160:    markProgrammaticScroll(duration) { window.markdownEditorScrollSync?.markProgrammaticScroll?.('editor', duration); },
-src/editor/virtual-editor.js:161:    suspendScrollSync(duration) { window.markdownEditorScrollSync?.suspend?.(duration); },
-src/editor/hybrid-markdown.js:267:        globalThis.window?.markdownEditorScrollSync?.markProgrammaticScroll?.(surface, durationMs);
-src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js:24:  runtimeWindow?.markdownEditorScrollSync?.notifyGeometryChanged?.('editor');
-src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js:25:  runtimeWindow?.markdownEditorSelectionController?.notifyEditorGeometry?.(`hybrid-widget:${reason}`);
-src/runtime/performance.js:333:    const scrollClassification = window.markdownEditorScrollController?.classifyScrollTarget?.(target) || null;
-src/runtime/performance.js:446:    const syncState = window.markdownEditorScrollController?.getState?.() || null;
-src/runtime/performance.js:459:    const selectionState = window.markdownEditorSelectionController?.getState?.() || null;
-src/runtime/performance.js:613:  const scrollState = window.markdownEditorScrollController?.getState?.() || null;
-src/runtime/performance.js:614:  const selectionState = window.markdownEditorSelectionController?.getState?.() || null;
-public/app/scroll-sync.js:11:    const frozenSelectionMapping = scrollSyncCompatibilityHost?.markdownEditorSelectionMapping;
-public/app/scroll-sync.js:70:    const scrollController = window.markdownEditorScrollController;
-public/app/scroll-sync.js:989:    Object.assign(window.markdownEditorScrollSync, {
-public/app/scroll-sync.js:1003:    const selectionController = window.markdownEditorSelectionController;
-public/app/scroll-sync.js:1020:        const controller = window.markdownEditorSelectionController;
-tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:18:  assert.match(main, /compatibilityPlatformHost\.markdownEditorSelectionMapping = selectionMappingApi/);
-tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:19:  assert.match(main, /compatibilityPlatformHost\?\.markdownEditorSelectionMapping === selectionMappingApi/);
-tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:20:  assert.match(main, /delete compatibilityPlatformHost\.markdownEditorSelectionMapping/);
-tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:27:  assert.doesNotMatch(main, /window\.markdownEditorSelectionMapping/);
-tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:28:  assert.doesNotMatch(legacy, /window\.markdownEditorSelectionMapping/);
-tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:29:  assert.doesNotMatch(baseline, /window\.markdownEditorSelectionMapping/);
-tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:34:  assert.match(legacy, /const frozenSelectionMapping = scrollSyncCompatibilityHost\?\.markdownEditorSelectionMapping/);
-tests/architecture/stage-07-preview-virtual-window.test.mjs:48:  assert.doesNotMatch(combined, /preview-focus-controller|preview-enhancement-coordinator|preview-controller|preview-render-engine|scrollPreviewToLine|focusSection|markdownEditorScrollSync/);
-tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:25:  assert.doesNotMatch(main, /window\.markdownEditorScrollController/);
-tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:26:  assert.doesNotMatch(main, /window\.markdownEditorScrollSync/);
-tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:27:  assert.doesNotMatch(main, /window\.markdownEditorSelectionController/);
-tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:28:  assert.doesNotMatch(main, /markdownEditorSelectionMapping/);
-tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:80:  assert.doesNotMatch(combined, /markdownEditorScrollSync|markdownEditorScrollController|markdownEditorSelectionController/);
-tests/architecture/stage-09-scroll-source-ownership.test.mjs:61:  assert.match(legacy, /window\.markdownEditorScrollController/);
-tests/architecture/fixtures/architecture-baseline.json:463:      "global": "window.markdownEditorScrollController",
-tests/architecture/fixtures/architecture-baseline.json:471:      "global": "window.markdownEditorScrollSync",
-tests/architecture/fixtures/architecture-baseline.json:479:      "global": "window.markdownEditorSelectionController",
-tests/architecture/stage-09-scroll-controller.test.mjs:69:  assert.match(legacy, /const scrollController = window\.markdownEditorScrollController/);
-tests/architecture/stage-09-scroll-contract-freeze.test.mjs:47:  assert.match(legacy, /const scrollController = window\.markdownEditorScrollController/);
-tests/architecture/stage-09-scroll-contract-freeze.test.mjs:56:  assert.match(legacy, /Object\.assign\(window\.markdownEditorScrollSync/);
-tests/stage-08-hybrid-widget-lifecycle.test.mjs:70:  clock.markdownEditorScrollSync = { notifyGeometryChanged: surface => scrollSignals.push(surface) };
-tests/stage-08-hybrid-widget-lifecycle.test.mjs:71:  clock.markdownEditorSelectionController = { notifyEditorGeometry: reason => selectionSignals.push(reason) };
-
-=== CLASSIC SCROLL FUNCTIONS ===
-src/main.js:965:      preparePreviewEditorMetrics() {
-src/main.js:966:        if (editorUiCommandPort.has('preparePreviewEditorMetrics')) editorUiCommandPort.invoke('preparePreviewEditorMetrics');
-src/main.js:968:      invalidatePreviewAnchorMetrics() {
-src/main.js:969:        if (editorUiCommandPort.has('invalidatePreviewAnchorMetrics')) editorUiCommandPort.invoke('invalidatePreviewAnchorMetrics');
-src/main.js:971:      invalidatePreviewAnchorStructure() {
-src/main.js:972:        if (editorUiCommandPort.has('invalidatePreviewAnchorStructure')) editorUiCommandPort.invoke('invalidatePreviewAnchorStructure');
-src/main.js:974:      annotatePreviewSourceLines(source, tokens) {
-src/main.js:975:        if (editorUiCommandPort.has('annotatePreviewSourceLines')) return editorUiCommandPort.invoke('annotatePreviewSourceLines', source, tokens);
-src/main.js:978:      refreshPreviewAnchorStructure() {
-src/main.js:979:        if (editorUiCommandPort.has('refreshPreviewAnchorStructure')) return editorUiCommandPort.invoke('refreshPreviewAnchorStructure');
-src/main.js:982:      getPreviewAnchorMetrics() {
-src/main.js:983:        return editorUiCommandPort.has('getPreviewAnchorMetrics') ? editorUiCommandPort.invoke('getPreviewAnchorMetrics') : [];
-src/main.js:985:      getPreviewAnchorCount() {
-src/main.js:986:        return editorUiCommandPort.has('getPreviewAnchorCount') ? editorUiCommandPort.invoke('getPreviewAnchorCount') : 0;
-src/main.js:988:      scrollPreviewToLine(line, behavior, ratio) {
-src/main.js:989:        if (editorUiCommandPort.has('scrollPreviewToLine')) return editorUiCommandPort.invoke('scrollPreviewToLine', line, behavior, ratio);
-src/features/preview/application/preview-controller.js:55:    invalidateGeometry: () => shell.invalidatePreviewAnchorMetrics?.(),
-src/features/preview/application/preview-controller.js:78:    invalidateAnchors: () => shell.invalidatePreviewAnchorStructure?.(),
-src/features/preview/application/preview-controller.js:79:    scrollToLine: (line, behavior, viewportRatio) => shell.scrollPreviewToLine?.(line, behavior, viewportRatio)
-src/features/preview/application/preview-controller.js:116:      shell.invalidatePreviewAnchorMetrics?.();
-src/features/preview/application/preview-controller.js:159:    shell.invalidatePreviewAnchorStructure?.();
-src/features/preview/pipeline/preview-render-engine.js:97:        invalidateAnchorMetrics: () => shell.invalidatePreviewAnchorMetrics?.(),
-src/features/preview/pipeline/preview-render-engine.js:146:    shell.invalidatePreviewAnchorStructure?.();
-src/features/preview/pipeline/preview-render-engine.js:151:    shell.invalidatePreviewAnchorStructure?.();
-src/features/preview/pipeline/preview-render-engine.js:176:        if (!sourceAlreadyAnnotated) shell.annotatePreviewSourceLines?.(sourceText, blockTokens);
-src/features/preview/pipeline/preview-render-engine.js:177:        else shell.refreshPreviewAnchorStructure?.();
-src/features/preview/pipeline/preview-render-engine.js:185:            anchors: shell.getPreviewAnchorCount?.() || 0
-src/features/preview/pipeline/preview-render-engine.js:193:        shell.getPreviewAnchorMetrics?.();
-src/features/preview/pipeline/preview-render-engine.js:201:            anchors: shell.getPreviewAnchorCount?.() || 0
-src/features/preview/pipeline/preview-render-engine.js:227:    shell.preparePreviewEditorMetrics?.();
-src/features/preview/pipeline/preview-render-engine.js:312:              shell.invalidatePreviewAnchorMetrics?.();
-src/features/preview/pipeline/preview-render-engine.js:468:      shell.invalidatePreviewAnchorStructure?.();
-src/features/preview/pipeline/preview-render-engine.js:469:      shell.refreshPreviewAnchorStructure?.();
-src/features/preview/pipeline/preview-render-engine.js:530:    shell.invalidatePreviewAnchorStructure?.();
-src/runtime/performance.js:538:      ['annotatePreviewSourceLines', true],
-src/runtime/performance.js:540:      ['getPreviewAnchorMetrics', true]
-public/app/web-clipper.js:78:        webClipperPreviewCommandPort.update().then(() => syncEditorSelectionToPreview(true));
-public/app/web-clipper.js:80:        requestAnimationFrame(() => syncEditorSelectionToPreview(true));
-public/app/scroll-sync.js:188:    function invalidatePreviewAnchorMetrics() {
-public/app/scroll-sync.js:192:    function invalidatePreviewAnchorStructure() {
-public/app/scroll-sync.js:200:    function getPreviewAnchorMetrics() {
-public/app/scroll-sync.js:234:    function scrollPreviewToLine(line, behavior = 'auto', viewportRatio = SYNC_VIEWPORT_RATIO) {
-public/app/scroll-sync.js:279:    function annotatePreviewSourceLines(text, providedTokens = null) {
-public/app/scroll-sync.js:282:      invalidatePreviewAnchorStructure();
-public/app/scroll-sync.js:597:          invalidatePreviewAnchorStructure();
-public/app/scroll-sync.js:609:      const metrics = getPreviewAnchorMetrics();
-public/app/scroll-sync.js:632:          scrollPreviewToLine(from, scrollBehavior, targetViewportRatio);
-public/app/scroll-sync.js:660:    function syncEditorSelectionToPreview(shouldScroll = false, reason = 'editor-selection', selectionSnapshot = null) {
-public/app/scroll-sync.js:944:    function syncPreviewSelectionToEditor(reason = 'preview-selection', selectionSnapshot = null) {
-public/app/scroll-sync.js:1006:      syncEditorToPreview: ({ shouldScroll, reason, selection }) => syncEditorSelectionToPreview(shouldScroll, reason, selection),
-public/app/scroll-sync.js:1007:      syncPreviewToEditor: ({ reason, selection }) => syncPreviewSelectionToEditor(reason, selection)
-public/app/scroll-sync.js:1011:      syncEditorSelectionToPreview,
-public/app/scroll-sync.js:1012:      syncPreviewSelectionToEditor
-public/app/scroll-sync.js:1057:        invalidatePreviewAnchorMetrics();
-public/app/scroll-sync.js:1070:        invalidatePreviewAnchorMetrics();
-public/app/scroll-sync.js:1079:      preparePreviewEditorMetrics() {
-public/app/scroll-sync.js:1082:      invalidatePreviewAnchorMetrics: () => invalidatePreviewAnchorMetrics(),
-public/app/scroll-sync.js:1083:      invalidatePreviewAnchorStructure: () => invalidatePreviewAnchorStructure(),
-public/app/scroll-sync.js:1084:      annotatePreviewSourceLines: (source, tokens) => annotatePreviewSourceLines(source, tokens),
-public/app/scroll-sync.js:1085:      refreshPreviewAnchorStructure: () => previewScrollMapper.refreshStructure(),
-public/app/scroll-sync.js:1086:      getPreviewAnchorMetrics: () => getPreviewAnchorMetrics(),
-public/app/scroll-sync.js:1087:      getPreviewAnchorCount: () => getPreviewAnchors().length,
-public/app/scroll-sync.js:1088:      scrollPreviewToLine: (line, behavior, viewportRatio) => scrollPreviewToLine(line, behavior, viewportRatio)
-public/app/core.js:938:      if (coreEditorUiCommandPort.has('preparePreviewEditorMetrics')) coreEditorUiCommandPort.invoke('preparePreviewEditorMetrics');
-public/app/core.js:939:      if (coreEditorUiCommandPort.has('invalidatePreviewAnchorMetrics')) coreEditorUiCommandPort.invoke('invalidatePreviewAnchorMetrics');
-tests/unit/preview/preview-render-engine.test.mjs:118:    preparePreviewEditorMetrics() {},
-tests/unit/preview/preview-render-engine.test.mjs:121:    invalidatePreviewAnchorStructure() {},
-tests/unit/preview/preview-render-engine.test.mjs:122:    refreshPreviewAnchorStructure() {},
-tests/unit/preview/preview-render-engine.test.mjs:123:    getPreviewAnchorCount() { return 0; },
-tests/unit/preview/preview-render-engine.test.mjs:124:    getPreviewAnchorMetrics() { return []; },
-tests/unit/preview/preview-render-engine.test.mjs:125:    annotatePreviewSourceLines() {}
-tests/architecture/stage-09-preview-scroll-mapper.test.mjs:73:  assert.match(legacy, /refreshPreviewAnchorStructure: \(\) => previewScrollMapper\.refreshStructure\(\)/);
-tests/architecture/stage-09-preview-scroll-mapper.test.mjs:74:  assert.match(legacy, /invalidatePreviewAnchorMetrics: \(\) => invalidatePreviewAnchorMetrics\(\)/);
-tests/architecture/stage-09-preview-scroll-mapper.test.mjs:75:  assert.match(legacy, /invalidatePreviewAnchorStructure: \(\) => invalidatePreviewAnchorStructure\(\)/);
-tests/architecture/stage-07-preview-virtual-window.test.mjs:48:  assert.doesNotMatch(combined, /preview-focus-controller|preview-enhancement-coordinator|preview-controller|preview-render-engine|scrollPreviewToLine|focusSection|markdownEditorScrollSync/);
-tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:87:  assert.match(core, /coreEditorUiCommandPort\.invoke\('preparePreviewEditorMetrics'\)/);
-tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:88:  assert.match(clipper, /webClipperEditorUiCommandPort\.invoke\('syncEditorSelectionToPreview'/);
-tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:89:  assert.doesNotMatch(clipper, /\bsyncEditorSelectionToPreview\(/);
-tests/architecture/stage-06-split-controllers.test.mjs:24:    assert.doesNotMatch(source, /refreshPreviewAfterLayout|scheduleEditorMetricsRebuild|invalidatePreviewAnchorMetrics/);
-tests/architecture/stage-09-editor-scroll-mapper.test.mjs:64:  assert.match(core, /coreEditorUiCommandPort\.has\('preparePreviewEditorMetrics'\)/);
-tests/architecture/stage-09-editor-scroll-mapper.test.mjs:65:  assert.match(core, /coreEditorUiCommandPort\.invoke\('preparePreviewEditorMetrics'\)/);
-
-=== MAIN DECLARATIONS ===
-501:  let previewController = null;
-502:  let previewCommandHandler = null;
-503:  let previewScrollMapper = null;
-511:  let unregisterPreviewEditorCommands = null;
-527:  const destroyDocumentFeatures = () => {
-593:  window.addEventListener('pagehide', destroyDocumentFeatures, { once: true });
-1280:    destroyDocumentFeatures();
+=== CONTROLLER IMPORTS/CALLS ===
+tests/stage-09-final-sync-legacy-removal.test.mjs:5:  createSelectionSyncController
+tests/stage-09-final-sync-legacy-removal.test.mjs:93:  const controller = createSelectionSyncController(editor, preview, {
+tests/stage-09-final-sync-legacy-removal.test.mjs:183:  const result = controller.syncEditorToPreview(false, 'test', { from: 1, to: 10, isCollapsed: false });
+tests/stage-09-final-sync-legacy-removal.test.mjs:201:  const result = controller.syncEditorToPreview(false, 'test', { from: 0, to: 5, isCollapsed: false });
+tests/stage-09-final-sync-legacy-removal.test.mjs:228:  const result = controller.syncPreviewToEditor('selectionchange', { text: 'lpha', range, anchorOffset: 0, focusOffset: 2 });
+tests/stage-09-final-sync-legacy-removal.test.mjs:247:  const result = controller.syncPreviewToEditor('selectionchange', {
+tests/stage-09-final-sync-legacy-removal.test.mjs:256:test('R9-12 SelectionSyncController destroy is terminal and cancels owned scheduling without destroying injected specialist owners', () => {
+tests/stage-09-scroll-contract-freeze.test.mjs:117:    controller.configure({
+tests/stage-09-scroll-contract-freeze.test.mjs:136:    controller.configure({ syncFromPreview: () => { calls += 1; } });
+tests/stage-09-scroll-contract-freeze.test.mjs:173:    controller.configure({ syncFromEditor: () => { calls += 1; } });
+tests/stage-09-scroll-contract-freeze.test.mjs:190:    controller.configure({ syncFromEditor: () => { calls += 1; } });
+tests/stage-09-scroll-controller.test.mjs:102:    h.controller.configure({
+tests/stage-09-scroll-controller.test.mjs:126:    h.controller.configure({
+tests/stage-09-scroll-controller.test.mjs:177:    h.controller.configure({ syncFromEditor: () => { editorCalls += 1; } });
+tests/stage-09-scroll-controller.test.mjs:203:    h.controller.configure({ syncFromEditor: () => { calls += 1; } });
+tests/stage-09-scroll-controller.test.mjs:216:  h.controller.configure({ syncFromEditor: () => { calls += 1; } });
+tests/stage-09-scroll-geometry-session.test.mjs:192:    controller.configure({ syncFromEditor: () => { editorCalls += 1; } });
+tests/stage-09-selection-feedback-guard.test.mjs:4:import { createSelectionSyncController } from '../src/sync/selection-controller.js';
+tests/stage-09-selection-feedback-guard.test.mjs:166:test('R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement', () => {
+tests/stage-09-selection-feedback-guard.test.mjs:177:  const controller = createSelectionSyncController(editor, preview, {
+tests/stage-09-selection-feedback-guard.test.mjs:183:  }).configure({ syncPreviewToEditor: () => ({ status: 'mapped', selectionLength: 4 }) });
+tests/stage-09-selection-feedback-guard.test.mjs:201:test('R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates', () => {
+tests/stage-09-selection-feedback-guard.test.mjs:207:  const controller = createSelectionSyncController(editor, preview, {
+tests/stage-09-selection-retry-scheduler.test.mjs:4:import { createSelectionSyncController } from '../src/sync/selection-controller.js';
+tests/stage-09-selection-retry-scheduler.test.mjs:163:test('R9-10 SelectionSyncController delegates only pending editor results to Retry Scheduler with makeEditorKey version checks', () => {
+tests/stage-09-selection-retry-scheduler.test.mjs:172:  const controller = createSelectionSyncController(new FakeTarget(), new FakeTarget(), {
+tests/stage-09-selection-retry-scheduler.test.mjs:178:  }).configure({ syncEditorToPreview: () => syncResult });
+tests/stage-09-selection-retry-scheduler.test.mjs:193:test('R9-10 SelectionSyncController fresh scheduling clear and stop cancel old retries while retry attempt numbers come from Scheduler', () => {
+tests/stage-09-selection-retry-scheduler.test.mjs:203:  const controller = createSelectionSyncController(new FakeTarget(), new FakeTarget(), {
+tests/stage-09-selection-retry-scheduler.test.mjs:209:  }).configure({ syncEditorToPreview: ({ attempt }) => { attempts.push(attempt); return { status: attempt ? 'exact' : 'pending' }; } });
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:12:test('R9-12 removes the classic scroll-sync script and migrates SelectionSyncController to the Stage 9 feature boundary', async () => {
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:18:  assert.match(facade, /SelectionSyncController/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:19:  assert.match(facade, /createSelectionSyncController/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:30:  assert.match(main, /createSelectionSyncController/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:55:test('R9-12 final SelectionSyncController consumes frozen mapping API only through injected capability and never imports/copies the algorithm', async () => {
+tests/architecture/stage-09-scroll-contract-freeze.test.mjs:33:  assert.match(main, /createSelectionSyncController \} from ['"]\.\/sync\/selection-controller\.js['"]/);
+tests/architecture/stage-09-selection-feedback-guard.test.mjs:33:test('R9-08 legacy SelectionSyncController consumes the Guard and no longer owns applying-side release or preview revision duplicates', async () => {
+tests/architecture/stage-09-selection-highlight-session.test.mjs:62:test('R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling', async () => {
+tests/architecture/stage-09-selection-readers.test.mjs:47:test('R9-07 legacy SelectionSyncController consumes Readers and no longer owns raw selection boundaries or preview stabilization listeners', async () => {
+tests/architecture/stage-09-selection-readers.test.mjs:66:  assert.match(main, /createSelectionSyncController\(editorHost, previewHost, \{/);
+tests/architecture/stage-09-selection-retry-scheduler.test.mjs:30:test('R9-10 legacy SelectionSyncController delegates retry scheduling and no longer owns retry count or retry RAF state', async () => {
+tests/architecture/stage-09-selection-retry-scheduler.test.mjs:32:  assert.match(controller, /SelectionSyncController requires SelectionRetryScheduler/);
