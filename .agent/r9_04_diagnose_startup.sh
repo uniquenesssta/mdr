@@ -9,6 +9,7 @@ npm ci
 PYTHONDONTWRITEBYTECODE=1 python .agent/r9_04_apply.py
 PYTHONDONTWRITEBYTECODE=1 python .agent/r9_04_contract_fix.py
 PYTHONDONTWRITEBYTECODE=1 python .agent/r9_04_current_count_fix.py
+PYTHONDONTWRITEBYTECODE=1 python .agent/r9_04_startup_fix.py
 npm run build
 
 python - <<'PY'
