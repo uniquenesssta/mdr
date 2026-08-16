@@ -18,6 +18,13 @@ apply_path.write_text(apply_text, encoding='utf-8')
 
 validate_path = Path('.agent/r9_08_validate.sh')
 validate_text = validate_path.read_text(encoding='utf-8')
+
+old_readme = "R9-08：SelectionFeedbackGuard 以 sequence/source/revision 接管双向反馈，删除旧 applyingSide/releaseTimer/selectionSyncLock；R9-09+ 未启动，行为不变。验证：R9-08 16/16；R9-07 15/15；R9-06 14/14；R9-05 16/16；R9-04 14/14；R9-03~R9-01 13/13；Stage8 179/179；Node ${node_tests}/${node_pass}；Architecture/Build PASS；Browser 10/10；Built-app 29/29×2；audit 0。"
+new_readme = "R9-08：Feedback Guard 以 sequence/source/revision 接管选区反馈，删除旧布尔/双重状态；R9-09+ 未启动。验证：R9-08 16/16；R9-07 15/15；R9-06 14/14；R9-05 16/16；R9-04 14/14；R9-03~R9-01 13/13；Stage8 179/179；Node ${node_tests}/${node_pass}；Architecture/Build PASS；Browser 10/10；Built-app 29/29×2；audit 0。"
+if validate_text.count(old_readme) != 1:
+    raise RuntimeError(f'expected one R9-08 README record, found {validate_text.count(old_readme)}')
+validate_text = validate_text.replace(old_readme, new_readme, 1)
+
 start_marker = "# Final scope audit. Historical tests may only remove the now-current later-file assertion or move cardinality 378 -> 379.\n"
 end_marker = "\nnode -e \"const x=require('./tests/architecture/fixtures/production-modules.json'); if(x.modules.length!==379) process.exit(1);"
 start = validate_text.find(start_marker)
