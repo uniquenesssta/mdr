@@ -27,7 +27,7 @@ tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:30:  assert.match
 tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:55:test('R9-12 final SelectionSyncController consumes frozen mapping API only through injected capability and never imports/copies the algorithm', async () => {
 tests/architecture/stage-09-scroll-contract-freeze.test.mjs:33:  assert.match(main, /createSelectionSyncController \} from ['"]\.\/sync\/selection-controller\.js['"]/);
 tests/architecture/stage-09-selection-feedback-guard.test.mjs:33:test('R9-08 legacy SelectionSyncController consumes the Guard and no longer owns applying-side release or preview revision duplicates', async () => {
-tests/architecture/stage-09-selection-highlight-session.test.mjs:62:test('R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling', async () => {
+tests/architecture/stage-09-selection-highlight-session.test.mjs:58:test('R9-09 virtual remount recovery is delegated by final SelectionSyncController without Session-owned retry scheduling', async () => {
 tests/architecture/stage-09-selection-readers.test.mjs:47:test('R9-07 legacy SelectionSyncController consumes Readers and no longer owns raw selection boundaries or preview stabilization listeners', async () => {
 tests/architecture/stage-09-selection-readers.test.mjs:66:  assert.match(main, /createSelectionSyncController\(editorHost, previewHost, \{/);
 tests/architecture/stage-09-selection-retry-scheduler.test.mjs:31:test('R9-10 final SelectionSyncController delegates retry scheduling and owns no retry count or retry RAF state', async () => {
