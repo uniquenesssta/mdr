@@ -21,6 +21,7 @@ jobs:
       - name: Validate and publish clean R9-08 candidate
         shell: bash
         run: |
+          git rm -f --ignore-unmatch .agent/r9_08_failure.log
           set +e
           {
             python .agent/r9_08_prepare_fix.py
