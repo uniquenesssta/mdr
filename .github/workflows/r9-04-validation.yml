@@ -1,22 +1,22 @@
-name: R9-04 validation
+name: R9-04 startup diagnostic
 
 on:
   push:
     branches:
-      - agent/r9-04-runner3
+      - agent/r9-04-diagnostic
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  validate-r9-04:
+  diagnose-r9-04:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout runner branch
+      - name: Checkout diagnostic branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Validate R9-04
+      - name: Diagnose built app startup
         shell: bash
-        run: bash .agent/r9_04_validate_corrected.sh
+        run: bash .agent/r9_04_diagnose_startup.sh
