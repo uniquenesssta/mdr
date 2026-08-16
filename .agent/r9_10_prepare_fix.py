@@ -13,4 +13,12 @@ if old_facade not in text:
     raise SystemExit('R9-10 facade traceability marker missing')
 text = text.replace(old_facade, new_facade, 1)
 part.write_text(text, encoding='utf-8')
+
+part4 = Path('.agent/r9_10_apply.part4')
+text4 = part4.read_text(encoding='utf-8')
+old_assert = "  assert.doesNotMatch(controller, /status === 'mapping-failed'.*retryScheduler/s);"
+new_assert = "  const runEditorBlock = controller.slice(controller.indexOf('  runEditor('), controller.indexOf('  schedulePreview('));\n  assert.match(runEditorBlock, /retryScheduler\\.schedule/);\n  assert.doesNotMatch(runEditorBlock, /mapping-failed/);"
+if old_assert not in text4:
+    raise SystemExit('R9-10 recoverable-only architecture marker missing')
+part4.write_text(text4.replace(old_assert, new_assert, 1), encoding='utf-8')
 Path(__file__).unlink()
