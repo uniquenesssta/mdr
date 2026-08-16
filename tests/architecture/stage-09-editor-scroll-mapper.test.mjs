@@ -10,7 +10,6 @@ const LATER_FILES = [
   'src/features/sync/selection/selection-sync-controller.js',
   'src/features/sync/selection/selection-highlight-session.js',
   'src/features/sync/selection/selection-retry-scheduler.js',
-  'src/features/sync/selection/selection-feedback-guard.js'
 ];
 
 test('R9-04 creates one canonical EditorScrollMapper and exports it only through the Sync public entry', async () => {
@@ -83,7 +82,7 @@ test('R9-04 remains intact after R9-06 Geometry Session extraction without advan
 test('R9-04 inventory records one editor mapper and current package cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 378);
+  assert.equal(inventory.modules.length, 379);
   assert.equal(records.has('src/features/sync/scroll/editor-scroll-mapper.js'), true);
   assert.equal(records.get('src/features/sync/scroll/editor-scroll-mapper.js')[4], 'editor-scroll-mapper-lifecycle');
   assert.equal(records.has('src/features/sync/scroll/preview-scroll-mapper.js'), true);

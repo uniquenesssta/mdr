@@ -81,7 +81,6 @@ const editor = document.getElementById('editor');
     let tableVisualEditingEnabled = false;
     let codeVisualEditingEnabled = false;
     let cachedDocumentStatistics = null;
-    let selectionSyncLock = false;
     let saveStatusState = 'saved';
     let saveStatusResetTimer = 0;
     const LARGE_DOCUMENT_CHARS = corePreviewBehaviorThresholds.scheduling.postprocess.deferChars;

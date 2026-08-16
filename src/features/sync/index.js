@@ -1,7 +1,7 @@
 /**
- * Responsibility: Public Stage 9 synchronization contract. R9-04 EditorScrollMapper, R9-05 PreviewScrollMapper and R9-06 ScrollGeometrySession remain frozen while R9-07 adds EditorSelectionReader and PreviewSelectionReader; later selection policy remains unmigrated.
+ * Responsibility: Public Stage 9 synchronization contract. R9-04, R9-05, R9-06 and R9-07 remain frozen while R9-08 adds the canonical SelectionFeedbackGuard; later selection policy remains unmigrated.
  * Imports: Public synchronization modules only.
- * Exports: Scroll controller, source ownership, editor/preview mappers, geometry session and R9-07 selection reader classes/factories.
+ * Exports: Scroll owners/mappers/geometry, Selection Readers and the R9-08 Feedback Guard classes/factories.
  * State/side effects: None; import-only facade.
  * Lifecycle: None.
  */
@@ -34,3 +34,7 @@ export {
   PreviewSelectionReader,
   createPreviewSelectionReader
 } from './selection/preview-selection-reader.js';
+export {
+  SelectionFeedbackGuard,
+  createSelectionFeedbackGuard
+} from './selection/selection-feedback-guard.js';

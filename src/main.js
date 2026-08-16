@@ -44,7 +44,7 @@ import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
-import { createEditorSelectionReader, createPreviewSelectionReader } from './features/sync/index.js';
+import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard } from './features/sync/index.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {
@@ -307,13 +307,19 @@ async function loadAppModules() {
     requestFrame: callback => window.requestAnimationFrame(callback),
     cancelFrame: frameId => window.cancelAnimationFrame(frameId)
   });
+  const selectionFeedbackGuard = createSelectionFeedbackGuard({
+    setTimer: (callback, delay) => window.setTimeout(callback, delay),
+    clearTimer: timerId => window.clearTimeout(timerId)
+  });
   if (compatibilityPlatformHost) {
     compatibilityPlatformHost.markdownEditorEditorSelectionReader = editorSelectionReader;
     compatibilityPlatformHost.markdownEditorPreviewSelectionReader = previewSelectionReader;
+    compatibilityPlatformHost.markdownEditorSelectionFeedbackGuard = selectionFeedbackGuard;
   }
   const selectionController = createSelectionSyncController(editorHost, previewHost, {
     editorSelectionReader,
-    previewSelectionReader
+    previewSelectionReader,
+    feedbackGuard: selectionFeedbackGuard
   });
   window.markdownEditorSelectionController = selectionController;
   const destroySelectionReaders = () => {
@@ -324,6 +330,10 @@ async function loadAppModules() {
     if (compatibilityPlatformHost?.markdownEditorPreviewSelectionReader === previewSelectionReader) {
       delete compatibilityPlatformHost.markdownEditorPreviewSelectionReader;
     }
+    if (compatibilityPlatformHost?.markdownEditorSelectionFeedbackGuard === selectionFeedbackGuard) {
+      delete compatibilityPlatformHost.markdownEditorSelectionFeedbackGuard;
+    }
+    selectionFeedbackGuard.destroy();
     previewSelectionReader.destroy();
     editorSelectionReader.destroy();
   };

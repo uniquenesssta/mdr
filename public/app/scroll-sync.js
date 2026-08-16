@@ -6,6 +6,7 @@
     const scrollSyncPresentationPort = scrollSyncCompatibilityHost?.markdownEditorPresentationPort;
     const editorSelectionReader = scrollSyncCompatibilityHost?.markdownEditorEditorSelectionReader;
     const previewSelectionReader = scrollSyncCompatibilityHost?.markdownEditorPreviewSelectionReader;
+    const selectionFeedbackGuard = scrollSyncCompatibilityHost?.markdownEditorSelectionFeedbackGuard;
     if (!scrollSyncLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!scrollSyncOutlineControllerPort) throw new Error('Outline controller compatibility port is unavailable.');
     if (!scrollSyncEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
@@ -13,6 +14,7 @@
     if (!scrollSyncPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
     if (!editorSelectionReader) throw new Error('Editor Selection Reader compatibility capability is unavailable.');
     if (!previewSelectionReader) throw new Error('Preview Selection Reader compatibility capability is unavailable.');
+    if (!selectionFeedbackGuard) throw new Error('Selection Feedback Guard compatibility capability is unavailable.');
     const SYNC_VIEWPORT_RATIO = 0.38;
     const SELECTION_VIEWPORT_RATIO = 0.5;
     const SELECTION_SAFE_EDGE_MIN_PX = 32;
@@ -669,7 +671,9 @@
     }
 
     function syncEditorSelectionToPreview(shouldScroll = false, reason = 'editor-selection', selectionSnapshot = null) {
-      if (selectionSyncLock) return { status: 'locked', selectionLength: 0, matchedAnchors: 0 };
+      if (selectionFeedbackGuard.shouldIgnore('editor', { allowSource: true })) {
+        return { status: 'locked', selectionLength: 0, matchedAnchors: 0 };
+      }
       const editorSelection = selectionSnapshot || editorSelectionReader.read();
       const start = editorSelection?.from || 0;
       const end = editorSelection?.to || 0;
@@ -952,6 +956,9 @@
     }
 
     function syncPreviewSelectionToEditor(reason = 'preview-selection', selectionSnapshot = null) {
+      if (selectionFeedbackGuard.shouldIgnore('preview', { allowSource: true })) {
+        return { status: 'locked', selectionLength: 0, matchedAnchors: 0 };
+      }
       const context = getPreviewSelectionContext(selectionSnapshot || previewSelectionReader.read());
       if (!context) return { status: 'no-selection', selectionLength: 0, matchedAnchors: 0 };
       const range = findMarkdownRangeForPreviewSelection(context);
@@ -962,7 +969,6 @@
           matchedAnchors: Number(Boolean(context.startAnchor)) + Number(Boolean(context.endAnchor))
         };
       }
-      selectionSyncLock = true;
       editor.focus({ preventScroll: true });
       editor.setSelectionRange(range.start, range.end);
       const targetIndex = range.start + Math.floor((range.end - range.start) / 2);
@@ -980,7 +986,6 @@
         behavior: 'auto'
       });
       scrollSyncOutlineControllerPort.updateActiveLine(startLine);
-      setTimeout(() => { selectionSyncLock = false; }, 96);
       return {
         status: 'mapped',
         selectionLength: context.text.length,

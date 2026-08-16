@@ -11,7 +11,6 @@ const PLANNED_LATER_FILES = [
   'src/features/sync/selection/selection-sync-controller.js',
   'src/features/sync/selection/selection-highlight-session.js',
   'src/features/sync/selection/selection-retry-scheduler.js',
-  'src/features/sync/selection/selection-feedback-guard.js'
 ];
 
 test('R9-01 controller migration remains canonical after R9-02 source ownership extraction', async () => {
@@ -62,7 +61,7 @@ test('R9-01 legacy browser aggregate remains a compatibility client of the froze
 test('current inventory records public Sync, controller and source owner without restoring obsolete scroll controller', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const paths = new Set(inventory.modules.map(record => record[0]));
-  assert.equal(inventory.modules.length, 378);
+  assert.equal(inventory.modules.length, 379);
   assert.equal(paths.has('src/features/sync/index.js'), true);
   assert.equal(paths.has('src/features/sync/scroll/scroll-sync-controller.js'), true);
   assert.equal(paths.has('src/features/sync/scroll/scroll-source-ownership.js'), true);

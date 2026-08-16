@@ -11,7 +11,6 @@ const LATER_FILES = [
   'src/features/sync/selection/selection-sync-controller.js',
   'src/features/sync/selection/selection-highlight-session.js',
   'src/features/sync/selection/selection-retry-scheduler.js',
-  'src/features/sync/selection/selection-feedback-guard.js'
 ];
 
 test('R9-02 creates one canonical ScrollSourceOwnership module and public factory', async () => {
@@ -68,7 +67,7 @@ test('R9-02 keeps the classic scroll aggregate behind the controller compatibili
 test('R9-02 inventory records one source owner and current package cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 378);
+  assert.equal(inventory.modules.length, 379);
   assert.equal(records.has('src/features/sync/scroll/scroll-source-ownership.js'), true);
   assert.equal(records.get('src/features/sync/scroll/scroll-source-ownership.js')[4], 'scroll-source-ownership');
   assert.equal(records.get('src/features/sync/scroll/scroll-sync-controller.js')[4], 'scroll-sync-runtime');

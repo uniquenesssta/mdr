@@ -4,8 +4,18 @@ function nextFrame(callback) {
   return requestAnimationFrame(() => callback());
 }
 
+const REQUIRED_FEEDBACK_METHODS = [
+  'begin',
+  'shouldIgnore',
+  'advanceRevision',
+  'release',
+  'reset',
+  'getRevision',
+  'getState'
+];
+
 export class SelectionSyncController {
-  constructor(editor, preview, { editorSelectionReader, previewSelectionReader } = {}) {
+  constructor(editor, preview, { editorSelectionReader, previewSelectionReader, feedbackGuard } = {}) {
     if (!editorSelectionReader || typeof editorSelectionReader.read !== 'function') {
       throw new TypeError('SelectionSyncController requires EditorSelectionReader');
     }
@@ -16,19 +26,20 @@ export class SelectionSyncController {
       || typeof previewSelectionReader.stop !== 'function') {
       throw new TypeError('SelectionSyncController requires PreviewSelectionReader');
     }
+    if (!feedbackGuard || REQUIRED_FEEDBACK_METHODS.some(method => typeof feedbackGuard[method] !== 'function')) {
+      throw new TypeError('SelectionSyncController requires SelectionFeedbackGuard');
+    }
     this.editor = editor;
     this.preview = preview;
     this.editorSelectionReader = editorSelectionReader;
     this.previewSelectionReader = previewSelectionReader;
+    this.feedbackGuard = feedbackGuard;
     this.previewSelectionDisposer = null;
     this.callbacks = {};
     this.started = false;
-    this.applyingSide = '';
     this.editorPointerActive = false;
     this.editorFrame = 0;
     this.previewFrame = 0;
-    this.releaseTimer = 0;
-    this.previewRevision = 0;
     this.lastEditorKey = '';
     this.lastPreviewKey = '';
     this.editorAlignmentUntil = 0;
@@ -58,7 +69,7 @@ export class SelectionSyncController {
       }
     };
     this.onStablePreviewSelection = ({ reason = 'preview-selection', force = false, snapshot = null } = {}) => {
-      if (this.applyingSide) {
+      if (this.feedbackGuard.shouldIgnore('preview')) {
         this.stats.ignoredFeedbackEvents += 1;
         return;
       }
@@ -98,8 +109,7 @@ export class SelectionSyncController {
     this.started = false;
     cancelAnimationFrame(this.editorFrame);
     cancelAnimationFrame(this.previewFrame);
-    clearTimeout(this.releaseTimer);
-    this.applyingSide = '';
+    this.feedbackGuard.reset();
     this.editor.removeEventListener('select', this.onEditorSelect);
     this.editor.removeEventListener('keyup', this.onEditorKeyUp);
     this.editor.removeEventListener('pointerdown', this.onEditorPointerDown, true);
@@ -115,11 +125,11 @@ export class SelectionSyncController {
     const from = Number(selection?.from) || 0;
     const to = Math.max(from, Number(selection?.to) || 0);
     const documentVersion = window.markdownEditorDocumentModel?.getState?.().version || 0;
-    return `${documentVersion}:${from}:${to}:${this.previewRevision}`;
+    return `${documentVersion}:${from}:${to}:${this.feedbackGuard.getRevision()}`;
   }
 
   scheduleEditor(shouldScroll = false, reason = 'editor-selection', options = {}) {
-    if (this.applyingSide === 'preview') {
+    if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) {
       this.stats.ignoredFeedbackEvents += 1;
       return;
     }
@@ -141,17 +151,17 @@ export class SelectionSyncController {
   }
 
   runEditor(shouldScroll, reason, force, attempt) {
-    if (this.applyingSide === 'preview') return;
+    if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) return;
     const selection = this.editorSelectionReader.read();
     const key = this.makeEditorKey(selection);
     if (!force && key === this.lastEditorKey) return;
-    this.applyingSide = 'editor';
+    const feedbackToken = this.feedbackGuard.begin('editor');
     let result = null;
     try {
       result = this.callbacks.syncEditorToPreview?.({ shouldScroll, reason, attempt, selection }) || { status: 'unconfigured' };
       this.lastEditorKey = key;
     } finally {
-      this.releaseApplyingSide();
+      this.feedbackGuard.release(feedbackToken, 32);
     }
     this.recordResult('editor-to-preview', reason, result);
     if (result?.status === 'pending' && attempt < (result.maxRetries ?? DEFAULT_MAX_RETRIES)) {
@@ -164,7 +174,7 @@ export class SelectionSyncController {
   }
 
   schedulePreview(reason = 'preview-selection', options = {}) {
-    if (this.applyingSide === 'editor') {
+    if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) {
       this.stats.ignoredFeedbackEvents += 1;
       return;
     }
@@ -185,33 +195,26 @@ export class SelectionSyncController {
   }
 
   runPreview(reason, force, snapshot = null, snapshotProvided = false) {
-    if (this.applyingSide === 'editor') return;
+    if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return;
     const selection = snapshotProvided ? snapshot : this.previewSelectionReader.read();
     if (!selection) return;
     const key = `${selection.text || ''}:${selection.anchorOffset || 0}:${selection.focusOffset || 0}`;
     if (!force && key === this.lastPreviewKey) return;
-    this.applyingSide = 'preview';
+    const feedbackToken = this.feedbackGuard.begin('preview');
     let result = null;
     try {
       result = this.callbacks.syncPreviewToEditor?.({ reason, selection }) || { status: 'unconfigured' };
       if (result?.status === 'mapped') this.lastPreviewKey = key;
     } finally {
-      this.releaseApplyingSide(96);
+      this.feedbackGuard.release(feedbackToken, 96);
     }
     if (result?.status === 'mapping-failed') this.stats.mappingFailures += 1;
     this.recordResult('preview-to-editor', reason, result);
   }
 
-  releaseApplyingSide(delay = 32) {
-    clearTimeout(this.releaseTimer);
-    this.releaseTimer = setTimeout(() => {
-      this.applyingSide = '';
-    }, delay);
-  }
-
   notifyPreviewMounted(reason = 'preview-mounted') {
-    this.previewRevision += 1;
-    if (this.applyingSide === 'editor') return;
+    this.feedbackGuard.advanceRevision();
+    if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return;
     const editorSelection = this.editorSelectionReader.read();
     if (!editorSelection || editorSelection.isCollapsed) return;
     this.stats.previewRefreshes += 1;
@@ -224,7 +227,7 @@ export class SelectionSyncController {
   }
 
   notifyEditorGeometry(reason = 'editor-geometry') {
-    if (this.applyingSide) return;
+    if (this.feedbackGuard.shouldIgnore('editor')) return;
     this.stats.editorGeometryRefreshes += 1;
     const previewSelection = this.previewSelectionReader.read();
     if (previewSelection) {
@@ -253,7 +256,7 @@ export class SelectionSyncController {
       selectionLength: Number(result?.selectionLength) || 0,
       matchedAnchors: Number(result?.matchedAnchors) || 0,
       virtualized: Boolean(this.callbacks.isPreviewVirtualized?.()),
-      previewRevision: this.previewRevision,
+      previewRevision: this.feedbackGuard.getRevision(),
       sourceViewportRatio: Number.isFinite(result?.sourceViewportRatio)
         ? Number(result.sourceViewportRatio.toFixed(3))
         : null,
@@ -292,10 +295,11 @@ export class SelectionSyncController {
   }
 
   getState() {
+    const feedback = this.feedbackGuard.getState();
     return {
       started: this.started,
-      applyingSide: this.applyingSide,
-      previewRevision: this.previewRevision,
+      applyingSide: feedback.source,
+      previewRevision: feedback.revision,
       ...this.stats
     };
   }
