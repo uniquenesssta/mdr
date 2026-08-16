@@ -13,36 +13,33 @@ test('R9-11 composition obtains frozen mapping only from model-kernel and never 
   assert.doesNotMatch(main, /from ['"][^'"]*sync\/selection-mapping\.js['"]/);
 });
 
-test('R9-11 mounts the exact frozen model-kernel API on the scoped compatibility host and owns cleanup', async () => {
+test('R9-11 frozen model-kernel API remains the exact capability injected into the final Selection Controller', async () => {
   const main = await read('src/main.js');
-  assert.match(main, /compatibilityPlatformHost\.markdownEditorSelectionMapping = selectionMappingApi/);
-  assert.match(main, /compatibilityPlatformHost\?\.markdownEditorSelectionMapping === selectionMappingApi/);
-  assert.match(main, /delete compatibilityPlatformHost\.markdownEditorSelectionMapping/);
+  assert.match(main, /selectionMapping:\s*selectionMappingApi/);
+  assert.doesNotMatch(main, /markdownEditorSelectionMapping/);
+  assert.doesNotMatch(main, /window\.markdownEditorSelectionMapping/);
 });
 
-test('R9-11 removes the window selection mapping global from production and architecture baseline', async () => {
+test('R9-11 window selection mapping global remains absent after R9-12 removes the classic compatibility script', async () => {
   const main = await read('src/main.js');
-  const legacy = await read('public/app/scroll-sync.js');
   const baseline = await read('tests/architecture/fixtures/architecture-baseline.json');
   assert.doesNotMatch(main, /window\.markdownEditorSelectionMapping/);
-  assert.doesNotMatch(legacy, /window\.markdownEditorSelectionMapping/);
   assert.doesNotMatch(baseline, /window\.markdownEditorSelectionMapping/);
+  await assert.rejects(access(file('public/app/scroll-sync.js')));
 });
 
-test('R9-11 classic selection mapping call sites consume only the injected frozen capability', async () => {
-  const legacy = await read('public/app/scroll-sync.js');
-  assert.match(legacy, /const frozenSelectionMapping = scrollSyncCompatibilityHost\?\.markdownEditorSelectionMapping/);
-  assert.match(legacy, /frozenSelectionMapping\.createPreviewRangesForSourceSelection\(/);
-  assert.match(legacy, /frozenSelectionMapping\.mapPreviewDomPointToSource\(/);
-  assert.doesNotMatch(legacy, /const mapping = window\.|selectionMappingApi/);
+test('R9-11 final selection mapping call sites consume only the injected frozen capability', async () => {
+  const controller = await read('src/features/sync/selection/selection-sync-controller.js');
+  assert.match(controller, /this\.selectionMapping\.createPreviewRangesForSourceSelection\(/);
+  assert.match(controller, /this\.selectionMapping\.mapPreviewDomPointToSource\(/);
+  assert.doesNotMatch(controller, /selectionMappingApi|from ['"][^'"]*selection-mapping\.js['"]/);
 });
 
 test('R9-11 production code has no direct import of frozen selection-mapping outside model-kernel', async () => {
   const paths = [
     'src/main.js',
     'src/features/sync/index.js',
-    'src/sync/selection-controller.js',
-    'public/app/scroll-sync.js'
+    'src/features/sync/selection/selection-sync-controller.js'
   ];
   for (const path of paths) {
     const source = await read(path);
@@ -52,14 +49,13 @@ test('R9-11 production code has no direct import of frozen selection-mapping out
   assert.match(kernel, /from '\.\.\/sync\/selection-mapping\.js'/);
 });
 
-test('R9-11 does not copy frozen mapping algorithms into Sync modules and does not start R9-12', async () => {
+test('R9-11 frozen mapping algorithms remain uncopied while R9-12 removes only legacy fallback authority', async () => {
   const facade = await read('src/features/sync/index.js');
-  const controller = await read('src/sync/selection-controller.js');
-  const legacy = await read('public/app/scroll-sync.js');
+  const controller = await read('src/features/sync/selection/selection-sync-controller.js');
+  const mapping = await read('src/sync/selection-mapping.js');
   assert.match(facade, /R9-11/);
   assert.match(facade, /R9-12/);
   assert.doesNotMatch(facade + controller, /function\s+(createMarkdownSourceProjection|createPreviewDomProjection|createPreviewRangesForSourceSelection|mapPreviewDomPointToSource)\b/);
-  assert.match(legacy, /buildNormalizedTextMap/);
-  assert.match(legacy, /editor\.value/);
-  await access(file('public/app/scroll-sync.js'));
+  assert.match(mapping, /export const selectionMappingApi = Object\.freeze/);
+  await assert.rejects(access(file('public/app/scroll-sync.js')));
 });
