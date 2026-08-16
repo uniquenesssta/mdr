@@ -29,14 +29,14 @@ jobs:
           set -euo pipefail
           rm -f .agent/r9_11_failure.log
           set +e
-          bash .agent/r9_11_prepare.sh 2>&1 | tee /tmp/r9-11-validation.log
+          bash .agent/r9_11_prepare_cleanup.sh 2>&1 | tee /tmp/r9-11-validation.log
           status=${PIPESTATUS[0]}
           set -e
           if [ "$status" -ne 0 ]; then
             mkdir -p .agent
             {
               echo '=== MATCHED FAILURE CONTEXT ==='
-              grep -n -B 24 -A 48 -E '^not ok|failureType:|AssertionError|ERR_[A-Z_]+|^# fail [1-9]|RuntimeError|Traceback|Error:|expected one marker|Unexpected R9-11|runner contains unexpected|Missing R9-11|traceability marker missing' /tmp/r9-11-validation.log || true
+              grep -n -B 24 -A 48 -E '^not ok|failureType:|AssertionError|ERR_[A-Z_]+|^# fail [1-9]|RuntimeError|Traceback|Error:|expected one marker|Unexpected R9-11|runner contains unexpected|Missing R9-11|traceability marker missing|pycompile cleanup marker missing' /tmp/r9-11-validation.log || true
               echo
               echo '=== VALIDATION TAIL ==='
               tail -n 320 /tmp/r9-11-validation.log
