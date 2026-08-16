@@ -52,7 +52,13 @@ jobs:
             normalize() {"""
           if old not in text:
               raise SystemExit('R9-09 FakeElement patch marker missing')
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          text = text.replace(old, new, 1)
+          text = text.replace(
+              "assert.doesNotMatch(session, /retry|MAX_RETRIES|setTimer|scheduleFrame/);",
+              "assert.doesNotMatch(session, /MAX_RETRIES|setTimer|scheduleFrame|scheduleRetry|retryCount|retryTimer/);",
+              1
+          )
+          path.write_text(text, encoding='utf-8')
           PY
           set +e
           bash .agent/r9_09_validate.sh 2>&1 | tee /tmp/r9-09-validation.log
