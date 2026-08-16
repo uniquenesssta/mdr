@@ -15,4 +15,9 @@ new_gate = r'|this\.sourceSide\s*=|this\.sourceReason\s*=/'
 if text.count(old_gate) != 1:
     raise RuntimeError(f'apply-script fix expected one ownership-gate match, found {text.count(old_gate)}')
 text = text.replace(old_gate, new_gate, 1)
+old_index = 'R9-06 adds ScrollGeometrySession beside the Scroll Controller, sole source owner and editor/preview mappers;'
+new_index = 'R9-06 adds ScrollGeometrySession beside the Scroll Controller, sole source owner, R9-04 EditorScrollMapper and R9-05 PreviewScrollMapper;'
+if text.count(old_index) != 1:
+    raise RuntimeError(f'apply-script fix expected one Sync index marker match, found {text.count(old_index)}')
+text = text.replace(old_index, new_index, 1)
 path.write_text(text, encoding='utf-8')
