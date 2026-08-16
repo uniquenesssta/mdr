@@ -30,6 +30,11 @@ tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:28:  a
 tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:29:  assert.doesNotMatch(baseline, /window\.markdownEditorSelectionMapping/);
 tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs:34:  assert.match(legacy, /const frozenSelectionMapping = scrollSyncCompatibilityHost\?\.markdownEditorSelectionMapping/);
 tests/architecture/stage-07-preview-virtual-window.test.mjs:48:  assert.doesNotMatch(combined, /preview-focus-controller|preview-enhancement-coordinator|preview-controller|preview-render-engine|scrollPreviewToLine|focusSection|markdownEditorScrollSync/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:25:  assert.doesNotMatch(main, /window\.markdownEditorScrollController/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:26:  assert.doesNotMatch(main, /window\.markdownEditorScrollSync/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:27:  assert.doesNotMatch(main, /window\.markdownEditorSelectionController/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:28:  assert.doesNotMatch(main, /markdownEditorSelectionMapping/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:80:  assert.doesNotMatch(combined, /markdownEditorScrollSync|markdownEditorScrollController|markdownEditorSelectionController/);
 tests/architecture/stage-09-scroll-source-ownership.test.mjs:61:  assert.match(legacy, /window\.markdownEditorScrollController/);
 tests/architecture/fixtures/architecture-baseline.json:463:      "global": "window.markdownEditorScrollController",
 tests/architecture/fixtures/architecture-baseline.json:471:      "global": "window.markdownEditorScrollSync",
@@ -116,6 +121,9 @@ tests/architecture/stage-09-preview-scroll-mapper.test.mjs:73:  assert.match(leg
 tests/architecture/stage-09-preview-scroll-mapper.test.mjs:74:  assert.match(legacy, /invalidatePreviewAnchorMetrics: \(\) => invalidatePreviewAnchorMetrics\(\)/);
 tests/architecture/stage-09-preview-scroll-mapper.test.mjs:75:  assert.match(legacy, /invalidatePreviewAnchorStructure: \(\) => invalidatePreviewAnchorStructure\(\)/);
 tests/architecture/stage-07-preview-virtual-window.test.mjs:48:  assert.doesNotMatch(combined, /preview-focus-controller|preview-enhancement-coordinator|preview-controller|preview-render-engine|scrollPreviewToLine|focusSection|markdownEditorScrollSync/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:87:  assert.match(core, /coreEditorUiCommandPort\.invoke\('preparePreviewEditorMetrics'\)/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:88:  assert.match(clipper, /webClipperEditorUiCommandPort\.invoke\('syncEditorSelectionToPreview'/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:89:  assert.doesNotMatch(clipper, /\bsyncEditorSelectionToPreview\(/);
 tests/architecture/stage-06-split-controllers.test.mjs:24:    assert.doesNotMatch(source, /refreshPreviewAfterLayout|scheduleEditorMetricsRebuild|invalidatePreviewAnchorMetrics/);
 tests/architecture/stage-09-editor-scroll-mapper.test.mjs:64:  assert.match(core, /coreEditorUiCommandPort\.has\('preparePreviewEditorMetrics'\)/);
 tests/architecture/stage-09-editor-scroll-mapper.test.mjs:65:  assert.match(core, /coreEditorUiCommandPort\.invoke\('preparePreviewEditorMetrics'\)/);
