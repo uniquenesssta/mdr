@@ -91,7 +91,7 @@ test('R9-12 remaining classic callers use scoped editor UI commands instead of d
 
 test('R9-12 production inventory removes classic scroll-sync, replaces old controller path and contains the final sync modules exactly once', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
-  const paths = inventory.modules.map(entry => entry.path);
+  const paths = inventory.modules.map(entry => entry[0]);
   assert.equal(paths.includes('public/app/scroll-sync.js'), false);
   assert.equal(paths.includes('src/sync/selection-controller.js'), false);
   assert.equal(paths.filter(path => path === 'src/features/sync/selection/selection-sync-controller.js').length, 1);
