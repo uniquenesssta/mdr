@@ -1,446 +1,289 @@
 === MATCHED FAILURE CONTEXT ===
-75-ok 2 - R9-09 Highlight Session owns highlight effects/remount intent only and contains no mapping feedback retry scroll or event authority
-76-  ---
-77-  duration_ms: 1.25283
-78-  type: 'test'
-79-  ...
-80-# Subtest: R9-09 classic selection mapping only builds plans and delegates all CSS/class/text highlight effects to the scoped Session
-81-ok 3 - R9-09 classic selection mapping only builds plans and delegates all CSS/class/text highlight effects to the scoped Session
-82-  ---
-83-  duration_ms: 2.576131
-84-  type: 'test'
-85-  ...
-86-# Subtest: R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
-87-ok 4 - R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
-88-  ---
-89-  duration_ms: 1.775272
-90-  type: 'test'
-91-  ...
-92-# Subtest: R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
-93-ok 5 - R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
-94-  ---
-95-  duration_ms: 1.351054
-96-  type: 'test'
-97-  ...
-98-# Subtest: R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
-99:not ok 6 - R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
-100-  ---
-101-  duration_ms: 4.85605
-102-  type: 'test'
-103-  location: '/home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-highlight-session.test.mjs:63:1'
-104:  failureType: 'testCodeFailure'
-105-  error: |-
-106-    The input was expected to not match the regular expression /retry|MAX_RETRIES|setTimer|scheduleFrame/. Input:
-107-    
-108-    '/**\n' +
-109-      ' * Responsibility: Authoritative R9-09 preview selection highlight presentation and lifecycle.\n' +
-110-      ' * Imports: Injected preview/document/CSS Highlight capabilities only; no model, mapping, feedback, retry or scroll policy.\n' +
-111-      ' * Exports: SelectionHighlightSession and factory.\n' +
-112-      ' * State/side effects: Owns active CSS Highlight ranges, atomic classes, text fallback wrappers and one remount restore intent.\n' +
-113-      ' * Lifecycle: Explicit clear/destroy; destroy removes every owned range/effect and is terminal/idempotent.\n' +
-114-      ' */\n' +
-115-      '\n' +
-116-      'const TEXT_NODE = 3;\n' +
-117-      "const HIGHLIGHT_NAME = 'preview-selection-sync';\n" +
-118-      "const ATOMIC_CLASS = 'preview-atomic-selection-highlight';\n" +
-119-      "const FALLBACK_CLASS = 'preview-text-highlight';\n" +
-120-      '\n' +
-121-      'function assertCapability(condition, message) {\n' +
-122-      '  if (!condition) throw new TypeError(message);\n' +
-123-      '}\n' +
-124-      '\n' +
-125-      'function normalizePlan(plan = {}) {\n' +
-126-      '  return {\n' +
-127-      '    ranges: Array.from(plan?.ranges || []).filter(Boolean),\n' +
-128-      '    atomicElements: Array.from(plan?.atomicElements || []).filter(Boolean)\n' +
-129-      '  };\n' +
-130-      '}\n' +
-131-      '\n' +
-132-      'export class SelectionHighlightSession {\n' +
-133-      '  constructor({\n' +
-134-      '    previewElement,\n' +
-135-      '    documentRef = previewElement?.ownerDocument,\n' +
-136-      '    highlightRegistry = null,\n' +
-137-      '    HighlightCtor = null,\n' +
-138-      '    reportError = (message, error) => console.warn(message, error)\n' +
-139-      '  } = {}) {\n' +
-140-      "    assertCapability(previewElement && typeof previewElement.contains === 'function', 'SelectionHighlightSession requires previewElement');\n" +
-141-      "    assertCapability(documentRef && typeof documentRef.createElement === 'function' && typeof documentRef.createTextNode === 'function', 'SelectionHighlightSession requires documentRef DOM creation capabilities');\n" +
-142-      '    if (highlightRegistry) {\n' +
-143-      "      assertCapability(typeof highlightRegistry.set === 'function' && typeof highlightRegistry.delete === 'function', 'SelectionHighlightSession highlightRegistry requires set/delete');\n" +
-144-      '    }\n' +
-145-      "    if (HighlightCtor !== null) assertCapability(typeof HighlightCtor === 'function', 'SelectionHighlightSession HighlightCtor must be a constructor');\n" +
-146-      "    assertCapability(typeof reportError === 'function', 'SelectionHighlightSession requires reportError');\n" +
-147-      '\n' +
-148-      '    this.previewElement = previewElement;\n' +
-149-      '    this.documentRef = documentRef;\n' +
-150-      '    this.highlightRegistry = highlightRegistry;\n' +
-151-      '    this.HighlightCtor = HighlightCtor;\n' +
-152-      '    this.reportError = reportError;\n' +
---
-294-      '  clearEffects() {\n' +
-295-      '    this.highlightRegistry?.delete?.(HIGHLIGHT_NAME);\n' +
-296-      '    for (const element of this.atomicElements) element.classList?.remove?.(ATOMIC_CLASS);\n' +
-297-      '    this.atomicElements.clear();\n' +
-298-      '    for (const mark of this.fallbackMarks) {\n' +
-299-      '      const parent = mark?.parentNode;\n' +
-300-      '      if (!parent) continue;\n' +
-301-      "      const text = this.documentRef.createTextNode(mark.textContent || '');\n" +
-302-      '      mark.replaceWith(text);\n' +
-303-      '      parent.normalize?.();\n' +
-304-      '    }\n' +
-305-      '    this.fallbackMarks.clear();\n' +
-306-      '    this.ranges = [];\n' +
-307-      '  }\n' +
-308-      '\n' +
-309-      '  assertUsable() {\n' +
-310-      "    if (this.destroyed) throw new Error('SelectionHighlightSession is destroyed');\n" +
-311-      '  }\n' +
-312-      '}\n' +
-313-      '\n' +
-314-      'export function createSelectionHighlightSession(options = {}) {\n' +
-315-      '  return new SelectionHighlightSession(options);\n' +
-316-      '}\n'
-317-    
-318:  code: 'ERR_ASSERTION'
-319:  name: 'AssertionError'
-320-  expected:
-321-  actual: |-
-322-    /**
-323-     * Responsibility: Authoritative R9-09 preview selection highlight presentation and lifecycle.
-324-     * Imports: Injected preview/document/CSS Highlight capabilities only; no model, mapping, feedback, retry or scroll policy.
-325-     * Exports: SelectionHighlightSession and factory.
-326-     * State/side effects: Owns active CSS Highlight ranges, atomic classes, text fallback wrappers and one remount restore intent.
-327-     * Lifecycle: Explicit clear/destroy; destroy removes every owned range/effect and is terminal/idempotent.
-328-     */
-329-    
-330-    const TEXT_NODE = 3;
-331-    const HIGHLIGHT_NAME = 'preview-selection-sync';
-332-    const ATOMIC_CLASS = 'preview-atomic-selection-highlight';
-333-    const FALLBACK_CLASS = 'preview-text-highlight';
-334-    
-335-    function assertCapability(condition, message) {
-336-      if (!condition) throw new TypeError(message);
-337-    }
-338-    
-339-    function normalizePlan(plan = {}) {
-340-      return {
-341-        ranges: Array.from(plan?.ranges || []).filter(Boolean),
-342-        atomicElements: Array.from(plan?.atomicElements || []).filter(Boolean)
-343-      };
-344-    }
-345-    
-346-    export class SelectionHighlightSession {
-347-      constructor({
-348-        previewElement,
-349-        documentRef = previewElement?.ownerDocument,
-350-        highlightRegistry = null,
-351-        HighlightCtor = null,
-352-        reportError = (message, error) => console.warn(message, error)
-353-      } = {}) {
-354-        assertCapability(previewElement && typeof previewElement.contains === 'function', 'SelectionHighlightSession requires previewElement');
-355-        assertCapability(documentRef && typeof documentRef.createElement === 'function' && typeof documentRef.createTextNode === 'function', 'SelectionHighlightSession requires documentRef DOM creation capabilities');
-356-        if (highlightRegistry) {
-357-          assertCapability(typeof highlightRegistry.set === 'function' && typeof highlightRegistry.delete === 'function', 'SelectionHighlightSession highlightRegistry requires set/delete');
-358-        }
-359-        if (HighlightCtor !== null) assertCapability(typeof HighlightCtor === 'function', 'SelectionHighlightSession HighlightCtor must be a constructor');
-360-        assertCapability(typeof reportError === 'function', 'SelectionHighlightSession requires reportError');
-361-    
-362-        this.previewElement = previewElement;
-363-        this.documentRef = documentRef;
-364-        this.highlightRegistry = highlightRegistry;
-365-        this.HighlightCtor = HighlightCtor;
-366-        this.reportError = reportError;
-367-        this.ranges = [];
---
-530-    }
-531-    
-532-  operator: 'doesNotMatch'
-533-  stack: |-
-534-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-highlight-session.test.mjs:69:10)
-535-    async Test.run (node:internal/test_runner/test:1054:7)
-536-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
-537-  ...
-538-# Subtest: R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
-539-ok 7 - R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
-540-  ---
-541-  duration_ms: 2.839109
-542-  type: 'test'
-543-  ...
-544-# Subtest: R9-09 production inventory records one Highlight Session responsibility and cardinality 380
-545-ok 8 - R9-09 production inventory records one Highlight Session responsibility and cardinality 380
-546-  ---
-547-  duration_ms: 1.476176
-548-  type: 'test'
-549-  ...
-550-1..8
-551-# tests 8
-552-# suites 0
-553-# pass 7
-554:# fail 1
-555-# cancelled 0
-556-# skipped 0
-557-# todo 0
-558-# duration_ms 75.281563
+139-ok 3 - R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
+140-  ---
+141-  duration_ms: 0.237716
+142-  type: 'test'
+143-  ...
+144-# Subtest: R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
+145-ok 4 - R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
+146-  ---
+147-  duration_ms: 0.381071
+148-  type: 'test'
+149-  ...
+150-# Subtest: R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
+151-ok 5 - R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
+152-  ---
+153-  duration_ms: 0.326088
+154-  type: 'test'
+155-  ...
+156-# Subtest: R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
+157-ok 6 - R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
+158-  ---
+159-  duration_ms: 0.196415
+160-  type: 'test'
+161-  ...
+162-# Subtest: R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
+163:not ok 7 - R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
+164-  ---
+165-  duration_ms: 1.180178
+166-  type: 'test'
+167-  location: '/home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:166:1'
+168:  failureType: 'testCodeFailure'
+169-  error: 'SelectionSyncController requires SelectionHighlightSession'
+170:  code: 'ERR_TEST_FAILURE'
+171-  name: 'TypeError'
+172-  stack: |-
+173-    new SelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:34:13)
+174-    createSelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:316:10)
+175-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:177:22)
+176-    Test.runInAsyncScope (node:async_hooks:214:14)
+177-    Test.run (node:internal/test_runner/test:1047:25)
+178-    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+179-    Test.postRun (node:internal/test_runner/test:1173:19)
+180-    Test.run (node:internal/test_runner/test:1101:12)
+181-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+182-  ...
+183-# Subtest: R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
+184:not ok 8 - R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
+185-  ---
+186-  duration_ms: 0.197355
+187-  type: 'test'
+188-  location: '/home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:199:1'
+189:  failureType: 'testCodeFailure'
+190-  error: 'SelectionSyncController requires SelectionHighlightSession'
+191:  code: 'ERR_TEST_FAILURE'
+192-  name: 'TypeError'
+193-  stack: |-
+194-    new SelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:34:13)
+195-    createSelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:316:10)
+196-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:205:22)
+197-    Test.runInAsyncScope (node:async_hooks:214:14)
+198-    Test.run (node:internal/test_runner/test:1047:25)
+199-    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+200-    Test.postRun (node:internal/test_runner/test:1173:19)
+201-    Test.run (node:internal/test_runner/test:1101:12)
+202-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+203-  ...
+204-1..8
+205-# tests 8
+206-# suites 0
+207-# pass 6
+208:# fail 2
+209-# cancelled 0
+210-# skipped 0
+211-# todo 0
+212-# duration_ms 74.371414
 
 === VALIDATION TAIL ===
-      '      const parent = mark?.parentNode;\n' +
-      '      if (!parent) continue;\n' +
-      "      const text = this.documentRef.createTextNode(mark.textContent || '');\n" +
-      '      mark.replaceWith(text);\n' +
-      '      parent.normalize?.();\n' +
-      '    }\n' +
-      '    this.fallbackMarks.clear();\n' +
-      '    this.ranges = [];\n' +
-      '  }\n' +
-      '\n' +
-      '  assertUsable() {\n' +
-      "    if (this.destroyed) throw new Error('SelectionHighlightSession is destroyed');\n" +
-      '  }\n' +
-      '}\n' +
-      '\n' +
-      'export function createSelectionHighlightSession(options = {}) {\n' +
-      '  return new SelectionHighlightSession(options);\n' +
-      '}\n'
-    
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected:
-  actual: |-
-    /**
-     * Responsibility: Authoritative R9-09 preview selection highlight presentation and lifecycle.
-     * Imports: Injected preview/document/CSS Highlight capabilities only; no model, mapping, feedback, retry or scroll policy.
-     * Exports: SelectionHighlightSession and factory.
-     * State/side effects: Owns active CSS Highlight ranges, atomic classes, text fallback wrappers and one remount restore intent.
-     * Lifecycle: Explicit clear/destroy; destroy removes every owned range/effect and is terminal/idempotent.
-     */
-    
-    const TEXT_NODE = 3;
-    const HIGHLIGHT_NAME = 'preview-selection-sync';
-    const ATOMIC_CLASS = 'preview-atomic-selection-highlight';
-    const FALLBACK_CLASS = 'preview-text-highlight';
-    
-    function assertCapability(condition, message) {
-      if (!condition) throw new TypeError(message);
-    }
-    
-    function normalizePlan(plan = {}) {
-      return {
-        ranges: Array.from(plan?.ranges || []).filter(Boolean),
-        atomicElements: Array.from(plan?.atomicElements || []).filter(Boolean)
-      };
-    }
-    
-    export class SelectionHighlightSession {
-      constructor({
-        previewElement,
-        documentRef = previewElement?.ownerDocument,
-        highlightRegistry = null,
-        HighlightCtor = null,
-        reportError = (message, error) => console.warn(message, error)
-      } = {}) {
-        assertCapability(previewElement && typeof previewElement.contains === 'function', 'SelectionHighlightSession requires previewElement');
-        assertCapability(documentRef && typeof documentRef.createElement === 'function' && typeof documentRef.createTextNode === 'function', 'SelectionHighlightSession requires documentRef DOM creation capabilities');
-        if (highlightRegistry) {
-          assertCapability(typeof highlightRegistry.set === 'function' && typeof highlightRegistry.delete === 'function', 'SelectionHighlightSession highlightRegistry requires set/delete');
-        }
-        if (HighlightCtor !== null) assertCapability(typeof HighlightCtor === 'function', 'SelectionHighlightSession HighlightCtor must be a constructor');
-        assertCapability(typeof reportError === 'function', 'SelectionHighlightSession requires reportError');
-    
-        this.previewElement = previewElement;
-        this.documentRef = documentRef;
-        this.highlightRegistry = highlightRegistry;
-        this.HighlightCtor = HighlightCtor;
-        this.reportError = reportError;
-        this.ranges = [];
-        this.atomicElements = new Set();
-        this.fallbackMarks = new Set();
-        this.restoreFactory = null;
-        this.destroyed = false;
-        this.restoreCount = 0;
-      }
-    
-      canPresent(plan = {}) {
-        if (this.destroyed) return false;
-        const normalized = normalizePlan(plan);
-        if (!normalized.ranges.every(range => this.ownsRange(range))) return false;
-        if (!normalized.atomicElements.every(element => this.ownsElement(element))) return false;
-        if (!normalized.ranges.length) return normalized.atomicElements.length > 0;
-        if (this.supportsCssHighlights()) return true;
-        return normalized.ranges.length === 1 && this.canWrapTextRange(normalized.ranges[0]);
-      }
-    
-      show(plan = {}, { restore = null } = {}) {
-        this.assertUsable();
-        if (restore !== null && typeof restore !== 'function') {
-          throw new TypeError('SelectionHighlightSession restore must be a function or null');
-        }
-        this.clearEffects();
-        this.restoreFactory = restore;
-        if (!this.canPresent(plan)) return false;
-        return this.applyPlan(plan);
-      }
-    
-      restore() {
-        if (this.destroyed || typeof this.restoreFactory !== 'function') return false;
-        const restoreFactory = this.restoreFactory;
-        this.clearEffects();
-        let plan = null;
-        try {
-          plan = restoreFactory();
-        } catch (error) {
-          this.reportError('Selection highlight remount restore failed.', error);
-          return false;
-        }
-        if (!plan || !this.canPresent(plan)) return false;
-        const applied = this.applyPlan(plan);
-        if (applied) this.restoreCount += 1;
-        return applied;
-      }
-    
-      clear() {
-        if (this.destroyed) return;
-        this.clearEffects();
-        this.restoreFactory = null;
-      }
-    
-      getState() {
-        return Object.freeze({
-          active: this.ranges.length > 0 || this.atomicElements.size > 0 || this.fallbackMarks.size > 0,
-          rangeCount: this.ranges.length,
-          atomicCount: this.atomicElements.size,
-          fallbackCount: this.fallbackMarks.size,
-          hasRestore: typeof this.restoreFactory === 'function',
-          restoreCount: this.restoreCount,
-          destroyed: this.destroyed
-        });
-      }
-    
-      destroy() {
-        if (this.destroyed) return;
-        this.clear();
-        this.destroyed = true;
-        this.previewElement = null;
-        this.documentRef = null;
-        this.highlightRegistry = null;
-        this.HighlightCtor = null;
-        this.reportError = null;
-      }
-    
-      supportsCssHighlights() {
-        return Boolean(this.highlightRegistry && this.HighlightCtor);
-      }
-    
-      ownsElement(element) {
-        return Boolean(element && this.previewElement.contains(element));
-      }
-    
-      ownsRange(range) {
-        const start = range?.startContainer;
-        const end = range?.endContainer;
-        if (!start || !end) return false;
-        return this.ownsNode(start) && this.ownsNode(end);
-      }
-    
-      ownsNode(node) {
-        const element = node?.nodeType === TEXT_NODE ? node.parentNode : node;
-        return Boolean(element && (element === this.previewElement || this.previewElement.contains(element)));
-      }
-    
-      canWrapTextRange(range) {
-        if (!this.ownsRange(range)) return false;
-        if (range.startContainer !== range.endContainer || range.startContainer?.nodeType !== TEXT_NODE) return false;
-        const length = Number(range.startContainer.nodeValue?.length) || 0;
-        const start = Math.max(0, Math.min(length, Number(range.startOffset) || 0));
-        const end = Math.max(start, Math.min(length, Number(range.endOffset) || 0));
-        return end > start && typeof range.startContainer.splitText === 'function';
-      }
-    
-      applyPlan(plan) {
-        const { ranges, atomicElements } = normalizePlan(plan);
-        let presented = ranges.length === 0;
-        if (ranges.length && this.supportsCssHighlights()) {
-          this.highlightRegistry.set(HIGHLIGHT_NAME, new this.HighlightCtor(...ranges));
-          presented = true;
-        } else if (ranges.length === 1) {
-          const mark = this.wrapTextRange(ranges[0]);
-          if (mark) {
-            this.fallbackMarks.add(mark);
-            presented = true;
-          }
-        }
-        if (!presented) return false;
-        for (const element of atomicElements) {
-          element.classList?.add?.(ATOMIC_CLASS);
-          this.atomicElements.add(element);
-        }
-        this.ranges = ranges;
-        return ranges.length > 0 || atomicElements.length > 0;
-      }
-    
-      wrapTextRange(range) {
-        if (!this.canWrapTextRange(range)) return null;
-        const node = range.startContainer;
-        const length = node.nodeValue.length;
-        const start = Math.max(0, Math.min(length, Number(range.startOffset) || 0));
-        const end = Math.max(start, Math.min(length, Number(range.endOffset) || 0));
-        const selected = node.splitText(start);
-        selected.splitText(end - start);
-        const mark = this.documentRef.createElement('span');
-        mark.className = FALLBACK_CLASS;
-        mark.textContent = selected.nodeValue || '';
-        selected.replaceWith(mark);
-        return mark;
-      }
-    
-      clearEffects() {
-        this.highlightRegistry?.delete?.(HIGHLIGHT_NAME);
-        for (const element of this.atomicElements) element.classList?.remove?.(ATOMIC_CLASS);
-        this.atomicElements.clear();
-        for (const mark of this.fallbackMarks) {
-          const parent = mark?.parentNode;
-          if (!parent) continue;
-          const text = this.documentRef.createTextNode(mark.textContent || '');
-          mark.replaceWith(text);
-          parent.normalize?.();
-        }
-        this.fallbackMarks.clear();
-        this.ranges = [];
-      }
-    
-      assertUsable() {
-        if (this.destroyed) throw new Error('SelectionHighlightSession is destroyed');
-      }
-    }
-    
-    export function createSelectionHighlightSession(options = {}) {
-      return new SelectionHighlightSession(options);
-    }
-    
-  operator: 'doesNotMatch'
-  stack: |-
-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/architecture/stage-09-selection-highlight-session.test.mjs:69:10)
-    async Test.run (node:internal/test_runner/test:1054:7)
-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
-  ...
-# Subtest: R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
-ok 7 - R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
+
+added 153 packages, and audited 154 packages in 5s
+
+11 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+found 0 vulnerabilities
+TAP version 13
+# Subtest: R9-09 Highlight Session owns CSS Highlight multi-Range publication and exact range state
+ok 1 - R9-09 Highlight Session owns CSS Highlight multi-Range publication and exact range state
   ---
-  duration_ms: 2.839109
+  duration_ms: 2.037132
   type: 'test'
   ...
-# Subtest: R9-09 production inventory records one Highlight Session responsibility and cardinality 380
-ok 8 - R9-09 production inventory records one Highlight Session responsibility and cardinality 380
+# Subtest: R9-09 Highlight Session replaces old CSS ranges and atomic classes through one authority
+ok 2 - R9-09 Highlight Session replaces old CSS ranges and atomic classes through one authority
   ---
-  duration_ms: 1.476176
+  duration_ms: 0.298827
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session provides the legacy single-text fallback when CSS Highlight is unavailable and clear restores text
+ok 3 - R9-09 Highlight Session provides the legacy single-text fallback when CSS Highlight is unavailable and clear restores text
+  ---
+  duration_ms: 0.501632
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session rejects unsupported multi-Range fallback and ranges outside preview without side effects
+ok 4 - R9-09 Highlight Session rejects unsupported multi-Range fallback and ranges outside preview without side effects
+  ---
+  duration_ms: 0.244056
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session restores fresh ranges and atomic elements after virtual remount without retry scheduling
+ok 5 - R9-09 Highlight Session restores fresh ranges and atomic elements after virtual remount without retry scheduling
+  ---
+  duration_ms: 0.391056
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
+ok 6 - R9-09 Highlight Session reports restore exceptions keeps intent and permits a later remount recovery
+  ---
+  duration_ms: 0.332167
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
+ok 7 - R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent
+  ---
+  duration_ms: 0.205838
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session destroy clears every effect and is terminal idempotent
+ok 8 - R9-09 Highlight Session destroy clears every effect and is terminal idempotent
+  ---
+  duration_ms: 0.517245
   type: 'test'
   ...
 1..8
 # tests 8
 # suites 0
-# pass 7
-# fail 1
+# pass 8
+# fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 75.281563
+# duration_ms 74.468029
+TAP version 13
+# Subtest: R9-09 creates canonical SelectionHighlightSession and exports it only through the Sync public entry
+ok 1 - R9-09 creates canonical SelectionHighlightSession and exports it only through the Sync public entry
+  ---
+  duration_ms: 5.955321
+  type: 'test'
+  ...
+# Subtest: R9-09 Highlight Session owns highlight effects/remount intent only and contains no mapping feedback retry scroll or event authority
+ok 2 - R9-09 Highlight Session owns highlight effects/remount intent only and contains no mapping feedback retry scroll or event authority
+  ---
+  duration_ms: 1.035181
+  type: 'test'
+  ...
+# Subtest: R9-09 classic selection mapping only builds plans and delegates all CSS/class/text highlight effects to the scoped Session
+ok 3 - R9-09 classic selection mapping only builds plans and delegates all CSS/class/text highlight effects to the scoped Session
+  ---
+  duration_ms: 2.999803
+  type: 'test'
+  ...
+# Subtest: R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
+ok 4 - R9-09 preserves mapping builders and frozen selection mapping for R9-11 instead of moving algorithms into Highlight Session
+  ---
+  duration_ms: 1.847147
+  type: 'test'
+  ...
+# Subtest: R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
+ok 5 - R9-09 composition creates one Session from preview-scoped DOM/CSS capabilities injects it and destroys it without a window highlight global
+  ---
+  duration_ms: 0.999537
+  type: 'test'
+  ...
+# Subtest: R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
+ok 6 - R9-09 virtual remount recovery is delegated by SelectionSyncController without Session-owned retry scheduling
+  ---
+  duration_ms: 2.246195
+  type: 'test'
+  ...
+# Subtest: R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
+ok 7 - R9-09 keeps prior owners and frozen mapping untouched and does not advance R9-10+
+  ---
+  duration_ms: 1.670583
+  type: 'test'
+  ...
+# Subtest: R9-09 production inventory records one Highlight Session responsibility and cardinality 380
+ok 8 - R9-09 production inventory records one Highlight Session responsibility and cardinality 380
+  ---
+  duration_ms: 1.640142
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 73.92722
+TAP version 13
+# Subtest: R9-08 Feedback Guard begins immutable sequence/source/revision transactions and validates sources
+ok 1 - R9-08 Feedback Guard begins immutable sequence/source/revision transactions and validates sources
+  ---
+  duration_ms: 1.863571
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard blocks opposite-side feedback and optional same-source reentrancy without one boolean lock
+ok 2 - R9-08 Feedback Guard blocks opposite-side feedback and optional same-source reentrancy without one boolean lock
+  ---
+  duration_ms: 0.189163
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
+ok 3 - R9-08 Feedback Guard revision invalidates stale events while preserving an active source across preview replacement
+  ---
+  duration_ms: 0.237716
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
+ok 4 - R9-08 Feedback Guard sequence prevents a stale release callback from unlocking a newer transaction
+  ---
+  duration_ms: 0.381071
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
+ok 5 - R9-08 Feedback Guard reset cancels release work and stale forced callbacks cannot republish authority
+  ---
+  duration_ms: 0.326088
+  type: 'test'
+  ...
+# Subtest: R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
+ok 6 - R9-08 Feedback Guard destroy is terminal idempotent and fail-safe for late feedback reads
+  ---
+  duration_ms: 0.196415
+  type: 'test'
+  ...
+# Subtest: R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
+not ok 7 - R9-08 SelectionSyncController uses the shared Guard to reject editor feedback during preview-to-editor settlement
+  ---
+  duration_ms: 1.180178
+  type: 'test'
+  location: '/home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:166:1'
+  failureType: 'testCodeFailure'
+  error: 'SelectionSyncController requires SelectionHighlightSession'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    new SelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:34:13)
+    createSelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:316:10)
+    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:177:22)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
+not ok 8 - R9-08 SelectionSyncController exposes compatibility applyingSide/previewRevision from Guard state instead of owning duplicates
+  ---
+  duration_ms: 0.197355
+  type: 'test'
+  location: '/home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:199:1'
+  failureType: 'testCodeFailure'
+  error: 'SelectionSyncController requires SelectionHighlightSession'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    new SelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:34:13)
+    createSelectionSyncController (file:///home/runner/work/mdr/mdr/src/sync/selection-controller.js:316:10)
+    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/stage-09-selection-feedback-guard.test.mjs:205:22)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 6
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 74.371414
