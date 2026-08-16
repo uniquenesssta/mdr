@@ -7,11 +7,7 @@ const ROOT = resolve(new URL('../..', import.meta.url).pathname);
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 
-const PLANNED_LATER_FILES = [
-  'src/features/sync/selection/selection-sync-controller.js',
-];
-
-test('R9-01 controller migration remains canonical after R9-02 source ownership extraction', async () => {
+test('R9-01 controller migration remains canonical after all Stage 9 extractions', async () => {
   await access(file('src/features/sync/index.js'));
   await access(file('src/features/sync/scroll/scroll-sync-controller.js'));
   await assert.rejects(access(file('src/sync/scroll-controller.js')));
@@ -26,37 +22,42 @@ test('R9-01 controller migration remains canonical after R9-02 source ownership 
   assert.match(controller, /ignoredTargetEvents/);
 });
 
-test('R9-01 production caller remains on the public Sync entry without changing Selection ownership', async () => {
+test('R9-01 production caller remains on the public Sync entry and final Selection owner is also behind that boundary', async () => {
   const main = await read('src/main.js');
-  assert.match(main, /createScrollSyncController \} from ['"]\.\/features\/sync\/index\.js['"]/);
-  assert.doesNotMatch(main, /\.\/sync\/scroll-controller\.js/);
-  assert.match(main, /createSelectionSyncController \} from ['"]\.\/sync\/selection-controller\.js['"]/);
-  await access(file('src/sync/selection-controller.js'));
+  const index = await read('src/features/sync/index.js');
+  assert.match(main, /createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController/);
+  assert.match(main, /createSelectionSyncController/);
+  assert.doesNotMatch(main, /\.\/sync\/scroll-controller\.js|\.\/sync\/selection-controller\.js/);
+  assert.match(index, /\.\/selection\/selection-sync-controller\.js/);
+  await access(file('src/features/sync/selection/selection-sync-controller.js'));
   await access(file('src/sync/selection-mapping.js'));
 });
 
-test('R9-01 and R9-02 contracts remain intact after the R9-06 Geometry Session boundary is added', async () => {
+test('R9-01 and R9-02 contracts remain intact after Geometry Session and final Selection boundaries', async () => {
   await access(file('src/features/sync/scroll/scroll-source-ownership.js'));
   await access(file('src/features/sync/scroll/editor-scroll-mapper.js'));
   await access(file('src/features/sync/scroll/scroll-geometry-session.js'));
-  for (const path of PLANNED_LATER_FILES) await assert.rejects(access(file(path)), path);
+  await access(file('src/features/sync/selection/selection-sync-controller.js'));
+  await assert.rejects(access(file('src/sync/selection-controller.js')));
 });
 
-test('R9-01 legacy browser aggregate remains a compatibility client of the frozen controller contract', async () => {
-  const legacy = await read('public/app/scroll-sync.js');
-  assert.match(legacy, /const scrollController = window\.markdownEditorScrollController/);
-  assert.match(legacy, /function suspendAutomaticScrollSync\(duration = 360\)/);
-  assert.match(legacy, /function markProgrammaticScroll\(side, duration = 700\)/);
-  assert.match(legacy, /scrollController\.markProgrammaticScroll\(side, duration\)/);
-  assert.match(legacy, /scrollController\.scheduleTarget\(side, top, \{ reason: 'linked-scroll' \}\)/);
-  assert.match(legacy, /scrollController\.scrollTo\('editor'/);
-  assert.match(legacy, /scrollController\.scrollTo\('preview'/);
-  assert.match(legacy, /scrollController\.notifyGeometryChanged\('editor'\)/);
-  assert.match(legacy, /scrollController\.notifyGeometryChanged\('preview'\)/);
-  assert.match(legacy, /Object\.assign\(window\.markdownEditorScrollSync/);
+test('R9-01 frozen public controller contract is consumed directly after classic scroll aggregate deletion', async () => {
+  const main = await read('src/main.js');
+  const controller = await read('src/features/sync/scroll/scroll-sync-controller.js');
+  assert.match(controller, /getPublicApi\(\)/);
+  for (const token of ['markProgrammaticScroll', 'suspend', 'compensate', 'notifyGeometryChanged', 'scheduleTarget', 'scrollTo', 'syncNow']) {
+    assert.match(controller, new RegExp(token));
+  }
+  assert.match(main, /createVirtualEditor\(editorHost, \{ scrollSync: scrollController\.getPublicApi\(\) \}\)/);
+  assert.match(main, /scrollController\.scheduleTarget\('preview'/);
+  assert.match(main, /scrollController\.scheduleTarget\('editor'/);
+  assert.match(main, /scrollController\.notifyGeometryChanged\('preview'\)/);
+  assert.match(main, /scrollController\.notifyGeometryChanged\('editor'\)/);
+  assert.doesNotMatch(main, /window\.markdownEditorScrollController|window\.markdownEditorScrollSync/);
+  await assert.rejects(access(file('public/app/scroll-sync.js')));
 });
 
-test('current inventory records public Sync, controller and source owner without restoring obsolete scroll controller', async () => {
+test('current inventory records final public Sync owners without restoring obsolete controllers', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const paths = new Set(inventory.modules.map(record => record[0]));
   assert.equal(inventory.modules.length, 381);
@@ -64,6 +65,7 @@ test('current inventory records public Sync, controller and source owner without
   assert.equal(paths.has('src/features/sync/scroll/scroll-sync-controller.js'), true);
   assert.equal(paths.has('src/features/sync/scroll/scroll-source-ownership.js'), true);
   assert.equal(paths.has('src/sync/scroll-controller.js'), false);
-  assert.equal(paths.has('src/sync/selection-controller.js'), true);
+  assert.equal(paths.has('src/sync/selection-controller.js'), false);
+  assert.equal(paths.has('src/features/sync/selection/selection-sync-controller.js'), true);
   assert.equal(paths.has('src/sync/selection-mapping.js'), true);
 });
