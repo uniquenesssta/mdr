@@ -1,0 +1,29 @@
+=== STATUS ===
+## agent/r9-12-runner...origin/agent/r9-12-runner
+
+=== BASE HEAD ===
+92c6eda046dde6d11751dd890630331ac3c1d714
+
+=== SCROLL-SYNC REFERENCES ===
+
+=== SYNC PRODUCTION FILES ===
+public/app/bootstrap.js
+public/app/core.js
+public/app/editor-tools.js
+public/app/events.js
+public/app/export.js
+public/app/scroll-sync.js
+public/app/web-clipper.js
+src/features/sync/index.js
+src/features/sync/scroll/editor-scroll-mapper.js
+src/features/sync/scroll/preview-scroll-mapper.js
+src/features/sync/scroll/scroll-geometry-session.js
+src/features/sync/scroll/scroll-source-ownership.js
+src/features/sync/scroll/scroll-sync-controller.js
+src/features/sync/selection/editor-selection-reader.js
+src/features/sync/selection/preview-selection-reader.js
+src/features/sync/selection/selection-feedback-guard.js
+src/features/sync/selection/selection-highlight-session.js
+src/features/sync/selection/selection-retry-scheduler.js
+src/sync/selection-controller.js
+src/sync/selection-mapping.js
