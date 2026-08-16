@@ -1,5 +1,438 @@
 === MATCHED FAILURE CONTEXT ===
-1:runner contains unexpected pre-apply paths: ['.agent/r9_11_prepare.sh']
+1153-ok 17 - Atomic 8.15 Hybrid public entry exposes final application owners without leaking CodeMirror compatibility
+1154-  ---
+1155-  duration_ms: 4.023926
+1156-  type: 'test'
+1157-  ...
+1158-# Subtest: Atomic 8.15 editor facade is the sole CodeMirror/vendor/model/Preview integration boundary while the public Hybrid entry remains browser-direct-safe
+1159-ok 18 - Atomic 8.15 editor facade is the sole CodeMirror/vendor/model/Preview integration boundary while the public Hybrid entry remains browser-direct-safe
+1160-  ---
+1161-  duration_ms: 2.623775
+1162-  type: 'test'
+1163-  ...
+1164-# Subtest: Atomic 8.15 preserves the external hybrid-markdown facade surface
+1165-ok 19 - Atomic 8.15 preserves the external hybrid-markdown facade surface
+1166-  ---
+1167-  duration_ms: 1.770405
+1168-  type: 'test'
+1169-  ...
+1170-# Subtest: Atomic 8.15 production inventory has final Stage 8 ownership and no legacy aggregate record
+1171-ok 20 - Atomic 8.15 production inventory has final Stage 8 ownership and no legacy aggregate record
+1172-  ---
+1173-  duration_ms: 3.248548
+1174-  type: 'test'
+1175-  ...
+1176-# Subtest: Atomic 8.15 removes the obsolete legacy-controller business-global baseline without adding a replacement
+1177:not ok 21 - Atomic 8.15 removes the obsolete legacy-controller business-global baseline without adding a replacement
+1178-  ---
+1179-  duration_ms: 4.778243
+1180-  type: 'test'
+1181-  location: '/home/runner/work/mdr/mdr/tests/architecture/stage-08-hybrid-editor-controller.test.mjs:81:1'
+1182:  failureType: 'testCodeFailure'
+1183-  error: |-
+1184-    Expected values to be strictly equal:
+1185-    
+1186-    12 !== 13
+1187-    
+1188:  code: 'ERR_ASSERTION'
+1189:  name: 'AssertionError'
+1190-  expected: 13
+1191-  actual: 12
+1192-  operator: 'strictEqual'
+1193-  stack: |-
+1194-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/architecture/stage-08-hybrid-editor-controller.test.mjs:85:10)
+1195-    async Test.run (node:internal/test_runner/test:1054:7)
+1196-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+1197-  ...
+1198-# Subtest: Atomic 8.13 creates separate HTML Widget and View modules and exposes only the factory through the public entry
+1199-ok 22 - Atomic 8.13 creates separate HTML Widget and View modules and exposes only the factory through the public entry
+1200-  ---
+1201-  duration_ms: 50.415579
+1202-  type: 'test'
+1203-  ...
+1204-# Subtest: Atomic 8.13 HTML feature graph is browser-direct-safe and receives WidgetType and telemetry only by injection
+1205-ok 23 - Atomic 8.13 HTML feature graph is browser-direct-safe and receives WidgetType and telemetry only by injection
+1206-  ---
+1207-  duration_ms: 3.83322
+1208-  type: 'test'
+1209-  ...
+1210-# Subtest: Atomic 8.13 HTML View owns raw presentation only and does not introduce sanitizer or interaction authority
+1211-ok 24 - Atomic 8.13 HTML View owns raw presentation only and does not introduce sanitizer or interaction authority
+1212-  ---
+1213-  duration_ms: 3.65614
+1214-  type: 'test'
+1215-  ...
+1216-# Subtest: Atomic 8.13 HTML Widget owns SOURCE delegation and explicit idempotent cleanup without duplicating shared policy
+1217-ok 25 - Atomic 8.13 HTML Widget owns SOURCE delegation and explicit idempotent cleanup without duplicating shared policy
+1218-  ---
+1219-  duration_ms: 2.080341
+1220-  type: 'test'
+1221-  ...
+1222-# Subtest: Atomic 8.13 keeps legacy HTML authority removed and composes HTML through the final Hybrid editor facade
+1223-ok 26 - Atomic 8.13 keeps legacy HTML authority removed and composes HTML through the final Hybrid editor facade
+1224-  ---
+1225-  duration_ms: 5.174653
+1226-  type: 'test'
+1227-  ...
+1228-# Subtest: Atomic 8.13 inventory records the two HTML responsibilities and removes the legacy aggregate
+1229-ok 27 - Atomic 8.13 inventory records the two HTML responsibilities and removes the legacy aggregate
+1230-  ---
+1231-  duration_ms: 3.581912
+1232-  type: 'test'
+1233-  ...
+1234-# Subtest: Atomic 8.10 creates four responsibility-specific Image modules and exposes only cross-boundary capabilities through the public entry
+1235-ok 28 - Atomic 8.10 creates four responsibility-specific Image modules and exposes only cross-boundary capabilities through the public entry
+1236-  ---
+1237-  duration_ms: 46.178378
+--
+2126-  type: 'test'
+2127-  ...
+2128-# Subtest: Atomic 8.5 geometry scheduler coalesces to the latest reason and preserves the 120ms settle refresh contract
+2129-ok 177 - Atomic 8.5 geometry scheduler coalesces to the latest reason and preserves the 120ms settle refresh contract
+2130-  ---
+2131-  duration_ms: 0.508759
+2132-  type: 'test'
+2133-  ...
+2134-# Subtest: Atomic 8.5 scheduler destroy cancels pending frame and settle work and is idempotent
+2135-ok 178 - Atomic 8.5 scheduler destroy cancels pending frame and settle work and is idempotent
+2136-  ---
+2137-  duration_ms: 0.194293
+2138-  type: 'test'
+2139-  ...
+2140-# Subtest: Atomic 8.5 cleanup rejects stale observer callbacks and remains valid without ResizeObserver
+2141-ok 179 - Atomic 8.5 cleanup rejects stale observer callbacks and remains valid without ResizeObserver
+2142-  ---
+2143-  duration_ms: 0.297805
+2144-  type: 'test'
+2145-  ...
+2146-1..179
+2147-# tests 179
+2148-# suites 0
+2149-# pass 178
+2150:# fail 1
+2151-# cancelled 0
+2152-# skipped 0
+2153-# todo 0
+2154-# duration_ms 1091.768576
 
 === VALIDATION TAIL ===
-runner contains unexpected pre-apply paths: ['.agent/r9_11_prepare.sh']
+ok 128 - Atomic 8.11 exposes separate inline and block Math factories and requires an injected presentation renderer
+  ---
+  duration_ms: 1.948555
+  type: 'test'
+  ...
+# Subtest: Atomic 8.11 inline Math preserves dollar and backslash-parenthesis delimiter identity
+ok 129 - Atomic 8.11 inline Math preserves dollar and backslash-parenthesis delimiter identity
+  ---
+  duration_ms: 2.507712
+  type: 'test'
+  ...
+# Subtest: Atomic 8.11 inline Math reuses the presentation renderer in inline mode and preserves render-error fallback semantics
+ok 130 - Atomic 8.11 inline Math reuses the presentation renderer in inline mode and preserves render-error fallback semantics
+  ---
+  duration_ms: 1.91929
+  type: 'test'
+  ...
+# Subtest: Atomic 8.11 inline Math destroy removes source-action listeners idempotently
+ok 131 - Atomic 8.11 inline Math destroy removes source-action listeners idempotently
+  ---
+  duration_ms: 0.502237
+  type: 'test'
+  ...
+# Subtest: Atomic 8.11 block Math preserves display delimiters and renders through the presentation API in display mode
+ok 132 - Atomic 8.11 block Math preserves display delimiters and renders through the presentation API in display mode
+  ---
+  duration_ms: 1.127293
+  type: 'test'
+  ...
+# Subtest: Atomic 8.11 block Math reports display render failures and destroys source/lifecycle bindings idempotently
+ok 133 - Atomic 8.11 block Math reports display render failures and destroys source/lifecycle bindings idempotently
+  ---
+  duration_ms: 0.606121
+  type: 'test'
+  ...
+# Subtest: Atomic 8.12 render identity contains Mermaid source, theme and source position
+ok 134 - Atomic 8.12 render identity contains Mermaid source, theme and source position
+  ---
+  duration_ms: 1.037105
+  type: 'test'
+  ...
+# Subtest: Atomic 8.12 newer Mermaid render requests supersede older requests monotonically
+ok 135 - Atomic 8.12 newer Mermaid render requests supersede older requests monotonically
+  ---
+  duration_ms: 0.495024
+  type: 'test'
+  ...
+# Subtest: Atomic 8.12 stale Mermaid completion cannot publish after a newer request exists
+ok 136 - Atomic 8.12 stale Mermaid completion cannot publish after a newer request exists
+  ---
+  duration_ms: 1.152439
+  type: 'test'
+  ...
+# Subtest: Atomic 8.12 invalidation rejects an in-flight Mermaid completion before direct editing
+ok 137 - Atomic 8.12 invalidation rejects an in-flight Mermaid completion before direct editing
+  ---
+  duration_ms: 0.264283
+  type: 'test'
+  ...
+# Subtest: Atomic 8.12 Mermaid render-state destroy is terminal and rejects post-destroy work
+ok 138 - Atomic 8.12 Mermaid render-state destroy is terminal and rejects post-destroy work
+  ---
+  duration_ms: 0.359791
+  type: 'test'
+  ...
+# Subtest: Atomic 8.12 Mermaid copy uses the provided clipboard capability without DOM fallback
+ok 139 - Atomic 8.12 Mermaid copy uses the provided clipboard capability without DOM fallback
+  ---
+  duration_ms: 0.368187
+  type: 'test'
+  ...
+# Subtest: Atomic 8.12 Mermaid widget factory requires injected presentation capabilities and preserves descriptor equality
+ok 140 - Atomic 8.12 Mermaid widget factory requires injected presentation capabilities and preserves descriptor equality
+  ---
+  duration_ms: 1.030202
+  type: 'test'
+  ...
+# Subtest: Atomic 8.7 prefix presentation preserves bullet/ordered DOM and never owns source mutation
+ok 141 - Atomic 8.7 prefix presentation preserves bullet/ordered DOM and never owns source mutation
+  ---
+  duration_ms: 1.510768
+  type: 'test'
+  ...
+# Subtest: Atomic 8.7 task checkbox writes only its current marker in exactly one transaction
+ok 142 - Atomic 8.7 task checkbox writes only its current marker in exactly one transaction
+  ---
+  duration_ms: 1.608249
+  type: 'test'
+  ...
+# Subtest: Atomic 8.7 task checkbox rejects stale or invalid markers without dispatching
+ok 143 - Atomic 8.7 task checkbox rejects stale or invalid markers without dispatching
+  ---
+  duration_ms: 0.368047
+  type: 'test'
+  ...
+# Subtest: Atomic 8.7 horizontal rule remains presentation-only for single and double pointer interaction
+ok 144 - Atomic 8.7 horizontal rule remains presentation-only for single and double pointer interaction
+  ---
+  duration_ms: 0.274372
+  type: 'test'
+  ...
+# Subtest: Atomic 8.6 widget button preserves pointer defaults and scoped click dispatch
+ok 145 - Atomic 8.6 widget button preserves pointer defaults and scoped click dispatch
+  ---
+  duration_ms: 1.681827
+  type: 'test'
+  ...
+# Subtest: Atomic 8.6 toolbar primitives project shared classes and optional double zones only
+ok 146 - Atomic 8.6 toolbar primitives project shared classes and optional double zones only
+  ---
+  duration_ms: 0.430142
+  type: 'test'
+  ...
+# Subtest: Atomic 8.6 focus policy keeps single-click focus, excludes interactive descendants, and disposes idempotently
+ok 147 - Atomic 8.6 focus policy keeps single-click focus, excludes interactive descendants, and disposes idempotently
+  ---
+  duration_ms: 0.647367
+  type: 'test'
+  ...
+# Subtest: Atomic 8.6 source open delegates descriptor and anchor geometry through the existing controller port
+ok 148 - Atomic 8.6 source open delegates descriptor and anchor geometry through the existing controller port
+  ---
+  duration_ms: 1.417814
+  type: 'test'
+  ...
+# Subtest: Atomic 8.6 source action composes focus, strict double activation, keyboard activation, and exact teardown without component policy
+ok 149 - Atomic 8.6 source action composes focus, strict double activation, keyboard activation, and exact teardown without component policy
+  ---
+  duration_ms: 2.463976
+  type: 'test'
+  ...
+# Subtest: Atomic 8.4 opens SOURCE through the editor port with frozen range, selection and scroll margin semantics
+ok 150 - Atomic 8.4 opens SOURCE through the editor port with frozen range, selection and scroll margin semantics
+  ---
+  duration_ms: 2.602574
+  type: 'test'
+  ...
+# Subtest: Atomic 8.4 maps the active range and closes SOURCE when selection leaves it
+ok 151 - Atomic 8.4 maps the active range and closes SOURCE when selection leaves it
+  ---
+  duration_ms: 0.537232
+  type: 'test'
+  ...
+# Subtest: Atomic 8.4 preserves immediate outside-pointer close ordering and fallback selection
+ok 152 - Atomic 8.4 preserves immediate outside-pointer close ordering and fallback selection
+  ---
+  duration_ms: 0.643961
+  type: 'test'
+  ...
+# Subtest: Atomic 8.4 keeps an inside-source editor-line pointer open and blurs only for a full-document source range
+ok 153 - Atomic 8.4 keeps an inside-source editor-line pointer open and blurs only for a full-document source range
+  ---
+  duration_ms: 0.468815
+  type: 'test'
+  ...
+# Subtest: Atomic 8.4 invalidates stale deferred geometry and destroy is terminal
+ok 154 - Atomic 8.4 invalidates stale deferred geometry and destroy is terminal
+  ---
+  duration_ms: 1.169702
+  type: 'test'
+  ...
+# Subtest: Atomic 8.4 Session supersede clears the source range before another interactive component becomes current
+ok 155 - Atomic 8.4 Session supersede clears the source range before another interactive component becomes current
+  ---
+  duration_ms: 0.305139
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes the exact presented/direct/source mode vocabulary and rejects unknown modes
+ok 156 - Atomic 8.1 freezes the exact presented/direct/source mode vocabulary and rejects unknown modes
+  ---
+  duration_ms: 2.796747
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes same-component presented/direct/source transitions, reasons and monotonic revisions
+ok 157 - Atomic 8.1 freezes same-component presented/direct/source transitions, reasons and monotonic revisions
+  ---
+  duration_ms: 0.737295
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes cross-component mutual exclusion and superseded metadata
+ok 158 - Atomic 8.1 freezes cross-component mutual exclusion and superseded metadata
+  ---
+  duration_ms: 0.40735
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes runtime closer ordering before a different component becomes active
+ok 159 - Atomic 8.1 freezes runtime closer ordering before a different component becomes active
+  ---
+  duration_ms: 0.749167
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes stale delayed-close rejection with expectedMode
+ok 160 - Atomic 8.1 freezes stale delayed-close rejection with expectedMode
+  ---
+  duration_ms: 0.411888
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes current runtime close-reason producers through the final Atomic 8.15 application boundary
+ok 161 - Atomic 8.1 freezes current runtime close-reason producers through the final Atomic 8.15 application boundary
+  ---
+  duration_ms: 14.818241
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes clear/destroy semantics for state and registered closers
+ok 162 - Atomic 8.1 freezes clear/destroy semantics for state and registered closers
+  ---
+  duration_ms: 0.601151
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes strict double-activation time, target, button and distance boundaries
+ok 163 - Atomic 8.1 freezes strict double-activation time, target, button and distance boundaries
+  ---
+  duration_ms: 0.476139
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes click-sequence reset and delayed second-click activation semantics
+ok 164 - Atomic 8.1 freezes click-sequence reset and delayed second-click activation semantics
+  ---
+  duration_ms: 2.17085
+  type: 'test'
+  ...
+# Subtest: Atomic 8.1 freezes snapshots as detached read models rather than writable state authority
+ok 165 - Atomic 8.1 freezes snapshots as detached read models rather than writable state authority
+  ---
+  duration_ms: 0.726054
+  type: 'test'
+  ...
+# Subtest: Atomic 8.9 Tab moves to the next cell and wraps across the row boundary
+ok 166 - Atomic 8.9 Tab moves to the next cell and wraps across the row boundary
+  ---
+  duration_ms: 2.795845
+  type: 'test'
+  ...
+# Subtest: Atomic 8.9 Shift+Tab moves to the previous cell
+ok 167 - Atomic 8.9 Shift+Tab moves to the previous cell
+  ---
+  duration_ms: 0.348521
+  type: 'test'
+  ...
+# Subtest: Atomic 8.9 Enter moves down in the same column
+ok 168 - Atomic 8.9 Enter moves down in the same column
+  ---
+  duration_ms: 0.202647
+  type: 'test'
+  ...
+# Subtest: Atomic 8.9 Shift+Enter moves up in the same column
+ok 169 - Atomic 8.9 Shift+Enter moves up in the same column
+  ---
+  duration_ms: 0.474946
+  type: 'test'
+  ...
+# Subtest: Atomic 8.9 cell writeback uses the frozen encoder and exactly one isolated editor transaction
+ok 170 - Atomic 8.9 cell writeback uses the frozen encoder and exactly one isolated editor transaction
+  ---
+  duration_ms: 0.440963
+  type: 'test'
+  ...
+# Subtest: Atomic 8.9 unchanged cells and stale ranges never dispatch
+ok 171 - Atomic 8.9 unchanged cells and stale ranges never dispatch
+  ---
+  duration_ms: 0.314998
+  type: 'test'
+  ...
+# Subtest: Atomic 8.9 Escape cancels a direct cell edit, restores source value and dispatches nothing
+ok 172 - Atomic 8.9 Escape cancels a direct cell edit, restores source value and dispatches nothing
+  ---
+  duration_ms: 0.281515
+  type: 'test'
+  ...
+# Subtest: Atomic 8.9 cell-editor destroy removes its Session-owned document listener and cannot publish a late close
+ok 173 - Atomic 8.9 cell-editor destroy removes its Session-owned document listener and cannot publish a late close
+  ---
+  duration_ms: 0.179495
+  type: 'test'
+  ...
+# Subtest: Atomic 8.9 missing cells stay disabled and require source editing instead of inventing a writeback range
+ok 174 - Atomic 8.9 missing cells stay disabled and require source editing instead of inventing a writeback range
+  ---
+  duration_ms: 0.493681
+  type: 'test'
+  ...
+# Subtest: Atomic 8.5 attach has one owner and repeated destroy is side-effect idempotent
+ok 175 - Atomic 8.5 attach has one owner and repeated destroy is side-effect idempotent
+  ---
+  duration_ms: 1.973341
+  type: 'test'
+  ...
+# Subtest: Atomic 8.5 mount and ResizeObserver changes delegate geometry reasons without duplicate dimensions
+ok 176 - Atomic 8.5 mount and ResizeObserver changes delegate geometry reasons without duplicate dimensions
+  ---
+  duration_ms: 1.680134
+  type: 'test'
+  ...
+# Subtest: Atomic 8.5 geometry scheduler coalesces to the latest reason and preserves the 120ms settle refresh contract
+ok 177 - Atomic 8.5 geometry scheduler coalesces to the latest reason and preserves the 120ms settle refresh contract
+  ---
+  duration_ms: 0.508759
+  type: 'test'
+  ...
+# Subtest: Atomic 8.5 scheduler destroy cancels pending frame and settle work and is idempotent
+ok 178 - Atomic 8.5 scheduler destroy cancels pending frame and settle work and is idempotent
+  ---
+  duration_ms: 0.194293
+  type: 'test'
+  ...
+# Subtest: Atomic 8.5 cleanup rejects stale observer callbacks and remains valid without ResizeObserver
+ok 179 - Atomic 8.5 cleanup rejects stale observer callbacks and remains valid without ResizeObserver
+  ---
+  duration_ms: 0.297805
+  type: 'test'
+  ...
+1..179
+# tests 179
+# suites 0
+# pass 178
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1091.768576
