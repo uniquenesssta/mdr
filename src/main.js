@@ -43,7 +43,7 @@ import { createNativeDocumentStore } from './storage/native-document-store.js';
 import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
-import { createScrollSyncController } from './sync/scroll-controller.js';
+import { createScrollSyncController } from './features/sync/index.js';
 import { createSelectionSyncController } from './sync/selection-controller.js';
 import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {

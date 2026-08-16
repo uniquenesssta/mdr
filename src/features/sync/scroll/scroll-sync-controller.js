@@ -1,3 +1,11 @@
+/**
+ * Responsibility: Preserve the R9-01 scroll behavior contract for user-source acquisition, programmatic scroll suppression, compensation scheduling, timeout windows and runtime statistics.
+ * Imports: None; browser timing and element capabilities are consumed only through the explicit controller instance boundary.
+ * Exports: ScrollSyncController and createScrollSyncController.
+ * State/side effects: Owns one editor/preview scroll session, event listeners, requestAnimationFrame work, source metadata, programmatic windows and statistics; it does not own geometry mapping or selection mapping policy.
+ * Lifecycle: Explicit instance lifecycle; destroy() removes listeners, cancels queued animation frames and is safe to repeat.
+ */
+
 const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
 const SIDE_NAMES = new Set(['editor', 'preview']);
 

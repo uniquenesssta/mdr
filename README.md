@@ -2,4 +2,4 @@
 
 简介：模块化重写中的桌面 Markdown 编辑器；详见 [docs/README.md](docs/README.md)。
 
-Atomic 8.15 / Stage 8：Hybrid Decoration 与 Editor Controller 已独立落位，CodeMirror 集成收敛到 hybrid-markdown，公共 Hybrid 入口保持浏览器直接加载安全；旧三大聚合文件已删。验证：8.15 14/14，Stage 8 179/179，Node 149/149，Architecture/Browser/Build/Scope PASS，Built-app 29/29×3，audit 0；Rust、冻结模型、Preview、依赖不变。
+R9-01 / Stage 9：已冻结滚动输入源获取、程序化滚动、补偿、超时及统计语义，Scroll Controller 迁入 Sync 公共边界；旧 scroll-controller 路径删除，后续 source ownership/geometry/selection 尚未启动。验证：R9-01 13/13，Stage 8 179/179，Node 157/157，Architecture/Browser/Build/Built-app PASS，audit 0；冻结模型、Preview、依赖不变。
