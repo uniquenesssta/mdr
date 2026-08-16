@@ -1,100 +1,62 @@
 === MATCHED FAILURE CONTEXT ===
-3518-ok - application link preview uses scoped focus and cancels stale close completion (323ms)
-3519-ok - application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear (3ms)
-3520-ok - application Document Session Controller keeps lifecycle model, session and UI coherent (31ms)
-3521-ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (21ms)
-3522-ok - application switches deterministically across every layout mode (853ms)
-3523-ok - compact shell keeps 860/900 hysteresis and clears resize burst state (335ms)
-3524-ok - application toolbar boundary wraps from measured content width without hiding tools (130ms)
-3525-ok - application page fullscreen uses the Stage 6.6 controller without changing command IDs (36ms)
-3526-ok - application sidebar tabs switch one mount region and coordinate child lifecycles (831ms)
-3527-ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1549ms)
-3528-ok - application shell has no structural overflow or clipped focus across required viewports (5182ms)
-3529-ok - application code block placeholder never receives a phantom source highlight (760ms)
-3530-ok - application code block ignores single click and opens on strict double click (931ms)
-3531-ok - application keeps only one direct editor active (1005ms)
-3532-ok - application Hybrid table pointer input avoids block decoration dispatch races (1447ms)
-3533-ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1375ms)
-3534-ok - application source edit exits when pointer moves outside the source range (1010ms)
-3535-ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (650ms)
-3536-ok - application sidebar resize captures pointer, projects width and persists the final width (323ms)
-3537-ok - application pointer drag maps to exact editor characters (1649ms)
-3538-
-3539-Browser tests: 29, passed: 29, failed: 0
-3540-TAP version 13
-3541-# Subtest: root README is a concise introduction and detailed history lives in docs/README.md
-3542:not ok 1 - root README is a concise introduction and detailed history lives in docs/README.md
-3543-  ---
-3544-  duration_ms: 10.488475
-3545-  type: 'test'
-3546-  location: '/home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:5:1'
-3547:  failureType: 'testCodeFailure'
-3548-  error: |-
-3549-    The expression evaluated to a falsy value:
-3550-    
-3551-      assert.ok(normalizedRootReadme.length >= 120 && normalizedRootReadme.length <= 360)
-3552-    
-3553:  code: 'ERR_ASSERTION'
-3554:  name: 'AssertionError'
-3555-  expected: true
-3556-  actual: false
-3557-  operator: '=='
-3558-  stack: |-
-3559-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:17:10)
-3560-    async Test.run (node:internal/test_runner/test:1054:7)
-3561-    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
-3562-  ...
-3563-1..1
-3564-# tests 1
-3565-# suites 0
-3566-# pass 0
-3567:# fail 1
-3568-# cancelled 0
-3569-# skipped 0
-3570-# todo 0
-3571-# duration_ms 64.969776
 
 === VALIDATION TAIL ===
+  ---
+  duration_ms: 0.295254
+  type: 'test'
+  ...
+# Subtest: R9-07 PreviewSelectionReader waits through pointer selection and publishes one two-frame final snapshot on pointerup
+ok 208 - R9-07 PreviewSelectionReader waits through pointer selection and publishes one two-frame final snapshot on pointerup
+  ---
+  duration_ms: 0.682987
+  type: 'test'
+  ...
+# Subtest: R9-07 PreviewSelectionReader coalesces stable selectionchange work and stale cancelled callbacks cannot publish
+ok 209 - R9-07 PreviewSelectionReader coalesces stable selectionchange work and stale cancelled callbacks cannot publish
+  ---
+  duration_ms: 0.370718
+  type: 'test'
+  ...
 # Subtest: R9-07 PreviewSelectionReader stop/destroy remove every listener cancel pending work and remain terminal/idempotent
 ok 210 - R9-07 PreviewSelectionReader stop/destroy remove every listener cancel pending work and remain terminal/idempotent
   ---
-  duration_ms: 0.394106
+  duration_ms: 0.327532
   type: 'test'
   ...
 # Subtest: Atomic Task 2.3 sprite has one stable definition for every preserved icon ID
 ok 211 - Atomic Task 2.3 sprite has one stable definition for every preserved icon ID
   ---
-  duration_ms: 9.879215
+  duration_ms: 8.858301
   type: 'test'
   ...
 # Subtest: compatibility and dynamic callers reference the external sprite without a second geometry authority
 ok 212 - compatibility and dynamic callers reference the external sprite without a second geometry authority
   ---
-  duration_ms: 8.441881
+  duration_ms: 6.336739
   type: 'test'
   ...
 # Subtest: icon-view is a pure generic renderer with decorative and labelled accessibility modes
 ok 213 - icon-view is a pure generic renderer with decorative and labelled accessibility modes
   ---
-  duration_ms: 1.276393
+  duration_ms: 0.84785
   type: 'test'
   ...
 # Subtest: Vite dev server permits only the repository and intentional parent dependency directory
 ok 214 - Vite dev server permits only the repository and intentional parent dependency directory
   ---
-  duration_ms: 1.388963
+  duration_ms: 1.740367
   type: 'test'
   ...
 # Subtest: production bundle budgets remain stricter for startup chunks than lazy vendor chunks
 ok 215 - production bundle budgets remain stricter for startup chunks than lazy vendor chunks
   ---
-  duration_ms: 0.206185
+  duration_ms: 0.23953
   type: 'test'
   ...
 # Subtest: Windows native window workflow is pinned, isolated and evidence-producing
 ok 216 - Windows native window workflow is pinned, isolated and evidence-producing
   ---
-  duration_ms: 12.676317
+  duration_ms: 11.140514
   type: 'test'
   ...
 1..216
@@ -105,7 +67,7 @@ ok 216 - Windows native window workflow is pinned, isolated and evidence-produci
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 10851.713469
+# duration_ms 10607.41109
 
 > markdown-editor@1.0.0 verify:architecture
 > node scripts/verify-architecture.mjs
@@ -115,17 +77,17 @@ ok 216 - Windows native window workflow is pinned, isolated and evidence-produci
 > markdown-editor@1.0.0 test:browser:contract
 > node tests/e2e/run-browser-tests.mjs --contract
 
-Browser artifacts: /tmp/markdown-editor-e2e-artifacts-brKCh5
-ok - single click keeps a component presented (20ms)
-ok - strict double click opens direct editing on the same logical target (114ms)
-ok - fast clicks across components never count as a double click (12ms)
-ok - opening another component closes the previous interactive component (185ms)
-ok - source editing closes on an outside pointer action (15ms)
+Browser artifacts: /tmp/markdown-editor-e2e-artifacts-a3UypL
+ok - single click keeps a component presented (18ms)
+ok - strict double click opens direct editing on the same logical target (111ms)
+ok - fast clicks across components never count as a double click (9ms)
+ok - opening another component closes the previous interactive component (177ms)
+ok - source editing closes on an outside pointer action (11ms)
 ok - layout switching closes active component editing (95ms)
-ok - real pointer drag selects only the intended characters (292ms)
+ok - real pointer drag selects only the intended characters (290ms)
 ok - shared Mermaid renderer keeps hybrid and preview SVG normalization identical (4ms)
-ok - folder file tree renders nested readable files, preserves expansion, opens paths, and destroys listeners (199ms)
-ok - temporary compatibility business port mounts and destroys without owning the App Shell (65ms)
+ok - folder file tree renders nested readable files, preserves expansion, opens paths, and destroys listeners (175ms)
+ok - temporary compatibility business port mounts and destroys without owning the App Shell (53ms)
 
 Browser tests: 10, passed: 10, failed: 0
 
@@ -208,42 +170,42 @@ computing gzip size...
 [2mdist/[22m[2massets/[22m[36mmermaid.core-B1C8rAYh.js                  [39m[1m[2m497.70 kB[22m[1m[22m[2m │ gzip: 110.12 kB[22m
 [2mdist/[22m[2massets/[22m[36mmain-bktrCxf7.js                          [39m[1m[2m544.95 kB[22m[1m[22m[2m │ gzip: 153.93 kB[22m
 [2mdist/[22m[2massets/[22m[36mcynefin-VYW2F7L2-C5nJVcn-.js              [39m[1m[2m688.17 kB[22m[1m[22m[2m │ gzip: 154.20 kB[22m
-[32m✓ built in 11.63s[39m
+[32m✓ built in 11.31s[39m
 Built-app attempt 1
 
 > markdown-editor@1.0.0 test:browser
 > node tests/e2e/run-browser-tests.mjs --app
 
-Browser artifacts: /tmp/markdown-editor-e2e-artifacts-XjiqK5
-ok - application mounts one App Shell with strict named slots (2ms)
-ok - application Help feature owns first-run visibility, navigation and scoped lifecycle (89ms)
-ok - application Settings Store cancels draft without persisting changes (26ms)
-ok - application Settings UI validates and applies one draft without global dialog functions (166ms)
-ok - application language Settings commit updates I18n without legacy globals (82ms)
-ok - application theme switch changes visual tokens without changing shell geometry (219ms)
-ok - application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview (1284ms)
-ok - application Theme Service applies committed theme without rebuilding editor model or preview (952ms)
-ok - application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy (839ms)
-ok - application link preview uses scoped focus and cancels stale close completion (288ms)
+Browser artifacts: /tmp/markdown-editor-e2e-artifacts-CqcBE8
+ok - application mounts one App Shell with strict named slots (3ms)
+ok - application Help feature owns first-run visibility, navigation and scoped lifecycle (83ms)
+ok - application Settings Store cancels draft without persisting changes (23ms)
+ok - application Settings UI validates and applies one draft without global dialog functions (137ms)
+ok - application language Settings commit updates I18n without legacy globals (108ms)
+ok - application theme switch changes visual tokens without changing shell geometry (225ms)
+ok - application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview (1311ms)
+ok - application Theme Service applies committed theme without rebuilding editor model or preview (931ms)
+ok - application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy (868ms)
+ok - application link preview uses scoped focus and cancels stale close completion (309ms)
 ok - application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear (3ms)
-ok - application Document Session Controller keeps lifecycle model, session and UI coherent (34ms)
-ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (18ms)
-ok - application switches deterministically across every layout mode (852ms)
-ok - compact shell keeps 860/900 hysteresis and clears resize burst state (334ms)
+ok - application Document Session Controller keeps lifecycle model, session and UI coherent (31ms)
+ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (10ms)
+ok - application switches deterministically across every layout mode (834ms)
+ok - compact shell keeps 860/900 hysteresis and clears resize burst state (319ms)
 ok - application toolbar boundary wraps from measured content width without hiding tools (163ms)
 ok - application page fullscreen uses the Stage 6.6 controller without changing command IDs (37ms)
-ok - application sidebar tabs switch one mount region and coordinate child lifecycles (782ms)
-ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1532ms)
-ok - application shell has no structural overflow or clipped focus across required viewports (5198ms)
-ok - application code block placeholder never receives a phantom source highlight (776ms)
-ok - application code block ignores single click and opens on strict double click (931ms)
-ok - application keeps only one direct editor active (952ms)
-ok - application Hybrid table pointer input avoids block decoration dispatch races (1309ms)
-ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1466ms)
-ok - application source edit exits when pointer moves outside the source range (1059ms)
-ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (634ms)
-ok - application sidebar resize captures pointer, projects width and persists the final width (284ms)
-ok - application pointer drag maps to exact editor characters (1622ms)
+ok - application sidebar tabs switch one mount region and coordinate child lifecycles (748ms)
+ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1463ms)
+ok - application shell has no structural overflow or clipped focus across required viewports (5101ms)
+ok - application code block placeholder never receives a phantom source highlight (743ms)
+ok - application code block ignores single click and opens on strict double click (859ms)
+ok - application keeps only one direct editor active (929ms)
+ok - application Hybrid table pointer input avoids block decoration dispatch races (1262ms)
+ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1291ms)
+ok - application source edit exits when pointer moves outside the source range (975ms)
+ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (613ms)
+ok - application sidebar resize captures pointer, projects width and persists the final width (270ms)
+ok - application pointer drag maps to exact editor characters (1642ms)
 
 Browser tests: 29, passed: 29, failed: 0
 Built-app attempt 2
@@ -251,67 +213,51 @@ Built-app attempt 2
 > markdown-editor@1.0.0 test:browser
 > node tests/e2e/run-browser-tests.mjs --app
 
-Browser artifacts: /tmp/markdown-editor-e2e-artifacts-ugbbhk
+Browser artifacts: /tmp/markdown-editor-e2e-artifacts-kjcrYu
 ok - application mounts one App Shell with strict named slots (2ms)
-ok - application Help feature owns first-run visibility, navigation and scoped lifecycle (71ms)
-ok - application Settings Store cancels draft without persisting changes (21ms)
-ok - application Settings UI validates and applies one draft without global dialog functions (130ms)
-ok - application language Settings commit updates I18n without legacy globals (101ms)
-ok - application theme switch changes visual tokens without changing shell geometry (223ms)
-ok - application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview (1156ms)
-ok - application Theme Service applies committed theme without rebuilding editor model or preview (986ms)
-ok - application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy (772ms)
-ok - application link preview uses scoped focus and cancels stale close completion (323ms)
+ok - application Help feature owns first-run visibility, navigation and scoped lifecycle (95ms)
+ok - application Settings Store cancels draft without persisting changes (18ms)
+ok - application Settings UI validates and applies one draft without global dialog functions (129ms)
+ok - application language Settings commit updates I18n without legacy globals (92ms)
+ok - application theme switch changes visual tokens without changing shell geometry (246ms)
+ok - application Theme Toggle Controller commits through Settings and Theme Service without rebuilding editor model or preview (1100ms)
+ok - application Theme Service applies committed theme without rebuilding editor model or preview (956ms)
+ok - application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy (811ms)
+ok - application link preview uses scoped focus and cancels stale close completion (278ms)
 ok - application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear (3ms)
-ok - application Document Session Controller keeps lifecycle model, session and UI coherent (31ms)
-ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (21ms)
-ok - application switches deterministically across every layout mode (853ms)
+ok - application Document Session Controller keeps lifecycle model, session and UI coherent (28ms)
+ok - application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes (18ms)
+ok - application switches deterministically across every layout mode (868ms)
 ok - compact shell keeps 860/900 hysteresis and clears resize burst state (335ms)
-ok - application toolbar boundary wraps from measured content width without hiding tools (130ms)
-ok - application page fullscreen uses the Stage 6.6 controller without changing command IDs (36ms)
-ok - application sidebar tabs switch one mount region and coordinate child lifecycles (831ms)
-ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1549ms)
-ok - application shell has no structural overflow or clipped focus across required viewports (5182ms)
-ok - application code block placeholder never receives a phantom source highlight (760ms)
-ok - application code block ignores single click and opens on strict double click (931ms)
-ok - application keeps only one direct editor active (1005ms)
-ok - application Hybrid table pointer input avoids block decoration dispatch races (1447ms)
-ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1375ms)
-ok - application source edit exits when pointer moves outside the source range (1010ms)
-ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (650ms)
-ok - application sidebar resize captures pointer, projects width and persists the final width (323ms)
-ok - application pointer drag maps to exact editor characters (1649ms)
+ok - application toolbar boundary wraps from measured content width without hiding tools (164ms)
+ok - application page fullscreen uses the Stage 6.6 controller without changing command IDs (37ms)
+ok - application sidebar tabs switch one mount region and coordinate child lifecycles (764ms)
+ok - application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source (1513ms)
+ok - application shell has no structural overflow or clipped focus across required viewports (5134ms)
+ok - application code block placeholder never receives a phantom source highlight (726ms)
+ok - application code block ignores single click and opens on strict double click (861ms)
+ok - application keeps only one direct editor active (994ms)
+ok - application Hybrid table pointer input avoids block decoration dispatch races (1274ms)
+ok - application Mermaid presentation stays normalized across hybrid and preview layouts (1312ms)
+ok - application source edit exits when pointer moves outside the source range (992ms)
+ok - application split controllers drag, collapse and preserve compact hysteresis in the built app (623ms)
+ok - application sidebar resize captures pointer, projects width and persists the final width (384ms)
+ok - application pointer drag maps to exact editor characters (1651ms)
 
 Browser tests: 29, passed: 29, failed: 0
 TAP version 13
 # Subtest: root README is a concise introduction and detailed history lives in docs/README.md
-not ok 1 - root README is a concise introduction and detailed history lives in docs/README.md
+ok 1 - root README is a concise introduction and detailed history lives in docs/README.md
   ---
-  duration_ms: 10.488475
+  duration_ms: 5.204545
   type: 'test'
-  location: '/home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:5:1'
-  failureType: 'testCodeFailure'
-  error: |-
-    The expression evaluated to a falsy value:
-    
-      assert.ok(normalizedRootReadme.length >= 120 && normalizedRootReadme.length <= 360)
-    
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected: true
-  actual: false
-  operator: '=='
-  stack: |-
-    TestContext.<anonymous> (file:///home/runner/work/mdr/mdr/tests/documentation-layout.test.mjs:17:10)
-    async Test.run (node:internal/test_runner/test:1054:7)
-    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
   ...
 1..1
 # tests 1
 # suites 0
-# pass 0
-# fail 1
+# pass 1
+# fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 64.969776
+# duration_ms 60.73577
