@@ -1,0 +1,51 @@
+name: R9-11 authoritative validation
+
+on:
+  push:
+    branches:
+      - agent/r9-11-runner
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate-r9-11:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout runner branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Validate and publish clean R9-11 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .agent/r9_11_failure.log
+          set +e
+          bash .agent/r9_11_validate.sh 2>&1 | tee /tmp/r9-11-validation.log
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -ne 0 ]; then
+            mkdir -p .agent
+            {
+              echo '=== MATCHED FAILURE CONTEXT ==='
+              grep -n -B 24 -A 48 -E '^not ok|failureType:|AssertionError|ERR_[A-Z_]+|^# fail [1-9]|RuntimeError|Traceback|Error:|expected one marker|Unexpected R9-11|runner contains unexpected|Missing R9-11' /tmp/r9-11-validation.log || true
+              echo
+              echo '=== VALIDATION TAIL ==='
+              tail -n 320 /tmp/r9-11-validation.log
+            } > .agent/r9_11_failure.log
+            git reset
+            git add -f .agent/r9_11_failure.log
+            GIT_AUTHOR_NAME='atomic-runner' GIT_AUTHOR_EMAIL='atomic-runner@users.noreply.github.com' \
+            GIT_COMMITTER_NAME='atomic-runner' GIT_COMMITTER_EMAIL='atomic-runner@users.noreply.github.com' \
+              git commit -m 'ci: capture R9-11 terminal validation failure [skip ci]'
+            git push origin HEAD:refs/heads/agent/r9-11-runner
+            exit "$status"
+          fi
