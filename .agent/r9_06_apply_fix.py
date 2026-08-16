@@ -8,5 +8,11 @@ if needle not in controller:
     raise RuntimeError('controller pending geometry state: constructor marker missing')
 controller = controller.replace(needle, '', 1)'''
 if text.count(old) != 1:
-    raise RuntimeError(f'apply-script fix expected one source match, found {text.count(old)}')
-path.write_text(text.replace(old, new, 1), encoding='utf-8')
+    raise RuntimeError(f'apply-script fix expected one controller source match, found {text.count(old)}')
+text = text.replace(old, new, 1)
+old_gate = r'|sourceSide\s*=|sourceReason\s*=/'
+new_gate = r'|this\.sourceSide\s*=|this\.sourceReason\s*=/'
+if text.count(old_gate) != 1:
+    raise RuntimeError(f'apply-script fix expected one ownership-gate match, found {text.count(old_gate)}')
+text = text.replace(old_gate, new_gate, 1)
+path.write_text(text, encoding='utf-8')
