@@ -7,6 +7,7 @@
     const exportSidebarControllerPort = exportCompatibilityHost?.markdownEditorSidebarControllerPort;
     const exportPreviewCommandPort = exportCompatibilityHost?.markdownEditorPreviewCommandPort;
     const exportPresentationPort = exportCompatibilityHost?.markdownEditorPresentationPort;
+    const exportSaveStatusStorePort = exportCompatibilityHost?.markdownEditorSaveStatusStorePort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
@@ -14,6 +15,7 @@
     if (!exportSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
     if (!exportPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
     if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
+    if (!exportSaveStatusStorePort) throw new Error('Save Status Store compatibility port is unavailable.');
     exportDocumentUiCommandPort.register({ importFile: () => triggerImportFile() });
     let saveTimer;
     function autoSave() {
@@ -22,23 +24,23 @@
         updateStatusBar();
         return;
       }
-      setSaveStatus('queued');
+      exportSaveStatusStorePort.setState('queued');
       saveTimer = setTimeout(() => {
-        setSaveStatus('saving');
+        exportSaveStatusStorePort.setState('saving');
         // Tauri 中的超大文档会提交到 Rust 后台增量日志；浏览器模式继续使用本地存储。
         saveCurrentDocumentState(false).then(result => {
           if (result?.stale) return;
-          if (result?.error) setSaveStatus('error', '保存失败：' + result.error);
+          if (result?.error) exportSaveStatusStorePort.setState('error', '保存失败：' + result.error);
           else if (!result?.native) showSaveHint();
         }).catch(error => {
           console.error('Auto save failed:', error);
-          setSaveStatus('error', '保存失败：' + (error?.message || String(error)));
+          exportSaveStatusStorePort.setState('error', '保存失败：' + (error?.message || String(error)));
         });
       }, autoSaveDelay);
     }
 
     function showSaveHint() {
-      setSaveStatus('saved');
+      exportSaveStatusStorePort.setState('saved');
     }
 
 
@@ -243,7 +245,7 @@
     async function saveToLocal() {
       const generation = exportDocumentControllerPort.generation;
       try {
-        setSaveStatus('saving', '正在手动保存…');
+        exportSaveStatusStorePort.setState('saving', '正在手动保存…');
         const saveResult = await saveCurrentDocumentState(true, { waitForNative: true, forceSnapshot: true });
         if (saveResult?.stale || !exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
         const doc = exportDocumentControllerPort.getActiveRecord();
@@ -259,7 +261,7 @@
         return true;
       } catch (error) {
         if (exportDocumentControllerPort.isStaleError(error)) return false;
-        setSaveStatus('error', '保存失败：' + (error?.message || String(error)));
+        exportSaveStatusStorePort.setState('error', '保存失败：' + (error?.message || String(error)));
         showToast(error?.message || String(error));
         return false;
       }
@@ -303,7 +305,7 @@
     async function saveCurrentFile() {
       const generation = exportDocumentControllerPort.generation;
       try {
-        setSaveStatus('saving', '正在保存文件…');
+        exportSaveStatusStorePort.setState('saving', '正在保存文件…');
         const saveResult = await saveCurrentDocumentState(true, { waitForNative: true, forceSnapshot: true });
         if (saveResult?.stale || !exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
         const doc = exportDocumentControllerPort.getActiveRecord();
@@ -323,7 +325,7 @@
             'save-current-file'
           );
           if (!savedPath) {
-            if (exportDocumentControllerPort.isCurrentGeneration(generation)) setSaveStatus('saved');
+            if (exportDocumentControllerPort.isCurrentGeneration(generation)) exportSaveStatusStorePort.setState('saved');
             return false;
           }
           if (!exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
@@ -331,12 +333,12 @@
         }
 
         if (!exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
-        setSaveStatus('saved');
+        exportSaveStatusStorePort.setState('saved');
         showToast('文件已保存');
         return true;
       } catch (error) {
         if (exportDocumentControllerPort.isStaleError(error)) return false;
-        setSaveStatus('error', '保存失败：' + (error?.message || String(error)));
+        exportSaveStatusStorePort.setState('error', '保存失败：' + (error?.message || String(error)));
         showToast('保存失败：' + (error?.message || String(error)));
         window.markdownEditorPerf?.record?.('document.file-save-error', {
           category: 'document.error',

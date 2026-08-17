@@ -40,6 +40,7 @@ import {
   selectionMappingApi
 } from './model-kernel/index.js';
 import { createNativeDocumentStore } from './storage/native-document-store.js';
+import { createSaveStatusStore, mountClassicSaveStatusStorePort } from './features/persistence/index.js';
 import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
@@ -448,6 +449,20 @@ async function loadAppModules() {
     throw error;
   }
 
+  const saveStatusStore = createSaveStatusStore();
+  const saveStatusStorePort = mountClassicSaveStatusStorePort(compatibilityPlatformHost, saveStatusStore);
+  const unsubscribeNativeSaveStatus = window.markdownEditorDocumentStore.subscribe(event => {
+    saveStatusStore.consumePersistenceEvent(event);
+  });
+  let saveStatusFeatureDestroyed = false;
+  const destroySaveStatusFeature = () => {
+    if (saveStatusFeatureDestroyed) return;
+    saveStatusFeatureDestroyed = true;
+    unsubscribeNativeSaveStatus();
+    saveStatusStorePort.destroy();
+    saveStatusStore.destroy();
+  };
+
   const featureViews = [];
   let unregisterEditorViewCommands = null;
   let unregisterLayoutUiCommands = null;
@@ -492,6 +507,7 @@ async function loadAppModules() {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
     destroySelectionSync();
+    destroySaveStatusFeature();
     if (windowController) {
       const pendingWindowDestroy = windowController.destroy();
       if (pendingWindowDestroy && typeof pendingWindowDestroy.catch === 'function') {

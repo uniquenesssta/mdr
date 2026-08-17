@@ -15,6 +15,7 @@ const coreFolderTreeControllerPort = coreCompatibilityHost?.markdownEditorFolder
 const coreSubmenuPositionerPort = coreCompatibilityHost?.markdownEditorSubmenuPositionerPort;
 const corePreviewCommandPort = coreCompatibilityHost?.markdownEditorPreviewCommandPort;
 const coreTaskSchedulerPort = coreCompatibilityHost?.markdownEditorTaskSchedulerPort;
+const coreSaveStatusStorePort = coreCompatibilityHost?.markdownEditorSaveStatusStorePort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -30,6 +31,7 @@ if (!coreFolderTreeControllerPort) throw new Error('Folder Tree controller compa
 if (!coreSubmenuPositionerPort) throw new Error('Submenu Positioner compatibility port is unavailable.');
 if (!corePreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
 if (!coreTaskSchedulerPort) throw new Error('Task Scheduler compatibility port is unavailable.');
+if (!coreSaveStatusStorePort) throw new Error('Save Status Store compatibility port is unavailable.');
 const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
@@ -81,7 +83,6 @@ const editor = document.getElementById('editor');
     let tableVisualEditingEnabled = false;
     let codeVisualEditingEnabled = false;
     let cachedDocumentStatistics = null;
-    let saveStatusState = 'saved';
     let saveStatusResetTimer = 0;
     const LARGE_DOCUMENT_CHARS = corePreviewBehaviorThresholds.scheduling.postprocess.deferChars;
     const ULTRA_LARGE_DOCUMENT_CHARS = corePreviewBehaviorThresholds.mode.virtualChars;
@@ -159,22 +160,40 @@ const editor = document.getElementById('editor');
       document.body.classList.toggle('ultra-large-document', length >= ULTRA_LARGE_DOCUMENT_CHARS);
     }
 
-    function setSaveStatus(state, message = '') {
+    function getSaveStatusSnapshot() {
+      return coreSaveStatusStorePort.snapshot;
+    }
+
+    function resolveSaveStatusMessage(snapshot, state) {
+      const explicit = String(snapshot?.message || '');
+      if (state === 'error') {
+        if (explicit.startsWith('保存失败')) return explicit;
+        return '保存失败：' + (explicit || '未知错误');
+      }
+      if (explicit) return explicit;
+      if (state === 'queued') return '等待保存…';
+      if (state === 'saving') {
+        const progress = Number(snapshot?.progress);
+        if (Number.isFinite(progress)) {
+          return `正在分段创建安全快照… ${Math.max(0, Math.min(100, Math.round(progress * 100)))}%`;
+        }
+        return snapshot?.backendVersion === 0 ? '正在创建安全快照…' : '正在后台保存…';
+      }
+      if (state === 'saved') return snapshot?.snapshotCreated ? '✓ 已保存并生成快照' : '✓ ' + t('saved');
+      return '✓ ' + t('saved');
+    }
+
+    function renderSaveHint(snapshot = getSaveStatusSnapshot()) {
       const hint = document.getElementById('save-hint');
       if (!hint) return;
+      const state = snapshot?.state === 'idle' ? 'saved' : String(snapshot?.state || 'saved');
+      if (state === 'loading') return;
       clearTimeout(saveStatusResetTimer);
       saveStatusResetTimer = 0;
-      saveStatusState = state || 'saved';
-      const labels = {
-        queued: '等待保存…',
-        saving: '正在保存…',
-        saved: '✓ ' + t('saved'),
-        error: '保存失败'
-      };
-      hint.dataset.state = saveStatusState;
-      hint.textContent = message || labels[saveStatusState] || labels.saved;
-      hint.classList.toggle('show', saveStatusState !== 'saved');
-      if (saveStatusState === 'saved') {
+      hint.dataset.state = state;
+      hint.textContent = resolveSaveStatusMessage(snapshot, state);
+      hint.classList.toggle('show', state !== 'saved');
+      if (state === 'saved') {
         hint.classList.add('show');
         saveStatusResetTimer = setTimeout(() => hint.classList.remove('show'), 1500);
       }
@@ -186,7 +205,6 @@ const editor = document.getElementById('editor');
         ? `自动保存已启用 · ${Math.round(autoSaveDelay) / 1000} 秒`
         : '自动保存已关闭';
       if (!autoSaveEnabled) {
-        saveStatusState = 'saved';
         clearTimeout(saveStatusResetTimer);
         saveStatusResetTimer = 0;
         const hint = document.getElementById('save-hint');
@@ -197,56 +215,52 @@ const editor = document.getElementById('editor');
         }
         return;
       }
-      if (!['queued', 'saving', 'error'].includes(saveStatusState)) setSaveStatus('saved');
+      renderSaveHint(getSaveStatusSnapshot());
     }
 
-    window.markdownEditorDocumentStore?.subscribe?.(event => {
-      if (!event || event.documentId !== getActiveDocumentId()) return;
-      if (event.state === 'loading-index') {
+    function renderPersistenceStatus(snapshot) {
+      if (!snapshot || (snapshot.documentId && snapshot.documentId !== getActiveDocumentId())) return;
+      if (snapshot.operation === 'load') {
         const statusLeft = document.getElementById('status-left');
-        if (statusLeft) statusLeft.textContent = '正在读取文档索引…';
-      } else if (event.state === 'manifest') {
-        const manifest = event.manifest || {};
-        if (Array.isArray(manifest.headings)) {
-          coreOutlineControllerPort.replaceIndex(manifest.headings, {
-            version: 0,
-            documentKey: event.documentId,
-            changedHint: true,
-            reason: 'native-manifest'
-          });
-          updateDocumentStatistics({
-            characters: Number(manifest.textLength) || 0,
-            lines: Number(manifest.lineCount) || 1,
-            blocks: 0,
-            headings: manifest.headings.length,
-            nonWhitespaceCount: Number(manifest.nonWhitespaceCount) || 0,
-            nativeIndex: true
-          });
+        if (!statusLeft) return;
+        if (snapshot.state === 'loading') {
+          if (snapshot.phase === 'index') statusLeft.textContent = '正在读取文档索引…';
+          else if (snapshot.phase === 'manifest') statusLeft.textContent = '索引已恢复，正在读取正文…';
+          else {
+            const progress = Math.max(0, Math.min(100, Math.round((Number(snapshot.progress) || 0) * 100)));
+            statusLeft.textContent = `正在分段恢复文档… ${progress}%`;
+          }
+        } else if (snapshot.state === 'error') {
+          statusLeft.textContent = '文档恢复失败';
+        } else if (snapshot.state === 'idle') {
+          updateStatusBar();
         }
-        const statusLeft = document.getElementById('status-left');
-        if (statusLeft) statusLeft.textContent = '索引已恢复，正在读取正文…';
-      } else if (event.state === 'loading') {
-        const progress = Math.max(0, Math.min(100, Math.round((Number(event.progress) || 0) * 100)));
-        const statusLeft = document.getElementById('status-left');
-        if (statusLeft) statusLeft.textContent = `正在分段恢复文档… ${progress}%`;
-      } else if (event.state === 'loaded') {
-        updateStatusBar();
-      } else if (event.state === 'load-error') {
-        const statusLeft = document.getElementById('status-left');
-        if (statusLeft) statusLeft.textContent = '文档恢复失败';
-      } else if (event.state === 'queued') setSaveStatus('queued');
-      else if (event.state === 'saving') {
-        const progress = Number(event.progress);
-        const message = Number.isFinite(progress)
-          ? `正在分段创建安全快照… ${Math.max(0, Math.min(100, Math.round(progress * 100)))}%`
-          : event.backendVersion === 0 ? '正在创建安全快照…' : '正在后台保存…';
-        setSaveStatus('saving', message);
+        return;
       }
-      else if (event.state === 'saved') {
-        const detail = event.snapshotCreated ? '✓ 已保存并生成快照' : '✓ 已保存';
-        setSaveStatus(event.pending > 0 ? 'queued' : 'saved', event.pending > 0 ? '等待保存…' : detail);
-      } else if (event.state === 'error') {
-        setSaveStatus('error', '保存失败：' + (event.message || '未知错误'));
+      renderSaveHint(snapshot);
+    }
+
+    coreSaveStatusStorePort.subscribe(event => renderPersistenceStatus(event.current));
+    renderPersistenceStatus(getSaveStatusSnapshot());
+
+    window.markdownEditorDocumentStore?.subscribe?.(event => {
+      if (!event || event.documentId !== getActiveDocumentId() || event.state !== 'manifest') return;
+      const manifest = event.manifest || {};
+      if (Array.isArray(manifest.headings)) {
+        coreOutlineControllerPort.replaceIndex(manifest.headings, {
+          version: 0,
+          documentKey: event.documentId,
+          changedHint: true,
+          reason: 'native-manifest'
+        });
+        updateDocumentStatistics({
+          characters: Number(manifest.textLength) || 0,
+          lines: Number(manifest.lineCount) || 1,
+          blocks: 0,
+          headings: manifest.headings.length,
+          nonWhitespaceCount: Number(manifest.nonWhitespaceCount) || 0,
+          nativeIndex: true
+        });
       }
     });
 
@@ -652,7 +666,8 @@ const editor = document.getElementById('editor');
         || String(documentModel?.documentId || '') !== String(id || '')
         || !documentModel?.dirty
       ) return false;
-      return !autoSaveEnabled || saveStatusState === 'queued' || saveStatusState === 'error';
+      const saveState = coreSaveStatusStorePort.snapshot.state;
+      return !autoSaveEnabled || saveState === 'queued' || saveState === 'error';
     }
 
     async function closeDocument(id, event) {
