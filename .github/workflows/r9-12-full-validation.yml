@@ -73,9 +73,23 @@ jobs:
       - name: Full Node regression
         shell: bash
         run: |
-          set -euo pipefail
-          npm test | tee /tmp/r9_12_node.log
+          set -uo pipefail
+          set +e
+          npm test 2>&1 | tee /tmp/r9_12_node.log
+          status=${PIPESTATUS[0]}
+          set -e
           grep -E '# (tests|pass|fail) ' /tmp/r9_12_node.log | tail -n 3 || true
+          if [ "$status" -ne 0 ]; then
+            context="$(grep -n -B 16 -A 48 -E '^not ok|failureType:|AssertionError|ERR_[A-Z_]+|^# fail [1-9]|Error:' /tmp/r9_12_node.log | head -n 120 || true)"
+            if [ -z "$context" ]; then
+              context="$(tail -n 120 /tmp/r9_12_node.log)"
+            fi
+            context="${context//'%'/'%25'}"
+            context="${context//$'\r'/'%0D'}"
+            context="${context//$'\n'/'%0A'}"
+            echo "::error title=Full Node regression failure::$context"
+            exit "$status"
+          fi
 
       - name: Architecture and legacy runtime gates
         shell: bash
