@@ -1,5 +1,5 @@
 import { normalizeDocumentNativeMetadata } from '../features/documents/index.js';
-import { createNativeSaveSession } from '../features/persistence/index.js';
+import { createNativeSaveQueue, createNativeSaveSession } from '../features/persistence/index.js';
 
 const NATIVE_DOCUMENT_THRESHOLD = 100000;
 const DOCUMENT_CHUNK_BYTES = 512 * 1024;
@@ -36,16 +36,12 @@ function getSafeSnapshotChunkEnd(content, start) {
   return Math.max(start + 1, end);
 }
 
-// Atomic 10.5 migrates this queue/runtime responsibility. Atomic 10.4 intentionally
-// leaves it here so NativeSaveSession owns only per-document persistence metadata.
-function createSaveRuntime(documentId) {
-  return {
-    documentId,
-    document: null,
-    running: false,
-    waiters: [],
-    forceSnapshot: false
-  };
+function createSaveRequestContext(document) {
+  return Object.freeze({
+    documentId: String(document?.id || ''),
+    title: String(document?.title || ''),
+    updatedAt: Number(document?.updatedAt) || Date.now()
+  });
 }
 
 export class NativeDocumentStore {
@@ -53,7 +49,7 @@ export class NativeDocumentStore {
     this.documentStore = documentStore;
     this.nativeAvailable = Boolean(available);
     this.sessions = new Map();
-    this.saveRuntimes = new Map();
+    this.saveQueues = new Map();
     this.activeDocumentId = '';
     this.listeners = new Set();
     this.loadSequence = 0;
@@ -100,21 +96,23 @@ export class NativeDocumentStore {
     return session;
   }
 
-  getSaveRuntime(documentId) {
-    let runtime = this.saveRuntimes.get(documentId);
-    if (!runtime) {
-      runtime = createSaveRuntime(documentId);
-      this.saveRuntimes.set(documentId, runtime);
+  getSaveQueue(documentId) {
+    let queue = this.saveQueues.get(documentId);
+    if (!queue) {
+      const session = this.getSession(documentId);
+      queue = createNativeSaveQueue(documentId, {
+        executeBatch: batch => this.executeSaveBatch(session, batch),
+        notify: event => this.emit(event)
+      });
+      this.saveQueues.set(documentId, queue);
     }
-    return runtime;
+    return queue;
   }
 
   activateDocument(source, document, loaded = null) {
     if (!document?.id) return;
     this.activeDocumentId = document.id;
     const session = this.getSession(document.id);
-    const runtime = this.getSaveRuntime(document.id);
-    runtime.document = document;
     session.activate({
       source,
       editorVersion: currentDocumentVersion(source),
@@ -194,8 +192,8 @@ export class NativeDocumentStore {
     this.loadSequence += 1;
   }
 
-  async saveSnapshotInChunks(session, runtime, request, content) {
-    const documentId = runtime.document?.id || session.documentId;
+  async saveSnapshotInChunks(session, batch, request, content) {
+    const documentId = batch.documentId || session.documentId;
     const uploadId = `upload_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
     await this.documentStore.beginSnapshotUpload(documentId, uploadId);
     try {
@@ -219,7 +217,7 @@ export class NativeDocumentStore {
           uploadedChars: offset,
           totalChars: content.length,
           progress: content.length > 0 ? offset / content.length : 1,
-          pending: runtime.waiters.length
+          pending: batch.getPendingCount()
         });
         await new Promise(resolve => setTimeout(resolve, 0));
       }
@@ -250,16 +248,13 @@ export class NativeDocumentStore {
       return Promise.resolve({ native: false });
     }
     const session = this.getSession(document.id);
-    const runtime = this.getSaveRuntime(document.id);
+    const queue = this.getSaveQueue(document.id);
     session.attachSource(source);
-    runtime.document = document;
-    runtime.forceSnapshot = runtime.forceSnapshot || Boolean(options.forceSnapshot);
     const targetVersion = currentDocumentVersion(source);
     const forceSnapshot = Boolean(options.forceSnapshot);
     if (
       session.initialized
-      && !runtime.running
-      && !runtime.waiters.length
+      && queue.idle
       && !forceSnapshot
       && targetVersion <= session.lastEditorVersion
       && (document.title || '') === session.title
@@ -275,116 +270,91 @@ export class NativeDocumentStore {
       });
       return Promise.resolve(result);
     }
-    return new Promise((resolve, reject) => {
-      runtime.waiters.push({ targetVersion, forceSnapshot: Boolean(options.forceSnapshot), resolve, reject });
-      this.emit({
-        state: 'queued',
-        documentId: document.id,
-        targetVersion,
-        pending: runtime.waiters.length
-      });
-      this.pump(session, runtime);
+    return queue.enqueue({
+      targetVersion,
+      forceSnapshot,
+      context: createSaveRequestContext(document)
     });
   }
 
-  async pump(session, runtime) {
-    if (runtime.running || !session.source || !runtime.document) return;
-    runtime.running = true;
-    try {
-      while (runtime.waiters.length) {
-        if (session.source?.documentId && session.source.documentId !== runtime.document.id) {
-          throw new Error('DOCUMENT_SOURCE_MISMATCH');
-        }
-        const editorVersion = currentDocumentVersion(session.source);
-        const changes = getDocumentChanges(session.source, session.lastEditorVersion);
-        const mustReset = !session.initialized || !Array.isArray(changes);
-        const baseVersion = session.backendVersion;
-        const nextVersion = baseVersion + 1;
-        const forceSnapshot = runtime.forceSnapshot || runtime.waiters.some(waiter => waiter.forceSnapshot);
-        runtime.forceSnapshot = false;
-        const snapshotContent = mustReset ? createDocumentSnapshot(session.source) : null;
-        const useChunkedSnapshot = mustReset
-          && snapshotContent.length >= SNAPSHOT_UPLOAD_THRESHOLD
-          && this.supportsChunkedSnapshots;
-        const request = {
-          documentId: runtime.document.id,
-          title: runtime.document.title || '',
-          baseVersion,
-          nextVersion,
-          fullContent: useChunkedSnapshot ? null : snapshotContent,
-          transactions: mustReset ? [] : changes,
-          updatedAt: runtime.document.updatedAt || Date.now(),
-          forceSnapshot
-        };
+  async executeSaveBatch(session, batch) {
+    const document = batch.context || Object.freeze({ documentId: batch.documentId, title: '', updatedAt: Date.now() });
+    const source = session.source;
+    if (source?.documentId && source.documentId !== document.documentId) {
+      throw new Error('DOCUMENT_SOURCE_MISMATCH');
+    }
 
-        let response;
-        this.emit({
-          state: 'saving',
-          documentId: runtime.document.id,
-          targetVersion: editorVersion,
-          backendVersion: baseVersion,
-          pending: runtime.waiters.length
-        });
-        try {
-          response = useChunkedSnapshot
-            ? await this.saveSnapshotInChunks(session, runtime, request, snapshotContent)
-            : await this.documentStore.save(request);
-        } catch (error) {
-          const message = error?.message || String(error);
-          if (!mustReset && message.includes('VERSION_MISMATCH')) {
-            session.invalidateInitialization();
-            continue;
-          }
-          throw error;
-        }
+    while (true) {
+      const editorVersion = currentDocumentVersion(source);
+      const changes = getDocumentChanges(source, session.lastEditorVersion);
+      const mustReset = !session.initialized || !Array.isArray(changes);
+      const baseVersion = session.backendVersion;
+      const nextVersion = baseVersion + 1;
+      const snapshotContent = mustReset ? createDocumentSnapshot(source) : null;
+      const useChunkedSnapshot = mustReset
+        && snapshotContent.length >= SNAPSHOT_UPLOAD_THRESHOLD
+        && this.supportsChunkedSnapshots;
+      const request = {
+        documentId: document.documentId,
+        title: document.title,
+        baseVersion,
+        nextVersion,
+        fullContent: useChunkedSnapshot ? null : snapshotContent,
+        transactions: mustReset ? [] : changes,
+        updatedAt: document.updatedAt,
+        forceSnapshot: batch.forceSnapshot
+      };
 
-        const committedBackendVersion = Math.max(nextVersion, Number(response?.version) || 0);
-        session.commit({
-          editorVersion,
-          backendVersion: committedBackendVersion,
-          title: runtime.document.title || ''
-        });
-        const native = normalizeDocumentNativeMetadata({
-          nativeBacked: true,
-          nativeVersion: session.backendVersion
-        });
-
-        const completed = [];
-        const pending = [];
-        for (const waiter of runtime.waiters) {
-          if (waiter.targetVersion <= editorVersion) completed.push(waiter);
-          else pending.push(waiter);
-        }
-        runtime.waiters = pending;
-        completed.forEach(waiter => waiter.resolve({ native: true, ...response, ...native }));
-        this.emit({
-          state: 'saved',
-          documentId: runtime.document.id,
-          version: session.backendVersion,
-          snapshotCreated: Boolean(response?.snapshotCreated),
-          journalEntries: Number(response?.journalEntries) || 0,
-          pending: runtime.waiters.length
-        });
-      }
-    } catch (error) {
-      const waiters = runtime.waiters.splice(0);
+      let response;
       this.emit({
-        state: 'error',
-        documentId: runtime.document?.id || runtime.documentId,
-        message: error?.message || String(error)
+        state: 'saving',
+        documentId: document.documentId,
+        targetVersion: editorVersion,
+        backendVersion: baseVersion,
+        pending: batch.getPendingCount()
       });
-      waiters.forEach(waiter => waiter.reject(error));
-    } finally {
-      runtime.running = false;
-      if (runtime.waiters.length) queueMicrotask(() => this.pump(session, runtime));
+      try {
+        response = useChunkedSnapshot
+          ? await this.saveSnapshotInChunks(session, batch, request, snapshotContent)
+          : await this.documentStore.save(request);
+      } catch (error) {
+        const message = error?.message || String(error);
+        if (!mustReset && message.includes('VERSION_MISMATCH')) {
+          session.invalidateInitialization();
+          continue;
+        }
+        throw error;
+      }
+
+      const committedBackendVersion = Math.max(nextVersion, Number(response?.version) || 0);
+      session.commit({
+        editorVersion,
+        backendVersion: committedBackendVersion,
+        title: document.title
+      });
+      const native = normalizeDocumentNativeMetadata({
+        nativeBacked: true,
+        nativeVersion: session.backendVersion
+      });
+      return Object.freeze({
+        completedVersion: editorVersion,
+        completedTitle: document.title,
+        forceSnapshotApplied: Boolean(batch.forceSnapshot),
+        version: session.backendVersion,
+        snapshotCreated: Boolean(response?.snapshotCreated),
+        journalEntries: Number(response?.journalEntries) || 0,
+        value: Object.freeze({ native: true, ...response, ...native })
+      });
     }
   }
 
   async delete(documentId) {
+    const queue = this.saveQueues.get(documentId);
+    queue?.destroy();
+    this.saveQueues.delete(documentId);
     const session = this.sessions.get(documentId);
     session?.destroy();
     this.sessions.delete(documentId);
-    this.saveRuntimes.delete(documentId);
     if (this.activeDocumentId === documentId) this.activeDocumentId = '';
     if (!this.available || !documentId) return;
     await this.documentStore.remove(documentId);

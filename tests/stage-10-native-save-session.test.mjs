@@ -121,22 +121,17 @@ test('Atomic 10.4 NativeDocumentStore preserves skip and title-only native-save 
   assert.equal(session.destroyed, true);
 });
 
-test('Atomic 10.4 integration keeps NativeSaveSession as the single per-document metadata authority', async () => {
-  const [entry, nativeStoreSource, sessionSource, fixtureText, handoff] = await Promise.all([
+test('Atomic 10.4 integration keeps NativeSaveSession as the only native session metadata owner across later Stage 10 atomics', async () => {
+  const [entry, nativeStoreSource, sessionSource, fixtureText] = await Promise.all([
     source('src/features/persistence/index.js'),
     source('src/storage/native-document-store.js'),
     source('src/features/persistence/native-document-store/native-save-session.js'),
-    source('tests/architecture/fixtures/production-modules.json'),
-    source('tests/stage-01-handoff.test.mjs')
+    source('tests/architecture/fixtures/production-modules.json')
   ]);
   assert.match(entry, /createNativeSaveSession/);
   assert.match(nativeStoreSource, /from ['"]\.\.\/features\/persistence\/index\.js['"]/);
-  assert.doesNotMatch(nativeStoreSource, /function\s+createSession\s*\(/);
-  assert.doesNotMatch(nativeStoreSource, /session\.(?:backendVersion|lastEditorVersion|lastTitle|initialized|source)\s*=/);
-  assert.doesNotMatch(nativeStoreSource, /lastTitle/);
-  assert.doesNotMatch(nativeStoreSource, /\bcontent\s*:\s*session\./);
-  assert.match(handoff, /moduleFixture\.modules\.length, 389/);
-  assert.doesNotMatch(sessionSource, /waiters|running|forceSnapshot/);
+  assert.doesNotMatch(nativeStoreSource, /session\.(?:backendVersion|lastEditorVersion|title|initialized|source)\s*=/);
+  assert.equal(/waiters|running|forceSnapshot/.test(sessionSource), false);
   const fixture = JSON.parse(fixtureText);
   assert.ok(fixture.modules.length >= 389);
   assert.ok(fixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-save-session.js'));

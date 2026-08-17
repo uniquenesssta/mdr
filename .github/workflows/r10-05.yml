@@ -1,0 +1,120 @@
+name: R10-05 Native Save Queue
+
+on:
+  push:
+    branches:
+      - agent/r10-stage
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Guard R10-05 frozen contracts and queue ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='0cdf099843fdbf60eb0c1dd0904627467e79c894'
+          git merge-base --is-ancestor "$base" HEAD
+          git diff --quiet "$base"...HEAD -- \
+            src/model-kernel/index.js \
+            src/document/document-model.js \
+            src/sync/selection-mapping.js \
+            src/preview/incremental-preview.js \
+            src/preview/math-source.js \
+            src/editor/hybrid/block-registry.js \
+            src/editor/hybrid/math-ranges.js \
+            src/editor/hybrid/ranges.js \
+            src/editor/hybrid/table-model.js \
+            src-tauri/src/document_store.rs \
+            package.json package-lock.json
+          test ! -e .agent/r10_05_apply.py
+          test ! -e .github/workflows/r10-05-bootstrap.yml
+          test -f src/features/persistence/native-document-store/native-save-session.js
+          test -f src/features/persistence/native-document-store/native-save-queue.js
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
+          if (!Array.isArray(fixture.modules) || fixture.modules.length < 390) {
+            throw new Error(`R10-05 production module inventory regressed: expected at least 390, got ${fixture.modules?.length}`);
+          }
+          for (const path of [
+            'src/features/persistence/native-document-store/native-save-session.js',
+            'src/features/persistence/native-document-store/native-save-queue.js'
+          ]) {
+            if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing Stage 10 native persistence inventory record: ${path}`);
+          }
+          NODE
+          git diff --check
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high
+
+      - name: R10-05 targeted gate 9/9
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-save-queue.test.mjs | tee /tmp/r10_05_targeted.log
+          grep -q '# tests 9' /tmp/r10_05_targeted.log
+          grep -q '# pass 9' /tmp/r10_05_targeted.log
+          grep -q '# fail 0' /tmp/r10_05_targeted.log
+
+      - name: Full Node regression remains green
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test | tee /tmp/r10_05_node.log
+          grep -q '# fail 0' /tmp/r10_05_node.log
+          pass_count="$(sed -n 's/^# pass //p' /tmp/r10_05_node.log | tail -1)"
+          test "${pass_count:-0}" -ge 274
+
+      - name: Architecture and documentation gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run verify:architecture
+          npm run verify:no-legacy-runtime
+          npm run verify:generated-files
+          npm run verify:readme-record
+
+      - name: Browser preview contract 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser:contract | tee /tmp/r10_05_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_05_browser_contract.log
+
+      - name: Production build
+        run: npm run build
+
+      - name: Built-app browser regression 29/29
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser | tee /tmp/r10_05_browser.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_05_browser.log
+
+      - name: Validation must leave tracked tree clean
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff --exit-code
