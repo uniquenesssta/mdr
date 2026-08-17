@@ -119,19 +119,38 @@ test('documented Stage 1 public modules expose the exact handoff surface', async
   assert.deepEqual(Object.keys(modelKernel).sort(), [...MODEL_KERNEL_EXPORTS].sort());
 });
 
-test('Stage 1 historical counts and current package verification entries remain explicit', async () => {
+test('Stage 1 historical handoff and current migration baseline remain explicit', async () => {
   const packageJson = await readJson('package.json');
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
   assert.equal(moduleFixture.modules.length, 381);
   const readme = await readText('docs/README.md');
-  assert.match(extractSection(readme, '## Stage 1 架构交接'), /67 个生产模块/);
-  assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 7);
+  const stage1Section = extractSection(readme, '## Stage 1 架构交接');
+  assert.match(stage1Section, /67 个生产模块/);
+  assert.match(stage1Section, /9 个经典脚本/);
+  assert.match(stage1Section, /38 个业务全局写入/);
+
+  assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 6);
   assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 43);
-  assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 12);
+  assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 9);
   assert.equal(baseline.trackedGeneratedFiles.length, 4);
   assert.equal(baseline.policy.wildcardExemptions, false);
+  assert.equal(
+    baseline.legacyClassicScripts.some(item => item.loader === 'src/main.js' && item.script === 'public/app/scroll-sync.js'),
+    false
+  );
+  for (const global of [
+    'window.markdownEditorScrollController',
+    'window.markdownEditorScrollSync',
+    'window.markdownEditorSelectionController'
+  ]) {
+    assert.equal(
+      baseline.businessGlobalWrites.some(item => item.path === 'src/main.js' && item.global === global),
+      false,
+      `${global} must stay removed from the current migration baseline`
+    );
+  }
 
   assert.deepEqual(
     {
