@@ -473,9 +473,6 @@ async function loadAppModules() {
   let previewCommandHandler = null;
   let previewScrollMapper = null;
   const destroyPreviewScrollMapper = () => {
-    if (compatibilityPlatformHost?.markdownEditorPreviewScrollMapper === previewScrollMapper) {
-      delete compatibilityPlatformHost.markdownEditorPreviewScrollMapper;
-    }
     previewScrollMapper?.destroy();
     previewScrollMapper = null;
   };
