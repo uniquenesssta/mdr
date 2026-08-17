@@ -17,8 +17,11 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - name: R9-11 frozen selection mapping integration
-        run: node --test tests/stage-09-frozen-selection-mapping-integration.test.mjs tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs
+      - name: R9-11 direct frozen selection mapping contract
+        run: node --test tests/stage-09-frozen-selection-mapping-integration.test.mjs
+      - name: R9-11 architecture frozen selection mapping integration
+        if: ${{ always() }}
+        run: node --test tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs
       - name: R9-10 selection retry scheduler
         run: node --test tests/stage-09-selection-retry-scheduler.test.mjs tests/architecture/stage-09-selection-retry-scheduler.test.mjs
       - name: R9-09 selection highlight session
