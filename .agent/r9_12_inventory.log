@@ -31,4 +31,4 @@ tests/architecture/stage-09-selection-highlight-session.test.mjs:58:test('R9-09 
 tests/architecture/stage-09-selection-readers.test.mjs:45:test('R9-07 final SelectionSyncController consumes Readers and owns no raw selection boundaries or preview stabilization listeners', async () => {
 tests/architecture/stage-09-selection-readers.test.mjs:62:  assert.match(main, /createSelectionSyncController\(editorHost, previewHost, \{/);
 tests/architecture/stage-09-selection-retry-scheduler.test.mjs:31:test('R9-10 final SelectionSyncController delegates retry scheduling and owns no retry count or retry RAF state', async () => {
-tests/architecture/stage-09-selection-retry-scheduler.test.mjs:33:  assert.match(controller, /SelectionSyncController requires SelectionRetryScheduler/);
+tests/architecture/stage-09-selection-retry-scheduler.test.mjs:35:  assert.match(controller, /throw new TypeError\(`SelectionSyncController requires \$\{label\}`\)/);
