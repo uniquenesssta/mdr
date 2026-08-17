@@ -27,7 +27,7 @@ jobs:
           set -euo pipefail
           npm ci
           rm -rf .agent/__pycache__
-          PYTHONDONTWRITEBYTECODE=1 python .agent/r9_12_apply.py
+          PYTHONDONTWRITEBYTECODE=1 python .agent/r9_12_r905_cleanup.py
           rm -rf .agent/__pycache__
           git diff --check
           node --test tests/stage-09-final-sync-legacy-removal.test.mjs tests/architecture/stage-09-final-sync-legacy-removal.test.mjs | tee /tmp/r9-12-targeted.tap
@@ -35,8 +35,12 @@ jobs:
           grep -q '# pass 16' /tmp/r9-12-targeted.tap
           grep -q '# fail 0' /tmp/r9-12-targeted.tap
           npm run build
-          git add README.md public src tests
+          git add README.md src/main.js
+          if git diff --cached --quiet; then
+            echo 'R9-12 candidate patch already applied; validation only.'
+            exit 0
+          fi
           GIT_AUTHOR_NAME='atomic-runner' GIT_AUTHOR_EMAIL='atomic-runner@users.noreply.github.com' \
           GIT_COMMITTER_NAME='atomic-runner' GIT_COMMITTER_EMAIL='atomic-runner@users.noreply.github.com' \
-            git commit -m 'refactor: integrate R9-12 candidate [skip ci]'
+            git commit -m 'refactor: remove stale R9-05 preview mapper compatibility cleanup'
           git push origin HEAD:refs/heads/agent/r9-12-runner
