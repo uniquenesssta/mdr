@@ -19,7 +19,7 @@ tests/stage-09-scroll-geometry-session.test.mjs:192:    controller.configure({ s
 tests/stage-09-selection-feedback-guard.test.mjs:103:test('R9-08 final SelectionSyncController uses the shared Guard to reject editor feedback during preview settlement', () => {
 tests/stage-09-selection-feedback-guard.test.mjs:125:test('R9-08 final SelectionSyncController exposes applyingSide/previewRevision from Guard state instead of owning duplicates', () => {
 tests/stage-09-selection-retry-scheduler.test.mjs:107:test('R9-10 final SelectionSyncController delegates only recoverable pending editor results with makeEditorKey version checks', () => {
-tests/stage-09-selection-retry-scheduler.test.mjs:135:test('R9-10 final SelectionSyncController fresh scheduling clear and stop cancel old retries while attempts remain Scheduler-owned', () => {
+tests/stage-09-selection-retry-scheduler.test.mjs:135:test('R9-10 final SelectionSyncController cancels stale retries at lifecycle boundaries while Scheduler owns retry replacement', () => {
 tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:12:test('R9-12 removes the classic scroll-sync script and migrates SelectionSyncController to the Stage 9 feature boundary', async () => {
 tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:18:  assert.match(facade, /SelectionSyncController/);
 tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:19:  assert.match(facade, /createSelectionSyncController/);
