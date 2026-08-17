@@ -1,4 +1,5 @@
 import { normalizeDocumentNativeMetadata } from '../features/documents/index.js';
+import { createNativeSaveSession } from '../features/persistence/index.js';
 
 const NATIVE_DOCUMENT_THRESHOLD = 100000;
 const DOCUMENT_CHUNK_BYTES = 512 * 1024;
@@ -35,18 +36,15 @@ function getSafeSnapshotChunkEnd(content, start) {
   return Math.max(start + 1, end);
 }
 
-function createSession(documentId) {
+// Atomic 10.5 migrates this queue/runtime responsibility. Atomic 10.4 intentionally
+// leaves it here so NativeSaveSession owns only per-document persistence metadata.
+function createSaveRuntime(documentId) {
   return {
     documentId,
-    backendVersion: 0,
-    lastEditorVersion: 0,
-    lastTitle: '',
-    initialized: false,
+    document: null,
     running: false,
     waiters: [],
-    forceSnapshot: false,
-    source: null,
-    document: null
+    forceSnapshot: false
   };
 }
 
@@ -55,6 +53,7 @@ export class NativeDocumentStore {
     this.documentStore = documentStore;
     this.nativeAvailable = Boolean(available);
     this.sessions = new Map();
+    this.saveRuntimes = new Map();
     this.activeDocumentId = '';
     this.listeners = new Set();
     this.loadSequence = 0;
@@ -95,31 +94,36 @@ export class NativeDocumentStore {
   getSession(documentId) {
     let session = this.sessions.get(documentId);
     if (!session) {
-      session = createSession(documentId);
+      session = createNativeSaveSession(documentId);
       this.sessions.set(documentId, session);
     }
     return session;
+  }
+
+  getSaveRuntime(documentId) {
+    let runtime = this.saveRuntimes.get(documentId);
+    if (!runtime) {
+      runtime = createSaveRuntime(documentId);
+      this.saveRuntimes.set(documentId, runtime);
+    }
+    return runtime;
   }
 
   activateDocument(source, document, loaded = null) {
     if (!document?.id) return;
     this.activeDocumentId = document.id;
     const session = this.getSession(document.id);
-    session.source = source;
-    session.document = document;
-    session.lastEditorVersion = currentDocumentVersion(source);
-    source?.registerConsumer?.('storage', session.lastEditorVersion);
-    session.lastTitle = document.title || '';
-    if (loaded) {
-      session.backendVersion = Math.max(0, Number(loaded.version) || 0);
-      session.initialized = true;
-    } else if (!document.nativeBacked) {
-      session.backendVersion = 0;
-      session.initialized = false;
-    } else {
-      session.backendVersion = Math.max(0, Number(document.nativeVersion) || 0);
-      session.initialized = session.backendVersion > 0;
-    }
+    const runtime = this.getSaveRuntime(document.id);
+    runtime.document = document;
+    session.activate({
+      source,
+      editorVersion: currentDocumentVersion(source),
+      title: document.title || '',
+      loaded: Boolean(loaded),
+      loadedVersion: loaded?.version,
+      nativeBacked: Boolean(document.nativeBacked),
+      nativeVersion: document.nativeVersion
+    });
   }
 
   async load(documentId, options = {}) {
@@ -137,9 +141,7 @@ export class NativeDocumentStore {
       const loaded = await this.documentStore.load(documentId);
       ensureCurrentLoad();
       if (!loaded) return null;
-      const session = this.getSession(documentId);
-      session.backendVersion = Math.max(0, Number(loaded.version) || 0);
-      session.initialized = true;
+      this.getSession(documentId).recordLoaded(loaded.version);
       return loaded;
     }
 
@@ -174,9 +176,7 @@ export class NativeDocumentStore {
         contentChunks: chunks,
         segmented: true
       };
-      const session = this.getSession(documentId);
-      session.backendVersion = Math.max(0, Number(loaded.version) || 0);
-      session.initialized = true;
+      this.getSession(documentId).recordLoaded(loaded.version);
       this.emit({ state: 'loaded', documentId, progress: 1, totalBytes });
       return loaded;
     } catch (error) {
@@ -194,16 +194,17 @@ export class NativeDocumentStore {
     this.loadSequence += 1;
   }
 
-  async saveSnapshotInChunks(session, request, content) {
+  async saveSnapshotInChunks(session, runtime, request, content) {
+    const documentId = runtime.document?.id || session.documentId;
     const uploadId = `upload_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
-    await this.documentStore.beginSnapshotUpload(session.document.id, uploadId);
+    await this.documentStore.beginSnapshotUpload(documentId, uploadId);
     try {
       let offset = 0;
       let chunkIndex = 0;
       while (offset < content.length) {
         const end = getSafeSnapshotChunkEnd(content, offset);
         await this.documentStore.appendSnapshotChunk(
-          session.document.id,
+          documentId,
           uploadId,
           content.slice(offset, end),
           chunkIndex
@@ -212,20 +213,20 @@ export class NativeDocumentStore {
         chunkIndex += 1;
         this.emit({
           state: 'saving',
-          documentId: session.document.id,
+          documentId,
           targetVersion: currentDocumentVersion(session.source),
           backendVersion: session.backendVersion,
           uploadedChars: offset,
           totalChars: content.length,
           progress: content.length > 0 ? offset / content.length : 1,
-          pending: session.waiters.length
+          pending: runtime.waiters.length
         });
         await new Promise(resolve => setTimeout(resolve, 0));
       }
       return await this.documentStore.commitSnapshotUpload(request, uploadId);
     } catch (error) {
       try {
-        await this.documentStore.abortSnapshotUpload?.(session.document.id, uploadId);
+        await this.documentStore.abortSnapshotUpload?.(documentId, uploadId);
       } catch (_) {}
       throw error;
     }
@@ -249,18 +250,19 @@ export class NativeDocumentStore {
       return Promise.resolve({ native: false });
     }
     const session = this.getSession(document.id);
-    session.source = source;
-    session.document = document;
-    session.forceSnapshot = session.forceSnapshot || Boolean(options.forceSnapshot);
+    const runtime = this.getSaveRuntime(document.id);
+    session.attachSource(source);
+    runtime.document = document;
+    runtime.forceSnapshot = runtime.forceSnapshot || Boolean(options.forceSnapshot);
     const targetVersion = currentDocumentVersion(source);
     const forceSnapshot = Boolean(options.forceSnapshot);
     if (
       session.initialized
-      && !session.running
-      && !session.waiters.length
+      && !runtime.running
+      && !runtime.waiters.length
       && !forceSnapshot
       && targetVersion <= session.lastEditorVersion
-      && (document.title || '') === session.lastTitle
+      && (document.title || '') === session.title
     ) {
       const native = normalizeDocumentNativeMetadata({ nativeBacked: true, nativeVersion: session.backendVersion });
       const result = { native: true, version: session.backendVersion, ...native, skipped: true };
@@ -274,23 +276,23 @@ export class NativeDocumentStore {
       return Promise.resolve(result);
     }
     return new Promise((resolve, reject) => {
-      session.waiters.push({ targetVersion, forceSnapshot: Boolean(options.forceSnapshot), resolve, reject });
+      runtime.waiters.push({ targetVersion, forceSnapshot: Boolean(options.forceSnapshot), resolve, reject });
       this.emit({
         state: 'queued',
         documentId: document.id,
         targetVersion,
-        pending: session.waiters.length
+        pending: runtime.waiters.length
       });
-      this.pump(session);
+      this.pump(session, runtime);
     });
   }
 
-  async pump(session) {
-    if (session.running || !session.source || !session.document) return;
-    session.running = true;
+  async pump(session, runtime) {
+    if (runtime.running || !session.source || !runtime.document) return;
+    runtime.running = true;
     try {
-      while (session.waiters.length) {
-        if (session.source?.documentId && session.source.documentId !== session.document.id) {
+      while (runtime.waiters.length) {
+        if (session.source?.documentId && session.source.documentId !== runtime.document.id) {
           throw new Error('DOCUMENT_SOURCE_MISMATCH');
         }
         const editorVersion = currentDocumentVersion(session.source);
@@ -298,88 +300,91 @@ export class NativeDocumentStore {
         const mustReset = !session.initialized || !Array.isArray(changes);
         const baseVersion = session.backendVersion;
         const nextVersion = baseVersion + 1;
-        const forceSnapshot = session.forceSnapshot || session.waiters.some(waiter => waiter.forceSnapshot);
-        session.forceSnapshot = false;
+        const forceSnapshot = runtime.forceSnapshot || runtime.waiters.some(waiter => waiter.forceSnapshot);
+        runtime.forceSnapshot = false;
         const snapshotContent = mustReset ? createDocumentSnapshot(session.source) : null;
         const useChunkedSnapshot = mustReset
           && snapshotContent.length >= SNAPSHOT_UPLOAD_THRESHOLD
           && this.supportsChunkedSnapshots;
         const request = {
-          documentId: session.document.id,
-          title: session.document.title || '',
+          documentId: runtime.document.id,
+          title: runtime.document.title || '',
           baseVersion,
           nextVersion,
           fullContent: useChunkedSnapshot ? null : snapshotContent,
           transactions: mustReset ? [] : changes,
-          updatedAt: session.document.updatedAt || Date.now(),
+          updatedAt: runtime.document.updatedAt || Date.now(),
           forceSnapshot
         };
 
         let response;
         this.emit({
           state: 'saving',
-          documentId: session.document.id,
+          documentId: runtime.document.id,
           targetVersion: editorVersion,
           backendVersion: baseVersion,
-          pending: session.waiters.length
+          pending: runtime.waiters.length
         });
         try {
           response = useChunkedSnapshot
-            ? await this.saveSnapshotInChunks(session, request, snapshotContent)
+            ? await this.saveSnapshotInChunks(session, runtime, request, snapshotContent)
             : await this.documentStore.save(request);
         } catch (error) {
           const message = error?.message || String(error);
           if (!mustReset && message.includes('VERSION_MISMATCH')) {
-            session.initialized = false;
+            session.invalidateInitialization();
             continue;
           }
           throw error;
         }
 
-        session.backendVersion = Math.max(nextVersion, Number(response?.version) || 0);
-        session.lastEditorVersion = editorVersion;
-        session.initialized = true;
-        session.lastTitle = session.document.title || '';
+        const committedBackendVersion = Math.max(nextVersion, Number(response?.version) || 0);
+        session.commit({
+          editorVersion,
+          backendVersion: committedBackendVersion,
+          title: runtime.document.title || ''
+        });
         const native = normalizeDocumentNativeMetadata({
           nativeBacked: true,
           nativeVersion: session.backendVersion
         });
-        session.source?.markPersisted?.(editorVersion, session.backendVersion);
-        session.source?.acknowledge?.('storage', editorVersion);
 
         const completed = [];
         const pending = [];
-        for (const waiter of session.waiters) {
+        for (const waiter of runtime.waiters) {
           if (waiter.targetVersion <= editorVersion) completed.push(waiter);
           else pending.push(waiter);
         }
-        session.waiters = pending;
+        runtime.waiters = pending;
         completed.forEach(waiter => waiter.resolve({ native: true, ...response, ...native }));
         this.emit({
           state: 'saved',
-          documentId: session.document.id,
+          documentId: runtime.document.id,
           version: session.backendVersion,
           snapshotCreated: Boolean(response?.snapshotCreated),
           journalEntries: Number(response?.journalEntries) || 0,
-          pending: session.waiters.length
+          pending: runtime.waiters.length
         });
       }
     } catch (error) {
-      const waiters = session.waiters.splice(0);
+      const waiters = runtime.waiters.splice(0);
       this.emit({
         state: 'error',
-        documentId: session.document?.id || session.documentId,
+        documentId: runtime.document?.id || runtime.documentId,
         message: error?.message || String(error)
       });
       waiters.forEach(waiter => waiter.reject(error));
     } finally {
-      session.running = false;
-      if (session.waiters.length) queueMicrotask(() => this.pump(session));
+      runtime.running = false;
+      if (runtime.waiters.length) queueMicrotask(() => this.pump(session, runtime));
     }
   }
 
   async delete(documentId) {
+    const session = this.sessions.get(documentId);
+    session?.destroy();
     this.sessions.delete(documentId);
+    this.saveRuntimes.delete(documentId);
     if (this.activeDocumentId === documentId) this.activeDocumentId = '';
     if (!this.available || !documentId) return;
     await this.documentStore.remove(documentId);

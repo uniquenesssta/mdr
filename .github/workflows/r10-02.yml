@@ -25,7 +25,7 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Guard R10-02 scope, frozen contracts and inventory
+      - name: Guard R10-02 frozen contracts and minimum inventory
         shell: bash
         run: |
           set -euo pipefail
@@ -46,7 +46,6 @@ jobs:
           test ! -e .agent/r10_02_apply.py
           test -f src/features/persistence/application/save-controller.js
           test -f src/features/persistence/compatibility/classic-save-controller-port.js
-          test ! -e src/features/persistence/native-document-store/native-save-session.js
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
