@@ -132,7 +132,7 @@ test('R9-10 final SelectionSyncController delegates only recoverable pending edi
   controller.destroy();
 });
 
-test('R9-10 final SelectionSyncController fresh scheduling clear and stop cancel old retries while attempts remain Scheduler-owned', () => {
+test('R9-10 final SelectionSyncController cancels stale retries at lifecycle boundaries while Scheduler owns retry replacement', () => {
   const frames = createFrames();
   let cancels = 0;
   const scheduled = [];
@@ -151,10 +151,13 @@ test('R9-10 final SelectionSyncController fresh scheduling clear and stop cancel
   assert.equal(cancels, 1);
   frames.flush();
   assert.equal(scheduled.length, 1);
+  const cancelsBeforeRetryReplacement = cancels;
   scheduled[0].run({ attempt: 1 });
   assert.equal(scheduled.length, 2);
+  assert.equal(cancels, cancelsBeforeRetryReplacement);
   controller.clear();
+  assert.equal(cancels, 2);
   controller.stop();
-  assert.equal(cancels, 4);
+  assert.equal(cancels, 3);
   controller.destroy();
 });
