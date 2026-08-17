@@ -40,9 +40,12 @@ import {
   selectionMappingApi
 } from './model-kernel/index.js';
 import { createNativeDocumentStore } from './storage/native-document-store.js';
+import { SETTINGS_CHANGED_EVENT } from './features/settings/index.js';
 import {
+  createAutosaveController,
   createSaveController,
   createSaveStatusStore,
+  mountClassicAutosaveControllerPort,
   mountClassicSaveControllerPort,
   mountClassicSaveStatusStorePort
 } from './features/persistence/index.js';
@@ -454,6 +457,30 @@ async function loadAppModules() {
     throw error;
   }
 
+  const autosaveSettingsStorePort = compatibilityPlatformHost?.markdownEditorSettingsStorePort;
+  if (!autosaveSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable for Autosave.');
+  const autosaveSettingsSource = Object.freeze({
+    read() {
+      return Object.freeze({
+        enabled: Boolean(autosaveSettingsStorePort.get('autoSaveEnabled')),
+        delay: Number(autosaveSettingsStorePort.get('autoSaveDelay'))
+      });
+    },
+    subscribe(listener) {
+      if (typeof listener !== 'function') throw new TypeError('Autosave Settings listener must be a function.');
+      const handler = event => {
+        if (!event?.detail?.snapshot || !Array.isArray(event.detail.changedIds)) return;
+        listener(autosaveSettingsSource.read());
+      };
+      document.addEventListener(SETTINGS_CHANGED_EVENT, handler);
+      let active = true;
+      return () => {
+        if (!active) return;
+        active = false;
+        document.removeEventListener(SETTINGS_CHANGED_EVENT, handler);
+      };
+    }
+  });
   const saveStatusStore = createSaveStatusStore();
   const saveStatusStorePort = mountClassicSaveStatusStorePort(compatibilityPlatformHost, saveStatusStore);
   const saveController = createSaveController({
@@ -462,6 +489,17 @@ async function loadAppModules() {
     statusStore: saveStatusStore
   });
   const saveControllerPort = mountClassicSaveControllerPort(compatibilityPlatformHost, saveController);
+  const autosaveController = createAutosaveController({
+    saveController,
+    documentController,
+    model: documentModel,
+    statusStore: saveStatusStore,
+    settings: autosaveSettingsSource,
+    setTimer: (callback, delay) => window.setTimeout(callback, delay),
+    clearTimer: timerId => window.clearTimeout(timerId),
+    reportError(message, error) { console.error(message, error); }
+  });
+  const autosaveControllerPort = mountClassicAutosaveControllerPort(compatibilityPlatformHost, autosaveController);
   const unsubscribeNativeSaveStatus = window.markdownEditorDocumentStore.subscribe(event => {
     saveStatusStore.consumePersistenceEvent(event);
   });
@@ -469,6 +507,8 @@ async function loadAppModules() {
   const destroyPersistenceSaveFeature = () => {
     if (persistenceSaveFeatureDestroyed) return;
     persistenceSaveFeatureDestroyed = true;
+    autosaveControllerPort.destroy();
+    autosaveController.destroy();
     unsubscribeNativeSaveStatus();
     saveControllerPort.destroy();
     saveController.destroy();

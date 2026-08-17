@@ -18,8 +18,6 @@ if (!bootstrapPreviewCommandPort) throw new Error('Preview Command compatibility
       bootstrapEditorControllerPort.setText('');
       filenameInput.value = t('filenameDefault');
       bootstrapLayoutStatePort.sidebarVisible = restoredSettings.sidebarVisible;
-      autoSaveEnabled = restoredSettings.autoSaveEnabled;
-      autoSaveDelay = normalizeAutoSaveDelay(restoredSettings.autoSaveDelay);
       editorFontSize = restoredSettings.editorFontSize;
       editorTextColor = restoredSettings.editorTextColor;
       activeLineColor = restoredSettings.activeLineColor;

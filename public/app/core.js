@@ -16,6 +16,7 @@ const coreSubmenuPositionerPort = coreCompatibilityHost?.markdownEditorSubmenuPo
 const corePreviewCommandPort = coreCompatibilityHost?.markdownEditorPreviewCommandPort;
 const coreTaskSchedulerPort = coreCompatibilityHost?.markdownEditorTaskSchedulerPort;
 const coreSaveStatusStorePort = coreCompatibilityHost?.markdownEditorSaveStatusStorePort;
+const coreAutosaveControllerPort = coreCompatibilityHost?.markdownEditorAutosaveControllerPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -32,6 +33,7 @@ if (!coreSubmenuPositionerPort) throw new Error('Submenu Positioner compatibilit
 if (!corePreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
 if (!coreTaskSchedulerPort) throw new Error('Task Scheduler compatibility port is unavailable.');
 if (!coreSaveStatusStorePort) throw new Error('Save Status Store compatibility port is unavailable.');
+if (!coreAutosaveControllerPort) throw new Error('Autosave Controller compatibility port is unavailable.');
 const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
@@ -46,7 +48,7 @@ coreDocumentUiCommandPort.register({
   openFolderTreeFile: path => openFolderTreeFile(path),
   updateTitleDraft(value) {
     const result = coreDocumentControllerPort.updateActiveTitleDraft(value);
-    autoSave();
+    coreAutosaveControllerPort.schedule({ reason: 'title-draft' });
     syncCurrentDocumentFileTree();
     return result;
   }
@@ -71,8 +73,6 @@ const editor = document.getElementById('editor');
     let previewMode = 'preview';
     const getSessionDocuments = () => coreDocumentSessionPort.records;
     const getActiveDocumentId = () => coreDocumentSessionPort.activeId;
-    let autoSaveEnabled = true;
-    let autoSaveDelay = 500;
     let editorFontSize = 16;
     let editorTextColor = '';
     let activeLineColor = '';
@@ -86,8 +86,6 @@ const editor = document.getElementById('editor');
     let saveStatusResetTimer = 0;
     const LARGE_DOCUMENT_CHARS = corePreviewBehaviorThresholds.scheduling.postprocess.deferChars;
     const ULTRA_LARGE_DOCUMENT_CHARS = corePreviewBehaviorThresholds.mode.virtualChars;
-    const AUTOSAVE_MIN_SECONDS = 0.5;
-    const AUTOSAVE_MAX_SECONDS = 3600;
     const TOOLBAR_ITEM_IDS = new Set([
       'bold', 'italic', 'underline', 'strikethrough', 'script', 'textColor', 'highlight',
       'heading', 'quote', 'lists', 'code', 'link', 'image', 'table', 'find', 'mermaid'
@@ -120,14 +118,6 @@ const editor = document.getElementById('editor');
       document.body.dataset.previewPerformanceMode = resolved;
     }
 
-    function normalizeAutoSaveDelay(value) {
-      const delay = Number(value);
-      if (!Number.isFinite(delay)) return 500;
-      return Math.min(
-        AUTOSAVE_MAX_SECONDS * 1000,
-        Math.max(AUTOSAVE_MIN_SECONDS * 1000, Math.round(delay))
-      );
-    }
     let previewRenderTheme = '';
     let previewReferenceDefinitions = '';
     let countUpdateTimer = 0;
@@ -200,6 +190,8 @@ const editor = document.getElementById('editor');
     }
 
     function updateStatusBar() {
+      const autoSaveEnabled = Boolean(coreSettingsStorePort.get('autoSaveEnabled'));
+      const autoSaveDelay = Number(coreSettingsStorePort.get('autoSaveDelay'));
       const statusLeft = document.getElementById('status-left');
       if (statusLeft) statusLeft.textContent = autoSaveEnabled
         ? `自动保存已启用 · ${Math.round(autoSaveDelay) / 1000} 秒`
@@ -583,7 +575,7 @@ const editor = document.getElementById('editor');
     async function openDocument(id) {
       if (id === coreDocumentControllerPort.activeId) return;
       try {
-        clearTimeout(saveTimer);
+        coreAutosaveControllerPort.cancelPending('document-open');
         const result = await coreDocumentControllerPort.openDocument(id, {
           currentTitle: filenameInput.value,
           fallbackTitle: t('filenameDefault')
@@ -599,7 +591,7 @@ const editor = document.getElementById('editor');
 
     async function newDocument() {
       try {
-        clearTimeout(saveTimer);
+        coreAutosaveControllerPort.cancelPending('document-new');
         const index = getSessionDocuments().length + 1;
         const result = await coreDocumentControllerPort.newDocument({
           title: '未命名文档-' + index + '.md',
@@ -646,7 +638,7 @@ const editor = document.getElementById('editor');
         if (!result.renamed) return;
         if (result.active) {
           filenameInput.value = result.record.title;
-          autoSave();
+          coreAutosaveControllerPort.schedule({ reason: 'document-rename' });
         }
         syncCurrentDocumentFileTree();
         showToast('已重命名文档');
@@ -667,7 +659,7 @@ const editor = document.getElementById('editor');
         || !documentModel?.dirty
       ) return false;
       const saveState = coreSaveStatusStorePort.snapshot.state;
-      return !autoSaveEnabled || saveState === 'queued' || saveState === 'error';
+      return !coreSettingsStorePort.get('autoSaveEnabled') || saveState === 'queued' || saveState === 'error';
     }
 
     async function closeDocument(id, event) {
@@ -691,7 +683,7 @@ const editor = document.getElementById('editor');
       try {
         const closingActive = coreDocumentControllerPort.activeId === id;
         if (closingActive) {
-          clearTimeout(saveTimer);
+          coreAutosaveControllerPort.cancelPending('document-close');
           if (shouldSaveBeforeClose) {
             const saved = await saveCurrentFile();
             if (!saved) return;
@@ -893,8 +885,6 @@ const editor = document.getElementById('editor');
       const applied = event?.detail?.snapshot;
       if (!applied || !Array.isArray(event?.detail?.changedIds)) return;
       coreLayoutStatePort.sidebarVisible = applied.sidebarVisible;
-      autoSaveEnabled = applied.autoSaveEnabled;
-      autoSaveDelay = applied.autoSaveDelay;
       editorFontSize = applied.editorFontSize;
       editorTextColor = applied.editorTextColor;
       activeLineColor = applied.activeLineColor;
@@ -905,7 +895,6 @@ const editor = document.getElementById('editor');
       setLayoutMode(applied.layoutMode, false, false);
       applyEditorPreferences();
       updateStatusBar();
-      autoSave();
       showToast('设置已保存');
     });
 

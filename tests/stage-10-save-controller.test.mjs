@@ -1,6 +1,6 @@
 
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import {
   createSaveController,
@@ -247,13 +247,13 @@ test('Atomic 10.2 classic port is command-only and manual classic callers no lon
     assert.doesNotMatch(block, /exportSaveStatusStorePort\.setState\(/);
   }
 
-  assert.match(exportSource, /function autoSave\(\)[\s\S]*?saveCurrentDocumentState\(false\)/, 'R10-03 autosave migration must not be pulled into R10-02');
+  assert.doesNotMatch(exportSource, /\bfunction\s+autoSave\s*\(|\bsaveTimer\b|exportSaveStatusStorePort/, 'later R10-03 migration must not reintroduce the retired autosave implementation');
+  assert.match(core, /markdownEditorAutosaveControllerPort/, 'later R10-03 migration keeps classic callers behind the scoped Autosave port');
   assert.match(eventsSource, /eventsCloseSavePort\.register[\s\S]*?saveCurrentDocumentState\(false/, 'R10-11 close-save migration must remain future work');
-  assert.match(core, /async function saveCurrentDocumentState[\s\S]*?coreDocumentControllerPort\.saveActive\(/, 'legacy helper remains only for later autosave/close-save atomics');
-  await assert.rejects(access(new URL('../src/features/persistence/application/autosave-controller.js', import.meta.url)));
+  assert.match(core, /async function saveCurrentDocumentState[\s\S]*?coreDocumentControllerPort\.saveActive\(/, 'legacy helper remains only for later close-save work');
 
   const fixture = JSON.parse(fixtureText);
-  assert.equal(fixture.modules.length, 386);
+  assert.ok(fixture.modules.length >= 386);
   for (const path of [
     'src/features/persistence/application/save-controller.js',
     'src/features/persistence/compatibility/classic-save-controller-port.js'

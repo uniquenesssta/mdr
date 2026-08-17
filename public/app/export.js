@@ -7,8 +7,8 @@
     const exportSidebarControllerPort = exportCompatibilityHost?.markdownEditorSidebarControllerPort;
     const exportPreviewCommandPort = exportCompatibilityHost?.markdownEditorPreviewCommandPort;
     const exportPresentationPort = exportCompatibilityHost?.markdownEditorPresentationPort;
-    const exportSaveStatusStorePort = exportCompatibilityHost?.markdownEditorSaveStatusStorePort;
     const exportSaveControllerPort = exportCompatibilityHost?.markdownEditorSaveControllerPort;
+    const exportAutosaveControllerPort = exportCompatibilityHost?.markdownEditorAutosaveControllerPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
@@ -16,36 +16,9 @@
     if (!exportSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
     if (!exportPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
     if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
-    if (!exportSaveStatusStorePort) throw new Error('Save Status Store compatibility port is unavailable.');
     if (!exportSaveControllerPort) throw new Error('Save Controller compatibility port is unavailable.');
+    if (!exportAutosaveControllerPort) throw new Error('Autosave Controller compatibility port is unavailable.');
     exportDocumentUiCommandPort.register({ importFile: () => triggerImportFile() });
-    let saveTimer;
-    function autoSave() {
-      clearTimeout(saveTimer);
-      if (!autoSaveEnabled) {
-        updateStatusBar();
-        return;
-      }
-      exportSaveStatusStorePort.setState('queued');
-      saveTimer = setTimeout(() => {
-        exportSaveStatusStorePort.setState('saving');
-        // Tauri 中的超大文档会提交到 Rust 后台增量日志；浏览器模式继续使用本地存储。
-        saveCurrentDocumentState(false).then(result => {
-          if (result?.stale) return;
-          if (result?.error) exportSaveStatusStorePort.setState('error', '保存失败：' + result.error);
-          else if (!result?.native) showSaveHint();
-        }).catch(error => {
-          console.error('Auto save failed:', error);
-          exportSaveStatusStorePort.setState('error', '保存失败：' + (error?.message || String(error)));
-        });
-      }, autoSaveDelay);
-    }
-
-    function showSaveHint() {
-      exportSaveStatusStorePort.setState('saved');
-    }
-
-
     class ExportCancelledError extends Error {
       constructor() {
         super('EXPORT_CANCELLED');
@@ -854,7 +827,7 @@ ${'</scr' + 'ipt>'}
     async function loadDocumentFromContentLoader(name, loadContent, filePath = '', details = {}) {
       const normalizedName = name || t('filenameDefault');
       try {
-        clearTimeout(saveTimer);
+        exportAutosaveControllerPort.cancelPending('document-import');
         const result = await exportDocumentControllerPort.openExternalDocument({
           title: normalizedName,
           filePath,
@@ -867,7 +840,6 @@ ${'</scr' + 'ipt>'}
         filenameInput.value = result.record.title;
         if (!await applyDocumentLifecycleUi(result)) return false;
         if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
-        showSaveHint();
         if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
         void exportSidebarControllerPort.select('docs');
         window.markdownEditorPerf?.record?.('document.imported', {
@@ -918,4 +890,4 @@ ${'</scr' + 'ipt>'}
 
     // 切换主题
 
-    exportCompatibilityHost.markdownEditorEditorUiCommandPort?.register?.({ requestAutoSave: () => autoSave() });
+    exportCompatibilityHost.markdownEditorEditorUiCommandPort?.register?.({ requestAutoSave: () => exportAutosaveControllerPort.schedule({ reason: 'editor-ui-command' }) });

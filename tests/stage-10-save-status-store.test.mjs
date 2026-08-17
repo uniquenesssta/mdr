@@ -149,8 +149,8 @@ test('Atomic 10.1 composition gives status authority to Persistence and UI only 
   assert.doesNotMatch(core, /event\.state === 'queued'|event\.state === 'saving'|event\.state === 'saved'|event\.state === 'error'|event\.state === 'loading-index'|event\.state === 'loading'/);
   assert.match(core, /event\.state !== 'manifest'/);
 
-  assert.match(exportSource, /markdownEditorSaveStatusStorePort/);
-  assert.match(exportSource, /exportSaveStatusStorePort\.setState\(/);
+  assert.doesNotMatch(exportSource, /markdownEditorSaveStatusStorePort|exportSaveStatusStorePort\.setState\(/, 'later Persistence controllers must not return SaveStatusStore write authority to classic export code');
+  assert.match(exportSource, /markdownEditorAutosaveControllerPort/);
   assert.doesNotMatch(exportSource, /\bsetSaveStatus\s*\(/);
 
   const fixture = JSON.parse(fixtureText);

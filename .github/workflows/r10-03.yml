@@ -1,4 +1,4 @@
-name: R10-02 Save Controller
+name: R10-03 Autosave Controller
 
 on:
   push:
@@ -25,11 +25,11 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Guard R10-02 scope, frozen contracts and inventory
+      - name: Guard R10-03 scope, frozen contracts and inventory
         shell: bash
         run: |
           set -euo pipefail
-          base='cb34781548018ec68e3fcb5e6986d00080cd2298'
+          base='42e39bdef0374e61bc9447f85b036ab3c5d107a1'
           git merge-base --is-ancestor "$base" HEAD
           git diff --quiet "$base"...HEAD -- \
             src/model-kernel/index.js \
@@ -43,19 +43,20 @@ jobs:
             src/editor/hybrid/table-model.js \
             src-tauri/src/document_store.rs \
             package.json package-lock.json
-          test ! -e .agent/r10_02_apply.py
-          test -f src/features/persistence/application/save-controller.js
-          test -f src/features/persistence/compatibility/classic-save-controller-port.js
+          test ! -e .agent/r10_03_apply.py
+          test ! -e .github/workflows/r10-03-bootstrap.yml
+          test -f src/features/persistence/application/autosave-controller.js
+          test -f src/features/persistence/compatibility/classic-autosave-controller-port.js
           test ! -e src/features/persistence/native-document-store/native-save-session.js
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
-          if (!Array.isArray(fixture.modules) || fixture.modules.length < 386) throw new Error(`R10-02 production module inventory regressed: expected at least 386, got ${fixture.modules?.length}`);
+          if (fixture.modules.length !== 388) throw new Error(`Expected 388 production modules after R10-03, got ${fixture.modules.length}`);
           for (const path of [
-            'src/features/persistence/application/save-controller.js',
-            'src/features/persistence/compatibility/classic-save-controller-port.js'
+            'src/features/persistence/application/autosave-controller.js',
+            'src/features/persistence/compatibility/classic-autosave-controller-port.js'
           ]) {
-            if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing R10-02 production inventory record: ${path}`);
+            if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing R10-03 production inventory record: ${path}`);
           }
           NODE
           git diff --check
@@ -66,23 +67,23 @@ jobs:
       - name: Audit production dependencies
         run: npm audit --audit-level=high
 
-      - name: R10-02 targeted gate 8/8
+      - name: R10-03 targeted gate 9/9
         shell: bash
         run: |
           set -euo pipefail
-          node --test tests/stage-10-save-controller.test.mjs | tee /tmp/r10_02_targeted.log
-          grep -q '# tests 8' /tmp/r10_02_targeted.log
-          grep -q '# pass 8' /tmp/r10_02_targeted.log
-          grep -q '# fail 0' /tmp/r10_02_targeted.log
+          node --test tests/stage-10-autosave-controller.test.mjs | tee /tmp/r10_03_targeted.log
+          grep -q '# tests 9' /tmp/r10_03_targeted.log
+          grep -q '# pass 9' /tmp/r10_03_targeted.log
+          grep -q '# fail 0' /tmp/r10_03_targeted.log
 
       - name: Full Node regression remains green
         shell: bash
         run: |
           set -euo pipefail
-          npm test | tee /tmp/r10_02_node.log
-          grep -q '# fail 0' /tmp/r10_02_node.log
-          pass_count="$(sed -n 's/^# pass //p' /tmp/r10_02_node.log | tail -1)"
-          test "${pass_count:-0}" -ge 248
+          npm test | tee /tmp/r10_03_node.log
+          grep -q '# fail 0' /tmp/r10_03_node.log
+          pass_count="$(sed -n 's/^# pass //p' /tmp/r10_03_node.log | tail -1)"
+          test "${pass_count:-0}" -ge 257
 
       - name: Architecture and documentation gates
         shell: bash
@@ -97,8 +98,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run test:browser:contract | tee /tmp/r10_02_browser_contract.log
-          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_02_browser_contract.log
+          npm run test:browser:contract | tee /tmp/r10_03_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_03_browser_contract.log
 
       - name: Production build
         run: npm run build
@@ -107,8 +108,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run test:browser | tee /tmp/r10_02_browser.log
-          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_02_browser.log
+          npm run test:browser | tee /tmp/r10_03_browser.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_03_browser.log
 
       - name: Validation must leave tracked tree clean
         shell: bash
