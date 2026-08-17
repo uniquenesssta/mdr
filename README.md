@@ -12,4 +12,6 @@ R9-04 production cleanup：修复前 historical regression 为 13/14，唯一失
 
 Stage 8 regression：Atomic 8.5 Widget Geometry Scheduler 的两处历史测试已从旧 `markdownEditorScrollSync`/`markdownEditorSelectionController` globals 适配到 R9-12 最终 `hybrid-sync-capabilities` 显式注入边界；生产 Scheduler 未修改。candidate 已实际验证 Atomic 8.5 10/10 PASS、R9-04 14/14 PASS、R9-05 16/16 PASS、R9-12 targeted 16/16 PASS、`npm run build` PASS、`npm ci` 0 vulnerabilities；完整 historical regression 已确认 Stage 8 179/179 PASS。
 
-R9-12 impact inventory：先前红灯并非库存漂移；`.agent/r9_12_inventory.sh` 重新生成日志后工作区为 clean，失败来自旧 workflow 在无变化时仍强制执行 `git commit`，Git 返回 `nothing to commit`/exit 1。inventory workflow 已改为纯验证：重新生成日志后执行 `git diff --check` 与 `git diff --exit-code`，无差异即 PASS、有差异即 FAIL；已移除自动 commit/push 与 contents write 权限。修正后的 inventory 结果待最新 CI 确认。
+R9-12 impact inventory：先前红灯并非库存漂移；`.agent/r9_12_inventory.sh` 重新生成日志后工作区为 clean，失败来自旧 workflow 在无变化时仍强制执行 `git commit`，Git 返回 `nothing to commit`/exit 1。inventory workflow 已改为纯验证：重新生成日志后执行 `git diff --check` 与 `git diff --exit-code`，无差异即 PASS、有差异即 FAIL；已移除自动 commit/push 与 contents write 权限。提交 `98677c10fb220936889498acf7f2faff6abcf4c6` 触发的最新 impact inventory 已实际 PASS。
+
+R9-12 authoritative full validation：新增临时只读 CI 门禁，恢复 R9-11 正式收口时实际使用的 `npm audit --audit-level=high`、全量 Node、Architecture、Browser contract 10/10、build 与 Built-app Browser 29/29 双轮验证，并增加当前 R9-12 的 frozen model/package 边界、旧 Sync 文件缺失、381 production modules、no-legacy-runtime、generated-files、README record 与验证后 tracked tree clean 检查。该 workflow 不修改 production、不自动 commit/push，CI 结果待本次提交执行完成后记录。
