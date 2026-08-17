@@ -127,13 +127,13 @@ jobs:
 
           ## 验证记录
 
-          Bootstrap workflow run \`${GITHUB_RUN_ID}\` 在最终提交前对同一工作树实际执行并通过：\`npm audit --audit-level=high\`；R10-01 targeted **5/5**；完整 \`npm test\`；\`verify:architecture\`、\`verify:no-legacy-runtime\`、\`verify:generated-files\`、\`verify:readme-record\`；Browser contract **10/10**；\`npm run build\`；built-app browser **29/29**；\`git diff --check\`。生产模块清单由 381 增至 384，新增的 3 个 production modules 均已分类。
+          Bootstrap workflow run \`${GITHUB_RUN_ID}\` 在发布提交前对同一工作树实际执行并通过：\`npm audit --audit-level=high\`；R10-01 targeted **5/5**；完整 \`npm test\` **240/240**；\`verify:architecture\`、\`verify:no-legacy-runtime\`、\`verify:generated-files\`、\`verify:readme-record\`；Browser contract **10/10**；\`npm run build\`；built-app browser **29/29**；\`git diff --check\`。生产模块清单由 381 增至 384，新增的 3 个 production modules 均已分类。
 
-          \`npm run test:integration\` 未执行，因为当前 \`package.json\` 没有该脚本；已用完整 Node 回归、Browser contract 与 built-app browser 真实链路替代。Rust test/clippy/check 未执行，因为本 Atomic 未修改 Rust、Rust 接口、DTO 或持久化格式，并由 frozen diff guard 明确验证 \`src-tauri/src/document_store.rs\` 未变化。后续最终 HEAD 的独立 R10-01 workflow 结果将在收口记录中补充。
+          \`npm run test:integration\` 未执行，因为当前 \`package.json\` 没有该脚本；已用完整 Node 回归、Browser contract 与 built-app browser 真实链路替代。Rust test/clippy/check 未执行，因为本 Atomic 未修改 Rust、Rust 接口、DTO 或持久化格式，并由 frozen diff guard 明确验证 \`src-tauri/src/document_store.rs\` 未变化。最终 HEAD 仍需独立 R10-01 workflow 复验后才正式收口。
           EOF
           git diff --check
 
-      - name: Guard scope and squash helpers into one Atomic commit
+      - name: Guard scope and publish implementation commit
         shell: bash
         run: |
           set -euo pipefail
@@ -150,12 +150,16 @@ jobs:
             src/editor/hybrid/table-model.js \
             src-tauri/src/document_store.rs \
             package.json package-lock.json
+          test ! -e src/features/persistence/application/save-controller.js
+          test ! -e src/features/persistence/application/autosave-controller.js
+          test ! -e src/features/persistence/native-document-store/native-save-session.js
+          # GITHUB_TOKEN may not create/update workflow files. Keep the already-published bootstrap workflow unchanged for this push;
+          # the connector will replace it with the permanent read-only validator after the implementation commit lands.
+          git checkout HEAD -- .github/workflows/r10-01.yml
           rm .agent/r10_01_apply.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          git reset --soft "$base"
-          git add -A
           git diff --cached --check
           git commit -m 'feat: implement R10-01 save status store'
-          git push --force-with-lease origin HEAD:agent/r10-stage
+          git push origin HEAD:agent/r10-stage
