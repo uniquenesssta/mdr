@@ -4,4 +4,4 @@
 
 R9-12：删除 classic scroll-sync 与旧 Selection Controller；最终 Sync 仅用模块化 Mapper/Controller、frozen mapping 和显式能力，移除文本搜索/全文 editor.value fallback 与 Sync window globals。验证待权威 CI 完成后记录。
 
-R9-12 验证诊断：historical regression 临时 CI 已将原有 R9-11～R9-01 与 Stage 8 同一测试集合拆为独立命名门禁，以精确定位现存失败；未删除、跳过或弱化任何测试。R9-11 已进一步拆为 direct frozen contract 与 architecture integration 两个子检查，其中 direct 4/4 PASS；architecture 5/6，唯一失败来自测试将控制器错误消息字符串 `frozen selectionMappingApi` 误判为非法代码引用。该架构断言已收窄为检查真实运行时代码引用和 direct import，不修改生产错误语义、冻结 mapping 或注入链。R9-10 及之后门禁仍按硬失败停止，修正后的权威结果待最新 CI 记录。
+R9-12 验证诊断：historical regression 临时 CI 已将原有 R9-11～R9-01 与 Stage 8 同一测试集合拆为独立命名门禁，以精确定位现存失败；未删除、跳过或弱化任何测试。R9-11 direct frozen contract 4/4 PASS、architecture integration 6/6 PASS；此前 architecture 误报已收窄为检查真实运行时代码引用和 direct import，生产错误语义、冻结 mapping 与注入链均未修改。R9-10 上一轮为 14/16，两个失败均由历史测试写死旧 Controller 细节导致：architecture 不再要求泛型 `assertMethods` 展开成固定错误字符串；direct 生命周期测试改为验证新 editor 调度、clear、stop 三个 Controller 边界分别取消旧重试，同时明确再次 retry 的旧任务替换由 `SelectionRetryScheduler.schedule()` 内部 `cancelPending()` 独占。生产 Scheduler/Controller 未修改。修正后的 R9-10 权威结果待最新 CI 记录，硬失败仍阻止后续门禁。
