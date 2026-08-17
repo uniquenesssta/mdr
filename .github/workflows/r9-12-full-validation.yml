@@ -115,14 +115,14 @@ jobs:
         run: |
           set -euo pipefail
           npm run test:browser | tee /tmp/r9_12_browser_run1.log
-          grep -Fq 'Browser tests complete: 29/29 passed' /tmp/r9_12_browser_run1.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r9_12_browser_run1.log
 
       - name: Built-app browser run 2 29/29
         shell: bash
         run: |
           set -euo pipefail
           npm run test:browser | tee /tmp/r9_12_browser_run2.log
-          grep -Fq 'Browser tests complete: 29/29 passed' /tmp/r9_12_browser_run2.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r9_12_browser_run2.log
 
       - name: Validation must leave tracked tree clean
         shell: bash
