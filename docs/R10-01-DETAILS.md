@@ -12,4 +12,6 @@ Atomic 10.1 将保存/加载状态从经典脚本的局部变量与 DOM 反推�
 
 Bootstrap workflow run `32036188566` 在发布提交前对同一工作树实际执行并通过：`npm audit --audit-level=high`；R10-01 targeted **5/5**；完整 `npm test` **240/240**；`verify:architecture`、`verify:no-legacy-runtime`、`verify:generated-files`、`verify:readme-record`；Browser contract **10/10**；`npm run build`；built-app browser **29/29**；`git diff --check`。生产模块清单由 381 增至 384，新增的 3 个 production modules 均已分类。
 
-`npm run test:integration` 未执行，因为当前 `package.json` 没有该脚本；已用完整 Node 回归、Browser contract 与 built-app browser 真实链路替代。Rust test/clippy/check 未执行，因为本 Atomic 未修改 Rust、Rust 接口、DTO 或持久化格式，并由 frozen diff guard 明确验证 `src-tauri/src/document_store.rs` 未变化。最终 HEAD 仍需独立 R10-01 workflow 复验后才正式收口。
+独立只读 R10-01 门禁 run `32036335321` 已在代码与最终门禁提交 `0de20ebd57a0ca6175162ed342ebfc4150db9e76` 上再次通过：scope/frozen/inventory guard、依赖审计、targeted **5/5**、Full Node **240/240**、Architecture/Documentation、Browser contract **10/10**、Production build、Built-app **29/29**、tracked tree clean 全部 PASS。本记录的文档收口提交仅修改本文件，随后仍由同一只读门禁复验；该后续 run ID 保留在 GitHub Actions 证据链中，不再写回文档，以避免“记录自身 run ID”造成无限文档提交/触发循环。
+
+`npm run test:integration` 未执行，因为当前 `package.json` 没有该脚本；已用完整 Node 回归、Browser contract 与 built-app browser 真实链路替代。Rust test/clippy/check 未执行，因为本 Atomic 未修改 Rust、Rust 接口、DTO 或持久化格式，并由 frozen diff guard 明确验证 `src-tauri/src/document_store.rs` 未变化。
