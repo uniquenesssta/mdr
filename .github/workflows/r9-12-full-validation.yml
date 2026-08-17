@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   full-validation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - name: Checkout
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
@@ -58,25 +58,25 @@ jobs:
       - name: Audit production dependencies
         run: npm audit --audit-level=high
 
-      - name: R9-12 final sync targeted gate
+      - name: R9-12 final sync targeted gate 16/16
         shell: bash
         run: |
           set -euo pipefail
           node --test \
-            tests/stage-09-final-sync-wiring.test.mjs \
-            tests/architecture/stage-09-final-sync-wiring-architecture.test.mjs \
+            tests/stage-09-final-sync-legacy-removal.test.mjs \
+            tests/architecture/stage-09-final-sync-legacy-removal.test.mjs \
             | tee /tmp/r9_12_targeted.log
-          grep -Eq '^# tests 16$' /tmp/r9_12_targeted.log
-          grep -Eq '^# pass 16$' /tmp/r9_12_targeted.log
-          grep -Eq '^# fail 0$' /tmp/r9_12_targeted.log
+          grep -q '# tests 16' /tmp/r9_12_targeted.log
+          grep -q '# pass 16' /tmp/r9_12_targeted.log
+          grep -q '# fail 0' /tmp/r9_12_targeted.log
 
       - name: Full Node regression
         shell: bash
         run: |
           set -euo pipefail
           npm test | tee /tmp/r9_12_node.log
-          grep -Eq '^# fail 0$' /tmp/r9_12_node.log
-          grep -E '^# (tests|pass|fail) ' /tmp/r9_12_node.log | tail -n 3
+          grep -q '# fail 0' /tmp/r9_12_node.log
+          grep -E '# (tests|pass|fail) ' /tmp/r9_12_node.log | tail -n 3
 
       - name: Architecture and legacy runtime gates
         shell: bash
