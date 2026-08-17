@@ -30,7 +30,9 @@ test('R9-10 Retry Scheduler owns only bounded frame generation version and cance
 
 test('R9-10 final SelectionSyncController delegates retry scheduling and owns no retry count or retry RAF state', async () => {
   const controller = await read(controllerPath);
-  assert.match(controller, /SelectionSyncController requires SelectionRetryScheduler/);
+  assert.match(controller, /const REQUIRED_RETRY_METHODS = \['schedule', 'cancel'\]/);
+  assert.match(controller, /assertMethods\(retryScheduler, REQUIRED_RETRY_METHODS, 'SelectionRetryScheduler'\)/);
+  assert.match(controller, /throw new TypeError\(`SelectionSyncController requires \$\{label\}`\)/);
   assert.match(controller, /this\.retryScheduler\.schedule\(\{/);
   assert.match(controller, /version: key/);
   assert.match(controller, /getVersion: \(\) => this\.makeEditorKey\(\)/);
