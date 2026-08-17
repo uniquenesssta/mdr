@@ -105,7 +105,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run test:browser:contract | tee /tmp/r9_12_browser_contract.log
-          grep -Fq 'Browser preview contract tests complete: 10/10 passed' /tmp/r9_12_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r9_12_browser_contract.log
 
       - name: Production build
         run: npm run build
