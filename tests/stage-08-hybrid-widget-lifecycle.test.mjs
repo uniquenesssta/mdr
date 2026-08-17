@@ -1,5 +1,6 @@
-import test from 'node:test';
+import test, { afterEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { configureHybridSyncCapabilities } from '../src/features/hybrid-editor/index.js';
 import {
   destroyHybridWidgetGeometryScheduler,
   scheduleHybridWidgetGeometry
@@ -8,6 +9,8 @@ import {
   attachHybridWidgetLifecycle,
   destroyHybridWidgetLifecycle
 } from '../src/features/hybrid-editor/lifecycle/widget-lifecycle.js';
+
+afterEach(() => configureHybridSyncCapabilities(null));
 
 function createClock() {
   let nextId = 0;
@@ -67,8 +70,11 @@ function createHarness({ withObserver = true } = {}) {
   }
   if (withObserver) clock.ResizeObserver = FakeResizeObserver;
   clock.scheduleEditorMetricsRebuild = delay => metricsRebuilds.push(delay);
-  clock.markdownEditorScrollSync = { notifyGeometryChanged: surface => scrollSignals.push(surface) };
-  clock.markdownEditorSelectionController = { notifyEditorGeometry: reason => selectionSignals.push(reason) };
+  configureHybridSyncCapabilities({
+    markProgrammaticScroll() {},
+    notifyScrollGeometry(surface) { scrollSignals.push(surface); },
+    notifySelectionGeometry(reason) { selectionSignals.push(reason); }
+  });
   clock.markdownEditorPerf = {
     record(operation, payload) {
       if (operation === 'hybrid.widget-geometry') geometryReasons.push(payload.details.reason);

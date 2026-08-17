@@ -17,17 +17,19 @@ test('Atomic 8.5 has separate lifecycle and geometry scheduler owners behind the
   assert.match(index, /lifecycle\/widget-geometry-scheduler\.js/);
 });
 
-test('Atomic 8.5 separates element observation from the geometry side-effect queue without changing the frozen refresh contract', async () => {
+test('Atomic 8.5 separates element observation from the geometry side-effect queue while Stage 9 routes refresh through explicit sync capabilities', async () => {
   const lifecycle = await text('src/features/hybrid-editor/lifecycle/widget-lifecycle.js');
   const scheduler = await text('src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js');
   assert.match(lifecycle, /ResizeObserverCtor|elementLifecycles|lastWidth|lastHeight/);
   assert.match(lifecycle, /scheduleHybridWidgetGeometry/);
-  assert.doesNotMatch(lifecycle, /scheduleEditorMetricsRebuild|notifyGeometryChanged|notifyEditorGeometry|hybrid\.widget-geometry/);
+  assert.doesNotMatch(lifecycle, /scheduleEditorMetricsRebuild|notifyScrollGeometry|notifySelectionGeometry|hybrid\.widget-geometry/);
+  assert.match(scheduler, /getHybridSyncCapabilities/);
   assert.match(scheduler, /scheduleEditorMetricsRebuild\?\.\(40\)/);
-  assert.match(scheduler, /notifyGeometryChanged\?\.\('editor'\)/);
-  assert.match(scheduler, /notifyEditorGeometry\?\.\(`hybrid-widget:/);
+  assert.match(scheduler, /notifyScrollGeometry\('editor'\)/);
+  assert.match(scheduler, /notifySelectionGeometry\(`hybrid-widget:/);
   assert.match(scheduler, /hybrid\.widget-geometry/);
   assert.match(scheduler, /\}, 120\)/);
+  assert.doesNotMatch(scheduler, /markdownEditorScrollSync|markdownEditorScrollController|markdownEditorSelectionController/);
   assert.doesNotMatch(scheduler, /new ResizeObserverCtor|elementLifecycles/);
 });
 

@@ -6,30 +6,25 @@ on:
       - agent/r9-12-runner
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   candidate:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - name: Apply and test R9-12 candidate
+      - name: Validate R9-12 candidate
         shell: bash
         run: |
           set -euo pipefail
           npm ci
-          rm -rf .agent/__pycache__
-          PYTHONDONTWRITEBYTECODE=1 python .agent/r9_12_r904_cleanup.py
-          rm -rf .agent/__pycache__
-          git diff --check
+          node --test tests/stage-08-hybrid-widget-lifecycle.test.mjs tests/architecture/stage-08-hybrid-widget-lifecycle.test.mjs | tee /tmp/stage-08-widget-lifecycle.tap
+          grep -q '# tests 10' /tmp/stage-08-widget-lifecycle.tap
+          grep -q '# pass 10' /tmp/stage-08-widget-lifecycle.tap
+          grep -q '# fail 0' /tmp/stage-08-widget-lifecycle.tap
           node --test tests/stage-09-editor-scroll-mapper.test.mjs tests/architecture/stage-09-editor-scroll-mapper.test.mjs | tee /tmp/r9-04.tap
           grep -q '# tests 14' /tmp/r9-04.tap
           grep -q '# pass 14' /tmp/r9-04.tap
@@ -43,12 +38,3 @@ jobs:
           grep -q '# pass 16' /tmp/r9-12-targeted.tap
           grep -q '# fail 0' /tmp/r9-12-targeted.tap
           npm run build
-          git add README.md src/main.js
-          if git diff --cached --quiet; then
-            echo 'R9-04 candidate patch already applied; validation only.'
-            exit 0
-          fi
-          GIT_AUTHOR_NAME='atomic-runner' GIT_AUTHOR_EMAIL='atomic-runner@users.noreply.github.com' \
-          GIT_COMMITTER_NAME='atomic-runner' GIT_COMMITTER_EMAIL='atomic-runner@users.noreply.github.com' \
-            git commit -m 'refactor: remove stale R9-04 editor mapper compatibility exposure'
-          git push origin HEAD:refs/heads/agent/r9-12-runner
