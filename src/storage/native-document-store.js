@@ -1,10 +1,8 @@
 import { normalizeDocumentNativeMetadata } from '../features/documents/index.js';
-import { createNativeSaveQueue, createNativeSaveSession } from '../features/persistence/index.js';
+import { createNativeSaveQueue, createNativeSaveSession, createNativeSnapshotUploader } from '../features/persistence/index.js';
 
 const NATIVE_DOCUMENT_THRESHOLD = 100000;
 const DOCUMENT_CHUNK_BYTES = 512 * 1024;
-const SNAPSHOT_UPLOAD_THRESHOLD = 512 * 1024;
-const SNAPSHOT_UPLOAD_CHUNK_CHARS = 256 * 1024;
 
 function currentDocumentVersion(source) {
   return Math.max(0, Number(source?.getDocumentVersion?.() ?? source?.virtualEditor?.getDocumentVersion?.()) || 0);
@@ -24,18 +22,6 @@ function createDocumentSnapshot(source) {
   return String(source?.value ?? '');
 }
 
-function getSafeSnapshotChunkEnd(content, start) {
-  let end = Math.min(content.length, start + SNAPSHOT_UPLOAD_CHUNK_CHARS);
-  if (end < content.length) {
-    const previous = content.charCodeAt(end - 1);
-    const next = content.charCodeAt(end);
-    if (previous >= 0xD800 && previous <= 0xDBFF && next >= 0xDC00 && next <= 0xDFFF) {
-      end -= 1;
-    }
-  }
-  return Math.max(start + 1, end);
-}
-
 function createSaveRequestContext(document) {
   return Object.freeze({
     documentId: String(document?.id || ''),
@@ -52,6 +38,11 @@ export class NativeDocumentStore {
     this.saveQueues = new Map();
     this.activeDocumentId = '';
     this.listeners = new Set();
+    this.snapshotUploader = createNativeSnapshotUploader({
+      documentStore: this.documentStore,
+      notify: event => this.emit(event),
+      yieldControl: () => new Promise(resolve => setTimeout(resolve, 0))
+    });
     this.loadSequence = 0;
   }
 
@@ -76,11 +67,7 @@ export class NativeDocumentStore {
   }
 
   get supportsChunkedSnapshots() {
-    return Boolean(
-      this.documentStore?.beginSnapshotUpload
-      && this.documentStore?.appendSnapshotChunk
-      && this.documentStore?.commitSnapshotUpload
-    );
+    return this.snapshotUploader.supported;
   }
 
   shouldUse(document, contentLength) {
@@ -192,44 +179,6 @@ export class NativeDocumentStore {
     this.loadSequence += 1;
   }
 
-  async saveSnapshotInChunks(session, batch, request, content) {
-    const documentId = batch.documentId || session.documentId;
-    const uploadId = `upload_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
-    await this.documentStore.beginSnapshotUpload(documentId, uploadId);
-    try {
-      let offset = 0;
-      let chunkIndex = 0;
-      while (offset < content.length) {
-        const end = getSafeSnapshotChunkEnd(content, offset);
-        await this.documentStore.appendSnapshotChunk(
-          documentId,
-          uploadId,
-          content.slice(offset, end),
-          chunkIndex
-        );
-        offset = end;
-        chunkIndex += 1;
-        this.emit({
-          state: 'saving',
-          documentId,
-          targetVersion: currentDocumentVersion(session.source),
-          backendVersion: session.backendVersion,
-          uploadedChars: offset,
-          totalChars: content.length,
-          progress: content.length > 0 ? offset / content.length : 1,
-          pending: batch.getPendingCount()
-        });
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
-      return await this.documentStore.commitSnapshotUpload(request, uploadId);
-    } catch (error) {
-      try {
-        await this.documentStore.abortSnapshotUpload?.(documentId, uploadId);
-      } catch (_) {}
-      throw error;
-    }
-  }
-
   async search(documentId, query, from = 0, wrap = true) {
     if (!this.available || !documentId || !query || !this.documentStore?.search) return null;
     return this.documentStore.search({
@@ -292,8 +241,7 @@ export class NativeDocumentStore {
       const nextVersion = baseVersion + 1;
       const snapshotContent = mustReset ? createDocumentSnapshot(source) : null;
       const useChunkedSnapshot = mustReset
-        && snapshotContent.length >= SNAPSHOT_UPLOAD_THRESHOLD
-        && this.supportsChunkedSnapshots;
+        && this.snapshotUploader.shouldUpload(snapshotContent);
       const request = {
         documentId: document.documentId,
         title: document.title,
@@ -315,7 +263,13 @@ export class NativeDocumentStore {
       });
       try {
         response = useChunkedSnapshot
-          ? await this.saveSnapshotInChunks(session, batch, request, snapshotContent)
+          ? await this.snapshotUploader.upload({
+              request,
+              content: snapshotContent,
+              getTargetVersion: () => currentDocumentVersion(session.source),
+              backendVersion: session.backendVersion,
+              getPendingCount: batch.getPendingCount
+            })
           : await this.documentStore.save(request);
       } catch (error) {
         const message = error?.message || String(error);
@@ -352,12 +306,32 @@ export class NativeDocumentStore {
     const queue = this.saveQueues.get(documentId);
     queue?.destroy();
     this.saveQueues.delete(documentId);
+
+    let cancellationError = null;
+    try {
+      await this.snapshotUploader.cancel(documentId, 'document-deleted');
+    } catch (error) {
+      cancellationError = error;
+    }
+
     const session = this.sessions.get(documentId);
     session?.destroy();
     this.sessions.delete(documentId);
     if (this.activeDocumentId === documentId) this.activeDocumentId = '';
-    if (!this.available || !documentId) return;
-    await this.documentStore.remove(documentId);
+
+    let removeError = null;
+    if (this.available && documentId) {
+      try {
+        await this.documentStore.remove(documentId);
+      } catch (error) {
+        removeError = error;
+      }
+    }
+    if (cancellationError && removeError) {
+      throw new AggregateError([cancellationError, removeError], 'DOCUMENT_DELETE_CLEANUP_FAILED');
+    }
+    if (cancellationError) throw cancellationError;
+    if (removeError) throw removeError;
   }
 }
 
