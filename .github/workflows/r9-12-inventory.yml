@@ -16,5 +16,5 @@ jobs:
         run: |
           set -euo pipefail
           bash .agent/r9_12_inventory.sh
-          git diff --check -- .agent/r9_12_inventory.log
-          git diff --exit-code -- .agent/r9_12_inventory.log
+          git diff --check -- .agent/r9_12_inventory.txt
+          git diff --exit-code -- .agent/r9_12_inventory.txt

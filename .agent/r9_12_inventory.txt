@@ -8,7 +8,7 @@ tests/stage-09-final-sync-legacy-removal.test.mjs:247:  const result = controlle
 tests/stage-09-final-sync-legacy-removal.test.mjs:256:test('R9-12 SelectionSyncController destroy is terminal and cancels owned scheduling without destroying injected specialist owners', () => {
 tests/stage-09-scroll-contract-freeze.test.mjs:117:    controller.configure({
 tests/stage-09-scroll-contract-freeze.test.mjs:136:    controller.configure({ syncFromPreview: () => { calls += 1; } });
-tests/stage-09-scroll-contract-freeze.test.mjs:173:    controller.configure({ syncFromEditor: () => { calls += 1; } });
+tests/stage-09-scroll-contract-freeze.test.mjs:173:    controller.configure({ syncFromEditor: () => { editorCalls += 1; } });
 tests/stage-09-scroll-contract-freeze.test.mjs:190:    controller.configure({ syncFromEditor: () => { calls += 1; } });
 tests/stage-09-scroll-controller.test.mjs:102:    h.controller.configure({
 tests/stage-09-scroll-controller.test.mjs:126:    h.controller.configure({
