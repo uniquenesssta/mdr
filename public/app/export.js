@@ -8,6 +8,7 @@
     const exportPreviewCommandPort = exportCompatibilityHost?.markdownEditorPreviewCommandPort;
     const exportPresentationPort = exportCompatibilityHost?.markdownEditorPresentationPort;
     const exportSaveStatusStorePort = exportCompatibilityHost?.markdownEditorSaveStatusStorePort;
+    const exportSaveControllerPort = exportCompatibilityHost?.markdownEditorSaveControllerPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
@@ -16,6 +17,7 @@
     if (!exportPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
     if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
     if (!exportSaveStatusStorePort) throw new Error('Save Status Store compatibility port is unavailable.');
+    if (!exportSaveControllerPort) throw new Error('Save Controller compatibility port is unavailable.');
     exportDocumentUiCommandPort.register({ importFile: () => triggerImportFile() });
     let saveTimer;
     function autoSave() {
@@ -243,25 +245,28 @@
 
     // 手动保存
     async function saveToLocal() {
-      const generation = exportDocumentControllerPort.generation;
       try {
-        exportSaveStatusStorePort.setState('saving', '正在手动保存…');
-        const saveResult = await saveCurrentDocumentState(true, { waitForNative: true, forceSnapshot: true });
-        if (saveResult?.stale || !exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
-        const doc = exportDocumentControllerPort.getActiveRecord();
-        exportDocumentControllerPort.persistLegacyActiveSnapshot({
+        const saveResult = await exportSaveControllerPort.save({
           title: filenameInput.value,
-          content: documentModel?.createSnapshot?.('manual-local-save') ?? editor.value,
-          nativeBacked: Boolean(doc?.nativeBacked && window.markdownEditorDocumentStore?.available)
+          fallbackTitle: t('filenameDefault'),
+          forceSnapshot: true,
+          snapshotReason: 'document-storage',
+          statusMessage: '正在手动保存…',
+          contentReason: 'manual-local-save',
+          afterPersist(context) {
+            exportDocumentControllerPort.persistLegacyActiveSnapshot({
+              title: filenameInput.value,
+              content: context.content,
+              nativeBacked: Boolean(context.record?.nativeBacked && window.markdownEditorDocumentStore?.available)
+            });
+          }
         });
-        if (!exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
+        if (saveResult?.cancelled || saveResult?.stale) return false;
         updateStatusBar();
-        showSaveHint();
         showToast(t('toastSaved'));
         return true;
       } catch (error) {
         if (exportDocumentControllerPort.isStaleError(error)) return false;
-        exportSaveStatusStorePort.setState('error', '保存失败：' + (error?.message || String(error)));
         showToast(error?.message || String(error));
         return false;
       }
@@ -303,42 +308,41 @@
     }
 
     async function saveCurrentFile() {
-      const generation = exportDocumentControllerPort.generation;
       try {
-        exportSaveStatusStorePort.setState('saving', '正在保存文件…');
-        const saveResult = await saveCurrentDocumentState(true, { waitForNative: true, forceSnapshot: true });
-        if (saveResult?.stale || !exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
-        const doc = exportDocumentControllerPort.getActiveRecord();
-        if (!doc) throw new Error('当前没有可保存的文档');
-        const content = documentModel?.createSnapshot?.('save-current-file') ?? editor.value;
+        const saveResult = await exportSaveControllerPort.save({
+          title: filenameInput.value,
+          fallbackTitle: t('filenameDefault'),
+          forceSnapshot: true,
+          snapshotReason: 'document-storage',
+          statusMessage: '正在保存文件…',
+          contentReason: 'save-current-file',
+          async afterPersist(context) {
+            const doc = context.record;
+            if (!doc) throw new Error('当前没有可保存的文档');
 
-        if (exportPlatformPort?.supports('desktop.fileSystem') && doc.filePath) {
-          if (!exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
-          await exportPlatformPort.call('files', 'writeText', doc.filePath, content, {
-            extension: doc.title?.split('.').pop() || 'md',
-            reason: 'save-current-file'
-          });
-        } else {
-          const savedPath = await saveMarkdownWithPicker(
-            content,
-            doc.title || filenameInput.value || t('filenameDefault'),
-            'save-current-file'
-          );
-          if (!savedPath) {
-            if (exportDocumentControllerPort.isCurrentGeneration(generation)) exportSaveStatusStorePort.setState('saved');
-            return false;
+            if (exportPlatformPort?.supports('desktop.fileSystem') && doc.filePath) {
+              await exportPlatformPort.call('files', 'writeText', doc.filePath, context.content, {
+                extension: doc.title?.split('.').pop() || 'md',
+                reason: 'save-current-file'
+              });
+              return { path: doc.filePath };
+            }
+
+            const savedPath = await saveMarkdownWithPicker(
+              context.content,
+              doc.title || filenameInput.value || t('filenameDefault'),
+              'save-current-file'
+            );
+            if (!savedPath) return { cancelled: true, reason: 'file-picker-cancelled' };
+            if (typeof savedPath === 'string') bindDocumentFilePath(doc, savedPath);
+            return { path: typeof savedPath === 'string' ? savedPath : '' };
           }
-          if (!exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
-          if (typeof savedPath === 'string') bindDocumentFilePath(doc, savedPath);
-        }
-
-        if (!exportDocumentControllerPort.isCurrentGeneration(generation)) return false;
-        exportSaveStatusStorePort.setState('saved');
+        });
+        if (saveResult?.cancelled || saveResult?.stale) return false;
         showToast('文件已保存');
         return true;
       } catch (error) {
         if (exportDocumentControllerPort.isStaleError(error)) return false;
-        exportSaveStatusStorePort.setState('error', '保存失败：' + (error?.message || String(error)));
         showToast('保存失败：' + (error?.message || String(error)));
         window.markdownEditorPerf?.record?.('document.file-save-error', {
           category: 'document.error',

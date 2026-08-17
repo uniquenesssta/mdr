@@ -1,4 +1,4 @@
-name: R10-01 Save Status Store
+name: R10-02 Save Controller
 
 on:
   push:
@@ -25,14 +25,11 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Guard R10-01 frozen contracts and minimum inventory
+      - name: Guard R10-02 scope, frozen contracts and inventory
         shell: bash
         run: |
           set -euo pipefail
-          base='1c90fe1ae9cdb315352585a2e04729f9f4b975ee'
+          base='cb34781548018ec68e3fcb5e6986d00080cd2298'
           git merge-base --is-ancestor "$base" HEAD
           git diff --quiet "$base"...HEAD -- \
             src/model-kernel/index.js \
@@ -46,43 +43,47 @@ jobs:
             src/editor/hybrid/table-model.js \
             src-tauri/src/document_store.rs \
             package.json package-lock.json
-          test ! -e .agent/r10_01_apply.py
+          test ! -e .agent/r10_02_apply.py
+          test -f src/features/persistence/application/save-controller.js
+          test -f src/features/persistence/compatibility/classic-save-controller-port.js
+          test ! -e src/features/persistence/application/autosave-controller.js
+          test ! -e src/features/persistence/native-document-store/native-save-session.js
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
-          if (!Array.isArray(fixture.modules) || fixture.modules.length < 384) {
-            throw new Error(`R10-01 production module inventory regressed: expected at least 384, got ${fixture.modules?.length}`);
-          }
+          if (fixture.modules.length !== 386) throw new Error(`Expected 386 production modules after R10-02, got ${fixture.modules.length}`);
           for (const path of [
-            'src/features/persistence/index.js',
-            'src/features/persistence/state/save-status-store.js',
-            'src/features/persistence/compatibility/classic-save-status-store-port.js'
+            'src/features/persistence/application/save-controller.js',
+            'src/features/persistence/compatibility/classic-save-controller-port.js'
           ]) {
-            if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing R10-01 production inventory record: ${path}`);
+            if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing R10-02 production inventory record: ${path}`);
           }
           NODE
           git diff --check
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Audit production dependencies
         run: npm audit --audit-level=high
 
-      - name: R10-01 targeted gate 5/5
+      - name: R10-02 targeted gate 8/8
         shell: bash
         run: |
           set -euo pipefail
-          node --test tests/stage-10-save-status-store.test.mjs | tee /tmp/r10_01_targeted.log
-          grep -q '# tests 5' /tmp/r10_01_targeted.log
-          grep -q '# pass 5' /tmp/r10_01_targeted.log
-          grep -q '# fail 0' /tmp/r10_01_targeted.log
+          node --test tests/stage-10-save-controller.test.mjs | tee /tmp/r10_02_targeted.log
+          grep -q '# tests 8' /tmp/r10_02_targeted.log
+          grep -q '# pass 8' /tmp/r10_02_targeted.log
+          grep -q '# fail 0' /tmp/r10_02_targeted.log
 
-      - name: Full Node regression remains green
+      - name: Full Node regression 248/248
         shell: bash
         run: |
           set -euo pipefail
-          npm test | tee /tmp/r10_01_node.log
-          grep -q '# fail 0' /tmp/r10_01_node.log
-          pass_count="$(sed -n 's/^# pass //p' /tmp/r10_01_node.log | tail -1)"
-          test "${pass_count:-0}" -ge 240
+          npm test | tee /tmp/r10_02_node.log
+          grep -q '# tests 248' /tmp/r10_02_node.log
+          grep -q '# pass 248' /tmp/r10_02_node.log
+          grep -q '# fail 0' /tmp/r10_02_node.log
 
       - name: Architecture and documentation gates
         shell: bash
@@ -97,8 +98,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run test:browser:contract | tee /tmp/r10_01_browser_contract.log
-          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_01_browser_contract.log
+          npm run test:browser:contract | tee /tmp/r10_02_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_02_browser_contract.log
 
       - name: Production build
         run: npm run build
@@ -107,8 +108,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run test:browser | tee /tmp/r10_01_browser.log
-          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_01_browser.log
+          npm run test:browser | tee /tmp/r10_02_browser.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_02_browser.log
 
       - name: Validation must leave tracked tree clean
         shell: bash

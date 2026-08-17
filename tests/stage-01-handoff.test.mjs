@@ -124,7 +124,7 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 384);
+  assert.equal(moduleFixture.modules.length, 386);
   const readme = await readText('docs/README.md');
   const stage1Section = extractSection(readme, '## Stage 1 架构交接');
   assert.match(stage1Section, /67 个生产模块/);

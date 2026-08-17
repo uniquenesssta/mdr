@@ -40,7 +40,12 @@ import {
   selectionMappingApi
 } from './model-kernel/index.js';
 import { createNativeDocumentStore } from './storage/native-document-store.js';
-import { createSaveStatusStore, mountClassicSaveStatusStorePort } from './features/persistence/index.js';
+import {
+  createSaveController,
+  createSaveStatusStore,
+  mountClassicSaveControllerPort,
+  mountClassicSaveStatusStorePort
+} from './features/persistence/index.js';
 import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
@@ -451,14 +456,22 @@ async function loadAppModules() {
 
   const saveStatusStore = createSaveStatusStore();
   const saveStatusStorePort = mountClassicSaveStatusStorePort(compatibilityPlatformHost, saveStatusStore);
+  const saveController = createSaveController({
+    documentController,
+    model: documentModel,
+    statusStore: saveStatusStore
+  });
+  const saveControllerPort = mountClassicSaveControllerPort(compatibilityPlatformHost, saveController);
   const unsubscribeNativeSaveStatus = window.markdownEditorDocumentStore.subscribe(event => {
     saveStatusStore.consumePersistenceEvent(event);
   });
-  let saveStatusFeatureDestroyed = false;
-  const destroySaveStatusFeature = () => {
-    if (saveStatusFeatureDestroyed) return;
-    saveStatusFeatureDestroyed = true;
+  let persistenceSaveFeatureDestroyed = false;
+  const destroyPersistenceSaveFeature = () => {
+    if (persistenceSaveFeatureDestroyed) return;
+    persistenceSaveFeatureDestroyed = true;
     unsubscribeNativeSaveStatus();
+    saveControllerPort.destroy();
+    saveController.destroy();
     saveStatusStorePort.destroy();
     saveStatusStore.destroy();
   };
@@ -507,7 +520,7 @@ async function loadAppModules() {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
     destroySelectionSync();
-    destroySaveStatusFeature();
+    destroyPersistenceSaveFeature();
     if (windowController) {
       const pendingWindowDestroy = windowController.destroy();
       if (pendingWindowDestroy && typeof pendingWindowDestroy.catch === 'function') {
