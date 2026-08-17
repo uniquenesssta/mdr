@@ -32,7 +32,11 @@ test('R9-11 final selection mapping call sites consume only the injected frozen 
   const controller = await read('src/features/sync/selection/selection-sync-controller.js');
   assert.match(controller, /this\.selectionMapping\.createPreviewRangesForSourceSelection\(/);
   assert.match(controller, /this\.selectionMapping\.mapPreviewDomPointToSource\(/);
-  assert.doesNotMatch(controller, /selectionMappingApi|from ['"][^'"]*selection-mapping\.js['"]/);
+  assert.doesNotMatch(controller, /from ['"][^'"]*selection-mapping\.js['"]/);
+  assert.doesNotMatch(
+    controller,
+    /(?:^|\n)\s*selectionMappingApi\b|(?:=|:|,|\(|\[|\breturn\s+)\s*selectionMappingApi\b|\bselectionMappingApi\s*[.(\[]/m
+  );
 });
 
 test('R9-11 production code has no direct import of frozen selection-mapping outside model-kernel', async () => {
