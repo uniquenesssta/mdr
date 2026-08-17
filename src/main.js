@@ -334,16 +334,12 @@ async function loadAppModules() {
   let editorScrollMapper = null;
   try {
     editorScrollMapper = createEditorScrollMapper({ editorApi: virtualEditor, model: documentModel });
-    if (compatibilityPlatformHost) compatibilityPlatformHost.markdownEditorEditorScrollMapper = editorScrollMapper;
   } catch (error) {
     documentModel.destroy();
     virtualEditor.destroy();
     throw error;
   }
   const destroyEditorScrollMapper = () => {
-    if (compatibilityPlatformHost?.markdownEditorEditorScrollMapper === editorScrollMapper) {
-      delete compatibilityPlatformHost.markdownEditorEditorScrollMapper;
-    }
     editorScrollMapper?.destroy();
     editorScrollMapper = null;
   };
