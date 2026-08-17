@@ -52,10 +52,14 @@ test('R9-02 source ownership remains intact in final Stage 9 topology', async ()
   await access(file('src/sync/selection-mapping.js'));
 });
 
-test('R9-02 final composition has one source owner inside Scroll Controller and no classic or window source authority', async () => {
+test('R9-02 final composition keeps one validated source owner inside Scroll Controller with explicit external ownership support and no classic or window authority', async () => {
   const controller = await read('src/features/sync/scroll/scroll-sync-controller.js');
   const main = await read('src/main.js');
-  assert.match(controller, /this\.sourceOwnership = createScrollSourceOwnership/);
+  assert.match(controller, /const sourceOwnership = options\.sourceOwnership \|\| createScrollSourceOwnership\(\)/);
+  assert.match(controller, /assertSourceOwnership\(sourceOwnership\)/);
+  assert.match(controller, /this\.sourceOwnership = sourceOwnership/);
+  assert.match(controller, /this\.ownsSourceOwnership = !options\.sourceOwnership/);
+  assert.match(controller, /if \(this\.ownsSourceOwnership\) this\.sourceOwnership\.destroy\?\.\(\)/);
   assert.doesNotMatch(main, /ScrollSourceOwnership|createScrollSourceOwnership/);
   assert.doesNotMatch(main, /window\.markdownEditorScrollController|window\.markdownEditorScrollSync/);
   await assert.rejects(access(file('public/app/scroll-sync.js')));
