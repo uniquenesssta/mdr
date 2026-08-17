@@ -78,9 +78,21 @@ test('Atomic 8.15 production inventory has final Stage 8 ownership and no legacy
   ]) assert.equal(paths.has(path), false, path);
 });
 
-test('Atomic 8.15 removes the obsolete legacy-controller business-global baseline without adding a replacement', async () => {
+test('Atomic 8.15 legacy Hybrid globals stay removed while the current migration baseline advances monotonically', async () => {
   const baseline = JSON.parse(await read('tests/architecture/fixtures/architecture-baseline.json'));
   assert.equal(baseline.businessGlobalWrites.some(record => record.path === 'src/editor/hybrid/controller.js'), false);
   assert.equal(baseline.businessGlobalWrites.some(record => record.path === 'src/editor/hybrid-markdown.js'), false);
-  assert.equal(baseline.businessGlobalWrites.length, 12);
+  assert.equal(baseline.businessGlobalWrites.length, 9);
+
+  for (const global of [
+    'window.markdownEditorScrollController',
+    'window.markdownEditorScrollSync',
+    'window.markdownEditorSelectionController'
+  ]) {
+    assert.equal(
+      baseline.businessGlobalWrites.some(record => record.global === global),
+      false,
+      `${global} must stay removed from the current migration baseline`
+    );
+  }
 });
