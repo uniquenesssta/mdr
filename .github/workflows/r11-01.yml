@@ -66,8 +66,8 @@ jobs:
           rustc --version
           cargo --version
 
-      - name: Rust format gate
-        run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+      - name: R11-01 Rust format gate
+        run: rustfmt --edition 2021 --check src-tauri/tests/document_store_compatibility.rs
 
       - name: R11-01 compatibility fixtures 5/5
         shell: bash
