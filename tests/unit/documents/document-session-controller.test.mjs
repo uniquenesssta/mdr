@@ -12,6 +12,7 @@ import {
   createSessionDocumentRepository,
   mountClassicDocumentControllerPort
 } from '../../../src/features/documents/index.js';
+import { createBrowserDocumentRepository } from '../../../src/features/persistence/index.js';
 import { NativeDocumentStore } from '../../../src/storage/native-document-store.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
@@ -332,7 +333,8 @@ test('Atomic 5.3 session repository owns only compatibility body persistence and
     cancelLoad() {},
     async delete() {}
   };
-  const repository = createSessionDocumentRepository({ storage, nativeStore, scheduleCleanup: task => task() });
+  const browserRepository = createBrowserDocumentRepository({ storage });
+  const repository = createSessionDocumentRepository({ browserRepository, nativeStore, scheduleCleanup: task => task() });
   const metadata = record('browser', 'Browser.md');
   repository.rememberContent(metadata.id, 'browser body');
   repository.persistSession([metadata], metadata.id);
@@ -351,6 +353,7 @@ test('Atomic 5.3 session repository owns only compatibility body persistence and
     nativeVersion: 3
   });
   repository.destroy();
+  browserRepository.destroy();
   assert.throws(() => repository.persistSession([], null), /destroyed/);
 });
 
@@ -401,12 +404,13 @@ test('Atomic 5.3 classic controller port exposes only controller commands and ha
 });
 
 test('Atomic 5.3 production integration removes classic lifecycle/body-cache authority and keeps the frozen DocumentModel exact', async () => {
-  const [core, exportModule, events, main, nativeStore, entry] = await Promise.all([
+  const [core, exportModule, events, main, nativeStore, segmentedLoader, entry] = await Promise.all([
     readText('public/app/core.js'),
     readText('public/app/export.js'),
     readText('public/app/events.js'),
     readText('src/main.js'),
     readText('src/storage/native-document-store.js'),
+    readText('src/features/persistence/native-document-store/native-segmented-loader.js'),
     readText('src/features/documents/index.js')
   ]);
   assert.doesNotMatch(core, /legacyDocumentContentCache/);
@@ -419,7 +423,8 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
   assert.match(main, /createSessionDocumentRepository/);
   assert.match(main, /createDocumentSessionController/);
   assert.match(main, /mountClassicDocumentControllerPort/);
-  assert.match(nativeStore, /cancelPrevious/);
+  assert.match(nativeStore, /segmentedLoader\.load\(documentId, options\)/);
+  assert.match(segmentedLoader, /cancelPrevious/);
   assert.match(entry, /document-session-controller\.js/);
   assert.match(entry, /session-document-repository\.js/);
   assert.match(entry, /classic-document-controller-port\.js/);

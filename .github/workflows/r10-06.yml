@@ -48,7 +48,6 @@ jobs:
           test -f src/features/persistence/native-document-store/native-save-session.js
           test -f src/features/persistence/native-document-store/native-save-queue.js
           test -f src/features/persistence/native-document-store/native-snapshot-uploader.js
-          test ! -e src/features/persistence/browser/browser-document-repository.js
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));

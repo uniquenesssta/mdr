@@ -1,13 +1,8 @@
 /**
- * Responsibility: Persist document-session metadata/body compatibility data and delegate native document content I/O.
- * State/side effects: Owns only the non-native body cache plus storage/native I/O. Never owns session records, activeId, DOM or editor state.
+ * Responsibility: Coordinate the transitional document persistence contract by
+ * delegating browser fallback body/metadata persistence and native document I/O.
+ * State/side effects: Owns no document body cache, session records, activeId, DOM or editor state.
  */
-
-const DOCS_KEY = 'md_editor_documents';
-const CURRENT_DOC_KEY = 'md_editor_current_document';
-const EMPTY_DOCUMENTS_KEY = 'md_editor_documents_intentionally_empty';
-const STORAGE_KEY = 'md_editor_content';
-const FILENAME_KEY = 'md_editor_filename';
 
 function getDocumentLength(source) {
   return Math.max(0, Number(source?.getTextLength?.() ?? source?.textLength) || 0);
@@ -22,11 +17,6 @@ function createSnapshot(source, reason) {
   return String(source?.value ?? '');
 }
 
-function normalizeStoredRecords(value) {
-  if (!Array.isArray(value)) return [];
-  return value.filter(record => record && record.id).map(record => ({ ...record }));
-}
-
 function materializeLoadedContent(restored) {
   if (typeof restored?.content === 'string' && restored.content.length) return restored.content;
   if (Array.isArray(restored?.chunks)) return restored.chunks.join('');
@@ -34,67 +24,44 @@ function materializeLoadedContent(restored) {
   return String(restored?.content || '');
 }
 
+const REQUIRED_BROWSER_METHODS = Object.freeze([
+  'readLegacySession',
+  'resetLegacySession',
+  'rememberContent',
+  'forgetContent',
+  'hasContent',
+  'readContent',
+  'persistSession',
+  'persistLegacyActiveTitle',
+  'persistLegacyActiveSnapshot',
+  'clearLegacyActiveSnapshot'
+]);
+
 export function createSessionDocumentRepository({
-  storage,
+  browserRepository,
   nativeStore = null,
   scheduleCleanup = task => setTimeout(task, 0),
   reportError = (message, error) => console.warn(message, error)
 } = {}) {
-  if (!storage || typeof storage.getItem !== 'function' || typeof storage.setItem !== 'function' || typeof storage.removeItem !== 'function') {
-    throw new TypeError('Session document repository requires a Web Storage compatible object.');
+  if (!browserRepository || typeof browserRepository !== 'object') {
+    throw new TypeError('Session document repository requires a BrowserDocumentRepository.');
+  }
+  for (const method of REQUIRED_BROWSER_METHODS) {
+    if (typeof browserRepository[method] !== 'function') {
+      throw new TypeError(`BrowserDocumentRepository.${method}() is required.`);
+    }
   }
   if (typeof scheduleCleanup !== 'function') throw new TypeError('Session document repository cleanup scheduler must be a function.');
   if (typeof reportError !== 'function') throw new TypeError('Session document repository error reporter must be a function.');
 
   let destroyed = false;
-  const bodyCache = new Map();
-
   const assertActive = () => {
     if (destroyed) throw new Error('Session document repository has been destroyed.');
   };
 
-  const rememberContent = (documentId, content) => {
-    assertActive();
-    const id = String(documentId || '');
-    if (!id) throw new Error('Document id is required to cache document content.');
-    bodyCache.set(id, String(content ?? ''));
-  };
-
-  const forgetContent = documentId => {
-    assertActive();
-    bodyCache.delete(String(documentId || ''));
-  };
-
-  const persistSession = (records, activeId) => {
-    assertActive();
-    try {
-      const normalizedRecords = Array.from(records || []);
-      const serialized = normalizedRecords.map(record => {
-        const stored = { ...record };
-        if (record?.nativeBacked && nativeStore?.available) return stored;
-        const content = bodyCache.get(String(record?.id || ''));
-        if (typeof content === 'string') stored.content = content;
-        return stored;
-      });
-      storage.setItem(DOCS_KEY, JSON.stringify(serialized));
-      if (normalizedRecords.length) storage.removeItem(EMPTY_DOCUMENTS_KEY);
-      else storage.setItem(EMPTY_DOCUMENTS_KEY, 'true');
-      if (activeId) storage.setItem(CURRENT_DOC_KEY, String(activeId));
-      else storage.removeItem(CURRENT_DOC_KEY);
-      return true;
-    } catch (error) {
-      reportError('Document session storage failed:', error);
-      return false;
-    }
-  };
-
   const readLegacySession = () => {
     assertActive();
-    try {
-      return normalizeStoredRecords(JSON.parse(storage.getItem(DOCS_KEY) || '[]'));
-    } catch (_) {
-      return [];
-    }
+    return browserRepository.readLegacySession();
   };
 
   const resetLegacySession = records => {
@@ -102,19 +69,24 @@ export function createSessionDocumentRepository({
     const staleDocumentIds = Array.from(new Set(
       Array.from(records || []).map(record => String(record?.id || '')).filter(Boolean)
     ));
-    bodyCache.clear();
-    try {
-      storage.removeItem(DOCS_KEY);
-      storage.removeItem(CURRENT_DOC_KEY);
-      storage.removeItem(EMPTY_DOCUMENTS_KEY);
-      storage.removeItem(STORAGE_KEY);
-      storage.removeItem(FILENAME_KEY);
-    } catch (error) {
-      reportError('Legacy document session cleanup failed:', error);
-    }
-
+    browserRepository.resetLegacySession();
     if (!nativeStore?.available || typeof nativeStore.delete !== 'function' || !staleDocumentIds.length) return;
     scheduleCleanup(() => Promise.allSettled(staleDocumentIds.map(documentId => nativeStore.delete(documentId))));
+  };
+
+  const rememberContent = (documentId, content) => {
+    assertActive();
+    return browserRepository.rememberContent(documentId, content);
+  };
+
+  const forgetContent = documentId => {
+    assertActive();
+    return browserRepository.forgetContent(documentId);
+  };
+
+  const persistSession = (records, activeId) => {
+    assertActive();
+    return browserRepository.persistSession(records, activeId);
   };
 
   const load = async (record, options = {}) => {
@@ -125,7 +97,7 @@ export function createSessionDocumentRepository({
       loaded = await nativeStore.load(record.id, { cancelPrevious: options.isolated !== true });
     }
     if (loaded) {
-      bodyCache.delete(record.id);
+      browserRepository.forgetContent(record.id);
       return {
         content: typeof loaded.content === 'string' ? loaded.content : '',
         chunks: Array.isArray(loaded.contentChunks) ? loaded.contentChunks.slice() : null,
@@ -138,11 +110,11 @@ export function createSessionDocumentRepository({
         }
       };
     }
-    if (record.nativeBacked && !bodyCache.has(record.id)) {
+    if (record.nativeBacked && !browserRepository.hasContent(record.id)) {
       throw new Error('无法恢复后台文档快照，为避免覆盖原内容已停止打开');
     }
     return {
-      content: bodyCache.get(record.id) || '',
+      content: browserRepository.readContent(record.id),
       chunks: null,
       loaded: null,
       metadataPatch: null
@@ -156,14 +128,14 @@ export function createSessionDocumentRepository({
     const useNative = Boolean(nativeStore?.shouldUse?.(record, contentLength));
     const wasNativeBacked = Boolean(record.nativeBacked);
     if (!useNative || !wasNativeBacked) {
-      rememberContent(record.id, createSnapshot(source, options.snapshotReason || 'document-storage'));
+      browserRepository.rememberContent(record.id, createSnapshot(source, options.snapshotReason || 'document-storage'));
     }
     if (!useNative) {
       source?.markPersisted?.(getDocumentVersion(source), 0);
       return { native: false };
     }
     const result = await nativeStore.save(source, record, { forceSnapshot: Boolean(options.forceSnapshot) });
-    if (result?.native) bodyCache.delete(record.id);
+    if (result?.native) browserRepository.forgetContent(record.id);
     return result;
   };
 
@@ -180,40 +152,8 @@ export function createSessionDocumentRepository({
   const remove = async documentId => {
     assertActive();
     const id = String(documentId || '');
-    bodyCache.delete(id);
+    browserRepository.forgetContent(id);
     if (id) await nativeStore?.delete?.(id);
-  };
-
-  const persistLegacyActiveTitle = title => {
-    assertActive();
-    try {
-      if (title) storage.setItem(FILENAME_KEY, String(title));
-      else storage.removeItem(FILENAME_KEY);
-    } catch (error) {
-      reportError('Legacy filename storage failed:', error);
-    }
-  };
-
-  const persistLegacyActiveSnapshot = ({ title = '', content = '', nativeBacked = false } = {}) => {
-    assertActive();
-    try {
-      if (nativeBacked && nativeStore?.available) storage.removeItem(STORAGE_KEY);
-      else storage.setItem(STORAGE_KEY, String(content ?? ''));
-      if (title) storage.setItem(FILENAME_KEY, String(title));
-      else storage.removeItem(FILENAME_KEY);
-    } catch (error) {
-      reportError('Legacy active document storage failed:', error);
-    }
-  };
-
-  const clearLegacyActiveSnapshot = () => {
-    assertActive();
-    try {
-      storage.removeItem(STORAGE_KEY);
-      storage.removeItem(FILENAME_KEY);
-    } catch (error) {
-      reportError('Legacy active document cleanup failed:', error);
-    }
   };
 
   return Object.freeze({
@@ -228,13 +168,21 @@ export function createSessionDocumentRepository({
     cancelPendingLoad,
     remove,
     materializeLoadedContent,
-    persistLegacyActiveTitle,
-    persistLegacyActiveSnapshot,
-    clearLegacyActiveSnapshot,
+    persistLegacyActiveTitle(title) {
+      assertActive();
+      return browserRepository.persistLegacyActiveTitle(title);
+    },
+    persistLegacyActiveSnapshot(options) {
+      assertActive();
+      return browserRepository.persistLegacyActiveSnapshot(options);
+    },
+    clearLegacyActiveSnapshot() {
+      assertActive();
+      return browserRepository.clearLegacyActiveSnapshot();
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
-      bodyCache.clear();
       nativeStore?.cancelLoad?.();
     }
   });

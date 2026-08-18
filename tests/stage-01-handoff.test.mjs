@@ -124,7 +124,7 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 393);
+  assert.equal(moduleFixture.modules.length, 394);
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/application/autosave-controller.js'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/compatibility/classic-autosave-controller-port.js'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-save-session.js'));
@@ -132,6 +132,7 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-snapshot-uploader.js'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-segmented-loader.js'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-search-adapter.js'));
+  assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/browser/browser-document-repository.js'));
   const readme = await readText('docs/README.md');
   const stage1Section = extractSection(readme, '## Stage 1 架构交接');
   assert.match(stage1Section, /67 个生产模块/);

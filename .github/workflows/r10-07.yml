@@ -46,7 +46,6 @@ jobs:
           test ! -e .github/workflows/r10-07-bootstrap.yml
           ! compgen -G '.agent/r10-07-trigger*.txt' >/dev/null
           test -f src/features/persistence/native-document-store/native-segmented-loader.js
-          test ! -e src/features/persistence/browser/browser-document-repository.js
           grep -q 'createNativeSegmentedLoader' src/features/persistence/index.js
           grep -q 'segmentedLoader.load(documentId, options)' src/storage/native-document-store.js
           ! grep -q 'DOCUMENT_CHUNK_BYTES' src/storage/native-document-store.js

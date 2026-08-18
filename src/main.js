@@ -43,6 +43,7 @@ import { createNativeDocumentStore } from './storage/native-document-store.js';
 import { SETTINGS_CHANGED_EVENT } from './features/settings/index.js';
 import {
   createAutosaveController,
+  createBrowserDocumentRepository,
   createSaveController,
   createSaveStatusStore,
   mountClassicAutosaveControllerPort,
@@ -394,8 +395,14 @@ async function loadAppModules() {
   if (!documentSessionPort) throw new Error('Document session compatibility port is unavailable.');
   const menuCommandPort = compatibilityPlatformHost?.markdownEditorMenuCommandPort;
   if (!menuCommandPort) throw new Error('Menu command compatibility port is unavailable.');
-  const documentRepository = createSessionDocumentRepository({
+  const browserDocumentRepository = createBrowserDocumentRepository({
     storage: window.localStorage,
+    reportError(message, error) {
+      console.warn(message, error);
+    }
+  });
+  const documentRepository = createSessionDocumentRepository({
+    browserRepository: browserDocumentRepository,
     nativeStore: window.markdownEditorDocumentStore,
     scheduleCleanup(task) {
       if (backgroundTaskScheduler?.schedule) return backgroundTaskScheduler.schedule('document-session-cleanup-' + Date.now(), task, {
@@ -444,6 +451,7 @@ async function loadAppModules() {
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    browserDocumentRepository.destroy();
     editorUiCommandPort.destroy();
     editorControllerPort.destroy();
     editorFocusService.destroy();
@@ -600,6 +608,7 @@ async function loadAppModules() {
     documentControllerPort.destroy();
     documentController.destroy();
     documentRepository.destroy();
+    browserDocumentRepository.destroy();
     editorUiCommandPort.destroy();
     editorControllerPort.destroy();
     editorFocusService.destroy();
