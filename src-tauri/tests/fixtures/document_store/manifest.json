@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "a49d89918a20251287df28583ab29d4b6eb4c1de",
+  "sourceDocumentStoreBlob": "af58efc8ac19672e7834b5cd8bab26fd202f85aa",
+  "sourcePath": "src-tauri/src/document_store.rs",
+  "formatContract": {
+    "snapshotContent": "snapshot-{slot}.md",
+    "snapshotMeta": "snapshot-{slot}.json",
+    "journal": "changes.jsonl",
+    "hash": "fnv1a64",
+    "jsonCase": "camelCase",
+    "offsets": "UTF-16"
+  },
+  "cases": {
+    "valid-ab-journal-unicode": {
+      "expectedVersion": 3,
+      "expectedTitle": "中文😀.md",
+      "expectedContent": "# 标题😀\n第一行\n第二行\n搜索😀中文\n",
+      "expectedRecovered": false,
+      "search": {
+        "query": "😀中文",
+        "from": 17,
+        "to": 21
+      }
+    },
+    "truncated-journal": {
+      "expectedVersion": 5,
+      "expectedTitle": "截断😀.md",
+      "expectedContent": "甲乙😀丙",
+      "expectedRecovered": true,
+      "expectedRecoveryMessage": "检测到存储异常，已恢复到版本 5：增量日志包含未完整写入的记录"
+    },
+    "corrupt-slot": {
+      "expectedVersion": 6,
+      "expectedTitle": "恢复😀.md",
+      "expectedContent": "可用旧快照😀",
+      "expectedRecovered": true,
+      "expectedRecoveryMessage": "检测到存储异常，已从可用快照恢复到版本 6：B 槽快照校验失败"
+    }
+  }
+}
