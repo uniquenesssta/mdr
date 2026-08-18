@@ -5,7 +5,7 @@
 
 mod types;
 
-pub use types::{
+pub(crate) use types::{
     DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
     SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
     TextChange,
