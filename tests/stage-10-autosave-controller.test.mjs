@@ -264,8 +264,8 @@ test('Atomic 10.3 classic bridge is command-only and all legacy autosave callers
   assert.match(core, /markdownEditorAutosaveControllerPort/);
   assert.match(eventsSource, /markdownEditorAutosaveControllerPort/);
   assert.match(eventsSource, /eventsAutosaveControllerPort\.schedule\(/);
-  assert.match(eventsSource, /eventsCloseSavePort\.register[\s\S]*?eventsAutosaveControllerPort\.cancelPending\(['"]close-save['"]\)[\s\S]*?saveCurrentDocumentState\(false/, 'R10-11 close-save persistence remains future work while pending autosave cancellation moves to R10-03');
-  assert.match(core, /async function saveCurrentDocumentState[\s\S]*?coreDocumentControllerPort\.saveActive\(/, 'legacy helper remains only for R10-11 close-save after R10-03');
+  assert.doesNotMatch(eventsSource, /eventsCloseSavePort|markdownEditorCloseSavePort/, 'R10-11 removes the classic close-save bridge from events.js');
+  assert.match(core, /async function saveCurrentDocumentState[\s\S]*?coreDocumentControllerPort\.saveActive\(/, 'legacy helper remains for non-close-save classic persistence paths through R10-11');
 
   const fixture = JSON.parse(fixtureText);
   assert.ok(fixture.modules.length >= 388);

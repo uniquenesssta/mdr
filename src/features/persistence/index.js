@@ -9,6 +9,7 @@ export { SAVE_STATUS_STATES, createSaveStatusStore } from './state/save-status-s
 export { createSaveController } from './application/save-controller.js';
 export { createAutosaveController } from './application/autosave-controller.js';
 export { createLoadController } from './application/load-controller.js';
+export { createCloseSaveController } from './application/close-save-controller.js';
 export { createNativeSaveSession } from './native-document-store/native-save-session.js';
 export { createNativeSaveQueue } from './native-document-store/native-save-queue.js';
 export { createNativeSnapshotUploader } from './native-document-store/native-snapshot-uploader.js';

@@ -260,7 +260,7 @@ test('Atomic 10.10 slower persisted open cannot overwrite the newer Documents ge
   loadController.destroy();
 });
 
-test('Atomic 10.10 public composition creates one LoadController and leaves Close Save for R10-11', async () => {
+test('Atomic 10.10 keeps one LoadController authority after later Persistence application atomics', async () => {
   const [entry, mainSource, fixtureText, handoff, readme] = await Promise.all([
     source('src/features/persistence/index.js'),
     source('src/main.js'),
@@ -272,12 +272,9 @@ test('Atomic 10.10 public composition creates one LoadController and leaves Clos
   assert.match(mainSource, /createLoadController/);
   assert.match(mainSource, /loadController\s*\n?\s*\}/);
   assert.match(mainSource, /loadController\.destroy\(\)/);
-  assert.doesNotMatch(entry, /createCloseSaveController/);
-  assert.doesNotMatch(mainSource, /createCloseSaveController/);
-  await assert.rejects(source('src/features/persistence/application/close-save-controller.js'), error => error?.code === 'ENOENT');
   const fixture = JSON.parse(fixtureText);
-  assert.equal(fixture.modules.length, 395);
+  assert.ok(fixture.modules.length >= 395);
   assert.ok(fixture.modules.some(row => row[0] === 'src/features/persistence/application/load-controller.js'));
-  assert.match(handoff, /moduleFixture\.modules\.length,\s*395/);
-  assert.match(readme, /R10-10/);
+  assert.match(handoff, /moduleFixture\.modules\.length,\s*(?:39[5-9]|[4-9]\d{2,})/);
+  assert.match(readme, /Stage 10/);
 });

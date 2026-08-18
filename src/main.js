@@ -44,6 +44,7 @@ import { SETTINGS_CHANGED_EVENT } from './features/settings/index.js';
 import {
   createAutosaveController,
   createBrowserDocumentRepository,
+  createCloseSaveController,
   createLoadController,
   createSaveController,
   createSaveStatusStore,
@@ -554,6 +555,7 @@ async function loadAppModules() {
   let folderTreeController = null;
   let folderTreeControllerPort = null;
   let closeSavePort = null;
+  let closeSaveController = null;
   let classicCloseSavePort = null;
   let windowController = null;
   let previewRenderer = null;
@@ -587,7 +589,6 @@ async function loadAppModules() {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
     destroySelectionSync();
-    destroyPersistenceSaveFeature();
     if (windowController) {
       const pendingWindowDestroy = windowController.destroy();
       if (pendingWindowDestroy && typeof pendingWindowDestroy.catch === 'function') {
@@ -595,10 +596,13 @@ async function loadAppModules() {
       }
       windowController = null;
     }
+    closeSaveController?.destroy();
+    closeSaveController = null;
     classicCloseSavePort?.destroy();
     classicCloseSavePort = null;
     closeSavePort?.destroy();
     closeSavePort = null;
+    destroyPersistenceSaveFeature();
     unregisterLayoutUiCommands?.();
     unregisterLayoutUiCommands = null;
     sidebarControllerPort?.destroy();
@@ -1205,6 +1209,29 @@ async function loadAppModules() {
       backgroundTasks: backgroundTaskScheduler.getStats().pending
     }));
     closeSavePort = createCloseSavePort();
+    closeSaveController = createCloseSaveController({
+      saveController,
+      autosaveController,
+      documentController,
+      closeSavePort,
+      readSaveContext: () => ({ title: documentModel.title }),
+      async decideAfterFailure(error) {
+        console.error('[DocumentLifecycle] close-save failed', error);
+        const message = error instanceof Error
+          ? error.message
+          : String(error || '未知错误');
+        return platform.dialogs.confirm(
+          '关闭前保存失败：' + message + '\n\n仍然关闭软件吗？未保存的修改可能丢失。',
+          {
+            title: '关闭前保存失败',
+            kind: 'warning',
+            okLabel: '仍然关闭',
+            cancelLabel: '返回编辑'
+          }
+        );
+      }
+    });
+    closeSaveController.start();
     classicCloseSavePort = mountClassicCloseSavePort(compatibilityPlatformHost, closeSavePort);
     const layoutFrameHost = document.defaultView;
     const requestLayoutFrame = callback => layoutFrameHost.requestAnimationFrame(callback);

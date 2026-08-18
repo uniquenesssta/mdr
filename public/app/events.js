@@ -3,14 +3,12 @@
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
     const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
     const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
-    const eventsCloseSavePort = eventsCompatibilityHost?.markdownEditorCloseSavePort;
     const eventsAutosaveControllerPort = eventsCompatibilityHost?.markdownEditorAutosaveControllerPort;
     const eventsLayoutStatePort = eventsCompatibilityHost?.markdownEditorLayoutStatePort;
     const eventsPreviewCommandPort = eventsCompatibilityHost?.markdownEditorPreviewCommandPort;
     if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
     if (!eventsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
     if (!eventsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
-    if (!eventsCloseSavePort) throw new Error('CloseSavePort compatibility port is unavailable.');
     if (!eventsAutosaveControllerPort) throw new Error('Autosave Controller compatibility port is unavailable.');
     if (!eventsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!eventsPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
@@ -32,21 +30,7 @@
 
 
 
-    eventsCloseSavePort.register(async () => {
-      eventsAutosaveControllerPort.cancelPending('close-save');
-      try {
-        await saveCurrentDocumentState(false, { waitForNative: true, forceSnapshot: true });
-        return true;
-      } catch (error) {
-        const message = recordDocumentOperationError('close-save', error);
-        return Boolean(await confirmUserAction('关闭前保存失败：' + message + '\n\n仍然关闭软件吗？未保存的修改可能丢失。', {
-          title: '关闭前保存失败',
-          kind: 'warning',
-          okLabel: '仍然关闭',
-          cancelLabel: '返回编辑'
-        }));
-      }
-    });
+
 
     // 拖放文件打开
     const dropOverlay = document.getElementById('drop-overlay');

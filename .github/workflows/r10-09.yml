@@ -46,7 +46,6 @@ jobs:
           test ! -e .agent/r10-09-finalize.sh
           test ! -e .github/workflows/r10-09-bootstrap.yml
           test -f src/features/persistence/browser/browser-document-repository.js
-          test ! -e src/features/persistence/application/close-save-controller.js
           grep -q 'createBrowserDocumentRepository' src/features/persistence/index.js
           grep -q 'createBrowserDocumentRepository' src/main.js
           grep -q 'browserRepository: browserDocumentRepository' src/main.js

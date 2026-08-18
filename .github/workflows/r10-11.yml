@@ -1,9 +1,12 @@
-name: R10-10 Load Controller
+name: R10-11 Close Save Controller
 
 on:
   push:
     branches:
       - agent/r10-stage
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -25,11 +28,11 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Guard R10-10 frozen contracts and load ownership
+      - name: Guard R10-11 frozen contracts and close-save ownership
         shell: bash
         run: |
           set -euo pipefail
-          base='c0f1b6a1d6f797915d2cb9f963c5b0a985c43d47'
+          base='01d535da880185dc1eafd699a90b491931545167'
           git merge-base --is-ancestor "$base" HEAD
           git diff --quiet "$base"...HEAD -- \
             src/model-kernel/index.js \
@@ -43,22 +46,30 @@ jobs:
             src/editor/hybrid/table-model.js \
             src-tauri/src/document_store.rs \
             package.json package-lock.json
-          test ! -e .agent/r10-10-finalize.sh
-          test -f src/features/persistence/application/load-controller.js
-          grep -q 'createLoadController' src/features/persistence/index.js
-          grep -q 'createLoadController' src/main.js
-          grep -q 'loadController.loadExisting' src/features/documents/application/document-session-controller.js
-          grep -q 'loadController.readContent' src/features/documents/application/document-session-controller.js
-          ! grep -Eq 'repository\.load|materializeLoadedContent' src/features/documents/application/document-session-controller.js
-          ! grep -Eq 'repository\.load|openExisting|activateLoaded' src/features/documents/application/document-open-coordinator.js
-          grep -q 'loadController.loadExisting' src/features/documents/application/document-close-coordinator.js
+          test ! -e .agent/r10-11-apply.py
+          test ! -e .agent/r10-11-apply-wrapper.py
+          test ! -e .agent/r10-11-apply-wrapper2.py
+          test ! -e .github/workflows/r10-11-bootstrap.yml
+          test ! -e .github/workflows/r10-11-runner.yml
+          test -f src/features/persistence/application/close-save-controller.js
+          grep -q 'createCloseSaveController' src/features/persistence/index.js
+          grep -q 'createCloseSaveController' src/main.js
+          grep -q 'closeSaveController.start()' src/main.js
+          grep -q 'closeSaveController?.destroy()' src/main.js
+          grep -q "cancelPending('close-save')" src/features/persistence/application/close-save-controller.js
+          grep -q 'forceSnapshot: true' src/features/persistence/application/close-save-controller.js
+          grep -q "snapshotReason: 'close-save'" src/features/persistence/application/close-save-controller.js
+          ! grep -Eq 'eventsCloseSavePort|markdownEditorCloseSavePort' public/app/events.js
+          grep -q 'closeSave.prepareClose()' src/features/window/window-close-controller.js
+          ! grep -Eq 'saveController|autosaveController|forceSnapshot|snapshotReason' src/features/window/window-close-controller.js
+          grep -q 'saveCurrentDocumentState' public/app/core.js
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
-          if (!Array.isArray(fixture.modules) || fixture.modules.length < 395) {
-            throw new Error(`R10-10 production module inventory regressed: expected at least 395, got ${fixture.modules?.length}`);
+          if (!Array.isArray(fixture.modules) || fixture.modules.length !== 396) {
+            throw new Error(`R10-11 production module inventory mismatch: expected 396, got ${fixture.modules?.length}`);
           }
-          const path = 'src/features/persistence/application/load-controller.js';
+          const path = 'src/features/persistence/application/close-save-controller.js';
           if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing inventory record: ${path}`);
           NODE
           git diff --check
@@ -69,14 +80,23 @@ jobs:
       - name: Audit production dependencies
         run: npm audit --audit-level=high
 
-      - name: R10-10 targeted gate 10/10
+      - name: R10-11 targeted gate 10/10
         shell: bash
         run: |
           set -euo pipefail
-          node --test tests/stage-10-load-controller.test.mjs | tee /tmp/r10_10_targeted.log
-          grep -q '# tests 10' /tmp/r10_10_targeted.log
-          grep -q '# pass 10' /tmp/r10_10_targeted.log
-          grep -q '# fail 0' /tmp/r10_10_targeted.log
+          node --test tests/stage-10-close-save-controller.test.mjs | tee /tmp/r10_11_targeted.log
+          grep -q '# tests 10' /tmp/r10_11_targeted.log
+          grep -q '# pass 10' /tmp/r10_11_targeted.log
+          grep -q '# fail 0' /tmp/r10_11_targeted.log
+
+      - name: R10-10 Load Controller compatibility 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-load-controller.test.mjs | tee /tmp/r10_10_compat.log
+          grep -q '# tests 10' /tmp/r10_10_compat.log
+          grep -q '# pass 10' /tmp/r10_10_compat.log
+          grep -q '# fail 0' /tmp/r10_10_compat.log
 
       - name: R10-09 Browser Repository compatibility 10/10
         shell: bash
@@ -91,10 +111,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --test tests/unit/documents/document-session-controller.test.mjs | tee /tmp/r10_10_documents.log
-          grep -q '# tests 11' /tmp/r10_10_documents.log
-          grep -q '# pass 11' /tmp/r10_10_documents.log
-          grep -q '# fail 0' /tmp/r10_10_documents.log
+          node --test tests/unit/documents/document-session-controller.test.mjs | tee /tmp/r10_11_documents.log
+          grep -q '# tests 11' /tmp/r10_11_documents.log
+          grep -q '# pass 11' /tmp/r10_11_documents.log
+          grep -q '# fail 0' /tmp/r10_11_documents.log
 
       - name: R10-08 search adapter compatibility 8/8
         shell: bash
@@ -132,14 +152,14 @@ jobs:
           grep -q '# pass 9' /tmp/r10_05_compat.log
           grep -q '# fail 0' /tmp/r10_05_compat.log
 
-      - name: Full Node regression remains green
+      - name: Full Node regression 333/333
         shell: bash
         run: |
           set -euo pipefail
-          npm test | tee /tmp/r10_10_node.log
-          grep -q '# fail 0' /tmp/r10_10_node.log
-          pass_count="$(sed -n 's/^# pass //p' /tmp/r10_10_node.log | tail -1)"
-          test "${pass_count:-0}" -ge 323
+          npm test | tee /tmp/r10_11_node.log
+          grep -q '# tests 333' /tmp/r10_11_node.log
+          grep -q '# pass 333' /tmp/r10_11_node.log
+          grep -q '# fail 0' /tmp/r10_11_node.log
 
       - name: Architecture and documentation gates
         shell: bash
@@ -154,8 +174,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run test:browser:contract | tee /tmp/r10_10_browser_contract.log
-          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_10_browser_contract.log
+          npm run test:browser:contract | tee /tmp/r10_11_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_11_browser_contract.log
 
       - name: Production build
         run: npm run build
@@ -164,8 +184,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run test:browser | tee /tmp/r10_10_browser.log
-          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_10_browser.log
+          npm run test:browser | tee /tmp/r10_11_browser.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_11_browser.log
 
       - name: Validation must leave tracked tree clean
         shell: bash

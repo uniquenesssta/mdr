@@ -249,8 +249,8 @@ test('Atomic 10.2 classic port is command-only and manual classic callers no lon
 
   assert.doesNotMatch(exportSource, /\bfunction\s+autoSave\s*\(|\bsaveTimer\b|exportSaveStatusStorePort/, 'later R10-03 migration must not reintroduce the retired autosave implementation');
   assert.match(core, /markdownEditorAutosaveControllerPort/, 'later R10-03 migration keeps classic callers behind the scoped Autosave port');
-  assert.match(eventsSource, /eventsCloseSavePort\.register[\s\S]*?saveCurrentDocumentState\(false/, 'R10-11 close-save migration must remain future work');
-  assert.match(core, /async function saveCurrentDocumentState[\s\S]*?coreDocumentControllerPort\.saveActive\(/, 'legacy helper remains only for later close-save work');
+  assert.doesNotMatch(eventsSource, /eventsCloseSavePort|markdownEditorCloseSavePort/, 'R10-11 removes the classic close-save bridge from events.js');
+  assert.match(core, /async function saveCurrentDocumentState[\s\S]*?coreDocumentControllerPort\.saveActive\(/, 'legacy helper remains for non-close-save classic persistence paths through R10-11');
 
   const fixture = JSON.parse(fixtureText);
   assert.ok(fixture.modules.length >= 386);
