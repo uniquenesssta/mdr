@@ -116,8 +116,10 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
+          set +e
           npm test > /tmp/r11_01_node.log 2>&1
           status=$?
+          set -e
           if [ "$status" -ne 0 ]; then
             echo '--- Node regression failure summary ---'
             grep -nE '^(not ok|# Subtest:)|failureType:|error:|code:|ERR_|AssertionError|actual:|expected:|operator:' /tmp/r11_01_node.log | tail -n 180 || true
