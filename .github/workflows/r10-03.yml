@@ -46,19 +46,17 @@ jobs:
           test ! -e .agent/r10_03_apply.py
           test ! -e .github/workflows/r10-03-bootstrap.yml
           test -f src/features/persistence/application/autosave-controller.js
-          test -f src/features/persistence/compatibility/classic-autosave-controller-port.js
+          test ! -e src/features/persistence/compatibility/classic-autosave-controller-port.js
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
           if (!Array.isArray(fixture.modules) || fixture.modules.length < 388) {
             throw new Error(`R10-03 production module inventory regressed: expected at least 388, got ${fixture.modules?.length}`);
           }
-          for (const path of [
-            'src/features/persistence/application/autosave-controller.js',
-            'src/features/persistence/compatibility/classic-autosave-controller-port.js'
-          ]) {
-            if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing R10-03 production inventory record: ${path}`);
-          }
+          const autosavePath = 'src/features/persistence/application/autosave-controller.js';
+          if (!fixture.modules.some(record => record[0] === autosavePath)) throw new Error(`Missing R10-03 production inventory record: ${autosavePath}`);
+          const retiredPath = 'src/features/persistence/compatibility/classic-autosave-controller-port.js';
+          if (fixture.modules.some(record => record[0] === retiredPath)) throw new Error(`Retired R10-03 compatibility record remains: ${retiredPath}`);
           NODE
           git diff --check
 

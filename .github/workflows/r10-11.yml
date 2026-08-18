@@ -62,12 +62,12 @@ jobs:
           ! grep -Eq 'eventsCloseSavePort|markdownEditorCloseSavePort' public/app/events.js
           grep -q 'closeSave.prepareClose()' src/features/window/window-close-controller.js
           ! grep -Eq 'saveController|autosaveController|forceSnapshot|snapshotReason' src/features/window/window-close-controller.js
-          grep -q 'saveCurrentDocumentState' public/app/core.js
+          ! grep -q 'saveCurrentDocumentState' public/app/core.js
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
-          if (!Array.isArray(fixture.modules) || fixture.modules.length !== 396) {
-            throw new Error(`R10-11 production module inventory mismatch: expected 396, got ${fixture.modules?.length}`);
+          if (!Array.isArray(fixture.modules) || fixture.modules.length < 394) {
+            throw new Error(`R10-11 production module inventory regressed: expected at least 394, got ${fixture.modules?.length}`);
           }
           const path = 'src/features/persistence/application/close-save-controller.js';
           if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing inventory record: ${path}`);
@@ -152,14 +152,14 @@ jobs:
           grep -q '# pass 9' /tmp/r10_05_compat.log
           grep -q '# fail 0' /tmp/r10_05_compat.log
 
-      - name: Full Node regression 333/333
+      - name: Full Node regression remains green
         shell: bash
         run: |
           set -euo pipefail
           npm test | tee /tmp/r10_11_node.log
-          grep -q '# tests 333' /tmp/r10_11_node.log
-          grep -q '# pass 333' /tmp/r10_11_node.log
           grep -q '# fail 0' /tmp/r10_11_node.log
+          pass_count="$(sed -n 's/^# pass //p' /tmp/r10_11_node.log | tail -1)"
+          test "${pass_count:-0}" -ge 333
 
       - name: Architecture and documentation gates
         shell: bash

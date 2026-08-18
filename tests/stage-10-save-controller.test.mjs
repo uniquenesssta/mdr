@@ -4,8 +4,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import {
   createSaveController,
-  createSaveStatusStore,
-  mountClassicSaveControllerPort
+  createSaveStatusStore
 } from '../src/features/persistence/index.js';
 
 const root = new URL('../', import.meta.url);
@@ -209,20 +208,7 @@ test('Atomic 10.2 destroy is terminal and rejects late in-flight success publica
   harness.statusStore.destroy();
 });
 
-test('Atomic 10.2 classic port is command-only and manual classic callers no longer bypass SaveController', async () => {
-  const harness = createHarness();
-  const controller = createSaveController(harness);
-  const host = {};
-  const mount = mountClassicSaveControllerPort(host, controller);
-  const api = host.markdownEditorSaveControllerPort;
-  assert.equal(Object.prototype.propertyIsEnumerable.call(host, 'markdownEditorSaveControllerPort'), false);
-  await api.save({ title: 'Port.md' });
-  assert.equal(harness.calls.length, 1);
-  mount.destroy();
-  mount.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorSaveControllerPort'), false);
-  assert.throws(() => api.save(), /destroyed/);
-
+test('Atomic 10.2 SaveController remains the single manual-save authority after R10-12 classic caller removal', async () => {
   const [entry, main, exportSource, core, eventsSource, fixtureText] = await Promise.all([
     source('src/features/persistence/index.js'),
     source('src/main.js'),
@@ -232,33 +218,15 @@ test('Atomic 10.2 classic port is command-only and manual classic callers no lon
     source('tests/architecture/fixtures/production-modules.json')
   ]);
   assert.match(entry, /createSaveController/);
-  assert.match(entry, /mountClassicSaveControllerPort/);
+  assert.doesNotMatch(entry, /mountClassicSaveControllerPort|classic-save-controller-port/);
   assert.match(main, /createSaveController\(\{/);
-  assert.match(main, /mountClassicSaveControllerPort\(compatibilityPlatformHost, saveController\)/);
-  assert.match(main, /saveControllerPort\.destroy\(\)/);
-  assert.match(main, /saveController\.destroy\(\)/);
-  assert.match(exportSource, /markdownEditorSaveControllerPort/);
-
-  const manualLocal = exportSource.match(/async function saveToLocal\(\)[\s\S]*?async function saveMarkdownWithPicker/)[0];
-  const manualFile = exportSource.match(/async function saveCurrentFile\(\)[\s\S]*?async function saveAsMarkdown/)[0];
-  for (const block of [manualLocal, manualFile]) {
-    assert.match(block, /exportSaveControllerPort\.save\(/);
-    assert.doesNotMatch(block, /saveCurrentDocumentState\s*\(/);
-    assert.doesNotMatch(block, /exportSaveStatusStorePort\.setState\(/);
-  }
-
-  assert.doesNotMatch(exportSource, /\bfunction\s+autoSave\s*\(|\bsaveTimer\b|exportSaveStatusStorePort/, 'later R10-03 migration must not reintroduce the retired autosave implementation');
-  assert.match(core, /markdownEditorAutosaveControllerPort/, 'later R10-03 migration keeps classic callers behind the scoped Autosave port');
-  assert.doesNotMatch(eventsSource, /eventsCloseSavePort|markdownEditorCloseSavePort/, 'R10-11 removes the classic close-save bridge from events.js');
-  assert.match(core, /async function saveCurrentDocumentState[\s\S]*?coreDocumentControllerPort\.saveActive\(/, 'legacy helper remains for non-close-save classic persistence paths through R10-11');
-
+  assert.match(main, /saveController\.saveCurrentFile/);
+  assert.match(main, /saveController\.saveAsMarkdown/);
+  assert.doesNotMatch(main, /mountClassicSaveControllerPort|markdownEditorSaveControllerPort/);
+  assert.doesNotMatch(exportSource, /markdownEditorSaveControllerPort|exportSaveControllerPort|async function saveCurrentFile|async function saveAsMarkdown|async function saveToLocal/);
+  assert.doesNotMatch(core, /async function saveCurrentDocumentState|async function saveAsContextDocument/);
+  assert.doesNotMatch(eventsSource, /function saveCurrentFile|function saveAsMarkdown/);
   const fixture = JSON.parse(fixtureText);
-  assert.ok(fixture.modules.length >= 386);
-  for (const path of [
-    'src/features/persistence/application/save-controller.js',
-    'src/features/persistence/compatibility/classic-save-controller-port.js'
-  ]) assert.ok(fixture.modules.some(record => record[0] === path), `production inventory must classify ${path}`);
-
-  controller.destroy();
-  harness.statusStore.destroy();
+  assert.ok(fixture.modules.some(record => record[0] === 'src/features/persistence/application/save-controller.js'));
+  assert.equal(fixture.modules.some(record => record[0] === 'src/features/persistence/compatibility/classic-save-controller-port.js'), false);
 });

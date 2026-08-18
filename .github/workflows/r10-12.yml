@@ -1,0 +1,245 @@
+name: R10-12 Remove Legacy Save Code
+
+on:
+  push:
+    branches:
+      - agent/r10-stage
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Guard R10-12 frozen contracts and legacy-save removal
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='599ffff433f868264f20aa352dc149d3ed1efa19'
+          git merge-base --is-ancestor "$base" HEAD
+          git diff --quiet "$base"...HEAD -- \
+            src/model-kernel/index.js \
+            src/document/document-model.js \
+            src/sync/selection-mapping.js \
+            src/preview/incremental-preview.js \
+            src/preview/math-source.js \
+            src/editor/hybrid/block-registry.js \
+            src/editor/hybrid/math-ranges.js \
+            src/editor/hybrid/ranges.js \
+            src/editor/hybrid/table-model.js \
+            src-tauri/src/document_store.rs \
+            package.json package-lock.json
+
+          test ! -e .agent/r10-12-pr-trigger.txt
+          test ! -e .agent/r10-12-save-controller-clean.txt
+          test ! -e .github/workflows/r10-12-runner.yml
+          test ! -e src/features/persistence/compatibility/classic-save-controller-port.js
+          test ! -e src/features/persistence/compatibility/classic-autosave-controller-port.js
+          test -f src/features/persistence/application/save-controller.js
+          test -f src/features/persistence/application/autosave-controller.js
+          test -f src/features/persistence/application/close-save-controller.js
+
+          ! grep -Eq 'mountClassicSaveControllerPort|mountClassicAutosaveControllerPort|classic-save-controller-port|classic-autosave-controller-port' src/features/persistence/index.js
+          ! grep -Eq 'markdownEditorSaveControllerPort|markdownEditorAutosaveControllerPort|mountClassicSaveControllerPort|mountClassicAutosaveControllerPort' src/main.js
+          ! grep -Eq 'markdownEditorSaveControllerPort|markdownEditorAutosaveControllerPort|exportSaveControllerPort|exportAutosaveControllerPort|async function saveToLocal|async function saveCurrentFile|async function saveAsMarkdown|saveMarkdownWithPicker|bindDocumentFilePath' public/app/export.js
+          ! grep -Eq 'markdownEditorAutosaveControllerPort|coreAutosaveControllerPort|async function saveCurrentDocumentState|async function saveAsContextDocument' public/app/core.js
+          ! grep -Eq 'markdownEditorAutosaveControllerPort|eventsAutosaveControllerPort|function saveCurrentFile|function saveAsMarkdown|function autoSave' public/app/events.js
+          grep -q 'requestDocumentPersistence' public/app/core.js
+          grep -q 'prepareDocumentTransition' public/app/core.js
+          grep -q 'requestDocumentPersistence' public/app/events.js
+          grep -q "invoke('saveCurrentFile')" public/app/events.js
+          grep -q "invoke('saveAsMarkdown')" public/app/events.js
+          grep -q 'data-editor-action="save-current-file"' public/compatibility/business-content.html
+          grep -q 'data-editor-action="save-as-markdown"' public/compatibility/business-content.html
+          grep -q 'saveController.saveCurrentFile' src/main.js
+          grep -q 'saveController.saveAsMarkdown' src/main.js
+          grep -q 'autosaveController.schedule' src/main.js
+          grep -q 'autosaveController.cancelPending' src/main.js
+          grep -q "captureOperation('save-as-markdown')" src/features/persistence/application/save-controller.js
+          grep -q 'isCurrentGeneration(operationGeneration)' src/features/persistence/application/save-controller.js
+
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
+          if (!Array.isArray(fixture.modules) || fixture.modules.length !== 394) {
+            throw new Error(`R10-12 production module inventory mismatch: expected 394, got ${fixture.modules?.length}`);
+          }
+          for (const path of [
+            'src/features/persistence/application/save-controller.js',
+            'src/features/persistence/application/autosave-controller.js',
+            'src/features/persistence/application/close-save-controller.js'
+          ]) {
+            if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing R10-12 production inventory record: ${path}`);
+          }
+          for (const path of [
+            'src/features/persistence/compatibility/classic-save-controller-port.js',
+            'src/features/persistence/compatibility/classic-autosave-controller-port.js'
+          ]) {
+            if (fixture.modules.some(record => record[0] === path)) throw new Error(`Retired R10-12 production inventory record remains: ${path}`);
+          }
+          NODE
+          git diff --check
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high
+
+      - name: R10-12 targeted gate 11/11
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-remove-legacy-save.test.mjs | tee /tmp/r10_12_targeted.log
+          grep -q '# tests 11' /tmp/r10_12_targeted.log
+          grep -q '# pass 11' /tmp/r10_12_targeted.log
+          grep -q '# fail 0' /tmp/r10_12_targeted.log
+
+      - name: SaveController compatibility 8/8
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-save-controller.test.mjs | tee /tmp/r10_02_compat.log
+          grep -q '# tests 8' /tmp/r10_02_compat.log
+          grep -q '# pass 8' /tmp/r10_02_compat.log
+          grep -q '# fail 0' /tmp/r10_02_compat.log
+
+      - name: AutosaveController compatibility 9/9
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-autosave-controller.test.mjs | tee /tmp/r10_03_compat.log
+          grep -q '# tests 9' /tmp/r10_03_compat.log
+          grep -q '# pass 9' /tmp/r10_03_compat.log
+          grep -q '# fail 0' /tmp/r10_03_compat.log
+
+      - name: R10-11 Close Save Controller compatibility 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-close-save-controller.test.mjs | tee /tmp/r10_11_compat.log
+          grep -q '# tests 10' /tmp/r10_11_compat.log
+          grep -q '# pass 10' /tmp/r10_11_compat.log
+          grep -q '# fail 0' /tmp/r10_11_compat.log
+
+      - name: R10-10 Load Controller compatibility 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-load-controller.test.mjs | tee /tmp/r10_10_compat.log
+          grep -q '# tests 10' /tmp/r10_10_compat.log
+          grep -q '# pass 10' /tmp/r10_10_compat.log
+          grep -q '# fail 0' /tmp/r10_10_compat.log
+
+      - name: R10-09 Browser Repository compatibility 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-browser-document-repository.test.mjs | tee /tmp/r10_09_compat.log
+          grep -q '# tests 10' /tmp/r10_09_compat.log
+          grep -q '# pass 10' /tmp/r10_09_compat.log
+          grep -q '# fail 0' /tmp/r10_09_compat.log
+
+      - name: Documents Session Controller compatibility 11/11
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/unit/documents/document-session-controller.test.mjs | tee /tmp/r10_12_documents.log
+          grep -q '# tests 11' /tmp/r10_12_documents.log
+          grep -q '# pass 11' /tmp/r10_12_documents.log
+          grep -q '# fail 0' /tmp/r10_12_documents.log
+
+      - name: R10-08 search adapter compatibility 8/8
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-search-adapter.test.mjs | tee /tmp/r10_08_compat.log
+          grep -q '# tests 8' /tmp/r10_08_compat.log
+          grep -q '# pass 8' /tmp/r10_08_compat.log
+          grep -q '# fail 0' /tmp/r10_08_compat.log
+
+      - name: R10-07 segmented loader compatibility 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-segmented-loader.test.mjs | tee /tmp/r10_07_compat.log
+          grep -q '# tests 10' /tmp/r10_07_compat.log
+          grep -q '# pass 10' /tmp/r10_07_compat.log
+          grep -q '# fail 0' /tmp/r10_07_compat.log
+
+      - name: R10-06 snapshot uploader compatibility 11/11
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-snapshot-uploader.test.mjs | tee /tmp/r10_06_compat.log
+          grep -q '# tests 11' /tmp/r10_06_compat.log
+          grep -q '# pass 11' /tmp/r10_06_compat.log
+          grep -q '# fail 0' /tmp/r10_06_compat.log
+
+      - name: R10-05 save queue compatibility 9/9
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-save-queue.test.mjs | tee /tmp/r10_05_compat.log
+          grep -q '# tests 9' /tmp/r10_05_compat.log
+          grep -q '# pass 9' /tmp/r10_05_compat.log
+          grep -q '# fail 0' /tmp/r10_05_compat.log
+
+      - name: Full Node regression 344/344
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test | tee /tmp/r10_12_node.log
+          grep -q '# tests 344' /tmp/r10_12_node.log
+          grep -q '# pass 344' /tmp/r10_12_node.log
+          grep -q '# fail 0' /tmp/r10_12_node.log
+
+      - name: Architecture and documentation gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run verify:architecture
+          npm run verify:no-legacy-runtime
+          npm run verify:generated-files
+          npm run verify:readme-record
+
+      - name: Browser preview contract 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser:contract | tee /tmp/r10_12_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_12_browser_contract.log
+
+      - name: Production build
+        run: npm run build
+
+      - name: Built-app browser regression 29/29
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser | tee /tmp/r10_12_browser.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_12_browser.log
+
+      - name: Validation must leave tracked tree clean
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff --exit-code

@@ -16,7 +16,6 @@ const coreSubmenuPositionerPort = coreCompatibilityHost?.markdownEditorSubmenuPo
 const corePreviewCommandPort = coreCompatibilityHost?.markdownEditorPreviewCommandPort;
 const coreTaskSchedulerPort = coreCompatibilityHost?.markdownEditorTaskSchedulerPort;
 const coreSaveStatusStorePort = coreCompatibilityHost?.markdownEditorSaveStatusStorePort;
-const coreAutosaveControllerPort = coreCompatibilityHost?.markdownEditorAutosaveControllerPort;
 if (!coreI18nPort) throw new Error('I18n compatibility port is unavailable.');
 if (!coreSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable.');
 if (!coreDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -33,14 +32,12 @@ if (!coreSubmenuPositionerPort) throw new Error('Submenu Positioner compatibilit
 if (!corePreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
 if (!coreTaskSchedulerPort) throw new Error('Task Scheduler compatibility port is unavailable.');
 if (!coreSaveStatusStorePort) throw new Error('Save Status Store compatibility port is unavailable.');
-if (!coreAutosaveControllerPort) throw new Error('Autosave Controller compatibility port is unavailable.');
 const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
 coreDocumentUiCommandPort.register({
   openDocument: documentId => openDocument(documentId),
   closeDocument: documentId => closeDocument(documentId),
   renameDocument: documentId => renameDocument(documentId),
   duplicateDocument: documentId => duplicateDocument(documentId),
-  saveAsDocument: documentId => saveAsContextDocument(documentId),
   exportDocument: documentId => exportContextDocument(documentId),
   copyDocumentTitle: documentId => copyContextDocumentTitle(documentId),
   newDocument: () => newDocument(),
@@ -48,7 +45,7 @@ coreDocumentUiCommandPort.register({
   openFolderTreeFile: path => openFolderTreeFile(path),
   updateTitleDraft(value) {
     const result = coreDocumentControllerPort.updateActiveTitleDraft(value);
-    coreAutosaveControllerPort.schedule({ reason: 'title-draft' });
+    coreEditorUiCommandPort.invoke('requestDocumentPersistence', 'title-draft');
     syncCurrentDocumentFileTree();
     return result;
   }
@@ -535,22 +532,6 @@ const editor = document.getElementById('editor');
       return message;
     }
 
-    async function saveCurrentDocumentState(refreshList = true, options = {}) {
-      try {
-        const result = await coreDocumentControllerPort.saveActive({
-          title: filenameInput.value,
-          fallbackTitle: t('filenameDefault'),
-          forceSnapshot: Boolean(options.forceSnapshot),
-          snapshotReason: options.snapshotReason || 'document-storage'
-        });
-        if (refreshList && coreDocumentControllerPort.isCurrentGeneration(result.generation)) syncCurrentDocumentFileTree();
-        return result.result || { native: Boolean(result.native) };
-      } catch (error) {
-        if (coreDocumentControllerPort.isStaleError(error)) return { native: false, stale: true };
-        throw error;
-      }
-    }
-
     function normalizeWorkspaceFilePath(path) {
       const value = String(path || '').trim().replace(/\\/g, '/').replace(/\/+$/, '');
       if (!value) return '';
@@ -575,7 +556,7 @@ const editor = document.getElementById('editor');
     async function openDocument(id) {
       if (id === coreDocumentControllerPort.activeId) return;
       try {
-        coreAutosaveControllerPort.cancelPending('document-open');
+        coreDocumentUiCommandPort.invoke('prepareDocumentTransition', 'document-open');
         const result = await coreDocumentControllerPort.openDocument(id, {
           currentTitle: filenameInput.value,
           fallbackTitle: t('filenameDefault')
@@ -591,7 +572,7 @@ const editor = document.getElementById('editor');
 
     async function newDocument() {
       try {
-        coreAutosaveControllerPort.cancelPending('document-new');
+        coreDocumentUiCommandPort.invoke('prepareDocumentTransition', 'document-new');
         const index = getSessionDocuments().length + 1;
         const result = await coreDocumentControllerPort.newDocument({
           title: '未命名文档-' + index + '.md',
@@ -638,7 +619,7 @@ const editor = document.getElementById('editor');
         if (!result.renamed) return;
         if (result.active) {
           filenameInput.value = result.record.title;
-          coreAutosaveControllerPort.schedule({ reason: 'document-rename' });
+          coreEditorUiCommandPort.invoke('requestDocumentPersistence', 'document-rename');
         }
         syncCurrentDocumentFileTree();
         showToast('已重命名文档');
@@ -683,9 +664,9 @@ const editor = document.getElementById('editor');
       try {
         const closingActive = coreDocumentControllerPort.activeId === id;
         if (closingActive) {
-          coreAutosaveControllerPort.cancelPending('document-close');
+          coreDocumentUiCommandPort.invoke('prepareDocumentTransition', 'document-close');
           if (shouldSaveBeforeClose) {
-            const saved = await saveCurrentFile();
+            const saved = await coreEditorUiCommandPort.invoke('saveCurrentFile');
             if (!saved) return;
           }
         }
@@ -777,27 +758,6 @@ const editor = document.getElementById('editor');
         showToast('已导出 Markdown');
       } catch (error) {
         showToast(error?.message || String(error));
-      }
-    }
-
-    async function saveAsContextDocument(documentId) {
-      const doc = coreDocumentSessionPort.getRecord(documentId) || getCurrentDocument();
-      if (!doc) return;
-      try {
-        const savedPath = await saveMarkdownWithPicker(async () => {
-          if (doc.id === getActiveDocumentId()) {
-            return documentModel?.createSnapshot?.('context-save-as') ?? editor.value;
-          }
-          const contentResult = await coreDocumentControllerPort.readDocumentContent(doc.id);
-          if (!coreDocumentControllerPort.isCurrentGeneration(contentResult.generation)) throw new Error('DOCUMENT_OPERATION_STALE');
-          return contentResult.content;
-        }, doc.title || t('filenameDefault'), 'context-save-as');
-        if (savedPath) {
-          if (typeof savedPath === 'string') bindDocumentFilePath(doc, savedPath);
-          showToast('已另存为 Markdown');
-        }
-      } catch (error) {
-        showToast('另存为失败：' + (error?.message || String(error)));
       }
     }
 

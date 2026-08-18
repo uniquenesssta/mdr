@@ -124,9 +124,10 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 396);
+  assert.equal(moduleFixture.modules.length, 394);
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/application/autosave-controller.js'));
-  assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/compatibility/classic-autosave-controller-port.js'));
+  assert.equal(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/compatibility/classic-autosave-controller-port.js'), false);
+  assert.equal(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/compatibility/classic-save-controller-port.js'), false);
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-save-session.js'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-save-queue.js'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-snapshot-uploader.js'));
@@ -142,7 +143,7 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   assert.match(stage1Section, /38 个业务全局写入/);
 
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 6);
-  assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 43);
+  assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 41);
   assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 9);
   assert.equal(baseline.trackedGeneratedFiles.length, 4);
   assert.equal(baseline.policy.wildcardExemptions, false);

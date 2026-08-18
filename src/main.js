@@ -48,8 +48,6 @@ import {
   createLoadController,
   createSaveController,
   createSaveStatusStore,
-  mountClassicAutosaveControllerPort,
-  mountClassicSaveControllerPort,
   mountClassicSaveStatusStorePort
 } from './features/persistence/index.js';
 import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
@@ -81,6 +79,7 @@ import {
   createRecentFilesReadSource,
   createRecentFilesRepository,
   createSessionDocumentRepository,
+  normalizeDocumentTitle,
   updateDocumentRecord,
   mountClassicDocumentControllerPort,
   mountClassicDocumentUiCommandPort,
@@ -514,9 +513,14 @@ async function loadAppModules() {
   const saveController = createSaveController({
     documentController,
     model: documentModel,
-    statusStore: saveStatusStore
+    statusStore: saveStatusStore,
+    writeText(path, content, options) { return platform.files.writeText(path, content, options); },
+    chooseSaveFile: platform.capabilities.desktop.dialogs
+      ? (preferredName, options) => platform.dialogs.saveFile(preferredName, options)
+      : null,
+    persistentFileSystem: platform.capabilities.desktop.fileSystem,
+    normalizeTitle: normalizeDocumentTitle
   });
-  const saveControllerPort = mountClassicSaveControllerPort(compatibilityPlatformHost, saveController);
   const autosaveController = createAutosaveController({
     saveController,
     documentController,
@@ -527,18 +531,21 @@ async function loadAppModules() {
     clearTimer: timerId => window.clearTimeout(timerId),
     reportError(message, error) { console.error(message, error); }
   });
-  const autosaveControllerPort = mountClassicAutosaveControllerPort(compatibilityPlatformHost, autosaveController);
   const unsubscribeNativeSaveStatus = window.markdownEditorDocumentStore.subscribe(event => {
     saveStatusStore.consumePersistenceEvent(event);
   });
+  let unregisterPersistenceEditorCommands = null;
+  let unregisterPersistenceDocumentCommands = null;
   let persistenceSaveFeatureDestroyed = false;
   const destroyPersistenceSaveFeature = () => {
     if (persistenceSaveFeatureDestroyed) return;
     persistenceSaveFeatureDestroyed = true;
-    autosaveControllerPort.destroy();
+    unregisterPersistenceDocumentCommands?.();
+    unregisterPersistenceDocumentCommands = null;
+    unregisterPersistenceEditorCommands?.();
+    unregisterPersistenceEditorCommands = null;
     autosaveController.destroy();
     unsubscribeNativeSaveStatus();
-    saveControllerPort.destroy();
     saveController.destroy();
     saveStatusStorePort.destroy();
     saveStatusStore.destroy();
@@ -773,6 +780,59 @@ async function loadAppModules() {
   const currentLayoutMode = () => editorUiCommandPort.has('getLayoutMode')
     ? editorUiCommandPort.invoke('getLayoutMode')
     : 'both';
+  const readCurrentDocumentTitle = () => requireElement('#filename', 'Document title input').value;
+  const saveCurrentFileFromUi = async () => {
+    try {
+      const result = await saveController.saveCurrentFile({
+        title: readCurrentDocumentTitle(),
+        fallbackTitle: t('filenameDefault') || '未命名文档'
+      });
+      if (result?.cancelled || result?.stale || result?.completed === false) return false;
+      notify('文件已保存');
+      return true;
+    } catch (error) {
+      if (error?.code === 'DOCUMENT_OPERATION_STALE') return false;
+      notify('保存失败：' + String(error?.message || error));
+      window.markdownEditorPerf?.record?.('document.file-save-error', {
+        category: 'document.error',
+        status: 'error',
+        details: { message: String(error?.message || error) }
+      });
+      return false;
+    }
+  };
+  const saveAsMarkdownFromUi = async documentId => {
+    const record = documentId ? documentController.getRecord(documentId) : documentController.getActiveRecord();
+    if (!record) return false;
+    try {
+      const result = await saveController.saveAsMarkdown({
+        documentId: record.id,
+        title: record.id === documentController.activeId ? readCurrentDocumentTitle() : record.title,
+        fallbackTitle: t('filenameDefault') || '未命名文档'
+      });
+      if (result?.cancelled || result?.stale || result?.completed === false) return false;
+      notify('已另存为 Markdown');
+      return true;
+    } catch (error) {
+      if (error?.code === 'DOCUMENT_OPERATION_STALE') return false;
+      notify('另存为失败：' + String(error?.message || error));
+      window.markdownEditorPerf?.record?.('document.save-as-error', {
+        category: 'document.error',
+        status: 'error',
+        details: { message: String(error?.message || error) }
+      });
+      return false;
+    }
+  };
+  unregisterPersistenceEditorCommands = editorUiCommandPort.register({
+    requestDocumentPersistence: reason => autosaveController.schedule({ reason: String(reason || 'editor-ui-command') }),
+    saveCurrentFile: () => saveCurrentFileFromUi(),
+    saveAsMarkdown: () => saveAsMarkdownFromUi()
+  });
+  unregisterPersistenceDocumentCommands = documentUiCommandPort.register({
+    prepareDocumentTransition: reason => autosaveController.cancelPending(String(reason || 'document-transition')),
+    saveAsDocument: documentId => saveAsMarkdownFromUi(documentId)
+  });
   const runMutation = (method, ...args) => {
     editorHistoryAdapter.isolate();
     const result = editorCommandService[method](...args);
@@ -791,6 +851,8 @@ async function loadAppModules() {
       return true;
     }
     if (action === 'layout') return editorUiCommandPort.invoke('setLayoutMode', payload);
+    if (action === 'save-current-file') return saveCurrentFileFromUi();
+    if (action === 'save-as-markdown') return saveAsMarkdownFromUi();
     if (action === 'page-fullscreen') return editorUiCommandPort.invoke('togglePageFullscreen');
     if (action === 'system-fullscreen') return editorUiCommandPort.invoke('toggleSystemFullscreen');
     if (action === 'undo') {
@@ -1104,7 +1166,7 @@ async function loadAppModules() {
         return false;
       },
       requestAutoSave() {
-        if (editorUiCommandPort.has('requestAutoSave')) return editorUiCommandPort.invoke('requestAutoSave');
+        if (editorUiCommandPort.has('requestDocumentPersistence')) return editorUiCommandPort.invoke('requestDocumentPersistence', 'preview-shell');
         return false;
       },
       translate(key, ...args) { return t(key, ...args); }

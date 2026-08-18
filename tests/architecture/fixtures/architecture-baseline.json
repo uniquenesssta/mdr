@@ -176,20 +176,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "saveAsMarkdown(); closeAppMenus();",
-      "count": 1,
-      "lines": [13]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "saveCurrentFile(); closeAppMenus();",
-      "count": 1,
-      "lines": [12]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "selectImageRatio('1:1')",
       "count": 1,
       "lines": [419]

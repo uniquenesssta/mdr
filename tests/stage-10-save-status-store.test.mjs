@@ -150,7 +150,7 @@ test('Atomic 10.1 composition gives status authority to Persistence and UI only 
   assert.match(core, /event\.state !== 'manifest'/);
 
   assert.doesNotMatch(exportSource, /markdownEditorSaveStatusStorePort|exportSaveStatusStorePort\.setState\(/, 'later Persistence controllers must not return SaveStatusStore write authority to classic export code');
-  assert.match(exportSource, /markdownEditorAutosaveControllerPort/);
+  assert.doesNotMatch(exportSource, /markdownEditorAutosaveControllerPort/, 'R10-12 removes the classic autosave bridge from export code');
   assert.doesNotMatch(exportSource, /\bsetSaveStatus\s*\(/);
 
   const fixture = JSON.parse(fixtureText);

@@ -1113,7 +1113,9 @@ async function runAppSuite() {
           window.prompt=originalPrompt;
         }
         const renamedAlpha=snapshot();
-        const savedAlpha=await saveToLocal();
+        const persistencePort=host?.markdownEditorEditorUiCommandPort;
+        if(!persistencePort?.has?.('saveCurrentFile'))throw new Error('Editor persistence command port unavailable');
+        const savedAlpha=await persistencePort.invoke('saveCurrentFile');
         if(!savedAlpha)throw new Error('Atomic 5.3 lifecycle fixture failed to save renamed document');
 
         await closeDocument(alpha.record.id);

@@ -3,8 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import {
   createAutosaveController,
-  createSaveStatusStore,
-  mountClassicAutosaveControllerPort
+  createSaveStatusStore
 } from '../src/features/persistence/index.js';
 
 const root = new URL('../', import.meta.url);
@@ -225,21 +224,7 @@ test('Atomic 10.3 destroy is terminal, cancels debounce work and unsubscribes Se
   harness.statusStore.destroy();
 });
 
-test('Atomic 10.3 classic bridge is command-only and all legacy autosave callers use the scoped controller port', async () => {
-  const harness = createHarness();
-  const host = {};
-  const mount = mountClassicAutosaveControllerPort(host, harness.controller);
-  const api = host.markdownEditorAutosaveControllerPort;
-  assert.equal(Object.prototype.propertyIsEnumerable.call(host, 'markdownEditorAutosaveControllerPort'), false);
-  api.schedule({ reason: 'port' });
-  assert.equal(harness.timers.size, 1);
-  api.cancelPending('port-cancel');
-  assert.equal(harness.timers.size, 0);
-  mount.destroy();
-  mount.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorAutosaveControllerPort'), false);
-  assert.throws(() => api.schedule(), /destroyed/);
-
+test('Atomic 10.3 AutosaveController remains the single autosave authority after R10-12 classic caller removal', async () => {
   const [entry, main, core, bootstrap, exportSource, eventsSource, fixtureText] = await Promise.all([
     source('src/features/persistence/index.js'),
     source('src/main.js'),
@@ -250,30 +235,16 @@ test('Atomic 10.3 classic bridge is command-only and all legacy autosave callers
     source('tests/architecture/fixtures/production-modules.json')
   ]);
   assert.match(entry, /createAutosaveController/);
-  assert.match(entry, /mountClassicAutosaveControllerPort/);
+  assert.doesNotMatch(entry, /mountClassicAutosaveControllerPort|classic-autosave-controller-port/);
   assert.match(main, /createAutosaveController\(\{/);
-  assert.match(main, /mountClassicAutosaveControllerPort\(compatibilityPlatformHost, autosaveController\)/);
-  assert.match(main, /SETTINGS_CHANGED_EVENT/);
-  assert.match(main, /autosaveControllerPort\.destroy\(\)[\s\S]*?autosaveController\.destroy\(\)[\s\S]*?saveControllerPort\.destroy\(\)/);
-
-  assert.doesNotMatch(exportSource, /\bfunction\s+autoSave\s*\(|\bsaveTimer\b|exportSaveStatusStorePort/);
-  assert.doesNotMatch(exportSource, /showSaveHint|requestAutoSave:\s*\(\)\s*=>\s*autoSave/);
-  assert.match(exportSource, /requestAutoSave:\s*\(\)\s*=>\s*exportAutosaveControllerPort\.schedule\(\{ reason: ['"]editor-ui-command['"] \}\)/);
-  assert.doesNotMatch(core, /\blet\s+autoSaveEnabled\b|\blet\s+autoSaveDelay\b|\bautoSave\s*\(\s*\)/);
+  assert.match(main, /requestDocumentPersistence/);
+  assert.doesNotMatch(main, /mountClassicAutosaveControllerPort|markdownEditorAutosaveControllerPort/);
+  assert.doesNotMatch(exportSource, /markdownEditorAutosaveControllerPort|exportAutosaveControllerPort|requestAutoSave/);
+  assert.doesNotMatch(core, /markdownEditorAutosaveControllerPort|coreAutosaveControllerPort|\bautoSave\s*\(/);
   assert.doesNotMatch(bootstrap, /autoSaveEnabled\s*=|autoSaveDelay\s*=/);
-  assert.match(core, /markdownEditorAutosaveControllerPort/);
-  assert.match(eventsSource, /markdownEditorAutosaveControllerPort/);
-  assert.match(eventsSource, /eventsAutosaveControllerPort\.schedule\(/);
-  assert.doesNotMatch(eventsSource, /eventsCloseSavePort|markdownEditorCloseSavePort/, 'R10-11 removes the classic close-save bridge from events.js');
-  assert.match(core, /async function saveCurrentDocumentState[\s\S]*?coreDocumentControllerPort\.saveActive\(/, 'legacy helper remains for non-close-save classic persistence paths through R10-11');
-
+  assert.doesNotMatch(eventsSource, /markdownEditorAutosaveControllerPort|eventsAutosaveControllerPort/);
+  assert.match(eventsSource, /requestDocumentPersistence/);
   const fixture = JSON.parse(fixtureText);
-  assert.ok(fixture.modules.length >= 388);
-  for (const path of [
-    'src/features/persistence/application/autosave-controller.js',
-    'src/features/persistence/compatibility/classic-autosave-controller-port.js'
-  ]) assert.ok(fixture.modules.some(record => record[0] === path), `production inventory must classify ${path}`);
-
-  harness.controller.destroy();
-  harness.statusStore.destroy();
+  assert.ok(fixture.modules.some(record => record[0] === 'src/features/persistence/application/autosave-controller.js'));
+  assert.equal(fixture.modules.some(record => record[0] === 'src/features/persistence/compatibility/classic-autosave-controller-port.js'), false);
 });

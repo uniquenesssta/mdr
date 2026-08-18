@@ -9,8 +9,8 @@
         <div class="menu-dropdown-list" id="file-menu">
           <div class="menu-item" onclick="newDocument(); closeAppMenus();"><span>新建文档</span><kbd>Ctrl+N</kbd></div>
           <div class="menu-item" onclick="triggerImportFile(); closeAppMenus();"><span>打开文件...</span><kbd>Ctrl+O</kbd></div>
-          <div class="menu-item" onclick="saveCurrentFile(); closeAppMenus();"><span>保存</span><kbd>Ctrl+S</kbd></div>
-          <div class="menu-item" onclick="saveAsMarkdown(); closeAppMenus();"><span>另存为...</span><kbd>Ctrl+Shift+S</kbd></div>
+          <div class="menu-item" data-editor-action="save-current-file"><span>保存</span><kbd>Ctrl+S</kbd></div>
+          <div class="menu-item" data-editor-action="save-as-markdown"><span>另存为...</span><kbd>Ctrl+Shift+S</kbd></div>
           <div class="menu-item" onclick="renameCurrentDocument(); closeAppMenus();"><span>重命名当前文档...</span><kbd>F2</kbd></div>
           <div class="menu-item" data-settings-open><span>设置...</span><kbd>Ctrl+,</kbd></div>
           <div class="menu-item menu-submenu" id="recent-files-menu-item"><span>最近打开</span><span class="menu-arrow">›</span>

@@ -45,17 +45,15 @@ jobs:
             package.json package-lock.json
           test ! -e .agent/r10_02_apply.py
           test -f src/features/persistence/application/save-controller.js
-          test -f src/features/persistence/compatibility/classic-save-controller-port.js
+          test ! -e src/features/persistence/compatibility/classic-save-controller-port.js
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
           if (!Array.isArray(fixture.modules) || fixture.modules.length < 386) throw new Error(`R10-02 production module inventory regressed: expected at least 386, got ${fixture.modules?.length}`);
-          for (const path of [
-            'src/features/persistence/application/save-controller.js',
-            'src/features/persistence/compatibility/classic-save-controller-port.js'
-          ]) {
-            if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing R10-02 production inventory record: ${path}`);
-          }
+          const savePath = 'src/features/persistence/application/save-controller.js';
+          if (!fixture.modules.some(record => record[0] === savePath)) throw new Error(`Missing R10-02 production inventory record: ${savePath}`);
+          const retiredPath = 'src/features/persistence/compatibility/classic-save-controller-port.js';
+          if (fixture.modules.some(record => record[0] === retiredPath)) throw new Error(`Retired R10-02 compatibility record remains: ${retiredPath}`);
           NODE
           git diff --check
 

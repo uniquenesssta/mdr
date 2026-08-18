@@ -3,13 +3,11 @@
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
     const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
     const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
-    const eventsAutosaveControllerPort = eventsCompatibilityHost?.markdownEditorAutosaveControllerPort;
     const eventsLayoutStatePort = eventsCompatibilityHost?.markdownEditorLayoutStatePort;
     const eventsPreviewCommandPort = eventsCompatibilityHost?.markdownEditorPreviewCommandPort;
     if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
     if (!eventsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
     if (!eventsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
-    if (!eventsAutosaveControllerPort) throw new Error('Autosave Controller compatibility port is unavailable.');
     if (!eventsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
     if (!eventsPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
 
@@ -22,7 +20,7 @@
       scheduleEditorMetricsRebuild(120);
       eventsPreviewCommandPort.scheduleUpdate();
       eventsPreviewCommandPort.scheduleCountUpdate();
-      eventsAutosaveControllerPort.schedule({ reason: 'editor-transaction' });
+      eventsEditorUiCommandPort.invoke('requestDocumentPersistence', 'editor-transaction');
     });
     eventsEditorUiCommandPort.register({
       selectionChanged: () => eventsPreviewCommandPort.scheduleFocusUpdate()
@@ -31,6 +29,10 @@
 
 
 
+
+    function getFileNameFromPath(path) {
+      return String(path || '').split(/[\\/]/).pop() || '';
+    }
 
     // 拖放文件打开
     const dropOverlay = document.getElementById('drop-overlay');
@@ -200,7 +202,7 @@
           e.preventDefault();
           e.stopPropagation();
           tableCellInput.__markdownEditorCommitTableCell?.();
-          invokeShortcut(e.shiftKey ? saveAsMarkdown : saveCurrentFile);
+          invokeShortcut(() => eventsEditorUiCommandPort.invoke(e.shiftKey ? 'saveAsMarkdown' : 'saveCurrentFile'));
         }
         return;
       }
@@ -210,7 +212,7 @@
           e.preventDefault();
           e.stopPropagation();
           codeBlockEditor.__markdownEditorCommitCodeBlock?.();
-          invokeShortcut(e.shiftKey ? saveAsMarkdown : saveCurrentFile);
+          invokeShortcut(() => eventsEditorUiCommandPort.invoke(e.shiftKey ? 'saveAsMarkdown' : 'saveCurrentFile'));
         }
         return;
       }
@@ -218,8 +220,8 @@
       let action = null;
 
       if (modifier) {
-        if (key === 's' && e.shiftKey) action = saveAsMarkdown;
-        else if (key === 's') action = saveCurrentFile;
+        if (key === 's' && e.shiftKey) action = () => eventsEditorUiCommandPort.invoke('saveAsMarkdown');
+        else if (key === 's') action = () => eventsEditorUiCommandPort.invoke('saveCurrentFile');
         else if (key === 'o') action = triggerImportFile;
         else if (key === 'n') action = newDocument;
         else if (key === 'b' && e.shiftKey) action = toggleSidebar;

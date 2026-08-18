@@ -55,8 +55,8 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
-          if (!Array.isArray(fixture.modules) || fixture.modules.length < 395) {
-            throw new Error(`R10-10 production module inventory regressed: expected at least 395, got ${fixture.modules?.length}`);
+          if (!Array.isArray(fixture.modules) || fixture.modules.length < 394) {
+            throw new Error(`R10-10 production module inventory regressed: expected at least 394, got ${fixture.modules?.length}`);
           }
           const path = 'src/features/persistence/application/load-controller.js';
           if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing inventory record: ${path}`);
