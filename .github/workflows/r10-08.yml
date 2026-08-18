@@ -1,4 +1,4 @@
-name: R10-07 Native Segmented Loader
+name: R10-08 Native Search Adapter
 
 on:
   push:
@@ -25,11 +25,11 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Guard R10-07 frozen contracts and loader ownership
+      - name: Guard R10-08 frozen contracts and search ownership
         shell: bash
         run: |
           set -euo pipefail
-          base='10024ab37c156636229a05d89c6684ff39313172'
+          base='9fd3f2baaf54cbd28b15f2bb694faf153112c20e'
           git merge-base --is-ancestor "$base" HEAD
           git diff --quiet "$base"...HEAD -- \
             src/model-kernel/index.js \
@@ -43,21 +43,21 @@ jobs:
             src/editor/hybrid/table-model.js \
             src-tauri/src/document_store.rs \
             package.json package-lock.json
-          test ! -e .github/workflows/r10-07-bootstrap.yml
-          ! compgen -G '.agent/r10-07-trigger*.txt' >/dev/null
-          test -f src/features/persistence/native-document-store/native-segmented-loader.js
+          test ! -e .agent/r10-08-finalize.sh
+          test ! -e .github/workflows/r10-08-bootstrap.yml
+          test -f src/features/persistence/native-document-store/native-search-adapter.js
           test ! -e src/features/persistence/browser/browser-document-repository.js
-          grep -q 'createNativeSegmentedLoader' src/features/persistence/index.js
-          grep -q 'segmentedLoader.load(documentId, options)' src/storage/native-document-store.js
-          ! grep -q 'DOCUMENT_CHUNK_BYTES' src/storage/native-document-store.js
-          ! grep -q 'loadSequence' src/storage/native-document-store.js
+          test ! -e src/features/persistence/application/load-controller.js
+          grep -q 'createNativeSearchAdapter' src/features/persistence/index.js
+          grep -q 'searchAdapter.search(documentId, query, from, wrap)' src/storage/native-document-store.js
+          ! grep -Eq 'documentStore\?\.search|documentStore\.search\(' src/storage/native-document-store.js
           node - <<'NODE'
           const fs = require('node:fs');
           const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
-          if (!Array.isArray(fixture.modules) || fixture.modules.length < 392) {
-            throw new Error(`R10-07 production module inventory regressed: expected at least 392, got ${fixture.modules?.length}`);
+          if (!Array.isArray(fixture.modules) || fixture.modules.length !== 393) {
+            throw new Error(`R10-08 production module inventory mismatch: expected 393, got ${fixture.modules?.length}`);
           }
-          const path = 'src/features/persistence/native-document-store/native-segmented-loader.js';
+          const path = 'src/features/persistence/native-document-store/native-search-adapter.js';
           if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing inventory record: ${path}`);
           NODE
           git diff --check
@@ -68,14 +68,23 @@ jobs:
       - name: Audit production dependencies
         run: npm audit --audit-level=high
 
-      - name: R10-07 targeted gate 10/10
+      - name: R10-08 targeted gate 8/8
         shell: bash
         run: |
           set -euo pipefail
-          node --test tests/stage-10-native-segmented-loader.test.mjs | tee /tmp/r10_07_targeted.log
-          grep -q '# tests 10' /tmp/r10_07_targeted.log
-          grep -q '# pass 10' /tmp/r10_07_targeted.log
-          grep -q '# fail 0' /tmp/r10_07_targeted.log
+          node --test tests/stage-10-native-search-adapter.test.mjs | tee /tmp/r10_08_targeted.log
+          grep -q '# tests 8' /tmp/r10_08_targeted.log
+          grep -q '# pass 8' /tmp/r10_08_targeted.log
+          grep -q '# fail 0' /tmp/r10_08_targeted.log
+
+      - name: R10-07 segmented loader compatibility 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-segmented-loader.test.mjs | tee /tmp/r10_07_compat.log
+          grep -q '# tests 10' /tmp/r10_07_compat.log
+          grep -q '# pass 10' /tmp/r10_07_compat.log
+          grep -q '# fail 0' /tmp/r10_07_compat.log
 
       - name: R10-06 snapshot uploader compatibility 11/11
         shell: bash
@@ -86,7 +95,7 @@ jobs:
           grep -q '# pass 11' /tmp/r10_06_compat.log
           grep -q '# fail 0' /tmp/r10_06_compat.log
 
-      - name: R10-05 queue compatibility 9/9
+      - name: R10-05 save queue compatibility 9/9
         shell: bash
         run: |
           set -euo pipefail
@@ -95,14 +104,23 @@ jobs:
           grep -q '# pass 9' /tmp/r10_05_compat.log
           grep -q '# fail 0' /tmp/r10_05_compat.log
 
-      - name: Full Node regression remains green
+      - name: Stage 3 DocumentStore client remains compatible 10/10
         shell: bash
         run: |
           set -euo pipefail
-          npm test | tee /tmp/r10_07_node.log
-          grep -q '# fail 0' /tmp/r10_07_node.log
-          pass_count="$(sed -n 's/^# pass //p' /tmp/r10_07_node.log | tail -1)"
-          test "${pass_count:-0}" -ge 295
+          node --test tests/unit/platform/document-store-client.test.mjs | tee /tmp/r10_08_platform.log
+          grep -q '# tests 10' /tmp/r10_08_platform.log
+          grep -q '# pass 10' /tmp/r10_08_platform.log
+          grep -q '# fail 0' /tmp/r10_08_platform.log
+
+      - name: Full Node regression 303/303
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test | tee /tmp/r10_08_node.log
+          grep -q '# tests 303' /tmp/r10_08_node.log
+          grep -q '# pass 303' /tmp/r10_08_node.log
+          grep -q '# fail 0' /tmp/r10_08_node.log
 
       - name: Architecture and documentation gates
         shell: bash
@@ -117,8 +135,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run test:browser:contract | tee /tmp/r10_07_browser_contract.log
-          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_07_browser_contract.log
+          npm run test:browser:contract | tee /tmp/r10_08_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_08_browser_contract.log
 
       - name: Production build
         run: npm run build
@@ -127,8 +145,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run test:browser | tee /tmp/r10_07_browser.log
-          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_07_browser.log
+          npm run test:browser | tee /tmp/r10_08_browser.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_08_browser.log
 
       - name: Validation must leave tracked tree clean
         shell: bash

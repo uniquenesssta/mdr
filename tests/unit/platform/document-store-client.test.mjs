@@ -132,15 +132,16 @@ test('invalid client options fail at the adapter boundary', () => {
   assert.throws(() => createDocumentStoreClient({ invoke: null }), /requires an invoke function/);
 });
 
-test('DocumentStore client contains transport mapping only and leaves session/version policy in storage', async () => {
+test('DocumentStore client contains transport mapping only while Stage 10 specialists own persistence policy', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/document-store-client.js', import.meta.url), 'utf8');
   const storeSource = await readFile(new URL('../../../src/storage/native-document-store.js', import.meta.url), 'utf8');
   assert.doesNotMatch(clientSource, /sessions|loadSequence|VERSION_MISMATCH|forceSnapshot =|queueMicrotask|saveSnapshotInChunks|DOCUMENT_LOAD_CANCELLED/);
   assert.match(storeSource, /this\.sessions = new Map\(\)/);
-  assert.match(storeSource, /this\.loadSequence = 0/);
   assert.match(storeSource, /VERSION_MISMATCH/);
-  assert.match(storeSource, /saveSnapshotInChunks/);
-  assert.match(storeSource, /DOCUMENT_LOAD_CANCELLED/);
+  assert.match(storeSource, /createNativeSnapshotUploader/);
+  assert.match(storeSource, /createNativeSegmentedLoader/);
+  assert.match(storeSource, /createNativeSearchAdapter/);
+  assert.doesNotMatch(storeSource, /this\.loadSequence = 0|saveSnapshotInChunks|DOCUMENT_LOAD_CANCELLED/);
 });
 
 test('Rust document-store structs and commands remain camelCase authorities', async () => {
@@ -156,15 +157,19 @@ test('Rust document-store structs and commands remain camelCase authorities', as
   }
 });
 
-test('desktop platform exposes DocumentStorePort and NativeDocumentStore consumes only frozen port names', async () => {
+test('desktop platform exposes DocumentStorePort and Stage 10 persistence consumers use only frozen port names', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
   const store = await readFile(new URL('../../../src/storage/native-document-store.js', import.meta.url), 'utf8');
+  const uploader = await readFile(new URL('../../../src/features/persistence/native-document-store/native-snapshot-uploader.js', import.meta.url), 'utf8');
+  const loader = await readFile(new URL('../../../src/features/persistence/native-document-store/native-segmented-loader.js', import.meta.url), 'utf8');
+  const search = await readFile(new URL('../../../src/features/persistence/native-document-store/native-search-adapter.js', import.meta.url), 'utf8');
+  const consumers = [store, uploader, loader, search].join('\n');
   assert.match(desktop, /createDocumentStoreClient\(\{ invoke: invokeClient\.invoke \}\)/);
   assert.match(desktop, /documentStore: documentStoreClient/);
   for (const method of ['save', 'beginSnapshotUpload', 'appendSnapshotChunk', 'commitSnapshotUpload', 'abortSnapshotUpload', 'load', 'loadManifest', 'readChunk', 'search', 'remove']) {
-    assert.match(store, new RegExp(`documentStore\\.?${method}|documentStore\\?\\.${method}`));
+    assert.match(consumers, new RegExp(`documentStore\\.?${method}|documentStore\\?\\.${method}`));
   }
-  assert.doesNotMatch(store, /markdownEditorNative|nativeApi|saveDocumentState|readDocumentChunk/);
+  assert.doesNotMatch(consumers, /markdownEditorNative|nativeApi|saveDocumentState|readDocumentChunk/);
 });
 
 test('DocumentStore client is exported, registered and verified before the Stage 3 hard gate', async () => {

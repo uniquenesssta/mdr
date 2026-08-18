@@ -171,5 +171,5 @@ test('Atomic 10.7 NativeDocumentStore publishes Session metadata only for the ac
   assert.match(nativeStoreSource, /createNativeSegmentedLoader/);
   assert.match(nativeStoreSource, /segmentedLoader\.load\(documentId, options\)/);
   assert.doesNotMatch(nativeStoreSource, /DOCUMENT_CHUNK_BYTES|loadSequence|documentStore\?\.loadManifest|documentStore\.readChunk/);
-  assert.doesNotMatch(nativeStoreSource, /createNativeSearchAdapter/);
+  assert.doesNotMatch(nativeStoreSource, /createBrowserDocumentRepository/);
 });

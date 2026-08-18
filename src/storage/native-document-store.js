@@ -3,7 +3,8 @@ import {
   createNativeSaveQueue,
   createNativeSaveSession,
   createNativeSegmentedLoader,
-  createNativeSnapshotUploader
+  createNativeSnapshotUploader,
+  createNativeSearchAdapter
 } from '../features/persistence/index.js';
 
 const NATIVE_DOCUMENT_THRESHOLD = 100000;
@@ -51,6 +52,10 @@ export class NativeDocumentStore {
       documentStore: this.documentStore,
       notify: event => this.emit(event),
       yieldControl: () => new Promise(resolve => setTimeout(resolve, 0))
+    });
+    this.searchAdapter = createNativeSearchAdapter({
+      documentStore: this.documentStore,
+      available: this.available
     });
   }
 
@@ -140,14 +145,8 @@ export class NativeDocumentStore {
     this.segmentedLoader.cancelLoad();
   }
 
-  async search(documentId, query, from = 0, wrap = true) {
-    if (!this.available || !documentId || !query || !this.documentStore?.search) return null;
-    return this.documentStore.search({
-      documentId,
-      query: String(query),
-      from: Math.max(0, Number(from) || 0),
-      wrap: wrap !== false
-    });
+  search(documentId, query, from = 0, wrap = true) {
+    return this.searchAdapter.search(documentId, query, from, wrap);
   }
 
   save(source, document, options = {}) {

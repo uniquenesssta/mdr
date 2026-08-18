@@ -283,7 +283,7 @@ test('Atomic 10.6 NativeDocumentStore delegates large reset snapshots through th
   assert.match(nativeStoreSource, /snapshotUploader\.upload/);
   assert.doesNotMatch(nativeStoreSource, /saveSnapshotInChunks\(|getSafeSnapshotChunkEnd\(|SNAPSHOT_UPLOAD_CHUNK_CHARS/);
   assert.doesNotMatch(queueSource, /beginSnapshotUpload|appendSnapshotChunk|commitSnapshotUpload|abortSnapshotUpload/);
-  assert.doesNotMatch(nativeStoreSource, /createNativeSearchAdapter/);
+  assert.doesNotMatch(nativeStoreSource, /createBrowserDocumentRepository/);
   assert.match(handoff, /moduleFixture\.modules\.length,\s*\d+/);
   const fixture = JSON.parse(fixtureText);
   assert.ok(fixture.modules.length >= 391);
