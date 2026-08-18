@@ -23,7 +23,7 @@ fn normalize_url(input: &str) -> Result<Url, String> {
     let candidate = if trimmed.starts_with("http://") || trimmed.starts_with("https://") {
         trimmed.to_string()
     } else {
-        format!("https://{}", trimmed)
+        format!("https://{trimmed}")
     };
 
     let parsed = Url::parse(&candidate).map_err(|err| format!("Invalid URL: {err}"))?;
