@@ -14,7 +14,12 @@ use std::{
 
 const SOURCE_COMMIT: &str = "a49d89918a20251287df28583ab29d4b6eb4c1de";
 const SOURCE_DOCUMENT_STORE_BLOB: &str = "af58efc8ac19672e7834b5cd8bab26fd202f85aa";
-const SOURCE_DOCUMENT_STORE: &str = include_str!("../src/document_store.rs");
+const SOURCE_DOCUMENT_STORE_ENTRY: &str = include_str!("../src/document_store.rs");
+const SOURCE_DOCUMENT_STORE_TYPES: &str = include_str!("../src/document_store/types.rs");
+
+fn current_source_contains(token: &str) -> bool {
+    SOURCE_DOCUMENT_STORE_ENTRY.contains(token) || SOURCE_DOCUMENT_STORE_TYPES.contains(token)
+}
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -345,7 +350,7 @@ fn manifest_pins_the_exact_pre_rewrite_source_and_format_vocabulary() {
         "encode_utf16",
     ] {
         assert!(
-            SOURCE_DOCUMENT_STORE.contains(frozen_token),
+            current_source_contains(frozen_token),
             "current source no longer contains frozen R11-01 token: {frozen_token}"
         );
     }

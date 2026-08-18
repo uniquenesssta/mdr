@@ -1,4 +1,17 @@
-use serde::{Deserialize, Serialize};
+//! Document-store public entry and current orchestration shell.
+//!
+//! R11-02 owns only the stable DTO re-exports from `types`; persistence, validation, indexing,
+//! upload, command, and store orchestration remain here until their dedicated Stage 11 atomics.
+
+mod types;
+
+pub use types::{
+    DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
+    SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
+    TextChange,
+};
+use types::{JournalEntry, SnapshotMeta};
+
 use std::{
     collections::HashMap,
     fs::{self, File, OpenOptions},
@@ -44,138 +57,6 @@ struct DocumentIndex {
 struct IndexCheckpoint {
     byte_offset: usize,
     utf16_offset: usize,
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NativeHeading {
-    id: String,
-    level: u8,
-    text: String,
-    line: usize,
-    position: usize,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TextChange {
-    from: usize,
-    to: usize,
-    insert: String,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DocumentTransaction {
-    changes: Vec<TextChange>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SaveDocumentRequest {
-    document_id: String,
-    title: String,
-    base_version: u64,
-    next_version: u64,
-    full_content: Option<String>,
-    #[serde(default)]
-    transactions: Vec<DocumentTransaction>,
-    updated_at: u64,
-    #[serde(default)]
-    force_snapshot: bool,
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SaveDocumentResponse {
-    document_id: String,
-    version: u64,
-    content_bytes: usize,
-    snapshot_created: bool,
-    journal_entries: u32,
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct LoadedDocument {
-    document_id: String,
-    title: String,
-    content: String,
-    version: u64,
-    updated_at: u64,
-    recovered: bool,
-    recovery_message: Option<String>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DocumentManifest {
-    document_id: String,
-    title: String,
-    version: u64,
-    updated_at: u64,
-    content_bytes: usize,
-    text_length: usize,
-    line_count: usize,
-    non_whitespace_count: usize,
-    headings: Vec<NativeHeading>,
-    recovered: bool,
-    recovery_message: Option<String>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DocumentChunk {
-    document_id: String,
-    byte_offset: usize,
-    next_byte_offset: usize,
-    total_bytes: usize,
-    content: String,
-    done: bool,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SearchDocumentRequest {
-    document_id: String,
-    query: String,
-    #[serde(default)]
-    from: usize,
-    #[serde(default = "default_true")]
-    wrap: bool,
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SearchDocumentResponse {
-    from: usize,
-    to: usize,
-    wrapped: bool,
-    version: u64,
-}
-
-fn default_true() -> bool {
-    true
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct JournalEntry {
-    base_version: u64,
-    next_version: u64,
-    title: String,
-    updated_at: u64,
-    transactions: Vec<DocumentTransaction>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct SnapshotMeta {
-    version: u64,
-    title: String,
-    updated_at: u64,
-    content_bytes: usize,
-    content_hash: String,
 }
 
 fn safe_document_id(document_id: &str) -> Result<String, String> {

@@ -1,12 +1,6 @@
 name: R11-01 Document Store Compatibility Fixtures
 
 on:
-  push:
-    branches:
-      - agent/r11-stage
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -17,9 +11,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - name: Checkout
+      - name: Checkout frozen R11-01 final tree
         uses: actions/checkout@v4
         with:
+          ref: 6cdff0cb98982e7604053d6ec0c0df7c0991e2fd
           fetch-depth: 0
 
       - name: Guard R11-01 scope and provenance
