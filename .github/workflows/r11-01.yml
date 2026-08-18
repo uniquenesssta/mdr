@@ -61,7 +61,7 @@ jobs:
 
       - name: Pin Rust 1.88 with Clippy and rustfmt
         run: |
-          rustup toolchain install 1.88.0 --profile minimal --component clippy rustfmt
+          rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
           rustup override set 1.88.0
           rustc --version
           cargo --version
