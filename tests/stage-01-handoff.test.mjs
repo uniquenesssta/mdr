@@ -124,7 +124,7 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 391);
+  assert.equal(moduleFixture.modules.length, 392);
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/application/autosave-controller.js'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/compatibility/classic-autosave-controller-port.js'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-save-session.js'));
