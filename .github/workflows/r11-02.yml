@@ -38,7 +38,7 @@ jobs:
           test -f src-tauri/src/document_store.rs
           test -f src-tauri/src/document_store/types.rs
           grep -Fq 'mod types;' src-tauri/src/document_store.rs
-          grep -Fq 'pub use types::{' src-tauri/src/document_store.rs
+          grep -Fq 'pub(crate) use types::{' src-tauri/src/document_store.rs
           ! grep -Fq 'pub struct SaveDocumentRequest {' src-tauri/src/document_store.rs
           grep -Fq 'pub struct SaveDocumentRequest {' src-tauri/src/document_store/types.rs
           grep -Fq '#[serde(rename_all = "camelCase")]' src-tauri/src/document_store/types.rs

@@ -6,6 +6,7 @@
 - 兼容夹具：R11-01 的固定来源提交、来源 blob、磁盘夹具和格式声明均不变；其源码词法门禁现在同时读取 `document_store.rs` 与 `document_store/types.rs`，以便 serde 标注迁移后仍验证冻结格式词汇。
 - 外部兼容：未修改 `src-tauri/src/main.rs`、Tauri command 名称/参数 camelCase、Cargo/package 依赖、磁盘路径、A/B snapshot、journal format/version、恢复文本、UTF-16、Mutex 作用域或网络语义。
 - Facade 修正：首轮精确 CI run `32161625160` 已通过 scope/contracts guard、Rust format、JSON contracts 4/4、R11-01 compatibility 5/5 与完整 Rust tests；随后全量 Clippy 在 `document_store.rs` 的 `pub use types::{...}` 报 E0365/可见性错误。由于 `main.rs` 本身以 crate-private `mod document_store;` 声明父模块，修正为 `pub(crate) use types::{...}`，与实际既有可达范围一致，不公开 `types` 子模块、不放宽字段、不增加 allow，也不改变 Tauri/Serde/磁盘运行时契约。该 run 的 cargo check、Node、architecture、browser、build 与 clean-tree 因 fail-fast 被跳过，不能计为通过。
+- Guard 修正：第二轮精确 CI run `32163025483` 在 scope/contracts guard 即失败，因为工作流仍匹配旧的 `pub use types::{` 文本；其余验证因此全部跳过。已只把该断言同步为新的 `pub(crate) use types::{`，允许路径集合、冻结基线、Cargo/package/main/fixtures 不变约束均未放宽。
 - 工作流：已冻结已收口的 R11-01 workflow 为仅手动复验其最终提交 `6cdff0cb98982e7604053d6ec0c0df7c0991e2fd`，避免后续 Atomic 合法修改被旧 scope guard 误判；新增 R11-02 workflow，仅允许本 Atomic 的明确文件范围，并执行 JSON 4/4、R11-01 兼容 5/5、完整 Rust、Clippy/check、Node、architecture、browser 与 build 门禁。
-- 当前验证：可见性修正后的精确 R11-02 提交树重新执行完整硬门禁；全部通过前不收口，不进入 R11-03。
+- 当前验证：guard 同步后的精确 R11-02 提交树重新执行完整硬门禁；全部通过前不收口，不进入 R11-03。
 - 未提供：`npm run test:integration` 当前 package scripts 不提供该命令；本 Atomic 使用真实 Rust DTO/兼容夹具及完整 Rust/Node/Browser/Build 回归作为替代门禁。
