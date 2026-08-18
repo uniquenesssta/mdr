@@ -80,7 +80,7 @@ jobs:
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked
 
       - name: R11-01 Clippy hard gate
-        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --test document_store_compatibility -- -D warnings
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- --deny warnings
 
       - name: Rust check
         run: cargo check --manifest-path src-tauri/Cargo.toml --locked
