@@ -7,7 +7,10 @@
 //! Forbidden here: Tauri command execution, alternate persistence policy, or format migration.
 
 use serde::{Deserialize, Serialize};
-use std::{fs, path::{Path, PathBuf}};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 const SOURCE_COMMIT: &str = "a49d89918a20251287df28583ab29d4b6eb4c1de";
 const SOURCE_DOCUMENT_STORE_BLOB: &str = "af58efc8ac19672e7834b5cd8bab26fd202f85aa";
@@ -167,7 +170,11 @@ fn load_compatible_case(root: &Path) -> Result<Option<CompatibleDocument>, Strin
 
     let mut document = match (snapshot_a, snapshot_b) {
         (Some(left), Some(right)) => {
-            if left.version >= right.version { left } else { right }
+            if left.version >= right.version {
+                left
+            } else {
+                right
+            }
         }
         (Some(document), None) | (None, Some(document)) => document,
         (None, None) => {
@@ -264,7 +271,11 @@ fn utf16_to_byte_for_search(text: &str, target: usize) -> Result<usize, String> 
         }
         utf16 += width;
     }
-    if utf16 == target { Ok(text.len()) } else { Err("搜索位置超过文档长度".into()) }
+    if utf16 == target {
+        Ok(text.len())
+    } else {
+        Err("搜索位置超过文档长度".into())
+    }
 }
 
 fn search_utf16(
@@ -315,8 +326,14 @@ fn manifest_pins_the_exact_pre_rewrite_source_and_format_vocabulary() {
         manifest["sourcePath"].as_str(),
         Some("src-tauri/src/document_store.rs")
     );
-    assert_eq!(manifest["formatContract"]["jsonCase"].as_str(), Some("camelCase"));
-    assert_eq!(manifest["formatContract"]["offsets"].as_str(), Some("UTF-16"));
+    assert_eq!(
+        manifest["formatContract"]["jsonCase"].as_str(),
+        Some("camelCase")
+    );
+    assert_eq!(
+        manifest["formatContract"]["offsets"].as_str(),
+        Some("UTF-16")
+    );
 
     for frozen_token in [
         "snapshot-{slot}.md",
