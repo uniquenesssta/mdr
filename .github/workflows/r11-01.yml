@@ -31,9 +31,15 @@ jobs:
           git diff --quiet "$base"...HEAD -- \
             src \
             src-tauri/src \
+            ':(exclude)src-tauri/src/document_store.rs' \
+            ':(exclude)src-tauri/src/web_fetch.rs' \
             src-tauri/Cargo.toml \
             src-tauri/Cargo.lock \
             package.json package-lock.json
+          test "$(git diff --numstat "$base"...HEAD -- src-tauri/src/document_store.rs)" = $'0\t1\tsrc-tauri/src/document_store.rs'
+          test "$(git diff --numstat "$base"...HEAD -- src-tauri/src/web_fetch.rs)" = $'1\t1\tsrc-tauri/src/web_fetch.rs'
+          ! grep -q 'use std::io::Write as _;' src-tauri/src/document_store.rs
+          grep -Fq 'format!("https://{trimmed}")' src-tauri/src/web_fetch.rs
           test -f src-tauri/src/document_store.rs
           test ! -d src-tauri/src/document_store
           test -f src-tauri/tests/document_store_compatibility.rs
