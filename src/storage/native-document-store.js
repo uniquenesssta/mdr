@@ -1,8 +1,12 @@
 import { normalizeDocumentNativeMetadata } from '../features/documents/index.js';
-import { createNativeSaveQueue, createNativeSaveSession, createNativeSnapshotUploader } from '../features/persistence/index.js';
+import {
+  createNativeSaveQueue,
+  createNativeSaveSession,
+  createNativeSegmentedLoader,
+  createNativeSnapshotUploader
+} from '../features/persistence/index.js';
 
 const NATIVE_DOCUMENT_THRESHOLD = 100000;
-const DOCUMENT_CHUNK_BYTES = 512 * 1024;
 
 function currentDocumentVersion(source) {
   return Math.max(0, Number(source?.getDocumentVersion?.() ?? source?.virtualEditor?.getDocumentVersion?.()) || 0);
@@ -43,7 +47,11 @@ export class NativeDocumentStore {
       notify: event => this.emit(event),
       yieldControl: () => new Promise(resolve => setTimeout(resolve, 0))
     });
-    this.loadSequence = 0;
+    this.segmentedLoader = createNativeSegmentedLoader({
+      documentStore: this.documentStore,
+      notify: event => this.emit(event),
+      yieldControl: () => new Promise(resolve => setTimeout(resolve, 0))
+    });
   }
 
   subscribe(listener) {
@@ -113,70 +121,23 @@ export class NativeDocumentStore {
 
   async load(documentId, options = {}) {
     if (!this.available || !documentId) return null;
-    const cancelPrevious = options.cancelPrevious !== false;
-    const loadToken = cancelPrevious ? ++this.loadSequence : null;
-    const ensureCurrentLoad = () => {
-      if (cancelPrevious && loadToken !== this.loadSequence) throw new Error('DOCUMENT_LOAD_CANCELLED');
-    };
-    const supportsSegmentedLoad = Boolean(
-      this.documentStore?.loadManifest
-      && this.documentStore?.readChunk
-    );
-    if (!supportsSegmentedLoad) {
-      const loaded = await this.documentStore.load(documentId);
-      ensureCurrentLoad();
-      if (!loaded) return null;
-      this.getSession(documentId).recordLoaded(loaded.version);
-      return loaded;
-    }
-
-    this.emit({ state: 'loading-index', documentId, progress: 0 });
-    try {
-      const manifest = await this.documentStore.loadManifest(documentId);
-      ensureCurrentLoad();
-      if (!manifest) return null;
-      this.emit({ state: 'manifest', documentId, progress: 0, manifest });
-      const chunks = [];
-      const totalBytes = Math.max(0, Number(manifest.contentBytes) || 0);
-      let byteOffset = 0;
-      while (byteOffset < totalBytes) {
-        const chunk = await this.documentStore.readChunk(documentId, byteOffset, DOCUMENT_CHUNK_BYTES);
-        ensureCurrentLoad();
-        if (!chunk || Number(chunk.nextByteOffset) <= byteOffset) {
-          throw new Error('后台文档分段读取未前进');
-        }
-        chunks.push(String(chunk.content || ''));
-        byteOffset = Number(chunk.nextByteOffset) || totalBytes;
-        this.emit({
-          state: 'loading',
-          documentId,
-          loadedBytes: byteOffset,
-          totalBytes,
-          progress: totalBytes > 0 ? byteOffset / totalBytes : 1
-        });
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
-      const loaded = {
-        ...manifest,
-        contentChunks: chunks,
-        segmented: true
-      };
-      this.getSession(documentId).recordLoaded(loaded.version);
-      this.emit({ state: 'loaded', documentId, progress: 1, totalBytes });
-      return loaded;
-    } catch (error) {
-      if (error?.message === 'DOCUMENT_LOAD_CANCELLED') throw error;
+    const outcome = await this.segmentedLoader.load(documentId, options);
+    const loaded = outcome?.loaded || null;
+    if (!loaded) return null;
+    this.getSession(documentId).recordLoaded(loaded.version);
+    if (outcome.segmented) {
       this.emit({
-        state: 'load-error',
+        state: 'loaded',
         documentId,
-        message: error?.message || String(error)
+        progress: 1,
+        totalBytes: outcome.totalBytes
       });
-      throw error;
     }
+    return loaded;
   }
 
   cancelLoad() {
-    this.loadSequence += 1;
+    this.segmentedLoader.cancelLoad();
   }
 
   async search(documentId, query, from = 0, wrap = true) {
