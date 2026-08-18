@@ -1008,7 +1008,6 @@ pub async fn delete_document_state(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::Write as _;
 
     #[test]
     fn alternates_snapshot_slots_without_overwriting_current_snapshot() {
