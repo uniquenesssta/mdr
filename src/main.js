@@ -44,6 +44,7 @@ import { SETTINGS_CHANGED_EVENT } from './features/settings/index.js';
 import {
   createAutosaveController,
   createBrowserDocumentRepository,
+  createLoadController,
   createSaveController,
   createSaveStatusStore,
   mountClassicAutosaveControllerPort,
@@ -71,6 +72,7 @@ import {
 } from './features/sidebar/index.js';
 import { configureHybridImageSourcePlatform, configureHybridSyncCapabilities } from './features/hybrid-editor/index.js';
 import {
+  DocumentOperationStaleError,
   createDocumentContextMenuView,
   createDocumentListView,
   createDocumentSessionController,
@@ -78,6 +80,7 @@ import {
   createRecentFilesReadSource,
   createRecentFilesRepository,
   createSessionDocumentRepository,
+  updateDocumentRecord,
   mountClassicDocumentControllerPort,
   mountClassicDocumentUiCommandPort,
   mountClassicRecentFilesPort
@@ -415,10 +418,25 @@ async function loadAppModules() {
       console.warn(message, error);
     }
   });
-  const documentController = createDocumentSessionController({
+  let documentController = null;
+  const loadController = createLoadController({
+    documents: documentSessionPort,
+    model: documentModel,
+    editor: virtualEditor,
+    repository: documentRepository,
+    resolveRecord(record, patch, options) {
+      return updateDocumentRecord(record, patch, options);
+    },
+    assertGeneration(operation) {
+      if (documentController?.isCurrentGeneration(operation)) return true;
+      throw new DocumentOperationStaleError(operation, null);
+    }
+  });
+  documentController = createDocumentSessionController({
     session: documentSessionPort,
     model: window.markdownEditorDocumentModel,
-    repository: documentRepository
+    repository: documentRepository,
+    loadController
   });
   const documentControllerPort = mountClassicDocumentControllerPort(compatibilityPlatformHost, documentController);
   const recentFilesRepository = createRecentFilesRepository({
@@ -450,6 +468,7 @@ async function loadAppModules() {
     recentFilesRepository.destroy();
     documentControllerPort.destroy();
     documentController.destroy();
+    loadController.destroy();
     documentRepository.destroy();
     browserDocumentRepository.destroy();
     editorUiCommandPort.destroy();
@@ -607,6 +626,7 @@ async function loadAppModules() {
     recentFilesRepository.destroy();
     documentControllerPort.destroy();
     documentController.destroy();
+    loadController.destroy();
     documentRepository.destroy();
     browserDocumentRepository.destroy();
     editorUiCommandPort.destroy();

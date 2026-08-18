@@ -1,20 +1,20 @@
 /**
- * Responsibility: Close one session document and, when needed, activate the deterministic neighbour without exposing an async half-switched session.
- * State/side effects: No independent document state; coordinates the injected model/session/repository and validates lifecycle generation around async load.
+ * Responsibility: Close one session document and, when needed, commit the deterministic neighbour after Persistence LoadController prepares its body/runtime activation.
+ * State/side effects: No independent document/load state; owns only close orchestration around the injected Documents session, model, repository cleanup and LoadController.
  */
 
-export function createDocumentCloseCoordinator({ session, model, repository, openCoordinator, assertCurrent } = {}) {
+export function createDocumentCloseCoordinator({ session, model, repository, loadController, assertCurrent } = {}) {
   if (!session || typeof session.removeRecord !== 'function' || typeof session.getRecord !== 'function') {
     throw new TypeError('Document close coordinator requires a document session store.');
   }
   if (!model || typeof model.activate !== 'function') {
     throw new TypeError('Document close coordinator requires the frozen DocumentModel.');
   }
-  if (!repository || typeof repository.load !== 'function' || typeof repository.remove !== 'function') {
+  if (!repository || typeof repository.remove !== 'function' || typeof repository.persistSession !== 'function') {
     throw new TypeError('Document close coordinator requires a session document repository.');
   }
-  if (!openCoordinator || typeof openCoordinator.activateLoaded !== 'function') {
-    throw new TypeError('Document close coordinator requires the document open coordinator.');
+  if (!loadController || typeof loadController.loadExisting !== 'function') {
+    throw new TypeError('Document close coordinator requires the Persistence LoadController.');
   }
   if (typeof assertCurrent !== 'function') {
     throw new TypeError('Document close coordinator requires a generation validator.');
@@ -44,17 +44,16 @@ export function createDocumentCloseCoordinator({ session, model, repository, ope
     let nextLoaded = null;
     let nextMetadataPatch = null;
     if (closingActive && next) {
-      const restored = await repository.load(next);
-      nextLoaded = restored.loaded || null;
-      assertCurrent(operation);
-      const activated = openCoordinator.activateLoaded(next, restored, operation, {
+      const activated = await loadController.loadExisting(next.id, operation, {
         commitActive: false,
         commitMetadata: false,
         persist: false,
         reason: 'close-next'
       });
+      assertCurrent(operation);
       activatedNext = activated.record;
-      nextMetadataPatch = restored.metadataPatch || null;
+      nextLoaded = activated.loaded || null;
+      nextMetadataPatch = activated.metadataPatch || null;
     } else if (closingActive) {
       assertCurrent(operation);
       model.activate(null, { content: '' });

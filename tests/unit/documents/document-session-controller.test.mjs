@@ -9,10 +9,11 @@ import {
   createDocumentRecord,
   createDocumentSessionController,
   createDocumentSessionStore,
+  updateDocumentRecord,
   createSessionDocumentRepository,
   mountClassicDocumentControllerPort
 } from '../../../src/features/documents/index.js';
-import { createBrowserDocumentRepository } from '../../../src/features/persistence/index.js';
+import { createBrowserDocumentRepository, createLoadController } from '../../../src/features/persistence/index.js';
 import { NativeDocumentStore } from '../../../src/storage/native-document-store.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
@@ -135,14 +136,27 @@ function createHarness(options = {}) {
   const model = options.model || createModel();
   const repository = options.repository || createRepository();
   let clock = 100;
-  const controller = createDocumentSessionController({
+  let controller = null;
+  const loadController = createLoadController({
+    documents: session,
+    model,
+    editor: { getTextLength: () => model.getTextLength() },
+    repository,
+    resolveRecord(record, patch, options) { return updateDocumentRecord(record, patch, options); },
+    assertGeneration(operation) {
+      if (controller?.isCurrentGeneration(operation)) return true;
+      throw new DocumentOperationStaleError(operation, null);
+    }
+  });
+  controller = createDocumentSessionController({
     session,
     model,
     repository,
+    loadController,
     now: () => ++clock,
     random: () => 0.25
   });
-  return { session, model, repository, controller };
+  return { session, model, repository, controller, loadController };
 }
 
 test('Atomic 5.3 coordinates new, open, rename and close through one session/model/persistence path', async () => {
@@ -404,14 +418,17 @@ test('Atomic 5.3 classic controller port exposes only controller commands and ha
 });
 
 test('Atomic 5.3 production integration removes classic lifecycle/body-cache authority and keeps the frozen DocumentModel exact', async () => {
-  const [core, exportModule, events, main, nativeStore, segmentedLoader, entry] = await Promise.all([
+  const [core, exportModule, events, main, nativeStore, segmentedLoader, entry, loadControllerSource, persistenceEntry, sessionControllerSource] = await Promise.all([
     readText('public/app/core.js'),
     readText('public/app/export.js'),
     readText('public/app/events.js'),
     readText('src/main.js'),
     readText('src/storage/native-document-store.js'),
     readText('src/features/persistence/native-document-store/native-segmented-loader.js'),
-    readText('src/features/documents/index.js')
+    readText('src/features/documents/index.js'),
+    readText('src/features/persistence/application/load-controller.js'),
+    readText('src/features/persistence/index.js'),
+    readText('src/features/documents/application/document-session-controller.js')
   ]);
   assert.doesNotMatch(core, /legacyDocumentContentCache/);
   assert.doesNotMatch(core, /function\s+activateDocumentRuntime\b/);
@@ -422,7 +439,11 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
   assert.match(events, /markdownEditorDocumentControllerPort/);
   assert.match(main, /createSessionDocumentRepository/);
   assert.match(main, /createDocumentSessionController/);
+  assert.match(main, /createLoadController/);
   assert.match(main, /mountClassicDocumentControllerPort/);
+  assert.match(loadControllerSource, /repository\.load/);
+  assert.match(persistenceEntry, /createLoadController/);
+  assert.doesNotMatch(sessionControllerSource, /repository\.load|materializeLoadedContent/);
   assert.match(nativeStore, /segmentedLoader\.load\(documentId, options\)/);
   assert.match(segmentedLoader, /cancelPrevious/);
   assert.match(entry, /document-session-controller\.js/);

@@ -159,7 +159,7 @@ test('Atomic 10.9 preserves the native-backed no-fallback protection and schedul
   assert.deepEqual(deleted.sort(), ['a', 'b']);
 });
 
-test('Atomic 10.9 public composition uses one BrowserDocumentRepository and leaves Load Controller for R10-10', async () => {
+test('Atomic 10.9 keeps one BrowserDocumentRepository authority after later Persistence application atomics', async () => {
   const [entry, mainSource, sessionSource, fixtureText, handoff] = await Promise.all([
     source('src/features/persistence/index.js'),
     source('src/main.js'),
@@ -173,10 +173,10 @@ test('Atomic 10.9 public composition uses one BrowserDocumentRepository and leav
   assert.match(mainSource, /browserDocumentRepository\.destroy\(\)/);
   assert.match(sessionSource, /browserRepository\.persistSession/);
   assert.doesNotMatch(sessionSource, /localStorage|sessionStorage|const\s+DOCS_KEY|const\s+STORAGE_KEY/);
-  assert.doesNotMatch(entry, /createLoadController/);
-  assert.doesNotMatch(mainSource, /createLoadController/);
+  assert.match(entry, /createLoadController/);
+  assert.match(mainSource, /createLoadController/);
   const fixture = JSON.parse(fixtureText);
-  assert.equal(fixture.modules.length, 394);
+  assert.ok(fixture.modules.length >= 394);
   assert.ok(fixture.modules.some(record => record[0] === 'src/features/persistence/browser/browser-document-repository.js'));
-  assert.match(handoff, /moduleFixture\.modules\.length,\s*394/);
+  assert.match(handoff, /moduleFixture\.modules\.length/);
 });

@@ -1,5 +1,5 @@
 /**
- * Responsibility: Own document lifecycle orchestration and operation generation across Session Store, frozen DocumentModel and persistence.
+ * Responsibility: Own document lifecycle orchestration and the single operation-generation authority while delegating persisted body reads/activation to Persistence LoadController.
  * State/side effects: Owns only lifecycle generation/destroy state; document metadata belongs to Session Store and body belongs to DocumentModel/repository persistence.
  */
 import { createDocumentRecord } from '../domain/document-record.js';
@@ -25,6 +25,7 @@ export function createDocumentSessionController({
   session,
   model,
   repository,
+  loadController,
   now = Date.now,
   random = Math.random
 } = {}) {
@@ -34,8 +35,11 @@ export function createDocumentSessionController({
   if (!model || typeof model.activate !== 'function' || typeof model.createSnapshot !== 'function') {
     throw new TypeError('Document session controller requires the frozen DocumentModel.');
   }
-  if (!repository || typeof repository.load !== 'function' || typeof repository.save !== 'function') {
+  if (!repository || typeof repository.save !== 'function') {
     throw new TypeError('Document session controller requires a session document repository.');
+  }
+  if (!loadController || typeof loadController.loadExisting !== 'function' || typeof loadController.readContent !== 'function' || typeof loadController.cancelPending !== 'function') {
+    throw new TypeError('Document session controller requires the Persistence LoadController.');
   }
   if (typeof now !== 'function' || typeof random !== 'function') {
     throw new TypeError('Document session controller requires clock and random functions.');
@@ -66,7 +70,7 @@ export function createDocumentSessionController({
   const beginOperation = kind => {
     assertActive();
     generation += 1;
-    repository.cancelPendingLoad?.();
+    loadController.cancelPending();
     return Object.freeze({ generation, kind: String(kind || 'document') });
   };
 
@@ -76,7 +80,7 @@ export function createDocumentSessionController({
     session,
     model,
     repository,
-    openCoordinator,
+    loadController,
     assertCurrent
   });
 
@@ -98,9 +102,7 @@ export function createDocumentSessionController({
       repository.clearLegacyActiveSnapshot();
       return;
     }
-    const restored = await repository.load(activeRecord);
-    assertCurrent(operation);
-    openCoordinator.activateLoaded(activeRecord, restored, operation, {
+    await loadController.loadExisting(activeRecord.id, operation, {
       commitActive: true,
       commitMetadata: true,
       persist: true,
@@ -204,7 +206,7 @@ export function createDocumentSessionController({
         snapshotReason: 'document-switch'
       });
       assertCurrent(operation);
-      const opened = await openCoordinator.openExisting(id, operation, { reason: 'open' });
+      const opened = await loadController.loadExisting(id, operation, { reason: 'open' });
       assertCurrent(operation);
       return frozenResult(operation, { opened: true, record: opened.record, loaded: opened.loaded });
     } catch (error) {
@@ -294,9 +296,9 @@ export function createDocumentSessionController({
       if (source.id === session.activeId) {
         content = model.createSnapshot('duplicate-document');
       } else {
-        const restored = await repository.load(source, { isolated: true });
+        const restored = await loadController.readContent(source.id, operation, { isolated: true });
         assertCurrent(operation);
-        content = repository.materializeLoadedContent(restored);
+        content = restored.content;
       }
       const baseName = source.title.replace(/\.(md|markdown|txt)$/i, '');
       const record = createRecord({ title: baseName + copySuffix, fallbackTitle });
@@ -359,9 +361,9 @@ export function createDocumentSessionController({
     if (record.id === session.activeId && String(model.documentId || '') === record.id) {
       return frozenResult(operation, { record, content: model.createSnapshot('document-read') });
     }
-    const restored = await repository.load(record, { isolated: true });
+    const restored = await loadController.readContent(record.id, operation, { isolated: true });
     assertCurrent(operation);
-    return frozenResult(operation, { record, content: repository.materializeLoadedContent(restored), loaded: restored.loaded || null });
+    return frozenResult(operation, { record, content: restored.content, loaded: restored.loaded || null });
   };
 
   return Object.freeze({
@@ -390,7 +392,7 @@ export function createDocumentSessionController({
       if (destroyed) return;
       destroyed = true;
       generation += 1;
-      repository.cancelPendingLoad?.();
+      loadController.cancelPending();
       closeCoordinator.destroy();
       titleController.destroy();
       openCoordinator.destroy();
