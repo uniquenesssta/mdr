@@ -5,7 +5,6 @@
 
 mod types;
 
-pub use types::TextChange;
 pub(crate) use types::{
     DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
     SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
@@ -887,6 +886,7 @@ pub async fn delete_document_state(
 
 #[cfg(test)]
 mod tests {
+    use super::types::TextChange;
     use super::*;
 
     #[test]
