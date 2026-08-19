@@ -5,10 +5,10 @@
 
 mod types;
 
+pub use types::TextChange;
 pub(crate) use types::{
     DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
     SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
-    TextChange,
 };
 use types::{JournalEntry, SnapshotMeta};
 
@@ -397,7 +397,6 @@ fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String
     if b_exists && snapshot_b.is_none() {
         recovery_notes.push("B 槽快照校验失败".to_string());
     }
-
     let mut document = match (snapshot_a, snapshot_b) {
         (Some(left), Some(right)) => {
             if left.version >= right.version { left } else { right }
