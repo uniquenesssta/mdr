@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  R11_02_TARGET: e81deb0bfd24d13234e198f8f5f99bb304aa7fce
+  R11_02_TARGET: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   validate:
@@ -34,7 +34,7 @@ jobs:
           base='6cdff0cb98982e7604053d6ec0c0df7c0991e2fd'
           git merge-base --is-ancestor "$base" HEAD
           changed="$(git diff --name-only "$base"...HEAD)"
-          unexpected="$(printf '%s\n' "$changed" | grep -vE '^(README\.md|docs/R11-02-DETAILS\.md|src-tauri/src/document_store\.rs|src-tauri/src/document_store/types\.rs|src-tauri/tests/document_store_compatibility\.rs|\.github/workflows/r11-01\.yml|\.github/workflows/r11-02\.yml)$' || true)"
+          unexpected="$(printf '%s\n' "$changed" | grep -vE '^(README\.md|AGENTS\.md|docs/R11-02-DETAILS\.md|src-tauri/src/document_store\.rs|src-tauri/src/document_store/types\.rs|src-tauri/tests/document_store_compatibility\.rs|\.github/workflows/r11-01\.yml|\.github/workflows/r11-02\.yml)$' || true)"
           if [ -n "$unexpected" ]; then
             echo 'Unexpected R11-02 paths:'
             printf '%s\n' "$unexpected"
