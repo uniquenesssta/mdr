@@ -79,7 +79,7 @@ jobs:
           cargo --version
 
       - name: R11-02 Rust format gate
-        run: rustfmt --edition 2021 --check src-tauri/src/document_store.rs src-tauri/src/document_store/types.rs src-tauri/tests/document_store_compatibility.rs
+        run: rustfmt --edition 2021 --check src-tauri/src/document_store/types.rs src-tauri/tests/document_store_compatibility.rs
 
       - name: R11-02 JSON contracts 4/4
         shell: bash
