@@ -16,9 +16,14 @@ const SOURCE_COMMIT: &str = "a49d89918a20251287df28583ab29d4b6eb4c1de";
 const SOURCE_DOCUMENT_STORE_BLOB: &str = "af58efc8ac19672e7834b5cd8bab26fd202f85aa";
 const SOURCE_DOCUMENT_STORE_ENTRY: &str = include_str!("../src/document_store.rs");
 const SOURCE_DOCUMENT_STORE_TYPES: &str = include_str!("../src/document_store/types.rs");
+const SOURCE_DOCUMENT_STORE_VALIDATION: &str = include_str!("../src/document_store/validation.rs");
+const SOURCE_DOCUMENT_STORE_PATHS: &str = include_str!("../src/document_store/paths.rs");
 
 fn current_source_contains(token: &str) -> bool {
-    SOURCE_DOCUMENT_STORE_ENTRY.contains(token) || SOURCE_DOCUMENT_STORE_TYPES.contains(token)
+    SOURCE_DOCUMENT_STORE_ENTRY.contains(token)
+        || SOURCE_DOCUMENT_STORE_TYPES.contains(token)
+        || SOURCE_DOCUMENT_STORE_VALIDATION.contains(token)
+        || SOURCE_DOCUMENT_STORE_PATHS.contains(token)
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]

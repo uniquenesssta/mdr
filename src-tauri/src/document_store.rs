@@ -1,15 +1,19 @@
 //! Document-store public entry and current orchestration shell.
 //!
-//! R11-02 owns only the stable DTO re-exports from `types`; persistence, validation, indexing,
-//! upload, command, and store orchestration remain here until their dedicated Stage 11 atomics.
+//! R11-03 owns stable DTO, validation, and path-layout boundaries; persistence, indexing, upload,
+//! command, and store orchestration remain here until their dedicated Stage 11 atomics.
 
+mod paths;
 mod types;
+mod validation;
 
 pub(crate) use types::{
     DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
     SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
 };
+use paths::{document_directory, journal_path, snapshot_paths, snapshot_upload_path};
 use types::{JournalEntry, SnapshotMeta};
+use validation::{safe_document_id, transaction_byte_range, validate_save_versions};
 
 use std::{
     collections::HashMap,
@@ -58,26 +62,13 @@ struct IndexCheckpoint {
     utf16_offset: usize,
 }
 
-fn safe_document_id(document_id: &str) -> Result<String, String> {
-    let safe: String = document_id
-        .chars()
-        .filter(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_'))
-        .take(160)
-        .collect();
-    if safe.is_empty() {
-        return Err("文档标识无效".into());
-    }
-    Ok(safe)
-}
-
 fn document_root(app: &AppHandle, document_id: &str) -> Result<PathBuf, String> {
     let safe = safe_document_id(document_id)?;
-    let root = app
+    let app_data_dir = app
         .path()
         .app_data_dir()
-        .map_err(|err| format!("无法获取应用数据目录：{err}"))?
-        .join("documents")
-        .join(safe);
+        .map_err(|err| format!("无法获取应用数据目录：{err}"))?;
+    let root = document_directory(&app_data_dir, &safe);
     fs::create_dir_all(&root).map_err(|err| format!("无法创建文档存储目录：{err}"))?;
     Ok(root)
 }
@@ -269,52 +260,16 @@ fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
     replace_file(&temp, path)
 }
 
-fn utf16_to_byte_index(text: &str, target: usize) -> Result<usize, String> {
-    if target == 0 {
-        return Ok(0);
-    }
-    let mut utf16 = 0usize;
-    for (byte_index, ch) in text.char_indices() {
-        if utf16 == target {
-            return Ok(byte_index);
-        }
-        let width = ch.len_utf16();
-        if utf16 + width > target {
-            return Err("文本修改位置落在代理字符中间".into());
-        }
-        utf16 += width;
-    }
-    if utf16 == target {
-        Ok(text.len())
-    } else {
-        Err("文本修改位置超过文档长度".into())
-    }
-}
-
 fn apply_transactions(content: &mut String, transactions: &[DocumentTransaction]) -> Result<(), String> {
     for transaction in transactions {
         let mut changes = transaction.changes.clone();
         changes.sort_by(|left, right| right.from.cmp(&left.from));
         for change in changes {
-            if change.to < change.from {
-                return Err("文本修改范围无效".into());
-            }
-            let from = utf16_to_byte_index(content, change.from)?;
-            let to = utf16_to_byte_index(content, change.to)?;
-            if to < from {
-                return Err("文本修改范围无效".into());
-            }
-            content.replace_range(from..to, &change.insert);
+            let range = transaction_byte_range(content, change.from, change.to)?;
+            content.replace_range(range, &change.insert);
         }
     }
     Ok(())
-}
-
-fn snapshot_paths(root: &Path, slot: char) -> (PathBuf, PathBuf) {
-    (
-        root.join(format!("snapshot-{slot}.md")),
-        root.join(format!("snapshot-{slot}.json")),
-    )
 }
 
 fn read_snapshot(root: &Path, slot: char) -> Option<StoredDocument> {
@@ -336,14 +291,6 @@ fn read_snapshot(root: &Path, slot: char) -> Option<StoredDocument> {
         recovery_message: None,
         index: None,
     })
-}
-
-fn journal_path(root: &Path) -> PathBuf {
-    root.join("changes.jsonl")
-}
-
-fn snapshot_upload_path(root: &Path, upload_id: &str) -> Result<PathBuf, String> {
-    Ok(root.join(format!("snapshot-upload-{}.tmp", safe_document_id(upload_id)?)))
 }
 
 fn begin_snapshot_upload(root: &Path, upload_id: &str) -> Result<(), String> {
@@ -547,15 +494,12 @@ fn save_document_inner(
     let document = cache.get_mut(&key).ok_or("无法初始化文档存储")?;
 
     let is_full_reset = request.full_content.is_some();
-    if !is_full_reset && request.base_version != document.version {
-        return Err(format!(
-            "VERSION_MISMATCH:{}:{}",
-            document.version, request.base_version
-        ));
-    }
-    if request.next_version <= request.base_version && !is_full_reset {
-        return Err("文档版本未前进".into());
-    }
+    validate_save_versions(
+        document.version,
+        request.base_version,
+        request.next_version,
+        is_full_reset,
+    )?;
 
     if let Some(content) = request.full_content {
         document.content = content;
