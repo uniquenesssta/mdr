@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   validate:
@@ -21,59 +21,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Apply approved R11-02 facade fix
-        if: github.event_name == 'push' && github.ref == 'refs/heads/agent/r11-stage'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          source = Path('src-tauri/src/document_store.rs')
-          source_text = source.read_text(encoding='utf-8')
-          old_source = '''pub(crate) use types::{
-              DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
-              SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
-              TextChange,
-          };
-          use types::{JournalEntry, SnapshotMeta};
-          '''
-          new_source = '''pub use types::TextChange;
-          pub(crate) use types::{
-              DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
-              SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
-          };
-          use types::{JournalEntry, SnapshotMeta};
-          '''
-          if old_source not in source_text:
-              raise SystemExit('Expected R11-02 facade block not found; refusing automatic edit')
-          source.write_text(source_text.replace(old_source, new_source, 1), encoding='utf-8')
-
-          Path('README.md').write_text('''# Markdown Editor
-
-模块化 Markdown 编辑器。Stage 11 正在执行 R11-02：Serde DTO 已迁入 `document_store/types.rs`；针对 Clippy 暴露的 `TextChange` 未使用 crate re-export，已改为保持既有 `document_store::TextChange` 路径的公开 facade re-export，其余 DTO 仍为 crate 级入口。JSON、Tauri 命令、磁盘/恢复/UTF-16 语义及依赖不变。完整硬门禁重新验证中，全部通过前不收口、不进入 R11-03。详情见 [R11-02](docs/R11-02-DETAILS.md)。
-''', encoding='utf-8')
-
-          details = Path('docs/R11-02-DETAILS.md')
-          details_text = details.read_text(encoding='utf-8')
-          old_details = '- 当前验证：guard 同步后的精确 R11-02 提交树重新执行完整硬门禁；全部通过前不收口，不进入 R11-03。\n'
-          new_details = '''- 第三轮精确 CI run `32163214320` 已通过 scope/contracts guard、Rust format、JSON contracts 4/4、R11-01 compatibility 5/5 与完整 Rust tests；全量 `cargo clippy --all-targets -- --deny warnings` 随后仅报 `document_store.rs` 的 `TextChange` crate re-export 未使用。cargo check、Node、architecture、browser、build 与 clean-tree 因 fail-fast 被跳过，不能计为通过。\n- Clippy blocker 修复：不增加 `allow`、不降低 Clippy 门禁，也不删除 DTO。将 `TextChange` 从会触发未使用检查的 `pub(crate) use` 集合拆出为 `pub use types::TextChange;`，保持 R11-01 前既有的 `document_store::TextChange` facade 路径与可见性；其余实际由 crate 调用的 DTO 继续使用 `pub(crate)` re-export。运行时、Serde JSON、磁盘、命令和依赖均不变。\n- 当前验证：修复后的精确提交树重新执行完整硬门禁；全部通过前不收口，不进入 R11-03。\n'''
-          if old_details not in details_text:
-              raise SystemExit('Expected R11-02 validation record not found; refusing automatic edit')
-          details.write_text(details_text.replace(old_details, new_details, 1), encoding='utf-8')
-          PY
-
-          git diff --check
-          if git diff --quiet -- src-tauri/src/document_store.rs README.md docs/R11-02-DETAILS.md; then
-            echo 'R11-02 facade fix already present; nothing to commit.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src-tauri/src/document_store.rs README.md docs/R11-02-DETAILS.md
-          git commit -m 'fix(r11-02): preserve TextChange facade without unused import'
-          git push origin HEAD:agent/r11-stage
 
       - name: Guard R11-02 scope and contracts
         shell: bash
@@ -132,7 +79,7 @@ jobs:
           cargo --version
 
       - name: R11-02 Rust format gate
-        run: rustfmt --edition 2021 --check src-tauri/src/document_store/types.rs src-tauri/tests/document_store_compatibility.rs
+        run: rustfmt --edition 2021 --check src-tauri/src/document_store.rs src-tauri/src/document_store/types.rs src-tauri/tests/document_store_compatibility.rs
 
       - name: R11-02 JSON contracts 4/4
         shell: bash
