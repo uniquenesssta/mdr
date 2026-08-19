@@ -1,19 +1,13 @@
 name: R11-02 Document Store Types
 
 on:
-  push:
-    branches:
-      - agent/r11-stage
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
-  R11_02_TARGET: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  R11_02_TARGET: ee1e2533f4811d6a497460d166f07ffa7270c449
 
 jobs:
   validate:
