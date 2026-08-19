@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  R11_02_TARGET: e81deb0bfd24d13234e198f8f5f99bb304aa7fce
+
 jobs:
   validate:
     runs-on: ubuntu-24.04
@@ -20,12 +23,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.R11_02_TARGET }}
           fetch-depth: 0
 
       - name: Guard R11-02 scope and contracts
         shell: bash
         run: |
           set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$R11_02_TARGET"
           base='6cdff0cb98982e7604053d6ec0c0df7c0991e2fd'
           git merge-base --is-ancestor "$base" HEAD
           changed="$(git diff --name-only "$base"...HEAD)"
