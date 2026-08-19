@@ -19,3 +19,5 @@
 - Guard 同步：R11-02 scope/contracts 现在明确禁止重新出现 `pub use types::TextChange;`，确认测试直接引用 `types::TextChange`，并确认 `types.rs` 仍定义 `pub struct TextChange`；固定 scope base、允许路径与其余冻结检查均未放宽。
 - 当前验证：上述源码、guard 与 README 记录进入 `agent/r11-stage` 后，最终实际 HEAD 必须重新执行完整硬门禁；在 scope、format、JSON、兼容、Rust tests、Clippy/check、Node、architecture/documentation、Browser、build、clean-tree 全部通过前，R11-02 不收口，也不进入 R11-03。
 - 未提供：`npm run test:integration` 当前 package scripts 不提供该命令；本 Atomic 使用真实 Rust DTO/兼容夹具及完整 Rust/Node/Browser/Build 回归作为替代门禁，不将未执行命令描述为通过。
+- Node 回归失败记录：精确 run `32247076380` 实际检出 `1cb7e5d39391090b6ea34fb7698dd56ea2da2cc0`，并已通过 scope/contracts、Rust format、JSON 4/4、R11-01 compatibility 5/5、完整 Rust tests、Clippy `--deny warnings`、cargo check、npm ci/audit 与 R10-12 11/11；完整 Node 回归为 344 项中 342 通过、2 失败。两项均为根 README 既有文档契约：缺少字面量 `Stage 10`，以及缺少 `[docs/README.md](docs/README.md)` 链接；architecture/browser/build/clean-tree 因 fail-fast 未执行，不能计为通过。
+- README 契约修正：仅补回上述两项既有文档契约，同时保持根 README 长度门禁 120–360 字符；不修改源码、依赖或测试，不放宽 Node/architecture/browser/build 门禁。修正后的最终 HEAD 必须重新跑完整精确 CI 后才能收口。
