@@ -24,7 +24,7 @@ pub(super) fn journal_path(root: &Path) -> PathBuf {
 
 pub(super) fn snapshot_upload_path(root: &Path, upload_id: &str) -> Result<PathBuf, String> {
     Ok(root.join(format!(
-        "snapshot-upload-{}.tmp",
+        "snapshot-upload-{} .tmp",
         safe_document_id(upload_id)?
     )))
 }
