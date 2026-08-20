@@ -39,10 +39,18 @@ mod tests {
         let root = document_directory(&app_data, "doc_1");
         assert_eq!(root, app_data.join("documents").join("doc_1"));
         let (content, meta) = snapshot_paths(&root, 'b');
-        assert_eq!(content.file_name().and_then(|value| value.to_str()), Some("snapshot-b.md"));
-        assert_eq!(meta.file_name().and_then(|value| value.to_str()), Some("snapshot-b.json"));
         assert_eq!(
-            journal_path(&root).file_name().and_then(|value| value.to_str()),
+            content.file_name().and_then(|value| value.to_str()),
+            Some("snapshot-b.md")
+        );
+        assert_eq!(
+            meta.file_name().and_then(|value| value.to_str()),
+            Some("snapshot-b.json")
+        );
+        assert_eq!(
+            journal_path(&root)
+                .file_name()
+                .and_then(|value| value.to_str()),
             Some("changes.jsonl")
         );
     }
