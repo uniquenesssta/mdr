@@ -130,12 +130,30 @@ pub(super) struct JournalEntry {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct SnapshotMeta {
-    pub(super) version: u64,
-    pub(super) title: String,
-    pub(super) updated_at: u64,
-    pub(super) content_bytes: usize,
-    pub(super) content_hash: String,
+pub(in crate::document_store) struct SnapshotMeta {
+    pub(in crate::document_store) version: u64,
+    pub(in crate::document_store) title: String,
+    pub(in crate::document_store) updated_at: u64,
+    pub(in crate::document_store) content_bytes: usize,
+    pub(in crate::document_store) content_hash: String,
+}
+
+impl SnapshotMeta {
+    pub(in crate::document_store) fn new(
+        version: u64,
+        title: String,
+        updated_at: u64,
+        content_bytes: usize,
+        content_hash: String,
+    ) -> Self {
+        Self {
+            version,
+            title,
+            updated_at,
+            content_bytes,
+            content_hash,
+        }
+    }
 }
 
 #[cfg(test)]

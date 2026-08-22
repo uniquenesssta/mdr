@@ -1,9 +1,14 @@
 //! Document-store public entry and current orchestration shell.
 //!
-//! R11-03 owns stable DTO, validation, and path-layout boundaries; persistence, indexing, upload,
-//! command, and store orchestration remain here until their dedicated Stage 11 atomics.
+//! R11-03 owns stable DTO, validation, and path-layout boundaries; R11-04 owns atomic file IO
+//! primitives in `repository`; R11-05 owns snapshot A/B slot selection and R11-06 owns snapshot
+//! hashing/metadata construction/parsing, both in `snapshot`. Recovery strategy, journal
+//! semantics, indexing, command wiring, and store orchestration remain here until their
+//! dedicated Stage 11 atomics.
 
 mod paths;
+mod repository;
+mod snapshot;
 mod types;
 mod validation;
 
@@ -11,13 +16,21 @@ pub(crate) use types::{
     DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
     SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
 };
-use paths::{document_directory, journal_path, snapshot_paths, snapshot_upload_path};
-use types::{JournalEntry, SnapshotMeta};
+use paths::{document_directory, journal_path, snapshot_paths};
+use repository::{
+    abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, ensure_dir,
+    take_snapshot_upload, write_atomic,
+};
+use snapshot::{
+    build_snapshot_meta, content_integrity_valid, fnv1a64, next_snapshot_slot,
+    parse_snapshot_meta, select_active_slot,
+};
+use types::JournalEntry;
 use validation::{safe_document_id, transaction_byte_range, validate_save_versions};
 
 use std::{
     collections::HashMap,
-    fs::{self, File, OpenOptions},
+    fs::{self, OpenOptions},
     io::Write,
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
@@ -69,17 +82,8 @@ fn document_root(app: &AppHandle, document_id: &str) -> Result<PathBuf, String> 
         .app_data_dir()
         .map_err(|err| format!("无法获取应用数据目录：{err}"))?;
     let root = document_directory(&app_data_dir, &safe);
-    fs::create_dir_all(&root).map_err(|err| format!("无法创建文档存储目录：{err}"))?;
+    ensure_dir(&root)?;
     Ok(root)
-}
-
-fn fnv1a64(bytes: &[u8]) -> String {
-    let mut hash: u64 = 0xcbf29ce484222325;
-    for byte in bytes {
-        hash ^= u64::from(*byte);
-        hash = hash.wrapping_mul(0x100000001b3);
-    }
-    format!("{hash:016x}")
 }
 
 fn heading_id(line: usize, level: u8, text: &str) -> String {
@@ -226,40 +230,6 @@ fn index_byte_to_utf16(content: &str, index: &DocumentIndex, target: usize) -> R
     Ok(checkpoint.utf16_offset + content[checkpoint.byte_offset..target].encode_utf16().count())
 }
 
-fn write_temp_file(path: &Path, bytes: &[u8]) -> Result<PathBuf, String> {
-    let temp = path.with_extension(format!(
-        "{}.tmp",
-        path.extension().and_then(|value| value.to_str()).unwrap_or("data")
-    ));
-    let mut file = File::create(&temp).map_err(|err| format!("无法创建临时文件：{err}"))?;
-    file.write_all(bytes)
-        .map_err(|err| format!("无法写入临时文件：{err}"))?;
-    file.sync_all()
-        .map_err(|err| format!("无法同步临时文件：{err}"))?;
-    Ok(temp)
-}
-
-fn replace_file(temp: &Path, target: &Path) -> Result<(), String> {
-    match fs::rename(temp, target) {
-        Ok(()) => Ok(()),
-        Err(first_error) => {
-            if target.exists() {
-                fs::remove_file(target)
-                    .map_err(|err| format!("无法替换旧快照：{err}"))?;
-                fs::rename(temp, target)
-                    .map_err(|err| format!("无法提交快照（首次错误：{first_error}；重试错误：{err}）"))
-            } else {
-                Err(format!("无法提交快照：{first_error}"))
-            }
-        }
-    }
-}
-
-fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
-    let temp = write_temp_file(path, bytes)?;
-    replace_file(&temp, path)
-}
-
 fn apply_transactions(content: &mut String, transactions: &[DocumentTransaction]) -> Result<(), String> {
     for transaction in transactions {
         let mut changes = transaction.changes.clone();
@@ -274,9 +244,9 @@ fn apply_transactions(content: &mut String, transactions: &[DocumentTransaction]
 
 fn read_snapshot(root: &Path, slot: char) -> Option<StoredDocument> {
     let (content_path, meta_path) = snapshot_paths(root, slot);
-    let meta: SnapshotMeta = serde_json::from_slice(&fs::read(meta_path).ok()?).ok()?;
+    let meta = parse_snapshot_meta(&fs::read(meta_path).ok()?)?;
     let content = fs::read_to_string(content_path).ok()?;
-    if content.len() != meta.content_bytes || fnv1a64(content.as_bytes()) != meta.content_hash {
+    if !content_integrity_valid(&content, meta.content_bytes, &meta.content_hash) {
         return None;
     }
     Some(StoredDocument {
@@ -291,38 +261,6 @@ fn read_snapshot(root: &Path, slot: char) -> Option<StoredDocument> {
         recovery_message: None,
         index: None,
     })
-}
-
-fn begin_snapshot_upload(root: &Path, upload_id: &str) -> Result<(), String> {
-    let path = snapshot_upload_path(root, upload_id)?;
-    let file = File::create(path).map_err(|err| format!("无法创建分段快照：{err}"))?;
-    file.sync_all()
-        .map_err(|err| format!("无法初始化分段快照：{err}"))
-}
-
-fn append_snapshot_chunk(root: &Path, upload_id: &str, chunk: &str) -> Result<(), String> {
-    let path = snapshot_upload_path(root, upload_id)?;
-    let mut file = OpenOptions::new()
-        .append(true)
-        .open(path)
-        .map_err(|err| format!("无法打开分段快照：{err}"))?;
-    file.write_all(chunk.as_bytes())
-        .map_err(|err| format!("无法写入分段快照：{err}"))
-}
-
-fn take_snapshot_upload(root: &Path, upload_id: &str) -> Result<String, String> {
-    let path = snapshot_upload_path(root, upload_id)?;
-    let content = fs::read_to_string(&path).map_err(|err| format!("无法读取分段快照：{err}"))?;
-    fs::remove_file(path).map_err(|err| format!("无法清理分段快照：{err}"))?;
-    Ok(content)
-}
-
-fn abort_snapshot_upload(root: &Path, upload_id: &str) -> Result<(), String> {
-    let path = snapshot_upload_path(root, upload_id)?;
-    if path.exists() {
-        fs::remove_file(path).map_err(|err| format!("无法清理分段快照：{err}"))?;
-    }
-    Ok(())
 }
 
 fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String> {
@@ -343,17 +281,11 @@ fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String
     if b_exists && snapshot_b.is_none() {
         recovery_notes.push("B 槽快照校验失败".to_string());
     }
-    let mut document = match (snapshot_a, snapshot_b) {
-        (Some(left), Some(right)) => {
-            if left.version >= right.version { left } else { right }
+    let Some(mut document) = select_active_slot(snapshot_a, snapshot_b, |item| item.version) else {
+        if a_exists || b_exists {
+            return Err("后台文档的两个快照均无法通过完整性校验".into());
         }
-        (Some(document), None) | (None, Some(document)) => document,
-        (None, None) => {
-            if a_exists || b_exists {
-                return Err("后台文档的两个快照均无法通过完整性校验".into());
-            }
-            return Ok(None);
-        }
+        return Ok(None);
     };
 
     let journal = journal_path(root);
@@ -439,22 +371,17 @@ fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String
     Ok(Some(document))
 }
 
-fn next_snapshot_slot(current: Option<char>) -> char {
-    if current == Some('a') { 'b' } else { 'a' }
-}
-
 fn write_snapshot(root: &Path, document: &mut StoredDocument) -> Result<(), String> {
     // 始终写入非当前槽位。这样写入中断时，当前完整快照仍可与
     // 尚未清空的增量日志一起恢复，不能简单按版本奇偶覆盖当前槽。
     let slot = next_snapshot_slot(document.snapshot_slot);
     let (content_path, meta_path) = snapshot_paths(root, slot);
-    let meta = SnapshotMeta {
-        version: document.version,
-        title: document.title.clone(),
-        updated_at: document.updated_at,
-        content_bytes: document.content.len(),
-        content_hash: fnv1a64(document.content.as_bytes()),
-    };
+    let meta = build_snapshot_meta(
+        document.version,
+        document.title.clone(),
+        document.updated_at,
+        &document.content,
+    );
     write_atomic(&content_path, document.content.as_bytes())?;
     let meta_bytes = serde_json::to_vec(&meta).map_err(|err| format!("无法序列化快照信息：{err}"))?;
     write_atomic(&meta_path, &meta_bytes)?;
@@ -832,13 +759,6 @@ pub async fn delete_document_state(
 mod tests {
     use super::types::TextChange;
     use super::*;
-
-    #[test]
-    fn alternates_snapshot_slots_without_overwriting_current_snapshot() {
-        assert_eq!(next_snapshot_slot(None), 'a');
-        assert_eq!(next_snapshot_slot(Some('a')), 'b');
-        assert_eq!(next_snapshot_slot(Some('b')), 'a');
-    }
 
     #[test]
     fn applies_utf16_changes_for_chinese_and_emoji() {

@@ -1,3 +1,3 @@
 # Markdown Editor
 
-Stage 11 R11-03 正在将文档 ID、版本与 UTF-16 事务范围校验，以及文档目录/快照/日志/上传文件名布局，从 `document_store.rs` 提取到 `validation.rs` 与 `paths.rs`。错误文本、JSON/Tauri、磁盘格式、恢复、UTF-16、Mutex 与依赖契约保持不变；R11-02 已收口，Stage 10 兼容门禁冻结不变。完整硬验证通过前不进入 R11-04。历史见 [docs/README.md](docs/README.md)，详情见 [R11-03](docs/R11-03-DETAILS.md)。
+Stage 11 R11-06 正在把快照哈希（FNV-1a64）、字节数/哈希校验与元数据构建/解析从 `document_store.rs` 提取到 `snapshot/integrity.rs`、`snapshot/metadata.rs`。本地 Rust/Node/架构/构建验证已通过，真实 CI 尚未推送验证；Stage 10 兼容门禁冻结不变。历史见 [docs/README.md](docs/README.md)，详情见 [R11-06](docs/R11-06-DETAILS.md)。
