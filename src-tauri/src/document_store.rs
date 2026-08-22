@@ -4,9 +4,11 @@
 //! primitives in `repository`; R11-05 owns snapshot A/B slot selection, R11-06 owns snapshot
 //! hashing/metadata construction/parsing, and R11-07 owns snapshot write ordering and two-slot
 //! loading, all in `snapshot`; R11-08 owns journal entry encoding/append and R11-09 owns journal
-//! replay/recovery, both in `journal`. Indexing, command wiring, and store orchestration remain
+//! replay/recovery, both in `journal`; R11-10 owns document index construction and heading
+//! detection in `index`. UTF-16/search lookup, command wiring, and store orchestration remain
 //! here until their dedicated Stage 11 atomics.
 
+mod index;
 mod journal;
 mod paths;
 mod repository;
@@ -15,9 +17,10 @@ mod types;
 mod validation;
 
 pub(crate) use types::{
-    DocumentChunk, DocumentManifest, LoadedDocument, NativeHeading, SaveDocumentRequest,
-    SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
+    DocumentChunk, DocumentManifest, LoadedDocument, SaveDocumentRequest, SaveDocumentResponse,
+    SearchDocumentRequest, SearchDocumentResponse,
 };
+use index::{ensure_document_index, DocumentIndex};
 use journal::{
     append_journal, apply_transactions, recover_from_journal_replay, recover_from_snapshot_notes,
     replay_journal,
@@ -27,7 +30,7 @@ use repository::{
     abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, ensure_dir,
     take_snapshot_upload,
 };
-use snapshot::{fnv1a64, load_active_snapshot, write_snapshot};
+use snapshot::{load_active_snapshot, write_snapshot};
 use types::JournalEntry;
 use validation::{safe_document_id, validate_save_versions};
 
@@ -41,7 +44,6 @@ use tauri::{AppHandle, Manager, State};
 
 const SNAPSHOT_ENTRY_LIMIT: u32 = 24;
 const SNAPSHOT_BYTE_LIMIT: u64 = 2 * 1024 * 1024;
-const INDEX_CHECKPOINT_BYTES: usize = 64 * 1024;
 
 #[derive(Default)]
 pub struct DocumentStore {
@@ -62,21 +64,6 @@ struct StoredDocument {
     index: Option<DocumentIndex>,
 }
 
-#[derive(Clone, Debug, Default)]
-struct DocumentIndex {
-    checkpoints: Vec<IndexCheckpoint>,
-    headings: Vec<NativeHeading>,
-    utf16_length: usize,
-    line_count: usize,
-    non_whitespace_count: usize,
-}
-
-#[derive(Clone, Debug)]
-struct IndexCheckpoint {
-    byte_offset: usize,
-    utf16_offset: usize,
-}
-
 fn document_root(app: &AppHandle, document_id: &str) -> Result<PathBuf, String> {
     let safe = safe_document_id(document_id)?;
     let app_data_dir = app
@@ -86,115 +73,6 @@ fn document_root(app: &AppHandle, document_id: &str) -> Result<PathBuf, String> 
     let root = document_directory(&app_data_dir, &safe);
     ensure_dir(&root)?;
     Ok(root)
-}
-
-fn heading_id(line: usize, level: u8, text: &str) -> String {
-    format!("native-h-{line}-{level}-{}", fnv1a64(text.as_bytes()))
-}
-
-fn parse_atx_heading(line: &str) -> Option<(u8, String)> {
-    let trimmed = line.trim_start();
-    let level = trimmed.chars().take_while(|ch| *ch == '#').count();
-    if !(1..=6).contains(&level) {
-        return None;
-    }
-    let remainder = &trimmed[level..];
-    if remainder.chars().next().is_some_and(|ch| !ch.is_whitespace()) {
-        return None;
-    }
-    let text = remainder
-        .trim()
-        .trim_end_matches('#')
-        .trim()
-        .to_string();
-    if text.is_empty() {
-        return None;
-    }
-    Some((level as u8, text))
-}
-
-fn fence_marker(line: &str) -> Option<(char, usize)> {
-    let trimmed = line.trim_start();
-    let marker = trimmed.chars().next()?;
-    if marker != '`' && marker != '~' {
-        return None;
-    }
-    let count = trimmed.chars().take_while(|ch| *ch == marker).count();
-    if count >= 3 { Some((marker, count)) } else { None }
-}
-
-fn build_document_index(content: &str) -> DocumentIndex {
-    let mut checkpoints = vec![IndexCheckpoint {
-        byte_offset: 0,
-        utf16_offset: 0,
-    }];
-    let mut utf16_offset = 0usize;
-    let mut non_whitespace_count = 0usize;
-    let mut next_checkpoint = INDEX_CHECKPOINT_BYTES;
-
-    for (byte_offset, ch) in content.char_indices() {
-        if byte_offset >= next_checkpoint {
-            checkpoints.push(IndexCheckpoint {
-                byte_offset,
-                utf16_offset,
-            });
-            next_checkpoint = byte_offset.saturating_add(INDEX_CHECKPOINT_BYTES);
-        }
-        utf16_offset += ch.len_utf16();
-        if !ch.is_whitespace() {
-            non_whitespace_count += 1;
-        }
-    }
-    if checkpoints.last().map(|item| item.byte_offset) != Some(content.len()) {
-        checkpoints.push(IndexCheckpoint {
-            byte_offset: content.len(),
-            utf16_offset,
-        });
-    }
-
-    let mut headings = Vec::new();
-    let mut line_number = 1usize;
-    let mut line_start_utf16 = 0usize;
-    let mut active_fence: Option<(char, usize)> = None;
-    for raw_line in content.split_inclusive('\n') {
-        let line = raw_line.trim_end_matches('\n').trim_end_matches('\r');
-        if let Some((marker, count)) = fence_marker(line) {
-            match active_fence {
-                Some((active_marker, active_count)) if active_marker == marker && count >= active_count => {
-                    active_fence = None;
-                }
-                None => active_fence = Some((marker, count)),
-                _ => {}
-            }
-        } else if active_fence.is_none() {
-            if let Some((level, text)) = parse_atx_heading(line) {
-                headings.push(NativeHeading {
-                    id: heading_id(line_number, level, &text),
-                    level,
-                    text,
-                    line: line_number,
-                    position: line_start_utf16,
-                });
-            }
-        }
-        line_start_utf16 += raw_line.encode_utf16().count();
-        line_number += 1;
-    }
-
-    DocumentIndex {
-        checkpoints,
-        headings,
-        utf16_length: utf16_offset,
-        line_count: content.bytes().filter(|byte| *byte == b'\n').count() + 1,
-        non_whitespace_count,
-    }
-}
-
-fn ensure_document_index(document: &mut StoredDocument) -> &DocumentIndex {
-    if document.index.is_none() {
-        document.index = Some(build_document_index(&document.content));
-    }
-    document.index.as_ref().expect("document index initialized")
 }
 
 fn index_utf16_to_byte(content: &str, index: &DocumentIndex, target: usize) -> Result<usize, String> {
@@ -606,6 +484,7 @@ pub async fn delete_document_state(
 
 #[cfg(test)]
 mod tests {
+    use super::index::build_document_index;
     use super::paths::snapshot_paths;
     use super::types::{DocumentTransaction, TextChange};
     use super::*;
@@ -613,17 +492,15 @@ mod tests {
     use std::io::Write;
 
     #[test]
-    fn builds_sparse_index_and_ignores_fenced_headings() {
+    fn maps_utf16_and_byte_offsets_through_sparse_checkpoints_for_emoji() {
         let content = "# 标题😀\n正文\n```md\n# 代码标题\n```\n## 第二节\n";
         let index = build_document_index(content);
-        assert_eq!(index.line_count, 7);
-        assert_eq!(index.headings.len(), 2);
-        assert_eq!(index.headings[0].line, 1);
-        assert_eq!(index.headings[1].line, 6);
-        assert_eq!(index.utf16_length, content.encode_utf16().count());
         let emoji_byte = content.find('😀').unwrap();
         let emoji_utf16 = index_byte_to_utf16(content, &index, emoji_byte).unwrap();
-        assert_eq!(index_utf16_to_byte(content, &index, emoji_utf16).unwrap(), emoji_byte);
+        assert_eq!(
+            index_utf16_to_byte(content, &index, emoji_utf16).unwrap(),
+            emoji_byte
+        );
     }
 
 
