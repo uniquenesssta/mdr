@@ -1,10 +1,10 @@
 //! Document-store public entry and current orchestration shell.
 //!
 //! R11-03 owns stable DTO, validation, and path-layout boundaries; R11-04 owns atomic file IO
-//! primitives in `repository`; R11-05 owns snapshot A/B slot selection and R11-06 owns snapshot
-//! hashing/metadata construction/parsing, both in `snapshot`. Recovery strategy, journal
-//! semantics, indexing, command wiring, and store orchestration remain here until their
-//! dedicated Stage 11 atomics.
+//! primitives in `repository`; R11-05 owns snapshot A/B slot selection, R11-06 owns snapshot
+//! hashing/metadata construction/parsing, and R11-07 owns snapshot write ordering and two-slot
+//! loading, all in `snapshot`. Journal semantics, indexing, command wiring, and store
+//! orchestration remain here until their dedicated Stage 11 atomics.
 
 mod paths;
 mod repository;
@@ -16,15 +16,12 @@ pub(crate) use types::{
     DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
     SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
 };
-use paths::{document_directory, journal_path, snapshot_paths};
+use paths::{document_directory, journal_path};
 use repository::{
     abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, ensure_dir,
     take_snapshot_upload, write_atomic,
 };
-use snapshot::{
-    build_snapshot_meta, content_integrity_valid, fnv1a64, next_snapshot_slot,
-    parse_snapshot_meta, select_active_slot,
-};
+use snapshot::{fnv1a64, load_active_snapshot, write_snapshot};
 use types::JournalEntry;
 use validation::{safe_document_id, transaction_byte_range, validate_save_versions};
 
@@ -242,47 +239,11 @@ fn apply_transactions(content: &mut String, transactions: &[DocumentTransaction]
     Ok(())
 }
 
-fn read_snapshot(root: &Path, slot: char) -> Option<StoredDocument> {
-    let (content_path, meta_path) = snapshot_paths(root, slot);
-    let meta = parse_snapshot_meta(&fs::read(meta_path).ok()?)?;
-    let content = fs::read_to_string(content_path).ok()?;
-    if !content_integrity_valid(&content, meta.content_bytes, &meta.content_hash) {
-        return None;
-    }
-    Some(StoredDocument {
-        title: meta.title,
-        content,
-        version: meta.version,
-        updated_at: meta.updated_at,
-        journal_entries: 0,
-        journal_bytes: 0,
-        snapshot_slot: Some(slot),
-        recovered: false,
-        recovery_message: None,
-        index: None,
-    })
-}
-
 fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String> {
-    let a_exists = {
-        let (content, meta) = snapshot_paths(root, 'a');
-        content.exists() || meta.exists()
-    };
-    let b_exists = {
-        let (content, meta) = snapshot_paths(root, 'b');
-        content.exists() || meta.exists()
-    };
-    let snapshot_a = read_snapshot(root, 'a');
-    let snapshot_b = read_snapshot(root, 'b');
-    let mut recovery_notes = Vec::new();
-    if a_exists && snapshot_a.is_none() {
-        recovery_notes.push("A 槽快照校验失败".to_string());
-    }
-    if b_exists && snapshot_b.is_none() {
-        recovery_notes.push("B 槽快照校验失败".to_string());
-    }
-    let Some(mut document) = select_active_slot(snapshot_a, snapshot_b, |item| item.version) else {
-        if a_exists || b_exists {
+    let loaded = load_active_snapshot(root);
+    let mut recovery_notes = loaded.notes;
+    let Some(mut document) = loaded.document else {
+        if !recovery_notes.is_empty() {
             return Err("后台文档的两个快照均无法通过完整性校验".into());
         }
         return Ok(None);
@@ -369,25 +330,6 @@ fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String
     }
 
     Ok(Some(document))
-}
-
-fn write_snapshot(root: &Path, document: &mut StoredDocument) -> Result<(), String> {
-    // 始终写入非当前槽位。这样写入中断时，当前完整快照仍可与
-    // 尚未清空的增量日志一起恢复，不能简单按版本奇偶覆盖当前槽。
-    let slot = next_snapshot_slot(document.snapshot_slot);
-    let (content_path, meta_path) = snapshot_paths(root, slot);
-    let meta = build_snapshot_meta(
-        document.version,
-        document.title.clone(),
-        document.updated_at,
-        &document.content,
-    );
-    write_atomic(&content_path, document.content.as_bytes())?;
-    let meta_bytes = serde_json::to_vec(&meta).map_err(|err| format!("无法序列化快照信息：{err}"))?;
-    write_atomic(&meta_path, &meta_bytes)?;
-    document.snapshot_slot = Some(slot);
-    write_atomic(&journal_path(root), b"")?;
-    Ok(())
 }
 
 fn append_journal(root: &Path, entry: &JournalEntry) -> Result<u64, String> {
@@ -757,6 +699,7 @@ pub async fn delete_document_state(
 
 #[cfg(test)]
 mod tests {
+    use super::paths::snapshot_paths;
     use super::types::TextChange;
     use super::*;
 

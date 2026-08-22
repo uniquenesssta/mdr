@@ -4,9 +4,11 @@
 //! file IO, or policy itself.
 
 mod integrity;
+mod loader;
 mod metadata;
 mod slots;
+mod writer;
 
-pub(super) use integrity::{content_integrity_valid, fnv1a64};
-pub(super) use metadata::{build_snapshot_meta, parse_snapshot_meta};
-pub(super) use slots::{next_snapshot_slot, select_active_slot};
+pub(super) use integrity::fnv1a64;
+pub(super) use loader::load_active_snapshot;
+pub(super) use writer::write_snapshot;
