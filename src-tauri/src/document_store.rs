@@ -6,10 +6,12 @@
 //! loading, all in `snapshot`; R11-08 owns journal entry encoding/append and R11-09 owns journal
 //! replay/recovery, both in `journal`; R11-10 owns document index construction and heading
 //! detection and R11-11 owns UTF-16/byte mapping and search, both in `index`; R11-12 owns safe
-//! UTF-8 boundary chunk reading and R11-13 owns the upload-session lifecycle, both in `chunks`.
-//! Command wiring and store orchestration remain here until their dedicated Stage 11 atomics.
+//! UTF-8 boundary chunk reading and R11-13 owns the upload-session lifecycle, both in `chunks`;
+//! R11-14 owns Tauri command wiring in `commands`. Store orchestration remains here until its
+//! dedicated Stage 11 atomic.
 
 mod chunks;
+pub(crate) mod commands;
 mod index;
 mod journal;
 mod paths;
@@ -18,15 +20,7 @@ mod snapshot;
 mod types;
 mod validation;
 
-pub(crate) use types::{
-    DocumentChunk, DocumentManifest, LoadedDocument, SaveDocumentRequest, SaveDocumentResponse,
-    SearchDocumentRequest, SearchDocumentResponse,
-};
-use chunks::{
-    abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, read_chunk,
-    take_snapshot_upload,
-};
-use index::{ensure_document_index, search_document_content, DocumentIndex};
+use index::DocumentIndex;
 use journal::{
     append_journal, apply_transactions, recover_from_journal_replay, recover_from_snapshot_notes,
     replay_journal,
@@ -34,7 +28,7 @@ use journal::{
 use paths::{document_directory, journal_path};
 use repository::ensure_dir;
 use snapshot::{load_active_snapshot, write_snapshot};
-use types::JournalEntry;
+use types::{JournalEntry, SaveDocumentRequest, SaveDocumentResponse};
 use validation::{safe_document_id, validate_save_versions};
 
 use std::{
@@ -43,7 +37,7 @@ use std::{
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
 };
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Manager};
 
 const SNAPSHOT_ENTRY_LIMIT: u32 = 24;
 const SNAPSHOT_BYTE_LIMIT: u64 = 2 * 1024 * 1024;
@@ -175,265 +169,14 @@ fn save_document_inner(
     })
 }
 
-#[tauri::command]
-pub async fn save_document_state(
-    app: AppHandle,
-    store: State<'_, DocumentStore>,
-    request: SaveDocumentRequest,
-) -> Result<SaveDocumentResponse, String> {
-    let root = document_root(&app, &request.document_id)?;
-    let inner = store.inner.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let mut cache = inner.lock().map_err(|_| "文档存储锁已损坏".to_string())?;
-        save_document_inner(&root, &mut cache, request)
-    })
-    .await
-    .map_err(|err| format!("后台保存任务失败：{err}"))?
-}
-
-#[tauri::command]
-pub async fn begin_document_snapshot_upload(
-    app: AppHandle,
-    document_id: String,
-    upload_id: String,
-) -> Result<(), String> {
-    let root = document_root(&app, &document_id)?;
-    tauri::async_runtime::spawn_blocking(move || begin_snapshot_upload(&root, &upload_id))
-        .await
-        .map_err(|err| format!("后台初始化分段快照失败：{err}"))?
-}
-
-#[tauri::command]
-pub async fn append_document_snapshot_chunk(
-    app: AppHandle,
-    document_id: String,
-    upload_id: String,
-    chunk: String,
-) -> Result<(), String> {
-    let root = document_root(&app, &document_id)?;
-    tauri::async_runtime::spawn_blocking(move || append_snapshot_chunk(&root, &upload_id, &chunk))
-        .await
-        .map_err(|err| format!("后台写入分段快照失败：{err}"))?
-}
-
-#[tauri::command]
-pub async fn commit_document_snapshot_upload(
-    app: AppHandle,
-    store: State<'_, DocumentStore>,
-    mut request: SaveDocumentRequest,
-    upload_id: String,
-) -> Result<SaveDocumentResponse, String> {
-    let root = document_root(&app, &request.document_id)?;
-    let inner = store.inner.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        if request.full_content.is_some() {
-            return Err("分段快照提交不能同时包含完整正文".into());
-        }
-        let content = take_snapshot_upload(&root, &upload_id)?;
-        request.full_content = Some(content);
-        let mut cache = inner.lock().map_err(|_| "文档存储锁已损坏".to_string())?;
-        save_document_inner(&root, &mut cache, request)
-    })
-    .await
-    .map_err(|err| format!("后台提交分段快照失败：{err}"))?
-}
-
-#[tauri::command]
-pub async fn abort_document_snapshot_upload(
-    app: AppHandle,
-    document_id: String,
-    upload_id: String,
-) -> Result<(), String> {
-    let root = document_root(&app, &document_id)?;
-    tauri::async_runtime::spawn_blocking(move || abort_snapshot_upload(&root, &upload_id))
-        .await
-        .map_err(|err| format!("后台清理分段快照失败：{err}"))?
-}
-
-#[tauri::command]
-pub async fn load_document_state(
-    app: AppHandle,
-    store: State<'_, DocumentStore>,
-    document_id: String,
-) -> Result<Option<LoadedDocument>, String> {
-    let root = document_root(&app, &document_id)?;
-    let key = safe_document_id(&document_id)?;
-    let inner = store.inner.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let mut cache = inner.lock().map_err(|_| "文档存储锁已损坏".to_string())?;
-        if !cache.contains_key(&key) {
-            if let Some(document) = load_document_from_disk(&root)? {
-                cache.insert(key.clone(), document);
-            }
-        }
-        Ok(cache.get_mut(&key).map(|document| {
-            let recovered = document.recovered;
-            let recovery_message = document.recovery_message.take();
-            document.recovered = false;
-            LoadedDocument {
-                document_id,
-                title: document.title.clone(),
-                content: document.content.clone(),
-                version: document.version,
-                updated_at: document.updated_at,
-                recovered,
-                recovery_message,
-            }
-        }))
-    })
-    .await
-    .map_err(|err| format!("后台读取任务失败：{err}"))?
-}
-
-#[tauri::command]
-pub async fn load_document_manifest(
-    app: AppHandle,
-    store: State<'_, DocumentStore>,
-    document_id: String,
-) -> Result<Option<DocumentManifest>, String> {
-    let root = document_root(&app, &document_id)?;
-    let key = safe_document_id(&document_id)?;
-    let inner = store.inner.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let mut cache = inner.lock().map_err(|_| "文档存储锁已损坏".to_string())?;
-        if !cache.contains_key(&key) {
-            if let Some(document) = load_document_from_disk(&root)? {
-                cache.insert(key.clone(), document);
-            }
-        }
-        let Some(document) = cache.get_mut(&key) else {
-            return Ok(None);
-        };
-        let recovered = document.recovered;
-        let recovery_message = document.recovery_message.take();
-        document.recovered = false;
-        let index = ensure_document_index(document).clone();
-        Ok(Some(DocumentManifest {
-            document_id,
-            title: document.title.clone(),
-            version: document.version,
-            updated_at: document.updated_at,
-            content_bytes: document.content.len(),
-            text_length: index.utf16_length,
-            line_count: index.line_count,
-            non_whitespace_count: index.non_whitespace_count,
-            headings: index.headings,
-            recovered,
-            recovery_message,
-        }))
-    })
-    .await
-    .map_err(|err| format!("后台索引任务失败：{err}"))?
-}
-
-#[tauri::command]
-pub async fn read_document_chunk(
-    app: AppHandle,
-    store: State<'_, DocumentStore>,
-    document_id: String,
-    byte_offset: usize,
-    max_bytes: usize,
-) -> Result<Option<DocumentChunk>, String> {
-    let root = document_root(&app, &document_id)?;
-    let key = safe_document_id(&document_id)?;
-    let inner = store.inner.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let mut cache = inner.lock().map_err(|_| "文档存储锁已损坏".to_string())?;
-        if !cache.contains_key(&key) {
-            if let Some(document) = load_document_from_disk(&root)? {
-                cache.insert(key.clone(), document);
-            }
-        }
-        let Some(document) = cache.get(&key) else {
-            return Ok(None);
-        };
-        let chunk = read_chunk(&document.content, byte_offset, max_bytes)?;
-        Ok(Some(DocumentChunk {
-            document_id,
-            byte_offset,
-            next_byte_offset: chunk.next_byte_offset,
-            total_bytes: chunk.total_bytes,
-            content: chunk.content,
-            done: chunk.done,
-        }))
-    })
-    .await
-    .map_err(|err| format!("后台分段读取任务失败：{err}"))?
-}
-
-#[tauri::command]
-pub async fn search_document_state(
-    app: AppHandle,
-    store: State<'_, DocumentStore>,
-    request: SearchDocumentRequest,
-) -> Result<Option<SearchDocumentResponse>, String> {
-    if request.query.is_empty() {
-        return Ok(None);
-    }
-    let root = document_root(&app, &request.document_id)?;
-    let key = safe_document_id(&request.document_id)?;
-    let inner = store.inner.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let mut cache = inner.lock().map_err(|_| "文档存储锁已损坏".to_string())?;
-        if !cache.contains_key(&key) {
-            if let Some(document) = load_document_from_disk(&root)? {
-                cache.insert(key.clone(), document);
-            }
-        }
-        let Some(document) = cache.get_mut(&key) else {
-            return Ok(None);
-        };
-        let index = ensure_document_index(document).clone();
-        let Some(found) = search_document_content(
-            &document.content,
-            &index,
-            &request.query,
-            request.from,
-            request.wrap,
-        )?
-        else {
-            return Ok(None);
-        };
-        Ok(Some(SearchDocumentResponse {
-            from: found.from,
-            to: found.to,
-            wrapped: found.wrapped,
-            version: document.version,
-        }))
-    })
-    .await
-    .map_err(|err| format!("后台搜索任务失败：{err}"))?
-}
-
-#[tauri::command]
-pub async fn delete_document_state(
-    app: AppHandle,
-    store: State<'_, DocumentStore>,
-    document_id: String,
-) -> Result<(), String> {
-    let root = document_root(&app, &document_id)?;
-    let key = safe_document_id(&document_id)?;
-    let inner = store.inner.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let mut cache = inner.lock().map_err(|_| "文档存储锁已损坏".to_string())?;
-        cache.remove(&key);
-        if root.exists() {
-            fs::remove_dir_all(root).map_err(|err| format!("无法删除文档快照：{err}"))?;
-        }
-        Ok(())
-    })
-    .await
-    .map_err(|err| format!("后台删除任务失败：{err}"))?
-}
-
 #[cfg(test)]
 mod tests {
+    use super::chunks::{append_snapshot_chunk, begin_snapshot_upload, take_snapshot_upload};
     use super::paths::snapshot_paths;
     use super::types::{DocumentTransaction, TextChange};
     use super::*;
     use std::fs::OpenOptions;
     use std::io::Write;
-
 
     fn test_root(name: &str) -> PathBuf {
         let nonce = std::time::SystemTime::now()
