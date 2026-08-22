@@ -5,9 +5,11 @@
 //! hashing/metadata construction/parsing, and R11-07 owns snapshot write ordering and two-slot
 //! loading, all in `snapshot`; R11-08 owns journal entry encoding/append and R11-09 owns journal
 //! replay/recovery, both in `journal`; R11-10 owns document index construction and heading
-//! detection in `index`. UTF-16/search lookup, command wiring, and store orchestration remain
-//! here until their dedicated Stage 11 atomics.
+//! detection, R11-11 owns UTF-16/byte mapping and search, both in `index`; R11-12 owns safe
+//! UTF-8 boundary chunk reading in `chunks`. Upload-session state, command wiring, and store
+//! orchestration remain here until their dedicated Stage 11 atomics.
 
+mod chunks;
 mod index;
 mod journal;
 mod paths;
@@ -20,6 +22,7 @@ pub(crate) use types::{
     DocumentChunk, DocumentManifest, LoadedDocument, SaveDocumentRequest, SaveDocumentResponse,
     SearchDocumentRequest, SearchDocumentResponse,
 };
+use chunks::read_chunk;
 use index::{ensure_document_index, search_document_content, DocumentIndex};
 use journal::{
     append_journal, apply_transactions, recover_from_journal_replay, recover_from_snapshot_notes,
@@ -344,29 +347,14 @@ pub async fn read_document_chunk(
         let Some(document) = cache.get(&key) else {
             return Ok(None);
         };
-        let total_bytes = document.content.len();
-        if byte_offset > total_bytes || !document.content.is_char_boundary(byte_offset) {
-            return Err("文档分段读取位置无效".into());
-        }
-        let requested = max_bytes.clamp(16 * 1024, 2 * 1024 * 1024);
-        let mut end = byte_offset.saturating_add(requested).min(total_bytes);
-        while end > byte_offset && !document.content.is_char_boundary(end) {
-            end -= 1;
-        }
-        if end == byte_offset && byte_offset < total_bytes {
-            end = document.content[byte_offset..]
-                .char_indices()
-                .nth(1)
-                .map(|(relative, _)| byte_offset + relative)
-                .unwrap_or(total_bytes);
-        }
+        let chunk = read_chunk(&document.content, byte_offset, max_bytes)?;
         Ok(Some(DocumentChunk {
             document_id,
             byte_offset,
-            next_byte_offset: end,
-            total_bytes,
-            content: document.content[byte_offset..end].to_string(),
-            done: end >= total_bytes,
+            next_byte_offset: chunk.next_byte_offset,
+            total_bytes: chunk.total_bytes,
+            content: chunk.content,
+            done: chunk.done,
         }))
     })
     .await
