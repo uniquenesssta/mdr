@@ -5,9 +5,9 @@
 //! hashing/metadata construction/parsing, and R11-07 owns snapshot write ordering and two-slot
 //! loading, all in `snapshot`; R11-08 owns journal entry encoding/append and R11-09 owns journal
 //! replay/recovery, both in `journal`; R11-10 owns document index construction and heading
-//! detection, R11-11 owns UTF-16/byte mapping and search, both in `index`; R11-12 owns safe
-//! UTF-8 boundary chunk reading in `chunks`. Upload-session state, command wiring, and store
-//! orchestration remain here until their dedicated Stage 11 atomics.
+//! detection and R11-11 owns UTF-16/byte mapping and search, both in `index`; R11-12 owns safe
+//! UTF-8 boundary chunk reading and R11-13 owns the upload-session lifecycle, both in `chunks`.
+//! Command wiring and store orchestration remain here until their dedicated Stage 11 atomics.
 
 mod chunks;
 mod index;
@@ -22,17 +22,17 @@ pub(crate) use types::{
     DocumentChunk, DocumentManifest, LoadedDocument, SaveDocumentRequest, SaveDocumentResponse,
     SearchDocumentRequest, SearchDocumentResponse,
 };
-use chunks::read_chunk;
+use chunks::{
+    abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, read_chunk,
+    take_snapshot_upload,
+};
 use index::{ensure_document_index, search_document_content, DocumentIndex};
 use journal::{
     append_journal, apply_transactions, recover_from_journal_replay, recover_from_snapshot_notes,
     replay_journal,
 };
 use paths::{document_directory, journal_path};
-use repository::{
-    abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, ensure_dir,
-    take_snapshot_upload,
-};
+use repository::ensure_dir;
 use snapshot::{load_active_snapshot, write_snapshot};
 use types::JournalEntry;
 use validation::{safe_document_id, validate_save_versions};
