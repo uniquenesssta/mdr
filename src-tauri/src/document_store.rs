@@ -3,9 +3,11 @@
 //! R11-03 owns stable DTO, validation, and path-layout boundaries; R11-04 owns atomic file IO
 //! primitives in `repository`; R11-05 owns snapshot A/B slot selection, R11-06 owns snapshot
 //! hashing/metadata construction/parsing, and R11-07 owns snapshot write ordering and two-slot
-//! loading, all in `snapshot`. Journal semantics, indexing, command wiring, and store
-//! orchestration remain here until their dedicated Stage 11 atomics.
+//! loading, all in `snapshot`; R11-08 owns journal entry encoding and append in `journal`.
+//! Journal replay/recovery, indexing, command wiring, and store orchestration remain here until
+//! their dedicated Stage 11 atomics.
 
+mod journal;
 mod paths;
 mod repository;
 mod snapshot;
@@ -16,6 +18,7 @@ pub(crate) use types::{
     DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
     SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
 };
+use journal::append_journal;
 use paths::{document_directory, journal_path};
 use repository::{
     abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, ensure_dir,
@@ -27,8 +30,7 @@ use validation::{safe_document_id, transaction_byte_range, validate_save_version
 
 use std::{
     collections::HashMap,
-    fs::{self, OpenOptions},
-    io::Write,
+    fs,
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
 };
@@ -330,21 +332,6 @@ fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String
     }
 
     Ok(Some(document))
-}
-
-fn append_journal(root: &Path, entry: &JournalEntry) -> Result<u64, String> {
-    let mut encoded = serde_json::to_vec(entry).map_err(|err| format!("无法序列化增量日志：{err}"))?;
-    encoded.push(b'\n');
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(journal_path(root))
-        .map_err(|err| format!("无法打开增量日志：{err}"))?;
-    file.write_all(&encoded)
-        .map_err(|err| format!("无法写入增量日志：{err}"))?;
-    file.sync_data()
-        .map_err(|err| format!("无法同步增量日志：{err}"))?;
-    Ok(encoded.len() as u64)
 }
 
 fn load_or_default(root: &Path) -> Result<StoredDocument, String> {
@@ -702,6 +689,8 @@ mod tests {
     use super::paths::snapshot_paths;
     use super::types::TextChange;
     use super::*;
+    use std::fs::OpenOptions;
+    use std::io::Write;
 
     #[test]
     fn applies_utf16_changes_for_chinese_and_emoji() {
