@@ -3,9 +3,9 @@
 //! R11-03 owns stable DTO, validation, and path-layout boundaries; R11-04 owns atomic file IO
 //! primitives in `repository`; R11-05 owns snapshot A/B slot selection, R11-06 owns snapshot
 //! hashing/metadata construction/parsing, and R11-07 owns snapshot write ordering and two-slot
-//! loading, all in `snapshot`; R11-08 owns journal entry encoding and append in `journal`.
-//! Journal replay/recovery, indexing, command wiring, and store orchestration remain here until
-//! their dedicated Stage 11 atomics.
+//! loading, all in `snapshot`; R11-08 owns journal entry encoding/append and R11-09 owns journal
+//! replay/recovery, both in `journal`. Indexing, command wiring, and store orchestration remain
+//! here until their dedicated Stage 11 atomics.
 
 mod journal;
 mod paths;
@@ -15,18 +15,21 @@ mod types;
 mod validation;
 
 pub(crate) use types::{
-    DocumentChunk, DocumentManifest, DocumentTransaction, LoadedDocument, NativeHeading,
-    SaveDocumentRequest, SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
+    DocumentChunk, DocumentManifest, LoadedDocument, NativeHeading, SaveDocumentRequest,
+    SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
 };
-use journal::append_journal;
+use journal::{
+    append_journal, apply_transactions, recover_from_journal_replay, recover_from_snapshot_notes,
+    replay_journal,
+};
 use paths::{document_directory, journal_path};
 use repository::{
     abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, ensure_dir,
-    take_snapshot_upload, write_atomic,
+    take_snapshot_upload,
 };
 use snapshot::{fnv1a64, load_active_snapshot, write_snapshot};
 use types::JournalEntry;
-use validation::{safe_document_id, transaction_byte_range, validate_save_versions};
+use validation::{safe_document_id, validate_save_versions};
 
 use std::{
     collections::HashMap,
@@ -229,21 +232,9 @@ fn index_byte_to_utf16(content: &str, index: &DocumentIndex, target: usize) -> R
     Ok(checkpoint.utf16_offset + content[checkpoint.byte_offset..target].encode_utf16().count())
 }
 
-fn apply_transactions(content: &mut String, transactions: &[DocumentTransaction]) -> Result<(), String> {
-    for transaction in transactions {
-        let mut changes = transaction.changes.clone();
-        changes.sort_by(|left, right| right.from.cmp(&left.from));
-        for change in changes {
-            let range = transaction_byte_range(content, change.from, change.to)?;
-            content.replace_range(range, &change.insert);
-        }
-    }
-    Ok(())
-}
-
 fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String> {
     let loaded = load_active_snapshot(root);
-    let mut recovery_notes = loaded.notes;
+    let recovery_notes = loaded.notes;
     let Some(mut document) = loaded.document else {
         if !recovery_notes.is_empty() {
             return Err("后台文档的两个快照均无法通过完整性校验".into());
@@ -254,81 +245,10 @@ fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String
     let journal = journal_path(root);
     if journal.exists() {
         let bytes = fs::read(&journal).map_err(|err| format!("无法读取增量日志：{err}"))?;
-        let mut valid_journal = Vec::new();
-        let mut cursor = 0usize;
-        let mut stale_entries = false;
-        while cursor < bytes.len() {
-            let relative_end = bytes[cursor..]
-                .iter()
-                .position(|byte| *byte == b'\n')
-                .map(|offset| cursor + offset)
-                .unwrap_or(bytes.len());
-            let raw = &bytes[cursor..relative_end];
-            cursor = if relative_end < bytes.len() { relative_end + 1 } else { bytes.len() };
-            if raw.iter().all(|byte| byte.is_ascii_whitespace()) {
-                continue;
-            }
-            let line = match std::str::from_utf8(raw) {
-                Ok(line) => line.trim_end_matches('\r'),
-                Err(_) => {
-                    recovery_notes.push("增量日志尾部包含无效 UTF-8 数据".to_string());
-                    break;
-                }
-            };
-            let entry: JournalEntry = match serde_json::from_str(line) {
-                Ok(entry) => entry,
-                Err(_) => {
-                    recovery_notes.push("增量日志包含未完整写入的记录".to_string());
-                    break;
-                }
-            };
-            if entry.next_version <= document.version {
-                stale_entries = true;
-                continue;
-            }
-            if entry.base_version != document.version {
-                recovery_notes.push("增量日志版本链不连续".to_string());
-                break;
-            }
-
-            let mut next_content = document.content.clone();
-            if let Err(error) = apply_transactions(&mut next_content, &entry.transactions) {
-                recovery_notes.push(format!("增量日志文本范围无效：{error}"));
-                break;
-            }
-            document.content = next_content;
-            document.version = entry.next_version;
-            document.title = entry.title;
-            document.updated_at = entry.updated_at;
-            document.journal_entries += 1;
-            valid_journal.extend_from_slice(line.as_bytes());
-            valid_journal.push(b'\n');
-        }
-        document.journal_bytes = valid_journal.len() as u64;
-
-        if !recovery_notes.is_empty() {
-            document.recovered = true;
-            document.recovery_message = Some(format!(
-                "检测到存储异常，已恢复到版本 {}：{}",
-                document.version,
-                recovery_notes.join("；")
-            ));
-            // 将已经验证的连续增量折叠为新快照，并清空损坏尾部，避免后续保存
-            // 继续追加到无法重放的日志之后。
-            write_snapshot(root, &mut document)?;
-            document.journal_entries = 0;
-            document.journal_bytes = 0;
-        } else if stale_entries || valid_journal != bytes {
-            write_atomic(&journal, &valid_journal)?;
-        }
-    } else if !recovery_notes.is_empty() {
-        document.recovered = true;
-        document.recovery_message = Some(format!(
-            "检测到存储异常，已从可用快照恢复到版本 {}：{}",
-            document.version,
-            recovery_notes.join("；")
-        ));
-        write_snapshot(root, &mut document)?;
+        let replay = replay_journal(&mut document, &bytes, recovery_notes);
+        recover_from_journal_replay(root, &mut document, &bytes, replay)?;
+    } else {
+        recover_from_snapshot_notes(root, &mut document, &recovery_notes)?;
     }
 
     Ok(Some(document))
@@ -687,24 +607,10 @@ pub async fn delete_document_state(
 #[cfg(test)]
 mod tests {
     use super::paths::snapshot_paths;
-    use super::types::TextChange;
+    use super::types::{DocumentTransaction, TextChange};
     use super::*;
     use std::fs::OpenOptions;
     use std::io::Write;
-
-    #[test]
-    fn applies_utf16_changes_for_chinese_and_emoji() {
-        let mut content = "甲😀乙".to_string();
-        let transactions = vec![DocumentTransaction {
-            changes: vec![TextChange {
-                from: 1,
-                to: 3,
-                insert: "中".into(),
-            }],
-        }];
-        apply_transactions(&mut content, &transactions).unwrap();
-        assert_eq!(content, "甲中乙");
-    }
 
     #[test]
     fn builds_sparse_index_and_ignores_fenced_headings() {
