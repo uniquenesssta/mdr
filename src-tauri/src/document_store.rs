@@ -20,7 +20,7 @@ pub(crate) use types::{
     DocumentChunk, DocumentManifest, LoadedDocument, SaveDocumentRequest, SaveDocumentResponse,
     SearchDocumentRequest, SearchDocumentResponse,
 };
-use index::{ensure_document_index, DocumentIndex};
+use index::{ensure_document_index, search_document_content, DocumentIndex};
 use journal::{
     append_journal, apply_transactions, recover_from_journal_replay, recover_from_snapshot_notes,
     replay_journal,
@@ -73,41 +73,6 @@ fn document_root(app: &AppHandle, document_id: &str) -> Result<PathBuf, String> 
     let root = document_directory(&app_data_dir, &safe);
     ensure_dir(&root)?;
     Ok(root)
-}
-
-fn index_utf16_to_byte(content: &str, index: &DocumentIndex, target: usize) -> Result<usize, String> {
-    if target > index.utf16_length {
-        return Err("搜索位置超过文档长度".into());
-    }
-    let checkpoint_index = index
-        .checkpoints
-        .partition_point(|checkpoint| checkpoint.utf16_offset <= target)
-        .saturating_sub(1);
-    let checkpoint = &index.checkpoints[checkpoint_index];
-    let mut utf16 = checkpoint.utf16_offset;
-    for (relative, ch) in content[checkpoint.byte_offset..].char_indices() {
-        if utf16 == target {
-            return Ok(checkpoint.byte_offset + relative);
-        }
-        let width = ch.len_utf16();
-        if utf16 + width > target {
-            return Err("搜索位置落在代理字符中间".into());
-        }
-        utf16 += width;
-    }
-    if utf16 == target { Ok(content.len()) } else { Err("搜索位置超过文档长度".into()) }
-}
-
-fn index_byte_to_utf16(content: &str, index: &DocumentIndex, target: usize) -> Result<usize, String> {
-    if target > content.len() || !content.is_char_boundary(target) {
-        return Err("搜索结果不是有效 UTF-8 边界".into());
-    }
-    let checkpoint_index = index
-        .checkpoints
-        .partition_point(|checkpoint| checkpoint.byte_offset <= target)
-        .saturating_sub(1);
-    let checkpoint = &index.checkpoints[checkpoint_index];
-    Ok(checkpoint.utf16_offset + content[checkpoint.byte_offset..target].encode_utf16().count())
 }
 
 fn load_document_from_disk(root: &Path) -> Result<Option<StoredDocument>, String> {
@@ -431,29 +396,20 @@ pub async fn search_document_state(
             return Ok(None);
         };
         let index = ensure_document_index(document).clone();
-        let start = request.from.min(index.utf16_length);
-        let start_byte = index_utf16_to_byte(&document.content, &index, start)?;
-        let mut wrapped = false;
-        let found_byte = document.content[start_byte..]
-            .find(&request.query)
-            .map(|relative| start_byte + relative)
-            .or_else(|| {
-                if request.wrap && start_byte > 0 {
-                    wrapped = true;
-                    document.content[..start_byte].find(&request.query)
-                } else {
-                    None
-                }
-            });
-        let Some(found_byte) = found_byte else {
+        let Some(found) = search_document_content(
+            &document.content,
+            &index,
+            &request.query,
+            request.from,
+            request.wrap,
+        )?
+        else {
             return Ok(None);
         };
-        let from = index_byte_to_utf16(&document.content, &index, found_byte)?;
-        let to = from + request.query.encode_utf16().count();
         Ok(Some(SearchDocumentResponse {
-            from,
-            to,
-            wrapped,
+            from: found.from,
+            to: found.to,
+            wrapped: found.wrapped,
             version: document.version,
         }))
     })
@@ -484,24 +440,11 @@ pub async fn delete_document_state(
 
 #[cfg(test)]
 mod tests {
-    use super::index::build_document_index;
     use super::paths::snapshot_paths;
     use super::types::{DocumentTransaction, TextChange};
     use super::*;
     use std::fs::OpenOptions;
     use std::io::Write;
-
-    #[test]
-    fn maps_utf16_and_byte_offsets_through_sparse_checkpoints_for_emoji() {
-        let content = "# 标题😀\n正文\n```md\n# 代码标题\n```\n## 第二节\n";
-        let index = build_document_index(content);
-        let emoji_byte = content.find('😀').unwrap();
-        let emoji_utf16 = index_byte_to_utf16(content, &index, emoji_byte).unwrap();
-        assert_eq!(
-            index_utf16_to_byte(content, &index, emoji_utf16).unwrap(),
-            emoji_byte
-        );
-    }
 
 
     fn test_root(name: &str) -> PathBuf {
