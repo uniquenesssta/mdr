@@ -1,16 +1,12 @@
 //! Segmented snapshot upload Tauri commands (begin/append/commit/abort).
 //!
-//! Responsibility: destructure Tauri-injected parameters, run the upload-session lifecycle and
-//! (for commit) the store's save orchestration on a blocking task, and map join errors. No
-//! upload-session or save policy itself — those stay with `chunks` and `save_document_inner`.
+//! Responsibility: receive parameters, dispatch the store's upload API and map join errors.
+//! Commit validation, cache locking and session cleanup are not owned by this adapter.
 
 use tauri::{AppHandle, State};
 
 use crate::document_store::{
-    chunks::{
-        abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, take_snapshot_upload,
-    },
-    document_root, save_document_inner,
+    abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, document_root,
     types::{SaveDocumentRequest, SaveDocumentResponse},
     DocumentStore,
 };
@@ -44,22 +40,14 @@ pub async fn append_document_snapshot_chunk(
 pub async fn commit_document_snapshot_upload(
     app: AppHandle,
     store: State<'_, DocumentStore>,
-    mut request: SaveDocumentRequest,
+    request: SaveDocumentRequest,
     upload_id: String,
 ) -> Result<SaveDocumentResponse, String> {
     let root = document_root(&app, &request.document_id)?;
-    let inner = store.inner.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        if request.full_content.is_some() {
-            return Err("分段快照提交不能同时包含完整正文".into());
-        }
-        let content = take_snapshot_upload(&root, &upload_id)?;
-        request.full_content = Some(content);
-        let mut cache = inner.lock().map_err(|_| "文档存储锁已损坏".to_string())?;
-        save_document_inner(&root, &mut cache, request)
-    })
-    .await
-    .map_err(|err| format!("后台提交分段快照失败：{err}"))?
+    let store = store.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || store.commit_upload(&root, request, &upload_id))
+        .await
+        .map_err(|err| format!("后台提交分段快照失败：{err}"))?
 }
 
 #[tauri::command]

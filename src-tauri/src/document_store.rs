@@ -20,7 +20,8 @@ mod snapshot;
 mod types;
 mod validation;
 
-use index::DocumentIndex;
+use chunks::{abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload};
+use index::{ensure_document_index, search_document_content, DocumentIndex};
 use journal::{
     append_journal, apply_transactions, recover_from_journal_replay, recover_from_snapshot_notes,
     replay_journal,
@@ -28,7 +29,10 @@ use journal::{
 use paths::{document_directory, journal_path};
 use repository::ensure_dir;
 use snapshot::{load_active_snapshot, write_snapshot};
-use types::{JournalEntry, SaveDocumentRequest, SaveDocumentResponse};
+use types::{
+    DocumentChunk, DocumentManifest, JournalEntry, LoadedDocument, SaveDocumentRequest,
+    SaveDocumentResponse, SearchDocumentRequest, SearchDocumentResponse,
+};
 use validation::{safe_document_id, validate_save_versions};
 
 use std::{
@@ -42,7 +46,7 @@ use tauri::{AppHandle, Manager};
 const SNAPSHOT_ENTRY_LIMIT: u32 = 24;
 const SNAPSHOT_BYTE_LIMIT: u64 = 2 * 1024 * 1024;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct DocumentStore {
     inner: Arc<Mutex<HashMap<String, StoredDocument>>>,
 }
@@ -59,6 +63,193 @@ struct StoredDocument {
     recovered: bool,
     recovery_message: Option<String>,
     index: Option<DocumentIndex>,
+}
+
+// The command-facing use cases retain their existing lock and IO ordering. Extracting the
+// store and changing its lock scope belongs to R11-15, not the command-boundary migration.
+impl DocumentStore {
+    fn save(
+        &self,
+        root: &Path,
+        request: SaveDocumentRequest,
+    ) -> Result<SaveDocumentResponse, String> {
+        let mut cache = self
+            .inner
+            .lock()
+            .map_err(|_| "文档存储锁已损坏".to_string())?;
+        save_document_inner(root, &mut cache, request)
+    }
+
+    fn load(&self, root: &Path, document_id: String) -> Result<Option<LoadedDocument>, String> {
+        let key = safe_document_id(&document_id)?;
+        let mut cache = self
+            .inner
+            .lock()
+            .map_err(|_| "文档存储锁已损坏".to_string())?;
+        if !cache.contains_key(&key) {
+            if let Some(document) = load_document_from_disk(root)? {
+                cache.insert(key.clone(), document);
+            }
+        }
+        Ok(cache.get_mut(&key).map(|document| {
+            let recovered = document.recovered;
+            let recovery_message = document.recovery_message.take();
+            document.recovered = false;
+            LoadedDocument {
+                document_id,
+                title: document.title.clone(),
+                content: document.content.clone(),
+                version: document.version,
+                updated_at: document.updated_at,
+                recovered,
+                recovery_message,
+            }
+        }))
+    }
+
+    fn manifest(
+        &self,
+        root: &Path,
+        document_id: String,
+    ) -> Result<Option<DocumentManifest>, String> {
+        let key = safe_document_id(&document_id)?;
+        let mut cache = self
+            .inner
+            .lock()
+            .map_err(|_| "文档存储锁已损坏".to_string())?;
+        if !cache.contains_key(&key) {
+            if let Some(document) = load_document_from_disk(root)? {
+                cache.insert(key.clone(), document);
+            }
+        }
+        let Some(document) = cache.get_mut(&key) else {
+            return Ok(None);
+        };
+        let recovered = document.recovered;
+        let recovery_message = document.recovery_message.take();
+        document.recovered = false;
+        let index = ensure_document_index(document).clone();
+        Ok(Some(DocumentManifest {
+            document_id,
+            title: document.title.clone(),
+            version: document.version,
+            updated_at: document.updated_at,
+            content_bytes: document.content.len(),
+            text_length: index.utf16_length,
+            line_count: index.line_count,
+            non_whitespace_count: index.non_whitespace_count,
+            headings: index.headings,
+            recovered,
+            recovery_message,
+        }))
+    }
+
+    fn read_chunk(
+        &self,
+        root: &Path,
+        document_id: String,
+        byte_offset: usize,
+        max_bytes: usize,
+    ) -> Result<Option<DocumentChunk>, String> {
+        let key = safe_document_id(&document_id)?;
+        let mut cache = self
+            .inner
+            .lock()
+            .map_err(|_| "文档存储锁已损坏".to_string())?;
+        if !cache.contains_key(&key) {
+            if let Some(document) = load_document_from_disk(root)? {
+                cache.insert(key.clone(), document);
+            }
+        }
+        let Some(document) = cache.get(&key) else {
+            return Ok(None);
+        };
+        let chunk = chunks::read_chunk(&document.content, byte_offset, max_bytes)?;
+        Ok(Some(DocumentChunk {
+            document_id,
+            byte_offset,
+            next_byte_offset: chunk.next_byte_offset,
+            total_bytes: chunk.total_bytes,
+            content: chunk.content,
+            done: chunk.done,
+        }))
+    }
+
+    // Empty search returns before resolving/creating a directory, even for an invalid ID.
+    // Inject only root resolution so this ordering can be tested without a Tauri app.
+    fn prepare_search(
+        request: &SearchDocumentRequest,
+        resolve_root: impl FnOnce(&str) -> Result<PathBuf, String>,
+    ) -> Result<Option<PathBuf>, String> {
+        if request.query.is_empty() {
+            return Ok(None);
+        }
+        resolve_root(&request.document_id).map(Some)
+    }
+
+    fn search(
+        &self,
+        root: &Path,
+        request: SearchDocumentRequest,
+    ) -> Result<Option<SearchDocumentResponse>, String> {
+        let key = safe_document_id(&request.document_id)?;
+        let mut cache = self
+            .inner
+            .lock()
+            .map_err(|_| "文档存储锁已损坏".to_string())?;
+        if !cache.contains_key(&key) {
+            if let Some(document) = load_document_from_disk(root)? {
+                cache.insert(key.clone(), document);
+            }
+        }
+        let Some(document) = cache.get_mut(&key) else {
+            return Ok(None);
+        };
+        let index = ensure_document_index(document).clone();
+        let Some(found) = search_document_content(
+            &document.content,
+            &index,
+            &request.query,
+            request.from,
+            request.wrap,
+        )?
+        else {
+            return Ok(None);
+        };
+        Ok(Some(SearchDocumentResponse {
+            from: found.from,
+            to: found.to,
+            wrapped: found.wrapped,
+            version: document.version,
+        }))
+    }
+
+    fn delete(&self, root: &Path, document_id: &str) -> Result<(), String> {
+        let key = safe_document_id(document_id)?;
+        let mut cache = self
+            .inner
+            .lock()
+            .map_err(|_| "文档存储锁已损坏".to_string())?;
+        cache.remove(&key);
+        if root.exists() {
+            fs::remove_dir_all(root).map_err(|err| format!("无法删除文档快照：{err}"))?;
+        }
+        Ok(())
+    }
+
+    fn commit_upload(
+        &self,
+        root: &Path,
+        mut request: SaveDocumentRequest,
+        upload_id: &str,
+    ) -> Result<SaveDocumentResponse, String> {
+        if request.full_content.is_some() {
+            return Err("分段快照提交不能同时包含完整正文".into());
+        }
+        let content = chunks::take_snapshot_upload(root, upload_id)?;
+        request.full_content = Some(content);
+        self.save(root, request)
+    }
 }
 
 fn document_root(app: &AppHandle, document_id: &str) -> Result<PathBuf, String> {
@@ -168,6 +359,10 @@ fn save_document_inner(
         journal_entries: document.journal_entries,
     })
 }
+
+#[cfg(test)]
+#[path = "../tests/support/document_store_command_contracts.rs"]
+mod command_contract_tests;
 
 #[cfg(test)]
 mod tests {

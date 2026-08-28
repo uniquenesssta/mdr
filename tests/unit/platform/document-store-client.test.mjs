@@ -145,15 +145,18 @@ test('DocumentStore client contains transport mapping only while Stage 10 specia
 });
 
 test('Rust document-store structs and commands remain camelCase authorities', async () => {
-  const rustSource = await readFile(new URL('../../../src-tauri/src/document_store.rs', import.meta.url), 'utf8');
-  assert.ok((rustSource.match(/#\[serde\(rename_all = "camelCase"\)\]/g) || []).length >= 8);
+  const rustTypes = await readFile(new URL('../../../src-tauri/src/document_store/types.rs', import.meta.url), 'utf8');
+  const rustCommands = (await Promise.all(['save', 'load', 'delete', 'search', 'snapshot_upload'].map(name =>
+    readFile(new URL(`../../../src-tauri/src/document_store/commands/${name}.rs`, import.meta.url), 'utf8')
+  ))).join('\n');
+  assert.ok((rustTypes.match(/#\[serde\(rename_all = "camelCase"\)\]/g) || []).length >= 8);
   for (const command of [
     'save_document_state', 'begin_document_snapshot_upload', 'append_document_snapshot_chunk',
     'commit_document_snapshot_upload', 'abort_document_snapshot_upload', 'load_document_state',
     'load_document_manifest', 'read_document_chunk', 'search_document_state', 'delete_document_state'
-  ]) assert.match(rustSource, new RegExp(`pub async fn ${command}`));
+  ]) assert.match(rustCommands, new RegExp(`pub async fn ${command}`));
   for (const field of ['document_id', 'base_version', 'next_version', 'full_content', 'updated_at', 'force_snapshot']) {
-    assert.match(rustSource, new RegExp(`\\b${field}\\b`));
+    assert.match(rustTypes, new RegExp(`\\b${field}\\b`));
   }
 });
 
