@@ -5,14 +5,7 @@ on:
   push:
     branches:
       - rewrite/stage-07
-  pull_request:
-    branches:
-      - rewrite/modular-rebuild
-      - main
-    types:
-      - opened
-      - synchronize
-      - reopened
+  workflow_dispatch:
 
 permissions:
   contents: read

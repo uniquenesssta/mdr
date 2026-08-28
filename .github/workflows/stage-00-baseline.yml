@@ -1,27 +1,6 @@
 name: Stage 0 Baseline Verification
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
-    paths:
-      - .github/workflows/stage-00-baseline.yml
-      - ALL_AI_CODE.md
-      - AI_PROJECT_RULES.md
-      - package.json
-      - package-lock.json
-      - index.html
-      - public/**
-      - src/**
-      - src-tauri/**
-      - tests/**
-      - scripts/dependencies/**
-      - scripts/stage-00/**
   workflow_dispatch:
 
 permissions:

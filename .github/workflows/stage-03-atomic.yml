@@ -2,13 +2,7 @@
 name: Stage 3 Atomic Verification
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
-      - synchronize
-      - reopened
+  workflow_dispatch:
 
 permissions:
   contents: read

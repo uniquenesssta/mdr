@@ -10,7 +10,7 @@ on:
       - 'tests/unit/platform/document-store-client.test.mjs'
       - 'tests/fixtures/document-store-commands.json'
       - 'docs/R11-14-DETAILS.md'
-      - '.github/workflows/r11-14.yml'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:

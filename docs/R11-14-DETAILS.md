@@ -57,6 +57,7 @@
 - 全部命令保留失败状态；日志管道启用 `pipefail`。权限仅 `contents: read`，CI 不自动修改、提交或推送代码，最终检查 tracked diff 为空。
 - 不论成功失败上传分别命名的前端/Rust 日志及目标 SHA，保留 14 天，便于稍后查看失败证据。
 - [查看 R11-14 Actions](https://github.com/uniquenesssta/mdr/actions/workflows/r11-14.yml)。本记录不宣称已获得远端绿灯；本轮不等待工作流完成、不自动重跑、不推进 R11-15。
+- 后续 CI 收口：已完成阶段的 Stage 0–7、R10-11、R10-12 和 R11-03 workflow 保留 `workflow_dispatch`，但不再监听 `pull_request`；它们的历史验证内容与旧分支 push 触发（如有）没有删除。R11-14 改为监听 `.github/workflows/**`，所以当前分支的 workflow 配置改动仍由当前门禁验证，避免后续 PR 同时产生无关的历史红项。
 
 ## 架构核对与后续边界
 

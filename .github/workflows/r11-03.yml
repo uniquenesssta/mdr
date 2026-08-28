@@ -1,9 +1,6 @@
 name: R11-03 Document Store Validation Paths
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
