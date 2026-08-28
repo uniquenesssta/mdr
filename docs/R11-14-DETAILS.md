@@ -3,7 +3,7 @@
 ## 状态与范围
 
 - 日期：2026-08-28；沿用 `agent/r11-stage`，实现基线为 `325c8383f2c7c4dbbb69a07a0b4e3990d117847e`。该基线已经拆出五个 command 文件，但仍由命令直接操作缓存、锁、恢复标记、索引和删除逻辑。
-- 本轮完成 Atomic 11.14 的命令边界补齐、契约测试与 Actions 配置。按用户要求提交推送后不等待、不追踪 CI；原生与浏览器验收仍待 Actions，不标记整个阶段已验收。
+- **当前状态：R11-14 已完成验收。** 提交 `2664fb0f7fb929c80454510b43a894af6ddda8a8` 的 [Actions #33190952317](https://github.com/uniquenesssta/mdr/actions/runs/33190952317) 于 2026-08-28 成功：前端与 Rust 两个 job 的全部步骤均为 success。用户确认已绿，本次核对该既有结果并补齐记录；不是重新运行或追踪后续 CI。阶段 11 尚未整体完成，允许开始 R11-15。
 - 本轮不推进 11.15，不创建 `store.rs`、不调整 Mutex 与文件 IO 的先后顺序；现有 store 编排仍在 `document_store.rs`，后续锁范围优化单独实施。
 
 ## 文件与职责
@@ -32,7 +32,7 @@
 - 上传会话隔离、abort 幂等与清理、commit 冲突时保留待提交文件、缺失会话错误均有覆盖。commit 仍先检查 `fullContent` 冲突，再 take/清理临时文件，最后取缓存锁保存；没有在本轮更改历史失败顺序。
 - delete 仍先移除缓存再删除目录，保持幂等及原文件系统错误前缀。
 
-## 本地验证
+## R11-14 实施时的本地验证（历史记录）
 
 | 检查 | 结果 |
 | --- | --- |
@@ -56,7 +56,7 @@
 - Rust job：安装 Linux Tauri 系统依赖，固定 1.88.0 工具链，检查边界文件格式；运行真实 store 契约并硬断言 12/12、冻结兼容并硬断言 5/5，随后全量 `cargo test --locked`、`cargo clippy --locked --all-targets -- -D warnings`、`cargo check --locked`。
 - 全部命令保留失败状态；日志管道启用 `pipefail`。权限仅 `contents: read`，CI 不自动修改、提交或推送代码，最终检查 tracked diff 为空。
 - 不论成功失败上传分别命名的前端/Rust 日志及目标 SHA，保留 14 天，便于稍后查看失败证据。
-- [查看 R11-14 Actions](https://github.com/uniquenesssta/mdr/actions/workflows/r11-14.yml)。本记录不宣称已获得远端绿灯；本轮不等待工作流完成、不自动重跑、不推进 R11-15。
+- [R11-14 成功记录](https://github.com/uniquenesssta/mdr/actions/runs/33190952317)：真实 store 12/12、冻结兼容 5/5、全量 Rust/Clippy/check、前端与浏览器门禁均成功。实施时的本地缺项已由该次 CI 补足；正式桌面 GUI/Tauri release build 仍未执行。
 - 后续 CI 收口：已完成阶段的 Stage 0–7、R10-11、R10-12 和 R11-03 workflow 保留 `workflow_dispatch`，但不再监听 `pull_request`；它们的历史验证内容与旧分支 push 触发（如有）没有删除。R11-14 改为监听 `.github/workflows/**`，所以当前分支的 workflow 配置改动仍由当前门禁验证，避免后续 PR 同时产生无关的历史红项。
 
 ## 架构核对与后续边界
@@ -75,4 +75,4 @@ flowchart TD
   U --> T[独立上传临时文件]
 ```
 
-剩余风险是尚未执行的原生编译/运行和浏览器门禁，以及历史 store 在锁内执行 IO 的范围；后者属于 11.15。下一任务未开始，需先检查本次 Actions 结果。若需回退，可 revert 本轮补齐提交；不改写分支历史，亦不回滚用户的基线提交或 R11-13 已有工作。
+R11-14 的原生与浏览器门禁已通过；剩余结构问题是历史 store 在锁内执行 IO，交由 R11-15 处理。R11-14 不包含正式桌面 GUI/release build，阶段 11 的最终目录入口切换仍属于 R11-16。若需回退，可 revert 本轮补齐提交；不改写分支历史，亦不回滚用户的基线提交或 R11-13 已有工作。
