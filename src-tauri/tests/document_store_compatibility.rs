@@ -21,12 +21,16 @@ const SOURCE_DOCUMENT_STORE_PATHS: &str = include_str!("../src/document_store/pa
 const SOURCE_DOCUMENT_STORE_SNAPSHOT_INTEGRITY: &str =
     include_str!("../src/document_store/snapshot/integrity.rs");
 
+const SOURCE_DOCUMENT_STORE_INDEX_SEARCH: &str =
+    include_str!("../src/document_store/index/search.rs");
+
 fn current_source_contains(token: &str) -> bool {
     SOURCE_DOCUMENT_STORE_ENTRY.contains(token)
         || SOURCE_DOCUMENT_STORE_TYPES.contains(token)
         || SOURCE_DOCUMENT_STORE_VALIDATION.contains(token)
         || SOURCE_DOCUMENT_STORE_PATHS.contains(token)
         || SOURCE_DOCUMENT_STORE_SNAPSHOT_INTEGRITY.contains(token)
+        || SOURCE_DOCUMENT_STORE_INDEX_SEARCH.contains(token)
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]

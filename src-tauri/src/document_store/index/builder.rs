@@ -2,11 +2,11 @@
 //!
 //! Responsibility: build the full `DocumentIndex` from document content — sparse UTF-16
 //! checkpoints for byte<->UTF-16 mapping, ATX headings found outside fenced code, total UTF-16
-//! length, line count, and non-whitespace count — and lazily cache it on a `StoredDocument`. No
+//! length, line count, and non-whitespace count — without owning document cache state. No
 //! UTF-16<->byte lookup or search — those remain with the dedicated R11-11 atomic.
 
 use super::headings::{fence_marker, heading_id, parse_atx_heading};
-use crate::document_store::{types::NativeHeading, StoredDocument};
+use crate::document_store::types::NativeHeading;
 
 const INDEX_CHECKPOINT_BYTES: usize = 64 * 1024;
 
@@ -94,15 +94,6 @@ pub(in crate::document_store) fn build_document_index(content: &str) -> Document
     }
 }
 
-pub(in crate::document_store) fn ensure_document_index(
-    document: &mut StoredDocument,
-) -> &DocumentIndex {
-    if document.index.is_none() {
-        document.index = Some(build_document_index(&document.content));
-    }
-    document.index.as_ref().expect("document index initialized")
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -127,19 +118,5 @@ mod tests {
         let index = build_document_index(&content);
         assert!(index.checkpoints.len() > 1);
         assert!(index.non_whitespace_count >= 40_003);
-    }
-
-    #[test]
-    fn ensure_document_index_builds_once_and_caches_on_the_document() {
-        let mut document = StoredDocument {
-            content: "# 标题\n正文".into(),
-            ..StoredDocument::default()
-        };
-        assert!(document.index.is_none());
-        let first = ensure_document_index(&mut document).clone();
-        assert!(document.index.is_some());
-        let second = ensure_document_index(&mut document);
-        assert_eq!(first.line_count, second.line_count);
-        assert_eq!(first.headings.len(), second.headings.len());
     }
 }

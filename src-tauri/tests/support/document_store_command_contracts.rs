@@ -3,16 +3,20 @@
 //! directories. No substitute storage implementation or writes to the frozen fixture corpus.
 
 use super::*;
+use crate::document_store::{
+    abort_snapshot_upload, append_snapshot_chunk, begin_snapshot_upload, paths,
+};
 use serde_json::{json, Value};
+use std::fs;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-const DOCUMENT_ID: &str = "doc-r11-14";
+pub(super) const DOCUMENT_ID: &str = "doc-r11-14";
 static NEXT_ROOT: AtomicU64 = AtomicU64::new(0);
 
-struct TestRoot(PathBuf);
+pub(super) struct TestRoot(pub(super) PathBuf);
 
 impl TestRoot {
-    fn new() -> Self {
+    pub(super) fn new() -> Self {
         let nonce = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
@@ -26,7 +30,7 @@ impl TestRoot {
         Self(path)
     }
 
-    fn fixture(name: &str) -> Self {
+    pub(super) fn fixture(name: &str) -> Self {
         let root = Self::new();
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures/document_store")
@@ -48,7 +52,7 @@ impl Drop for TestRoot {
     }
 }
 
-fn full_request(content: &str) -> SaveDocumentRequest {
+pub(super) fn full_request(content: &str) -> SaveDocumentRequest {
     serde_json::from_value(json!({
         "documentId": DOCUMENT_ID, "title": "命令😀.md", "baseVersion": 0,
         "nextVersion": 1, "fullContent": content, "updatedAt": 42
@@ -62,7 +66,7 @@ fn upload_request() -> SaveDocumentRequest {
     request
 }
 
-fn query(text: &str, from: usize, wrap: bool) -> SearchDocumentRequest {
+pub(super) fn query(text: &str, from: usize, wrap: bool) -> SearchDocumentRequest {
     serde_json::from_value(json!({
         "documentId": DOCUMENT_ID, "query": text, "from": from, "wrap": wrap
     }))
@@ -262,7 +266,7 @@ fn cloned_command_handle_preserves_one_shared_cache_owner() {
     let worker = store.clone();
     assert!(Arc::ptr_eq(&store.inner, &worker.inner));
     worker.save(&root.0, full_request("共享缓存😀")).unwrap();
-    assert_eq!(store.inner.lock().unwrap().len(), 1);
+    assert_eq!(store.inner.cached_len(), 1);
     assert_eq!(
         store
             .load(&root.0, DOCUMENT_ID.into())
@@ -320,7 +324,7 @@ fn rejected_upload_commit_preserves_the_pending_file_and_original_error_text() {
         fs::read_to_string(paths::snapshot_upload_path(&root.0, "pending").unwrap()).unwrap(),
         "待提交"
     );
-    assert!(store.inner.lock().unwrap().is_empty());
+    assert_eq!(store.inner.cached_len(), 0);
     let error = store
         .commit_upload(&root.0, upload_request(), "missing")
         .unwrap_err();
@@ -341,11 +345,11 @@ fn delete_clears_cache_is_idempotent_and_reports_filesystem_errors() {
         .delete(&regular_file, DOCUMENT_ID)
         .unwrap_err()
         .starts_with("无法删除文档快照："));
-    assert!(store.inner.lock().unwrap().is_empty());
+    assert_eq!(store.inner.cached_len(), 0);
     assert!(store.load(&root.0, DOCUMENT_ID.into()).unwrap().is_some());
     store.delete(&root.0, DOCUMENT_ID).unwrap();
     assert!(!root.0.exists());
-    assert!(store.inner.lock().unwrap().is_empty());
+    assert_eq!(store.inner.cached_len(), 0);
     store.delete(&root.0, DOCUMENT_ID).unwrap();
 }
 
@@ -355,12 +359,18 @@ fn poisoned_cache_errors_are_preserved_in_every_stateful_command_use_case() {
     let store = DocumentStore::default();
     let poisoned = store.clone();
     assert!(std::thread::spawn(move || {
-        let _guard = poisoned.inner.lock().unwrap();
-        panic!("deliberately poison the test cache");
+        poisoned.inner.poison_for_test();
     })
     .join()
     .is_err());
     let expected = "文档存储锁已损坏";
+    let mut invalid_save = full_request("非法 ID");
+    invalid_save.document_id = "../".into();
+    assert_eq!(store.save(&root.0, invalid_save).unwrap_err(), expected);
+    assert_eq!(
+        store.load(&root.0, "../".into()).unwrap_err(),
+        "文档标识无效"
+    );
     assert_eq!(
         store.save(&root.0, full_request("甲")).unwrap_err(),
         expected

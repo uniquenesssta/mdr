@@ -4,7 +4,7 @@
 
 - 日期：2026-08-28；沿用 `agent/r11-stage`，实现基线为 `325c8383f2c7c4dbbb69a07a0b4e3990d117847e`。该基线已经拆出五个 command 文件，但仍由命令直接操作缓存、锁、恢复标记、索引和删除逻辑。
 - **当前状态：R11-14 已完成验收。** 提交 `2664fb0f7fb929c80454510b43a894af6ddda8a8` 的 [Actions #33190952317](https://github.com/uniquenesssta/mdr/actions/runs/33190952317) 于 2026-08-28 成功：前端与 Rust 两个 job 的全部步骤均为 success。用户确认已绿，本次核对该既有结果并补齐记录；不是重新运行或追踪后续 CI。阶段 11 尚未整体完成，允许开始 R11-15。
-- 本轮不推进 11.15，不创建 `store.rs`、不调整 Mutex 与文件 IO 的先后顺序；现有 store 编排仍在 `document_store.rs`，后续锁范围优化单独实施。
+- R11-14 实施时未推进 11.15，未创建 `store.rs`、不调整 Mutex 与文件 IO 的先后顺序；现有 store 编排仍在 `document_store.rs`，后续锁范围优化单独实施。
 
 ## 文件与职责
 
@@ -51,13 +51,15 @@
 
 ## Actions 交付与验收
 
-- 工作流在 `agent/r11-stage` 的相关文件 push 时自动触发，也保留 `workflow_dispatch`；两个 job 均 checkout 精确 `${{ github.sha }}`，记录提交并校验它包含本轮基线，避免验证到默认分支或旧提交。
+- R11-14 实施时工作流在 `agent/r11-stage` 的相关文件 push 时自动触发，也保留 `workflow_dispatch`；两个 job 均 checkout 精确 `${{ github.sha }}`，记录提交并校验它包含本轮基线，避免验证到默认分支或旧提交。
 - 前端 job：锁定依赖安装、安全审计、16 项定向测试、全量 Node、四项架构/文档门禁、浏览器 contract、生产 build、built-app 浏览器回归。
 - Rust job：安装 Linux Tauri 系统依赖，固定 1.88.0 工具链，检查边界文件格式；运行真实 store 契约并硬断言 12/12、冻结兼容并硬断言 5/5，随后全量 `cargo test --locked`、`cargo clippy --locked --all-targets -- -D warnings`、`cargo check --locked`。
 - 全部命令保留失败状态；日志管道启用 `pipefail`。权限仅 `contents: read`，CI 不自动修改、提交或推送代码，最终检查 tracked diff 为空。
 - 不论成功失败上传分别命名的前端/Rust 日志及目标 SHA，保留 14 天，便于稍后查看失败证据。
 - [R11-14 成功记录](https://github.com/uniquenesssta/mdr/actions/runs/33190952317)：真实 store 12/12、冻结兼容 5/5、全量 Rust/Clippy/check、前端与浏览器门禁均成功。实施时的本地缺项已由该次 CI 补足；正式桌面 GUI/Tauri release build 仍未执行。
 - 后续 CI 收口：已完成阶段的 Stage 0–7、R10-11、R10-12 和 R11-03 workflow 保留 `workflow_dispatch`，但不再监听 `pull_request`；它们的历史验证内容与旧分支 push 触发（如有）没有删除。R11-14 改为监听 `.github/workflows/**`，所以当前分支的 workflow 配置改动仍由当前门禁验证，避免后续 PR 同时产生无关的历史红项。
+
+后续进入 R11-15 后，自动分支门禁由 `r11-15.yml` 接管；`r11-14.yml` 保留手动复验及既有硬门禁，测试筛选路径随 Store 迁移更新。
 
 ## 架构核对与后续边界
 

@@ -126,6 +126,8 @@ npm run check
 
 ## Change Log
 
+- 2026-08-28：R11-15 Store 实现：新增 `store.rs` 与 `cache.rs`，将用例编排、内存缓存与锁职责从旧入口移出；同一文档按规范化 ID 串行，跨文档 IO 并行，Mutex 不跨 IO；保留命令、磁盘格式、恢复/错误语义与 Stage 10 契约。新增 8 项真实并发回归，R11-15 Actions 接管当前分支验证，R11-14 保留手动复验。本地真实存储模块 99 单元 + 5 兼容通过，Node 353/353、构建、架构及安全审计通过；完整 Tauri/Clippy 和浏览器验收待 Actions。完整范围、验证和未执行项见 [R11-15-DETAILS.md](R11-15-DETAILS.md)；本次推送后不跟踪 CI，R11-16 未开始。
+
 - 2026-08-28：R11-14 Commands 验收完成。提交 `2664fb0f7fb929c80454510b43a894af6ddda8a8` 的 [Actions #33190952317](https://github.com/uniquenesssta/mdr/actions/runs/33190952317) 两个 job 全部成功，覆盖真实 store 12/12、冻结兼容 5/5、全量 Rust tests、Clippy/check、前端与浏览器回归。已更新根 README、R11-14 详情与阶段 11.14 勾选；允许开始 R11-15，阶段 11 仍未整体收口；正式桌面 GUI/release build 未执行。
 <!-- cross-stage-repair:cr-02 -->
 - 2026-08-10：CR-02（Stage 2 UI Structure Reconciliation）完成。修复 Stage 2 验收与机器证据把历史冻结事实误当作当前运行事实的问题：Atomic Task 2.1 的 184 个内联事件继续作为不可变历史基线保存；当前 compatibility 内联事件以 158 为单向收缩上限，后续只允许减少、不得回升；经典 `/i18n.js` 入口明确禁止恢复，I18n 继续由 Stage 4 的 `src/i18n/` ESM 服务拥有；Settings 模态框继续由 Stage 4 feature 拥有，compatibility 只保留 `data-settings-open` 触发边界；Stage 2 SVG 证据同步到现行 2.3 硬契约的 47 个外部 sprite 引用，同时继续强制 35 个唯一 symbol、合法 ID 与单一几何权威。本 CR 只修改 Stage 2 验收/证据与文档，没有修改生产 UI、模型、Rust、依赖或锁文件。`31357149906` 已通过 Stage 1 handoff、2.1–2.11、architecture、44/44 Node、10/10 browser contract、build、22/22 built application、证据生成与上传；Stage 3 仍在既存 3.4 Dialog 陈旧断言处失败，留给 CR-03，未在 CR-02 跨阶段修复。

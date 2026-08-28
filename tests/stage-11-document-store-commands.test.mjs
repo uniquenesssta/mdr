@@ -69,8 +69,8 @@ test('R11-14 leaves the frozen Serde DTOs and frontend wire adapter byte-identic
   assert.equal(hash(read('src/platform/desktop/document-store-client.js')), fixture.frontendSha256);
 });
 
-test('R11-14 Actions validates the pushed SHA with read-only hard gates and retained failure evidence', () => {
-  const workflow = read('.github/workflows/r11-14.yml');
+test('R11-15 Actions validates the pushed SHA with read-only hard gates and retained failure evidence', () => {
+  const workflow = read('.github/workflows/r11-15.yml');
   assert.match(workflow, /push:\s*\n\s*branches:\s*\[agent\/r11-stage\]/);
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/);
@@ -79,9 +79,32 @@ test('R11-14 Actions validates the pushed SHA with read-only hard gates and reta
     'cargo test', 'cargo clippy', 'cargo check', '--all-targets', '-- -D warnings',
     'npm test', 'npm run build', 'npm run verify:architecture',
     'npm run test:browser:contract', 'npm run test:browser',
-    'document_store::command_contract_tests', '--test document_store_compatibility',
+    'document_store::store::command_contract_tests', 'document_store::store::concurrency_tests', '--test document_store_compatibility',
     'tests/unit/platform/document-store-client.test.mjs',
     'actions/upload-artifact@v4', 'if: always()', 'git diff --exit-code'
   ]) assert.ok(workflow.includes(gate), `missing hard gate: ${gate}`);
   assert.doesNotMatch(workflow, /continue-on-error: true|git push|git commit|contents: write/);
+});
+
+
+test('R11-15 separates short cache locks from all IO and keeps one production store implementation', () => {
+  const code = path => read(path).replace(/^\s*\/\/.*$/gm, '');
+  const entry = code('src-tauri/src/document_store.rs');
+  const store = code('src-tauri/src/document_store/store.rs');
+  const cache = code('src-tauri/src/document_store/cache.rs');
+  assert.match(entry, /mod store;/);
+  assert.match(entry, /use store::DocumentStore;/);
+  assert.doesNotMatch(entry, /struct DocumentStore|impl DocumentStore|fn save_document_inner|fn load_document_from_disk/);
+  assert.match(store, /inner: Arc<DocumentCache>/);
+  assert.doesNotMatch(store.split('#[cfg(test)]')[0], /\b(?:Mutex|MutexGuard|HashMap|Condvar|tauri)\b|\.lock\s*\(|\bfs::/);
+  assert.doesNotMatch(cache, /\b(?:fs|Path|PathBuf|tauri|repository|snapshot|journal)\s*::|std::io/);
+  assert.match(cache, /state\.documents\.remove\(&key\)/);
+  assert.match(cache, /drop\(state\);\s*Ok\(DocumentLease/);
+  assert.match(cache, /let admission_key = key\.to_ascii_lowercase\(\)/);
+  assert.match(cache, /while state\.active\.contains\(&admission_key\)/);
+  assert.match(cache, /available\s*\.wait\(state\)/);
+  assert.match(cache, /impl Drop for DocumentLease/);
+  assert.match(cache, /available\.notify_all\(\)/);
+  assert.doesNotMatch(cache, /document\.clone\(|clear_poison/);
+  assert.doesNotMatch(code('src-tauri/src/document_store/index/builder.rs'), /StoredDocument|ensure_document_index/);
 });

@@ -1,4 +1,4 @@
-//! Document-store atomic file IO primitives: durable write and directory creation.
+//! Document-store file IO primitives: durable writes, byte reads and directory operations.
 //!
 //! Responsibility: own only byte-level create/write/rename/directory operations shared across
 //! callers. No recovery strategy, snapshot slot selection, integrity validation, journal entry
@@ -12,6 +12,21 @@ use std::{
 
 pub(super) fn ensure_dir(path: &Path) -> Result<(), String> {
     fs::create_dir_all(path).map_err(|err| format!("无法创建文档存储目录：{err}"))
+}
+
+pub(super) fn read_if_exists(path: &Path) -> std::io::Result<Option<Vec<u8>>> {
+    if path.exists() {
+        fs::read(path).map(Some)
+    } else {
+        Ok(None)
+    }
+}
+
+pub(super) fn remove_dir_if_exists(path: &Path) -> std::io::Result<()> {
+    if path.exists() {
+        fs::remove_dir_all(path)?;
+    }
+    Ok(())
 }
 
 fn write_temp_file(path: &Path, bytes: &[u8]) -> Result<PathBuf, String> {

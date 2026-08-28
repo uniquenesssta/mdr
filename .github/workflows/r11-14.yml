@@ -1,16 +1,6 @@
 name: R11-14 Document Store Commands
 
 on:
-  push:
-    branches: [agent/r11-stage]
-    paths:
-      - 'src-tauri/**'
-      - 'src/platform/desktop/document-store-client.js'
-      - 'tests/stage-11-document-store-commands.test.mjs'
-      - 'tests/unit/platform/document-store-client.test.mjs'
-      - 'tests/fixtures/document-store-commands.json'
-      - 'docs/R11-14-DETAILS.md'
-      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
@@ -124,7 +114,7 @@ jobs:
       - name: R11-14 real store contracts 12 of 12
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
-            document_store::command_contract_tests \
+            document_store::store::command_contract_tests \
             2>&1 | tee "$RUNNER_TEMP/r11-14/rust-command-contracts.log"
           grep -Fq 'test result: ok. 12 passed; 0 failed' "$RUNNER_TEMP/r11-14/rust-command-contracts.log"
       - name: Frozen compatibility fixtures 5 of 5
