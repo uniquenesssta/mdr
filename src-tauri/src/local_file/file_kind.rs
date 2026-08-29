@@ -27,9 +27,7 @@ pub(super) fn classify(path: &Path) -> FileKind {
         "jpg" | "jpeg" => FileKind::Image { mime: "image/jpeg" },
         "gif" => FileKind::Image { mime: "image/gif" },
         "webp" => FileKind::Image { mime: "image/webp" },
-        "svg" => FileKind::Image {
-            mime: "image/svg+xml",
-        },
+        "svg" => FileKind::Image { mime: "image/svg+xml" },
         _ => FileKind::Unsupported,
     }
 }

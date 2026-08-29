@@ -464,8 +464,8 @@ mod tests {
 mod stage_12_tests {
     use super::{
         classify, list_text_file_tree_inner, read_dropped_file_inner, read_local_image_inner,
-        scan_text_file_tree_directory, FileKind, TextFileTreeScanState, MAX_EMBEDDED_IMAGE_BYTES,
-        MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES, MAX_IMAGE_BYTES, MAX_TEXT_BYTES,
+        scan_text_file_tree_directory, FileKind, TextFileTreeScanState, MAX_EMBEDDED_IMAGE_BYTES, MAX_FILE_TREE_DEPTH,
+        MAX_FILE_TREE_ENTRIES, MAX_IMAGE_BYTES, MAX_TEXT_BYTES,
     };
     use std::{
         fs,
@@ -509,9 +509,7 @@ mod stage_12_tests {
         );
         assert_eq!(
             classify(std::path::Path::new("image.svg")),
-            FileKind::Image {
-                mime: "image/svg+xml",
-            }
+            FileKind::Image { mime: "image/svg+xml" }
         );
         assert_eq!(classify(std::path::Path::new("image.bmp")), FileKind::Unsupported);
     }
