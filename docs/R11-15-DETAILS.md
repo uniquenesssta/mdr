@@ -4,7 +4,7 @@
 
 - 沿用 `agent/r11-stage`，实现基线 `6c07582fb0e4968d119b3a74dba28afc49134c5e`；开始时工作区干净。
 - 前置 R11-14 已通过 [Actions #33190952317](https://github.com/uniquenesssta/mdr/actions/runs/33190952317)，验收记录独立提交。
-- 当前完成 Store 实现及验证配置；完整 Tauri/Rust 和浏览器门禁仍交由 R11-15 Actions，推送后按用户要求不等待、不跟踪。未开始 R11-16，未勾选 11.15 远端验收完成。
+- R11-15 已完成验收：提交 `c9377d9d6653e863056ad6aa1524749a283c8b2b` 的 [Actions #33194155165](https://github.com/uniquenesssta/mdr/actions/runs/33194155165) 两个 job 与全部步骤成功，包含 Store 12/12、并发 8/8、冻结兼容 5/5、全量 Rust tests、Clippy/check、Node、架构、构建及浏览器回归。允许开始 R11-16。
 
 ## 实现范围与状态所有权
 
