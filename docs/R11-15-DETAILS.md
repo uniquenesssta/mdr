@@ -62,7 +62,7 @@
 
 ## Actions 与回退
 
-- 自动工作流为 [R11-15 Document Store](https://github.com/uniquenesssta/mdr/actions/workflows/r11-15.yml)，保留手动入口。R11-14 不再随本阶段重复触发，其历史门禁未删除。
+- [R11-15 Document Store](https://github.com/uniquenesssta/mdr/actions/workflows/r11-15.yml) 已完成上述验收，现保留手动复验入口；R11-16 接管本分支自动门禁。R11-14/R11-15 历史门禁均未删除。
 - 先运行 12/12 命令契约、8/8 并发契约与 5/5 冻结兼容，然后完整 `cargo test --locked`、`cargo clippy --locked --all-targets -- -D warnings`、`cargo check --locked`；前端继续全量 Node、架构、构建、安全审计与两类浏览器门禁。
 - 不加入 `continue-on-error`，不降低数量断言；日志管道保持 `pipefail`，成功/失败都上传证据，验证后检查 tracked diff。
 - 回退仅 revert 本 R11-15 实现提交；不回滚 R11-14 已绿验收或用户基线，不改写远端历史。磁盘格式未变，无迁移步骤。

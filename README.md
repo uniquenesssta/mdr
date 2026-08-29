@@ -1,3 +1,3 @@
 # Markdown Editor
 
-Stage 11：R11-14 已绿并完成验收。R11-15 已拆出 Store/缓存协调器，Mutex 不跨文件 IO，同文档串行、不同文档并行；本地存储 104 项、Node 353 项通过，完整门禁待 Actions。10 个命令、DTO、磁盘格式及 Stage 10 契约不变。R11-16 未开始；正式桌面 GUI/release build 未验证。历史见 [docs/README.md](docs/README.md)，详情见 [R11-15](docs/R11-15-DETAILS.md)。
+Stage 11：R11-15 已通过 Actions #33194155165 验收。R11-16 已删除旧 `document_store.rs`，以目录 `document_store/mod.rs` 作为唯一入口；关键实现均只有一个提供者，10 个命令、DTO、磁盘格式和 Stage 10 契约不变。本地存储 104/104、Node 354/354、构建及四项架构门禁通过；完整 Tauri/Clippy/浏览器验收待 Actions。详情见 [docs/README.md](docs/README.md)。

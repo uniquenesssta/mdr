@@ -61,7 +61,7 @@ public/
     events.js               # 全局事件、拖放与快捷键
 src-tauri/                  # Tauri / Rust 桌面后端
   src/main.rs
-  src/document_store.rs     # 超大文档增量日志与双槽快照
+  src/document_store/       # 原生文档存储目录入口、命令与分层实现
   src/web_fetch.rs
   src/performance_log.rs    # 性能日志落盘
 logs/                       # 开发者性能日志目录
@@ -126,7 +126,9 @@ npm run check
 
 ## Change Log
 
-- 2026-08-28：R11-15 Store 实现：新增 `store.rs` 与 `cache.rs`，将用例编排、内存缓存与锁职责从旧入口移出；同一文档按规范化 ID 串行，跨文档 IO 并行，Mutex 不跨 IO；保留命令、磁盘格式、恢复/错误语义与 Stage 10 契约。新增 8 项真实并发回归，R11-15 Actions 接管当前分支验证，R11-14 保留手动复验。本地真实存储模块 99 单元 + 5 兼容通过，Node 353/353、构建、架构及安全审计通过；完整 Tauri/Clippy 和浏览器验收待 Actions。完整范围、验证和未执行项见 [R11-15-DETAILS.md](R11-15-DETAILS.md)；本次推送后不跟踪 CI，R11-16 未开始。
+- 2026-08-29：R11-16 目录入口切换完成实现：删除 `src-tauri/src/document_store.rs`，以 `document_store/mod.rs` 作为唯一公共入口；生产清单补齐全部 32 个文档存储模块，并增加旧文件不存在及关键实现唯一提供者门禁。10 个命令、DTO、Store/缓存、磁盘格式和错误语义均未改变。本地真实存储 104/104、Node 354/354、构建、Rustfmt 和四项架构门禁通过；完整 Tauri/Clippy/浏览器验收交由 R11-16 Actions，推送后不跟踪。详情见 [R11-16-DETAILS.md](R11-16-DETAILS.md)。
+
+- 2026-08-29：R11-15 Store 已完成验收。提交 `c9377d9d6653e863056ad6aa1524749a283c8b2b` 的 [Actions #33194155165](https://github.com/uniquenesssta/mdr/actions/runs/33194155165) 两个 job 与全部步骤成功，覆盖 12/12 Store 契约、8/8 并发、5/5 冻结兼容、全量 Rust tests、Clippy/check、Node、架构、构建及浏览器回归；允许进入 R11-16。完整范围见 [R11-15-DETAILS.md](R11-15-DETAILS.md)。
 
 - 2026-08-28：R11-14 Commands 验收完成。提交 `2664fb0f7fb929c80454510b43a894af6ddda8a8` 的 [Actions #33190952317](https://github.com/uniquenesssta/mdr/actions/runs/33190952317) 两个 job 全部成功，覆盖真实 store 12/12、冻结兼容 5/5、全量 Rust tests、Clippy/check、前端与浏览器回归。已更新根 README、R11-14 详情与阶段 11.14 勾选；允许开始 R11-15，阶段 11 仍未整体收口；正式桌面 GUI/release build 未执行。
 <!-- cross-stage-repair:cr-02 -->

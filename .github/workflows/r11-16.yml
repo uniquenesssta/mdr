@@ -1,7 +1,24 @@
-name: R11-15 Document Store
-run-name: R11-15 Store · ${{ github.sha }}
+name: R11-16 Directory Cutover
+run-name: R11-16 Directory boundary · ${{ github.sha }}
 
 on:
+  push:
+    branches: [agent/r11-stage]
+    paths:
+      - 'src-tauri/**'
+      - 'src/platform/desktop/document-store-client.js'
+      - 'tests/stage-11-document-store-commands.test.mjs'
+      - 'tests/unit/platform/document-store-client.test.mjs'
+      - 'tests/fixtures/document-store-commands.json'
+      - 'tests/architecture/**'
+      - 'tests/stage-01-handoff.test.mjs'
+      - 'tests/stage-10-close-save-controller.test.mjs'
+      - 'docs/R11-16-DETAILS.md'
+      - 'docs/README.md'
+      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/12-*'
+      - 'README.md'
+      - 'tests/historical-workflow-routing.test.mjs'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
@@ -25,38 +42,38 @@ jobs:
           persist-credentials: false
       - name: Record validation target
         run: |
-          mkdir -p "$RUNNER_TEMP/r11-15"
+          mkdir -p "$RUNNER_TEMP/r11-16"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor 6c07582fb0e4968d119b3a74dba28afc49134c5e HEAD
-          git rev-parse HEAD | tee "$RUNNER_TEMP/r11-15/commit.txt"
+          git merge-base --is-ancestor c9377d9d6653e863056ad6aa1524749a283c8b2b HEAD
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r11-16/commit.txt"
       - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
       - name: Install locked frontend dependencies
-        run: npm run deps:prepare 2>&1 | tee "$RUNNER_TEMP/r11-15/dependencies.log"
+        run: npm run deps:prepare 2>&1 | tee "$RUNNER_TEMP/r11-16/dependencies.log"
       - name: Dependency audit hard gate
-        run: npm audit --audit-level=high 2>&1 | tee "$RUNNER_TEMP/r11-15/npm-audit.log"
-      - name: R11-15 signatures and frontend payload contracts
+        run: npm audit --audit-level=high 2>&1 | tee "$RUNNER_TEMP/r11-16/npm-audit.log"
+      - name: R11-16 directory boundary and frontend contracts
         run: |
           node --test tests/stage-11-document-store-commands.test.mjs \
             tests/unit/platform/document-store-client.test.mjs \
-            2>&1 | tee "$RUNNER_TEMP/r11-15/command-contracts.log"
+            2>&1 | tee "$RUNNER_TEMP/r11-16/command-contracts.log"
       - name: Full Node regression
-        run: npm test 2>&1 | tee "$RUNNER_TEMP/r11-15/node.log"
+        run: npm test 2>&1 | tee "$RUNNER_TEMP/r11-16/node.log"
       - name: Architecture and documentation hard gates
         run: |
-          npm run verify:architecture 2>&1 | tee "$RUNNER_TEMP/r11-15/architecture.log"
-          npm run verify:no-legacy-runtime 2>&1 | tee "$RUNNER_TEMP/r11-15/no-legacy.log"
-          npm run verify:generated-files 2>&1 | tee "$RUNNER_TEMP/r11-15/generated.log"
-          npm run verify:readme-record 2>&1 | tee "$RUNNER_TEMP/r11-15/readme.log"
+          npm run verify:architecture 2>&1 | tee "$RUNNER_TEMP/r11-16/architecture.log"
+          npm run verify:no-legacy-runtime 2>&1 | tee "$RUNNER_TEMP/r11-16/no-legacy.log"
+          npm run verify:generated-files 2>&1 | tee "$RUNNER_TEMP/r11-16/generated.log"
+          npm run verify:readme-record 2>&1 | tee "$RUNNER_TEMP/r11-16/readme.log"
       - name: Browser preview contract
-        run: npm run test:browser:contract 2>&1 | tee "$RUNNER_TEMP/r11-15/browser-contract.log"
+        run: npm run test:browser:contract 2>&1 | tee "$RUNNER_TEMP/r11-16/browser-contract.log"
       - name: Production build
-        run: npm run build 2>&1 | tee "$RUNNER_TEMP/r11-15/build.log"
+        run: npm run build 2>&1 | tee "$RUNNER_TEMP/r11-16/build.log"
       - name: Built-app browser regression
-        run: npm run test:browser 2>&1 | tee "$RUNNER_TEMP/r11-15/browser-app.log"
+        run: npm run test:browser 2>&1 | tee "$RUNNER_TEMP/r11-16/browser-app.log"
       - name: Validation leaves tracked sources unchanged
         run: |
           git diff --check
@@ -65,11 +82,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r11-15-frontend-${{ github.sha }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/r11-15/
+          name: r11-16-frontend-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r11-16/
           if-no-files-found: error
           retention-days: 14
-
   rust:
     name: Real document store and Rust hard gates
     runs-on: ubuntu-24.04
@@ -86,10 +102,10 @@ jobs:
           persist-credentials: false
       - name: Record validation target
         run: |
-          mkdir -p "$RUNNER_TEMP/r11-15"
+          mkdir -p "$RUNNER_TEMP/r11-16"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor 6c07582fb0e4968d119b3a74dba28afc49134c5e HEAD
-          git rev-parse HEAD | tee "$RUNNER_TEMP/r11-15/commit.txt"
+          git merge-base --is-ancestor c9377d9d6653e863056ad6aa1524749a283c8b2b HEAD
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r11-16/commit.txt"
       - name: Install Linux Tauri build dependencies
         run: |
           sudo apt-get update
@@ -100,7 +116,7 @@ jobs:
           rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
           rustc --version
           cargo --version
-      - name: Format every Rust file in the R11-15 change boundary
+      - name: Format every Rust file in the R11-16 change boundary
         run: |
           rustfmt --edition 2021 --check --config skip_children=true \
             src-tauri/src/document_store/mod.rs src-tauri/src/main.rs \
@@ -118,30 +134,30 @@ jobs:
             src-tauri/src/document_store/commands/search.rs \
             src-tauri/src/document_store/commands/snapshot_upload.rs \
             src-tauri/tests/support/document_store_command_contracts.rs \
-            2>&1 | tee "$RUNNER_TEMP/r11-15/rustfmt.log"
-      - name: R11-15 real store contracts 12 of 12
+            2>&1 | tee "$RUNNER_TEMP/r11-16/rustfmt.log"
+      - name: R11-16 real store contracts 12 of 12
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             document_store::store::command_contract_tests \
-            2>&1 | tee "$RUNNER_TEMP/r11-15/rust-command-contracts.log"
-          grep -Fq 'test result: ok. 12 passed; 0 failed' "$RUNNER_TEMP/r11-15/rust-command-contracts.log"
-      - name: R11-15 real concurrency contracts 8 of 8
+            2>&1 | tee "$RUNNER_TEMP/r11-16/rust-command-contracts.log"
+          grep -Fq 'test result: ok. 12 passed; 0 failed' "$RUNNER_TEMP/r11-16/rust-command-contracts.log"
+      - name: R11-16 real concurrency contracts 8 of 8
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             document_store::store::concurrency_tests \
-            2>&1 | tee "$RUNNER_TEMP/r11-15/rust-concurrency.log"
-          grep -Fq 'test result: ok. 8 passed; 0 failed' "$RUNNER_TEMP/r11-15/rust-concurrency.log"
+            2>&1 | tee "$RUNNER_TEMP/r11-16/rust-concurrency.log"
+          grep -Fq 'test result: ok. 8 passed; 0 failed' "$RUNNER_TEMP/r11-16/rust-concurrency.log"
       - name: Frozen compatibility fixtures 5 of 5
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --test document_store_compatibility \
-            2>&1 | tee "$RUNNER_TEMP/r11-15/rust-compatibility.log"
-          grep -Fq 'test result: ok. 5 passed; 0 failed' "$RUNNER_TEMP/r11-15/rust-compatibility.log"
+            2>&1 | tee "$RUNNER_TEMP/r11-16/rust-compatibility.log"
+          grep -Fq 'test result: ok. 5 passed; 0 failed' "$RUNNER_TEMP/r11-16/rust-compatibility.log"
       - name: Full Rust tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r11-15/rust-tests.log"
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r11-16/rust-tests.log"
       - name: Full Clippy warnings-denied gate
-        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings 2>&1 | tee "$RUNNER_TEMP/r11-15/clippy.log"
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings 2>&1 | tee "$RUNNER_TEMP/r11-16/clippy.log"
       - name: Rust check
-        run: cargo check --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r11-15/cargo-check.log"
+        run: cargo check --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r11-16/cargo-check.log"
       - name: Validation leaves tracked sources unchanged
         run: |
           git diff --check
@@ -150,7 +166,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r11-15-rust-${{ github.sha }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/r11-15/
+          name: r11-16-rust-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r11-16/
           if-no-files-found: error
           retention-days: 14

@@ -102,7 +102,7 @@ jobs:
       - name: Format every Rust file in the R11-14 change boundary
         run: |
           rustfmt --edition 2021 --check --config skip_children=true \
-            src-tauri/src/document_store.rs src-tauri/src/main.rs \
+            src-tauri/src/document_store/mod.rs src-tauri/src/main.rs \
             src-tauri/src/document_store/commands/mod.rs \
             src-tauri/src/document_store/commands/save.rs \
             src-tauri/src/document_store/commands/load.rs \

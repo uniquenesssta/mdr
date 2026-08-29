@@ -49,9 +49,12 @@ test('production module ownership fixture covers the exact runtime source surfac
 test('frozen model classification matches the Stage 0 frozen hash contract', () => {
   const frozenByPath = new Map(frozenBaseline.map(record => [record.path, record.sha256]));
   const classifiedFrozen = manifest.modules.filter(record => record.frozen);
-  assert.deepEqual(classifiedFrozen.map(record => record.path).sort(), [...frozenByPath.keys()].sort());
+  const baselinePath = path => path === 'src-tauri/src/document_store/mod.rs'
+    ? 'src-tauri/src/document_store.rs'
+    : path;
+  assert.deepEqual(classifiedFrozen.map(record => baselinePath(record.path)).sort(), [...frozenByPath.keys()].sort());
   for (const record of classifiedFrozen) {
-    assert.equal(record.migration, record.path === 'src-tauri/src/document_store.rs'
+    assert.equal(record.migration, record.path === 'src-tauri/src/document_store/mod.rs'
       ? 'decompose-preserving-contract'
       : 'retain-frozen');
   }

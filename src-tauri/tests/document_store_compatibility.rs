@@ -14,7 +14,7 @@ use std::{
 
 const SOURCE_COMMIT: &str = "a49d89918a20251287df28583ab29d4b6eb4c1de";
 const SOURCE_DOCUMENT_STORE_BLOB: &str = "af58efc8ac19672e7834b5cd8bab26fd202f85aa";
-const SOURCE_DOCUMENT_STORE_ENTRY: &str = include_str!("../src/document_store.rs");
+const SOURCE_DOCUMENT_STORE_ENTRY: &str = include_str!("../src/document_store/mod.rs");
 const SOURCE_DOCUMENT_STORE_TYPES: &str = include_str!("../src/document_store/types.rs");
 const SOURCE_DOCUMENT_STORE_VALIDATION: &str = include_str!("../src/document_store/validation.rs");
 const SOURCE_DOCUMENT_STORE_PATHS: &str = include_str!("../src/document_store/paths.rs");

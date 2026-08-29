@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import test from 'node:test';
 
 const read = path => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
@@ -36,7 +36,7 @@ test('R11-14 registers each command once by its owning module and leaves no mono
   const registered = [...main.matchAll(/document_store::commands::(\w+)::(\w+)/g)]
     .map(match => `${match[1]}::${match[2]}`).sort();
   assert.deepEqual(registered, fixture.commands.map(command => `${command.module}::${command.name}`).sort());
-  const entry = read('src-tauri/src/document_store.rs');
+  const entry = read('src-tauri/src/document_store/mod.rs');
   assert.match(entry, /pub\(crate\) mod commands;/);
   assert.doesNotMatch(entry, /#\[tauri::command/);
   const commandsEntry = read('src-tauri/src/document_store/commands/mod.rs');
@@ -69,12 +69,17 @@ test('R11-14 leaves the frozen Serde DTOs and frontend wire adapter byte-identic
   assert.equal(hash(read('src/platform/desktop/document-store-client.js')), fixture.frontendSha256);
 });
 
-test('R11-15 Actions validates the pushed SHA with read-only hard gates and retained failure evidence', () => {
-  const workflow = read('.github/workflows/r11-15.yml');
+test('R11-16 Actions validates the pushed SHA with read-only hard gates and retained failure evidence', () => {
+  const workflow = read('.github/workflows/r11-16.yml');
   assert.match(workflow, /push:\s*\n\s*branches:\s*\[agent\/r11-stage\]/);
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/);
   assert.match(workflow, /contents: read/);
+  assert.ok(workflow.includes('c9377d9d6653e863056ad6aa1524749a283c8b2b'));
+  for (const path of [
+    'tests/architecture/**', 'tests/stage-01-handoff.test.mjs',
+    'tests/stage-10-close-save-controller.test.mjs', 'docs/README.md'
+  ]) assert.ok(workflow.includes(path), `missing R11-16 trigger path: ${path}`);
   for (const gate of [
     'cargo test', 'cargo clippy', 'cargo check', '--all-targets', '-- -D warnings',
     'npm test', 'npm run build', 'npm run verify:architecture',
@@ -89,7 +94,7 @@ test('R11-15 Actions validates the pushed SHA with read-only hard gates and reta
 
 test('R11-15 separates short cache locks from all IO and keeps one production store implementation', () => {
   const code = path => read(path).replace(/^\s*\/\/.*$/gm, '');
-  const entry = code('src-tauri/src/document_store.rs');
+  const entry = code('src-tauri/src/document_store/mod.rs');
   const store = code('src-tauri/src/document_store/store.rs');
   const cache = code('src-tauri/src/document_store/cache.rs');
   assert.match(entry, /mod store;/);
@@ -107,4 +112,29 @@ test('R11-15 separates short cache locks from all IO and keeps one production st
   assert.match(cache, /available\.notify_all\(\)/);
   assert.doesNotMatch(cache, /document\.clone\(|clear_poison/);
   assert.doesNotMatch(code('src-tauri/src/document_store/index/builder.rs'), /StoredDocument|ensure_document_index/);
+});
+
+test('R11-16 removes the monolithic file and leaves one provider for every migrated entry symbol', () => {
+  assert.equal(existsSync(new URL('../src-tauri/src/document_store.rs', import.meta.url)), false);
+  assert.equal(existsSync(new URL('../src-tauri/src/document_store/mod.rs', import.meta.url)), true);
+  const inventory = JSON.parse(read('tests/architecture/fixtures/production-modules.json'));
+  const pathIndex = inventory.fields.indexOf('path');
+  const inventoryPaths = inventory.modules.map(record => record[pathIndex]);
+  const documentStorePaths = inventoryPaths
+    .filter(path => path.startsWith('src-tauri/src/document_store/'));
+  assert.equal(documentStorePaths.length, 32);
+  assert.equal(inventoryPaths.includes('src-tauri/src/document_store.rs'), false);
+  assert.equal(documentStorePaths.includes('src-tauri/src/document_store/mod.rs'), true);
+  const root = new URL('../src-tauri/src/document_store/', import.meta.url);
+  const rustSources = readdirSync(root, { recursive: true, withFileTypes: true })
+    .filter(entry => entry.isFile() && entry.name.endsWith('.rs'))
+    .map(entry => readFileSync(`${entry.parentPath}/${entry.name}`, 'utf8'))
+    .join('\n');
+  for (const symbol of [
+    'DocumentStore', 'document_root', 'save_document_inner', 'load_document_from_disk',
+    ...fixture.commands.map(command => command.name)
+  ]) {
+    const providers = [...rustSources.matchAll(new RegExp(`\\b(?:struct|fn)\\s+${symbol}\\b`, 'g'))];
+    assert.equal(providers.length, 1, `${symbol} must have exactly one production provider`);
+  }
 });
