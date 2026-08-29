@@ -36,6 +36,7 @@ test('R12-01 freezes local text image size depth count symlink and unreadable-fi
   const contract = await fixture();
   const rust = [
     await source('src-tauri/src/local_file.rs'),
+    await source('src-tauri/src/local_file/file_kind.rs'),
     await source('src-tauri/src/local_file/path_policy.rs')
   ].join('\n');
   assert.deepEqual(contract.localFile.textExtensions, ['md', 'markdown', 'txt']);
@@ -116,8 +117,9 @@ test('R12-01 freezes all nine registered command names without changing frontend
   ]) assert.match(client, new RegExp(command));
 });
 
-test('completed R12-01 stays manual while R12-02 is the sole automatic Stage branch workflow', async () => {
-  const [current, previous] = await Promise.all([
+test('completed R12-01 and R12-02 stay manual while R12-03 owns Stage branch validation', async () => {
+  const [current, previous, first] = await Promise.all([
+    source('.github/workflows/r12-03.yml'),
     source('.github/workflows/r12-02.yml'),
     source('.github/workflows/r12-01.yml')
   ]);
@@ -127,4 +129,6 @@ test('completed R12-01 stays manual while R12-02 is the sole automatic Stage bra
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*push:\s*$/m);
   assert.doesNotMatch(previous, /^\s*pull_request:\s*$/m);
+  assert.match(first, /^\s*workflow_dispatch:\s*$/m);
+  assert.doesNotMatch(first, /^\s*push:\s*$/m);
 });

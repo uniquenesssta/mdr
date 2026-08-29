@@ -7,8 +7,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
+mod file_kind;
 mod path_policy;
 
+use file_kind::{classify, extension, is_supported_text_path, FileKind};
 use path_policy::{
     input_path, inspect_tree_entry, parent_directory, required_path, resolve_local_image_path,
     TreeEntryPolicy,
@@ -60,28 +62,6 @@ struct TextFileTreeScanState {
     truncated: bool,
 }
 
-fn extension(path: &Path) -> String {
-    path.extension()
-        .and_then(|value| value.to_str())
-        .unwrap_or("")
-        .to_ascii_lowercase()
-}
-
-fn is_supported_text_path(path: &Path) -> bool {
-    matches!(extension(path).as_str(), "md" | "markdown" | "txt")
-}
-
-fn image_mime(ext: &str) -> Option<&'static str> {
-    match ext {
-        "png" => Some("image/png"),
-        "jpg" | "jpeg" => Some("image/jpeg"),
-        "gif" => Some("image/gif"),
-        "webp" => Some("image/webp"),
-        "svg" => Some("image/svg+xml"),
-        _ => None,
-    }
-}
-
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LocalImageData {
@@ -102,8 +82,10 @@ fn read_local_image_inner(
     if metadata.len() > MAX_EMBEDDED_IMAGE_BYTES {
         return Err("图片超过 20MB，混合编辑模式暂不加载".into());
     }
-    let ext = extension(&path);
-    let mime = image_mime(&ext).ok_or_else(|| "不支持该本地图片格式".to_string())?;
+    let mime = match classify(&path) {
+        FileKind::Image { mime } => mime,
+        FileKind::Text | FileKind::Unsupported => return Err("不支持该本地图片格式".into()),
+    };
     let bytes = fs::read(&path).map_err(|err| format!("无法读取图片文件：{err}"))?;
     let encoded = general_purpose::STANDARD.encode(&bytes);
     Ok(LocalImageData {
@@ -278,38 +260,36 @@ fn read_dropped_file_inner(path: String) -> Result<DroppedFile, String> {
         .and_then(|value| value.to_str())
         .unwrap_or("未命名文件")
         .to_string();
-    let ext = extension(&path_buf);
-
-    if matches!(ext.as_str(), "md" | "markdown" | "txt") {
-        if metadata.len() > MAX_TEXT_BYTES {
-            return Err("文本文件过大，暂不支持直接拖入".into());
+    match classify(&path_buf) {
+        FileKind::Text => {
+            if metadata.len() > MAX_TEXT_BYTES {
+                return Err("文本文件过大，暂不支持直接拖入".into());
+            }
+            let content = fs::read_to_string(&path_buf).map_err(|err| format!("无法读取文本文件：{err}"))?;
+            Ok(DroppedFile {
+                name,
+                path,
+                kind: "text".into(),
+                content: Some(content),
+                data_url: None,
+            })
         }
-        let content = fs::read_to_string(&path_buf).map_err(|err| format!("无法读取文本文件：{err}"))?;
-        return Ok(DroppedFile {
-            name,
-            path,
-            kind: "text".into(),
-            content: Some(content),
-            data_url: None,
-        });
-    }
-
-    if let Some(mime) = image_mime(&ext) {
-        if metadata.len() > MAX_IMAGE_BYTES {
-            return Err("图片超过 5MB，暂不支持直接插入".into());
+        FileKind::Image { mime } => {
+            if metadata.len() > MAX_IMAGE_BYTES {
+                return Err("图片超过 5MB，暂不支持直接插入".into());
+            }
+            let bytes = fs::read(&path_buf).map_err(|err| format!("无法读取图片文件：{err}"))?;
+            let encoded = general_purpose::STANDARD.encode(bytes);
+            Ok(DroppedFile {
+                name,
+                path,
+                kind: "image".into(),
+                content: None,
+                data_url: Some(format!("data:{mime};base64,{encoded}")),
+            })
         }
-        let bytes = fs::read(&path_buf).map_err(|err| format!("无法读取图片文件：{err}"))?;
-        let encoded = general_purpose::STANDARD.encode(bytes);
-        return Ok(DroppedFile {
-            name,
-            path,
-            kind: "image".into(),
-            content: None,
-            data_url: Some(format!("data:{mime};base64,{encoded}")),
-        });
+        FileKind::Unsupported => Err("不支持该文件类型，请拖入 Markdown、文本或图片文件".into()),
     }
-
-    Err("不支持该文件类型，请拖入 Markdown、文本或图片文件".into())
 }
 
 #[tauri::command]
@@ -483,9 +463,9 @@ mod tests {
 #[cfg(test)]
 mod stage_12_tests {
     use super::{
-        image_mime, list_text_file_tree_inner, read_dropped_file_inner, read_local_image_inner,
-        scan_text_file_tree_directory, TextFileTreeScanState, MAX_EMBEDDED_IMAGE_BYTES, MAX_FILE_TREE_DEPTH,
-        MAX_FILE_TREE_ENTRIES, MAX_IMAGE_BYTES, MAX_TEXT_BYTES,
+        classify, list_text_file_tree_inner, read_dropped_file_inner, read_local_image_inner,
+        scan_text_file_tree_directory, FileKind, TextFileTreeScanState, MAX_EMBEDDED_IMAGE_BYTES,
+        MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES, MAX_IMAGE_BYTES, MAX_TEXT_BYTES,
     };
     use std::{
         fs,
@@ -507,13 +487,33 @@ mod stage_12_tests {
         assert_eq!(MAX_EMBEDDED_IMAGE_BYTES, 20 * 1024 * 1024);
         assert_eq!(MAX_FILE_TREE_DEPTH, 24);
         assert_eq!(MAX_FILE_TREE_ENTRIES, 12_000);
-        assert_eq!(image_mime("png"), Some("image/png"));
-        assert_eq!(image_mime("jpg"), Some("image/jpeg"));
-        assert_eq!(image_mime("jpeg"), Some("image/jpeg"));
-        assert_eq!(image_mime("gif"), Some("image/gif"));
-        assert_eq!(image_mime("webp"), Some("image/webp"));
-        assert_eq!(image_mime("svg"), Some("image/svg+xml"));
-        assert_eq!(image_mime("bmp"), None);
+        assert_eq!(
+            classify(std::path::Path::new("image.png")),
+            FileKind::Image { mime: "image/png" }
+        );
+        assert_eq!(
+            classify(std::path::Path::new("image.jpg")),
+            FileKind::Image { mime: "image/jpeg" }
+        );
+        assert_eq!(
+            classify(std::path::Path::new("image.jpeg")),
+            FileKind::Image { mime: "image/jpeg" }
+        );
+        assert_eq!(
+            classify(std::path::Path::new("image.gif")),
+            FileKind::Image { mime: "image/gif" }
+        );
+        assert_eq!(
+            classify(std::path::Path::new("image.webp")),
+            FileKind::Image { mime: "image/webp" }
+        );
+        assert_eq!(
+            classify(std::path::Path::new("image.svg")),
+            FileKind::Image {
+                mime: "image/svg+xml",
+            }
+        );
+        assert_eq!(classify(std::path::Path::new("image.bmp")), FileKind::Unsupported);
     }
 
     #[test]

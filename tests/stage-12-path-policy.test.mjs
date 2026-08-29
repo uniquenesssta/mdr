@@ -81,11 +81,11 @@ test('R12-02 preserves command signatures dependencies and the frozen parent-rel
   ]) assert.match(fileClient, new RegExp(command));
 });
 
-test('R12-02 records Path Policy ownership and owns automatic Stage validation', async () => {
+test('R12-02 records Path Policy ownership and stays manually runnable after R12-03 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-02.yml'),
-    source('.github/workflows/r12-01.yml')
+    source('.github/workflows/r12-03.yml'),
+    source('.github/workflows/r12-02.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');
   const record = inventory.modules.find(item => item[pathIndex] === 'src-tauri/src/local_file/path_policy.rs');
@@ -95,10 +95,8 @@ test('R12-02 records Path Policy ownership and owns automatic Stage validation',
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
-  assert.match(current, /grep -El 'fn resolve_local_image_path'/);
-  assert.doesNotMatch(current, /\brg\b/, 'pre-install guards must use tools present on the runner image');
-  assert.ok(current.includes("sed -n '/^\\/\\/ R12-01 rustfmt boundary/,$p' src-tauri/src/local_file.rs"));
   assert.match(current, /src-tauri\/src\/local_file\/path_policy\.rs/);
+  assert.doesNotMatch(current, /\brg\b/, 'pre-install guards must use tools present on the runner image');
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*push:\s*$/m);
 });

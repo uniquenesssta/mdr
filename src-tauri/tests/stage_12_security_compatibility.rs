@@ -11,6 +11,7 @@ use serde_json::Value;
 use std::{fs, path::Path};
 
 const SOURCE_LOCAL_FILE: &str = include_str!("../src/local_file.rs");
+const SOURCE_LOCAL_FILE_KIND: &str = include_str!("../src/local_file/file_kind.rs");
 const SOURCE_LOCAL_FILE_PATH_POLICY: &str = include_str!("../src/local_file/path_policy.rs");
 const SOURCE_EXTERNAL_LINK: &str = include_str!("../src/external_link.rs");
 const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");
@@ -37,7 +38,9 @@ fn strings(value: &Value) -> Vec<&str> {
 }
 
 fn local_file_source_contains(token: &str) -> bool {
-    SOURCE_LOCAL_FILE.contains(token) || SOURCE_LOCAL_FILE_PATH_POLICY.contains(token)
+    SOURCE_LOCAL_FILE.contains(token)
+        || SOURCE_LOCAL_FILE_KIND.contains(token)
+        || SOURCE_LOCAL_FILE_PATH_POLICY.contains(token)
 }
 
 #[test]
@@ -107,7 +110,7 @@ fn local_file_fixture_freezes_extensions_mime_limits_and_tree_policy() {
         "Path Policy must keep the frozen symlink rejection"
     );
     for mime in ["image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml"] {
-        assert!(SOURCE_LOCAL_FILE.contains(mime), "missing MIME contract: {mime}");
+        assert!(SOURCE_LOCAL_FILE_KIND.contains(mime), "missing MIME contract: {mime}");
     }
 }
 

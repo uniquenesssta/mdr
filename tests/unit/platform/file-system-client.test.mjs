@@ -159,7 +159,10 @@ test('the FileSystem client contains command mapping only and does not own docum
   const clientSource = await readFile(new URL('../../../src/platform/desktop/file-system-client.js', import.meta.url), 'utf8');
   const eventSource = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
   const exportSource = await readFile(new URL('../../../public/app/export.js', import.meta.url), 'utf8');
-  const rustSource = await readFile(new URL('../../../src-tauri/src/local_file.rs', import.meta.url), 'utf8');
+  const rustFileKind = await readFile(
+    new URL('../../../src-tauri/src/local_file/file_kind.rs', import.meta.url),
+    'utf8'
+  );
 
   assert.doesNotMatch(clientSource, /showToast|loadTextContentAsDocument|insertImageMarkdown|newDocument|createDocument|dropped\.kind/);
   assert.doesNotMatch(clientSource, /image\/png|image\/jpeg|image\/gif|image\/webp|image\/svg\+xml/);
@@ -167,9 +170,8 @@ test('the FileSystem client contains command mapping only and does not own docum
   assert.match(eventSource, /call\('files', 'readImage'/);
   assert.match(eventSource, /showToast/);
   assert.match(exportSource, /showToast/);
-  assert.match(rustSource, /fn image_mime/);
-  assert.match(rustSource, /"webp" => Some\("image\/webp"\)/);
-  assert.match(rustSource, /"svg" => Some\("image\/svg\+xml"\)/);
+  assert.match(rustFileKind, /FileKind::Image \{ mime: "image\/webp" \}/);
+  assert.match(rustFileKind, /mime: "image\/svg\+xml"/);
 });
 
 test('desktop platform maps the six FilesPort responsibilities through the dedicated FileSystem client', async () => {
