@@ -2,37 +2,6 @@ name: R12-01 Security Behavior Fixtures
 run-name: R12-01 security contract · ${{ github.sha }}
 
 on:
-  push:
-    branches: [agent/r12-stage]
-    paths:
-      - 'src-tauri/src/local_file.rs'
-      - 'src-tauri/src/external_link.rs'
-      - 'src-tauri/src/web_fetch.rs'
-      - 'src-tauri/src/performance_log.rs'
-      - 'src-tauri/src/main.rs'
-      - 'src-tauri/tests/stage_12_security_compatibility.rs'
-      - 'src-tauri/tests/fixtures/stage_12_security/**'
-      - 'src-tauri/Cargo.toml'
-      - 'src-tauri/Cargo.lock'
-      - 'src/runtime/performance.js'
-      - 'src/platform/desktop/file-system-client.js'
-      - 'src/platform/desktop/link-client.js'
-      - 'src/platform/desktop/web-fetch-client.js'
-      - 'src/platform/desktop/performance-log-client.js'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tests/stage-12-security-contract.test.mjs'
-      - 'tests/unit/platform/file-system-client.test.mjs'
-      - 'tests/unit/platform/link-client.test.mjs'
-      - 'tests/unit/platform/web-fetch-client.test.mjs'
-      - 'tests/unit/platform/performance-log-client.test.mjs'
-      - 'tests/historical-workflow-routing.test.mjs'
-      - 'tests/architecture/**'
-      - 'docs/R12-01-DETAILS.md'
-      - 'docs/README.md'
-      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/13-*'
-      - 'README.md'
-      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:

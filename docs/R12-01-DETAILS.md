@@ -3,8 +3,8 @@
 ## 状态与基线
 
 - Stage 11 已在提交 `b8ee68b93cf51f45835ac837cad8110aeea24ad0` 闭环；Stage 12 从该提交建立独立 `agent/r12-stage`，没有继续写入 `agent/r11-stage`。
-- 本 Atomic 只冻结拆分前行为：生产命令、参数、返回 DTO、运行时路径和依赖均未改变，R12-02 及后续目录拆分尚未开始。
-- R12-01 实现和本地可运行门禁已完成；完整 Linux Tauri、Clippy、Cargo check 与浏览器验收交由 `.github/workflows/r12-01.yml`。按用户要求，推送后不等待或跟踪 Actions 结果。
+- 本 Atomic 只冻结拆分前行为：生产命令、参数、返回 DTO、运行时路径和依赖均未改变；后续目录拆分由独立 Atomic 接续。
+- R12-01 实现、本地门禁与专属 Actions 均已完成；远端绿色结果由用户于 2026-08-29 核验，未伪造或补写当前环境无法读取的运行编号。
 
 ## 夹具与测试
 
@@ -40,10 +40,11 @@
 | Workflow | R11-16/R12-01 YAML 解析通过；路由契约确认 R11-16 仅手动、R12-01 仅随 `agent/r12-stage` 自动运行。 |
 | 本地 Cargo | 已下载锁定 crate 并进入编译；容器缺少 `pkg-config`/`glib-2.0` 等 Linux Tauri 系统库，停在 `glib-sys` 构建脚本，未进入项目测试。Actions 会先安装完整系统依赖再执行 10/10 直接测试、6/6 兼容夹具、全量 Rust、Clippy `-D warnings` 和 Cargo check。 |
 | 浏览器 | 当前容器未提供 Chrome；browser contract/app 交由 Actions。 |
+| 专属 Actions | 用户已核验 R12-01 绿色，Atomic 完成。 |
 
 ## 契约、风险与回退
 
 - 没有新增 crate 或 npm 包；`Cargo.toml`、`Cargo.lock`、`package.json`、`package-lock.json` 由 fixture Blob 和 CI scope guard 双重锁定。
 - 当前未过滤网页 Content-Type、未限制网页响应体字节数、Rust 日志命令未脱敏是被夹具记录的拆分前事实，不在 R12-01 越权修改；后续任务若按任务书实施安全策略，必须显式更新测试、记录兼容影响并独立验收。
 - 回退只需 revert R12-01 提交；没有数据格式、持久化内容或运行时迁移。
-- R12-01 Actions 未绿前不勾选任务书完成项，也不进入 R12-02。
+- R12-01 已勾选任务书完成项；工作流保留 `workflow_dispatch` 人工复验能力，自动阶段门禁已交接给 R12-02。

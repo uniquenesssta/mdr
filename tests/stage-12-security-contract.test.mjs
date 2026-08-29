@@ -34,7 +34,10 @@ test('R12-01 manifest pins the closed Stage 11 source and unchanged dependency c
 
 test('R12-01 freezes local text image size depth count symlink and unreadable-file behavior', async () => {
   const contract = await fixture();
-  const rust = await source('src-tauri/src/local_file.rs');
+  const rust = [
+    await source('src-tauri/src/local_file.rs'),
+    await source('src-tauri/src/local_file/path_policy.rs')
+  ].join('\n');
   assert.deepEqual(contract.localFile.textExtensions, ['md', 'markdown', 'txt']);
   assert.deepEqual(contract.localFile.imageMimeByExtension, {
     png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml'
@@ -49,7 +52,7 @@ test('R12-01 freezes local text image size depth count symlink and unreadable-fi
   });
   assert.equal(contract.localFile.treePolicy.symlinks, 'skip-without-counting-as-skipped');
   assert.equal(contract.localFile.treePolicy.unreadableSupportedFiles, 'skip-and-increment-skipped-count');
-  assert.match(rust, /if file_type\.is_symlink\(\) \{\s*continue;/);
+  assert.match(rust, /metadata\.file_type\(\)\.is_symlink\(\).*TreeEntryPolicy::Skip/);
   assert.match(rust, /metadata\.len\(\) > MAX_TEXT_BYTES \|\| File::open\(&path\)\.is_err\(\)/);
 });
 
@@ -113,10 +116,10 @@ test('R12-01 freezes all nine registered command names without changing frontend
   ]) assert.match(client, new RegExp(command));
 });
 
-test('R12-01 is the sole automatic Stage branch workflow while completed R11-16 stays manual', async () => {
+test('completed R12-01 stays manual while R12-02 is the sole automatic Stage branch workflow', async () => {
   const [current, previous] = await Promise.all([
-    source('.github/workflows/r12-01.yml'),
-    source('.github/workflows/r11-16.yml')
+    source('.github/workflows/r12-02.yml'),
+    source('.github/workflows/r12-01.yml')
   ]);
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);

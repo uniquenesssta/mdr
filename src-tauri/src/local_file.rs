@@ -7,6 +7,13 @@ use std::{
     path::{Path, PathBuf},
 };
 
+mod path_policy;
+
+use path_policy::{
+    input_path, inspect_tree_entry, parent_directory, required_path, resolve_local_image_path,
+    TreeEntryPolicy,
+};
+
 const MAX_TEXT_BYTES: u64 = 20 * 1024 * 1024;
 const MAX_IMAGE_BYTES: u64 = 5 * 1024 * 1024;
 const MAX_EMBEDDED_IMAGE_BYTES: u64 = 20 * 1024 * 1024;
@@ -83,34 +90,6 @@ pub struct LocalImageData {
     pub bytes: usize,
 }
 
-fn resolve_local_image_path(source: &str, document_path: Option<&str>) -> Result<PathBuf, String> {
-    let value = source.trim();
-    if value.is_empty() {
-        return Err("图片地址为空".into());
-    }
-
-    let mut path = if value.to_ascii_lowercase().starts_with("file:") {
-        url::Url::parse(value)
-            .map_err(|_| "本地图片地址格式无效".to_string())?
-            .to_file_path()
-            .map_err(|_| "无法解析本地图片地址".to_string())?
-    } else {
-        PathBuf::from(value)
-    };
-
-    if path.is_relative() {
-        let document = document_path
-            .filter(|item| !item.trim().is_empty())
-            .map(PathBuf::from)
-            .ok_or_else(|| "相对图片路径需要先将 Markdown 文档保存到电脑".to_string())?;
-        let directory = document
-            .parent()
-            .ok_or_else(|| "无法确定 Markdown 文档所在目录".to_string())?;
-        path = directory.join(path);
-    }
-    Ok(path)
-}
-
 fn read_local_image_inner(
     source: String,
     document_path: Option<String>,
@@ -142,10 +121,7 @@ pub struct LocalWriteResult {
 }
 
 fn write_local_text_file_inner(path: String, content: String) -> Result<LocalWriteResult, String> {
-    let path_buf = PathBuf::from(&path);
-    if path_buf.as_os_str().is_empty() {
-        return Err("保存路径不能为空".into());
-    }
+    let path_buf = required_path(&path, "保存路径不能为空")?;
     fs::write(&path_buf, content.as_bytes()).map_err(|err| format!("无法写入文本文件：{err}"))?;
     Ok(LocalWriteResult {
         path: path_buf.to_string_lossy().into_owned(),
@@ -154,10 +130,7 @@ fn write_local_text_file_inner(path: String, content: String) -> Result<LocalWri
 }
 
 fn write_local_binary_file_inner(path: String, content: Vec<u8>) -> Result<LocalWriteResult, String> {
-    let path_buf = PathBuf::from(&path);
-    if path_buf.as_os_str().is_empty() {
-        return Err("保存路径不能为空".into());
-    }
+    let path_buf = required_path(&path, "保存路径不能为空")?;
     let bytes = content.len();
     fs::write(&path_buf, content).map_err(|err| format!("无法写入文件：{err}"))?;
     Ok(LocalWriteResult {
@@ -176,6 +149,7 @@ fn compare_tree_nodes(left: &TextFileTreeNode, right: &TextFileTreeNode) -> std:
 }
 
 fn scan_text_file_tree_directory(
+    root: &Path,
     directory: &Path,
     depth: usize,
     state: &mut TextFileTreeScanState,
@@ -207,20 +181,18 @@ fn scan_text_file_tree_directory(
             }
         };
         let path = entry.path();
-        let metadata = match fs::symlink_metadata(&path) {
-            Ok(metadata) => metadata,
-            Err(_) => {
+        let metadata = match inspect_tree_entry(root, &path) {
+            TreeEntryPolicy::Allowed(metadata) => metadata,
+            TreeEntryPolicy::Skip => continue,
+            TreeEntryPolicy::Unreadable => {
                 state.skipped_count += 1;
                 continue;
             }
         };
         let file_type = metadata.file_type();
-        if file_type.is_symlink() {
-            continue;
-        }
         let name = entry.file_name().to_string_lossy().into_owned();
         if file_type.is_dir() {
-            let children = scan_text_file_tree_directory(&path, depth + 1, state);
+            let children = scan_text_file_tree_directory(root, &path, depth + 1, state);
             if !children.is_empty() {
                 state.directory_count += 1;
                 nodes.push(TextFileTreeNode {
@@ -252,23 +224,16 @@ fn scan_text_file_tree_directory(
 }
 
 fn list_text_file_tree_inner(document_path: String) -> Result<TextFileTree, String> {
-    let requested_path = PathBuf::from(document_path.trim());
-    if requested_path.as_os_str().is_empty() {
-        return Err("当前文档尚未关联本地文件".into());
-    }
-    let document = requested_path;
+    let document = required_path(document_path.trim(), "当前文档尚未关联本地文件")?;
     let metadata = fs::metadata(&document).map_err(|err| format!("无法读取当前文档信息：{err}"))?;
     if !metadata.is_file() || !is_supported_text_path(&document) {
         return Err("当前文档不是可读取的 Markdown 或 TXT 文件".into());
     }
-    let root = document
-        .parent()
-        .ok_or_else(|| "无法确定当前文档所在文件夹".to_string())?
-        .to_path_buf();
+    let root = parent_directory(&document, "无法确定当前文档所在文件夹")?;
     fs::read_dir(&root).map_err(|err| format!("无法读取当前文件夹：{err}"))?;
 
     let mut state = TextFileTreeScanState::default();
-    let nodes = scan_text_file_tree_directory(&root, 0, &mut state);
+    let nodes = scan_text_file_tree_directory(&root, &root, 0, &mut state);
     let root_name = root
         .file_name()
         .and_then(|value| value.to_str())
@@ -302,7 +267,7 @@ pub async fn list_text_file_tree(document_path: String) -> Result<TextFileTree, 
 }
 
 fn read_dropped_file_inner(path: String) -> Result<DroppedFile, String> {
-    let path_buf = PathBuf::from(&path);
+    let path_buf = input_path(&path);
     let metadata = fs::metadata(&path_buf).map_err(|err| format!("无法读取文件信息：{err}"))?;
     if !metadata.is_file() {
         return Err("只支持拖入文件，不支持拖入文件夹".into());
@@ -349,7 +314,7 @@ fn read_dropped_file_inner(path: String) -> Result<DroppedFile, String> {
 
 #[tauri::command]
 pub fn read_dropped_file(path: String) -> Result<DroppedFile, String> {
-    let extension = PathBuf::from(&path)
+    let extension = input_path(&path)
         .extension()
         .and_then(|value| value.to_str())
         .unwrap_or("")
@@ -597,7 +562,8 @@ mod stage_12_tests {
         fs::write(root.join("visible.md"), "text").expect("write tree file");
 
         let mut depth_state = TextFileTreeScanState::default();
-        let depth_nodes = scan_text_file_tree_directory(&root, MAX_FILE_TREE_DEPTH + 1, &mut depth_state);
+        let depth_nodes =
+            scan_text_file_tree_directory(&root, &root, MAX_FILE_TREE_DEPTH + 1, &mut depth_state);
         assert!(depth_nodes.is_empty());
         assert!(depth_state.truncated);
         assert_eq!(depth_state.scanned_entries, 0);
@@ -606,7 +572,7 @@ mod stage_12_tests {
             scanned_entries: MAX_FILE_TREE_ENTRIES,
             ..TextFileTreeScanState::default()
         };
-        let entry_nodes = scan_text_file_tree_directory(&root, 0, &mut entry_state);
+        let entry_nodes = scan_text_file_tree_directory(&root, &root, 0, &mut entry_state);
         assert!(entry_nodes.is_empty());
         assert!(entry_state.truncated);
         assert_eq!(entry_state.scanned_entries, MAX_FILE_TREE_ENTRIES);

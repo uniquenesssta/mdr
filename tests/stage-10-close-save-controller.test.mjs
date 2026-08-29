@@ -168,6 +168,7 @@ test('Atomic 10.11 production integration gives Persistence one Close Save autho
   assert.doesNotMatch(events, /eventsCloseSavePort|markdownEditorCloseSavePort/);
   assert.match(windowClose, /closeSave\.prepareClose\(\)/);
   assert.doesNotMatch(windowClose, /saveController|autosaveController|forceSnapshot|snapshotReason/);
-  assert.equal(fixture.modules.length, 425);
+  assert.equal(fixture.modules.length, 426);
+  assert.ok(fixture.modules.some(([modulePath]) => modulePath === 'src-tauri/src/local_file/path_policy.rs'));
   assert.ok(fixture.modules.some(([modulePath]) => modulePath === 'src/features/persistence/application/close-save-controller.js'));
 });

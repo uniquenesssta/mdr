@@ -126,7 +126,8 @@ npm run check
 
 ## Change Log
 
-- 2026-08-29：Stage 12 从 Stage 11 闭环提交 `b8ee68b93cf51f45835ac837cad8110aeea24ad0` 建立独立 `agent/r12-stage`。R12-01 新增带源 Blob/依赖溯源的安全行为 manifest、10 个直接 Rust 生产行为测试、6 个独立 Rust 兼容测试和 7 个 Node 契约测试，冻结本地文件扩展/MIME/大小/树深度与数量/符号链接及不可读策略、外链协议、网页 10 次重定向/30 秒超时/响应字段，以及性能日志字段和上限；明确记录当前网页响应类型仅上报且无响应体字节上限、Rust 日志命令无脱敏，不在本 Atomic 偷跑后续策略。本地定向 Node 34/34、全量 Node 361/361、构建、四项架构/文档门禁、Rustfmt 和 workflow YAML 校验通过；完整 Cargo/Clippy/check 与浏览器验收交由 R12-01 Actions，推送后不跟踪。详情见 [R12-01-DETAILS.md](R12-01-DETAILS.md)。
+- 2026-08-29：Stage 12 从 Stage 11 闭环提交 `b8ee68b93cf51f45835ac837cad8110aeea24ad0` 建立独立 `agent/r12-stage`。R12-01 新增带源 Blob/依赖溯源的安全行为 manifest、10 个直接 Rust 生产行为测试、6 个独立 Rust 兼容测试和 7 个 Node 契约测试，冻结本地文件扩展/MIME/大小/树深度与数量/符号链接及不可读策略、外链协议、网页 10 次重定向/30 秒超时/响应字段，以及性能日志字段和上限；明确记录当前网页响应类型仅上报且无响应体字节上限、Rust 日志命令无脱敏，不在本 Atomic 偷跑后续策略。本地定向 Node 34/34、全量 Node 361/361、构建、四项架构/文档门禁、Rustfmt 和 workflow YAML 校验通过；专属 Actions 已由用户核验绿色，R12-01 完成。详情见 [R12-01-DETAILS.md](R12-01-DETAILS.md)。
+- 2026-08-29：R12-02 新增 `local_file/path_policy.rs`，成为输入路径、空路径、父目录、绝对/`file:`/相对图片解析、目录词法越界和目录项符号链接/不可读判定的唯一权威；`local_file.rs` 的读图、拖入读取、文本/二进制写入和目录树入口全部改为复用该策略。保留系统绝对路径、Markdown `../images`、命令/DTO/前端载荷、错误文本、树深度/数量以及“符号链接跳过但不计数、不可读条目计数”行为，未提前迁移 R12-03 File Kind，也未新增依赖。定向 Node 23/23、全量 Node、构建及架构/文档门禁通过；完整 Path Policy Rust 10/10、R12-01 Rust 回归、Clippy/check 和浏览器验收交由 R12-02 Actions，推送后不跟踪。详情见 [R12-02-DETAILS.md](R12-02-DETAILS.md)。
 
 - 2026-08-29：Stage 11 完成验收。R11-16 提交 `5efc57865aa162b5948054b7dc1a5c10e17fd026` 的 [Actions #33239806668](https://github.com/uniquenesssta/mdr/actions/runs/33239806668) 两个 job 与全部步骤成功，覆盖目录边界、Store 12/12、并发 8/8、冻结兼容 5/5、全量 Rust tests、Clippy/check、Node、架构、构建及浏览器回归。R11-01 至 R11-16 的职责已由最终目录结构和全链路回归共同验收，允许建立 Stage 12 分支；正式桌面 release build 仍留给最终阶段。
 

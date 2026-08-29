@@ -11,6 +11,7 @@ use serde_json::Value;
 use std::{fs, path::Path};
 
 const SOURCE_LOCAL_FILE: &str = include_str!("../src/local_file.rs");
+const SOURCE_LOCAL_FILE_PATH_POLICY: &str = include_str!("../src/local_file/path_policy.rs");
 const SOURCE_EXTERNAL_LINK: &str = include_str!("../src/external_link.rs");
 const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");
 const SOURCE_PERFORMANCE_LOG: &str = include_str!("../src/performance_log.rs");
@@ -33,6 +34,10 @@ fn strings(value: &Value) -> Vec<&str> {
         .iter()
         .map(|item| item.as_str().expect("fixture array item must be a string"))
         .collect()
+}
+
+fn local_file_source_contains(token: &str) -> bool {
+    SOURCE_LOCAL_FILE.contains(token) || SOURCE_LOCAL_FILE_PATH_POLICY.contains(token)
 }
 
 #[test]
@@ -94,7 +99,7 @@ fn local_file_fixture_freezes_extensions_mime_limits_and_tree_policy() {
         "File::open(&path).is_err()",
     ] {
         assert!(
-            SOURCE_LOCAL_FILE.contains(token),
+            local_file_source_contains(token),
             "missing local-file contract token: {token}"
         );
     }
