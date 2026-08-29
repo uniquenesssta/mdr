@@ -95,7 +95,6 @@ fn local_file_fixture_freezes_extensions_mime_limits_and_tree_policy() {
         "const MAX_EMBEDDED_IMAGE_BYTES: u64 = 20 * 1024 * 1024;",
         "const MAX_FILE_TREE_DEPTH: usize = 24;",
         "const MAX_FILE_TREE_ENTRIES: usize = 12_000;",
-        "file_type.is_symlink()",
         "File::open(&path).is_err()",
     ] {
         assert!(
@@ -103,6 +102,10 @@ fn local_file_fixture_freezes_extensions_mime_limits_and_tree_policy() {
             "missing local-file contract token: {token}"
         );
     }
+    assert!(
+        SOURCE_LOCAL_FILE_PATH_POLICY.contains("metadata.file_type().is_symlink()"),
+        "Path Policy must keep the frozen symlink rejection"
+    );
     for mime in ["image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml"] {
         assert!(SOURCE_LOCAL_FILE.contains(mime), "missing MIME contract: {mime}");
     }
