@@ -95,6 +95,8 @@ test('R12-02 records Path Policy ownership and owns automatic Stage validation',
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
+  assert.match(current, /grep -El 'fn resolve_local_image_path'/);
+  assert.doesNotMatch(current, /\brg\b/, 'pre-install guards must use tools present on the runner image');
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*push:\s*$/m);
 });

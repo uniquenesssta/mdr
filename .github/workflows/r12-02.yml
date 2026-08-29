@@ -127,7 +127,7 @@ jobs:
           test -f src-tauri/src/local_file.rs
           test -f src-tauri/src/local_file/path_policy.rs
           grep -Fq 'mod path_policy;' src-tauri/src/local_file.rs
-          test "$(rg -l 'fn resolve_local_image_path' src-tauri/src/local_file.rs src-tauri/src/local_file/path_policy.rs | wc -l)" -eq 1
+          test "$(grep -El 'fn resolve_local_image_path' src-tauri/src/local_file.rs src-tauri/src/local_file/path_policy.rs | wc -l)" -eq 1
           git diff --check
       - name: Install Linux Tauri build dependencies
         run: |
