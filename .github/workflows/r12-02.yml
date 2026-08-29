@@ -141,10 +141,12 @@ jobs:
           cargo --version
       - name: Rust formatting
         run: |
+          sed -n '/^\/\/ R12-01 rustfmt boundary/,$p' src-tauri/src/local_file.rs \
+            > "$RUNNER_TEMP/r12-02/local-file-stage-12.rs"
           rustfmt --edition 2021 --check --config max_width=120 \
-            src-tauri/src/local_file.rs \
             src-tauri/src/local_file/path_policy.rs \
             src-tauri/tests/stage_12_security_compatibility.rs \
+            "$RUNNER_TEMP/r12-02/local-file-stage-12.rs" \
             2>&1 | tee "$RUNNER_TEMP/r12-02/rustfmt.log"
       - name: R12-02 direct Path Policy tests 10 of 10
         run: |

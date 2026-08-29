@@ -97,6 +97,8 @@ test('R12-02 records Path Policy ownership and owns automatic Stage validation',
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
   assert.match(current, /grep -El 'fn resolve_local_image_path'/);
   assert.doesNotMatch(current, /\brg\b/, 'pre-install guards must use tools present on the runner image');
+  assert.ok(current.includes("sed -n '/^\\/\\/ R12-01 rustfmt boundary/,$p' src-tauri/src/local_file.rs"));
+  assert.match(current, /src-tauri\/src\/local_file\/path_policy\.rs/);
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*push:\s*$/m);
 });

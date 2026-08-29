@@ -31,15 +31,10 @@ pub(super) fn required_path(value: &str, empty_error: &str) -> Result<PathBuf, S
 }
 
 pub(super) fn parent_directory(path: &Path, error: &str) -> Result<PathBuf, String> {
-    path.parent()
-        .map(Path::to_path_buf)
-        .ok_or_else(|| error.to_string())
+    path.parent().map(Path::to_path_buf).ok_or_else(|| error.to_string())
 }
 
-pub(super) fn resolve_local_image_path(
-    source: &str,
-    document_path: Option<&str>,
-) -> Result<PathBuf, String> {
+pub(super) fn resolve_local_image_path(source: &str, document_path: Option<&str>) -> Result<PathBuf, String> {
     let value = source.trim();
     if value.is_empty() {
         return Err("图片地址为空".into());
@@ -90,8 +85,8 @@ pub(super) fn inspect_tree_entry(root: &Path, candidate: &Path) -> TreeEntryPoli
 #[cfg(test)]
 mod tests {
     use super::{
-        input_path, inspect_tree_entry, is_within_directory, parent_directory, required_path,
-        resolve_local_image_path, TreeEntryPolicy,
+        input_path, inspect_tree_entry, is_within_directory, parent_directory, required_path, resolve_local_image_path,
+        TreeEntryPolicy,
     };
     use std::{
         fs,
@@ -123,13 +118,11 @@ mod tests {
     #[test]
     fn returns_the_parent_without_canonicalizing_the_input() {
         assert_eq!(
-            parent_directory(Path::new("workspace/notes.md"), "missing parent")
-                .expect("relative parent"),
+            parent_directory(Path::new("workspace/notes.md"), "missing parent").expect("relative parent"),
             PathBuf::from("workspace")
         );
         assert_eq!(
-            parent_directory(Path::new("/"), "missing parent")
-                .expect_err("filesystem root has no parent"),
+            parent_directory(Path::new("/"), "missing parent").expect_err("filesystem root has no parent"),
             "missing parent"
         );
     }
@@ -138,8 +131,7 @@ mod tests {
     fn keeps_absolute_image_paths_unchanged() {
         let absolute = temporary_path("absolute.png");
         assert_eq!(
-            resolve_local_image_path(absolute.to_str().expect("UTF-8 path"), None)
-                .expect("absolute image path"),
+            resolve_local_image_path(absolute.to_str().expect("UTF-8 path"), None).expect("absolute image path"),
             absolute
         );
     }
@@ -162,12 +154,8 @@ mod tests {
     fn resolves_relative_images_against_the_document_parent() {
         let document = temporary_path("project").join("notes.md");
         assert_eq!(
-            resolve_local_image_path("images/picture.png", document.to_str())
-                .expect("relative image path"),
-            document
-                .parent()
-                .expect("document parent")
-                .join("images/picture.png")
+            resolve_local_image_path("images/picture.png", document.to_str()).expect("relative image path"),
+            document.parent().expect("document parent").join("images/picture.png")
         );
     }
 
@@ -175,8 +163,7 @@ mod tests {
     fn preserves_parent_relative_markdown_image_semantics() {
         let document = temporary_path("project").join("notes").join("entry.md");
         assert_eq!(
-            resolve_local_image_path("../images/picture.png", document.to_str())
-                .expect("parent-relative image path"),
+            resolve_local_image_path("../images/picture.png", document.to_str()).expect("parent-relative image path"),
             document
                 .parent()
                 .expect("document parent")
@@ -187,8 +174,7 @@ mod tests {
     #[test]
     fn relative_images_require_a_saved_document_path() {
         assert_eq!(
-            resolve_local_image_path("images/picture.png", None)
-                .expect_err("unsaved relative image must fail"),
+            resolve_local_image_path("images/picture.png", None).expect_err("unsaved relative image must fail"),
             "相对图片路径需要先将 Markdown 文档保存到电脑"
         );
         assert_eq!(
@@ -230,14 +216,8 @@ mod tests {
         fs::write(&file, "notes").expect("write regular file");
         symlink(&file, &alias).expect("create symlink");
 
-        assert!(matches!(
-            inspect_tree_entry(&root, &file),
-            TreeEntryPolicy::Allowed(_)
-        ));
-        assert!(matches!(
-            inspect_tree_entry(&root, &alias),
-            TreeEntryPolicy::Skip
-        ));
+        assert!(matches!(inspect_tree_entry(&root, &file), TreeEntryPolicy::Allowed(_)));
+        assert!(matches!(inspect_tree_entry(&root, &alias), TreeEntryPolicy::Skip));
 
         fs::remove_dir_all(root).expect("remove root");
     }

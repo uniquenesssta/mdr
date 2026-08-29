@@ -562,8 +562,7 @@ mod stage_12_tests {
         fs::write(root.join("visible.md"), "text").expect("write tree file");
 
         let mut depth_state = TextFileTreeScanState::default();
-        let depth_nodes =
-            scan_text_file_tree_directory(&root, &root, MAX_FILE_TREE_DEPTH + 1, &mut depth_state);
+        let depth_nodes = scan_text_file_tree_directory(&root, &root, MAX_FILE_TREE_DEPTH + 1, &mut depth_state);
         assert!(depth_nodes.is_empty());
         assert!(depth_state.truncated);
         assert_eq!(depth_state.scanned_entries, 0);
