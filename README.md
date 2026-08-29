@@ -1,3 +1,3 @@
 # Markdown Editor
 
-Stage 11：R11-15 已通过 Actions #33194155165 验收。R11-16 已删除旧 `document_store.rs`，以目录 `document_store/mod.rs` 作为唯一入口；关键实现均只有一个提供者，10 个命令、DTO、磁盘格式和 Stage 10 契约不变。本地存储 104/104、Node 354/354、构建及四项架构门禁通过；完整 Tauri/Clippy/浏览器验收待 Actions。详情见 [docs/README.md](docs/README.md)。
+Stage 11 已完成验收：R11-16 提交 `5efc578` 的 Actions #33239806668 全绿，覆盖存储契约、并发、兼容夹具、全量 Rust、Clippy/check、Node、架构、构建及浏览器回归。旧 `document_store.rs` 已删除，目录入口为唯一实现；命令、DTO、磁盘格式和 Stage 10 契约不变。允许开始 Stage 12。详情见 [docs/README.md](docs/README.md)。
