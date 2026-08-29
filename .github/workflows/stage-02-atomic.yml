@@ -1,0 +1,76 @@
+name: Stage 2 Atomic Verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-02-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  ui-foundation:
+    name: Verify Stage 2 UI foundation
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm run deps:prepare
+      - name: Verify Stage 1 historical handoff remains intact
+        run: node --test tests/stage-01-handoff.test.mjs
+      - name: Verify Atomic Task 2.1 frozen DOM inventory
+        run: node --test tests/ui/dom-asset-inventory.test.mjs
+      - name: Verify Atomic Task 2.2 minimal index and module entry
+        run: node --test tests/ui/minimal-index.test.mjs
+      - name: Verify Atomic Task 2.3 SVG sprite and icon view
+        run: node --test tests/svg-sprite.test.mjs
+      - name: Verify Atomic Task 2.4 App Shell and strict refs
+        run: node --test tests/ui/app-shell.test.mjs
+      - name: Verify Atomic Task 2.5 bounded DOM primitives
+        run: node --test tests/ui/dom-primitives.test.mjs
+      - name: Verify Atomic Task 2.6 Modal Shell
+        run: node --test tests/ui/modal-shell.test.mjs
+      - name: Verify Atomic Task 2.7 CSS tokens
+        run: node --test tests/ui/css-tokens.test.mjs
+      - name: Verify Atomic Task 2.8 themes
+        run: node --test tests/ui/themes.test.mjs
+      - name: Verify Atomic Task 2.9 style layering and naming
+        run: node --test tests/ui/style-layering.test.mjs
+      - name: Verify Atomic Task 2.10 responsive shell
+        run: node --test tests/ui/responsive-shell.test.mjs
+      - name: Verify Atomic Task 2.11 old shell cutover
+        run: node --test tests/ui/shell-cutover.test.mjs
+      - name: Run architecture hard gate
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-02/02-10-architecture-scan.json
+      - name: Run existing Node regression suite
+        run: npm test
+      - name: Run browser interaction contract
+        env:
+          E2E_ARTIFACT_DIR: artifacts/stage-02/browser-contract
+        run: npm run test:browser:contract
+      - name: Build current application
+        run: npm run build
+      - name: Verify built application responsive shell and theme layout invariance
+        env:
+          E2E_ARTIFACT_DIR: artifacts/stage-02/browser-app
+        run: npm run test:browser
+      - name: Record current Stage 2 evidence
+        run: node scripts/stage-02/record-ui-foundation-evidence.mjs
+      - name: Upload Atomic Task evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-02-ui-foundation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-02
+          if-no-files-found: error
+          retention-days: 30

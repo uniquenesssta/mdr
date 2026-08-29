@@ -1,156 +1,37 @@
-    editor.addEventListener('input', () => {
+    const eventsCompatibilityHost = document.getElementById('compatibility-business-ports');
+    const eventsPlatformPort = eventsCompatibilityHost?.markdownEditorPlatformPort;
+    const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
+    const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
+    const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
+    const eventsLayoutStatePort = eventsCompatibilityHost?.markdownEditorLayoutStatePort;
+    const eventsPreviewCommandPort = eventsCompatibilityHost?.markdownEditorPreviewCommandPort;
+    if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
+    if (!eventsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
+    if (!eventsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+    if (!eventsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
+    if (!eventsPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
+
+    eventsEditorControllerPort.subscribeTransactions(transaction => {
+      if (!transaction.interactive) return;
       ensureCurrentDocumentForEditing();
-      if (!editor.virtualEditor) {
-        clearTimeout(historyTimer);
-        historyTimer = setTimeout(recordHistory, 400);
-      }
       editorLineIndexText = null;
       editorMetricText = null;
-      cachedHeadingSource = null;
-      if (!editor.virtualEditor) outlineDirty = true;
       updateLargeDocumentMode();
       scheduleEditorMetricsRebuild(120);
-      schedulePreviewUpdate();
-      scheduleCountUpdate();
-      autoSave();
-      updateInlineColorToolAvailability();
+      eventsPreviewCommandPort.scheduleUpdate();
+      eventsPreviewCommandPort.scheduleCountUpdate();
+      eventsEditorUiCommandPort.invoke('requestDocumentPersistence', 'editor-transaction');
     });
-    editor.addEventListener('select', () => {
-      schedulePreviewFocusUpdate();
-      updateInlineColorToolAvailability();
-    });
-    previewSource.addEventListener('input', () => {
-      // 保留隐藏 textarea 仅作旧环境兼容；虚拟编辑器不复制百万字全文。
-      if (!editor.virtualEditor) previewSource.value = editor.value;
-      else previewSource.value = '';
-    });
-    filenameInput.addEventListener('input', () => {
-      documentModel?.updateTitle?.(filenameInput.value);
-      autoSave();
-      setTimeout(renderDocumentList, 550);
+    eventsEditorUiCommandPort.register({
+      selectionChanged: () => eventsPreviewCommandPort.scheduleFocusUpdate()
     });
 
-    const linkModal = document.getElementById('link-modal');
-    const linkUrlInput = document.getElementById('link-url-input');
-    linkUrlInput?.addEventListener('keydown', event => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        confirmLinkInsert();
-      } else if (event.key === 'Escape') {
-        event.preventDefault();
-        closeLinkModal();
-      }
-    });
-    linkModal?.addEventListener('mousedown', event => {
-      if (event.target === linkModal) closeLinkModal();
-    });
 
-    function bindCompactPaneActivation(selector, pane) {
-      document.querySelector(selector)?.addEventListener('click', event => {
-        if (!compactSplitActive || event.target.closest('.collapse-btn')) return;
-        const isCollapsed = pane === 'editor' ? editorCollapsed : previewCollapsed;
-        if (isCollapsed) activateCompactSplitPane(pane, `collapsed-${pane}-click`);
-      });
-    }
-    bindCompactPaneActivation('.editor-pane', 'editor');
-    bindCompactPaneActivation('.preview-pane', 'preview');
 
-    function applyWindowMaximizedState(isMaximized) {
-      const maximizeButton = document.getElementById('window-maximize-btn');
-      if (!maximizeButton) return;
-      const maximizeUse = maximizeButton.querySelector('use');
-      const maximized = Boolean(isMaximized);
-      maximizeButton.dataset.maximized = maximized ? 'true' : 'false';
-      maximizeButton.title = maximized ? '还原窗口' : '最大化';
-      maximizeButton.setAttribute('aria-label', maximized ? '还原窗口' : '最大化');
-      if (maximizeUse) maximizeUse.setAttribute('href', maximized ? '#icon-restore' : '#icon-maximize');
-      document.documentElement.classList.toggle('window-maximized', maximized);
-    }
 
-    async function refreshWindowChromeState() {
-      if (!window.markdownEditorNative?.isAvailable || typeof window.markdownEditorNative.isWindowMaximized !== 'function') return;
-      try {
-        applyWindowMaximizedState(await window.markdownEditorNative.isWindowMaximized());
-      } catch (error) {
-        console.warn('Failed to refresh window state:', error);
-      }
-    }
 
-    function setupWindowChrome() {
-      const controls = document.getElementById('window-controls');
-      if (!controls) return;
-      if (!window.markdownEditorNative?.isAvailable) {
-        controls.hidden = true;
-        document.documentElement.classList.remove('tauri-shell');
-        return;
-      }
-      controls.hidden = false;
-      const menuBar = document.querySelector('.menu-bar');
-      const minimizeButton = document.getElementById('window-minimize-btn');
-      const maximizeButton = document.getElementById('window-maximize-btn');
-      const closeButton = document.getElementById('window-close-btn');
-
-      menuBar?.addEventListener('mousedown', async event => {
-        if (event.buttons !== 1) return;
-        if (event.target instanceof Element && event.target.closest('.menu-dropdown, .window-controls, button, input, select, textarea, a, [role="button"]')) return;
-        try {
-          if (event.detail === 2) {
-            const maximized = await window.markdownEditorNative.toggleMaximizeWindow?.();
-            applyWindowMaximizedState(maximized);
-          } else {
-            await window.markdownEditorNative.startWindowDragging?.();
-          }
-        } catch (error) {
-          console.warn('Window drag failed:', error);
-        }
-      });
-
-      minimizeButton?.addEventListener('click', async () => {
-        try {
-          await window.markdownEditorNative.minimizeWindow?.();
-        } catch (error) {
-          showToast(error?.message || String(error));
-        }
-      });
-
-      maximizeButton?.addEventListener('click', async () => {
-        try {
-          const maximized = await window.markdownEditorNative.toggleMaximizeWindow?.();
-          applyWindowMaximizedState(maximized);
-        } catch (error) {
-          showToast(error?.message || String(error));
-        }
-      });
-
-      closeButton?.addEventListener('click', async () => {
-        try {
-          if (windowCloseSaving) return;
-          windowCloseSaving = true;
-          clearTimeout(saveTimer);
-          await saveCurrentDocumentState(false, { waitForNative: true, forceSnapshot: true });
-          await commitWindowClose();
-        } catch (error) {
-          windowCloseSaving = false;
-          const message = recordDocumentOperationError('close-save', error);
-          const exitAnyway = await confirmUserAction('关闭前保存失败：' + message + '\n\n仍然关闭软件吗？未保存的修改可能丢失。', {
-            title: '关闭前保存失败',
-            kind: 'warning',
-            okLabel: '仍然关闭',
-            cancelLabel: '返回编辑'
-          });
-          if (exitAnyway) await commitWindowClose();
-        }
-      });
-
-      if (typeof window.markdownEditorNative.onWindowResized === 'function') {
-        window.markdownEditorNative.onWindowResized(() => {
-          refreshWindowChromeState();
-        }).catch(error => {
-          console.warn('Failed to register window resize listener:', error);
-        });
-      }
-
-      refreshWindowChromeState();
+    function getFileNameFromPath(path) {
+      return String(path || '').split(/[\\/]/).pop() || '';
     }
 
     // 拖放文件打开
@@ -187,7 +68,7 @@
       e.preventDefault();
       dragCounter = 0;
       hideDropOverlay();
-      if (window.markdownEditorNative?.isAvailable) return;
+      if (eventsPlatformPort?.supports('desktop.dragDrop')) return;
       const files = e.dataTransfer.files;
       if (!files.length) return;
       const file = files[0];
@@ -217,16 +98,24 @@
     });
 
     async function handleNativeDroppedPath(path) {
+      const resolvedPath = String(path || '').trim();
+      if (!resolvedPath || !eventsPlatformPort?.supports('desktop.fileSystem')) return false;
+      const name = getFileNameFromPath(resolvedPath);
+      const ext = String(name.split('.').pop() || '').toLowerCase();
       try {
-        const dropped = await window.markdownEditorNative.readDroppedFile(path);
-        if (dropped.kind === 'text') {
-          const resolvedPath = dropped.path || path;
-          const opened = await loadTextContentAsDocument(dropped.name, dropped.content || '', resolvedPath);
-          if (opened) addRecentFile(resolvedPath, dropped.name);
+        if (['md', 'markdown', 'txt'].includes(ext)) {
+          const opened = await loadDocumentFromContentLoader(
+            name,
+            () => eventsPlatformPort.call('files', 'readText', resolvedPath),
+            resolvedPath,
+            { nativePath: resolvedPath }
+          );
+          if (opened) addRecentFile(resolvedPath, name);
           return opened;
         }
-        if (dropped.kind === 'image') {
-          insertImageMarkdown(dropped.name, dropped.dataUrl);
+        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
+          const dataUrl = await eventsPlatformPort.call('files', 'readImage', resolvedPath, '');
+          insertImageMarkdown(name, dataUrl);
           showToast(t('toastImageInserted'));
           return true;
         }
@@ -238,82 +127,24 @@
       }
     }
 
-    if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.onDragDrop === 'function') {
-      window.markdownEditorNative.onDragDrop(async (event) => {
-        const payload = event?.payload || {};
-        if (payload.type === 'over') {
+    if (eventsPlatformPort?.supports('desktop.dragDrop')) {
+      Promise.resolve(eventsPlatformPort.call('dragDrop', 'subscribe', async payload => {
+        if (payload?.type === 'over') {
           showDropOverlay();
           return;
         }
-        if (payload.type === 'drop') {
+        if (payload?.type === 'drop') {
           hideDropOverlay();
           const path = Array.isArray(payload.paths) ? payload.paths[0] : null;
           if (path) await handleNativeDroppedPath(path);
           return;
         }
         hideDropOverlay();
-      }).catch((err) => console.warn('Failed to register native drag-drop listener', err));
+      })).catch(err => console.warn('Failed to register native drag-drop listener', err));
     }
 
-    let windowCloseCommitted = false;
-    let windowCloseSaving = false;
-
-    async function commitWindowClose() {
-      windowCloseCommitted = true;
-      try {
-        if (typeof window.markdownEditorNative.closeWindow === 'function') {
-          await window.markdownEditorNative.closeWindow();
-          return;
-        }
-        await window.markdownEditorNative.destroyWindow?.();
-      } catch (closeError) {
-        try {
-          await window.markdownEditorNative.destroyWindow?.();
-        } catch (destroyError) {
-          windowCloseCommitted = false;
-          windowCloseSaving = false;
-          const message = destroyError?.message || closeError?.message || String(destroyError || closeError);
-          console.error('Window close failed:', closeError, destroyError);
-          window.markdownEditorPerf?.record?.('window.close-error', {
-            category: 'app.lifecycle',
-            status: 'error',
-            details: { message }
-          });
-          showToast('关闭窗口失败：' + message);
-        }
-      }
-    }
-
-    if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.onCloseRequested === 'function') {
-      window.markdownEditorNative.onCloseRequested(async event => {
-        if (windowCloseCommitted) return;
-        event.preventDefault();
-        if (windowCloseSaving) return;
-        windowCloseSaving = true;
-        clearTimeout(saveTimer);
-        try {
-          await saveCurrentDocumentState(false, { waitForNative: true, forceSnapshot: true });
-          await commitWindowClose();
-        } catch (error) {
-          windowCloseSaving = false;
-          const message = recordDocumentOperationError('close-save', error);
-          const exitAnyway = await confirmUserAction('关闭前保存失败：' + message + '\n\n仍然关闭软件吗？未保存的修改可能丢失。', {
-            title: '关闭前保存失败',
-            kind: 'warning',
-            okLabel: '仍然关闭',
-            cancelLabel: '返回编辑'
-          });
-          if (exitAnyway) await commitWindowClose();
-        }
-      }).catch(error => {
-        console.warn('Failed to register close handler:', error);
-        window.markdownEditorPerf?.record?.('window.close-handler-error', {
-          category: 'app.lifecycle',
-          status: 'error',
-          details: { message: error?.message || String(error) }
-        });
-      });
-    }
+    // Settings menu trigger preserves the legacy menu-close side effect without inline handlers.
+    document.querySelector('[data-settings-open]')?.addEventListener('click', closeAppMenus);
 
     // 点击外部关闭下拉菜单
     document.addEventListener('click', (e) => {
@@ -331,34 +162,12 @@
       if (importDropdown && !importDropdown.contains(e.target)) {
         closeImportMenu();
       }
-      const headingDropdown = document.getElementById('heading-dropdown');
-      if (headingDropdown && !headingDropdown.contains(e.target)) {
-        closeHeadingMenu();
-      }
-      const viewDropdown = document.getElementById('view-dropdown');
-      if (viewDropdown && !viewDropdown.contains(e.target)) {
-        closeViewMenu();
-      }
-      const tableDropdown = document.getElementById('table-dropdown');
-      if (tableDropdown && !tableDropdown.contains(e.target)) {
-        closeTableMenu();
-      }
-      const langDropdown = document.getElementById('lang-dropdown');
-      if (langDropdown && !langDropdown.contains(e.target)) {
-        closeLangMenu();
-      }
-      if (!e.target.closest('.color-dropdown')) {
-        closeInlineColorMenus();
-      }
     });
 
-    // 全屏状态监听
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
     // 快捷键
     function isEditorShortcutTarget(target) {
-      return target === previewSource || target === editor || Boolean(editor?.contains?.(target));
+      return target === editor || Boolean(editor?.contains?.(target));
     }
 
     function isTextControlOutsideEditor(target) {
@@ -393,7 +202,7 @@
           e.preventDefault();
           e.stopPropagation();
           tableCellInput.__markdownEditorCommitTableCell?.();
-          invokeShortcut(e.shiftKey ? saveAsMarkdown : saveCurrentFile);
+          invokeShortcut(() => eventsEditorUiCommandPort.invoke(e.shiftKey ? 'saveAsMarkdown' : 'saveCurrentFile'));
         }
         return;
       }
@@ -403,7 +212,7 @@
           e.preventDefault();
           e.stopPropagation();
           codeBlockEditor.__markdownEditorCommitCodeBlock?.();
-          invokeShortcut(e.shiftKey ? saveAsMarkdown : saveCurrentFile);
+          invokeShortcut(() => eventsEditorUiCommandPort.invoke(e.shiftKey ? 'saveAsMarkdown' : 'saveCurrentFile'));
         }
         return;
       }
@@ -411,26 +220,25 @@
       let action = null;
 
       if (modifier) {
-        if (key === 's' && e.shiftKey) action = saveAsMarkdown;
-        else if (key === 's') action = saveCurrentFile;
+        if (key === 's' && e.shiftKey) action = () => eventsEditorUiCommandPort.invoke('saveAsMarkdown');
+        else if (key === 's') action = () => eventsEditorUiCommandPort.invoke('saveCurrentFile');
         else if (key === 'o') action = triggerImportFile;
         else if (key === 'n') action = newDocument;
-        else if (key === ',') action = openSettings;
         else if (key === 'b' && e.shiftKey) action = toggleSidebar;
-        else if (!outsideTextControl && key === 'z' && e.shiftKey) action = redo;
-        else if (!outsideTextControl && key === 'y') action = redo;
-        else if (!outsideTextControl && key === 'z') action = undo;
-        else if (!outsideTextControl && key === 'k' && e.shiftKey) action = openImageModal;
-        else if (!outsideTextControl && key === 'b') action = formatBold;
-        else if (!outsideTextControl && key === 'u') action = formatUnderline;
-        else if (!outsideTextControl && key === 'i') action = formatItalic;
-        else if (!outsideTextControl && key === 'k') action = insertLink;
-        else if (!outsideTextControl && key === 'f') action = () => openFindModal(false);
-        else if (!outsideTextControl && key === 'h') action = () => openFindModal(true);
+        else if (!outsideTextControl && key === 'z' && e.shiftKey) action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'redo');
+        else if (!outsideTextControl && key === 'y') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'redo');
+        else if (!outsideTextControl && key === 'z') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'undo');
+        else if (!outsideTextControl && key === 'k' && e.shiftKey) action = () => eventsEditorUiCommandPort.invoke('openImage');
+        else if (!outsideTextControl && key === 'b') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'bold');
+        else if (!outsideTextControl && key === 'u') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'underline');
+        else if (!outsideTextControl && key === 'i') action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'italic');
+        else if (!outsideTextControl && key === 'k') action = () => eventsEditorUiCommandPort.invoke('openLink');
+        else if (!outsideTextControl && key === 'f') action = () => eventsEditorUiCommandPort.invoke('openFind', false);
+        else if (!outsideTextControl && key === 'h') action = () => eventsEditorUiCommandPort.invoke('openFind', true);
       } else if (key === 'f2') {
         action = renameCurrentDocument;
       } else if (key === 'f11') {
-        action = togglePageFullscreen;
+        action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'page-fullscreen');
       }
 
       if (action) {
@@ -443,24 +251,18 @@
       if (key === 'tab' && isEditorShortcutTarget(e.target)) {
         e.preventDefault();
         e.stopPropagation();
-        const el = getActiveEditor();
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-        el.setRangeText('    ', start, end, 'end');
-        syncEditorFromActive();
-        updatePreview();
-        updateCount();
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        editor.setRangeText('    ', start, end, 'end');
       }
     }
     document.addEventListener('keydown', handleAppKeydown, true);
 
     // 启动
-    setupWindowChrome();
-    initializeAppSubmenus();
-    updateInlineColorToolAvailability();
     window.__markdownEditorInitPromise = init().then(async () => {
-      updateInlineColorToolAvailability();
-      const initialPath = await window.markdownEditorNative?.getInitialFilePath?.();
+      const initialPath = eventsPlatformPort?.supports('desktop.fileSystem')
+        ? await eventsPlatformPort.call('files', 'getInitialPath')
+        : null;
       if (initialPath) await handleNativeDroppedPath(initialPath);
     }).catch(error => {
       console.error('Application initialization failed:', error);

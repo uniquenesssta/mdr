@@ -1,0 +1,175 @@
+name: R10-10 Load Controller
+
+on:
+  push:
+    branches:
+      - agent/r10-stage
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Guard R10-10 frozen contracts and load ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='c0f1b6a1d6f797915d2cb9f963c5b0a985c43d47'
+          git merge-base --is-ancestor "$base" HEAD
+          git diff --quiet "$base"...HEAD -- \
+            src/model-kernel/index.js \
+            src/document/document-model.js \
+            src/sync/selection-mapping.js \
+            src/preview/incremental-preview.js \
+            src/preview/math-source.js \
+            src/editor/hybrid/block-registry.js \
+            src/editor/hybrid/math-ranges.js \
+            src/editor/hybrid/ranges.js \
+            src/editor/hybrid/table-model.js \
+            src-tauri/src/document_store.rs \
+            package.json package-lock.json
+          test ! -e .agent/r10-10-finalize.sh
+          test -f src/features/persistence/application/load-controller.js
+          grep -q 'createLoadController' src/features/persistence/index.js
+          grep -q 'createLoadController' src/main.js
+          grep -q 'loadController.loadExisting' src/features/documents/application/document-session-controller.js
+          grep -q 'loadController.readContent' src/features/documents/application/document-session-controller.js
+          ! grep -Eq 'repository\.load|materializeLoadedContent' src/features/documents/application/document-session-controller.js
+          ! grep -Eq 'repository\.load|openExisting|activateLoaded' src/features/documents/application/document-open-coordinator.js
+          grep -q 'loadController.loadExisting' src/features/documents/application/document-close-coordinator.js
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
+          if (!Array.isArray(fixture.modules) || fixture.modules.length < 394) {
+            throw new Error(`R10-10 production module inventory regressed: expected at least 394, got ${fixture.modules?.length}`);
+          }
+          const path = 'src/features/persistence/application/load-controller.js';
+          if (!fixture.modules.some(record => record[0] === path)) throw new Error(`Missing inventory record: ${path}`);
+          NODE
+          git diff --check
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high
+
+      - name: R10-10 targeted gate 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-load-controller.test.mjs | tee /tmp/r10_10_targeted.log
+          grep -q '# tests 10' /tmp/r10_10_targeted.log
+          grep -q '# pass 10' /tmp/r10_10_targeted.log
+          grep -q '# fail 0' /tmp/r10_10_targeted.log
+
+      - name: R10-09 Browser Repository compatibility 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-browser-document-repository.test.mjs | tee /tmp/r10_09_compat.log
+          grep -q '# tests 10' /tmp/r10_09_compat.log
+          grep -q '# pass 10' /tmp/r10_09_compat.log
+          grep -q '# fail 0' /tmp/r10_09_compat.log
+
+      - name: Documents Session Controller compatibility 11/11
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/unit/documents/document-session-controller.test.mjs | tee /tmp/r10_10_documents.log
+          grep -q '# tests 11' /tmp/r10_10_documents.log
+          grep -q '# pass 11' /tmp/r10_10_documents.log
+          grep -q '# fail 0' /tmp/r10_10_documents.log
+
+      - name: R10-08 search adapter compatibility 8/8
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-search-adapter.test.mjs | tee /tmp/r10_08_compat.log
+          grep -q '# tests 8' /tmp/r10_08_compat.log
+          grep -q '# pass 8' /tmp/r10_08_compat.log
+          grep -q '# fail 0' /tmp/r10_08_compat.log
+
+      - name: R10-07 segmented loader compatibility 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-segmented-loader.test.mjs | tee /tmp/r10_07_compat.log
+          grep -q '# tests 10' /tmp/r10_07_compat.log
+          grep -q '# pass 10' /tmp/r10_07_compat.log
+          grep -q '# fail 0' /tmp/r10_07_compat.log
+
+      - name: R10-06 snapshot uploader compatibility 11/11
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-snapshot-uploader.test.mjs | tee /tmp/r10_06_compat.log
+          grep -q '# tests 11' /tmp/r10_06_compat.log
+          grep -q '# pass 11' /tmp/r10_06_compat.log
+          grep -q '# fail 0' /tmp/r10_06_compat.log
+
+      - name: R10-05 save queue compatibility 9/9
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-native-save-queue.test.mjs | tee /tmp/r10_05_compat.log
+          grep -q '# tests 9' /tmp/r10_05_compat.log
+          grep -q '# pass 9' /tmp/r10_05_compat.log
+          grep -q '# fail 0' /tmp/r10_05_compat.log
+
+      - name: Full Node regression remains green
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test | tee /tmp/r10_10_node.log
+          grep -q '# fail 0' /tmp/r10_10_node.log
+          pass_count="$(sed -n 's/^# pass //p' /tmp/r10_10_node.log | tail -1)"
+          test "${pass_count:-0}" -ge 323
+
+      - name: Architecture and documentation gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run verify:architecture
+          npm run verify:no-legacy-runtime
+          npm run verify:generated-files
+          npm run verify:readme-record
+
+      - name: Browser preview contract 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser:contract | tee /tmp/r10_10_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r10_10_browser_contract.log
+
+      - name: Production build
+        run: npm run build
+
+      - name: Built-app browser regression 29/29
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser | tee /tmp/r10_10_browser.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r10_10_browser.log
+
+      - name: Validation must leave tracked tree clean
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff --exit-code

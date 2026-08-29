@@ -1,0 +1,113 @@
+name: Stage 3 Windows Window Automation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-03-windows-window-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  windows-window:
+    name: Verify native Windows window lifecycle
+    runs-on: windows-2025
+    timeout-minutes: 90
+    env:
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: '1'
+      MARKDOWN_EDITOR_BINARY: ../.cargo-target/markdown-editor-windows-driver-host/debug/markdown-editor.exe
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install declared Rust toolchain
+        shell: pwsh
+        run: |
+          $manifest = Get-Content src-tauri/Cargo.toml -Raw
+          if ($manifest -notmatch 'rust-version\s*=\s*"([^"]+)"') {
+            throw 'src-tauri/Cargo.toml does not declare rust-version.'
+          }
+          $toolchain = $Matches[1]
+          rustup toolchain install $toolchain --profile minimal --no-self-update
+          rustup default $toolchain
+          rustc --version
+          cargo --version
+
+      - name: Install frontend and pinned transient WebDriver dependencies
+        run: npm run deps:prepare -- --add selenium-webdriver@4.34.0
+
+      - name: Verify Windows automation architecture contract
+        run: node --test tests/windows-window-automation.test.mjs tests/dependency-location.test.mjs
+
+      - name: Build current frontend
+        run: npm run build
+
+      - name: Build current Windows release application
+        run: cargo build --release --locked --manifest-path src-tauri/Cargo.toml
+
+      - name: Prepare isolated embedded WebDriver host
+        shell: pwsh
+        run: ./scripts/stage-03/windows/prepare-embedded-driver-host.ps1
+
+      - name: Build isolated embedded WebDriver application
+        run: cargo build --locked --target-dir ../.cargo-target/markdown-editor-windows-driver-host --manifest-path ../.markdown-editor-windows-driver-host/src-tauri/Cargo.toml
+
+      - name: Prepare Windows evidence directory
+        shell: pwsh
+        run: |
+          $evidenceDirectory = 'artifacts/stage-03/windows-window'
+          New-Item -ItemType Directory -Force -Path $evidenceDirectory | Out-Null
+          Copy-Item '../.markdown-editor-windows-driver-host/driver-host.json' "$evidenceDirectory/driver-host.json" -Force
+          [pscustomobject]@{
+            headSha = '${{ github.event.pull_request.head.sha || github.sha }}'
+            runner = '${{ runner.os }}'
+            image = '${{ runner.name }}'
+            status = 'workflow-started'
+            driverProvider = 'embedded-isolated-host'
+            releaseBinary = '../.cargo-target/markdown-editor/release/markdown-editor.exe'
+            webdriverBinary = $env:MARKDOWN_EDITOR_BINARY
+          } | ConvertTo-Json | Set-Content -Path "$evidenceDirectory/workflow-bootstrap.json" -Encoding utf8
+
+      - name: Verify automation inputs
+        shell: pwsh
+        run: |
+          $releaseBinary = '../.cargo-target/markdown-editor/release/markdown-editor.exe'
+          if (-not (Test-Path $releaseBinary)) {
+            throw "Windows release application binary missing: $releaseBinary"
+          }
+          if (-not (Test-Path $env:MARKDOWN_EDITOR_BINARY)) {
+            throw "Windows embedded WebDriver test binary missing: $env:MARKDOWN_EDITOR_BINARY"
+          }
+          if ((Get-Content 'src-tauri/Cargo.toml' -Raw) -match 'tauri-plugin-wdio-webdriver') {
+            throw 'Production Cargo.toml was modified by the Windows automation preparation.'
+          }
+          if ((Get-Content 'src-tauri/src/main.rs' -Raw) -match 'tauri_plugin_wdio_webdriver') {
+            throw 'Production main.rs was modified by the Windows automation preparation.'
+          }
+          Get-Item $releaseBinary
+          Get-Item $env:MARKDOWN_EDITOR_BINARY
+
+      - name: Run native Windows window automation
+        run: node tests/e2e/windows/run-window-automation.mjs
+
+      - name: Upload Windows window evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-03-windows-window-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-03/windows-window
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,12 @@
+/* Responsibility: Global font family, rasterization and baseline text tracking. */
+
+html,
+body {
+  font-family: var(--font-family-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  letter-spacing: -0.005em;
+}

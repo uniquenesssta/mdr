@@ -1,163 +1,93 @@
+    const webClipperCompatibilityHost = document.getElementById('compatibility-business-ports');
+    const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
+    const webClipperEditorUiCommandPort = webClipperCompatibilityHost?.markdownEditorEditorUiCommandPort;
+    const webClipperDocumentUiCommandPort = webClipperCompatibilityHost?.markdownEditorDocumentUiCommandPort;
+const webClipperPreviewCommandPort = webClipperCompatibilityHost?.markdownEditorPreviewCommandPort;
+    if (!webClipperEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
+    if (!webClipperDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
+if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
+    webClipperEditorUiCommandPort.register({
+      getFindSearchOptions: setStatus => createFindSearchOptions(setStatus),
+      afterFindMatch: match => afterFindMatch(match)
+    });
+    webClipperDocumentUiCommandPort.register({ openWebClipper: () => openUrlModal() });
+
+    function setClipperHidden(element, hidden) {
+      element?.classList.toggle('is-hidden', Boolean(hidden));
+    }
+
+    function setClipperStatusTone(element, tone = 'muted') {
+      if (!element) return;
+      element.classList.remove('is-muted', 'is-success', 'is-error');
+      element.classList.add(tone === 'success' ? 'is-success' : tone === 'error' ? 'is-error' : 'is-muted');
+    }
+
     function openUrlModal() {
-      const el = document.getElementById('url-modal');
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
       document.getElementById('url-input').value = '';
       document.getElementById('url-status').textContent = '';
-      document.getElementById('url-status').style.color = 'var(--text-muted)';
-      document.getElementById('manual-area').style.display = 'none';
+      setClipperStatusTone(document.getElementById('url-status'), 'muted');
+      setClipperHidden(document.getElementById('manual-area'), true);
       document.getElementById('manual-html').value = '';
-      document.getElementById('use-local-proxy').checked = Boolean(window.markdownEditorNative?.isAvailable);
-      document.getElementById('proxy-url').style.display = 'none';
+      document.getElementById('use-local-proxy').checked = Boolean(webClipperPlatformPort?.supports('desktop.webFetch'));
+      setClipperHidden(document.getElementById('proxy-url'), true);
       toggleProxyInput();
       fetchedHtml = '';
+      const modal = document.getElementById('url-modal');
+      const request = {
+        options: {
+          initialFocus: document.getElementById('url-input'),
+          onClose: () => { fetchedHtml = ''; }
+        }
+      };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
     }
     function closeUrlModal() {
-      const el = document.getElementById('url-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
-      fetchedHtml = '';
+      const modal = document.getElementById('url-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
-    // 查找与替换
-    let findIndex = 0;
-
-    function openFindModal() {
-      const el = document.getElementById('find-modal');
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
-      const findInput = document.getElementById('find-input');
-      const ed = getActiveEditor();
-      if (ed.selectionStart !== ed.selectionEnd) {
-        findInput.value = documentModel
-          ? documentModel.sliceText(ed.selectionStart, ed.selectionEnd)
-          : ed.virtualEditor
-            ? ed.virtualEditor.sliceText(ed.selectionStart, ed.selectionEnd)
-            : ed.value.slice(ed.selectionStart, ed.selectionEnd);
-      }
-      document.getElementById('find-status').textContent = '';
-      findInput.focus();
-      findInput.select();
-    }
-
-    function closeFindModal() {
-      const el = document.getElementById('find-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
-      document.getElementById('find-status').textContent = '';
-    }
-
-    async function findNext() {
-      const query = document.getElementById('find-input').value;
-      const status = document.getElementById('find-status');
-      const el = getActiveEditor();
-      if (!query) {
-        status.textContent = '';
-        return;
-      }
-      let virtualMatch = null;
+    // Atomic 5.12：Find/Replace 对话框已迁移，classic 只保留 native 搜索与预览同步桥。
+    function createFindSearchOptions(setStatus = () => {}) {
       const currentDoc = getCurrentDocument?.();
       const nativeStore = window.markdownEditorDocumentStore;
+      const documentLength = documentModel.getTextLength();
       const useNativeSearch = Boolean(
         currentDoc?.nativeBacked
         && nativeStore?.search
-        && (documentModel?.getTextLength?.() ?? el.textLength ?? 0) >= ULTRA_LARGE_DOCUMENT_CHARS
+        && documentLength >= ULTRA_LARGE_DOCUMENT_CHARS
       );
-      let nativeSearchCompleted = false;
-      if (useNativeSearch) {
-        status.textContent = '正在后台查找…';
-        try {
+      if (!useNativeSearch) return {};
+      return {
+        async nativeSearch({ query, from, wrap }) {
+          setStatus('正在后台查找…');
           await saveCurrentDocumentState(false, { waitForNative: true });
-          virtualMatch = await nativeStore.search(currentDoc.id, query, findIndex, true);
-          nativeSearchCompleted = true;
-        } catch (error) {
+          return nativeStore.search(currentDoc.id, query, from, wrap);
+        },
+        onNativeSearchError(error) {
           console.warn('Native document search fallback:', error);
         }
-      }
-      if (!nativeSearchCompleted) {
-        virtualMatch = documentModel?.findText?.(query, findIndex, { wrap: true })
-          || el.virtualEditor?.findText?.(query, findIndex, { wrap: true });
-      }
-      let pos = virtualMatch?.from ?? -1;
-      if (pos < 0 && !el.virtualEditor) {
-        const text = el.value;
-        pos = text.indexOf(query, findIndex);
-        if (pos === -1) pos = text.indexOf(query, 0);
-      }
-      if (pos === -1) {
-        status.textContent = t('statusNoMatch');
-        return;
-      }
-      findIndex = virtualMatch?.to ?? pos + query.length;
-      el.setSelectionRange(pos, findIndex);
-      el.focus();
-      el.virtualEditor?.scrollPositionIntoView?.(pos, 'smooth', 0.45);
-      if (activeResolvedPreviewMode === 'chapter') {
-        updatePreview().then(() => syncEditorSelectionToPreview(true));
-      } else {
-        requestAnimationFrame(() => syncEditorSelectionToPreview(true));
-      }
-      status.textContent = t('statusFoundMatch');
+      };
     }
 
-    function replaceOne() {
-      const query = document.getElementById('find-input').value;
-      const replacement = document.getElementById('replace-input').value;
-      const status = document.getElementById('find-status');
-      const el = getActiveEditor();
-      if (!query) {
-        status.textContent = '';
-        return;
-      }
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const selected = documentModel
-        ? documentModel.sliceText(start, end)
-        : el.virtualEditor
-          ? el.virtualEditor.sliceText(start, end)
-          : el.value.slice(start, end);
-      if (selected !== query) {
-        findNext();
-        return;
-      }
-      el.setRangeText(replacement, start, end, 'end');
-      syncEditorFromActive();
-      findIndex = start + replacement.length;
-      updatePreview();
-      updateCount();
-      autoSave();
-      findNext();
-    }
-
-    function replaceAll() {
-      const query = document.getElementById('find-input').value;
-      const replacement = document.getElementById('replace-input').value;
-      const status = document.getElementById('find-status');
-      const el = getActiveEditor();
-      if (!query) {
-        status.textContent = '';
-        return;
-      }
-      let count = 0;
-      if (documentModel?.replaceAllText || el.virtualEditor?.replaceAllText) {
-        count = documentModel?.replaceAllText?.(query, replacement)
-          ?? el.virtualEditor.replaceAllText(query, replacement);
+    function afterFindMatch(match) {
+      if (!match) return false;
+      if (webClipperPreviewCommandPort.snapshot.mode === 'chapter') {
+        webClipperPreviewCommandPort.update().then(() => {
+          if (webClipperEditorUiCommandPort.has('syncEditorSelectionToPreview')) {
+            webClipperEditorUiCommandPort.invoke('syncEditorSelectionToPreview', true, 'find-match');
+          }
+        });
       } else {
-        const text = el.value;
-        const parts = text.split(query);
-        count = Math.max(0, parts.length - 1);
-        if (count) el.value = parts.join(replacement);
+        requestAnimationFrame(() => {
+          if (webClipperEditorUiCommandPort.has('syncEditorSelectionToPreview')) {
+            webClipperEditorUiCommandPort.invoke('syncEditorSelectionToPreview', true, 'find-match');
+          }
+        });
       }
-      if (count > 0) {
-        syncEditorFromActive();
-        findIndex = 0;
-        updatePreview();
-        updateCount();
-        autoSave();
-      }
-      status.textContent = count > 0 ? t('statusReplacedCount', count) : t('statusNoMatch');
+      return true;
     }
 
     function toggleProxyInput() {
@@ -165,17 +95,17 @@
       const proxyInput = document.getElementById('proxy-url');
       if (!proxyInput) return;
 
-      if (window.markdownEditorNative?.isAvailable) {
-        proxyInput.style.display = 'none';
+      if (webClipperPlatformPort?.supports('desktop.webFetch')) {
+        setClipperHidden(proxyInput, true);
         return;
       }
 
-      proxyInput.style.display = checked ? 'block' : 'none';
+      setClipperHidden(proxyInput, !checked);
     }
 
     async function fetchWithNativeBackend(url) {
-      if (!window.markdownEditorNative?.isAvailable) return null;
-      return window.markdownEditorNative.fetchUrl(url);
+      if (!webClipperPlatformPort?.supports('desktop.webFetch')) return null;
+      return webClipperPlatformPort.call('web', 'fetchText', url);
     }
 
     // 尝试通过 Tauri Rust 后端、本地代理或公共 CORS 代理获取网页
@@ -189,28 +119,28 @@
 
       if (!url) {
         status.textContent = t('urlStatusEmptyUrl');
-        status.style.color = 'var(--danger)';
+        setClipperStatusTone(status, 'error');
         return;
       }
 
       status.textContent = t('urlStatusFetching');
-      status.style.color = 'var(--text-muted)';
+      setClipperStatusTone(status, 'muted');
       fetchedHtml = '';
 
       // 桌面版优先使用 Rust 后端，不再依赖 Python 代理或公网 CORS 服务。
-      if (window.markdownEditorNative?.isAvailable) {
+      if (webClipperPlatformPort?.supports('desktop.webFetch')) {
         try {
           const data = await fetchWithNativeBackend(url);
-          fetchedHtml = data?.html || data?.content || '';
+          fetchedHtml = String(data || '');
           if (!fetchedHtml) throw new Error('Native backend returned empty content');
           status.textContent = t('urlStatusLocalSuccess');
-          status.style.color = 'var(--accent)';
-          manualArea.style.display = 'none';
+          setClipperStatusTone(status, 'success');
+          setClipperHidden(manualArea, true);
           return;
         } catch (err) {
           status.innerHTML = t('urlStatusLocalFailed', err.message || String(err));
-          status.style.color = 'var(--danger)';
-          manualArea.style.display = 'block';
+          setClipperStatusTone(status, 'error');
+          setClipperHidden(manualArea, false);
           return;
         }
       }
@@ -229,14 +159,14 @@
           fetchedHtml = data.html || data.content || '';
           if (!fetchedHtml) throw new Error('Local proxy returned empty content');
           status.textContent = t('urlStatusLocalSuccess');
-          status.style.color = 'var(--accent)';
-          manualArea.style.display = 'none';
+          setClipperStatusTone(status, 'success');
+          setClipperHidden(manualArea, true);
           return;
         } catch (err) {
           const hint = data?.hint ? data.hint : '';
           status.innerHTML = t('urlStatusLocalFailed', err.message) + (hint ? '<br><small>' + hint + '</small>' : '');
-          status.style.color = 'var(--danger)';
-          manualArea.style.display = 'block';
+          setClipperStatusTone(status, 'error');
+          setClipperHidden(manualArea, false);
           return;
         }
       }
@@ -267,8 +197,8 @@
           if (!text || text.length < 100) throw new Error('Content too short');
           fetchedHtml = text;
           status.textContent = t('urlStatusPublicSuccess');
-          status.style.color = 'var(--accent)';
-          manualArea.style.display = 'none';
+          setClipperStatusTone(status, 'success');
+          setClipperHidden(manualArea, true);
           return;
         } catch (err) {
           lastError = err.message;
@@ -276,8 +206,8 @@
       }
 
       status.textContent = t('urlStatusPublicFailed', lastError);
-      status.style.color = 'var(--danger)';
-      manualArea.style.display = 'block';
+      setClipperStatusTone(status, 'error');
+      setClipperHidden(manualArea, false);
     }
 
     // 提取网页元信息
@@ -417,24 +347,15 @@
           showToast(t('toastExtractFailed'));
           return;
         }
-        const currentLength = documentModel?.getTextLength?.() ?? editor.textLength;
-        const isEmpty = documentModel
-          ? documentModel.getNonWhitespaceCount() === 0
-          : !editor.value.trim();
+        const currentLength = documentModel.getTextLength();
+        const isEmpty = documentModel.getNonWhitespaceCount() === 0;
         if (isEmpty) {
-          if (documentModel) documentModel.replaceRange(markdown, 0, currentLength, 'end');
-          else editor.value = markdown;
-        } else if (documentModel) {
-          documentModel.replaceRange('\n\n' + markdown, currentLength, currentLength, 'end');
+          documentModel.replaceRange(markdown, 0, currentLength, 'end');
         } else {
-          editor.value += '\n\n' + markdown;
+          documentModel.replaceRange('\n\n' + markdown, currentLength, currentLength, 'end');
         }
-
-        if (previewMode === 'source') {
-          previewSource.value = editor.virtualEditor ? '' : editor.value;
-        }
-        updatePreview();
-        updateCount();
+        webClipperPreviewCommandPort.update();
+        webClipperPreviewCommandPort.updateCount();
         saveToLocal();
         closeUrlModal();
         showToast(t('toastInsertedMd'));

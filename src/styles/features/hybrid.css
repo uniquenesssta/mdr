@@ -1,0 +1,341 @@
+/* Responsibility: Hybrid editor presentation and shared block widget geometry. */
+
+.editor-presentation-badge[hidden] {
+  display: none;
+}
+
+body.hybrid-view-mode .f-preview-pane,
+body.hybrid-view-mode .l-pane-resizer {
+  display: none !important;
+}
+
+body.hybrid-view-mode .f-editor-pane {
+  flex: 1 1 100% !important;
+  max-width: none !important;
+  border-right: 0;
+}
+
+body.hybrid-view-mode .f-editor-pane .collapse-btn {
+  display: none;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-gutters {
+  display: none;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content {
+  width: min(100%, 980px);
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 36px 0 120px;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-line {
+  --hybrid-line-inline-padding: 42px;
+  padding: var(--space-2xs) var(--hybrid-line-inline-padding);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  transition: color var(--motion-duration-fast) ease, background-color var(--motion-duration-fast) ease, box-shadow var(--motion-duration-fast) ease;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-activeLine {
+  background: transparent;
+}
+
+/* Hybrid selections stay on rendered characters instead of painting the
+   virtual newline across the remaining content width. */
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-selectionBackground {
+  background: transparent !important;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-selection-exact {
+  background: color-mix(in srgb, var(--color-accent) 24%, transparent);
+  border-radius: var(--radius-2xs);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-source-active {
+  background: var(--color-editor-active-line);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--color-accent) 72%, transparent);
+  color: var(--color-editor-text);
+  font-family: var(--font-family-editor);
+  font-size: var(--editor-font-size, var(--font-size-2xl));
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-weight: 750;
+  letter-spacing: -.018em;
+  line-height: 1.32;
+  padding-top: .42em;
+  padding-bottom: .16em;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-1 {
+  font-size: 190%;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-2 {
+  font-size: 175%;
+  border-bottom: 0;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-3 {
+  font-size: 130%;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-4 {
+  font-size: 114%;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-5 {
+  font-size: 104%;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-6 {
+  color: var(--color-text-secondary);
+  font-size: var(--editor-font-size, var(--font-size-2xl));
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-setext-marker-line {
+  min-height: 0;
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-reference-definition-line {
+  min-height: 0;
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-strong {
+  color: var(--color-text-primary);
+  font-weight: 750;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-emphasis {
+  font-style: italic;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-strikethrough {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-inline-code {
+  padding: .08em .34em;
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 78%, transparent);
+  border-radius: 4px;
+  background: var(--color-surface-subtle);
+  color: var(--color-danger);
+  font-family: var(--font-family-mono);
+  font-size: .9em;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-link {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-accent) 42%, transparent);
+  text-underline-offset: 3px;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-image {
+  color: var(--color-accent);
+  font-style: italic;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-blockquote {
+  --hybrid-quote-depth: 1;
+  --hybrid-quote-step: 28px;
+  --hybrid-quote-indent: 28px;
+  padding-left: calc(var(--hybrid-line-inline-padding) + var(--hybrid-quote-indent));
+  border-radius: 0;
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+to right,
+var(--color-text-muted) 0 3px,
+transparent 3px var(--hybrid-quote-step)
+  );
+  background-position: var(--hybrid-line-inline-padding) 0;
+  background-repeat: no-repeat;
+  background-size: var(--hybrid-quote-indent) 100%;
+  color: var(--color-text-muted);
+  font-size: .95em;
+  font-style: italic;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-blockquote-root-start {
+  padding-top: var(--space-lg);
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-blockquote-root-end {
+  padding-bottom: var(--space-lg);
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-list-line {
+  padding-left: 54px;
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-blockquote.cm-hybrid-list-line {
+  padding-left: calc(var(--hybrid-line-inline-padding) + var(--hybrid-quote-indent) + var(--space-4xl));
+}
+
+.virtual-editor-host .cm-hybrid-prefix {
+  display: inline-flex;
+  min-width: 1.45em;
+  margin-right: .28em;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  font-family: var(--font-family-ui);
+  font-style: normal;
+  font-weight: 650;
+  user-select: none;
+}
+
+.virtual-editor-host .cm-hybrid-task-box {
+  width: 1.05em;
+  height: 1.05em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
+  font-size: .78em;
+  line-height: 1;
+}
+
+.virtual-editor-host .cm-hybrid-horizontal-rule {
+  display: inline-block;
+  width: 100%;
+  height: 1px;
+  margin: .72em 0;
+  vertical-align: middle;
+  background: var(--color-border-subtle);
+  user-select: none;
+}
+
+@media (max-width: 760px) {
+  .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content {
+width: 100%;
+  }
+  .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-line {
+--hybrid-line-inline-padding: 18px;
+padding-right: var(--hybrid-line-inline-padding);
+padding-left: var(--hybrid-line-inline-padding);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-line {
+transition: none;
+  }
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-inline-color {
+  border-radius: var(--radius-2xs);
+}
+
+/* 2026 interface refresh: modern desktop creation workspace */
+
+
+html,
+body {
+  background: var(--color-canvas);
+}
+
+.virtual-editor-host .cm-hybrid-block-toolbar {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  padding: 5px var(--space-md) 5px var(--space-xl);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-surface-subtle) 82%, var(--color-surface-raised));
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+.virtual-editor-host .cm-hybrid-block-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.virtual-editor-host .cm-hybrid-widget-action {
+  min-height: 24px;
+  padding: 3px var(--space-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-base);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.virtual-editor-host .cm-hybrid-widget-action:hover {
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
+}
+
+.virtual-editor-host .cm-hybrid-task-box {
+  appearance: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-family-ui);
+}
+
+.virtual-editor-host .cm-hybrid-task-box:hover {
+  background: var(--color-accent-soft);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.virtual-editor-host .cm-editor.cm-hybrid-mode [data-hybrid-link-url] {
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-block-widget {
+width: calc(100% - 36px);
+margin-right: 18px;
+margin-left: 18px;
+  }
+}
+
+/* Hybrid phase 2: stable widget/source transitions and local image feedback. */
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-block-widget:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-focus-content-card);
+}
+
+/* Hybrid block subsystem: complex Markdown blocks remain source-backed CodeMirror widgets. */
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-block-widget {
+  width: calc(100% - 84px);
+  margin: var(--space-lg) 42px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-content-card);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+}

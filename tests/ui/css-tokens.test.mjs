@@ -1,0 +1,134 @@
+import assert from 'node:assert/strict';
+import { readdir } from 'node:fs/promises';
+import { extname, join, resolve } from 'node:path';
+import test from 'node:test';
+import {
+  STYLE_IMPORTS,
+  collectDefinitions,
+  expectedStyleEntry,
+  extractRule,
+  readImportedStyles,
+  readText,
+  root
+} from './style-test-utils.mjs';
+
+async function listSourceFiles(directory) {
+  const entries = await readdir(resolve(root, directory), { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const relative = join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...await listSourceFiles(relative));
+    else if (['.css', '.html', '.js'].includes(extname(entry.name))) files.push(relative);
+  }
+  return files;
+}
+
+const legacyTokens = [
+  '--bg', '--panel-bg', '--surface', '--surface-hover', '--text', '--text-secondary',
+  '--text-muted', '--border', '--border-strong', '--accent', '--accent-hover',
+  '--accent-soft', '--accent-strong-soft', '--danger', '--editor-text-color',
+  '--editor-active-line-color', '--chrome-bg', '--card-bg', '--shadow-sm', '--shadow',
+  '--shadow-md', '--shadow-lg', '--font-sans', '--font-mono', '--font-editor', '--font-ui'
+];
+
+const requiredTokens = {
+  color: [
+    '--color-canvas', '--color-surface-raised', '--color-text-primary',
+    '--color-border-subtle', '--color-accent', '--color-danger'
+  ],
+  typography: [
+    '--font-family-ui', '--font-family-editor', '--font-family-mono',
+    '--font-size-xs', '--font-size-md', '--font-size-2xl'
+  ],
+  spacing: ['--space-2xs', '--space-md', '--space-2xl', '--space-8xl'],
+  radius: ['--radius-xs', '--radius-md', '--radius-xl', '--radius-pill'],
+  shadow: ['--shadow-low', '--shadow-raised', '--shadow-floating', '--shadow-overlay'],
+  layer: ['--layer-below', '--layer-menu', '--layer-modal', '--layer-link-preview'],
+  motion: [
+    '--motion-duration-fast', '--motion-duration-moderate',
+    '--motion-ease-standard', '--motion-ease-emphasized'
+  ],
+  code: [
+    '--code-background', '--code-text', '--code-border', '--code-token-keyword',
+    '--code-token-string', '--code-token-comment'
+  ]
+};
+
+test('Atomic Task 2.7 keeps one ordered stylesheet entry and one semantic token contract after 2.9 layering', async () => {
+  const [entrySource, mainEntrySource, tokenSource, lightSource, darkSource, styles] = await Promise.all([
+    readText('src/styles/index.css'),
+    readText('src/main.js'),
+    readText('src/styles/foundation/tokens.css'),
+    readText('src/styles/themes/light.css'),
+    readText('src/styles/themes/dark.css'),
+    readImportedStyles()
+  ]);
+
+  assert.equal(entrySource, expectedStyleEntry());
+  assert.equal(styles.length, STYLE_IMPORTS.length);
+  assert.match(mainEntrySource, /^import '\.\/styles\/index\.css';/);
+  assert.doesNotMatch(mainEntrySource, /styles\/main\.css/);
+  assert.match(tokenSource, /^:root\s*\{/);
+  assert.match(lightSource, /^:root\s*\{/);
+  assert.match(darkSource, /^\[data-theme="dark"\]\s*\{/);
+  assert.doesNotMatch(tokenSource, /\[data-theme/);
+  for (const { path, source } of styles.filter(record => !record.path.includes('/themes/'))) {
+    if (path.endsWith('/foundation/tokens.css')) continue;
+    assert.doesNotMatch(source, /(^|\n):root\s*\{|\[data-theme/, path);
+  }
+});
+
+test('token contract separates required semantic categories without page-position names', async () => {
+  const [tokenSource, lightSource, darkSource] = await Promise.all([
+    readText('src/styles/foundation/tokens.css'),
+    readText('src/styles/themes/light.css'),
+    readText('src/styles/themes/dark.css')
+  ]);
+  const baseDefinitions = collectDefinitions(extractRule(tokenSource, ':root'));
+  const lightDefinitions = collectDefinitions(extractRule(lightSource, ':root'));
+  const darkDefinitions = collectDefinitions(extractRule(darkSource, '[data-theme="dark"]'));
+  const defaultDefinitions = new Map([...baseDefinitions, ...lightDefinitions]);
+
+  for (const [category, names] of Object.entries(requiredTokens)) {
+    for (const name of names) assert.ok(defaultDefinitions.has(name), `${category} token missing: ${name}`);
+  }
+  for (const name of darkDefinitions.keys()) {
+    assert.ok(lightDefinitions.has(name), `dark override has no light default: ${name}`);
+  }
+  for (const name of defaultDefinitions.keys()) {
+    assert.doesNotMatch(name, /(?:left|right|top|bottom|sidebar|workspace|header|footer)/, name);
+  }
+
+  assert.equal(lightDefinitions.get('--color-canvas'), '#eef1f5');
+  assert.equal(lightDefinitions.get('--color-editor-text'), '#202530');
+  assert.equal(baseDefinitions.get('--radius-md'), '7px');
+  assert.equal(baseDefinitions.get('--motion-duration-moderate'), '0.20s');
+  assert.equal(lightDefinitions.get('--code-background'), '#f5f7fb');
+  assert.equal(darkDefinitions.get('--color-canvas'), '#0c1017');
+  assert.equal(darkDefinitions.get('--code-background'), '#0b0f15');
+});
+
+test('production callers use semantic tokens and layered CSS has no visual color literals outside themes', async () => {
+  const [styles, sourceFiles] = await Promise.all([
+    readImportedStyles(),
+    Promise.all(['src', 'public'].map(listSourceFiles))
+  ]);
+  const available = new Set(styles.flatMap(record => [...collectDefinitions(record.source).keys()]));
+  const runtimeOwned = new Set([
+    '--editor-font-size', '--indicator-color', '--sidebar-width', '--swatch-color', '--tree-depth'
+  ]);
+
+  for (const { path, source } of styles.filter(record => !record.path.includes('/themes/'))) {
+    assert.doesNotMatch(source, /#[0-9a-f]{3,8}\b|rgba?\(/i, path);
+  }
+  const productionFiles = sourceFiles.flat();
+  for (const path of productionFiles) {
+    const source = await readText(path);
+    for (const name of legacyTokens) {
+      assert.doesNotMatch(source, new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![a-z0-9-])`, 'i'), `${path}: ${name}`);
+    }
+    for (const match of source.matchAll(/var\((--[a-z0-9-]+)/gi)) {
+      assert.ok(available.has(match[1]) || runtimeOwned.has(match[1]), `${path}: undefined ${match[1]}`);
+    }
+  }
+});

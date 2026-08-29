@@ -1,0 +1,59 @@
+/* Responsibility: Shared keyframes, reduced-motion policy and view-transition behavior. */
+
+/* 下拉菜单进入动画 */
+@keyframes menuIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+}
+
+/* 布局切换使用 View Transition 快照动画，避免 width/flex 在每一帧重排大型预览。 */
+@supports (view-transition-name: none) {
+  html.view-transitions-supported .l-sidebar {
+view-transition-name: sidebar-panel;
+transition: none;
+  }
+  html.view-transitions-supported .f-editor-pane {
+view-transition-name: editor-pane;
+transition: none;
+  }
+  html.view-transitions-supported .f-preview-pane {
+view-transition-name: preview-pane;
+transition: none;
+  }
+  html.view-transitions-supported .l-pane-resizer {
+view-transition-name: pane-resizer;
+  }
+
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+animation: none;
+mix-blend-mode: normal;
+  }
+
+  html[data-layout-transition="sidebar"]::view-transition-group(sidebar-panel),
+  html[data-layout-transition="sidebar"]::view-transition-group(editor-pane),
+  html[data-layout-transition="sidebar"]::view-transition-group(preview-pane),
+  html[data-layout-transition="sidebar"]::view-transition-group(pane-resizer) {
+animation-duration: 180ms;
+animation-timing-function: var(--motion-ease-spring);
+  }
+
+  html[data-layout-transition="panes"]::view-transition-group(editor-pane),
+  html[data-layout-transition="panes"]::view-transition-group(preview-pane),
+  html[data-layout-transition="panes"]::view-transition-group(pane-resizer) {
+animation-duration: 220ms;
+animation-timing-function: var(--motion-ease-spring);
+  }
+
+  ::view-transition-old(sidebar-panel),
+  ::view-transition-new(sidebar-panel),
+  ::view-transition-old(editor-pane),
+  ::view-transition-new(editor-pane),
+  ::view-transition-old(preview-pane),
+  ::view-transition-new(preview-pane),
+  ::view-transition-old(pane-resizer),
+  ::view-transition-new(pane-resizer) {
+mix-blend-mode: normal;
+  }
+}

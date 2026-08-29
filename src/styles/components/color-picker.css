@@ -1,0 +1,149 @@
+/* Responsibility: Toolbar color-picker controls and fixed palette swatches. */
+
+.color-tool-button {
+      position: relative;
+      min-width: 42px;
+      padding: 5px var(--space-xs) 7px !important;
+      gap: 3px !important;
+}
+
+.color-tool-glyph {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 15px;
+      font-size: var(--font-size-lg);
+      font-weight: 750;
+      line-height: 1;
+}
+
+.color-tool-highlight {
+      padding: 1px var(--space-2xs);
+      border-radius: var(--radius-xs);
+      background: var(--color-highlight);
+      color: var(--color-highlight-ink);
+}
+
+.color-tool-indicator {
+      position: absolute;
+      left: 5px;
+      bottom: 3px;
+      width: 16px;
+      height: 3px;
+      border-radius: var(--radius-2xs);
+      background: var(--indicator-color, var(--color-accent));
+      box-shadow: var(--shadow-inset-control-border);
+}
+
+.color-menu {
+      width: 224px;
+      min-width: 224px;
+      padding: 11px;
+      gap: 9px;
+      overflow: visible;
+}
+
+.color-menu > strong {
+      padding: 0 var(--space-2xs);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-md);
+}
+
+.color-swatches {
+      display: grid;
+      grid-template-columns: repeat(5, 30px);
+      gap: var(--space-md);
+}
+
+.l-toolbar-shell .color-menu .color-swatch {
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      padding: 0;
+      border: 1px solid color-mix(in srgb, var(--color-border-subtle) 75%, var(--color-export-ink) 25%);
+      border-radius: var(--radius-md);
+      background: var(--swatch-color);
+      box-shadow: var(--shadow-inset-highlight);
+}
+
+.l-toolbar-shell .color-menu .color-swatch:hover {
+      background: var(--swatch-color);
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-swatch-hover);
+      transform: translateY(-1px);
+}
+
+.color-menu-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--color-border-subtle);
+}
+
+.l-toolbar-shell .color-menu-actions > button,
+.l-toolbar-shell .color-menu-actions > label {
+      min-height: 32px;
+      flex: 1 1 0;
+      justify-content: center;
+      padding: 5px var(--space-md);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--color-canvas);
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-sm);
+}
+
+.l-toolbar-shell .color-menu-actions > button:hover,
+.l-toolbar-shell .color-menu-actions > label:hover {
+      border-color: var(--color-accent);
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+}
+
+.custom-color-action input[type="color"] {
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      cursor: pointer;
+}
+
+/* Theme-owned fixed editor color presets. */
+.c-color-swatch--text-ink { --swatch-color: var(--color-preset-text-ink); }
+
+.c-color-swatch--text-gray { --swatch-color: var(--color-preset-text-gray); }
+
+.c-color-swatch--text-red { --swatch-color: var(--color-preset-text-red); }
+
+.c-color-swatch--text-orange { --swatch-color: var(--color-preset-text-orange); }
+
+.c-color-swatch--text-yellow { --swatch-color: var(--color-preset-text-yellow); }
+
+.c-color-swatch--text-green { --swatch-color: var(--color-preset-text-green); }
+
+.c-color-swatch--text-cyan { --swatch-color: var(--color-preset-text-cyan); }
+
+.c-color-swatch--text-blue { --swatch-color: var(--color-preset-text-blue); }
+
+.c-color-swatch--text-purple { --swatch-color: var(--color-preset-text-purple); }
+
+.c-color-swatch--text-pink { --swatch-color: var(--color-preset-text-pink); }
+
+.c-color-swatch--highlight-yellow { --swatch-color: var(--color-preset-highlight-yellow); }
+
+.c-color-swatch--highlight-orange { --swatch-color: var(--color-preset-highlight-orange); }
+
+.c-color-swatch--highlight-red { --swatch-color: var(--color-preset-highlight-red); }
+
+.c-color-swatch--highlight-green { --swatch-color: var(--color-preset-highlight-green); }
+
+.c-color-swatch--highlight-blue { --swatch-color: var(--color-preset-highlight-blue); }
+
+.c-color-swatch--highlight-purple { --swatch-color: var(--color-preset-highlight-purple); }
+
+.c-color-swatch--highlight-pink { --swatch-color: var(--color-preset-highlight-pink); }
+
+.c-color-swatch--highlight-gray { --swatch-color: var(--color-preset-highlight-gray); }

@@ -1,28 +1,76 @@
+import { accessSync, constants } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
-import { delimiter, join } from 'node:path';
-import { spawn, spawnSync } from 'node:child_process';
+import { delimiter, extname, isAbsolute, join, resolve } from 'node:path';
+import { spawn } from 'node:child_process';
 
-function executableCandidates() {
+function cleanCandidate(value) {
+  return String(value || '').trim().replace(/^['"]|['"]$/g, '');
+}
+
+function executableExtensions(value, platform, environment) {
+  if (platform !== 'win32' || extname(value)) return [''];
+  const configured = String(environment.PATHEXT || '.COM;.EXE;.BAT;.CMD')
+    .split(';')
+    .map(item => item.trim())
+    .filter(Boolean);
+  return configured.length ? configured : ['.EXE'];
+}
+
+function canUseExecutable(path, platform) {
+  try {
+    accessSync(path, platform === 'win32' ? constants.F_OK : constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function resolveExecutableCandidate(candidate, options = {}) {
+  const platform = options.platform || process.platform;
+  const environment = options.environment || process.env;
+  const value = cleanCandidate(candidate);
+  if (!value) return null;
+  const extensions = executableExtensions(value, platform, environment);
+  const directPath = isAbsolute(value) || value.includes('/') || value.includes('\\');
+  if (directPath) {
+    for (const extension of extensions) {
+      const path = resolve(`${value}${extension}`);
+      if (canUseExecutable(path, platform)) return path;
+    }
+    return null;
+  }
+  for (const directoryValue of String(environment.PATH || '').split(delimiter)) {
+    const directory = cleanCandidate(directoryValue);
+    if (!directory) continue;
+    for (const extension of extensions) {
+      const path = join(directory, `${value}${extension}`);
+      if (canUseExecutable(path, platform)) return path;
+    }
+  }
+  return null;
+}
+
+function executableCandidates(environment = process.env, platform = process.platform) {
   const candidates = [
-    process.env.CHROMIUM_PATH,
-    process.env.CHROME_PATH,
+    environment.CHROMIUM_PATH,
+    environment.CHROME_PATH,
     'chromium',
     'chromium-browser',
     'google-chrome',
     'google-chrome-stable',
     'chrome'
   ].filter(Boolean);
-  if (process.platform === 'win32') {
-    const roots = [process.env.PROGRAMFILES, process.env['PROGRAMFILES(X86)'], process.env.LOCALAPPDATA].filter(Boolean);
+  if (platform === 'win32') {
+    const roots = [environment.PROGRAMFILES, environment['PROGRAMFILES(X86)'], environment.LOCALAPPDATA].filter(Boolean);
     for (const root of roots) {
       candidates.push(
         join(root, 'Google', 'Chrome', 'Application', 'chrome.exe'),
         join(root, 'Microsoft', 'Edge', 'Application', 'msedge.exe')
       );
     }
-  } else if (process.platform === 'darwin') {
+  } else if (platform === 'darwin') {
     candidates.push(
       '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
       '/Applications/Chromium.app/Contents/MacOS/Chromium'
@@ -31,23 +79,25 @@ function executableCandidates() {
   return [...new Set(candidates)];
 }
 
-export function findChromiumExecutable() {
-  for (const candidate of executableCandidates()) {
-    const result = spawnSync(candidate, ['--version'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-    if (!result.error && result.status === 0) return candidate;
+export function findChromiumExecutable(options = {}) {
+  const platform = options.platform || process.platform;
+  const environment = options.environment || process.env;
+  for (const candidate of executableCandidates(environment, platform)) {
+    const executable = resolveExecutableCandidate(candidate, { platform, environment });
+    if (executable) return executable;
   }
   return null;
 }
 
 async function getFreePort() {
   const server = createServer();
-  await new Promise((resolve, reject) => {
+  await new Promise((resolvePromise, reject) => {
     server.once('error', reject);
-    server.listen(0, '127.0.0.1', resolve);
+    server.listen(0, '127.0.0.1', resolvePromise);
   });
   const address = server.address();
   const port = typeof address === 'object' && address ? address.port : 0;
-  await new Promise(resolve => server.close(resolve));
+  await new Promise(resolvePromise => server.close(resolvePromise));
   return port;
 }
 
@@ -62,7 +112,7 @@ async function waitForJson(url, timeoutMs = 10000) {
     } catch (error) {
       lastError = error;
     }
-    await new Promise(resolve => setTimeout(resolve, 80));
+    await new Promise(resolvePromise => setTimeout(resolvePromise, 80));
   }
   throw new Error(`CDP endpoint did not become ready: ${lastError?.message || url}`);
 }
@@ -78,8 +128,8 @@ class CdpConnection {
 
   async open() {
     this.socket = new WebSocket(this.url);
-    await new Promise((resolve, reject) => {
-      this.socket.addEventListener('open', resolve, { once: true });
+    await new Promise((resolvePromise, reject) => {
+      this.socket.addEventListener('open', resolvePromise, { once: true });
       this.socket.addEventListener('error', reject, { once: true });
     });
     this.socket.addEventListener('message', event => this.#handleMessage(event.data));
@@ -109,8 +159,8 @@ class CdpConnection {
       return Promise.reject(new Error('CDP connection is not open'));
     }
     const id = this.nextId++;
-    return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject, method });
+    return new Promise((resolvePromise, reject) => {
+      this.pending.set(id, { resolve: resolvePromise, reject, method });
       this.socket.send(JSON.stringify({ id, method, params }));
     });
   }
@@ -195,9 +245,30 @@ export class CdpPage {
       } catch (error) {
         lastError = error;
       }
-      await new Promise(resolve => setTimeout(resolve, intervalMs));
+      await new Promise(resolvePromise => setTimeout(resolvePromise, intervalMs));
     }
     throw new Error(`Timed out waiting for ${description}${lastError ? `: ${lastError.message}` : ''}`);
+  }
+
+  async setViewport(options = {}) {
+    const width = Math.round(Number(options.width));
+    const height = Math.round(Number(options.height));
+    const deviceScaleFactor = Number(options.deviceScaleFactor) || 1;
+    if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
+      throw new TypeError('Viewport width and height must be positive finite numbers');
+    }
+    await this.connection.send('Emulation.setDeviceMetricsOverride', {
+      width,
+      height,
+      deviceScaleFactor,
+      mobile: false,
+      screenWidth: width,
+      screenHeight: height,
+      positionX: 0,
+      positionY: 0
+    });
+    await this.evaluate(`new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))`);
+    return { width, height, deviceScaleFactor };
   }
 
   async elementRect(selector) {
@@ -217,6 +288,45 @@ export class CdpPage {
     return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   }
 
+  async waitForElementStable(selector, options = {}) {
+    const timeoutMs = Math.max(100, Number(options.timeoutMs) || 2500);
+    const intervalMs = Math.max(10, Number(options.intervalMs) || 40);
+    const stableSamples = Math.max(2, Math.round(Number(options.stableSamples) || 4));
+    const toleranceValue = Number(options.tolerancePx);
+    const tolerancePx = Number.isFinite(toleranceValue) ? Math.max(0, toleranceValue) : 0.25;
+    const description = options.description || selector;
+    const encoded = JSON.stringify(selector);
+    const started = Date.now();
+    let previous = null;
+    let stableCount = 0;
+    let lastRect = null;
+
+    while (Date.now() - started < timeoutMs) {
+      const rect = await this.elementRect(selector);
+      lastRect = rect;
+      const hittable = await this.evaluate(`(() => {
+        const element = document.querySelector(${encoded});
+        if (!element) return false;
+        const rect = element.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return false;
+        const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        return Boolean(hit && (hit === element || element.contains(hit)));
+      })()`);
+      const stable = Boolean(previous && hittable && ['x', 'y', 'width', 'height'].every(
+        key => Math.abs(rect[key] - previous[key]) <= tolerancePx
+      ));
+      stableCount = stable ? stableCount + 1 : (hittable ? 1 : 0);
+      if (stableCount >= stableSamples) return rect;
+      previous = rect;
+      await new Promise(resolvePromise => setTimeout(resolvePromise, intervalMs));
+    }
+
+    const detail = lastRect
+      ? ` (${lastRect.x.toFixed(2)},${lastRect.y.toFixed(2)} ${lastRect.width.toFixed(2)}x${lastRect.height.toFixed(2)})`
+      : '';
+    throw new Error(`Timed out waiting for stable element geometry: ${description}${detail}`);
+  }
+
   async click(selector, options = {}) {
     const point = await this.elementCenter(selector);
     await this.clickAt(point.x, point.y, options);
@@ -232,7 +342,7 @@ export class CdpPage {
       await this.connection.send('Input.dispatchMouseEvent', {
         type: 'mouseReleased', x, y, button: 'left', buttons: 0, clickCount: index
       });
-      if (index < count) await new Promise(resolve => setTimeout(resolve, intervalMs));
+      if (index < count) await new Promise(resolvePromise => setTimeout(resolvePromise, intervalMs));
     }
   }
 
@@ -253,7 +363,7 @@ export class CdpPage {
         button: 'left',
         buttons: 1
       });
-      await new Promise(resolve => setTimeout(resolve, Number(options.stepDelayMs) || 12));
+      await new Promise(resolvePromise => setTimeout(resolvePromise, Number(options.stepDelayMs) || 12));
     }
     await this.connection.send('Input.dispatchMouseEvent', {
       type: 'mouseReleased', x: end.x, y: end.y, button: 'left', buttons: 0, clickCount: 1
@@ -271,6 +381,21 @@ export class CdpPage {
     const { writeFile } = await import('node:fs/promises');
     await writeFile(path, Buffer.from(data, 'base64'));
   }
+}
+
+async function removeProfileDirectory(path, attempts = 8) {
+  let lastError = null;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      await rm(path, { recursive: true, force: true });
+      return;
+    } catch (error) {
+      lastError = error;
+      if (!['ENOTEMPTY', 'EBUSY', 'EPERM'].includes(error?.code) || attempt >= attempts - 1) throw error;
+      await new Promise(resolvePromise => setTimeout(resolvePromise, 80 * (attempt + 1)));
+    }
+  }
+  if (lastError) throw lastError;
 }
 
 export async function launchChromium(options = {}) {
@@ -305,7 +430,7 @@ export async function launchChromium(options = {}) {
   processHandle.stdout.on('data', () => {});
 
   try {
-    const targets = await waitForJson(`http://127.0.0.1:${port}/json/list`, 12000);
+    const targets = await waitForJson(`http://127.0.0.1:${port}/json/list`, 30000);
     const target = targets.find(item => item.type === 'page');
     if (!target?.webSocketDebuggerUrl) throw new Error('No page target was exposed by Chromium');
     const connection = await new CdpConnection(target.webSocketDebuggerUrl).open();
@@ -317,18 +442,18 @@ export async function launchChromium(options = {}) {
       async close() {
         connection.close();
         if (!processHandle.killed) processHandle.kill('SIGTERM');
-        await new Promise(resolve => {
-          const timer = setTimeout(resolve, 1500);
-          processHandle.once('exit', () => { clearTimeout(timer); resolve(); });
+        await new Promise(resolvePromise => {
+          const timer = setTimeout(resolvePromise, 1500);
+          processHandle.once('exit', () => { clearTimeout(timer); resolvePromise(); });
         });
         if (!processHandle.killed) processHandle.kill('SIGKILL');
-        await rm(profileDir, { recursive: true, force: true });
+        await removeProfileDirectory(profileDir);
       },
       get stderr() { return stderr; }
     };
   } catch (error) {
     if (!processHandle.killed) processHandle.kill('SIGKILL');
-    await rm(profileDir, { recursive: true, force: true });
+    await removeProfileDirectory(profileDir);
     throw new Error(`${error.message}${stderr ? `\nChromium: ${stderr.slice(-1200)}` : ''}`);
   }
 }

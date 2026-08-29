@@ -5,8 +5,8 @@ import {
   getNativeParentPath,
   isNativePathWithinDirectory,
   isSameNativePath,
-  normalizeFolderFileTreeResult
-} from '../src/sidebar/folder-file-tree.js';
+  normalizeFolderTreeResult
+} from '../src/features/sidebar/index.js';
 
 test('folder file tree normalizes Windows paths and parent directories', () => {
   assert.equal(getNativeParentPath('F:\\Notes\\daily\\today.md'), 'F:\\Notes\\daily');
@@ -18,7 +18,7 @@ test('folder file tree normalizes Windows paths and parent directories', () => {
 });
 
 test('folder file tree keeps supported files, sorts directories first, and normalizes counts', () => {
-  const tree = normalizeFolderFileTreeResult({
+  const tree = normalizeFolderTreeResult({
     rootPath: 'F:\\Notes',
     rootName: 'Notes',
     fileCount: 3,
@@ -45,21 +45,25 @@ test('folder file tree keeps supported files, sorts directories first, and norma
   assert.equal(tree.nodes.some(node => node.name === 'ignore.png'), false);
 });
 
-test('folder file tree is wired through the sidebar, runtime bridge, core state, and Rust command', async () => {
-  const [index, main, core, tauri, rustMain, rustLocal] = await Promise.all([
-    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+test('folder file tree is wired through the Sidebar controller, runtime bridge, core state, and Rust command', async () => {
+  const [index, main, core, sidebarState, desktopPlatform, rustMain, rustLocal] = await Promise.all([
+    readFile(new URL('../public/compatibility/business-content.html', import.meta.url), 'utf8'),
     readFile(new URL('../src/main.js', import.meta.url), 'utf8'),
     readFile(new URL('../public/app/core.js', import.meta.url), 'utf8'),
-    readFile(new URL('../src/runtime/tauri.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/features/sidebar/state/sidebar-state.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8'),
     readFile(new URL('../src-tauri/src/main.rs', import.meta.url), 'utf8'),
     readFile(new URL('../src-tauri/src/local_file.rs', import.meta.url), 'utf8')
   ]);
   assert.match(index, /id="sidebar-files-tab"/);
   assert.match(index, /id="folder-file-tree"/);
-  assert.match(main, /createFolderFileTreeController/);
-  assert.match(core, /\['docs', 'files', 'outline'\]/);
+  assert.match(main, /createFolderTreeController/);
+  assert.match(main, /registerLifecycle\('files', folderTreeController\)/);
+  assert.match(sidebarState, /\['docs', 'files', 'outline'\]/);
   assert.match(core, /openFolderTreeFile/);
-  assert.match(tauri, /listTextFileTree/);
+  assert.match(core, /markdownEditorFolderTreeControllerPort/);
+  assert.match(desktopPlatform, /listTextTree/);
+  assert.match(desktopPlatform, /fileSystemClient\.listTextFileTree/);
   assert.match(rustMain, /local_file::list_text_file_tree/);
   assert.match(rustLocal, /pub async fn list_text_file_tree/);
   assert.match(rustLocal, /MAX_FILE_TREE_ENTRIES/);

@@ -1,0 +1,180 @@
+/* Responsibility: Hybrid table direct-edit presentation. */
+
+/* Insert-menu switch for optional deep table editing. */
+.menu-switch-item {
+  min-width: 250px;
+}
+
+.menu-switch-item.active {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.menu-inline-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.menu-inline-switch-track {
+  position: relative;
+  width: 30px;
+  height: 17px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-hover);
+  transition: background-color var(--motion-duration-normal) ease, border-color var(--motion-duration-normal) ease;
+}
+
+.menu-inline-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: var(--radius-round);
+  background: var(--color-text-muted);
+  box-shadow: var(--shadow-low);
+  transition: transform var(--motion-duration-normal) ease, background-color var(--motion-duration-normal) ease;
+}
+
+.menu-switch-item.active .menu-inline-switch-track {
+  border-color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 28%, transparent);
+}
+
+.menu-switch-item.active .menu-inline-switch-thumb {
+  background: var(--color-accent);
+  transform: translateX(13px);
+}
+
+.menu-switch-item.active .menu-inline-switch-state {
+  color: var(--color-accent);
+}
+
+.virtual-editor-host .cm-hybrid-table-label-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.virtual-editor-host .cm-hybrid-table-editing-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 1px 7px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: 650;
+}
+
+.virtual-editor-host .cm-hybrid-table-widget.is-cell-editing-enabled th,
+.virtual-editor-host .cm-hybrid-table-widget.is-cell-editing-enabled td {
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.virtual-editor-host .cm-hybrid-table-cell-value {
+  display: block;
+  width: 100%;
+  min-width: 82px;
+  min-height: 32px;
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  transition: background-color var(--motion-duration-fast) ease, border-color var(--motion-duration-fast) ease;
+}
+
+.virtual-editor-host .cm-hybrid-table-widget.is-cell-editing-enabled .cm-hybrid-table-cell-value:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+}
+
+.virtual-editor-host .cm-hybrid-table-widget.is-cell-editing-enabled td.is-direct-edit-active,
+.virtual-editor-host .cm-hybrid-table-widget.is-cell-editing-enabled th.is-direct-edit-active {
+  background: color-mix(in srgb, var(--color-accent) 4%, var(--color-surface-raised));
+}
+
+.virtual-editor-host .cm-hybrid-table-cell-input {
+  display: block;
+  width: 100%;
+  min-width: 82px;
+  min-height: 32px;
+  margin: 0;
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1.45;
+  text-align: inherit;
+  box-sizing: border-box;
+  transition: background-color var(--motion-duration-fast) ease, border-color var(--motion-duration-fast) ease, box-shadow var(--motion-duration-fast) ease;
+}
+
+.virtual-editor-host .cm-hybrid-table-cell-input:hover {
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+
+.virtual-editor-host .cm-hybrid-table-cell-input:focus {
+  background: var(--color-surface-raised);
+  border-color: color-mix(in srgb, var(--color-accent) 65%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 13%, transparent);
+}
+
+.virtual-editor-host .cm-hybrid-table-cell-input:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.virtual-editor-host .cm-hybrid-table-scroller {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.virtual-editor-host .cm-hybrid-table-widget table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+  font-size: .94em;
+}
+
+.virtual-editor-host .cm-hybrid-table-widget th,
+.virtual-editor-host .cm-hybrid-table-widget td {
+  min-width: 96px;
+  padding: 9px var(--space-xl);
+  border-right: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
+  vertical-align: top;
+  white-space: pre-wrap;
+}
+
+.virtual-editor-host .cm-hybrid-table-widget th:last-child,
+.virtual-editor-host .cm-hybrid-table-widget td:last-child {
+  border-right: 0;
+}
+
+.virtual-editor-host .cm-hybrid-table-widget tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.virtual-editor-host .cm-hybrid-table-widget th {
+  background: color-mix(in srgb, var(--color-surface-subtle) 68%, var(--color-surface-raised));
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.virtual-editor-host .cm-hybrid-table-widget tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--color-surface-subtle) 40%, transparent);
+}

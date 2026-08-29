@@ -1,0 +1,379 @@
+{
+  "schemaVersion": 1,
+  "kind": "stage-01-exact-migration-regression-baseline",
+  "sourceCommit": "4c9703a2474ecd89224d51417a6c5d16889ff3b6",
+  "policy": {
+    "exactEntriesOnly": true,
+    "wildcardExemptions": false,
+    "additionsRequireMigrationRemovalOrBaselineReview": true
+  },
+  "legacyClassicScripts": [
+    {
+      "loader": "src/main.js",
+      "script": "public/app/bootstrap.js",
+      "count": 1
+    },
+    {
+      "loader": "src/main.js",
+      "script": "public/app/core.js",
+      "count": 1
+    },
+    {
+      "loader": "src/main.js",
+      "script": "public/app/editor-tools.js",
+      "count": 1
+    },
+    {
+      "loader": "src/main.js",
+      "script": "public/app/events.js",
+      "count": 1
+    },
+    {
+      "loader": "src/main.js",
+      "script": "public/app/export.js",
+      "count": 1
+    },
+    {
+      "loader": "src/main.js",
+      "script": "public/app/web-clipper.js",
+      "count": 1
+    }
+  ],
+  "inlineEvents": [
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onchange",
+      "handler": "importFile(this)",
+      "count": 1,
+      "lines": [515]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onchange",
+      "handler": "renderExportImagePreview()",
+      "count": 1,
+      "lines": [423]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onchange",
+      "handler": "toggleProxyInput()",
+      "count": 1,
+      "lines": [347]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "cancelActiveExport()",
+      "count": 1,
+      "lines": [402]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "closeAppMenus();",
+      "count": 1,
+      "lines": [96]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "closeExportImageModal()",
+      "count": 2,
+      "lines": [411, 433]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "closeUrlModal()",
+      "count": 2,
+      "lines": [341, 359]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "convertAndInsert()",
+      "count": 1,
+      "lines": [360]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "downloadExportImage()",
+      "count": 1,
+      "lines": [435]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "exportFile(); closeAppMenus();",
+      "count": 1,
+      "lines": [24]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "exportHTML(); closeAppMenus();",
+      "count": 1,
+      "lines": [27]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "exportPDF(); closeAppMenus();",
+      "count": 1,
+      "lines": [26]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "exportWord(); closeAppMenus();",
+      "count": 1,
+      "lines": [25]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "fetchUrl()",
+      "count": 1,
+      "lines": [351]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "newDocument(); closeAppMenus();",
+      "count": 1,
+      "lines": [10]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "openExportImageModal(); closeAppMenus();",
+      "count": 1,
+      "lines": [28]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "openUrlModal(); closeAppMenus();",
+      "count": 1,
+      "lines": [20]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "renameCurrentDocument(); closeAppMenus();",
+      "count": 1,
+      "lines": [14]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "renderExportImagePreview()",
+      "count": 1,
+      "lines": [434]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('1:1')",
+      "count": 1,
+      "lines": [419]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('16:9')",
+      "count": 1,
+      "lines": [420]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('3:4')",
+      "count": 1,
+      "lines": [418]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('4:5')",
+      "count": 1,
+      "lines": [417]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "selectImageRatio('9:16')",
+      "count": 1,
+      "lines": [416]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "setLayoutMode('both'); closeAppMenus();",
+      "count": 1,
+      "lines": [52]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "setLayoutMode('edit'); closeAppMenus();",
+      "count": 1,
+      "lines": [53]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "setLayoutMode('preview'); closeAppMenus();",
+      "count": 1,
+      "lines": [54]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('app-view-menu')",
+      "count": 1,
+      "lines": [48]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('edit-menu')",
+      "count": 1,
+      "lines": [34]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('file-menu')",
+      "count": 1,
+      "lines": [8]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('help-menu')",
+      "count": 1,
+      "lines": [94]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleAppMenu('insert-menu')",
+      "count": 1,
+      "lines": [61]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleCodeVisualEditing(event)",
+      "count": 1,
+      "lines": [80]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleFullscreen(); closeAppMenus();",
+      "count": 1,
+      "lines": [57]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "togglePageFullscreen(); closeAppMenus();",
+      "count": 1,
+      "lines": [56]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleSidebar()",
+      "count": 1,
+      "lines": [224]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleSidebar(); closeAppMenus();",
+      "count": 1,
+      "lines": [50]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "toggleTableVisualEditing(event)",
+      "count": 1,
+      "lines": [76]
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "attribute": "onclick",
+      "handler": "triggerImportFile(); closeAppMenus();",
+      "count": 1,
+      "lines": [11]
+    }
+  ],
+  "businessGlobalWrites": [
+    {
+      "path": "public/app/core.js",
+      "global": "window.markdownEditorDocumentStatistics",
+      "count": 1,
+      "lines": [346]
+    },
+    {
+      "path": "public/app/core.js",
+      "global": "window.markdownEditorRuntimeContext",
+      "count": 1,
+      "lines": [488]
+    },
+    {
+      "path": "public/app/events.js",
+      "global": "window.__markdownEditorInitPromise",
+      "count": 1,
+      "lines": [274]
+    },
+    {
+      "path": "src/main.js",
+      "global": "window.markdownEditorDocumentModel",
+      "count": 1,
+      "lines": [411]
+    },
+    {
+      "path": "src/main.js",
+      "global": "window.markdownEditorDocumentStore",
+      "count": 1,
+      "lines": [412]
+    },
+    {
+      "path": "src/runtime/e2e-bridge.js",
+      "global": "globalThis.__MARKDOWN_EDITOR_E2E__",
+      "count": 1,
+      "lines": [3]
+    },
+    {
+      "path": "src/runtime/link-preview.js",
+      "global": "window.markdownEditorLinkPreview",
+      "count": 1,
+      "lines": [325]
+    },
+    {
+      "path": "src/runtime/link-preview.js",
+      "global": "window.showToast",
+      "count": 1,
+      "lines": [42]
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "global": "window.markdownEditorPerf",
+      "count": 1,
+      "lines": [640]
+    }
+  ],
+  "trackedGeneratedFiles": [
+    ".vite/deps/_metadata.json",
+    ".vite/deps/package.json",
+    "logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl",
+    "logs/performance-2026-07-25_17-29-13-389_pid-20484.jsonl"
+  ]
+}

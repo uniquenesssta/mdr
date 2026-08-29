@@ -1,0 +1,47 @@
+{
+  "mode": {
+    "workerChars": 100000,
+    "virtualChars": 400000,
+    "chapterChars": 1000000,
+    "virtualBlocks": 1400,
+    "chapterBlocks": 12000,
+    "badgeChars": 100000
+  },
+  "scheduling": {
+    "input": {
+      "defaultMs": 18,
+      "mediumChars": 40000,
+      "mediumMs": 70,
+      "workerMs": 120,
+      "virtualMs": 420
+    },
+    "focusMs": 120,
+    "layout": {
+      "maxAttempts": 18,
+      "stableFrames": 2,
+      "retryMs": 34
+    },
+    "postprocess": {
+      "deferChars": 80000,
+      "idleTimeoutMs": 260,
+      "fallbackMs": 32
+    },
+    "prewarmTimeoutMs": 700,
+    "enhancement": {
+      "idleTimeoutMs": 180,
+      "fallbackMs": 16,
+      "minimumTimeRemainingMs": 3
+    }
+  },
+  "virtualWindow": {
+    "overscanPx": 1000,
+    "minimumBlocks": 24,
+    "maximumBlocks": 180,
+    "prewarmBlocks": 96
+  },
+  "chapter": {
+    "minimumBlocks": 24,
+    "priorityBlocks": 96,
+    "priorityChars": 120000
+  }
+}

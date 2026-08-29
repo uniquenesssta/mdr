@@ -1,4 +1,7 @@
 node_modules/
+.vite/
+.windows-driver-host/
+.windows-driver-host.zip
 dist/
 src-tauri/target/
 .DS_Store

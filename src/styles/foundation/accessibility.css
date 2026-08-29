@@ -1,0 +1,31 @@
+/* Responsibility: Global selection policy and editable-surface text interaction. */
+
+body,
+body * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.f-editor-surface,
+.f-preview-surface,
+.f-preview-surface *,
+.modal input,
+.modal textarea,
+.modal select {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-text-primary);
+}
+
+.c-clipboard-buffer {
+  position: fixed;
+  inset: 0 auto auto 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}

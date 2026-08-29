@@ -1,0 +1,119 @@
+/* Responsibility: Hybrid code direct-edit presentation. */
+
+/* Optional source-backed direct editing for fenced and indented code blocks. */
+.virtual-editor-host .cm-hybrid-code-label-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.virtual-editor-host .cm-hybrid-code-editing-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 1px 7px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--code-toolbar-background));
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.virtual-editor-host .cm-hybrid-code-editor {
+  display: block;
+  width: 100%;
+  min-height: 96px;
+  max-height: 52vh;
+  margin: 0;
+  padding: 13px var(--space-2xl) 15px;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  overflow: auto;
+  background: var(--code-background);
+  color: var(--code-text);
+  caret-color: var(--color-accent);
+  font-family: var(--font-family-mono);
+  font-size: .9em;
+  line-height: 1.65;
+  tab-size: 4;
+  white-space: pre;
+}
+
+.virtual-editor-host .cm-hybrid-code-editor:focus {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-accent) 34%, transparent);
+}
+
+.virtual-editor-host .cm-hybrid-code-widget {
+  border-color: var(--code-border);
+  background: var(--code-background);
+}
+
+.virtual-editor-host .cm-hybrid-code-widget .cm-hybrid-block-toolbar {
+  border-bottom-color: var(--code-border);
+  background: var(--code-toolbar-background);
+  color: var(--code-toolbar-text);
+}
+
+.virtual-editor-host .cm-hybrid-code-widget .cm-hybrid-widget-action {
+  color: var(--code-action-text);
+}
+
+.virtual-editor-host .cm-hybrid-code-widget .cm-hybrid-widget-action:hover {
+  border-color: var(--code-border);
+  background: var(--code-action-hover-background);
+  color: var(--color-accent);
+}
+
+.virtual-editor-host .cm-hybrid-code-language {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  text-transform: lowercase;
+}
+
+.virtual-editor-host .cm-hybrid-code-body {
+  max-width: 100%;
+  padding: var(--space-lg) 0 var(--space-xl);
+  overflow-x: auto;
+  color: var(--code-text);
+  font-family: var(--font-family-mono);
+  font-size: .9em;
+  line-height: 1.65;
+  tab-size: 4;
+}
+
+.virtual-editor-host .cm-hybrid-code-row {
+  min-width: max-content;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
+  padding-right: 18px;
+}
+
+.virtual-editor-host .cm-hybrid-code-row:hover {
+  background: var(--code-line-hover);
+}
+
+.virtual-editor-host .cm-hybrid-code-line-number {
+  padding-right: var(--space-xl);
+  color: var(--code-line-number);
+  text-align: right;
+  user-select: none;
+}
+
+.virtual-editor-host .cm-hybrid-code-line {
+  display: block;
+  min-height: 1.65em;
+  white-space: pre;
+  color: var(--code-text);
+  font: inherit;
+}

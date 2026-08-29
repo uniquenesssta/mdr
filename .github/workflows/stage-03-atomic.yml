@@ -1,0 +1,79 @@
+# Atomic Task 3.12 final Stage 3 validation node.
+name: Stage 3 Atomic Verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-03-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  platform-foundation:
+    name: Verify Stage 3 platform foundation
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm run deps:prepare
+      - name: Verify Stage 2 handoff remains intact
+        run: node --test tests/ui/shell-cutover.test.mjs
+      - name: Verify Atomic Task 3.1 platform ports
+        run: node --test tests/unit/platform/platform-ports.test.mjs
+      - name: Verify Atomic Task 3.2 capability detection
+        run: node --test tests/unit/platform/platform-detection.test.mjs
+      - name: Verify Atomic Task 3.3 invoke client
+        run: node --test tests/unit/platform/invoke-client.test.mjs
+      - name: Verify Atomic Task 3.4 dialog client
+        run: node --test tests/unit/platform/dialog-client.test.mjs
+      - name: Verify Atomic Task 3.5 window client
+        run: node --test tests/unit/platform/window-client.test.mjs
+      - name: Verify Atomic Task 3.6 drag-drop client
+        run: node --test tests/unit/platform/drag-drop-client.test.mjs
+      - name: Verify Atomic Task 3.7 file-system client
+        run: node --test tests/unit/platform/file-system-client.test.mjs
+      - name: Verify Atomic Task 3.8 document-store client
+        run: node --test tests/unit/platform/document-store-client.test.mjs
+      - name: Verify Atomic Task 3.9 web link log clients
+        run: node --test tests/unit/platform/web-fetch-client.test.mjs tests/unit/platform/link-client.test.mjs tests/unit/platform/performance-log-client.test.mjs
+      - name: Verify Atomic Task 3.10 browser adapters
+        run: node --test tests/unit/platform/browser-storage.test.mjs tests/unit/platform/browser-file-download.test.mjs tests/unit/platform/browser-clipboard.test.mjs tests/unit/platform/browser-fullscreen.test.mjs tests/unit/platform/browser-print.test.mjs tests/unit/platform/browser-file-reader.test.mjs
+      - name: Verify Atomic Task 3.11 createPlatform
+        run: node --test tests/unit/platform/desktop-platform-contract.test.mjs tests/unit/platform/create-platform.test.mjs
+      - name: Verify Atomic Task 3.12 final Platform cutover
+        run: node --test tests/unit/platform/classic-platform-port.test.mjs tests/unit/platform/platform-cutover.test.mjs
+      - name: Run architecture hard gate
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-03/03-12-architecture-scan.json
+      - name: Run existing Node regression suite
+        run: npm test
+      - name: Run browser interaction contract
+        env:
+          E2E_ARTIFACT_DIR: artifacts/stage-03/browser-contract
+        run: npm run test:browser:contract
+      - name: Build current application
+        run: npm run build
+      - name: Verify built application regression
+        env:
+          E2E_ARTIFACT_DIR: artifacts/stage-03/browser-app
+        run: npm run test:browser
+      - name: Record current Stage 3 evidence
+        run: node scripts/stage-03/record-platform-evidence.mjs
+      - name: Upload Atomic Task evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-03-platform-foundation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-03
+          if-no-files-found: error
+          retention-days: 30

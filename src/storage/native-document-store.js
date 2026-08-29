@@ -1,7 +1,13 @@
+import { normalizeDocumentNativeMetadata } from '../features/documents/index.js';
+import {
+  createNativeSaveQueue,
+  createNativeSaveSession,
+  createNativeSegmentedLoader,
+  createNativeSnapshotUploader,
+  createNativeSearchAdapter
+} from '../features/persistence/index.js';
+
 const NATIVE_DOCUMENT_THRESHOLD = 100000;
-const DOCUMENT_CHUNK_BYTES = 512 * 1024;
-const SNAPSHOT_UPLOAD_THRESHOLD = 512 * 1024;
-const SNAPSHOT_UPLOAD_CHUNK_CHARS = 256 * 1024;
 
 function currentDocumentVersion(source) {
   return Math.max(0, Number(source?.getDocumentVersion?.() ?? source?.virtualEditor?.getDocumentVersion?.()) || 0);
@@ -21,40 +27,36 @@ function createDocumentSnapshot(source) {
   return String(source?.value ?? '');
 }
 
-function getSafeSnapshotChunkEnd(content, start) {
-  let end = Math.min(content.length, start + SNAPSHOT_UPLOAD_CHUNK_CHARS);
-  if (end < content.length) {
-    const previous = content.charCodeAt(end - 1);
-    const next = content.charCodeAt(end);
-    if (previous >= 0xD800 && previous <= 0xDBFF && next >= 0xDC00 && next <= 0xDFFF) {
-      end -= 1;
-    }
-  }
-  return Math.max(start + 1, end);
-}
-
-function createSession(documentId) {
-  return {
-    documentId,
-    backendVersion: 0,
-    lastEditorVersion: 0,
-    lastTitle: '',
-    initialized: false,
-    running: false,
-    waiters: [],
-    forceSnapshot: false,
-    source: null,
-    document: null
-  };
+function createSaveRequestContext(document) {
+  return Object.freeze({
+    documentId: String(document?.id || ''),
+    title: String(document?.title || ''),
+    updatedAt: Number(document?.updatedAt) || Date.now()
+  });
 }
 
 export class NativeDocumentStore {
-  constructor(nativeApi = window.markdownEditorNative) {
-    this.nativeApi = nativeApi;
+  constructor({ documentStore, available = false } = {}) {
+    this.documentStore = documentStore;
+    this.nativeAvailable = Boolean(available);
     this.sessions = new Map();
+    this.saveQueues = new Map();
     this.activeDocumentId = '';
     this.listeners = new Set();
-    this.loadSequence = 0;
+    this.snapshotUploader = createNativeSnapshotUploader({
+      documentStore: this.documentStore,
+      notify: event => this.emit(event),
+      yieldControl: () => new Promise(resolve => setTimeout(resolve, 0))
+    });
+    this.segmentedLoader = createNativeSegmentedLoader({
+      documentStore: this.documentStore,
+      notify: event => this.emit(event),
+      yieldControl: () => new Promise(resolve => setTimeout(resolve, 0))
+    });
+    this.searchAdapter = createNativeSearchAdapter({
+      documentStore: this.documentStore,
+      available: this.available
+    });
   }
 
   subscribe(listener) {
@@ -74,15 +76,11 @@ export class NativeDocumentStore {
   }
 
   get available() {
-    return Boolean(this.nativeApi?.isAvailable && this.nativeApi?.saveDocumentState);
+    return Boolean(this.nativeAvailable && this.documentStore?.save);
   }
 
   get supportsChunkedSnapshots() {
-    return Boolean(
-      this.nativeApi?.beginDocumentSnapshotUpload
-      && this.nativeApi?.appendDocumentSnapshotChunk
-      && this.nativeApi?.commitDocumentSnapshotUpload
-    );
+    return this.snapshotUploader.supported;
   }
 
   shouldUse(document, contentLength) {
@@ -92,151 +90,63 @@ export class NativeDocumentStore {
   getSession(documentId) {
     let session = this.sessions.get(documentId);
     if (!session) {
-      session = createSession(documentId);
+      session = createNativeSaveSession(documentId);
       this.sessions.set(documentId, session);
     }
     return session;
+  }
+
+  getSaveQueue(documentId) {
+    let queue = this.saveQueues.get(documentId);
+    if (!queue) {
+      const session = this.getSession(documentId);
+      queue = createNativeSaveQueue(documentId, {
+        executeBatch: batch => this.executeSaveBatch(session, batch),
+        notify: event => this.emit(event)
+      });
+      this.saveQueues.set(documentId, queue);
+    }
+    return queue;
   }
 
   activateDocument(source, document, loaded = null) {
     if (!document?.id) return;
     this.activeDocumentId = document.id;
     const session = this.getSession(document.id);
-    session.source = source;
-    session.document = document;
-    session.lastEditorVersion = currentDocumentVersion(source);
-    source?.registerConsumer?.('storage', session.lastEditorVersion);
-    session.lastTitle = document.title || '';
-    if (loaded) {
-      session.backendVersion = Math.max(0, Number(loaded.version) || 0);
-      session.initialized = true;
-      document.nativeBacked = true;
-      document.nativeVersion = session.backendVersion;
-    } else if (!document.nativeBacked) {
-      session.backendVersion = 0;
-      session.initialized = false;
-    } else {
-      session.backendVersion = Math.max(0, Number(document.nativeVersion) || 0);
-      session.initialized = session.backendVersion > 0;
-    }
+    session.activate({
+      source,
+      editorVersion: currentDocumentVersion(source),
+      title: document.title || '',
+      loaded: Boolean(loaded),
+      loadedVersion: loaded?.version,
+      nativeBacked: Boolean(document.nativeBacked),
+      nativeVersion: document.nativeVersion
+    });
   }
 
-  async load(documentId) {
+  async load(documentId, options = {}) {
     if (!this.available || !documentId) return null;
-    const loadToken = ++this.loadSequence;
-    const ensureCurrentLoad = () => {
-      if (loadToken !== this.loadSequence) throw new Error('DOCUMENT_LOAD_CANCELLED');
-    };
-    const supportsSegmentedLoad = Boolean(
-      this.nativeApi?.loadDocumentManifest
-      && this.nativeApi?.readDocumentChunk
-    );
-    if (!supportsSegmentedLoad) {
-      const loaded = await this.nativeApi.loadDocumentState(documentId);
-      ensureCurrentLoad();
-      if (!loaded) return null;
-      const session = this.getSession(documentId);
-      session.backendVersion = Math.max(0, Number(loaded.version) || 0);
-      session.initialized = true;
-      return loaded;
-    }
-
-    this.emit({ state: 'loading-index', documentId, progress: 0 });
-    try {
-      const manifest = await this.nativeApi.loadDocumentManifest(documentId);
-      ensureCurrentLoad();
-      if (!manifest) return null;
-      this.emit({ state: 'manifest', documentId, progress: 0, manifest });
-      const chunks = [];
-      const totalBytes = Math.max(0, Number(manifest.contentBytes) || 0);
-      let byteOffset = 0;
-      while (byteOffset < totalBytes) {
-        const chunk = await this.nativeApi.readDocumentChunk(documentId, byteOffset, DOCUMENT_CHUNK_BYTES);
-        ensureCurrentLoad();
-        if (!chunk || Number(chunk.nextByteOffset) <= byteOffset) {
-          throw new Error('后台文档分段读取未前进');
-        }
-        chunks.push(String(chunk.content || ''));
-        byteOffset = Number(chunk.nextByteOffset) || totalBytes;
-        this.emit({
-          state: 'loading',
-          documentId,
-          loadedBytes: byteOffset,
-          totalBytes,
-          progress: totalBytes > 0 ? byteOffset / totalBytes : 1
-        });
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
-      const loaded = {
-        ...manifest,
-        contentChunks: chunks,
-        segmented: true
-      };
-      const session = this.getSession(documentId);
-      session.backendVersion = Math.max(0, Number(loaded.version) || 0);
-      session.initialized = true;
-      this.emit({ state: 'loaded', documentId, progress: 1, totalBytes });
-      return loaded;
-    } catch (error) {
-      if (error?.message === 'DOCUMENT_LOAD_CANCELLED') throw error;
+    const outcome = await this.segmentedLoader.load(documentId, options);
+    const loaded = outcome?.loaded || null;
+    if (!loaded) return null;
+    this.getSession(documentId).recordLoaded(loaded.version);
+    if (outcome.segmented) {
       this.emit({
-        state: 'load-error',
+        state: 'loaded',
         documentId,
-        message: error?.message || String(error)
+        progress: 1,
+        totalBytes: outcome.totalBytes
       });
-      throw error;
     }
+    return loaded;
   }
 
   cancelLoad() {
-    this.loadSequence += 1;
+    this.segmentedLoader.cancelLoad();
   }
 
-  async saveSnapshotInChunks(session, request, content) {
-    const uploadId = `upload_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
-    await this.nativeApi.beginDocumentSnapshotUpload(session.document.id, uploadId);
-    try {
-      let offset = 0;
-      let chunkIndex = 0;
-      while (offset < content.length) {
-        const end = getSafeSnapshotChunkEnd(content, offset);
-        await this.nativeApi.appendDocumentSnapshotChunk(
-          session.document.id,
-          uploadId,
-          content.slice(offset, end),
-          chunkIndex
-        );
-        offset = end;
-        chunkIndex += 1;
-        this.emit({
-          state: 'saving',
-          documentId: session.document.id,
-          targetVersion: currentDocumentVersion(session.source),
-          backendVersion: session.backendVersion,
-          uploadedChars: offset,
-          totalChars: content.length,
-          progress: content.length > 0 ? offset / content.length : 1,
-          pending: session.waiters.length
-        });
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
-      return await this.nativeApi.commitDocumentSnapshotUpload(request, uploadId);
-    } catch (error) {
-      try {
-        await this.nativeApi.abortDocumentSnapshotUpload?.(session.document.id, uploadId);
-      } catch (_) {}
-      throw error;
-    }
-  }
-
-  async search(documentId, query, from = 0, wrap = true) {
-    if (!this.available || !documentId || !query || !this.nativeApi?.searchDocumentState) return null;
-    return this.nativeApi.searchDocumentState({
-      documentId,
-      query: String(query),
-      from: Math.max(0, Number(from) || 0),
-      wrap: wrap !== false
-    });
+  search(documentId, query, from = 0, wrap = true) {
+    return this.searchAdapter.search(documentId, query, from, wrap);
   }
 
   save(source, document, options = {}) {
@@ -247,20 +157,19 @@ export class NativeDocumentStore {
       return Promise.resolve({ native: false });
     }
     const session = this.getSession(document.id);
-    session.source = source;
-    session.document = document;
-    session.forceSnapshot = session.forceSnapshot || Boolean(options.forceSnapshot);
+    const queue = this.getSaveQueue(document.id);
+    session.attachSource(source);
     const targetVersion = currentDocumentVersion(source);
     const forceSnapshot = Boolean(options.forceSnapshot);
     if (
       session.initialized
-      && !session.running
-      && !session.waiters.length
+      && queue.idle
       && !forceSnapshot
       && targetVersion <= session.lastEditorVersion
-      && (document.title || '') === session.lastTitle
+      && (document.title || '') === session.title
     ) {
-      const result = { native: true, version: session.backendVersion, skipped: true };
+      const native = normalizeDocumentNativeMetadata({ nativeBacked: true, nativeVersion: session.backendVersion });
+      const result = { native: true, version: session.backendVersion, ...native, skipped: true };
       this.emit({
         state: 'saved',
         documentId: document.id,
@@ -270,117 +179,122 @@ export class NativeDocumentStore {
       });
       return Promise.resolve(result);
     }
-    return new Promise((resolve, reject) => {
-      session.waiters.push({ targetVersion, forceSnapshot: Boolean(options.forceSnapshot), resolve, reject });
-      this.emit({
-        state: 'queued',
-        documentId: document.id,
-        targetVersion,
-        pending: session.waiters.length
-      });
-      this.pump(session);
+    return queue.enqueue({
+      targetVersion,
+      forceSnapshot,
+      context: createSaveRequestContext(document)
     });
   }
 
-  async pump(session) {
-    if (session.running || !session.source || !session.document) return;
-    session.running = true;
-    try {
-      while (session.waiters.length) {
-        if (session.source?.documentId && session.source.documentId !== session.document.id) {
-          throw new Error('DOCUMENT_SOURCE_MISMATCH');
-        }
-        const editorVersion = currentDocumentVersion(session.source);
-        const changes = getDocumentChanges(session.source, session.lastEditorVersion);
-        const mustReset = !session.initialized || !Array.isArray(changes);
-        const baseVersion = session.backendVersion;
-        const nextVersion = baseVersion + 1;
-        const forceSnapshot = session.forceSnapshot || session.waiters.some(waiter => waiter.forceSnapshot);
-        session.forceSnapshot = false;
-        const snapshotContent = mustReset ? createDocumentSnapshot(session.source) : null;
-        const useChunkedSnapshot = mustReset
-          && snapshotContent.length >= SNAPSHOT_UPLOAD_THRESHOLD
-          && this.supportsChunkedSnapshots;
-        const request = {
-          documentId: session.document.id,
-          title: session.document.title || '',
-          baseVersion,
-          nextVersion,
-          fullContent: useChunkedSnapshot ? null : snapshotContent,
-          transactions: mustReset ? [] : changes,
-          updatedAt: session.document.updatedAt || Date.now(),
-          forceSnapshot
-        };
+  async executeSaveBatch(session, batch) {
+    const document = batch.context || Object.freeze({ documentId: batch.documentId, title: '', updatedAt: Date.now() });
+    const source = session.source;
+    if (source?.documentId && source.documentId !== document.documentId) {
+      throw new Error('DOCUMENT_SOURCE_MISMATCH');
+    }
 
-        let response;
-        this.emit({
-          state: 'saving',
-          documentId: session.document.id,
-          targetVersion: editorVersion,
-          backendVersion: baseVersion,
-          pending: session.waiters.length
-        });
-        try {
-          response = useChunkedSnapshot
-            ? await this.saveSnapshotInChunks(session, request, snapshotContent)
-            : await this.nativeApi.saveDocumentState(request);
-        } catch (error) {
-          const message = error?.message || String(error);
-          if (!mustReset && message.includes('VERSION_MISMATCH')) {
-            session.initialized = false;
-            continue;
-          }
-          throw error;
-        }
+    while (true) {
+      const editorVersion = currentDocumentVersion(source);
+      const changes = getDocumentChanges(source, session.lastEditorVersion);
+      const mustReset = !session.initialized || !Array.isArray(changes);
+      const baseVersion = session.backendVersion;
+      const nextVersion = baseVersion + 1;
+      const snapshotContent = mustReset ? createDocumentSnapshot(source) : null;
+      const useChunkedSnapshot = mustReset
+        && this.snapshotUploader.shouldUpload(snapshotContent);
+      const request = {
+        documentId: document.documentId,
+        title: document.title,
+        baseVersion,
+        nextVersion,
+        fullContent: useChunkedSnapshot ? null : snapshotContent,
+        transactions: mustReset ? [] : changes,
+        updatedAt: document.updatedAt,
+        forceSnapshot: batch.forceSnapshot
+      };
 
-        session.backendVersion = Math.max(nextVersion, Number(response?.version) || 0);
-        session.lastEditorVersion = editorVersion;
-        session.initialized = true;
-        session.lastTitle = session.document.title || '';
-        session.document.nativeBacked = true;
-        session.document.nativeVersion = session.backendVersion;
-        session.source?.markPersisted?.(editorVersion, session.backendVersion);
-        session.source?.acknowledge?.('storage', editorVersion);
-
-        const completed = [];
-        const pending = [];
-        for (const waiter of session.waiters) {
-          if (waiter.targetVersion <= editorVersion) completed.push(waiter);
-          else pending.push(waiter);
-        }
-        session.waiters = pending;
-        completed.forEach(waiter => waiter.resolve({ native: true, ...response }));
-        this.emit({
-          state: 'saved',
-          documentId: session.document.id,
-          version: session.backendVersion,
-          snapshotCreated: Boolean(response?.snapshotCreated),
-          journalEntries: Number(response?.journalEntries) || 0,
-          pending: session.waiters.length
-        });
-      }
-    } catch (error) {
-      const waiters = session.waiters.splice(0);
+      let response;
       this.emit({
-        state: 'error',
-        documentId: session.document?.id || session.documentId,
-        message: error?.message || String(error)
+        state: 'saving',
+        documentId: document.documentId,
+        targetVersion: editorVersion,
+        backendVersion: baseVersion,
+        pending: batch.getPendingCount()
       });
-      waiters.forEach(waiter => waiter.reject(error));
-    } finally {
-      session.running = false;
-      if (session.waiters.length) queueMicrotask(() => this.pump(session));
+      try {
+        response = useChunkedSnapshot
+          ? await this.snapshotUploader.upload({
+              request,
+              content: snapshotContent,
+              getTargetVersion: () => currentDocumentVersion(session.source),
+              backendVersion: session.backendVersion,
+              getPendingCount: batch.getPendingCount
+            })
+          : await this.documentStore.save(request);
+      } catch (error) {
+        const message = error?.message || String(error);
+        if (!mustReset && message.includes('VERSION_MISMATCH')) {
+          session.invalidateInitialization();
+          continue;
+        }
+        throw error;
+      }
+
+      const committedBackendVersion = Math.max(nextVersion, Number(response?.version) || 0);
+      session.commit({
+        editorVersion,
+        backendVersion: committedBackendVersion,
+        title: document.title
+      });
+      const native = normalizeDocumentNativeMetadata({
+        nativeBacked: true,
+        nativeVersion: session.backendVersion
+      });
+      return Object.freeze({
+        completedVersion: editorVersion,
+        completedTitle: document.title,
+        forceSnapshotApplied: Boolean(batch.forceSnapshot),
+        version: session.backendVersion,
+        snapshotCreated: Boolean(response?.snapshotCreated),
+        journalEntries: Number(response?.journalEntries) || 0,
+        value: Object.freeze({ native: true, ...response, ...native })
+      });
     }
   }
 
   async delete(documentId) {
+    const queue = this.saveQueues.get(documentId);
+    queue?.destroy();
+    this.saveQueues.delete(documentId);
+
+    let cancellationError = null;
+    try {
+      await this.snapshotUploader.cancel(documentId, 'document-deleted');
+    } catch (error) {
+      cancellationError = error;
+    }
+
+    const session = this.sessions.get(documentId);
+    session?.destroy();
     this.sessions.delete(documentId);
     if (this.activeDocumentId === documentId) this.activeDocumentId = '';
-    if (!this.available || !documentId) return;
-    await this.nativeApi.deleteDocumentState(documentId);
+
+    let removeError = null;
+    if (this.available && documentId) {
+      try {
+        await this.documentStore.remove(documentId);
+      } catch (error) {
+        removeError = error;
+      }
+    }
+    if (cancellationError && removeError) {
+      throw new AggregateError([cancellationError, removeError], 'DOCUMENT_DELETE_CLEANUP_FAILED');
+    }
+    if (cancellationError) throw cancellationError;
+    if (removeError) throw removeError;
   }
 }
 
-export function createNativeDocumentStore() {
-  return new NativeDocumentStore();
+export function createNativeDocumentStore(options = {}) {
+  return new NativeDocumentStore(options);
 }

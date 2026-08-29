@@ -24,7 +24,14 @@ src/                        # 前端源码
     vendor.js               # marked / KaTeX / Mermaid / dom-to-image-more 注入
     tauri.js                # Tauri Rust 后端桥接
     performance.js          # 前端操作与渲染性能采集
-  styles/main.css           # 应用样式
+  styles/
+    index.css               # 单一有序样式入口
+    foundation/             # reset、令牌、排版、可访问性与动效
+    themes/                 # 亮暗主题视觉令牌
+    shell/                  # App Shell 视觉结构
+    layout/                 # 侧栏、分栏、紧凑与全屏布局
+    components/             # 通用视觉组件
+    features/               # 编辑器、预览、导出及混合编辑样式
 public/
   i18n.js                   # 多语言文本
   app/                      # 前端功能模块（按职责拆分）
@@ -33,7 +40,7 @@ public/
     bootstrap.js            # 初始化与状态恢复
     preview.js              # Markdown 预览渲染
     export.js               # 保存、导入与导出
-    editor-tools.js         # 编辑命令、图片、表格与 Mermaid
+    editor-tools.js         # 过渡：布局/全屏、可视编辑开关与 Mermaid 预览增强（后续阶段拆除）
     web-clipper.js          # 网页抓取与 HTML 转 Markdown
     events.js               # 全局事件、拖放与快捷键
 src-tauri/                  # Tauri / Rust 桌面后端

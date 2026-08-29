@@ -1,0 +1,114 @@
+/* Responsibility: CodeMirror editor surface and editor-specific presentation. */
+
+.virtual-editor-host {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+      overflow: hidden;
+      background: var(--color-surface-raised);
+      color: var(--color-editor-text);
+      font-family: var(--font-family-editor);
+      font-size: var(--editor-font-size, var(--font-size-2xl));
+      line-height: 1.8;
+}
+
+.virtual-editor-host .cm-editor {
+      height: 100%;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+}
+
+.virtual-editor-host .cm-scroller {
+      overflow: auto;
+      font-family: inherit;
+      line-height: inherit;
+      overscroll-behavior: contain;
+      scroll-behavior: auto;
+}
+
+.virtual-editor-host .cm-content {
+      min-height: 100%;
+      padding: 28px 0;
+      caret-color: var(--color-accent);
+      tab-size: 4;
+}
+
+.virtual-editor-host .cm-line {
+      padding: 0 var(--space-5xl) 0 var(--space-xl);
+}
+
+.virtual-editor-host .cm-gutters {
+      min-width: 44px;
+      padding-top: 28px;
+      border-right: 1px solid transparent;
+      background: var(--color-surface-raised);
+      color: var(--color-text-muted);
+      transition: color var(--motion-duration-quick) ease, border-color var(--motion-duration-quick) ease, background-color var(--motion-duration-moderate) ease;
+}
+
+.virtual-editor-host:focus-within .cm-gutters {
+      border-right-color: var(--color-border-subtle);
+}
+
+.virtual-editor-host .cm-gutterElement {
+      padding: 0 var(--space-lg) 0 var(--space-md);
+}
+
+.virtual-editor-host .cm-activeLine,
+.virtual-editor-host .cm-activeLineGutter {
+      background: var(--color-editor-active-line);
+}
+
+.virtual-editor-host .cm-selectionBackground {
+      background: var(--color-accent-selection) !important;
+}
+
+.virtual-editor-host .cm-content::selection,
+.virtual-editor-host .cm-content ::selection {
+      background: transparent !important;
+}
+
+.virtual-editor-host .cm-cursor {
+      border-left-color: var(--color-accent);
+}
+
+.virtual-editor-host .cm-focused {
+      outline: none;
+}
+
+.virtual-editor-host,
+.virtual-editor-host .cm-gutters,
+.preview-content {
+  background: var(--color-surface-raised);
+}
+
+.virtual-editor-host .cm-content {
+  padding-top: 34px;
+  padding-bottom: 42px;
+}
+
+.virtual-editor-host .cm-line {
+  padding-right: 38px;
+  padding-left: 14px;
+}
+
+.virtual-editor-host .cm-gutters {
+  min-width: 48px;
+  padding-top: 34px;
+  color: color-mix(in srgb, var(--color-text-muted) 78%, transparent);
+}
+
+.virtual-editor-host:focus-within .cm-gutters {
+  border-right-color: var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-surface-raised) 92%, var(--color-surface-subtle));
+}
+
+.virtual-editor-host .cm-selectionBackground {
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent) !important;
+}
+
+.virtual-editor-host .cm-content::selection,
+.virtual-editor-host .cm-content ::selection {
+  background: transparent !important;
+}

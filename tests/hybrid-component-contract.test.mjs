@@ -3,15 +3,15 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
   HYBRID_COMPONENT_MODES,
-  HybridComponentStateMachine,
+  HybridComponentSession,
   createHybridComponentKey
-} from '../src/editor/hybrid/component-state.js';
+} from '../src/features/hybrid-editor/index.js';
 
 const contractUrl = new URL('./fixtures/hybrid-component-contract.json', import.meta.url);
 
 test('every visual component follows the same presentation/source lifecycle', async () => {
   const contract = JSON.parse(await readFile(contractUrl, 'utf8'));
-  const machine = new HybridComponentStateMachine();
+  const machine = new HybridComponentSession();
 
   for (let index = 0; index < contract.length; index += 1) {
     const component = contract[index];
@@ -42,20 +42,42 @@ test('every visual component follows the same presentation/source lifecycle', as
 });
 
 test('component widgets are wired to the shared runtime coordinator', async () => {
-  const widgets = await readFile(new URL('../src/editor/hybrid/widgets.js', import.meta.url), 'utf8');
-  const controller = await readFile(new URL('../src/editor/hybrid/controller.js', import.meta.url), 'utf8');
+  const htmlBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/html/html-block-widget.js', import.meta.url), 'utf8');
+  const codeBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/code-block/code-block-widget.js', import.meta.url), 'utf8');
+  const tableBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/table/table-widget.js', import.meta.url), 'utf8');
+  const imageBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/image/image-widget.js', import.meta.url), 'utf8');
+  const mathBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/math/block-math-widget.js', import.meta.url), 'utf8');
+  const mermaidBlock = await readFile(new URL('../src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js', import.meta.url), 'utf8');
+  const controller = await readFile(new URL('../src/editor/hybrid-markdown.js', import.meta.url), 'utf8');
+  const applicationController = await readFile(new URL('../src/features/hybrid-editor/application/hybrid-editor-controller.js', import.meta.url), 'utf8');
+  const sourceEditorPort = await readFile(new URL('../src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js', import.meta.url), 'utf8');
 
+  const componentSources = new Map([
+    ['code', codeBlock],
+    ['table', tableBlock],
+    ['image', imageBlock],
+    ['math', mathBlock],
+    ['mermaid', mermaidBlock],
+    ['html', htmlBlock]
+  ]);
   for (const type of ['code', 'mermaid', 'table', 'math', 'html', 'image']) {
-    assert.match(widgets, new RegExp(`componentType:\\s*['\"]${type}['\"]`), `${type} is missing a source-edit component type`);
+    assert.match(
+      componentSources.get(type),
+      new RegExp(String.raw`componentType:\s*['"]${type}['"]`),
+      `${type} is missing a source-edit component type`
+    );
   }
   for (const type of ['code', 'mermaid', 'table']) {
     assert.match(
-      widgets,
-      new RegExp(`type:\\s*['\"]${type}['\"][\\s\\S]{0,180}mode:\\s*HYBRID_COMPONENT_MODES\\.DIRECT`),
+      componentSources.get(type),
+      new RegExp(String.raw`type:\s*['"]${type}['"][\s\S]{0,180}mode:\s*HYBRID_COMPONENT_MODES\.DIRECT`),
       `${type} is missing direct-edit state coordination`
     );
   }
 
-  assert.match(controller, /range\s*=\s*\{\s*\.\.\.range,/, 'source range metadata must survive document changes');
-  assert.match(controller, /clearHybridComponentStates\(this\.view\)/, 'component state must be cleared with the editor view');
+  assert.match(sourceEditorPort, /mapped\s*=\s*\{\s*\.\.\.mapped,/, 'source range metadata must survive document changes');
+  assert.match(sourceEditorPort, /transaction\.changes\.mapPos\(mapped\.from, -1\)/, 'source range positions must map through document changes');
+  assert.match(controller, /destroySession: \(\) => destroyHybridComponentSession\(view\)/, 'component session destroy must be injected at the CodeMirror integration boundary');
+  assert.match(controller, /destroy\(\) \{[\s\S]{0,120}this\.controller\.destroy\(\)/, 'ViewPlugin destroy must delegate to the Hybrid application controller');
+  assert.match(applicationController, /this\.destroySession\(\)/, 'Hybrid application destroy must release the shared component session');
 });

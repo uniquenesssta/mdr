@@ -1,0 +1,269 @@
+/* Responsibility: Markdown preview and virtualized preview presentation. */
+
+.preview-content {
+      flex: 1;
+      overflow: auto;
+      font-family: var(--font-family-editor);
+      font-size: var(--editor-font-size, var(--font-size-2xl));
+      line-height: 1.8;
+      color: var(--color-text-primary);
+      width: 100%;
+      max-width: none;
+      margin: 0;
+}
+
+.preview-content .markdown-body {
+      max-width: none;
+      margin: 0;
+      padding: 28px var(--space-5xl);
+}
+
+/* Markdown 预览样式 */
+.preview-content h1, .preview-content h2, .preview-content h3,
+.preview-content h4, .preview-content h5, .preview-content h6 {
+      margin-top: 1.1em;
+      margin-bottom: .55em;
+      font-weight: 600;
+      line-height: 1.25;
+      color: var(--color-text-primary);
+      letter-spacing: -0.01em;
+}
+
+
+.preview-content h1 { font-size: 2.25em; font-weight: 700; letter-spacing: -0.02em; }
+
+.preview-content h2 { font-size: 1.75em; }
+
+.preview-content h3 { font-size: 1.4em; }
+
+.preview-content h4 { font-size: 1.15em; }
+
+.preview-content p { margin: 0 0 .8em; color: var(--color-text-primary); }
+
+.preview-content a { color: var(--color-accent); text-decoration: none; }
+
+.preview-content a:hover { text-decoration: underline; }
+
+.preview-content ul, .preview-content ol { margin: 0 0 .8em; padding-left: 1.8em; }
+
+.preview-content li { margin: var(--space-sm) 0; }
+
+.preview-content code {
+      background: var(--color-surface-subtle);
+      padding: 3px 7px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-family-mono);
+      font-size: 0.875em;
+      color: var(--color-accent);
+}
+
+.preview-content pre {
+      background: var(--code-background);
+      color: var(--code-text);
+      padding: 18px 22px;
+      border-radius: var(--radius-xl);
+      overflow-x: auto;
+      margin: 0 0 var(--space-3xl);
+      box-shadow: var(--shadow-low);
+}
+
+.preview-content pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.9em;
+}
+
+.preview-content blockquote {
+      margin: 0 0 var(--space-3xl);
+      padding: var(--space-lg) var(--space-4xl);
+      border-left: 3px solid var(--color-text-muted);
+      background: transparent;
+      color: var(--color-text-muted);
+      font-style: italic;
+      font-size: 0.95em;
+}
+
+.preview-content table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: var(--space-3xl);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+}
+
+.preview-content .mermaid {
+      margin: 0 0 var(--space-3xl);
+      text-align: center;
+}
+
+.preview-content .mermaid svg {
+      max-width: 100%;
+      height: auto;
+}
+
+.preview-content th, .preview-content td {
+      border: 1px solid var(--color-border-subtle);
+      padding: var(--space-lg) 14px;
+      text-align: left;
+}
+
+.preview-content th { background: var(--color-surface-subtle); font-weight: 600; color: var(--color-text-primary); }
+
+.preview-content img { max-width: 100%; height: auto; border-radius: var(--radius-xl); box-shadow: var(--shadow-raised); opacity: var(--content-image-opacity); }
+
+.preview-content [data-source-line] {
+      transition: background-color var(--motion-duration-quick) ease, outline-color var(--motion-duration-quick) ease;
+      scroll-margin-top: var(--space-2xl);
+}
+
+.preview-content .preview-source-highlight {
+      background: var(--color-accent-soft);
+      outline: 1px solid var(--color-accent-outline);
+      border-radius: var(--radius-md);
+}
+
+.preview-content .preview-text-highlight {
+      background: var(--color-accent-selection);
+      border-radius: var(--radius-xs);
+      box-shadow: var(--shadow-selection-border);
+}
+
+::highlight(preview-selection-sync) {
+      background: var(--color-accent-selection-strong);
+      color: inherit;
+}
+
+.preview-content .preview-atomic-selection-highlight {
+      outline: 2px solid color-mix(in srgb, var(--color-accent) 72%, transparent);
+      outline-offset: 2px;
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+
+.preview-content hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--color-border-subtle), transparent);
+      margin: var(--space-6xl) 0;
+}
+
+/* 大文档尚未进入预览窗口化时，继续跳过视口外块的布局和绘制。 */
+body.ultra-large-document .preview-content .markdown-body > [data-source-line] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 42px;
+}
+
+.preview-content .markdown-body.preview-loading {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+}
+
+@keyframes preview-block-enter {
+      from { opacity: .72; transform: translateY(2px); }
+      to { opacity: 1; transform: translateY(0); }
+}
+
+.preview-content .preview-block-enter {
+      animation: preview-block-enter var(--motion-duration-normal) ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+      .preview-content .preview-block-enter { animation: none; }
+}
+
+/* 百万字级预览窗口化：仅挂载视口附近的富文本块，间隔由高度索引占位。 */
+.preview-content .virtual-preview-body {
+  min-height: 100%;
+  overflow-anchor: none;
+}
+
+.preview-content .virtual-preview-spacer {
+  width: 1px;
+  min-height: 0;
+  pointer-events: none;
+  contain: strict;
+}
+
+.preview-content .preview-virtual-block {
+  display: flow-root;
+  min-height: 1px;
+  contain: layout style;
+}
+
+.preview-content .preview-virtual-block > :first-child {
+  margin-top: 0;
+}
+
+.preview-content .preview-virtual-block > :last-child {
+  margin-bottom: 0;
+}
+
+.preview-content .preview-virtual-block[data-preview-block-type="heading"] {
+  margin: 1.1em 0 .55em;
+}
+
+.preview-content .preview-virtual-block[data-preview-block-type="paragraph"],
+.preview-content .preview-virtual-block[data-preview-block-type="list"] {
+  margin: 0 0 .8em;
+}
+
+.preview-content .preview-virtual-block[data-preview-block-type="code"],
+.preview-content .preview-virtual-block[data-preview-block-type="blockquote"],
+.preview-content .preview-virtual-block[data-preview-block-type="table"] {
+  margin: 0 0 var(--space-3xl);
+}
+
+body.ultra-large-document .preview-content .virtual-preview-body > [data-source-line] {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+}
+
+.preview-strategy-badge {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 120px;
+  padding: var(--space-2xs) 7px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-2xs);
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--motion-duration-normal) ease, border-color var(--motion-duration-normal) ease, background var(--motion-duration-normal) ease;
+}
+
+.preview-strategy-badge[data-mode="virtual"] {
+  color: var(--color-accent);
+  border-color: color-mix(in srgb, var(--color-accent) 38%, var(--color-border-subtle));
+  background: var(--color-accent-soft);
+}
+
+.preview-strategy-badge[data-mode="chapter"] {
+  color: var(--color-accent);
+  border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border-subtle));
+  background: var(--color-accent-soft);
+}
+
+.preview-strategy-badge[hidden] {
+  display: none;
+}
+
+.preview-content .markdown-body {
+  padding: 34px var(--space-6xl) var(--space-7xl);
+}
+
+/* 让顶层预览块的 offsetTop 相对 markdown-body 计算，降低滚动锚点测量成本。 */
+.preview-content .markdown-body {
+  position: relative;
+}

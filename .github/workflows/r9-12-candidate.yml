@@ -1,0 +1,40 @@
+name: R9-12 candidate integration
+
+on:
+  push:
+    branches:
+      - agent/r9-12-runner
+  workflow_dispatch:
+
+jobs:
+  candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Validate R9-12 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          node --test tests/stage-08-hybrid-widget-lifecycle.test.mjs tests/architecture/stage-08-hybrid-widget-lifecycle.test.mjs | tee /tmp/stage-08-widget-lifecycle.tap
+          grep -q '# tests 10' /tmp/stage-08-widget-lifecycle.tap
+          grep -q '# pass 10' /tmp/stage-08-widget-lifecycle.tap
+          grep -q '# fail 0' /tmp/stage-08-widget-lifecycle.tap
+          node --test tests/stage-09-editor-scroll-mapper.test.mjs tests/architecture/stage-09-editor-scroll-mapper.test.mjs | tee /tmp/r9-04.tap
+          grep -q '# tests 14' /tmp/r9-04.tap
+          grep -q '# pass 14' /tmp/r9-04.tap
+          grep -q '# fail 0' /tmp/r9-04.tap
+          node --test tests/stage-09-preview-scroll-mapper.test.mjs tests/architecture/stage-09-preview-scroll-mapper.test.mjs | tee /tmp/r9-05.tap
+          grep -q '# tests 16' /tmp/r9-05.tap
+          grep -q '# pass 16' /tmp/r9-05.tap
+          grep -q '# fail 0' /tmp/r9-05.tap
+          node --test tests/stage-09-final-sync-legacy-removal.test.mjs tests/architecture/stage-09-final-sync-legacy-removal.test.mjs | tee /tmp/r9-12-targeted.tap
+          grep -q '# tests 16' /tmp/r9-12-targeted.tap
+          grep -q '# pass 16' /tmp/r9-12-targeted.tap
+          grep -q '# fail 0' /tmp/r9-12-targeted.tap
+          npm run build

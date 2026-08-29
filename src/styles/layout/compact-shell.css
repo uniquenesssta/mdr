@@ -1,0 +1,198 @@
+/* Responsibility: Compact desktop shell behavior at constrained dimensions. */
+
+/* Compact desktop shell: one stable minimum layout without crowding window controls. */
+.menu-button-icon {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .l-toolbar-shell [data-toolbar-item] > span,
+  .l-toolbar-shell > .format-group > button > span {
+display: none;
+  }
+
+  .l-toolbar-shell button,
+  .l-toolbar-shell label {
+padding-left: var(--space-sm);
+padding-right: var(--space-sm);
+  }
+}
+
+@media (max-width: 900px) {
+  .app-brand-name,
+  .app-mode-badge span:last-child {
+display: none;
+  }
+
+  .app-mode-badge {
+width: 28px;
+justify-content: center;
+padding: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .l-app-shell {
+padding: 0 var(--space-sm) var(--space-sm);
+  }
+
+  .l-menu-bar {
+min-height: 42px;
+margin: 0 -6px;
+padding: 0 var(--space-md);
+  }
+
+  .l-toolbar-shell {
+margin: var(--space-sm) 0;
+border-radius: var(--radius-2xl);
+flex-wrap: wrap;
+overflow: visible;
+  }
+
+  .l-toolbar-shell .format-group {
+width: 100%;
+flex-wrap: wrap;
+  }
+
+  .l-toolbar-shell .editor-actions {
+width: 100%;
+justify-content: flex-end;
+padding-top: 5px;
+padding-left: 0;
+border-top: 1px solid var(--color-border-subtle);
+  }
+
+  .l-toolbar-shell .editor-actions::before {
+display: none;
+  }
+
+  .l-workspace {
+gap: var(--space-sm);
+  }
+
+  .l-sidebar,
+  .l-split-pane {
+border-radius: var(--radius-2xl);
+  }
+
+  .l-sidebar {
+flex-basis: 190px;
+  }
+
+  .sidebar-header {
+height: 46px;
+  }
+
+  .sidebar-kicker {
+display: none;
+  }
+
+  .preview-content .markdown-body {
+padding: 26px var(--space-4xl) 36px;
+  }
+
+  .l-status-bar {
+padding-top: var(--space-xs);
+  }
+}
+
+.menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.menu-dropdown > .menu-dropdown-list.show {
+  z-index: var(--layer-modal);
+  max-width: calc(100vw - 16px);
+  max-height: none;
+  overflow: visible;
+}
+
+.menu-submenu-list {
+  z-index: var(--layer-modal-nested);
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+html.is-compact-shell .l-menu-bar {
+  min-height: 42px;
+  padding-right: var(--space-md);
+  padding-left: var(--space-md);
+  overflow: visible;
+  flex-wrap: nowrap;
+}
+
+html.is-compact-shell .app-brand {
+  gap: 0;
+  padding-right: var(--space-2xs);
+}
+
+html.is-compact-shell .app-brand-name {
+  display: none;
+}
+
+html.is-compact-shell .menu-bar-divider {
+  margin-right: 3px;
+  margin-left: 3px;
+}
+
+html.is-compact-shell .menu-dropdown {
+  flex: 0 0 auto;
+}
+
+html.is-compact-shell .menu-dropdown > .menu-trigger {
+  width: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0;
+}
+
+html.is-compact-shell .menu-button-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+}
+
+html.is-compact-shell .menu-button-label {
+  display: none;
+}
+
+html.is-compact-shell .menu-bar-spacer {
+  min-width: 4px;
+}
+
+html.is-compact-shell .window-controls {
+  flex: 0 0 auto;
+  gap: var(--space-2xs);
+  margin-left: var(--space-xs);
+}
+
+html.is-compact-shell .window-control-btn {
+  width: 28px;
+  height: 28px;
+}
+
+html.is-compact-shell .l-workspace {
+  gap: 0;
+}
+
+html.is-compact-shell .l-sidebar.is-hidden,
+html.is-compact-shell .l-sidebar-resizer.is-hidden {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .l-menu-bar {
+overflow: visible;
+  }
+}
+
+/* Keep every toolbar command visible; wrap only when measured content reaches the boundary. */
+.l-toolbar-shell.toolbar-boundary-wrap {
+  flex-wrap: wrap;
+  overflow: visible;
+}

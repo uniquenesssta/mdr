@@ -1,0 +1,8 @@
+/* Responsibility: Shared pane and sidebar resize interaction states. */
+
+.is-sidebar-resizing .l-sidebar { transition: none !important; }
+
+.is-resizing .l-pane,
+.is-resizing .l-pane-resizer {
+      transition: none !important;
+}

@@ -1,29 +1,20 @@
-    let saveTimer;
-    function autoSave() {
-      clearTimeout(saveTimer);
-      if (!autoSaveEnabled) {
-        updateStatusBar();
-        return;
-      }
-      setSaveStatus('queued');
-      saveTimer = setTimeout(() => {
-        setSaveStatus('saving');
-        // Tauri 中的超大文档会提交到 Rust 后台增量日志；浏览器模式继续使用本地存储。
-        saveCurrentDocumentState(false).then(result => {
-          if (result?.error) setSaveStatus('error', '保存失败：' + result.error);
-          else if (!result?.native) showSaveHint();
-        }).catch(error => {
-          console.error('Auto save failed:', error);
-          setSaveStatus('error', '保存失败：' + (error?.message || String(error)));
-        });
-      }, autoSaveDelay);
-    }
-
-    function showSaveHint() {
-      setSaveStatus('saved');
-    }
-
-
+    const exportCompatibilityHost = document.getElementById('compatibility-business-ports');
+    const exportPlatformPort = exportCompatibilityHost?.markdownEditorPlatformPort;
+    const exportDocumentDomainPort = exportCompatibilityHost?.markdownEditorDocumentDomainPort;
+    const exportDocumentSessionPort = exportCompatibilityHost?.markdownEditorDocumentSessionPort;
+    const exportDocumentControllerPort = exportCompatibilityHost?.markdownEditorDocumentControllerPort;
+    const exportDocumentUiCommandPort = exportCompatibilityHost?.markdownEditorDocumentUiCommandPort;
+    const exportSidebarControllerPort = exportCompatibilityHost?.markdownEditorSidebarControllerPort;
+    const exportPreviewCommandPort = exportCompatibilityHost?.markdownEditorPreviewCommandPort;
+    const exportPresentationPort = exportCompatibilityHost?.markdownEditorPresentationPort;
+    if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
+    if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
+    if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
+    if (!exportDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
+    if (!exportSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
+    if (!exportPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
+    if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
+    exportDocumentUiCommandPort.register({ importFile: () => triggerImportFile() });
     class ExportCancelledError extends Error {
       constructor() {
         super('EXPORT_CANCELLED');
@@ -49,6 +40,7 @@
         title,
         cancelled: false,
         cancelable: true,
+        modalOpened: false,
         update(progress, message) {
           if (activeExportTask !== task) return;
           const modal = document.getElementById('export-progress-modal');
@@ -58,11 +50,13 @@
           if (heading) heading.textContent = task.title;
           if (value) value.style.width = Math.max(0, Math.min(100, Number(progress) || 0)) + '%';
           if (status) status.textContent = message || '正在处理…';
-          if (modal) {
-            modal.style.display = 'flex';
-            requestAnimationFrame(() => {
-              if (activeExportTask === task) modal.classList.add('show');
-            });
+          if (modal && !task.modalOpened) {
+            task.modalOpened = true;
+            const request = {
+              options: { initialFocus: document.getElementById('export-progress-cancel') }
+            };
+            modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+            if (request.error) throw request.error;
           }
         },
         setCancelable(value) {
@@ -87,10 +81,9 @@
       if (!task || activeExportTask !== task) return;
       activeExportTask = null;
       const modal = document.getElementById('export-progress-modal');
-      modal?.classList.remove('show');
-      setTimeout(() => {
-        if (modal && !modal.classList.contains('show')) modal.style.display = 'none';
-      }, 180);
+      const request = { reason: 'export-finished' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function cancelActiveExport() {
@@ -130,21 +123,21 @@
       task?.throwIfCancelled();
       const source = documentModel?.createSnapshot?.('full-preview-export') ?? editor.value;
       try {
-        if (typeof marked !== 'undefined') {
-          const mathApi = window.markdownEditorMath;
+        if (Boolean(exportPresentationPort.markdown?.parse)) {
+          const mathApi = exportPresentationPort.math;
           const protectedMath = typeof mathApi?.protectSource === 'function'
             ? mathApi.protectSource(source, 'EXPORT_MATH')
             : { text: source, placeholders: [] };
-          const rendered = marked.parse(protectedMath.text);
+          const rendered = exportPresentationPort.markdown.parse(protectedMath.text);
           body.innerHTML = typeof mathApi?.restoreSource === 'function'
             ? mathApi.restoreSource(rendered, protectedMath.placeholders)
             : rendered;
         } else {
-          body.innerHTML = '<pre style="white-space:pre-wrap">' + escapeHtml(source) + '</pre>';
+          body.innerHTML = '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
         }
       } catch (error) {
         console.error('Export preview render error:', error);
-        body.innerHTML = '<pre style="white-space:pre-wrap">' + escapeHtml(source) + '</pre>';
+        body.innerHTML = '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
       }
       task?.throwIfCancelled();
       task?.update(60, '完整文档已解析');
@@ -159,16 +152,16 @@
         task?.throwIfCancelled();
         const batch = children.slice(start, start + batchSize);
         styleTaskLists(batch);
-        const mathRenderer = window.markdownEditorPresentation?.math || window.markdownEditorMath;
-        if (mathRenderer?.renderTree || typeof renderMathInElement !== 'undefined') {
+        const mathRenderer = exportPresentationPort.math;
+        if (mathRenderer?.renderTree || Boolean(exportPresentationPort.math?.renderTree)) {
           batch.forEach(node => {
             if (!(mathRenderer?.containsMath?.(node.textContent) ?? node.textContent?.includes('$'))) return;
             if (mathRenderer?.renderTree) {
               mathRenderer.renderTree(node, { delimiters: mathRenderer.delimiters });
               return;
             }
-            renderMathInElement(node, {
-              delimiters: window.markdownEditorMath?.delimiters,
+            exportPresentationPort.math.renderTree(node, {
+              delimiters: exportPresentationPort.math.delimiters,
               throwOnError: false
             });
           });
@@ -197,10 +190,10 @@
     }
 
     async function exportTextContent(content, preferredName, options) {
-      if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.chooseSavePath === 'function') {
-        const path = await window.markdownEditorNative.chooseSavePath(preferredName, options);
+      if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
+        const path = await exportPlatformPort.call('dialogs', 'saveFile', preferredName, options);
         if (!path) return null;
-        await window.markdownEditorNative.writeTextFile(path, content, { extension: options.extension, reason: 'export' });
+        await exportPlatformPort.call('files', 'writeText', path, content, { extension: options.extension, reason: 'export' });
         return path;
       }
       return false;
@@ -217,130 +210,6 @@
       const bytes = new Uint8Array(binary.length);
       for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
       return bytes;
-    }
-
-    // 手动保存
-    async function saveToLocal() {
-      try {
-        setSaveStatus('saving', '正在手动保存…');
-        await saveCurrentDocumentState(true, { waitForNative: true, forceSnapshot: true });
-        const doc = getCurrentDocument();
-        if (doc?.nativeBacked && window.markdownEditorDocumentStore?.available) {
-          localStorage.removeItem(STORAGE_KEY);
-        } else {
-          localStorage.setItem(STORAGE_KEY, documentModel?.createSnapshot?.('manual-local-save') ?? editor.value);
-        }
-        localStorage.setItem(FILENAME_KEY, filenameInput.value);
-        updateStatusBar();
-        showSaveHint();
-        showToast(t('toastSaved'));
-      } catch (error) {
-        setSaveStatus('error', '保存失败：' + (error?.message || String(error)));
-        showToast(error?.message || String(error));
-      }
-    }
-
-    async function saveMarkdownWithPicker(contentFactory, preferredName, snapshotReason = 'save-as-markdown') {
-      const normalizedName = normalizeDocumentTitle(preferredName || t('filenameDefault'));
-      if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.chooseSavePath === 'function') {
-        const path = await window.markdownEditorNative.chooseSavePath(normalizedName, {
-          title: '另存为 Markdown',
-          extension: 'md',
-          extensions: ['md', 'markdown'],
-          filterName: 'Markdown 文档'
-        });
-        if (!path) return false;
-        const content = typeof contentFactory === 'function' ? await contentFactory() : String(contentFactory ?? '');
-        await window.markdownEditorNative.writeTextFile(path, content, { extension: 'md', reason: snapshotReason });
-        return path;
-      }
-      const content = typeof contentFactory === 'function' ? await contentFactory() : String(contentFactory ?? '');
-      exportMarkdownContent(content, normalizedName);
-      return true;
-    }
-
-    function getFileNameFromPath(path) {
-      return String(path || '').split(/[\\/]/).pop() || '';
-    }
-
-    function bindDocumentFilePath(doc, path) {
-      if (!doc || typeof path !== 'string' || !path) return;
-      doc.filePath = path;
-      const fileName = getFileNameFromPath(path);
-      if (fileName) {
-        doc.title = normalizeDocumentTitle(fileName);
-        if (doc.id === currentDocumentId) {
-          filenameInput.value = doc.title;
-          documentModel?.updateTitle?.(doc.title);
-          localStorage.setItem(FILENAME_KEY, doc.title);
-        }
-      }
-      doc.updatedAt = getCurrentTimestamp();
-      saveDocumentsToStorage();
-      renderDocumentList();
-    }
-
-    async function saveCurrentFile() {
-      try {
-        setSaveStatus('saving', '正在保存文件…');
-        await saveCurrentDocumentState(true, { waitForNative: true, forceSnapshot: true });
-        const doc = getCurrentDocument();
-        if (!doc) throw new Error('当前没有可保存的文档');
-        const content = documentModel?.createSnapshot?.('save-current-file') ?? editor.value;
-
-        if (window.markdownEditorNative?.isAvailable && doc.filePath) {
-          await window.markdownEditorNative.writeTextFile(doc.filePath, content, {
-            extension: doc.title?.split('.').pop() || 'md',
-            reason: 'save-current-file'
-          });
-        } else {
-          const savedPath = await saveMarkdownWithPicker(
-            content,
-            doc.title || filenameInput.value || t('filenameDefault'),
-            'save-current-file'
-          );
-          if (!savedPath) {
-            setSaveStatus('saved');
-            return false;
-          }
-          if (typeof savedPath === 'string') bindDocumentFilePath(doc, savedPath);
-        }
-
-        setSaveStatus('saved');
-        showToast('文件已保存');
-        return true;
-      } catch (error) {
-        setSaveStatus('error', '保存失败：' + (error?.message || String(error)));
-        showToast('保存失败：' + (error?.message || String(error)));
-        window.markdownEditorPerf?.record?.('document.file-save-error', {
-          category: 'document.error',
-          status: 'error',
-          details: { message: error?.message || String(error) }
-        });
-        return false;
-      }
-    }
-
-    async function saveAsMarkdown() {
-      try {
-        const currentName = filenameInput.value.trim() || t('filenameDefault');
-        const savedPath = await saveMarkdownWithPicker(
-          () => documentModel?.createSnapshot?.('save-as-markdown') ?? editor.value,
-          currentName,
-          'save-as-markdown'
-        );
-        if (savedPath) {
-          if (typeof savedPath === 'string') bindDocumentFilePath(getCurrentDocument(), savedPath);
-          showToast('已另存为 Markdown');
-        }
-      } catch (error) {
-        showToast('另存为失败：' + (error?.message || String(error)));
-        window.markdownEditorPerf?.record?.('document.save-as-error', {
-          category: 'document.error',
-          status: 'error',
-          details: { message: error?.message || String(error) }
-        });
-      }
     }
 
     // 导出文件
@@ -488,7 +357,7 @@ ${bodyHtml}
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js">${'</scr' + 'ipt>'}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    if (typeof renderMathInElement !== 'undefined') {
+    if (Boolean(exportPresentationPort.math?.renderTree)) {
       renderMathInElement(document.body, {
         delimiters: [
           { left: '$$', right: '$$', display: true },
@@ -537,21 +406,20 @@ ${'</scr' + 'ipt>'}
     async function exportPDF() {
       const task = beginExportTask('正在准备 PDF');
       if (!task) return;
-      const wasSource = previewMode === 'source';
-      if (wasSource) setPreviewMode('preview');
+      const wasSource = exportPreviewCommandPort.getViewMode() === 'source';
+      if (wasSource) exportPreviewCommandPort.setViewMode('preview');
       const restorePreview = () => {
-        resetPreviewPipeline();
-        if (wasSource) setPreviewMode('source');
+        exportPreviewCommandPort.reset();
+        if (wasSource) exportPreviewCommandPort.setViewMode('source');
       };
       let replacedPreview = false;
       try {
-        virtualPreviewController?.deactivate();
+        exportPreviewCommandPort.deactivateVirtual();
         const fullBody = await createFullPreviewBodyForExport(task);
         task.throwIfCancelled();
         preview.replaceChildren(fullBody);
         replacedPreview = true;
         observedPreviewBody = null;
-        invalidatePreviewAnchorStructure();
         await enhanceFullPreviewForExport(fullBody, task);
         task.throwIfCancelled();
         task.update(100, 'PDF 内容已准备完成');
@@ -615,21 +483,24 @@ ${'</scr' + 'ipt>'}
     );
 
     function openExportImageModal() {
-      if (previewMode !== 'preview') {
-        setPreviewMode('preview');
+      if (exportPreviewCommandPort.getViewMode() !== 'preview') {
+        exportPreviewCommandPort.setViewMode('preview');
       }
-      const el = document.getElementById('export-image-modal');
-      el.style.display = 'flex';
-      void el.offsetWidth;
-      el.classList.add('show');
       document.getElementById('image-crop-fit').checked = false;
       selectImageRatio(currentImageRatio);
+      const modal = document.getElementById('export-image-modal');
+      const request = {
+        options: { initialFocus: document.querySelector('#export-image-modal .ratio-btn.active') }
+      };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function closeExportImageModal() {
-      const el = document.getElementById('export-image-modal');
-      el.classList.remove('show');
-      setTimeout(() => { if (!el.classList.contains('show')) el.style.display = 'none'; }, 200);
+      const modal = document.getElementById('export-image-modal');
+      const request = { reason: 'feature-close' };
+      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+      if (request.error) throw request.error;
     }
 
     function selectImageRatio(ratio) {
@@ -673,15 +544,16 @@ ${'</scr' + 'ipt>'}
       if (!task) return;
       let clone = null;
       try {
-        if (typeof domtoimage === 'undefined') {
+        let domToImageApi = null;
+        if (!domToImageApi) {
           task.update(5, '正在加载图片导出模块…');
           try {
-            await window.markdownEditorVendors?.loadDomToImage?.();
+            domToImageApi = await exportPresentationPort.loadDomToImage();
           } catch (error) {
             console.error('Image export library load error:', error);
           }
         }
-        if (typeof domtoimage === 'undefined') {
+        if (!domToImageApi) {
           showToast(t('toastImageLibMissing'));
           return;
         }
@@ -699,8 +571,8 @@ ${'</scr' + 'ipt>'}
         clone.style.fontSize = Math.round(preset.width / 36) + 'px';
         clone.style.lineHeight = '1.7';
         clone.style.boxSizing = 'border-box';
-        clone.style.background = 'var(--panel-bg)';
-        clone.style.color = 'var(--text)';
+        clone.style.background = 'var(--color-surface-raised)';
+        clone.style.color = 'var(--color-text-primary)';
         clone.style.overflow = 'visible';
         clone.style.maxWidth = 'none';
         clone.style.margin = '0';
@@ -742,7 +614,7 @@ ${'</scr' + 'ipt>'}
         stage.style.height = captureHeight + 'px';
         task.update(96, '正在生成 PNG，此阶段完成前不能立即取消…');
         task.setCancelable(false);
-        const dataUrl = await domtoimage.toPng(clone, {
+        const dataUrl = await domToImageApi.toPng(clone, {
           width: preset.width,
           height: captureHeight,
           bgcolor: getComputedStyle(clone).backgroundColor || '#ffffff',
@@ -753,7 +625,7 @@ ${'</scr' + 'ipt>'}
         currentImageDataUrl = dataUrl;
         const previewImg = document.getElementById('export-image-preview');
         previewImg.src = dataUrl;
-        previewImg.style.display = 'block';
+        previewImg.classList.remove('is-hidden');
         showToast(t('toastPreviewGenerated'));
       } catch (error) {
         if (!(error instanceof ExportCancelledError)) {
@@ -781,15 +653,15 @@ ${'</scr' + 'ipt>'}
       name = name.replace(/\.(md|markdown|txt|html|doc)$/i, '') + '.png';
 
       try {
-        if (window.markdownEditorNative?.isAvailable && typeof window.markdownEditorNative.chooseSavePath === 'function') {
-          const path = await window.markdownEditorNative.chooseSavePath(name, getExportSaveOptions(
+        if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
+          const path = await exportPlatformPort.call('dialogs', 'saveFile', name, getExportSaveOptions(
             '导出图片',
             'png',
             'PNG 图片',
             ['png']
           ));
           if (!path) return;
-          await window.markdownEditorNative.writeBinaryFile(path, dataUrlToBytes(currentImageDataUrl), { extension: 'png' });
+          await exportPlatformPort.call('files', 'writeBinary', path, dataUrlToBytes(currentImageDataUrl), { extension: 'png' });
         } else {
           const a = document.createElement('a');
           a.href = currentImageDataUrl;
@@ -816,104 +688,61 @@ ${'</scr' + 'ipt>'}
       return source.length - crlfPairs;
     }
 
-    async function loadTextContentAsDocument(name, content, filePath = '') {
-      const source = String(content ?? '');
-      const expectedEditorLength = getEditorNormalizedLength(source);
-      const previousDocumentId = currentDocumentId;
-      const previousDocument = getCurrentDocument();
-      let runtimeActivated = false;
-      let committed = false;
+    async function loadDocumentFromContentLoader(name, loadContent, filePath = '', details = {}) {
+      const normalizedName = name || t('filenameDefault');
       try {
-        clearTimeout(saveTimer);
-        await saveCurrentDocumentState(false, { waitForNative: true });
-        const doc = createDocument(name, source, filePath);
-
-        // 先装载并验证编辑器状态，全部成功后才提交文档列表与当前文档 ID。
-        activateDocumentRuntime(doc, null, source);
-        runtimeActivated = true;
-        if (documentModel?.documentId && documentModel.documentId !== doc.id) {
-          throw new Error('导入文档状态未正确激活');
-        }
-        if (editor.textLength !== expectedEditorLength) {
-          throw new Error(`导入文档长度校验失败：期望 ${expectedEditorLength}，实际 ${editor.textLength}`);
-        }
-
-        documents.unshift(doc);
-        currentDocumentId = doc.id;
-        committed = true;
-        filenameInput.value = doc.title;
-        localStorage.setItem(CURRENT_DOC_KEY, currentDocumentId);
-        localStorage.setItem(FILENAME_KEY, filenameInput.value);
-        resetHistoryForCurrentDocument();
-        await resetPreviewPipeline();
-        updateCount();
-        await saveToLocal();
-        renderDocumentList();
-        setSidebarTab('docs');
+        exportDocumentUiCommandPort.invoke('prepareDocumentTransition', 'document-import');
+        const result = await exportDocumentControllerPort.openExternalDocument({
+          title: normalizedName,
+          filePath,
+          currentTitle: filenameInput.value,
+          fallbackTitle: t('filenameDefault'),
+          loadContent,
+          expectedTextLength: getEditorNormalizedLength
+        });
+        if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
+        filenameInput.value = result.record.title;
+        if (!await applyDocumentLifecycleUi(result)) return false;
+        if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
+        if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
+        void exportSidebarControllerPort.select('docs');
         window.markdownEditorPerf?.record?.('document.imported', {
           category: 'document.operation',
           status: 'ok',
           details: {
-            documentId: doc.id,
-            sourceCharacters: source.length,
-            editorCharacters: expectedEditorLength,
-            normalizedCrLf: source.length - expectedEditorLength
+            documentId: result.record.id,
+            sourceCharacters: result.sourceCharacters,
+            editorCharacters: result.editorCharacters,
+            normalizedCrLf: result.sourceCharacters - result.editorCharacters,
+            ...details
           }
         });
         showToast(t('toastFileImported'));
         return true;
       } catch (error) {
-        if (!committed && runtimeActivated && previousDocument) {
-          try {
-            const restored = await loadDocumentContent(previousDocument);
-            activateDocumentRuntime(previousDocument, restored.loaded, restored.content);
-            currentDocumentId = previousDocumentId;
-            filenameInput.value = previousDocument.title || t('filenameDefault');
-            if (previousDocumentId) localStorage.setItem(CURRENT_DOC_KEY, previousDocumentId);
-            resetHistoryForCurrentDocument();
-            await resetPreviewPipeline();
-            updateCount();
-          } catch (restoreError) {
-            console.error('Failed to restore previous document after import error:', restoreError);
-          }
-        } else if (committed) {
-          saveDocumentsToStorage();
-          renderDocumentList();
-        }
+        if (exportDocumentControllerPort.isStaleError(error)) return false;
         showToast(recordDocumentOperationError('import', error, {
           fileName: String(name || ''),
-          sourceCharacters: source.length,
-          expectedEditorCharacters: expectedEditorLength,
-          runtimeActivated,
-          committed
+          ...details
         }));
         return false;
       }
     }
 
-    // 加载文件内容到编辑器（文件输入与浏览器拖放共用）
+    async function loadTextContentAsDocument(name, content, filePath = '') {
+      const source = String(content ?? '');
+      return loadDocumentFromContentLoader(name, async () => source, filePath, { sourceCharacters: source.length });
+    }
+
     function loadFile(file) {
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async event => {
-        try {
-          await loadTextContentAsDocument(file.name, event.target?.result ?? '');
-        } catch (error) {
-          showToast(recordDocumentOperationError('file-read', error, {
-            fileName: String(file.name || ''),
-            fileBytes: Number(file.size) || 0
-          }));
-        }
-      };
-      reader.onerror = () => {
-        const error = reader.error || new Error('无法读取所选文档');
-        showToast(recordDocumentOperationError('file-read', error, {
-          fileName: String(file.name || ''),
-          fileBytes: Number(file.size) || 0
-        }));
-      };
-      reader.onabort = () => showToast('文档读取已取消');
-      reader.readAsText(file);
+      if (!file) return Promise.resolve(false);
+      return loadDocumentFromContentLoader(file.name, () => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = event => resolve(event.target?.result ?? '');
+        reader.onerror = () => reject(reader.error || new Error('无法读取所选文档'));
+        reader.onabort = () => reject(new Error('文档读取已取消'));
+        reader.readAsText(file);
+      }), '', { fileBytes: Number(file.size) || 0 });
     }
 
     // 导入文件

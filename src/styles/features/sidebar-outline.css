@@ -1,0 +1,124 @@
+/* Responsibility: Sidebar outline tree, hierarchy and navigation states. */
+
+.outline-list {
+      gap: 0;
+      padding: var(--space-xs) 0 var(--space-lg);
+}
+
+.outline-tree,
+.outline-children {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+}
+
+.outline-children {
+      margin-left: 11px;
+      padding-left: var(--space-lg);
+      border-left: 1px solid var(--color-border-subtle);
+}
+
+.outline-children.collapsed {
+      display: none;
+}
+
+.outline-node {
+      margin: 1px 0;
+}
+
+.outline-row {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      align-items: center;
+      min-height: 28px;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+}
+
+.outline-row:hover {
+      background: var(--color-surface-subtle);
+      color: var(--color-accent);
+}
+
+.outline-row.active {
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      font-weight: 700;
+}
+
+.outline-toggle {
+      width: 22px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--color-text-muted);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+      line-height: 1;
+      transform: translateY(0);
+}
+
+.outline-toggle:hover {
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+}
+
+.outline-toggle-placeholder {
+      cursor: default;
+      pointer-events: none;
+}
+
+.outline-link {
+      min-width: 0;
+      border: none;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      padding: 5px var(--space-md) 5px var(--space-2xs);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: var(--font-size-md);
+      line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+}
+
+.outline-level-1 > .outline-row .outline-link { font-size: 13.5px; font-weight: 800; color: var(--color-text-primary); }
+
+.outline-level-2 > .outline-row .outline-link { font-size: var(--font-size-md); font-weight: 700; color: var(--color-text-primary); }
+
+.outline-level-3 > .outline-row .outline-link { font-size: 12.8px; font-weight: 600; color: var(--color-text-secondary); }
+
+.outline-level-4 > .outline-row .outline-link { font-size: 12.5px; font-weight: 500; color: var(--color-text-secondary); }
+
+.outline-level-5 > .outline-row .outline-link { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-muted); }
+
+.outline-level-6 > .outline-row .outline-link { font-size: var(--font-size-sm); font-weight: 400; color: var(--color-text-muted); }
+
+.outline-row.active .outline-link,
+.outline-row:hover .outline-link { color: inherit; }
+
+.outline-children {
+  border-left-color: var(--color-border-subtle);
+}
+
+.outline-row {
+  min-height: 31px;
+  border-radius: var(--radius-lg);
+}
+
+.outline-row:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+}
+
+.outline-row.active {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  box-shadow: inset 2px 0 0 var(--color-accent);
+}

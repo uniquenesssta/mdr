@@ -1,0 +1,80 @@
+/* Responsibility: Hybrid HTML block presentation and inline HTML semantics. */
+
+.virtual-editor-host .cm-hybrid-html-widget {
+  background: var(--color-surface-raised);
+}
+
+.virtual-editor-host .cm-hybrid-html-body {
+  min-width: 0;
+  padding: var(--space-2xl) 18px;
+  overflow-x: auto;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: var(--editor-font-size, var(--font-size-2xl));
+  line-height: 1.72;
+  user-select: text;
+}
+
+.virtual-editor-host .cm-hybrid-html-body > :first-child {
+  margin-top: 0;
+}
+
+.virtual-editor-host .cm-hybrid-html-body > :last-child {
+  margin-bottom: 0;
+}
+
+.virtual-editor-host .cm-hybrid-html-body p {
+  margin: .65em 0;
+}
+
+.virtual-editor-host .cm-hybrid-html-body details {
+  padding: var(--space-lg) var(--space-xl);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-surface-subtle) 52%, var(--color-surface-raised));
+}
+
+.virtual-editor-host .cm-hybrid-html-body summary {
+  cursor: pointer;
+}
+
+.virtual-editor-host .cm-hybrid-html-body kbd,
+.virtual-editor-host .cm-hybrid-html-kbd {
+  display: inline-block;
+  padding: .08em .4em;
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: .82em;
+  line-height: 1.35;
+}
+
+.virtual-editor-host .cm-hybrid-html-body mark,
+.virtual-editor-host .cm-hybrid-html-mark {
+  padding: .05em .16em;
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--color-highlight-strong) 38%, transparent);
+  color: inherit;
+}
+
+.virtual-editor-host .cm-hybrid-html-sub {
+  vertical-align: sub;
+  font-size: .76em;
+}
+
+.virtual-editor-host .cm-hybrid-html-sup {
+  vertical-align: super;
+  font-size: .76em;
+}
+
+.virtual-editor-host .cm-hybrid-html-underline {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.virtual-editor-host .cm-hybrid-html-small {
+  font-size: .84em;
+}

@@ -1,0 +1,20 @@
+name: R9-12 impact inventory
+
+on:
+  push:
+    branches:
+      - agent/r9-12-runner
+  workflow_dispatch:
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify R9-12 impact inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash .agent/r9_12_inventory.sh
+          git diff --check -- .agent/r9_12_inventory.txt
+          git diff --exit-code -- .agent/r9_12_inventory.txt

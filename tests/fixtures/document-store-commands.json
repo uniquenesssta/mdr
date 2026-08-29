@@ -1,0 +1,121 @@
+{
+  "baseline": "10c0387d3b286400ceda8d3161193c7aa46cbd80",
+  "commands": [
+    {
+      "name": "save_document_state",
+      "module": "save",
+      "parameters": [
+        "app:AppHandle",
+        "store:State<'_,DocumentStore>",
+        "request:SaveDocumentRequest"
+      ],
+      "returns": "Result<SaveDocumentResponse,String>",
+      "joinError": "后台保存任务失败：{err}"
+    },
+    {
+      "name": "begin_document_snapshot_upload",
+      "module": "snapshot_upload",
+      "parameters": [
+        "app:AppHandle",
+        "document_id:String",
+        "upload_id:String"
+      ],
+      "returns": "Result<(),String>",
+      "joinError": "后台初始化分段快照失败：{err}"
+    },
+    {
+      "name": "append_document_snapshot_chunk",
+      "module": "snapshot_upload",
+      "parameters": [
+        "app:AppHandle",
+        "document_id:String",
+        "upload_id:String",
+        "chunk:String"
+      ],
+      "returns": "Result<(),String>",
+      "joinError": "后台写入分段快照失败：{err}"
+    },
+    {
+      "name": "commit_document_snapshot_upload",
+      "module": "snapshot_upload",
+      "parameters": [
+        "app:AppHandle",
+        "store:State<'_,DocumentStore>",
+        "request:SaveDocumentRequest",
+        "upload_id:String"
+      ],
+      "returns": "Result<SaveDocumentResponse,String>",
+      "joinError": "后台提交分段快照失败：{err}"
+    },
+    {
+      "name": "abort_document_snapshot_upload",
+      "module": "snapshot_upload",
+      "parameters": [
+        "app:AppHandle",
+        "document_id:String",
+        "upload_id:String"
+      ],
+      "returns": "Result<(),String>",
+      "joinError": "后台清理分段快照失败：{err}"
+    },
+    {
+      "name": "load_document_state",
+      "module": "load",
+      "parameters": [
+        "app:AppHandle",
+        "store:State<'_,DocumentStore>",
+        "document_id:String"
+      ],
+      "returns": "Result<Option<LoadedDocument>,String>",
+      "joinError": "后台读取任务失败：{err}"
+    },
+    {
+      "name": "load_document_manifest",
+      "module": "load",
+      "parameters": [
+        "app:AppHandle",
+        "store:State<'_,DocumentStore>",
+        "document_id:String"
+      ],
+      "returns": "Result<Option<DocumentManifest>,String>",
+      "joinError": "后台索引任务失败：{err}"
+    },
+    {
+      "name": "read_document_chunk",
+      "module": "load",
+      "parameters": [
+        "app:AppHandle",
+        "store:State<'_,DocumentStore>",
+        "document_id:String",
+        "byte_offset:usize",
+        "max_bytes:usize"
+      ],
+      "returns": "Result<Option<DocumentChunk>,String>",
+      "joinError": "后台分段读取任务失败：{err}"
+    },
+    {
+      "name": "search_document_state",
+      "module": "search",
+      "parameters": [
+        "app:AppHandle",
+        "store:State<'_,DocumentStore>",
+        "request:SearchDocumentRequest"
+      ],
+      "returns": "Result<Option<SearchDocumentResponse>,String>",
+      "joinError": "后台搜索任务失败：{err}"
+    },
+    {
+      "name": "delete_document_state",
+      "module": "delete",
+      "parameters": [
+        "app:AppHandle",
+        "store:State<'_,DocumentStore>",
+        "document_id:String"
+      ],
+      "returns": "Result<(),String>",
+      "joinError": "后台删除任务失败：{err}"
+    }
+  ],
+  "dtoSha256": "fb8cab890ad8ada29f41f8fa66f2492af8be68d0bc1e9c5de859ad84cd610368",
+  "frontendSha256": "adab662523b7f13bc10c1451c5722e7ca3b127d965c907e61471e427447da0af"
+}

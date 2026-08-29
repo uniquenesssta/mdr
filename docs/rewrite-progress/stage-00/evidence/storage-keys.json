@@ -1,0 +1,193 @@
+[
+  {
+    "key": "md_editor_active_line_color",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_autosave_delay",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_autosave_enabled",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_code_visual_editing",
+    "locations": [
+      "public/app/core.js",
+      "src/runtime/e2e-bridge.js"
+    ]
+  },
+  {
+    "key": "md_editor_content",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_current_document",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_documents",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_documents_intentionally_empty",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_editor_collapsed",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_editor_font_size",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_export_directory",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_filename",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_help_shown",
+    "locations": [
+      "public/app/core.js",
+      "tests/e2e/run-browser-tests.mjs"
+    ]
+  },
+  {
+    "key": "md_editor_language",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_layout_mode",
+    "locations": [
+      "public/app/core.js",
+      "src/runtime/e2e-bridge.js"
+    ]
+  },
+  {
+    "key": "md_editor_outline_collapsed",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_page_fullscreen",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_preview_collapsed",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_preview_mode",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_preview_performance_mode",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_ratio",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_recent_files",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_sidebar_tab",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_sidebar_visible",
+    "locations": [
+      "public/app/core.js",
+      "tests/e2e/run-browser-tests.mjs"
+    ]
+  },
+  {
+    "key": "md_editor_sidebar_width",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_table_visual_editing",
+    "locations": [
+      "public/app/core.js",
+      "src/runtime/e2e-bridge.js"
+    ]
+  },
+  {
+    "key": "md_editor_text_color",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_theme",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_toolbar_hidden_items",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_toolbar_visible",
+    "locations": [
+      "public/app/core.js"
+    ]
+  },
+  {
+    "key": "md_editor_view_mode",
+    "locations": [
+      "src/runtime/e2e-bridge.js"
+    ]
+  }
+]

@@ -1,0 +1,46 @@
+name: R9-12 historical regression
+
+on:
+  push:
+    branches:
+      - agent/r9-12-runner
+  workflow_dispatch:
+
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: R9-11 direct frozen selection mapping contract
+        run: node --test tests/stage-09-frozen-selection-mapping-integration.test.mjs
+      - name: R9-11 architecture frozen selection mapping integration
+        if: ${{ always() }}
+        run: node --test tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs
+      - name: R9-10 selection retry scheduler
+        run: node --test tests/stage-09-selection-retry-scheduler.test.mjs tests/architecture/stage-09-selection-retry-scheduler.test.mjs
+      - name: R9-09 selection highlight session
+        run: node --test tests/stage-09-selection-highlight-session.test.mjs tests/architecture/stage-09-selection-highlight-session.test.mjs
+      - name: R9-08 selection feedback guard
+        run: node --test tests/stage-09-selection-feedback-guard.test.mjs tests/architecture/stage-09-selection-feedback-guard.test.mjs
+      - name: R9-07 selection readers
+        run: node --test tests/stage-09-selection-readers.test.mjs tests/architecture/stage-09-selection-readers.test.mjs
+      - name: R9-06 scroll geometry session
+        run: node --test tests/stage-09-scroll-geometry-session.test.mjs tests/architecture/stage-09-scroll-geometry-session.test.mjs
+      - name: R9-05 preview scroll mapper
+        run: node --test tests/stage-09-preview-scroll-mapper.test.mjs tests/architecture/stage-09-preview-scroll-mapper.test.mjs
+      - name: R9-04 editor scroll mapper
+        run: node --test tests/stage-09-editor-scroll-mapper.test.mjs tests/architecture/stage-09-editor-scroll-mapper.test.mjs
+      - name: R9-03 scroll controller
+        run: node --test tests/stage-09-scroll-controller.test.mjs tests/architecture/stage-09-scroll-controller.test.mjs
+      - name: R9-02 scroll source ownership
+        run: node --test tests/stage-09-scroll-source-ownership.test.mjs tests/architecture/stage-09-scroll-source-ownership.test.mjs
+      - name: R9-01 scroll contract freeze
+        run: node --test tests/stage-09-scroll-contract-freeze.test.mjs tests/architecture/stage-09-scroll-contract-freeze.test.mjs
+      - name: Stage 8 regression
+        run: node --test tests/stage-08*.test.mjs tests/architecture/stage-08*.test.mjs

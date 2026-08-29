@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   HYBRID_COMPONENT_MODES,
-  HybridComponentStateMachine,
+  HybridComponentSession,
   createHybridComponentKey
-} from '../src/editor/hybrid/component-state.js';
+} from '../src/features/hybrid-editor/index.js';
 
 test('component keys are stable by type and source position', () => {
   assert.equal(createHybridComponentKey('Mermaid', 42), 'mermaid:42');
@@ -13,7 +13,7 @@ test('component keys are stable by type and source position', () => {
 
 test('only one component may remain interactive', () => {
   const transitions = [];
-  const machine = new HybridComponentStateMachine({
+  const machine = new HybridComponentSession({
     now: () => 100,
     onTransition: transition => transitions.push(transition)
   });
@@ -28,7 +28,7 @@ test('only one component may remain interactive', () => {
 });
 
 test('direct and source edit return deterministically to presentation', () => {
-  const machine = new HybridComponentStateMachine();
+  const machine = new HybridComponentSession();
   machine.transition({ type: 'mermaid', from: 120, mode: HYBRID_COMPONENT_MODES.DIRECT, reason: 'doubleclick' });
   assert.equal(machine.get('mermaid:120').mode, HYBRID_COMPONENT_MODES.DIRECT);
 
@@ -46,7 +46,7 @@ test('runtime coordinator asks the previous component to close before opening an
     getHybridComponentState,
     registerHybridComponentCloser,
     transitionHybridComponent
-  } = await import('../src/editor/hybrid/component-state.js');
+  } = await import('../src/features/hybrid-editor/index.js');
   const view = {};
   let closeCalls = 0;
   transitionHybridComponent(view, {
@@ -75,7 +75,7 @@ test('a delayed direct-editor blur cannot close an already opened source editor'
     closeHybridComponent,
     getHybridComponentState,
     transitionHybridComponent
-  } = await import('../src/editor/hybrid/component-state.js');
+  } = await import('../src/features/hybrid-editor/index.js');
   const view = {};
   transitionHybridComponent(view, {
     type: 'mermaid',

@@ -1,0 +1,516 @@
+<template data-compat-slot="menu">
+      <div class="app-brand window-drag-region" aria-label="Markdown Editor">
+        <span class="app-brand-mark" aria-hidden="true">M</span>
+        <span class="app-brand-name">Markdown Editor</span>
+      </div>
+      <span class="menu-bar-divider" aria-hidden="true"></span>
+      <div class="menu-dropdown" id="file-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('file-menu')" title="文件" aria-label="文件菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-file"></use></svg><span class="menu-button-label">文件</span></button>
+        <div class="menu-dropdown-list" id="file-menu">
+          <div class="menu-item" onclick="newDocument(); closeAppMenus();"><span>新建文档</span><kbd>Ctrl+N</kbd></div>
+          <div class="menu-item" onclick="triggerImportFile(); closeAppMenus();"><span>打开文件...</span><kbd>Ctrl+O</kbd></div>
+          <div class="menu-item" data-editor-action="save-current-file"><span>保存</span><kbd>Ctrl+S</kbd></div>
+          <div class="menu-item" data-editor-action="save-as-markdown"><span>另存为...</span><kbd>Ctrl+Shift+S</kbd></div>
+          <div class="menu-item" onclick="renameCurrentDocument(); closeAppMenus();"><span>重命名当前文档...</span><kbd>F2</kbd></div>
+          <div class="menu-item" data-settings-open><span>设置...</span><kbd>Ctrl+,</kbd></div>
+          <div class="menu-item menu-submenu" id="recent-files-menu-item"><span>最近打开</span><span class="menu-arrow">›</span>
+            <div class="menu-dropdown-list menu-submenu-list recent-files-menu" id="recent-files-menu"></div>
+          </div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" onclick="openUrlModal(); closeAppMenus();"><span>从网页导入 Markdown...</span></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item menu-submenu"><span>导出</span><span class="menu-arrow">›</span>
+            <div class="menu-dropdown-list menu-submenu-list">
+              <div class="menu-item" onclick="exportFile(); closeAppMenus();"><span>Markdown</span></div>
+              <div class="menu-item" onclick="exportWord(); closeAppMenus();"><span>Word</span></div>
+              <div class="menu-item" onclick="exportPDF(); closeAppMenus();"><span>PDF</span></div>
+              <div class="menu-item" onclick="exportHTML(); closeAppMenus();"><span>HTML</span></div>
+              <div class="menu-item" onclick="openExportImageModal(); closeAppMenus();"><span>图片...</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="menu-dropdown" id="edit-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('edit-menu')" title="编辑" aria-label="编辑菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-edit"></use></svg><span class="menu-button-label">编辑</span></button>
+        <div class="menu-dropdown-list" id="edit-menu">
+          <div class="menu-item" data-editor-action="undo"><span>撤销</span><kbd>Ctrl+Z</kbd></div>
+          <div class="menu-item" data-editor-action="redo"><span>重做</span><kbd>Ctrl+Y</kbd></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" data-editor-action="bold"><span>加粗</span><kbd>Ctrl+B</kbd></div>
+          <div class="menu-item" data-editor-action="italic"><span>斜体</span><kbd>Ctrl+I</kbd></div>
+          <div class="menu-item" data-editor-action="underline"><span>下划线</span><kbd>Ctrl+U</kbd></div>
+          <div class="menu-item" data-editor-action="open-find"><span>查找 / 替换...</span><kbd>Ctrl+F</kbd></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" data-editor-action="clear"><span>清空当前文档</span></div>
+        </div>
+      </div>
+      <div class="menu-dropdown" id="view-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('app-view-menu')" title="视图" aria-label="视图菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-view"></use></svg><span class="menu-button-label">视图</span></button>
+        <div class="menu-dropdown-list" id="app-view-menu">
+          <div class="menu-item" onclick="toggleSidebar(); closeAppMenus();"><span>显示 / 隐藏侧边栏</span><kbd>Ctrl+Shift+B</kbd></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" onclick="setLayoutMode('both'); closeAppMenus();"><span>编辑 + 预览</span></div>
+          <div class="menu-item" onclick="setLayoutMode('edit'); closeAppMenus();"><span>仅编辑</span></div>
+          <div class="menu-item" onclick="setLayoutMode('preview'); closeAppMenus();"><span>仅预览</span></div>
+          <div class="menu-separator"></div>
+          <div class="menu-item" onclick="togglePageFullscreen(); closeAppMenus();"><span>专注模式</span><kbd>F11</kbd></div>
+          <div class="menu-item" onclick="toggleFullscreen(); closeAppMenus();"><span>系统全屏</span></div>
+        </div>
+      </div>
+      <div class="menu-dropdown" id="insert-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('insert-menu')" title="插入" aria-label="插入菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-insert"></use></svg><span class="menu-button-label">插入</span></button>
+        <div class="menu-dropdown-list" id="insert-menu">
+          <div class="menu-item menu-submenu"><span>标题</span><span class="menu-arrow">›</span>
+            <div class="menu-dropdown-list menu-submenu-list">
+              <div class="menu-item" data-editor-action="heading" data-level="1"><span>H1 一级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="2"><span>H2 二级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="3"><span>H3 三级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="4"><span>H4 四级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="5"><span>H5 五级标题</span></div>
+              <div class="menu-item" data-editor-action="heading" data-level="6"><span>H6 六级标题</span></div>
+            </div>
+          </div>
+          <div class="menu-item" data-editor-action="open-link"><span>链接</span><kbd>Ctrl+K</kbd></div>
+          <div class="menu-item" data-editor-action="open-image"><span>图片...</span><kbd>Ctrl+Shift+K</kbd></div>
+          <div class="menu-item" data-editor-action="insert-table" data-rows="3" data-cols="3"><span>表格 3 × 3</span></div>
+          <div class="menu-item menu-switch-item" id="table-visual-editing-toggle" role="menuitemcheckbox" aria-checked="false" onclick="toggleTableVisualEditing(event)">
+            <span>表格深度可视化编辑</span>
+            <span class="menu-inline-switch" aria-hidden="true"><span class="menu-inline-switch-track"><span class="menu-inline-switch-thumb"></span></span><span class="menu-inline-switch-state">关</span></span>
+          </div>
+          <div class="menu-item menu-switch-item" id="code-visual-editing-toggle" role="menuitemcheckbox" aria-checked="false" onclick="toggleCodeVisualEditing(event)">
+            <span>代码块深度可视化编辑</span>
+            <span class="menu-inline-switch" aria-hidden="true"><span class="menu-inline-switch-track"><span class="menu-inline-switch-thumb"></span></span><span class="menu-inline-switch-state">关</span></span>
+          </div>
+          <div class="menu-item menu-submenu"><span>数学公式</span><span class="menu-arrow">›</span>
+            <div class="menu-dropdown-list menu-submenu-list">
+              <div class="menu-item" data-editor-action="inline-math"><span>行内公式 $…$</span></div>
+              <div class="menu-item" data-editor-action="block-math"><span>块级公式 $$…$$</span></div>
+            </div>
+          </div>
+          <div class="menu-item" data-editor-action="open-mermaid"><span>Mermaid 图表...</span></div>
+        </div>
+      </div>
+      <div class="menu-dropdown" id="help-menu-dropdown">
+        <button class="menu-trigger" onclick="toggleAppMenu('help-menu')" title="帮助" aria-label="帮助菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-help"></use></svg><span class="menu-button-label">帮助</span></button>
+        <div class="menu-dropdown-list" id="help-menu">
+          <div class="menu-item" data-help-open onclick="closeAppMenus();"><span>使用帮助</span></div>
+        </div>
+      </div>
+      <div class="menu-bar-spacer window-drag-region"></div>
+      <div class="window-controls" id="window-controls" hidden aria-label="窗口控制">
+        <button type="button" class="window-control-btn" id="window-minimize-btn" title="最小化" aria-label="最小化">
+          <svg class="icon"><use href="/assets/icons.svg#icon-minimize"></use></svg>
+        </button>
+        <button type="button" class="window-control-btn" id="window-maximize-btn" title="最大化" aria-label="最大化" data-maximized="false">
+          <svg class="icon"><use href="/assets/icons.svg#icon-maximize"></use></svg>
+        </button>
+        <button type="button" class="window-control-btn close" id="window-close-btn" title="关闭" aria-label="关闭">
+          <svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg>
+        </button>
+      </div>
+</template>
+
+<template data-compat-slot="toolbar">
+      <div class="format-group">
+        <button data-editor-action="undo" data-i18n-title="undoTitle" title="撤销 Ctrl+Z"><svg class="icon"><use href="/assets/icons.svg#icon-undo"></use></svg></button>
+        <button data-editor-action="redo" data-i18n-title="redoTitle" title="重做 Ctrl+Y / Ctrl+Shift+Z"><svg class="icon"><use href="/assets/icons.svg#icon-redo"></use></svg></button>
+        <span class="divider"></span>
+        <button data-editor-action="bold" data-toolbar-item="bold" data-i18n-title="boldTitle" title="加粗 Ctrl+B"><b>B</b></button>
+        <button data-editor-action="italic" data-toolbar-item="italic" data-i18n-title="italicTitle" title="斜体 Ctrl+I"><i>I</i></button>
+        <button data-editor-action="underline" data-toolbar-item="underline" data-i18n-title="underlineTitle" title="下划线 Ctrl+U"><u>U</u></button>
+        <button data-editor-action="strikethrough" data-toolbar-item="strikethrough" data-i18n-title="strikethroughTitle" title="删除线"><s>S</s></button>
+        <button data-editor-action="subscript" data-toolbar-item="script" data-i18n-title="subscriptTitle" title="下标">x₂</button>
+        <button data-editor-action="superscript" data-toolbar-item="script" data-i18n-title="superscriptTitle" title="上标">x²</button>
+        <div class="dropdown color-dropdown" id="text-color-dropdown" data-toolbar-item="textColor">
+          <button type="button" id="text-color-button" class="color-tool-button" data-color-menu-kind="text" title="文字颜色（请先选择文字）" aria-haspopup="true" aria-expanded="false" disabled>
+            <span class="color-tool-glyph">A</span><span class="color-tool-indicator" id="text-color-indicator"></span><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg>
+          </button>
+          <div class="dropdown-menu color-menu" id="text-color-menu">
+            <strong>文字颜色</strong>
+            <div class="color-swatches" aria-label="文字颜色预设">
+              <button type="button" class="color-swatch c-color-swatch--text-ink" title="黑色" data-inline-color-kind="text" data-inline-color="#1a1d23"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-gray" title="灰色" data-inline-color-kind="text" data-inline-color="#6b7280"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-red" title="红色" data-inline-color-kind="text" data-inline-color="#dc2626"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-orange" title="橙色" data-inline-color-kind="text" data-inline-color="#ea580c"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-yellow" title="黄色" data-inline-color-kind="text" data-inline-color="#ca8a04"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-green" title="绿色" data-inline-color-kind="text" data-inline-color="#16a34a"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-cyan" title="青色" data-inline-color-kind="text" data-inline-color="#0891b2"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-blue" title="蓝色" data-inline-color-kind="text" data-inline-color="#2563eb"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-purple" title="紫色" data-inline-color-kind="text" data-inline-color="#7c3aed"></button>
+              <button type="button" class="color-swatch c-color-swatch--text-pink" title="粉色" data-inline-color-kind="text" data-inline-color="#db2777"></button>
+            </div>
+            <div class="color-menu-actions">
+              <label class="custom-color-action">自定义<input type="color" id="custom-text-color" value="#2563eb" data-inline-color-custom="text"></label>
+              <button type="button" data-inline-color-clear="text">清除颜色</button>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown color-dropdown" id="highlight-color-dropdown" data-toolbar-item="highlight">
+          <button type="button" id="highlight-color-button" class="color-tool-button" data-color-menu-kind="highlight" title="文字高亮（请先选择文字）" aria-haspopup="true" aria-expanded="false" disabled>
+            <span class="color-tool-glyph color-tool-highlight">A</span><span class="color-tool-indicator" id="highlight-color-indicator"></span><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg>
+          </button>
+          <div class="dropdown-menu color-menu" id="highlight-color-menu">
+            <strong>文字高亮</strong>
+            <div class="color-swatches" aria-label="文字高亮预设">
+              <button type="button" class="color-swatch c-color-swatch--highlight-yellow" title="黄色" data-inline-color-kind="highlight" data-inline-color="#fff3a3"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-orange" title="橙色" data-inline-color-kind="highlight" data-inline-color="#fed7aa"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-red" title="红色" data-inline-color-kind="highlight" data-inline-color="#fecaca"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-green" title="绿色" data-inline-color-kind="highlight" data-inline-color="#bbf7d0"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-blue" title="蓝色" data-inline-color-kind="highlight" data-inline-color="#bae6fd"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-purple" title="紫色" data-inline-color-kind="highlight" data-inline-color="#ddd6fe"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-pink" title="粉色" data-inline-color-kind="highlight" data-inline-color="#fbcfe8"></button>
+              <button type="button" class="color-swatch c-color-swatch--highlight-gray" title="灰色" data-inline-color-kind="highlight" data-inline-color="#e5e7eb"></button>
+            </div>
+            <div class="color-menu-actions">
+              <label class="custom-color-action">自定义<input type="color" id="custom-highlight-color" value="#fff3a3" data-inline-color-custom="highlight"></label>
+              <button type="button" data-inline-color-clear="highlight">清除高亮</button>
+            </div>
+          </div>
+        </div>
+        <span class="divider"></span>
+        <div class="dropdown" id="heading-dropdown" data-toolbar-item="heading">
+          <button data-editor-action="toggle-heading-menu" data-i18n-title="heading" title="标题">H <svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg></button>
+          <div class="dropdown-menu" id="heading-menu">
+            <div class="dropdown-item" data-editor-action="heading" data-level="1" data-i18n="headingH1">H1 一级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="2" data-i18n="headingH2">H2 二级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="3" data-i18n="headingH3">H3 三级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="4" data-i18n="headingH4">H4 四级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="5" data-i18n="headingH5">H5 五级标题</div>
+            <div class="dropdown-item" data-editor-action="heading" data-level="6" data-i18n="headingH6">H6 六级标题</div>
+          </div>
+        </div>
+        <span class="divider"></span>
+        <button data-editor-action="quote" data-toolbar-item="quote" data-i18n-title="quote" title="引用"><svg class="icon"><use href="/assets/icons.svg#icon-quote"></use></svg> <span data-i18n="quote">引用</span></button>
+        <button data-editor-action="unordered" data-toolbar-item="lists" data-i18n-title="unordered" title="无序列表"><svg class="icon"><use href="/assets/icons.svg#icon-list"></use></svg> <span data-i18n="unordered">无序</span></button>
+        <button data-editor-action="ordered" data-toolbar-item="lists" data-i18n-title="ordered" title="有序列表"><svg class="icon"><use href="/assets/icons.svg#icon-list-numbered"></use></svg> <span data-i18n="ordered">有序</span></button>
+        <button data-editor-action="task" data-toolbar-item="lists" data-i18n-title="task" title="任务列表"><svg class="icon"><use href="/assets/icons.svg#icon-task"></use></svg> <span data-i18n="task">任务</span></button>
+        <span class="divider"></span>
+        <button data-editor-action="inline-code" data-toolbar-item="code" data-i18n-title="inlineCode" title="行内代码"><svg class="icon"><use href="/assets/icons.svg#icon-code"></use></svg> <span data-i18n="inlineCode">行内代码</span></button>
+        <button data-editor-action="code" data-toolbar-item="code" data-i18n-title="codeBlock" title="代码块"><svg class="icon"><use href="/assets/icons.svg#icon-braces"></use></svg></button>
+        <button data-editor-action="open-link" data-toolbar-item="link" data-i18n-title="link" title="插入链接 Ctrl+K"><svg class="icon"><use href="/assets/icons.svg#icon-link"></use></svg> <span data-i18n="link">链接</span></button>
+        <button data-editor-action="open-image" data-toolbar-item="image" data-i18n-title="image" title="插入图片 Ctrl+Shift+K"><svg class="icon"><use href="/assets/icons.svg#icon-image"></use></svg> <span data-i18n="image">图片</span></button>
+        <div class="dropdown" id="table-dropdown" data-toolbar-item="table">
+          <button data-editor-action="toggle-table" data-i18n-title="table" title="插入表格"><svg class="icon"><use href="/assets/icons.svg#icon-table"></use></svg> <span data-i18n="table">表格</span></button>
+          <div class="dropdown-menu table-selector-menu" id="table-menu">
+            <div class="table-grid" id="table-grid"></div>
+            <div class="table-size-label" id="table-size-label">0 行 × 0 列</div>
+          </div>
+        </div>
+        <button data-editor-action="open-find" data-toolbar-item="find" data-i18n-title="find" title="查找替换 Ctrl+F"><svg class="icon"><use href="/assets/icons.svg#icon-search"></use></svg> <span data-i18n="find">查找</span></button>
+        <button data-editor-action="open-mermaid" data-toolbar-item="mermaid" data-i18n-title="mermaid" title="插入 Mermaid 图表"><svg class="icon"><use href="/assets/icons.svg#icon-mermaid"></use></svg> <span data-i18n="mermaid">Mermaid</span></button>
+      </div>
+      <div class="editor-actions">
+        <div class="dropdown" id="view-dropdown">
+          <button data-editor-action="toggle-view-menu" data-i18n-title="view" title="视图布局"><svg class="icon"><use href="/assets/icons.svg#icon-layout"></use></svg> <span data-i18n="view">视图</span> <svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-down"></use></svg></button>
+          <div class="dropdown-menu" id="view-menu">
+            <div class="dropdown-item" data-editor-action="layout" data-mode="both" data-i18n="viewBoth">编辑 + 预览</div>
+            <div class="dropdown-item" data-editor-action="layout" data-mode="hybrid" data-i18n="viewHybrid">单视图混合编辑</div>
+            <div class="dropdown-item" data-editor-action="layout" data-mode="edit" data-i18n="viewEdit">仅编辑</div>
+            <div class="dropdown-item" data-editor-action="layout" data-mode="preview" data-i18n="viewPreview">仅预览</div>
+            <div class="dropdown-item" data-editor-action="page-fullscreen" data-i18n="pageFullscreen">页面全屏</div>
+            <div class="dropdown-item" data-editor-action="system-fullscreen" data-i18n="systemFullscreen">系统全屏</div>
+          </div>
+        </div>
+        <button data-theme-toggle data-i18n-title="theme" title="切换主题"><svg class="icon"><use href="/assets/icons.svg#icon-sun"></use></svg> <span data-i18n="theme">主题</span></button>
+      </div>
+</template>
+
+<template data-compat-slot="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-heading">
+            <span class="sidebar-kicker">WORKSPACE</span>
+            <strong>内容导航</strong>
+          </div>
+          <button onclick="toggleSidebar()" title="隐藏侧边栏"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg></button>
+        </div>
+        <div class="sidebar-tabs">
+          <button class="active" id="sidebar-docs-tab"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-book"></use></svg><span>文档</span></button>
+          <button id="sidebar-files-tab" title="文件树：当前文件所在文件夹"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-folder"></use></svg><span>文件</span></button>
+          <button id="sidebar-outline-tab"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-list"></use></svg><span>大纲</span></button>
+        </div>
+        <section class="sidebar-panel active" id="sidebar-docs-panel" >
+          <div class="document-list" id="document-list"></div>
+        </section>
+        <section class="sidebar-panel sidebar-files-panel" id="sidebar-files-panel">
+          <div class="folder-tree-header">
+            <div class="folder-tree-root-summary">
+              <strong id="folder-file-tree-root">未关联文件夹</strong>
+              <small id="folder-file-tree-summary"></small>
+            </div>
+            <button type="button" id="folder-file-tree-refresh" class="folder-tree-refresh" title="刷新文件树" aria-label="刷新文件树"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-redo"></use></svg></button>
+          </div>
+          <div class="folder-file-tree" id="folder-file-tree"></div>
+        </section>
+        <section class="sidebar-panel" id="sidebar-outline-panel">
+          <div class="outline-list" id="outline-list"></div>
+        </section>
+</template>
+
+<template data-compat-slot="editor">
+          <div class="pane-header">
+            <span class="pane-title" data-i18n="editorPaneTitle">编辑</span>
+            <span class="editor-presentation-badge" id="editor-presentation-badge" hidden data-i18n="viewHybrid">单视图混合编辑</span>
+            <span data-i18n="editorPaneHint">支持 Markdown 语法</span>
+            <button class="collapse-btn" id="editor-collapse-btn" data-editor-pane-action="collapse" title="收起编辑区"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg></button>
+          </div>
+          <div id="editor" class="virtual-editor-host f-editor-surface" data-i18n-placeholder="editorPlaceholder" data-placeholder="开始输入 Markdown..."></div>
+</template>
+
+<template data-compat-slot="preview">
+          <div class="pane-header">
+            <button class="collapse-btn" id="preview-collapse-btn" title="收起预览区"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-right"></use></svg></button>
+            <span class="pane-title" data-i18n="previewPaneTitle">实时预览</span>
+            <span class="preview-strategy-badge" id="preview-strategy-badge" hidden></span>
+            <span id="word-count">0 字</span>
+          </div>
+          <div class="preview-content f-preview-surface" id="preview"></div>
+</template>
+
+<template data-compat-slot="status">
+      <div class="statusbar-left">
+        <div class="app-mode-badge statusbar-mode-badge" title="本地优先，无需联网">
+          <span class="app-mode-dot" aria-hidden="true"></span>
+          <span>本地编辑</span>
+        </div>
+        <span id="status-left" hidden aria-hidden="true" class="f-status-message"></span>
+      </div>
+      <span class="save-hint" id="save-hint">✓ 已保存</span>
+      <span class="statusbar-spacer"></span>
+      <span class="statusbar-format">Markdown</span>
+</template>
+
+<template data-compat-slot="overlay">
+    <!-- 拖放文件提示遮罩 -->
+    <div class="drop-overlay" id="drop-overlay">
+      <div class="drop-message"><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-upload-cloud"></use></svg> <span data-i18n="dropMessage">释放以打开文件或插入图片</span></div>
+    </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="context-menu" id="document-context-menu" role="menu">
+    <button data-document-action="openDocument">打开</button>
+    <button data-document-action="renameDocument">重命名...</button>
+    <button data-document-action="duplicateDocument">复制副本</button>
+    <button data-document-action="saveAsDocument">另存为...</button>
+    <button data-document-action="exportDocument">导出 Markdown</button>
+    <button data-document-action="copyDocumentTitle">复制文件名</button>
+    <div class="context-separator"></div>
+    <button data-document-action="closeDocument">关闭文档</button>
+  </div>
+
+  <div class="context-menu" id="sidebar-context-menu" role="menu">
+    <button data-sidebar-action="newDocument">新建文档</button>
+    <button data-sidebar-action="duplicateActiveDocument">复制当前文档</button>
+    <button data-sidebar-action="importFile">打开文件...</button>
+    <button data-sidebar-action="openWebClipper">从网页导入 Markdown...</button>
+  </div>
+
+
+  <div class="context-menu" id="outline-context-menu" role="menu">
+    <button data-outline-context-action="expand-all">展开全部大纲</button>
+    <button data-outline-context-action="collapse-all">折叠全部大纲</button>
+    <div class="context-separator" id="outline-context-node-separator" hidden></div>
+    <button id="outline-context-collapse-node" data-outline-context-action="collapse-node" hidden>折叠此大纲的所有子集</button>
+  </div>
+
+  <!-- 使用帮助模态框 -->
+
+  <!-- 插入链接模态框 -->
+  <div class="modal-overlay" id="link-modal">
+    <div class="modal c-modal c-modal--narrow" role="dialog" aria-modal="true" aria-labelledby="link-modal-title">
+      <div class="modal-header">
+        <h3 id="link-modal-title"><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-link"></use></svg> <span data-i18n="link">链接</span></h3>
+        <button data-link-action="close" aria-label="关闭"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="link-url-input" data-i18n="promptLinkUrl">请输入链接地址</label>
+        <input type="url" id="link-url-input" autocomplete="url" spellcheck="false" placeholder="https://">
+      </div>
+      <div class="modal-footer">
+        <button data-link-action="close" data-i18n="cancel">取消</button>
+        <button data-link-action="confirm" class="primary" data-i18n="insert">插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 网页转 Markdown 模态框 -->
+  <div class="modal-overlay" id="url-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-globe"></use></svg> <span data-i18n="urlTitle">网页转 Markdown</span></h3>
+        <button onclick="closeUrlModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="url-input" data-i18n="urlLabel">网页地址</label>
+        <input type="url" id="url-input" data-i18n-placeholder="urlPlaceholder" placeholder="https://example.com/article">
+        <div class="c-form-inline-option">
+          <input type="checkbox" id="use-local-proxy" class="c-inline-checkbox" onchange="toggleProxyInput()">
+          <label for="use-local-proxy" class="c-inline-label" data-i18n="useProxy">使用 Rust 本地后端（桌面版默认）</label>
+        </div>
+        <input type="url" id="proxy-url" value="http://localhost:8765/fetch" data-i18n-placeholder="proxyPlaceholder" placeholder="浏览器预览代理地址" class="c-proxy-input is-hidden">
+        <button onclick="fetchUrl()" class="primary" data-i18n="fetchBtn">尝试获取</button>
+        <div id="url-status" class="c-form-status"></div>
+        <div id="manual-area" class="c-manual-input is-hidden">
+          <label for="manual-html" data-i18n="manualLabel">网页 HTML 源码（手动粘贴）</label>
+          <textarea id="manual-html" rows="6" data-i18n-placeholder="manualPlaceholder" placeholder="在浏览器中打开目标网页 → 右键「查看网页源代码」→ 全选复制 → 粘贴到此处"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeUrlModal()" data-i18n="cancel">取消</button>
+        <button onclick="convertAndInsert()" class="primary" data-i18n="convertInsert">转换并插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 查找与替换模态框 -->
+  <div class="modal-overlay" id="find-modal">
+    <div class="modal c-modal c-modal--narrow">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-search"></use></svg> <span data-i18n="findTitle">查找与替换</span></h3>
+        <button data-find-action="close"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="find-input" data-i18n="findLabel">查找</label>
+        <input type="text" id="find-input" data-i18n-placeholder="findPlaceholder" placeholder="要查找的内容">
+        <label for="replace-input" data-i18n="replaceLabel">替换为</label>
+        <input type="text" id="replace-input" data-i18n-placeholder="replacePlaceholder" placeholder="替换后的内容">
+        <div id="find-status" class="c-form-status"></div>
+      </div>
+      <div class="modal-footer">
+        <button data-find-action="close" data-i18n="cancel">关闭</button>
+        <button data-find-action="replace-all" data-i18n="replaceAll">全部替换</button>
+        <button data-find-action="replace-one" data-i18n="replaceOne">替换</button>
+        <button data-find-action="next" class="primary" data-i18n="findNext">查找下一个</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出图片模态框 -->
+  <div class="modal-overlay export-progress-overlay" id="export-progress-modal" aria-live="polite">
+    <div class="modal export-progress-modal" role="dialog" aria-modal="true" aria-labelledby="export-progress-title">
+      <div class="modal-header">
+        <h3 id="export-progress-title">正在准备导出</h3>
+      </div>
+      <div class="modal-body">
+        <div class="export-progress-track" aria-hidden="true">
+          <div class="export-progress-value" id="export-progress-value"></div>
+        </div>
+        <p class="export-progress-status" id="export-progress-status">正在准备文档…</p>
+        <p class="hint">超大文档会分批构建导出内容，编辑器不会长时间无响应。</p>
+      </div>
+      <div class="modal-footer">
+        <button id="export-progress-cancel" onclick="cancelActiveExport()">取消导出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="export-image-modal">
+    <div class="modal c-modal c-modal--preview">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-image"></use></svg> <span data-i18n="exportImageTitle">导出图片</span></h3>
+        <button onclick="closeExportImageModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label data-i18n="ratioLabel">分享比例</label>
+        <div class="ratio-grid">
+          <button class="ratio-btn active" data-ratio="9:16" onclick="selectImageRatio('9:16')">9:16<br><small data-i18n="ratio9_16">手机竖屏/故事</small></button>
+          <button class="ratio-btn" data-ratio="4:5" onclick="selectImageRatio('4:5')">4:5<br><small data-i18n="ratio4_5">小红书/IG</small></button>
+          <button class="ratio-btn" data-ratio="3:4" onclick="selectImageRatio('3:4')">3:4<br><small data-i18n="ratio3_4">竖图</small></button>
+          <button class="ratio-btn" data-ratio="1:1" onclick="selectImageRatio('1:1')">1:1<br><small data-i18n="ratio1_1">方形</small></button>
+          <button class="ratio-btn" data-ratio="16:9" onclick="selectImageRatio('16:9')">16:9<br><small data-i18n="ratio16_9">横图</small></button>
+        </div>
+        <div class="option-row">
+          <input type="checkbox" id="image-crop-fit" onchange="renderExportImagePreview()">
+          <label for="image-crop-fit" data-i18n="cropLabel">过长时裁剪为固定比例（默认生成长图）</label>
+        </div>
+        <label data-i18n="previewLabel">预览</label>
+        <div id="export-image-preview-wrap" class="f-export-image-preview-wrap">
+          <img id="export-image-preview" alt="导出预览" data-i18n-alt="exportImagePreviewAlt" class="f-export-image-preview is-hidden">
+        </div>
+        <p class="hint" data-i18n="exportImageHint">内容较长时将按内容高度生成长图，方便手机阅读。</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeExportImageModal()" data-i18n="cancel">取消</button>
+        <button onclick="renderExportImagePreview()" data-i18n="refreshPreview">刷新预览</button>
+        <button onclick="downloadExportImage()" class="primary" data-i18n="downloadPng">下载 PNG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 插入图片模态框 -->
+  <div class="modal-overlay" id="image-modal">
+    <div class="modal c-modal c-modal--medium">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-image"></use></svg> <span data-i18n="imageTitle">插入图片</span></h3>
+        <button data-image-action="close"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="image-modal-tabs">
+          <button type="button" class="image-tab active" data-tab="url" data-image-tab="url" data-i18n="imageTabUrl">链接</button>
+          <button type="button" class="image-tab" data-tab="upload" data-image-tab="upload" data-i18n="imageTabUpload">本地上传</button>
+        </div>
+        <div class="image-tab-panel active" id="image-tab-url">
+          <label for="image-url-input" data-i18n="imageUrlLabel">图片链接</label>
+          <input type="url" id="image-url-input" data-i18n-placeholder="imageUrlPlaceholder" placeholder="https://example.com/image.png">
+          <label for="image-url-alt" data-i18n="imageAltLabel">描述文字</label>
+          <input type="text" id="image-url-alt" data-i18n-placeholder="imageAltPlaceholder" placeholder="图片描述">
+        </div>
+        <div class="image-tab-panel" id="image-tab-upload">
+          <div class="upload-area" id="image-upload-area">
+            <p data-i18n="uploadArea">点击选择或拖拽图片到此处</p>
+            <input type="file" id="image-file-input" accept="image/*" >
+          </div>
+          <div id="image-upload-preview" class="upload-preview"></div>
+          <label for="image-upload-alt" data-i18n="imageAltLabel">描述文字</label>
+          <input type="text" id="image-upload-alt" data-i18n-placeholder="imageAltPlaceholder" placeholder="图片描述">
+        </div>
+        <p class="hint" data-i18n="imageHint">本地图片将以 Base64 嵌入文档，文件过大可能影响性能和保存。</p>
+      </div>
+      <div class="modal-footer">
+        <button data-image-action="close" data-i18n="cancel">取消</button>
+        <button data-image-action="confirm" class="primary" data-i18n="insert">插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 插入 Mermaid 模态框 -->
+  <div class="modal-overlay" id="mermaid-modal">
+    <div class="modal c-modal c-modal--wide">
+      <div class="modal-header">
+        <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-mermaid"></use></svg> <span data-i18n="mermaidTitle">插入 Mermaid 图表</span></h3>
+        <button data-mermaid-action="close"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
+      </div>
+      <div class="modal-body">
+        <label for="mermaid-type" data-i18n="mermaidTypeLabel">图表类型</label>
+        <select id="mermaid-type" >
+          <option value="mindmap" data-i18n="mermaidTypeMindmap">思维导图</option>
+          <option value="flowchart" data-i18n="mermaidTypeFlowchart">流程图</option>
+        </select>
+        <label for="mermaid-code" data-i18n="mermaidCodeLabel">Mermaid 源码</label>
+        <textarea id="mermaid-code" rows="10" data-i18n-placeholder="mermaidCodePlaceholder" placeholder="mindmap\n  root((主题))\n    子主题 A\n    子主题 B"></textarea>
+        <p class="hint" data-i18n="mermaidHint">支持 Mermaid 语法，插入后将在预览区自动渲染。</p>
+      </div>
+      <div class="modal-footer">
+        <button data-mermaid-action="close" data-i18n="cancel">取消</button>
+        <button data-mermaid-action="confirm" class="primary" data-i18n="insert">插入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Marked.js：体积约 40KB，CDN 加载，离线也可编辑（预览降级为纯文本） -->
+
+
+
+
+
+
+<!-- 导出图片隐藏舞台 -->
+  <div id="export-image-stage" class="export-image-stage" aria-hidden="true">
+    <div id="export-image-content"></div>
+  </div>
+</template>
+
+<template data-compat-slot="ports">
+    <input type="text" id="filename" value="未命名文档.md" hidden class="c-file-input">
+    <input type="file" id="importFile" accept=".md,.markdown,.txt" onchange="importFile(this)" hidden class="c-file-input">
+</template>

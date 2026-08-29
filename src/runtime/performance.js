@@ -11,6 +11,22 @@ const DEFAULT_DIAGNOSTIC_INTERVAL_MS = 5000;
 let flushInProgress = false;
 let lastFlushError = '';
 let logPath = '';
+let platformLogs = null;
+let platformLogsEnabled = false;
+let runtimeStatsProvider = () => ({});
+
+export function configurePerformanceRuntimeStats(provider) {
+  if (typeof provider !== 'function') throw new TypeError('performance runtime stats provider must be a function');
+  runtimeStatsProvider = provider;
+}
+
+export function configurePerformancePlatform({ logs, enabled = false } = {}) {
+  if (!logs || typeof logs.writePerformance !== 'function') {
+    throw new TypeError('performance runtime requires a logs port');
+  }
+  platformLogs = logs;
+  platformLogsEnabled = Boolean(enabled);
+}
 
 function timestampMs() {
   return Date.now();
@@ -162,11 +178,11 @@ function drainAggregates() {
 }
 
 async function flush() {
-  if (flushInProgress || !queue.length || !window.markdownEditorNative?.isAvailable) return;
+  if (flushInProgress || !queue.length || !platformLogsEnabled || !platformLogs) return;
   flushInProgress = true;
   const batch = queue.splice(0, Math.min(queue.length, 250));
   try {
-    logPath = await window.markdownEditorNative.writePerformanceLogs(batch);
+    logPath = await platformLogs.writePerformance(batch);
     lastFlushError = '';
   } catch (error) {
     queue.unshift(...batch);
@@ -244,7 +260,7 @@ function describeElement(element) {
     return cleanString(`hybrid-${type}${position ? `:${position}` : ''}${zone ? `:${zone}` : ''}`, 140);
   }
   if (element.closest('[data-hybrid-inline-math]')) return 'hybrid-inline-math';
-  const editorRoot = element.closest('#editor, #preview, #preview-source');
+  const editorRoot = element.closest('#editor, #preview');
   if (editorRoot) return `${editorRoot.tagName.toLowerCase()}#${editorRoot.id}`;
   const id = element.id ? `#${element.id}` : '';
   const role = element.getAttribute('role');
@@ -314,7 +330,7 @@ function installInteractionTracking() {
     // CodeMirror 的原生滚动会转发为编辑器宿主事件，忽略内部 scroller，
     // 避免同一次滚动在日志中出现两条完全相同的 burst。
     if (target.classList.contains('cm-scroller') && target.closest('.virtual-editor-host')) return;
-    const scrollClassification = window.markdownEditorScrollController?.classifyScrollTarget?.(target) || null;
+    const scrollClassification = runtimeStatsProvider()?.classifyScrollTarget?.(target) || null;
     // 目标侧联动滚动和虚拟高度补偿不是用户交互，不计入交互 burst。
     // 否则日志会把一次编辑器滚动误报为编辑器、预览两次滚动。
     if (scrollClassification && scrollClassification.origin !== 'user') return;
@@ -426,8 +442,9 @@ function installErrorTracking() {
 function functionDetails(name) {
   const editor = document.getElementById('editor');
   const preview = document.getElementById('preview');
+  const runtimeStats = runtimeStatsProvider() || {};
   if (name.includes('Scroll')) {
-    const syncState = window.markdownEditorScrollController?.getState?.() || null;
+    const syncState = runtimeStats.scrollSync || null;
     return {
       editorScrollTop: Math.round(editor?.scrollTop || 0),
       previewScrollTop: Math.round(preview?.scrollTop || 0),
@@ -440,7 +457,7 @@ function functionDetails(name) {
     };
   }
   if (name.includes('Selection')) {
-    const selectionState = window.markdownEditorSelectionController?.getState?.() || null;
+    const selectionState = runtimeStats.selectionSync || null;
     return {
       selectionLength: Math.max(0, (editor?.selectionEnd || 0) - (editor?.selectionStart || 0)),
       selectionApplyingSide: selectionState?.applyingSide || '',
@@ -453,7 +470,7 @@ function functionDetails(name) {
   const previewBody = preview?.querySelector?.('.markdown-body');
   const virtualEditor = editor?.virtualEditor;
   const viewport = virtualEditor?.getVisibleRange?.();
-  const virtualPreview = window.markdownEditorVirtualPreview?.getStats?.();
+  const virtualPreview = runtimeStats.virtualPreview || null;
   const documentStatistics = window.markdownEditorDocumentStatistics || null;
   const documentModel = window.markdownEditorDocumentModel?.getState?.() || null;
   const presentationStats = virtualEditor?.getPresentationStats?.() || null;
@@ -465,7 +482,7 @@ function functionDetails(name) {
     documentDirty: Boolean(documentModel?.dirty),
     documentJournalEntries: documentModel?.journalEntries || 0,
     documentJournalChars: documentModel?.journalChars || 0,
-    editorLines: virtualEditor?.view?.state?.doc?.lines || 0,
+    editorLines: virtualEditor?.getLineCount?.() || 0,
     editorRenderedLines: editor?.querySelectorAll?.('.cm-line')?.length || 0,
     editorPresentationMode: virtualEditor?.getPresentationMode?.() || 'source',
     editorDecoratedLines: presentationStats?.decoratedLines || 0,
@@ -489,7 +506,7 @@ function functionDetails(name) {
     previewVirtualized: Boolean(virtualPreview?.active),
     previewMeasuredHeights: virtualPreview?.measuredHeights || 0,
     previewCachedHeights: virtualPreview?.cachedHeights || 0,
-    backgroundTasks: window.markdownEditorTaskScheduler?.getStats?.().pending || 0,
+    backgroundTasks: Number(runtimeStats.backgroundTasks) || 0,
     previewAnchors: preview?.querySelectorAll?.('[data-source-line]')?.length || 0
   };
 }
@@ -518,18 +535,6 @@ function installLegacyInstrumentation() {
       ['updatePreview', true],
       ['renderMermaidBlocks', true],
       ['renderOutline', true],
-      ['annotatePreviewSourceLines', true],
-      ['rebuildEditorLineMetrics', true],
-      ['getPreviewAnchorMetrics', true]
-    ],
-    'sync.scroll': [
-      ['syncFromEditorScroll', true],
-      ['syncFromPreviewScroll', true],
-      ['scheduleSyncedScroll', true],
-      ['scheduleSourceScrollSync', true]
-    ],
-    'sync.selection': [
-      ['highlightPreviewLines', true]
     ],
     'document.operation': [
       ['setupDocuments', false],
@@ -593,8 +598,9 @@ function installLegacyInstrumentation() {
 
 function recordRuntimeSnapshot() {
   const memory = performance.memory;
-  const scrollState = window.markdownEditorScrollController?.getState?.() || null;
-  const selectionState = window.markdownEditorSelectionController?.getState?.() || null;
+  const runtimeStats = runtimeStatsProvider() || {};
+  const scrollState = runtimeStats.scrollSync || null;
+  const selectionState = runtimeStats.selectionSync || null;
   record('runtime.snapshot', {
     category: 'runtime.performance',
     details: {

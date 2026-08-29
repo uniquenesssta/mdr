@@ -1,0 +1,138 @@
+/* Responsibility: Export-image and print/export presentation. */
+
+/* 打印 / 导出 PDF */
+@media print {
+      .l-menu-bar, .l-toolbar-shell, .l-status-bar, .l-sidebar, .f-editor-pane, .l-pane-resizer, .f-preview-pane .pane-header,
+      .modal-overlay, .toast, .icon-sprite {
+        display: none !important;
+      }
+      .f-preview-pane {
+        border: none !important;
+        flex: 1 1 100% !important;
+        max-width: none !important;
+        width: 100% !important;
+      }
+      .preview-content {
+        padding: 0 !important;
+        overflow: visible !important;
+        max-width: none !important;
+        color: var(--color-export-ink) !important;
+      }
+      .preview-content .markdown-body {
+        max-width: none !important;
+        padding: 0 !important;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3,
+      .preview-content h4, .preview-content h5, .preview-content h6,
+      .preview-content p, .preview-content li, .preview-content td, .preview-content th { color: var(--color-export-ink) !important; }
+      .preview-content pre, .preview-content code { background: var(--color-export-code-background) !important; color: var(--color-export-ink) !important; }
+      html, body, .l-app-shell, .l-workspace, .l-split-pane {
+        height: auto !important;
+        overflow: visible !important;
+      }
+      body {
+        background: var(--color-export-paper) !important;
+        color: var(--color-export-ink) !important;
+      }
+}
+
+/* 导出图片 */
+.export-image-stage {
+      position: fixed;
+      left: -99999px;
+      top: 0;
+      visibility: visible;
+      pointer-events: none;
+      z-index: var(--layer-below);
+}
+
+.ratio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: var(--space-md);
+      margin-bottom: 14px;
+}
+
+.ratio-btn {
+      padding: var(--space-lg) var(--space-xs);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--color-canvas);
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--motion-duration-quick) ease;
+      line-height: 1.3;
+}
+
+.ratio-btn small {
+      display: block;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      font-weight: 400;
+      margin-top: var(--space-2xs);
+}
+
+.ratio-btn:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      background: var(--color-surface-subtle);
+}
+
+.ratio-btn.active {
+      background: var(--color-accent);
+      color: var(--color-on-accent);
+      border-color: var(--color-accent);
+}
+
+.ratio-btn.active small {
+      color: var(--color-on-dark-muted);
+}
+
+.option-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin: var(--space-xl) 0 var(--space-2xl);
+}
+
+.option-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+}
+
+.option-row label {
+      display: inline;
+      margin: 0;
+      font-weight: normal;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+}
+
+.f-export-image-preview-wrap {
+      min-height: 120px;
+      max-height: 420px;
+      background: var(--color-canvas);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      padding: var(--space-lg);
+}
+
+.f-export-image-preview {
+      max-width: 100%;
+      display: block;
+      border-radius: var(--radius-md);
+}
+
+.modal-body .hint {
+      margin: var(--space-lg) 0 0;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+}
+
+.f-export-image-preview.is-hidden { display: none; }

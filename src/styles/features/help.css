@@ -1,0 +1,140 @@
+/* Responsibility: Help pages, shortcut reference and about-card presentation. */
+
+.help-content p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.help-step-list {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.help-step-list > div {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xl);
+  padding: 13px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-canvas);
+}
+
+.help-step-list > div > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.help-step-list p {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.help-step-list b,
+.help-topic-card h5 {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-weight: 650;
+}
+
+.help-step-list small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+}
+
+.help-topic-card {
+  margin-bottom: var(--space-xl);
+  padding: 14px 15px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-canvas);
+}
+
+.help-topic-card h5 {
+  margin: 0 0 var(--space-md);
+}
+
+.help-topic-card ul {
+  margin: 0;
+  padding-left: 1.35em;
+  color: var(--color-text-secondary);
+}
+
+.help-topic-card li {
+  margin: 5px 0;
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.shortcut-grid > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  min-width: 0;
+  padding: var(--space-lg) 11px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-canvas);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.shortcut-grid kbd {
+  flex: 0 0 auto;
+}
+
+.about-app-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: var(--space-2xl);
+  padding: 15px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-subtle);
+}
+
+.about-app-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-2xl);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--font-size-3xl);
+  font-weight: 750;
+}
+
+.about-app-card div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.about-app-card b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+}
+
+.about-app-card small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}

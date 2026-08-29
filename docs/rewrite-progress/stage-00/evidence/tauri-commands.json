@@ -1,0 +1,158 @@
+{
+  "annotated": [
+    {
+      "name": "abort_document_snapshot_upload",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "append_document_snapshot_chunk",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "begin_document_snapshot_upload",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "commit_document_snapshot_upload",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "delete_document_state",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "fetch_url",
+      "locations": [
+        "src-tauri/src/web_fetch.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "initial_file_path",
+      "locations": [
+        "src-tauri/src/local_file.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "list_text_file_tree",
+      "locations": [
+        "src-tauri/src/local_file.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "load_document_manifest",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "load_document_state",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "open_external_url",
+      "locations": [
+        "src-tauri/src/external_link.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "read_document_chunk",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "read_dropped_file",
+      "locations": [
+        "src-tauri/src/local_file.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "read_local_image",
+      "locations": [
+        "src-tauri/src/local_file.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "save_document_state",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "search_document_state",
+      "locations": [
+        "src-tauri/src/document_store.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "write_local_binary_file",
+      "locations": [
+        "src-tauri/src/local_file.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "write_local_text_file",
+      "locations": [
+        "src-tauri/src/local_file.rs"
+      ],
+      "registered": false
+    },
+    {
+      "name": "write_performance_logs",
+      "locations": [
+        "src-tauri/src/performance_log.rs"
+      ],
+      "registered": false
+    }
+  ],
+  "invokeHandlerEntries": [
+    "document_store::abort_document_snapshot_upload",
+    "document_store::append_document_snapshot_chunk",
+    "document_store::begin_document_snapshot_upload",
+    "document_store::commit_document_snapshot_upload",
+    "document_store::delete_document_state",
+    "document_store::load_document_manifest",
+    "document_store::load_document_state",
+    "document_store::read_document_chunk",
+    "document_store::save_document_state",
+    "document_store::search_document_state",
+    "external_link::open_external_url",
+    "local_file::initial_file_path",
+    "local_file::list_text_file_tree",
+    "local_file::read_dropped_file",
+    "local_file::read_local_image",
+    "local_file::write_local_binary_file",
+    "local_file::write_local_text_file",
+    "performance_log::write_performance_logs",
+    "web_fetch::fetch_url"
+  ]
+}

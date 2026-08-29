@@ -1,0 +1,62 @@
+/* Responsibility: Status bar shell and status presentation. */
+
+.l-status-bar .save-hint { color: var(--color-accent); opacity: 0; transition: opacity var(--motion-duration-slower) ease; font-weight: 500; }
+
+.l-status-bar .save-hint.show { opacity: 1; }
+
+.l-status-bar {
+  min-height: 28px;
+  padding: var(--space-sm) 5px 0;
+  gap: var(--space-xl);
+  border-top: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 10.5px;
+}
+
+.statusbar-format {
+  padding: var(--space-2xs) 7px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-surface-raised) 68%, transparent);
+  font-weight: 600;
+}
+
+.l-status-bar .save-hint {
+  color: var(--color-success-strong);
+}
+
+/* 状态栏 */
+.l-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      min-width: 0;
+      overflow: hidden;
+      gap: 18px;
+      padding: 5px var(--space-2xl);
+      background: var(--color-canvas);
+      border-top: 1px solid var(--color-border-subtle);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+}
+
+.statusbar-left {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 1 auto;
+  gap: var(--space-lg);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.l-status-bar .save-hint,
+.statusbar-format {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.statusbar-left .f-status-message {
+  display: none !important;
+}

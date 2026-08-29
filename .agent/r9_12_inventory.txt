@@ -1,0 +1,34 @@
+=== CONTROLLER IMPORTS/CALLS ===
+tests/stage-09-final-sync-legacy-removal.test.mjs:5:  createSelectionSyncController
+tests/stage-09-final-sync-legacy-removal.test.mjs:93:  const controller = createSelectionSyncController(editor, preview, {
+tests/stage-09-final-sync-legacy-removal.test.mjs:183:  const result = controller.syncEditorToPreview(false, 'test', { from: 1, to: 10, isCollapsed: false });
+tests/stage-09-final-sync-legacy-removal.test.mjs:201:  const result = controller.syncEditorToPreview(false, 'test', { from: 0, to: 5, isCollapsed: false });
+tests/stage-09-final-sync-legacy-removal.test.mjs:228:  const result = controller.syncPreviewToEditor('selectionchange', { text: 'lpha', range, anchorOffset: 0, focusOffset: 2 });
+tests/stage-09-final-sync-legacy-removal.test.mjs:247:  const result = controller.syncPreviewToEditor('selectionchange', {
+tests/stage-09-final-sync-legacy-removal.test.mjs:256:test('R9-12 SelectionSyncController destroy is terminal and cancels owned scheduling without destroying injected specialist owners', () => {
+tests/stage-09-scroll-contract-freeze.test.mjs:117:    controller.configure({
+tests/stage-09-scroll-contract-freeze.test.mjs:136:    controller.configure({ syncFromPreview: () => { calls += 1; } });
+tests/stage-09-scroll-contract-freeze.test.mjs:173:    controller.configure({ syncFromEditor: () => { calls += 1; } });
+tests/stage-09-scroll-contract-freeze.test.mjs:190:    controller.configure({ syncFromEditor: () => { calls += 1; } });
+tests/stage-09-scroll-controller.test.mjs:102:    h.controller.configure({
+tests/stage-09-scroll-controller.test.mjs:126:    h.controller.configure({
+tests/stage-09-scroll-controller.test.mjs:177:    h.controller.configure({ syncFromEditor: () => { editorCalls += 1; } });
+tests/stage-09-scroll-controller.test.mjs:203:    h.controller.configure({ syncFromEditor: () => { calls += 1; } });
+tests/stage-09-scroll-controller.test.mjs:216:  h.controller.configure({ syncFromEditor: () => { calls += 1; } });
+tests/stage-09-scroll-geometry-session.test.mjs:192:    controller.configure({ syncFromEditor: () => { editorCalls += 1; } });
+tests/stage-09-selection-feedback-guard.test.mjs:103:test('R9-08 final SelectionSyncController uses the shared Guard to reject editor feedback during preview settlement', () => {
+tests/stage-09-selection-feedback-guard.test.mjs:125:test('R9-08 final SelectionSyncController exposes applyingSide/previewRevision from Guard state instead of owning duplicates', () => {
+tests/stage-09-selection-retry-scheduler.test.mjs:107:test('R9-10 final SelectionSyncController delegates only recoverable pending editor results with makeEditorKey version checks', () => {
+tests/stage-09-selection-retry-scheduler.test.mjs:135:test('R9-10 final SelectionSyncController cancels stale retries at lifecycle boundaries while Scheduler owns retry replacement', () => {
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:12:test('R9-12 removes the classic scroll-sync script and migrates SelectionSyncController to the Stage 9 feature boundary', async () => {
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:18:  assert.match(facade, /SelectionSyncController/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:19:  assert.match(facade, /createSelectionSyncController/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:30:  assert.match(main, /createSelectionSyncController/);
+tests/architecture/stage-09-final-sync-legacy-removal.test.mjs:55:test('R9-12 final SelectionSyncController consumes frozen mapping API only through injected capability and never imports/copies the algorithm', async () => {
+tests/architecture/stage-09-scroll-contract-freeze.test.mjs:29:  assert.match(main, /createSelectionSyncController/);
+tests/architecture/stage-09-selection-feedback-guard.test.mjs:31:test('R9-08 final SelectionSyncController consumes the Guard and owns no applying-side release or preview revision duplicates', async () => {
+tests/architecture/stage-09-selection-highlight-session.test.mjs:58:test('R9-09 virtual remount recovery is delegated by final SelectionSyncController without Session-owned retry scheduling', async () => {
+tests/architecture/stage-09-selection-readers.test.mjs:45:test('R9-07 final SelectionSyncController consumes Readers and owns no raw selection boundaries or preview stabilization listeners', async () => {
+tests/architecture/stage-09-selection-readers.test.mjs:62:  assert.match(main, /createSelectionSyncController\(editorHost, previewHost, \{/);
+tests/architecture/stage-09-selection-retry-scheduler.test.mjs:31:test('R9-10 final SelectionSyncController delegates retry scheduling and owns no retry count or retry RAF state', async () => {
+tests/architecture/stage-09-selection-retry-scheduler.test.mjs:35:  assert.match(controller, /throw new TypeError\(`SelectionSyncController requires \$\{label\}`\)/);

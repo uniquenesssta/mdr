@@ -1,0 +1,207 @@
+name: R11-03 Document Store Validation Paths
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  R11_03_TARGET: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.R11_03_TARGET }}
+          fetch-depth: 0
+
+      - name: Guard R11-03 scope and contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$R11_03_TARGET"
+          base='0cbcc2000afcb928da57ab5c6aeebf87321036b3'
+          git merge-base --is-ancestor "$base" HEAD
+          changed="$(git diff --name-only "$base"...HEAD)"
+          unexpected="$(printf '%s\n' "$changed" | grep -vE '^(README\.md|docs/R11-03-DETAILS\.md|src-tauri/src/document_store\.rs|src-tauri/src/document_store/validation\.rs|src-tauri/src/document_store/paths\.rs|src-tauri/tests/document_store_compatibility\.rs|\.github/workflows/r11-03\.yml)$' || true)"
+          if [ -n "$unexpected" ]; then
+            echo 'Unexpected R11-03 paths:'
+            printf '%s\n' "$unexpected"
+            exit 1
+          fi
+          test -f src-tauri/src/document_store/validation.rs
+          test -f src-tauri/src/document_store/paths.rs
+          grep -Fq 'mod paths;' src-tauri/src/document_store.rs
+          grep -Fq 'mod validation;' src-tauri/src/document_store.rs
+          ! grep -Fq 'fn safe_document_id(' src-tauri/src/document_store.rs
+          ! grep -Fq 'fn utf16_to_byte_index(' src-tauri/src/document_store.rs
+          ! grep -Fq 'fn snapshot_paths(' src-tauri/src/document_store.rs
+          ! grep -Fq 'fn journal_path(' src-tauri/src/document_store.rs
+          ! grep -Fq 'fn snapshot_upload_path(' src-tauri/src/document_store.rs
+          grep -Fq 'pub(super) fn safe_document_id(' src-tauri/src/document_store/validation.rs
+          grep -Fq 'pub(super) fn validate_save_versions(' src-tauri/src/document_store/validation.rs
+          grep -Fq 'pub(super) fn transaction_byte_range(' src-tauri/src/document_store/validation.rs
+          grep -Fq 'pub(super) fn document_directory(' src-tauri/src/document_store/paths.rs
+          grep -Fq 'snapshot-{slot}.md' src-tauri/src/document_store/paths.rs
+          grep -Fq 'snapshot-{slot}.json' src-tauri/src/document_store/paths.rs
+          grep -Fq 'changes.jsonl' src-tauri/src/document_store/paths.rs
+          grep -Fq 'fs::create_dir_all(&root)' src-tauri/src/document_store.rs
+          ! grep -Fq 'std::fs' src-tauri/src/document_store/paths.rs
+          ! grep -Fq 'tauri' src-tauri/src/document_store/paths.rs
+          ! grep -Fq 'std::fs' src-tauri/src/document_store/validation.rs
+          ! grep -Fq 'tauri' src-tauri/src/document_store/validation.rs
+          grep -Fq 'SOURCE_DOCUMENT_STORE_VALIDATION' src-tauri/tests/document_store_compatibility.rs
+          grep -Fq 'SOURCE_DOCUMENT_STORE_PATHS' src-tauri/tests/document_store_compatibility.rs
+          git diff --quiet "$base"...HEAD -- \
+            src-tauri/Cargo.toml \
+            src-tauri/Cargo.lock \
+            package.json \
+            package-lock.json \
+            src-tauri/src/main.rs \
+            src-tauri/src/document_store/types.rs \
+            src-tauri/tests/fixtures/document_store \
+            .github/workflows/r11-01.yml \
+            .github/workflows/r11-02.yml
+          grep -Fq 'R11_02_TARGET: ee1e2533f4811d6a497460d166f07ffa7270c449' .github/workflows/r11-02.yml
+          ! grep -q '^  push:' .github/workflows/r11-02.yml
+          ! grep -q '^  pull_request:' .github/workflows/r11-02.yml
+          git diff --check
+
+      - name: Install Linux Tauri build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Pin Rust 1.88 with Clippy and rustfmt
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
+          rustup override set 1.88.0
+          rustc --version
+          cargo --version
+
+      - name: R11-03 Rust format gate
+        run: rustfmt --edition 2021 --check src-tauri/src/document_store/validation.rs src-tauri/src/document_store/paths.rs src-tauri/tests/document_store_compatibility.rs
+
+      - name: R11-03 validation contracts 7/7
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor document_store::validation::tests | tee /tmp/r11_03_validation.log
+          grep -q 'test result: ok. 7 passed; 0 failed' /tmp/r11_03_validation.log
+
+      - name: R11-03 path contracts 2/2
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor document_store::paths::tests | tee /tmp/r11_03_paths.log
+          grep -q 'test result: ok. 2 passed; 0 failed' /tmp/r11_03_paths.log
+
+      - name: R11-02 JSON contracts 4/4
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor document_store::types::tests | tee /tmp/r11_02_types.log
+          grep -q 'test result: ok. 4 passed; 0 failed' /tmp/r11_02_types.log
+
+      - name: R11-01 compatibility fixtures 5/5
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --test document_store_compatibility | tee /tmp/r11_01_compat.log
+          grep -q 'test result: ok. 5 passed; 0 failed' /tmp/r11_01_compat.log
+
+      - name: Full Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+
+      - name: R11-03 Clippy hard gate
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- --deny warnings
+
+      - name: Rust check
+        run: cargo check --manifest-path src-tauri/Cargo.toml --locked
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high
+
+      - name: R10-12 compatibility 11/11
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-remove-legacy-save.test.mjs | tee /tmp/r10_12.log
+          grep -q '# tests 11' /tmp/r10_12.log
+          grep -q '# pass 11' /tmp/r10_12.log
+          grep -q '# fail 0' /tmp/r10_12.log
+
+      - name: Full Node regression 344/344
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          npm test > /tmp/r11_03_node.log 2>&1
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            echo '--- Node regression failing test context ---'
+            grep -n -B 20 -A 35 -E '^[[:space:]]*not ok [0-9]+ -' /tmp/r11_03_node.log || true
+            echo '--- Node regression assertion context ---'
+            grep -n -B 8 -A 16 -E 'failureType:|AssertionError|ERR_|actual:|expected:|operator:' /tmp/r11_03_node.log || true
+            echo '--- Node regression totals ---'
+            grep -E '^# (tests|pass|fail|cancelled|skipped|todo) ' /tmp/r11_03_node.log || true
+            exit "$status"
+          fi
+          grep -q '# tests 344' /tmp/r11_03_node.log
+          grep -q '# pass 344' /tmp/r11_03_node.log
+          grep -q '# fail 0' /tmp/r11_03_node.log
+          grep -E '^# (tests|pass|fail) ' /tmp/r11_03_node.log
+
+      - name: Architecture and documentation gates
+        run: |
+          npm run verify:architecture
+          npm run verify:no-legacy-runtime
+          npm run verify:generated-files
+          npm run verify:readme-record
+
+      - name: Browser preview contract 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser:contract | tee /tmp/r11_03_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r11_03_browser_contract.log
+
+      - name: Production build
+        run: npm run build
+
+      - name: Built-app browser regression 29/29
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser | tee /tmp/r11_03_browser.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r11_03_browser.log
+
+      - name: Validation must leave tracked tree clean
+        run: |
+          git diff --check
+          git diff --exit-code

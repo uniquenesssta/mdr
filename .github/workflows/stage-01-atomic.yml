@@ -1,0 +1,169 @@
+name: Stage 1 Atomic Verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-01-atomic-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  architecture-foundation:
+    name: Verify Stage 1 architecture foundation
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm run deps:prepare
+      - name: Verify production module ownership fixture
+        run: node --test tests/architecture/module-inventory.test.mjs
+      - name: Verify minimal composition root
+        run: node --test tests/architecture/application-composition.test.mjs
+      - name: Verify application lifecycle state machine
+        run: node --test tests/architecture/application-lifecycle.test.mjs
+      - name: Verify disposer registry
+        run: node --test tests/architecture/disposer-registry.test.mjs
+      - name: Verify command registry and command bus
+        run: node --test tests/architecture/command-bus.test.mjs
+      - name: Verify event types and event bus
+        run: node --test tests/architecture/event-bus.test.mjs
+      - name: Verify stable model-kernel facade
+        run: node --test tests/architecture/model-kernel-contract.test.mjs
+      - name: Verify architecture scanner contracts
+        run: >-
+          node --test
+          tests/architecture/dependency-boundaries.test.mjs
+          tests/architecture/no-global-business-api.test.mjs
+          tests/architecture/no-inline-events.test.mjs
+          tests/architecture/module-side-effects.test.mjs
+          tests/architecture/architecture-tooling.test.mjs
+      - name: Verify Stage 1 handoff contract
+        run: node --test tests/stage-01-handoff.test.mjs
+      - name: Run architecture hard gate
+        run: node scripts/verify-architecture.mjs --output=artifacts/stage-01/01-08-architecture-scan.json
+      - name: Collect machine-readable module inventory
+        run: node scripts/stage-01/collect-module-inventory.mjs --output=artifacts/stage-01/01-01-module-inventory.json
+      - name: Record composition-root evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-02-composition-root.json',JSON.stringify({node:'stage-01/01-02',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT},null,2)+'\n')"
+      - name: Record lifecycle evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-03-application-lifecycle.json',JSON.stringify({node:'stage-01/01-03',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,states:['created','starting','started','stopping','stopped','failed'],startupOrder:'registration',rollbackOrder:'reverse',shutdownOrder:'reverse'},null,2)+'\n')"
+      - name: Record disposer-registry evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-04-disposer-registry.json',JSON.stringify({node:'stage-01/01-04',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,states:['open','disposing','failed'],cleanupOrder:'lifo',retryPolicy:'failed-only',concurrentDispose:'shared-transition'},null,2)+'\n')"
+      - name: Record command-infrastructure evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-05-command-infrastructure.json',JSON.stringify({node:'stage-01/01-05',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,registryOwnership:'unique-handler',duplicatePolicy:'reject',unregisterPolicy:'exact-idempotent',dispatchResult:'promise',missingCommand:'reject',handlerErrors:'preserve'},null,2)+'\n')"
+      - name: Record event-infrastructure evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-06-event-infrastructure.json',JSON.stringify({node:'stage-01/01-06',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,payloadPolicy:'deep-frozen-plain-data-snapshot',deliveryOrder:'registration',oncePolicy:'remove-before-invoke',unsubscribePolicy:'exact-idempotent',listenerErrors:'isolated-reported',publishResult:'void',destroyedUse:'reject'},null,2)+'\n')"
+      - name: Record model-kernel evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/stage-01
+          node -e "const fs=require('node:fs');fs.writeFileSync('artifacts/stage-01/01-07-model-kernel.json',JSON.stringify({node:'stage-01/01-07',status:'passed',commit:process.env.GITHUB_SHA,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,javascriptFrozenModules:8,totalFrozenContracts:9,publicExports:26,exportPolicy:'explicit-named-reexports',importerPolicy:'non-model-through-facade',frozenHashes:'unchanged'},null,2)+'\n')"
+      - name: Record architecture-gate evidence
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const baseline = JSON.parse(await readFile('tests/architecture/fixtures/architecture-baseline.json', 'utf8'));
+          const scan = JSON.parse(await readFile('artifacts/stage-01/01-08-architecture-scan.json', 'utf8'));
+          if (scan.status !== 'passed' || scan.issueCount !== 0) process.exit(1);
+          await writeFile('artifacts/stage-01/01-08-architecture-gates.json', `${JSON.stringify({
+            node: 'stage-01/01-08',
+            status: 'passed',
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            attempt: process.env.GITHUB_RUN_ATTEMPT,
+            gates: [
+              'inline-events',
+              'classic-scripts',
+              'business-globals',
+              'cross-feature-internal-imports',
+              'circular-dependencies',
+              'module-import-side-effects',
+              'tracked-generated-files',
+              'legacy-file-suffixes',
+              'readme-stage-records'
+            ],
+            exactMigrationBaseline: {
+              sourceCommit: baseline.sourceCommit,
+              wildcardExemptions: baseline.policy.wildcardExemptions,
+              classicScripts: baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0),
+              inlineEvents: baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0),
+              businessGlobals: baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0),
+              trackedGeneratedFiles: baseline.trackedGeneratedFiles.length
+            }
+          }, null, 2)}\n`, 'utf8');
+          NODE
+      - name: Record Stage 1 handoff evidence
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const baseline = JSON.parse(await readFile('tests/architecture/fixtures/architecture-baseline.json', 'utf8'));
+          const moduleFixture = JSON.parse(await readFile('tests/architecture/fixtures/production-modules.json', 'utf8'));
+          const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
+          await writeFile('artifacts/stage-01/01-10-stage-01-handoff.json', `${JSON.stringify({
+            node: 'stage-01/01-10',
+            status: 'passed',
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            attempt: process.env.GITHUB_RUN_ATTEMPT,
+            handoffScope: 'architecture-foundation-only',
+            stage2: 'in-progress-after-handoff',
+            productionBootstrap: 'stage-02-module-entry-and-current-shell-compatibility',
+            stage1ProductionModules: 67,
+            currentProductionModules: moduleFixture.modules.length,
+            exactMigrationBaseline: {
+              wildcardExemptions: baseline.policy.wildcardExemptions,
+              classicScripts: baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0),
+              inlineEvents: baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0),
+              businessGlobals: baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0),
+              trackedGeneratedFiles: baseline.trackedGeneratedFiles.length
+            },
+            packageVerificationEntries: [
+              'verify:architecture',
+              'verify:no-legacy-runtime',
+              'verify:generated-files',
+              'verify:readme-record'
+            ].map(name => ({ name, command: packageJson.scripts[name] }))
+          }, null, 2)}\n`, 'utf8');
+          NODE
+      - name: Run existing Node regression suite
+        run: npm test
+      - name: Run browser interaction contract
+        run: npm run test:browser:contract
+      - name: Build current application
+        run: npm run build
+      - name: Upload Atomic Task evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-01-architecture-foundation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-01
+          if-no-files-found: error
+          retention-days: 30

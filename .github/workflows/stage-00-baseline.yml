@@ -1,0 +1,131 @@
+name: Stage 0 Baseline Verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-00-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  baseline:
+    name: Freeze and verify current baseline
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    env:
+      STAGE0_REPORT_DIR: artifacts/stage-00
+      E2E_ARTIFACT_DIR: artifacts/stage-00/browser
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: '1'
+
+    steps:
+      - name: Checkout baseline branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install declared Rust toolchain
+        continue-on-error: true
+        shell: bash
+        run: |
+          RUST_TOOLCHAIN="$(sed -n 's/^rust-version = "\([^"]*\)"/\1/p' src-tauri/Cargo.toml)"
+          if [[ -z "$RUST_TOOLCHAIN" ]]; then
+            echo "src-tauri/Cargo.toml does not declare rust-version" >&2
+            exit 1
+          fi
+          echo "RUST_TOOLCHAIN=$RUST_TOOLCHAIN" >> "$GITHUB_ENV"
+          node scripts/stage-00/run-check.mjs rust-toolchain bash -lc \
+            "rustup toolchain install $RUST_TOOLCHAIN --profile minimal --no-self-update && rustup default $RUST_TOOLCHAIN && rustc --version && cargo --version"
+
+      - name: Install Tauri Linux system dependencies
+        continue-on-error: true
+        run: >-
+          node scripts/stage-00/run-check.mjs tauri-system-deps bash -lc
+          "sudo apt-get update && sudo apt-get install -y
+          libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev
+          libssl-dev libayatana-appindicator3-dev librsvg2-dev"
+
+      - name: Resolve Chromium executable
+        shell: bash
+        run: |
+          for candidate in google-chrome google-chrome-stable chromium chromium-browser; do
+            if command -v "$candidate" >/dev/null 2>&1; then
+              echo "CHROME_PATH=$(command -v "$candidate")" >> "$GITHUB_ENV"
+              "$candidate" --version
+              exit 0
+            fi
+          done
+          echo "No Chromium executable found; browser checks will record the failure."
+
+      - name: Collect static baseline and contracts
+        if: always()
+        run: node scripts/stage-00/collect-baseline.mjs
+
+      - name: Install frontend dependencies
+        continue-on-error: true
+        run: node scripts/stage-00/run-check.mjs npm-ci npm run deps:prepare
+
+      - name: Run Node test suite
+        continue-on-error: true
+        run: node scripts/stage-00/run-check.mjs npm-test npm test
+
+      - name: Run browser interaction contract
+        continue-on-error: true
+        run: node scripts/stage-00/run-check.mjs browser-contract npm run test:browser:contract
+
+      - name: Build frontend
+        continue-on-error: true
+        run: node scripts/stage-00/run-check.mjs frontend-build npm run build
+
+      - name: Run built application browser regression
+        continue-on-error: true
+        run: node scripts/stage-00/run-check.mjs browser-app npm run test:browser
+
+      - name: Run Rust tests with lockfile
+        continue-on-error: true
+        run: >-
+          node scripts/stage-00/run-check.mjs cargo-test cargo test
+          --manifest-path src-tauri/Cargo.toml --locked
+
+      - name: Run Rust check with lockfile
+        continue-on-error: true
+        run: >-
+          node scripts/stage-00/run-check.mjs cargo-check cargo check
+          --manifest-path src-tauri/Cargo.toml --locked
+
+      - name: Run extended Tauri Linux build
+        continue-on-error: true
+        run: >-
+          node scripts/stage-00/run-check.mjs tauri-build npm run tauri:build -- --verbose
+
+      - name: Summarize verification results
+        if: always()
+        run: node scripts/stage-00/summarize-results.mjs
+
+      - name: Generate Stage 0 documentation in workspace
+        if: always()
+        continue-on-error: true
+        run: node scripts/stage-00/persist-results.mjs
+
+      - name: Upload Stage 0 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-00-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/stage-00
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Enforce Stage 0 hard gate
+        if: always()
+        run: node scripts/stage-00/summarize-results.mjs --enforce

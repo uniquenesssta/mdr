@@ -87,11 +87,6 @@ async function waitForIdle(options = {}) {
   return false;
 }
 
-function dispatchEditorInput(editor) {
-  const event = new Event('input', { bubbles: true, cancelable: false });
-  editor.dispatchEvent(event);
-}
-
 async function setLayout(mode) {
   const normalized = ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
   if (typeof globalThis.setLayoutMode !== 'function') {
@@ -116,18 +111,79 @@ async function setVisualEditing(options = {}) {
   await waitForIdle();
 }
 
-async function loadMarkdown(source, options = {}) {
+function findFixtureFocusPosition(content, options = {}) {
+  const requestedSelection = Number(options.selection);
+  if (Number.isFinite(requestedSelection)) {
+    return Math.max(0, Math.min(content.length, requestedSelection));
+  }
+  const requestedText = String(options.focusText || '');
+  if (requestedText) {
+    const requestedIndex = content.indexOf(requestedText);
+    if (requestedIndex >= 0) return requestedIndex;
+  }
+  const fencedCode = content.match(/```(?!mermaid\b)[^\n]*\n/);
+  if (fencedCode?.index !== undefined) {
+    return fencedCode.index + fencedCode[0].length;
+  }
+  return 0;
+}
+
+async function revealPosition(position, options = {}) {
   const editor = getEditor();
   if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable');
-  editor.virtualEditor.loadDocument(String(source || ''), {
-    selection: Number.isFinite(Number(options.selection)) ? Number(options.selection) : 0
-  });
-  dispatchEditorInput(editor);
+  const safePosition = Math.max(0, Math.min(editor.textLength, Number(position) || 0));
+  if (options.preserveSelection !== true) {
+    editor.focus({ preventScroll: true });
+    await waitForAnimationFrames(1);
+    editor.setSelectionRange(safePosition, safePosition);
+  }
+  editor.virtualEditor.scrollPositionIntoView?.(
+    safePosition,
+    options.behavior === 'smooth' ? 'smooth' : 'auto',
+    Number.isFinite(Number(options.viewportRatio)) ? Number(options.viewportRatio) : 0.5
+  );
+  await waitForAnimationFrames(3);
+  await waitForIdle({ timeoutMs: options.timeoutMs || 5000 });
+  return safePosition;
+}
+
+async function revealText(text, options = {}) {
+  const editor = getEditor();
+  if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable');
+  const query = String(text || '');
+  if (!query) throw new Error('revealText requires non-empty text');
+  const match = editor.virtualEditor.findText?.(query, Number(options.from) || 0, { wrap: options.wrap !== false });
+  if (!match) throw new Error(`Unable to find E2E fixture text: ${query}`);
+  return revealPosition(options.edge === 'end' ? match.to : match.from, options);
+}
+
+async function loadApplicationDocument(source, options = {}) {
+  if (typeof globalThis.loadTextContentAsDocument !== 'function') {
+    throw new Error('application document import flow is unavailable');
+  }
+  const content = String(source || '');
+  const loaded = await globalThis.loadTextContentAsDocument(
+    String(options.name || 'e2e-fixture.md'),
+    content,
+    ''
+  );
+  if (!loaded) throw new Error('application document import flow rejected the E2E fixture');
+
+  const editor = getEditor();
+  if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable after document import');
+  const focusPosition = findFixtureFocusPosition(content, options);
+  await revealPosition(focusPosition, { timeoutMs: options.timeoutMs || 5000 });
+  return editor;
+}
+
+async function loadMarkdown(source, options = {}) {
+  await loadApplicationDocument(source, options);
   await setVisualEditing({
     code: options.codeVisualEditing !== false,
     table: options.tableVisualEditing !== false
   });
   await setLayout(options.layout || 'hybrid');
+  await revealPosition(getEditor()?.selectionStart || 0, { timeoutMs: options.timeoutMs || 6000 });
   await waitForIdle({ timeoutMs: options.timeoutMs || 6000 });
   return snapshot();
 }
@@ -155,6 +211,8 @@ export function installMarkdownEditorE2EBridge() {
     loadMarkdown,
     setLayout,
     setVisualEditing,
+    revealPosition,
+    revealText,
     waitForIdle,
     snapshot,
     clearStorage() {

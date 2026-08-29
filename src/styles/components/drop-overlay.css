@@ -1,0 +1,41 @@
+/* Responsibility: File-drop overlay component. */
+
+/* 拖放文件提示遮罩 */
+.drop-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--color-drop-target);
+      border: 2px dashed var(--color-accent);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--layer-popover);
+      pointer-events: none;
+      transition: opacity var(--motion-duration-moderate) ease;
+      opacity: 0;
+      backdrop-filter: blur(2px);
+}
+
+.drop-overlay.show {
+      display: flex;
+      opacity: 1;
+}
+
+.drop-message {
+      color: var(--color-accent);
+      font-size: var(--font-size-3xl);
+      font-weight: 600;
+      padding: var(--space-4xl) var(--space-6xl);
+      border-radius: var(--radius-3xl);
+      background: var(--color-surface-raised);
+      box-shadow: var(--shadow-overlay);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-lg);
+}
+
+.drop-overlay {
+  inset: 10px;
+  border-radius: var(--radius-4xl);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}

@@ -1,0 +1,17 @@
+/* Responsibility: Generic SVG icon component sizing and alignment. */
+
+/* SVG 图标基线对齐 */
+.icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+}
+
+.icon-sm { width: 14px; height: 14px; }
+
+.icon-lg { width: 18px; height: 18px; }

@@ -1,0 +1,132 @@
+name: R9-12 authoritative full validation
+
+on:
+  push:
+    branches:
+      - agent/r9-12-runner
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Guard R9-12 scope, frozen files, and production inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='9556ece1f5ca5dc5a376291d5eb0dfad76b419d5'
+          git merge-base --is-ancestor "$base" HEAD
+          git diff --quiet "$base"...HEAD -- \
+            src/sync/selection-mapping.js \
+            src/model-kernel/index.js \
+            src/document/document-model.js \
+            package.json \
+            package-lock.json
+          test ! -e public/app/scroll-sync.js
+          test ! -e src/sync/selection-controller.js
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const fixture = JSON.parse(fs.readFileSync('tests/architecture/fixtures/production-modules.json', 'utf8'));
+          if (!Array.isArray(fixture.modules)) {
+            throw new Error('production module fixture must expose a modules array');
+          }
+          if (fixture.modules.length !== 381) {
+            throw new Error(`production module inventory drift: expected 381, got ${fixture.modules.length}`);
+          }
+          console.log('Production module inventory: 381/381');
+          NODE
+          git diff --check
+
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high
+
+      - name: R9-12 final sync targeted gate 16/16
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            tests/stage-09-final-sync-legacy-removal.test.mjs \
+            tests/architecture/stage-09-final-sync-legacy-removal.test.mjs \
+            | tee /tmp/r9_12_targeted.log
+          grep -q '# tests 16' /tmp/r9_12_targeted.log
+          grep -q '# pass 16' /tmp/r9_12_targeted.log
+          grep -q '# fail 0' /tmp/r9_12_targeted.log
+
+      - name: Full Node regression
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          npm test 2>&1 | tee /tmp/r9_12_node.log
+          status=${PIPESTATUS[0]}
+          set -e
+          grep -E '# (tests|pass|fail) ' /tmp/r9_12_node.log | tail -n 3 || true
+          if [ "$status" -ne 0 ]; then
+            context="$(grep -n -B 16 -A 48 -E '^not ok|failureType:|AssertionError|ERR_[A-Z_]+|^# fail [1-9]|Error:' /tmp/r9_12_node.log | head -n 120 || true)"
+            if [ -z "$context" ]; then
+              context="$(tail -n 120 /tmp/r9_12_node.log)"
+            fi
+            context="${context//'%'/'%25'}"
+            context="${context//$'\r'/'%0D'}"
+            context="${context//$'\n'/'%0A'}"
+            echo "::error title=Full Node regression failure::$context"
+            exit "$status"
+          fi
+
+      - name: Architecture and legacy runtime gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run verify:architecture
+          npm run verify:no-legacy-runtime
+          npm run verify:generated-files
+          npm run verify:readme-record
+
+      - name: Browser preview contract 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser:contract | tee /tmp/r9_12_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r9_12_browser_contract.log
+
+      - name: Production build
+        run: npm run build
+
+      - name: Built-app browser run 1 29/29
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser | tee /tmp/r9_12_browser_run1.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r9_12_browser_run1.log
+
+      - name: Built-app browser run 2 29/29
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser | tee /tmp/r9_12_browser_run2.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r9_12_browser_run2.log
+
+      - name: Validation must leave tracked tree clean
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff --exit-code

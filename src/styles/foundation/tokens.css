@@ -1,0 +1,95 @@
+:root {
+  /* Typography */
+  --font-family-ui: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-family-body: var(--font-family-ui);
+  --font-family-editor: "SF Pro Text", "Inter", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-family-mono: "JetBrains Mono", "SF Mono", "Fira Code", Consolas, Menlo, monospace;
+  --font-size-3xs: 9px;
+  --font-size-2xs: 10px;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 14px;
+  --font-size-xl: 15px;
+  --font-size-2xl: 16px;
+  --font-size-3xl: 18px;
+
+  /* Spacing */
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 6px;
+  --space-md: 8px;
+  --space-lg: 10px;
+  --space-xl: 12px;
+  --space-2xl: 16px;
+  --space-3xl: 20px;
+  --space-4xl: 24px;
+  --space-5xl: 32px;
+  --space-6xl: 40px;
+  --space-7xl: 48px;
+  --space-8xl: 64px;
+
+  /* Corner radius */
+  --radius-2xs: 2px;
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-base: 6px;
+  --radius-md: 7px;
+  --radius-lg: 8px;
+  --radius-lg-plus: 10px;
+  --radius-xl: 11px;
+  --radius-2xl: 12px;
+  --radius-2xl-plus: 14px;
+  --radius-3xl: 15px;
+  --radius-4xl: 18px;
+  --radius-pill: 999px;
+  --radius-round: 50%;
+
+  /* Composed elevation and focus shadows */
+--shadow-accent-control: 0 1px 2px var(--color-accent-shadow);
+  --shadow-accent-control-hover: 0 4px 10px var(--color-accent-shadow-strong);
+  --shadow-accent-control-raised: 0 5px 14px var(--color-accent-control-shadow), inset 0 1px 0 var(--color-control-inset-highlight);
+  --shadow-inset-control-border: inset 0 0 0 1px var(--color-control-inset-border);
+  --shadow-inset-highlight: inset 0 0 0 1px var(--color-control-inset-highlight);
+  --shadow-swatch-hover: 0 0 0 2px var(--color-accent-soft), inset 0 0 0 1px var(--color-control-inset-highlight);
+  --shadow-selection-border: 0 0 0 1px var(--color-accent-selection-border);
+  --shadow-chrome-highlight: 0 1px 0 var(--color-chrome-highlight);
+  --shadow-success-ring: 0 0 0 3px var(--color-success-soft);
+  --shadow-bordered-control: 0 1px 2px var(--color-shadow-subtle), 0 0 0 1px var(--color-border-subtle);
+  --shadow-content-card: 0 3px 12px var(--color-shadow-faint);
+  --shadow-focus-content-card: 0 0 0 4px var(--color-accent-soft), var(--shadow-content-card);
+  --shadow-toolbar: 0 1px 8px var(--color-shadow-subtle);
+
+  /* Stacking layers */
+  --layer-below: -1;
+  --layer-raised: 1;
+  --layer-sticky: 5;
+  --layer-resize-handle: 7;
+  --layer-chrome: 30;
+  --layer-dropdown: 100;
+  --layer-menu: 200;
+  --layer-popover: 300;
+  --layer-modal: 1000;
+  --layer-modal-nested: 1010;
+  --layer-progress-overlay: 1300;
+  --layer-context-menu: 3000;
+  --layer-link-preview: 5200;
+
+  /* Motion */
+  --motion-duration-none: 0s;
+  --motion-duration-instant-feedback: 0.10s;
+  --motion-duration-fast: 0.14s;
+  --motion-duration-quick: 0.15s;
+  --motion-duration-normal: 0.16s;
+  --motion-duration-medium: 0.18s;
+  --motion-duration-moderate: 0.20s;
+  --motion-duration-slow: 0.25s;
+  --motion-duration-slower: 0.30s;
+  --motion-duration-long: 0.70s;
+  --motion-duration-longer: 0.80s;
+  --motion-ease-standard: ease;
+  --motion-ease-out: ease-out;
+  --motion-ease-linear: linear;
+  --motion-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+}

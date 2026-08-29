@@ -1,0 +1,178 @@
+name: R11-02 Document Store Types
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  R11_02_TARGET: ee1e2533f4811d6a497460d166f07ffa7270c449
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.R11_02_TARGET }}
+          fetch-depth: 0
+
+      - name: Guard R11-02 scope and contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$R11_02_TARGET"
+          base='6cdff0cb98982e7604053d6ec0c0df7c0991e2fd'
+          git merge-base --is-ancestor "$base" HEAD
+          changed="$(git diff --name-only "$base"...HEAD)"
+          unexpected="$(printf '%s\n' "$changed" | grep -vE '^(README\.md|AGENTS\.md|docs/R11-02-DETAILS\.md|src-tauri/src/document_store\.rs|src-tauri/src/document_store/types\.rs|src-tauri/tests/document_store_compatibility\.rs|\.github/workflows/r11-01\.yml|\.github/workflows/r11-02\.yml)$' || true)"
+          if [ -n "$unexpected" ]; then
+            echo 'Unexpected R11-02 paths:'
+            printf '%s\n' "$unexpected"
+            exit 1
+          fi
+          test -f src-tauri/src/document_store.rs
+          test -f src-tauri/src/document_store/types.rs
+          grep -Fq 'mod types;' src-tauri/src/document_store.rs
+          ! grep -Fq 'pub use types::TextChange;' src-tauri/src/document_store.rs
+          grep -Fq 'use super::types::TextChange;' src-tauri/src/document_store.rs
+          grep -Fq 'pub(crate) use types::{' src-tauri/src/document_store.rs
+          ! grep -Fq 'pub struct SaveDocumentRequest {' src-tauri/src/document_store.rs
+          grep -Fq 'pub struct TextChange {' src-tauri/src/document_store/types.rs
+          grep -Fq 'pub struct SaveDocumentRequest {' src-tauri/src/document_store/types.rs
+          grep -Fq '#[serde(rename_all = "camelCase")]' src-tauri/src/document_store/types.rs
+          grep -Fq 'SOURCE_DOCUMENT_STORE_TYPES' src-tauri/tests/document_store_compatibility.rs
+          git diff --quiet "$base"...HEAD -- \
+            src-tauri/Cargo.toml \
+            src-tauri/Cargo.lock \
+            package.json \
+            package-lock.json \
+            src-tauri/src/main.rs \
+            src-tauri/tests/fixtures/document_store
+          ! grep -q '^  push:' .github/workflows/r11-01.yml
+          ! grep -q '^  pull_request:' .github/workflows/r11-01.yml
+          grep -Fq 'ref: 6cdff0cb98982e7604053d6ec0c0df7c0991e2fd' .github/workflows/r11-01.yml
+          git diff --check
+
+      - name: Install Linux Tauri build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Pin Rust 1.88 with Clippy and rustfmt
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
+          rustup override set 1.88.0
+          rustc --version
+          cargo --version
+
+      - name: R11-02 Rust format gate
+        run: rustfmt --edition 2021 --check src-tauri/src/document_store/types.rs src-tauri/tests/document_store_compatibility.rs
+
+      - name: R11-02 JSON contracts 4/4
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor document_store::types::tests | tee /tmp/r11_02_types.log
+          grep -q 'test result: ok. 4 passed; 0 failed' /tmp/r11_02_types.log
+
+      - name: R11-01 compatibility fixtures 5/5
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --test document_store_compatibility | tee /tmp/r11_01_compat.log
+          grep -q 'test result: ok. 5 passed; 0 failed' /tmp/r11_01_compat.log
+
+      - name: Full Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+
+      - name: R11-02 Clippy hard gate
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- --deny warnings
+
+      - name: Rust check
+        run: cargo check --manifest-path src-tauri/Cargo.toml --locked
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high
+
+      - name: R10-12 compatibility 11/11
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-10-remove-legacy-save.test.mjs | tee /tmp/r10_12.log
+          grep -q '# tests 11' /tmp/r10_12.log
+          grep -q '# pass 11' /tmp/r10_12.log
+          grep -q '# fail 0' /tmp/r10_12.log
+
+      - name: Full Node regression 344/344
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          npm test > /tmp/r11_02_node.log 2>&1
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            echo '--- Node regression failing test context ---'
+            grep -n -B 20 -A 35 -E '^[[:space:]]*not ok [0-9]+ -' /tmp/r11_02_node.log || true
+            echo '--- Node regression assertion context ---'
+            grep -n -B 8 -A 16 -E 'failureType:|AssertionError|ERR_|actual:|expected:|operator:' /tmp/r11_02_node.log || true
+            echo '--- Node regression totals ---'
+            grep -E '^# (tests|pass|fail|cancelled|skipped|todo) ' /tmp/r11_02_node.log || true
+            exit "$status"
+          fi
+          grep -q '# tests 344' /tmp/r11_02_node.log
+          grep -q '# pass 344' /tmp/r11_02_node.log
+          grep -q '# fail 0' /tmp/r11_02_node.log
+          grep -E '^# (tests|pass|fail) ' /tmp/r11_02_node.log
+
+      - name: Architecture and documentation gates
+        run: |
+          npm run verify:architecture
+          npm run verify:no-legacy-runtime
+          npm run verify:generated-files
+          npm run verify:readme-record
+
+      - name: Browser preview contract 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser:contract | tee /tmp/r11_02_browser_contract.log
+          grep -Fq 'Browser tests: 10, passed: 10, failed: 0' /tmp/r11_02_browser_contract.log
+
+      - name: Production build
+        run: npm run build
+
+      - name: Built-app browser regression 29/29
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:browser | tee /tmp/r11_02_browser.log
+          grep -Fq 'Browser tests: 29, passed: 29, failed: 0' /tmp/r11_02_browser.log
+
+      - name: Validation must leave tracked tree clean
+        run: |
+          git diff --check
+          git diff --exit-code

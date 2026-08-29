@@ -1,0 +1,163 @@
+/* Responsibility: Shared enhanced code presentation across preview and hybrid modes. */
+
+/* Keep hybrid code presentation visually aligned with the enhanced live preview. */
+.virtual-editor-host .cm-hybrid-code-body,
+.preview-content pre.preview-code-widget code.preview-code-body {
+  max-width: 100%;
+  padding: var(--space-lg) 0 var(--space-xl);
+  overflow-x: auto;
+  background: transparent;
+  color: var(--code-text);
+  font-family: var(--font-family-mono);
+  font-size: .9em;
+  line-height: 1.65;
+  tab-size: 4;
+}
+
+.virtual-editor-host .markdown-code-row,
+.preview-content .markdown-code-row {
+  min-width: max-content;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
+  padding-right: 18px;
+}
+
+.virtual-editor-host .markdown-code-line,
+.preview-content .markdown-code-line {
+  display: block;
+  min-height: 1.65em;
+  white-space: pre;
+  color: var(--code-text);
+  font: inherit;
+}
+
+.virtual-editor-host .cm-hybrid-code-body.is-direct-edit-trigger {
+  cursor: default;
+  outline: none;
+  transition: box-shadow var(--motion-duration-fast) ease, background-color var(--motion-duration-fast) ease;
+}
+
+.virtual-editor-host .cm-hybrid-code-body.is-direct-edit-trigger:hover {
+  background: color-mix(in srgb, var(--color-accent) 3%, transparent);
+}
+
+.virtual-editor-host .cm-hybrid-code-body.is-direct-edit-trigger:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-accent) 24%, transparent);
+}
+
+.virtual-editor-host .cm-hybrid-code-widget.is-code-editor-active .cm-hybrid-code-editing-badge {
+  background: color-mix(in srgb, var(--color-accent) 18%, var(--code-toolbar-background));
+}
+
+.markdown-code-token-keyword { color: var(--code-token-keyword); }
+
+.markdown-code-token-string { color: var(--code-token-string); }
+
+.markdown-code-token-number { color: var(--code-token-number); }
+
+.markdown-code-token-comment { color: var(--code-token-comment); font-style: italic; }
+
+.markdown-code-token-type { color: var(--code-token-type); }
+
+.markdown-code-token-property { color: var(--code-token-property); }
+
+.markdown-code-token-operator { color: var(--code-token-operator); }
+
+.markdown-code-token-punctuation { color: var(--code-token-punctuation); }
+
+.preview-content pre.preview-code-widget {
+  position: relative;
+  padding: 0;
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius-2xl);
+  background: var(--code-background);
+  color: var(--code-text);
+  overflow: hidden;
+}
+
+.preview-content pre.preview-code-widget::before {
+  content: attr(data-code-language);
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 5px 76px 5px var(--space-xl);
+  border-bottom: 1px solid var(--code-border);
+  background: var(--code-toolbar-background);
+  color: var(--code-toolbar-text);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  line-height: 1.4;
+  text-transform: lowercase;
+}
+
+.preview-content .preview-code-copy {
+  position: absolute;
+  z-index: var(--layer-raised);
+  top: 5px;
+  right: 8px;
+  min-height: 24px;
+  padding: 3px var(--space-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-base);
+  background: transparent;
+  color: var(--code-action-text);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.preview-content .preview-code-copy::before {
+  content: '复制';
+}
+
+.preview-content .preview-code-copy:hover {
+  border-color: var(--code-border);
+  background: var(--code-action-hover-background);
+  color: var(--color-accent);
+}
+
+.preview-content pre.preview-code-widget code.preview-code-body {
+  display: block;
+  max-width: 100%;
+  padding: var(--space-lg) 0 var(--space-xl);
+  overflow-x: auto;
+  background: transparent;
+  color: var(--code-text);
+  font-family: var(--font-family-mono);
+  font-size: .9em;
+  line-height: 1.65;
+  tab-size: 4;
+}
+
+.preview-content .preview-code-row {
+  min-width: max-content;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
+  padding-right: 18px;
+}
+
+.preview-content .preview-code-row::before {
+  content: attr(data-line-number);
+  padding-right: var(--space-xl);
+  color: var(--code-line-number);
+  text-align: right;
+  user-select: none;
+}
+
+.preview-content .preview-code-row:hover {
+  background: var(--code-line-hover);
+}
+
+.preview-content .preview-code-line {
+  display: block;
+  min-height: 1.65em;
+  white-space: pre;
+  color: var(--code-text);
+}
+
+.preview-content .preview-code-source-newline {
+  display: none;
+}

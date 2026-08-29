@@ -1,0 +1,142 @@
+name: R11-14 Document Store Commands
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+jobs:
+  frontend:
+    name: Command contracts and frontend regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record validation target
+        run: |
+          mkdir -p "$RUNNER_TEMP/r11-14"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 325c8383f2c7c4dbbb69a07a0b4e3990d117847e HEAD
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r11-14/commit.txt"
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked frontend dependencies
+        run: npm run deps:prepare 2>&1 | tee "$RUNNER_TEMP/r11-14/dependencies.log"
+      - name: Dependency audit hard gate
+        run: npm audit --audit-level=high 2>&1 | tee "$RUNNER_TEMP/r11-14/npm-audit.log"
+      - name: R11-14 signatures and frontend payload contracts
+        run: |
+          node --test tests/stage-11-document-store-commands.test.mjs \
+            tests/unit/platform/document-store-client.test.mjs \
+            2>&1 | tee "$RUNNER_TEMP/r11-14/command-contracts.log"
+      - name: Full Node regression
+        run: npm test 2>&1 | tee "$RUNNER_TEMP/r11-14/node.log"
+      - name: Architecture and documentation hard gates
+        run: |
+          npm run verify:architecture 2>&1 | tee "$RUNNER_TEMP/r11-14/architecture.log"
+          npm run verify:no-legacy-runtime 2>&1 | tee "$RUNNER_TEMP/r11-14/no-legacy.log"
+          npm run verify:generated-files 2>&1 | tee "$RUNNER_TEMP/r11-14/generated.log"
+          npm run verify:readme-record 2>&1 | tee "$RUNNER_TEMP/r11-14/readme.log"
+      - name: Browser preview contract
+        run: npm run test:browser:contract 2>&1 | tee "$RUNNER_TEMP/r11-14/browser-contract.log"
+      - name: Production build
+        run: npm run build 2>&1 | tee "$RUNNER_TEMP/r11-14/build.log"
+      - name: Built-app browser regression
+        run: npm run test:browser 2>&1 | tee "$RUNNER_TEMP/r11-14/browser-app.log"
+      - name: Validation leaves tracked sources unchanged
+        run: |
+          git diff --check
+          git diff --exit-code
+      - name: Retain frontend evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r11-14-frontend-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r11-14/
+          if-no-files-found: error
+          retention-days: 14
+
+  rust:
+    name: Real document store and Rust hard gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RUSTUP_TOOLCHAIN: '1.88.0'
+      CARGO_TERM_COLOR: never
+    steps:
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record validation target
+        run: |
+          mkdir -p "$RUNNER_TEMP/r11-14"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 325c8383f2c7c4dbbb69a07a0b4e3990d117847e HEAD
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r11-14/commit.txt"
+      - name: Install Linux Tauri build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+      - name: Pin Rust 1.88 with Clippy and rustfmt
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
+          rustc --version
+          cargo --version
+      - name: Format every Rust file in the R11-14 change boundary
+        run: |
+          rustfmt --edition 2021 --check --config skip_children=true \
+            src-tauri/src/document_store/mod.rs src-tauri/src/main.rs \
+            src-tauri/src/document_store/commands/mod.rs \
+            src-tauri/src/document_store/commands/save.rs \
+            src-tauri/src/document_store/commands/load.rs \
+            src-tauri/src/document_store/commands/delete.rs \
+            src-tauri/src/document_store/commands/search.rs \
+            src-tauri/src/document_store/commands/snapshot_upload.rs \
+            src-tauri/tests/support/document_store_command_contracts.rs \
+            2>&1 | tee "$RUNNER_TEMP/r11-14/rustfmt.log"
+      - name: R11-14 real store contracts 12 of 12
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            document_store::store::command_contract_tests \
+            2>&1 | tee "$RUNNER_TEMP/r11-14/rust-command-contracts.log"
+          grep -Fq 'test result: ok. 12 passed; 0 failed' "$RUNNER_TEMP/r11-14/rust-command-contracts.log"
+      - name: Frozen compatibility fixtures 5 of 5
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --test document_store_compatibility \
+            2>&1 | tee "$RUNNER_TEMP/r11-14/rust-compatibility.log"
+          grep -Fq 'test result: ok. 5 passed; 0 failed' "$RUNNER_TEMP/r11-14/rust-compatibility.log"
+      - name: Full Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r11-14/rust-tests.log"
+      - name: Full Clippy warnings-denied gate
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings 2>&1 | tee "$RUNNER_TEMP/r11-14/clippy.log"
+      - name: Rust check
+        run: cargo check --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r11-14/cargo-check.log"
+      - name: Validation leaves tracked sources unchanged
+        run: |
+          git diff --check
+          git diff --exit-code
+      - name: Retain Rust evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r11-14-rust-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r11-14/
+          if-no-files-found: error
+          retention-days: 14
