@@ -2,23 +2,6 @@ name: R11-16 Directory Cutover
 run-name: R11-16 Directory boundary · ${{ github.sha }}
 
 on:
-  push:
-    branches: [agent/r11-stage]
-    paths:
-      - 'src-tauri/**'
-      - 'src/platform/desktop/document-store-client.js'
-      - 'tests/stage-11-document-store-commands.test.mjs'
-      - 'tests/unit/platform/document-store-client.test.mjs'
-      - 'tests/fixtures/document-store-commands.json'
-      - 'tests/architecture/**'
-      - 'tests/stage-01-handoff.test.mjs'
-      - 'tests/stage-10-close-save-controller.test.mjs'
-      - 'docs/R11-16-DETAILS.md'
-      - 'docs/README.md'
-      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/12-*'
-      - 'README.md'
-      - 'tests/historical-workflow-routing.test.mjs'
-      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,202 @@
+name: R12-01 Security Behavior Fixtures
+run-name: R12-01 security contract · ${{ github.sha }}
+
+on:
+  push:
+    branches: [agent/r12-stage]
+    paths:
+      - 'src-tauri/src/local_file.rs'
+      - 'src-tauri/src/external_link.rs'
+      - 'src-tauri/src/web_fetch.rs'
+      - 'src-tauri/src/performance_log.rs'
+      - 'src-tauri/src/main.rs'
+      - 'src-tauri/tests/stage_12_security_compatibility.rs'
+      - 'src-tauri/tests/fixtures/stage_12_security/**'
+      - 'src-tauri/Cargo.toml'
+      - 'src-tauri/Cargo.lock'
+      - 'src/runtime/performance.js'
+      - 'src/platform/desktop/file-system-client.js'
+      - 'src/platform/desktop/link-client.js'
+      - 'src/platform/desktop/web-fetch-client.js'
+      - 'src/platform/desktop/performance-log-client.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tests/stage-12-security-contract.test.mjs'
+      - 'tests/unit/platform/file-system-client.test.mjs'
+      - 'tests/unit/platform/link-client.test.mjs'
+      - 'tests/unit/platform/web-fetch-client.test.mjs'
+      - 'tests/unit/platform/performance-log-client.test.mjs'
+      - 'tests/historical-workflow-routing.test.mjs'
+      - 'tests/architecture/**'
+      - 'docs/R12-01-DETAILS.md'
+      - 'docs/README.md'
+      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/13-*'
+      - 'README.md'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+jobs:
+  frontend:
+    name: Frozen security contracts and frontend regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record validation target
+        run: |
+          mkdir -p "$RUNNER_TEMP/r12-01"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor b8ee68b93cf51f45835ac837cad8110aeea24ad0 HEAD
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r12-01/commit.txt"
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked frontend dependencies
+        run: npm run deps:prepare 2>&1 | tee "$RUNNER_TEMP/r12-01/dependencies.log"
+      - name: Dependency audit hard gate
+        run: npm audit --audit-level=high 2>&1 | tee "$RUNNER_TEMP/r12-01/npm-audit.log"
+      - name: R12-01 security fixture and adapter contracts
+        run: |
+          node --test \
+            tests/stage-12-security-contract.test.mjs \
+            tests/unit/platform/file-system-client.test.mjs \
+            tests/unit/platform/link-client.test.mjs \
+            tests/unit/platform/web-fetch-client.test.mjs \
+            tests/unit/platform/performance-log-client.test.mjs \
+            2>&1 | tee "$RUNNER_TEMP/r12-01/security-contracts.log"
+      - name: Full Node regression
+        run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-01/node.log"
+      - name: Architecture and documentation hard gates
+        run: |
+          npm run verify:architecture 2>&1 | tee "$RUNNER_TEMP/r12-01/architecture.log"
+          npm run verify:no-legacy-runtime 2>&1 | tee "$RUNNER_TEMP/r12-01/no-legacy.log"
+          npm run verify:generated-files 2>&1 | tee "$RUNNER_TEMP/r12-01/generated.log"
+          npm run verify:readme-record 2>&1 | tee "$RUNNER_TEMP/r12-01/readme.log"
+      - name: Browser preview contract
+        run: npm run test:browser:contract 2>&1 | tee "$RUNNER_TEMP/r12-01/browser-contract.log"
+      - name: Production build
+        run: npm run build 2>&1 | tee "$RUNNER_TEMP/r12-01/build.log"
+      - name: Built-app browser regression
+        run: npm run test:browser 2>&1 | tee "$RUNNER_TEMP/r12-01/browser-app.log"
+      - name: Validation leaves tracked sources unchanged
+        run: |
+          git diff --check
+          git diff --exit-code
+      - name: Retain frontend evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r12-01-frontend-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r12-01/
+          if-no-files-found: error
+          retention-days: 14
+
+  rust:
+    name: Real Rust security behavior and hard gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RUSTUP_TOOLCHAIN: '1.88.0'
+      CARGO_TERM_COLOR: never
+    steps:
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record validation target
+        run: |
+          mkdir -p "$RUNNER_TEMP/r12-01"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor b8ee68b93cf51f45835ac837cad8110aeea24ad0 HEAD
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r12-01/commit.txt"
+      - name: Guard R12-01 scope provenance and dependencies
+        run: |
+          base='b8ee68b93cf51f45835ac837cad8110aeea24ad0'
+          git diff --quiet "$base"...HEAD -- \
+            src-tauri/Cargo.toml src-tauri/Cargo.lock package.json package-lock.json \
+            src/runtime/performance.js \
+            src/platform/desktop/file-system-client.js \
+            src/platform/desktop/link-client.js \
+            src/platform/desktop/web-fetch-client.js \
+            src/platform/desktop/performance-log-client.js \
+            src-tauri/src/main.rs
+          test -f src-tauri/src/local_file.rs
+          test -f src-tauri/src/external_link.rs
+          test -f src-tauri/src/web_fetch.rs
+          test -f src-tauri/src/performance_log.rs
+          test ! -d src-tauri/src/local_file
+          test ! -d src-tauri/src/external_link
+          test ! -d src-tauri/src/web_fetch
+          test ! -d src-tauri/src/performance_log
+          grep -Fq "$base" src-tauri/tests/fixtures/stage_12_security/manifest.json
+          git diff --check
+      - name: Install Linux Tauri build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+      - name: Pin Rust 1.88 with Clippy and rustfmt
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
+          rustc --version
+          cargo --version
+      - name: Format the R12-01 Rust test boundary
+        run: |
+          for source in \
+            src-tauri/src/local_file.rs src-tauri/src/external_link.rs \
+            src-tauri/src/web_fetch.rs src-tauri/src/performance_log.rs
+          do
+            sed -n '/^\/\/ R12-01 rustfmt boundary/,$p' "$source" \
+              > "$RUNNER_TEMP/r12-01/$(basename "$source")"
+          done
+          rustfmt --edition 2021 --check --config max_width=120 \
+            "$RUNNER_TEMP/r12-01/local_file.rs" \
+            "$RUNNER_TEMP/r12-01/external_link.rs" \
+            "$RUNNER_TEMP/r12-01/web_fetch.rs" \
+            "$RUNNER_TEMP/r12-01/performance_log.rs" \
+            src-tauri/tests/stage_12_security_compatibility.rs \
+            2>&1 | tee "$RUNNER_TEMP/r12-01/rustfmt.log"
+      - name: R12-01 direct production behavior tests 10 of 10
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor stage_12_ \
+            2>&1 | tee "$RUNNER_TEMP/r12-01/rust-production-contracts.log"
+          grep -Fq 'test result: ok. 10 passed; 0 failed' "$RUNNER_TEMP/r12-01/rust-production-contracts.log"
+      - name: R12-01 independent compatibility fixture 6 of 6
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --test stage_12_security_compatibility \
+            2>&1 | tee "$RUNNER_TEMP/r12-01/rust-fixture.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-01/rust-fixture.log"
+      - name: Full Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r12-01/rust-tests.log"
+      - name: Full Clippy warnings-denied gate
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings 2>&1 | tee "$RUNNER_TEMP/r12-01/clippy.log"
+      - name: Rust check
+        run: cargo check --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r12-01/cargo-check.log"
+      - name: Validation leaves tracked sources unchanged
+        run: |
+          git diff --check
+          git diff --exit-code
+      - name: Retain Rust evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r12-01-rust-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r12-01/
+          if-no-files-found: error
+          retention-days: 14

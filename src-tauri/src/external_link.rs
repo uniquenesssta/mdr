@@ -97,3 +97,39 @@ mod tests {
         assert!(validate_external_url("javascript:alert(1)").is_err());
     }
 }
+
+// R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.
+#[cfg(test)]
+mod stage_12_tests {
+    use super::validate_external_url;
+
+    #[test]
+    fn stage_12_preserves_trimmed_values_and_the_exact_allowlist() {
+        assert_eq!(
+            validate_external_url("  HTTPS://example.com/path  "),
+            Ok("HTTPS://example.com/path".to_string())
+        );
+        assert_eq!(
+            validate_external_url(" MAILTO:test@example.com "),
+            Ok("MAILTO:test@example.com".to_string())
+        );
+        assert_eq!(
+            validate_external_url(" tel:+8613800000000 "),
+            Ok("tel:+8613800000000".to_string())
+        );
+    }
+
+    #[test]
+    fn stage_12_preserves_validation_errors_before_platform_open() {
+        assert_eq!(validate_external_url(""), Err("链接地址为空".to_string()));
+        assert_eq!(validate_external_url("not a url"), Err("链接格式无效".to_string()));
+        assert_eq!(
+            validate_external_url("file:///tmp/private.txt"),
+            Err("不支持打开此链接".to_string())
+        );
+        assert_eq!(
+            validate_external_url("javascript:alert(1)"),
+            Err("不支持打开此链接".to_string())
+        );
+    }
+}

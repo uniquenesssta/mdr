@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "atomicTask": "R12-01",
+  "source": {
+    "commit": "b8ee68b93cf51f45835ac837cad8110aeea24ad0",
+    "files": {
+      "src-tauri/src/local_file.rs": "87a5ecb7a34e0676741d8dd9b968e5002f01a8be",
+      "src-tauri/src/external_link.rs": "fb1f2fec1eb54319b623db99705194d82ea43f53",
+      "src-tauri/src/web_fetch.rs": "58c6c352372c87417b714c92e67f8dd696193bfa",
+      "src-tauri/src/performance_log.rs": "ac7c37e072b36758b9ccfba644b63bd0f7e3cdde"
+    },
+    "dependencyFiles": {
+      "src-tauri/Cargo.toml": "9356da697230ec37691fa855cf175dc0183ac506",
+      "src-tauri/Cargo.lock": "4b0fab4f33f06e47f366224d2b680bfeb2b27fde",
+      "package.json": "7c7b3c78b792e553ae2f03e0a053cd5d77b51237",
+      "package-lock.json": "3f084cf57bf76499c22e0adad43627771c0379eb"
+    }
+  },
+  "localFile": {
+    "textExtensions": ["md", "markdown", "txt"],
+    "imageMimeByExtension": {
+      "png": "image/png",
+      "jpg": "image/jpeg",
+      "jpeg": "image/jpeg",
+      "gif": "image/gif",
+      "webp": "image/webp",
+      "svg": "image/svg+xml"
+    },
+    "limits": {
+      "droppedTextBytes": 20971520,
+      "droppedImageBytes": 5242880,
+      "embeddedImageBytes": 20971520,
+      "treeDepth": 24,
+      "treeEntries": 12000,
+      "byteBoundary": "allow-equal-reject-greater"
+    },
+    "treePolicy": {
+      "rootDepth": 0,
+      "depthBoundary": "stop-when-greater-than-limit",
+      "entryBoundary": "stop-before-next-entry-at-limit",
+      "symlinks": "skip-without-counting-as-skipped",
+      "unreadableSupportedFiles": "skip-and-increment-skipped-count",
+      "unsupportedEntries": "skip-without-counting-as-skipped",
+      "emptyDirectories": "omit",
+      "sort": "directories-first-then-case-insensitive-name-then-name"
+    }
+  },
+  "externalLink": {
+    "trimInput": true,
+    "parser": "url::Url",
+    "allowedSchemes": ["http", "https", "mailto", "tel"],
+    "unsupportedPolicy": "reject-before-platform-open"
+  },
+  "webFetch": {
+    "input": {
+      "trim": true,
+      "defaultScheme": "https",
+      "allowedParsedSchemes": ["http", "https"]
+    },
+    "redirectLimit": 10,
+    "timeoutSeconds": 30,
+    "successStatus": "2xx",
+    "headers": {
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "acceptLanguage": "zh-CN,zh;q=0.9,en;q=0.8",
+      "userAgentProduct": "Chrome/126.0.0.0"
+    },
+    "contentType": {
+      "policy": "reported-only-no-allowlist",
+      "responseField": "content_type"
+    },
+    "responseBody": {
+      "decoder": "reqwest-response-text",
+      "maximumBytes": null,
+      "emptyTrimmedBody": "reject"
+    },
+    "responseFields": ["success", "url", "final_url", "status", "content_type", "html"]
+  },
+  "performanceLog": {
+    "limits": {
+      "batchEntries": 500,
+      "serializedEntryBytes": 65536
+    },
+    "writeMode": {
+      "debug": "append-jsonl",
+      "release": "return-empty-path-without-writing"
+    },
+    "directoryEnvironmentVariable": "MARKDOWN_EDITOR_LOG_DIR",
+    "fileNamePattern": "performance-<UTC>_pid-<PID>.jsonl",
+    "commandInput": "arbitrary-json-values",
+    "commandRedaction": "none",
+    "frontendEntryFields": ["timestampMs", "sessionId", "source", "category", "operation", "durationMs", "status", "details"],
+    "backendEntryFields": ["timestampMs", "source", "category", "operation", "durationMs", "status", "details"],
+    "lifecycleDetailFields": ["debugBuild", "pid"]
+  },
+  "commands": [
+    "read_dropped_file",
+    "list_text_file_tree",
+    "read_local_image",
+    "write_local_text_file",
+    "write_local_binary_file",
+    "initial_file_path",
+    "open_external_url",
+    "fetch_url",
+    "write_performance_logs"
+  ]
+}

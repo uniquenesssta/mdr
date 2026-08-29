@@ -126,6 +126,8 @@ npm run check
 
 ## Change Log
 
+- 2026-08-29：Stage 12 从 Stage 11 闭环提交 `b8ee68b93cf51f45835ac837cad8110aeea24ad0` 建立独立 `agent/r12-stage`。R12-01 新增带源 Blob/依赖溯源的安全行为 manifest、10 个直接 Rust 生产行为测试、6 个独立 Rust 兼容测试和 7 个 Node 契约测试，冻结本地文件扩展/MIME/大小/树深度与数量/符号链接及不可读策略、外链协议、网页 10 次重定向/30 秒超时/响应字段，以及性能日志字段和上限；明确记录当前网页响应类型仅上报且无响应体字节上限、Rust 日志命令无脱敏，不在本 Atomic 偷跑后续策略。本地定向 Node 34/34、全量 Node 361/361、构建、四项架构/文档门禁、Rustfmt 和 workflow YAML 校验通过；完整 Cargo/Clippy/check 与浏览器验收交由 R12-01 Actions，推送后不跟踪。详情见 [R12-01-DETAILS.md](R12-01-DETAILS.md)。
+
 - 2026-08-29：Stage 11 完成验收。R11-16 提交 `5efc57865aa162b5948054b7dc1a5c10e17fd026` 的 [Actions #33239806668](https://github.com/uniquenesssta/mdr/actions/runs/33239806668) 两个 job 与全部步骤成功，覆盖目录边界、Store 12/12、并发 8/8、冻结兼容 5/5、全量 Rust tests、Clippy/check、Node、架构、构建及浏览器回归。R11-01 至 R11-16 的职责已由最终目录结构和全链路回归共同验收，允许建立 Stage 12 分支；正式桌面 release build 仍留给最终阶段。
 
 - 2026-08-29：R11-16 目录入口切换完成实现：删除 `src-tauri/src/document_store.rs`，以 `document_store/mod.rs` 作为唯一公共入口；生产清单补齐全部 32 个文档存储模块，并增加旧文件不存在及关键实现唯一提供者门禁。10 个命令、DTO、Store/缓存、磁盘格式和错误语义均未改变。本地真实存储 104/104、Node 354/354、构建、Rustfmt 和四项架构门禁通过；完整 Tauri/Clippy/浏览器验收交由 R11-16 Actions，推送后不跟踪。详情见 [R11-16-DETAILS.md](R11-16-DETAILS.md)。

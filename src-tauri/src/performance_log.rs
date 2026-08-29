@@ -210,3 +210,27 @@ where
 pub fn write_performance_logs(entries: Vec<Value>) -> Result<String, String> {
     append_values(&entries).map(|path| path.to_string_lossy().to_string())
 }
+
+// R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.
+#[cfg(test)]
+mod tests {
+    use super::{append_values, utc_timestamp_from_unix_ms, MAX_BATCH_ENTRIES, MAX_ENTRY_BYTES};
+    use serde_json::Value;
+
+    #[test]
+    fn stage_12_freezes_log_limits_and_utc_file_timestamp_shape() {
+        assert_eq!(MAX_BATCH_ENTRIES, 500);
+        assert_eq!(MAX_ENTRY_BYTES, 64 * 1024);
+        assert_eq!(utc_timestamp_from_unix_ms(0), "1970-01-01_00-00-00-000");
+        assert_eq!(utc_timestamp_from_unix_ms(1_704_164_645_678), "2024-01-02_03-04-05-678");
+    }
+
+    #[test]
+    fn stage_12_rejects_oversized_batches_before_opening_a_log_file() {
+        let entries = vec![Value::Null; MAX_BATCH_ENTRIES + 1];
+        assert_eq!(
+            append_values(&entries).expect_err("oversized batch must fail"),
+            "单次性能日志数量不能超过 500 条"
+        );
+    }
+}

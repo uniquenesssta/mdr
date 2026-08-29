@@ -69,17 +69,14 @@ test('R11-14 leaves the frozen Serde DTOs and frontend wire adapter byte-identic
   assert.equal(hash(read('src/platform/desktop/document-store-client.js')), fixture.frontendSha256);
 });
 
-test('R11-16 Actions validates the pushed SHA with read-only hard gates and retained failure evidence', () => {
+test('completed R11-16 Actions stays manually reproducible with read-only hard gates and retained evidence', () => {
   const workflow = read('.github/workflows/r11-16.yml');
-  assert.match(workflow, /push:\s*\n\s*branches:\s*\[agent\/r11-stage\]/);
   assert.match(workflow, /workflow_dispatch:/);
+  assert.doesNotMatch(workflow, /^\s*push:\s*$/m);
+  assert.doesNotMatch(workflow, /^\s*pull_request:\s*$/m);
   assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/);
   assert.match(workflow, /contents: read/);
   assert.ok(workflow.includes('c9377d9d6653e863056ad6aa1524749a283c8b2b'));
-  for (const path of [
-    'tests/architecture/**', 'tests/stage-01-handoff.test.mjs',
-    'tests/stage-10-close-save-controller.test.mjs', 'docs/README.md'
-  ]) assert.ok(workflow.includes(path), `missing R11-16 trigger path: ${path}`);
   for (const gate of [
     'cargo test', 'cargo clippy', 'cargo check', '--all-targets', '-- -D warnings',
     'npm test', 'npm run build', 'npm run verify:architecture',
