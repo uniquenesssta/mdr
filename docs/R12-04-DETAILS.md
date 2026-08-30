@@ -23,13 +23,13 @@
 
 | 验证 | 结果 |
 |---|---|
-| Reader 直接 Rust | 10 项：文本 4 项、图片 6 项；由 R12-04 Actions 使用 Rust 1.88 执行。 |
+| Reader 直接 Rust | 文本 4/4、图片 6/6；由 R12-04 Actions 使用 Rust 1.88 通过。 |
 | 定向 Node | R12-01 至 R12-04、FileSystem adapter 和 workflow 路由共 33/33 通过。 |
 | 全量 Node | 376/376 通过。 |
 | 架构门禁 | `verify:architecture`、`verify:no-legacy-runtime`、`verify:generated-files` 通过；生产模块清单由 427 增至 429。 |
 | 构建与依赖 | `npm run build` 通过；`npm audit --audit-level=high` 为 0 个漏洞。 |
-| 浏览器 | 当前容器没有 Chromium/Chrome，browser contract/app 交由 R12-04 Actions。 |
-| Rust | 当前容器没有 Cargo/rustfmt；Actions 执行 Reader 10/10、File Kind 6/6、Path Policy 10/10、R12-01 行为 10/10、独立兼容夹具 6/6、全量 Rust、Clippy `-D warnings` 和 Cargo check。 |
+| 浏览器 | R12-04 Actions 的 browser contract 与 built-app browser regression 通过。 |
+| Rust | Reader 10/10、File Kind 6/6、Path Policy 10/10、R12-01 行为 10/10、独立兼容夹具 6/6、全量 Rust、Clippy `-D warnings` 和 Cargo check 通过。 |
 
 ## 契约、风险与回退
 
@@ -37,4 +37,4 @@
 - 六个本地文件命令名、参数、Serde DTO、错误文本、文件大小边界、校验顺序和 Data URL 格式未改变。
 - Reader 按 File Kind 已完成的扩展名/MIME 分类读取，不增加 magic-byte 判断；无效 UTF-8 文本会保留为读取错误，这是冻结行为。
 - 回退只需 revert R12-04 提交；没有数据格式、持久化内容、依赖或前端协议迁移。
-- R12-04 Actions 未由用户核验绿色前不勾选 12.4，也不推进 R12-05。
+- 最终提交 `d92f8393b197544f3332da1e8324003e62d35ceb` 的 [Actions #33294085755](https://github.com/uniquenesssta/mdr/actions/runs/33294085755) 两个 job 与全部步骤成功；R12-04 已由用户核验完成，允许进入 R12-05。

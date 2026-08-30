@@ -82,10 +82,10 @@ test('R12-03 preserves commands dependencies and the R12-01 source contracts', a
   assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
 });
 
-test('R12-03 records File Kind ownership and stays manual after R12-04 starts', async () => {
+test('R12-03 records File Kind ownership and stays manual after R12-05 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-04.yml'),
+    source('.github/workflows/r12-05.yml'),
     source('.github/workflows/r12-03.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');

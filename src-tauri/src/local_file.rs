@@ -1,4 +1,3 @@
-use base64::{engine::general_purpose, Engine as _};
 use serde::Serialize;
 use serde_json::json;
 use std::{
@@ -7,11 +6,14 @@ use std::{
     path::{Path, PathBuf},
 };
 
+mod binary_writer;
 mod file_kind;
 mod image_reader;
 mod path_policy;
 mod text_reader;
+mod text_writer;
 
+use binary_writer::{decode_binary, write_binary};
 use file_kind::{classify, extension, is_supported_text_path, FileKind};
 use image_reader::{read_dropped_image, read_embedded_image, validate_embedded_image_size};
 use path_policy::{
@@ -19,6 +21,7 @@ use path_policy::{
     TreeEntryPolicy,
 };
 use text_reader::{is_supported_text_size, read_dropped_text};
+use text_writer::write_text;
 
 const MAX_FILE_TREE_DEPTH: usize = 24;
 const MAX_FILE_TREE_ENTRIES: usize = 12_000;
@@ -102,17 +105,16 @@ pub struct LocalWriteResult {
 
 fn write_local_text_file_inner(path: String, content: String) -> Result<LocalWriteResult, String> {
     let path_buf = required_path(&path, "保存路径不能为空")?;
-    fs::write(&path_buf, content.as_bytes()).map_err(|err| format!("无法写入文本文件：{err}"))?;
+    let bytes = write_text(&path_buf, &content)?;
     Ok(LocalWriteResult {
         path: path_buf.to_string_lossy().into_owned(),
-        bytes: content.len(),
+        bytes,
     })
 }
 
 fn write_local_binary_file_inner(path: String, content: Vec<u8>) -> Result<LocalWriteResult, String> {
     let path_buf = required_path(&path, "保存路径不能为空")?;
-    let bytes = content.len();
-    fs::write(&path_buf, content).map_err(|err| format!("无法写入文件：{err}"))?;
+    let bytes = write_binary(&path_buf, &content)?;
     Ok(LocalWriteResult {
         path: path_buf.to_string_lossy().into_owned(),
         bytes,
@@ -336,9 +338,7 @@ pub async fn write_local_text_file(path: String, content: String) -> Result<Loca
 pub async fn write_local_binary_file(path: String, content_base64: String) -> Result<LocalWriteResult, String> {
     let extension = extension(Path::new(&path));
     tauri::async_runtime::spawn_blocking(move || {
-        let content = general_purpose::STANDARD
-            .decode(content_base64)
-            .map_err(|err| format!("文件数据解码失败：{err}"))?;
+        let content = decode_binary(&content_base64)?;
         let bytes = content.len();
         crate::performance_log::measure_sync(
             "native.command",
