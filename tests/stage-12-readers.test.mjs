@@ -112,6 +112,11 @@ test('R12-04 records both Readers and becomes the sole automatic Stage workflow'
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
+  assert.match(current, /local_file::text_reader::tests/);
+  assert.match(current, /test result: ok\. 4 passed; 0 failed/);
+  assert.match(current, /local_file::image_reader::tests/);
+  assert.match(current, /test result: ok\. 6 passed; 0 failed/);
+  assert.doesNotMatch(current, /--bin markdown-editor reader::tests/);
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*push:\s*$/m);
 });

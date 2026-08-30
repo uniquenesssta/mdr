@@ -176,9 +176,12 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/r12-04/rustfmt.log"
       - name: R12-04 direct Reader tests 10 of 10
         run: |
-          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor reader::tests \
-            2>&1 | tee "$RUNNER_TEMP/r12-04/rust-readers.log"
-          grep -Fq 'test result: ok. 10 passed; 0 failed' "$RUNNER_TEMP/r12-04/rust-readers.log"
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::text_reader::tests 2>&1 | tee "$RUNNER_TEMP/r12-04/rust-text-reader.log"
+          grep -Fq 'test result: ok. 4 passed; 0 failed' "$RUNNER_TEMP/r12-04/rust-text-reader.log"
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::image_reader::tests 2>&1 | tee "$RUNNER_TEMP/r12-04/rust-image-reader.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-04/rust-image-reader.log"
       - name: R12-03 direct File Kind regression 6 of 6
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor file_kind::tests \
