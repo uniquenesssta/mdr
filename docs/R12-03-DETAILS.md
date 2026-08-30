@@ -6,6 +6,7 @@
 - 新增 `src-tauri/src/local_file/file_kind.rs`，唯一负责最终扩展名规范化、文本/图片/不支持分类，以及受支持图片 MIME 映射。
 - File Kind 是无状态纯函数边界，不读取文件或 metadata，不持有路径、大小限制、Base64、命令、DTO、目录树或实际 I/O。
 - R12-04 Text/Image Readers 及后续职责没有提前迁移。
+- 实现提交经最终修复后以远端提交 `d93a5b2164b28731d5b542ead251a5839d6c69e0` 验收。
 
 ## 迁移结果
 
@@ -26,8 +27,9 @@
 | 全量 Node | 371/371 通过。 |
 | 架构门禁 | `verify:architecture`、`verify:no-legacy-runtime`、`verify:generated-files` 通过；生产模块清单由 426 增至 427。 |
 | 构建 | `npm run build` 通过。 |
-| 浏览器 | 当前容器没有 Chromium/Chrome，browser contract/app 交由 R12-03 Actions。 |
-| Rust | 当前容器没有 Cargo/rustfmt；Actions 使用 Rust 1.88，执行 File Kind 6/6、Path Policy 10/10、R12-01 行为 10/10、独立兼容夹具 6/6、全量 Rust、Clippy `-D warnings` 和 Cargo check。 |
+| 专属 Actions | [#33267731097](https://github.com/uniquenesssta/mdr/actions/runs/33267731097) 两个 job 与全部步骤成功。 |
+| 浏览器 | browser contract 与 built-app browser regression 在专属 Actions 通过。 |
+| Rust | Rust 1.88 下 File Kind 6/6、Path Policy 10/10、R12-01 行为 10/10、独立兼容夹具 6/6、全量 Rust、Clippy `-D warnings` 和 Cargo check 全部通过。 |
 
 ## 契约、风险与回退
 
@@ -35,4 +37,4 @@
 - 六个本地文件命令名、参数、Serde DTO、错误文本、文件大小边界和 Data URL 格式未改变。
 - File Kind 只按扩展名分类，不检查文件内容或 magic bytes；这是冻结行为，不在本 Atomic 扩大策略。
 - 回退只需 revert R12-03 提交；没有数据格式、持久化内容、依赖或前端协议迁移。
-- R12-03 Actions 未由用户核验绿色前不勾选 12.3，也不推进 R12-04。
+- R12-03 已通过专属 Actions 并完成；自动阶段门禁已交给 R12-04。

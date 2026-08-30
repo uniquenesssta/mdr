@@ -37,6 +37,8 @@ test('R12-01 freezes local text image size depth count symlink and unreadable-fi
   const rust = [
     await source('src-tauri/src/local_file.rs'),
     await source('src-tauri/src/local_file/file_kind.rs'),
+    await source('src-tauri/src/local_file/image_reader.rs'),
+    await source('src-tauri/src/local_file/text_reader.rs'),
     await source('src-tauri/src/local_file/path_policy.rs')
   ].join('\n');
   assert.deepEqual(contract.localFile.textExtensions, ['md', 'markdown', 'txt']);
@@ -54,7 +56,7 @@ test('R12-01 freezes local text image size depth count symlink and unreadable-fi
   assert.equal(contract.localFile.treePolicy.symlinks, 'skip-without-counting-as-skipped');
   assert.equal(contract.localFile.treePolicy.unreadableSupportedFiles, 'skip-and-increment-skipped-count');
   assert.match(rust, /metadata\.file_type\(\)\.is_symlink\(\).*TreeEntryPolicy::Skip/);
-  assert.match(rust, /metadata\.len\(\) > MAX_TEXT_BYTES \|\| File::open\(&path\)\.is_err\(\)/);
+  assert.match(rust, /!is_supported_text_size\(metadata\.len\(\)\) \|\| File::open\(&path\)\.is_err\(\)/);
 });
 
 test('R12-01 freezes external-link trimming validation order and four-scheme allowlist', async () => {
@@ -117,10 +119,10 @@ test('R12-01 freezes all nine registered command names without changing frontend
   ]) assert.match(client, new RegExp(command));
 });
 
-test('completed R12-01 and R12-02 stay manual while R12-03 owns Stage branch validation', async () => {
+test('completed R12-01 through R12-03 stay manual while R12-04 owns Stage branch validation', async () => {
   const [current, previous, first] = await Promise.all([
+    source('.github/workflows/r12-04.yml'),
     source('.github/workflows/r12-03.yml'),
-    source('.github/workflows/r12-02.yml'),
     source('.github/workflows/r12-01.yml')
   ]);
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);

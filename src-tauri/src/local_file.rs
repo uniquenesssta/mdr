@@ -8,17 +8,18 @@ use std::{
 };
 
 mod file_kind;
+mod image_reader;
 mod path_policy;
+mod text_reader;
 
 use file_kind::{classify, extension, is_supported_text_path, FileKind};
+use image_reader::{read_dropped_image, read_embedded_image, validate_embedded_image_size};
 use path_policy::{
     input_path, inspect_tree_entry, parent_directory, required_path, resolve_local_image_path,
     TreeEntryPolicy,
 };
+use text_reader::{is_supported_text_size, read_dropped_text};
 
-const MAX_TEXT_BYTES: u64 = 20 * 1024 * 1024;
-const MAX_IMAGE_BYTES: u64 = 5 * 1024 * 1024;
-const MAX_EMBEDDED_IMAGE_BYTES: u64 = 20 * 1024 * 1024;
 const MAX_FILE_TREE_DEPTH: usize = 24;
 const MAX_FILE_TREE_ENTRIES: usize = 12_000;
 
@@ -79,19 +80,16 @@ fn read_local_image_inner(
     if !metadata.is_file() {
         return Err("图片路径不是文件".into());
     }
-    if metadata.len() > MAX_EMBEDDED_IMAGE_BYTES {
-        return Err("图片超过 20MB，混合编辑模式暂不加载".into());
-    }
+    validate_embedded_image_size(metadata.len())?;
     let mime = match classify(&path) {
         FileKind::Image { mime } => mime,
         FileKind::Text | FileKind::Unsupported => return Err("不支持该本地图片格式".into()),
     };
-    let bytes = fs::read(&path).map_err(|err| format!("无法读取图片文件：{err}"))?;
-    let encoded = general_purpose::STANDARD.encode(&bytes);
+    let image = read_embedded_image(&path, mime)?;
     Ok(LocalImageData {
         path: path.to_string_lossy().into_owned(),
-        data_url: format!("data:{mime};base64,{encoded}"),
-        bytes: bytes.len(),
+        data_url: image.data_url,
+        bytes: image.bytes,
     })
 }
 
@@ -189,7 +187,7 @@ fn scan_text_file_tree_directory(
         if !file_type.is_file() || !is_supported_text_path(&path) {
             continue;
         }
-        if metadata.len() > MAX_TEXT_BYTES || File::open(&path).is_err() {
+        if !is_supported_text_size(metadata.len()) || File::open(&path).is_err() {
             state.skipped_count += 1;
             continue;
         }
@@ -262,10 +260,7 @@ fn read_dropped_file_inner(path: String) -> Result<DroppedFile, String> {
         .to_string();
     match classify(&path_buf) {
         FileKind::Text => {
-            if metadata.len() > MAX_TEXT_BYTES {
-                return Err("文本文件过大，暂不支持直接拖入".into());
-            }
-            let content = fs::read_to_string(&path_buf).map_err(|err| format!("无法读取文本文件：{err}"))?;
+            let content = read_dropped_text(&path_buf, metadata.len())?;
             Ok(DroppedFile {
                 name,
                 path,
@@ -275,17 +270,13 @@ fn read_dropped_file_inner(path: String) -> Result<DroppedFile, String> {
             })
         }
         FileKind::Image { mime } => {
-            if metadata.len() > MAX_IMAGE_BYTES {
-                return Err("图片超过 5MB，暂不支持直接插入".into());
-            }
-            let bytes = fs::read(&path_buf).map_err(|err| format!("无法读取图片文件：{err}"))?;
-            let encoded = general_purpose::STANDARD.encode(bytes);
+            let image = read_dropped_image(&path_buf, mime, metadata.len())?;
             Ok(DroppedFile {
                 name,
                 path,
                 kind: "image".into(),
                 content: None,
-                data_url: Some(format!("data:{mime};base64,{encoded}")),
+                data_url: Some(image.data_url),
             })
         }
         FileKind::Unsupported => Err("不支持该文件类型，请拖入 Markdown、文本或图片文件".into()),
@@ -464,9 +455,10 @@ mod tests {
 mod stage_12_tests {
     use super::{
         classify, list_text_file_tree_inner, read_dropped_file_inner, read_local_image_inner,
-        scan_text_file_tree_directory, FileKind, TextFileTreeScanState, MAX_EMBEDDED_IMAGE_BYTES, MAX_FILE_TREE_DEPTH,
-        MAX_FILE_TREE_ENTRIES, MAX_IMAGE_BYTES, MAX_TEXT_BYTES,
+        scan_text_file_tree_directory, FileKind, TextFileTreeScanState, MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES,
     };
+    use super::image_reader::{MAX_EMBEDDED_IMAGE_BYTES, MAX_IMAGE_BYTES};
+    use super::text_reader::MAX_TEXT_BYTES;
     use std::{
         fs,
         time::{SystemTime, UNIX_EPOCH},

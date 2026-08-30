@@ -126,7 +126,8 @@ npm run check
 
 ## Change Log
 
-- 2026-08-29：R12-03 新增无状态、无 I/O 的 `local_file/file_kind.rs`，成为最终扩展名规范化、`Text`/`Image { mime }`/`Unsupported` 分类和受支持图片 MIME 的唯一权威；拖入读取、本地图片、目录树、启动文件筛选及命令日志全部复用该模块。保留六个命令与 DTO、错误文本、大小限制、Data URL、路径策略和依赖，未提前迁移 Reader。定向 Node 28/28、全量 Node 371/371、生产模块 427、构建和三项架构门禁通过；完整 Rust/Clippy/check 与浏览器验收交由 R12-03 Actions。详情见 [R12-03-DETAILS.md](R12-03-DETAILS.md)。
+- 2026-08-30：R12-04 新增 `local_file/text_reader.rs` 与 `image_reader.rs`，分别成为受限 UTF-8 文本读取和图片字节/Data URL 编码权威；旧单体不再直接读取文本或编码图片。保持大小校验顺序、File Kind MIME、六个命令与 DTO、错误文本、路径策略和依赖不变，并以无效 UTF-8 证明二进制不会误当文本。Reader 直接 Rust 测试 10 项交由 Actions；本地定向 Node 33/33、全量 Node 376/376、生产模块 429、构建、架构门禁和安全审计通过，完整 Rust/Clippy/check 与浏览器验收待 R12-04 Actions。详情见 [R12-04-DETAILS.md](R12-04-DETAILS.md)。
+- 2026-08-30：R12-03 完成验收。最终修复提交 `d93a5b2164b28731d5b542ead251a5839d6c69e0` 的 [Actions #33267731097](https://github.com/uniquenesssta/mdr/actions/runs/33267731097) 两个 job 与全部步骤成功，覆盖 File Kind 6/6、Path Policy 10/10、旧行为 10/10、独立兼容夹具 6/6、全量 Rust、Clippy/check、Node、架构、构建和浏览器回归；允许进入 R12-04。详情见 [R12-03-DETAILS.md](R12-03-DETAILS.md)。
 - 2026-08-29：R12-02 完成验收。最终修复提交 `7df7b59cfc547161bb171e1052bc9991bb8d954c` 的 [Actions #33257110310](https://github.com/uniquenesssta/mdr/actions/runs/33257110310) 两个 job 与全部步骤成功，覆盖 Path Policy 10/10、旧行为 10/10、独立兼容夹具 6/6、全量 Rust、Clippy/check、Node、架构、构建和浏览器回归；允许进入 R12-03。详情见 [R12-02-DETAILS.md](R12-02-DETAILS.md)。
 - 2026-08-29：Stage 12 从 Stage 11 闭环提交 `b8ee68b93cf51f45835ac837cad8110aeea24ad0` 建立独立 `agent/r12-stage`。R12-01 新增带源 Blob/依赖溯源的安全行为 manifest、10 个直接 Rust 生产行为测试、6 个独立 Rust 兼容测试和 7 个 Node 契约测试，冻结本地文件扩展/MIME/大小/树深度与数量/符号链接及不可读策略、外链协议、网页 10 次重定向/30 秒超时/响应字段，以及性能日志字段和上限；明确记录当前网页响应类型仅上报且无响应体字节上限、Rust 日志命令无脱敏，不在本 Atomic 偷跑后续策略。本地定向 Node 34/34、全量 Node 361/361、构建、四项架构/文档门禁、Rustfmt 和 workflow YAML 校验通过；专属 Actions 已由用户核验绿色，R12-01 完成。详情见 [R12-01-DETAILS.md](R12-01-DETAILS.md)。
 
