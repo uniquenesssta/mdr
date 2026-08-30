@@ -2,11 +2,11 @@ use serde::Serialize;
 use serde_json::json;
 use std::{
     env, fs,
-    fs::File,
     path::{Path, PathBuf},
 };
 
 mod binary_writer;
+mod directory_tree;
 mod file_kind;
 mod image_reader;
 mod path_policy;
@@ -14,13 +14,12 @@ mod text_reader;
 mod text_writer;
 
 use binary_writer::{decode_binary, write_binary};
+use directory_tree::build_text_file_tree;
+pub use directory_tree::{TextFileTree, TextFileTreeNode};
 use file_kind::{classify, extension, is_supported_text_path, FileKind};
 use image_reader::{read_dropped_image, read_embedded_image, validate_embedded_image_size};
-use path_policy::{
-    input_path, inspect_tree_entry, parent_directory, required_path, resolve_local_image_path,
-    TreeEntryPolicy,
-};
-use text_reader::{is_supported_text_size, read_dropped_text};
+use path_policy::{input_path, required_path, resolve_local_image_path};
+use text_reader::read_dropped_text;
 use text_writer::write_text;
 
 const MAX_FILE_TREE_DEPTH: usize = 24;
@@ -34,36 +33,6 @@ pub struct DroppedFile {
     pub kind: String,
     pub content: Option<String>,
     pub data_url: Option<String>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TextFileTreeNode {
-    pub name: String,
-    pub path: String,
-    pub kind: String,
-    pub children: Vec<TextFileTreeNode>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TextFileTree {
-    pub root_path: String,
-    pub root_name: String,
-    pub nodes: Vec<TextFileTreeNode>,
-    pub file_count: usize,
-    pub directory_count: usize,
-    pub skipped_count: usize,
-    pub truncated: bool,
-}
-
-#[derive(Default)]
-struct TextFileTreeScanState {
-    scanned_entries: usize,
-    file_count: usize,
-    directory_count: usize,
-    skipped_count: usize,
-    truncated: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -121,118 +90,6 @@ fn write_local_binary_file_inner(path: String, content: Vec<u8>) -> Result<Local
     })
 }
 
-fn compare_tree_nodes(left: &TextFileTreeNode, right: &TextFileTreeNode) -> std::cmp::Ordering {
-    let left_directory = left.kind == "directory";
-    let right_directory = right.kind == "directory";
-    right_directory
-        .cmp(&left_directory)
-        .then_with(|| left.name.to_ascii_lowercase().cmp(&right.name.to_ascii_lowercase()))
-        .then_with(|| left.name.cmp(&right.name))
-}
-
-fn scan_text_file_tree_directory(
-    root: &Path,
-    directory: &Path,
-    depth: usize,
-    state: &mut TextFileTreeScanState,
-) -> Vec<TextFileTreeNode> {
-    if depth > MAX_FILE_TREE_DEPTH {
-        state.truncated = true;
-        return Vec::new();
-    }
-
-    let entries = match fs::read_dir(directory) {
-        Ok(entries) => entries,
-        Err(_) => {
-            state.skipped_count += 1;
-            return Vec::new();
-        }
-    };
-    let mut nodes = Vec::new();
-    for entry_result in entries {
-        if state.scanned_entries >= MAX_FILE_TREE_ENTRIES {
-            state.truncated = true;
-            break;
-        }
-        state.scanned_entries += 1;
-        let entry = match entry_result {
-            Ok(entry) => entry,
-            Err(_) => {
-                state.skipped_count += 1;
-                continue;
-            }
-        };
-        let path = entry.path();
-        let metadata = match inspect_tree_entry(root, &path) {
-            TreeEntryPolicy::Allowed(metadata) => metadata,
-            TreeEntryPolicy::Skip => continue,
-            TreeEntryPolicy::Unreadable => {
-                state.skipped_count += 1;
-                continue;
-            }
-        };
-        let file_type = metadata.file_type();
-        let name = entry.file_name().to_string_lossy().into_owned();
-        if file_type.is_dir() {
-            let children = scan_text_file_tree_directory(root, &path, depth + 1, state);
-            if !children.is_empty() {
-                state.directory_count += 1;
-                nodes.push(TextFileTreeNode {
-                    name,
-                    path: path.to_string_lossy().into_owned(),
-                    kind: "directory".into(),
-                    children,
-                });
-            }
-            continue;
-        }
-        if !file_type.is_file() || !is_supported_text_path(&path) {
-            continue;
-        }
-        if !is_supported_text_size(metadata.len()) || File::open(&path).is_err() {
-            state.skipped_count += 1;
-            continue;
-        }
-        state.file_count += 1;
-        nodes.push(TextFileTreeNode {
-            name,
-            path: path.to_string_lossy().into_owned(),
-            kind: "file".into(),
-            children: Vec::new(),
-        });
-    }
-    nodes.sort_by(compare_tree_nodes);
-    nodes
-}
-
-fn list_text_file_tree_inner(document_path: String) -> Result<TextFileTree, String> {
-    let document = required_path(document_path.trim(), "当前文档尚未关联本地文件")?;
-    let metadata = fs::metadata(&document).map_err(|err| format!("无法读取当前文档信息：{err}"))?;
-    if !metadata.is_file() || !is_supported_text_path(&document) {
-        return Err("当前文档不是可读取的 Markdown 或 TXT 文件".into());
-    }
-    let root = parent_directory(&document, "无法确定当前文档所在文件夹")?;
-    fs::read_dir(&root).map_err(|err| format!("无法读取当前文件夹：{err}"))?;
-
-    let mut state = TextFileTreeScanState::default();
-    let nodes = scan_text_file_tree_directory(&root, &root, 0, &mut state);
-    let root_name = root
-        .file_name()
-        .and_then(|value| value.to_str())
-        .filter(|value| !value.is_empty())
-        .map(str::to_string)
-        .unwrap_or_else(|| root.to_string_lossy().into_owned());
-    Ok(TextFileTree {
-        root_path: root.to_string_lossy().into_owned(),
-        root_name,
-        nodes,
-        file_count: state.file_count,
-        directory_count: state.directory_count,
-        skipped_count: state.skipped_count,
-        truncated: state.truncated,
-    })
-}
-
 #[tauri::command]
 pub async fn list_text_file_tree(document_path: String) -> Result<TextFileTree, String> {
     let extension = extension(Path::new(&document_path));
@@ -241,7 +98,7 @@ pub async fn list_text_file_tree(document_path: String) -> Result<TextFileTree, 
             "native.command",
             "list_text_file_tree",
             json!({ "extension": extension }),
-            || list_text_file_tree_inner(document_path),
+            || build_text_file_tree(&document_path, MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES),
         )
     })
     .await
@@ -363,8 +220,9 @@ pub fn initial_file_path() -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::{
-        is_supported_text_path, list_text_file_tree_inner, resolve_local_image_path,
-        write_local_binary_file_inner, write_local_text_file_inner,
+        build_text_file_tree, is_supported_text_path, resolve_local_image_path,
+        write_local_binary_file_inner, write_local_text_file_inner, MAX_FILE_TREE_DEPTH,
+        MAX_FILE_TREE_ENTRIES,
     };
     use std::{
         fs,
@@ -391,8 +249,12 @@ mod tests {
         fs::write(root.join("image.png"), "not an image").expect("write ignored file");
         fs::write(nested.join("nested.markdown"), "# Nested").expect("write nested markdown");
 
-        let tree = list_text_file_tree_inner(current.to_string_lossy().into_owned())
-            .expect("scan file tree");
+        let tree = build_text_file_tree(
+            &current.to_string_lossy(),
+            MAX_FILE_TREE_DEPTH,
+            MAX_FILE_TREE_ENTRIES,
+        )
+        .expect("scan file tree");
         assert_eq!(tree.file_count, 3);
         assert_eq!(tree.directory_count, 1);
         assert!(!tree.truncated);
@@ -453,11 +315,14 @@ mod tests {
 // R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.
 #[cfg(test)]
 mod stage_12_tests {
+    use super::directory_tree::{
+        build_text_file_tree, scan_text_file_tree_directory, DirectoryTreeScanState,
+    };
     use super::image_reader::{MAX_EMBEDDED_IMAGE_BYTES, MAX_IMAGE_BYTES};
     use super::text_reader::MAX_TEXT_BYTES;
     use super::{
-        classify, list_text_file_tree_inner, read_dropped_file_inner, read_local_image_inner,
-        scan_text_file_tree_directory, FileKind, TextFileTreeScanState, MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES,
+        classify, read_dropped_file_inner, read_local_image_inner, FileKind, MAX_FILE_TREE_DEPTH,
+        MAX_FILE_TREE_ENTRIES,
     };
     use std::{
         fs,
@@ -551,17 +416,31 @@ mod stage_12_tests {
         fs::create_dir_all(&root).expect("create tree root");
         fs::write(root.join("visible.md"), "text").expect("write tree file");
 
-        let mut depth_state = TextFileTreeScanState::default();
-        let depth_nodes = scan_text_file_tree_directory(&root, &root, MAX_FILE_TREE_DEPTH + 1, &mut depth_state);
+        let mut depth_state = DirectoryTreeScanState::default();
+        let depth_nodes = scan_text_file_tree_directory(
+            &root,
+            &root,
+            MAX_FILE_TREE_DEPTH + 1,
+            MAX_FILE_TREE_DEPTH,
+            MAX_FILE_TREE_ENTRIES,
+            &mut depth_state,
+        );
         assert!(depth_nodes.is_empty());
         assert!(depth_state.truncated);
         assert_eq!(depth_state.scanned_entries, 0);
 
-        let mut entry_state = TextFileTreeScanState {
+        let mut entry_state = DirectoryTreeScanState {
             scanned_entries: MAX_FILE_TREE_ENTRIES,
-            ..TextFileTreeScanState::default()
+            ..DirectoryTreeScanState::default()
         };
-        let entry_nodes = scan_text_file_tree_directory(&root, &root, 0, &mut entry_state);
+        let entry_nodes = scan_text_file_tree_directory(
+            &root,
+            &root,
+            0,
+            MAX_FILE_TREE_DEPTH,
+            MAX_FILE_TREE_ENTRIES,
+            &mut entry_state,
+        );
         assert!(entry_nodes.is_empty());
         assert!(entry_state.truncated);
         assert_eq!(entry_state.scanned_entries, MAX_FILE_TREE_ENTRIES);
@@ -580,7 +459,12 @@ mod stage_12_tests {
         fs::write(&current, "text").expect("write current document");
         symlink(&current, root.join("alias.md")).expect("create file symlink");
 
-        let tree = list_text_file_tree_inner(current.to_string_lossy().into_owned()).expect("scan symlink tree");
+        let tree = build_text_file_tree(
+            &current.to_string_lossy(),
+            MAX_FILE_TREE_DEPTH,
+            MAX_FILE_TREE_ENTRIES,
+        )
+        .expect("scan symlink tree");
         assert_eq!(tree.file_count, 1);
         assert_eq!(tree.skipped_count, 0);
         assert!(!tree.nodes.iter().any(|node| node.name == "alias.md"));

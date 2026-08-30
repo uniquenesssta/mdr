@@ -37,6 +37,7 @@ test('R12-01 freezes local text image size depth count symlink and unreadable-fi
   const rust = [
     await source('src-tauri/src/local_file.rs'),
     await source('src-tauri/src/local_file/binary_writer.rs'),
+    await source('src-tauri/src/local_file/directory_tree.rs'),
     await source('src-tauri/src/local_file/file_kind.rs'),
     await source('src-tauri/src/local_file/image_reader.rs'),
     await source('src-tauri/src/local_file/text_reader.rs'),
@@ -121,10 +122,10 @@ test('R12-01 freezes all nine registered command names without changing frontend
   ]) assert.match(client, new RegExp(command));
 });
 
-test('completed R12-01 through R12-04 stay manual while R12-05 owns Stage branch validation', async () => {
+test('completed R12-01 through R12-05 stay manual while R12-06 owns Stage branch validation', async () => {
   const [current, previous, first] = await Promise.all([
+    source('.github/workflows/r12-06.yml'),
     source('.github/workflows/r12-05.yml'),
-    source('.github/workflows/r12-04.yml'),
     source('.github/workflows/r12-01.yml')
   ]);
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);

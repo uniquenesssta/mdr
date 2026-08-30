@@ -124,8 +124,9 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 431);
+  assert.equal(moduleFixture.modules.length, 432);
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/binary_writer.rs'));
+  assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/directory_tree.rs'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/file_kind.rs'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/image_reader.rs'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/path_policy.rs'));

@@ -2,40 +2,6 @@ name: R12-05 Local File Writers
 run-name: R12-05 local file writers · ${{ github.sha }}
 
 on:
-  push:
-    branches: [agent/r12-stage]
-    paths:
-      - 'src-tauri/src/local_file.rs'
-      - 'src-tauri/src/local_file/binary_writer.rs'
-      - 'src-tauri/src/local_file/file_kind.rs'
-      - 'src-tauri/src/local_file/image_reader.rs'
-      - 'src-tauri/src/local_file/path_policy.rs'
-      - 'src-tauri/src/local_file/text_reader.rs'
-      - 'src-tauri/src/local_file/text_writer.rs'
-      - 'src-tauri/tests/stage_12_security_compatibility.rs'
-      - 'src-tauri/tests/fixtures/stage_12_security/**'
-      - 'src-tauri/Cargo.toml'
-      - 'src-tauri/Cargo.lock'
-      - 'src/platform/desktop/file-system-client.js'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tests/stage-12-security-contract.test.mjs'
-      - 'tests/stage-12-path-policy.test.mjs'
-      - 'tests/stage-12-file-kind.test.mjs'
-      - 'tests/stage-12-readers.test.mjs'
-      - 'tests/stage-12-writers.test.mjs'
-      - 'tests/unit/platform/file-system-client.test.mjs'
-      - 'tests/historical-workflow-routing.test.mjs'
-      - 'tests/architecture/**'
-      - 'docs/R12-01-DETAILS.md'
-      - 'docs/R12-02-DETAILS.md'
-      - 'docs/R12-03-DETAILS.md'
-      - 'docs/R12-04-DETAILS.md'
-      - 'docs/R12-05-DETAILS.md'
-      - 'docs/README.md'
-      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/13-*'
-      - 'README.md'
-      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:

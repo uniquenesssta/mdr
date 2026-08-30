@@ -21,13 +21,13 @@
 
 | 验证 | 结果 |
 |---|---|
-| Writer 直接 Rust | 10 项：文本 4 项、二进制 6 项；由 R12-05 Actions 使用 Rust 1.88 执行。 |
+| Writer 直接 Rust | 文本 4/4、二进制 6/6；由 R12-05 Actions 使用 Rust 1.88 通过。 |
 | 定向 Node | R12-01 至 R12-05、FileSystem adapter 和 workflow 路由共 38/38 通过。 |
 | 全量 Node | 381/381 通过。 |
 | 架构门禁 | `verify:architecture`、`verify:no-legacy-runtime`、`verify:generated-files`、`verify:readme-record` 通过；生产模块清单由 429 增至 431。 |
 | 构建与依赖 | `npm run build` 通过；`npm audit --audit-level=high` 为 0 个漏洞。 |
-| 浏览器 | 当前容器没有 Chromium/Chrome，browser contract/app 交由 R12-05 Actions。 |
-| Rust | 当前容器没有 Cargo/rustfmt；Actions 执行 Writer 10/10、Reader 10/10、File Kind 6/6、Path Policy 10/10、R12-01 行为 10/10、独立兼容夹具 6/6、全量 Rust、Clippy `-D warnings` 和 Cargo check。 |
+| 浏览器 | R12-05 Actions 的 browser contract 与 built-app browser regression 通过。 |
+| Rust | Writer 10/10、Reader 10/10、File Kind 6/6、Path Policy 10/10、R12-01 行为 10/10、独立兼容夹具 6/6、全量 Rust、Clippy `-D warnings` 和 Cargo check 通过。 |
 
 ## 契约、风险与回退
 
@@ -35,4 +35,4 @@
 - 六个本地文件命令名、参数、Serde DTO、错误文本、路径解析、文件分类、覆盖写入和性能日志字段未改变。
 - 文本字节数继续使用 UTF-8 `str::len()`；二进制字节数继续在 Base64 解码后计算。Writer 不创建父目录，也不拥有文件选择对话框。
 - 回退只需 revert R12-05 提交；没有数据格式、持久化内容、依赖或前端协议迁移。
-- R12-05 Actions 未由用户核验绿色前不勾选 12.5，也不推进 R12-06。
+- 最终提交 `50a827359705577bc978cf5e421bcb2930a44f13` 的 [Actions #33297604183](https://github.com/uniquenesssta/mdr/actions/runs/33297604183) 两个 job 与全部步骤成功；R12-05 已由用户核验完成，允许进入 R12-06。

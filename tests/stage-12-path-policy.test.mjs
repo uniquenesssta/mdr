@@ -26,28 +26,35 @@ test('R12-02 creates one narrow Path Policy authority with no command or content
 });
 
 test('R12-02 routes all local-file read and write path construction through Path Policy', async () => {
-  const entry = await source('src-tauri/src/local_file.rs');
+  const [entry, directoryTree] = await Promise.all([
+    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/directory_tree.rs')
+  ]);
   const production = entry.split('#[cfg(test)]')[0];
+  const treeProduction = directoryTree.split('#[cfg(test)]')[0];
 
   assert.match(production, /required_path\(&path, "保存路径不能为空"\)\?/g);
   assert.equal((production.match(/required_path\(&path, "保存路径不能为空"\)\?/g) || []).length, 2);
-  assert.match(production, /required_path\(document_path\.trim\(\), "当前文档尚未关联本地文件"\)\?/);
+  assert.match(treeProduction, /required_path\(document_path\.trim\(\), "当前文档尚未关联本地文件"\)\?/);
   assert.match(production, /let path_buf = input_path\(&path\);/);
   assert.match(production, /resolve_local_image_path\(&source, document_path\.as_deref\(\)\)\?/);
-  assert.match(production, /parent_directory\(&document, "无法确定当前文档所在文件夹"\)\?/);
+  assert.match(treeProduction, /parent_directory\(&document, "无法确定当前文档所在文件夹"\)\?/);
   assert.doesNotMatch(production, /PathBuf::from\(&path\)|PathBuf::from\(document_path/);
+  assert.doesNotMatch(treeProduction, /PathBuf::from\(&path\)|PathBuf::from\(document_path/);
 });
 
 test('R12-02 centralizes tree containment symlink and unreadable-entry classification', async () => {
-  const [entry, policy] = await Promise.all([
+  const [entry, directoryTree, policy] = await Promise.all([
     source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/directory_tree.rs'),
     source('src-tauri/src/local_file/path_policy.rs')
   ]);
 
-  assert.match(entry, /inspect_tree_entry\(root, &path\)/);
-  assert.match(entry, /TreeEntryPolicy::Skip => continue/);
-  assert.match(entry, /TreeEntryPolicy::Unreadable => \{\s*state\.skipped_count \+= 1/);
+  assert.match(directoryTree, /inspect_tree_entry\(root, &path\)/);
+  assert.match(directoryTree, /TreeEntryPolicy::Skip => continue/);
+  assert.match(directoryTree, /TreeEntryPolicy::Unreadable => \{\s*state\.skipped_count \+= 1/);
   assert.doesNotMatch(entry, /fs::symlink_metadata/);
+  assert.doesNotMatch(directoryTree, /fs::symlink_metadata/);
   assert.match(policy, /candidate\.strip_prefix\(root\)/);
   assert.match(policy, /Component::ParentDir \| Component::RootDir \| Component::Prefix\(_\)/);
   assert.match(policy, /fs::symlink_metadata\(candidate\)/);
@@ -81,10 +88,10 @@ test('R12-02 preserves command signatures dependencies and the frozen parent-rel
   ]) assert.match(fileClient, new RegExp(command));
 });
 
-test('R12-02 records Path Policy ownership and stays manually runnable after R12-05 starts', async () => {
+test('R12-02 records Path Policy ownership and stays manually runnable after R12-06 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-05.yml'),
+    source('.github/workflows/r12-06.yml'),
     source('.github/workflows/r12-02.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');

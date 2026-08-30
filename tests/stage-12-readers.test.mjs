@@ -93,10 +93,10 @@ test('R12-04 preserves commands and frozen dependency blobs', async () => {
   assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
 });
 
-test('R12-04 records both Readers and stays manual after R12-05 starts', async () => {
+test('R12-04 records both Readers and stays manual after R12-06 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-05.yml'),
+    source('.github/workflows/r12-06.yml'),
     source('.github/workflows/r12-04.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');
