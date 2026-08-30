@@ -453,12 +453,12 @@ mod tests {
 // R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.
 #[cfg(test)]
 mod stage_12_tests {
+    use super::image_reader::{MAX_EMBEDDED_IMAGE_BYTES, MAX_IMAGE_BYTES};
+    use super::text_reader::MAX_TEXT_BYTES;
     use super::{
         classify, list_text_file_tree_inner, read_dropped_file_inner, read_local_image_inner,
         scan_text_file_tree_directory, FileKind, TextFileTreeScanState, MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES,
     };
-    use super::image_reader::{MAX_EMBEDDED_IMAGE_BYTES, MAX_IMAGE_BYTES};
-    use super::text_reader::MAX_TEXT_BYTES;
     use std::{
         fs,
         time::{SystemTime, UNIX_EPOCH},

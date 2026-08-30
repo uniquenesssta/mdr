@@ -68,8 +68,7 @@ mod tests {
         fs::write(&path, [1_u8]).expect("write boundary image");
         assert!(read_dropped_image(&path, "image/png", MAX_IMAGE_BYTES).is_ok());
         assert_eq!(
-            read_dropped_image(&path, "image/png", MAX_IMAGE_BYTES + 1)
-                .expect_err("oversized dropped image must fail"),
+            read_dropped_image(&path, "image/png", MAX_IMAGE_BYTES + 1).expect_err("oversized dropped image must fail"),
             "图片超过 5MB，暂不支持直接插入"
         );
         let _ = fs::remove_file(path);
