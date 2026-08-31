@@ -315,14 +315,11 @@ mod tests {
 // R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.
 #[cfg(test)]
 mod stage_12_tests {
-    use super::directory_tree::{
-        build_text_file_tree, scan_text_file_tree_directory, DirectoryTreeScanState,
-    };
+    use super::directory_tree::{build_text_file_tree, scan_text_file_tree_directory, DirectoryTreeScanState};
     use super::image_reader::{MAX_EMBEDDED_IMAGE_BYTES, MAX_IMAGE_BYTES};
     use super::text_reader::MAX_TEXT_BYTES;
     use super::{
-        classify, read_dropped_file_inner, read_local_image_inner, FileKind, MAX_FILE_TREE_DEPTH,
-        MAX_FILE_TREE_ENTRIES,
+        classify, read_dropped_file_inner, read_local_image_inner, FileKind, MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES,
     };
     use std::{
         fs,
@@ -459,12 +456,8 @@ mod stage_12_tests {
         fs::write(&current, "text").expect("write current document");
         symlink(&current, root.join("alias.md")).expect("create file symlink");
 
-        let tree = build_text_file_tree(
-            &current.to_string_lossy(),
-            MAX_FILE_TREE_DEPTH,
-            MAX_FILE_TREE_ENTRIES,
-        )
-        .expect("scan symlink tree");
+        let tree = build_text_file_tree(&current.to_string_lossy(), MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES)
+            .expect("scan symlink tree");
         assert_eq!(tree.file_count, 1);
         assert_eq!(tree.skipped_count, 0);
         assert!(!tree.nodes.iter().any(|node| node.name == "alias.md"));

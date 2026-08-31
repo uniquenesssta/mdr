@@ -101,14 +101,7 @@ pub(super) fn scan_text_file_tree_directory(
         let file_type = metadata.file_type();
         let name = entry.file_name().to_string_lossy().into_owned();
         if file_type.is_dir() {
-            let children = scan_text_file_tree_directory(
-                root,
-                &path,
-                depth + 1,
-                max_depth,
-                max_entries,
-                state,
-            );
+            let children = scan_text_file_tree_directory(root, &path, depth + 1, max_depth, max_entries, state);
             if !children.is_empty() {
                 state.directory_count += 1;
                 nodes.push(TextFileTreeNode {
@@ -200,14 +193,17 @@ mod tests {
         fs::write(notes.join("nested.markdown"), "# Nested").expect("write nested markdown");
         fs::write(empty.join("image.png"), "ignored").expect("write ignored image");
 
-        let tree = build_text_file_tree(current.to_str().expect("document path"), 24, 12_000)
-            .expect("build directory tree");
+        let tree =
+            build_text_file_tree(current.to_str().expect("document path"), 24, 12_000).expect("build directory tree");
 
         assert_eq!(tree.file_count, 3);
         assert_eq!(tree.directory_count, 1);
         assert_eq!(tree.skipped_count, 0);
         assert!(!tree.truncated);
-        assert!(tree.nodes.iter().any(|node| node.name == "notes" && node.children.len() == 1));
+        assert!(tree
+            .nodes
+            .iter()
+            .any(|node| node.name == "notes" && node.children.len() == 1));
         assert!(!tree.nodes.iter().any(|node| node.name == "empty"));
         fs::remove_dir_all(root).expect("remove nested tree");
     }
@@ -225,11 +221,14 @@ mod tests {
             fs::write(root.join(file), "text").expect("write sorted file");
         }
 
-        let tree = build_text_file_tree(current.to_str().expect("document path"), 24, 12_000)
-            .expect("build sorted tree");
+        let tree =
+            build_text_file_tree(current.to_str().expect("document path"), 24, 12_000).expect("build sorted tree");
         let names = tree.nodes.iter().map(|node| node.name.as_str()).collect::<Vec<_>>();
 
-        assert_eq!(names, ["Alpha", "beta", "alpha.md", "Bravo.md", "current.md", "zeta.md"]);
+        assert_eq!(
+            names,
+            ["Alpha", "beta", "alpha.md", "Bravo.md", "current.md", "zeta.md"]
+        );
         fs::remove_dir_all(root).expect("remove sorted tree");
     }
 
@@ -291,8 +290,8 @@ mod tests {
             .set_len(20 * 1024 * 1024 + 1)
             .expect("size oversized text");
 
-        let tree = build_text_file_tree(current.to_str().expect("document path"), 24, 12_000)
-            .expect("build oversized tree");
+        let tree =
+            build_text_file_tree(current.to_str().expect("document path"), 24, 12_000).expect("build oversized tree");
 
         assert_eq!(tree.file_count, 1);
         assert_eq!(tree.skipped_count, 1);
@@ -315,8 +314,8 @@ mod tests {
         symlink(&current, root.join("alias.md")).expect("create file symlink");
         symlink(&outside, root.join("linked-directory")).expect("create directory symlink");
 
-        let tree = build_text_file_tree(current.to_str().expect("document path"), 24, 12_000)
-            .expect("build symlink tree");
+        let tree =
+            build_text_file_tree(current.to_str().expect("document path"), 24, 12_000).expect("build symlink tree");
 
         assert_eq!(tree.file_count, 1);
         assert_eq!(tree.directory_count, 0);
