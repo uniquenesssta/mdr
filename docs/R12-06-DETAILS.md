@@ -24,6 +24,7 @@
 
 - 首次 Actions 运行 `33298482488` 的前端/浏览器任务全部通过；Rust 任务只在 Rust 1.88 `rustfmt --check` 处失败，尚未执行后续 Rust 测试。
 - 已逐项应用该运行日志给出的全部格式差异，仅调整 `local_file.rs` 与 `directory_tree.rs` 的换行布局；目录树实现、测试断言与公开契约未改变。修复提交的专属 Actions 待用户核验。
+- 第二次 Actions 运行 `33382951498` 已通过 rustfmt、Directory Tree 6/6、全部分层 Rust 回归和全量 Rust；唯一失败为 Clippy 将兼容性公共重导出 `TextFileTreeNode` 判为未使用导入。该类型路径仍属冻结 DTO 契约，因此保留重导出并只对这一行添加精确的 `unused_imports` 例外，不放宽其他 Clippy 警告。
 
 | 验证 | 结果 |
 |---|---|

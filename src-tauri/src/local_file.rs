@@ -15,6 +15,8 @@ mod text_writer;
 
 use binary_writer::{decode_binary, write_binary};
 use directory_tree::build_text_file_tree;
+// Preserve the historical DTO path even though current callers infer node values through TextFileTree.
+#[allow(unused_imports)]
 pub use directory_tree::{TextFileTree, TextFileTreeNode};
 use file_kind::{classify, extension, is_supported_text_path, FileKind};
 use image_reader::{read_dropped_image, read_embedded_image, validate_embedded_image_size};
