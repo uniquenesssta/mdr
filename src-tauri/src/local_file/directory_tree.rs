@@ -2,16 +2,15 @@
 //!
 //! Responsibility: recursively scan one validated document directory, keep supported readable
 //! text files, omit empty directories, sort stable directory-first nodes, count accepted/skipped
-//! entries, and report truncation without following symbolic links. The caller supplies the
-//! current depth and entry limits; limit ownership remains outside this module until R12-07.
-//! Allowed dependencies: local File Kind, Path Policy and Text Reader boundaries plus `std::fs`.
+//! entries, and report truncation without following symbolic links. Tree Limits owns all scan
+//! thresholds, counters and truncation state.
+//! Allowed dependencies: local File Kind, Path Policy and Tree Limits boundaries plus `std::fs`.
 //! Forbidden here: Tauri commands, performance logs, dialogs, writes, Base64 and limit constants.
-//! The scan state is call-local and requires no lifecycle cleanup.
 
 use super::{
     file_kind::is_supported_text_path,
     path_policy::{inspect_tree_entry, parent_directory, required_path, TreeEntryPolicy},
-    text_reader::is_supported_text_size,
+    tree_limits::{TreeLimitState, TreeLimits},
 };
 use serde::Serialize;
 use std::{fs, fs::File, path::Path};
@@ -37,15 +36,6 @@ pub struct TextFileTree {
     pub truncated: bool,
 }
 
-#[derive(Default)]
-pub(super) struct DirectoryTreeScanState {
-    pub(super) scanned_entries: usize,
-    pub(super) file_count: usize,
-    pub(super) directory_count: usize,
-    pub(super) skipped_count: usize,
-    pub(super) truncated: bool,
-}
-
 fn compare_tree_nodes(left: &TextFileTreeNode, right: &TextFileTreeNode) -> std::cmp::Ordering {
     let left_directory = left.kind == "directory";
     let right_directory = right.kind == "directory";
@@ -59,33 +49,29 @@ pub(super) fn scan_text_file_tree_directory(
     root: &Path,
     directory: &Path,
     depth: usize,
-    max_depth: usize,
-    max_entries: usize,
-    state: &mut DirectoryTreeScanState,
+    limits: TreeLimits,
+    state: &mut TreeLimitState,
 ) -> Vec<TextFileTreeNode> {
-    if depth > max_depth {
-        state.truncated = true;
+    if !state.admit_depth(depth, limits) {
         return Vec::new();
     }
 
     let entries = match fs::read_dir(directory) {
         Ok(entries) => entries,
         Err(_) => {
-            state.skipped_count += 1;
+            state.record_skipped();
             return Vec::new();
         }
     };
     let mut nodes = Vec::new();
     for entry_result in entries {
-        if state.scanned_entries >= max_entries {
-            state.truncated = true;
+        if !state.admit_entry(limits) {
             break;
         }
-        state.scanned_entries += 1;
         let entry = match entry_result {
             Ok(entry) => entry,
             Err(_) => {
-                state.skipped_count += 1;
+                state.record_skipped();
                 continue;
             }
         };
@@ -94,16 +80,16 @@ pub(super) fn scan_text_file_tree_directory(
             TreeEntryPolicy::Allowed(metadata) => metadata,
             TreeEntryPolicy::Skip => continue,
             TreeEntryPolicy::Unreadable => {
-                state.skipped_count += 1;
+                state.record_skipped();
                 continue;
             }
         };
         let file_type = metadata.file_type();
         let name = entry.file_name().to_string_lossy().into_owned();
         if file_type.is_dir() {
-            let children = scan_text_file_tree_directory(root, &path, depth + 1, max_depth, max_entries, state);
+            let children = scan_text_file_tree_directory(root, &path, depth + 1, limits, state);
             if !children.is_empty() {
-                state.directory_count += 1;
+                state.record_directory();
                 nodes.push(TextFileTreeNode {
                     name,
                     path: path.to_string_lossy().into_owned(),
@@ -116,11 +102,11 @@ pub(super) fn scan_text_file_tree_directory(
         if !file_type.is_file() || !is_supported_text_path(&path) {
             continue;
         }
-        if !is_supported_text_size(metadata.len()) || File::open(&path).is_err() {
-            state.skipped_count += 1;
+        if !limits.accepts_file_size(metadata.len()) || File::open(&path).is_err() {
+            state.record_skipped();
             continue;
         }
-        state.file_count += 1;
+        state.record_file();
         nodes.push(TextFileTreeNode {
             name,
             path: path.to_string_lossy().into_owned(),
@@ -132,11 +118,7 @@ pub(super) fn scan_text_file_tree_directory(
     nodes
 }
 
-pub(super) fn build_text_file_tree(
-    document_path: &str,
-    max_depth: usize,
-    max_entries: usize,
-) -> Result<TextFileTree, String> {
+pub(super) fn build_text_file_tree(document_path: &str, limits: TreeLimits) -> Result<TextFileTree, String> {
     let document = required_path(document_path.trim(), "当前文档尚未关联本地文件")?;
     let metadata = fs::metadata(&document).map_err(|err| format!("无法读取当前文档信息：{err}"))?;
     if !metadata.is_file() || !is_supported_text_path(&document) {
@@ -145,8 +127,8 @@ pub(super) fn build_text_file_tree(
     let root = parent_directory(&document, "无法确定当前文档所在文件夹")?;
     fs::read_dir(&root).map_err(|err| format!("无法读取当前文件夹：{err}"))?;
 
-    let mut state = DirectoryTreeScanState::default();
-    let nodes = scan_text_file_tree_directory(&root, &root, 0, max_depth, max_entries, &mut state);
+    let mut state = TreeLimitState::default();
+    let nodes = scan_text_file_tree_directory(&root, &root, 0, limits, &mut state);
     let root_name = root
         .file_name()
         .and_then(|value| value.to_str())
@@ -157,16 +139,17 @@ pub(super) fn build_text_file_tree(
         root_path: root.to_string_lossy().into_owned(),
         root_name,
         nodes,
-        file_count: state.file_count,
-        directory_count: state.directory_count,
-        skipped_count: state.skipped_count,
-        truncated: state.truncated,
+        file_count: state.file_count(),
+        directory_count: state.directory_count(),
+        skipped_count: state.skipped_count(),
+        truncated: state.truncated(),
     })
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{build_text_file_tree, scan_text_file_tree_directory, DirectoryTreeScanState};
+    use super::{build_text_file_tree, scan_text_file_tree_directory};
+    use crate::local_file::tree_limits::{TreeLimitState, TreeLimits};
     use std::{
         fs,
         time::{SystemTime, UNIX_EPOCH},
@@ -193,8 +176,8 @@ mod tests {
         fs::write(notes.join("nested.markdown"), "# Nested").expect("write nested markdown");
         fs::write(empty.join("image.png"), "ignored").expect("write ignored image");
 
-        let tree =
-            build_text_file_tree(current.to_str().expect("document path"), 24, 12_000).expect("build directory tree");
+        let tree = build_text_file_tree(current.to_str().expect("document path"), TreeLimits::default())
+            .expect("build directory tree");
 
         assert_eq!(tree.file_count, 3);
         assert_eq!(tree.directory_count, 1);
@@ -221,8 +204,8 @@ mod tests {
             fs::write(root.join(file), "text").expect("write sorted file");
         }
 
-        let tree =
-            build_text_file_tree(current.to_str().expect("document path"), 24, 12_000).expect("build sorted tree");
+        let tree = build_text_file_tree(current.to_str().expect("document path"), TreeLimits::default())
+            .expect("build sorted tree");
         let names = tree.nodes.iter().map(|node| node.name.as_str()).collect::<Vec<_>>();
 
         assert_eq!(
@@ -235,13 +218,13 @@ mod tests {
     #[test]
     fn preserves_document_validation_errors() {
         assert_eq!(
-            build_text_file_tree("  ", 24, 12_000).expect_err("empty path must fail"),
+            build_text_file_tree("  ", TreeLimits::default()).expect_err("empty path must fail"),
             "当前文档尚未关联本地文件"
         );
 
         let missing = temporary_path("missing.md");
         assert!(
-            build_text_file_tree(missing.to_str().expect("missing path"), 24, 12_000)
+            build_text_file_tree(missing.to_str().expect("missing path"), TreeLimits::default())
                 .expect_err("missing document must fail")
                 .starts_with("无法读取当前文档信息：")
         );
@@ -249,7 +232,7 @@ mod tests {
         let unsupported = temporary_path("unsupported.png");
         fs::write(&unsupported, "not markdown").expect("write unsupported document");
         assert_eq!(
-            build_text_file_tree(unsupported.to_str().expect("unsupported path"), 24, 12_000)
+            build_text_file_tree(unsupported.to_str().expect("unsupported path"), TreeLimits::default())
                 .expect_err("unsupported document must fail"),
             "当前文档不是可读取的 Markdown 或 TXT 文件"
         );
@@ -262,20 +245,19 @@ mod tests {
         fs::create_dir_all(&root).expect("create limit root");
         fs::write(root.join("visible.md"), "text").expect("write visible file");
 
-        let mut depth_state = DirectoryTreeScanState::default();
-        let depth_nodes = scan_text_file_tree_directory(&root, &root, 2, 1, 10, &mut depth_state);
+        let depth_limits = TreeLimits::new(1, 10, u64::MAX);
+        let mut depth_state = TreeLimitState::default();
+        let depth_nodes = scan_text_file_tree_directory(&root, &root, 2, depth_limits, &mut depth_state);
         assert!(depth_nodes.is_empty());
-        assert!(depth_state.truncated);
-        assert_eq!(depth_state.scanned_entries, 0);
+        assert!(depth_state.truncated());
+        assert_eq!(depth_state.scanned_entries(), 0);
 
-        let mut entry_state = DirectoryTreeScanState {
-            scanned_entries: 1,
-            ..DirectoryTreeScanState::default()
-        };
-        let entry_nodes = scan_text_file_tree_directory(&root, &root, 0, 10, 1, &mut entry_state);
+        let entry_limits = TreeLimits::new(10, 1, u64::MAX);
+        let mut entry_state = TreeLimitState::with_scanned_entries(1);
+        let entry_nodes = scan_text_file_tree_directory(&root, &root, 0, entry_limits, &mut entry_state);
         assert!(entry_nodes.is_empty());
-        assert!(entry_state.truncated);
-        assert_eq!(entry_state.scanned_entries, 1);
+        assert!(entry_state.truncated());
+        assert_eq!(entry_state.scanned_entries(), 1);
         fs::remove_dir_all(root).expect("remove limit root");
     }
 
@@ -290,8 +272,8 @@ mod tests {
             .set_len(20 * 1024 * 1024 + 1)
             .expect("size oversized text");
 
-        let tree =
-            build_text_file_tree(current.to_str().expect("document path"), 24, 12_000).expect("build oversized tree");
+        let tree = build_text_file_tree(current.to_str().expect("document path"), TreeLimits::default())
+            .expect("build oversized tree");
 
         assert_eq!(tree.file_count, 1);
         assert_eq!(tree.skipped_count, 1);
@@ -314,8 +296,8 @@ mod tests {
         symlink(&current, root.join("alias.md")).expect("create file symlink");
         symlink(&outside, root.join("linked-directory")).expect("create directory symlink");
 
-        let tree =
-            build_text_file_tree(current.to_str().expect("document path"), 24, 12_000).expect("build symlink tree");
+        let tree = build_text_file_tree(current.to_str().expect("document path"), TreeLimits::default())
+            .expect("build symlink tree");
 
         assert_eq!(tree.file_count, 1);
         assert_eq!(tree.directory_count, 0);

@@ -12,6 +12,7 @@ mod image_reader;
 mod path_policy;
 mod text_reader;
 mod text_writer;
+mod tree_limits;
 
 use binary_writer::{decode_binary, write_binary};
 use directory_tree::build_text_file_tree;
@@ -23,9 +24,7 @@ use image_reader::{read_dropped_image, read_embedded_image, validate_embedded_im
 use path_policy::{input_path, required_path, resolve_local_image_path};
 use text_reader::read_dropped_text;
 use text_writer::write_text;
-
-const MAX_FILE_TREE_DEPTH: usize = 24;
-const MAX_FILE_TREE_ENTRIES: usize = 12_000;
+use tree_limits::TreeLimits;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -100,7 +99,7 @@ pub async fn list_text_file_tree(document_path: String) -> Result<TextFileTree, 
             "native.command",
             "list_text_file_tree",
             json!({ "extension": extension }),
-            || build_text_file_tree(&document_path, MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES),
+            || build_text_file_tree(&document_path, TreeLimits::default()),
         )
     })
     .await
@@ -223,8 +222,7 @@ pub fn initial_file_path() -> Option<String> {
 mod tests {
     use super::{
         build_text_file_tree, is_supported_text_path, resolve_local_image_path,
-        write_local_binary_file_inner, write_local_text_file_inner, MAX_FILE_TREE_DEPTH,
-        MAX_FILE_TREE_ENTRIES,
+        write_local_binary_file_inner, write_local_text_file_inner, TreeLimits,
     };
     use std::{
         fs,
@@ -251,12 +249,8 @@ mod tests {
         fs::write(root.join("image.png"), "not an image").expect("write ignored file");
         fs::write(nested.join("nested.markdown"), "# Nested").expect("write nested markdown");
 
-        let tree = build_text_file_tree(
-            &current.to_string_lossy(),
-            MAX_FILE_TREE_DEPTH,
-            MAX_FILE_TREE_ENTRIES,
-        )
-        .expect("scan file tree");
+        let tree =
+            build_text_file_tree(&current.to_string_lossy(), TreeLimits::default()).expect("scan file tree");
         assert_eq!(tree.file_count, 3);
         assert_eq!(tree.directory_count, 1);
         assert!(!tree.truncated);
@@ -317,12 +311,11 @@ mod tests {
 // R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.
 #[cfg(test)]
 mod stage_12_tests {
-    use super::directory_tree::{build_text_file_tree, scan_text_file_tree_directory, DirectoryTreeScanState};
+    use super::directory_tree::{build_text_file_tree, scan_text_file_tree_directory};
     use super::image_reader::{MAX_EMBEDDED_IMAGE_BYTES, MAX_IMAGE_BYTES};
     use super::text_reader::MAX_TEXT_BYTES;
-    use super::{
-        classify, read_dropped_file_inner, read_local_image_inner, FileKind, MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES,
-    };
+    use super::tree_limits::{TreeLimitState, TreeLimits, MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES};
+    use super::{classify, read_dropped_file_inner, read_local_image_inner, FileKind};
     use std::{
         fs,
         time::{SystemTime, UNIX_EPOCH},
@@ -415,34 +408,24 @@ mod stage_12_tests {
         fs::create_dir_all(&root).expect("create tree root");
         fs::write(root.join("visible.md"), "text").expect("write tree file");
 
-        let mut depth_state = DirectoryTreeScanState::default();
+        let limits = TreeLimits::default();
+        let mut depth_state = TreeLimitState::default();
         let depth_nodes = scan_text_file_tree_directory(
             &root,
             &root,
             MAX_FILE_TREE_DEPTH + 1,
-            MAX_FILE_TREE_DEPTH,
-            MAX_FILE_TREE_ENTRIES,
+            limits,
             &mut depth_state,
         );
         assert!(depth_nodes.is_empty());
-        assert!(depth_state.truncated);
-        assert_eq!(depth_state.scanned_entries, 0);
+        assert!(depth_state.truncated());
+        assert_eq!(depth_state.scanned_entries(), 0);
 
-        let mut entry_state = DirectoryTreeScanState {
-            scanned_entries: MAX_FILE_TREE_ENTRIES,
-            ..DirectoryTreeScanState::default()
-        };
-        let entry_nodes = scan_text_file_tree_directory(
-            &root,
-            &root,
-            0,
-            MAX_FILE_TREE_DEPTH,
-            MAX_FILE_TREE_ENTRIES,
-            &mut entry_state,
-        );
+        let mut entry_state = TreeLimitState::with_scanned_entries(MAX_FILE_TREE_ENTRIES);
+        let entry_nodes = scan_text_file_tree_directory(&root, &root, 0, limits, &mut entry_state);
         assert!(entry_nodes.is_empty());
-        assert!(entry_state.truncated);
-        assert_eq!(entry_state.scanned_entries, MAX_FILE_TREE_ENTRIES);
+        assert!(entry_state.truncated());
+        assert_eq!(entry_state.scanned_entries(), MAX_FILE_TREE_ENTRIES);
 
         fs::remove_dir_all(root).expect("remove tree root");
     }
@@ -458,7 +441,7 @@ mod stage_12_tests {
         fs::write(&current, "text").expect("write current document");
         symlink(&current, root.join("alias.md")).expect("create file symlink");
 
-        let tree = build_text_file_tree(&current.to_string_lossy(), MAX_FILE_TREE_DEPTH, MAX_FILE_TREE_ENTRIES)
+        let tree = build_text_file_tree(&current.to_string_lossy(), TreeLimits::default())
             .expect("scan symlink tree");
         assert_eq!(tree.file_count, 1);
         assert_eq!(tree.skipped_count, 0);

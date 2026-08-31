@@ -52,7 +52,7 @@ test('R12-02 centralizes tree containment symlink and unreadable-entry classific
 
   assert.match(directoryTree, /inspect_tree_entry\(root, &path\)/);
   assert.match(directoryTree, /TreeEntryPolicy::Skip => continue/);
-  assert.match(directoryTree, /TreeEntryPolicy::Unreadable => \{\s*state\.skipped_count \+= 1/);
+  assert.match(directoryTree, /TreeEntryPolicy::Unreadable => \{\s*state\.record_skipped\(\)/);
   assert.doesNotMatch(entry, /fs::symlink_metadata/);
   assert.doesNotMatch(directoryTree, /fs::symlink_metadata/);
   assert.match(policy, /candidate\.strip_prefix\(root\)/);
@@ -88,10 +88,10 @@ test('R12-02 preserves command signatures dependencies and the frozen parent-rel
   ]) assert.match(fileClient, new RegExp(command));
 });
 
-test('R12-02 records Path Policy ownership and stays manually runnable after R12-06 starts', async () => {
+test('R12-02 records Path Policy ownership and stays manually runnable after R12-07 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-06.yml'),
+    source('.github/workflows/r12-07.yml'),
     source('.github/workflows/r12-02.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');

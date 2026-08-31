@@ -18,6 +18,7 @@ const SOURCE_LOCAL_FILE_IMAGE_READER: &str = include_str!("../src/local_file/ima
 const SOURCE_LOCAL_FILE_PATH_POLICY: &str = include_str!("../src/local_file/path_policy.rs");
 const SOURCE_LOCAL_FILE_TEXT_READER: &str = include_str!("../src/local_file/text_reader.rs");
 const SOURCE_LOCAL_FILE_TEXT_WRITER: &str = include_str!("../src/local_file/text_writer.rs");
+const SOURCE_LOCAL_FILE_TREE_LIMITS: &str = include_str!("../src/local_file/tree_limits.rs");
 const SOURCE_EXTERNAL_LINK: &str = include_str!("../src/external_link.rs");
 const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");
 const SOURCE_PERFORMANCE_LOG: &str = include_str!("../src/performance_log.rs");
@@ -51,6 +52,7 @@ fn local_file_source_contains(token: &str) -> bool {
         || SOURCE_LOCAL_FILE_PATH_POLICY.contains(token)
         || SOURCE_LOCAL_FILE_TEXT_READER.contains(token)
         || SOURCE_LOCAL_FILE_TEXT_WRITER.contains(token)
+        || SOURCE_LOCAL_FILE_TREE_LIMITS.contains(token)
 }
 
 #[test]

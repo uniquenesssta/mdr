@@ -124,7 +124,7 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
   const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
 
-  assert.equal(moduleFixture.modules.length, 432);
+  assert.equal(moduleFixture.modules.length, 433);
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/binary_writer.rs'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/directory_tree.rs'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/file_kind.rs'));
@@ -132,6 +132,7 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/path_policy.rs'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/text_reader.rs'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/text_writer.rs'));
+  assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/tree_limits.rs'));
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/application/autosave-controller.js'));
   assert.equal(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/compatibility/classic-autosave-controller-port.js'), false);
   assert.equal(moduleFixture.modules.some(record => record[0] === 'src/features/persistence/compatibility/classic-save-controller-port.js'), false);
