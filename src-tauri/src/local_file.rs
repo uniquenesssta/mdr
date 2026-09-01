@@ -410,13 +410,8 @@ mod stage_12_tests {
 
         let limits = TreeLimits::default();
         let mut depth_state = TreeLimitState::default();
-        let depth_nodes = scan_text_file_tree_directory(
-            &root,
-            &root,
-            MAX_FILE_TREE_DEPTH + 1,
-            limits,
-            &mut depth_state,
-        );
+        let depth_nodes =
+            scan_text_file_tree_directory(&root, &root, MAX_FILE_TREE_DEPTH + 1, limits, &mut depth_state);
         assert!(depth_nodes.is_empty());
         assert!(depth_state.truncated());
         assert_eq!(depth_state.scanned_entries(), 0);
@@ -441,8 +436,7 @@ mod stage_12_tests {
         fs::write(&current, "text").expect("write current document");
         symlink(&current, root.join("alias.md")).expect("create file symlink");
 
-        let tree = build_text_file_tree(&current.to_string_lossy(), TreeLimits::default())
-            .expect("scan symlink tree");
+        let tree = build_text_file_tree(&current.to_string_lossy(), TreeLimits::default()).expect("scan symlink tree");
         assert_eq!(tree.file_count, 1);
         assert_eq!(tree.skipped_count, 0);
         assert!(!tree.nodes.iter().any(|node| node.name == "alias.md"));
