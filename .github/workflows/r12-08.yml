@@ -32,6 +32,8 @@ on:
       - 'tests/stage-12-directory-tree.test.mjs'
       - 'tests/stage-12-tree-limits.test.mjs'
       - 'tests/stage-12-local-commands.test.mjs'
+      - 'tests/stage-12-validation-workspace.test.mjs'
+      - 'scripts/ci/archive-tauri-schema.mjs'
       - 'tests/folder-file-tree.test.mjs'
       - 'tests/documentation-layout.test.mjs'
       - 'tests/unit/platform/file-system-client.test.mjs'
@@ -146,6 +148,8 @@ jobs:
       - name: Record validation target
         run: |
           mkdir -p "$RUNNER_TEMP/r12-08"
+          test -z "$(git status --porcelain)"
+          test ! -e src-tauri/gen/schemas/linux-schema.json
           printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-08/performance-logs\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor 9405ab44d6bb5f05eb755a2341e3ba76b4831ed8 HEAD
@@ -259,6 +263,10 @@ jobs:
         run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings 2>&1 | tee "$RUNNER_TEMP/r12-08/clippy.log"
       - name: Rust check
         run: cargo check --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r12-08/cargo-check.log"
+      - name: Preserve newly generated Linux schema as evidence
+        run: |
+          git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-08/worktree-before-cleanup.log"
+          node scripts/ci/archive-tauri-schema.mjs
       - name: Validation leaves tracked sources unchanged
         run: |
           git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-08/workspace.log"
