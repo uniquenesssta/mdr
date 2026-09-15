@@ -76,6 +76,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor 9405ab44d6bb5f05eb755a2341e3ba76b4831ed8 HEAD
           git rev-parse HEAD | tee "$RUNNER_TEMP/r12-08/commit.txt"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/r12-08/source.tar.gz" HEAD
       - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
@@ -115,6 +116,7 @@ jobs:
         run: npm run test:browser 2>&1 | tee "$RUNNER_TEMP/r12-08/browser-app.log"
       - name: Validation leaves tracked sources unchanged
         run: |
+          git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-08/workspace.log"
           git diff --check
           git diff --exit-code
           test -z "$(git ls-files --others --exclude-standard)"
@@ -259,6 +261,7 @@ jobs:
         run: cargo check --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r12-08/cargo-check.log"
       - name: Validation leaves tracked sources unchanged
         run: |
+          git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-08/workspace.log"
           git diff --check
           git diff --exit-code
           test -z "$(git ls-files --others --exclude-standard)"
