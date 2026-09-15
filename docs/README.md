@@ -1,6 +1,6 @@
 # Markdown Editor
 
-当前 R12-08 实施与联合验收状态以根目录 [README](../README.md) 为变更记录，边界、验证限制和回退见 [R12-08](R12-08-DETAILS.md)。下方日期化记录保留各历史提交当时状态。
+当前 R12-09 实施与验收状态以根目录 [README](../README.md) 为准，边界及回退见 [R12-09](R12-09-DETAILS.md)。07/08 联合 Actions `34996236589` 已全部通过；下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

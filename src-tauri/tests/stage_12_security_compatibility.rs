@@ -19,6 +19,7 @@ const SOURCE_LOCAL_FILE_PATH_POLICY: &str = include_str!("../src/local_file/path
 const SOURCE_LOCAL_FILE_TEXT_READER: &str = include_str!("../src/local_file/text_reader.rs");
 const SOURCE_LOCAL_FILE_TEXT_WRITER: &str = include_str!("../src/local_file/text_writer.rs");
 const SOURCE_LOCAL_FILE_TREE_LIMITS: &str = include_str!("../src/local_file/tree_limits.rs");
+const SOURCE_EXTERNAL_LINK_VALIDATION: &str = include_str!("../src/external_link/validation.rs");
 const SOURCE_EXTERNAL_LINK: &str = include_str!("../src/external_link.rs");
 const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");
 const SOURCE_PERFORMANCE_LOG: &str = include_str!("../src/performance_log.rs");
@@ -140,7 +141,7 @@ fn external_link_fixture_freezes_the_exact_protocol_allowlist() {
         fixture["externalLink"]["unsupportedPolicy"],
         "reject-before-platform-open"
     );
-    assert!(SOURCE_EXTERNAL_LINK.contains("\"http\" | \"https\" | \"mailto\" | \"tel\""));
+    assert!(SOURCE_EXTERNAL_LINK_VALIDATION.contains("\"http\" | \"https\" | \"mailto\" | \"tel\""));
     assert!(SOURCE_EXTERNAL_LINK.contains("let validated = validate_external_url(&url)?;"));
     assert!(SOURCE_EXTERNAL_LINK.contains("open_platform_url(&validated)"));
 }

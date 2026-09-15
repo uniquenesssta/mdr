@@ -39,7 +39,7 @@ test('link client does not duplicate Rust supported-scheme policy', async () => 
   assert.deepEqual(calls, [{ operation: 'open_external_url', args: { url: 'javascript:alert(1)' } }]);
 
   const clientSource = await readFile(new URL('../../../src/platform/desktop/link-client.js', import.meta.url), 'utf8');
-  const rustSource = await readFile(new URL('../../../src-tauri/src/external_link.rs', import.meta.url), 'utf8');
+  const rustSource = await readFile(new URL('../../../src-tauri/src/external_link/validation.rs', import.meta.url), 'utf8');
   assert.doesNotMatch(clientSource, /SUPPORTED_SCHEMES|mailto.*tel|javascript:|file:\/\//);
   assert.match(rustSource, /"http" \| "https" \| "mailto" \| "tel"/);
   assert.match(rustSource, /不支持打开此链接/);

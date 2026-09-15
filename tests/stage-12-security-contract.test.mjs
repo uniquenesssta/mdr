@@ -68,7 +68,10 @@ test('R12-01 freezes local text image size depth count symlink and unreadable-fi
 
 test('R12-01 freezes external-link trimming validation order and four-scheme allowlist', async () => {
   const contract = await fixture();
-  const rust = await source('src-tauri/src/external_link.rs');
+  const rust = (await Promise.all([
+    source('src-tauri/src/external_link.rs'),
+    source('src-tauri/src/external_link/validation.rs')
+  ])).join('\n');
   assert.deepEqual(contract.externalLink.allowedSchemes, ['http', 'https', 'mailto', 'tel']);
   assert.equal(contract.externalLink.trimInput, true);
   assert.match(rust, /"http" \| "https" \| "mailto" \| "tel"/);
@@ -126,9 +129,9 @@ test('R12-01 freezes all nine registered command names without changing frontend
   ]) assert.match(client, new RegExp(command));
 });
 
-test('historical R12-01 through R12-07 stay manual while R12-08 owns combined validation', async () => {
+test('historical R12-01 through R12-07 stay manual while R12-09 owns cumulative validation', async () => {
   const [current, previous, first] = await Promise.all([
-    source('.github/workflows/r12-08.yml'),
+    source('.github/workflows/r12-09.yml'),
     source('.github/workflows/r12-07.yml'),
     source('.github/workflows/r12-01.yml')
   ]);

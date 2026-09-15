@@ -1,0 +1,304 @@
+name: R12-09 External Link Validation
+run-name: R12-09 external link validation and cumulative regression · ${{ github.sha }}
+
+on:
+  push:
+    branches: [agent/r12-stage]
+    paths:
+      - 'src-tauri/src/external_link.rs'
+      - 'src-tauri/src/external_link/**'
+      - 'src-tauri/tests/external_link/**'
+      - 'tests/stage-12-external-link-validation.test.mjs'
+      - 'tests/unit/platform/link-client.test.mjs'
+      - 'src/platform/desktop/link-client.js'
+      - 'docs/R12-09-DETAILS.md'
+      - 'src-tauri/src/local_file.rs'
+      - 'src-tauri/src/local_file/**'
+      - 'src-tauri/src/main.rs'
+      - 'src-tauri/tests/local_file/**'
+      - 'src-tauri/src/local_file/binary_writer.rs'
+      - 'src-tauri/src/local_file/directory_tree.rs'
+      - 'src-tauri/src/local_file/file_kind.rs'
+      - 'src-tauri/src/local_file/image_reader.rs'
+      - 'src-tauri/src/local_file/path_policy.rs'
+      - 'src-tauri/src/local_file/text_reader.rs'
+      - 'src-tauri/src/local_file/text_writer.rs'
+      - 'src-tauri/src/local_file/tree_limits.rs'
+      - 'src-tauri/tests/stage_12_security_compatibility.rs'
+      - 'src-tauri/tests/fixtures/stage_12_security/**'
+      - 'src-tauri/Cargo.toml'
+      - 'src-tauri/Cargo.lock'
+      - 'src/platform/desktop/file-system-client.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tests/stage-12-security-contract.test.mjs'
+      - 'tests/stage-12-path-policy.test.mjs'
+      - 'tests/stage-12-file-kind.test.mjs'
+      - 'tests/stage-12-readers.test.mjs'
+      - 'tests/stage-12-writers.test.mjs'
+      - 'tests/stage-12-directory-tree.test.mjs'
+      - 'tests/stage-12-tree-limits.test.mjs'
+      - 'tests/stage-12-local-commands.test.mjs'
+      - 'tests/stage-12-validation-workspace.test.mjs'
+      - 'scripts/ci/archive-tauri-schema.mjs'
+      - 'tests/folder-file-tree.test.mjs'
+      - 'tests/documentation-layout.test.mjs'
+      - 'tests/unit/platform/file-system-client.test.mjs'
+      - 'tests/historical-workflow-routing.test.mjs'
+      - 'tests/architecture/**'
+      - 'docs/R12-01-DETAILS.md'
+      - 'docs/R12-02-DETAILS.md'
+      - 'docs/R12-03-DETAILS.md'
+      - 'docs/R12-04-DETAILS.md'
+      - 'docs/R12-05-DETAILS.md'
+      - 'docs/R12-06-DETAILS.md'
+      - 'docs/R12-07-DETAILS.md'
+      - 'docs/R12-08-DETAILS.md'
+      - 'docs/README.md'
+      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/13-*'
+      - 'README.md'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+jobs:
+  frontend:
+    name: External Link Validation and frontend regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record validation target
+        run: |
+          mkdir -p "$RUNNER_TEMP/r12-09"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 5a296257535ebf2222f8b0345ffda89f9a346310 HEAD
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r12-09/commit.txt"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/r12-09/source.tar.gz" HEAD
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked frontend dependencies
+        run: npm run deps:prepare 2>&1 | tee "$RUNNER_TEMP/r12-09/dependencies.log"
+      - name: Dependency audit hard gate
+        run: npm audit --audit-level=high 2>&1 | tee "$RUNNER_TEMP/r12-09/npm-audit.log"
+      - name: R12-08 command boundaries and R12-07 compatibility contracts
+        run: |
+          node --test \
+            tests/stage-12-security-contract.test.mjs \
+            tests/stage-12-path-policy.test.mjs \
+            tests/stage-12-file-kind.test.mjs \
+            tests/stage-12-readers.test.mjs \
+            tests/stage-12-writers.test.mjs \
+            tests/stage-12-directory-tree.test.mjs \
+            tests/stage-12-tree-limits.test.mjs \
+            tests/stage-12-local-commands.test.mjs \
+            tests/stage-12-external-link-validation.test.mjs \
+            tests/unit/platform/link-client.test.mjs \
+            tests/unit/platform/file-system-client.test.mjs \
+            tests/historical-workflow-routing.test.mjs \
+            2>&1 | tee "$RUNNER_TEMP/r12-09/tree-limits-contracts.log"
+      - name: Full Node regression
+        run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-09/node.log"
+      - name: Architecture and documentation hard gates
+        run: |
+          npm run verify:architecture 2>&1 | tee "$RUNNER_TEMP/r12-09/architecture.log"
+          npm run verify:no-legacy-runtime 2>&1 | tee "$RUNNER_TEMP/r12-09/no-legacy.log"
+          npm run verify:generated-files 2>&1 | tee "$RUNNER_TEMP/r12-09/generated.log"
+          npm run verify:readme-record 2>&1 | tee "$RUNNER_TEMP/r12-09/readme.log"
+      - name: Browser preview contract
+        run: npm run test:browser:contract 2>&1 | tee "$RUNNER_TEMP/r12-09/browser-contract.log"
+      - name: Production build
+        run: npm run build 2>&1 | tee "$RUNNER_TEMP/r12-09/build.log"
+      - name: Built-app browser regression
+        run: npm run test:browser 2>&1 | tee "$RUNNER_TEMP/r12-09/browser-app.log"
+      - name: Validation leaves tracked sources unchanged
+        run: |
+          git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-09/workspace.log"
+          git diff --check
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Retain frontend evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r12-09-frontend-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r12-09/
+          if-no-files-found: error
+          retention-days: 14
+
+  rust:
+    name: Real Rust External Link Validation and cumulative hard gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RUSTUP_TOOLCHAIN: '1.88.0'
+      CARGO_TERM_COLOR: never
+    steps:
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record validation target
+        run: |
+          mkdir -p "$RUNNER_TEMP/r12-09"
+          test -z "$(git status --porcelain)"
+          test ! -e src-tauri/gen/schemas/linux-schema.json
+          printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-09/performance-logs\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 5a296257535ebf2222f8b0345ffda89f9a346310 HEAD
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r12-09/commit.txt"
+      - name: Guard R12-09 scope and frozen policies
+        run: |
+          base='5a296257535ebf2222f8b0345ffda89f9a346310'
+          git diff --quiet "$base"...HEAD -- \
+            src-tauri/Cargo.toml src-tauri/Cargo.lock package.json package-lock.json \
+            src-tauri/src/main.rs src-tauri/src/local_file src-tauri/src/web_fetch.rs \
+            src-tauri/src/performance_log.rs src-tauri/src/document_store \
+            src-tauri/src/local_file/path_policy.rs src-tauri/src/local_file/file_kind.rs \
+            src-tauri/src/local_file/text_reader.rs src-tauri/src/local_file/image_reader.rs \
+            src-tauri/src/local_file/text_writer.rs src-tauri/src/local_file/binary_writer.rs \
+            src-tauri/src/local_file/directory_tree.rs src-tauri/src/local_file/tree_limits.rs \
+            src/platform/desktop/file-system-client.js src/platform/desktop/link-client.js
+          test ! -e src-tauri/src/local_file.rs
+          test ! -e .github/workflows/r12-source-snapshot.yml
+          node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs \
+            2>&1 | tee "$RUNNER_TEMP/r12-09/command-scope.log"
+          git diff --check
+      - name: Install Linux Tauri build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+      - name: Pin Rust 1.88 with Clippy and rustfmt
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
+          rustc --version
+          cargo --version
+      - name: Rust formatting
+        run: |
+          rustfmt --edition 2021 --check --config max_width=120 \
+            src-tauri/src/external_link/validation.rs \
+            src-tauri/tests/external_link/command_validation.rs \
+            src-tauri/src/local_file/mod.rs \
+            src-tauri/src/local_file/commands.rs \
+            src-tauri/src/local_file/operations.rs \
+            src-tauri/src/local_file/types.rs \
+            src-tauri/src/local_file/binary_writer.rs \
+            src-tauri/src/local_file/directory_tree.rs \
+            src-tauri/src/local_file/file_kind.rs \
+            src-tauri/src/local_file/image_reader.rs \
+            src-tauri/src/local_file/path_policy.rs \
+            src-tauri/src/local_file/text_reader.rs \
+            src-tauri/src/local_file/text_writer.rs \
+            src-tauri/src/local_file/tree_limits.rs \
+            src-tauri/tests/local_file/legacy.rs \
+            src-tauri/tests/local_file/stage_12.rs \
+            src-tauri/tests/local_file/commands.rs \
+            src-tauri/tests/stage_12_security_compatibility.rs \
+            2>&1 | tee "$RUNNER_TEMP/r12-09/rustfmt.log"
+      - name: R12-09 direct URL validation 8 of 8
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor external_link::validation::tests \
+            2>&1 | tee "$RUNNER_TEMP/r12-09/rust-url-validation.log"
+          grep -Fq 'test result: ok. 8 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-url-validation.log"
+      - name: R12-09 real backend command rejection 2 of 2
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor external_link::validation_command_tests \
+            2>&1 | tee "$RUNNER_TEMP/r12-09/rust-url-command.log"
+          grep -Fq 'test result: ok. 2 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-url-command.log"
+      - name: R12-08 real command tests 12 of 12
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::command_tests 2>&1 | tee "$RUNNER_TEMP/r12-09/rust-commands.log"
+          grep -Fq 'test result: ok. 12 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-commands.log"
+      - name: Preserved local-file legacy regression 4 of 4
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::tests 2>&1 | tee "$RUNNER_TEMP/r12-09/rust-legacy.log"
+          grep -Fq 'test result: ok. 4 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-legacy.log"
+      - name: R12-07 direct Tree Limits tests 6 of 6
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::tree_limits::tests 2>&1 | tee "$RUNNER_TEMP/r12-09/rust-tree-limits.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-tree-limits.log"
+      - name: R12-06 direct Directory Tree regression 6 of 6
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::directory_tree::tests 2>&1 | tee "$RUNNER_TEMP/r12-09/rust-directory-tree.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-directory-tree.log"
+      - name: R12-05 direct Writer regression 10 of 10
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::text_writer::tests 2>&1 | tee "$RUNNER_TEMP/r12-09/rust-text-writer.log"
+          grep -Fq 'test result: ok. 4 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-text-writer.log"
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::binary_writer::tests 2>&1 | tee "$RUNNER_TEMP/r12-09/rust-binary-writer.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-binary-writer.log"
+      - name: R12-04 direct Reader regression 10 of 10
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::text_reader::tests 2>&1 | tee "$RUNNER_TEMP/r12-09/rust-text-reader.log"
+          grep -Fq 'test result: ok. 4 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-text-reader.log"
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
+            local_file::image_reader::tests 2>&1 | tee "$RUNNER_TEMP/r12-09/rust-image-reader.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-image-reader.log"
+      - name: R12-03 direct File Kind regression 6 of 6
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor file_kind::tests \
+            2>&1 | tee "$RUNNER_TEMP/r12-09/rust-file-kind.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-file-kind.log"
+      - name: R12-02 direct Path Policy regression 10 of 10
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor path_policy::tests \
+            2>&1 | tee "$RUNNER_TEMP/r12-09/rust-path-policy.log"
+          grep -Fq 'test result: ok. 10 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-path-policy.log"
+      - name: R12-01 direct behavior regression 10 of 10
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor stage_12_ \
+            2>&1 | tee "$RUNNER_TEMP/r12-09/rust-production-contracts.log"
+          grep -Fq 'test result: ok. 10 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-production-contracts.log"
+      - name: R12-01 independent compatibility fixture 6 of 6
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --test stage_12_security_compatibility \
+            2>&1 | tee "$RUNNER_TEMP/r12-09/rust-fixture.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-09/rust-fixture.log"
+      - name: Full Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r12-09/rust-tests.log"
+      - name: Full Clippy warnings-denied gate
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings 2>&1 | tee "$RUNNER_TEMP/r12-09/clippy.log"
+      - name: Rust check
+        run: cargo check --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r12-09/cargo-check.log"
+      - name: Preserve newly generated Linux schema as evidence
+        run: |
+          git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-09/worktree-before-cleanup.log"
+          node --input-type=module -e "import { archiveTauriLinuxSchema } from './scripts/ci/archive-tauri-schema.mjs'; archiveTauriLinuxSchema(process.cwd(), process.env.RUNNER_TEMP + '/r12-09');"
+      - name: Validation leaves tracked sources unchanged
+        run: |
+          git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-09/workspace.log"
+          git diff --check
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Retain Rust evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r12-09-rust-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r12-09/
+          if-no-files-found: error
+          retention-days: 14

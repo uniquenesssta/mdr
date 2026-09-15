@@ -1,17 +1,6 @@
-use url::Url;
+mod validation;
 
-fn validate_external_url(value: &str) -> Result<String, String> {
-    let trimmed = value.trim();
-    if trimmed.is_empty() {
-        return Err("链接地址为空".to_string());
-    }
-
-    let parsed = Url::parse(trimmed).map_err(|_| "链接格式无效".to_string())?;
-    match parsed.scheme() {
-        "http" | "https" | "mailto" | "tel" => Ok(trimmed.to_string()),
-        _ => Err("不支持打开此链接".to_string()),
-    }
-}
+use validation::validate_external_url;
 
 #[cfg(target_os = "windows")]
 fn open_platform_url(url: &str) -> Result<(), String> {
@@ -133,3 +122,7 @@ mod stage_12_tests {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/external_link/command_validation.rs"]
+mod validation_command_tests;

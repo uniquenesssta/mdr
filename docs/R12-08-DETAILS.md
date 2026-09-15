@@ -1,5 +1,9 @@
 # R12-08 — Local Commands
 
+### 联合验收闭环（2026-09-16）
+
+提交 `5a296257535ebf2222f8b0345ffda89f9a346310` 的 [联合 Actions #34996236589](https://github.com/uniquenesssta/mdr/actions/runs/34996236589) 两个 job 与全部硬性步骤成功：真实命令 12/12、Tree Limits 6/6、全部 Rust 回归、Clippy `-D warnings`、Cargo check、前端/浏览器/构建、审计以及最终工作区检查均通过。此前失败唯一未跟踪项为 `src-tauri/gen/schemas/linux-schema.json`；现在仅在确认构建前不存在、未被跟踪且与 desktop schema 字节一致后归档到 runner 证据目录，未知文件和源码修改仍会失败。新增 7 项真实临时工作区测试保护此边界。07/08 已完成，允许进入 R12-09；用户已确认桌面端可通过 `npm run tauri:dev` 打开，这不替代自动验收。
+
 ## 状态与输入
 
 - 分支继续使用 `agent/r12-stage`；生产源码基线为 R12-07 的 `9405ab44d6bb5f05eb755a2341e3ba76b4831ed8`。

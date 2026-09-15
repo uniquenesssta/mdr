@@ -100,10 +100,10 @@ test('R12-07 preserves commands DTOs frozen dependency blobs and the shared text
   assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
 });
 
-test('R12-07 records Tree Limits ownership and is revalidated by the sole automatic R12-08 workflow', async () => {
+test('R12-07 records Tree Limits ownership and is revalidated by the sole automatic R12-09 workflow', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-08.yml'),
+    source('.github/workflows/r12-09.yml'),
     source('.github/workflows/r12-07.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');
