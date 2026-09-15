@@ -91,7 +91,7 @@ test('R12-02 preserves command signatures dependencies and the frozen parent-rel
 test('R12-02 records Path Policy ownership and stays manually runnable after R12-09 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-09.yml'),
+    source('.github/workflows/r12-10.yml'),
     source('.github/workflows/r12-02.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');

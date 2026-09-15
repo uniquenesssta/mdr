@@ -129,9 +129,9 @@ test('R12-01 freezes all nine registered command names without changing frontend
   ]) assert.match(client, new RegExp(command));
 });
 
-test('historical R12-01 through R12-07 stay manual while R12-09 owns cumulative validation', async () => {
+test('historical R12-01 through R12-07 stay manual while R12-10 owns cumulative validation', async () => {
   const [current, previous, first] = await Promise.all([
-    source('.github/workflows/r12-09.yml'),
+    source('.github/workflows/r12-10.yml'),
     source('.github/workflows/r12-07.yml'),
     source('.github/workflows/r12-01.yml')
   ]);

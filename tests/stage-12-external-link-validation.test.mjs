@@ -34,12 +34,14 @@ test('R12-09 keeps the complete frozen parser allowlist error order and returned
   assert.doesNotMatch(after, /parsed\.(?:as_str|to_string)\(/);
 });
 
-test('R12-09 leaves every platform opener command and all four legacy tests byte-identical', async () => {
+test('R12-09 preserves command and legacy tests after R12-10 extracts only the system opener', async () => {
   const before = frozen(entryPath);
   const expected = before
-    .replace('use url::Url;', 'mod validation;\n\nuse validation::validate_external_url;')
+    .replace('use url::Url;', 'mod opener;\nmod validation;\n\nuse opener::open_platform_url;\nuse validation::validate_external_url;')
     .replace(`${validator(before)}\n\n`, '')
-    + '\n#[cfg(test)]\n#[path = "../tests/external_link/command_validation.rs"]\nmod validation_command_tests;\n';
+    .replace(before.slice(before.indexOf('#[cfg(target_os = \"windows\")]'), before.indexOf('#[tauri::command]')), '')
+    + '\n#[cfg(test)]\n#[path = "../tests/external_link/command_validation.rs"]\nmod validation_command_tests;\n'
+    + '\n#[cfg(all(test, target_os = \"linux\"))]\n#[path = \"../tests/external_link/opener.rs\"]\nmod opener_tests;\n';
   assert.equal(await source(entryPath), expected);
   assert.equal((before.match(/#\[test\]/g) || []).length, 4);
 });
@@ -74,11 +76,11 @@ test('R12-09 records one additional policy module with no state owner', async ()
   assert.equal(records.length, 1);
   assert.equal(records[0][inventory.fields.indexOf('stateOwner')], 'none');
   assert.equal(records[0][inventory.fields.indexOf('lifecycle')], 'pure-call');
-  assert.equal(inventory.modules.length, 437);
+  assert.equal(inventory.modules.length, 438);
 });
 
-test('R12-09 retains cumulative hard gates and makes R12-08 manual without weakening it', async () => {
-  const current = await source('.github/workflows/r12-09.yml');
+test('R12-09 coverage remains in the cumulative hard gates and R12-08 stays manual', async () => {
+  const current = await source('.github/workflows/r12-10.yml');
   const previous = await source('.github/workflows/r12-08.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
@@ -94,5 +96,5 @@ test('R12-09 retains cumulative hard gates and makes R12-08 manual without weake
     'tests/unit/platform/link-client.test.mjs']) {
     assert.ok(current.includes(text), `missing validation: ${text}`);
   }
-  assert.ok(current.includes("process.env.RUNNER_TEMP + '/r12-09'"));
+  assert.ok(current.includes("process.env.RUNNER_TEMP + '/r12-10'"));
 });
