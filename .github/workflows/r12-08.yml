@@ -134,7 +134,6 @@ jobs:
     env:
       RUSTUP_TOOLCHAIN: '1.88.0'
       CARGO_TERM_COLOR: never
-      MARKDOWN_EDITOR_LOG_DIR: ${{ runner.temp }}/r12-08/performance-logs
     steps:
       - name: Checkout exact event commit
         uses: actions/checkout@v4
@@ -145,6 +144,7 @@ jobs:
       - name: Record validation target
         run: |
           mkdir -p "$RUNNER_TEMP/r12-08"
+          printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-08/performance-logs\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor 9405ab44d6bb5f05eb755a2341e3ba76b4831ed8 HEAD
           git rev-parse HEAD | tee "$RUNNER_TEMP/r12-08/commit.txt"
