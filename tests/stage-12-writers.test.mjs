@@ -17,7 +17,7 @@ function gitBlobSha(content) {
 
 test('R12-05 gives text and binary persistence separate Writer authorities', async () => {
   const [entry, textWriter, binaryWriter] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/mod.rs'),
     source('src-tauri/src/local_file/text_writer.rs'),
     source('src-tauri/src/local_file/binary_writer.rs')
   ]);
@@ -42,19 +42,22 @@ test('R12-05 gives text and binary persistence separate Writer authorities', asy
 });
 
 test('R12-05 routes writes through Writers without duplicate file IO or Base64 decoding', async () => {
-  const entry = await source('src-tauri/src/local_file.rs');
+  const [entry, commands] = await Promise.all([
+    source('src-tauri/src/local_file/operations.rs'),
+    source('src-tauri/src/local_file/commands.rs')
+  ]);
   const production = entry.split('#[cfg(test)]')[0];
 
   assert.match(production, /write_text\(&path_buf, &content\)\?/);
   assert.match(production, /write_binary\(&path_buf, &content\)\?/);
-  assert.match(production, /decode_binary\(&content_base64\)\?/);
-  assert.doesNotMatch(production, /fs::write|general_purpose|\.decode\(content_base64\)/);
+  assert.match(commands, /decode_binary\(&content_base64\)\?/);
+  assert.doesNotMatch(`${production}\n${commands}`, /fs::write|general_purpose|\.decode\(content_base64\)/);
   assert.equal((production.match(/required_path\(&path, "保存路径不能为空"\)\?/g) || []).length, 2);
 });
 
 test('R12-05 preserves parent decode byte-count and error ordering without dialog ownership', async () => {
   const [entry, textWriter, binaryWriter] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/src/local_file/text_writer.rs'),
     source('src-tauri/src/local_file/binary_writer.rs')
   ]);
@@ -77,7 +80,7 @@ test('R12-05 preserves parent decode byte-count and error ordering without dialo
 
 test('R12-05 preserves commands DTOs and frozen dependency blobs', async () => {
   const [entry, cargo, packageJson, manifest] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/Cargo.toml'),
     source('package.json'),
     source('src-tauri/tests/fixtures/stage_12_security/manifest.json').then(JSON.parse)
@@ -96,10 +99,10 @@ test('R12-05 preserves commands DTOs and frozen dependency blobs', async () => {
   assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
 });
 
-test('R12-05 records both Writers and stays manual after R12-07 starts', async () => {
+test('R12-05 records both Writers and stays manual after R12-08 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-07.yml'),
+    source('.github/workflows/r12-08.yml'),
     source('.github/workflows/r12-05.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');

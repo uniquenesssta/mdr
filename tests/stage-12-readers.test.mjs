@@ -17,7 +17,7 @@ function gitBlobSha(content) {
 
 test('R12-04 gives UTF-8 text and binary image reading separate authorities', async () => {
   const [entry, textReader, imageReader] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/mod.rs'),
     source('src-tauri/src/local_file/text_reader.rs'),
     source('src-tauri/src/local_file/image_reader.rs')
   ]);
@@ -37,7 +37,7 @@ test('R12-04 gives UTF-8 text and binary image reading separate authorities', as
 
 test('R12-04 routes reads through Readers and keeps binary bytes out of text', async () => {
   const [entry, textReader] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/operations.rs'),
     source('src-tauri/src/local_file/text_reader.rs')
   ]);
   const production = entry.split('#[cfg(test)]')[0];
@@ -52,14 +52,15 @@ test('R12-04 routes reads through Readers and keeps binary bytes out of text', a
 
 test('R12-04 preserves size validation order Data URL MIME and exact errors', async () => {
   const [entry, textReader, imageReader] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/operations.rs'),
     source('src-tauri/src/local_file/text_reader.rs'),
     source('src-tauri/src/local_file/image_reader.rs')
   ]);
-  const imageStart = entry.indexOf('fn read_local_image_inner');
-  const imageEnd = entry.indexOf('#[derive(Debug, Serialize)]', imageStart);
+  const imageStart = entry.indexOf('fn read_local_image(');
+  const imageEnd = entry.indexOf('pub(super) fn write_local_text_file', imageStart);
   const localImage = entry.slice(imageStart, imageEnd);
 
+  assert.ok(imageStart >= 0 && imageEnd > imageStart, 'inspect the actual image operation');
   assert.ok(localImage.indexOf('validate_embedded_image_size(metadata.len())?') < localImage.indexOf('classify(&path)'));
   for (const error of [
     '文本文件过大，暂不支持直接拖入', '无法读取文本文件：',
@@ -74,7 +75,7 @@ test('R12-04 preserves size validation order Data URL MIME and exact errors', as
 
 test('R12-04 preserves commands and frozen dependency blobs', async () => {
   const [entry, cargo, packageJson, manifest] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/Cargo.toml'),
     source('package.json'),
     source('src-tauri/tests/fixtures/stage_12_security/manifest.json').then(JSON.parse)
@@ -93,10 +94,10 @@ test('R12-04 preserves commands and frozen dependency blobs', async () => {
   assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
 });
 
-test('R12-04 records both Readers and stays manual after R12-07 starts', async () => {
+test('R12-04 records both Readers and stays manual after R12-08 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-07.yml'),
+    source('.github/workflows/r12-08.yml'),
     source('.github/workflows/r12-04.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');

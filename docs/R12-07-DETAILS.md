@@ -36,7 +36,9 @@
 | 浏览器 | 当前容器没有 Chromium/Chrome，browser contract/app 交由 R12-07 Actions。 |
 | Rust | 当前容器没有 Cargo/rustfmt；Actions 执行 Tree Limits 6/6、全部既有分层 Rust、全量 Rust、Clippy `-D warnings` 和 Cargo check。 |
 
-R12-07 Actions 未由用户核验绿色前不勾选 12.7，也不推进 R12-08。
+### 与 R12-08 联合复验（2026-09-15）
+
+历史提交 `9405ab44d6bb5f05eb755a2341e3ba76b4831ed8` 的 Actions `33468075423` 已成功。用户本轮明确要求先完成 R12-08，再一起处理 R12-07 的复验与记录。R12-08 保持 `tree_limits.rs` 和 `directory_tree.rs` 原 Blob 不变，专属 Actions 包含既有 Tree Limits 6/6、Directory Tree 6/6 和全部既有回归，并新增真实命令层目录截断/调用隔离覆盖。此处不把历史绿色当作新提交的联合验收；联合结果未确认前，12.7/12.8 均不新增完成勾选，不进入 R12-09。
 
 ## 契约、风险与回退
 

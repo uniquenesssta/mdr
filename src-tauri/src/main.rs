@@ -26,12 +26,12 @@ pub fn run() {
             document_store::commands::load::read_document_chunk,
             document_store::commands::search::search_document_state,
             document_store::commands::delete::delete_document_state,
-            local_file::read_dropped_file,
-            local_file::list_text_file_tree,
-            local_file::read_local_image,
-            local_file::write_local_text_file,
-            local_file::write_local_binary_file,
-            local_file::initial_file_path,
+            local_file::commands::read_dropped_file,
+            local_file::commands::list_text_file_tree,
+            local_file::commands::read_local_image,
+            local_file::commands::write_local_text_file,
+            local_file::commands::write_local_binary_file,
+            local_file::commands::initial_file_path,
             performance_log::write_performance_logs
         ])
         .run(tauri::generate_context!());

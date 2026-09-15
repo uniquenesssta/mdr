@@ -17,7 +17,7 @@ function gitBlobSha(content) {
 
 test('R12-03 creates one pure File Kind authority with no file or command ownership', async () => {
   const [entry, fileKind] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/mod.rs'),
     source('src-tauri/src/local_file/file_kind.rs')
   ]);
   const productionEntry = entry.split('#[cfg(test)]')[0];
@@ -48,8 +48,9 @@ test('R12-03 preserves the frozen text image and unsupported classification', as
 });
 
 test('R12-03 routes every local-file kind decision through File Kind', async () => {
-  const [entry, directoryTree] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+  const [entry, commands, directoryTree] = await Promise.all([
+    source('src-tauri/src/local_file/operations.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/src/local_file/directory_tree.rs')
   ]);
   const production = entry.split('#[cfg(test)]')[0];
@@ -62,13 +63,13 @@ test('R12-03 routes every local-file kind decision through File Kind', async () 
   assert.match(production, /FileKind::Image \{ mime \} =>/);
   assert.match(production, /FileKind::Unsupported => Err\("不支持该文件类型/);
   assert.equal((combined.match(/is_supported_text_path\(/g) || []).length, 3);
-  assert.equal((production.match(/extension\(Path::new\(/g) || []).length, 3);
+  assert.equal((commands.match(/extension\(Path::new\(/g) || []).length, 3);
   assert.doesNotMatch(production, /"md" \| "markdown" \| "txt"|"png" =>|"jpg" \| "jpeg"/);
 });
 
 test('R12-03 preserves commands dependencies and the R12-01 source contracts', async () => {
   const [entry, cargo, packageJson, manifest] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/Cargo.toml'),
     source('package.json'),
     source('src-tauri/tests/fixtures/stage_12_security/manifest.json').then(JSON.parse)
@@ -87,10 +88,10 @@ test('R12-03 preserves commands dependencies and the R12-01 source contracts', a
   assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
 });
 
-test('R12-03 records File Kind ownership and stays manual after R12-07 starts', async () => {
+test('R12-03 records File Kind ownership and stays manual after R12-08 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-07.yml'),
+    source('.github/workflows/r12-08.yml'),
     source('.github/workflows/r12-03.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');

@@ -46,14 +46,15 @@ test('folder file tree keeps supported files, sorts directories first, and norma
 });
 
 test('folder file tree is wired through the Sidebar controller, runtime bridge, core state, and Rust command', async () => {
-  const [index, main, core, sidebarState, desktopPlatform, rustMain, rustLocal] = await Promise.all([
+  const [index, main, core, sidebarState, desktopPlatform, rustMain, rustLocal, treeLimits] = await Promise.all([
     readFile(new URL('../public/compatibility/business-content.html', import.meta.url), 'utf8'),
     readFile(new URL('../src/main.js', import.meta.url), 'utf8'),
     readFile(new URL('../public/app/core.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/features/sidebar/state/sidebar-state.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8'),
     readFile(new URL('../src-tauri/src/main.rs', import.meta.url), 'utf8'),
-    readFile(new URL('../src-tauri/src/local_file.rs', import.meta.url), 'utf8')
+    readFile(new URL('../src-tauri/src/local_file/commands.rs', import.meta.url), 'utf8'),
+    readFile(new URL('../src-tauri/src/local_file/tree_limits.rs', import.meta.url), 'utf8')
   ]);
   assert.match(index, /id="sidebar-files-tab"/);
   assert.match(index, /id="folder-file-tree"/);
@@ -64,7 +65,7 @@ test('folder file tree is wired through the Sidebar controller, runtime bridge, 
   assert.match(core, /markdownEditorFolderTreeControllerPort/);
   assert.match(desktopPlatform, /listTextTree/);
   assert.match(desktopPlatform, /fileSystemClient\.listTextFileTree/);
-  assert.match(rustMain, /local_file::list_text_file_tree/);
+  assert.match(rustMain, /local_file::commands::list_text_file_tree/);
   assert.match(rustLocal, /pub async fn list_text_file_tree/);
-  assert.match(rustLocal, /MAX_FILE_TREE_ENTRIES/);
+  assert.match(treeLimits, /MAX_FILE_TREE_ENTRIES: usize = 12_000/);
 });

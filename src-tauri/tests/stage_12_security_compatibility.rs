@@ -10,7 +10,7 @@
 use serde_json::Value;
 use std::{fs, path::Path};
 
-const SOURCE_LOCAL_FILE: &str = include_str!("../src/local_file.rs");
+const SOURCE_LOCAL_FILE: &str = include_str!("../src/local_file/mod.rs");
 const SOURCE_LOCAL_FILE_BINARY_WRITER: &str = include_str!("../src/local_file/binary_writer.rs");
 const SOURCE_LOCAL_FILE_DIRECTORY_TREE: &str = include_str!("../src/local_file/directory_tree.rs");
 const SOURCE_LOCAL_FILE_KIND: &str = include_str!("../src/local_file/file_kind.rs");

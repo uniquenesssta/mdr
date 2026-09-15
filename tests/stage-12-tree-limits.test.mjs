@@ -17,7 +17,7 @@ function gitBlobSha(content) {
 
 test('R12-07 creates one Tree Limits authority and removes command-layer constants', async () => {
   const [entry, treeLimits] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/mod.rs'),
     source('src-tauri/src/local_file/tree_limits.rs')
   ]);
   const productionEntry = entry.split('#[cfg(test)]')[0];
@@ -34,7 +34,7 @@ test('R12-07 creates one Tree Limits authority and removes command-layer constan
 
 test('R12-07 routes the command and Directory Tree through one default limit set', async () => {
   const [entry, directoryTree] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/src/local_file/directory_tree.rs')
   ]);
   const productionEntry = entry.split('#[cfg(test)]')[0];
@@ -82,7 +82,7 @@ test('R12-07 owns file directory skipped and truncation state per scan call', as
 
 test('R12-07 preserves commands DTOs frozen dependency blobs and the shared text ceiling', async () => {
   const [entry, directoryTree, textReader, cargo, packageJson, manifest] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/src/local_file/directory_tree.rs'),
     source('src-tauri/src/local_file/text_reader.rs'),
     source('src-tauri/Cargo.toml'),
@@ -100,11 +100,11 @@ test('R12-07 preserves commands DTOs frozen dependency blobs and the shared text
   assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
 });
 
-test('R12-07 records Tree Limits ownership and becomes the sole automatic Stage workflow', async () => {
+test('R12-07 records Tree Limits ownership and is revalidated by the sole automatic R12-08 workflow', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-07.yml'),
-    source('.github/workflows/r12-06.yml')
+    source('.github/workflows/r12-08.yml'),
+    source('.github/workflows/r12-07.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');
   const record = inventory.modules.find(item => item[pathIndex] === 'src-tauri/src/local_file/tree_limits.rs');

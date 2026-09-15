@@ -16,8 +16,9 @@ function gitBlobSha(content) {
 }
 
 test('R12-06 creates one Directory Tree authority and removes the old scan implementation', async () => {
-  const [entry, directoryTree] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+  const [entry, commands, directoryTree] = await Promise.all([
+    source('src-tauri/src/local_file/mod.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/src/local_file/directory_tree.rs')
   ]);
   const productionEntry = entry.split('#[cfg(test)]')[0];
@@ -26,7 +27,7 @@ test('R12-06 creates one Directory Tree authority and removes the old scan imple
   assert.match(entry, /mod directory_tree;/);
   assert.match(entry, /pub use directory_tree::\{TextFileTree, TextFileTreeNode\};/);
   assert.match(directoryTree, /Responsibility: recursively scan one validated document directory/);
-  assert.match(productionEntry, /build_text_file_tree\(&document_path, TreeLimits::default\(\)\)/);
+  assert.match(commands, /build_text_file_tree\(&document_path, TreeLimits::default\(\)\)/);
   assert.doesNotMatch(productionEntry, /fs::read_dir|File::open|fn compare_tree_nodes|fn scan_text_file_tree_directory/);
   assert.doesNotMatch(productionEntry, /pub struct TextFileTree(?:Node)?|struct DirectoryTreeScanState/);
   assert.equal((`${entry}\n${directoryTree}`.match(/fn build_text_file_tree\s*\(/g) || []).length, 1);
@@ -70,7 +71,7 @@ test('R12-06 never follows symbolic links and preserves skip accounting', async 
 
 test('R12-06 delegates its migrated scan to the later R12-07 Tree Limits authority', async () => {
   const [entry, directoryTree, treeLimits] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/src/local_file/directory_tree.rs'),
     source('src-tauri/src/local_file/tree_limits.rs')
   ]);
@@ -88,7 +89,7 @@ test('R12-06 delegates its migrated scan to the later R12-07 Tree Limits authori
 
 test('R12-06 preserves DTO errors readable-file policy commands and dependencies', async () => {
   const [entry, directoryTree, cargo, packageJson, manifest] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/src/local_file/directory_tree.rs'),
     source('src-tauri/Cargo.toml'),
     source('package.json'),
@@ -110,10 +111,10 @@ test('R12-06 preserves DTO errors readable-file policy commands and dependencies
   assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
 });
 
-test('R12-06 records Directory Tree ownership and stays manual after R12-07 starts', async () => {
+test('R12-06 records Directory Tree ownership and stays manual after R12-08 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-07.yml'),
+    source('.github/workflows/r12-08.yml'),
     source('.github/workflows/r12-06.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');

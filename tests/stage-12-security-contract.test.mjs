@@ -35,7 +35,10 @@ test('R12-01 manifest pins the closed Stage 11 source and unchanged dependency c
 test('R12-01 freezes local text image size depth count symlink and unreadable-file behavior', async () => {
   const contract = await fixture();
   const rust = [
-    await source('src-tauri/src/local_file.rs'),
+    await source('src-tauri/src/local_file/mod.rs'),
+    await source('src-tauri/src/local_file/commands.rs'),
+    await source('src-tauri/src/local_file/operations.rs'),
+    await source('src-tauri/src/local_file/types.rs'),
     await source('src-tauri/src/local_file/binary_writer.rs'),
     await source('src-tauri/src/local_file/directory_tree.rs'),
     await source('src-tauri/src/local_file/file_kind.rs'),
@@ -123,10 +126,10 @@ test('R12-01 freezes all nine registered command names without changing frontend
   ]) assert.match(client, new RegExp(command));
 });
 
-test('completed R12-01 through R12-06 stay manual while R12-07 owns Stage branch validation', async () => {
+test('historical R12-01 through R12-07 stay manual while R12-08 owns combined validation', async () => {
   const [current, previous, first] = await Promise.all([
+    source('.github/workflows/r12-08.yml'),
     source('.github/workflows/r12-07.yml'),
-    source('.github/workflows/r12-06.yml'),
     source('.github/workflows/r12-01.yml')
   ]);
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);

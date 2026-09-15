@@ -8,7 +8,7 @@ async function source(path) {
 
 test('R12-02 creates one narrow Path Policy authority with no command or content ownership', async () => {
   const [entry, policy] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/mod.rs'),
     source('src-tauri/src/local_file/path_policy.rs')
   ]);
   const productionPolicy = policy.split('#[cfg(test)]')[0];
@@ -27,7 +27,7 @@ test('R12-02 creates one narrow Path Policy authority with no command or content
 
 test('R12-02 routes all local-file read and write path construction through Path Policy', async () => {
   const [entry, directoryTree] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/operations.rs'),
     source('src-tauri/src/local_file/directory_tree.rs')
   ]);
   const production = entry.split('#[cfg(test)]')[0];
@@ -45,7 +45,7 @@ test('R12-02 routes all local-file read and write path construction through Path
 
 test('R12-02 centralizes tree containment symlink and unreadable-entry classification', async () => {
   const [entry, directoryTree, policy] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/operations.rs'),
     source('src-tauri/src/local_file/directory_tree.rs'),
     source('src-tauri/src/local_file/path_policy.rs')
   ]);
@@ -63,7 +63,7 @@ test('R12-02 centralizes tree containment symlink and unreadable-entry classific
 
 test('R12-02 preserves command signatures dependencies and the frozen parent-relative image contract', async () => {
   const [entry, policy, cargo, packageJson, fileClient] = await Promise.all([
-    source('src-tauri/src/local_file.rs'),
+    source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/src/local_file/path_policy.rs'),
     source('src-tauri/Cargo.toml'),
     source('package.json'),
@@ -88,10 +88,10 @@ test('R12-02 preserves command signatures dependencies and the frozen parent-rel
   ]) assert.match(fileClient, new RegExp(command));
 });
 
-test('R12-02 records Path Policy ownership and stays manually runnable after R12-07 starts', async () => {
+test('R12-02 records Path Policy ownership and stays manually runnable after R12-08 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-07.yml'),
+    source('.github/workflows/r12-08.yml'),
     source('.github/workflows/r12-02.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');
