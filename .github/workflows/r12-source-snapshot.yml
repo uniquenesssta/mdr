@@ -1,4 +1,4 @@
-name: R12 source snapshot (temporary)
+name: R12 source snapshot and pinned formatter (temporary)
 on:
   push:
     branches: [agent/r12-stage]
@@ -8,7 +8,7 @@ permissions:
 jobs:
   snapshot:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,11 +23,29 @@ jobs:
           if git config --local --get-regexp 'http.*extraheader' >/dev/null; then exit 1; fi
           tar -czf "$RUNNER_TEMP/mdr-r12-baseline.tar.gz" .
           sha256sum "$RUNNER_TEMP/mdr-r12-baseline.tar.gz" > "$RUNNER_TEMP/mdr-r12-baseline.sha256"
+      - name: Package the pinned formatter without changing the application
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal --component rustfmt
+          formatter="$(rustup which --toolchain 1.88.0 rustfmt)"
+          toolchain="$(dirname "$(dirname "$formatter")")"
+          mkdir -p "$RUNNER_TEMP/rustfmt-1.88/bin" "$RUNNER_TEMP/rustfmt-1.88/lib"
+          cp "$formatter" "$RUNNER_TEMP/rustfmt-1.88/bin/rustfmt"
+          while read -r library; do
+            case "$library" in
+              "$toolchain"/*) cp -L "$library" "$RUNNER_TEMP/rustfmt-1.88/lib/" ;;
+            esac
+          done < <(ldd "$formatter" | awk '/=> \/.* / {print $3}')
+          LD_LIBRARY_PATH="$RUNNER_TEMP/rustfmt-1.88/lib" "$RUNNER_TEMP/rustfmt-1.88/bin/rustfmt" --version
+          tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/mdr-rustfmt-1.88.tar.gz" rustfmt-1.88
+          sha256sum "$RUNNER_TEMP/mdr-rustfmt-1.88.tar.gz" > "$RUNNER_TEMP/mdr-rustfmt-1.88.sha256"
       - uses: actions/upload-artifact@v4
         with:
-          name: mdr-r12-baseline-9405ab4
+          name: mdr-r12-baseline-and-rustfmt-9405ab4
           path: |
             ${{ runner.temp }}/mdr-r12-baseline.tar.gz
             ${{ runner.temp }}/mdr-r12-baseline.sha256
+            ${{ runner.temp }}/mdr-rustfmt-1.88.tar.gz
+            ${{ runner.temp }}/mdr-rustfmt-1.88.sha256
           retention-days: 1
           if-no-files-found: error
