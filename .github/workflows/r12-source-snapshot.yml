@@ -1,0 +1,33 @@
+name: R12 source snapshot (temporary)
+on:
+  push:
+    branches: [agent/r12-stage]
+    paths: ['.github/workflows/r12-source-snapshot.yml']
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9405ab44d6bb5f05eb755a2341e3ba76b4831ed8
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Package exact baseline without credentials
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          test "$(git rev-parse HEAD)" = 9405ab44d6bb5f05eb755a2341e3ba76b4831ed8
+          test -z "$(git status --porcelain)"
+          if git config --local --get-regexp 'http.*extraheader' >/dev/null; then exit 1; fi
+          tar -czf "$RUNNER_TEMP/mdr-r12-baseline.tar.gz" .
+          sha256sum "$RUNNER_TEMP/mdr-r12-baseline.tar.gz" > "$RUNNER_TEMP/mdr-r12-baseline.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mdr-r12-baseline-9405ab4
+          path: |
+            ${{ runner.temp }}/mdr-r12-baseline.tar.gz
+            ${{ runner.temp }}/mdr-r12-baseline.sha256
+          retention-days: 1
+          if-no-files-found: error
