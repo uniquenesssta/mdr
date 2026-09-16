@@ -90,6 +90,8 @@ test('R12-11 keeps the predecessor workflow intact as manual history and adds be
   assert.equal(await read(oldPath), frozen(oldPath).replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
   const current = await read('.github/workflows/r12-11.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /^\s+NO_PROXY: 127\.0\.0\.1,localhost$/m);
+  assert.doesNotMatch(current, /^\s+no_proxy:/m, 'GitHub rejects case-insensitive duplicate mapping keys');
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);
   for (const code of [`git archive ${baseline} | tar`,
     'test ! -e "$baseline/src-tauri/src/web_fetch/validation.rs"',

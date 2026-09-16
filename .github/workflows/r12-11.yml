@@ -161,7 +161,6 @@ jobs:
       RUSTUP_TOOLCHAIN: '1.88.0'
       CARGO_TERM_COLOR: never
       NO_PROXY: 127.0.0.1,localhost
-      no_proxy: 127.0.0.1,localhost
     steps:
       - name: Checkout exact event commit
         uses: actions/checkout@v4
