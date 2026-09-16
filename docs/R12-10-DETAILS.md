@@ -1,5 +1,15 @@
 # R12-10 — Opener
 
+## 最新验收与交接（2026-09-17）
+
+已核对实现提交 `4f52836e088459e90e7ab953f03b19122d950c86` 的 Actions [35004623556](https://github.com/uniquenesssta/mdr/actions/runs/35004623556)：状态 `completed/success`，四个 job 及全部步骤成功。Linux 拆分前后真实进程测试分别 7/7，URL 策略 8/8、真实后端拒绝 2/2、本地命令 12/12、其余累计 Rust 回归、完整 Rust 测试、Clippy `-D warnings`、Cargo check 均通过；前端 Node 422/422、依赖审计、架构/文档、生产构建、浏览器及最终工作区门禁通过。Windows/macOS 生产 Opener 编译链接通过，不将其描述为系统浏览器 GUI 交互验证。
+
+R12-10 自动验收完成，阶段任务书 12.10 已勾选。本轮只更新 README、本文件与阶段任务书；未修改源码、测试、工作流或依赖，没有新增分支。文档定向契约 8/8、`verify:readme-record`、`verify:no-legacy-runtime`、`verify:generated-files` 与 `git diff --check` 通过；未因文档修改在本地重新执行完整 Rust/浏览器验收，上述完整通过结果仅对应已核对的实现提交。
+
+R12-11 前置检查发现阶段任务书 §1.1 要求“不改变抓取限制”，但 §12.11 要求“最大响应和内容类型”及“重定向后再次验证”。现有 `web_fetch.rs` 和 R12-01 manifest 明确为无响应体字节上限、Content-Type 仅上报。主任务书、当前阶段任务书及历史记录未指定新增上限、允许类型或缺失类型处理。R12-11 停在范围确认，12.11 不勾选，不以等价拆分冒充安全策略验收；须先确认保留现状还是授权新增安全限制，再按确定的策略实施和验证。
+
+以下为实施时记录，保留当时的验证限制。
+
 ## 输入与前置验收
 
 继续使用唯一阶段分支 `agent/r12-stage`。实施基线 `db46e1b26eac069e3534831bcfd25c311bfa3050`，树 `c4f6aa1848dfa89fef133ec8a0b2d53fa3abd11d`；该提交的 R12-09 Actions [35000092958](https://github.com/uniquenesssta/mdr/actions/runs/35000092958) 已成功，前序实现 `21c8c06` 的 [34998792248](https://github.com/uniquenesssta/mdr/actions/runs/34998792248) 全部步骤也已成功。
