@@ -81,10 +81,12 @@ test('R12-10 adds exactly one cohesive stateless system boundary to the ownershi
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
   const after = JSON.parse(await read(path));
-  assert.equal(after.modules.length, 438);
-  assert.equal(after.modules.length, before.modules.length + 1);
+  assert.equal(after.modules.length, 439);
+  // R12-11 separately verifies the one added web policy and its entry ownership change.
+  const withoutWebPolicy = after.modules.filter(row => row[0] !== 'src-tauri/src/web_fetch/validation.rs');
+  assert.equal(withoutWebPolicy.length, before.modules.length + 1);
   assert.deepEqual(after.fields, before.fields);
-  for (const row of before.modules.filter(row => row[0] !== entryPath)) {
+  for (const row of before.modules.filter(row => row[0] !== entryPath && row[0] !== 'src-tauri/src/web_fetch.rs')) {
     assert.deepEqual(after.modules.find(next => next[0] === row[0]), row);
   }
   const records = after.modules.filter(row => row[0] === openerPath);
@@ -97,7 +99,7 @@ test('R12-10 keeps the complete old workflow as manual history and every cumulat
   const oldPath = '.github/workflows/r12-09.yml';
   const before = frozen(oldPath);
   assert.equal(await read(oldPath), before.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
-  const current = await read('.github/workflows/r12-10.yml');
+  const current = await read('.github/workflows/r12-11.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git clean|git reset/);
   for (const text of ['external_link::validation::tests', 'external_link::validation_command_tests',
@@ -115,7 +117,7 @@ test('R12-10 keeps the complete old workflow as manual history and every cumulat
 });
 
 test('R12-10 validates unchanged real process tests before and after extraction plus native linkage', async () => {
-  const current = await read('.github/workflows/r12-10.yml');
+  const current = await read('.github/workflows/r12-11.yml');
   for (const text of [`git archive ${baseline} | tar`,
     'cp src-tauri/tests/external_link/opener.rs "$baseline/src-tauri/tests/external_link/opener.rs"',
     'test ! -e "$baseline/src-tauri/src/external_link/opener.rs"',

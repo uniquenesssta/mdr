@@ -80,11 +80,11 @@ test('R12-08 changes only the six Rust registry paths and no frontend or depende
   let expected = frozen('src-tauri/src/main.rs');
   for (const name of names) expected = expected.replace(`local_file::${name}`, `local_file::commands::${name}`);
   assert.equal(await source('src-tauri/src/main.rs'), expected);
-  // R12-09 freezes the moved external-link policy and all unchanged opener/command bytes.
+  // R12-09/10 freeze external links; R12-11 compares the moved web policy and unchanged HTTP chain.
   for (const path of [
     'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'package.json', 'package-lock.json',
     'src/platform/desktop/file-system-client.js',
-    'src-tauri/src/web_fetch.rs', 'src-tauri/src/performance_log.rs'
+    'src-tauri/src/performance_log.rs'
   ]) assert.equal(await source(path), frozen(path), `protected contract changed: ${path}`);
 });
 
@@ -109,7 +109,7 @@ test('R12-08 retains all eight legacy direct tests and adds twelve real command 
 
 test('R12-08 records unique module ownership and never exposes lower-level modules publicly', async () => {
   const inventory = JSON.parse(await source('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 438);
+  assert.equal(inventory.modules.length, 439);
   const records = inventory.modules.filter(record => record[0].startsWith(directory));
   assert.equal(records.length, 12);
   assert.equal(new Set(records.map(record => record[0])).size, 12);
@@ -123,7 +123,7 @@ test('R12-08 records unique module ownership and never exposes lower-level modul
 });
 
 test('R12-08 combines R12-07 regression with command tests and every existing hard gate', async () => {
-  const workflow = await source('.github/workflows/r12-10.yml');
+  const workflow = await source('.github/workflows/r12-11.yml');
   const previous = await source('.github/workflows/r12-07.yml');
   assert.match(workflow, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.match(workflow, /^\s*workflow_dispatch:\s*$/m);
@@ -131,7 +131,7 @@ test('R12-08 combines R12-07 regression with command tests and every existing ha
   // runner context is unavailable in job-level env; resolve this path inside the runner step.
   const jobEnvironments = [...workflow.matchAll(/^    env:\n((?:      [^\n]*\n)*)/gm)];
   for (const [, environment] of jobEnvironments) assert.doesNotMatch(environment, /\$\{\{\s*runner\./);
-  assert.ok(workflow.includes(`printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-10/performance-logs\\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"`));
+  assert.ok(workflow.includes(`printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-11/performance-logs\\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"`));
   for (const text of [
     'local_file::command_tests', 'test result: ok. 12 passed; 0 failed',
     'local_file::tree_limits::tests', 'test result: ok. 6 passed; 0 failed',

@@ -2,7 +2,9 @@ use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_LANGUAGE, CONTENT_T
 use serde::Serialize;
 use serde_json::json;
 use std::time::Duration;
-use url::Url;
+mod validation;
+
+use validation::normalize_url;
 
 #[derive(Debug, Serialize)]
 pub struct FetchResponse {
@@ -12,25 +14,6 @@ pub struct FetchResponse {
     pub status: u16,
     pub content_type: String,
     pub html: String,
-}
-
-fn normalize_url(input: &str) -> Result<Url, String> {
-    let trimmed = input.trim();
-    if trimmed.is_empty() {
-        return Err("URL is empty".into());
-    }
-
-    let candidate = if trimmed.starts_with("http://") || trimmed.starts_with("https://") {
-        trimmed.to_string()
-    } else {
-        format!("https://{trimmed}")
-    };
-
-    let parsed = Url::parse(&candidate).map_err(|err| format!("Invalid URL: {err}"))?;
-    match parsed.scheme() {
-        "http" | "https" => Ok(parsed),
-        scheme => Err(format!("Unsupported URL scheme: {scheme}")),
-    }
 }
 
 fn browser_headers() -> HeaderMap {
@@ -158,3 +141,11 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/web_fetch/validation.rs"]
+mod validation_tests;
+
+#[cfg(test)]
+#[path = "../tests/web_fetch/http_compatibility.rs"]
+mod http_compatibility_tests;
