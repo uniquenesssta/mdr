@@ -96,5 +96,5 @@ test('R12-09 coverage remains in the cumulative hard gates and R12-08 stays manu
     'tests/unit/platform/link-client.test.mjs']) {
     assert.ok(current.includes(text), `missing validation: ${text}`);
   }
-  assert.ok(current.includes("process.env.RUNNER_TEMP + '/r12-11'"));
+  assert.ok(current.includes("process.env.RUNNER_TEMP + '/r12-12'"));
 });

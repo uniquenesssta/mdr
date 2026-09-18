@@ -23,3 +23,10 @@ R12-12 工作流继续执行累计 Rust、Clippy `-D warnings`、Cargo check、�
 ## 回退
 
 回退本 R12-12 实现提交即可把 header 和 ClientBuilder 放回 `web_fetch.rs` 并恢复 R12-11 自动入口；不回退已验收的 12.11，也不改变用户数据、配置、依赖或 R12-S01 的待办状态。
+
+
+## 首轮 CI 修复
+
+实现提交 `afa56ba7757444ac192f6ebbad3b5bc85c9f84fc` 的 Actions `35311301877` 正常解析并启动；Windows/macOS 原生边界通过，但前端累计契约与 Rust scope gate 在真正 Cargo 验收前失败。失败均为历史源码位置断言：R12-09 仍固定检查 `r12-11` 临时证据目录，R12-01 安全契约仍只在 `web_fetch.rs` 查找 redirect/timeout，平台 Web Fetch Client 契约也仍假定 redirect 位于入口文件。新 R12-12 七项契约全部通过，未发现生产 Client 行为失败。
+
+仅迁移上述三项历史断言到 R12-12 工作流路径和 `web_fetch/client.rs` 权威位置，不修改生产代码、依赖、错误、超时、重定向或压缩配置。修复后先运行相关 Node 契约，再以新提交完整 Actions 为验收依据；首轮失败不能计为 12.12 通过。

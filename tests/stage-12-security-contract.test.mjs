@@ -81,13 +81,14 @@ test('R12-01 freezes external-link trimming validation order and four-scheme all
 test('R12-01 records web timeout redirects response fields and the current unfiltered response gaps', async () => {
   const contract = await fixture();
   const rust = await source('src-tauri/src/web_fetch.rs');
+  const client = await source('src-tauri/src/web_fetch/client.rs');
   assert.equal(contract.webFetch.redirectLimit, 10);
   assert.equal(contract.webFetch.timeoutSeconds, 30);
   assert.equal(contract.webFetch.contentType.policy, 'reported-only-no-allowlist');
   assert.equal(contract.webFetch.responseBody.maximumBytes, null);
   assert.deepEqual(contract.webFetch.responseFields, ['success', 'url', 'final_url', 'status', 'content_type', 'html']);
-  assert.match(rust, /Policy::limited\(10\)/);
-  assert.match(rust, /Duration::from_secs\(30\)/);
+  assert.match(client, /Policy::limited\(10\)/);
+  assert.match(client, /Duration::from_secs\(30\)/);
   assert.match(rust, /\.get\(CONTENT_TYPE\)/);
   assert.match(rust, /\.text\(\)/);
   assert.doesNotMatch(rust, /MAX_RESPONSE_BYTES/);
