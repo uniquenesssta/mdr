@@ -9,6 +9,20 @@ const policyPath = 'src-tauri/src/web_fetch/validation.rs';
 const clientPath = 'src-tauri/src/web_fetch/client.rs';
 const read = path => readFile(path, 'utf8');
 const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
+
+function expectedSecurityFixtureAfterClientExtraction(text) {
+  return text
+    .replace(
+      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");',
+      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");\nconst SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");'
+    )
+    .replace('assert!(SOURCE_WEB_FETCH.contains("Policy::limited(10)"));',
+      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::limited(10)"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains("Duration::from_secs(30)"));',
+      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Duration::from_secs(30)"));')
+    .replace('assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));',
+      'assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));');
+}
 const hook = '\n#[cfg(test)]\n#[path = "../tests/web_fetch/validation.rs"]\nmod validation_tests;\n\n#[cfg(test)]\n#[path = "../tests/web_fetch/http_compatibility.rs"]\nmod http_compatibility_tests;\n';
 function normalizer(text) {
   const match = text.match(/^(?:pub\(super\) )?fn normalize_url\b[\s\S]*?^}/m);
@@ -53,9 +67,14 @@ test('R12-11 preserves frontend registry dependency and frozen security fixture 
     'public/app/web-clipper.js', 'src-tauri/src/main.rs', 'src-tauri/src/performance_log.rs',
     'src-tauri/src/external_link.rs', 'src-tauri/src/external_link/validation.rs', 'src-tauri/src/external_link/opener.rs',
     'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'package.json', 'package-lock.json',
-    'src-tauri/tests/stage_12_security_compatibility.rs', 'src-tauri/tests/fixtures/stage_12_security/manifest.json']) {
+    'src-tauri/tests/fixtures/stage_12_security/manifest.json']) {
     assert.equal(await read(path), frozen(path), `protected boundary changed: ${path}`);
   }
+  assert.equal(
+    await read('src-tauri/tests/stage_12_security_compatibility.rs'),
+    expectedSecurityFixtureAfterClientExtraction(frozen('src-tauri/tests/stage_12_security_compatibility.rs')),
+    'R12-11 fixture changed beyond the later R12-12 client ownership migration'
+  );
 });
 
 test('R12-11 explicitly preserves unbounded reported-only response policy without claiming hardening', async () => {

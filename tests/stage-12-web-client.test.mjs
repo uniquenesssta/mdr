@@ -65,6 +65,11 @@ test('R12-12 freezes reqwest rustls and automatic compression feature selection 
   assert.match(cargo, /reqwest = \{ version = "0\.12", default-features = false, features = \["rustls-tls", "gzip", "brotli", "deflate", "json"\] \}/);
   const client = await read(clientPath);
   assert.doesNotMatch(client, /native_tls|default_tls|no_gzip|no_brotli|no_deflate|\.gzip\(false\)|\.brotli\(false\)|\.deflate\(false\)/);
+  const fixture = await read('src-tauri/tests/stage_12_security_compatibility.rs');
+  assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT: &str = include_str!\("\.\.\/src\/web_fetch\/client\.rs"\)/);
+  assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT\.contains\("Policy::limited\(10\)"\)/);
+  assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT\.contains\("Duration::from_secs\(30\)"\)/);
+  assert.match(fixture, /SOURCE_WEB_FETCH\.contains\("\.get\(CONTENT_TYPE\)"\)/);
 });
 
 test('R12-12 verifies headers redirects timeout and gzip through the real locked reqwest path', async () => {

@@ -8,6 +8,20 @@ const entryPath = 'src-tauri/src/external_link.rs';
 const openerPath = 'src-tauri/src/external_link/opener.rs';
 const read = path => readFile(path, 'utf8');
 const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
+
+function expectedSecurityFixtureAfterClientExtraction(text) {
+  return text
+    .replace(
+      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");',
+      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");\nconst SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");'
+    )
+    .replace('assert!(SOURCE_WEB_FETCH.contains("Policy::limited(10)"));',
+      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::limited(10)"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains("Duration::from_secs(30)"));',
+      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Duration::from_secs(30)"));')
+    .replace('assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));',
+      'assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));');
+}
 const hook = '\n#[cfg(all(test, target_os = "linux"))]\n#[path = "../tests/external_link/opener.rs"]\nmod opener_tests;\n';
 function platformBlock(text) {
   const start = text.indexOf('#[cfg(target_os = "windows")]');
@@ -52,10 +66,14 @@ test('R12-10 freezes validation, frontend, registry, dependency and independent 
   for (const path of ['src-tauri/src/external_link/validation.rs',
     'src-tauri/tests/external_link/command_validation.rs', 'src-tauri/src/main.rs',
     'src/platform/desktop/link-client.js', 'src/runtime/link-preview.js',
-    'src-tauri/tests/stage_12_security_compatibility.rs',
     'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'package.json', 'package-lock.json']) {
     assert.equal(await read(path), frozen(path), `frozen contract changed: ${path}`);
   }
+  assert.equal(
+    await read('src-tauri/tests/stage_12_security_compatibility.rs'),
+    expectedSecurityFixtureAfterClientExtraction(frozen('src-tauri/tests/stage_12_security_compatibility.rs')),
+    'independent security fixture changed beyond R12-12 client ownership migration'
+  );
 });
 
 test('R12-10 covers the real system launcher, failure propagation and validation before launch', async () => {

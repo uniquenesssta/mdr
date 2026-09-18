@@ -60,3 +60,9 @@ R12-12 工作流继续执行累计 Rust、Clippy `-D warnings`、Cargo check、�
 提交 `9212863` 的旧 Rust run 在 R12-01 独立安全夹具处暴露最后一个源码位置迁移：夹具仍只在 `web_fetch.rs` 检查 `Policy::limited(10)` 和 30 秒超时，而两项现已由 `client.rs` 唯一拥有。该 run 在此之前已通过 R12-12 拆分前/后真实 HTTP 9/9、Client 2/2、R12-11 前后 17/17 及 R12-02 至 10 累计直接回归。
 
 本次仅让独立夹具新增 `SOURCE_WEB_FETCH_CLIENT`：重定向/超时继续精确断言在 Client，Content-Type/正文/状态/空体继续精确断言在入口，`MAX_RESPONSE_BYTES` 在两处都必须不存在。R12-01 manifest、生产代码及安全语义不变，不用跨文件宽泛搜索削弱责任边界。
+
+## 第七轮 CI 修复
+
+提交 `38750c38fc2e8f17be775bf2c6b22dc8afcadeb5` 将 R12-01 独立夹具正确迁到 Client 所有权，但 R12-10/R12-11 两个历史 Node 契约仍要求该夹具字节级不变，因此在最前置契约处阻塞；不是生产行为或 Rust 编译失败。
+
+本次保留历史保护：两个旧契约先对各自基线夹具应用唯一允许的 R12-12 迁移（新增 Client source、把重定向/超时断言转到 Client、额外确认 Client 无响应大小限制），再要求当前夹具逐字相等；R12-12 当前契约同时明确检查 Client 与 Response 的断言归属。没有从保护列表简单删除后放任漂移。
