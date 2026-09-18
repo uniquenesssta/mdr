@@ -1,9 +1,10 @@
-use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_LANGUAGE, CONTENT_TYPE, USER_AGENT};
+use reqwest::header::CONTENT_TYPE;
 use serde::Serialize;
 use serde_json::json;
-use std::time::Duration;
+mod client;
 mod validation;
 
+use client::build_client;
 use validation::normalize_url;
 
 #[derive(Debug, Serialize)]
@@ -16,32 +17,10 @@ pub struct FetchResponse {
     pub html: String,
 }
 
-fn browser_headers() -> HeaderMap {
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        USER_AGENT,
-        HeaderValue::from_static(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
-             (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-        ),
-    );
-    headers.insert(
-        ACCEPT,
-        HeaderValue::from_static("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
-    );
-    headers.insert(ACCEPT_LANGUAGE, HeaderValue::from_static("zh-CN,zh;q=0.9,en;q=0.8"));
-    headers
-}
-
 async fn fetch_url_inner(url: String) -> Result<FetchResponse, String> {
     let parsed = normalize_url(&url)?;
 
-    let client = reqwest::Client::builder()
-        .default_headers(browser_headers())
-        .redirect(reqwest::redirect::Policy::limited(10))
-        .timeout(Duration::from_secs(30))
-        .build()
-        .map_err(|err| format!("Failed to create HTTP client: {err}"))?;
+    let client = build_client()?;
 
     let response = client
         .get(parsed.clone())
@@ -98,7 +77,7 @@ pub async fn fetch_url(url: String) -> Result<FetchResponse, String> {
 // R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.
 #[cfg(test)]
 mod tests {
-    use super::{browser_headers, normalize_url};
+    use super::{client::browser_headers, normalize_url};
     use reqwest::header::{ACCEPT, ACCEPT_LANGUAGE, USER_AGENT};
 
     #[test]

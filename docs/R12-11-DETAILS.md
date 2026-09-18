@@ -1,5 +1,9 @@
 # R12-11 — Web Validation（等价拆分）
 
+## 最终验收（2026-09-18）
+
+修复提交 `fecd05b27da67ac73abd2f4c63c5c27675ae46be` 的 Actions `35137179217` 已 `completed/success`。Windows/macOS 原生边界、前端、真实 Rust 四个 job 全部成功；拆分前后 URL + 真实 HTTP 行为分别 16/16，累计 Rust、Clippy `-D warnings`、Cargo check、全量 Node、架构、构建、浏览器与最终工作区洁净门禁均通过。12.11 等价拆分完成；R12-S01 仍是未实施的独立安全任务。
+
 ## 输入与范围裁定
 
 分支 `agent/r12-stage`，基线 `3f1233585dd5359fe2a7168be8206074b30627ec`，树 `50ecc2beb24fa9edc7870294a2a5e194655f5df1`；该提交的 R12-10 复验 Actions `35132438090` 成功。从精确 CI 归档恢复隔离工作区，核对 Git 树和提交哈希；修改前干净，没有访问用户电脑的未提交文件。仓库无 `docs/plans`，仍使用既有 18 文档主任务书和阶段 12 任务书。上传规则与仓库规则仅有空行差异，没有内容冲突。

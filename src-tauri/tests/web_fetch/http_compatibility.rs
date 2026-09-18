@@ -143,6 +143,28 @@ fn real_http_preserves_payload_unicode_and_browser_headers() {
     assert!(headers.contains("accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"));
 }
 
+
+#[test]
+fn automatic_gzip_decompression_remains_enabled_by_the_locked_reqwest_feature() {
+    const GZIP_BODY: &[u8] = &[
+        31, 139, 8, 0, 0, 0, 0, 0, 2, 255, 75, 206, 207, 45, 40, 74, 45, 46, 78, 77, 81, 200, 72, 205,
+        201, 201, 87, 120, 178, 99, 237, 179, 105, 237, 31, 230, 207, 108, 2, 0, 221, 211, 75, 187, 27, 0,
+        0, 0,
+    ];
+    let server = Server::start(|_| {
+        Some(response(
+            200,
+            "Content-Type: text/plain; charset=utf-8\r\nContent-Encoding: gzip\r\n",
+            GZIP_BODY,
+        ))
+    });
+    let result = fetch(server.url.clone()).expect("gzip response");
+    let requests = server.finish();
+    assert_eq!(result.html, "compressed hello 中文🙂");
+    assert_eq!(requests.len(), 1);
+    assert!(requests[0].to_ascii_lowercase().contains("accept-encoding: "));
+}
+
 #[test]
 fn missing_and_non_html_types_still_report_without_filtering() {
     for content_type in ["", "application/octet-stream", "application/json", "image/png"] {

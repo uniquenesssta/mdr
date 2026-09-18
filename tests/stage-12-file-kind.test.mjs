@@ -91,7 +91,7 @@ test('R12-03 preserves commands dependencies and the R12-01 source contracts', a
 test('R12-03 records File Kind ownership and stays manual after R12-09 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-11.yml'),
+    source('.github/workflows/r12-12.yml'),
     source('.github/workflows/r12-03.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');
