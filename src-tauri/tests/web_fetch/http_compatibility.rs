@@ -143,13 +143,11 @@ fn real_http_preserves_payload_unicode_and_browser_headers() {
     assert!(headers.contains("accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"));
 }
 
-
 #[test]
 fn automatic_gzip_decompression_remains_enabled_by_the_locked_reqwest_feature() {
     const GZIP_BODY: &[u8] = &[
-        31, 139, 8, 0, 0, 0, 0, 0, 2, 255, 75, 206, 207, 45, 40, 74, 45, 46, 78, 77, 81, 200, 72, 205,
-        201, 201, 87, 120, 178, 99, 237, 179, 105, 237, 31, 230, 207, 108, 2, 0, 221, 211, 75, 187, 27, 0,
-        0, 0,
+        31, 139, 8, 0, 0, 0, 0, 0, 2, 255, 75, 206, 207, 45, 40, 74, 45, 46, 78, 77, 81, 200, 72, 205, 201, 201, 87,
+        120, 178, 99, 237, 179, 105, 237, 31, 230, 207, 108, 2, 0, 221, 211, 75, 187, 27, 0, 0, 0,
     ];
     let server = Server::start(|_| {
         Some(response(

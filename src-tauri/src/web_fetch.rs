@@ -65,13 +65,7 @@ pub async fn fetch_url(url: String) -> Result<FetchResponse, String> {
     let details = json!({
         "inputLength": url.len()
     });
-    crate::performance_log::measure_async(
-        "native.command",
-        "fetch_url",
-        details,
-        fetch_url_inner(url),
-    )
-    .await
+    crate::performance_log::measure_async("native.command", "fetch_url", details, fetch_url_inner(url)).await
 }
 
 // R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.

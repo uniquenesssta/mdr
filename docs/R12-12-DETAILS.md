@@ -30,3 +30,9 @@ R12-12 工作流继续执行累计 Rust、Clippy `-D warnings`、Cargo check、�
 实现提交 `afa56ba7757444ac192f6ebbad3b5bc85c9f84fc` 的 Actions `35311301877` 正常解析并启动；Windows/macOS 原生边界通过，但前端累计契约与 Rust scope gate 在真正 Cargo 验收前失败。失败均为历史源码位置断言：R12-09 仍固定检查 `r12-11` 临时证据目录，R12-01 安全契约仍只在 `web_fetch.rs` 查找 redirect/timeout，平台 Web Fetch Client 契约也仍假定 redirect 位于入口文件。新 R12-12 七项契约全部通过，未发现生产 Client 行为失败。
 
 仅迁移上述三项历史断言到 R12-12 工作流路径和 `web_fetch/client.rs` 权威位置，不修改生产代码、依赖、错误、超时、重定向或压缩配置。修复后先运行相关 Node 契约，再以新提交完整 Actions 为验收依据；首轮失败不能计为 12.12 通过。
+
+## 第二轮 CI 修复
+
+修复提交 `2203af35f27134b9fa2501292e86aa08e7ed45bf` 的 Actions `35311591477` 已进入完整流程：Windows/macOS 原生边界和新增 R12-12 七项契约通过。全量 Node 仅剩 README 360 字符门禁及两个历史模块总数仍为 439；Rust 仅在 rustfmt 检查发现 `web_fetch.rs` 与新增 gzip 测试的格式差异，尚未进入行为测试。
+
+本次仅压缩根 README、把两个历史总数更新为当前 440，并按 Rust 1.88 rustfmt 输出调整两处格式；不修改生产 Client 配置、依赖、超时、重定向、压缩、响应或命令行为。定向本地检查：README 1/1、Stage 1 模块计数专项 1/1、Stage 10 Close Save 10/10；完整验收仍以新的 Actions 为准。
