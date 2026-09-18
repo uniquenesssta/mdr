@@ -33,7 +33,11 @@ test('R12-11 response command telemetry and legacy URL test remain unchanged aft
     assert.ok(match, 'response and command tail must remain present');
     return match[0];
   };
-  assert.equal(tail(after), tail(before));
+  const expectedTail = tail(before).replace(
+    '    crate::performance_log::measure_async(\\n        "native.command",\\n        "fetch_url",\\n        details,\\n        fetch_url_inner(url),\\n    )\\n    .await\\n',
+    '    crate::performance_log::measure_async("native.command", "fetch_url", details, fetch_url_inner(url)).await\\n'
+  );
+  assert.equal(tail(after), expectedTail);
   for (const name of ['stage_12_preserves_url_normalization_and_scheme_policy', 'stage_12_preserves_browser_request_headers']) {
     const fn = text => {
       const match = text.match(new RegExp(`fn ${name}\\(\\) \{[\\s\\S]*?^    \}`, 'm'));

@@ -45,6 +45,10 @@ test('R12-12 leaves response command telemetry and validation behavior byte-stab
     .replace('use validation::normalize_url;\n', 'use client::build_client;\nuse validation::normalize_url;\n')
     .replace(`${headersFunction(before)}\n\n`, '')
     .replace(`${clientBuilderBlock(before)}\n`, '    let client = build_client()?;\n')
+    .replace(
+      '    crate::performance_log::measure_async(\\n        "native.command",\\n        "fetch_url",\\n        details,\\n        fetch_url_inner(url),\\n    )\\n    .await\\n',
+      '    crate::performance_log::measure_async("native.command", "fetch_url", details, fetch_url_inner(url)).await\\n'
+    )
     .replace('use super::{browser_headers, normalize_url};', 'use super::{client::browser_headers, normalize_url};');
   assert.equal(await read(entryPath), expected);
   const entry = await read(entryPath);

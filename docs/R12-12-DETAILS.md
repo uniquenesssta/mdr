@@ -36,3 +36,9 @@ R12-12 工作流继续执行累计 Rust、Clippy `-D warnings`、Cargo check、�
 修复提交 `2203af35f27134b9fa2501292e86aa08e7ed45bf` 的 Actions `35311591477` 已进入完整流程：Windows/macOS 原生边界和新增 R12-12 七项契约通过。全量 Node 仅剩 README 360 字符门禁及两个历史模块总数仍为 439；Rust 仅在 rustfmt 检查发现 `web_fetch.rs` 与新增 gzip 测试的格式差异，尚未进入行为测试。
 
 本次仅压缩根 README、把两个历史总数更新为当前 440，并按 Rust 1.88 rustfmt 输出调整两处格式；不修改生产 Client 配置、依赖、超时、重定向、压缩、响应或命令行为。定向本地检查：README 1/1、Stage 1 模块计数专项 1/1、Stage 10 Close Save 10/10；完整验收仍以新的 Actions 为准。
+
+## 第三轮 CI 修复
+
+提交 `6aef3f4385d6aa9b626f6994ac2d81463f8d9437` 的 Actions `35312249420` 在更前置的累计契约处失败；Windows/macOS 原生边界继续通过。失败只来自两个字节级源码对照仍把 `fetch_url` 日志调用的旧多行排版视为契约，而 Rust 1.88 rustfmt 已合法压成单行，因此未进入 Cargo 行为测试。
+
+本次不回退 rustfmt，也不放宽响应/命令契约；两个测试只把该一段确定的多行→单行 rustfmt 变换加入期望值，其余源码继续逐字比较。生产代码、依赖、Client 配置、超时、重定向和压缩均不修改。完整验收仍以新 Actions 为准。
