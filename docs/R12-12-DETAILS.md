@@ -54,3 +54,9 @@ R12-12 工作流继续执行累计 Rust、Clippy `-D warnings`、Cargo check、�
 提交 `9212863abc528d72561ac9200669ccb1ad6f2665` 的 Actions `35312540524` 已越过累计 Stage 契约、Rust scope 和 rustfmt；拆分前真实 HTTP 9/9 与 Client 单元 2/2 已通过，Windows/macOS 原生边界也通过。前端全量 Node 仅发现一个历史 README 契约要求根记录保留 “Stage 10” 字样，和 R12-12 Client 行为无关。
 
 本次仅在 360 字符 README 上限内恢复 “Stage 10/11 契约不变” 标记并压缩当前状态文字；不修改源码、测试门禁或生产行为。完整验收继续以新提交 Actions 为准。
+
+## 第六轮 CI 修复
+
+提交 `9212863` 的旧 Rust run 在 R12-01 独立安全夹具处暴露最后一个源码位置迁移：夹具仍只在 `web_fetch.rs` 检查 `Policy::limited(10)` 和 30 秒超时，而两项现已由 `client.rs` 唯一拥有。该 run 在此之前已通过 R12-12 拆分前/后真实 HTTP 9/9、Client 2/2、R12-11 前后 17/17 及 R12-02 至 10 累计直接回归。
+
+本次仅让独立夹具新增 `SOURCE_WEB_FETCH_CLIENT`：重定向/超时继续精确断言在 Client，Content-Type/正文/状态/空体继续精确断言在入口，`MAX_RESPONSE_BYTES` 在两处都必须不存在。R12-01 manifest、生产代码及安全语义不变，不用跨文件宽泛搜索削弱责任边界。

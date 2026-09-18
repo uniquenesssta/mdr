@@ -22,6 +22,7 @@ const SOURCE_LOCAL_FILE_TREE_LIMITS: &str = include_str!("../src/local_file/tree
 const SOURCE_EXTERNAL_LINK_VALIDATION: &str = include_str!("../src/external_link/validation.rs");
 const SOURCE_EXTERNAL_LINK: &str = include_str!("../src/external_link.rs");
 const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");
+const SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");
 const SOURCE_PERFORMANCE_LOG: &str = include_str!("../src/performance_log.rs");
 const SOURCE_MAIN: &str = include_str!("../src/main.rs");
 
@@ -162,13 +163,14 @@ fn web_fetch_fixture_records_limits_response_fields_and_current_unfiltered_gaps(
         ["success", "url", "final_url", "status", "content_type", "html"]
     );
 
-    assert!(SOURCE_WEB_FETCH.contains("Policy::limited(10)"));
-    assert!(SOURCE_WEB_FETCH.contains("Duration::from_secs(30)"));
+    assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::limited(10)"));
+    assert!(SOURCE_WEB_FETCH_CLIENT.contains("Duration::from_secs(30)"));
     assert!(SOURCE_WEB_FETCH.contains(".get(CONTENT_TYPE)"));
     assert!(SOURCE_WEB_FETCH.contains(".text()"));
     assert!(SOURCE_WEB_FETCH.contains("if !status.is_success()"));
     assert!(SOURCE_WEB_FETCH.contains("if html.trim().is_empty()"));
     assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));
+    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));
 }
 
 #[test]
