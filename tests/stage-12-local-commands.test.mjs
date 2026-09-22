@@ -131,7 +131,7 @@ test('R12-08 combines R12-07 regression with command tests and every existing ha
   // runner context is unavailable in job-level env; resolve this path inside the runner step.
   const jobEnvironments = [...workflow.matchAll(/^    env:\n((?:      [^\n]*\n)*)/gm)];
   for (const [, environment] of jobEnvironments) assert.doesNotMatch(environment, /\$\{\{\s*runner\./);
-  assert.ok(workflow.includes(`printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-12/performance-logs\\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"`));
+  assert.ok(workflow.includes(`printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-13/performance-logs\\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"`));
   for (const text of [
     'local_file::command_tests', 'test result: ok. 12 passed; 0 failed',
     'local_file::tree_limits::tests', 'test result: ok. 6 passed; 0 failed',

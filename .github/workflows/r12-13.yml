@@ -180,7 +180,7 @@ jobs:
           printf 'CARGO_TARGET_DIR=%s/r12-13-target\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-13/performance-logs\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor fecd05b27da67ac73abd2f4c63c5c27675ae46be HEAD
+          git merge-base --is-ancestor 9b6d6369fce3f2b36a33cdd12dd28c4d0460d927 HEAD
           git rev-parse HEAD | tee "$RUNNER_TEMP/r12-13/commit.txt"
       - name: Guard R12-13 scope and frozen policies
         run: |
