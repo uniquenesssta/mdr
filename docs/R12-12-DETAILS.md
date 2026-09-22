@@ -18,7 +18,7 @@ R12-12 工作流继续执行累计 Rust、Clippy `-D warnings`、Cargo check、�
 
 ## 当前状态
 
-本地源码/契约修改完成；定向 Node 与文档门禁在提交前执行。容器没有 Cargo/rustc，完整 Rust、真实 gzip、Clippy、构建与浏览器以精确提交 Actions 为准。在专属 Actions 全绿前，12.12 不勾选，不推进 12.13。R12-S01 仍保持未完成，不因 Client 拆分而改变网页允许范围或抓取限制。
+R12-12 已完成并验收。提交 `8734bfa8c1885c11a218ac80be4ea17ec0d88bcf` 的 Actions `35313161223` 已于 2026-09-18 完成，frontend、Rust 累计硬门禁以及 Windows/macOS 原生边界四个 job 全部成功。R12-S01 仍保持未完成，不因 Client 拆分而改变网页允许范围或抓取限制；下一 Atomic Task 可进入 12.13 Web Response。
 
 ## 回退
 
@@ -66,3 +66,8 @@ R12-12 工作流继续执行累计 Rust、Clippy `-D warnings`、Cargo check、�
 提交 `38750c38fc2e8f17be775bf2c6b22dc8afcadeb5` 将 R12-01 独立夹具正确迁到 Client 所有权，但 R12-10/R12-11 两个历史 Node 契约仍要求该夹具字节级不变，因此在最前置契约处阻塞；不是生产行为或 Rust 编译失败。
 
 本次保留历史保护：两个旧契约先对各自基线夹具应用唯一允许的 R12-12 迁移（新增 Client source、把重定向/超时断言转到 Client、额外确认 Client 无响应大小限制），再要求当前夹具逐字相等；R12-12 当前契约同时明确检查 Client 与 Response 的断言归属。没有从保护列表简单删除后放任漂移。
+
+
+## 最终验收
+
+Actions `35313161223` 对精确 HEAD `8734bfa8c1885c11a218ac80be4ea17ec0d88bcf` 完整通过：Web Client/frontend regression、Real Rust Web Client and cumulative hard gates、Windows native boundary、macOS native boundary 均为 success。R12-12 的 reqwest Client、headers、压缩、重定向和超时职责因此正式验收；依赖、Cargo lock、Response 处理与 Command Registry 均未提前改变。
