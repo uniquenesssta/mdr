@@ -63,7 +63,7 @@ test('R12-13 leaves request transport command telemetry and legacy tests byte-st
     .replace('mod client;\nmod validation;\n', 'mod client;\nmod response;\nmod validation;\n')
     .replace(
       'use client::build_client;\nuse validation::normalize_url;\n',
-      'use client::build_client;\npub use response::FetchResponse;\nuse response::read_response;\nuse validation::normalize_url;\n'
+      'use client::build_client;\nuse response::read_response;\npub use response::FetchResponse;\nuse validation::normalize_url;\n'
     )
     .replace(`${dtoBlock(before)}\n\n`, '')
     .replace(responseBlock(before), '    read_response(parsed, response).await');

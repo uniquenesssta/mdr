@@ -35,3 +35,8 @@ R12-13 专属工作流继续执行前序 Stage 12 累计契约、完整 Rust、C
 ## 第二轮 CI 修复
 
 提交 `b13811cf96eec572eb27f924304929336428bc49` 已通过 R12-13 scope gate 与专属 Stage 12 契约。全量 Node 唯一失败是根 README 的历史文档契约仍要求显式保留 R12-08 条目和详情链接；Windows/macOS 原生编译、链接与工作区洁净均通过，但证据上传路径仍指向旧 `r12-12-native` 目录。修复仅恢复 README 的 R12-08 锚点并把 artifact path 对齐到 `r12-13-native`，不修改生产 Response、依赖或外部行为。
+
+
+## 第三轮 CI 修复
+
+第二轮 Rust job 在进入行为测试前由 Rust 1.88 `rustfmt --check` 阻塞，唯一差异是 `web_fetch.rs` 中 `use response::read_response` 与 `pub use response::FetchResponse` 的确定排序。按 rustfmt 输出同步入口及两个字节级迁移契约的期望值；Response 行为、DTO、错误、依赖和外部接口均不改变。

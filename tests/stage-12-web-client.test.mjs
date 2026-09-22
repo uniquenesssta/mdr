@@ -81,7 +81,7 @@ test('R12-12 client extraction remains byte-stable after the later R12-13 respon
     .replace('use serde::Serialize;\n', '')
     .replace('use std::time::Duration;\nmod validation;\n', 'mod client;\nmod response;\nmod validation;\n')
     .replace('use validation::normalize_url;\n',
-      'use client::build_client;\npub use response::FetchResponse;\nuse response::read_response;\nuse validation::normalize_url;\n')
+      'use client::build_client;\nuse response::read_response;\npub use response::FetchResponse;\nuse validation::normalize_url;\n')
     .replace(`${headersFunction(before)}\n\n`, '')
     .replace(`${clientBuilderBlock(before)}\n`, '    let client = build_client()?;\n')
     .replace(`${dtoBlock(before)}\n\n`, '')

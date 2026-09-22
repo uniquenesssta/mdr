@@ -4,8 +4,8 @@ mod response;
 mod validation;
 
 use client::build_client;
-pub use response::FetchResponse;
 use response::read_response;
+pub use response::FetchResponse;
 use validation::normalize_url;
 
 async fn fetch_url_inner(url: String) -> Result<FetchResponse, String> {
