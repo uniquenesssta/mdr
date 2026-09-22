@@ -155,7 +155,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: r12-14-frontend-${{ github.sha }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/r12-13/
+          path: ${{ runner.temp }}/r12-14/
           if-no-files-found: error
           retention-days: 14
 
@@ -179,12 +179,12 @@ jobs:
           mkdir -p "$RUNNER_TEMP/r12-14"
           test -z "$(git status --porcelain)"
           test ! -e src-tauri/gen/schemas/linux-schema.json
-          printf 'CARGO_TARGET_DIR=%s/r12-13-target\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
-          printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-13/performance-logs\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'CARGO_TARGET_DIR=%s/r12-14-target\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-14/performance-logs\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor 9b6d6369fce3f2b36a33cdd12dd28c4d0460d927 HEAD
           git rev-parse HEAD | tee "$RUNNER_TEMP/r12-14/commit.txt"
-      - name: Guard R12-13 scope and frozen policies
+      - name: Guard R12-14 scope and frozen policies
         run: |
           base='3692eb913473a8be3a45f326f5d93656d6cf1fb2'
           git diff --quiet "$base"...HEAD -- \
@@ -402,7 +402,7 @@ jobs:
       - name: Preserve newly generated Linux schema as evidence
         run: |
           git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-14/worktree-before-cleanup.log"
-          node --input-type=module -e "import { archiveTauriLinuxSchema } from './scripts/ci/archive-tauri-schema.mjs'; archiveTauriLinuxSchema(process.cwd(), process.env.RUNNER_TEMP + '/r12-13');"
+          node --input-type=module -e "import { archiveTauriLinuxSchema } from './scripts/ci/archive-tauri-schema.mjs'; archiveTauriLinuxSchema(process.cwd(), process.env.RUNNER_TEMP + '/r12-14');"
       - name: Validation leaves tracked sources unchanged
         run: |
           git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-14/workspace.log"
@@ -414,7 +414,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: r12-14-rust-${{ github.sha }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/r12-13/
+          path: ${{ runner.temp }}/r12-14/
           if-no-files-found: error
           retention-days: 14
 

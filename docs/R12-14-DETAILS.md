@@ -31,3 +31,10 @@ R12-14 专属 workflow 继续执行 Stage 12 累计 Node/Rust、架构/文档、
 ## 回退
 
 回退本 R12-14 Atomic Task 即恢复写盘前不脱敏的 R12-13 基线；不回退 12.13 及更早已验收职责，不改变用户数据格式、依赖或其他 Stage 12 能力。
+
+
+## 首轮 CI 修复
+
+实现提交 `1aa2b16762c9e8661692eaf276b943c15132df5f` 的 Actions 首轮在 Rust scope 前置契约停止。失败均为迁移配套：R12-14 workflow 仍有旧 `r12-13` 日志/Artifact 临时目录；三个历史模块清单测试因不必要地修改了既有 `performance_log.rs` 描述而失配。生产 `redaction.rs` 规则尚未进入 Rust 行为测试，未发现生产实现失败。
+
+修复恢复既有 `performance_log.rs` 模块描述，仅由新增 `redaction.rs` 表达新职责；同时统一 R12-14 临时目录和 scope 名称。历史职责和生产行为均不因此扩大。

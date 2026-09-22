@@ -63,9 +63,7 @@ test('R12-14 adds exactly one pure redaction module and changes no unrelated inv
   assert.equal(after.modules.length, 442);
   assert.deepEqual(after.fields, before.fields);
   for (const row of before.modules) {
-    const expected = row[0] === entryPath ? row.map((field, index) => index === 3
-      ? 'Development performance log session and JSONL persistence; delegates recursive redaction before serialization.' : field) : row;
-    assert.deepEqual(after.modules.find(next => next[0] === row[0]), expected, `inventory drift: ${row[0]}`);
+    assert.deepEqual(after.modules.find(next => next[0] === row[0]), row, `inventory drift: ${row[0]}`);
   }
   assert.deepEqual(after.modules.at(-1), [redactionPath, 'rust-module', 'telemetry',
     'Pure recursive performance-log redaction for body payloads, sensitive fields and full paths before persistence.',

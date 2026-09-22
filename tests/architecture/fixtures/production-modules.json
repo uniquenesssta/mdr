@@ -581,7 +581,7 @@
       "src-tauri/src/performance_log.rs",
       "rust-module",
       "telemetry",
-      "Development performance log session and JSONL persistence; delegates recursive redaction before serialization.",
+      "Development performance log session creation and JSONL persistence.",
       "performance-log-session",
       "process-lifecycle",
       "rewrite",
