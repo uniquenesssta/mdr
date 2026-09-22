@@ -20,7 +20,7 @@ R12-13 专属工作流继续执行前序 Stage 12 累计契约、完整 Rust、C
 
 ## 当前状态
 
-源码、契约和工作流按 12.13 边界实施中；专属 Actions 全绿前不勾选 12.13，也不推进 12.14。
+R12-13 已完成并验收。提交 `33744a848e1fdd26dfc91e22d2e87b12578ff9bd` 的 Actions `35756238550` attempt 2 四个 job 全部成功；下一 Atomic Task 可进入 12.14 Log Redaction。R12-S01 仍保持未实施。
 
 ## 回退
 
@@ -40,3 +40,10 @@ R12-13 专属工作流继续执行前序 Stage 12 累计契约、完整 Rust、C
 ## 第三轮 CI 修复
 
 第二轮 Rust job 在进入行为测试前由 Rust 1.88 `rustfmt --check` 阻塞，唯一差异是 `web_fetch.rs` 中 `use response::read_response` 与 `pub use response::FetchResponse` 的确定排序。按 rustfmt 输出同步入口及两个字节级迁移契约的期望值；Response 行为、DTO、错误、依赖和外部接口均不改变。
+
+
+## 最终验收
+
+提交 `33744a848e1fdd26dfc91e22d2e87b12578ff9bd` 的 Actions `35756238550` attempt 2 完整通过：Web Response/frontend regression、Real Rust Web Response and cumulative hard gates、Windows native boundary、macOS native boundary 均为 success。前一次 attempt 1 唯一失败为 CI Chromium 未能建立 CDP endpoint；同一提交的 attempt 2 已通过 Browser Contract、Production Build 与 Built-app Browser Regression，因此未为该环境故障修改生产代码或放宽测试。
+
+R12-13 的状态码、最终 URL、Content-Type、文本正文、空体/HTTP/正文读取错误及 `FetchResponse` DTO 已由 `web_fetch/response.rs` 唯一负责；URL Validation、Client、命令注册、依赖与 R12-S01 均未提前改变。
