@@ -107,11 +107,11 @@ test('R12-10 adds exactly one cohesive stateless system boundary to the ownershi
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
   const after = JSON.parse(await read(path));
-  assert.equal(after.modules.length, 441);
+  assert.equal(after.modules.length, 442);
   // R12-11/R12-12 separately verify the later web policy and client ownership changes.
   const withoutLaterWeb = after.modules.filter(row => ![
     'src-tauri/src/web_fetch/validation.rs', 'src-tauri/src/web_fetch/client.rs',
-    'src-tauri/src/web_fetch/response.rs'
+    'src-tauri/src/web_fetch/response.rs', 'src-tauri/src/performance_log/redaction.rs'
   ].includes(row[0]));
   assert.equal(withoutLaterWeb.length, before.modules.length + 1);
   assert.deepEqual(after.fields, before.fields);
@@ -128,7 +128,7 @@ test('R12-10 keeps the complete old workflow as manual history and every cumulat
   const oldPath = '.github/workflows/r12-09.yml';
   const before = frozen(oldPath);
   assert.equal(await read(oldPath), before.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
-  const current = await read('.github/workflows/r12-13.yml');
+  const current = await read('.github/workflows/r12-14.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git clean|git reset/);
   for (const text of ['external_link::validation::tests', 'external_link::validation_command_tests',
@@ -146,7 +146,7 @@ test('R12-10 keeps the complete old workflow as manual history and every cumulat
 });
 
 test('R12-10 validates unchanged real process tests before and after extraction plus native linkage', async () => {
-  const current = await read('.github/workflows/r12-13.yml');
+  const current = await read('.github/workflows/r12-14.yml');
   for (const text of [`git archive ${baseline} | tar`,
     'cp src-tauri/tests/external_link/opener.rs "$baseline/src-tauri/tests/external_link/opener.rs"',
     'test ! -e "$baseline/src-tauri/src/external_link/opener.rs"',

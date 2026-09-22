@@ -137,9 +137,11 @@ test('R12-12 keeps exactly one stateless client owner after the later response e
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
   const after = JSON.parse(await read(path));
-  assert.equal(after.modules.length, 441);
+  assert.equal(after.modules.length, 442);
   assert.deepEqual(after.fields, before.fields);
-  const r12_12 = after.modules.filter(row => row[0] !== responsePath).map(row => row[0] === entryPath
+  const r12_12 = after.modules
+    .filter(row => ![responsePath, 'src-tauri/src/performance_log/redaction.rs'].includes(row[0]))
+    .map(row => row[0] === entryPath
     ? row.map((field, index) => index === 3
       ? 'HTTP fetch orchestration, existing response handling and command telemetry; delegates input and client policy.' : field)
     : row);
@@ -158,7 +160,7 @@ test('R12-12 remains cumulatively protected after R12-13 becomes the automatic S
   const previous = await read('.github/workflows/r12-11.yml');
   const original = frozen('.github/workflows/r12-11.yml');
   assert.equal(previous, original.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
-  const current = await read('.github/workflows/r12-13.yml');
+  const current = await read('.github/workflows/r12-14.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);
   for (const code of [

@@ -111,23 +111,25 @@ test('R12-13 adds exactly one stateless response owner and changes no other inve
   const before = JSON.parse(frozen(path));
   const after = JSON.parse(await read(path));
   assert.equal(before.modules.length, 440);
-  assert.equal(after.modules.length, 441);
+  assert.equal(after.modules.length, 442);
   assert.deepEqual(after.fields, before.fields);
+  const beforeR14 = after.modules.filter(row => row[0] !== 'src-tauri/src/performance_log/redaction.rs');
+  assert.equal(beforeR14.length, 441);
   for (const row of before.modules) {
     const expected = row[0] === entryPath ? row.map((field, index) => index === 3
       ? 'HTTP fetch orchestration and command telemetry; delegates input, client and response handling.' : field) : row;
-    assert.deepEqual(after.modules.find(next => next[0] === row[0]), expected, `inventory drift: ${row[0]}`);
+    assert.deepEqual(beforeR14.find(next => next[0] === row[0]), expected, `inventory drift: ${row[0]}`);
   }
-  assert.deepEqual(after.modules.at(-1), [responsePath, 'rust-module', 'desktop-platform',
+  assert.deepEqual(beforeR14.at(-1), [responsePath, 'rust-module', 'desktop-platform',
     'Web-fetch response projection with frozen status, final URL, Content-Type, text body and error mapping.',
     'none', 'per-response', 'retain', false]);
 });
 
-test('R12-13 makes R12-12 historical and owns the only automatic cumulative Stage workflow', async () => {
-  const previous = await read('.github/workflows/r12-12.yml');
+test('R12-13 remains historical while R12-14 owns the automatic cumulative Stage workflow', async () => {
+  const previous = await read('.github/workflows/r12-13.yml');
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*push:\s*$/m);
-  const current = await read('.github/workflows/r12-13.yml');
+  const current = await read('.github/workflows/r12-14.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);
   for (const code of [

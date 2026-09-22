@@ -1,3 +1,6 @@
+mod redaction;
+
+use redaction::redact_value;
 use serde_json::{json, Value};
 use std::{
     env,
@@ -115,7 +118,8 @@ fn append_values(values: &[Value]) -> Result<PathBuf, String> {
         .map_err(|err| format!("无法打开性能日志：{err}"))?;
 
     for value in values {
-        let line = serde_json::to_string(value).map_err(|err| format!("性能日志序列化失败：{err}"))?;
+        let redacted = redact_value(value);
+        let line = serde_json::to_string(&redacted).map_err(|err| format!("性能日志序列化失败：{err}"))?;
         if line.len() > MAX_ENTRY_BYTES {
             return Err(format!("单条性能日志不能超过 {MAX_ENTRY_BYTES} 字节"));
         }

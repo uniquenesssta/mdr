@@ -68,12 +68,22 @@ test('R12-11 URL behavior and command telemetry remain unchanged after later cli
 
 test('R12-11 preserves frontend registry dependency and frozen security fixture bytes', async () => {
   for (const path of ['src/platform/desktop/web-fetch-client.js', 'src/platform/desktop/desktop-platform.js',
-    'public/app/web-clipper.js', 'src-tauri/src/main.rs', 'src-tauri/src/performance_log.rs',
+    'public/app/web-clipper.js', 'src-tauri/src/main.rs',
     'src-tauri/src/external_link.rs', 'src-tauri/src/external_link/validation.rs', 'src-tauri/src/external_link/opener.rs',
     'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'package.json', 'package-lock.json',
     'src-tauri/tests/fixtures/stage_12_security/manifest.json']) {
     assert.equal(await read(path), frozen(path), `protected boundary changed: ${path}`);
   }
+  const performanceBefore = frozen('src-tauri/src/performance_log.rs');
+  const expectedPerformance = performanceBefore
+    .replace('use serde_json::{json, Value};\n',
+      'mod redaction;\n\nuse redaction::redact_value;\nuse serde_json::{json, Value};\n')
+    .replace(
+      '    for value in values {\n        let line = serde_json::to_string(value).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n',
+      '    for value in values {\n        let redacted = redact_value(value);\n        let line = serde_json::to_string(&redacted).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n'
+    );
+  assert.equal(await read('src-tauri/src/performance_log.rs'), expectedPerformance,
+    'performance log changed beyond the later R12-14 redaction handoff');
   assert.equal(
     await read('src-tauri/tests/stage_12_security_compatibility.rs'),
     expectedSecurityFixtureAfterLaterExtractions(frozen('src-tauri/tests/stage_12_security_compatibility.rs')),
@@ -113,10 +123,10 @@ test('R12-11 keeps exactly one pure policy owner after later client and response
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
   const after = JSON.parse(await read(path));
-  assert.equal(after.modules.length, 441);
+  assert.equal(after.modules.length, 442);
   assert.deepEqual(after.fields, before.fields);
   const r12_11 = after.modules
-    .filter(row => ![clientPath, responsePath].includes(row[0]))
+    .filter(row => ![clientPath, responsePath, 'src-tauri/src/performance_log/redaction.rs'].includes(row[0]))
     .map(row => row[0] === entryPath
       ? row.map((field, index) => index === 3
         ? 'HTTP fetch orchestration, existing client/response handling and command telemetry; delegates input policy.' : field)
@@ -136,7 +146,7 @@ test('R12-11 remains manually runnable while R12-12 carries its cumulative hard 
   const previous = await read('.github/workflows/r12-11.yml');
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*(?:push|pull_request):/m);
-  const current = await read('.github/workflows/r12-13.yml');
+  const current = await read('.github/workflows/r12-14.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.match(current, /^\s+NO_PROXY: 127\.0\.0\.1,localhost$/m);
   assert.doesNotMatch(current, /^\s+no_proxy:/m, 'GitHub rejects case-insensitive duplicate mapping keys');

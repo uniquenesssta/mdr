@@ -581,7 +581,7 @@
       "src-tauri/src/performance_log.rs",
       "rust-module",
       "telemetry",
-      "Development performance log session creation and JSONL persistence.",
+      "Development performance log session and JSONL persistence; delegates recursive redaction before serialization.",
       "performance-log-session",
       "process-lifecycle",
       "rewrite",
@@ -4424,6 +4424,16 @@
       "Web-fetch response projection with frozen status, final URL, Content-Type, text body and error mapping.",
       "none",
       "per-response",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/performance_log/redaction.rs",
+      "rust-module",
+      "telemetry",
+      "Pure recursive performance-log redaction for body payloads, sensitive fields and full paths before persistence.",
+      "none",
+      "pure-call",
       "retain",
       false
     ]

@@ -96,7 +96,7 @@ test('R12-01 records web timeout redirects response fields and the current unfil
   assert.doesNotMatch(`${rust}\n${client}\n${response}`, /MAX_RESPONSE_BYTES/);
 });
 
-test('R12-01 records performance-log limits fields modes and the current no-redaction boundary', async () => {
+test('R12-01 preserves the historical performance-log limits fields modes and pre-redaction baseline', async () => {
   const contract = await fixture();
   const [rust, frontend] = await Promise.all([
     source('src-tauri/src/performance_log.rs'),
@@ -134,7 +134,7 @@ test('R12-01 freezes all nine registered command names without changing frontend
 
 test('historical R12-01 through R12-07 stay manual while R12-10 owns cumulative validation', async () => {
   const [current, previous, first] = await Promise.all([
-    source('.github/workflows/r12-13.yml'),
+    source('.github/workflows/r12-14.yml'),
     source('.github/workflows/r12-07.yml'),
     source('.github/workflows/r12-01.yml')
   ]);

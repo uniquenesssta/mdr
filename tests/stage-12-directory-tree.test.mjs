@@ -114,7 +114,7 @@ test('R12-06 preserves DTO errors readable-file policy commands and dependencies
 test('R12-06 records Directory Tree ownership and stays manual after R12-09 starts', async () => {
   const [inventory, current, previous] = await Promise.all([
     source('tests/architecture/fixtures/production-modules.json').then(JSON.parse),
-    source('.github/workflows/r12-13.yml'),
+    source('.github/workflows/r12-14.yml'),
     source('.github/workflows/r12-06.yml')
   ]);
   const pathIndex = inventory.fields.indexOf('path');
