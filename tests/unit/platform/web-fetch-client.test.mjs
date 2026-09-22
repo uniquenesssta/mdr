@@ -41,6 +41,7 @@ test('Rust remains authoritative for URL normalization, redirects and HTTP valid
   const clientSource = await readFile(new URL('../../../src/platform/desktop/web-fetch-client.js', import.meta.url), 'utf8');
   const rustSource = await readFile(new URL('../../../src-tauri/src/web_fetch.rs', import.meta.url), 'utf8');
   const rustClientSource = await readFile(new URL('../../../src-tauri/src/web_fetch/client.rs', import.meta.url), 'utf8');
+  const rustResponseSource = await readFile(new URL('../../../src-tauri/src/web_fetch/response.rs', import.meta.url), 'utf8');
 
   assert.doesNotMatch(clientSource, /startsWith\(['"]https|reqwest|redirect\(|redirect::|Unsupported URL scheme|Response body is empty|status\.is_success/);
   const policySource = await readFile(new URL('../../../src-tauri/src/web_fetch/validation.rs', import.meta.url), 'utf8');
@@ -48,7 +49,8 @@ test('Rust remains authoritative for URL normalization, redirects and HTTP valid
   assert.match(rustSource, /use validation::normalize_url/);
   assert.match(rustClientSource, /redirect\(reqwest::redirect::Policy::limited\(10\)\)/);
   assert.match(policySource, /Unsupported URL scheme/);
-  assert.match(rustSource, /Response body is empty/);
+  assert.match(rustSource, /read_response\(parsed, response\)\.await/);
+  assert.match(rustResponseSource, /Response body is empty/);
 });
 
 test('invalid web-fetch client dependencies fail at the adapter boundary', () => {

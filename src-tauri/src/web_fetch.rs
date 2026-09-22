@@ -1,21 +1,12 @@
-use reqwest::header::CONTENT_TYPE;
-use serde::Serialize;
 use serde_json::json;
 mod client;
+mod response;
 mod validation;
 
 use client::build_client;
+pub use response::FetchResponse;
+use response::read_response;
 use validation::normalize_url;
-
-#[derive(Debug, Serialize)]
-pub struct FetchResponse {
-    pub success: bool,
-    pub url: String,
-    pub final_url: String,
-    pub status: u16,
-    pub content_type: String,
-    pub html: String,
-}
 
 async fn fetch_url_inner(url: String) -> Result<FetchResponse, String> {
     let parsed = normalize_url(&url)?;
@@ -28,36 +19,7 @@ async fn fetch_url_inner(url: String) -> Result<FetchResponse, String> {
         .await
         .map_err(|err| format!("Request failed: {err}"))?;
 
-    let status = response.status();
-    let final_url = response.url().to_string();
-    let content_type = response
-        .headers()
-        .get(CONTENT_TYPE)
-        .and_then(|value| value.to_str().ok())
-        .unwrap_or("")
-        .to_string();
-
-    if !status.is_success() {
-        return Err(format!("HTTP request failed with status {}", status.as_u16()));
-    }
-
-    let html = response
-        .text()
-        .await
-        .map_err(|err| format!("Failed to read response body: {err}"))?;
-
-    if html.trim().is_empty() {
-        return Err("Response body is empty".into());
-    }
-
-    Ok(FetchResponse {
-        success: true,
-        url: parsed.to_string(),
-        final_url,
-        status: status.as_u16(),
-        content_type,
-        html,
-    })
+    read_response(parsed, response).await
 }
 
 #[tauri::command]

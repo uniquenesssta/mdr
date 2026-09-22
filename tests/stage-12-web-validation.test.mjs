@@ -7,21 +7,30 @@ const baseline = '3f1233585dd5359fe2a7168be8206074b30627ec';
 const entryPath = 'src-tauri/src/web_fetch.rs';
 const policyPath = 'src-tauri/src/web_fetch/validation.rs';
 const clientPath = 'src-tauri/src/web_fetch/client.rs';
+const responsePath = 'src-tauri/src/web_fetch/response.rs';
 const read = path => readFile(path, 'utf8');
 const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
 
-function expectedSecurityFixtureAfterClientExtraction(text) {
+function expectedSecurityFixtureAfterLaterExtractions(text) {
   return text
     .replace(
       'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");',
-      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");\nconst SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");'
+      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");\nconst SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");\nconst SOURCE_WEB_FETCH_RESPONSE: &str = include_str!("../src/web_fetch/response.rs");'
     )
     .replace('assert!(SOURCE_WEB_FETCH.contains("Policy::limited(10)"));',
       'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::limited(10)"));')
     .replace('assert!(SOURCE_WEB_FETCH.contains("Duration::from_secs(30)"));',
       'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Duration::from_secs(30)"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains(".get(CONTENT_TYPE)"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".get(CONTENT_TYPE)"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains(".text()"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".text()"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains("if !status.is_success()"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if !status.is_success()"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains("if html.trim().is_empty()"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if html.trim().is_empty()"));')
     .replace('assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));',
-      'assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));');
+      'assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_RESPONSE.contains("MAX_RESPONSE_BYTES"));');
 }
 const hook = '\n#[cfg(test)]\n#[path = "../tests/web_fetch/validation.rs"]\nmod validation_tests;\n\n#[cfg(test)]\n#[path = "../tests/web_fetch/http_compatibility.rs"]\nmod http_compatibility_tests;\n';
 function normalizer(text) {
@@ -36,30 +45,25 @@ test('R12-11 has one private pure input policy with the exact legacy function bo
   assert.equal((policy.match(/fn normalize_url/g) || []).length, 1);
   assert.match(policy, /^use url::Url;/m);
   assert.doesNotMatch(policy, /tauri::|reqwest::|std::fs|std::process|static |Mutex|pub fn/);
-  assert.deepEqual(await readdir('src-tauri/src/web_fetch'), ['client.rs', 'validation.rs']);
+  assert.deepEqual(await readdir('src-tauri/src/web_fetch'), ['client.rs', 'response.rs', 'validation.rs']);
 });
 
-test('R12-11 response command telemetry and legacy URL test remain unchanged after later client extraction', async () => {
+test('R12-11 URL behavior and command telemetry remain unchanged after later client and response extractions', async () => {
   const before = frozen(entryPath);
   const after = await read(entryPath);
-  const tail = text => {
-    const match = text.match(/    let response = client[\s\S]*?\n}\n\n\/\/ R12-01 rustfmt boundary/);
-    assert.ok(match, 'response and command tail must remain present');
-    return match[0];
-  };
-  const expectedTail = tail(before).replace(
-    '    crate::performance_log::measure_async(\n        "native.command",\n        "fetch_url",\n        details,\n        fetch_url_inner(url),\n    )\n    .await\n',
-    '    crate::performance_log::measure_async("native.command", "fetch_url", details, fetch_url_inner(url)).await\n'
-  );
-  assert.equal(tail(after), expectedTail);
   for (const name of ['stage_12_preserves_url_normalization_and_scheme_policy', 'stage_12_preserves_browser_request_headers']) {
     const fn = text => {
-      const match = text.match(new RegExp(`fn ${name}\\(\\) \{[\\s\\S]*?^    \}`, 'm'));
+      const match = text.match(new RegExp(`fn ${name}\\(\\) \\{[\\s\\S]*?^    \\}`, 'm'));
       assert.ok(match, `missing legacy test: ${name}`);
       return match[0];
     };
     assert.equal(fn(after), fn(before));
   }
+  assert.match(after, /let response = client[\s\S]*?\.map_err\(\|err\| format!\("Request failed: \{err\}"\)\)\?;/);
+  assert.match(after, /read_response\(parsed, response\)\.await/);
+  assert.match(after, /crate::performance_log::measure_async/);
+  assert.match(after, /#\[tauri::command\]/);
+  assert.doesNotMatch(after, /CONTENT_TYPE|response\.status\(\)|response\.url\(\)|\.text\(\)|Response body is empty/);
 });
 
 test('R12-11 preserves frontend registry dependency and frozen security fixture bytes', async () => {
@@ -72,7 +76,7 @@ test('R12-11 preserves frontend registry dependency and frozen security fixture 
   }
   assert.equal(
     await read('src-tauri/tests/stage_12_security_compatibility.rs'),
-    expectedSecurityFixtureAfterClientExtraction(frozen('src-tauri/tests/stage_12_security_compatibility.rs')),
+    expectedSecurityFixtureAfterLaterExtractions(frozen('src-tauri/tests/stage_12_security_compatibility.rs')),
     'R12-11 fixture changed beyond the later R12-12 client ownership migration'
   );
 });
@@ -83,7 +87,8 @@ test('R12-11 explicitly preserves unbounded reported-only response policy withou
   assert.equal(manifest.webFetch.contentType.policy, 'reported-only-no-allowlist');
   const entry = await read(entryPath);
   const client = await read(clientPath);
-  const combined = `${entry}\n${client}`;
+  const response = await read(responsePath);
+  const combined = `${entry}\n${client}\n${response}`;
   for (const code of ['Policy::limited(10)', 'Duration::from_secs(30)', '.get(CONTENT_TYPE)', '.text()',
     'if !status.is_success()', 'if html.trim().is_empty()']) assert.ok(combined.includes(code), `missing preserved policy: ${code}`);
   assert.doesNotMatch(combined, /MAX_RESPONSE_BYTES|content_length\(|\.chunk\(|Policy::custom/);
@@ -104,18 +109,19 @@ test('R12-11 adds eight URL and eight actual loopback HTTP tests with owned clea
   assert.doesNotMatch(unit + http, /#\[ignore\]|mock!|set_var\(|set_current_dir\(/);
 });
 
-test('R12-11 adds exactly one pure policy owner without modifying unrelated inventory entries', async () => {
+test('R12-11 keeps exactly one pure policy owner after later client and response extractions', async () => {
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
   const after = JSON.parse(await read(path));
-  assert.equal(after.modules.length, 440);
-  const r12_11 = after.modules.filter(row => row[0] !== clientPath).map(row => row[0] === entryPath
-    ? row.map((field, index) => index === 3
-      ? 'HTTP fetch orchestration, existing client/response handling and command telemetry; delegates input policy.' : field)
-    : row);
-  assert.equal(r12_11.length, before.modules.length + 1);
+  assert.equal(after.modules.length, 441);
   assert.deepEqual(after.fields, before.fields);
-  assert.deepEqual(r12_11.slice(0, -1).map(row => row[0]), before.modules.map(row => row[0]));
+  const r12_11 = after.modules
+    .filter(row => ![clientPath, responsePath].includes(row[0]))
+    .map(row => row[0] === entryPath
+      ? row.map((field, index) => index === 3
+        ? 'HTTP fetch orchestration, existing client/response handling and command telemetry; delegates input policy.' : field)
+      : row);
+  assert.equal(r12_11.length, before.modules.length + 1);
   for (const row of before.modules) {
     const expected = row[0] === entryPath ? row.map((field, index) => index === 3
       ? 'HTTP fetch orchestration, existing client/response handling and command telemetry; delegates input policy.' : field) : row;
@@ -130,7 +136,7 @@ test('R12-11 remains manually runnable while R12-12 carries its cumulative hard 
   const previous = await read('.github/workflows/r12-11.yml');
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*(?:push|pull_request):/m);
-  const current = await read('.github/workflows/r12-12.yml');
+  const current = await read('.github/workflows/r12-13.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.match(current, /^\s+NO_PROXY: 127\.0\.0\.1,localhost$/m);
   assert.doesNotMatch(current, /^\s+no_proxy:/m, 'GitHub rejects case-insensitive duplicate mapping keys');

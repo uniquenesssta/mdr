@@ -9,18 +9,26 @@ const openerPath = 'src-tauri/src/external_link/opener.rs';
 const read = path => readFile(path, 'utf8');
 const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
 
-function expectedSecurityFixtureAfterClientExtraction(text) {
+function expectedSecurityFixtureAfterLaterExtractions(text) {
   return text
     .replace(
       'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");',
-      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");\nconst SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");'
+      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");\nconst SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");\nconst SOURCE_WEB_FETCH_RESPONSE: &str = include_str!("../src/web_fetch/response.rs");'
     )
     .replace('assert!(SOURCE_WEB_FETCH.contains("Policy::limited(10)"));',
       'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::limited(10)"));')
     .replace('assert!(SOURCE_WEB_FETCH.contains("Duration::from_secs(30)"));',
       'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Duration::from_secs(30)"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains(".get(CONTENT_TYPE)"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".get(CONTENT_TYPE)"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains(".text()"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".text()"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains("if !status.is_success()"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if !status.is_success()"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains("if html.trim().is_empty()"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if html.trim().is_empty()"));')
     .replace('assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));',
-      'assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));');
+      'assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_RESPONSE.contains("MAX_RESPONSE_BYTES"));');
 }
 const hook = '\n#[cfg(all(test, target_os = "linux"))]\n#[path = "../tests/external_link/opener.rs"]\nmod opener_tests;\n';
 function platformBlock(text) {
@@ -71,7 +79,7 @@ test('R12-10 freezes validation, frontend, registry, dependency and independent 
   }
   assert.equal(
     await read('src-tauri/tests/stage_12_security_compatibility.rs'),
-    expectedSecurityFixtureAfterClientExtraction(frozen('src-tauri/tests/stage_12_security_compatibility.rs')),
+    expectedSecurityFixtureAfterLaterExtractions(frozen('src-tauri/tests/stage_12_security_compatibility.rs')),
     'independent security fixture changed beyond R12-12 client ownership migration'
   );
 });
@@ -99,10 +107,11 @@ test('R12-10 adds exactly one cohesive stateless system boundary to the ownershi
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
   const after = JSON.parse(await read(path));
-  assert.equal(after.modules.length, 440);
+  assert.equal(after.modules.length, 441);
   // R12-11/R12-12 separately verify the later web policy and client ownership changes.
   const withoutLaterWeb = after.modules.filter(row => ![
-    'src-tauri/src/web_fetch/validation.rs', 'src-tauri/src/web_fetch/client.rs'
+    'src-tauri/src/web_fetch/validation.rs', 'src-tauri/src/web_fetch/client.rs',
+    'src-tauri/src/web_fetch/response.rs'
   ].includes(row[0]));
   assert.equal(withoutLaterWeb.length, before.modules.length + 1);
   assert.deepEqual(after.fields, before.fields);
@@ -119,7 +128,7 @@ test('R12-10 keeps the complete old workflow as manual history and every cumulat
   const oldPath = '.github/workflows/r12-09.yml';
   const before = frozen(oldPath);
   assert.equal(await read(oldPath), before.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
-  const current = await read('.github/workflows/r12-12.yml');
+  const current = await read('.github/workflows/r12-13.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git clean|git reset/);
   for (const text of ['external_link::validation::tests', 'external_link::validation_command_tests',
@@ -137,7 +146,7 @@ test('R12-10 keeps the complete old workflow as manual history and every cumulat
 });
 
 test('R12-10 validates unchanged real process tests before and after extraction plus native linkage', async () => {
-  const current = await read('.github/workflows/r12-12.yml');
+  const current = await read('.github/workflows/r12-13.yml');
   for (const text of [`git archive ${baseline} | tar`,
     'cp src-tauri/tests/external_link/opener.rs "$baseline/src-tauri/tests/external_link/opener.rs"',
     'test ! -e "$baseline/src-tauri/src/external_link/opener.rs"',

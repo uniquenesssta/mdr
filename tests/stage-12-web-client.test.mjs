@@ -7,6 +7,7 @@ const accepted = 'fecd05b27da67ac73abd2f4c63c5c27675ae46be';
 const baseline = accepted;
 const entryPath = 'src-tauri/src/web_fetch.rs';
 const clientPath = 'src-tauri/src/web_fetch/client.rs';
+const responsePath = 'src-tauri/src/web_fetch/response.rs';
 const read = path => readFile(path, 'utf8');
 const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
 
@@ -14,6 +15,42 @@ function headersFunction(text) {
   const match = text.match(/^(?:pub\(super\) )?fn browser_headers\b[\s\S]*?^}/m);
   assert.ok(match, 'browser_headers must exist exactly once');
   return match[0];
+}
+
+function dtoBlock(text) {
+  const match = text.match(/#\[derive\(Debug, Serialize\)\]\npub struct FetchResponse \{[\s\S]*?\n\}/);
+  assert.ok(match, 'FetchResponse DTO must exist exactly once');
+  return match[0];
+}
+
+function responseBlock(text) {
+  const start = text.indexOf('    let status = response.status();');
+  assert.notEqual(start, -1, 'response handling must exist');
+  const end = text.indexOf('\n}', start);
+  assert.notEqual(end, -1, 'response handling must end at function boundary');
+  return text.slice(start, end);
+}
+
+function expectedSecurityFixtureAfterResponseExtraction(text) {
+  return text
+    .replace(
+      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");',
+      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");\nconst SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");\nconst SOURCE_WEB_FETCH_RESPONSE: &str = include_str!("../src/web_fetch/response.rs");'
+    )
+    .replace('assert!(SOURCE_WEB_FETCH.contains("Policy::limited(10)"));',
+      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::limited(10)"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains("Duration::from_secs(30)"));',
+      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Duration::from_secs(30)"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains(".get(CONTENT_TYPE)"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".get(CONTENT_TYPE)"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains(".text()"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".text()"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains("if !status.is_success()"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if !status.is_success()"));')
+    .replace('assert!(SOURCE_WEB_FETCH.contains("if html.trim().is_empty()"));',
+      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if html.trim().is_empty()"));')
+    .replace('assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));',
+      'assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_RESPONSE.contains("MAX_RESPONSE_BYTES"));');
 }
 
 function clientBuilderBlock(text) {
@@ -37,25 +74,35 @@ test('R12-12 moves the exact frozen headers and client-builder settings to one p
   assert.doesNotMatch(client.split('#[cfg(test)]')[0], /CONTENT_TYPE|\.text\(\)|FetchResponse|tauri::|serde|Url::parse/);
 });
 
-test('R12-12 leaves response command telemetry and validation behavior byte-stable around the extracted client', async () => {
+test('R12-12 client extraction remains byte-stable after the later R12-13 response ownership move', async () => {
   const before = frozen(entryPath);
   let expected = before
-    .replace('use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_LANGUAGE, CONTENT_TYPE, USER_AGENT};\n', 'use reqwest::header::CONTENT_TYPE;\n')
-    .replace('use std::time::Duration;\nmod validation;\n', 'mod client;\nmod validation;\n')
-    .replace('use validation::normalize_url;\n', 'use client::build_client;\nuse validation::normalize_url;\n')
+    .replace('use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_LANGUAGE, CONTENT_TYPE, USER_AGENT};\n', '')
+    .replace('use serde::Serialize;\n', '')
+    .replace('use std::time::Duration;\nmod validation;\n', 'mod client;\nmod response;\nmod validation;\n')
+    .replace('use validation::normalize_url;\n',
+      'use client::build_client;\npub use response::FetchResponse;\nuse response::read_response;\nuse validation::normalize_url;\n')
     .replace(`${headersFunction(before)}\n\n`, '')
     .replace(`${clientBuilderBlock(before)}\n`, '    let client = build_client()?;\n')
+    .replace(`${dtoBlock(before)}\n\n`, '')
+    .replace(responseBlock(before), '    read_response(parsed, response).await')
     .replace(
       '    crate::performance_log::measure_async(\n        "native.command",\n        "fetch_url",\n        details,\n        fetch_url_inner(url),\n    )\n    .await\n',
       '    crate::performance_log::measure_async("native.command", "fetch_url", details, fetch_url_inner(url)).await\n'
     )
-    .replace('use super::{browser_headers, normalize_url};', 'use super::{client::browser_headers, normalize_url};');
+    .replace('use super::{browser_headers, normalize_url};',
+      'use super::{client::browser_headers, normalize_url};');
   assert.equal(await read(entryPath), expected);
   const entry = await read(entryPath);
+  const response = await read(responsePath);
   assert.doesNotMatch(entry, /Client::builder|Policy::limited\(10\)|Duration::from_secs\(30\)|fn browser_headers/);
   for (const code of ['response.status()', 'response.url().to_string()', '.get(CONTENT_TYPE)', '.text()',
-    'HTTP request failed with status', 'Failed to read response body:', 'Response body is empty',
-    'crate::performance_log::measure_async', '#[tauri::command]']) assert.ok(entry.includes(code), `response/command drift: ${code}`);
+    'HTTP request failed with status', 'Failed to read response body:', 'Response body is empty']) {
+    assert.ok(response.includes(code), `response drift after R12-13: ${code}`);
+  }
+  assert.match(entry, /read_response\(parsed, response\)\.await/);
+  assert.match(entry, /crate::performance_log::measure_async/);
+  assert.match(entry, /#\[tauri::command\]/);
 });
 
 test('R12-12 freezes reqwest rustls and automatic compression feature selection without dependency changes', async () => {
@@ -69,7 +116,7 @@ test('R12-12 freezes reqwest rustls and automatic compression feature selection 
   assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT: &str = include_str!\("\.\.\/src\/web_fetch\/client\.rs"\)/);
   assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT\.contains\("Policy::limited\(10\)"\)/);
   assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT\.contains\("Duration::from_secs\(30\)"\)/);
-  assert.match(fixture, /SOURCE_WEB_FETCH\.contains\("\.get\(CONTENT_TYPE\)"\)/);
+  assert.match(fixture, /SOURCE_WEB_FETCH_RESPONSE\.contains\("\.get\(CONTENT_TYPE\)"\)/);
 });
 
 test('R12-12 verifies headers redirects timeout and gzip through the real locked reqwest path', async () => {
@@ -86,28 +133,32 @@ test('R12-12 verifies headers redirects timeout and gzip through the real locked
   assert.doesNotMatch(http, /#\[ignore\]|mock!|set_var\(|set_current_dir\(/);
 });
 
-test('R12-12 adds exactly one stateless client owner and preserves every other inventory record', async () => {
+test('R12-12 keeps exactly one stateless client owner after the later response extraction', async () => {
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
   const after = JSON.parse(await read(path));
-  assert.equal(after.modules.length, 440);
-  assert.equal(after.modules.length, before.modules.length + 1);
+  assert.equal(after.modules.length, 441);
   assert.deepEqual(after.fields, before.fields);
+  const r12_12 = after.modules.filter(row => row[0] !== responsePath).map(row => row[0] === entryPath
+    ? row.map((field, index) => index === 3
+      ? 'HTTP fetch orchestration, existing response handling and command telemetry; delegates input and client policy.' : field)
+    : row);
+  assert.equal(r12_12.length, 440);
   for (const row of before.modules) {
     const expected = row[0] === entryPath ? row.map((field, index) => index === 3
       ? 'HTTP fetch orchestration, existing response handling and command telemetry; delegates input and client policy.' : field) : row;
-    assert.deepEqual(after.modules.find(next => next[0] === row[0]), expected, `inventory drift: ${row[0]}`);
+    assert.deepEqual(r12_12.find(next => next[0] === row[0]), expected, `inventory drift: ${row[0]}`);
   }
-  assert.deepEqual(after.modules.at(-1), [clientPath, 'rust-module', 'desktop-platform',
+  assert.deepEqual(r12_12.at(-1), [clientPath, 'rust-module', 'desktop-platform',
     'Stateless reqwest client construction with frozen browser headers, redirect limit and timeout over Cargo-selected rustls/compression features.',
     'none', 'per-call-client-builder', 'retain', false]);
 });
 
-test('R12-12 makes R12-11 manual and owns the only automatic cumulative Stage workflow', async () => {
+test('R12-12 remains cumulatively protected after R12-13 becomes the automatic Stage workflow', async () => {
   const previous = await read('.github/workflows/r12-11.yml');
   const original = frozen('.github/workflows/r12-11.yml');
   assert.equal(previous, original.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
-  const current = await read('.github/workflows/r12-12.yml');
+  const current = await read('.github/workflows/r12-13.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);
   for (const code of [
@@ -122,10 +173,11 @@ test('R12-12 makes R12-11 manual and owns the only automatic cumulative Stage wo
   ]) assert.ok(current.includes(code), `missing R12-12 gate: ${code}`);
 });
 
-test('R12-12 documentation closes 12.11 while leaving 12.12 and R12-S01 pending until acceptance', async () => {
+test('R12-12 documentation is accepted while R12-13 and R12-S01 remain pending', async () => {
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md');
   assert.match(stage, /- \[x\] 12\.11 Web Validation/);
-  assert.match(stage, /- \[ \] 12\.12 Web Client/);
+  assert.match(stage, /- \[x\] 12\.12 Web Client/);
+  assert.match(stage, /- \[ \] 12\.13 Web Response/);
   assert.match(stage, /- \[ \] R12-S01/);
   assert.match(stage, /R12-12/);
   const detail = await read('docs/R12-12-DETAILS.md');
