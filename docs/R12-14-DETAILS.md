@@ -43,3 +43,10 @@ R12-14 专属 workflow 继续执行 Stage 12 累计 Node/Rust、架构/文档、
 ## 第二轮 CI 修复
 
 提交 `fb0c590e4dcd602c350e2668ab2fa70c69e31b00` 的 Rust scope 前置契约已由 33/37 提升到 36/37；唯一剩余失败是 R12-09 历史测试仍固定要求当前累计 workflow 把 Linux schema 证据归档到 `/r12-13`。全量扫描确认 Stage 12 测试中其余 `r12-13` 引用仅是有意读取已完成的 R12-13 历史 workflow。修复只把该当前证据目录断言迁到 `/r12-14`。
+
+
+## 第三轮 CI 修复
+
+提交 `18f44f19146e6383beec2ab5b1eeb07e67683a1f` 已通过 R12-14 scope、全量 Node、架构/文档以及 Windows/macOS 原生边界。Rust 在行为测试前由 rustfmt 阻塞：12.14 workflow 新增时错误地把历史 `performance_log.rs` 整文件纳入 Rust 1.88/max_width=120 检查，会要求重排大量与本任务无关的既有代码。恢复 R12-13 的既有格式门禁边界，仅新增检查新文件 `performance_log/redaction.rs`；`performance_log.rs` 的两处允许变更继续由 R12-08/R12-11/R12-14 字节级契约保护，因此没有降低既有质量门禁。
+
+同一 run 的 Browser Contract 失败为 Chromium 未暴露 page target，并伴随 runner DBus 连接错误；全量 Node 与架构门禁均已通过。该环境启动故障不修改生产代码，后续 run 继续执行同一 Browser Contract。

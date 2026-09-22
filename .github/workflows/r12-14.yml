@@ -219,7 +219,6 @@ jobs:
         run: |
           rustfmt --edition 2021 --check --config max_width=120 \
             src-tauri/src/external_link.rs \
-            src-tauri/src/performance_log.rs \
             src-tauri/src/performance_log/redaction.rs \
             src-tauri/src/web_fetch.rs \
             src-tauri/src/web_fetch/client.rs \
