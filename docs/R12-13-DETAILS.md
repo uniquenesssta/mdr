@@ -30,3 +30,8 @@ R12-13 专属工作流继续执行前序 Stage 12 累计契约、完整 Rust、C
 ## 首轮 CI 修复
 
 实现提交 `ec6eb2c6f3b19d847b76d8f8a26c03159c192989` 的首轮 Actions 在 Rust scope gate 停止：37 个前置 Node 契约中 36 个通过，唯一失败是 R12-08 历史测试仍要求当前累计工作流使用 `r12-12/performance-logs` 临时目录。该断言随自动验证权威迁到 R12-13 后应检查 `r12-13/performance-logs`；生产 Response、依赖和外部契约均不因此改变。同时把 R12-13 工作流剩余的祖先检查统一固定到已验收的 R12-12 收尾提交 `9b6d636`。
+
+
+## 第二轮 CI 修复
+
+提交 `b13811cf96eec572eb27f924304929336428bc49` 已通过 R12-13 scope gate 与专属 Stage 12 契约。全量 Node 唯一失败是根 README 的历史文档契约仍要求显式保留 R12-08 条目和详情链接；Windows/macOS 原生编译、链接与工作区洁净均通过，但证据上传路径仍指向旧 `r12-12-native` 目录。修复仅恢复 README 的 R12-08 锚点并把 artifact path 对齐到 `r12-13-native`，不修改生产 Response、依赖或外部行为。

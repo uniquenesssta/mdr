@@ -450,6 +450,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: r12-13-native-${{ matrix.os }}-${{ github.sha }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/r12-12-native/
+          path: ${{ runner.temp }}/r12-13-native/
           if-no-files-found: error
           retention-days: 14
