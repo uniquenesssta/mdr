@@ -47,3 +47,8 @@ R12-13 已完成并验收。提交 `33744a848e1fdd26dfc91e22d2e87b12578ff9bd` �
 提交 `33744a848e1fdd26dfc91e22d2e87b12578ff9bd` 的 Actions `35756238550` attempt 2 完整通过：Web Response/frontend regression、Real Rust Web Response and cumulative hard gates、Windows native boundary、macOS native boundary 均为 success。前一次 attempt 1 唯一失败为 CI Chromium 未能建立 CDP endpoint；同一提交的 attempt 2 已通过 Browser Contract、Production Build 与 Built-app Browser Regression，因此未为该环境故障修改生产代码或放宽测试。
 
 R12-13 的状态码、最终 URL、Content-Type、文本正文、空体/HTTP/正文读取错误及 `FetchResponse` DTO 已由 `web_fetch/response.rs` 唯一负责；URL Validation、Client、命令注册、依赖与 R12-S01 均未提前改变。
+
+
+## 第四轮 CI 修复
+
+正式验收记录提交 `4fcd86b3c85be1272c1423ae148d17de16510141` 后，R12-12 历史文档契约和 R12-13 实施期契约仍固定要求 12.13 未勾选，导致前端专项与 Rust scope gate 在行为验证前失败。两项契约仅迁移为已验收状态：继续要求 12.11/12.12/12.13 已完成，同时明确 12.14 与 R12-S01 仍未完成；生产 Response、依赖、安全策略和行为断言不变。

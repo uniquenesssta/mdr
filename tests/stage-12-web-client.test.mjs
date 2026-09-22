@@ -173,11 +173,12 @@ test('R12-12 remains cumulatively protected after R12-13 becomes the automatic S
   ]) assert.ok(current.includes(code), `missing R12-12 gate: ${code}`);
 });
 
-test('R12-12 documentation is accepted while R12-13 and R12-S01 remain pending', async () => {
+test('R12-12 remains accepted after R12-13 while later work and R12-S01 stay pending', async () => {
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md');
   assert.match(stage, /- \[x\] 12\.11 Web Validation/);
   assert.match(stage, /- \[x\] 12\.12 Web Client/);
-  assert.match(stage, /- \[ \] 12\.13 Web Response/);
+  assert.match(stage, /- \[x\] 12\.13 Web Response/);
+  assert.match(stage, /- \[ \] 12\.14 Log Redaction/);
   assert.match(stage, /- \[ \] R12-S01/);
   assert.match(stage, /R12-12/);
   const detail = await read('docs/R12-12-DETAILS.md');

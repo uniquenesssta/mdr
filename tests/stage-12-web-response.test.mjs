@@ -145,14 +145,15 @@ test('R12-13 makes R12-12 historical and owns the only automatic cumulative Stag
   ]) assert.ok(current.includes(code), `missing R12-13 gate: ${code}`);
 });
 
-test('R12-13 documentation closes 12.12 while leaving 12.13 and R12-S01 pending until acceptance', async () => {
+test('R12-13 documentation records acceptance while 12.14 and R12-S01 remain pending', async () => {
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md');
   assert.match(stage, /- \[x\] 12\.12 Web Client/);
-  assert.match(stage, /- \[ \] 12\.13 Web Response/);
+  assert.match(stage, /- \[x\] 12\.13 Web Response/);
+  assert.match(stage, /- \[ \] 12\.14 Log Redaction/);
   assert.match(stage, /- \[ \] R12-S01/);
   assert.match(stage, /R12-13/);
   const detail = await read('docs/R12-13-DETAILS.md');
-  for (const text of ['状态码', 'Content-Type', '正文', 'R12-S01', '9b6d6369fce3f2b36a33cdd12dd28c4d0460d927']) {
+  for (const text of ['状态码', 'Content-Type', '正文', 'R12-S01', '35756238550', '33744a848e1fdd26dfc91e22d2e87b12578ff9bd']) {
     assert.ok(detail.includes(text), `missing R12-13 detail: ${text}`);
   }
 });
