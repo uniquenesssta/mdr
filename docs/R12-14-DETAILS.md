@@ -50,3 +50,21 @@ R12-14 专属 workflow 继续执行 Stage 12 累计 Node/Rust、架构/文档、
 提交 `18f44f19146e6383beec2ab5b1eeb07e67683a1f` 已通过 R12-14 scope、全量 Node、架构/文档以及 Windows/macOS 原生边界。Rust 在行为测试前由 rustfmt 阻塞：12.14 workflow 新增时错误地把历史 `performance_log.rs` 整文件纳入 Rust 1.88/max_width=120 检查，会要求重排大量与本任务无关的既有代码。恢复 R12-13 的既有格式门禁边界，仅新增检查新文件 `performance_log/redaction.rs`；`performance_log.rs` 的两处允许变更继续由 R12-08/R12-11/R12-14 字节级契约保护，因此没有降低既有质量门禁。
 
 同一 run 的 Browser Contract 失败为 Chromium 未暴露 page target，并伴随 runner DBus 连接错误；全量 Node 与架构门禁均已通过。该环境启动故障不修改生产代码，后续 run 继续执行同一 Browser Contract。
+
+
+## 验证入口修复（2026-09-28）
+
+修复基线为 `b988da7ddcf3f634f1d35841adab06e4898423f8`。其 Actions `35761578037` 的前端、Windows、macOS job 均成功；Rust 在 direct redaction 步骤因命令末尾两个反斜杠收到多余参数，报 `unexpected argument`，六项脱敏行为测试和后续累计 Rust 门禁均未运行。
+
+本次修复将该 Cargo/tee 调用写为单行，保留 `--locked`、测试过滤器、原六项通过计数和失败即停；补上 `performance_log.rs` 与 `performance_log/**` 的 push 路径过滤，并让 Rust scope gate 执行现有 R12-14 契约。未改变生产脱敏规则、日志接口、依赖和其他 Atomic Task。
+
+在已有 `tests/stage-12-log-redaction.test.mjs` 增加两项回归：精确验证直接测试命令及结果门禁；验证日志源码触发范围和 scope 契约调用。两项在修复前均失败，修复后均通过。
+
+本地使用该精确提交的 Actions 源码快照（下载 artifact SHA-256 已核对），未把快照伪装为完整 Git 历史。实际执行：
+
+- `node --test --test-name-pattern 'R12-14 (shell command|production log|recursively|makes|documentation)' tests/stage-12-log-redaction.test.mjs`：5/5 通过，其中生产规则检查为源码契约，不是 Rust 行为测试。
+- `node --test tests/historical-workflow-routing.test.mjs tests/documentation-layout.test.mjs`：3/3 通过。
+- 解析 workflow 后对 45 个 run block 执行 `bash --noprofile --norc -n`：全部通过；仅为语法检查将 Actions 表达式替换为普通占位词，没有执行或替代真实 Cargo 调用。
+- `git diff --check`：通过；未发现其他行尾双反斜杠。
+
+本地没有 Cargo/rustc，网络 DNS 无法解析 GitHub，不能克隆完整历史或安装工具链；未在本地运行全量 Node、Rust、Clippy、构建和浏览器门禁。修复提交由原 R12-14 Actions 执行真实验证，完成前 12.14 仍不勾选。复验入口为 `agent/r12-stage` 上的 `R12-14 Log Redaction Compatibility` workflow；不得以此前前端或原生成功替代修复 HEAD 的累计 Rust 结果。

@@ -5,6 +5,8 @@ on:
   push:
     branches: [agent/r12-stage]
     paths:
+      - 'src-tauri/src/performance_log.rs'
+      - 'src-tauri/src/performance_log/**'
       - 'src-tauri/src/web_fetch.rs'
       - 'src-tauri/src/web_fetch/**'
       - 'src-tauri/tests/web_fetch/**'
@@ -202,7 +204,7 @@ jobs:
             src/platform/desktop/performance-log-client.js src/runtime/performance.js
           test ! -e src-tauri/src/local_file.rs
           test ! -e .github/workflows/r12-source-snapshot.yml
-          node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs \
+          node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-log-redaction.test.mjs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/command-scope.log"
           git diff --check
       - name: Install Linux Tauri build dependencies
@@ -250,8 +252,7 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/r12-14/rustfmt.log"
       - name: R12-14 direct recursive redaction 6 of 6
         run: |
-          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction::tests \\
-            2>&1 | tee "$RUNNER_TEMP/r12-14/log-redaction.log"
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/log-redaction.log"
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/log-redaction.log"
       - name: R12-13 pre-split real HTTP response behavior 9 of 9
         run: |

@@ -100,3 +100,27 @@ test('R12-14 documentation records implementation while keeping later atomic tas
     assert.ok(detail.includes(marker), `missing R12-14 detail: ${marker}`);
   }
 });
+
+
+test('R12-14 shell command starts Cargo with only the intended arguments and keeps the result gate', async () => {
+  const workflow = await read('.github/workflows/r12-14.yml');
+  const step = workflow.match(/^      - name: R12-14 direct recursive redaction 6 of 6\n        run: \|\n([\s\S]*?)(?=^      - name:)/m);
+  assert.ok(step, 'missing direct redaction test step');
+  const commands = step[1].replace(/\\\r?\n[ \t]*/g, ' ')
+    .trim().split('\n').map(line => line.trim()).filter(Boolean);
+  assert.deepEqual(commands, [
+    'cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/log-redaction.log"',
+    "grep -Fq 'test result: ok. 6 passed; 0 failed' \"$RUNNER_TEMP/r12-14/log-redaction.log\""
+  ]);
+});
+
+test('R12-14 production log changes trigger validation and its scope gate runs the redaction contracts', async () => {
+  const workflow = await read('.github/workflows/r12-14.yml');
+  const triggers = workflow.split('  workflow_dispatch:')[0];
+  for (const path of [entryPath, 'src-tauri/src/performance_log/**']) {
+    assert.ok(triggers.includes(`      - '${path}'`), `unwatched production path: ${path}`);
+  }
+  const scope = workflow.match(/^      - name: Guard R12-14 scope and frozen policies\n        run: \|\n([\s\S]*?)(?=^      - name:)/m);
+  assert.ok(scope, 'missing scope gate');
+  assert.match(scope[1], /node --test[^\n]*tests\/stage-12-log-redaction\.test\.mjs/);
+});
