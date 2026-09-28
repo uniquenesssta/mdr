@@ -68,3 +68,14 @@ R12-14 专属 workflow 继续执行 Stage 12 累计 Node/Rust、架构/文档、
 - `git diff --check`：通过；未发现其他行尾双反斜杠。
 
 本地没有 Cargo/rustc，网络 DNS 无法解析 GitHub，不能克隆完整历史或安装工具链；未在本地运行全量 Node、Rust、Clippy、构建和浏览器门禁。修复提交由原 R12-14 Actions 执行真实验证，完成前 12.14 仍不勾选。复验入口为 `agent/r12-stage` 上的 `R12-14 Log Redaction Compatibility` workflow；不得以此前前端或原生成功替代修复 HEAD 的累计 Rust 结果。
+
+
+## Clippy 修复与实测结果（2026-09-28）
+
+验证入口修复提交 `1a0cd7471d878dfb5621299fe95d8bd3cea91470` 的 Actions `36442964433` 已真实通过脱敏 6/6、Stage 12 累计定向 Rust、全量 Rust（217、5、1、6 四组均无失败）、全量 Node、架构/文档和 Windows/macOS 原生边界。原来的 Cargo 多余参数故障已消除。
+
+剩余 Rust 阻塞为 `redaction.rs` 第 60、65 行的 `clippy::manual_pattern_char_comparison`。仅将 `trim_end_matches` 与 `rsplit` 的双字符谓词改为 `['/', '\\']` 数组模式；匹配的正反斜杠、路径末级组件及其余脱敏行为保持不变，不增加 allow 或降低 `-D warnings`。六项 Rust 测试、命令计数和所有累计门禁均保留，修复后仍须精确 HEAD 复验。
+
+同一 run 的浏览器契约在应用断言前报 `CDP endpoint did not become ready: fetch failed`；尝试单独重跑时 GitHub 因该 run 的 Rust job 尚在运行拒绝请求，未把重跑记为已启动或已通过。后续修复提交继续执行原浏览器契约、构建与 built-app 回归。
+
+本地补充验证中，`node --test tests/unit/platform/performance-log-client.test.mjs` 因源码快照未安装 `@tauri-apps/plugin-dialog` 在模块加载阶段失败，未运行该文件的用例；不以 mock 绕过。该前端适配器源码未改变，完整依赖下的累计 Node 验证以 Actions 为准。本地新增的五个故障变体检查均能拒绝多余 Cargo 参数、遗漏两个源码触发路径、漏跑 scope 契约及弱化计数门禁，临时副本已清理。

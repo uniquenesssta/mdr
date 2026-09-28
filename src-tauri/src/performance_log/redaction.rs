@@ -57,12 +57,12 @@ fn is_path_field(key: &str) -> bool {
 }
 
 fn terminal_path_component(value: &str) -> String {
-    let trimmed = value.trim_end_matches(|character| character == '/' || character == '\\');
+    let trimmed = value.trim_end_matches(['/', '\\']);
     if trimmed.is_empty() {
         return "[path]".to_string();
     }
     trimmed
-        .rsplit(|character| character == '/' || character == '\\')
+        .rsplit(['/', '\\'])
         .next()
         .filter(|component| !component.is_empty())
         .unwrap_or("[path]")
