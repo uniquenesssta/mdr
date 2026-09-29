@@ -1,3 +1,4 @@
+import { inventoryBeforeLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -159,7 +160,7 @@ test('Atomic 10.11 production integration gives Persistence one Close Save autho
   const main = read('src/main.js');
   const events = read('public/app/events.js');
   const windowClose = read('src/features/window/window-close-controller.js');
-  const fixture = JSON.parse(read('tests/architecture/fixtures/production-modules.json'));
+  const fixture = inventoryBeforeLogStorageExtraction(JSON.parse(read('tests/architecture/fixtures/production-modules.json')));
 
   assert.match(persistenceEntry, /createCloseSaveController/);
   assert.equal((main.match(/createCloseSaveController\(/g) || []).length, 1);

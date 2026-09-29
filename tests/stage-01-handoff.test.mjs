@@ -1,3 +1,4 @@
+import { inventoryBeforeLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -122,7 +123,7 @@ test('documented Stage 1 public modules expose the exact handoff surface', async
 test('Stage 1 historical handoff and current migration baseline remain explicit', async () => {
   const packageJson = await readJson('package.json');
   const baseline = await readJson('tests/architecture/fixtures/architecture-baseline.json');
-  const moduleFixture = await readJson('tests/architecture/fixtures/production-modules.json');
+  const moduleFixture = inventoryBeforeLogStorageExtraction(await readJson('tests/architecture/fixtures/production-modules.json'));
 
   assert.equal(moduleFixture.modules.length, 442);
   assert.ok(moduleFixture.modules.some(record => record[0] === 'src-tauri/src/local_file/binary_writer.rs'));

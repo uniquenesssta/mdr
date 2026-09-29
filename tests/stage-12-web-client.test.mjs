@@ -181,7 +181,7 @@ test('R12-12 remains accepted after R12-13 while later work and R12-S01 stay pen
   assert.match(stage, /- \[x\] 12\.11 Web Validation/);
   assert.match(stage, /- \[x\] 12\.12 Web Client/);
   assert.match(stage, /- \[x\] 12\.13 Web Response/);
-  assert.match(stage, /- \[ \] 12\.14 Log Redaction/);
+  assert.match(stage, /- \[x\] 12\.14 Log Redaction/);
   assert.match(stage, /- \[ \] R12-S01/);
   assert.match(stage, /R12-12/);
   const detail = await read('docs/R12-12-DETAILS.md');

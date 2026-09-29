@@ -80,10 +80,13 @@ pub(super) fn log_file_path() -> Result<PathBuf, String> {
 
 #[cfg(test)]
 mod tests {
+    use super::super::writer::{MAX_BATCH_ENTRIES, MAX_ENTRY_BYTES};
     use super::utc_timestamp_from_unix_ms;
 
     #[test]
-    fn utc_file_names_preserve_epoch_leap_day_and_year_boundary() {
+    fn stage_12_freezes_log_limits_and_utc_file_timestamp_shape() {
+        assert_eq!(MAX_BATCH_ENTRIES, 500);
+        assert_eq!(MAX_ENTRY_BYTES, 64 * 1024);
         assert_eq!(utc_timestamp_from_unix_ms(0), "1970-01-01_00-00-00-000");
         assert_eq!(utc_timestamp_from_unix_ms(1_704_164_645_678), "2024-01-02_03-04-05-678");
         assert_eq!(utc_timestamp_from_unix_ms(951_782_400_123), "2000-02-29_00-00-00-123");

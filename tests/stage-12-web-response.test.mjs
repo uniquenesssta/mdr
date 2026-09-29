@@ -150,11 +150,11 @@ test('R12-13 remains historical while R12-14 owns the automatic cumulative Stage
   ]) assert.ok(current.includes(code), `missing R12-13 gate: ${code}`);
 });
 
-test('R12-13 documentation records acceptance while 12.14 and R12-S01 remain pending', async () => {
+test('R12-13 documentation records acceptance after R12-14 acceptance while R12-S01 remains pending', async () => {
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md');
   assert.match(stage, /- \[x\] 12\.12 Web Client/);
   assert.match(stage, /- \[x\] 12\.13 Web Response/);
-  assert.match(stage, /- \[ \] 12\.14 Log Redaction/);
+  assert.match(stage, /- \[x\] 12\.14 Log Redaction/);
   assert.match(stage, /- \[ \] R12-S01/);
   assert.match(stage, /R12-13/);
   const detail = await read('docs/R12-13-DETAILS.md');
