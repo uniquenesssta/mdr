@@ -72,7 +72,10 @@ test('R12-08 preserves exact DTO definitions and all eight specialist source blo
   assert.doesNotMatch(types, /\bfn\s|fs::|tauri::|performance_log/);
   for (const name of specialists) {
     const path = `${directory}${name}.rs`;
-    assert.equal(await source(path), frozen(path), `specialist changed outside command migration: ${path}`);
+    const expected = name === 'path_policy'
+      ? frozen(path).replace('    use std::{\n        fs,\n', '    #[cfg(unix)]\n    use std::fs;\n    use std::{\n')
+      : frozen(path);
+    assert.equal(await source(path), expected, `specialist changed beyond the authorized Windows test import correction: ${path}`);
   }
 });
 

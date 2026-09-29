@@ -216,7 +216,9 @@ jobs:
             src-tauri/src/local_file/text_writer.rs src-tauri/src/local_file/binary_writer.rs \
             src-tauri/src/local_file/directory_tree.rs src-tauri/src/local_file/tree_limits.rs \
             src/platform/desktop/file-system-client.js src/platform/desktop/link-client.js src/platform/desktop/web-fetch-client.js \
-            src/platform/desktop/performance-log-client.js src/runtime/performance.js
+            src/platform/desktop/performance-log-client.js src/runtime/performance.js \
+            ':!src-tauri/src/local_file/path_policy.rs'
+          node scripts/ci/verify-windows-test-imports.mjs
           test ! -e src-tauri/src/local_file.rs
           test ! -e .github/workflows/r12-source-snapshot.yml
           node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-log-redaction.test.mjs \
@@ -266,7 +268,7 @@ jobs:
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/log-redaction.log"
       - name: R12-13 pre-split real HTTP response behavior 9 of 9
         run: |
-          baseline="$RUNNER_TEMP/r12-14-response-baseline"
+          baseline="$(cygpath -u "$RUNNER_TEMP")/r12-14-response-baseline"
           mkdir "$baseline"
           git archive 9b6d6369fce3f2b36a33cdd12dd28c4d0460d927 | tar -x -C "$baseline"
           test ! -e "$baseline/src-tauri/src/web_fetch/response.rs"
@@ -280,7 +282,7 @@ jobs:
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-response.log"
       - name: R12-12 pre-split real HTTP client behavior 9 of 9
         run: |
-          baseline="$RUNNER_TEMP/r12-14-client-baseline"
+          baseline="$(cygpath -u "$RUNNER_TEMP")/r12-14-client-baseline"
           mkdir "$baseline"
           git archive fecd05b27da67ac73abd2f4c63c5c27675ae46be | tar -x -C "$baseline"
           test ! -e "$baseline/src-tauri/src/web_fetch/client.rs"
@@ -300,7 +302,7 @@ jobs:
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-client.log"
       - name: R12-11 pre-split URL and real HTTP behavior 17 of 17
         run: |
-          baseline="$RUNNER_TEMP/r12-14-web-baseline"
+          baseline="$(cygpath -u "$RUNNER_TEMP")/r12-14-web-baseline"
           mkdir "$baseline"
           git archive 3f1233585dd5359fe2a7168be8206074b30627ec | tar -x -C "$baseline"
           test ! -e "$baseline/src-tauri/src/web_fetch/validation.rs"

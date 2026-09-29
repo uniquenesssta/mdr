@@ -88,8 +88,9 @@ mod tests {
         input_path, inspect_tree_entry, is_within_directory, parent_directory, required_path, resolve_local_image_path,
         TreeEntryPolicy,
     };
+    #[cfg(unix)]
+    use std::fs;
     use std::{
-        fs,
         path::{Path, PathBuf},
         time::{SystemTime, UNIX_EPOCH},
     };

@@ -1,6 +1,8 @@
 //! Preserved R12-01 direct security behavior tests after directory promotion.
 
-use super::directory_tree::{build_text_file_tree, scan_text_file_tree_directory};
+#[cfg(unix)]
+use super::directory_tree::build_text_file_tree;
+use super::directory_tree::scan_text_file_tree_directory;
 use super::file_kind::{classify, FileKind};
 use super::image_reader::{MAX_EMBEDDED_IMAGE_BYTES, MAX_IMAGE_BYTES};
 use super::operations::{read_dropped_file, read_local_image};
