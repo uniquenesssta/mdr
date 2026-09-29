@@ -109,13 +109,23 @@ fn writer_contract_child() {
             }
         }
         "append" => {
-            let path = write_performance_logs(vec![json!({"count": 1, "path": "C:\\private\\中文.md", "body": "secret"}), json!(null)]).unwrap();
+            let path = write_performance_logs(vec![
+                json!({"count": 1, "path": "C:\\private\\中文.md", "body": "secret"}),
+                json!(null),
+            ])
+            .unwrap();
             assert_eq!(write_performance_logs(vec![json!({"count": 2})]).unwrap(), path);
             let rows = read_rows(&path);
-            assert_eq!(rows, vec![json!({"count": 1, "path": "中文.md"}), Value::Null, json!({"count": 2})]);
+            assert_eq!(
+                rows,
+                vec![json!({"count": 1, "path": "中文.md"}), Value::Null, json!({"count": 2})]
+            );
         }
         "batch" => {
-            assert_eq!(write_performance_logs(vec![Value::Null; 501]).unwrap_err(), "单次性能日志数量不能超过 500 条");
+            assert_eq!(
+                write_performance_logs(vec![Value::Null; 501]).unwrap_err(),
+                "单次性能日志数量不能超过 500 条"
+            );
             assert!(!directory.exists());
             let path = write_performance_logs(vec![Value::Null; 500]).unwrap();
             assert_eq!(read_rows(&path).len(), 500);
@@ -123,7 +133,10 @@ fn writer_contract_child() {
         "size" => {
             let path = write_performance_logs(vec![sized_entry(64 * 1024)]).unwrap();
             assert_eq!(fs::read(&path).unwrap().len(), 64 * 1024 + 1);
-            assert_eq!(write_performance_logs(vec![sized_entry(64 * 1024 + 1)]).unwrap_err(), "单条性能日志不能超过 65536 字节");
+            assert_eq!(
+                write_performance_logs(vec![sized_entry(64 * 1024 + 1)]).unwrap_err(),
+                "单条性能日志不能超过 65536 字节"
+            );
             assert_eq!(read_rows(&path).len(), 1);
             write_performance_logs(vec![json!({"count": 3})]).unwrap();
             assert_eq!(read_rows(&path).len(), 2);
@@ -137,7 +150,9 @@ fn writer_contract_child() {
         "directory" => {
             fs::create_dir_all(directory.parent().unwrap()).unwrap();
             fs::write(&directory, b"directory blocker").unwrap();
-            assert!(write_performance_logs(vec![Value::Null]).unwrap_err().starts_with("无法创建性能日志目录："));
+            assert!(write_performance_logs(vec![Value::Null])
+                .unwrap_err()
+                .starts_with("无法创建性能日志目录："));
             fs::remove_file(&directory).unwrap();
             let path = write_performance_logs(vec![json!({"count": 1})]).unwrap();
             assert_eq!(read_rows(&path), vec![json!({"count": 1})]);
@@ -145,24 +160,44 @@ fn writer_contract_child() {
         "open" => {
             let path = write_performance_logs(vec![]).unwrap();
             fs::create_dir(&path).unwrap();
-            assert!(write_performance_logs(vec![Value::Null]).unwrap_err().starts_with("无法打开性能日志："));
+            assert!(write_performance_logs(vec![Value::Null])
+                .unwrap_err()
+                .starts_with("无法打开性能日志："));
             fs::remove_dir(&path).unwrap();
             assert_eq!(write_performance_logs(vec![Value::Null]).unwrap(), path);
             assert_eq!(read_rows(&path), vec![Value::Null]);
         }
         "concurrent" => {
-            let handles: Vec<_> = (0..8).map(|worker| thread::spawn(move || {
-                let mut path = String::new();
-                for batch in 0..8 {
-                    path = write_performance_logs((0..10).map(|index| json!({"worker": worker, "batch": batch, "index": index})).collect()).unwrap();
-                }
-                path
-            })).collect();
+            let handles: Vec<_> = (0..8)
+                .map(|worker| {
+                    thread::spawn(move || {
+                        let mut path = String::new();
+                        for batch in 0..8 {
+                            path = write_performance_logs(
+                                (0..10)
+                                    .map(|index| json!({"worker": worker, "batch": batch, "index": index}))
+                                    .collect(),
+                            )
+                            .unwrap();
+                        }
+                        path
+                    })
+                })
+                .collect();
             let paths: Vec<_> = handles.into_iter().map(|handle| handle.join().unwrap()).collect();
             assert!(paths.iter().all(|path| path == &paths[0]));
             let rows = read_rows(&paths[0]);
             assert_eq!(rows.len(), 640);
-            let unique: std::collections::HashSet<_> = rows.iter().map(|row| (row["worker"].as_u64().unwrap(), row["batch"].as_u64().unwrap(), row["index"].as_u64().unwrap())).collect();
+            let unique: std::collections::HashSet<_> = rows
+                .iter()
+                .map(|row| {
+                    (
+                        row["worker"].as_u64().unwrap(),
+                        row["batch"].as_u64().unwrap(),
+                        row["index"].as_u64().unwrap(),
+                    )
+                })
+                .collect();
             assert_eq!(unique.len(), 640);
             for batch in rows.chunks_exact(10) {
                 for (index, row) in batch.iter().enumerate() {

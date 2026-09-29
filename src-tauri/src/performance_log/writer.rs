@@ -29,9 +29,7 @@ pub(super) fn append_values(values: &[Value]) -> Result<PathBuf, String> {
     }
 
     let file_path = log_file_path()?;
-    let _guard = write_lock()
-        .lock()
-        .map_err(|_| "性能日志写入锁已损坏".to_string())?;
+    let _guard = write_lock().lock().map_err(|_| "性能日志写入锁已损坏".to_string())?;
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)

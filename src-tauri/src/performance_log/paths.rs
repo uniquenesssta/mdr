@@ -48,10 +48,7 @@ fn log_directory() -> Result<PathBuf, String> {
     #[cfg(debug_assertions)]
     let path = {
         let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        manifest_dir
-            .parent()
-            .unwrap_or(manifest_dir.as_path())
-            .join("logs")
+        manifest_dir.parent().unwrap_or(manifest_dir.as_path()).join("logs")
     };
 
     #[cfg(not(debug_assertions))]
