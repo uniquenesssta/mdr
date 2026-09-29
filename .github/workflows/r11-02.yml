@@ -11,6 +11,7 @@ env:
 
 jobs:
   validate:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:

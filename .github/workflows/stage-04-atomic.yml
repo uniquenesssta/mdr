@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   legacy-i18n-removal:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Verify Stage 4 Legacy I18n Removal
     runs-on: ubuntu-22.04
     timeout-minutes: 30

@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   destroy-validation:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Verify Stage 6 Through Destroy Validation
     runs-on: ubuntu-22.04
     timeout-minutes: 35

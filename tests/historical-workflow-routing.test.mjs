@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const historicalWorkflows = [
@@ -9,12 +9,12 @@ const historicalWorkflows = [
   'r11-16', 'r12-01', 'r12-02', 'r12-03', 'r12-04', 'r12-05', 'r12-06', 'r12-07', 'r12-08', 'r12-09', 'r12-10', 'r12-11', 'r12-12', 'r12-13'
 ];
 
-test('completed-stage workflows remain manually runnable but never rerun on later pull-request synchronization', async () => {
+test('historical workflow definitions retain their dispatch syntax and do not validate later PRs', async () => {
   const sources = await Promise.all(historicalWorkflows.map(name =>
     readFile(`.github/workflows/${name}.yml`, 'utf8')
   ));
   for (const [index, source] of sources.entries()) {
-    assert.match(source, /^\s*workflow_dispatch:\s*$/m, `${historicalWorkflows[index]} stays manually runnable`);
+    assert.match(source, /^\s*workflow_dispatch:\s*$/m, `${historicalWorkflows[index]} retains historical dispatch syntax`);
     assert.doesNotMatch(source, /^\s*pull_request:\s*$/m, `${historicalWorkflows[index]} must not validate later PRs`);
   }
 });
@@ -24,4 +24,28 @@ test('R12-14 is the automatic Stage branch validation authority for workflow cha
   assert.match(workflow, /push:\s*\n\s*branches:\s*\[agent\/r12-stage\]/);
   assert.match(workflow, /- '\.github\/workflows\/\*\*'/);
   assert.doesNotMatch(workflow, /^\s*pull_request:\s*$/m);
+});
+
+
+test('every enabled CI job targets Windows and obsolete non-Windows workflows are retired', async () => {
+  for (const name of await readdir('.github/workflows')) {
+    if (!name.endsWith('.yml')) continue;
+    const source = await readFile(`.github/workflows/${name}`, 'utf8');
+    const jobs = source.split('jobs:')[1].split(/(?=^  [\w-]+:\s*$)/m).filter(value => /^  [\w-]+:/m.test(value));
+    assert.ok(jobs.length, `${name}: no jobs inspected`);
+    const activeWorkflow = ['r12-14.yml', 'stage-03-windows-window.yml'].includes(name);
+    for (const job of jobs) {
+      if (!activeWorkflow) {
+        assert.match(job, /^    if: \$\{\{ false \}\} # Retired:/m, `${name}: historical job can still schedule`);
+      } else {
+        assert.doesNotMatch(job, /^    if: \$\{\{ false/m, `${name}: active validation disabled`);
+        if (/runs-on: \$\{\{ matrix.os \}\}/.test(job)) {
+          assert.match(job, /os: \[windows-latest\]/);
+        } else {
+          assert.match(job, /runs-on: windows-(?:latest|2025)/);
+        }
+        assert.doesNotMatch(job, /ubuntu-|macos-|apt-get|xdg-utils/);
+      }
+    }
+  }
 });

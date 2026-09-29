@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   platform-foundation:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Verify Stage 3 platform foundation
     runs-on: ubuntu-22.04
     timeout-minutes: 30

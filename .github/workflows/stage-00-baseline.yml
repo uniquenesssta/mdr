@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   baseline:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Freeze and verify current baseline
     runs-on: ubuntu-22.04
     timeout-minutes: 90

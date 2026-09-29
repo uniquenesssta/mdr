@@ -159,7 +159,7 @@ test('R12-12 keeps exactly one stateless client owner after the later response e
 test('R12-12 remains cumulatively protected after R12-13 becomes the automatic Stage workflow', async () => {
   const previous = await read('.github/workflows/r12-11.yml');
   const original = frozen('.github/workflows/r12-11.yml');
-  assert.equal(previous, original.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
+  assert.equal(previous.replace(/^    if: \$\{\{ false \}\} # Retired: Windows-only validation policy, 2026-09-29\.\n/gm, ''), original.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
   const current = await read('.github/workflows/r12-14.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);
@@ -168,10 +168,10 @@ test('R12-12 remains cumulatively protected after R12-13 becomes the automatic S
     'web_fetch::client::tests', 'test result: ok. 2 passed; 0 failed',
     'R12-12 pre-split real HTTP client behavior 9 of 9', 'R12-12 extracted real HTTP client behavior 9 of 9',
     'test result: ok. 9 passed; 0 failed', `git archive ${accepted} | tar`,
-    'web_fetch::validation_tests', 'external_link::opener_tests', 'local_file::command_tests',
+    'web_fetch::validation_tests', 'src-tauri/tests/external_link_opener_platform.rs', 'local_file::command_tests',
     'cargo clippy', '--all-targets -- -D warnings', 'cargo check', 'npm test', 'npm audit --audit-level=high',
     'npm run verify:architecture', 'npm run test:browser:contract', 'npm run test:browser', 'npm run build',
-    'git diff --exit-code', 'git ls-files --others --exclude-standard', 'os: [windows-latest, macos-latest]',
+    'git diff --exit-code', 'git ls-files --others --exclude-standard', 'os: [windows-latest]',
   ]) assert.ok(current.includes(code), `missing R12-12 gate: ${code}`);
 });
 

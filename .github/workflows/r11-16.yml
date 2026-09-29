@@ -13,6 +13,7 @@ defaults:
 
 jobs:
   frontend:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Command contracts and frontend regression
     runs-on: ubuntu-24.04
     timeout-minutes: 40
@@ -70,6 +71,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
   rust:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Real document store and Rust hard gates
     runs-on: ubuntu-24.04
     timeout-minutes: 60

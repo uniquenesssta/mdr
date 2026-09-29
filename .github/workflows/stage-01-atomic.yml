@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   architecture-foundation:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Verify Stage 1 architecture foundation
     runs-on: ubuntu-22.04
     timeout-minutes: 30

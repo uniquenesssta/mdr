@@ -13,6 +13,7 @@ defaults:
 
 jobs:
   frontend:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: External Link Opener and frontend regression
     runs-on: ubuntu-24.04
     timeout-minutes: 40
@@ -86,6 +87,7 @@ jobs:
           retention-days: 14
 
   rust:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Real Rust External Link Opener and cumulative hard gates
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -271,6 +273,7 @@ jobs:
           retention-days: 14
 
   native-boundary:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Native opener compilation and linkage (${{ matrix.os }})
     strategy:
       fail-fast: false

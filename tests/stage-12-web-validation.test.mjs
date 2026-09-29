@@ -154,10 +154,10 @@ test('R12-11 remains manually runnable while R12-12 carries its cumulative hard 
   for (const code of [
     'web_fetch::validation_tests', 'web_fetch::http_compatibility_tests',
     'tests/unit/platform/web-fetch-client.test.mjs',
-    'external_link::opener_tests', 'local_file::command_tests', 'stage_12_security_compatibility',
+    'src-tauri/tests/external_link_opener_platform.rs', 'local_file::command_tests', 'stage_12_security_compatibility',
     'cargo clippy', '--all-targets -- -D warnings', 'cargo check', 'npm test',
     'npm audit --audit-level=high', 'npm run verify:architecture', 'npm run test:browser', 'npm run build',
-    'git diff --exit-code', 'git ls-files --others --exclude-standard', 'os: [windows-latest, macos-latest]'
+    'git diff --exit-code', 'git ls-files --others --exclude-standard', 'os: [windows-latest]'
   ]) assert.ok(current.includes(code), `missing cumulative gate: ${code}`);
 });
 

@@ -5,6 +5,12 @@ on:
   push:
     branches: [agent/r12-stage]
     paths:
+      - 'src/**'
+      - 'src-tauri/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - 'AGENTS.md'
+      - 'docs/WINDOWS_VALIDATION_POLICY.md'
       - 'src-tauri/src/performance_log.rs'
       - 'src-tauri/src/performance_log/**'
       - 'src-tauri/src/web_fetch.rs'
@@ -89,9 +95,11 @@ defaults:
 jobs:
   frontend:
     name: Log Redaction and frontend regression
-    runs-on: ubuntu-24.04
+    runs-on: windows-latest
     timeout-minutes: 40
     steps:
+      - name: Preserve repository LF bytes on Windows
+        run: git config --global core.autocrlf false
       - name: Checkout exact event commit
         uses: actions/checkout@v4
         with:
@@ -133,20 +141,26 @@ jobs:
             tests/historical-workflow-routing.test.mjs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/tree-limits-contracts.log"
       - name: Full Node regression
+        if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"
       - name: Architecture and documentation hard gates
+        if: ${{ !cancelled() }}
         run: |
           npm run verify:architecture 2>&1 | tee "$RUNNER_TEMP/r12-14/architecture.log"
           npm run verify:no-legacy-runtime 2>&1 | tee "$RUNNER_TEMP/r12-14/no-legacy.log"
           npm run verify:generated-files 2>&1 | tee "$RUNNER_TEMP/r12-14/generated.log"
           npm run verify:readme-record 2>&1 | tee "$RUNNER_TEMP/r12-14/readme.log"
       - name: Browser preview contract
+        if: ${{ !cancelled() }}
         run: npm run test:browser:contract 2>&1 | tee "$RUNNER_TEMP/r12-14/browser-contract.log"
       - name: Production build
+        if: ${{ !cancelled() }}
         run: npm run build 2>&1 | tee "$RUNNER_TEMP/r12-14/build.log"
       - name: Built-app browser regression
+        if: ${{ !cancelled() }}
         run: npm run test:browser 2>&1 | tee "$RUNNER_TEMP/r12-14/browser-app.log"
       - name: Validation leaves tracked sources unchanged
+        if: ${{ !cancelled() }}
         run: |
           git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-14/workspace.log"
           git diff --check
@@ -163,13 +177,15 @@ jobs:
 
   rust:
     name: Log Redaction and cumulative hard gates
-    runs-on: ubuntu-24.04
+    runs-on: windows-latest
     timeout-minutes: 60
     env:
       RUSTUP_TOOLCHAIN: '1.88.0'
       CARGO_TERM_COLOR: never
       NO_PROXY: 127.0.0.1,localhost
     steps:
+      - name: Preserve repository LF bytes on Windows
+        run: git config --global core.autocrlf false
       - name: Checkout exact event commit
         uses: actions/checkout@v4
         with:
@@ -180,7 +196,6 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/r12-14"
           test -z "$(git status --porcelain)"
-          test ! -e src-tauri/gen/schemas/linux-schema.json
           printf 'CARGO_TARGET_DIR=%s/r12-14-target\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-14/performance-logs\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
@@ -207,11 +222,6 @@ jobs:
           node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-log-redaction.test.mjs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/command-scope.log"
           git diff --check
-      - name: Install Linux Tauri build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
-            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf xdg-utils
       - name: Pin Rust 1.88 with Clippy and rustfmt
         run: |
           rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
@@ -311,22 +321,6 @@ jobs:
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor web_fetch::http_compatibility_tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-http.log"
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-http.log"
-      - name: R12-10 pre-split real process behavior 7 of 7
-        run: |
-          baseline="$RUNNER_TEMP/r12-14-baseline"
-          mkdir "$baseline"
-          git archive db46e1b26eac069e3534831bcfd25c311bfa3050 | tar -x -C "$baseline"
-          test ! -e "$baseline/src-tauri/src/external_link/opener.rs"
-          cp src-tauri/tests/external_link/opener.rs "$baseline/src-tauri/tests/external_link/opener.rs"
-          printf '\n#[cfg(all(test, target_os = "linux"))]\n#[path = "../tests/external_link/opener.rs"]\nmod opener_tests;\n' >> "$baseline/src-tauri/src/external_link.rs"
-          cargo test --manifest-path "$baseline/src-tauri/Cargo.toml" --locked --bin markdown-editor external_link::opener_tests \
-            2>&1 | tee "$RUNNER_TEMP/r12-14/rust-opener-baseline.log"
-          grep -Fq 'test result: ok. 7 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-opener-baseline.log"
-      - name: R12-10 extracted real process behavior 7 of 7
-        run: |
-          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor external_link::opener_tests \
-            2>&1 | tee "$RUNNER_TEMP/r12-14/rust-opener.log"
-          grep -Fq 'test result: ok. 7 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-opener.log"
       - name: R12-09 direct URL validation 8 of 8
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor external_link::validation::tests \
@@ -352,11 +346,11 @@ jobs:
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             local_file::tree_limits::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-tree-limits.log"
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-tree-limits.log"
-      - name: R12-06 direct Directory Tree regression 6 of 6
+      - name: R12-06 direct Windows Directory Tree regression 5 of 5
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             local_file::directory_tree::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-directory-tree.log"
-          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-directory-tree.log"
+          grep -Fq 'test result: ok. 5 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-directory-tree.log"
       - name: R12-05 direct Writer regression 10 of 10
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
@@ -378,32 +372,32 @@ jobs:
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor file_kind::tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-file-kind.log"
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-file-kind.log"
-      - name: R12-02 direct Path Policy regression 10 of 10
+      - name: R12-02 direct Windows Path Policy regression 9 of 9
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor path_policy::tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-path-policy.log"
-          grep -Fq 'test result: ok. 10 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-path-policy.log"
-      - name: R12-01 direct behavior regression 10 of 10
+          grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-path-policy.log"
+      - name: R12-01 direct Windows behavior regression 9 of 9
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor stage_12_ \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-production-contracts.log"
-          grep -Fq 'test result: ok. 10 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-production-contracts.log"
+          grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-production-contracts.log"
       - name: R12-01 independent compatibility fixture 6 of 6
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --test stage_12_security_compatibility \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-fixture.log"
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-fixture.log"
       - name: Full Rust tests
+        if: ${{ !cancelled() }}
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-tests.log"
       - name: Full Clippy warnings-denied gate
+        if: ${{ !cancelled() }}
         run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings 2>&1 | tee "$RUNNER_TEMP/r12-14/clippy.log"
       - name: Rust check
+        if: ${{ !cancelled() }}
         run: cargo check --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r12-14/cargo-check.log"
-      - name: Preserve newly generated Linux schema as evidence
-        run: |
-          git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-14/worktree-before-cleanup.log"
-          node --input-type=module -e "import { archiveTauriLinuxSchema } from './scripts/ci/archive-tauri-schema.mjs'; archiveTauriLinuxSchema(process.cwd(), process.env.RUNNER_TEMP + '/r12-14');"
       - name: Validation leaves tracked sources unchanged
+        if: ${{ !cancelled() }}
         run: |
           git status --short --untracked-files=all | tee "$RUNNER_TEMP/r12-14/workspace.log"
           git diff --check
@@ -423,12 +417,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     env:
       RUSTUP_TOOLCHAIN: '1.88.0'
     steps:
+      - name: Preserve repository LF bytes on Windows
+        run: git config --global core.autocrlf false
       - name: Checkout exact event commit
         uses: actions/checkout@v4
         with:
@@ -451,6 +447,7 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/r12-14-native/signature.log"
           grep -Fq 'test result: ok. 1 passed; 0 failed' "$RUNNER_TEMP/r12-14-native/signature.log"
       - name: Validation leaves tracked sources unchanged
+        if: ${{ !cancelled() }}
         run: |
           git diff --check
           git diff --exit-code
@@ -461,5 +458,35 @@ jobs:
         with:
           name: r12-14-native-${{ matrix.os }}-${{ github.sha }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/r12-14-native/
+          if-no-files-found: error
+          retention-days: 14
+
+  repository-tests:
+    name: All repository Node tests (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - name: Preserve repository LF bytes on Windows
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked frontend dependencies
+        run: npm run deps:prepare
+      - name: Run every tracked Node test including nested suites
+        run: |
+          mkdir -p "$RUNNER_TEMP/repository-audit"
+          node scripts/ci/run-repository-tests.mjs 2>&1 | tee "$RUNNER_TEMP/repository-audit/node.log"
+      - name: Preserve complete audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-tests-windows-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/repository-audit/
           if-no-files-found: error
           retention-days: 14

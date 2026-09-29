@@ -127,7 +127,7 @@ test('R12-10 adds exactly one cohesive stateless system boundary to the ownershi
 test('R12-10 keeps the complete old workflow as manual history and every cumulative hard gate', async () => {
   const oldPath = '.github/workflows/r12-09.yml';
   const before = frozen(oldPath);
-  assert.equal(await read(oldPath), before.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
+  assert.equal((await read(oldPath)).replace(/^    if: \$\{\{ false \}\} # Retired: Windows-only validation policy, 2026-09-29\.\n/gm, ''), before.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
   const current = await read('.github/workflows/r12-14.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git clean|git reset/);
@@ -139,23 +139,18 @@ test('R12-10 keeps the complete old workflow as manual history and every cumulat
     '--locked --all-targets -- -D warnings', 'cargo check', 'npm test', 'npm audit --audit-level=high',
     'npm run verify:architecture', 'npm run verify:no-legacy-runtime', 'npm run verify:generated-files',
     'npm run verify:readme-record', 'npm run test:browser:contract', 'npm run test:browser', 'npm run build',
-    'git diff --exit-code', 'git ls-files --others --exclude-standard', 'archiveTauriLinuxSchema',
+    'git diff --exit-code', 'git ls-files --others --exclude-standard',
     'tests/unit/platform/link-client.test.mjs', 'tests/stage-12-opener.test.mjs']) {
     assert.ok(current.includes(text), `missing cumulative gate: ${text}`);
   }
 });
 
-test('R12-10 validates unchanged real process tests before and after extraction plus native linkage', async () => {
+test('Windows-only validation retains native linkage without running retired Linux launcher checks', async () => {
   const current = await read('.github/workflows/r12-14.yml');
-  for (const text of [`git archive ${baseline} | tar`,
-    'cp src-tauri/tests/external_link/opener.rs "$baseline/src-tauri/tests/external_link/opener.rs"',
-    'test ! -e "$baseline/src-tauri/src/external_link/opener.rs"',
-    'external_link::opener_tests', 'rust-opener-baseline.log', 'rust-opener.log',
-    'test result: ok. 7 passed; 0 failed', 'xdg-utils',
-    'os: [windows-latest, macos-latest]', 'rustc --edition=2021 --test -D warnings',
+  for (const text of ['os: [windows-latest]', 'rustc --edition=2021 --test -D warnings',
     'src-tauri/tests/external_link_opener_platform.rs', 'test result: ok. 1 passed; 0 failed',
     'ref: ${{ github.sha }}', 'persist-credentials: false']) {
-    assert.ok(current.includes(text), `missing native/baseline gate: ${text}`);
+    assert.ok(current.includes(text), `missing Windows linkage gate: ${text}`);
   }
-  assert.ok(current.indexOf('pre-split real process behavior') < current.indexOf('extracted real process behavior'));
+  assert.doesNotMatch(current, /external_link::opener_tests|xdg-utils|apt-get|archiveTauriLinuxSchema|macos-latest|ubuntu-/);
 });

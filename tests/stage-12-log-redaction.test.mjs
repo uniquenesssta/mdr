@@ -85,7 +85,7 @@ test('R12-14 makes R12-13 historical and owns the cumulative validation without 
     'npm audit --audit-level=high', 'npm run verify:architecture',
     'npm run test:browser:contract', 'npm run test:browser', 'npm run build',
     'git diff --exit-code', 'git ls-files --others --exclude-standard',
-    'os: [windows-latest, macos-latest]'
+    'os: [windows-latest]'
   ]) assert.ok(current.includes(marker), `missing R12-14 gate: ${marker}`);
 });
 

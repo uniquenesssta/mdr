@@ -92,9 +92,9 @@ test('R12-09 coverage remains in the cumulative hard gates and R12-08 stays manu
     'cargo clippy', '--locked --all-targets -- -D warnings', 'cargo check', 'npm test',
     'npm audit --audit-level=high', 'npm run verify:architecture', 'npm run test:browser:contract',
     'npm run test:browser', 'npm run build', 'git diff --exit-code',
-    'git ls-files --others --exclude-standard', 'archiveTauriLinuxSchema',
+    'git ls-files --others --exclude-standard',
     'tests/unit/platform/link-client.test.mjs']) {
     assert.ok(current.includes(text), `missing validation: ${text}`);
   }
-  assert.ok(current.includes("process.env.RUNNER_TEMP + '/r12-14'"));
+  assert.match(current, /runs-on: windows-latest/);
 });

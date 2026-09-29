@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   preview-scheduler-cancellation:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Verify Stage 7 Through Atomic 7.14 Legacy Preview Deletion
     runs-on: ubuntu-22.04
     timeout-minutes: 35

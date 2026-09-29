@@ -138,12 +138,12 @@ test('R12-13 remains historical while R12-14 owns the automatic cumulative Stage
     'R12-13 extracted real HTTP response behavior 9 of 9',
     'git archive 9b6d6369fce3f2b36a33cdd12dd28c4d0460d927 | tar',
     'R12-12 pre-split real HTTP client behavior 9 of 9',
-    'web_fetch::validation_tests', 'external_link::opener_tests', 'local_file::command_tests',
+    'web_fetch::validation_tests', 'src-tauri/tests/external_link_opener_platform.rs', 'local_file::command_tests',
     'cargo clippy', '--all-targets -- -D warnings', 'cargo check', 'npm test',
     'npm audit --audit-level=high', 'npm run verify:architecture',
     'npm run test:browser:contract', 'npm run test:browser', 'npm run build',
     'git diff --exit-code', 'git ls-files --others --exclude-standard',
-    'os: [windows-latest, macos-latest]'
+    'os: [windows-latest]'
   ]) assert.ok(current.includes(code), `missing R12-13 gate: ${code}`);
 });
 

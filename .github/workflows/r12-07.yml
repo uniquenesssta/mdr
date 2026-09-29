@@ -13,6 +13,7 @@ defaults:
 
 jobs:
   frontend:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Tree Limits contracts and frontend regression
     runs-on: ubuntu-24.04
     timeout-minutes: 40
@@ -79,6 +80,7 @@ jobs:
           retention-days: 14
 
   rust:
+    if: ${{ false }} # Retired: Windows-only validation policy, 2026-09-29.
     name: Real Rust Tree Limits and hard gates
     runs-on: ubuntu-24.04
     timeout-minutes: 60
