@@ -1,6 +1,6 @@
 # Markdown Editor
 
-- 2026-09-29：R12-15 Log Paths/Writer 已实施，Windows CI 待验证；仅本项继续，R12-16 及后续尚未实施。[详情](R12-15-DETAILS.md)。
+- 2026-09-29：R12-15 Log Paths/Writer 已通过 Windows 专项验收，Rust 235/235；全仓 Node 原 40 项失败不变，R12-16 尚未实施。[详情](R12-15-DETAILS.md)。
 
 - 2026-09-29：用户进一步要求现在修复 R12-14/A01；结构化日志、保守字符串脱敏及真实 JSONL 回读测试已通过 Windows 验证，Rust 227 项通过；本项完成，累计 Node 原 40 项失败仍待收尾。其余问题保持原排期，12.20 后续复核本项成果。[修复记录](R12-14-DETAILS.md)。
 
