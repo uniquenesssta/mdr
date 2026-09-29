@@ -481,7 +481,7 @@ jobs:
       - name: Run every tracked Node test including nested suites
         run: |
           mkdir -p "$RUNNER_TEMP/repository-audit"
-          node scripts/ci/run-repository-tests.mjs 2>&1 | tee "$RUNNER_TEMP/repository-audit/node.log"
+          npm exec --offline -- node scripts/ci/run-repository-tests.mjs 2>&1 | tee "$RUNNER_TEMP/repository-audit/node.log"
       - name: Preserve complete audit results
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,10 +1,11 @@
+import { fileURLToPath } from 'node:url';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const ROOT = resolve(new URL('../..', import.meta.url).pathname);
+const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 

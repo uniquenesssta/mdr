@@ -1,10 +1,11 @@
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import { buildModuleInventory, discoverProductionFiles, normalizeOwnershipManifest } from '../../scripts/stage-01/module-inventory-core.mjs';
 
-const root = resolve(new URL('../..', import.meta.url).pathname);
+const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const rawManifest = JSON.parse(await readFile(
   resolve(root, 'tests/architecture/fixtures/production-modules.json'),
   'utf8'
