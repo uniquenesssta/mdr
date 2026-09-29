@@ -36,6 +36,18 @@ Windows 执行当前 Node 全量、架构/文档、Rust 全量、格式、Clippy
 
 ## 验证状态
 
-本地只执行源码/清单/文档静态检查：103 项源码契约、165 项布局/所有权/文档检查通过；未执行 Linux 产品运行验证。Windows 证据待回填；当前不勾选 12.18。
+本地只执行源码/清单/文档静态检查：103 项源码契约、165 项布局/所有权/文档检查、46 项补充静态检查及 1 项清单门禁反例检查通过；未执行 Linux 产品运行验证。Windows 证据待回填；当前不勾选 12.18。
 
-Mermaid Chart 用于展示实际验证链路；未引入第三方 API 或依赖，不需 Context7。
+Mermaid Chart 展示实际验证链路；Context7 核对锁定的 CodeMirror State 6.7.1 Facet/EditorState 配置读取 API。生产依赖未修改。
+
+补充：移除 Writer 必须直接 `fs::write` 的实现断言，改保留签名和真实读写语义，避免阻止 12.21 安全替换写入。架构、旧运行时、生成文件和文档门禁分别执行，真实架构失败不会中断其他门禁的证据收集。
+
+## 首轮 Windows 与门禁修正
+
+运行 [36614535482](https://github.com/uniquenesssta/mdr/actions/runs/36614535482)，提交 `5dc5b9673f4f9b6d632658b796ce98dadd3361ef`：递归 Node 1442 项，1436 通过、6 失败；Rust 241/241、前端专项 127/127、构建和浏览器通过。Clippy/格式未完成验收：模型测试早于 npm 依赖准备，失败后工具链准备被跳过；已将模型测试放到前端依赖安装后，Rust 工具链先于守卫准备。
+
+六项 Node 失败中：架构循环依赖保留；3 条引用其他测试中固定模块数的断言、1 条 Hybrid 专属 CodeMirror 兼容端口所有权、1 条已迁移 readChunk 责任断言属于 A02，已按真实责任替换。没有跳过或修改保存行为用例。
+
+扫描器把 `globalThis.foo === ...` 误认作赋值。修正赋值运算符匹配，新增比较/赋值反例；仅移除两条经源文件确认从未赋值的旧基线记录：e2e-bridge 的 `__MARKDOWN_EDITOR_E2E__` 比较和 link-preview 的 `showToast` 能力检查。修正有明确审计元数据，不重新生成基线、不放行任何真实全局写入。新补入的 PreviewScheduler 四条同类能力读取也不再误报。
+
+CodeMirror 只允许实际已迁移的 `hybrid-editor/compatibility/codemirror-source-editor-port.js`，继续扫描其他 Hybrid 模块；未对整个 Hybrid 功能开放 CodeMirror 导入。

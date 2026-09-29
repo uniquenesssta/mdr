@@ -1,3 +1,4 @@
+import { assertProductionInventory } from './support/production-inventory.mjs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
@@ -176,7 +177,7 @@ test('Atomic 10.9 keeps one BrowserDocumentRepository authority after later Pers
   assert.match(entry, /createLoadController/);
   assert.match(mainSource, /createLoadController/);
   const fixture = JSON.parse(fixtureText);
-  assert.ok(fixture.modules.length >= 394);
+  await assertProductionInventory(fixture);
   assert.ok(fixture.modules.some(record => record[0] === 'src/features/persistence/browser/browser-document-repository.js'));
-  assert.match(handoff, /moduleFixture\.modules\.length/);
+  assert.match(handoff, /assertProductionInventory/);
 });

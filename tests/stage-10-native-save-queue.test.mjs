@@ -1,3 +1,4 @@
+import { assertProductionInventory } from './support/production-inventory.mjs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
@@ -255,9 +256,9 @@ test('Atomic 10.5 NativeDocumentStore delegates queue state while preserving nat
   assert.doesNotMatch(nativeStoreSource, /function\s+createSaveRuntime\s*\(|saveRuntimes|runtime\.waiters|runtime\.running|runtime\.forceSnapshot/);
   assert.doesNotMatch(nativeStoreSource, /saveSnapshotInChunks\(|getSafeSnapshotChunkEnd\(/);
   assert.doesNotMatch(queueSource, /beginSnapshotUpload|appendSnapshotChunk|commitSnapshotUpload|abortSnapshotUpload/);
-  assert.match(handoff, /moduleFixture\.modules\.length,\s*\d+/);
+  assert.match(handoff, /assertProductionInventory/);
   const fixture = JSON.parse(fixtureText);
-  assert.ok(fixture.modules.length >= 390);
+  await assertProductionInventory(fixture);
   assert.ok(fixture.modules.some(record => record[0] === 'src/features/persistence/native-document-store/native-save-queue.js'));
   await store.delete('doc-1');
   assert.equal(store.saveQueues.has('doc-1'), false);

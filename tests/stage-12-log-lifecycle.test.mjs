@@ -2,17 +2,13 @@ import { assertProductionInventory } from './support/production-inventory.mjs';
 import { assertCurrentValidation, assertOwner } from './support/current-rust-contracts.mjs';
 import { readCurrentRustSources as readFile } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 
 import test from 'node:test';
 import { rustFunction } from './support/performance-log/storage-contract.mjs';
 
-const baseline = 'd9f0bae9244f26da004dfd5013a05d5d92c4c6c3';
 const read = path => readFile(path, 'utf8');
-const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
 const entryPath = 'src-tauri/src/performance_log/mod.rs';
 const lifecyclePath = 'src-tauri/src/performance_log/lifecycle.rs';
-const tokens = source => source.replace(/\s+/g, '');
 
 test('R12-16 delegates stateless lifecycle events through the best-effort log sink', async () => {
   const entry = await read('src-tauri/src/performance_log/mod.rs');

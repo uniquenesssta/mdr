@@ -74,7 +74,7 @@ test('R12-04 preserves size validation order Data URL MIME and exact errors', as
   assert.match(textReader, /MAX_TEXT_BYTES: u64 = 20 \* 1024 \* 1024/);
 });
 
-test('R12-04 preserves commands and frozen dependency blobs', async () => {
+test('R12-04 preserves commands and historical dependency provenance', async () => {
   const [entry, cargo, packageJson, manifest] = await Promise.all([
     source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/Cargo.toml'),

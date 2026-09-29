@@ -1,3 +1,4 @@
+import { checkLegacyRuntime } from '../../scripts/architecture/checks.mjs';
 import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 
@@ -84,7 +85,7 @@ test('Atomic 8.15 legacy Hybrid globals stay removed while the current migration
   const baseline = JSON.parse(await read('tests/architecture/fixtures/architecture-baseline.json'));
   assert.equal(baseline.businessGlobalWrites.some(record => record.path === 'src/editor/hybrid/controller.js'), false);
   assert.equal(baseline.businessGlobalWrites.some(record => record.path === 'src/editor/hybrid-markdown.js'), false);
-  assert.equal(baseline.businessGlobalWrites.length, 9);
+  assert.deepEqual(await checkLegacyRuntime(), []);
 
   for (const global of [
     'window.markdownEditorScrollController',

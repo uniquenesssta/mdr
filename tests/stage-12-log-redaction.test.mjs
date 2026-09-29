@@ -36,7 +36,7 @@ test('R12-14 recursively removes bodies and secrets while minimizing path fields
   }
 });
 
-test('R12-14 preserves historical evidence and adapter bytes while the runtime keeps nested structures', async () => {
+test('R12-14 preserves historical evidence and structured runtime details while the runtime keeps nested structures', async () => {
   const manifest = JSON.parse(await read('src-tauri/tests/fixtures/stage_12_security/manifest.json'));
   assert.equal(manifest.performanceLog.commandRedaction, 'none');
   assert.equal(await read('src-tauri/tests/fixtures/stage_12_security/manifest.json'),

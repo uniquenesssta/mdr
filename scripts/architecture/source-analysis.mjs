@@ -164,8 +164,8 @@ export function collectBusinessGlobalWrites(path, source) {
   const searchable = stripComments(source);
   const records = [];
   const patterns = [
-    /\b(window|globalThis)\.([A-Za-z_$][\w$]*)\s*(?:=|\?\?=|\|\|=|&&=|\+=|-=|\*=|\/=)/g,
-    /\b(window|globalThis)\s*\[\s*(["'])([A-Za-z_$][\w$]*)\2\s*\]\s*(?:=|\?\?=|\|\|=|&&=|\+=|-=|\*=|\/=)/g
+    /\b(window|globalThis)\.([A-Za-z_$][\w$]*)\s*(?:=(?![=>])|\?\?=|\|\|=|&&=|\+=|-=|\*=|\/=)/g,
+    /\b(window|globalThis)\s*\[\s*(["'])([A-Za-z_$][\w$]*)\2\s*\]\s*(?:=(?![=>])|\?\?=|\|\|=|&&=|\+=|-=|\*=|\/=)/g
   ];
   for (const pattern of patterns) {
     let match;

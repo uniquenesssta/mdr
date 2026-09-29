@@ -48,7 +48,7 @@ test('all migrated classic callers use the scoped LayoutState port while Atomic 
   assert.match(previewController, /const isHybrid = \(\) => layoutState\.snapshot\.mode === 'hybrid'/);
   assert.doesNotMatch(previewController, /markdownEditorLayoutStatePort/);
   for (const name of migratedStateDeclarations) {
-    const declaration = new RegExp(`\b(?:let|var|const)\s+${name}\b`);
+    const declaration = new RegExp(`\\b(?:let|var|const)\\s+${name}\\b`);
     for (const [index, source] of [...classicSources, previewController].entries()) {
       assert.doesNotMatch(source, declaration, `${index < classicPaths.length ? classicPaths[index] : 'PreviewController'} must not redeclare ${name}`);
     }
@@ -119,7 +119,7 @@ test('Atomic 6.1 layout state remains single-authority after Atomic 6.4 removes 
     'isResizing', 'isSidebarResizing',
     'windowResizeActiveUntil', 'windowResizeBurstStartedAt', 'windowResizeBurstEvents'
   ]) {
-    const declaration = new RegExp(`\b(?:let|var|const)\s+${name}\b`);
+    const declaration = new RegExp(`\\b(?:let|var|const)\\s+${name}\\b`);
     assert.doesNotMatch(core, declaration, `core must not recreate layout authority ${name}`);
   }
   assert.doesNotMatch(core, /function (?:startResize|onResizeMove|stopResize|applySplit|applyPaneStates|reconcileCompactSplitLayout|activateCompactSplitPane)\b/);

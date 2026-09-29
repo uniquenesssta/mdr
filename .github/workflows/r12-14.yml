@@ -126,7 +126,7 @@ jobs:
       - name: R12-08 command boundaries and R12-07 compatibility contracts
         run: |
           node --test \
-            tests/stage-12-security-contract.test.mjs \
+            tests/stage-12-security-contract.test.mjs tests/architecture/model-kernel-contract.test.mjs tests/architecture/module-inventory.test.mjs \
             tests/stage-12-path-policy.test.mjs \
             tests/stage-12-file-kind.test.mjs \
             tests/stage-12-readers.test.mjs \
@@ -148,8 +148,17 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           npm run verify:architecture 2>&1 | tee "$RUNNER_TEMP/r12-14/architecture.log"
+      - name: Legacy runtime hard gate
+        if: ${{ !cancelled() }}
+        run: |
           npm run verify:no-legacy-runtime 2>&1 | tee "$RUNNER_TEMP/r12-14/no-legacy.log"
+      - name: Generated files hard gate
+        if: ${{ !cancelled() }}
+        run: |
           npm run verify:generated-files 2>&1 | tee "$RUNNER_TEMP/r12-14/generated.log"
+      - name: Documentation record hard gate
+        if: ${{ !cancelled() }}
+        run: |
           npm run verify:readme-record 2>&1 | tee "$RUNNER_TEMP/r12-14/readme.log"
       - name: Browser preview contract
         if: ${{ !cancelled() }}
@@ -202,11 +211,6 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor 9b6d6369fce3f2b36a33cdd12dd28c4d0460d927 HEAD
           git rev-parse HEAD | tee "$RUNNER_TEMP/r12-14/commit.txt"
-      - name: Guard current model and interface contracts
-        run: |
-          node scripts/ci/verify-windows-test-imports.mjs
-          node --test tests/architecture/model-kernel-contract.test.mjs tests/architecture/module-inventory.test.mjs tests/stage-12-command-registry.test.mjs tests/stage-12-log-redaction.test.mjs
-          git diff --check
       - name: Setup Node for the actual frontend to Rust log regression
         uses: actions/setup-node@v4
         with:
@@ -216,6 +220,11 @@ jobs:
           rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
           rustc --version
           cargo --version
+      - name: Guard current model and interface contracts
+        run: |
+          node scripts/ci/verify-windows-test-imports.mjs
+          node --test tests/architecture/module-inventory.test.mjs tests/stage-12-command-registry.test.mjs tests/stage-12-log-redaction.test.mjs
+          git diff --check
       - name: Rust formatting
         run: |
           rustfmt --edition 2021 --check --config max_width=120 \

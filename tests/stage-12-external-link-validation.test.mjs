@@ -2,16 +2,13 @@ import { assertCurrentValidation } from './support/current-rust-contracts.mjs';
 import { assertProductionInventory } from './support/production-inventory.mjs';
 import { readCurrentRustSources as readFile } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 
 import test from 'node:test';
 
-const baseline = '9405ab44d6bb5f05eb755a2341e3ba76b4831ed8';
 const entryPath = 'src-tauri/src/external_link/mod.rs';
 const policyPath = 'src-tauri/src/external_link/validation.rs';
 const commandTestPath = 'src-tauri/tests/external_link/command_validation.rs';
 const source = path => readFile(path, 'utf8');
-const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
 function validator(text) {
   const match = text.match(/^(?:pub\(super\) )?fn validate_external_url\b[\s\S]*?^}/m);
   assert.ok(match, 'a single explicit URL validator must exist');

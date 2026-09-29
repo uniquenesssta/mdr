@@ -23,7 +23,7 @@ function gitBlobSha(content) {
     .digest('hex');
 }
 
-test('R12-01 manifest pins the closed Stage 11 source and unchanged dependency contracts', async () => {
+test('R12-01 manifest pins the closed Stage 11 source and historical dependency provenance', async () => {
   const contract = await fixture();
   assert.equal(contract.schemaVersion, 1);
   assert.equal(contract.atomicTask, 'R12-01');

@@ -285,7 +285,7 @@ function walkJavaScript(root) {
   return results;
 }
 
-test('production integration keeps raw CodeMirror confined to the editor feature and removes classic raw-view access', () => {
+test('production integration keeps raw CodeMirror confined to editor and the explicit Hybrid compatibility port', () => {
   const repositoryRoot = path.resolve(import.meta.dirname, '../../..');
   const virtualEditor = fs.readFileSync(path.join(repositoryRoot, 'src/editor/virtual-editor.js'), 'utf8');
   const scrollSync = fs.readFileSync(path.join(repositoryRoot, 'src/features/sync/scroll/scroll-sync-controller.js'), 'utf8');
@@ -301,8 +301,13 @@ test('production integration keeps raw CodeMirror confined to the editor feature
   assert.match(main, /const\s+virtualEditor\s*=\s*createVirtualEditor\(editorHost(?:, [^;]+)?\)/);
   assert.match(main, /virtualEditor\.destroy\(\)/);
 
+  // R8 moved this responsibility into a single explicit Hybrid compatibility port.
+  const hybridPort = path.join(repositoryRoot, 'src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js');
+  const hybridPortSource = fs.readFileSync(hybridPort, 'utf8');
+  assert.match(hybridPortSource, /export function createCodeMirrorSourceEditorPort/);
+  assert.match(hybridPortSource, /destroy\(/);
   const nonEditorSource = walkJavaScript(path.join(repositoryRoot, 'src'))
-    .filter(file => !file.includes(`${path.sep}src${path.sep}editor${path.sep}`)
+    .filter(file => file !== hybridPort && !file.includes(`${path.sep}src${path.sep}editor${path.sep}`)
       && !file.includes(`${path.sep}src${path.sep}features${path.sep}editor${path.sep}`));
   const classicSource = walkJavaScript(path.join(repositoryRoot, 'public', 'app'));
   for (const file of [...nonEditorSource, ...classicSource]) {

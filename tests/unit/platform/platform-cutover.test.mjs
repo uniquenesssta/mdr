@@ -36,12 +36,14 @@ test('classic callers use the scoped compatibility host instead of a replacement
 
 test('ESM consumers receive responsibility-focused ports rather than native DTO facade methods', async () => {
   const store = await readFile(new URL('../../../src/storage/native-document-store.js', import.meta.url), 'utf8');
+  const loader = await readFile(new URL('../../../src/features/persistence/native-document-store/native-segmented-loader.js', import.meta.url), 'utf8');
   const tree = await readFile(new URL('../../../src/features/sidebar/folder-tree/folder-tree-controller.js', import.meta.url), 'utf8');
   const images = await readFile(new URL('../../../src/features/hybrid-editor/image/image-source-resolver.js', import.meta.url), 'utf8');
   const performance = await readFile(new URL('../../../src/runtime/performance.js', import.meta.url), 'utf8');
   const links = await readFile(new URL('../../../src/runtime/link-preview.js', import.meta.url), 'utf8');
   assert.match(store, /this\.documentStore\.save\(/);
-  assert.match(store, /this\.documentStore\.readChunk\(/);
+  assert.match(store, /createNativeSegmentedLoader\(\{\s*documentStore: this\.documentStore/);
+  assert.match(loader, /documentStore\.readChunk\(/);
   assert.doesNotMatch(store, /saveDocumentState|readDocumentChunk|nativeApi/);
   assert.match(tree, /files\.listTextTree\(/);
   assert.doesNotMatch(tree, /listTextFileTree|nativeApi/);

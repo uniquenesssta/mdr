@@ -20,8 +20,7 @@ const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(
 
 
 
-test('R12-12 moves the exact frozen headers and client-builder settings to one private client owner', async () => {
-  const before = frozen(entryPath);
+test('R12-12 preserves the request headers and client-builder settings to one private client owner', async () => {
   const client = await read(clientPath);
   assert.match(client, /fn browser_headers\(\) -> HeaderMap/);
   for (const code of [

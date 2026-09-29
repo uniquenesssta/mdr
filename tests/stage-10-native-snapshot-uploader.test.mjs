@@ -1,3 +1,4 @@
+import { assertProductionInventory } from './support/production-inventory.mjs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
@@ -284,9 +285,9 @@ test('Atomic 10.6 NativeDocumentStore delegates large reset snapshots through th
   assert.doesNotMatch(nativeStoreSource, /saveSnapshotInChunks\(|getSafeSnapshotChunkEnd\(|SNAPSHOT_UPLOAD_CHUNK_CHARS/);
   assert.doesNotMatch(queueSource, /beginSnapshotUpload|appendSnapshotChunk|commitSnapshotUpload|abortSnapshotUpload/);
   assert.doesNotMatch(nativeStoreSource, /createBrowserDocumentRepository/);
-  assert.match(handoff, /moduleFixture\.modules\.length,\s*\d+/);
+  assert.match(handoff, /assertProductionInventory/);
   const fixture = JSON.parse(fixtureText);
-  assert.ok(fixture.modules.length >= 391);
+  await assertProductionInventory(fixture);
   assert.ok(fixture.modules.some(item => item[0] === 'src/features/persistence/native-document-store/native-snapshot-uploader.js'));
   await store.delete('doc-large');
 });

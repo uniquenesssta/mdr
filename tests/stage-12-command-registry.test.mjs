@@ -11,11 +11,6 @@ const read = path => readFile(path, 'utf8');
 const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
 const commands = [['external_link', 'open_external_url'], ['web_fetch', 'fetch_url'], ['performance_log', 'write_performance_logs']];
 const registry = text => text.match(/tauri::generate_handler!\[([\s\S]*?)\]/)[1].split(',').map(s => s.trim()).filter(Boolean);
-const tokens = text => text.replace(/\s+/g, '');
-async function owner(module) {
-  try { await access(`src-tauri/src/${module}.rs`); return `src-tauri/src/${module}.rs`; }
-  catch (error) { if (error.code !== 'ENOENT') throw error; return `src-tauri/src/${module}/command.rs`; }
-}
 
 test('R12-17 preserves all nineteen registered names and their order without duplicates', async () => {
   const before = registry(frozen('src-tauri/src/main.rs'));

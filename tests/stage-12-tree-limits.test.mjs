@@ -81,7 +81,7 @@ test('R12-07 owns file directory skipped and truncation state per scan call', as
   assert.doesNotMatch(productionLimits, /fs::|File::|Path|#\[tauri::command\]|serde|TextFileTree/);
 });
 
-test('R12-07 preserves commands DTOs frozen dependency blobs and the shared text ceiling', async () => {
+test('R12-07 preserves commands DTOs historical dependency provenance and the shared text ceiling', async () => {
   const [entry, directoryTree, textReader, cargo, packageJson, manifest] = await Promise.all([
     source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/src/local_file/directory_tree.rs'),

@@ -29,13 +29,13 @@ test('R12-05 gives text and binary persistence separate Writer authorities', asy
   assert.match(entry, /mod binary_writer;/);
   assert.match(textWriter, /Responsibility: write the supplied text bytes to one already-resolved path/);
   assert.match(binaryWriter, /Responsibility: decode the command's Base64 payload, write the supplied bytes/);
-  assert.match(productionText, /fs::write\(path, content\.as_bytes\(\)\)/);
+  assert.match(productionText, /pub\(super\) fn write_text\(path: &Path, content: &str\) -> Result<usize, String>/);
   assert.doesNotMatch(
     productionText,
     /base64|decode|#\[tauri::command\]|LocalWriteResult|tauri_plugin_dialog|dialog::|FileDialog|open_dialog|save_dialog|create_dir/,
   );
   assert.match(productionBinary, /general_purpose::STANDARD\s*\.decode\(content_base64\)/);
-  assert.match(productionBinary, /fs::write\(path, content\)/);
+  assert.match(productionBinary, /pub\(super\) fn write_binary\(path: &Path, content: &\[u8\]\) -> Result<usize, String>/);
   assert.doesNotMatch(
     productionBinary,
     /read_to_string|#\[tauri::command\]|LocalWriteResult|tauri_plugin_dialog|dialog::|FileDialog|open_dialog|save_dialog|create_dir/,
@@ -79,7 +79,7 @@ test('R12-05 preserves parent decode byte-count and error ordering without dialo
   assert.match(binaryWriter, /missing_parent_error_without_creating_directories/);
 });
 
-test('R12-05 preserves commands DTOs and frozen dependency blobs', async () => {
+test('R12-05 preserves commands DTOs and historical dependency provenance', async () => {
   const [entry, cargo, packageJson, manifest] = await Promise.all([
     source('src-tauri/src/local_file/commands.rs'),
     source('src-tauri/Cargo.toml'),

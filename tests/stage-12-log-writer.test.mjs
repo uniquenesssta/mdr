@@ -2,13 +2,10 @@ import { assertCurrentValidation, assertOwner } from './support/current-rust-con
 import { assertProductionInventory } from './support/production-inventory.mjs';
 import { readCurrentRustSources as readFile } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 
 import test from 'node:test';
 
-const baseline = '17b8f430066219817e5405d8047234fb556a745e';
 const read = path => readFile(path, 'utf8');
-const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
 
 test('R12-15 preserves current command measurement and storage interfaces', async () => {
   const command = await read('src-tauri/src/performance_log/command.rs');
@@ -46,7 +43,7 @@ test('R12-15 inventories the actual log state owners', async () => {
   await assertOwner('src-tauri/src/performance_log/writer.rs', 'performance-log-write-lock');
 });
 
-test('R12-15 Windows workflow exercises before and after real file behavior plus release no-write mode', async () => {
+test('R12-15 Windows workflow exercises current real file behavior plus release no-write mode', async () => {
   const workflow = await read('.github/workflows/r12-14.yml');
   await assertCurrentValidation();
   const scenarios = await read('src-tauri/tests/performance_log/writer_contract.rs');

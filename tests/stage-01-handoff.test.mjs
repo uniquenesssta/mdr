@@ -1,3 +1,4 @@
+import { checkLegacyRuntime } from '../scripts/architecture/checks.mjs';
 import { assertProductionInventory } from './support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -153,7 +154,7 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
 
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 6);
   assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 41);
-  assert.equal(baseline.businessGlobalWrites.reduce((sum, item) => sum + item.count, 0), 9);
+  assert.deepEqual(await checkLegacyRuntime({ root: ROOT }), []);
   assert.equal(baseline.trackedGeneratedFiles.length, 4);
   assert.equal(baseline.policy.wildcardExemptions, false);
   assert.equal(
