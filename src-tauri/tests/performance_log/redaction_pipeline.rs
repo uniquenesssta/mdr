@@ -17,8 +17,11 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     assert!(entries[0]["details"]["nested"].is_object());
     let session = entries[0]["sessionId"].clone();
     let path = write_performance_logs(entries).unwrap();
-    let rows: Vec<Value> = fs::read_to_string(path)
-        .unwrap()
+    let contents = {
+        let _guard = super::write_lock().lock().unwrap();
+        fs::read_to_string(path).unwrap()
+    };
+    let rows: Vec<Value> = contents
         .lines()
         .map(|line| serde_json::from_str::<Value>(line).unwrap())
         .filter(|row| row["sessionId"] == session)
@@ -42,6 +45,7 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     assert_eq!(details["contentType"], "text/html");
     assert_eq!(rows[0]["operation"], "runtime.snapshot");
     assert_eq!(rows[0]["durationMs"], 12.5);
+    assert_eq!(rows[1]["status"], "warning");
     assert_eq!(rows[2]["status"], "error");
     assert_eq!(rows[2]["details"]["error"], "[redacted]");
 }

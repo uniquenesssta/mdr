@@ -10,6 +10,7 @@ test('R12-14 actual runtime preserves nested structures through the desktop log 
   assert.equal(details.nested.count, 7);
   assert.equal(details.array[0].count, 7);
   assert.equal(typeof entries[1].details.nested, 'object');
+  assert.equal(entries[1].status, 'warning');
   assert.equal(entries[2].status, 'error');
   assert.equal(entries[0].durationMs, 12.5);
 });

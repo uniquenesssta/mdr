@@ -31,7 +31,7 @@ export async function producePayload() {
     cycle, invalid: 1n, notFinite: Infinity, items: Array(50).fill({count:1}),
     contentType:'text/html', contentLength:2048, hasDocumentPath:true
   }});
-  runtime.diagnostic('runtime.error', {category:'runtime.error', details:{message:secrets[2], nested}});
+  runtime.diagnostic('runtime.error', {category:'runtime.error', status:'warning', details:{message:secrets[2], nested}});
   try { runtime.measure('runtime.error', () => { throw new Error(secrets[2]); }, {category:'runtime.error'}); } catch {}
   await runtime.flush();
   return { entries: batches.flat(), secrets };

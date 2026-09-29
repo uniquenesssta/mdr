@@ -79,7 +79,7 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
     if envelope {
         match key {
             "source" => return matches!(value, "frontend" | "rust"),
-            "status" => return matches!(value, "ok" | "error" | "cancelled" | "skipped"),
+            "status" => return matches!(value, "ok" | "error" | "warning" | "cancelled" | "skipped"),
             "category" => {
                 return matches!(
                     value,
@@ -470,6 +470,10 @@ mod tests {
         let mut expected = value.clone();
         expected["details"][3] = json!("[redacted]");
         assert_eq!(redact_value(&value), expected);
+        for status in ["ok", "error", "warning", "cancelled", "skipped"] {
+            let result = redact_value(&json!({ "status": status }));
+            assert_eq!(result["status"], status);
+        }
     }
 
     #[test]
