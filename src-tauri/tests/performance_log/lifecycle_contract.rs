@@ -57,11 +57,12 @@ fn lifecycle_child() {
     match case.as_str() {
         "events" => {
             record_lifecycle("app.start");
-            write_performance_logs(vec![json!({"operation": "frontend.marker"})]).unwrap();
+            write_performance_logs(vec![json!({"operation": "frontend.marker", "count": 1})]).unwrap();
             record_lifecycle("app.exit");
             let values = rows();
             assert_eq!(values.len(), 3);
-            assert_eq!(values[1], json!({"operation": "frontend.marker"}));
+            // Unknown operation labels remain redacted under the accepted R12-14 policy.
+            assert_eq!(values[1], json!({"operation": "[redacted]", "count": 1}));
             for (index, operation) in [(0, "app.start"), (2, "app.exit")] {
                 let value = &values[index];
                 assert_eq!(value.as_object().unwrap().len(), 7);
