@@ -17,7 +17,9 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     assert!(entries[0]["details"]["nested"].is_object());
     let session = entries[0]["sessionId"].clone();
     let path = write_performance_logs(entries).unwrap();
-    let rows: Vec<Value> = fs::read_to_string(path).unwrap().lines()
+    let rows: Vec<Value> = fs::read_to_string(path)
+        .unwrap()
+        .lines()
         .map(|line| serde_json::from_str::<Value>(line).unwrap())
         .filter(|row| row["sessionId"] == session)
         .collect();

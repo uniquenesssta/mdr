@@ -80,185 +80,198 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
         match key {
             "source" => return matches!(value, "frontend" | "rust"),
             "status" => return matches!(value, "ok" | "error" | "cancelled" | "skipped"),
-            "category" => return matches!(value,
-                "app.lifecycle"
-                | "content.operation"
-                | "document.error"
-                | "document.model"
-                | "document.operation"
-                | "editor.hybrid"
-                | "editor.input"
-                | "export.operation"
-                | "link.preview"
-                | "native.command"
-                | "native.roundtrip"
-                | "render.pipeline"
-                | "runtime.diagnostic"
-                | "runtime.error"
-                | "runtime.event-timing"
-                | "runtime.performance"
-                | "sidebar.file-tree"
-                | "sync.selection"
-                | "ui.interaction"
-                | "ui.layout"
-                | "ui.operation"
-            ),
-            "operation" => return matches!(value,
-                "abort_document_snapshot_upload"
-                | "app.exit"
-                | "app.ready"
-                | "app.start"
-                | "append_document_snapshot_chunk"
-                | "applySettings"
-                | "applySplit"
-                | "autoSave"
-                | "begin_document_snapshot_upload"
-                | "browser.event.change"
-                | "browser.event.click"
-                | "browser.event.contextmenu"
-                | "browser.event.dblclick"
-                | "browser.event.drop"
-                | "browser.event.focusin"
-                | "browser.event.focusout"
-                | "browser.event.input"
-                | "browser.event.keydown"
-                | "browser.event.mousedown"
-                | "browser.event.mouseup"
-                | "browser.event.pointerdown"
-                | "browser.event.pointerup"
-                | "closeDocument"
-                | "commit_document_snapshot_upload"
-                | "confirmImageInsert"
-                | "confirmMermaidInsert"
-                | "convertAndInsert"
-                | "delete_document_state"
-                | "document.file-save-error"
-                | "document.save-as-error"
-                | "document.snapshot"
-                | "downloadExportImage"
-                | "duplicateDocument"
-                | "editor.pointer-position-corrected"
-                | "exportFile"
-                | "exportHTML"
-                | "exportPDF"
-                | "exportWord"
-                | "fetch_url"
-                | "findNext"
-                | "frontend.bootstrap"
-                | "hybrid.block-dispatch-failure"
-                | "hybrid.component-state-transition"
-                | "hybrid.decoration-build-failure"
-                | "hybrid.html-range-fallback"
-                | "hybrid.invalid-block-range"
-                | "hybrid.slow-decoration-build"
-                | "hybrid.source-edit-close"
-                | "hybrid.widget-build-failure"
-                | "hybrid.widget-geometry"
-                | "initial_file_path"
-                | "insertHeading"
-                | "insertTable"
-                | "instrumentation.ready"
-                | "interaction.change"
-                | "interaction.click"
-                | "interaction.contextmenu"
-                | "interaction.dblclick"
-                | "interaction.drop"
-                | "interaction.focusin"
-                | "interaction.focusout"
-                | "interaction.input"
-                | "interaction.input.frame"
-                | "interaction.keydown"
-                | "interaction.mousedown"
-                | "interaction.mouseup"
-                | "interaction.pointerdown"
-                | "interaction.pointerup"
-                | "interaction.scroll.burst"
-                | "interaction.shortcut"
-                | "layout.compact-shell-change"
-                | "layout.system-fullscreen-error"
-                | "layout.toolbar-boundary-change"
-                | "layout.window-resize-settled"
-                | "list_text_file_tree"
-                | "loadFile"
-                | "loadTextContentAsDocument"
-                | "load_document_manifest"
-                | "load_document_state"
-                | "native.abort_document_snapshot_upload"
-                | "native.append_document_snapshot_chunk"
-                | "native.begin_document_snapshot_upload"
-                | "native.commit_document_snapshot_upload"
-                | "native.delete_document_state"
-                | "native.fetch_url"
-                | "native.initial_file_path"
-                | "native.list_text_file_tree"
-                | "native.load_document_manifest"
-                | "native.load_document_state"
-                | "native.open-directory-dialog"
-                | "native.open-file-dialog"
-                | "native.open_external_url"
-                | "native.read_document_chunk"
-                | "native.read_dropped_file"
-                | "native.read_local_image"
-                | "native.save-file-dialog"
-                | "native.save_document_state"
-                | "native.search_document_state"
-                | "native.write_local_binary_file"
-                | "native.write_local_text_file"
-                | "native.write_performance_logs"
-                | "newDocument"
-                | "openDocument"
-                | "open_external_url"
-                | "prefixLines"
-                | "preview.mermaid-render-failure"
-                | "preview.mermaid-render-result"
-                | "read_document_chunk"
-                | "read_dropped_file"
-                | "read_local_image"
-                | "redo"
-                | "renameDocument"
-                | "render.preview-layout-refresh"
-                | "renderMermaidBlocks"
-                | "renderOutline"
-                | "replaceAll"
-                | "replaceOne"
-                | "runtime.error"
-                | "runtime.long-task"
-                | "runtime.navigation"
-                | "runtime.snapshot"
-                | "runtime.unhandled-rejection"
-                | "saveAsMarkdown"
-                | "saveCurrentDocumentState"
-                | "saveToLocal"
-                | "save_document_state"
-                | "search_document_state"
-                | "selection.sync-anomaly"
-                | "selection.sync-result"
-                | "setAppTheme"
-                | "setLanguage"
-                | "setLayoutMode"
-                | "setupDocuments"
-                | "togglePane"
-                | "toggleSidebar"
-                | "undo"
-                | "updatePreview"
-                | "window.close-error"
-                | "window.close-handler-error"
-                | "wrapSelection"
-                | "write_local_binary_file"
-                | "write_local_text_file"
-                | "write_performance_logs"
-            ),
+            "category" => {
+                return matches!(
+                    value,
+                    "app.lifecycle"
+                        | "content.operation"
+                        | "document.error"
+                        | "document.model"
+                        | "document.operation"
+                        | "editor.hybrid"
+                        | "editor.input"
+                        | "export.operation"
+                        | "link.preview"
+                        | "native.command"
+                        | "native.roundtrip"
+                        | "render.pipeline"
+                        | "runtime.diagnostic"
+                        | "runtime.error"
+                        | "runtime.event-timing"
+                        | "runtime.performance"
+                        | "sidebar.file-tree"
+                        | "sync.selection"
+                        | "ui.interaction"
+                        | "ui.layout"
+                        | "ui.operation"
+                );
+            }
+            "operation" => {
+                return matches!(
+                    value,
+                    "abort_document_snapshot_upload"
+                        | "app.exit"
+                        | "app.ready"
+                        | "app.start"
+                        | "append_document_snapshot_chunk"
+                        | "applySettings"
+                        | "applySplit"
+                        | "autoSave"
+                        | "begin_document_snapshot_upload"
+                        | "browser.event.change"
+                        | "browser.event.click"
+                        | "browser.event.contextmenu"
+                        | "browser.event.dblclick"
+                        | "browser.event.drop"
+                        | "browser.event.focusin"
+                        | "browser.event.focusout"
+                        | "browser.event.input"
+                        | "browser.event.keydown"
+                        | "browser.event.mousedown"
+                        | "browser.event.mouseup"
+                        | "browser.event.pointerdown"
+                        | "browser.event.pointerup"
+                        | "closeDocument"
+                        | "commit_document_snapshot_upload"
+                        | "confirmImageInsert"
+                        | "confirmMermaidInsert"
+                        | "convertAndInsert"
+                        | "delete_document_state"
+                        | "document.file-save-error"
+                        | "document.save-as-error"
+                        | "document.snapshot"
+                        | "downloadExportImage"
+                        | "duplicateDocument"
+                        | "editor.pointer-position-corrected"
+                        | "exportFile"
+                        | "exportHTML"
+                        | "exportPDF"
+                        | "exportWord"
+                        | "fetch_url"
+                        | "findNext"
+                        | "frontend.bootstrap"
+                        | "hybrid.block-dispatch-failure"
+                        | "hybrid.component-state-transition"
+                        | "hybrid.decoration-build-failure"
+                        | "hybrid.html-range-fallback"
+                        | "hybrid.invalid-block-range"
+                        | "hybrid.slow-decoration-build"
+                        | "hybrid.source-edit-close"
+                        | "hybrid.widget-build-failure"
+                        | "hybrid.widget-geometry"
+                        | "initial_file_path"
+                        | "insertHeading"
+                        | "insertTable"
+                        | "instrumentation.ready"
+                        | "interaction.change"
+                        | "interaction.click"
+                        | "interaction.contextmenu"
+                        | "interaction.dblclick"
+                        | "interaction.drop"
+                        | "interaction.focusin"
+                        | "interaction.focusout"
+                        | "interaction.input"
+                        | "interaction.input.frame"
+                        | "interaction.keydown"
+                        | "interaction.mousedown"
+                        | "interaction.mouseup"
+                        | "interaction.pointerdown"
+                        | "interaction.pointerup"
+                        | "interaction.scroll.burst"
+                        | "interaction.shortcut"
+                        | "layout.compact-shell-change"
+                        | "layout.system-fullscreen-error"
+                        | "layout.toolbar-boundary-change"
+                        | "layout.window-resize-settled"
+                        | "list_text_file_tree"
+                        | "loadFile"
+                        | "loadTextContentAsDocument"
+                        | "load_document_manifest"
+                        | "load_document_state"
+                        | "native.abort_document_snapshot_upload"
+                        | "native.append_document_snapshot_chunk"
+                        | "native.begin_document_snapshot_upload"
+                        | "native.commit_document_snapshot_upload"
+                        | "native.delete_document_state"
+                        | "native.fetch_url"
+                        | "native.initial_file_path"
+                        | "native.list_text_file_tree"
+                        | "native.load_document_manifest"
+                        | "native.load_document_state"
+                        | "native.open-directory-dialog"
+                        | "native.open-file-dialog"
+                        | "native.open_external_url"
+                        | "native.read_document_chunk"
+                        | "native.read_dropped_file"
+                        | "native.read_local_image"
+                        | "native.save-file-dialog"
+                        | "native.save_document_state"
+                        | "native.search_document_state"
+                        | "native.write_local_binary_file"
+                        | "native.write_local_text_file"
+                        | "native.write_performance_logs"
+                        | "newDocument"
+                        | "openDocument"
+                        | "open_external_url"
+                        | "prefixLines"
+                        | "preview.mermaid-render-failure"
+                        | "preview.mermaid-render-result"
+                        | "read_document_chunk"
+                        | "read_dropped_file"
+                        | "read_local_image"
+                        | "redo"
+                        | "renameDocument"
+                        | "render.preview-layout-refresh"
+                        | "renderMermaidBlocks"
+                        | "renderOutline"
+                        | "replaceAll"
+                        | "replaceOne"
+                        | "runtime.error"
+                        | "runtime.long-task"
+                        | "runtime.navigation"
+                        | "runtime.snapshot"
+                        | "runtime.unhandled-rejection"
+                        | "saveAsMarkdown"
+                        | "saveCurrentDocumentState"
+                        | "saveToLocal"
+                        | "save_document_state"
+                        | "search_document_state"
+                        | "selection.sync-anomaly"
+                        | "selection.sync-result"
+                        | "setAppTheme"
+                        | "setLanguage"
+                        | "setLayoutMode"
+                        | "setupDocuments"
+                        | "togglePane"
+                        | "toggleSidebar"
+                        | "undo"
+                        | "updatePreview"
+                        | "window.close-error"
+                        | "window.close-handler-error"
+                        | "wrapSelection"
+                        | "write_local_binary_file"
+                        | "write_local_text_file"
+                        | "write_performance_logs"
+                );
+            }
             "sessionId" => {
                 return value.len() == 36
                     && value.bytes().enumerate().all(|(i, b)| {
-                        if matches!(i, 8 | 13 | 18 | 23) { b == b'-' } else { b.is_ascii_hexdigit() }
+                        if matches!(i, 8 | 13 | 18 | 23) {
+                            b == b'-'
+                        } else {
+                            b.is_ascii_hexdigit()
+                        }
                     });
             }
             _ => {}
         }
     }
     match key {
-        "contentType" => matches!(value, "text/html" | "text/plain" | "text/markdown" | "application/json"),
+        "contentType" => matches!(
+            value,
+            "text/html" | "text/plain" | "text/markdown" | "application/json"
+        ),
         "side" | "sourceSide" | "targetSide" => matches!(value, "editor" | "preview" | ""),
         "mode" | "presentationMode" => matches!(value, "source" | "hybrid" | "preview"),
         _ => false,
@@ -284,7 +297,11 @@ fn redact_path_value(value: &Value, depth: usize, remaining: &mut usize) -> Valu
             }
         }
         Value::Array(values) => Value::Array(
-            values.iter().take(20).map(|v| redact_path_value(v, depth + 1, remaining)).collect(),
+            values
+                .iter()
+                .take(20)
+                .map(|v| redact_path_value(v, depth + 1, remaining))
+                .collect(),
         ),
         Value::Object(_) => redact_nested(value, "", depth + 1, remaining, false),
         _ => value.clone(),
@@ -300,7 +317,9 @@ fn redact_nested(value: &Value, key: &str, depth: usize, remaining: &mut usize, 
         Value::Object(object) => {
             let mut redacted = Map::new();
             for (key, nested) in object.iter().take(64) {
-                if *remaining == 0 { break; }
+                if *remaining == 0 {
+                    break;
+                }
                 if is_body_field(key) || is_sensitive_field(key) {
                     continue;
                 }
@@ -318,7 +337,11 @@ fn redact_nested(value: &Value, key: &str, depth: usize, remaining: &mut usize, 
             Value::Object(redacted)
         }
         Value::Array(values) => Value::Array(
-            values.iter().take(20).map(|v| redact_nested(v, "", depth + 1, remaining, false)).collect(),
+            values
+                .iter()
+                .take(20)
+                .map(|v| redact_nested(v, "", depth + 1, remaining, false))
+                .collect(),
         ),
         Value::String(text) => {
             // Legacy/double-encoded JSON is still recursively filtered. Invalid, truncated
@@ -456,13 +479,18 @@ mod tests {
 
     #[test]
     fn decodes_legacy_json_strings_before_recursive_redaction() {
-        let value = json!({ "nested": r#"{"body":"SECRET","token":"TOKEN","path":"C:\\Private\\note.md","count":7}"# });
+        let value = json!({
+            "nested": r#"{"body":"SECRET","token":"TOKEN","path":"C:\\Private\\note.md","count":7}"#
+        });
         assert_eq!(redact_value(&value), json!({ "nested": {"path":"note.md","count":7} }));
     }
 
     #[test]
     fn withholds_free_error_text_and_unknown_strings() {
-        let value = json!({ "error":"C:\\Private SECRET", "message":"body", "reason":"token", "stack":"secret", "other":"private prose" });
+        let value = json!({
+            "error": "C:\\Private SECRET",
+            "message": "body", "reason": "token", "stack": "secret", "other": "private prose"
+        });
         let result = redact_value(&value);
         for key in ["error", "message", "reason", "stack", "other"] {
             assert_eq!(result[key], "[redacted]");
@@ -471,13 +499,25 @@ mod tests {
 
     #[test]
     fn nested_envelope_names_cannot_bypass_redaction() {
-        let value = json!({"operation":"runtime.error","details":{"operation":"runtime.error","source":"rust","status":"ok"}});
-        assert_eq!(redact_value(&value), json!({"operation":"runtime.error","details":{"operation":"[redacted]","source":"[redacted]","status":"[redacted]"}}));
+        let value = json!({
+            "operation": "runtime.error",
+            "details": {"operation":"runtime.error","source":"rust","status":"ok"}
+        });
+        assert_eq!(
+            redact_value(&value),
+            json!({
+                "operation": "runtime.error",
+                "details": {"operation":"[redacted]","source":"[redacted]","status":"[redacted]"}
+            })
+        );
     }
 
     #[test]
     fn unknown_envelope_labels_do_not_leak_caller_strings() {
-        let value = json!({"operation":"SECRET_TOKEN","category":"SECRET_BODY","source":"secret","status":"private","sessionId":"private document title"});
+        let value = json!({
+            "operation":"SECRET_TOKEN", "category":"SECRET_BODY",
+            "source":"secret", "status":"private", "sessionId":"private document title"
+        });
         let result = redact_value(&value);
         for key in ["operation", "category", "source", "status", "sessionId"] {
             assert_eq!(result[key], "[redacted]");
@@ -487,13 +527,18 @@ mod tests {
     #[test]
     fn invalid_or_truncated_encoded_json_fails_closed() {
         let value = json!({"payload":"{\"token\":\"SECRET", "array":["SECRET", {"password":"SECRET","count":2}]});
-        assert_eq!(redact_value(&value), json!({"payload":"[redacted]","array":["[redacted]",{"count":2}]}));
+        assert_eq!(
+            redact_value(&value),
+            json!({"payload":"[redacted]","array":["[redacted]",{"count":2}]})
+        );
     }
 
     #[test]
     fn limits_nested_and_encoded_diagnostic_work() {
         let mut value = json!({"token":"SECRET"});
-        for _ in 0..30 { value = json!({"nested":value}); }
+        for _ in 0..30 {
+            value = json!({"nested":value});
+        }
         let result = redact_value(&value).to_string();
         assert!(!result.contains("SECRET"));
         assert!(result.contains("[redacted]"));
@@ -503,7 +548,9 @@ mod tests {
 
     #[test]
     fn withholds_path_queries_credentials_and_malformed_path_payloads() {
-        let value = json!({"path":"https://host/file?token=SECRET", "paths":["C:\\x\\ok.md", "{\"token\":\"SECRET\"}"]});
+        let value = json!({
+            "path":"https://host/file?token=SECRET", "paths":["C:\\x\\ok.md", "{\"token\":\"SECRET\"}"]
+        });
         assert_eq!(redact_value(&value), json!({"path":"[redacted]","paths":["ok.md","[redacted]"]}));
     }
 
@@ -512,7 +559,9 @@ mod tests {
         let encoded = serde_json::to_string(&json!({"token":"SECRET","durationMs":3.5})).unwrap();
         let twice = serde_json::to_string(&encoded).unwrap();
         let value = json!({"encoded":twice,"count":7,"active":true,"empty":null});
-        assert_eq!(redact_value(&value), json!({"encoded":{"durationMs":3.5},"count":7,"active":true,"empty":null}));
+        assert_eq!(
+            redact_value(&value),
+            json!({"encoded":{"durationMs":3.5},"count":7,"active":true,"empty":null})
+        );
     }
-
 }

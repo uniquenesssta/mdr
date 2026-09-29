@@ -28,7 +28,7 @@ test('R12-14 adds one recursive redaction owner at the existing JSONL persistenc
   assert.match(entry, /let redacted = redact_value\(value\);/);
   assert.match(entry, /serde_json::to_string\(&redacted\)/);
   assert.equal((redaction.match(/#\[test\]/g) || []).length, 14);
-  assert.doesNotMatch(redaction.split('#[cfg(test)]')[0], /std::fs|OpenOptions|env::|tauri::|Mutex|OnceLock|write_performance_logs/);
+  assert.doesNotMatch(redaction.split('#[cfg(test)]')[0], /std::fs|OpenOptions|env::|tauri::|Mutex|OnceLock|\bwrite_performance_logs\s*\(/);
 });
 
 test('R12-14 recursively removes bodies and secrets while minimizing path fields without erasing metrics', async () => {
