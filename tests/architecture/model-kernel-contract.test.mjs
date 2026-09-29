@@ -127,13 +127,15 @@ test('model-kernel is an explicit side-effect-free named re-export facade', asyn
   assert.equal(source.replace(statementPattern, '').trim(), '');
 });
 
-test('all Stage 0 frozen hashes remain byte-identical', async () => {
+test('all eight Stage 0 JavaScript model hashes remain byte-identical', async () => {
   const baseline = JSON.parse(await readFile(
     resolve(root, 'docs/rewrite-progress/stage-00/evidence/frozen-model-hashes.json'),
     'utf8'
   ));
   assert.equal(baseline.length, 9);
-  for (const record of baseline) {
+  const models = baseline.filter(record => frozenJavaScriptPaths.has(record.path));
+  assert.deepEqual(models.map(record => record.path).sort(), [...frozenJavaScriptPaths].sort());
+  for (const record of models) {
     const bytes = await readFile(resolve(root, record.path));
     const actual = createHash('sha256').update(bytes).digest('hex');
     assert.equal(actual, record.sha256, `frozen contract changed: ${record.path}`);

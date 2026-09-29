@@ -136,7 +136,7 @@ test('the desktop window client is the sole production owner of the Tauri window
 test('desktop platform keeps every WindowPort method while Atomic 6.13 Window feature becomes the sole application consumer', async () => {
   const [desktop, events, main, controller, closeController] = await Promise.all([
     readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8'),
-    readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/features/persistence/application/close-save-controller.js', import.meta.url), 'utf8'),
     readFile(new URL('../../../src/main.js', import.meta.url), 'utf8'),
     readFile(new URL('../../../src/features/window/window-controller.js', import.meta.url), 'utf8'),
     readFile(new URL('../../../src/features/window/window-close-controller.js', import.meta.url), 'utf8')
@@ -157,15 +157,15 @@ test('desktop platform keeps every WindowPort method while Atomic 6.13 Window fe
 test('save-before-close remains in the application CloseSavePort and stays absent from the platform/window orchestration internals', async () => {
   const [clientSource, eventsSource, closeController, closeSavePort, main] = await Promise.all([
     readFile(new URL('../../../src/platform/desktop/window-client.js', import.meta.url), 'utf8'),
-    readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/features/persistence/application/close-save-controller.js', import.meta.url), 'utf8'),
     readFile(new URL('../../../src/features/window/window-close-controller.js', import.meta.url), 'utf8'),
     readFile(new URL('../../../src/features/window/close-save-port.js', import.meta.url), 'utf8'),
     readFile(new URL('../../../src/main.js', import.meta.url), 'utf8')
   ]);
   assert.doesNotMatch(clientSource, /saveCurrentDocumentState|confirmUserAction|close-save|document/);
-  assert.match(eventsSource, /eventsCloseSavePort\.register/);
-  assert.match(eventsSource, /saveCurrentDocumentState\(false, \{ waitForNative: true, forceSnapshot: true \}\)/);
-  assert.match(eventsSource, /confirmUserAction\('关闭前保存失败/);
+  assert.match(eventsSource, /closeSavePort\.register/);
+  assert.match(eventsSource, /await saveController\.save\(\{[\s\S]*?forceSnapshot: true/);
+  assert.match(eventsSource, /await decideAfterFailure\(error\)/);
   assert.match(closeController, /closeSave\.prepareClose\(\)/);
   assert.match(closeController, /event\?\.preventDefault\?\.\(\)/);
   assert.doesNotMatch(closeController, /saveCurrentDocumentState|confirmUserAction|localStorage|sessionStorage/);

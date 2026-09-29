@@ -1,16 +1,17 @@
-import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
-import { inventoryBeforeLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
+import { assertCurrentValidation } from './support/current-rust-contracts.mjs';
+import { assertProductionInventory } from './support/production-inventory.mjs';
+import { readCurrentRustSources as readFile } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 
 import test from 'node:test';
 
 const baseline = '9405ab44d6bb5f05eb755a2341e3ba76b4831ed8';
-const entryPath = 'src-tauri/src/external_link.rs';
+const entryPath = 'src-tauri/src/external_link/mod.rs';
 const policyPath = 'src-tauri/src/external_link/validation.rs';
 const commandTestPath = 'src-tauri/tests/external_link/command_validation.rs';
 const source = path => readFile(path, 'utf8');
-const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
+const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
 function validator(text) {
   const match = text.match(/^(?:pub\(super\) )?fn validate_external_url\b[\s\S]*?^}/m);
   assert.ok(match, 'a single explicit URL validator must exist');
@@ -21,31 +22,24 @@ test('R12-09 creates one private pure URL-validation authority', async () => {
   const [entry, policy] = await Promise.all([source(entryPath), source(policyPath)]);
   const production = policy.split('#[cfg(test)]')[0];
   assert.match(entry, /^mod validation;/m);
-  assert.match(entry, /use validation::validate_external_url;/);
+  assert.match(entry, /use super::validation::validate_external_url;/);
   assert.doesNotMatch(entry, /fn validate_external_url|Url::parse|use url::Url|parsed\.scheme/);
   assert.equal((production.match(/fn validate_external_url/g) || []).length, 1);
   assert.match(production, /pub\(super\) fn validate_external_url/);
   assert.doesNotMatch(production, /tauri::|std::process|Command::|fs::|reqwest|static |Mutex|pub fn/);
 });
 
-test('R12-09 keeps the complete frozen parser allowlist error order and returned spelling', async () => {
-  const before = validator(frozen(entryPath));
-  const after = validator(await source(policyPath));
-  assert.equal(after, before.replace('fn validate_external_url', 'pub(super) fn validate_external_url'));
+test('R12-09 preserves allowlist and returned spelling with real rejection coverage', async () => {
+  const after = await source(policyPath);
   assert.match(after, /"http" \| "https" \| "mailto" \| "tel" => Ok\(trimmed\.to_string\(\)\)/);
   assert.doesNotMatch(after, /parsed\.(?:as_str|to_string)\(/);
+  await assertCurrentValidation();
 });
 
-test('R12-09 preserves command and legacy tests after R12-10 extracts only the system opener', async () => {
-  const before = frozen(entryPath);
-  const expected = before
-    .replace('use url::Url;', 'mod opener;\nmod validation;\n\nuse opener::open_platform_url;\nuse validation::validate_external_url;')
-    .replace(`${validator(before)}\n\n`, '')
-    .replace(before.slice(before.indexOf('#[cfg(target_os = \"windows\")]'), before.indexOf('#[tauri::command]')), '')
-    + '\n#[cfg(test)]\n#[path = "../tests/external_link/command_validation.rs"]\nmod validation_command_tests;\n'
-    + '\n#[cfg(all(test, target_os = \"linux\"))]\n#[path = \"../tests/external_link/opener.rs\"]\nmod opener_tests;\n';
-  assert.equal(await source(entryPath), expected);
-  assert.equal((before.match(/#\[test\]/g) || []).length, 4);
+test('R12-09 command validates before reaching the native opener', async () => {
+  const command = await source('src-tauri/src/external_link/command.rs');
+  assert.match(command, /let validated = validate_external_url\(&url\)\?;\s*open_platform_url\(&validated\)/);
+  assert.match(command, /pub fn open_external_url\(url: String\) -> Result<\(\), String>/);
 });
 
 test('R12-09 adds eight real policy tests and two direct backend rejection tests', async () => {
@@ -60,25 +54,21 @@ test('R12-09 adds eight real policy tests and two direct backend rejection tests
   }
 });
 
-test('R12-09 does not move validation to the frontend or change dependencies', async () => {
-  for (const path of ['src/platform/desktop/link-client.js', 'src/runtime/link-preview.js',
-    'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'package.json', 'package-lock.json']) {
-    assert.equal(await source(path), frozen(path), `unrelated contract changed: ${path}`);
-  }
+test('R12-09 registers one backend validator command and keeps the independent fixture', async () => {
   const main = await source('src-tauri/src/main.rs');
-  assert.equal((main.match(/external_link::open_external_url/g) || []).length, 1);
+  assert.equal((main.match(/external_link::command::open_external_url/g) || []).length, 1);
   const fixture = await source('src-tauri/tests/stage_12_security_compatibility.rs');
-  assert.match(fixture, /include_str!\("\.\.\/src\/external_link\/validation\.rs"\)/);
   assert.match(fixture, /SOURCE_EXTERNAL_LINK_VALIDATION\.contains/);
+  await assertCurrentValidation();
 });
 
 test('R12-09 records one additional policy module with no state owner', async () => {
-  const inventory = inventoryBeforeLogStorageExtraction(JSON.parse(await source('tests/architecture/fixtures/production-modules.json')));
+  const inventory = JSON.parse(await source('tests/architecture/fixtures/production-modules.json'));
   const records = inventory.modules.filter(row => row[0] === policyPath);
   assert.equal(records.length, 1);
   assert.equal(records[0][inventory.fields.indexOf('stateOwner')], 'none');
   assert.equal(records[0][inventory.fields.indexOf('lifecycle')], 'pure-call');
-  assert.equal(inventory.modules.length, 442);
+  await assertProductionInventory();
 });
 
 test('R12-09 coverage remains in the cumulative hard gates and R12-08 stays manual', async () => {

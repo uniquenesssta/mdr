@@ -1,3 +1,4 @@
+import { historicalDependency } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -107,8 +108,8 @@ test('R12-06 preserves DTO errors readable-file policy commands and dependencies
     '无法读取当前文件夹：'
   ]) assert.ok(directoryTree.includes(error), `missing directory-tree error: ${error}`);
   assert.match(directoryTree, /!limits\.accepts_file_size\(metadata\.len\(\)\) \|\| File::open\(&path\)\.is_err\(\)/);
-  assert.equal(gitBlobSha(cargo), manifest.source.dependencyFiles['src-tauri/Cargo.toml']);
-  assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
+  assert.equal(gitBlobSha(historicalDependency(manifest, 'src-tauri/Cargo.toml')), manifest.source.dependencyFiles['src-tauri/Cargo.toml']);
+  assert.equal(gitBlobSha(historicalDependency(manifest, 'package.json')), manifest.source.dependencyFiles['package.json']);
 });
 
 test('R12-06 records Directory Tree ownership and stays manual after R12-09 starts', async () => {

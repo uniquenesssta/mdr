@@ -1,3 +1,4 @@
+import { historicalDependency } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -95,8 +96,8 @@ test('R12-05 preserves commands DTOs and frozen dependency blobs', async () => {
     'pub fn initial_file_path() -> Option<String>'
   ]) assert.ok(entry.includes(signature), `changed command signature: ${signature}`);
 
-  assert.equal(gitBlobSha(cargo), manifest.source.dependencyFiles['src-tauri/Cargo.toml']);
-  assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
+  assert.equal(gitBlobSha(historicalDependency(manifest, 'src-tauri/Cargo.toml')), manifest.source.dependencyFiles['src-tauri/Cargo.toml']);
+  assert.equal(gitBlobSha(historicalDependency(manifest, 'package.json')), manifest.source.dependencyFiles['package.json']);
 });
 
 test('R12-05 records both Writers and stays manual after R12-09 starts', async () => {

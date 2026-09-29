@@ -8,9 +8,12 @@ import {
   createCodeMirrorExtensionRegistry
 } from '../../../src/features/editor/index.js';
 import {
-  hybridCodeVisualEditingFacet,
-  hybridTableVisualEditingFacet
+  createHybridMarkdownConfiguration
 } from '../../../src/editor/hybrid-markdown.js';
+
+const [tableProvider, codeProvider] = createHybridMarkdownConfiguration({ tableVisualEditing: true, codeVisualEditing: true });
+const hybridTableVisualEditingFacet = tableProvider.facet;
+const hybridCodeVisualEditingFacet = codeProvider.facet;
 
 function createStateHarness(registry, doc = 'alpha') {
   let state = EditorState.create({ doc, extensions: registry.getExtensions() });

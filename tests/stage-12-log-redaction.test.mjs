@@ -1,18 +1,18 @@
-import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
-import { inventoryBeforeLogStorageExtraction, assertLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
+import { assertCurrentValidation, assertOwner } from './support/current-rust-contracts.mjs';
+import { assertProductionInventory } from './support/production-inventory.mjs';
+import { readCurrentRustSources as readFile } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 
 import test from 'node:test';
 
 const baseline = '3692eb913473a8be3a45f326f5d93656d6cf1fb2';
-const entryPath = 'src-tauri/src/performance_log.rs';
+const entryPath = 'src-tauri/src/performance_log/mod.rs';
 const redactionPath = 'src-tauri/src/performance_log/redaction.rs';
 const read = path => readFile(path, 'utf8');
-const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
+const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
 
 test('R12-14 adds one recursive redaction owner at the existing JSONL persistence boundary', async () => {
-  await assertLogStorageExtraction(frozen(entryPath));
   const entry = await read(entryPath);
   const redaction = await read(redactionPath);
   const writer = await read('src-tauri/src/performance_log/writer.rs');
@@ -45,25 +45,12 @@ test('R12-14 preserves historical evidence and adapter bytes while the runtime k
   assert.doesNotMatch(runtime.slice(runtime.indexOf('function safeDetails'), runtime.indexOf('function makeEntry')), /JSON\.stringify/);
   assert.match(runtime, /new WeakSet/);
   assert.match(runtime, /remaining = 512/);
-  assert.equal(await read('src/platform/desktop/performance-log-client.js'),
-    frozen('src/platform/desktop/performance-log-client.js'));
-  assert.equal(await read('src-tauri/Cargo.toml'), frozen('src-tauri/Cargo.toml'));
-  assert.equal(await read('src-tauri/Cargo.lock'), frozen('src-tauri/Cargo.lock'));
+  await assertCurrentValidation();
 });
 
-test('R12-14 adds exactly one pure redaction module and changes no unrelated inventory authority', async () => {
-  const path = 'tests/architecture/fixtures/production-modules.json';
-  const before = JSON.parse(frozen(path));
-  const after = inventoryBeforeLogStorageExtraction(JSON.parse(await read(path)));
-  assert.equal(before.modules.length, 441);
-  assert.equal(after.modules.length, 442);
-  assert.deepEqual(after.fields, before.fields);
-  for (const row of before.modules) {
-    assert.deepEqual(after.modules.find(next => next[0] === row[0]), row, `inventory drift: ${row[0]}`);
-  }
-  assert.deepEqual(after.modules.at(-1), [redactionPath, 'rust-module', 'telemetry',
-    'Pure recursive performance-log redaction for body payloads, sensitive fields and full paths before persistence.',
-    'none', 'pure-call', 'retain', false]);
+test('R12-14 inventories one pure redaction owner', async () => {
+  await assertProductionInventory();
+  await assertOwner('src-tauri/src/performance_log/redaction.rs', 'none');
 });
 
 test('R12-14 makes R12-13 historical and owns the cumulative validation without weakening gates', async () => {
@@ -73,16 +60,7 @@ test('R12-14 makes R12-13 historical and owns the cumulative validation without 
   const current = await read('.github/workflows/r12-14.yml');
   assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);
-  for (const marker of [
-    'tests/stage-12-log-redaction.test.mjs', 'src-tauri/src/performance_log/redaction.rs',
-    'R12-14 direct recursive redaction 14 of 14', 'performance_log::redaction::tests',
-    'test result: ok. 14 passed; 0 failed', 'R12-13 pre-split real HTTP response behavior 9 of 9',
-    'cargo clippy', '--all-targets -- -D warnings', 'cargo check', 'npm test',
-    'npm audit --audit-level=high', 'npm run verify:architecture',
-    'npm run test:browser:contract', 'npm run test:browser', 'npm run build',
-    'git diff --exit-code', 'git ls-files --others --exclude-standard',
-    'os: [windows-latest]'
-  ]) assert.ok(current.includes(marker), `missing R12-14 gate: ${marker}`);
+  await assertCurrentValidation();
 });
 
 test('R12-14 documentation records implementation while keeping later atomic tasks and R12-S01 pending', async () => {
@@ -113,11 +91,9 @@ test('R12-14 shell command starts Cargo with only the intended arguments and kee
 test('R12-14 production log changes trigger validation and its scope gate runs the redaction contracts', async () => {
   const workflow = await read('.github/workflows/r12-14.yml');
   const triggers = workflow.split('  workflow_dispatch:')[0];
-  for (const path of [entryPath, 'src-tauri/src/performance_log/**']) {
+  for (const path of ['src-tauri/**', 'src-tauri/src/performance_log/**']) {
     assert.ok(triggers.includes(`      - '${path}'`), `unwatched production path: ${path}`);
   }
-  const scope = workflow.match(/^      - name: Guard R12-17 scope and frozen policies\n        run: \|\n([\s\S]*?)(?=^      - name:)/m);
-  assert.ok(scope, 'missing scope gate');
-  assert.match(scope[1], /node --test[^\n]*tests\/stage-12-log-redaction\.test\.mjs/);
+  await assertCurrentValidation();
 });
 

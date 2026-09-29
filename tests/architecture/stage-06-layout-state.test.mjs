@@ -36,8 +36,7 @@ test('all migrated classic callers use the scoped LayoutState port while Atomic 
     'public/app/core.js',
     'public/app/bootstrap.js',
     'public/app/editor-tools.js',
-    'public/app/events.js',
-    'public/app/scroll-sync.js'
+    'public/app/events.js'
   ];
   const [classicSources, previewController] = await Promise.all([
     Promise.all(classicPaths.map(read)),
@@ -126,8 +125,14 @@ test('Atomic 6.1 layout state remains single-authority after Atomic 6.4 removes 
   assert.doesNotMatch(core, /function (?:startResize|onResizeMove|stopResize|applySplit|applyPaneStates|reconcileCompactSplitLayout|activateCompactSplitPane)\b/);
 });
 
-test('Atomic 6.1 scroll-sync reads resize activity only from LayoutState', async () => {
-  const scrollSync = await read('public/app/scroll-sync.js');
-  assert.match(scrollSync, /scrollSyncLayoutStatePort\.isResizing/);
-  assert.doesNotMatch(scrollSync, /(?<![\\w.$])\bisResizing\b/);
+test('LayoutState owns resize activity and the current split controller notifies ScrollSync geometry', async () => {
+  const [main, resize, scroll] = await Promise.all([
+    read('src/main.js'),
+    read('src/features/layout/split/split-resize-controller.js'),
+    read('src/features/sync/scroll/scroll-sync-controller.js')
+  ]);
+  assert.match(main, /createSplitResizeController\(\{\s*state: layoutState,[\s\S]*?onGeometryChanged\(\) \{ scrollController\.notifyGeometryChanged\(\); \}/);
+  assert.match(resize, /state\.setResize\(/);
+  assert.doesNotMatch(scroll, /(?:let|const|var)\s+isResizing\b|markdownEditorLayoutStatePort/);
+  await assert.rejects(access('public/app/scroll-sync.js'));
 });

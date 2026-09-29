@@ -31,21 +31,22 @@ test('Atomic 6.13 exposes the responsibility-split Window feature through one pu
 });
 
 test('Atomic 6.13 removes classic Window authority while preserving close-save policy in the application layer', async () => {
-  const [events, main, closeController, closeSavePort, classicPort] = await Promise.all([
+  const [events, main, closeController, closeSavePort, classicPort, persistence] = await Promise.all([
     read('public/app/events.js'),
     read('src/main.js'),
     read('src/features/window/window-close-controller.js'),
     read('src/features/window/close-save-port.js'),
-    read('src/features/window/compatibility/classic-close-save-port.js')
+    read('src/features/window/compatibility/classic-close-save-port.js'),
+    read('src/features/persistence/application/close-save-controller.js')
   ]);
   for (const token of [
     'applyWindowMaximizedState', 'refreshWindowChromeState', 'setupWindowChrome',
     'windowCloseCommitted', 'windowCloseSaving', 'commitWindowClose'
   ]) assert.doesNotMatch(events, new RegExp(token));
   assert.doesNotMatch(events, /call\('window'/);
-  assert.match(events, /eventsCloseSavePort\.register/);
-  assert.match(events, /saveCurrentDocumentState\(false, \{ waitForNative: true, forceSnapshot: true \}\)/);
-  assert.match(events, /confirmUserAction\('关闭前保存失败/);
+  assert.match(persistence, /closeSavePort\.register/);
+  assert.match(persistence, /await saveController\.save\(\{[\s\S]*?forceSnapshot: true/);
+  assert.match(persistence, /await decideAfterFailure\(error\)/);
   assert.match(main, /mountClassicCloseSavePort\(compatibilityPlatformHost, closeSavePort\)/);
   assert.match(closeController, /closeSave\.prepareClose\(\)/);
   assert.doesNotMatch(closeController, /saveCurrentDocumentState|confirmUserAction|localStorage|sessionStorage/);

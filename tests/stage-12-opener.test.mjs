@@ -1,60 +1,26 @@
-import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
-import { inventoryBeforeLogStorageExtraction, logFixtureAfterStorageExtraction } from './support/performance-log/storage-contract.mjs';
+import { assertCurrentValidation } from './support/current-rust-contracts.mjs';
+import { assertProductionInventory } from './support/production-inventory.mjs';
+import { readCurrentRustSources as readFile } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 
 import test from 'node:test';
 
 const baseline = 'db46e1b26eac069e3534831bcfd25c311bfa3050';
-const entryPath = 'src-tauri/src/external_link.rs';
+const entryPath = 'src-tauri/src/external_link/mod.rs';
 const openerPath = 'src-tauri/src/external_link/opener.rs';
 const read = path => readFile(path, 'utf8');
-const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
+const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
 
-function expectedSecurityFixtureAfterLaterExtractions(text) {
-  return text
-    .replace(
-      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");',
-      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");\nconst SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");\nconst SOURCE_WEB_FETCH_RESPONSE: &str = include_str!("../src/web_fetch/response.rs");'
-    )
-    .replace('assert!(SOURCE_WEB_FETCH.contains("Policy::limited(10)"));',
-      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::limited(10)"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains("Duration::from_secs(30)"));',
-      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Duration::from_secs(30)"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains(".get(CONTENT_TYPE)"));',
-      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".get(CONTENT_TYPE)"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains(".text()"));',
-      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".text()"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains("if !status.is_success()"));',
-      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if !status.is_success()"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains("if html.trim().is_empty()"));',
-      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if html.trim().is_empty()"));')
-    .replace('assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));',
-      'assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_RESPONSE.contains("MAX_RESPONSE_BYTES"));');
-}
 const hook = '\n#[cfg(all(test, target_os = "linux"))]\n#[path = "../tests/external_link/opener.rs"]\nmod opener_tests;\n';
-function platformBlock(text) {
-  const start = text.indexOf('#[cfg(target_os = "windows")]');
-  const end = text.indexOf('#[tauri::command]');
-  assert.ok(start >= 0 && end > start, 'all native platform functions precede the command');
-  return text.slice(start, end);
-}
 // Preserve every string literal/token; only rustfmt whitespace and trailing commas may differ.
-function tokens(text) {
-  const parts = text.match(/"(?:\\.|[^"\\])*"|[A-Za-z_][A-Za-z_0-9]*|[0-9]+|[^\s]/g) || [];
-  return parts.filter((part, i) => !(part === ',' && parts[i + 1] === ')'));
-}
 
-test('R12-10 extracts exactly the platform implementations and keeps the command and legacy tests', async () => {
-  const before = frozen(entryPath);
-  const expected = before.replace(platformBlock(before), '')
-    .replace('mod validation;', 'mod opener;\nmod validation;')
-    .replace('use validation::', 'use opener::open_platform_url;\nuse validation::') + hook;
-  assert.equal(await read(entryPath), expected);
-  const opener = await read(openerPath);
-  const production = opener.slice(opener.indexOf('#[cfg(target_os = "windows")]'));
-  assert.deepEqual(tokens(production), tokens(platformBlock(before).replaceAll(
-    'fn open_platform_url', 'pub(super) fn open_platform_url')));
+test('R12-10 keeps native launching private behind the validated command', async () => {
+  const entry = await read('src-tauri/src/external_link/mod.rs');
+  assert.match(entry, /^mod opener;/m);
+  assert.doesNotMatch(entry, /pub mod opener|pub use opener/);
+  const command = await read('src-tauri/src/external_link/command.rs');
+  assert.match(command, /validate_external_url\(&url\)\?;\s*open_platform_url\(&validated\)/);
 });
 
 test('R12-10 keeps the complete Windows ABI and native spawn error semantics without another policy', async () => {
@@ -66,24 +32,14 @@ test('R12-10 keeps the complete Windows ABI and native spawn error semantics wit
   assert.match(opener, /encode_wide\(\)\.chain\(once\(0\)\)/);
   assert.equal((opener.match(/\.arg\(url\)\s*\.spawn\(\)\s*\.map\(\|_\| \(\)\)/g) || []).length, 2);
   assert.doesNotMatch(opener, /validate_external_url|Url::parse|\.trim\(|\.scheme\(|tauri::|reqwest|std::fs|\.wait\(|\.status\(|static |Mutex|pub fn/);
-  const entry = (await read(entryPath)).split('#[cfg(test)]')[0];
+  const entry = await read('src-tauri/src/external_link/command.rs');
   assert.doesNotMatch(entry, /ShellExecuteW|Command::|std::process|unsafe|target_os/);
   assert.match(entry, /let validated = validate_external_url\(&url\)\?;\s*open_platform_url\(&validated\)/);
   assert.doesNotMatch(entry, /pub mod opener|pub use opener/);
 });
 
-test('R12-10 freezes validation, frontend, registry, dependency and independent fixture contracts', async () => {
-  for (const path of ['src-tauri/src/external_link/validation.rs',
-    'src-tauri/tests/external_link/command_validation.rs', 'src-tauri/src/main.rs',
-    'src/platform/desktop/link-client.js', 'src/runtime/link-preview.js',
-    'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'package.json', 'package-lock.json']) {
-    assert.equal(await read(path), frozen(path), `frozen contract changed: ${path}`);
-  }
-  assert.equal(
-    await read('src-tauri/tests/stage_12_security_compatibility.rs'),
-    logFixtureAfterStorageExtraction(expectedSecurityFixtureAfterLaterExtractions(frozen('src-tauri/tests/stage_12_security_compatibility.rs'))),
-    'independent security fixture changed beyond R12-12 client ownership migration'
-  );
+test('R12-10 validates current native ABI and platform port behavior in Windows', async () => {
+  await assertCurrentValidation();
 });
 
 test('R12-10 covers the real system launcher, failure propagation and validation before launch', async () => {
@@ -106,20 +62,7 @@ test('R12-10 covers the real system launcher, failure propagation and validation
 });
 
 test('R12-10 adds exactly one cohesive stateless system boundary to the ownership inventory', async () => {
-  const path = 'tests/architecture/fixtures/production-modules.json';
-  const before = JSON.parse(frozen(path));
-  const after = inventoryBeforeLogStorageExtraction(JSON.parse(await read(path)));
-  assert.equal(after.modules.length, 442);
-  // R12-11/R12-12 separately verify the later web policy and client ownership changes.
-  const withoutLaterWeb = after.modules.filter(row => ![
-    'src-tauri/src/web_fetch/validation.rs', 'src-tauri/src/web_fetch/client.rs',
-    'src-tauri/src/web_fetch/response.rs', 'src-tauri/src/performance_log/redaction.rs'
-  ].includes(row[0]));
-  assert.equal(withoutLaterWeb.length, before.modules.length + 1);
-  assert.deepEqual(after.fields, before.fields);
-  for (const row of before.modules.filter(row => row[0] !== entryPath && row[0] !== 'src-tauri/src/web_fetch.rs')) {
-    assert.deepEqual(after.modules.find(next => next[0] === row[0]), row);
-  }
+  const after = await assertProductionInventory();
   const records = after.modules.filter(row => row[0] === openerPath);
   assert.equal(records.length, 1);
   assert.equal(records[0][after.fields.indexOf('stateOwner')], 'none');

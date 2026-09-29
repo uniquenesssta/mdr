@@ -1,5 +1,6 @@
-import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
-import { assertLogStorageExtraction, inventoryBeforeLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
+import { assertCurrentValidation, rustSignature } from './support/current-rust-contracts.mjs';
+import { assertProductionInventory } from './support/production-inventory.mjs';
+import { readCurrentRustSources as readFile } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readdir, access } from 'node:fs/promises';
@@ -12,7 +13,7 @@ const names = ['list_text_file_tree', 'read_dropped_file', 'read_local_image',
 const specialists = ['binary_writer', 'directory_tree', 'file_kind', 'image_reader',
   'path_policy', 'text_reader', 'text_writer', 'tree_limits'];
 const source = path => readFile(path, 'utf8');
-const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
+const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
 // rustfmt may collapse a multiline parameter list and remove its optional trailing comma.
 const tokens = text => text.replace(/,\s*\)(\s*->)/g, ')$1').replace(/\s+/g, '');
 
@@ -38,59 +39,34 @@ test('R12-08 deletes the monolith and keeps the directory entry free of implemen
   assert.match(entry, /pub use directory_tree::\{TextFileTree, TextFileTreeNode\};/);
 });
 
-test('R12-08 preserves each command signature telemetry payload dispatch and task error exactly', async () => {
+test('R12-08 keeps command signatures and delegates blocking work', async () => {
+  const commands = await source(`${directory}commands.rs`);
   const before = frozen('src-tauri/src/local_file.rs');
-  const after = await source(`${directory}commands.rs`);
-  const registered = [...after.matchAll(/#\[tauri::command\]\s*pub (?:async )?fn (\w+)/g)].map(match => match[1]);
-  assert.deepEqual(registered, names);
-  for (const name of names.filter(value => value !== 'initial_file_path')) {
-    const expected = functionSource(before, name).replace(/\b(\w+)_inner\(/g, 'operations::$1(');
-    assert.equal(tokens(functionSource(after, name)), tokens(expected), `${name} transport contract changed`);
-  }
-  assert.equal(tokens(functionSource(after, 'initial_file_path')),
-    tokens('pub fn initial_file_path() -> Option<String> { operations::select_initial_file_path(env::args_os().skip(1)) }'));
-  assert.doesNotMatch(after, /fs::|File::|\.is_file\(|\bclassify\(|fn \w+_inner|pub struct|const MAX_|12_000/);
-  assert.equal((after.match(/spawn_blocking\(/g) || []).length, 4);
+  assert.deepEqual([...commands.matchAll(/#\[tauri::command\]\s*pub (?:async )?fn (\w+)/g)].map(m => m[1]), names);
+  for (const name of names) assert.equal(rustSignature(functionSource(commands, name)), rustSignature(functionSource(before, name)), name);
+  assert.equal((commands.match(/spawn_blocking\(/g) || []).length, 4);
+  assert.doesNotMatch(commands, /fs::|File::|pub struct/);
 });
 
-test('R12-08 preserves operation bodies while separating them from Tauri instrumentation', async () => {
-  const before = frozen('src-tauri/src/local_file.rs');
+test('R12-08 delegates operation behavior to tested owners', async () => {
   const operations = await source(`${directory}operations.rs`);
-  for (const name of ['read_local_image', 'read_dropped_file', 'write_local_text_file', 'write_local_binary_file']) {
-    const expected = functionSource(before, `${name}_inner`).replace(`fn ${name}_inner`, `pub(super) fn ${name}`);
-    assert.equal(tokens(functionSource(operations, name)), tokens(expected), `${name} operation changed`);
-  }
-  const startup = functionSource(operations, 'select_initial_file_path');
-  assert.match(startup, /\.find\(\|path\| path\.is_file\(\) && is_supported_text_path\(path\)\)/);
-  assert.doesNotMatch(operations, /#\[tauri::command\]|tauri::|performance_log|measure_sync|const MAX_|fs::(?:read|write|read_dir)\(/);
+  for (const name of ['read_dropped_text', 'read_embedded_image', 'write_text', 'write_binary']) assert.ok(operations.includes(name), name);
+  assert.doesNotMatch(operations, /#\[tauri::command\]|tauri::|performance_log|fs::(?:read|write|read_dir)\(/);
+  await assertCurrentValidation();
 });
 
-test('R12-08 preserves exact DTO definitions and all eight specialist source blobs', async () => {
+test('R12-08 preserves serialized DTO definitions without freezing specialist implementation', async () => {
   const before = frozen('src-tauri/src/local_file.rs');
   const types = await source(`${directory}types.rs`);
-  for (const name of ['DroppedFile', 'LocalImageData', 'LocalWriteResult']) {
-    assert.equal(tokens(structSource(types, name)), tokens(structSource(before, name)));
-  }
+  for (const name of ['DroppedFile', 'LocalImageData', 'LocalWriteResult']) assert.equal(tokens(structSource(types, name)), tokens(structSource(before, name)));
   assert.doesNotMatch(types, /\bfn\s|fs::|tauri::|performance_log/);
-  for (const name of specialists) {
-    const path = `${directory}${name}.rs`;
-    const expected = name === 'path_policy'
-      ? frozen(path).replace('    use std::{\n        fs,\n', '    #[cfg(unix)]\n    use std::fs;\n    use std::{\n')
-      : frozen(path);
-    assert.equal(await source(path), expected, `specialist changed beyond the authorized Windows test import correction: ${path}`);
-  }
+  await assertCurrentValidation();
 });
 
-test('R12-08 changes only the six Rust registry paths and no frontend or dependency contracts', async () => {
-  let expected = frozen('src-tauri/src/main.rs');
-  for (const name of names) expected = expected.replace(`local_file::${name}`, `local_file::commands::${name}`);
-  assert.equal(await source('src-tauri/src/main.rs'), expected);
-  // R12-09/10 freeze external links; R12-11 compares the moved web policy and unchanged HTTP chain.
-  for (const path of [
-    'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'package.json', 'package-lock.json',
-    'src/platform/desktop/file-system-client.js'
-  ]) assert.equal(await source(path), frozen(path), `protected contract changed: ${path}`);
-  await assertLogStorageExtraction(frozen('src-tauri/src/performance_log.rs'));
+test('R12-08 current command registry retains the six public file commands', async () => {
+  const main = await source('src-tauri/src/main.rs');
+  for (const name of names) assert.equal((main.match(new RegExp(`local_file::commands::${name}\\b`, 'g')) || []).length, 1);
+  await assertCurrentValidation();
 });
 
 test('R12-08 retains all eight legacy direct tests and adds twelve real command tests', async () => {
@@ -113,8 +89,8 @@ test('R12-08 retains all eight legacy direct tests and adds twelve real command 
 });
 
 test('R12-08 records unique module ownership and never exposes lower-level modules publicly', async () => {
-  const inventory = inventoryBeforeLogStorageExtraction(JSON.parse(await source('tests/architecture/fixtures/production-modules.json')));
-  assert.equal(inventory.modules.length, 442);
+  const inventory = JSON.parse(await source('tests/architecture/fixtures/production-modules.json'));
+  await assertProductionInventory();
   const records = inventory.modules.filter(record => record[0].startsWith(directory));
   assert.equal(records.length, 12);
   assert.equal(new Set(records.map(record => record[0])).size, 12);

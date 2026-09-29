@@ -50,7 +50,7 @@ test('Atomic 6.8 consumes model/preview heading indexes and never reparses the f
 test('Atomic 6.8 removes classic Outline state/render/parser authority while Atomic 7.14 Preview consumes Outline through direct injection', async () => {
   const [core, bootstrap, events, renderEngine, scroll] = await Promise.all([
     read('public/app/core.js'), read('public/app/bootstrap.js'), read('public/app/events.js'),
-    read('src/features/preview/pipeline/preview-render-engine.js'), read('public/app/scroll-sync.js')
+    read('src/features/preview/pipeline/preview-render-engine.js'), read('src/main.js')
   ]);
   for (const legacy of [
     /\boutlineDirty\b/, /\bcachedHeadings\b/, /\bcachedHeadingSource\b/, /\boutlineCollapsed\b/,
@@ -64,7 +64,7 @@ test('Atomic 6.8 removes classic Outline state/render/parser authority while Ato
   assert.match(renderEngine, /outline\?\.replaceIndex/);
   assert.match(renderEngine, /outline\?\.replacePreviewBlocks/);
   assert.doesNotMatch(renderEngine, /\brenderOutline\s*\(|previewOutlineControllerPort/);
-  assert.match(scroll, /scrollSyncOutlineControllerPort\.updateActiveLine/);
+  assert.match(scroll, /updateActiveLine: line => outlineController\?\.updateActiveLine\?\.\(line\)/);
   assert.doesNotMatch(scroll, /\bupdateActiveOutlineByLine\s*\(/);
   assert.match(core, /function\s+persistCurrentDocumentIndex\s*\(/);
 });

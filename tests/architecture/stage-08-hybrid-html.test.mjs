@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
@@ -69,7 +70,7 @@ test('Atomic 8.13 keeps legacy HTML authority removed and composes HTML through 
 test('Atomic 8.13 inventory records the two HTML responsibilities and removes the legacy aggregate', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   const paths = new Set(inventory.modules.map(row => row[0]));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   for (const path of htmlPaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/widgets.js'), false);
   const view = inventory.modules.find(row => row[0] === htmlPaths[1]);

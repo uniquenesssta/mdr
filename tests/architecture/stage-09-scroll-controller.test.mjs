@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -72,7 +73,7 @@ test('R9-03 public Sync surface remains canonical and final composition configur
 test('R9-03 inventory records the canonical controller and source owner in final Stage 9 topology', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   assert.equal(records.has('src/features/sync/scroll/scroll-sync-controller.js'), true);
   assert.equal(records.get('src/features/sync/scroll/scroll-sync-controller.js')[4], 'scroll-sync-runtime');
   assert.equal(records.has('src/features/sync/scroll/scroll-source-ownership.js'), true);

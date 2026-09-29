@@ -4496,6 +4496,456 @@
       "tauri-command",
       "retain",
       false
+    ],
+    [
+      "src/features/documents/application/recent-files-read-source.js",
+      "esm-module",
+      "feature-documents",
+      "Expose RecentFilesRepository snapshots as a read-only cross-feature source.",
+      "Owns no data; delegates snapshot reads and subscriptions only.",
+      "Pure adapter. Returned unsubscribe callbacks are idempotent and owned by callers.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/compatibility/classic-layout-state-port.js",
+      "esm-module",
+      "feature-layout",
+      "Scoped Stage 6 migration bridge exposing the one LayoutState owner to remaining classic layout callers.",
+      "Owns one non-enumerable compatibility-host property; owns no layout values and removes the property on destroy.",
+      "mount one scoped property; destroy removes the property",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/layout/compatibility/classic-split-controller-port.js",
+      "esm-module",
+      "feature-layout",
+      "Scoped migration bridge from remaining classic layout-mode callers to the authoritative Stage 6 Split controllers.",
+      "Owns one non-enumerable compatibility-host property and no layout state/DOM behavior.",
+      "Explicit destroy removes the scoped host property.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/layout/fullscreen/page-fullscreen-controller.js",
+      "esm-module",
+      "feature-layout",
+      "Own persisted page-focus fullscreen state and exact shell class projection.",
+      "Writes only LayoutState fullscreen.page, injected shell classes and one persisted string key.",
+      "Explicit idempotent start/destroy; destroy removes owned classes and makes the controller terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/fullscreen/system-fullscreen-controller.js",
+      "esm-module",
+      "feature-layout",
+      "Own system fullscreen state synchronization and platform fullscreen transitions.",
+      "Writes only LayoutState fullscreen.system and owns one injected platform subscription disposer.",
+      "Explicit idempotent start/destroy with stale subscription suppression; destroy is terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/index.js",
+      "esm-facade",
+      "feature-layout",
+      "Public Stage 6 Layout contract for runtime layout state, responsive thresholds and the scoped classic migration bridge.",
+      "Import-only facade; no DOM, storage or runtime state ownership.",
+      "module-load",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/shell/responsive-breakpoints.js",
+      "esm-module",
+      "feature-layout",
+      "Own Stage 6 responsive layout thresholds and media-query strings used by layout state/controllers.",
+      "Pure constants and calculations; no DOM, storage or listeners.",
+      "pure-call",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/sidebar/sidebar-resize-controller.js",
+      "esm-module",
+      "feature-layout",
+      "Own sidebar drag-resize interaction, width policy, CSS projection, persistence and resize lifecycle.",
+      "Writes canonical LayoutState sidebar/resize groups, one CSS variable, resizer ARIA, local storage and scoped DOM classes.",
+      "Explicit start/destroy; all pointer and viewport listeners are removed and an active capture is cleaned on destroy.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/split/compact-split-controller.js",
+      "esm-module",
+      "feature-layout",
+      "Own compact split entry/exit hysteresis, mutually-exclusive compact pane selection and collapsed-pane activation gestures.",
+      "Writes canonical LayoutState compact split fields and compact split CSS classes; delegates collapse projection to SplitPaneController.",
+      "Explicit start/destroy; ResizeObserver/viewport fallback, RAF and pane listeners are all cleaned.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/split/split-pane-controller.js",
+      "esm-module",
+      "feature-layout",
+      "Own split-pane collapse state, pane/resizer collapsed presentation and collapse persistence.",
+      "Writes canonical LayoutState split collapse fields, pane/resizer classes, collapse-button presentation and local storage.",
+      "Explicit start/destroy; preview collapse listener is owned and removed here.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/split/split-resize-controller.js",
+      "esm-module",
+      "feature-layout",
+      "Own ordinary split pointer drag, ratio policy/projection, persistence and split-resize lifecycle.",
+      "Writes canonical LayoutState ratio/resize state, editor/preview flex styles, resizer ARIA and scoped resize classes; emits geometry-changed only.",
+      "Explicit start/destroy; pointer capture, state subscription and scheduled frame are cleaned terminally.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/state/layout-state.js",
+      "esm-module",
+      "feature-layout",
+      "Own the authoritative runtime layout state for sidebar, split panes, layout mode, compact modes, fullscreen and observable resize activity.",
+      "In-memory immutable snapshots and synchronous subscriptions only; no DOM, storage, timers or platform access.",
+      "Explicit destroy; destroy clears subscribers and makes all state operations terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/toolbar/toolbar-boundary-controller.js",
+      "esm-module",
+      "feature-layout",
+      "Own toolbar single/double-row boundary measurement and its observer/frame lifecycle.",
+      "Measures injected toolbar DOM, projects only toolbar-boundary-wrap, owns one RAF and one ResizeObserver or resize-listener fallback.",
+      "Explicit start/refresh/destroy; destroy disconnects observers/listeners, cancels scheduled work and is terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/compatibility/classic-menu-command-adapter.js",
+      "esm-module",
+      "feature-menu",
+      "Adapt canonical Menu command IDs to the remaining classic application command surface during staged rewrite.",
+      "Owns only registrations in MenuCommandBindings; it never owns document/editor/layout state.",
+      "Explicit start/destroy; classic global lookup is lazy and therefore never copied into Menu Model state.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/menu/compatibility/classic-menu-command-port.js",
+      "esm-module",
+      "feature-menu",
+      "Expose MenuCommandBindings execution to staged runtime modules through one scoped compatibility host property.",
+      "Owns only one host property lifecycle and command error/close orchestration.",
+      "Explicit idempotent destroy; never destroys the injected bindings.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/menu/compatibility/classic-submenu-positioner-port.js",
+      "esm-module",
+      "feature-menu",
+      "Expose the canonical SubmenuPositioner close operation to the remaining classic top-level menu close path.",
+      "Owns only one scoped compatibility-host property.",
+      "Explicit destroy removes only the exact port instance it mounted.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/menu/index.js",
+      "esm-facade",
+      "feature-menu",
+      "Stable public entry for the Menu feature.",
+      "None.",
+      "Import-only facade.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/menu-command-bindings.js",
+      "esm-module",
+      "feature-menu",
+      "Define stable Menu command IDs and own runtime command-handler registrations.",
+      "Owns only handler registrations and close-after-execute policy; no business or UI state.",
+      "Explicit idempotent destroy; terminal after destroy.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/menu-controller.js",
+      "esm-module",
+      "feature-menu",
+      "Orchestrate Menu command activation from selector state through command bindings.",
+      "Owns Menu View subscription/start lifecycle and command error reporting only.",
+      "Explicit idempotent start/destroy; destroy prevents future command dispatch.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/menu-state.js",
+      "esm-module",
+      "feature-menu",
+      "Own the immutable Menu declaration and enabled/visible selector values.",
+      "Owns selector booleans and synchronous immutable subscriptions; no DOM or business side effects.",
+      "Explicit idempotent destroy; terminal after destroy.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/menu-view.js",
+      "esm-module",
+      "feature-menu",
+      "Project Menu Model command metadata onto existing Menu DOM and own command click delegation.",
+      "Owns only command-element metadata, enabled/visible projection and one capture click listener.",
+      "Explicit start/destroy; destroy removes the listener and runtime command metadata.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/recent-files-menu-controller.js",
+      "esm-module",
+      "feature-menu",
+      "Project Documents recent-file snapshots into the Recent Files submenu and emit stable Menu commands.",
+      "Owns one read-only source subscription, one delegated click listener and transient rendered DOM only.",
+      "Explicit idempotent start/destroy; destroy removes listeners/subscriptions and generated rows.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/submenu-positioner.js",
+      "esm-module",
+      "feature-menu",
+      "Own submenu open/close interaction, viewport-aware geometry, delayed close timers and focus lifecycle.",
+      "Owns submenu listener/timer/frame registrations and transient positioning styles only.",
+      "Explicit idempotent start/closeAll/destroy; destroy removes every listener and cancels pending work.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/application/preview-state.js",
+      "esm-module",
+      "feature-preview",
+      "Own the authoritative DOM-free preview runtime state for resolved mode, render version, lifecycle status, last stable metadata, focus section and error.",
+      "Immutable in-memory snapshots and synchronous subscriptions only; no DOM, storage, timers, Worker, platform or rendering access.",
+      "Explicit destroy; destroy clears subscribers and makes all reads and writes terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/compatibility/classic-preview-mode-resolver-port.js",
+      "esm-module",
+      "feature-preview",
+      "Scoped Stage 7 migration bridge exposing the pure Preview Mode Resolver to remaining classic preview callers.",
+      "Owns one non-enumerable compatibility-host property; owns no preview mode state and removes the property on destroy.",
+      "mountClassicPreviewModeResolverPort()/destroy() are idempotent per mount; API calls are terminal after destroy.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/preview/compatibility/classic-preview-render-coordinator-port.js",
+      "esm-module",
+      "feature-preview",
+      "Scoped bridge from remaining classic preview code to the Stage 7 Render Coordinator.",
+      "Owns one non-enumerable compatibility-host property and removes it on destroy.",
+      "API calls are terminal after destroy(); coordinator lifecycle stays with the composition root.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/preview/compatibility/classic-preview-scheduler-port.js",
+      "esm-module",
+      "feature-preview",
+      "Scoped migration bridge exposing Preview Scheduler channels to remaining classic preview callers.",
+      "Owns one non-enumerable compatibility-host property; owns no scheduling state and removes the property on destroy.",
+      "mountClassicPreviewSchedulerPort()/destroy() are idempotent per mount; API calls are terminal after destroy.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/preview/compatibility/classic-preview-state-port.js",
+      "esm-module",
+      "feature-preview",
+      "Scoped Stage 7 migration bridge exposing the canonical PreviewState to remaining classic preview callers without copying state.",
+      "Owns one non-enumerable compatibility-host property; owns no Preview state and removes the property on destroy.",
+      "mountClassicPreviewStatePort()/destroy() are idempotent per mount; API calls are terminal after destroy.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/preview/compatibility/classic-preview-thresholds-port.js",
+      "esm-module",
+      "feature-preview",
+      "Scoped Stage 7 migration bridge exposing the immutable preview threshold owner to remaining classic preview callers.",
+      "Owns one non-enumerable compatibility-host property; owns no threshold values and removes the property on destroy.",
+      "mountClassicPreviewThresholdsPort()/destroy() are idempotent per mount.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/preview/index.js",
+      "esm-facade",
+      "feature-preview",
+      "Public preview feature entry.",
+      "none",
+      "module-load",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/pipeline/preview-cancellation.js",
+      "esm-module",
+      "feature-preview",
+      "Own independent generation tokens for Preview scheduling channels and gate stale task commits.",
+      "In-memory channel generations only; no DOM, timers, Worker, storage or rendering access.",
+      "destroy() invalidates every token and makes future mutation terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/pipeline/preview-mode-resolver.js",
+      "esm-module",
+      "feature-preview",
+      "Resolve the preview presentation mode from the persisted preview setting and document size signals.",
+      "None; inputs are read-only and no DOM, storage, Worker, timers or runtime globals are accessed.",
+      "Pure functions; no start/destroy contract.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/pipeline/preview-render-coordinator.js",
+      "esm-module",
+      "feature-preview",
+      "Select the Stage 7 preview render target from model output and mode policy.",
+      "Owns only lifecycle state; never reads DOM, settings UI, Worker or persistence state.",
+      "createPlan()/execute() reject after destroy().",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/pipeline/preview-scheduler.js",
+      "esm-module",
+      "feature-preview",
+      "Coalesce and schedule Preview input, focus, layout and enhancement work while preserving per-channel cancellation tokens.",
+      "Owns queued timer/frame/idle/background handles per Preview channel; owns no DOM or Preview business state.",
+      "cancel()/cancelAll()/destroy() release queued resources; stale/running tasks cannot commit after ownership changes.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/pipeline/preview-thresholds.js",
+      "esm-module",
+      "feature-preview",
+      "Own the immutable Stage 7 preview behavior thresholds frozen from the Stage 6 baseline.",
+      "None; the exported configuration is recursively frozen at module evaluation.",
+      "Pure configuration module; no start/destroy contract.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/worker/preview-worker-protocol.js",
+      "esm-module",
+      "feature-preview",
+      "Validate and classify Preview worker request/response messages.",
+      "none",
+      "pure-call",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/worker/preview-worker-session.js",
+      "esm-module",
+      "feature-preview",
+      "Own Preview Worker creation, request/acknowledgement correlation, generation checks and failure restarts.",
+      "worker-instance, generation, synchronized-version, request-counter and pending-request-map",
+      "lazy worker creation; restart rejects pending requests; terminal destroy detaches listeners and terminates Worker",
+      "retain",
+      false
+    ],
+    [
+      "src/features/window/close-save-port.js",
+      "esm-module",
+      "feature-window",
+      "Define the application CloseSavePort used by Window close orchestration.",
+      "Owns exactly one registered close-save handler; owns no document or window state.",
+      "Registration disposer and destroy are idempotent; destroy is terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/window/compatibility/classic-close-save-port.js",
+      "esm-module",
+      "feature-window",
+      "Expose only CloseSavePort handler registration to remaining classic application code.",
+      "Owns one host property and the registration disposer it creates.",
+      "Explicit terminal destroy removes only its own host property and registration.",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/window/index.js",
+      "esm-facade",
+      "feature-window",
+      "Public window feature entry.",
+      "none",
+      "module-load",
+      "retain",
+      false
+    ],
+    [
+      "src/features/window/window-close-controller.js",
+      "esm-module",
+      "feature-window",
+      "Orchestrate save-before-close, native close interception and close/force-close fallback.",
+      "Writes only WindowState.closePhase and owns one WindowPort close-request subscription.",
+      "Explicit idempotent start/async destroy with generation guards; destroy is terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/window/window-controller.js",
+      "esm-module",
+      "feature-window",
+      "Coordinate WindowState, controls, drag, close lifecycle and WindowPort resize/maximize synchronization.",
+      "Owns one resize subscription and delegates DOM/close/drag responsibilities to injected feature modules.",
+      "Explicit idempotent async start/destroy with stale async suppression; destroy is terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/window/window-controls-view.js",
+      "esm-module",
+      "feature-window",
+      "Project WindowState into desktop window-control DOM and own control click listeners.",
+      "Holds DOM references only; reads WindowState and invokes injected commands.",
+      "Explicit idempotent start/destroy; destroy removes listeners/subscription and resets owned DOM.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/window/window-drag-region.js",
+      "esm-module",
+      "feature-window",
+      "Own the desktop menu-bar drag gesture and double-click maximize gesture.",
+      "Owns one mousedown listener only; invokes injected commands and owns no WindowState.",
+      "Explicit idempotent start/destroy; destroy removes the listener and is terminal.",
+      "retain",
+      false
+    ],
+    [
+      "src/features/window/window-state.js",
+      "esm-module",
+      "feature-window",
+      "Own the canonical desktop-window state snapshot for the Window feature.",
+      "Owns available, maximized and closePhase only; publishes immutable snapshots.",
+      "Explicit terminal destroy; subscriptions are idempotently disposable.",
+      "retain",
+      false
     ]
   ]
 }

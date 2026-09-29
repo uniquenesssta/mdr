@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
@@ -96,5 +97,5 @@ test('R9-12 production inventory removes classic scroll-sync, replaces old contr
   assert.equal(paths.includes('src/sync/selection-controller.js'), false);
   assert.equal(paths.filter(path => path === 'src/features/sync/selection/selection-sync-controller.js').length, 1);
   assert.equal(paths.filter(path => path === 'src/features/hybrid-editor/runtime/hybrid-sync-capabilities.js').length, 1);
-  assert.equal(paths.length, 381);
+  await assertProductionInventory();
 });

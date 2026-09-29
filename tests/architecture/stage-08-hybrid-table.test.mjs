@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
@@ -88,7 +89,7 @@ test('Atomic 8.9 preserves Session/source/lifecycle ownership and leaves the fro
 
 test('Atomic 8.9 Table ownership remains intact after Atomic 8.12 Mermaid migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of tablePaths) assert.equal(paths.has(path), true, path);
   for (const imagePath of [

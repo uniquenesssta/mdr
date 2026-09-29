@@ -1,4 +1,5 @@
-import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
+import { historicalDependency } from './support/current-rust-contracts.mjs';
+import { readCurrentRustSources as readFile } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 
@@ -29,7 +30,7 @@ test('R12-01 manifest pins the closed Stage 11 source and unchanged dependency c
   assert.equal(contract.source.commit, 'b8ee68b93cf51f45835ac837cad8110aeea24ad0');
 
   for (const [path, expectedSha] of Object.entries(contract.source.dependencyFiles)) {
-    assert.equal(gitBlobSha(await readFile(new URL(`../${path}`, import.meta.url))), expectedSha, path);
+    assert.equal(gitBlobSha(historicalDependency(contract, path)), expectedSha, path);
   }
 });
 
@@ -70,7 +71,7 @@ test('R12-01 freezes local text image size depth count symlink and unreadable-fi
 test('R12-01 freezes external-link trimming validation order and four-scheme allowlist', async () => {
   const contract = await fixture();
   const rust = (await Promise.all([
-    source('src-tauri/src/external_link.rs'),
+    source('src-tauri/src/external_link/mod.rs'),
     source('src-tauri/src/external_link/validation.rs')
   ])).join('\n');
   assert.deepEqual(contract.externalLink.allowedSchemes, ['http', 'https', 'mailto', 'tel']);
@@ -81,7 +82,7 @@ test('R12-01 freezes external-link trimming validation order and four-scheme all
 
 test('R12-01 records web timeout redirects response fields and the current unfiltered response gaps', async () => {
   const contract = await fixture();
-  const rust = await source('src-tauri/src/web_fetch.rs');
+  const rust = await source('src-tauri/src/web_fetch/mod.rs');
   const client = await source('src-tauri/src/web_fetch/client.rs');
   const response = await source('src-tauri/src/web_fetch/response.rs');
   assert.equal(contract.webFetch.redirectLimit, 10);
@@ -100,7 +101,7 @@ test('R12-01 records web timeout redirects response fields and the current unfil
 test('R12-01 preserves the historical performance-log limits fields modes and pre-redaction baseline', async () => {
   const contract = await fixture();
   const [rust, frontend] = await Promise.all([
-    Promise.all(['src-tauri/src/performance_log.rs', 'src-tauri/src/performance_log/writer.rs'].map(source)).then(parts => parts.join('\n')),
+    Promise.all(['src-tauri/src/performance_log/mod.rs', 'src-tauri/src/performance_log/writer.rs'].map(source)).then(parts => parts.join('\n')),
     source('src/runtime/performance.js')
   ]);
   assert.deepEqual(contract.performanceLog.backendEntryFields, [

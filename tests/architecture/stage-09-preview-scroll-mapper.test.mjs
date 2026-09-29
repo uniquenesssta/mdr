@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -84,7 +85,7 @@ test('R9-05 remains intact after final Selection orchestration and legacy remova
 test('R9-05 inventory records preview mapper and final Stage 9 cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   assert.equal(records.has('src/features/sync/scroll/editor-scroll-mapper.js'), true);
   assert.equal(records.has('src/features/sync/scroll/preview-scroll-mapper.js'), true);
   assert.equal(records.get('src/features/sync/scroll/preview-scroll-mapper.js')[4], 'preview-scroll-mapper-geometry-cache');

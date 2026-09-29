@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { discoverProductionFiles } from '../stage-01/module-inventory-core.mjs';
 import {
   getGitHead,
   getLineAndColumn,
@@ -488,8 +489,26 @@ export async function checkReadmeRecord({ root = process.cwd() } = {}) {
   return issues;
 }
 
+export async function checkProductionInventory({ root = process.cwd() } = {}) {
+  const manifest = await loadOwnershipManifest(root);
+  const actual = new Set(await discoverProductionFiles(root));
+  const seen = new Set();
+  const issues = [];
+  for (const record of manifest.modules) {
+    const path = record.path;
+    if (seen.has(path)) issues.push(architectureIssue('production-inventory', path, 'Duplicate ownership record.'));
+    if (!actual.has(path)) issues.push(architectureIssue('production-inventory', path, 'Ownership record has no production file.'));
+    seen.add(path);
+  }
+  for (const path of actual) {
+    if (!seen.has(path)) issues.push(architectureIssue('production-inventory', path, 'Production file has no ownership record.'));
+  }
+  return issues;
+}
+
 export async function checkArchitecture(options = {}) {
   const checks = await Promise.all([
+    checkProductionInventory(options),
     checkDependencyBoundaries(options),
     checkModuleImportSideEffects(options),
     checkLegacyRuntime(options),

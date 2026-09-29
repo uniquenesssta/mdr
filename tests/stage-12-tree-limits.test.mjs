@@ -1,3 +1,4 @@
+import { historicalDependency } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -96,8 +97,8 @@ test('R12-07 preserves commands DTOs frozen dependency blobs and the shared text
     'file_count: usize', 'directory_count: usize', 'skipped_count: usize', 'truncated: bool'
   ]) assert.ok(directoryTree.includes(field), `missing tree DTO field: ${field}`);
   assert.match(textReader, /const MAX_TEXT_BYTES: u64 = 20 \* 1024 \* 1024;/);
-  assert.equal(gitBlobSha(cargo), manifest.source.dependencyFiles['src-tauri/Cargo.toml']);
-  assert.equal(gitBlobSha(packageJson), manifest.source.dependencyFiles['package.json']);
+  assert.equal(gitBlobSha(historicalDependency(manifest, 'src-tauri/Cargo.toml')), manifest.source.dependencyFiles['src-tauri/Cargo.toml']);
+  assert.equal(gitBlobSha(historicalDependency(manifest, 'package.json')), manifest.source.dependencyFiles['package.json']);
 });
 
 test('R12-07 records Tree Limits ownership and is revalidated by the sole automatic R12-09 workflow', async () => {

@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -61,7 +62,7 @@ test('R9-01 frozen public controller contract is consumed directly after classic
 test('current inventory records final public Sync owners without restoring obsolete controllers', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const paths = new Set(inventory.modules.map(record => record[0]));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   assert.equal(paths.has('src/features/sync/index.js'), true);
   assert.equal(paths.has('src/features/sync/scroll/scroll-sync-controller.js'), true);
   assert.equal(paths.has('src/features/sync/scroll/scroll-source-ownership.js'), true);

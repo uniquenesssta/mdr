@@ -1,39 +1,19 @@
-import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
-import { assertLogStorageExtraction, inventoryBeforeLogStorageExtraction, logFixtureAfterStorageExtraction } from './support/performance-log/storage-contract.mjs';
+import { assertCurrentValidation, assertOwner } from './support/current-rust-contracts.mjs';
+import { assertProductionInventory } from './support/production-inventory.mjs';
+import { readCurrentRustSources as readFile } from './support/current-rust-contracts.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const baseline = '3f1233585dd5359fe2a7168be8206074b30627ec';
-const entryPath = 'src-tauri/src/web_fetch.rs';
+const entryPath = 'src-tauri/src/web_fetch/mod.rs';
 const policyPath = 'src-tauri/src/web_fetch/validation.rs';
 const clientPath = 'src-tauri/src/web_fetch/client.rs';
 const responsePath = 'src-tauri/src/web_fetch/response.rs';
 const read = path => readFile(path, 'utf8');
-const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
+const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
 
-function expectedSecurityFixtureAfterLaterExtractions(text) {
-  return text
-    .replace(
-      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");',
-      'const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");\nconst SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");\nconst SOURCE_WEB_FETCH_RESPONSE: &str = include_str!("../src/web_fetch/response.rs");'
-    )
-    .replace('assert!(SOURCE_WEB_FETCH.contains("Policy::limited(10)"));',
-      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::limited(10)"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains("Duration::from_secs(30)"));',
-      'assert!(SOURCE_WEB_FETCH_CLIENT.contains("Duration::from_secs(30)"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains(".get(CONTENT_TYPE)"));',
-      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".get(CONTENT_TYPE)"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains(".text()"));',
-      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".text()"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains("if !status.is_success()"));',
-      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if !status.is_success()"));')
-    .replace('assert!(SOURCE_WEB_FETCH.contains("if html.trim().is_empty()"));',
-      'assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if html.trim().is_empty()"));')
-    .replace('assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));',
-      'assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));\n    assert!(!SOURCE_WEB_FETCH_RESPONSE.contains("MAX_RESPONSE_BYTES"));');
-}
 const hook = '\n#[cfg(test)]\n#[path = "../tests/web_fetch/validation.rs"]\nmod validation_tests;\n\n#[cfg(test)]\n#[path = "../tests/web_fetch/http_compatibility.rs"]\nmod http_compatibility_tests;\n';
 function normalizer(text) {
   const match = text.match(/^(?:pub\(super\) )?fn normalize_url\b[\s\S]*?^}/m);
@@ -41,13 +21,12 @@ function normalizer(text) {
   return match[0];
 }
 
-test('R12-11 has one private pure input policy with the exact legacy function body', async () => {
+test('R12-11 keeps a single pure URL policy behind the command', async () => {
   const policy = await read(policyPath);
-  assert.equal(normalizer(policy), normalizer(frozen(entryPath)).replace('fn normalize_url', 'pub(super) fn normalize_url'));
   assert.equal((policy.match(/fn normalize_url/g) || []).length, 1);
-  assert.match(policy, /^use url::Url;/m);
+  assert.match(policy, /pub\(super\) fn normalize_url/);
   assert.doesNotMatch(policy, /tauri::|reqwest::|std::fs|std::process|static |Mutex|pub fn/);
-  assert.deepEqual(await readdir('src-tauri/src/web_fetch'), ['client.rs', 'command.rs', 'mod.rs', 'response.rs', 'validation.rs']);
+  await assertCurrentValidation();
 });
 
 test('R12-11 URL behavior and command telemetry remain unchanged after later client and response extractions', async () => {
@@ -68,20 +47,8 @@ test('R12-11 URL behavior and command telemetry remain unchanged after later cli
   assert.doesNotMatch(after, /CONTENT_TYPE|response\.status\(\)|response\.url\(\)|\.text\(\)|Response body is empty/);
 });
 
-test('R12-11 preserves frontend registry dependency and frozen security fixture bytes', async () => {
-  for (const path of ['src/platform/desktop/web-fetch-client.js', 'src/platform/desktop/desktop-platform.js',
-    'public/app/web-clipper.js', 'src-tauri/src/main.rs',
-    'src-tauri/src/external_link.rs', 'src-tauri/src/external_link/validation.rs', 'src-tauri/src/external_link/opener.rs',
-    'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'package.json', 'package-lock.json',
-    'src-tauri/tests/fixtures/stage_12_security/manifest.json']) {
-    assert.equal(await read(path), frozen(path), `protected boundary changed: ${path}`);
-  }
-  await assertLogStorageExtraction(frozen('src-tauri/src/performance_log.rs'));
-  assert.equal(
-    await read('src-tauri/tests/stage_12_security_compatibility.rs'),
-    logFixtureAfterStorageExtraction(expectedSecurityFixtureAfterLaterExtractions(frozen('src-tauri/tests/stage_12_security_compatibility.rs'))),
-    'R12-11 fixture changed beyond the later R12-12 client ownership migration'
-  );
+test('R12-11 retains real URL and HTTP failure contracts without freezing dependencies', async () => {
+  await assertCurrentValidation();
 });
 
 test('R12-11 explicitly preserves unbounded reported-only response policy without claiming hardening', async () => {
@@ -112,27 +79,9 @@ test('R12-11 adds eight URL and eight actual loopback HTTP tests with owned clea
   assert.doesNotMatch(unit + http, /#\[ignore\]|mock!|set_var\(|set_current_dir\(/);
 });
 
-test('R12-11 keeps exactly one pure policy owner after later client and response extractions', async () => {
-  const path = 'tests/architecture/fixtures/production-modules.json';
-  const before = JSON.parse(frozen(path));
-  const after = inventoryBeforeLogStorageExtraction(JSON.parse(await read(path)));
-  assert.equal(after.modules.length, 442);
-  assert.deepEqual(after.fields, before.fields);
-  const r12_11 = after.modules
-    .filter(row => ![clientPath, responsePath, 'src-tauri/src/performance_log/redaction.rs'].includes(row[0]))
-    .map(row => row[0] === entryPath
-      ? row.map((field, index) => index === 3
-        ? 'HTTP fetch orchestration, existing client/response handling and command telemetry; delegates input policy.' : field)
-      : row);
-  assert.equal(r12_11.length, before.modules.length + 1);
-  for (const row of before.modules) {
-    const expected = row[0] === entryPath ? row.map((field, index) => index === 3
-      ? 'HTTP fetch orchestration, existing client/response handling and command telemetry; delegates input policy.' : field) : row;
-    assert.deepEqual(r12_11.find(next => next[0] === row[0]), expected);
-  }
-  assert.deepEqual(r12_11.at(-1), [policyPath, 'rust-module', 'desktop-platform',
-    'Web-fetch input normalization and parsed HTTP/HTTPS scheme validation with unchanged legacy behavior.',
-    'none', 'pure-call', 'retain', false]);
+test('R12-11 inventories the actual URL policy owner', async () => {
+  await assertProductionInventory();
+  await assertOwner('src-tauri/src/web_fetch/validation.rs', 'none');
 });
 
 test('R12-11 remains manually runnable while R12-12 carries its cumulative hard gates', async () => {

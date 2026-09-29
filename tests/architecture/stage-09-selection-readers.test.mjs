@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -93,7 +94,7 @@ test('R9-07 keeps frozen mapping and prior scroll owners separate from later Sel
 test('R9-07 production inventory records exactly two Reader responsibilities and final Stage 9 cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   assert.equal(records.get('src/features/sync/selection/editor-selection-reader.js')?.[4], 'editor-selection-reader-lifecycle');
   assert.equal(records.get('src/features/sync/selection/preview-selection-reader.js')?.[4], 'preview-selection-stability-session');
 });

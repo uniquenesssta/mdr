@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
@@ -81,7 +82,7 @@ test('Atomic 8.10 removes legacy Image authority and composes platform plus Widg
 
 test('Atomic 8.10 Image ownership remains intact after Atomic 8.12 Mermaid migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of imagePaths) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid/image-source.js'), false);

@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 
 import test from 'node:test';
@@ -89,7 +90,7 @@ test('Atomic 8.14 leaf files retain one named presentation responsibility each',
 test('Atomic 8.14 production inventory replaces one aggregate with seven presentation records', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const paths = new Set(inventory.modules.map(record => record[0]));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   assert.equal(paths.has('src/editor/hybrid/inline-presentation.js'), false);
   for (const path of PRESENTATION_FILES) assert.equal(paths.has(path), true, path);
 });

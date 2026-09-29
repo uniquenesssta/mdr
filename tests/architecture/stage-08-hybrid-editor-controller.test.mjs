@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 
 import test from 'node:test';
@@ -69,7 +70,7 @@ test('Atomic 8.15 preserves the external hybrid-markdown facade surface', async 
 test('Atomic 8.15 production inventory has final Stage 8 ownership and no legacy aggregate record', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const paths = new Set(inventory.modules.map(record => record[0]));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   for (const path of APP_FILES) assert.equal(paths.has(path), true, path);
   assert.equal(paths.has('src/editor/hybrid-markdown.js'), true);
   for (const path of [

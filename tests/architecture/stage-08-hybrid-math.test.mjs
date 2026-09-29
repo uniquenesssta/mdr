@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
@@ -80,7 +81,7 @@ test('Atomic 8.11 gives both Math variants explicit source-action cleanup and bl
 
 test('Atomic 8.11 Math ownership remains intact after Atomic 8.14 Inline Presentation migration', async () => {
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of mathPaths) assert.equal(paths.has(path), true, path);
   for (const mermaidPath of [

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import test from 'node:test';
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { buildModuleInventory, discoverProductionFiles, normalizeOwnershipManifest } from '../../scripts/stage-01/module-inventory-core.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -28,7 +29,11 @@ const ALLOWED_MIGRATIONS = new Set([
   'retain-until-persistence-migration', 'split-by-feature',
   'remove-with-classic-business-compatibility', 'remove-with-classic-document-callers',
   'remove-with-classic-editor-callers', 'remove-with-classic-i18n-callers',
-  'remove-with-classic-recent-files-callers', 'remove-with-classic-settings-callers'
+  'remove-with-classic-recent-files-callers', 'remove-with-classic-settings-callers',
+  'remove-with-classic-callers', 'remove-with-classic-folder-tree-callers',
+  'remove-with-classic-outline-callers', 'remove-with-classic-preview-callers',
+  'remove-with-classic-sidebar-callers', 'remove-with-codemirror-compatibility',
+  'remove-with-legacy-hybrid-callers', 'retain-until-classic-preview-callers-removed'
 ]);
 
 test('production module ownership fixture covers the exact runtime source surface', async () => {
@@ -45,6 +50,14 @@ test('production module ownership fixture covers the exact runtime source surfac
     assert.ok(ALLOWED_SURFACES.has(record.surface), `unknown surface for ${record.path}: ${record.surface}`);
     assert.ok(ALLOWED_MIGRATIONS.has(record.migration), `unknown migration for ${record.path}: ${record.migration}`);
   }
+});
+
+test('production inventory rejects missing duplicate and nonexistent source records', async () => {
+  await assert.rejects(assertProductionInventory({ ...rawManifest, modules: rawManifest.modules.slice(1) }), /exactly the actual source/);
+  await assert.rejects(assertProductionInventory({ ...rawManifest, modules: [...rawManifest.modules, rawManifest.modules[0]] }), /duplicate paths/);
+  const phantom = [...rawManifest.modules[0]];
+  phantom[0] = 'src/nonexistent-audit-module.js';
+  await assert.rejects(assertProductionInventory({ ...rawManifest, modules: [...rawManifest.modules, phantom] }), /exactly the actual source/);
 });
 
 test('frozen model classification matches the Stage 0 frozen hash contract', () => {
@@ -76,6 +89,8 @@ test('module inventory collector records imports, exports, listeners, state and 
   assert.ok(main.detected.imports.includes('./platform/index.js'));
   assert.ok(main.detected.globalWrites.length > 0, 'current bootstrap globals must remain visible in the baseline inventory');
   const legacyScripts = inventory.modules.filter(record => record.surface === 'legacy-classic-script');
-  assert.equal(legacyScripts.length, 8);
+  const mainSource = await readFile(resolve(root, 'src/main.js'), 'utf8');
+  const loadedScripts = [...mainSource.matchAll(/['"](\/app\/[^'"]+\.js)['"]/g)].map(match => `public${match[1]}`);
+  assert.deepEqual(legacyScripts.map(record => record.path).sort(), loadedScripts.sort());
   assert.ok(legacyScripts.every(record => record.lifecycle === 'classic-script'));
 });

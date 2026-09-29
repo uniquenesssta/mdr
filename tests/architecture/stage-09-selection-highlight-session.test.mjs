@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -76,6 +77,6 @@ test('R9-09 prior owners and frozen mapping remain separate after R9-12 final co
 test('R9-09 production inventory records one Highlight Session responsibility and final Stage 9 cardinality', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   assert.equal(records.get('src/features/sync/selection/selection-highlight-session.js')?.[4], 'selection-highlight-session-lifecycle');
 });

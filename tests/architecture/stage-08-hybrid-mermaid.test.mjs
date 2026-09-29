@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
@@ -89,7 +90,7 @@ test('Atomic 8.12 Mermaid ownership remains intact after Atomic 8.13 HTML migrat
   assert.match(widget, /__markdownEditorDestroyCodeBlock/);
   assert.match(widget, /destroy\(dom\) \{[\s\S]*__markdownEditorMermaidBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   const paths = new Set(inventory.modules.map(row => row[0]));
   for (const path of mermaidPaths) assert.equal(paths.has(path), true, path);
   for (const htmlPath of [

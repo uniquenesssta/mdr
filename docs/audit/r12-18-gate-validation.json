@@ -1,0 +1,457 @@
+{
+  "schemaVersion": 1,
+  "scope": "R12-18 / A02",
+  "baselineCommit": "d356dd73284614208094ea0338dfe543290da431",
+  "baselineRun": 36607929723,
+  "baselineNode": {
+    "tests": 1434,
+    "pass": 1394,
+    "fail": 40
+  },
+  "productionFiles": 493,
+  "manifestBefore": 448,
+  "manifestAdded": 45,
+  "knownFailures": [
+    {
+      "historicalFailure": "Atomic 10.10 keeps one LoadController authority after later Persistence application atomics",
+      "category": "当前README旧阶段及固定总数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "保留LoadController装配/销毁；真实清单；当前文档链接",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 6.1 scroll-sync reads resize activity only from LayoutState",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 6.13 removes classic Window authority while preserving close-save policy in the application layer",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 6.8 removes classic Outline state/render/parser authority while Atomic 7.14 Preview consumes Outline through direct injection",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 7.14 remaining classic callers use the single scoped Preview command surface instead of rebuilding Preview ownership",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.10 Image ownership remains intact after Atomic 8.12 Mermaid migration",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.11 Math ownership remains intact after Atomic 8.14 Inline Presentation migration",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.12 Mermaid ownership remains intact after Atomic 8.13 HTML migration",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.13 inventory records the two HTML responsibilities and removes the legacy aggregate",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.14 production inventory replaces one aggregate with seven presentation records",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.15 production inventory has final Stage 8 ownership and no legacy aggregate record",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.2 production inventory records the facade and sole Session state owner",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.3 Activation boundary remains intact after Atomic 8.6 Shared Widget UI extraction",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.4 production inventory records the new responsibility boundaries",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.5 lifecycle boundary remains intact after Atomic 8.10 Image migration",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.6 Shared Widget UI boundary remains intact after Atomic 8.10 Image migration",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.7 production inventory keeps the three responsibility-specific Prefix/HR modules after Atomic 8.14",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.8 Code Block ownership remains intact after Atomic 8.9 Table migration",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic 8.9 Table ownership remains intact after Atomic 8.12 Mermaid migration",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-global caller",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "ESM consumers receive responsibility-focused ports rather than native DTO facade methods",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-02 inventory records one source owner and final Stage 9 cardinality",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-03 inventory records the canonical controller and source owner in final Stage 9 topology",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-04 inventory records one editor mapper and final Stage 9 cardinality",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-05 inventory records preview mapper and final Stage 9 cardinality",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-06 inventory records one geometry owner and final Stage 9 cardinality",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-07 production inventory records exactly two Reader responsibilities and final Stage 9 cardinality",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-08 production inventory records one Feedback Guard responsibility and final Stage 9 cardinality",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-09 production inventory records one Highlight Session responsibility and final Stage 9 cardinality",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-10 production inventory records one Retry Scheduler owner and final controller remains a distinct orchestration owner",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "R9-12 production inventory removes classic scroll-sync, replaces old controller path and contains the final sync modules exactly once",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "all Stage 0 frozen hashes remain byte-identical",
+      "category": "已删除Rust单文件的哈希断言",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "8个JS模型哈希不变；Rust格式/恢复由document_store_compatibility及当前全量Rust测试验证",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "all migrated classic callers use the scoped LayoutState port while Atomic 7.14 Preview uses direct LayoutState injection without a second state center",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "current inventory records final public Sync owners without restoring obsolete controllers",
+      "category": "历史固定模块数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "实际文件集合精确匹配，保留各功能所有权及删除断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "module inventory collector records imports, exports, listeners, state and side-effect signals",
+      "category": "清单漏项及过时类型/经典脚本数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "补齐45项；真实加载脚本集合比较；缺失/重复/虚构清单反例",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "production integration keeps raw CodeMirror confined to the editor feature and removes classic raw-view access",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "production module ownership fixture covers the exact runtime source surface",
+      "category": "清单漏项及过时类型/经典脚本数",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "补齐45项；真实加载脚本集合比较；缺失/重复/虚构清单反例",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "save-before-close remains in the application CloseSavePort and stays absent from the platform/window orchestration internals",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "stable compatibility presentation has no inline style authority",
+      "category": "已删除路径或已迁移责任",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "当前Layout/Sync/Outline/CloseSave/Image/Widget责任文件及原接口、样式、生命周期断言",
+      "windowsStatus": "pending"
+    },
+    {
+      "historicalFailure": "tests/unit/editor/codemirror-extension-registry.test.mjs",
+      "category": "已移除的内部导出",
+      "owner": "R12-18 / A02",
+      "replacementCoverage": "通过公共配置工厂的Facet provider验证真实EditorState配置及重建",
+      "windowsStatus": "pending"
+    }
+  ],
+  "replacedExtractionAssertions": [
+    {
+      "file": "tests/stage-12-local-commands.test.mjs",
+      "old": "R12-08 changes only the six Rust registry paths and no frontend or dependency contracts",
+      "replacement": "R12-08 current command registry retains the six public file commands"
+    },
+    {
+      "file": "tests/stage-12-local-commands.test.mjs",
+      "old": "R12-08 preserves exact DTO definitions and all eight specialist source blobs",
+      "replacement": "R12-08 preserves serialized DTO definitions without freezing specialist implementation"
+    },
+    {
+      "file": "tests/stage-12-local-commands.test.mjs",
+      "old": "R12-08 preserves operation bodies while separating them from Tauri instrumentation",
+      "replacement": "R12-08 delegates operation behavior to tested owners"
+    },
+    {
+      "file": "tests/stage-12-local-commands.test.mjs",
+      "old": "R12-08 preserves each command signature telemetry payload dispatch and task error exactly",
+      "replacement": "R12-08 keeps command signatures and delegates blocking work"
+    },
+    {
+      "file": "tests/stage-12-external-link-validation.test.mjs",
+      "old": "R12-09 does not move validation to the frontend or change dependencies",
+      "replacement": "R12-09 registers one backend validator command and keeps the independent fixture"
+    },
+    {
+      "file": "tests/stage-12-external-link-validation.test.mjs",
+      "old": "R12-09 preserves command and legacy tests after R12-10 extracts only the system opener",
+      "replacement": "R12-09 command validates before reaching the native opener"
+    },
+    {
+      "file": "tests/stage-12-external-link-validation.test.mjs",
+      "old": "R12-09 keeps the complete frozen parser allowlist error order and returned spelling",
+      "replacement": "R12-09 preserves allowlist and returned spelling with real rejection coverage"
+    },
+    {
+      "file": "tests/stage-12-opener.test.mjs",
+      "old": "R12-10 freezes validation, frontend, registry, dependency and independent fixture contracts",
+      "replacement": "R12-10 validates current native ABI and platform port behavior in Windows"
+    },
+    {
+      "file": "tests/stage-12-opener.test.mjs",
+      "old": "R12-10 extracts exactly the platform implementations and keeps the command and legacy tests",
+      "replacement": "R12-10 keeps native launching private behind the validated command"
+    },
+    {
+      "file": "tests/stage-12-web-validation.test.mjs",
+      "old": "R12-11 keeps exactly one pure policy owner after later client and response extractions",
+      "replacement": "R12-11 inventories the actual URL policy owner"
+    },
+    {
+      "file": "tests/stage-12-web-validation.test.mjs",
+      "old": "R12-11 preserves frontend registry dependency and frozen security fixture bytes",
+      "replacement": "R12-11 retains real URL and HTTP failure contracts without freezing dependencies"
+    },
+    {
+      "file": "tests/stage-12-web-validation.test.mjs",
+      "old": "R12-11 has one private pure input policy with the exact legacy function body",
+      "replacement": "R12-11 keeps a single pure URL policy behind the command"
+    },
+    {
+      "file": "tests/stage-12-web-client.test.mjs",
+      "old": "R12-12 keeps exactly one stateless client owner after the later response extraction",
+      "replacement": "R12-12 inventories the actual stateless client owner"
+    },
+    {
+      "file": "tests/stage-12-web-client.test.mjs",
+      "old": "R12-12 client extraction remains byte-stable after the later R12-13 response ownership move",
+      "replacement": "R12-12 command delegates transport and response handling to separate owners"
+    },
+    {
+      "file": "tests/stage-12-web-response.test.mjs",
+      "old": "R12-13 adds exactly one stateless response owner and changes no other inventory authority",
+      "replacement": "R12-13 inventories the actual stateless response owner"
+    },
+    {
+      "file": "tests/stage-12-web-response.test.mjs",
+      "old": "R12-13 transfers the independent security fixture to the response owner without changing policy",
+      "replacement": "R12-13 independent fixture reads the current response owner"
+    },
+    {
+      "file": "tests/stage-12-web-response.test.mjs",
+      "old": "R12-13 preserves the real nine-case HTTP characterization and all dependency choices",
+      "replacement": "R12-13 retains the real HTTP response failure and gzip scenarios"
+    },
+    {
+      "file": "tests/stage-12-web-response.test.mjs",
+      "old": "R12-13 leaves request transport command telemetry and legacy tests byte-stable around response delegation",
+      "replacement": "R12-13 command propagates transport errors and delegates response projection"
+    },
+    {
+      "file": "tests/stage-12-log-redaction.test.mjs",
+      "old": "R12-14 adds exactly one pure redaction module and changes no unrelated inventory authority",
+      "replacement": "R12-14 inventories one pure redaction owner"
+    },
+    {
+      "file": "tests/stage-12-log-writer.test.mjs",
+      "old": "R12-15 inventory assigns session and serialization states to their actual owners",
+      "replacement": "R12-15 inventories the actual log state owners"
+    },
+    {
+      "file": "tests/stage-12-log-writer.test.mjs",
+      "old": "R12-15 preserves moved log function bodies and all public measurement command and lifecycle behavior",
+      "replacement": "R12-15 preserves current command measurement and storage interfaces"
+    },
+    {
+      "file": "tests/stage-12-log-lifecycle.test.mjs",
+      "old": "R12-16 adds only its lifecycle inventory record without changing prior ownership",
+      "replacement": "R12-16 inventories the stateless lifecycle owner"
+    },
+    {
+      "file": "tests/stage-12-log-lifecycle.test.mjs",
+      "old": "R12-16 leaves paths writer redaction commands dependencies and frontend behavior unchanged",
+      "replacement": "R12-16 preserves real lifecycle failure handling and release no-write contracts"
+    },
+    {
+      "file": "tests/stage-12-log-lifecycle.test.mjs",
+      "old": "R12-16 moves the unchanged lifecycle event into one stateless owner with a public re-export",
+      "replacement": "R12-16 delegates stateless lifecycle events through the best-effort log sink"
+    },
+    {
+      "file": "tests/stage-12-command-registry.test.mjs",
+      "old": "R12-17 inventories all new real owners and preserves every unrelated state record",
+      "replacement": "R12-17 inventories actual command owners without a historical total"
+    },
+    {
+      "file": "tests/stage-12-command-registry.test.mjs",
+      "old": "R12-17 changes only command paths in application composition and preserves frontend payloads",
+      "replacement": "R12-17 keeps actual command paths and exercises frontend payload contracts"
+    },
+    {
+      "file": "tests/stage-12-command-registry.test.mjs",
+      "old": "R12-17 preserves command signatures bodies payloads and asynchronous error propagation",
+      "replacement": "R12-17 preserves command signatures payloads and asynchronous error propagation"
+    }
+  ],
+  "historicalEvidencePolicy": "Original manifests and accepted run records stay immutable. Current lockfile/source bytes are not frozen by historical identities. No Rust behavior tests or frozen JS models changed.",
+  "staticChecks": {
+    "sourceContractTests": 103,
+    "layoutOwnershipAndDocsTests": 165,
+    "productRuntimeValidation": "Windows pending; no local Linux product validation"
+  },
+  "newFindings": [
+    {
+      "id": "R18-N01",
+      "kind": "real architecture failure",
+      "path": "src/features/preview/virtual/virtual-preview-controller.js",
+      "cycle": [
+        "src/features/preview/index.js",
+        "src/features/preview/virtual/virtual-preview-controller.js",
+        "src/features/preview/index.js"
+      ],
+      "owner": "R12-22",
+      "deadline": "R12-24",
+      "status": "open; checkDependencyBoundaries remains failing"
+    }
+  ],
+  "windows": {
+    "status": "pending"
+  }
+}

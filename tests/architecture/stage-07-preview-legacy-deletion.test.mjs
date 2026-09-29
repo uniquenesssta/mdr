@@ -59,8 +59,7 @@ test('Atomic 7.14 remaining classic callers use the single scoped Preview comman
     'public/app/bootstrap.js',
     'public/app/events.js',
     'public/app/editor-tools.js',
-    'public/app/web-clipper.js',
-    'public/app/scroll-sync.js'
+    'public/app/web-clipper.js'
   ];
   const combined = (await Promise.all(paths.map(source))).join('\n');
   assert.match(combined, /markdownEditorPreviewCommandPort/);

@@ -1,4 +1,4 @@
-import { inventoryBeforeLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
+import { assertProductionInventory } from './support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -155,12 +155,12 @@ test('Atomic 10.11 concurrent requests coalesce and destroy suppresses late save
   assert.throws(() => controller.prepareClose(), /destroyed/);
 });
 
-test('Atomic 10.11 production integration gives Persistence one Close Save authority and leaves Window port-only', () => {
+test('Atomic 10.11 production integration gives Persistence one Close Save authority and leaves Window port-only', async () => {
   const persistenceEntry = read('src/features/persistence/index.js');
   const main = read('src/main.js');
   const events = read('public/app/events.js');
   const windowClose = read('src/features/window/window-close-controller.js');
-  const fixture = inventoryBeforeLogStorageExtraction(JSON.parse(read('tests/architecture/fixtures/production-modules.json')));
+  const fixture = JSON.parse(read('tests/architecture/fixtures/production-modules.json'));
 
   assert.match(persistenceEntry, /createCloseSaveController/);
   assert.equal((main.match(/createCloseSaveController\(/g) || []).length, 1);
@@ -169,7 +169,7 @@ test('Atomic 10.11 production integration gives Persistence one Close Save autho
   assert.doesNotMatch(events, /eventsCloseSavePort|markdownEditorCloseSavePort/);
   assert.match(windowClose, /closeSave\.prepareClose\(\)/);
   assert.doesNotMatch(windowClose, /saveController|autosaveController|forceSnapshot|snapshotReason/);
-  assert.equal(fixture.modules.length, 442);
+  await assertProductionInventory();
   assert.ok(fixture.modules.some(([modulePath]) => modulePath === 'src-tauri/src/local_file/binary_writer.rs'));
   assert.ok(fixture.modules.some(([modulePath]) => modulePath === 'src-tauri/src/local_file/directory_tree.rs'));
   assert.ok(fixture.modules.some(([modulePath]) => modulePath === 'src-tauri/src/local_file/file_kind.rs'));

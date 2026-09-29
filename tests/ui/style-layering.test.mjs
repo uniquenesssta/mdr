@@ -147,7 +147,9 @@ test('stable compatibility presentation has no inline style authority', async ()
     'public/app/export.js',
     'src/features/preview/worker/preview-worker.js',
     'src/features/preview/render/presentation/mermaid-presentation.js',
-    'src/editor/hybrid/widgets.js'
+    'src/features/hybrid-editor/widgets/code-block/code-block-actions.js',
+    'src/features/hybrid-editor/widgets/mermaid/mermaid-actions.js',
+    'src/features/hybrid-editor/widgets/html/html-block-widget.js'
   ].map(readText));
   const combinedStableSources = stableStyleSources.join('\n');
   assert.doesNotMatch(combinedStableSources, /<pre\s+style=/i);

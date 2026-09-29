@@ -1,3 +1,4 @@
+import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -84,7 +85,7 @@ test('R9-10 prior specialist owners and frozen selection mapping remain separate
 test('R9-10 production inventory records one Retry Scheduler owner and final controller remains a distinct orchestration owner', async () => {
   const inventory = JSON.parse(await read('tests/architecture/fixtures/production-modules.json'));
   const records = new Map(inventory.modules.map(record => [record[0], record]));
-  assert.equal(inventory.modules.length, 381);
+  await assertProductionInventory(inventory);
   assert.equal(records.get('src/features/sync/selection/selection-retry-scheduler.js')?.[4], 'selection-retry-scheduler-lifecycle');
   assert.equal(records.get(controllerPath)?.[4], 'selection-sync-controller-orchestration');
   assert.equal(records.has('src/sync/selection-controller.js'), false);

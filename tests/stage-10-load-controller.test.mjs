@@ -1,3 +1,4 @@
+import { assertProductionInventory } from './support/production-inventory.mjs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
@@ -273,8 +274,8 @@ test('Atomic 10.10 keeps one LoadController authority after later Persistence ap
   assert.match(mainSource, /loadController\s*\n?\s*\}/);
   assert.match(mainSource, /loadController\.destroy\(\)/);
   const fixture = JSON.parse(fixtureText);
-  assert.ok(fixture.modules.length >= 394);
+  await assertProductionInventory(fixture);
   assert.ok(fixture.modules.some(row => row[0] === 'src/features/persistence/application/load-controller.js'));
-  assert.match(handoff, /moduleFixture\.modules\.length,\s*(?:394|39[5-9]|[4-9]\d{2,})/);
-  assert.match(readme, /Stage 10/);
+  assert.match(handoff, /assertProductionInventory/);
+  assert.match(readme, /docs\/README\.md/);
 });
