@@ -149,3 +149,13 @@ P1：阻塞验收的数据可靠性/安全问题。P2：需修复或明确接受
 提交 `4d443ea` 的 [Actions 36553566571](https://github.com/uniquenesssta/mdr/actions/runs/36553566571) 已实际跑完递归 Node：**1418 个结果，1378 通过、40 失败**。其中 architecture 368/335/33（总/过/失败），根测试 453/452/1，UI 42/41/1，unit/editor 46/44/2，unit/platform 136/133/3，其余目录无失败；8 个独立 e2e 文件在 Windows 实际执行通过。[失败名称清单](audit/windows-node-results.json)。这些是 runner 报告结果，不把加载失败文件内尚未展开的测试当作已执行。
 
 前一轮 `e5eea0c` 已确认 tar 路径修复生效、Windows Clippy 与 cargo check 通过；还暴露了真实 HTTP 夹具的 Windows 非阻塞 socket 继承问题（WSAEWOULDBLOCK / 10035），导致 HTTP 基线 6/9、当前 Rust 主测试 205/206。夹具已显式将 accepted socket 切回阻塞，再设置原有 2 秒超时；仍使用真实 TCP/reqwest、原来的 9 个断言，无忽略测试。旧/新基线使用同一修正后的夹具，原产品源、超时、响应策略保持不变。
+
+### 最终验证提交
+
+最终代码与 CI 配置提交为 `18fe040dc96fbcc26898b901ef25495006a28ec9`，真实 Windows 运行见 [Actions 36554016082](https://github.com/uniquenesssta/mdr/actions/runs/36554016082)。后续提交仅归档本轮报告和证据。平台结论针对 `agent/r12-stage` 当前工作流配置，不表示其他未修改的历史分支也已应用同一策略。
+
+完整 Node 再次得到 **1418 项、1378 通过、40 失败**，与前次一致。前端构建、依赖审计、四项架构/文档 CLI、浏览器 contract、built-app 浏览器回归、原生 opener 编译链接均通过；前端 job 仍因要求当前 README 保留 Stage 10 的根测试而失败。独立 CLI 通过不能覆盖或抹去完整 architecture 测试的失败。
+
+**最终 Rust job 全部通过**：全量 `cargo test` 为 **206 + 5 + 1 + 6 = 218 项通过，0 失败、0 忽略**；`cargo clippy -- -D warnings`、`cargo check`、rustfmt、所有定向阶段契约和旧/新真实 HTTP 比较均通过。Windows socket 修正已获得本轮实跑确认。[最终逐 job / step 证据](audit/windows-validation-final.json) 与 [完整 Node 失败清单](audit/windows-node-results.json) 已归档。
+
+这些结果不消除 A01/A07/A09，也不证明 A03 的 Windows WebView 风险已排除。**全仓审计完成；产品验收未通过；R12-14 不标记完成。**

@@ -1,0 +1,365 @@
+{
+  "run": 36554016082,
+  "commit": "18fe040dc96fbcc26898b901ef25495006a28ec9",
+  "platform": "Windows Server 2025",
+  "jobs": [
+    {
+      "id": 109358723325,
+      "name": "Log Redaction and cumulative hard gates",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserve repository LF bytes on Windows",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Record validation target",
+          "conclusion": "success"
+        },
+        {
+          "name": "Guard R12-14 scope and frozen policies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Pin Rust 1.88 with Clippy and rustfmt",
+          "conclusion": "success"
+        },
+        {
+          "name": "Rust formatting",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-14 direct recursive redaction 6 of 6",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-13 pre-split real HTTP response behavior 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-13 extracted real HTTP response behavior 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-12 pre-split real HTTP client behavior 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-12 direct client ownership tests 2 of 2",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-12 extracted real HTTP client behavior 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-11 pre-split URL and real HTTP behavior 17 of 17",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-11 extracted URL and real HTTP behavior 17 of 17",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-09 direct URL validation 8 of 8",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-09 real backend command rejection 2 of 2",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-08 real command tests 12 of 12",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserved local-file legacy regression 4 of 4",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-07 direct Tree Limits tests 6 of 6",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-06 direct Windows Directory Tree regression 5 of 5",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-05 direct Writer regression 10 of 10",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-04 direct Reader regression 10 of 10",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-03 direct File Kind regression 6 of 6",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-02 direct Windows Path Policy regression 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-01 direct Windows behavior regression 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-01 independent compatibility fixture 6 of 6",
+          "conclusion": "success"
+        },
+        {
+          "name": "Full Rust tests",
+          "conclusion": "success"
+        },
+        {
+          "name": "Full Clippy warnings-denied gate",
+          "conclusion": "success"
+        },
+        {
+          "name": "Rust check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Validation leaves tracked sources unchanged",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain Rust evidence even on failure",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 109358723721,
+      "name": "All repository Node tests (Windows)",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserve repository LF bytes on Windows",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install locked frontend dependencies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run every tracked Node test including nested suites",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Preserve complete audit results",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 109358723866,
+      "name": "Native opener compilation and linkage (windows-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserve repository LF bytes on Windows",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Record target and pin Rust",
+          "conclusion": "success"
+        },
+        {
+          "name": "Compile and link the production native boundary",
+          "conclusion": "success"
+        },
+        {
+          "name": "Validation leaves tracked sources unchanged",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain native boundary evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 109358723980,
+      "name": "Log Redaction and frontend regression",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserve repository LF bytes on Windows",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Record validation target",
+          "conclusion": "success"
+        },
+        {
+          "name": "Setup Node 22",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install locked frontend dependencies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Dependency audit hard gate",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-08 command boundaries and R12-07 compatibility contracts",
+          "conclusion": "success"
+        },
+        {
+          "name": "Full Node regression",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Architecture and documentation hard gates",
+          "conclusion": "success"
+        },
+        {
+          "name": "Browser preview contract",
+          "conclusion": "success"
+        },
+        {
+          "name": "Production build",
+          "conclusion": "success"
+        },
+        {
+          "name": "Built-app browser regression",
+          "conclusion": "success"
+        },
+        {
+          "name": "Validation leaves tracked sources unchanged",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain frontend evidence even on failure",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Setup Node 22",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "rustTestSummaries": [
+    "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 200 filtered out; finished in 0.00s",
+    "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 191 filtered out; finished in 30.02s",
+    "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 197 filtered out; finished in 30.03s",
+    "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 189 filtered out; finished in 30.02s",
+    "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 204 filtered out; finished in 0.00s",
+    "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 197 filtered out; finished in 30.02s",
+    "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 190 filtered out; finished in 0.00s",
+    "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 189 filtered out; finished in 30.02s",
+    "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 198 filtered out; finished in 0.00s",
+    "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 197 filtered out; finished in 30.02s",
+    "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 198 filtered out; finished in 0.00s",
+    "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 204 filtered out; finished in 0.00s",
+    "test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 194 filtered out; finished in 0.03s",
+    "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 0.00s",
+    "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 200 filtered out; finished in 0.00s",
+    "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 201 filtered out; finished in 0.01s",
+    "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 0.00s",
+    "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 200 filtered out; finished in 0.00s",
+    "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 0.00s",
+    "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 200 filtered out; finished in 0.00s",
+    "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 200 filtered out; finished in 0.00s",
+    "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 197 filtered out; finished in 0.00s",
+    "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 197 filtered out; finished in 0.00s",
+    "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "test result: ok. 206 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 36.19s",
+    "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+  ],
+  "nodeTotals": {
+    "tests": 1418,
+    "pass": 1378,
+    "fail": 40
+  },
+  "acceptance": "failed",
+  "limitations": [
+    "Native opener evidence is compilation/linkage only; no real ShellExecute proof.",
+    "Windows installer, file association, native WebView security and persistence fault injection remain incomplete.",
+    "Static audit is full-repository coverage, not a claim of manual line-by-line review of every file."
+  ]
+}
+

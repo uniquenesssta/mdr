@@ -1,6 +1,6 @@
 {
-  "run": 36553566571,
-  "commit": "4d443ea4d4167bf843b1a77f8b625bf95ebf3946",
+  "run": 36554016082,
+  "commit": "18fe040dc96fbcc26898b901ef25495006a28ec9",
   "platform": "Windows Server 2025",
   "totals": {
     "tests": 1418,
@@ -48,5 +48,6 @@
     "not ok 98 - Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-global caller",
     "not ok 100 - ESM consumers receive responsibility-focused ports rather than native DTO facade methods",
     "not ok 135 - save-before-close remains in the application CloseSavePort and stays absent from the platform/window orchestration internals"
-  ]
+  ],
+  "previousMatchingRun": 36553566571
 }
