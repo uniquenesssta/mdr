@@ -1,0 +1,3151 @@
+{
+  "baseline": "74e3184e2d175abc84b7e4db786ad71cc3fb2aaf",
+  "rules": {
+    "html_sink": "innerHTML\\s*=|insertAdjacentHTML\\s*\\(",
+    "dynamic_code": "\\beval\\s*\\(|new Function\\s*\\(",
+    "native_unsafe": "\\bunsafe\\s*\\{",
+    "process": "Command::|\\bspawn\\(|execFile|execSync|spawnSync",
+    "file_write": "fs::write|write_atomic|write_all|writeFile|setItem\\(",
+    "async_resource": "setTimeout|setInterval|requestAnimationFrame|new Worker|new ResizeObserver|new MutationObserver",
+    "empty_catch": "catch\\s*(?:\\([^)]*\\))?\\s*\\{\\s*\\}"
+  },
+  "scope_note": "Whole-text heuristic scan; counts are review leads, not confirmed vulnerabilities. Imports in strings can be fixtures. No dynamic validation is implied.",
+  "groups": {
+    ".cargo/config.toml": [
+      1,
+      2
+    ],
+    ".github/workflows": [
+      45,
+      8313
+    ],
+    "(root)": [
+      3,
+      106
+    ],
+    "public/app": [
+      6,
+      2568
+    ],
+    "public/compatibility": [
+      1,
+      516
+    ],
+    "scripts/architecture": [
+      4,
+      893
+    ],
+    "scripts/ci": [
+      1,
+      39
+    ],
+    "scripts/dependencies": [
+      1,
+      266
+    ],
+    "scripts/stage-00": [
+      6,
+      782
+    ],
+    "scripts/stage-01": [
+      2,
+      218
+    ],
+    "scripts/stage-02": [
+      6,
+      1057
+    ],
+    "scripts/stage-03": [
+      4,
+      1309
+    ],
+    "scripts/stage-04": [
+      1,
+      279
+    ],
+    "scripts/verify-architecture.mjs": [
+      1,
+      8
+    ],
+    "scripts/verify-generated-files.mjs": [
+      1,
+      7
+    ],
+    "scripts/verify-no-legacy-runtime.mjs": [
+      1,
+      8
+    ],
+    "scripts/verify-readme-record.mjs": [
+      1,
+      7
+    ],
+    "src-tauri/Cargo.toml": [
+      1,
+      20
+    ],
+    "src-tauri/build.rs": [
+      1,
+      3
+    ],
+    "src-tauri/src": [
+      54,
+      5503
+    ],
+    "src-tauri/tests": [
+      12,
+      2575
+    ],
+    "src/app": [
+      11,
+      776
+    ],
+    "src/bootstrap": [
+      1,
+      321
+    ],
+    "src/document": [
+      1,
+      369
+    ],
+    "src/editor": [
+      6,
+      1426
+    ],
+    "src/features/documents": [
+      24,
+      1980
+    ],
+    "src/features/editor": [
+      32,
+      2745
+    ],
+    "src/features/help": [
+      18,
+      1020
+    ],
+    "src/features/hybrid-editor": [
+      49,
+      5724
+    ],
+    "src/features/layout": [
+      14,
+      1879
+    ],
+    "src/features/menu": [
+      10,
+      1135
+    ],
+    "src/features/persistence": [
+      13,
+      2132
+    ],
+    "src/features/preview": [
+      45,
+      6663
+    ],
+    "src/features/settings": [
+      24,
+      2183
+    ],
+    "src/features/sidebar": [
+      17,
+      1846
+    ],
+    "src/features/sync": [
+      12,
+      2478
+    ],
+    "src/features/window": [
+      8,
+      770
+    ],
+    "src/i18n": [
+      16,
+      2210
+    ],
+    "src/main.js": [
+      1,
+      1525
+    ],
+    "src/model-kernel": [
+      1,
+      49
+    ],
+    "src/platform": [
+      36,
+      2169
+    ],
+    "src/preview": [
+      2,
+      451
+    ],
+    "src/runtime": [
+      3,
+      1229
+    ],
+    "src/shared": [
+      3,
+      186
+    ],
+    "src/storage": [
+      1,
+      300
+    ],
+    "src/styles": [
+      52,
+      5502
+    ],
+    "src/sync": [
+      1,
+      742
+    ],
+    "src/theme": [
+      3,
+      198
+    ],
+    "src/ui": [
+      19,
+      1235
+    ],
+    "tests/architecture": [
+      74,
+      6397
+    ],
+    "tests/browser-e2e-contract.test.mjs": [
+      1,
+      87
+    ],
+    "tests/built-application-assets.test.mjs": [
+      1,
+      34
+    ],
+    "tests/dependency-location.test.mjs": [
+      1,
+      80
+    ],
+    "tests/documentation-layout.test.mjs": [
+      1,
+      30
+    ],
+    "tests/e2e": [
+      20,
+      4370
+    ],
+    "tests/folder-file-tree.test.mjs": [
+      1,
+      71
+    ],
+    "tests/helpers": [
+      2,
+      346
+    ],
+    "tests/historical-workflow-routing.test.mjs": [
+      1,
+      27
+    ],
+    "tests/hybrid-component-contract.test.mjs": [
+      1,
+      83
+    ],
+    "tests/hybrid-component-state.test.mjs": [
+      1,
+      101
+    ],
+    "tests/hybrid-regression-baseline.test.mjs": [
+      1,
+      21
+    ],
+    "tests/hybrid-source-highlight.test.mjs": [
+      1,
+      26
+    ],
+    "tests/package-scripts.test.mjs": [
+      1,
+      77
+    ],
+    "tests/presentation-renderer-contract.test.mjs": [
+      1,
+      82
+    ],
+    "tests/stage-01-handoff.test.mjs": [
+      1,
+      211
+    ],
+    "tests/stage-06-menu-model.test.mjs": [
+      1,
+      18
+    ],
+    "tests/stage-06-recent-files-menu.test.mjs": [
+      1,
+      25
+    ],
+    "tests/stage-06-submenu-positioner.test.mjs": [
+      1,
+      26
+    ],
+    "tests/stage-06-window-controller.test.mjs": [
+      1,
+      76
+    ],
+    "tests/stage-08-hybrid-activation.test.mjs": [
+      1,
+      141
+    ],
+    "tests/stage-08-hybrid-code-block.test.mjs": [
+      1,
+      207
+    ],
+    "tests/stage-08-hybrid-component-session.test.mjs": [
+      1,
+      136
+    ],
+    "tests/stage-08-hybrid-editor-controller.test.mjs": [
+      1,
+      146
+    ],
+    "tests/stage-08-hybrid-html.test.mjs": [
+      1,
+      52
+    ],
+    "tests/stage-08-hybrid-image.test.mjs": [
+      1,
+      182
+    ],
+    "tests/stage-08-hybrid-inline-presentation.test.mjs": [
+      1,
+      145
+    ],
+    "tests/stage-08-hybrid-math.test.mjs": [
+      1,
+      189
+    ],
+    "tests/stage-08-hybrid-mermaid.test.mjs": [
+      1,
+      101
+    ],
+    "tests/stage-08-hybrid-prefix-hr.test.mjs": [
+      1,
+      188
+    ],
+    "tests/stage-08-hybrid-shared-widget-ui.test.mjs": [
+      1,
+      192
+    ],
+    "tests/stage-08-hybrid-source-edit-controller.test.mjs": [
+      1,
+      146
+    ],
+    "tests/stage-08-hybrid-state-machine-freeze.test.mjs": [
+      1,
+      325
+    ],
+    "tests/stage-08-hybrid-table.test.mjs": [
+      1,
+      206
+    ],
+    "tests/stage-08-hybrid-widget-lifecycle.test.mjs": [
+      1,
+      175
+    ],
+    "tests/stage-09-editor-scroll-mapper.test.mjs": [
+      1,
+      126
+    ],
+    "tests/stage-09-final-sync-legacy-removal.test.mjs": [
+      1,
+      271
+    ],
+    "tests/stage-09-frozen-selection-mapping-integration.test.mjs": [
+      1,
+      37
+    ],
+    "tests/stage-09-preview-scroll-mapper.test.mjs": [
+      1,
+      144
+    ],
+    "tests/stage-09-scroll-contract-freeze.test.mjs": [
+      1,
+      261
+    ],
+    "tests/stage-09-scroll-controller.test.mjs": [
+      1,
+      248
+    ],
+    "tests/stage-09-scroll-geometry-session.test.mjs": [
+      1,
+      220
+    ],
+    "tests/stage-09-scroll-source-ownership.test.mjs": [
+      1,
+      184
+    ],
+    "tests/stage-09-selection-feedback-guard.test.mjs": [
+      1,
+      136
+    ],
+    "tests/stage-09-selection-highlight-session.test.mjs": [
+      1,
+      244
+    ],
+    "tests/stage-09-selection-readers.test.mjs": [
+      1,
+      197
+    ],
+    "tests/stage-09-selection-retry-scheduler.test.mjs": [
+      1,
+      163
+    ],
+    "tests/stage-10-autosave-controller.test.mjs": [
+      1,
+      250
+    ],
+    "tests/stage-10-browser-document-repository.test.mjs": [
+      1,
+      182
+    ],
+    "tests/stage-10-close-save-controller.test.mjs": [
+      1,
+      181
+    ],
+    "tests/stage-10-load-controller.test.mjs": [
+      1,
+      280
+    ],
+    "tests/stage-10-native-save-queue.test.mjs": [
+      1,
+      264
+    ],
+    "tests/stage-10-native-save-session.test.mjs": [
+      1,
+      138
+    ],
+    "tests/stage-10-native-search-adapter.test.mjs": [
+      1,
+      127
+    ],
+    "tests/stage-10-native-segmented-loader.test.mjs": [
+      1,
+      175
+    ],
+    "tests/stage-10-native-snapshot-uploader.test.mjs": [
+      1,
+      330
+    ],
+    "tests/stage-10-remove-legacy-save.test.mjs": [
+      1,
+      195
+    ],
+    "tests/stage-10-save-controller.test.mjs": [
+      1,
+      232
+    ],
+    "tests/stage-10-save-status-store.test.mjs": [
+      1,
+      163
+    ],
+    "tests/stage-11-document-store-commands.test.mjs": [
+      1,
+      137
+    ],
+    "tests/stage-12-directory-tree.test.mjs": [
+      1,
+      133
+    ],
+    "tests/stage-12-external-link-validation.test.mjs": [
+      1,
+      100
+    ],
+    "tests/stage-12-file-kind.test.mjs": [
+      1,
+      108
+    ],
+    "tests/stage-12-local-commands.test.mjs": [
+      1,
+      155
+    ],
+    "tests/stage-12-log-redaction.test.mjs": [
+      1,
+      126
+    ],
+    "tests/stage-12-opener.test.mjs": [
+      1,
+      161
+    ],
+    "tests/stage-12-path-policy.test.mjs": [
+      1,
+      109
+    ],
+    "tests/stage-12-readers.test.mjs": [
+      1,
+      123
+    ],
+    "tests/stage-12-security-contract.test.mjs": [
+      1,
+      149
+    ],
+    "tests/stage-12-tree-limits.test.mjs": [
+      1,
+      124
+    ],
+    "tests/stage-12-validation-workspace.test.mjs": [
+      1,
+      81
+    ],
+    "tests/stage-12-web-client.test.mjs": [
+      1,
+      188
+    ],
+    "tests/stage-12-web-response.test.mjs": [
+      1,
+      161
+    ],
+    "tests/stage-12-web-validation.test.mjs": [
+      1,
+      176
+    ],
+    "tests/stage-12-writers.test.mjs": [
+      1,
+      128
+    ],
+    "tests/svg-sprite.test.mjs": [
+      1,
+      121
+    ],
+    "tests/ui": [
+      11,
+      1756
+    ],
+    "tests/unit": [
+      124,
+      14542
+    ],
+    "tests/vite-config.test.mjs": [
+      1,
+      20
+    ],
+    "tests/windows-window-automation.test.mjs": [
+      1,
+      171
+    ]
+  },
+  "signals": [
+    {
+      "path": ".github/workflows/r12-05.yml",
+      "line": 120,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/r12-06.yml",
+      "line": 123,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/r12-07.yml",
+      "line": 128,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 62,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 67,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 72,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 77,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 82,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 87,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 92,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 96,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 127,
+      "rule": "file_write"
+    },
+    {
+      "path": ".github/workflows/stage-01-atomic.yml",
+      "line": 131,
+      "rule": "file_write"
+    },
+    {
+      "path": "public/app/bootstrap.js",
+      "line": 39,
+      "rule": "html_sink"
+    },
+    {
+      "path": "public/app/bootstrap.js",
+      "line": 35,
+      "rule": "file_write"
+    },
+    {
+      "path": "public/app/core.js",
+      "line": 398,
+      "rule": "file_write"
+    },
+    {
+      "path": "public/app/core.js",
+      "line": 185,
+      "rule": "async_resource"
+    },
+    {
+      "path": "public/app/core.js",
+      "line": 405,
+      "rule": "async_resource"
+    },
+    {
+      "path": "public/app/core.js",
+      "line": 412,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "public/app/export.js",
+      "line": 132,
+      "rule": "html_sink"
+    },
+    {
+      "path": "public/app/export.js",
+      "line": 136,
+      "rule": "html_sink"
+    },
+    {
+      "path": "public/app/export.js",
+      "line": 140,
+      "rule": "html_sink"
+    },
+    {
+      "path": "public/app/export.js",
+      "line": 565,
+      "rule": "html_sink"
+    },
+    {
+      "path": "public/app/export.js",
+      "line": 29,
+      "rule": "async_resource"
+    },
+    {
+      "path": "public/app/export.js",
+      "line": 435,
+      "rule": "async_resource"
+    },
+    {
+      "path": "public/app/export.js",
+      "line": 437,
+      "rule": "async_resource"
+    },
+    {
+      "path": "public/app/web-clipper.js",
+      "line": 141,
+      "rule": "html_sink"
+    },
+    {
+      "path": "public/app/web-clipper.js",
+      "line": 167,
+      "rule": "html_sink"
+    },
+    {
+      "path": "public/app/web-clipper.js",
+      "line": 84,
+      "rule": "async_resource"
+    },
+    {
+      "path": "public/app/web-clipper.js",
+      "line": 371,
+      "rule": "async_resource"
+    },
+    {
+      "path": "public/app/web-clipper.js",
+      "line": 192,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "scripts/architecture/checks.mjs",
+      "line": 4,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/architecture/checks.mjs",
+      "line": 403,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/architecture/checks.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/architecture/checks.mjs",
+      "line": 162,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/architecture/checks.mjs",
+      "line": 392,
+      "rule": "async_resource"
+    },
+    {
+      "path": "scripts/architecture/checks.mjs",
+      "line": 392,
+      "rule": "async_resource"
+    },
+    {
+      "path": "scripts/architecture/checks.mjs",
+      "line": 392,
+      "rule": "async_resource"
+    },
+    {
+      "path": "scripts/architecture/cli.mjs",
+      "line": 2,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/architecture/cli.mjs",
+      "line": 38,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/architecture/repository.mjs",
+      "line": 4,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/architecture/repository.mjs",
+      "line": 42,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/architecture/repository.mjs",
+      "line": 105,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/ci/archive-tauri-schema.mjs",
+      "line": 5,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/ci/archive-tauri-schema.mjs",
+      "line": 21,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/dependencies/prepare-parent-node-modules.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/dependencies/prepare-parent-node-modules.mjs",
+      "line": 238,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/dependencies/prepare-parent-node-modules.mjs",
+      "line": 9,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/dependencies/prepare-parent-node-modules.mjs",
+      "line": 104,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/collect-baseline.mjs",
+      "line": 4,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/stage-00/collect-baseline.mjs",
+      "line": 13,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/stage-00/collect-baseline.mjs",
+      "line": 2,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/collect-baseline.mjs",
+      "line": 36,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/collect-baseline.mjs",
+      "line": 40,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/persist-results.mjs",
+      "line": 3,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/stage-00/persist-results.mjs",
+      "line": 26,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/stage-00/persist-results.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/persist-results.mjs",
+      "line": 75,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/persist-results.mjs",
+      "line": 92,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/run-check.mjs",
+      "line": 32,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/stage-00/run-check.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/run-check.mjs",
+      "line": 85,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/run-check.mjs",
+      "line": 86,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/summarize-results.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/summarize-results.mjs",
+      "line": 85,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-00/summarize-results.mjs",
+      "line": 86,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-01/collect-module-inventory.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-01/collect-module-inventory.mjs",
+      "line": 12,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-01/module-inventory-core.mjs",
+      "line": 133,
+      "rule": "process"
+    },
+    {
+      "path": "scripts/stage-01/module-inventory-core.mjs",
+      "line": 96,
+      "rule": "async_resource"
+    },
+    {
+      "path": "scripts/stage-01/module-inventory-core.mjs",
+      "line": 96,
+      "rule": "async_resource"
+    },
+    {
+      "path": "scripts/stage-01/module-inventory-core.mjs",
+      "line": 96,
+      "rule": "async_resource"
+    },
+    {
+      "path": "scripts/stage-02/collect-dom-asset-inventory.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-02/collect-dom-asset-inventory.mjs",
+      "line": 54,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-02/record-ui-foundation-evidence.mjs",
+      "line": 2,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-02/record-ui-foundation-evidence.mjs",
+      "line": 251,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-create-platform-evidence.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-create-platform-evidence.mjs",
+      "line": 45,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-create-platform-evidence.mjs",
+      "line": 229,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-cutover-evidence.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-cutover-evidence.mjs",
+      "line": 72,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 2,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 88,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 308,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 560,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 593,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 617,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 638,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 661,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 684,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 707,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 729,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 750,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-03/record-platform-evidence.mjs",
+      "line": 782,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-04/locale-key-audit.mjs",
+      "line": 2,
+      "rule": "file_write"
+    },
+    {
+      "path": "scripts/stage-04/locale-key-audit.mjs",
+      "line": 274,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/chunks/upload_session.rs",
+      "line": 39,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/journal/append.rs",
+      "line": 24,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/journal/recovery.rs",
+      "line": 13,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/journal/recovery.rs",
+      "line": 52,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/repository.rs",
+      "line": 40,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/repository.rs",
+      "line": 63,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/repository.rs",
+      "line": 93,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/repository.rs",
+      "line": 96,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/repository.rs",
+      "line": 98,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/loader.rs",
+      "line": 66,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/loader.rs",
+      "line": 83,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/loader.rs",
+      "line": 84,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/loader.rs",
+      "line": 115,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/loader.rs",
+      "line": 130,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/writer.rs",
+      "line": 14,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/writer.rs",
+      "line": 32,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/writer.rs",
+      "line": 35,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/writer.rs",
+      "line": 37,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/snapshot/writer.rs",
+      "line": 103,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/store.rs",
+      "line": 361,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/document_store/store.rs",
+      "line": 381,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/external_link/opener.rs",
+      "line": 34,
+      "rule": "native_unsafe"
+    },
+    {
+      "path": "src-tauri/src/external_link/opener.rs",
+      "line": 44,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/src/external_link/opener.rs",
+      "line": 46,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/src/external_link/opener.rs",
+      "line": 53,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/src/external_link/opener.rs",
+      "line": 55,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/src/local_file/binary_writer.rs",
+      "line": 19,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/binary_writer.rs",
+      "line": 66,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 174,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 175,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 176,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 177,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 199,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 202,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 204,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 233,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 246,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 269,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 294,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/directory_tree.rs",
+      "line": 295,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/image_reader.rs",
+      "line": 68,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/image_reader.rs",
+      "line": 99,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/image_reader.rs",
+      "line": 111,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/path_policy.rs",
+      "line": 216,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/text_reader.rs",
+      "line": 47,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/text_reader.rs",
+      "line": 68,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/text_writer.rs",
+      "line": 10,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/local_file/text_writer.rs",
+      "line": 43,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/performance_log.rs",
+      "line": 126,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/src/performance_log.rs",
+      "line": 127,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/external_link/opener.rs",
+      "line": 75,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/external_link/opener.rs",
+      "line": 98,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/external_link/opener.rs",
+      "line": 162,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/external_link/opener.rs",
+      "line": 164,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/external_link/opener.rs",
+      "line": 59,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/external_link/opener.rs",
+      "line": 64,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/local_file/commands.rs",
+      "line": 29,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/local_file/commands.rs",
+      "line": 203,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/local_file/legacy.rs",
+      "line": 28,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/local_file/legacy.rs",
+      "line": 29,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/local_file/legacy.rs",
+      "line": 30,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/local_file/legacy.rs",
+      "line": 31,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/local_file/stage_12.rs",
+      "line": 98,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/local_file/stage_12.rs",
+      "line": 124,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_command_contracts.rs",
+      "line": 361,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_command_contracts.rs",
+      "line": 343,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_command_contracts.rs",
+      "line": 443,
+      "rule": "file_write"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 25,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 34,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 69,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 114,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 152,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 189,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 212,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 250,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 276,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 285,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 288,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "line": 300,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/web_fetch/http_compatibility.rs",
+      "line": 26,
+      "rule": "process"
+    },
+    {
+      "path": "src-tauri/tests/web_fetch/http_compatibility.rs",
+      "line": 57,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/editor/hybrid-markdown.js",
+      "line": 275,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/documents/infrastructure/recent-files-repository.js",
+      "line": 68,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/documents/infrastructure/session-document-repository.js",
+      "line": 43,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/editor/ui/find-replace-dialog-view.js",
+      "line": 102,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/editor/ui/image-dialog-view.js",
+      "line": 97,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/editor/ui/link-dialog-view.js",
+      "line": 57,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/editor/ui/mermaid-dialog-view.js",
+      "line": 54,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/help/help-controller.js",
+      "line": 55,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/help/ui/help-dialog-view.js",
+      "line": 13,
+      "rule": "html_sink"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js",
+      "line": 39,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js",
+      "line": 39,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js",
+      "line": 41,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js",
+      "line": 41,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-lifecycle.js",
+      "line": 27,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-lifecycle.js",
+      "line": 27,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-lifecycle.js",
+      "line": 37,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/code-block/code-block-widget.js",
+      "line": 33,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/horizontal-rule/horizontal-rule-widget.js",
+      "line": 18,
+      "rule": "html_sink"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/html/html-block-view.js",
+      "line": 11,
+      "rule": "html_sink"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+      "line": 38,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+      "line": 300,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/table/table-keyboard-navigation.js",
+      "line": 48,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/table/table-widget.js",
+      "line": 31,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/layout/fullscreen/system-fullscreen-controller.js",
+      "line": 86,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/layout/sidebar/sidebar-resize-controller.js",
+      "line": 143,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/layout/split/split-pane-controller.js",
+      "line": 55,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/layout/split/split-pane-controller.js",
+      "line": 56,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/layout/split/split-resize-controller.js",
+      "line": 121,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/menu/submenu-positioner.js",
+      "line": 71,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/menu/submenu-positioner.js",
+      "line": 86,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/menu/submenu-positioner.js",
+      "line": 87,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/menu/submenu-positioner.js",
+      "line": 88,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/menu/submenu-positioner.js",
+      "line": 139,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/persistence/browser/browser-document-repository.js",
+      "line": 91,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/persistence/browser/browser-document-repository.js",
+      "line": 93,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/persistence/browser/browser-document-repository.js",
+      "line": 94,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/persistence/browser/browser-document-repository.js",
+      "line": 122,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/persistence/browser/browser-document-repository.js",
+      "line": 135,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/persistence/browser/browser-document-repository.js",
+      "line": 136,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/persistence/native-document-store/native-segmented-loader.js",
+      "line": 21,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/preview/application/preview-controller.js",
+      "line": 181,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-scheduler.js",
+      "line": 30,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-scheduler.js",
+      "line": 38,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-scheduler.js",
+      "line": 38,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-scheduler.js",
+      "line": 39,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/preview/render/presentation/mermaid-presentation.js",
+      "line": 74,
+      "rule": "html_sink"
+    },
+    {
+      "path": "src/features/preview/render/preview-block-view.js",
+      "line": 10,
+      "rule": "html_sink"
+    },
+    {
+      "path": "src/features/preview/render/preview-dom-renderer.js",
+      "line": 49,
+      "rule": "html_sink"
+    },
+    {
+      "path": "src/features/preview/render/virtual-window/height-cache.js",
+      "line": 100,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/preview/render/virtual-window/height-cache.js",
+      "line": 46,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/preview/virtual/virtual-preview-controller.js",
+      "line": 23,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/preview/virtual/virtual-preview-controller.js",
+      "line": 29,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/preview/worker/preview-worker-client.js",
+      "line": 4,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/settings/infrastructure/settings-repository.js",
+      "line": 69,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/settings/infrastructure/settings-repository.js",
+      "line": 119,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/features/settings/ui/autosave-field-view.js",
+      "line": 96,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/settings/ui/color-field-view.js",
+      "line": 72,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/settings/ui/directory-field-view.js",
+      "line": 50,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/settings/ui/settings-field-view.js",
+      "line": 85,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/settings/ui/settings-field-view.js",
+      "line": 108,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/settings/ui/settings-field-view.js",
+      "line": 142,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/settings/ui/settings-navigation-view.js",
+      "line": 66,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/features/sync/scroll/preview-scroll-mapper.js",
+      "line": 86,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/sync/scroll/scroll-sync-controller.js",
+      "line": 58,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/features/sync/selection/selection-feedback-guard.js",
+      "line": 24,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 302,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 313,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 324,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 328,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 415,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 530,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 1083,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 1102,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 1299,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/main.js",
+      "line": 1313,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/platform/browser/browser-storage.js",
+      "line": 30,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/runtime/e2e-bridge.js",
+      "line": 105,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/runtime/e2e-bridge.js",
+      "line": 109,
+      "rule": "file_write"
+    },
+    {
+      "path": "src/runtime/e2e-bridge.js",
+      "line": 17,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/e2e-bridge.js",
+      "line": 85,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/link-preview.js",
+      "line": 201,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/link-preview.js",
+      "line": 227,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 196,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 282,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 283,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 312,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 344,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 596,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 654,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 655,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 656,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 376,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 397,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 414,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "line": 526,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "src/shared/scheduling/task-scheduler.js",
+      "line": 82,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/shared/scheduling/task-scheduler.js",
+      "line": 86,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/shared/scheduling/task-scheduler.js",
+      "line": 90,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/storage/native-document-store.js",
+      "line": 49,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/storage/native-document-store.js",
+      "line": 54,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/ui/compatibility/business-content-port.js",
+      "line": 95,
+      "rule": "html_sink"
+    },
+    {
+      "path": "src/ui/components/modal-shell.js",
+      "line": 80,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/ui/components/modal-shell.js",
+      "line": 82,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/ui/components/modal-shell.js",
+      "line": 114,
+      "rule": "async_resource"
+    },
+    {
+      "path": "src/ui/dom/transition-visibility.js",
+      "line": 71,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/architecture-tooling.test.mjs",
+      "line": 5,
+      "rule": "process"
+    },
+    {
+      "path": "tests/architecture/architecture-tooling.test.mjs",
+      "line": 25,
+      "rule": "process"
+    },
+    {
+      "path": "tests/architecture/architecture-tooling.test.mjs",
+      "line": 27,
+      "rule": "process"
+    },
+    {
+      "path": "tests/architecture/architecture-tooling.test.mjs",
+      "line": 35,
+      "rule": "process"
+    },
+    {
+      "path": "tests/architecture/architecture-tooling.test.mjs",
+      "line": 3,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/architecture-tooling.test.mjs",
+      "line": 24,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/architecture-tooling.test.mjs",
+      "line": 26,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/command-bus.test.mjs",
+      "line": 181,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/command-bus.test.mjs",
+      "line": 181,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 3,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 45,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/disposer-registry.test.mjs",
+      "line": 181,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/disposer-registry.test.mjs",
+      "line": 181,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/event-bus.test.mjs",
+      "line": 289,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/event-bus.test.mjs",
+      "line": 289,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/helpers.mjs",
+      "line": 4,
+      "rule": "process"
+    },
+    {
+      "path": "tests/architecture/helpers.mjs",
+      "line": 23,
+      "rule": "process"
+    },
+    {
+      "path": "tests/architecture/helpers.mjs",
+      "line": 24,
+      "rule": "process"
+    },
+    {
+      "path": "tests/architecture/helpers.mjs",
+      "line": 26,
+      "rule": "process"
+    },
+    {
+      "path": "tests/architecture/helpers.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/helpers.mjs",
+      "line": 21,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/module-side-effects.test.mjs",
+      "line": 20,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/module-side-effects.test.mjs",
+      "line": 27,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/no-global-business-api.test.mjs",
+      "line": 3,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/no-global-business-api.test.mjs",
+      "line": 20,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/no-inline-events.test.mjs",
+      "line": 3,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/no-inline-events.test.mjs",
+      "line": 20,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/no-inline-events.test.mjs",
+      "line": 48,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/architecture/stage-05-basic-command-boundary.test.mjs",
+      "line": 22,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-05-basic-command-boundary.test.mjs",
+      "line": 23,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-06-compact-shell.test.mjs",
+      "line": 53,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-06-menu-model.test.mjs",
+      "line": 37,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-06-submenu-positioner.test.mjs",
+      "line": 25,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-06-submenu-positioner.test.mjs",
+      "line": 29,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-06-submenu-positioner.test.mjs",
+      "line": 41,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-dom-renderers.test.mjs",
+      "line": 13,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-enhancement-coordinator.test.mjs",
+      "line": 28,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-mode-resolver.test.mjs",
+      "line": 17,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-mode-resolver.test.mjs",
+      "line": 17,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-state.test.mjs",
+      "line": 15,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-state.test.mjs",
+      "line": 15,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-thresholds.test.mjs",
+      "line": 56,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-html.test.mjs",
+      "line": 34,
+      "rule": "html_sink"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-widget-lifecycle.test.mjs",
+      "line": 33,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-widget-lifecycle.test.mjs",
+      "line": 47,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-widget-lifecycle.test.mjs",
+      "line": 47,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-09-scroll-controller.test.mjs",
+      "line": 17,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-09-scroll-controller.test.mjs",
+      "line": 50,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-09-scroll-geometry-session.test.mjs",
+      "line": 26,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-09-scroll-source-ownership.test.mjs",
+      "line": 28,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-09-selection-highlight-session.test.mjs",
+      "line": 26,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-09-selection-highlight-session.test.mjs",
+      "line": 26,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/architecture/stage-09-selection-retry-scheduler.test.mjs",
+      "line": 28,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/browser-e2e-contract.test.mjs",
+      "line": 38,
+      "rule": "process"
+    },
+    {
+      "path": "tests/dependency-location.test.mjs",
+      "line": 27,
+      "rule": "process"
+    },
+    {
+      "path": "tests/e2e/fixtures/interaction-harness.js",
+      "line": 30,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 424,
+      "rule": "process"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 381,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 382,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 115,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 248,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 270,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 270,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 321,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 345,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 366,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 395,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/cdp-browser.mjs",
+      "line": 446,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/lib/virtual-file-host.mjs",
+      "line": 75,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "tests/e2e/lib/virtual-file-host.mjs",
+      "line": 87,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "tests/e2e/preview-layout-stability.test.mjs",
+      "line": 30,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/preview-layout-stability.test.mjs",
+      "line": 49,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/preview-layout-stability.test.mjs",
+      "line": 76,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/preview-virtual-window.test.mjs",
+      "line": 28,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/preview-virtual-window.test.mjs",
+      "line": 30,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/preview-virtual-window.test.mjs",
+      "line": 32,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 2,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 530,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 531,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1294,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1470,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1759,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 257,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 357,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 366,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 386,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 386,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 386,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 394,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 394,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 451,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 797,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 797,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1015,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1212,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1600,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1600,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1600,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1686,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 1767,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "line": 51,
+      "rule": "empty_catch"
+    },
+    {
+      "path": "tests/e2e/submenu-positioner.test.mjs",
+      "line": 50,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/submenu-positioner.test.mjs",
+      "line": 58,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/window-controller.test.mjs",
+      "line": 139,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/windows/embedded-webdriver-session.mjs",
+      "line": 49,
+      "rule": "process"
+    },
+    {
+      "path": "tests/e2e/windows/embedded-webdriver-session.mjs",
+      "line": 140,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/windows/embedded-webdriver-session.mjs",
+      "line": 140,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/windows/embedded-webdriver-session.mjs",
+      "line": 9,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/windows/embedded-webdriver-session.mjs",
+      "line": 209,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/windows/native-window-interop.mjs",
+      "line": 4,
+      "rule": "process"
+    },
+    {
+      "path": "tests/e2e/windows/native-window-interop.mjs",
+      "line": 19,
+      "rule": "process"
+    },
+    {
+      "path": "tests/e2e/windows/native-window-interop.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/windows/native-window-interop.mjs",
+      "line": 59,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/windows/native-window-system.mjs",
+      "line": 1,
+      "rule": "process"
+    },
+    {
+      "path": "tests/e2e/windows/native-window-system.mjs",
+      "line": 18,
+      "rule": "process"
+    },
+    {
+      "path": "tests/e2e/windows/native-window-system.mjs",
+      "line": 376,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/windows/native-window-system.mjs",
+      "line": 395,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/windows/run-window-automation.mjs",
+      "line": 21,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/e2e/windows/window-evidence.mjs",
+      "line": 1,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/e2e/windows/window-evidence.mjs",
+      "line": 29,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/package-scripts.test.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "tests/package-scripts.test.mjs",
+      "line": 65,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-06-submenu-positioner.test.mjs",
+      "line": 12,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-06-submenu-positioner.test.mjs",
+      "line": 14,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-08-hybrid-prefix-hr.test.mjs",
+      "line": 20,
+      "rule": "html_sink"
+    },
+    {
+      "path": "tests/stage-08-hybrid-widget-lifecycle.test.mjs",
+      "line": 24,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-08-hybrid-widget-lifecycle.test.mjs",
+      "line": 30,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-09-scroll-contract-freeze.test.mjs",
+      "line": 39,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-09-scroll-contract-freeze.test.mjs",
+      "line": 45,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-09-scroll-contract-freeze.test.mjs",
+      "line": 74,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-09-scroll-source-ownership.test.mjs",
+      "line": 35,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-09-scroll-source-ownership.test.mjs",
+      "line": 37,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-09-scroll-source-ownership.test.mjs",
+      "line": 40,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-09-scroll-source-ownership.test.mjs",
+      "line": 41,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-autosave-controller.test.mjs",
+      "line": 103,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-autosave-controller.test.mjs",
+      "line": 105,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-browser-document-repository.test.mjs",
+      "line": 15,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/stage-10-browser-document-repository.test.mjs",
+      "line": 27,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-browser-document-repository.test.mjs",
+      "line": 27,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-browser-document-repository.test.mjs",
+      "line": 27,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-close-save-controller.test.mjs",
+      "line": 60,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-close-save-controller.test.mjs",
+      "line": 60,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-load-controller.test.mjs",
+      "line": 101,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-load-controller.test.mjs",
+      "line": 101,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-load-controller.test.mjs",
+      "line": 101,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-save-queue.test.mjs",
+      "line": 35,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-save-queue.test.mjs",
+      "line": 35,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-save-queue.test.mjs",
+      "line": 35,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-save-session.test.mjs",
+      "line": 12,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-save-session.test.mjs",
+      "line": 12,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-save-session.test.mjs",
+      "line": 12,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-search-adapter.test.mjs",
+      "line": 20,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-search-adapter.test.mjs",
+      "line": 20,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-search-adapter.test.mjs",
+      "line": 20,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-segmented-loader.test.mjs",
+      "line": 20,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-snapshot-uploader.test.mjs",
+      "line": 35,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-snapshot-uploader.test.mjs",
+      "line": 35,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-native-snapshot-uploader.test.mjs",
+      "line": 35,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-save-controller.test.mjs",
+      "line": 64,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-save-controller.test.mjs",
+      "line": 64,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-save-controller.test.mjs",
+      "line": 64,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-save-status-store.test.mjs",
+      "line": 133,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-save-status-store.test.mjs",
+      "line": 133,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-10-save-status-store.test.mjs",
+      "line": 133,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/stage-12-external-link-validation.test.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-external-link-validation.test.mjs",
+      "line": 11,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-external-link-validation.test.mjs",
+      "line": 26,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-local-commands.test.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-local-commands.test.mjs",
+      "line": 13,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-log-redaction.test.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-log-redaction.test.mjs",
+      "line": 10,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-opener.test.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-opener.test.mjs",
+      "line": 10,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-opener.test.mjs",
+      "line": 68,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-validation-workspace.test.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-validation-workspace.test.mjs",
+      "line": 21,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-validation-workspace.test.mjs",
+      "line": 3,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/stage-12-validation-workspace.test.mjs",
+      "line": 22,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/stage-12-web-client.test.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-web-client.test.mjs",
+      "line": 12,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-web-response.test.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-web-response.test.mjs",
+      "line": 10,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-web-validation.test.mjs",
+      "line": 2,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-web-validation.test.mjs",
+      "line": 12,
+      "rule": "process"
+    },
+    {
+      "path": "tests/stage-12-writers.test.mjs",
+      "line": 31,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/stage-12-writers.test.mjs",
+      "line": 37,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/stage-12-writers.test.mjs",
+      "line": 54,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/ui/fixtures/dom-migration-map.json",
+      "line": 15501,
+      "rule": "html_sink"
+    },
+    {
+      "path": "tests/ui/fixtures/dom-migration-map.json",
+      "line": 15589,
+      "rule": "html_sink"
+    },
+    {
+      "path": "tests/ui/fixtures/dom-migration-map.json",
+      "line": 20739,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/ui/fixtures/dom-migration-map.json",
+      "line": 22736,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/ui/modal-shell.test.mjs",
+      "line": 176,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/ui/modal-shell.test.mjs",
+      "line": 253,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/ui/modal-shell.test.mjs",
+      "line": 297,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/documents/document-domain.test.mjs",
+      "line": 3,
+      "rule": "process"
+    },
+    {
+      "path": "tests/unit/documents/document-domain.test.mjs",
+      "line": 124,
+      "rule": "process"
+    },
+    {
+      "path": "tests/unit/documents/document-session-controller.test.mjs",
+      "line": 3,
+      "rule": "process"
+    },
+    {
+      "path": "tests/unit/documents/document-session-controller.test.mjs",
+      "line": 455,
+      "rule": "process"
+    },
+    {
+      "path": "tests/unit/documents/document-session-controller.test.mjs",
+      "line": 27,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/documents/document-session-store.test.mjs",
+      "line": 3,
+      "rule": "process"
+    },
+    {
+      "path": "tests/unit/documents/document-session-store.test.mjs",
+      "line": 166,
+      "rule": "process"
+    },
+    {
+      "path": "tests/unit/documents/recent-files-repository.test.mjs",
+      "line": 3,
+      "rule": "process"
+    },
+    {
+      "path": "tests/unit/documents/recent-files-repository.test.mjs",
+      "line": 226,
+      "rule": "process"
+    },
+    {
+      "path": "tests/unit/documents/recent-files-repository.test.mjs",
+      "line": 21,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/documents/recent-files-repository.test.mjs",
+      "line": 92,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/help/help-feature.test.mjs",
+      "line": 46,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/layout/sidebar-resize-controller.test.mjs",
+      "line": 57,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/layout/split-resize-controller.test.mjs",
+      "line": 51,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/layout/split-resize-controller.test.mjs",
+      "line": 78,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/layout/stage-06-layout-destroy-validation.test.mjs",
+      "line": 45,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/menu/stage-06-menu-destroy-validation.test.mjs",
+      "line": 125,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/menu/stage-06-menu-destroy-validation.test.mjs",
+      "line": 127,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/menu/submenu-positioner.test.mjs",
+      "line": 45,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/menu/submenu-positioner.test.mjs",
+      "line": 47,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/platform/browser-print.test.mjs",
+      "line": 24,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/platform/browser-storage.test.mjs",
+      "line": 13,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/platform/browser-storage.test.mjs",
+      "line": 46,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/platform/browser-storage.test.mjs",
+      "line": 60,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/platform/create-platform.test.mjs",
+      "line": 47,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/platform/performance-log-client.test.mjs",
+      "line": 35,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/platform/platform-detection.test.mjs",
+      "line": 17,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/preview/height-cache.test.mjs",
+      "line": 12,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/preview/preview-controller-command-handler.test.mjs",
+      "line": 10,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/preview/preview-controller-command-handler.test.mjs",
+      "line": 10,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/preview/preview-enhancement-coordinator.test.mjs",
+      "line": 148,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/unit/settings/settings-repository.test.mjs",
+      "line": 31,
+      "rule": "file_write"
+    },
+    {
+      "path": "tests/unit/sidebar/folder-tree-controller.test.mjs",
+      "line": 12,
+      "rule": "async_resource"
+    },
+    {
+      "path": "tests/windows-window-automation.test.mjs",
+      "line": 134,
+      "rule": "async_resource"
+    }
+  ],
+  "missing_relative_import_candidates": [
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 10,
+      "target": "./alpha.js"
+    },
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 11,
+      "target": "../beta/index.js"
+    },
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 12,
+      "target": "./internal.js"
+    },
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 26,
+      "target": "./alpha.js"
+    },
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 27,
+      "target": "../beta/internal.js"
+    },
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 28,
+      "target": "./internal.js"
+    },
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 29,
+      "target": "../alpha/alpha.js"
+    },
+    {
+      "path": "tests/architecture/dependency-boundaries.test.mjs",
+      "line": 47,
+      "target": "../beta/index.js"
+    },
+    {
+      "path": "tests/ui/style-test-utils.mjs",
+      "line": 62,
+      "target": "./${path}"
+    },
+    {
+      "path": "tests/unit/editor/editor-command-service.test.mjs",
+      "line": 193,
+      "target": "../../../src/features/editor/compatibility/classic-editor-command-port.js"
+    },
+    {
+      "path": "tests/unit/editor/editor-controller.test.mjs",
+      "line": 139,
+      "target": "./features/editor/index.js"
+    },
+    {
+      "path": "tests/unit/editor/editor-controller.test.mjs",
+      "line": 140,
+      "target": "./editor/index.js"
+    },
+    {
+      "path": "tests/unit/editor/editor-history-adapter.test.mjs",
+      "line": 59,
+      "target": "../../../src/features/editor/compatibility/classic-editor-history-port.js"
+    }
+  ],
+  "json_errors": []
+}

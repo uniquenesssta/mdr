@@ -1,0 +1,13 @@
+{
+  "kind": "production-JS-logic-probe-with-injected-failing-storage",
+  "platformAcceptance": false,
+  "saved": true,
+  "native": false,
+  "dirty": false,
+  "storageErrors": [
+    "QuotaExceededError",
+    "QuotaExceededError",
+    "QuotaExceededError"
+  ],
+  "bytesWritten": 0
+}

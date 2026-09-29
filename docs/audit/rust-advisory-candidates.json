@@ -1,0 +1,255 @@
+{
+  "databaseCommit": "f23b768236fe2880e4cfa167da662cad8ca79240",
+  "lockfile": "src-tauri/Cargo.lock",
+  "method": "Static lockfile version matching; Cargo range commas converted to intersections and bare versions to caret. Not cargo-audit; optional dependencies and target features require Windows reachability review.",
+  "matches": [
+    {
+      "name": "unic-common",
+      "locked": [
+        "0.9.0"
+      ],
+      "id": "RUSTSEC-2025-0080",
+      "date": "2025-10-18",
+      "informational": "unmaintained",
+      "title": null,
+      "versions": {
+        "patched": [],
+        "unaffected": []
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2025-0080.html"
+    },
+    {
+      "name": "proc-macro-error",
+      "locked": [
+        "1.0.4"
+      ],
+      "id": "RUSTSEC-2024-0370",
+      "date": "2024-09-01",
+      "informational": "unmaintained",
+      "title": null,
+      "versions": {
+        "patched": []
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2024-0370.html"
+    },
+    {
+      "name": "quinn-proto",
+      "locked": [
+        "0.11.14"
+      ],
+      "id": "RUSTSEC-2026-0185",
+      "date": "2026-06-22",
+      "informational": null,
+      "title": null,
+      "versions": {
+        "patched": [
+          ">= 0.11.15"
+        ]
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2026-0185.html"
+    },
+    {
+      "name": "unic-char-property",
+      "locked": [
+        "0.9.0"
+      ],
+      "id": "RUSTSEC-2025-0081",
+      "date": "2025-10-18",
+      "informational": "unmaintained",
+      "title": null,
+      "versions": {
+        "patched": [],
+        "unaffected": []
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2025-0081.html"
+    },
+    {
+      "name": "quick-xml",
+      "locked": [
+        "0.38.4"
+      ],
+      "id": "RUSTSEC-2026-0195",
+      "date": "2026-06-29",
+      "informational": null,
+      "title": null,
+      "versions": {
+        "patched": [
+          ">= 0.41.0"
+        ]
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2026-0195.html"
+    },
+    {
+      "name": "quick-xml",
+      "locked": [
+        "0.38.4"
+      ],
+      "id": "RUSTSEC-2026-0194",
+      "date": "2026-06-29",
+      "informational": null,
+      "title": null,
+      "versions": {
+        "patched": [
+          ">= 0.41.0"
+        ]
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2026-0194.html"
+    },
+    {
+      "name": "unic-ucd-ident",
+      "locked": [
+        "0.9.0"
+      ],
+      "id": "RUSTSEC-2025-0100",
+      "date": "2025-10-18",
+      "informational": "unmaintained",
+      "title": null,
+      "versions": {
+        "patched": [],
+        "unaffected": []
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2025-0100.html"
+    },
+    {
+      "name": "unic-char-range",
+      "locked": [
+        "0.9.0"
+      ],
+      "id": "RUSTSEC-2025-0075",
+      "date": "2025-10-18",
+      "informational": "unmaintained",
+      "title": null,
+      "versions": {
+        "patched": [],
+        "unaffected": []
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2025-0075.html"
+    },
+    {
+      "name": "rustls",
+      "locked": [
+        "0.23.41"
+      ],
+      "id": "RUSTSEC-2026-0285",
+      "date": "2026-09-14",
+      "informational": null,
+      "title": null,
+      "versions": {
+        "patched": [
+          ">= 0.23.45"
+        ],
+        "unaffected": [
+          "< 0.23.13"
+        ]
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2026-0285.html"
+    },
+    {
+      "name": "glib",
+      "locked": [
+        "0.18.5"
+      ],
+      "id": "RUSTSEC-2024-0429",
+      "date": "2024-03-30",
+      "informational": "unsound",
+      "title": null,
+      "versions": {
+        "patched": [
+          ">=0.20.0"
+        ],
+        "unaffected": [
+          "<0.15.0"
+        ]
+      },
+      "affected": {
+        "functions": {
+          "glib::VariantStrIter::next": [
+            ">=0.15.0,<0.20.0"
+          ],
+          "glib::VariantStrIter::nth": [
+            ">=0.15.0,<0.20.0"
+          ],
+          "glib::VariantStrIter::last": [
+            ">=0.15.0,<0.20.0"
+          ],
+          "glib::VariantStrIter::next_back": [
+            ">=0.15.0,<0.20.0"
+          ],
+          "glib::VariantStrIter::nth_back": [
+            ">=0.15.0,<0.20.0"
+          ]
+        }
+      },
+      "url": "https://rustsec.org/advisories/RUSTSEC-2024-0429.html"
+    },
+    {
+      "name": "unic-ucd-version",
+      "locked": [
+        "0.9.0"
+      ],
+      "id": "RUSTSEC-2025-0098",
+      "date": "2025-10-18",
+      "informational": "unmaintained",
+      "title": null,
+      "versions": {
+        "patched": [],
+        "unaffected": []
+      },
+      "affected": null,
+      "url": "https://rustsec.org/advisories/RUSTSEC-2025-0098.html"
+    },
+    {
+      "name": "time",
+      "locked": [
+        "0.3.41"
+      ],
+      "id": "RUSTSEC-2026-0009",
+      "date": "2026-02-05",
+      "informational": null,
+      "title": null,
+      "versions": {
+        "patched": [
+          ">= 0.3.47"
+        ],
+        "unaffected": [
+          "< 0.3.6"
+        ]
+      },
+      "affected": {
+        "functions": {
+          "time::parsing::Parsed::parse_item": [
+            ">= 0.3.6, < 0.3.47"
+          ],
+          "time::Date::parse": [
+            ">= 0.3.6, < 0.3.47"
+          ],
+          "time::Time::parse": [
+            ">= 0.3.6, < 0.3.47"
+          ],
+          "time::UtcOffset::parse": [
+            ">= 0.3.6, < 0.3.47"
+          ],
+          "time::PrimitiveDateTime::parse": [
+            ">= 0.3.6, < 0.3.47"
+          ],
+          "time::OffsetDateTime::parse": [
+            ">= 0.3.6, < 0.3.47"
+          ],
+          "time::UtcDateTime::parse": [
+            ">= 0.3.38, < 0.3.47"
+          ]
+        }
+      },
+      "url": "https://rustsec.org/advisories/RUSTSEC-2026-0009.html"
+    }
+  ]
+}

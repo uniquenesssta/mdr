@@ -1,0 +1,14 @@
+import { createBrowserDocumentRepository } from '../../src/features/persistence/browser/browser-document-repository.js';
+import { createSessionDocumentRepository } from '../../src/features/documents/infrastructure/session-document-repository.js';
+import { createDocumentSessionStore } from '../../src/features/documents/state/document-session-store.js';
+import { createDocumentSessionController } from '../../src/features/documents/application/document-session-controller.js';
+const errors=[];
+const storage={getItem:()=>null, setItem(){throw new Error('QuotaExceededError');}, removeItem(){}};
+const browserRepository=createBrowserDocumentRepository({storage,reportError:(message,error)=>errors.push(error.message)});
+const repository=createSessionDocumentRepository({browserRepository});
+const session=createDocumentSessionStore({initialRecords:[{id:'audit',title:'audit.md'}],activeId:'audit'});
+const model={documentId:'audit',dirty:true,activate(){},createSnapshot:()=> 'unsaved audit content',updateTitle(){},getTextLength:()=>21,getDocumentVersion:()=>1,markPersisted(){this.dirty=false;}};
+const loadController={loadExisting(){},readContent(){},cancelPending(){}};
+const controller=createDocumentSessionController({session,model,repository,loadController});
+const result=await controller.saveActive({title:'audit.md'});
+console.log(JSON.stringify({kind:'production-JS-logic-probe-with-injected-failing-storage',platformAcceptance:false,saved:result.saved,native:result.native,dirty:model.dirty,storageErrors:errors,bytesWritten:0},null,2));

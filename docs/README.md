@@ -1,5 +1,7 @@
 # Markdown Editor
 
+- 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
+
 当前进度以根目录 [README](../README.md) 为准。R12-14 既有 CI 全绿，但 2026-09-29 验收发现脱敏链路缺口，仍未通过；完整审计见 [CURRENT_AUDIT](CURRENT_AUDIT.md)。R12-S01 仍未实施。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
