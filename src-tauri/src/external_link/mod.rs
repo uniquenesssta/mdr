@@ -1,14 +1,11 @@
+pub(crate) mod command;
 mod opener;
 mod validation;
 
-use opener::open_platform_url;
+#[cfg(test)]
+use command::open_external_url;
+#[cfg(test)]
 use validation::validate_external_url;
-
-#[tauri::command]
-pub fn open_external_url(url: String) -> Result<(), String> {
-    let validated = validate_external_url(&url)?;
-    open_platform_url(&validated)
-}
 
 #[cfg(test)]
 mod tests {
@@ -66,9 +63,9 @@ mod stage_12_tests {
 }
 
 #[cfg(test)]
-#[path = "../tests/external_link/command_validation.rs"]
+#[path = "../../tests/external_link/command_validation.rs"]
 mod validation_command_tests;
 
 #[cfg(all(test, target_os = "linux"))]
-#[path = "../tests/external_link/opener.rs"]
+#[path = "../../tests/external_link/opener.rs"]
 mod opener_tests;

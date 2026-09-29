@@ -14,8 +14,8 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .manage(document_store::DocumentStore::default())
         .invoke_handler(tauri::generate_handler![
-            web_fetch::fetch_url,
-            external_link::open_external_url,
+            web_fetch::command::fetch_url,
+            external_link::command::open_external_url,
             document_store::commands::save::save_document_state,
             document_store::commands::snapshot_upload::begin_document_snapshot_upload,
             document_store::commands::snapshot_upload::append_document_snapshot_chunk,
@@ -32,7 +32,7 @@ pub fn run() {
             local_file::commands::write_local_text_file,
             local_file::commands::write_local_binary_file,
             local_file::commands::initial_file_path,
-            performance_log::write_performance_logs
+            performance_log::command::write_performance_logs
         ])
         .run(tauri::generate_context!());
     performance_log::record_lifecycle("app.exit");

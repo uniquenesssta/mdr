@@ -1,5 +1,7 @@
 # Markdown Editor
 
+- 2026-09-30：R12-17 已实现，19 项命令保持；Windows CI 待验收，未启动 R12-18。[详情](R12-17-DETAILS.md)。
+
 - 2026-09-29：R12-16 日志生命周期已通过 Windows 专项验收，Rust 241/241；原 40 项 Node 遗留不变，R12-17 尚未实施。[详情](R12-16-DETAILS.md)。
 
 - 2026-09-29：R12-15 Log Paths/Writer 已通过 Windows 专项验收，Rust 235/235；全仓 Node 原 40 项失败不变；此处保留 R12-15 验收记录。[详情](R12-15-DETAILS.md)。

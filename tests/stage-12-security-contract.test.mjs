@@ -1,6 +1,7 @@
+import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+
 import test from 'node:test';
 
 const fixturePath = new URL('../src-tauri/tests/fixtures/stage_12_security/manifest.json', import.meta.url);

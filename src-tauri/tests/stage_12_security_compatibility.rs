@@ -20,12 +20,13 @@ const SOURCE_LOCAL_FILE_TEXT_READER: &str = include_str!("../src/local_file/text
 const SOURCE_LOCAL_FILE_TEXT_WRITER: &str = include_str!("../src/local_file/text_writer.rs");
 const SOURCE_LOCAL_FILE_TREE_LIMITS: &str = include_str!("../src/local_file/tree_limits.rs");
 const SOURCE_EXTERNAL_LINK_VALIDATION: &str = include_str!("../src/external_link/validation.rs");
-const SOURCE_EXTERNAL_LINK: &str = include_str!("../src/external_link.rs");
-const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");
+const SOURCE_EXTERNAL_LINK: &str = include_str!("../src/external_link/command.rs");
+const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch/command.rs");
 const SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");
 const SOURCE_WEB_FETCH_RESPONSE: &str = include_str!("../src/web_fetch/response.rs");
 const SOURCE_PERFORMANCE_LOG: &str = concat!(
-    include_str!("../src/performance_log.rs"),
+    include_str!("../src/performance_log/mod.rs"),
+    include_str!("../src/performance_log/command.rs"),
     include_str!("../src/performance_log/paths.rs"),
     include_str!("../src/performance_log/writer.rs"),
     include_str!("../src/performance_log/lifecycle.rs"),

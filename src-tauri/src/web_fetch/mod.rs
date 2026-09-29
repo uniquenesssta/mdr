@@ -1,34 +1,13 @@
-use serde_json::json;
 mod client;
+pub(crate) mod command;
 mod response;
 mod validation;
 
-use client::build_client;
-use response::read_response;
+#[cfg(test)]
+use command::fetch_url;
 pub use response::FetchResponse;
+#[cfg(test)]
 use validation::normalize_url;
-
-async fn fetch_url_inner(url: String) -> Result<FetchResponse, String> {
-    let parsed = normalize_url(&url)?;
-
-    let client = build_client()?;
-
-    let response = client
-        .get(parsed.clone())
-        .send()
-        .await
-        .map_err(|err| format!("Request failed: {err}"))?;
-
-    read_response(parsed, response).await
-}
-
-#[tauri::command]
-pub async fn fetch_url(url: String) -> Result<FetchResponse, String> {
-    let details = json!({
-        "inputLength": url.len()
-    });
-    crate::performance_log::measure_async("native.command", "fetch_url", details, fetch_url_inner(url)).await
-}
 
 // R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.
 #[cfg(test)]
@@ -78,9 +57,9 @@ mod tests {
 }
 
 #[cfg(test)]
-#[path = "../tests/web_fetch/validation.rs"]
+#[path = "../../tests/web_fetch/validation.rs"]
 mod validation_tests;
 
 #[cfg(test)]
-#[path = "../tests/web_fetch/http_compatibility.rs"]
+#[path = "../../tests/web_fetch/http_compatibility.rs"]
 mod http_compatibility_tests;

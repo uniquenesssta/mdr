@@ -1,3 +1,4 @@
+pub(crate) mod command;
 mod lifecycle;
 pub use lifecycle::record_lifecycle;
 
@@ -5,18 +6,14 @@ mod paths;
 mod redaction;
 mod writer;
 
+#[cfg(test)]
+use command::write_performance_logs;
 use paths::unix_time_ms;
 use serde_json::{json, Value};
 use std::time::{Duration, Instant};
 use writer::append_values;
 
-pub fn record_backend(
-    category: &str,
-    operation: &str,
-    duration: Duration,
-    status: &str,
-    details: Value,
-) {
+pub fn record_backend(category: &str, operation: &str, duration: Duration, status: &str, details: Value) {
     if !cfg!(debug_assertions) {
         return;
     }
@@ -34,12 +31,7 @@ pub fn record_backend(
     }
 }
 
-pub async fn measure_async<T, E, F>(
-    category: &str,
-    operation: &str,
-    details: Value,
-    future: F,
-) -> Result<T, E>
+pub async fn measure_async<T, E, F>(category: &str, operation: &str, details: Value, future: F) -> Result<T, E>
 where
     F: std::future::Future<Output = Result<T, E>>,
 {
@@ -55,12 +47,7 @@ where
     result
 }
 
-pub fn measure_sync<T, E, F>(
-    category: &str,
-    operation: &str,
-    details: Value,
-    function: F,
-) -> Result<T, E>
+pub fn measure_sync<T, E, F>(category: &str, operation: &str, details: Value, function: F) -> Result<T, E>
 where
     F: FnOnce() -> Result<T, E>,
 {
@@ -76,19 +63,14 @@ where
     result
 }
 
-#[tauri::command]
-pub fn write_performance_logs(entries: Vec<Value>) -> Result<String, String> {
-    append_values(&entries).map(|path| path.to_string_lossy().to_string())
-}
-
 #[cfg(all(test, debug_assertions))]
-#[path = "../tests/performance_log/redaction_pipeline.rs"]
+#[path = "../../tests/performance_log/redaction_pipeline.rs"]
 mod redaction_pipeline_tests;
 
 #[cfg(test)]
-#[path = "../tests/performance_log/writer_contract.rs"]
+#[path = "../../tests/performance_log/writer_contract.rs"]
 mod writer_contract_tests;
 
 #[cfg(all(test, debug_assertions))]
-#[path = "../tests/performance_log/lifecycle_contract.rs"]
+#[path = "../../tests/performance_log/lifecycle_contract.rs"]
 mod lifecycle_contract_tests;

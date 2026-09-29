@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFileBeforeRegistry as readFile } from '../command-registry-contract.mjs';
 
 const root = 'src-tauri/src/performance_log';
 const read = path => readFile(path, 'utf8');
@@ -7,7 +7,9 @@ const tokens = text => text.replace(/\s+/g, '');
 export function rustFunction(text, name) {
   const match = text.match(new RegExp(`^(?:pub(?:\\(super\\))? )?(?:async )?fn ${name}\\b[\\s\\S]*?^}`, 'm'));
   assert.ok(match, `missing log function ${name}`);
-  return match[0].replace(/^pub(?:\(super\))? /, '');
+  const declaration = match[0].indexOf('{');
+  return (match[0].slice(0, declaration).replace(/,\s*\)/g, ')') + match[0].slice(declaration))
+    .replace(/^pub(?:\(super\))? /, '');
 }
 
 // A prior task's whole-file freeze becomes a per-owner function contract after R12-15.

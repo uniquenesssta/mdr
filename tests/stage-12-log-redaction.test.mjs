@@ -1,7 +1,8 @@
+import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
 import { inventoryBeforeLogStorageExtraction, assertLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+
 import test from 'node:test';
 
 const baseline = '3692eb913473a8be3a45f326f5d93656d6cf1fb2';
@@ -88,7 +89,7 @@ test('R12-14 documentation records implementation while keeping later atomic tas
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md');
   assert.match(stage, /- \[x\] 12\.13 Web Response/);
   assert.match(stage, /- \[x\] 12\.14 Log Redaction/);
-  assert.match(stage, /- \[ \] 12\.16 Lifecycle/);
+  assert.match(stage, /- \[x\] 12\.16 Lifecycle/);
   assert.match(stage, /- \[ \] R12-S01/);
   const detail = await read('docs/R12-14-DETAILS.md');
   for (const marker of ['递归', '正文', '敏感字段', '完整路径', 'commandRedaction', '3692eb913473a8be3a45f326f5d93656d6cf1fb2']) {
@@ -115,7 +116,7 @@ test('R12-14 production log changes trigger validation and its scope gate runs t
   for (const path of [entryPath, 'src-tauri/src/performance_log/**']) {
     assert.ok(triggers.includes(`      - '${path}'`), `unwatched production path: ${path}`);
   }
-  const scope = workflow.match(/^      - name: Guard R12-14 scope and frozen policies\n        run: \|\n([\s\S]*?)(?=^      - name:)/m);
+  const scope = workflow.match(/^      - name: Guard R12-17 scope and frozen policies\n        run: \|\n([\s\S]*?)(?=^      - name:)/m);
   assert.ok(scope, 'missing scope gate');
   assert.match(scope[1], /node --test[^\n]*tests\/stage-12-log-redaction\.test\.mjs/);
 });

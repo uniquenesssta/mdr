@@ -1,6 +1,7 @@
+import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+
 import test from 'node:test';
 import { assertLogStorageExtraction, inventoryBeforeLifecycleExtraction } from './support/performance-log/storage-contract.mjs';
 
@@ -61,7 +62,7 @@ test('R12-15 inventory assigns session and serialization states to their actual 
 
 test('R12-15 Windows workflow exercises before and after real file behavior plus release no-write mode', async () => {
   const workflow = await read('.github/workflows/r12-14.yml');
-  for (const marker of ['R12-16 Log Lifecycle', 'tests/stage-12-log-writer.test.mjs',
+  for (const marker of ['R12-17 Command Registry', 'tests/stage-12-log-writer.test.mjs',
     'R12-15 pre-split real log writer 9 of 9', 'R12-15 extracted real log writer 9 of 9',
     'R12-15 release writer creates no log files', 'performance_log::writer_contract_tests',
     'test result: ok. 9 passed; 0 failed', 'scripts/ci/verify-release-log-writer.mjs',

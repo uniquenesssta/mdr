@@ -11,8 +11,8 @@ const deps = path.resolve(process.env.CARGO_TARGET_DIR, 'debug/deps');
 const library = readdirSync(deps).filter(name => /^libserde_json-.*\.rlib$/.test(name))
   .map(name => path.join(deps, name)).sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0];
 assert.ok(library, 'build the locked production dependencies first');
-const source = readFileSync('src-tauri/src/performance_log.rs', 'utf8');
-const projected = source.replace('#[tauri::command]\n', '')
+const source = readFileSync('src-tauri/src/performance_log/mod.rs', 'utf8');
+const projected = source.replace('pub(crate) mod command;\n', '').replace('#[cfg(test)]\nuse command::write_performance_logs;\n', '')
   .replace(/#\[cfg\([^\n]+\)\]\n#\[path = "[^"\n]+"\]\nmod \w+;\n/g, '')
   .replace(/^mod (\w+);$/gm, (_, name) =>
     `#[path = ${JSON.stringify(path.resolve('src-tauri/src/performance_log', `${name}.rs`))}]\nmod ${name};`);

@@ -39,14 +39,14 @@ test('web-fetch client preserves native result and error identity', async () => 
 
 test('Rust remains authoritative for URL normalization, redirects and HTTP validation', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/web-fetch-client.js', import.meta.url), 'utf8');
-  const rustSource = await readFile(new URL('../../../src-tauri/src/web_fetch.rs', import.meta.url), 'utf8');
+  const rustSource = await readFile(new URL('../../../src-tauri/src/web_fetch/command.rs', import.meta.url), 'utf8');
   const rustClientSource = await readFile(new URL('../../../src-tauri/src/web_fetch/client.rs', import.meta.url), 'utf8');
   const rustResponseSource = await readFile(new URL('../../../src-tauri/src/web_fetch/response.rs', import.meta.url), 'utf8');
 
   assert.doesNotMatch(clientSource, /startsWith\(['"]https|reqwest|redirect\(|redirect::|Unsupported URL scheme|Response body is empty|status\.is_success/);
   const policySource = await readFile(new URL('../../../src-tauri/src/web_fetch/validation.rs', import.meta.url), 'utf8');
   assert.match(policySource, /fn normalize_url/);
-  assert.match(rustSource, /use validation::normalize_url/);
+  assert.match(rustSource, /use super::validation::normalize_url/);
   assert.match(rustClientSource, /redirect\(reqwest::redirect::Policy::limited\(10\)\)/);
   assert.match(policySource, /Unsupported URL scheme/);
   assert.match(rustSource, /read_response\(parsed, response\)\.await/);

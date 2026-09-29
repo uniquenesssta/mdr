@@ -1,6 +1,7 @@
+import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+
 import test from 'node:test';
 import { rustFunction } from './support/performance-log/storage-contract.mjs';
 
@@ -61,7 +62,7 @@ test('R12-16 adds only its lifecycle inventory record without changing prior own
 
 test('R12-16 Windows validation covers real lifecycle I/O failures and release no-write mode', async () => {
   const workflow = await read('.github/workflows/r12-14.yml');
-  for (const marker of ['R12-16 Log Lifecycle', baseline, 'lifecycle-before.log', 'lifecycle-after.log',
+  for (const marker of ['R12-17 Command Registry', baseline, 'lifecycle-before.log', 'lifecycle-after.log',
     'performance_log::lifecycle_contract_tests', 'test result: ok. 6 passed; 0 failed',
     'scripts/ci/verify-release-log-lifecycle.mjs', 'tests/stage-12-log-lifecycle.test.mjs']) {
     assert.ok(workflow.includes(marker), marker);

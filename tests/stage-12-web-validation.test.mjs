@@ -1,7 +1,8 @@
+import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
 import { assertLogStorageExtraction, inventoryBeforeLogStorageExtraction, logFixtureAfterStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const baseline = '3f1233585dd5359fe2a7168be8206074b30627ec';
@@ -46,7 +47,7 @@ test('R12-11 has one private pure input policy with the exact legacy function bo
   assert.equal((policy.match(/fn normalize_url/g) || []).length, 1);
   assert.match(policy, /^use url::Url;/m);
   assert.doesNotMatch(policy, /tauri::|reqwest::|std::fs|std::process|static |Mutex|pub fn/);
-  assert.deepEqual(await readdir('src-tauri/src/web_fetch'), ['client.rs', 'response.rs', 'validation.rs']);
+  assert.deepEqual(await readdir('src-tauri/src/web_fetch'), ['client.rs', 'command.rs', 'mod.rs', 'response.rs', 'validation.rs']);
 });
 
 test('R12-11 URL behavior and command telemetry remain unchanged after later client and response extractions', async () => {

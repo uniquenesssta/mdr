@@ -1,9 +1,9 @@
 # Markdown Editor
 
-Stage 12 使用 `agent/r12-stage`；历史见 [docs/README.md](docs/README.md)。
+Stage 12：`agent/r12-stage`；历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
 
-- 2026-09-18：R12-08 已验收，09～13 已完成；[记录](docs/R12-08-DETAILS.md)。
-- 2026-09-29：R12-14/A01 通过 Windows 专项验收；[详情](docs/R12-14-DETAILS.md)。
-- 2026-09-29：R12-16 已通过 Windows 专项验收，Rust 241/241；原 40 项遗留不变，按后续排期处理。[详情](docs/R12-16-DETAILS.md)。
+- 2026-09-18：R12-08 已验收，09～13 已完成；[详情](docs/R12-08-DETAILS.md)。
+- 2026-09-29：R12-14/A01、16 已专项验收；[详情](docs/R12-16-DETAILS.md)。
+- 2026-09-30：R12-17 命令迁移，19 项注册不变；Windows 待验收，40 项遗留未处理。[详情](docs/R12-17-DETAILS.md)。

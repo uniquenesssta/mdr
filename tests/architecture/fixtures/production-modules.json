@@ -428,10 +428,10 @@
       false
     ],
     [
-      "src-tauri/src/external_link.rs",
+      "src-tauri/src/external_link/mod.rs",
       "rust-module",
       "desktop-platform",
-      "External-link Tauri command: validate once, then delegate to the private operating-system opener.",
+      "Feature module composition and test wiring.",
       "none",
       "tauri-command",
       "retain",
@@ -578,20 +578,20 @@
       false
     ],
     [
-      "src-tauri/src/performance_log.rs",
+      "src-tauri/src/performance_log/mod.rs",
       "rust-module",
       "telemetry",
-      "Performance log command and backend measurement/lifecycle envelopes; delegates session paths and JSONL persistence.",
+      "Backend performance measurement envelopes and log module composition.",
       "none",
       "process-lifecycle",
       "rewrite",
       false
     ],
     [
-      "src-tauri/src/web_fetch.rs",
+      "src-tauri/src/web_fetch/mod.rs",
       "rust-module",
       "desktop-platform",
-      "HTTP fetch orchestration and command telemetry; delegates input, client and response handling.",
+      "Feature module composition and test wiring.",
       "none",
       "tauri-command",
       "rewrite",
@@ -4464,6 +4464,36 @@
       "Stateless startup and exit event projection through the best-effort backend log sink.",
       "none",
       "per-lifecycle-event",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/external_link/command.rs",
+      "rust-module",
+      "desktop-platform",
+      "External-link command validation and platform-open dispatch.",
+      "none",
+      "tauri-command",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/web_fetch/command.rs",
+      "rust-module",
+      "desktop-platform",
+      "HTTP command orchestration and telemetry through validation, client and response owners.",
+      "none",
+      "tauri-command",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/performance_log/command.rs",
+      "rust-module",
+      "telemetry",
+      "Frontend log batch command and writer result projection.",
+      "none",
+      "tauri-command",
       "retain",
       false
     ]

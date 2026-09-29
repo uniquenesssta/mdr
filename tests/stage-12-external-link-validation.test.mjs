@@ -1,7 +1,8 @@
+import { readFileBeforeRegistry as readFile } from './support/command-registry-contract.mjs';
 import { inventoryBeforeLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+
 import test from 'node:test';
 
 const baseline = '9405ab44d6bb5f05eb755a2341e3ba76b4831ed8';
