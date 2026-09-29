@@ -1,5 +1,7 @@
 # Markdown Editor
 
+- 2026-09-29：用户进一步要求现在修复 R12-14/A01；已补结构化日志、保守字符串脱敏及真实 JSONL 回读测试，Windows 验证待确认。其余问题保持原排期，12.20 后续复核本项成果。[修复记录](R12-14-DETAILS.md)。
+
 - 2026-09-29：用户确定先完成 R12-17，再执行新增 **R12-18～24 审计收尾**，通过后进入 R13。A05 抓取策略由 R13-S01 承接，A04 日志批次重试由 R15.4/15.7 承接；保存、当前脱敏/HTML 风险、安全写入、依赖公告及失效门禁在 R12 收尾处置。合理约束已生效，本轮未修改产品代码。[R12 任务书](markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md) · [全局约束](markdown-main-full-rewrite-taskbook-18-docs/01-全局架构规划与基线冻结.md)。
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。

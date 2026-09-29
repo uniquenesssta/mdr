@@ -82,7 +82,7 @@ test('R12-11 preserves frontend registry dependency and frozen security fixture 
       '    for value in values {\n        let line = serde_json::to_string(value).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n',
       '    for value in values {\n        let redacted = redact_value(value);\n        let line = serde_json::to_string(&redacted).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n'
     );
-  assert.equal(await read('src-tauri/src/performance_log.rs'), expectedPerformance,
+  assert.equal(await read('src-tauri/src/performance_log.rs'), expectedPerformance + '\n#[cfg(test)]\n#[path = "../tests/performance_log/redaction_pipeline.rs"]\nmod redaction_pipeline_tests;\n',
     'performance log changed beyond the later R12-14 redaction handoff');
   assert.equal(
     await read('src-tauri/tests/stage_12_security_compatibility.rs'),

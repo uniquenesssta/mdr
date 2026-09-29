@@ -6,6 +6,7 @@ import test from 'node:test';
 const baseline = '3692eb913473a8be3a45f326f5d93656d6cf1fb2';
 const entryPath = 'src-tauri/src/performance_log.rs';
 const redactionPath = 'src-tauri/src/performance_log/redaction.rs';
+const pipelineTestModule = '\n#[cfg(test)]\n#[path = "../tests/performance_log/redaction_pipeline.rs"]\nmod redaction_pipeline_tests;\n';
 const read = path => readFile(path, 'utf8');
 const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
 
@@ -20,13 +21,13 @@ function expectedPerformanceLogAfterRedaction(text) {
 }
 
 test('R12-14 adds one recursive redaction owner at the existing JSONL persistence boundary', async () => {
-  assert.equal(await read(entryPath), expectedPerformanceLogAfterRedaction(frozen(entryPath)));
+  assert.equal(await read(entryPath), expectedPerformanceLogAfterRedaction(frozen(entryPath)) + pipelineTestModule);
   const entry = await read(entryPath);
   const redaction = await read(redactionPath);
   assert.match(entry, /^mod redaction;/m);
   assert.match(entry, /let redacted = redact_value\(value\);/);
   assert.match(entry, /serde_json::to_string\(&redacted\)/);
-  assert.equal((redaction.match(/#\[test\]/g) || []).length, 6);
+  assert.equal((redaction.match(/#\[test\]/g) || []).length, 14);
   assert.doesNotMatch(redaction.split('#[cfg(test)]')[0], /std::fs|OpenOptions|env::|tauri::|Mutex|OnceLock|write_performance_logs/);
 });
 
@@ -43,12 +44,15 @@ test('R12-14 recursively removes bodies and secrets while minimizing path fields
   }
 });
 
-test('R12-14 preserves the historical no-redaction manifest and frontend payload/adapter bytes', async () => {
+test('R12-14 preserves historical evidence and adapter bytes while the runtime keeps nested structures', async () => {
   const manifest = JSON.parse(await read('src-tauri/tests/fixtures/stage_12_security/manifest.json'));
   assert.equal(manifest.performanceLog.commandRedaction, 'none');
   assert.equal(await read('src-tauri/tests/fixtures/stage_12_security/manifest.json'),
     frozen('src-tauri/tests/fixtures/stage_12_security/manifest.json'));
-  assert.equal(await read('src/runtime/performance.js'), frozen('src/runtime/performance.js'));
+  const runtime = await read('src/runtime/performance.js');
+  assert.doesNotMatch(runtime.slice(runtime.indexOf('function safeDetails'), runtime.indexOf('function makeEntry')), /JSON\.stringify/);
+  assert.match(runtime, /new WeakSet/);
+  assert.match(runtime, /remaining = 512/);
   assert.equal(await read('src/platform/desktop/performance-log-client.js'),
     frozen('src/platform/desktop/performance-log-client.js'));
   assert.equal(await read('src-tauri/Cargo.toml'), frozen('src-tauri/Cargo.toml'));
@@ -79,8 +83,8 @@ test('R12-14 makes R12-13 historical and owns the cumulative validation without 
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);
   for (const marker of [
     'tests/stage-12-log-redaction.test.mjs', 'src-tauri/src/performance_log/redaction.rs',
-    'R12-14 direct recursive redaction 6 of 6', 'performance_log::redaction::tests',
-    'test result: ok. 6 passed; 0 failed', 'R12-13 pre-split real HTTP response behavior 9 of 9',
+    'R12-14 direct recursive redaction 14 of 14', 'performance_log::redaction::tests',
+    'test result: ok. 14 passed; 0 failed', 'R12-13 pre-split real HTTP response behavior 9 of 9',
     'cargo clippy', '--all-targets -- -D warnings', 'cargo check', 'npm test',
     'npm audit --audit-level=high', 'npm run verify:architecture',
     'npm run test:browser:contract', 'npm run test:browser', 'npm run build',
@@ -104,13 +108,13 @@ test('R12-14 documentation records implementation while keeping later atomic tas
 
 test('R12-14 shell command starts Cargo with only the intended arguments and keeps the result gate', async () => {
   const workflow = await read('.github/workflows/r12-14.yml');
-  const step = workflow.match(/^      - name: R12-14 direct recursive redaction 6 of 6\n        run: \|\n([\s\S]*?)(?=^      - name:)/m);
+  const step = workflow.match(/^      - name: R12-14 direct recursive redaction 14 of 14\n        run: \|\n([\s\S]*?)(?=^      - name:)/m);
   assert.ok(step, 'missing direct redaction test step');
   const commands = step[1].replace(/\\\r?\n[ \t]*/g, ' ')
     .trim().split('\n').map(line => line.trim()).filter(Boolean);
   assert.deepEqual(commands, [
     'cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/log-redaction.log"',
-    "grep -Fq 'test result: ok. 6 passed; 0 failed' \"$RUNNER_TEMP/r12-14/log-redaction.log\""
+    "grep -Fq 'test result: ok. 14 passed; 0 failed' \"$RUNNER_TEMP/r12-14/log-redaction.log\""
   ]);
 });
 

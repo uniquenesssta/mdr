@@ -216,7 +216,7 @@ jobs:
             src-tauri/src/local_file/text_writer.rs src-tauri/src/local_file/binary_writer.rs \
             src-tauri/src/local_file/directory_tree.rs src-tauri/src/local_file/tree_limits.rs \
             src/platform/desktop/file-system-client.js src/platform/desktop/link-client.js src/platform/desktop/web-fetch-client.js \
-            src/platform/desktop/performance-log-client.js src/runtime/performance.js \
+            src/platform/desktop/performance-log-client.js \
             ':!src-tauri/src/local_file/path_policy.rs' ':!src-tauri/tests/web_fetch/http_compatibility.rs'
           node scripts/ci/verify-windows-test-imports.mjs
           test ! -e src-tauri/src/local_file.rs
@@ -224,6 +224,10 @@ jobs:
           node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-log-redaction.test.mjs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/command-scope.log"
           git diff --check
+      - name: Setup Node for the actual frontend to Rust log regression
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Pin Rust 1.88 with Clippy and rustfmt
         run: |
           rustup toolchain install 1.88.0 --profile minimal --component clippy --component rustfmt
@@ -234,6 +238,7 @@ jobs:
           rustfmt --edition 2021 --check --config max_width=120 \
             src-tauri/src/external_link.rs \
             src-tauri/src/performance_log/redaction.rs \
+            src-tauri/tests/performance_log/redaction_pipeline.rs \
             src-tauri/src/web_fetch.rs \
             src-tauri/src/web_fetch/client.rs \
             src-tauri/src/web_fetch/response.rs \
@@ -262,10 +267,15 @@ jobs:
             src-tauri/tests/local_file/commands.rs \
             src-tauri/tests/stage_12_security_compatibility.rs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rustfmt.log"
-      - name: R12-14 direct recursive redaction 6 of 6
+      - name: R12-14 direct recursive redaction 14 of 14
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/log-redaction.log"
-          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/log-redaction.log"
+          grep -Fq 'test result: ok. 14 passed; 0 failed' "$RUNNER_TEMP/r12-14/log-redaction.log"
+      - name: R12-14 actual frontend payload to Rust JSONL
+        run: |
+          node --test tests/stage-12-log-payload.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/frontend-payload.log"
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction_pipeline_tests 2>&1 | tee "$RUNNER_TEMP/r12-14/redaction-pipeline.log"
+          grep -Fq 'test result: ok. 1 passed; 0 failed' "$RUNNER_TEMP/r12-14/redaction-pipeline.log"
       - name: R12-13 pre-split real HTTP response behavior 9 of 9
         run: |
           baseline="$(cygpath -u "$RUNNER_TEMP")/r12-14-response-baseline"

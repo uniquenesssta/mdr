@@ -238,3 +238,7 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/performance_log/redaction_pipeline.rs"]
+mod redaction_pipeline_tests;

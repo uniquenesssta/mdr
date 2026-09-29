@@ -39,28 +39,36 @@ function cleanString(value, maxLength = 160) {
     .slice(0, maxLength);
 }
 
+// Keep data structured until the single Rust redaction boundary. Bound hostile/cyclic
+// diagnostic objects without JSON-stringifying their nested payloads into opaque strings.
 function safeDetails(details) {
   if (!details || typeof details !== 'object') return {};
-  const safe = {};
-  for (const [key, value] of Object.entries(details)) {
-    if (value === undefined || typeof value === 'function') continue;
-    if (typeof value === 'string') {
-      safe[key] = cleanString(value);
-    } else if (typeof value === 'number' || typeof value === 'boolean' || value === null) {
-      safe[key] = value;
-    } else if (Array.isArray(value)) {
-      safe[key] = value.slice(0, 20).map(item =>
-        typeof item === 'string' ? cleanString(item, 80) : item
-      );
-    } else {
-      try {
-        safe[key] = cleanString(JSON.stringify(value), 300);
-      } catch (_) {
-        safe[key] = '[unserializable]';
+  const ancestors = new WeakSet();
+  let remaining = 512;
+  const visit = (value, depth) => {
+    if (--remaining < 0 || depth > 8) return '[truncated]';
+    if (value === null || typeof value === 'boolean') return value;
+    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+    if (typeof value === 'string') return cleanString(value, 300);
+    if (typeof value !== 'object') return undefined;
+    if (ancestors.has(value)) return '[circular]';
+    ancestors.add(value);
+    try {
+      if (Array.isArray(value)) return value.slice(0, 20).map(item => visit(item, depth + 1) ?? null);
+      const safe = Object.create(null);
+      for (const key of Object.keys(value).slice(0, 64)) {
+        if (remaining <= 0) break;
+        const nested = visit(value[key], depth + 1);
+        if (nested !== undefined) safe[key] = nested;
       }
+      return safe;
+    } catch (_) {
+      return '[unserializable]';
+    } finally {
+      ancestors.delete(value);
     }
-  }
-  return safe;
+  };
+  return visit(details, 0);
 }
 
 function makeEntry(operation, options = {}) {
