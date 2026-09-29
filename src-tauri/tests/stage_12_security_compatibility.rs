@@ -28,6 +28,7 @@ const SOURCE_PERFORMANCE_LOG: &str = concat!(
     include_str!("../src/performance_log.rs"),
     include_str!("../src/performance_log/paths.rs"),
     include_str!("../src/performance_log/writer.rs"),
+    include_str!("../src/performance_log/lifecycle.rs"),
 );
 const SOURCE_MAIN: &str = include_str!("../src/main.rs");
 

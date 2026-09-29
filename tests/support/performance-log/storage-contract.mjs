@@ -19,7 +19,8 @@ export async function assertLogStorageExtraction(before) {
   }
   const [entry, paths, writer] = await Promise.all([read(`${root}.rs`), read(`${root}/paths.rs`), read(`${root}/writer.rs`)]);
   for (const [source, names] of [
-    [entry, ['record_backend', 'record_lifecycle', 'measure_async', 'measure_sync', 'write_performance_logs']],
+    [entry, ['record_backend', 'measure_async', 'measure_sync', 'write_performance_logs']],
+    [await read(`${root}/lifecycle.rs`), ['record_lifecycle']],
     [paths, ['unix_time_ms', 'utc_timestamp_from_unix_ms', 'log_directory', 'log_file_path']],
     [writer, ['write_lock', 'append_values']]
   ]) for (const name of names) assert.equal(tokens(rustFunction(source, name)), tokens(rustFunction(before, name)), name);
@@ -32,13 +33,17 @@ export async function assertLogStorageExtraction(before) {
 
 export function logFixtureAfterStorageExtraction(text) {
   return text.replace('const SOURCE_PERFORMANCE_LOG: &str = include_str!("../src/performance_log.rs");',
-    'const SOURCE_PERFORMANCE_LOG: &str = concat!(\n    include_str!("../src/performance_log.rs"),\n    include_str!("../src/performance_log/paths.rs"),\n    include_str!("../src/performance_log/writer.rs"),\n);');
+    'const SOURCE_PERFORMANCE_LOG: &str = concat!(\n    include_str!("../src/performance_log.rs"),\n    include_str!("../src/performance_log/paths.rs"),\n    include_str!("../src/performance_log/writer.rs"),\n    include_str!("../src/performance_log/lifecycle.rs"),\n);');
 }
 
 // Historical inventory assertions keep checking their own task. R12-15 separately
 // checks the actual new rows and their unique state owners, never the projected view.
+export function inventoryBeforeLifecycleExtraction(inventory) {
+  return { ...inventory, modules: inventory.modules.filter(row => row[0] !== `${root}/lifecycle.rs`) };
+}
+
 export function inventoryBeforeLogStorageExtraction(inventory) {
-  return { ...inventory, modules: inventory.modules
+  return { ...inventory, modules: inventoryBeforeLifecycleExtraction(inventory).modules
     .filter(row => ![`${root}/paths.rs`, `${root}/writer.rs`].includes(row[0]))
     .map(row => row[0] === `${root}.rs` ? [row[0], 'rust-module', 'telemetry',
       'Development performance log session creation and JSONL persistence.',

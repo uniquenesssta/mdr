@@ -4456,6 +4456,16 @@
       "per-batch-append",
       "retain",
       false
+    ],
+    [
+      "src-tauri/src/performance_log/lifecycle.rs",
+      "rust-module",
+      "telemetry",
+      "Stateless startup and exit event projection through the best-effort backend log sink.",
+      "none",
+      "per-lifecycle-event",
+      "retain",
+      false
     ]
   ]
 }

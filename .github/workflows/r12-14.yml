@@ -1,5 +1,5 @@
-name: R12-15 Log Paths and Writer
-run-name: R12-15 log paths/writer and cumulative regression · ${{ github.sha }}
+name: R12-16 Log Lifecycle
+run-name: R12-16 log lifecycle and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -95,7 +95,7 @@ defaults:
 
 jobs:
   frontend:
-    name: Log Paths/Writer and frontend regression
+    name: Log Lifecycle and frontend regression
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
@@ -135,7 +135,7 @@ jobs:
             tests/stage-12-tree-limits.test.mjs \
             tests/stage-12-local-commands.test.mjs \
             tests/stage-12-external-link-validation.test.mjs \
-            tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-web-response.test.mjs tests/stage-12-log-redaction.test.mjs tests/stage-12-log-writer.test.mjs \
+            tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-web-response.test.mjs tests/stage-12-log-redaction.test.mjs tests/stage-12-log-writer.test.mjs tests/stage-12-log-lifecycle.test.mjs \
             tests/unit/platform/link-client.test.mjs \
             tests/unit/platform/web-fetch-client.test.mjs \
             tests/unit/platform/file-system-client.test.mjs \
@@ -177,7 +177,7 @@ jobs:
           retention-days: 14
 
   rust:
-    name: Log Paths/Writer and cumulative hard gates
+    name: Log Lifecycle and cumulative hard gates
     runs-on: windows-latest
     timeout-minutes: 60
     env:
@@ -222,7 +222,7 @@ jobs:
           node scripts/ci/verify-windows-test-imports.mjs
           test ! -e src-tauri/src/local_file.rs
           test ! -e .github/workflows/r12-source-snapshot.yml
-          node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-log-redaction.test.mjs tests/stage-12-log-writer.test.mjs \
+          node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-log-redaction.test.mjs tests/stage-12-log-writer.test.mjs tests/stage-12-log-lifecycle.test.mjs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/command-scope.log"
           git diff --check
       - name: Setup Node for the actual frontend to Rust log regression
@@ -241,6 +241,8 @@ jobs:
             src-tauri/src/performance_log/redaction.rs \
             src-tauri/src/performance_log/paths.rs \
             src-tauri/src/performance_log/writer.rs \
+            src-tauri/src/performance_log/lifecycle.rs \
+            src-tauri/tests/performance_log/lifecycle_contract.rs \
             src-tauri/tests/performance_log/writer_contract.rs \
             src-tauri/tests/performance_log/release_writer.rs \
             src-tauri/tests/performance_log/redaction_pipeline.rs \
@@ -272,6 +274,24 @@ jobs:
             src-tauri/tests/local_file/commands.rs \
             src-tauri/tests/stage_12_security_compatibility.rs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rustfmt.log"
+      - name: R12-16 pre-split lifecycle 6 of 6
+        if: ${{ !cancelled() }}
+        run: |
+          baseline="$(cygpath -u "$RUNNER_TEMP")/r12-16-lifecycle-baseline"
+          mkdir "$baseline"
+          git archive d9f0bae9244f26da004dfd5013a05d5d92c4c6c3 | tar -x -C "$baseline"
+          cp src-tauri/tests/performance_log/lifecycle_contract.rs "$baseline/src-tauri/tests/performance_log/lifecycle_contract.rs"
+          printf '\n#[cfg(all(test, debug_assertions))]\n#[path = "../tests/performance_log/lifecycle_contract.rs"]\nmod lifecycle_contract_tests;\n' >> "$baseline/src-tauri/src/performance_log.rs"
+          cargo test --manifest-path "$baseline/src-tauri/Cargo.toml" --locked --bin markdown-editor performance_log::lifecycle_contract_tests 2>&1 | tee "$RUNNER_TEMP/r12-14/lifecycle-before.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/lifecycle-before.log"
+      - name: R12-16 extracted lifecycle 6 of 6
+        if: ${{ !cancelled() }}
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::lifecycle_contract_tests 2>&1 | tee "$RUNNER_TEMP/r12-14/lifecycle-after.log"
+          grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/lifecycle-after.log"
+      - name: R12-16 release lifecycle creates no logs
+        if: ${{ !cancelled() }}
+        run: node scripts/ci/verify-release-log-lifecycle.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/release-lifecycle.log"
       - name: R12-15 pre-split real log writer 9 of 9
         if: ${{ !cancelled() }}
         run: |

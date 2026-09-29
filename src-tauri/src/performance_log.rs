@@ -1,3 +1,6 @@
+mod lifecycle;
+pub use lifecycle::record_lifecycle;
+
 mod paths;
 mod redaction;
 mod writer;
@@ -29,19 +32,6 @@ pub fn record_backend(
     if let Err(err) = append_values(&[entry]) {
         eprintln!("performance log error: {err}");
     }
-}
-
-pub fn record_lifecycle(operation: &str) {
-    record_backend(
-        "app.lifecycle",
-        operation,
-        Duration::ZERO,
-        "ok",
-        json!({
-            "debugBuild": cfg!(debug_assertions),
-            "pid": std::process::id()
-        }),
-    );
 }
 
 pub async fn measure_async<T, E, F>(
@@ -98,3 +88,7 @@ mod redaction_pipeline_tests;
 #[cfg(test)]
 #[path = "../tests/performance_log/writer_contract.rs"]
 mod writer_contract_tests;
+
+#[cfg(all(test, debug_assertions))]
+#[path = "../tests/performance_log/lifecycle_contract.rs"]
+mod lifecycle_contract_tests;
