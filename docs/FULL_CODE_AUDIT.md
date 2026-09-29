@@ -1,6 +1,6 @@
 # MDR 全仓代码审计、Windows 验收与任务书约束评估
 
-> **A01 修复跟进**：2026-09-29 用户要求提前修复 R12-14，当前正在实施并验证。原发现和审计证据保留；本项验收及 Windows 运行结果以 [R12-14 详情](R12-14-DETAILS.md) 为准，其他 A02～A10 状态不变。
+> **A01 修复跟进**：2026-09-29 用户要求提前修复 R12-14，现已完成 Windows 专项验证（14 项脱敏、真实 JSONL 回读及 227 项 Rust 通过）。A01 标记为已修复；原发现和审计证据保留，本项验收及 Windows 运行结果以 [R12-14 详情](R12-14-DETAILS.md) 为准，其他 A02～A10 状态不变。
 
 审计日期：2026-09-29 UTC。代码基准：`74e3184e2d175abc84b7e4db786ad71cc3fb2aaf`，对应生产实现 `3cc56f0`。分支：`agent/r12-stage`。本报告替代首次审计对“完整范围”的表述；历史记录仍见 `CURRENT_AUDIT.md`。
 
@@ -51,7 +51,7 @@ P1：阻塞验收的数据可靠性/安全问题。P2：需修复或明确接受
 
 | 编号 | 级别 | 问题 | 证据与状态 |
 |---|---|---|---|
-| A01 | P1 | 前端先将嵌套日志对象序列化为字符串，Rust 仅按结构化字段递归脱敏，正文/token/path 及自由错误文本可绕过 | 生产 JS 探针 + Rust 路径静态追踪；仅 debug 后端写日志，release 不写；原 6 个 Rust 测试未覆盖跨端链路 |
+| A01 | P1（已修复） | 前端先将嵌套日志对象序列化为字符串，Rust 仅按结构化字段递归脱敏，正文/token/path 及自由错误文本可绕过 | 生产 JS 探针 + Rust 路径静态追踪；仅 debug 后端写日志，release 不写；原 6 个 Rust 测试未覆盖跨端链路 |
 | A02 | P1（验收证据） | 根 npm test 未递归；旧测试仍引用删除路径、旧导出、固定模块总数；manifest 漏项 | 全仓测试实跑确认；此次只补全入口及 Windows 适配，未把历史失败跳过 |
 | A03 | P1 风险 | 不可信 Markdown 的 raw HTML 进入 template.innerHTML，再挂载到主 DOM；Tauri CSP 为 null | 确认 parser 保留事件属性及两个真实挂载点；尚无 Windows WebView 脚本执行/IPC利用复现 |
 | A04 | P2 | 日志批次部分写入后出错，前端重排整批并短间隔重试，可能重复记录/持续重试 | `performance_log.rs` 循环 append 与 `performance.js` catch/requeue；静态确认 |
@@ -162,4 +162,4 @@ P1：阻塞验收的数据可靠性/安全问题。P2：需修复或明确接受
 
 **最终 Rust job 全部通过**：全量 `cargo test` 为 **206 + 5 + 1 + 6 = 218 项通过，0 失败、0 忽略**；`cargo clippy -- -D warnings`、`cargo check`、rustfmt、所有定向阶段契约和旧/新真实 HTTP 比较均通过。Windows socket 修正已获得本轮实跑确认。[最终逐 job / step 证据](audit/windows-validation-final.json) 与 [完整 Node 失败清单](audit/windows-node-results.json) 已归档。
 
-这些结果不消除 A01/A07/A09，也不证明 A03 的 Windows WebView 风险已排除。**全仓审计完成；产品验收未通过；R12-14 不标记完成。**
+上述审计时的结果未消除 A01/A07/A09，也未证明 A03 的 Windows WebView 风险已排除；A01 后续专项修复状态见文首与 R12-14 详情。**原审计裁定：全仓审计完成；产品验收未通过；当时 R12-14 不标记完成。后续 A01 已修复，R12-14 专项验收见文首。**

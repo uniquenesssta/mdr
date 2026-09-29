@@ -96,7 +96,7 @@ test('R12-14 makes R12-13 historical and owns the cumulative validation without 
 test('R12-14 documentation records implementation while keeping later atomic tasks and R12-S01 pending', async () => {
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md');
   assert.match(stage, /- \[x\] 12\.13 Web Response/);
-  assert.match(stage, /- \[ \] 12\.14 Log Redaction/);
+  assert.match(stage, /- \[x\] 12\.14 Log Redaction/);
   assert.match(stage, /- \[ \] 12\.15 Log Paths\/Writer/);
   assert.match(stage, /- \[ \] R12-S01/);
   const detail = await read('docs/R12-14-DETAILS.md');

@@ -1,0 +1,445 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-29",
+  "repository": "uniquenesssta/mdr",
+  "branch": "agent/r12-stage",
+  "scope": "R12-14 / A01 log redaction only",
+  "productionCommit": "3cf4b683255d1f6f6ade72ab3df9f3e0474e435f",
+  "run": 36560794359,
+  "runUrl": "https://github.com/uniquenesssta/mdr/actions/runs/36560794359",
+  "platform": "Windows (windows-latest)",
+  "toolchains": {
+    "node": "22",
+    "rust": "1.88"
+  },
+  "node": {
+    "totals": {
+      "tests": 1420,
+      "pass": 1380,
+      "fail": 40
+    },
+    "failedTests": [
+      "all Stage 0 frozen hashes remain byte-identical",
+      "production module ownership fixture covers the exact runtime source surface",
+      "module inventory collector records imports, exports, listeners, state and side-effect signals",
+      "all migrated classic callers use the scoped LayoutState port while Atomic 7.14 Preview uses direct LayoutState injection without a second state center",
+      "Atomic 6.1 scroll-sync reads resize activity only from LayoutState",
+      "Atomic 6.8 removes classic Outline state/render/parser authority while Atomic 7.14 Preview consumes Outline through direct injection",
+      "Atomic 6.13 removes classic Window authority while preserving close-save policy in the application layer",
+      "Atomic 7.14 remaining classic callers use the single scoped Preview command surface instead of rebuilding Preview ownership",
+      "Atomic 8.3 Activation boundary remains intact after Atomic 8.6 Shared Widget UI extraction",
+      "Atomic 8.8 Code Block ownership remains intact after Atomic 8.9 Table migration",
+      "Atomic 8.2 production inventory records the facade and sole Session state owner",
+      "Atomic 8.15 production inventory has final Stage 8 ownership and no legacy aggregate record",
+      "Atomic 8.13 inventory records the two HTML responsibilities and removes the legacy aggregate",
+      "Atomic 8.10 Image ownership remains intact after Atomic 8.12 Mermaid migration",
+      "Atomic 8.14 production inventory replaces one aggregate with seven presentation records",
+      "Atomic 8.11 Math ownership remains intact after Atomic 8.14 Inline Presentation migration",
+      "Atomic 8.12 Mermaid ownership remains intact after Atomic 8.13 HTML migration",
+      "Atomic 8.7 production inventory keeps the three responsibility-specific Prefix/HR modules after Atomic 8.14",
+      "Atomic 8.6 Shared Widget UI boundary remains intact after Atomic 8.10 Image migration",
+      "Atomic 8.4 production inventory records the new responsibility boundaries",
+      "Atomic 8.9 Table ownership remains intact after Atomic 8.12 Mermaid migration",
+      "Atomic 8.5 lifecycle boundary remains intact after Atomic 8.10 Image migration",
+      "R9-04 inventory records one editor mapper and final Stage 9 cardinality",
+      "R9-12 production inventory removes classic scroll-sync, replaces old controller path and contains the final sync modules exactly once",
+      "R9-05 inventory records preview mapper and final Stage 9 cardinality",
+      "current inventory records final public Sync owners without restoring obsolete controllers",
+      "R9-03 inventory records the canonical controller and source owner in final Stage 9 topology",
+      "R9-06 inventory records one geometry owner and final Stage 9 cardinality",
+      "R9-02 inventory records one source owner and final Stage 9 cardinality",
+      "R9-08 production inventory records one Feedback Guard responsibility and final Stage 9 cardinality",
+      "R9-09 production inventory records one Highlight Session responsibility and final Stage 9 cardinality",
+      "R9-07 production inventory records exactly two Reader responsibilities and final Stage 9 cardinality",
+      "R9-10 production inventory records one Retry Scheduler owner and final controller remains a distinct orchestration owner",
+      "Atomic 10.10 keeps one LoadController authority after later Persistence application atomics",
+      "stable compatibility presentation has no inline style authority",
+      "production integration keeps raw CodeMirror confined to the editor feature and removes classic raw-view access",
+      "tests/unit/editor/codemirror-extension-registry.test.mjs",
+      "Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-global caller",
+      "ESM consumers receive responsibility-focused ports rather than native DTO facade methods",
+      "save-before-close remains in the application CloseSavePort and stays absent from the platform/window orchestration internals"
+    ],
+    "baselineRun": 36554016082,
+    "added": [],
+    "removed": []
+  },
+  "acceptanceBoundary": {
+    "unit": "R12-14 / A01",
+    "product": "not accepted",
+    "deferred": "A02 existing Node failures remain assigned to R12-18; other audit items keep taskbook assignments; R12-20 reviews this fix"
+  },
+  "limitations": [
+    "Synthetic secrets only; no claim of observed real-user leakage.",
+    "Payload generated by real production JS runtime and desktop adapter under a VM. Actual Rust command writes and reads JSONL; test does not exercise WebView IPC or native GUI.",
+    "Unknown strings are redacted; new permitted log labels require explicit policy updates.",
+    "No Linux or macOS product validation.",
+    "Final archive commit only updates documentation, evidence and completion-status assertion; Windows production evidence is tied to productionCommit."
+  ],
+  "acceptance": "R12-14/A01 passed; whole R12/product not accepted",
+  "checks": {
+    "redaction": {
+      "pass": 14,
+      "fail": 0
+    },
+    "frontendPayload": {
+      "pass": 2,
+      "fail": 0
+    },
+    "actualJsonlRoundTrip": {
+      "pass": 1,
+      "fail": 0
+    },
+    "fullRust": {
+      "pass": 227,
+      "fail": 0,
+      "suites": [
+        215,
+        5,
+        1,
+        6
+      ]
+    },
+    "rustfmt": "passed",
+    "clippyWarningsDenied": "passed",
+    "cargoCheck": "passed",
+    "frontendTargeted": {
+      "pass": 113,
+      "fail": 0
+    },
+    "frontendBuild": "passed",
+    "browserContract": "passed",
+    "builtAppBrowser": "passed",
+    "nativeOpener": "passed"
+  },
+  "jobs": [
+    {
+      "id": 109380896247,
+      "name": "Log Redaction and frontend regression",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserve repository LF bytes on Windows",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Record validation target",
+          "conclusion": "success"
+        },
+        {
+          "name": "Setup Node 22",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install locked frontend dependencies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Dependency audit hard gate",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-08 command boundaries and R12-07 compatibility contracts",
+          "conclusion": "success"
+        },
+        {
+          "name": "Full Node regression",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Architecture and documentation hard gates",
+          "conclusion": "success"
+        },
+        {
+          "name": "Browser preview contract",
+          "conclusion": "success"
+        },
+        {
+          "name": "Production build",
+          "conclusion": "success"
+        },
+        {
+          "name": "Built-app browser regression",
+          "conclusion": "success"
+        },
+        {
+          "name": "Validation leaves tracked sources unchanged",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain frontend evidence even on failure",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Setup Node 22",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 109380896484,
+      "name": "Log Redaction and cumulative hard gates",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserve repository LF bytes on Windows",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Record validation target",
+          "conclusion": "success"
+        },
+        {
+          "name": "Guard R12-14 scope and frozen policies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Setup Node for the actual frontend to Rust log regression",
+          "conclusion": "success"
+        },
+        {
+          "name": "Pin Rust 1.88 with Clippy and rustfmt",
+          "conclusion": "success"
+        },
+        {
+          "name": "Rust formatting",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-14 direct recursive redaction 14 of 14",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-14 actual frontend payload to Rust JSONL",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-13 pre-split real HTTP response behavior 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-13 extracted real HTTP response behavior 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-12 pre-split real HTTP client behavior 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-12 direct client ownership tests 2 of 2",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-12 extracted real HTTP client behavior 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-11 pre-split URL and real HTTP behavior 17 of 17",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-11 extracted URL and real HTTP behavior 17 of 17",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-09 direct URL validation 8 of 8",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-09 real backend command rejection 2 of 2",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-08 real command tests 12 of 12",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserved local-file legacy regression 4 of 4",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-07 direct Tree Limits tests 6 of 6",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-06 direct Windows Directory Tree regression 5 of 5",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-05 direct Writer regression 10 of 10",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-04 direct Reader regression 10 of 10",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-03 direct File Kind regression 6 of 6",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-02 direct Windows Path Policy regression 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-01 direct Windows behavior regression 9 of 9",
+          "conclusion": "success"
+        },
+        {
+          "name": "R12-01 independent compatibility fixture 6 of 6",
+          "conclusion": "success"
+        },
+        {
+          "name": "Full Rust tests",
+          "conclusion": "success"
+        },
+        {
+          "name": "Full Clippy warnings-denied gate",
+          "conclusion": "success"
+        },
+        {
+          "name": "Rust check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Validation leaves tracked sources unchanged",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain Rust evidence even on failure",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Setup Node for the actual frontend to Rust log regression",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 109380897025,
+      "name": "All repository Node tests (Windows)",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserve repository LF bytes on Windows",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install locked frontend dependencies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run every tracked Node test including nested suites",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Preserve complete audit results",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 109380897839,
+      "name": "Native opener compilation and linkage (windows-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Preserve repository LF bytes on Windows",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Record target and pin Rust",
+          "conclusion": "success"
+        },
+        {
+          "name": "Compile and link the production native boundary",
+          "conclusion": "success"
+        },
+        {
+          "name": "Validation leaves tracked sources unchanged",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain native boundary evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout exact event commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ]
+}

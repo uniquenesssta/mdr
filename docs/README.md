@@ -1,12 +1,12 @@
 # Markdown Editor
 
-- 2026-09-29：用户进一步要求现在修复 R12-14/A01；已补结构化日志、保守字符串脱敏及真实 JSONL 回读测试，Windows 验证待确认。其余问题保持原排期，12.20 后续复核本项成果。[修复记录](R12-14-DETAILS.md)。
+- 2026-09-29：用户进一步要求现在修复 R12-14/A01；结构化日志、保守字符串脱敏及真实 JSONL 回读测试已通过 Windows 验证，Rust 227 项通过；本项完成，累计 Node 原 40 项失败仍待收尾。其余问题保持原排期，12.20 后续复核本项成果。[修复记录](R12-14-DETAILS.md)。
 
 - 2026-09-29：用户确定先完成 R12-17，再执行新增 **R12-18～24 审计收尾**，通过后进入 R13。A05 抓取策略由 R13-S01 承接，A04 日志批次重试由 R15.4/15.7 承接；保存、当前脱敏/HTML 风险、安全写入、依赖公告及失效门禁在 R12 收尾处置。合理约束已生效，本轮未修改产品代码。[R12 任务书](markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md) · [全局约束](markdown-main-full-rewrite-taskbook-18-docs/01-全局架构规划与基线冻结.md)。
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 为准。R12-14 既有 CI 全绿，但 2026-09-29 验收发现脱敏链路缺口，仍未通过；完整审计见 [FULL_CODE_AUDIT](FULL_CODE_AUDIT.md)。R12-S01 仍未实施，现由 R13-S01 承接；后续执行顺序以上方新排程为准。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 为准。R12-14/A01 已完成修复并通过 Windows 专项验收；整个 R12 仍待原计划与新增审计收尾，完整审计见 [FULL_CODE_AUDIT](FULL_CODE_AUDIT.md)。R12-S01 仍未实施，现由 R13-S01 承接；后续执行顺序以上方新排程为准。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 
