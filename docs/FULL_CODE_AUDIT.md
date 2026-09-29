@@ -15,6 +15,7 @@
 - [逐文件清单](audit/full-code-inventory.csv)：代码与配置均有记录，不将自动扫描标成逐行人工审阅。
 - [扫描规则与结果](audit/static-scan-evidence.json)：HTML 注入点、动态执行、unsafe、进程边界、写入、异步资源与空 catch。命中是审查线索，不直接计为漏洞；相对 import 扫描中的字符串夹具已区分。
 - 深入阅读和跨模块追踪集中于启动/销毁、文档身份/会话、保存/关闭、Rust 缓存/快照/日志、预览/混合 HTML、Worker 代次、系统文件/链接/网络/日志、权限与测试门禁。其他叶子模块结合全文扫描、公共接口、依赖关系和现有测试审查。
+- 补充全量检查：52 个 CSS 文件解析通过；全部 45 个 workflow YAML 可解析且所有活动 job 指向 Windows；1,096 个跟踪文本文件的高置信密钥模式扫描未命中（不等于证明没有任何秘密）。生产范围扫描得到 14 个 HTML sink、65 个写入线索、71 个异步资源线索、18 个空 catch、1 个 unsafe 块、4 个进程边界线索，用作跨模块复核线索，不按命中数计算漏洞。
 - 静态语法检查：713 个当前 JS/MJS/CJS 文件全部通过。该检查不是 Linux 产品验收。见 [结果](audit/js-syntax-results.json)。
 - 动态证据只能覆盖实际运行的路径；未做每条路径形式化证明、全状态穷举或全部故障注入。Windows 安装包、文件关联、真实 ShellExecute、休眠/断电恢复仍是明确的验收缺口。
 
@@ -46,7 +47,7 @@ P1：阻塞验收的数据可靠性/安全问题。P2：需修复或明确接受
 
 | 编号 | 级别 | 问题 | 证据与状态 |
 |---|---|---|---|
-| A01 | P1 | 前端先将嵌套日志对象序列化为字符串，Rust 仅按结构化字段递归脱敏，正文/token/path 及自由错误文本可绕过 | 生产 JS 探针 + Rust 路径静态追踪；原 6 个 Rust 脱敏测试没有覆盖跨端链路 |
+| A01 | P1 | 前端先将嵌套日志对象序列化为字符串，Rust 仅按结构化字段递归脱敏，正文/token/path 及自由错误文本可绕过 | 生产 JS 探针 + Rust 路径静态追踪；仅 debug 后端写日志，release 不写；原 6 个 Rust 测试未覆盖跨端链路 |
 | A02 | P1（验收证据） | 根 npm test 未递归；旧测试仍引用删除路径、旧导出、固定模块总数；manifest 漏项 | 全仓测试实跑确认；此次只补全入口及 Windows 适配，未把历史失败跳过 |
 | A03 | P1 风险 | 不可信 Markdown 的 raw HTML 进入 template.innerHTML，再挂载到主 DOM；Tauri CSP 为 null | 确认 parser 保留事件属性及两个真实挂载点；尚无 Windows WebView 脚本执行/IPC利用复现 |
 | A04 | P2 | 日志批次部分写入后出错，前端重排整批并短间隔重试，可能重复记录/持续重试 | `performance_log.rs` 循环 append 与 `performance.js` catch/requeue；静态确认 |
@@ -142,3 +143,9 @@ P1：阻塞验收的数据可靠性/安全问题。P2：需修复或明确接受
 后续 Windows 迁移迭代以及最终结果写入本节的增补记录。第二轮因 npm exec 将 node 误识别为待安装包而未启动递归测试，不能算重跑通过；已改为官方支持的 `--call` 命令形式。测试 URL 路径修正、tar 修正和测试导入修正都不改变产品行为。
 
 验收仍需要：修复已确认 P1；治理过时测试并补齐漏项；全部 Windows 当前回归通过；补真实 Windows 安装/启动/文件关联/外链，以及保存失败、异常退出、恢复的链路证据。R12-14 不勾选完成，R12-15～17 未开始；不以审计完成代替产品验收完成。
+
+### Windows 全仓复跑增补
+
+提交 `4d443ea` 的 [Actions 36553566571](https://github.com/uniquenesssta/mdr/actions/runs/36553566571) 已实际跑完递归 Node：**1418 个结果，1378 通过、40 失败**。其中 architecture 368/335/33（总/过/失败），根测试 453/452/1，UI 42/41/1，unit/editor 46/44/2，unit/platform 136/133/3，其余目录无失败；8 个独立 e2e 文件在 Windows 实际执行通过。[失败名称清单](audit/windows-node-results.json)。这些是 runner 报告结果，不把加载失败文件内尚未展开的测试当作已执行。
+
+前一轮 `e5eea0c` 已确认 tar 路径修复生效、Windows Clippy 与 cargo check 通过；还暴露了真实 HTTP 夹具的 Windows 非阻塞 socket 继承问题（WSAEWOULDBLOCK / 10035），导致 HTTP 基线 6/9、当前 Rust 主测试 205/206。夹具已显式将 accepted socket 切回阻塞，再设置原有 2 秒超时；仍使用真实 TCP/reqwest、原来的 9 个断言，无忽略测试。旧/新基线使用同一修正后的夹具，原产品源、超时、响应策略保持不变。

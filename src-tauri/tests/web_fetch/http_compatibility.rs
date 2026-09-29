@@ -35,6 +35,8 @@ impl Server {
                     }
                     Err(error) => return Err(format!("accept: {error}")),
                 };
+                // Windows accepted sockets can inherit the listener nonblocking mode.
+                stream.set_nonblocking(false).map_err(|e| e.to_string())?;
                 stream
                     .set_read_timeout(Some(Duration::from_secs(2)))
                     .map_err(|e| e.to_string())?;

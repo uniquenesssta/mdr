@@ -78,7 +78,9 @@ test('R12-13 leaves request transport command telemetry and legacy tests byte-st
 
 test('R12-13 preserves the real nine-case HTTP characterization and all dependency choices', async () => {
   assert.equal(await read('src-tauri/tests/web_fetch/http_compatibility.rs'),
-    frozen('src-tauri/tests/web_fetch/http_compatibility.rs'));
+    frozen('src-tauri/tests/web_fetch/http_compatibility.rs').replace(
+      '                stream\n                    .set_read_timeout',
+      '                // Windows accepted sockets can inherit the listener nonblocking mode.\n                stream.set_nonblocking(false).map_err(|e| e.to_string())?;\n                stream\n                    .set_read_timeout'));
   assert.equal(await read('src-tauri/Cargo.toml'), frozen('src-tauri/Cargo.toml'));
   assert.equal(await read('src-tauri/Cargo.lock'), frozen('src-tauri/Cargo.lock'));
   const http = await read('src-tauri/tests/web_fetch/http_compatibility.rs');
