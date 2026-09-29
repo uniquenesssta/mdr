@@ -268,10 +268,7 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
         }
     }
     match key {
-        "contentType" => matches!(
-            value,
-            "text/html" | "text/plain" | "text/markdown" | "application/json"
-        ),
+        "contentType" => matches!(value, "text/html" | "text/plain" | "text/markdown" | "application/json"),
         "side" | "sourceSide" | "targetSide" => matches!(value, "editor" | "preview" | ""),
         "mode" | "presentationMode" => matches!(value, "source" | "hybrid" | "preview"),
         _ => false,
@@ -288,9 +285,7 @@ fn redact_path_value(value: &Value, depth: usize, remaining: &mut usize) -> Valu
         // do not mistake its final slash-delimited fragment for a safe file name.
         Value::String(path) => {
             let name = terminal_path_component(path);
-            if name.len() > 160
-                || name.chars().any(|c| c.is_control() || "?&#=\"{}[]<>:".contains(c))
-            {
+            if name.len() > 160 || name.chars().any(|c| c.is_control() || "?&#=\"{}[]<>:".contains(c)) {
                 Value::String(REDACTED.into())
             } else {
                 Value::String(name)
@@ -551,7 +546,10 @@ mod tests {
         let value = json!({
             "path":"https://host/file?token=SECRET", "paths":["C:\\x\\ok.md", "{\"token\":\"SECRET\"}"]
         });
-        assert_eq!(redact_value(&value), json!({"path":"[redacted]","paths":["ok.md","[redacted]"]}));
+        assert_eq!(
+            redact_value(&value),
+            json!({"path":"[redacted]","paths":["ok.md","[redacted]"]})
+        );
     }
 
     #[test]
