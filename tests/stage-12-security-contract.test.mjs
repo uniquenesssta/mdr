@@ -99,7 +99,7 @@ test('R12-01 records web timeout redirects response fields and the current unfil
 test('R12-01 preserves the historical performance-log limits fields modes and pre-redaction baseline', async () => {
   const contract = await fixture();
   const [rust, frontend] = await Promise.all([
-    source('src-tauri/src/performance_log.rs'),
+    Promise.all(['src-tauri/src/performance_log.rs', 'src-tauri/src/performance_log/writer.rs'].map(source)).then(parts => parts.join('\n')),
     source('src/runtime/performance.js')
   ]);
   assert.deepEqual(contract.performanceLog.backendEntryFields, [

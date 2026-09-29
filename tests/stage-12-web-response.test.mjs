@@ -1,3 +1,4 @@
+import { inventoryBeforeLogStorageExtraction, logFixtureAfterStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
@@ -96,7 +97,7 @@ test('R12-13 preserves the real nine-case HTTP characterization and all dependen
 
 test('R12-13 transfers the independent security fixture to the response owner without changing policy', async () => {
   const fixturePath = 'src-tauri/tests/stage_12_security_compatibility.rs';
-  assert.equal(await read(fixturePath), expectedSecurityFixtureAfterResponseExtraction(frozen(fixturePath)));
+  assert.equal(await read(fixturePath), logFixtureAfterStorageExtraction(expectedSecurityFixtureAfterResponseExtraction(frozen(fixturePath))));
   const fixture = await read(fixturePath);
   assert.match(fixture, /SOURCE_WEB_FETCH_RESPONSE: &str = include_str!\("\.\.\/src\/web_fetch\/response\.rs"\)/);
   for (const code of [
@@ -111,7 +112,7 @@ test('R12-13 transfers the independent security fixture to the response owner wi
 test('R12-13 adds exactly one stateless response owner and changes no other inventory authority', async () => {
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
-  const after = JSON.parse(await read(path));
+  const after = inventoryBeforeLogStorageExtraction(JSON.parse(await read(path)));
   assert.equal(before.modules.length, 440);
   assert.equal(after.modules.length, 442);
   assert.deepEqual(after.fields, before.fields);

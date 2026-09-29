@@ -1,3 +1,4 @@
+import { inventoryBeforeLogStorageExtraction, logFixtureAfterStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
@@ -79,7 +80,7 @@ test('R12-10 freezes validation, frontend, registry, dependency and independent 
   }
   assert.equal(
     await read('src-tauri/tests/stage_12_security_compatibility.rs'),
-    expectedSecurityFixtureAfterLaterExtractions(frozen('src-tauri/tests/stage_12_security_compatibility.rs')),
+    logFixtureAfterStorageExtraction(expectedSecurityFixtureAfterLaterExtractions(frozen('src-tauri/tests/stage_12_security_compatibility.rs'))),
     'independent security fixture changed beyond R12-12 client ownership migration'
   );
 });
@@ -106,7 +107,7 @@ test('R12-10 covers the real system launcher, failure propagation and validation
 test('R12-10 adds exactly one cohesive stateless system boundary to the ownership inventory', async () => {
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
-  const after = JSON.parse(await read(path));
+  const after = inventoryBeforeLogStorageExtraction(JSON.parse(await read(path)));
   assert.equal(after.modules.length, 442);
   // R12-11/R12-12 separately verify the later web policy and client ownership changes.
   const withoutLaterWeb = after.modules.filter(row => ![

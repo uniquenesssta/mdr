@@ -24,7 +24,11 @@ const SOURCE_EXTERNAL_LINK: &str = include_str!("../src/external_link.rs");
 const SOURCE_WEB_FETCH: &str = include_str!("../src/web_fetch.rs");
 const SOURCE_WEB_FETCH_CLIENT: &str = include_str!("../src/web_fetch/client.rs");
 const SOURCE_WEB_FETCH_RESPONSE: &str = include_str!("../src/web_fetch/response.rs");
-const SOURCE_PERFORMANCE_LOG: &str = include_str!("../src/performance_log.rs");
+const SOURCE_PERFORMANCE_LOG: &str = concat!(
+    include_str!("../src/performance_log.rs"),
+    include_str!("../src/performance_log/paths.rs"),
+    include_str!("../src/performance_log/writer.rs"),
+);
 const SOURCE_MAIN: &str = include_str!("../src/main.rs");
 
 fn manifest() -> Value {

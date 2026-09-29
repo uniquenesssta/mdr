@@ -1,3 +1,4 @@
+import { assertLogStorageExtraction, inventoryBeforeLogStorageExtraction, logFixtureAfterStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
@@ -74,19 +75,10 @@ test('R12-11 preserves frontend registry dependency and frozen security fixture 
     'src-tauri/tests/fixtures/stage_12_security/manifest.json']) {
     assert.equal(await read(path), frozen(path), `protected boundary changed: ${path}`);
   }
-  const performanceBefore = frozen('src-tauri/src/performance_log.rs');
-  const expectedPerformance = performanceBefore
-    .replace('use serde_json::{json, Value};\n',
-      'mod redaction;\n\nuse redaction::redact_value;\nuse serde_json::{json, Value};\n')
-    .replace(
-      '    for value in values {\n        let line = serde_json::to_string(value).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n',
-      '    for value in values {\n        let redacted = redact_value(value);\n        let line = serde_json::to_string(&redacted).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n'
-    );
-  assert.equal(await read('src-tauri/src/performance_log.rs'), expectedPerformance + '\n#[cfg(test)]\n#[path = "../tests/performance_log/redaction_pipeline.rs"]\nmod redaction_pipeline_tests;\n',
-    'performance log changed beyond the later R12-14 redaction handoff');
+  await assertLogStorageExtraction(frozen('src-tauri/src/performance_log.rs'));
   assert.equal(
     await read('src-tauri/tests/stage_12_security_compatibility.rs'),
-    expectedSecurityFixtureAfterLaterExtractions(frozen('src-tauri/tests/stage_12_security_compatibility.rs')),
+    logFixtureAfterStorageExtraction(expectedSecurityFixtureAfterLaterExtractions(frozen('src-tauri/tests/stage_12_security_compatibility.rs'))),
     'R12-11 fixture changed beyond the later R12-12 client ownership migration'
   );
 });
@@ -122,7 +114,7 @@ test('R12-11 adds eight URL and eight actual loopback HTTP tests with owned clea
 test('R12-11 keeps exactly one pure policy owner after later client and response extractions', async () => {
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
-  const after = JSON.parse(await read(path));
+  const after = inventoryBeforeLogStorageExtraction(JSON.parse(await read(path)));
   assert.equal(after.modules.length, 442);
   assert.deepEqual(after.fields, before.fields);
   const r12_11 = after.modules

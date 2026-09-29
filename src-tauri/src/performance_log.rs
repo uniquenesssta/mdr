@@ -1,135 +1,11 @@
+mod paths;
 mod redaction;
+mod writer;
 
-use redaction::redact_value;
+use paths::unix_time_ms;
 use serde_json::{json, Value};
-use std::{
-    env,
-    fs::{self, OpenOptions},
-    io::Write,
-    path::PathBuf,
-    sync::{Mutex, OnceLock},
-    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
-};
-
-const MAX_BATCH_ENTRIES: usize = 500;
-const MAX_ENTRY_BYTES: usize = 64 * 1024;
-
-static WRITE_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
-static LOG_FILE_PATH: OnceLock<PathBuf> = OnceLock::new();
-
-fn write_lock() -> &'static Mutex<()> {
-    WRITE_LOCK.get_or_init(|| Mutex::new(()))
-}
-
-fn unix_time_ms() -> u128 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or(Duration::ZERO)
-        .as_millis()
-}
-
-fn utc_timestamp_from_unix_ms(timestamp_ms: u128) -> String {
-    let total_seconds = timestamp_ms / 1_000;
-    let seconds_of_day = total_seconds % 86_400;
-    let hour = seconds_of_day / 3_600;
-    let minute = (seconds_of_day % 3_600) / 60;
-    let second = seconds_of_day % 60;
-    let millisecond = timestamp_ms % 1_000;
-
-    let mut z = (total_seconds / 86_400) as i64;
-    z += 719_468;
-    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
-    let day_of_era = z - era * 146_097;
-    let year_of_era =
-        (day_of_era - day_of_era / 1_460 + day_of_era / 36_524 - day_of_era / 146_096)
-            / 365;
-    let mut year = year_of_era + era * 400;
-    let day_of_year =
-        day_of_era - (365 * year_of_era + year_of_era / 4 - year_of_era / 100);
-    let month_prime = (5 * day_of_year + 2) / 153;
-    let day = day_of_year - (153 * month_prime + 2) / 5 + 1;
-    let month = month_prime + if month_prime < 10 { 3 } else { -9 };
-    year += if month <= 2 { 1 } else { 0 };
-
-    format!(
-        "{year:04}-{month:02}-{day:02}_{hour:02}-{minute:02}-{second:02}-{millisecond:03}"
-    )
-}
-
-fn log_directory() -> Result<PathBuf, String> {
-    if let Some(custom) = env::var_os("MARKDOWN_EDITOR_LOG_DIR") {
-        let path = PathBuf::from(custom);
-        fs::create_dir_all(&path).map_err(|err| format!("无法创建性能日志目录：{err}"))?;
-        return Ok(path);
-    }
-
-    #[cfg(debug_assertions)]
-    let path = {
-        let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        manifest_dir
-            .parent()
-            .unwrap_or(manifest_dir.as_path())
-            .join("logs")
-    };
-
-    #[cfg(not(debug_assertions))]
-    let path = env::current_exe()
-        .ok()
-        .and_then(|value| value.parent().map(|parent| parent.join("logs")))
-        .unwrap_or_else(|| PathBuf::from("logs"));
-
-    fs::create_dir_all(&path).map_err(|err| format!("无法创建性能日志目录：{err}"))?;
-    Ok(path)
-}
-
-fn log_file_path() -> Result<PathBuf, String> {
-    if let Some(path) = LOG_FILE_PATH.get() {
-        return Ok(path.clone());
-    }
-
-    let path = log_directory()?.join(format!(
-        "performance-{}_pid-{}.jsonl",
-        utc_timestamp_from_unix_ms(unix_time_ms()),
-        std::process::id()
-    ));
-    let _ = LOG_FILE_PATH.set(path.clone());
-    Ok(LOG_FILE_PATH.get().cloned().unwrap_or(path))
-}
-
-fn append_values(values: &[Value]) -> Result<PathBuf, String> {
-    if !cfg!(debug_assertions) {
-        return Ok(PathBuf::new());
-    }
-    if values.is_empty() {
-        return log_file_path();
-    }
-    if values.len() > MAX_BATCH_ENTRIES {
-        return Err(format!("单次性能日志数量不能超过 {MAX_BATCH_ENTRIES} 条"));
-    }
-
-    let file_path = log_file_path()?;
-    let _guard = write_lock()
-        .lock()
-        .map_err(|_| "性能日志写入锁已损坏".to_string())?;
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&file_path)
-        .map_err(|err| format!("无法打开性能日志：{err}"))?;
-
-    for value in values {
-        let redacted = redact_value(value);
-        let line = serde_json::to_string(&redacted).map_err(|err| format!("性能日志序列化失败：{err}"))?;
-        if line.len() > MAX_ENTRY_BYTES {
-            return Err(format!("单条性能日志不能超过 {MAX_ENTRY_BYTES} 字节"));
-        }
-        file.write_all(line.as_bytes())
-            .and_then(|_| file.write_all(b"\n"))
-            .map_err(|err| format!("性能日志写入失败：{err}"))?;
-    }
-    file.flush().map_err(|err| format!("性能日志刷新失败：{err}"))?;
-    Ok(file_path)
-}
+use std::time::{Duration, Instant};
+use writer::append_values;
 
 pub fn record_backend(
     category: &str,
@@ -215,30 +91,10 @@ pub fn write_performance_logs(entries: Vec<Value>) -> Result<String, String> {
     append_values(&entries).map(|path| path.to_string_lossy().to_string())
 }
 
-// R12-01 rustfmt boundary: only the new pre-rewrite behavior tests below.
-#[cfg(test)]
-mod tests {
-    use super::{append_values, utc_timestamp_from_unix_ms, MAX_BATCH_ENTRIES, MAX_ENTRY_BYTES};
-    use serde_json::Value;
-
-    #[test]
-    fn stage_12_freezes_log_limits_and_utc_file_timestamp_shape() {
-        assert_eq!(MAX_BATCH_ENTRIES, 500);
-        assert_eq!(MAX_ENTRY_BYTES, 64 * 1024);
-        assert_eq!(utc_timestamp_from_unix_ms(0), "1970-01-01_00-00-00-000");
-        assert_eq!(utc_timestamp_from_unix_ms(1_704_164_645_678), "2024-01-02_03-04-05-678");
-    }
-
-    #[test]
-    fn stage_12_rejects_oversized_batches_before_opening_a_log_file() {
-        let entries = vec![Value::Null; MAX_BATCH_ENTRIES + 1];
-        assert_eq!(
-            append_values(&entries).expect_err("oversized batch must fail"),
-            "单次性能日志数量不能超过 500 条"
-        );
-    }
-}
-
-#[cfg(test)]
+#[cfg(all(test, debug_assertions))]
 #[path = "../tests/performance_log/redaction_pipeline.rs"]
 mod redaction_pipeline_tests;
+
+#[cfg(test)]
+#[path = "../tests/performance_log/writer_contract.rs"]
+mod writer_contract_tests;

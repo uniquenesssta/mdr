@@ -581,8 +581,8 @@
       "src-tauri/src/performance_log.rs",
       "rust-module",
       "telemetry",
-      "Development performance log session creation and JSONL persistence.",
-      "performance-log-session",
+      "Performance log command and backend measurement/lifecycle envelopes; delegates session paths and JSONL persistence.",
+      "none",
       "process-lifecycle",
       "rewrite",
       false
@@ -4434,6 +4434,26 @@
       "Pure recursive performance-log redaction for body payloads, sensitive fields and full paths before persistence.",
       "none",
       "pure-call",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/performance_log/paths.rs",
+      "rust-module",
+      "telemetry",
+      "Development log directory policy, UTC session filename and per-process cached file identity.",
+      "performance-log-session-path",
+      "process-lifecycle",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/performance_log/writer.rs",
+      "rust-module",
+      "telemetry",
+      "Debug-only serialized JSONL append with batch/byte limits, redaction and write error propagation.",
+      "performance-log-write-lock",
+      "per-batch-append",
       "retain",
       false
     ]

@@ -1,5 +1,7 @@
 # Markdown Editor
 
+- 2026-09-29：R12-15 Log Paths/Writer 已实施，Windows CI 待验证；仅本项继续，R12-16 及后续尚未实施。[详情](R12-15-DETAILS.md)。
+
 - 2026-09-29：用户进一步要求现在修复 R12-14/A01；结构化日志、保守字符串脱敏及真实 JSONL 回读测试已通过 Windows 验证，Rust 227 项通过；本项完成，累计 Node 原 40 项失败仍待收尾。其余问题保持原排期，12.20 后续复核本项成果。[修复记录](R12-14-DETAILS.md)。
 
 - 2026-09-29：用户确定先完成 R12-17，再执行新增 **R12-18～24 审计收尾**，通过后进入 R13。A05 抓取策略由 R13-S01 承接，A04 日志批次重试由 R15.4/15.7 承接；保存、当前脱敏/HTML 风险、安全写入、依赖公告及失效门禁在 R12 收尾处置。合理约束已生效，本轮未修改产品代码。[R12 任务书](markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md) · [全局约束](markdown-main-full-rewrite-taskbook-18-docs/01-全局架构规划与基线冻结.md)。
@@ -452,3 +454,4 @@ Editor/preview text-selection synchronization is owned by `src/sync/selection-co
 - 架构清单：生产模块 260→262；DocumentModel、Rust、`package.json`、`package-lock.json` 与生产依赖未修改。
 - clean validation runner：GitHub Actions `31351876875`。专项 Stage 1 合并验证 27/27 PASS；架构门禁 PASS；Node 44/44 PASS；Browser Contract 10/10 PASS；生产 Build PASS；Built App 22/22 PASS；protected-surface diff 与 `git diff --check` PASS。
 - 本 clean validation runner 未执行 Cargo/Tauri 构建，因为 CR-01 未修改 Rust/Tauri 路径；正式 Stage 1/Stage 5 工作流将在 CR-01 clean commit 上继续作为发布门禁，未通过前不得推进 CR-02。
+

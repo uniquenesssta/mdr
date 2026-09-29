@@ -1,3 +1,4 @@
+import { inventoryBeforeLogStorageExtraction, assertLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
@@ -6,27 +7,17 @@ import test from 'node:test';
 const baseline = '3692eb913473a8be3a45f326f5d93656d6cf1fb2';
 const entryPath = 'src-tauri/src/performance_log.rs';
 const redactionPath = 'src-tauri/src/performance_log/redaction.rs';
-const pipelineTestModule = '\n#[cfg(test)]\n#[path = "../tests/performance_log/redaction_pipeline.rs"]\nmod redaction_pipeline_tests;\n';
 const read = path => readFile(path, 'utf8');
 const frozen = path => execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' });
 
-function expectedPerformanceLogAfterRedaction(text) {
-  return text
-    .replace('use serde_json::{json, Value};\n',
-      'mod redaction;\n\nuse redaction::redact_value;\nuse serde_json::{json, Value};\n')
-    .replace(
-      '    for value in values {\n        let line = serde_json::to_string(value).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n',
-      '    for value in values {\n        let redacted = redact_value(value);\n        let line = serde_json::to_string(&redacted).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n'
-    );
-}
-
 test('R12-14 adds one recursive redaction owner at the existing JSONL persistence boundary', async () => {
-  assert.equal(await read(entryPath), expectedPerformanceLogAfterRedaction(frozen(entryPath)) + pipelineTestModule);
+  await assertLogStorageExtraction(frozen(entryPath));
   const entry = await read(entryPath);
   const redaction = await read(redactionPath);
+  const writer = await read('src-tauri/src/performance_log/writer.rs');
   assert.match(entry, /^mod redaction;/m);
-  assert.match(entry, /let redacted = redact_value\(value\);/);
-  assert.match(entry, /serde_json::to_string\(&redacted\)/);
+  assert.match(writer, /let redacted = redact_value\(value\);/);
+  assert.match(writer, /serde_json::to_string\(&redacted\)/);
   assert.equal((redaction.match(/#\[test\]/g) || []).length, 14);
   assert.doesNotMatch(redaction.split('#[cfg(test)]')[0], /std::fs|OpenOptions|env::|tauri::|Mutex|OnceLock|\bwrite_performance_logs\s*\(/);
 });
@@ -62,7 +53,7 @@ test('R12-14 preserves historical evidence and adapter bytes while the runtime k
 test('R12-14 adds exactly one pure redaction module and changes no unrelated inventory authority', async () => {
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
-  const after = JSON.parse(await read(path));
+  const after = inventoryBeforeLogStorageExtraction(JSON.parse(await read(path)));
   assert.equal(before.modules.length, 441);
   assert.equal(after.modules.length, 442);
   assert.deepEqual(after.fields, before.fields);
@@ -97,7 +88,7 @@ test('R12-14 documentation records implementation while keeping later atomic tas
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md');
   assert.match(stage, /- \[x\] 12\.13 Web Response/);
   assert.match(stage, /- \[x\] 12\.14 Log Redaction/);
-  assert.match(stage, /- \[ \] 12\.15 Log Paths\/Writer/);
+  assert.match(stage, /- \[ \] 12\.16 Lifecycle/);
   assert.match(stage, /- \[ \] R12-S01/);
   const detail = await read('docs/R12-14-DETAILS.md');
   for (const marker of ['递归', '正文', '敏感字段', '完整路径', 'commandRedaction', '3692eb913473a8be3a45f326f5d93656d6cf1fb2']) {
@@ -108,7 +99,7 @@ test('R12-14 documentation records implementation while keeping later atomic tas
 
 test('R12-14 shell command starts Cargo with only the intended arguments and keeps the result gate', async () => {
   const workflow = await read('.github/workflows/r12-14.yml');
-  const step = workflow.match(/^      - name: R12-14 direct recursive redaction 14 of 14\n        run: \|\n([\s\S]*?)(?=^      - name:)/m);
+  const step = workflow.match(/^      - name: R12-14 direct recursive redaction 14 of 14\n(?:        if: [^\n]+\n)?        run: \|\n([\s\S]*?)(?=^      - name:)/m);
   assert.ok(step, 'missing direct redaction test step');
   const commands = step[1].replace(/\\\r?\n[ \t]*/g, ' ')
     .trim().split('\n').map(line => line.trim()).filter(Boolean);
@@ -128,3 +119,4 @@ test('R12-14 production log changes trigger validation and its scope gate runs t
   assert.ok(scope, 'missing scope gate');
   assert.match(scope[1], /node --test[^\n]*tests\/stage-12-log-redaction\.test\.mjs/);
 });
+

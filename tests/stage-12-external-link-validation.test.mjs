@@ -1,3 +1,4 @@
+import { inventoryBeforeLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
@@ -71,7 +72,7 @@ test('R12-09 does not move validation to the frontend or change dependencies', a
 });
 
 test('R12-09 records one additional policy module with no state owner', async () => {
-  const inventory = JSON.parse(await source('tests/architecture/fixtures/production-modules.json'));
+  const inventory = inventoryBeforeLogStorageExtraction(JSON.parse(await source('tests/architecture/fixtures/production-modules.json')));
   const records = inventory.modules.filter(row => row[0] === policyPath);
   assert.equal(records.length, 1);
   assert.equal(records[0][inventory.fields.indexOf('stateOwner')], 'none');

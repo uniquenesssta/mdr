@@ -1,3 +1,4 @@
+import { assertLogStorageExtraction, inventoryBeforeLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFile, readdir, access } from 'node:fs/promises';
@@ -88,16 +89,7 @@ test('R12-08 changes only the six Rust registry paths and no frontend or depende
     'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', 'package.json', 'package-lock.json',
     'src/platform/desktop/file-system-client.js'
   ]) assert.equal(await source(path), frozen(path), `protected contract changed: ${path}`);
-  const performanceBefore = frozen('src-tauri/src/performance_log.rs');
-  const expectedPerformance = performanceBefore
-    .replace('use serde_json::{json, Value};\n',
-      'mod redaction;\n\nuse redaction::redact_value;\nuse serde_json::{json, Value};\n')
-    .replace(
-      '    for value in values {\n        let line = serde_json::to_string(value).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n',
-      '    for value in values {\n        let redacted = redact_value(value);\n        let line = serde_json::to_string(&redacted).map_err(|err| format!("性能日志序列化失败：{err}"))?;\n'
-    );
-  assert.equal(await source('src-tauri/src/performance_log.rs'), expectedPerformance + '\n#[cfg(test)]\n#[path = "../tests/performance_log/redaction_pipeline.rs"]\nmod redaction_pipeline_tests;\n',
-    'performance log changed beyond the later R12-14 redaction handoff');
+  await assertLogStorageExtraction(frozen('src-tauri/src/performance_log.rs'));
 });
 
 test('R12-08 retains all eight legacy direct tests and adds twelve real command tests', async () => {
@@ -120,7 +112,7 @@ test('R12-08 retains all eight legacy direct tests and adds twelve real command 
 });
 
 test('R12-08 records unique module ownership and never exposes lower-level modules publicly', async () => {
-  const inventory = JSON.parse(await source('tests/architecture/fixtures/production-modules.json'));
+  const inventory = inventoryBeforeLogStorageExtraction(JSON.parse(await source('tests/architecture/fixtures/production-modules.json')));
   assert.equal(inventory.modules.length, 442);
   const records = inventory.modules.filter(record => record[0].startsWith(directory));
   assert.equal(records.length, 12);

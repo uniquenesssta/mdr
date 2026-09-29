@@ -1,3 +1,4 @@
+import { inventoryBeforeLogStorageExtraction } from './support/performance-log/storage-contract.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
@@ -136,7 +137,7 @@ test('R12-12 verifies headers redirects timeout and gzip through the real locked
 test('R12-12 keeps exactly one stateless client owner after the later response extraction', async () => {
   const path = 'tests/architecture/fixtures/production-modules.json';
   const before = JSON.parse(frozen(path));
-  const after = JSON.parse(await read(path));
+  const after = inventoryBeforeLogStorageExtraction(JSON.parse(await read(path)));
   assert.equal(after.modules.length, 442);
   assert.deepEqual(after.fields, before.fields);
   const r12_12 = after.modules

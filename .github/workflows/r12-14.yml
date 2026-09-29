@@ -1,5 +1,5 @@
-name: R12-14 Log Redaction Compatibility
-run-name: R12-14 log redaction compatibility and cumulative regression · ${{ github.sha }}
+name: R12-15 Log Paths and Writer
+run-name: R12-15 log paths/writer and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -26,6 +26,7 @@ on:
       - 'docs/R12-12-DETAILS.md'
       - 'docs/R12-13-DETAILS.md'
       - 'docs/R12-14-DETAILS.md'
+      - 'docs/R12-15-DETAILS.md'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/01-*'
       - 'src-tauri/src/external_link.rs'
       - 'src-tauri/src/external_link/**'
@@ -94,7 +95,7 @@ defaults:
 
 jobs:
   frontend:
-    name: Log Redaction and frontend regression
+    name: Log Paths/Writer and frontend regression
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
@@ -134,7 +135,7 @@ jobs:
             tests/stage-12-tree-limits.test.mjs \
             tests/stage-12-local-commands.test.mjs \
             tests/stage-12-external-link-validation.test.mjs \
-            tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-web-response.test.mjs tests/stage-12-log-redaction.test.mjs \
+            tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-web-response.test.mjs tests/stage-12-log-redaction.test.mjs tests/stage-12-log-writer.test.mjs \
             tests/unit/platform/link-client.test.mjs \
             tests/unit/platform/web-fetch-client.test.mjs \
             tests/unit/platform/file-system-client.test.mjs \
@@ -176,7 +177,7 @@ jobs:
           retention-days: 14
 
   rust:
-    name: Log Redaction and cumulative hard gates
+    name: Log Paths/Writer and cumulative hard gates
     runs-on: windows-latest
     timeout-minutes: 60
     env:
@@ -221,7 +222,7 @@ jobs:
           node scripts/ci/verify-windows-test-imports.mjs
           test ! -e src-tauri/src/local_file.rs
           test ! -e .github/workflows/r12-source-snapshot.yml
-          node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-log-redaction.test.mjs \
+          node --test tests/stage-12-local-commands.test.mjs tests/stage-12-external-link-validation.test.mjs tests/stage-12-opener.test.mjs tests/stage-12-web-validation.test.mjs tests/stage-12-web-client.test.mjs tests/stage-12-log-redaction.test.mjs tests/stage-12-log-writer.test.mjs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/command-scope.log"
           git diff --check
       - name: Setup Node for the actual frontend to Rust log regression
@@ -238,6 +239,10 @@ jobs:
           rustfmt --edition 2021 --check --config max_width=120 \
             src-tauri/src/external_link.rs \
             src-tauri/src/performance_log/redaction.rs \
+            src-tauri/src/performance_log/paths.rs \
+            src-tauri/src/performance_log/writer.rs \
+            src-tauri/tests/performance_log/writer_contract.rs \
+            src-tauri/tests/performance_log/release_writer.rs \
             src-tauri/tests/performance_log/redaction_pipeline.rs \
             src-tauri/src/web_fetch.rs \
             src-tauri/src/web_fetch/client.rs \
@@ -267,16 +272,39 @@ jobs:
             src-tauri/tests/local_file/commands.rs \
             src-tauri/tests/stage_12_security_compatibility.rs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rustfmt.log"
+      - name: R12-15 pre-split real log writer 9 of 9
+        if: ${{ !cancelled() }}
+        run: |
+          baseline="$(cygpath -u "$RUNNER_TEMP")/r12-15-log-baseline"
+          mkdir "$baseline"
+          git archive 17b8f430066219817e5405d8047234fb556a745e | tar -x -C "$baseline"
+          cp src-tauri/tests/performance_log/writer_contract.rs "$baseline/src-tauri/tests/performance_log/writer_contract.rs"
+          printf '\n#[cfg(test)]\n#[path = "../tests/performance_log/writer_contract.rs"]\nmod writer_contract_tests;\n' >> "$baseline/src-tauri/src/performance_log.rs"
+          cargo test --manifest-path "$baseline/src-tauri/Cargo.toml" --locked --bin markdown-editor performance_log::writer_contract_tests 2>&1 | tee "$RUNNER_TEMP/r12-14/writer-before.log"
+          grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/writer-before.log"
+      - name: R12-15 extracted real log writer 9 of 9
+        if: ${{ !cancelled() }}
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::writer_contract_tests 2>&1 | tee "$RUNNER_TEMP/r12-14/writer-after.log"
+          grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/writer-after.log"
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::paths::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/log-paths.log"
+          grep -Fq 'test result: ok. 1 passed; 0 failed' "$RUNNER_TEMP/r12-14/log-paths.log"
+      - name: R12-15 release writer creates no log files
+        if: ${{ !cancelled() }}
+        run: node scripts/ci/verify-release-log-writer.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/release-writer.log"
       - name: R12-14 direct recursive redaction 14 of 14
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/log-redaction.log"
           grep -Fq 'test result: ok. 14 passed; 0 failed' "$RUNNER_TEMP/r12-14/log-redaction.log"
       - name: R12-14 actual frontend payload to Rust JSONL
+        if: ${{ !cancelled() }}
         run: |
           node --test tests/stage-12-log-payload.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/frontend-payload.log"
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction_pipeline_tests 2>&1 | tee "$RUNNER_TEMP/r12-14/redaction-pipeline.log"
           grep -Fq 'test result: ok. 1 passed; 0 failed' "$RUNNER_TEMP/r12-14/redaction-pipeline.log"
       - name: R12-13 pre-split real HTTP response behavior 9 of 9
+        if: ${{ !cancelled() }}
         run: |
           baseline="$(cygpath -u "$RUNNER_TEMP")/r12-14-response-baseline"
           mkdir "$baseline"
@@ -287,11 +315,13 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-response-baseline.log"
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-response-baseline.log"
       - name: R12-13 extracted real HTTP response behavior 9 of 9
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor web_fetch::http_compatibility_tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-response.log"
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-response.log"
       - name: R12-12 pre-split real HTTP client behavior 9 of 9
+        if: ${{ !cancelled() }}
         run: |
           baseline="$(cygpath -u "$RUNNER_TEMP")/r12-14-client-baseline"
           mkdir "$baseline"
@@ -302,16 +332,19 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-client-baseline.log"
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-client-baseline.log"
       - name: R12-12 direct client ownership tests 2 of 2
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor web_fetch::client::tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-client-unit.log"
           grep -Fq 'test result: ok. 2 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-client-unit.log"
       - name: R12-12 extracted real HTTP client behavior 9 of 9
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor web_fetch::http_compatibility_tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-client.log"
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-client.log"
       - name: R12-11 pre-split URL and real HTTP behavior 17 of 17
+        if: ${{ !cancelled() }}
         run: |
           baseline="$(cygpath -u "$RUNNER_TEMP")/r12-14-web-baseline"
           mkdir "$baseline"
@@ -327,6 +360,7 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-http-baseline.log"
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-http-baseline.log"
       - name: R12-11 extracted URL and real HTTP behavior 17 of 17
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor web_fetch::validation_tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-url.log"
@@ -335,36 +369,43 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-http.log"
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-http.log"
       - name: R12-09 direct URL validation 8 of 8
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor external_link::validation::tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-url-validation.log"
           grep -Fq 'test result: ok. 8 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-url-validation.log"
       - name: R12-09 real backend command rejection 2 of 2
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor external_link::validation_command_tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-url-command.log"
           grep -Fq 'test result: ok. 2 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-url-command.log"
       - name: R12-08 real command tests 12 of 12
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             local_file::command_tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-commands.log"
           grep -Fq 'test result: ok. 12 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-commands.log"
       - name: Preserved local-file legacy regression 4 of 4
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             local_file::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-legacy.log"
           grep -Fq 'test result: ok. 4 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-legacy.log"
       - name: R12-07 direct Tree Limits tests 6 of 6
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             local_file::tree_limits::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-tree-limits.log"
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-tree-limits.log"
       - name: R12-06 direct Windows Directory Tree regression 5 of 5
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             local_file::directory_tree::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-directory-tree.log"
           grep -Fq 'test result: ok. 5 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-directory-tree.log"
       - name: R12-05 direct Writer regression 10 of 10
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             local_file::text_writer::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-text-writer.log"
@@ -373,6 +414,7 @@ jobs:
             local_file::binary_writer::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-binary-writer.log"
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-binary-writer.log"
       - name: R12-04 direct Reader regression 10 of 10
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor \
             local_file::text_reader::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-text-reader.log"
@@ -381,21 +423,25 @@ jobs:
             local_file::image_reader::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-image-reader.log"
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-image-reader.log"
       - name: R12-03 direct File Kind regression 6 of 6
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor file_kind::tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-file-kind.log"
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-file-kind.log"
       - name: R12-02 direct Windows Path Policy regression 9 of 9
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor path_policy::tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-path-policy.log"
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-path-policy.log"
       - name: R12-01 direct Windows behavior regression 9 of 9
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor stage_12_ \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-production-contracts.log"
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-production-contracts.log"
       - name: R12-01 independent compatibility fixture 6 of 6
+        if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --test stage_12_security_compatibility \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-fixture.log"

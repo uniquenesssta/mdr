@@ -18,7 +18,7 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     let session = entries[0]["sessionId"].clone();
     let path = write_performance_logs(entries).unwrap();
     let contents = {
-        let _guard = super::write_lock().lock().unwrap();
+        let _guard = super::writer::write_lock().lock().unwrap();
         fs::read_to_string(path).unwrap()
     };
     let rows: Vec<Value> = contents
