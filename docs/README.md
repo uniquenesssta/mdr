@@ -1,6 +1,6 @@
 # Markdown Editor
 
-当前 R12-12 Web Client 与独立安全待办状态以根目录 [README](../README.md) 为准；R12-11 已验收，R12-S01 仍未实施。边界及回退见 [R12-12](R12-12-DETAILS.md)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 为准。R12-14 既有 CI 全绿，但 2026-09-29 验收发现脱敏链路缺口，仍未通过；完整审计见 [CURRENT_AUDIT](CURRENT_AUDIT.md)。R12-S01 仍未实施。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

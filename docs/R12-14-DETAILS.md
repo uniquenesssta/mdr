@@ -26,7 +26,7 @@ R12-14 专属 workflow 继续执行 Stage 12 累计 Node/Rust、架构/文档、
 
 ## 当前状态
 
-源码、测试、文档和工作流按 12.14 边界实施中；专属 Actions 全绿前不勾选 12.14，也不推进后续 Atomic Task。
+截至 2026-09-29，精确提交 `3cc56f09188ef9c432247788723e36415f9f3e03` 的既有 Actions 已全绿；本轮验收发现真实前端 payload 与 Rust 脱敏的衔接缺口，结论为验收未通过。12.14 保持未勾选，不推进 12.15。详见下方验收裁定及 [当前完整审计](CURRENT_AUDIT.md)。
 
 ## 回退
 
@@ -79,3 +79,20 @@ R12-14 专属 workflow 继续执行 Stage 12 累计 Node/Rust、架构/文档、
 同一 run 的浏览器契约在应用断言前报 `CDP endpoint did not become ready: fetch failed`；尝试单独重跑时 GitHub 因该 run 的 Rust job 尚在运行拒绝请求，未把重跑记为已启动或已通过。后续修复提交继续执行原浏览器契约、构建与 built-app 回归。
 
 本地补充验证中，`node --test tests/unit/platform/performance-log-client.test.mjs` 因源码快照未安装 `@tauri-apps/plugin-dialog` 在模块加载阶段失败，未运行该文件的用例；不以 mock 绕过。该前端适配器源码未改变，完整依赖下的累计 Node 验证以 Actions 为准。本地新增的五个故障变体检查均能拒绝多余 Cargo 参数、遗漏两个源码触发路径、漏跑 scope 契约及弱化计数门禁，临时副本已清理。
+
+
+## 验收裁定（2026-09-29）
+
+用户授权验收后进行完整审计。本轮从远端完整检出 `agent/r12-stage`，初始工作区洁净，HEAD 为 `3cc56f09188ef9c432247788723e36415f9f3e03`；未更改生产源码、依赖、测试或工作流。
+
+### 已核实的成功证据
+
+[Actions #36444268636](https://github.com/uniquenesssta/mdr/actions/runs/36444268636) 精确验证上述 HEAD，4 个 job 全部成功。核对 job 步骤及 Rust/前端原始日志确认：脱敏 6/6、累计 Rust、全量 Rust 217+5+1+6、Clippy `-D warnings`、Cargo check、根目录 Node 452/452、平台与阶段定向测试 112/112、四项架构/文档门禁、浏览器契约 10/10、构建后浏览器 29/29、构建和工作区检查通过。此前 Cargo 参数、Clippy 和浏览器启动失败在该 run 中已消除。Windows/macOS job 只验证 opener 的编译、链接和函数签名，不能表述为完整桌面运行验收。
+
+### 未通过原因
+
+任务书 12.14 要求移除正文、完整路径和敏感字段，并覆盖递归对象。`src/runtime/performance.js:42–63` 的 `safeDetails()` 会把嵌套对象 JSON 序列化成字符串；`redaction.rs:81–99` 对普通字符串直接 clone。实际执行前端 `record()`/`flush()`（注入捕获 LogsPort，不冒充 Rust 落盘）确认 `details.nested` 已变成含 body/token/path 的字符串。普通 `error`、`message`、`reason` 也不进入字段名脱敏分支。由当前写盘调用链可直接确定这些字符串没有后续脱敏步骤。
+
+六项 Rust 单元测试只覆盖对象形式的输入，没有覆盖前端序列化后的输入与实际 JSONL 内容；因此全绿不能满足完整验收。缺口在调试日志链路中生效，release 仍由既有 `debug_assertions` 关闭日志。本轮不修改前端或增加临时脱敏补丁。
+
+**裁定：既有 CI 已通过；R12-14 功能验收未通过。** 保留任务书未勾选，暂不推进 R12-15。修复须覆盖前端日志构造、错误文本策略、Rust 唯一写盘边界与真实落盘断言，不通过删除失败输入或放宽测试来收尾。另有项目累计测试发现，见 [CURRENT_AUDIT.md](CURRENT_AUDIT.md)，不得把本任务 CI 视为全仓库回归通过。
