@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileBeforeRegistry as readFile } from '../command-registry-contract.mjs';
+import { readFileBeforeRegistry as readFile, inventoryBeforeRegistryExtraction } from '../command-registry-contract.mjs';
 
 const root = 'src-tauri/src/performance_log';
 const read = path => readFile(path, 'utf8');
@@ -41,6 +41,7 @@ export function logFixtureAfterStorageExtraction(text) {
 // Historical inventory assertions keep checking their own task. R12-15 separately
 // checks the actual new rows and their unique state owners, never the projected view.
 export function inventoryBeforeLifecycleExtraction(inventory) {
+  inventory = inventoryBeforeRegistryExtraction(inventory);
   return { ...inventory, modules: inventory.modules.filter(row => row[0] !== `${root}/lifecycle.rs`) };
 }
 

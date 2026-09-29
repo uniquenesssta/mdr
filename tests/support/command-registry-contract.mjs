@@ -41,7 +41,13 @@ export async function readFileBeforeRegistry(input, encoding) {
     for (const name of modules) text = text.replaceAll(`../src/${name}/command.rs`, `../src/${name}.rs`);
   }
   if (relative === 'tests/architecture/fixtures/production-modules.json') {
-    const inventory = JSON.parse(text);
+    return JSON.stringify(inventoryBeforeRegistryExtraction(JSON.parse(text)));
+  }
+  return text;
+}
+
+export function inventoryBeforeRegistryExtraction(input) {
+  const inventory = { ...input };
     inventory.modules = inventory.modules.filter(row => !modules.some(name => row[0] === `src-tauri/src/${name}/command.rs`)).map(row => {
       const name = modules.find(name => row[0] === `src-tauri/src/${name}/mod.rs`);
       if (!name) return row;
@@ -50,7 +56,5 @@ export async function readFileBeforeRegistry(input, encoding) {
       restored[3] = descriptions[name];
       return restored;
     });
-    return JSON.stringify(inventory);
-  }
-  return text;
+  return inventory;
 }
