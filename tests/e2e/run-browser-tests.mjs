@@ -101,6 +101,15 @@ async function centerByText(page, rootSelector, text) {
 }
 
 async function runContractSuite() {
+  // The contract host serves source ESM without Vite. Resolve the same installed
+  // package as production and embed its ESM bytes; never expose parent directories.
+  const purifierSource = await readFile(new URL(import.meta.resolve('dompurify')));
+  const importMap = JSON.stringify({ imports: {
+    dompurify: `data:text/javascript;base64,${purifierSource.toString('base64')}`
+  } });
+  const setContractDocument = html => browser.page.setDocumentContent(
+    html.replace('<head>', `<head><script type="importmap">${importMap}</script>`)
+  );
   const browser = await launchChromium();
   const virtualHost = await installVirtualFileHost(browser.page, { root: projectRoot, origin: 'https://markdown-editor.test' });
   activePage = browser.page;
@@ -109,9 +118,34 @@ async function runContractSuite() {
     harnessHtml = harnessHtml
       .replace('<head>', `<head><base href="${virtualHost.origin}/tests/e2e/fixtures/">`)
       .replace(/<script type="module" src="\.\/interaction-harness\.js"><\/script>/, '');
-    await browser.page.setDocumentContent(harnessHtml);
+    await setContractDocument(harnessHtml);
     await browser.page.evaluate(`import('${virtualHost.origin}/tests/e2e/fixtures/interaction-harness.js').then(()=>true)`);
     await browser.page.waitFor(() => window.__interactionHarness?.ready === true, { description: 'interaction harness' });
+
+    await test('source ESM uses locked DOMPurify and preserves only passive document HTML', async () => {
+      const lock = JSON.parse(await readFile(resolve(projectRoot, 'package-lock.json'), 'utf8'));
+      const result = await browser.page.evaluate(`(async () => {
+        const { default: purifier } = await import('dompurify');
+        const { createDocumentHtmlFragment } = await import('${virtualHost.origin}/src/shared/security/document-html.js');
+        const root = document.createElement('div');
+        root.append(createDocumentHtmlFragment('<details open><summary>safe</summary><em>kept</em></details><button onclick="window.__contractAttack=true">click</button><a href="javascript:window.__contractAttack=true">link</a><iframe srcdoc="bad"></iframe>'));
+        window.__contractAttack = false;
+        document.body.append(root);
+        try {
+          root.querySelector('button').click();
+          root.querySelector('a').click();
+          return {
+            version: purifier.version, executed: window.__contractAttack,
+            activeMarkup: Boolean(root.querySelector('[onclick], a[href], iframe')),
+            safeHtml: root.querySelector('details[open] em')?.textContent
+          };
+        } finally { root.remove(); delete window.__contractAttack; }
+      })()`);
+      assert.deepEqual(result, {
+        version: lock.packages['node_modules/dompurify'].version,
+        executed: false, activeMarkup: false, safeHtml: 'kept'
+      });
+    });
 
     await test('single click keeps a component presented', async () => {
       await browser.page.evaluate('window.__interactionHarness.reset()');
@@ -193,7 +227,7 @@ async function runContractSuite() {
     });
 
     await test('folder file tree renders nested readable files, preserves expansion, opens paths, and destroys listeners', async () => {
-      await browser.page.setDocumentContent(`<!doctype html><html><head><base href="${virtualHost.origin}/"></head><body>
+      await setContractDocument(`<!doctype html><html><head><base href="${virtualHost.origin}/"></head><body>
         <section id="sidebar-files-panel">
           <strong id="folder-file-tree-root"></strong><small id="folder-file-tree-summary"></small>
           <button id="folder-file-tree-refresh"></button><div id="folder-file-tree"></div>
@@ -260,7 +294,7 @@ async function runContractSuite() {
 
 
     await test('temporary compatibility business port mounts and destroys without owning the App Shell', async () => {
-      await browser.page.setDocumentContent(`<!doctype html><html><head><base href="${virtualHost.origin}/"></head><body>
+      await setContractDocument(`<!doctype html><html><head><base href="${virtualHost.origin}/"></head><body>
         <div id="app-root" hidden><span id="pre-shell-node">before</span></div>
       </body></html>`);
       const result = await browser.page.evaluate(`(async()=>{

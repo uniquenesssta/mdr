@@ -110,104 +110,121 @@ try {
       const observation = { surface, id: fixture.id, status: 'running' };
       evidence.surfaces.push(observation);
       await persist();
-      await browser.execute(async (kind, data) => {
-        const host = document.getElementById('compatibility-business-ports');
-        window.__r12Probe = { events: [], ipcAttempted: false, ipc: null, cspViolations: [] };
-        window.__r12CspListener && document.removeEventListener('securitypolicyviolation', window.__r12CspListener);
-        window.__r12CspListener = event => window.__r12Probe.cspViolations.push({
-          directive: event.effectiveDirective, disposition: event.disposition,
-          blocked: ['inline', 'eval'].includes(event.blockedURI) ? event.blockedURI : 'resource'
+      try {
+        await browser.execute(async (kind, data) => {
+          const host = document.getElementById('compatibility-business-ports');
+          window.__r12Probe = { events: [], ipcAttempted: false, ipc: null, cspViolations: [] };
+          window.__r12CspListener && document.removeEventListener('securitypolicyviolation', window.__r12CspListener);
+          window.__r12CspListener = event => window.__r12Probe.cspViolations.push({
+            directive: event.effectiveDirective, disposition: event.disposition,
+            blocked: ['inline', 'eval'].includes(event.blockedURI) ? event.blockedURI : 'resource'
+          });
+          document.addEventListener('securitypolicyviolation', window.__r12CspListener);
+          const ui = host.markdownEditorEditorUiCommandPort;
+          ui.invoke('setLayoutMode', kind === 'hybrid-html-widget' ? 'hybrid' : 'both');
+          if (kind === 'preview-markdown' || kind === 'hybrid-html-widget') {
+            const editor = document.getElementById('editor');
+            editor.virtualEditor.loadDocument(data.markdown, { selection: data.markdown.length });
+            editor.dispatchEvent(new Event('input', { bubbles: true }));
+            if (kind === 'preview-markdown') await host.markdownEditorPreviewCommandPort.update();
+          } else if (kind === 'preview-full-html') {
+            host.markdownEditorPreviewRendererPort.patchHtml(data.html, { forceFullRebuild: true });
+          } else if (kind === 'preview-virtual-block') {
+            // VirtualWindowController uses this same canonical factory for each mount.
+            // Own its connected test mount: the live Preview owns and may repaint #preview.
+            const body = document.createElement('div');
+            body.id = 'r12-owned-virtual-surface';
+            body.className = 'markdown-body';
+            Object.assign(body.style, { position: 'fixed', inset: '24px', overflow: 'auto', zIndex: '2147483647', background: 'white' });
+            body.append(...host.markdownEditorPreviewRendererPort.createBlockNodes({
+              id: data.id, html: data.html, startLine: 1, endLine: 1, start: 0, end: data.html.length
+            }));
+            document.body.append(body);
+            // Exercise the repaint that previously removed the probe, before sampling.
+            await host.markdownEditorPreviewCommandPort.update();
+            if (!body.isConnected || !body.querySelector('[data-r12-probe]')) {
+              throw new Error('Virtual factory probe did not survive the live Preview update.');
+            }
+          } else {
+            host.markdownEditorPreviewRendererPort.patchBlocks({
+              blocks: [{ id: data.id, html: data.html, startLine: 1, endLine: 1, start: 0, end: data.html.length }],
+              changedIds: [data.id], incremental: false
+            }, { forceAll: true });
+          }
+        }, surface, fixture);
+        const rootSelector = surface === 'preview-virtual-block' ? '#r12-owned-virtual-surface'
+          : surface === 'hybrid-html-widget' ? '.cm-hybrid-html-body' : '#preview .markdown-body';
+        observation.mount = surface === 'preview-virtual-block'
+          ? 'canonical factory in owned connected DOM after live Preview update' : 'production rendering surface';
+        await browser.waitUntil(() => browser.execute((selector, id) => Boolean(
+          document.querySelector(`${selector} [data-r12-probe="${id}"]`)
+        ), rootSelector, fixture.id), { timeout: 15_000, timeoutMsg: `${surface} did not mount its actual HTML sink.` });
+        await browser.execute((selector, id) => {
+          const root = document.querySelector(`${selector} [data-r12-probe="${id}"]`);
+          root.querySelector('[data-r12-kind="click"]')?.click();
+          for (const kind of ['javascript', 'encoded-url', 'data-url']) root.querySelector(`[data-r12-kind="${kind}"]`)?.click();
+        }, rootSelector, fixture.id);
+        // Bounded observation window: absence of a marker is inconclusive, never a safety verdict.
+        const snapshot = await browser.execute(async (selector, id) => {
+          await new Promise(resolvePromise => setTimeout(resolvePromise, 1_000));
+          const root = document.querySelector(`${selector} [data-r12-probe="${id}"]`);
+          if (!root) throw new Error('Probe left its rendering surface before evidence capture.');
+          const attributes = Array.from(root.querySelectorAll('*')).flatMap(node =>
+            Array.from(node.attributes).filter(attribute => /^on/i.test(attribute.name)).map(attribute => ({
+              element: node.tagName.toLowerCase(), name: attribute.name
+            }))
+          );
+          return {
+            eventAttributes: attributes,
+            href: location.href,
+            javascriptUrlRetained: root.querySelector('[data-r12-kind="javascript"]')?.getAttribute('href')?.startsWith('javascript:') || false,
+            retainedEmbeds: ['iframe', 'object', 'embed', 'style'].filter(tag => root.querySelector(tag)),
+            unsafeUrls: Array.from(root.querySelectorAll('[href], [src]')).flatMap(node =>
+              ['href', 'src'].filter(name => /^(?:(?:javascript|vbscript):|data:text\/html)/i.test(node.getAttribute(name) || ''))),
+            unsafeAttributes: Array.from(root.querySelectorAll('*')).flatMap(node =>
+              Array.from(node.attributes).filter(attribute => /^(?:name|srcset|formaction|data-editor-action)$/i.test(attribute.name)).map(attribute => attribute.name)),
+            clobberingId: Boolean(document.getElementById('__TAURI_INTERNALS__')),
+            spoofClass: Boolean(root.querySelector('.cm-hybrid-widget-action')),
+            unsafeStyle: Array.from(root.querySelectorAll('[style]')).some(node => /url\s*\(|position\s*:|inset\s*:/i.test(node.getAttribute('style'))),
+            boundedColorPreserved: root.querySelector('[data-r12-kind="spoof"]')?.style.color === 'rgb(18, 52, 86)',
+            harmlessTextPreserved: root.querySelector('[data-r12-kind="text"]')?.textContent === 'R12 harmless marker',
+            events: [...window.__r12Probe.events],
+            ipcAttempted: window.__r12Probe.ipcAttempted,
+            ipc: window.__r12Probe.ipc,
+            cspViolations: [...window.__r12Probe.cspViolations]
+          };
+        }, rootSelector, fixture.id);
+        Object.assign(observation, snapshot, {
+          markerRequests: requests.filter(request => request.marker.includes(`/${fixture.id}/`)),
+          status: 'observed',
+          securityVerdict: verifyBoundary ? 'verification-pending' : 'not-accepted; use observations to design and verify remediation'
         });
-        document.addEventListener('securitypolicyviolation', window.__r12CspListener);
-        const ui = host.markdownEditorEditorUiCommandPort;
-        ui.invoke('setLayoutMode', kind === 'hybrid-html-widget' ? 'hybrid' : 'both');
-        if (kind === 'preview-markdown' || kind === 'hybrid-html-widget') {
-          const editor = document.getElementById('editor');
-          editor.virtualEditor.loadDocument(data.markdown, { selection: data.markdown.length });
-          editor.dispatchEvent(new Event('input', { bubbles: true }));
-          if (kind === 'preview-markdown') await host.markdownEditorPreviewCommandPort.update();
-        } else if (kind === 'preview-full-html') {
-          host.markdownEditorPreviewRendererPort.patchHtml(data.html, { forceFullRebuild: true });
-        } else if (kind === 'preview-virtual-block') {
-          // VirtualWindowController uses this same canonical factory for each mount.
-          const body = document.createElement('div');
-          body.className = 'markdown-body';
-          body.append(...host.markdownEditorPreviewRendererPort.createBlockNodes({
-            id: data.id, html: data.html, startLine: 1, endLine: 1, start: 0, end: data.html.length
-          }));
-          document.getElementById('preview').replaceChildren(body);
-        } else {
-          host.markdownEditorPreviewRendererPort.patchBlocks({
-            blocks: [{ id: data.id, html: data.html, startLine: 1, endLine: 1, start: 0, end: data.html.length }],
-            changedIds: [data.id], incremental: false
-          }, { forceAll: true });
+        await persist();
+        assert.equal(snapshot.harmlessTextPreserved, true, `${surface}: control text missing.`);
+        if (verifyBoundary) {
+          assert.deepEqual(snapshot.eventAttributes, [], `${surface}: event attributes survived.`);
+          assert.deepEqual(snapshot.events, [], `${surface}: injected code ran.`);
+          assert.equal(snapshot.ipcAttempted, false, `${surface}: markup reached native IPC.`);
+          assert.equal(snapshot.ipc, null);
+          assert.equal(snapshot.javascriptUrlRetained, false);
+          assert.equal(snapshot.href, evidence.environment.href, `${surface}: document navigated.`);
+          assert.deepEqual(snapshot.unsafeUrls, []);
+          assert.deepEqual(snapshot.unsafeAttributes, []);
+          assert.deepEqual(snapshot.retainedEmbeds, []);
+          assert.equal(snapshot.clobberingId, false);
+          assert.equal(snapshot.spoofClass, false);
+          assert.equal(snapshot.unsafeStyle, false);
+          assert.equal(snapshot.boundedColorPreserved, true);
+          assert.equal(observation.markerRequests.some(request => request.marker.endsWith('/css')), false, 'Document CSS must not start resource loads.');
+          // Passive HTTP images are intentionally supported; their fixed image marker is not script execution.
+          observation.securityVerdict = 'attack-fixtures-blocked; normal-content-verification-required';
         }
-      }, surface, fixture);
-      const rootSelector = surface === 'hybrid-html-widget' ? '.cm-hybrid-html-body' : '#preview .markdown-body';
-      await browser.waitUntil(() => browser.execute((selector, id) => Boolean(
-        document.querySelector(`${selector} [data-r12-probe="${id}"]`)
-      ), rootSelector, fixture.id), { timeout: 15_000, timeoutMsg: `${surface} did not mount its actual HTML sink.` });
-      await browser.execute((selector, id) => {
-        const root = document.querySelector(`${selector} [data-r12-probe="${id}"]`);
-        root.querySelector('[data-r12-kind="click"]')?.click();
-        for (const kind of ['javascript', 'encoded-url', 'data-url']) root.querySelector(`[data-r12-kind="${kind}"]`)?.click();
-      }, rootSelector, fixture.id);
-      // Bounded observation window: absence of a marker is inconclusive, never a safety verdict.
-      const snapshot = await browser.execute(async (selector, id) => {
-        await new Promise(resolvePromise => setTimeout(resolvePromise, 1_000));
-        const root = document.querySelector(`${selector} [data-r12-probe="${id}"]`);
-        if (!root) throw new Error('Probe left its rendering surface before evidence capture.');
-        const attributes = Array.from(root.querySelectorAll('*')).flatMap(node =>
-          Array.from(node.attributes).filter(attribute => /^on/i.test(attribute.name)).map(attribute => ({
-            element: node.tagName.toLowerCase(), name: attribute.name
-          }))
-        );
-        return {
-          eventAttributes: attributes,
-          href: location.href,
-          javascriptUrlRetained: root.querySelector('[data-r12-kind="javascript"]')?.getAttribute('href')?.startsWith('javascript:') || false,
-          retainedEmbeds: ['iframe', 'object', 'embed', 'style'].filter(tag => root.querySelector(tag)),
-          unsafeUrls: Array.from(root.querySelectorAll('[href], [src]')).flatMap(node =>
-            ['href', 'src'].filter(name => /^(?:(?:javascript|vbscript):|data:text\/html)/i.test(node.getAttribute(name) || ''))),
-          unsafeAttributes: Array.from(root.querySelectorAll('*')).flatMap(node =>
-            Array.from(node.attributes).filter(attribute => /^(?:name|srcset|formaction|data-editor-action)$/i.test(attribute.name)).map(attribute => attribute.name)),
-          clobberingId: Boolean(document.getElementById('__TAURI_INTERNALS__')),
-          spoofClass: Boolean(root.querySelector('.cm-hybrid-widget-action')),
-          unsafeStyle: Array.from(root.querySelectorAll('[style]')).some(node => /url\s*\(|position\s*:|inset\s*:/i.test(node.getAttribute('style'))),
-          boundedColorPreserved: root.querySelector('[data-r12-kind="spoof"]')?.style.color === 'rgb(18, 52, 86)',
-          harmlessTextPreserved: root.querySelector('[data-r12-kind="text"]')?.textContent === 'R12 harmless marker',
-          events: [...window.__r12Probe.events],
-          ipcAttempted: window.__r12Probe.ipcAttempted,
-          ipc: window.__r12Probe.ipc,
-          cspViolations: [...window.__r12Probe.cspViolations]
-        };
-      }, rootSelector, fixture.id);
-      Object.assign(observation, snapshot, {
-        markerRequests: requests.filter(request => request.marker.includes(`/${fixture.id}/`)),
-        status: 'observed',
-        securityVerdict: verifyBoundary ? 'verification-pending' : 'not-accepted; use observations to design and verify remediation'
-      });
-      await persist();
-      assert.equal(snapshot.harmlessTextPreserved, true, `${surface}: control text missing.`);
-      if (verifyBoundary) {
-        assert.deepEqual(snapshot.eventAttributes, [], `${surface}: event attributes survived.`);
-        assert.deepEqual(snapshot.events, [], `${surface}: injected code ran.`);
-        assert.equal(snapshot.ipcAttempted, false, `${surface}: markup reached native IPC.`);
-        assert.equal(snapshot.ipc, null);
-        assert.equal(snapshot.javascriptUrlRetained, false);
-        assert.equal(snapshot.href, evidence.environment.href, `${surface}: document navigated.`);
-        assert.deepEqual(snapshot.unsafeUrls, []);
-        assert.deepEqual(snapshot.unsafeAttributes, []);
-        assert.deepEqual(snapshot.retainedEmbeds, []);
-        assert.equal(snapshot.clobberingId, false);
-        assert.equal(snapshot.spoofClass, false);
-        assert.equal(snapshot.unsafeStyle, false);
-        assert.equal(snapshot.boundedColorPreserved, true);
-        assert.equal(observation.markerRequests.some(request => request.marker.endsWith('/css')), false, 'Document CSS must not start resource loads.');
-        // Passive HTTP images are intentionally supported; their fixed image marker is not script execution.
-        observation.securityVerdict = 'attack-fixtures-blocked; normal-content-verification-required';
+        await browser.saveScreenshot(join(evidenceRoot, `${surface}.png`));
+      } finally {
+        if (surface === 'preview-virtual-block') {
+          await browser.execute(() => document.getElementById('r12-owned-virtual-surface')?.remove());
+        }
       }
-      await browser.saveScreenshot(join(evidenceRoot, `${surface}.png`));
     }
     if (verifyBoundary) {
       evidence.normalContent = [];

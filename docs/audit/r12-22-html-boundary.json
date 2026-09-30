@@ -7,7 +7,7 @@
   "productionBaseline": "cde35b8cd3f46d86791653cd7488bb77a40a19ae",
   "previousAcceptanceRecord": "7dfab1822e452ec2bb81dfea0ef3304a96735bdd",
   "phase": "post-baseline remediation",
-  "status": "shared HTML boundary and CSP implemented; actual Windows verification pending",
+  "status": "first remediation run failed in two harness entry points; harness repairs pending Windows verification",
   "acceptedSecurityBoundary": false,
   "a03Closed": false,
   "r18n01": "resolved; architecture passed on Windows run 36704905753",
@@ -50,7 +50,7 @@
   "productionLockProtection": "all production registry name/version/source/checksum identities retained in isolated host lock; otherwise job fails",
   "validation": {
     "local": "static actionlint 1.7.12 semantic check reproduced original failure and passes after repair; JS/YAML/bash/JSON/docs/diff checks only",
-    "windows": "baseline verified; remediation Windows pending",
+    "windows": "baseline passed; first remediation run 3/5 jobs passed; repaired harness rerun pending",
     "entry": ".github/workflows/r12-14.yml",
     "nativeJob": "webview-baseline",
     "baselineSuccessIsSecurityAcceptance": false,
@@ -103,5 +103,32 @@
     "securityAccepted": false,
     "nativeMarkupIpc": "4/4 owned canary reads succeeded",
     "cspPresent": false
+  },
+  "firstRemediationRun": {
+    "commit": "5af331df4fbb1536cb099eae40a9521fedc0543b",
+    "run": 36708920012,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36708920012",
+    "conclusion": "failure",
+    "jobs": "3/5",
+    "node": "1474/1474",
+    "rust": "268/268",
+    "builtAppBrowser": "29/29",
+    "artifact": 11093925497,
+    "artifactJsonInspected": true,
+    "attackFixtureSurfacesPassed": 4,
+    "nativeCanaryControlPassed": true,
+    "independentCspChallengePassed": true,
+    "normalContentExecuted": false,
+    "failures": [
+      "Browser contract bare dompurify module resolution",
+      "Fifth virtual factory probe overwritten by live Preview repaint"
+    ]
+  },
+  "harnessRepair": {
+    "productionChanged": false,
+    "contract": "map installed DOMPurify ESM before each source document import; browser asserts locked version and real sanitization",
+    "virtualFactory": "owned connected DOM in same WebView; force live Preview update before evidence; finally cleanup",
+    "coverage": "four real production entry points plus canonical virtual block factory; not full virtual scroll scheduling",
+    "status": "pending Windows CI"
   }
 }

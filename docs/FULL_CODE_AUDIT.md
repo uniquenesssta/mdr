@@ -1,6 +1,6 @@
 # MDR 全仓代码审计、Windows 验收与任务书约束评估
 
-> **A03 已实施整改、待 Windows 验收**：基线 `631adcb` 的 Actions 36704905753 全绿，但四面实际执行事件并读取自有 canary，CSP 缺失。R18-N01 已通过架构复验；本轮公共 DOMPurify/CSP、五面阻断及两布局合法内容回归已实现，待新提交 Windows CI。A03 保持开放，见 [R12-22 详情](R12-22-DETAILS.md)。
+> **A03 待 Windows 重验**：整改提交 `5af331d` 的 [Actions 36708920012](https://github.com/uniquenesssta/mdr/actions/runs/36708920012) 为 3/5 job 通过；全仓 Node 1474/1474、Rust 268/268、built-app 浏览器 29/29 通过。真实 WebView 前四面攻击样例及独立 CSP 阻断通过，第五面被预览重绘覆盖，正常内容回归尚未执行；浏览器契约入口缺少 DOMPurify 模块映射。两处测试入口已修正，待新提交 Windows 重验。A03 仍开放、12.22 不勾选、12.23 未开始。 见 [R12-22 详情](R12-22-DETAILS.md)。
 
 > **A06 已整改验收**：R12-21 已将文本/二进制写入改为共用同目录临时文件、同步后替换，保留失败恢复副本及 Windows 写权限/DACL 边界，新增 18 项故障回归。修正提交 `cde35b8` 在 Windows 安全写入 18/18、Rust 268/268、Clippy 通过；A06 已关闭，整体仍因既有 R18-N01 失败。原发现及审计证据保留，见 [R12-21 详情](R12-21-DETAILS.md)。
 

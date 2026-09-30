@@ -1,6 +1,6 @@
 # R12-22 当前 HTML 渲染安全边界整改（A03）
 
-状态：基线提交 `631adcb9106e1e9b5031e4d91a84db0f5cb55bdc` 的 [Windows Actions 36704905753](https://github.com/uniquenesssta/mdr/actions/runs/36704905753) 已全绿，5/5 job、全仓 Node 1472/1472、Rust 268/268、架构/Clippy/构建通过。真实 WebView 四面均确认事件执行与测试自有文件原生 IPC 访问；没有 CSP。R18-N01 已通过 Windows 架构复验。本轮根据证据实施公共净化与 CSP，修复后 Windows 验收待 CI；A03 仍开放、12.22 不勾选，12.23 未开始。分支仅 `agent/r12-stage`。
+状态：整改提交 `5af331d` 的 [Actions 36708920012](https://github.com/uniquenesssta/mdr/actions/runs/36708920012) 为 3/5 job 通过；全仓 Node 1474/1474、Rust 268/268、built-app 浏览器 29/29 通过。真实 WebView 前四面攻击样例及独立 CSP 阻断通过，第五面被预览重绘覆盖，正常内容回归尚未执行；浏览器契约入口缺少 DOMPurify 模块映射。两处测试入口已修正，待新提交 Windows 重验。A03 仍开放、12.22 不勾选、12.23 未开始。 R18-N01 已通过基线 Windows 架构复验。分支仅 `agent/r12-stage`。
 
 ## 顺序与当前范围
 
@@ -82,3 +82,13 @@ IPC 只调用既有 `read_dropped_file` 读取本测试在 RUNNER_TEMP 新建的
 本轮 Context7 已查询 DOMPurify 返回 fragment/允许清单/资源策略和 Mermaid strict/secure；Tauri 的 Context7 库返回 library_not_finalized，改读官方 CSP 文档并核对当前配置。已使用 Mermaid Chart 更新实际公共净化链路图。版本索引不代表精确包实现，真实锁版本的动态行为由 Windows 回归核对。
 
 本次推送触发 Actions 后结束，不轮询；约 15～20 分钟后由用户发起“查询 R12-22 CI”。
+
+## 整改首轮结果及测试入口修正（2026-09-30）
+
+已读取提交 `5af331d` 的 run `36708920012` job 日志和 artifact `11093925497`。全仓 Node、Rust、native opener 三个 job 成功；frontend 仅 Browser preview contract 因裸模块 `dompurify` 无法解析而失败，生产构建和 built-app 29/29 通过。原生 job 在第五面报 `Probe left its rendering surface before evidence capture`，此前四面无事件执行/危险属性/危险 URL/嵌入/原生 IPC 尝试，文字和有限颜色保留；真实 Rust canary 控制与 CSP 独立挑战通过。第五面未取完证，两布局正常内容没有运行，故不接受本阶段。
+
+浏览器契约是直接加载源 ESM 的虚拟文件宿主，不能依赖 Vite 解析裸模块。现在在各契约文档导入模块前注册 import map：Node `import.meta.resolve('dompurify')` 找到实际安装的 ESM，读取后以 data URL 映射。继续使用锁定包，不下载 CDN、不伪造 sanitizer、不扩大文件宿主的目录范围。新增浏览器行为回归核对实际 DOMPurify 版本等于锁文件，并检查事件/危险链接/iframe 被移除、点击不执行、details/emphasis 保留。生产 CSP 不作改动，此映射仅用于独立浏览器契约宿主。
+
+虚拟块附加探测原先直接写入活跃 `#preview`；从 Hybrid 切回 both 的异步更新仍由真实 Preview 拥有，会覆盖该测试 DOM。现在真实 `createBlockNodes` 的返回节点挂在同一 WebView document 的测试自有容器，仍处于相同 CSP/原生 IPC 环境。主动调用正常 Preview update 后确认节点仍连接，再执行原攻击点击、完整断言和一秒观察；finally 移除容器，避免污染后续正常内容验证。容器作为可见覆盖层仅便于截图，不隔离脚本，也不改净化策略。证据标明 canonical factory 挂载范围；该第五面继续验证虚拟窗口使用的真实工厂，不声称覆盖完整虚拟滚动调度。其余四个实际应用入口保持。
+
+本轮 Context7 核对 DOMPurify ESM export；索引仅提供当前官方文档，实际包版本另由 Windows 浏览器断言核对。只改两个测试 runner 和进度记录，没有生产模块或架构变更，沿用已有链路图。本地只执行 JS 语法、actionlint、JSON、差异及所选文件远端基线核对；未在 Linux 运行产品动态测试。全部 Windows 门禁保持，推送启动 Actions 后结束、不轮询，约 15～20 分钟后查询。
