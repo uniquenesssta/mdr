@@ -1,6 +1,6 @@
 # R12-18 审计门禁与真实清单整改（A02）
 
-状态：实现与静态复核完成，Windows 当前提交验收待运行。仅实施 12.18；不启动 12.19～12.23。
+状态：审计门禁整改已验收。Windows 当前提交仅剩已归属 R12-22 的真实 Preview 循环依赖；不代表产品全绿。
 
 生产源码、8 个冻结 JS 模型、Rust 持久化格式、依赖及锁文件均未修改。生产清单从漏报的 448 项补齐到实际 493 项；此数仅为本次观测，不是后续门禁常量。新增精确集合门禁，同时拒绝缺失、重复和不存在的记录。
 
@@ -36,7 +36,7 @@ Windows 执行当前 Node 全量、架构/文档、Rust 全量、格式、Clippy
 
 ## 验证状态
 
-本地只执行源码/清单/文档静态检查：103 项源码契约、165 项布局/所有权/文档检查、46 项补充静态检查及 1 项清单门禁反例检查通过；未执行 Linux 产品运行验证。Windows 证据待回填；当前不勾选 12.18。
+本地只执行源码/清单/文档静态检查：103 项源码契约、165 项布局/所有权/文档检查、46 项补充静态检查及 1 项清单门禁反例检查通过；未执行 Linux 产品运行验证。Windows 最终证据见下文。
 
 Mermaid Chart 展示实际验证链路；Context7 核对锁定的 CodeMirror State 6.7.1 Facet/EditorState 配置读取 API。生产依赖未修改。
 
@@ -51,3 +51,7 @@ Mermaid Chart 展示实际验证链路；Context7 核对锁定的 CodeMirror Sta
 扫描器把 `globalThis.foo === ...` 误认作赋值。修正赋值运算符匹配，新增比较/赋值反例；仅移除两条经源文件确认从未赋值的旧基线记录：e2e-bridge 的 `__MARKDOWN_EDITOR_E2E__` 比较和 link-preview 的 `showToast` 能力检查。修正有明确审计元数据，不重新生成基线、不放行任何真实全局写入。新补入的 PreviewScheduler 四条同类能力读取也不再误报。
 
 CodeMirror 只允许实际已迁移的 `hybrid-editor/compatibility/codemirror-source-editor-port.js`，继续扫描其他 Hybrid 模块；未对整个 Hybrid 功能开放 CodeMirror 导入。
+
+## 第二轮 Windows 验收
+
+运行 [36616863617](https://github.com/uniquenesssta/mdr/actions/runs/36616863617)，提交 `601e3148b324d0a2401b1e0459e09a02fcb09d58`：递归 Node 1445 项，1444 通过、1 失败；专项 135/135、Rust 241/241、格式、Clippy、cargo check、native linkage、前端构建及浏览器通过。唯一失败为 R18-N01 Preview 循环依赖，架构门禁保持红色，责任仍为 R12-22。A02 过时门禁已关闭，12.18 按其治理验收条件勾选。
