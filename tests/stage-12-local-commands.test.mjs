@@ -10,7 +10,7 @@ const baseline = '9405ab44d6bb5f05eb755a2341e3ba76b4831ed8';
 const directory = 'src-tauri/src/local_file/';
 const names = ['list_text_file_tree', 'read_dropped_file', 'read_local_image',
   'write_local_text_file', 'write_local_binary_file', 'initial_file_path'];
-const specialists = ['binary_writer', 'directory_tree', 'file_kind', 'image_reader',
+const specialists = ['atomic_writer', 'binary_writer', 'directory_tree', 'file_kind', 'image_reader',
   'path_policy', 'text_reader', 'text_writer', 'tree_limits'];
 const source = path => readFile(path, 'utf8');
 const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(/\/(external_link|web_fetch|performance_log)\/mod\.rs$/, "/$1.rs")}`], { encoding: 'utf8' });
@@ -92,8 +92,11 @@ test('R12-08 records unique module ownership and never exposes lower-level modul
   const inventory = JSON.parse(await source('tests/architecture/fixtures/production-modules.json'));
   await assertProductionInventory();
   const records = inventory.modules.filter(record => record[0].startsWith(directory));
-  assert.equal(records.length, 12);
-  assert.equal(new Set(records.map(record => record[0])).size, 12);
+  const modulePaths = records.map(record => record[0]);
+  const expectedPaths = [...specialists, 'mod', 'commands', 'operations', 'types']
+    .map(name => `${directory}${name}.rs`).sort();
+  assert.equal(new Set(modulePaths).size, modulePaths.length);
+  assert.deepEqual([...modulePaths].sort(), expectedPaths);
   assert.ok(!inventory.modules.some(record => record[0] === 'src-tauri/src/local_file.rs'));
   const entry = await source(`${directory}mod.rs`);
   for (const name of [...specialists, 'operations', 'types']) {

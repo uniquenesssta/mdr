@@ -1,6 +1,6 @@
 # R12-21 用户文件安全写入整改（A06）
 
-状态：实现和 Windows 回归已提交准备，Windows 动态验收待运行结果；12.21 尚未勾选。分支 `agent/r12-stage`，基线为 R12-20 验收记录提交 `35dbb831a294c3762f8738f20dbbb6665ec85732`。
+状态：首次 Windows 专项 18/18、Rust 全量 268/268 通过；两个本轮门禁兼容问题已修正，等待修正提交的 CI 复验；12.21 尚未勾选。分支 `agent/r12-stage`，基线为 R12-20 验收记录提交 `35dbb831a294c3762f8738f20dbbb6665ec85732`。
 
 ## 写入责任与契约
 
@@ -38,6 +38,16 @@ Windows 提交直接调用 `MoveFileExW(REPLACE_EXISTING | WRITE_THROUGH)`，临
 原文本 4 项、二进制 6 项和命令 12 项保持。累计 Windows 工作流沿用 `.github/workflows/r12-14.yml`，显示名更新为 R12-21，新增精确 18 项专项门禁；原全部 Node/Rust/架构/依赖/构建/浏览器与原生门禁保留，不忽略 Preview 的既有 R18-N01。Rust 全量预期由 250 增至 268，但预期数量不代表已通过。
 
 ## 验证状态和续接
+
+提交 `4853eaeefdb3032bcdc293eb3bc59167647e75ed` 的 [Windows Actions 36680764895](https://github.com/uniquenesssta/mdr/actions/runs/36680764895) 已完成：安全写入专项 18/18、文本 4/4、二进制 6/6、命令 12/12、Rust 全量 268/268，Rust 格式和 cargo check、构建、浏览器、原生链接通过。整体 CI 仍失败，原因和本次修正如下：
+
+| 失败原因 | 修正或责任 |
+|---|---|
+| R12-08 清单测试固定要求 12 个模块，本轮实际增加到 13 个 | 用明确职责模块路径集合代替历史数量，加入 `atomic_writer`；保持全仓真实清单校验、唯一性、精确文件集合对照，并把新模块纳入私有边界检查 |
+| 只读测试恢复时调用 `set_readonly(false)`，Rust 1.88 Clippy 在 Windows 也拦截此调用 | 修改属性前保存原 `fs::Permissions`，Drop 用 `set_permissions` 恢复原属性；不添加 allow、不降低 `-D warnings`，两个真实只读测试及重试断言保留 |
+| 既有 R18-N01 Preview 循环依赖 | 仍归 R12-22；架构/全仓 Node 保留失败，不在本次提前修改生产链路 |
+
+本次只改上述两个测试及进度记录，安全写入生产实现、全部测试数及 Windows 工作流门禁不变。修正提交的 Windows 专项与 Clippy 结果尚未查询，不把首次功能测试通过当作最终验收。
 
 本地仅有远端精确文件快照，非完整 Git 历史。本地执行 Rust 1.88 rustfmt 静态解析/格式检查、修改 JS 的 `node --check`、工作流 YAML 与 shell block 静态语法、JSON/模块清单和相对文档链接校验、`git diff --check`。未在 Linux 执行产品测试、编译、构建、浏览器或平台验收；真实文件权限、OS 替换和全部累计门禁只以精确提交的 Windows Actions 结果为准。
 

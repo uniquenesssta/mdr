@@ -5,7 +5,7 @@
   "scope": "R12-21 / A06 safe user-file write",
   "platform": "Windows",
   "baselineCommit": "35dbb831a294c3762f8738f20dbbb6665ec85732",
-  "status": "implemented; Windows validation pending; A06 not accepted",
+  "status": "implemented; initial Windows behavior passed; gate repair validation pending; A06 not accepted",
   "sharedAuthority": "src-tauri/src/local_file/atomic_writer.rs",
   "commandAndDtoChanged": false,
   "dependenciesChanged": false,
@@ -31,7 +31,7 @@
   },
   "validation": {
     "local": "static only: Rust 1.88 rustfmt, JS syntax, YAML/shell syntax, JSON/inventory/docs/diff checks",
-    "windows": "pending; no dynamic success claimed"
+    "windows": "initial behavior passed; gate repair run pending; A06 not accepted"
   },
   "knownPriorFailure": {
     "id": "R18-N01",
@@ -46,5 +46,34 @@
     "crash recovery siblings require inspection; no automatic replay",
     "no cross-process transaction or version conflict coordination"
   ],
-  "next": "trigger Windows Actions then end turn; user query about 15 minutes later"
+  "next": "trigger Windows Actions then end turn; user query about 15 minutes later",
+  "firstWindowsValidation": {
+    "commit": "4853eaeefdb3032bcdc293eb3bc59167647e75ed",
+    "run": 36680764895,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36680764895",
+    "safeWriter": 18,
+    "rustFull": 268,
+    "textWriter": 4,
+    "binaryWriter": 6,
+    "localCommands": 12,
+    "rustfmt": "passed",
+    "cargoCheck": "passed",
+    "build": "passed",
+    "browser": "passed",
+    "nativeLink": "passed",
+    "overall": "failure",
+    "newFailures": [
+      "local-file module inventory fixed count 12 vs actual 13",
+      "test readonly reset rejected by Clippy permissions_set_readonly_false"
+    ],
+    "priorFailure": "R18-N01 Preview circular dependency"
+  },
+  "repair": {
+    "scope": "two test files and progress records only; production implementation unchanged",
+    "inventory": "exact explicit responsibility paths including atomic_writer, unique inventory, actual file set and private boundary assertions retained",
+    "readonly": "capture original fs::Permissions before mutation; restore cloned original in Drop",
+    "warningsDeniedUnchanged": true,
+    "focusedTestCountUnchanged": true,
+    "status": "Windows repair run pending"
+  }
 }

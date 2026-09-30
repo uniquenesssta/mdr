@@ -187,13 +187,23 @@ fn occupied_target_rejects_real_windows_replace_then_retries() {
     fixture.assert_clean(REPLACEMENT);
 }
 
-struct RestoreReadonly(PathBuf);
+struct RestoreReadonly {
+    path: PathBuf,
+    permissions: fs::Permissions,
+}
+
+impl RestoreReadonly {
+    fn new(path: &Path) -> Self {
+        Self {
+            path: path.to_path_buf(),
+            permissions: fs::metadata(path).expect("original fixture permissions").permissions(),
+        }
+    }
+}
 
 impl Drop for RestoreReadonly {
     fn drop(&mut self) {
-        let mut permissions = fs::metadata(&self.0).expect("readonly fixture").permissions();
-        permissions.set_readonly(false);
-        fs::set_permissions(&self.0, permissions).expect("restore owned fixture");
+        fs::set_permissions(&self.path, self.permissions.clone()).expect("restore original fixture permissions");
     }
 }
 
@@ -201,7 +211,7 @@ impl Drop for RestoreReadonly {
 fn readonly_target_remains_readonly_and_recoverable() {
     let fixture = Fixture::new();
     let target = fixture.original();
-    let restore = RestoreReadonly(target.clone());
+    let restore = RestoreReadonly::new(&target);
     let mut permissions = fs::metadata(&target).expect("metadata").permissions();
     permissions.set_readonly(true);
     fs::set_permissions(&target, permissions).expect("set readonly");
@@ -222,7 +232,7 @@ fn readonly_target_remains_readonly_and_recoverable() {
 fn readonly_set_after_staging_still_rejects_commit() {
     let fixture = Fixture::new();
     let target = fixture.original();
-    let restore = RestoreReadonly(target.clone());
+    let restore = RestoreReadonly::new(&target);
     let mut hook = |phase, _: &Path| {
         if phase == Phase::BeforeReplace {
             let mut permissions = fs::metadata(&target)?.permissions();
