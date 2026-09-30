@@ -34,3 +34,5 @@ Context7 核对 Rust Windows OpenOptionsExt::share_mode(0) 的独占共享语义
 Windows 目录大小写敏感测试依据 [Microsoft 官方说明](https://learn.microsoft.com/en-us/windows/wsl/case-sensitivity)，只设置测试拥有的临时目录。
 
 补充复核：原生后端不可用时禁止将内存缓存当成已持久化；Browser→Native 迁移时正文成功而索引失败，保留重试正文直到索引成功。R11 并发故障用例原先断言“失败的未提交版本也留在缓存”，本轮改验从磁盘版本重试；LoadController 顺序断言改验元数据落盘后发布运行状态。
+
+并发提交补充：保存结果携带实际提交的正文版本与标题，避免同代次并发重命名时用较新的 Session 记录误确认旧标题；手动保存后续异步操作中出现新编辑，也不能发布已保存状态。对应 JS 端到端回归随当前 Windows 专项执行。

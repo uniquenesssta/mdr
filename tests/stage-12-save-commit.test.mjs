@@ -216,3 +216,29 @@ test('R12-19 browser to native migration retains retry body until index commits'
   assert.equal(Object.hasOwn(stored, 'content'), false);
   assert.equal(h.requests.length, 1);
 });
+
+test('R12-19 edits during manual-save continuation cannot publish saved', async () => {
+  const h = harness();
+  h.edit('写入版本');
+  await assert.rejects(h.saver.save({ async afterPersist() { h.edit('继续编辑版本'); } }), /DOCUMENT_CHANGED_DURING_SAVE/);
+  assert.equal(h.model.dirty, true);
+  assert.equal(h.model.createSnapshot(), '继续编辑版本');
+  assert.equal(h.statusStore.snapshot.state, 'error');
+  assert.equal((await h.saver.save()).saved, true);
+});
+
+test('R12-19 concurrent title saves acknowledge the actual committed title only', async () => {
+  const releases = [];
+  const h = harness({ native: true, nativeSave: () => new Promise(resolve => releases.push(resolve)) });
+  h.edit('同一正文');
+  const first = h.controller.saveActive({ title: 'first.md' });
+  const rejected = assert.rejects(first, /DOCUMENT_CHANGED_DURING_SAVE/);
+  const second = h.controller.saveActive({ title: 'second.md' });
+  releases[0]();
+  await rejected;
+  assert.equal(h.model.dirty, true);
+  releases[1]();
+  await second;
+  assert.equal(h.model.dirty, false);
+  assert.equal(h.disk.title, 'second.md');
+});

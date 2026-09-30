@@ -169,7 +169,7 @@ export class NativeDocumentStore {
       && (document.title || '') === session.title
     ) {
       const native = normalizeDocumentNativeMetadata({ nativeBacked: true, nativeVersion: session.backendVersion });
-      const result = { native: true, version: session.backendVersion, ...native, editorVersion: session.lastEditorVersion, skipped: true };
+      const result = { native: true, version: session.backendVersion, ...native, editorVersion: session.lastEditorVersion, editorTitle: session.title, skipped: true };
       this.emit({
         state: 'body-saved',
         documentId: document.id,
@@ -260,7 +260,7 @@ export class NativeDocumentStore {
         version: session.backendVersion,
         snapshotCreated: Boolean(response?.snapshotCreated),
         journalEntries: Number(response?.journalEntries) || 0,
-        value: Object.freeze({ native: true, ...response, ...native, editorVersion })
+        value: Object.freeze({ native: true, ...response, ...native, editorVersion, editorTitle: document.title })
       });
     }
   }

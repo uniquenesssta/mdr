@@ -148,6 +148,7 @@ export function createDocumentSessionController({
     repository.persistLegacyActiveTitle(record.title);
 
     const targetVersion = model.getDocumentVersion();
+    const targetTitle = record.title;
     const saveResult = await repository.save(model, record, { forceSnapshot, snapshotReason });
     assertCurrent(operation);
     if (saveResult?.native) {
@@ -159,7 +160,7 @@ export function createDocumentSessionController({
     }
     repository.persistSession(session.records, session.activeId);
     const committedVersion = Number(saveResult?.editorVersion ?? targetVersion);
-    if (model.getDocumentVersion() > committedVersion || model.title !== record.title) {
+    if (model.getDocumentVersion() > committedVersion || model.title !== (saveResult?.editorTitle ?? targetTitle)) {
       const error = new Error('DOCUMENT_CHANGED_DURING_SAVE');
       error.code = 'DOCUMENT_CHANGED_DURING_SAVE';
       throw error;

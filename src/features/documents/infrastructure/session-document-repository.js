@@ -132,7 +132,7 @@ export function createSessionDocumentRepository({
       browserRepository.rememberContent(record.id, createSnapshot(source, options.snapshotReason || 'document-storage'));
     }
     if (!useNative) {
-      return { native: false, editorVersion: getDocumentVersion(source) };
+      return { native: false, editorVersion: getDocumentVersion(source), editorTitle: record.title };
     }
     const result = await nativeStore.save(source, record, { forceSnapshot: Boolean(options.forceSnapshot) });
     if (!result?.native) throw new Error('NATIVE_DOCUMENT_NOT_COMMITTED');

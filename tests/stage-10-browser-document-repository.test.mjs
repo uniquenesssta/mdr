@@ -107,7 +107,7 @@ test('Atomic 10.9 SessionDocumentRepository delegates browser fallback reads and
     markPersisted(version, backendVersion) { this.persisted = [version, backendVersion]; }
   };
   const result = await repository.save(sourceModel, { id: 'doc', nativeBacked: false });
-  assert.deepEqual(result, { native: false, editorVersion: 2 });
+  assert.deepEqual(result, { native: false, editorVersion: 2, editorTitle: undefined });
   assert.equal(browser.readContent('doc'), 'body');
   assert.equal(sourceModel.persisted, undefined);
   const loaded = await repository.load({ id: 'doc', nativeBacked: false });

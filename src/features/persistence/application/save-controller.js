@@ -183,6 +183,14 @@ export function createSaveController({
       }
     }
 
+    // SaveActive may have committed an older version before this continuation
+    // yielded. Never label newer edits as saved (or admit a close for them).
+    if (model.dirty === true) {
+      const error = new Error('DOCUMENT_CHANGED_DURING_SAVE');
+      error.code = 'DOCUMENT_CHANGED_DURING_SAVE';
+      publishFailure({ documentId: currentDocumentId, targetVersion, backendVersion, error });
+      throw error;
+    }
     const continuationSnapshot = freezeContinuation(continuation);
     const cancelled = Boolean(continuationSnapshot?.cancelled);
     statusStore.setState('saved', {
