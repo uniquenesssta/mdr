@@ -1,6 +1,6 @@
 # R12-19 保存提交与缓存一致性（A07/A08/A09）
 
-状态：实现完成，Windows 验证待运行。只实施 12.19；8 个冻结 JS 模型、IPC DTO、持久化格式及恢复算法保持不变。
+状态：已完成 Windows 专项验收，A07/A08/A09 关闭。只实施 12.19；8 个冻结 JS 模型、IPC DTO、持久化格式及恢复算法保持不变。
 
 ## 提交与失败边界
 
@@ -29,7 +29,16 @@ Context7 核对 Rust Windows OpenOptionsExt::share_mode(0) 的独占共享语义
 
 ## Windows 结果
 
-待回填。原 R18-N01 Preview 循环依赖仍归 R12-22，架构门禁保留失败；不在本轮修复或豁免。
+运行 [36664847931](https://github.com/uniquenesssta/mdr/actions/runs/36664847931)，验证提交 `d269fad613ab85f9f36f474c87c2e53271aaa022`：
+
+- R12-19 JS 专项 21/21、Rust 保存/磁盘/别名专项 9/9，通过全部上述故障场景。
+- 全仓递归 Node 1466 项，1465 通过、1 失败；Rust 全量 250/250。
+- 当前 CI 格式门禁、Clippy warnings-denied、cargo check、135 项前端接口/冻结模型专项、生产构建、浏览器契约与应用回归、Windows native linkage 通过。
+- 唯一失败是原 R18-N01 Preview 循环依赖，继续归 R12-22，架构门禁保持红色；未添加豁免，也不表示阶段 12 已全部验收。
+
+[机器可读证据](audit/r12-19-save-validation.json) 记录提交、run/job、故障类型、全部 9 个 Rust 专项名称和前序修正。首轮发现的旧加载顺序、旧失败缓存版本断言已改为本项要求的提交语义；最终仅修正测试中的 Clippy 格式字符串，未降低 warnings-denied 门禁。
+
+验证限制：仅 Windows 产品执行；本地只做源码/清单/文档/语法与差异静态检查。重启恢复证据是同一真实磁盘的新 Store 读取，不冒充桌面进程崩溃或断电测试；系统窗口关闭/安装交付场景仍按 R17 复验。
 
 Windows 目录大小写敏感测试依据 [Microsoft 官方说明](https://learn.microsoft.com/en-us/windows/wsl/case-sensitivity)，只设置测试拥有的临时目录。
 

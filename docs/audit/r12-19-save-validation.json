@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "scope": "R12-19 / A07 / A08 / A09",
+  "platform": "Windows",
+  "attempts": [
+    {
+      "run": 36663615113,
+      "commit": "4df4d5bda797a7f4e5bca4e99eb9e8b965ae5990",
+      "result": "R12-19 JS17 and Rust9 passed; old load order assertion and old failed-cache-version assertion required updates; Preview cycle active"
+    },
+    {
+      "run": 36664169532,
+      "commit": "3a57a890c44bbb243b5a618275b129a198cc2bc7",
+      "result": "JS19, Rust9 fault tests, full Rust250 passed including real Windows case-sensitive directory; Clippy test formatting failed; Preview cycle active"
+    },
+    {
+      "run": 36664504010,
+      "commit": "6436b12c7fd24def21d1455208d5f0d0192ba7de",
+      "node": {
+        "tests": 1466,
+        "pass": 1465,
+        "fail": 1
+      },
+      "jsFocused": 21,
+      "result": "Frontend build/browser and native linkage passed; sole Node failure Preview cycle; Rust job was in progress at interval check"
+    }
+  ],
+  "current": {
+    "status": "accepted for R12-19; unrelated Preview architecture failure remains active",
+    "commit": "d269fad613ab85f9f36f474c87c2e53271aaa022",
+    "run": 36664847931,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36664847931",
+    "node": {
+      "tests": 1466,
+      "pass": 1465,
+      "fail": 1
+    },
+    "jsFocused": 21,
+    "rustFocused": 9,
+    "rustFull": 250,
+    "checks": {
+      "clippy": "passed",
+      "rustCheck": "passed",
+      "rustFormattingGate": "passed",
+      "browserContract": "passed",
+      "productionBuild": "passed",
+      "browserApp": "passed",
+      "nativeLinkage": "passed",
+      "frozenModels": "passed",
+      "inventory": "passed"
+    },
+    "rustFaultTests": [
+      "invalid_later_transaction_never_publishes_partially_mutated_cache ... ok",
+      "journal_committed_but_snapshot_failed_reloads_committed_delta ... ok",
+      "windows_case_alias_read_save_delete_never_observe_stale_cache ... ok",
+      "injected_journal_open_partial_write_and_sync_errors_recover_disk_fact ... ok",
+      "windows_case_sensitive_directory_preserves_distinct_spelling_bodies ... ok",
+      "real_directory_obstructions_at_each_snapshot_stage_keep_disk_and_cache_consistent ... ok",
+      "windows_real_exclusive_journal_handle_refuses_append_and_recovers ... ok",
+      "windows_real_snapshot_replace_denial_preserves_previous_slot ... ok",
+      "injected_snapshot_content_metadata_and_reset_boundaries_preserve_recoverable_state ... ok"
+    ],
+    "jobs": [
+      {
+        "id": 109727216269,
+        "name": "Native opener compilation and linkage (windows-latest)",
+        "conclusion": "success",
+        "failedSteps": []
+      },
+      {
+        "id": 109727216437,
+        "name": "Command Registry and cumulative hard gates",
+        "conclusion": "success",
+        "failedSteps": []
+      },
+      {
+        "id": 109727216521,
+        "name": "Command Registry and frontend regression",
+        "conclusion": "failure",
+        "failedSteps": [
+          "Full Node regression",
+          "Architecture and documentation hard gates"
+        ]
+      },
+      {
+        "id": 109727216535,
+        "name": "All repository Node tests (Windows)",
+        "conclusion": "failure",
+        "failedSteps": [
+          "Run every tracked Node test including nested suites"
+        ]
+      }
+    ]
+  },
+  "injectedFaults": [
+    "Web Storage/IPC",
+    "Rust journal open/partial write/sync",
+    "Rust snapshot content/meta/journal reset create/write/sync/replace"
+  ],
+  "realFilesystemFaults": [
+    "Windows exclusive journal handle",
+    "Windows exclusive inactive snapshot replacement targets",
+    "snapshot temporary paths occupied by directories"
+  ],
+  "identityChecks": [
+    "case-insensitive aliases read/save/delete",
+    "fsutil enabled case-sensitive temporary directory with CaseDoc/casedoc"
+  ],
+  "unchanged": [
+    "8 frozen JS models",
+    "Rust DTO and persistent data format",
+    "Rust recovery algorithm"
+  ],
+  "knownUnrelatedFailure": {
+    "id": "R18-N01",
+    "owner": "R12-22",
+    "gate": "Preview circular dependency remains failing"
+  }
+}

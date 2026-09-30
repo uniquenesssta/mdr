@@ -140,7 +140,7 @@ npm run check
 
 ## Change Log
 
-- 2026-09-29：R12-18 门禁/清单整改实现，Windows 验证中；[详情](R12-18-DETAILS.md)。
+- 2026-09-29：R12-18 门禁/清单整改已验收，真实 Preview 循环依赖保留至 R12-22；[详情](R12-18-DETAILS.md)。
 
 - 2026-08-31：R12-07 新增唯一 `local_file/tree_limits.rs`，集中冻结的目录树深度 24、扫描条目 12,000、共享 Text Reader 的 20 MiB 文本上限，以及每次扫描独立的文件、目录、跳过和截断状态。命令入口使用唯一默认限制集，Directory Tree 只负责遍历和 DTO 构造，不再持有限制常量或计数状态；六个命令、DTO、错误、路径/类型策略、大小边界和依赖不变。本地定向 Node 50/50、全量 Node 393/393、生产模块 433、四项架构门禁、构建和安全审计通过；Tree Limits 直接 Rust 6 项与完整 Rust/Clippy/check、浏览器验收交由 R12-07 Actions。未推进 R12-08。详情见 [R12-07-DETAILS.md](R12-07-DETAILS.md)。
 - 2026-08-31：R12-06 完成验收。最终提交 `63582800b57a0ecf84c658fa25880896606d7ab2` 的 [Actions #33387645294](https://github.com/uniquenesssta/mdr/actions/runs/33387645294) 两个 job 与全部步骤成功，覆盖 Directory Tree 6/6、Writer 10/10、Reader 10/10、File Kind 6/6、Path Policy 10/10、旧行为 10/10、独立兼容夹具 6/6、全量 Rust、Clippy/check、Node、架构、构建和浏览器回归；允许进入 R12-07。详情见 [R12-06-DETAILS.md](R12-06-DETAILS.md)。
@@ -462,4 +462,4 @@ Editor/preview text-selection synchronization is owned by `src/sync/selection-co
 - 本 clean validation runner 未执行 Cargo/Tauri 构建，因为 CR-01 未修改 Rust/Tauri 路径；正式 Stage 1/Stage 5 工作流将在 CR-01 clean commit 上继续作为发布门禁，未通过前不得推进 CR-02。
 
 
-- [R12-19 保存提交与缓存一致性](R12-19-DETAILS.md)：Windows 验证中。
+- [R12-19 保存提交与缓存一致性](R12-19-DETAILS.md)：A07/A08/A09 已关闭；Windows JS 专项 21/21、Rust 专项 9/9、Rust 全量 250/250。Node 1465/1466，唯一 Preview 循环依赖仍归 R12-22。
