@@ -5,7 +5,7 @@
   "scope": "R12-21 / A06 safe user-file write",
   "platform": "Windows",
   "baselineCommit": "35dbb831a294c3762f8738f20dbbb6665ec85732",
-  "status": "implemented; initial Windows behavior passed; gate repair validation pending; A06 not accepted",
+  "status": "accepted on Windows; A06 closed; overall R12 pending",
   "sharedAuthority": "src-tauri/src/local_file/atomic_writer.rs",
   "commandAndDtoChanged": false,
   "dependenciesChanged": false,
@@ -31,7 +31,7 @@
   },
   "validation": {
     "local": "static only: Rust 1.88 rustfmt, JS syntax, YAML/shell syntax, JSON/inventory/docs/diff checks",
-    "windows": "initial behavior passed; gate repair run pending; A06 not accepted"
+    "windows": "accepted scoped regression; overall failure only prior R18-N01"
   },
   "knownPriorFailure": {
     "id": "R18-N01",
@@ -74,6 +74,32 @@
     "readonly": "capture original fs::Permissions before mutation; restore cloned original in Drop",
     "warningsDeniedUnchanged": true,
     "focusedTestCountUnchanged": true,
-    "status": "Windows repair run pending"
+    "status": "accepted in Windows run 36686262120"
+  },
+  "latestWindowsValidation": {
+    "commit": "cde35b8cd3f46d86791653cd7488bb77a40a19ae",
+    "run": 36686262120,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36686262120",
+    "safeWriter": {
+      "passed": 18,
+      "failed": 0
+    },
+    "rustFull": {
+      "passed": 268,
+      "failed": 0
+    },
+    "recursiveNode": {
+      "passed": 1466,
+      "failed": 1
+    },
+    "clippy": "passed with -D warnings",
+    "fmt": "passed",
+    "cargoCheck": "passed",
+    "releaseBuild": "passed",
+    "frontendBuild": "passed",
+    "browser": "passed",
+    "nativeLink": "passed",
+    "overall": "failure",
+    "soleFailure": "R18-N01 Preview circular dependency"
   }
 }

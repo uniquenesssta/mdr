@@ -1,6 +1,6 @@
 # R12-21 用户文件安全写入整改（A06）
 
-状态：首次 Windows 专项 18/18、Rust 全量 268/268 通过；两个本轮门禁兼容问题已修正，等待修正提交的 CI 复验；12.21 尚未勾选。分支 `agent/r12-stage`，基线为 R12-20 验收记录提交 `35dbb831a294c3762f8738f20dbbb6665ec85732`。
+状态：修正提交 `cde35b8cd3f46d86791653cd7488bb77a40a19ae` 的 Windows 专项已验收，A06 已关闭；R12 整体尚未验收。分支 `agent/r12-stage`，基线为 R12-20 验收记录提交 `35dbb831a294c3762f8738f20dbbb6665ec85732`。
 
 ## 写入责任与契约
 
@@ -47,11 +47,11 @@ Windows 提交直接调用 `MoveFileExW(REPLACE_EXISTING | WRITE_THROUGH)`，临
 | 只读测试恢复时调用 `set_readonly(false)`，Rust 1.88 Clippy 在 Windows 也拦截此调用 | 修改属性前保存原 `fs::Permissions`，Drop 用 `set_permissions` 恢复原属性；不添加 allow、不降低 `-D warnings`，两个真实只读测试及重试断言保留 |
 | 既有 R18-N01 Preview 循环依赖 | 仍归 R12-22；架构/全仓 Node 保留失败，不在本次提前修改生产链路 |
 
-本次只改上述两个测试及进度记录，安全写入生产实现、全部测试数及 Windows 工作流门禁不变。修正提交的 Windows 专项与 Clippy 结果尚未查询，不把首次功能测试通过当作最终验收。
+修正提交只改上述两个测试及进度记录，安全写入生产实现、全部测试数及 Windows 工作流门禁不变。已核对 [Windows Actions 36686262120](https://github.com/uniquenesssta/mdr/actions/runs/36686262120)：安全写入 18/18、文本 4/4、二进制 6/6、命令 12/12、Rust 全量 268/268、Clippy `-D warnings`、rustfmt、cargo check、release build、前端构建、浏览器与原生链接均通过。递归全仓 Node 1466/1467，唯一失败为既有 R18-N01 Preview 循环依赖；整体 run 因此仍为 failure。R12-21 专项已验收，不将整体失败误写为全绿。
 
 本地仅有远端精确文件快照，非完整 Git 历史。本地执行 Rust 1.88 rustfmt 静态解析/格式检查、修改 JS 的 `node --check`、工作流 YAML 与 shell block 静态语法、JSON/模块清单和相对文档链接校验、`git diff --check`。未在 Linux 执行产品测试、编译、构建、浏览器或平台验收；真实文件权限、OS 替换和全部累计门禁只以精确提交的 Windows Actions 结果为准。
 
-[机器可读记录](audit/r12-21-safe-write.json) 标记待验收并列出故障证据方式。R12-20 专项已验收；R12-21 不因编写完代码而勾选，A06 仍待 Windows 结果。唯一已知前序 Node 失败为 R18-N01 Preview 循环依赖，归 R12-22；本项没有开始 R12-22。
+[机器可读记录](audit/r12-21-safe-write.json) 保存修正提交及 Windows 结果。12.21 已勾选、A06 已关闭；R18-N01 归 R12-22，R12 整体尚未验收。
 
 按用户要求，推送触发 Actions 后立即结束会话，不轮询；约 15 分钟后由用户发起“查询 R12-21 CI”。回退仅撤回本项共享写入、测试和工作流/记录调整，不撤回 R12-20 及前序已验收修复；回退会重新引入 A06 截断风险，不作为正常故障恢复办法。
 
