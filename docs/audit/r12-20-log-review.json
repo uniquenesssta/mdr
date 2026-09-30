@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "repository": "uniquenesssta/mdr",
+  "branch": "agent/r12-stage",
+  "scope": "R12-20 / A01 log redaction review",
+  "platform": "Windows",
+  "baselineCommit": "83583712c3038561b8c432394bff0c9213271319",
+  "originalAcceptanceCommit": "3cf4b683255d1f6f6ade72ab3df9f3e0474e435f",
+  "status": "review and additional assertions implemented; current Windows CI pending",
+  "coreBlobComparison": [
+    {
+      "path": "src/runtime/performance.js",
+      "originalBlob": "714900ce60868d013ba41d3d8e9b22949530de39",
+      "currentBlob": "714900ce60868d013ba41d3d8e9b22949530de39",
+      "unchanged": true
+    },
+    {
+      "path": "src/platform/desktop/performance-log-client.js",
+      "originalBlob": "4db5e14240aa5f34ccfdbd0c641fcdd92a8a7f67",
+      "currentBlob": "4db5e14240aa5f34ccfdbd0c641fcdd92a8a7f67",
+      "unchanged": true
+    },
+    {
+      "path": "src/platform/desktop/invoke-client.js",
+      "originalBlob": "5aa00f9362be029816291bf09b17d834fa69cc81",
+      "currentBlob": "5aa00f9362be029816291bf09b17d834fa69cc81",
+      "unchanged": true
+    },
+    {
+      "path": "src-tauri/src/performance_log/redaction.rs",
+      "originalBlob": "ea0790ff7243daa3d61b866d24e9364ff56ee699",
+      "currentBlob": "ea0790ff7243daa3d61b866d24e9364ff56ee699",
+      "unchanged": true
+    }
+  ],
+  "reusedWindowsEvidence": {
+    "commit": "d269fad613ab85f9f36f474c87c2e53271aaa022",
+    "run": 36664847931,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36664847931",
+    "rustJob": 109727216437,
+    "redaction": 14,
+    "frontendPayload": 2,
+    "jsonlRoundTrip": 1,
+    "writer": 9,
+    "lifecycle": 6,
+    "releaseWriter": "passed",
+    "releaseLifecycle": "passed",
+    "rustFull": 250,
+    "acceptance": "existing A01 evidence remains valid; does not validate the new R12-20 assertions"
+  },
+  "additionalCases": [
+    "structured message/cause/reason/password and causes array from actual frontend payload",
+    "throwing enumerable property normalized by actual frontend runtime",
+    "explicit disk assertions for array bodies/tokens/free text/path minimization and useful counts",
+    "existing cycle/BigInt/non-finite/array limits explicitly checked after JSONL readback"
+  ],
+  "currentValidation": {
+    "workflow": ".github/workflows/r12-14.yml",
+    "name": "R12-20 Log Redaction Review",
+    "trigger": "push on agent/r12-stage",
+    "status": "pending",
+    "required": [
+      "R12-14 direct recursive redaction 14 of 14",
+      "R12-14 actual frontend payload to Rust JSONL",
+      "R12-15 extracted real log writer 9 of 9",
+      "R12-15 release writer creates no log files",
+      "R12-16 extracted lifecycle 6 of 6",
+      "R12-16 release lifecycle creates no logs",
+      "Full Rust tests",
+      "Full Clippy warnings-denied gate",
+      "Full Node regression",
+      "Architecture and documentation hard gates"
+    ]
+  },
+  "localStaticChecks": {
+    "jsSyntax": "passed (two modified JS files)",
+    "workflowYaml": "passed",
+    "shellSyntax": "passed (53 run blocks)",
+    "diffWhitespace": "passed",
+    "evidenceLinks": "passed",
+    "rustFormatting": "not run locally; required Windows gate"
+  },
+  "limitations": [
+    "No production implementation or dependency changes.",
+    "New assertions require Windows execution; local checks are static only.",
+    "VM exercises real production frontend and adapter but not WebView IPC/native GUI.",
+    "A04 retry protocol remains assigned to R15; R18-N01 Preview cycle remains assigned to R12-22.",
+    "Do not accept R12-20 or advance to R12-21 before checking the new Windows result."
+  ],
+  "continuationPreference": "Once GitHub Actions is triggered, end the session without polling; user will ask for a result check after about 15 minutes."
+}

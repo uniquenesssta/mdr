@@ -9,6 +9,8 @@ test('R12-14 actual runtime preserves nested structures through the desktop log 
   assert.equal(typeof details.nested, 'object');
   assert.equal(details.nested.count, 7);
   assert.equal(details.array[0].count, 7);
+  assert.equal(details.errorChain.cause.causes[0].count, 4);
+  assert.equal(typeof details.errorChain.cause, 'object');
   assert.equal(typeof entries[1].details.nested, 'object');
   assert.equal(entries[1].status, 'warning');
   assert.equal(entries[2].status, 'error');
@@ -19,6 +21,7 @@ test('R12-14 runtime bounds diagnostic containers and safely handles cycles and 
   const {entries} = await producePayload();
   const details = entries[0].details;
   assert.equal(details.cycle.self, '[circular]');
+  assert.equal(details.exceptional, '[unserializable]');
   assert.equal(details.items.length, 20);
   assert.equal(details.notFinite, null);
   assert.ok(!Object.hasOwn(details, 'invalid'));

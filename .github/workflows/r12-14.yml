@@ -1,5 +1,5 @@
-name: R12-19 Save Commit Consistency
-run-name: R12-19 save commit and cumulative regression · ${{ github.sha }}
+name: R12-20 Log Redaction Review
+run-name: R12-20 log redaction review and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -95,7 +95,7 @@ defaults:
 
 jobs:
   frontend:
-    name: Command Registry and frontend regression
+    name: Log Redaction Review and frontend regression
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
@@ -189,7 +189,7 @@ jobs:
           retention-days: 14
 
   rust:
-    name: Command Registry and cumulative hard gates
+    name: Log Redaction Review and cumulative hard gates
     runs-on: windows-latest
     timeout-minutes: 60
     env:

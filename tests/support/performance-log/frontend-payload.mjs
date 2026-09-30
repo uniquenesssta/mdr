@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import { randomUUID } from 'node:crypto';
 import { createPerformanceLogClient } from '../../../src/platform/desktop/performance-log-client.js';
 
-export const secrets = ['AUDIT_BODY_SECRET', 'AUDIT_TOKEN_SECRET', 'AUDIT_ERROR_SECRET', 'C:\\PrivateRoot', '/private/root', 'AUDIT_STACK_SECRET'];
+export const secrets = ['AUDIT_BODY_SECRET', 'AUDIT_TOKEN_SECRET', 'AUDIT_ERROR_SECRET', 'C:\\PrivateRoot', '/private/root', 'AUDIT_STACK_SECRET', 'AUDIT_CAUSE_SECRET', 'AUDIT_PASSWORD_SECRET', 'AUDIT_GETTER_SECRET'];
 export async function producePayload() {
   const path = new URL('../../../src/runtime/performance.js', import.meta.url);
   const source = (await readFile(path, 'utf8')).replaceAll('export function ', 'function ')
@@ -23,10 +23,16 @@ export async function producePayload() {
   runtime.configurePerformancePlatform({logs, enabled: true});
   const nested = { body: secrets[0], token: secrets[1], path: secrets[3] + '\\note.md', count: 7 };
   const cycle = {}; cycle.self = cycle;
+  const exceptional = Object.defineProperty({}, 'value', { enumerable: true, get() { throw new Error(secrets[8]); } });
   runtime.record('runtime.snapshot', { category:'runtime.performance', durationMs: 12.5, details: {
     nested, encoded: JSON.stringify(nested), twice: JSON.stringify(JSON.stringify(nested)),
     error: 'Cannot open ' + secrets[3] + '; token=' + secrets[2],
     message: secrets[0], reason: secrets[1], stack: secrets[5],
+    errorChain: { message: secrets[2], count: 2, cause: {
+      reason: secrets[6], password: secrets[7], path: secrets[3] + '\\cause.md', count: 1,
+      causes: [{ stack: secrets[5], token: secrets[1], count: 4 }]
+    } },
+    exceptional,
     array: [nested, secrets[0], { path: secrets[4] + '/other.md', count: 3 }],
     cycle, invalid: 1n, notFinite: Infinity, items: Array(50).fill({count:1}),
     contentType:'text/html', contentLength:2048, hasDocumentPath:true
