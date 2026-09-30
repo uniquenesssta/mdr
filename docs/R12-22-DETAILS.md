@@ -1,7 +1,8 @@
 # R12-22 当前 HTML 渲染安全边界整改（A03）
 
-状态：整改提交 `5af331d` 的 [Actions 36708920012](https://github.com/uniquenesssta/mdr/actions/runs/36708920012) 为 3/5 job 通过；全仓 Node 1474/1474、Rust 268/268、built-app 浏览器 29/29 通过。真实 WebView 前四面攻击样例及独立 CSP 阻断通过，第五面被预览重绘覆盖，正常内容回归尚未执行；浏览器契约入口缺少 DOMPurify 模块映射。两处测试入口已修正，待新提交 Windows 重验。A03 仍开放、12.22 不勾选、12.23 未开始。 R18-N01 已通过基线 Windows 架构复验。分支仅 `agent/r12-stage`。
+状态：提交 `ccaf7afe95ff04828064232a4456a8b1fa1de65b` 的 [Windows Actions 36711704503](https://github.com/uniquenesssta/mdr/actions/runs/36711704503) 已通过 5/5 job；全仓 Node 1474/1474、Rust 268/268、浏览器契约 11/11、built-app 29/29，架构/Clippy/构建通过。已读取 artifact `11094620716`：四个实际应用入口及 canonical 虚拟块工厂攻击样例均被阻断，真实 Rust canary 正常控制通过，CSP 独立阻断通过，both/hybrid 的 Markdown/图片/公式/Mermaid/安全 HTML 均正常。R12-22 已验收，A03 当前本地 Markdown 渲染风险关闭，R18-N01 已解决；新增网页来源与最终复验仍由 R13/R17 承接。 当前开始 R12-23，12.24 尚未开始；分支仍仅 `agent/r12-stage`。
 
+以下保留基线及整改过程的历史记录；最终验收以文首和文末验收章节为准。
 ## 顺序与当前范围
 
 任务书 12.22 明确要求“先在真实 Windows WebView 用无害标记确认 raw HTML 的事件属性、危险 URL/嵌入元素及 CSP/IPC 边界”。因此先提交可复核的原生探测，不在观察结果出现前宣称已修复或已排除 A03。用户要求启动 GitHub Actions 后立即结束会话，不轮询；基线已查询并读取原生 JSON，本批按真实结果实施公共净化/CSP，并提交修复后安全与合法内容回归。12.23 尚未开始。
@@ -92,3 +93,9 @@ IPC 只调用既有 `read_dropped_file` 读取本测试在 RUNNER_TEMP 新建的
 虚拟块附加探测原先直接写入活跃 `#preview`；从 Hybrid 切回 both 的异步更新仍由真实 Preview 拥有，会覆盖该测试 DOM。现在真实 `createBlockNodes` 的返回节点挂在同一 WebView document 的测试自有容器，仍处于相同 CSP/原生 IPC 环境。主动调用正常 Preview update 后确认节点仍连接，再执行原攻击点击、完整断言和一秒观察；finally 移除容器，避免污染后续正常内容验证。容器作为可见覆盖层仅便于截图，不隔离脚本，也不改净化策略。证据标明 canonical factory 挂载范围；该第五面继续验证虚拟窗口使用的真实工厂，不声称覆盖完整虚拟滚动调度。其余四个实际应用入口保持。
 
 本轮 Context7 核对 DOMPurify ESM export；索引仅提供当前官方文档，实际包版本另由 Windows 浏览器断言核对。只改两个测试 runner 和进度记录，没有生产模块或架构变更，沿用已有链路图。本地只执行 JS 语法、actionlint、JSON、差异及所选文件远端基线核对；未在 Linux 运行产品动态测试。全部 Windows 门禁保持，推送启动 Actions 后结束、不轮询，约 15～20 分钟后查询。
+
+## Windows 最终验收与收尾（2026-09-30）
+
+提交 `ccaf7afe95ff04828064232a4456a8b1fa1de65b` 的 [Windows Actions 36711704503](https://github.com/uniquenesssta/mdr/actions/runs/36711704503) 已通过 5/5 job；全仓 Node 1474/1474、Rust 268/268、浏览器契约 11/11、built-app 29/29，架构/Clippy/构建通过。已读取 artifact `11094620716`：四个实际应用入口及 canonical 虚拟块工厂攻击样例均被阻断，真实 Rust canary 正常控制通过，CSP 独立阻断通过，both/hybrid 的 Markdown/图片/公式/Mermaid/安全 HTML 均正常。R12-22 已验收，A03 当前本地 Markdown 渲染风险关闭，R18-N01 已解决；新增网页来源与最终复验仍由 R13/R17 承接。
+
+已按官方 artifact digest `88b24269ae7ec09f1674b90ea55c91f2864a9093cf433f0364e59ee08dfead64` 核对 ZIP，并读取精确 SHA 的 `render-boundary-verification.json`，其 `acceptedSecurityBoundary:true`；累计门禁全部成功。第五面验证实际虚拟窗口使用的节点工厂在同一 WebView document 中的挂载，不宣称已完成虚拟滚动性能验收。原风险发现与两轮失败历史保留，不删除或改写成安全通过。当前进入 R12-23 依赖公告处置，R12 整体仍待 12.23/12.24。

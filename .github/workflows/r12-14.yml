@@ -1,5 +1,5 @@
-name: R12-22 Windows HTML Boundary Verification
-run-name: R12-22 repaired WebView boundary and cumulative regression · ${{ github.sha }}
+name: R12-23 Windows Dependency Advisory Verification
+run-name: R12-23 dependency remediation and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -27,6 +27,8 @@ on:
       - 'docs/R12-13-DETAILS.md'
       - 'docs/R12-14-DETAILS.md'
       - 'docs/R12-15-DETAILS.md'
+      - 'docs/R12-23-DETAILS.md'
+      - 'docs/audit/r12-23-dependency-advisories.json'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/01-*'
       - 'src-tauri/src/external_link.rs'
       - 'src-tauri/src/external_link/**'
@@ -250,6 +252,7 @@ jobs:
             src-tauri/src/web_fetch/validation.rs \
             src-tauri/tests/web_fetch/validation.rs \
             src-tauri/tests/web_fetch/http_compatibility.rs \
+            src-tauri/tests/web_fetch/tls_server.rs \
             src-tauri/src/external_link/opener.rs \
             src-tauri/tests/external_link/opener.rs \
             src-tauri/tests/external_link_opener_platform.rs \
@@ -481,6 +484,54 @@ jobs:
         with:
           name: r12-14-native-${{ matrix.os }}-${{ github.sha }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/r12-14-native/
+          if-no-files-found: error
+          retention-days: 14
+
+  dependency-advisories:
+    name: R12-23 official RustSec and Windows dependency graph
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      RUSTUP_TOOLCHAIN: '1.88.0'
+      CARGO_TERM_COLOR: never
+    steps:
+      - name: Preserve repository LF bytes on Windows
+        run: git config --global core.autocrlf false
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Record exact source and pin Rust 1.88
+        run: |
+          mkdir -p "$RUNNER_TEMP/r12-23"
+          test -z "$(git status --porcelain)"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor ccaf7afe95ff04828064232a4456a8b1fa1de65b HEAD
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r12-23/commit.txt"
+          rustup toolchain install 1.88.0 --profile minimal
+          rustc --version | tee "$RUNNER_TEMP/r12-23/rustc.txt"
+      - name: Verify advisory disposition failure cases
+        run: node --test tests/stage-12-dependency-advisories.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-23/contracts.log"
+      - name: Official RustSec scan and actual Windows normal build graph
+        run: node scripts/ci/run-windows-dependency-audit.mjs 2>&1 | tee "$RUNNER_TEMP/r12-23/verification.log"
+      - name: Validation leaves tracked sources unchanged
+        if: ${{ !cancelled() }}
+        run: |
+          git diff --check
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Retain advisory evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r12-23-dependencies-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r12-23/
           if-no-files-found: error
           retention-days: 14
 

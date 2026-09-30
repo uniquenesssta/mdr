@@ -1,7 +1,8 @@
 # MDR 全仓代码审计、Windows 验收与任务书约束评估
 
-> **A03 待 Windows 重验**：整改提交 `5af331d` 的 [Actions 36708920012](https://github.com/uniquenesssta/mdr/actions/runs/36708920012) 为 3/5 job 通过；全仓 Node 1474/1474、Rust 268/268、built-app 浏览器 29/29 通过。真实 WebView 前四面攻击样例及独立 CSP 阻断通过，第五面被预览重绘覆盖，正常内容回归尚未执行；浏览器契约入口缺少 DOMPurify 模块映射。两处测试入口已修正，待新提交 Windows 重验。A03 仍开放、12.22 不勾选、12.23 未开始。 见 [R12-22 详情](R12-22-DETAILS.md)。
+> **A03 当前渲染风险已验收关闭**：提交 `ccaf7afe95ff04828064232a4456a8b1fa1de65b` 的 [Windows Actions 36711704503](https://github.com/uniquenesssta/mdr/actions/runs/36711704503) 已通过 5/5 job；全仓 Node 1474/1474、Rust 268/268、浏览器契约 11/11、built-app 29/29，架构/Clippy/构建通过。已读取 artifact `11094620716`：四个实际应用入口及 canonical 虚拟块工厂攻击样例均被阻断，真实 Rust canary 正常控制通过，CSP 独立阻断通过，both/hybrid 的 Markdown/图片/公式/Mermaid/安全 HTML 均正常。R12-22 已验收，A03 当前本地 Markdown 渲染风险关闭，R18-N01 已解决；新增网页来源与最终复验仍由 R13/R17 承接。 见 [R12-22 详情](R12-22-DETAILS.md)。
 
+> **A10 已实施、待 Windows 验收**：按 2026-09-30 官方公告定向升级十个锁文件条目，静态 cargo-audit 漏洞为零；六条维护提示逐条记录，glib 的 Windows 适用性由目标依赖图核对。新增官方扫描、MSRV/特性证据与 TLS 1.3 通信/证书拒绝回归，仍待精确提交 Windows CI，见 [R12-23 详情](R12-23-DETAILS.md)。
 > **A06 已整改验收**：R12-21 已将文本/二进制写入改为共用同目录临时文件、同步后替换，保留失败恢复副本及 Windows 写权限/DACL 边界，新增 18 项故障回归。修正提交 `cde35b8` 在 Windows 安全写入 18/18、Rust 268/268、Clippy 通过；A06 已关闭，整体仍因既有 R18-N01 失败。原发现及审计证据保留，见 [R12-21 详情](R12-21-DETAILS.md)。
 
 > **A01 修复跟进**：2026-09-29 用户要求提前修复 R12-14，现已完成 Windows 专项验证（14 项脱敏、真实 JSONL 回读及 227 项 Rust 通过）。A01 标记为已修复；原发现和审计证据保留，本项验收及 Windows 运行结果以 [R12-14 详情](R12-14-DETAILS.md) 为准，其他 A02～A10 状态不变。

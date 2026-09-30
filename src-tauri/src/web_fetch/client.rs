@@ -38,6 +38,11 @@ mod tests {
     use super::{browser_headers, build_client};
     use reqwest::header::{ACCEPT, ACCEPT_LANGUAGE, USER_AGENT};
 
+    #[cfg(windows)]
+    mod tls_server {
+        include!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/web_fetch/tls_server.rs"));
+    }
+
     #[test]
     fn keeps_the_frozen_browser_headers() {
         let headers = browser_headers();
@@ -57,7 +62,38 @@ mod tests {
 
     #[test]
     fn builds_independent_clients_without_shared_state() {
-        build_client().expect("first client");
+        let first = build_client().expect("first client");
         build_client().expect("second client");
+        #[cfg(windows)]
+        {
+            let server = tls_server::OwnedTlsServer::start();
+            let root =
+                reqwest::Certificate::from_pem(include_bytes!("../../../tests/fixtures/dependency-tls/root-ca.pem"));
+            // Test-only trust addition; production build_client retains public roots.
+            let trusted = reqwest::Client::builder()
+                .add_root_certificate(root.expect("owned test CA"))
+                .timeout(std::time::Duration::from_secs(5))
+                .build()
+                .expect("owned-CA client");
+            tauri::async_runtime::block_on(async {
+                let response = trusted.get(&server.url).send().await.expect("TLS 1.3 handshake");
+                assert_eq!(response.status(), reqwest::StatusCode::OK);
+                assert_eq!(
+                    response.text().await.expect("HTTPS text"),
+                    "R12-23 owned TLS 1.3 中文🙂"
+                );
+                let error = first
+                    .get(&server.url)
+                    .send()
+                    .await
+                    .expect_err("production must reject the untrusted CA");
+                assert!(
+                    error.is_connect(),
+                    "untrusted TLS certificate must fail connection: {error:?}"
+                );
+            });
+        }
+        #[cfg(not(windows))]
+        drop(first);
     }
 }

@@ -4,6 +4,8 @@ Stage 12：`agent/r12-stage`；历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
 
+- 2026-09-30：R12-22 `ccaf7af` Windows CI 5/5、Node 1474/1474、Rust 268/268、浏览器 11/11+29/29 通过，原生安全及两布局合法内容证据已核对，A03 当前渲染风险关闭；开始 R12-23，定向更新 rustls/time/quick-xml/quinn-proto 依赖链，新增官方公告验证与真实 TLS 1.3 回归，待 Windows CI。[22 验收](docs/R12-22-DETAILS.md) · [23 详情](docs/R12-23-DETAILS.md)。
+
 - 2026-09-30：R12-22 整改 CI `36708920012` 为 3/5 job 通过，Node 1474/1474、Rust 268/268、built-app 29/29；四面攻击样例通过，第五面挂载与浏览器模块解析中断。已修正契约测试 DOMPurify 映射及虚拟工厂探针容器所有权，新增浏览器行为回归；待 Windows 重验，A03 保持开放。[详情](docs/R12-22-DETAILS.md)。
 
 - 2026-09-30：R12-22 基线 CI 5/5、全仓 Node 1472/1472、Rust 268/268 通过，R18-N01 已复验；依据真实 WebView 风险接入公共 HTML 净化、CSP 和五面安全/两布局合法内容硬性回归，整改待 Windows CI，A03 保持开放。[详情](docs/R12-22-DETAILS.md)。

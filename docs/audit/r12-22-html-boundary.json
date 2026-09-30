@@ -6,10 +6,10 @@
   "platform": "Windows",
   "productionBaseline": "cde35b8cd3f46d86791653cd7488bb77a40a19ae",
   "previousAcceptanceRecord": "7dfab1822e452ec2bb81dfea0ef3304a96735bdd",
-  "phase": "post-baseline remediation",
-  "status": "first remediation run failed in two harness entry points; harness repairs pending Windows verification",
-  "acceptedSecurityBoundary": false,
-  "a03Closed": false,
+  "phase": "accepted current Markdown HTML boundary",
+  "status": "accepted on Windows run 36711704503; cumulative gates passed",
+  "acceptedSecurityBoundary": true,
+  "a03Closed": true,
   "r18n01": "resolved; architecture passed on Windows run 36704905753",
   "productionHtmlPolicyChanged": true,
   "productionCsp": {
@@ -50,7 +50,7 @@
   "productionLockProtection": "all production registry name/version/source/checksum identities retained in isolated host lock; otherwise job fails",
   "validation": {
     "local": "static actionlint 1.7.12 semantic check reproduced original failure and passes after repair; JS/YAML/bash/JSON/docs/diff checks only",
-    "windows": "baseline passed; first remediation run 3/5 jobs passed; repaired harness rerun pending",
+    "windows": "accepted exact commit ccaf7afe95ff04828064232a4456a8b1fa1de65b",
     "entry": ".github/workflows/r12-14.yml",
     "nativeJob": "webview-baseline",
     "baselineSuccessIsSecurityAcceptance": false,
@@ -67,8 +67,8 @@
     }
   },
   "evidenceArtifact": "r12-22-webview-verification-<commit>-<attempt>",
-  "next": "query Windows CI about 15-20 minutes after push; accept only security, normal content and cumulative gates all pass",
-  "r12_23Started": false,
+  "next": "R12-23 dependency advisory disposition; R13 new-input coverage and R17 final WebView recheck retained",
+  "r12_23Started": true,
   "firstWorkflowFailure": {
     "commit": "f5a9ce7110ddcc3774ad5c6e42c5e9eae79042e9",
     "run": 36695958389,
@@ -129,6 +129,28 @@
     "contract": "map installed DOMPurify ESM before each source document import; browser asserts locked version and real sanitization",
     "virtualFactory": "owned connected DOM in same WebView; force live Preview update before evidence; finally cleanup",
     "coverage": "four real production entry points plus canonical virtual block factory; not full virtual scroll scheduling",
-    "status": "pending Windows CI"
+    "status": "passed Windows CI"
+  },
+  "acceptance": {
+    "commit": "ccaf7afe95ff04828064232a4456a8b1fa1de65b",
+    "run": 36711704503,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36711704503",
+    "jobs": "5/5",
+    "node": "1474/1474",
+    "rust": "268/268",
+    "browserContract": "11/11",
+    "builtAppBrowser": "29/29",
+    "artifact": 11094620716,
+    "artifactSha256": "88b24269ae7ec09f1674b90ea55c91f2864a9093cf433f0364e59ee08dfead64",
+    "artifactJsonInspected": true,
+    "actualRenderingEntryPoints": 4,
+    "virtualBlockFactoryPassed": true,
+    "normalContentLayouts": [
+      "both",
+      "hybrid"
+    ],
+    "independentCspChallengePassed": true,
+    "nativeCanaryControlPassed": true,
+    "scope": "current local Markdown sinks; not full virtual scroll performance or new webpage source coverage"
   }
 }
