@@ -1,0 +1,192 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { readFile } from 'node:fs/promises';
+import vm from 'node:vm';
+import { createImageDialogView } from '../src/features/editor/ui/image-dialog-view.js';
+
+const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
+const eventsSource = await read('public/app/events.js');
+const exportSource = await read('public/app/export.js');
+const coreSource = await read('public/app/core.js');
+const webSource = await read('public/app/web-clipper.js');
+const MiB = 1024 * 1024;
+
+// Execute unchanged legacy sections; injected ports observe routing, not real native I/O.
+function section(source, start, end) {
+  const first = source.indexOf(start);
+  const last = source.indexOf(end, first);
+  assert.ok(first >= 0 && last > first, 'legacy section must still exist until its migration');
+  return source.slice(first, last);
+}
+function dropHost({ desktop = false, failRead = false, opened = true } = {}) {
+  const calls = [], handlers = new Map();
+  const overlay = new Set();
+  const context = vm.createContext({
+    document: {
+      getElementById: () => ({ classList: { add: x => overlay.add(x), remove: x => overlay.delete(x) } }),
+      addEventListener: (name, handler) => handlers.set(name, handler)
+    },
+    eventsPlatformPort: {
+      supports: name => desktop && ['desktop.fileSystem', 'desktop.dragDrop'].includes(name),
+      async call(group, operation, ...args) {
+        if (group === 'dragDrop') { handlers.set('native', args[0]); return; }
+        calls.push([operation, ...args]);
+        if (failRead) throw new Error('read denied');
+        return operation === 'readText' ? '正文' : 'data:image/png;base64,AA==';
+      }
+    },
+    loadFile: file => calls.push(['text', file.name]),
+    loadDocumentFromContentLoader: async (name, loader, path) => { await loader(); calls.push(['document', name, path]); return opened; },
+    addRecentFile: (...args) => calls.push(['recent', ...args]),
+    insertImageMarkdown: (...args) => calls.push(['image', ...args]),
+    showToast: message => calls.push(['toast', message]), t: key => key, console,
+    FileReader: class { readAsDataURL(file) { calls.push(['dataUrl', file.name]); this.onload({ target: { result: 'data:image/png;base64,AA==' } }); } }
+  });
+  vm.runInContext(section(eventsSource, '    function getFileNameFromPath', '    // Settings menu trigger'), context);
+  return { context, calls, handlers, overlay, drop(files) { handlers.get('drop')({ preventDefault() {}, dataTransfer: { files } }); } };
+}
+
+for (const extension of ['md', 'MARKDOWN', 'TxT']) {
+  test('browser text extension takes precedence over MIME: ' + extension, () => {
+    const h = dropHost(); h.drop([{ name: 'note.' + extension, type: 'image/png', size: 9 * MiB }]);
+    assert.deepEqual(h.calls, [['text', 'note.' + extension]]);
+  });
+}
+for (const mime of ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp']) {
+  test('browser image MIME and inclusive 5 MiB boundary: ' + mime, () => {
+    const h = dropHost(); h.drop([{ name: 'photo.unknown', type: mime, size: 5 * MiB }]);
+    assert.equal(h.calls[0][0], 'dataUrl'); assert.equal(h.calls[1][0], 'image');
+    assert.deepEqual(h.calls[2], ['toast', 'toastImageInserted']);
+  });
+}
+test('browser over-limit, unsupported MIME, empty and multiple drops', () => {
+  const h = dropHost(); h.drop([]); assert.deepEqual(h.calls, []);
+  h.drop([{ name: 'large.png', type: 'image/png', size: 5 * MiB + 1 }]);
+  h.drop([{ name: 'fake.png', type: '', size: 1 }]);
+  h.drop([{ name: 'a.pdf', type: 'application/pdf', size: 1 }, { name: 'b.md', type: '', size: 1 }]);
+  assert.deepEqual(h.calls, [['toast', 'toastImageTooLarge'], ['toast', 'toastDropUnsupported'], ['toast', 'toastDropUnsupported']]);
+});
+test('native paths use extensions, preserve source path and add recents only after success', async () => {
+  for (const extension of ['MD', 'markdown', 'txt']) {
+    const h = dropHost({ desktop: true }); const path = 'C:\\notes\\正文.' + extension;
+    assert.equal(await h.context.handleNativeDroppedPath(path), true);
+    assert.deepEqual(h.calls.map(x => x[0]), ['readText', 'document', 'recent']);
+    assert.equal(h.calls[0][1], path);
+  }
+  const h = dropHost({ desktop: true, opened: false });
+  assert.equal(await h.context.handleNativeDroppedPath('C:\\a.md'), false);
+  assert.equal(h.calls.some(x => x[0] === 'recent'), false);
+});
+test('native image extensions route through readImage, including SVG, but not BMP', async () => {
+  for (const extension of ['png', 'JPG', 'jpeg', 'gif', 'webp', 'svg']) {
+    const h = dropHost({ desktop: true });
+    assert.equal(await h.context.handleNativeDroppedPath('C:\\photo.' + extension), true);
+    assert.deepEqual(h.calls.map(x => x[0]), ['readImage', 'image', 'toast']);
+    assert.equal(h.calls[0][2], '');
+  }
+  const h = dropHost({ desktop: true });
+  assert.equal(await h.context.handleNativeDroppedPath('C:\\photo.bmp'), false);
+  assert.deepEqual(h.calls, [['toast', 'toastDropUnsupported']]);
+});
+test('native read failure and empty path do not insert or add a recent file', async () => {
+  const h = dropHost({ desktop: true, failRead: true });
+  assert.equal(await h.context.handleNativeDroppedPath('  '), false);
+  assert.equal(await h.context.handleNativeDroppedPath('C:\\a.png'), false);
+  assert.deepEqual(h.calls.map(x => x[0]), ['readImage', 'toast']);
+  assert.equal(h.calls[1][1], 'read denied');
+});
+test('native drag-drop suppresses DOM duplicate and takes only first native path', async () => {
+  const h = dropHost({ desktop: true });
+  h.drop([{ name: 'a.md', type: '', size: 1 }]); assert.deepEqual(h.calls, []);
+  await h.handlers.get('native')({ type: 'over' }); assert.ok(h.overlay.has('show'));
+  await h.handlers.get('native')({ type: 'drop', paths: ['C:\\a.md', 'C:\\b.md'] });
+  assert.equal(h.overlay.size, 0); assert.equal(h.calls.filter(x => x[0] === 'readText').length, 1);
+  assert.equal(h.calls[0][1], 'C:\\a.md');
+  await h.handlers.get('native')({ type: 'leave' }); assert.equal(h.overlay.size, 0);
+});
+test('browser text read preserves text and rejects read error or cancellation before document commit', async () => {
+  for (const outcome of ['load', 'error', 'abort']) {
+    const committed = [], messages = [];
+    const context = vm.createContext({
+      filenameInput: { value: 'existing' }, t: key => key, window: {},
+      exportDocumentUiCommandPort: { invoke() {} },
+      exportDocumentControllerPort: {
+        async openExternalDocument({ loadContent }) { const content = await loadContent(); committed.push(content); return { generation: 1, record: { title: 'note.md' } }; },
+        isCurrentGeneration: () => true, isStaleError: () => false
+      },
+      exportSidebarControllerPort: { select() {} }, applyDocumentLifecycleUi: async () => true,
+      recordDocumentOperationError: (_, error) => error.message, showToast: x => messages.push(x),
+      FileReader: class { readAsText() { this.error = new Error('read denied'); this['on' + outcome]({ target: { result: '中文\r\ntext' } }); } }
+    });
+    vm.runInContext(section(exportSource, '    function getEditorNormalizedLength', '    // 切换主题'), context);
+    assert.equal(await context.loadFile(null), false);
+    assert.equal(await context.loadFile({ name: 'note.md', size: 1 }), outcome === 'load');
+    assert.deepEqual(committed, outcome === 'load' ? ['中文\r\ntext'] : []);
+    if (outcome === 'abort') assert.deepEqual(messages, ['文档读取已取消']);
+    if (outcome === 'error') assert.deepEqual(messages, ['read denied']);
+    const emptyInput = { files: [], value: 'old' }; context.importFile(emptyInput); assert.equal(emptyInput.value, '');
+  }
+});
+test('picker cancellation is inert; browser picker resets for selecting the same file again', async () => {
+  for (const desktop of [true, false]) {
+    const calls = [], input = { value: 'old', click() { calls.push('click'); } };
+    const context = vm.createContext({
+      corePlatformPort: { supports: () => desktop, async call(group, operation, options) { assert.deepEqual(Array.from(options.extensions), ['md', 'markdown', 'txt']); return null; } },
+      handleNativeDroppedPath: () => calls.push('open'), document: { getElementById: () => input },
+      recordDocumentOperationError: (_, e) => e.message, showToast: x => calls.push(x)
+    });
+    vm.runInContext(section(coreSource, '    async function triggerImportFile', '    function getCurrentTimestamp'), context);
+    await context.triggerImportFile(); assert.deepEqual(calls, desktop ? [] : ['click']);
+    if (!desktop) assert.equal(input.value, '');
+  }
+});
+
+function imageHost(confirmLargeFile = () => true) {
+  const nodes = new Map(), reads = [], inserted = [], messages = [];
+  class Element extends EventTarget {
+    value = ''; files = []; classList = { toggle() {} }; dataset = {};
+    replaceChildren() {} querySelector(selector) { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); }
+    querySelectorAll() { return []; }
+  }
+  class CustomEvent extends Event { constructor(type, options) { super(type); this.detail = options.detail; } }
+  const root = new Element(); root.ownerDocument = {
+    defaultView: { CustomEvent, FileReader: class { readAsDataURL(file) { reads.push(file); this.onload({ target: { result: 'data:image/png;base64,AA==' } }); } } },
+    createElement: () => new Element()
+  };
+  const view = createImageDialogView({ root, selection: { snapshot: () => ({ start: 1, end: 1 }) }, insertImage: (...args) => inserted.push(args), notify: x => messages.push(x), confirmLargeFile });
+  view.open();
+  return { root, view, reads, inserted, messages, choose(file) { const input = root.querySelector('#image-file-input'); input.files = file ? [file] : []; input.dispatchEvent(new Event('change')); } };
+}
+test('image dialog preserves 2 MiB confirmation and inclusive 5 MiB hard limit', () => {
+  for (const [size, confirmations, reads] of [[2 * MiB, 0, 1], [2 * MiB + 1, 1, 1], [5 * MiB, 1, 1], [5 * MiB + 1, 0, 0]]) {
+    let asks = 0; const h = imageHost(() => { asks++; return true; });
+    h.choose({ name: 'a.png', type: 'image/png', size }); assert.equal(asks, confirmations); assert.equal(h.reads.length, reads);
+    h.view.destroy();
+  }
+});
+test('image dialog refusal, empty selection, invalid MIME and destruction do not insert', () => {
+  const h = imageHost(() => false); h.choose(null); h.choose({ type: 'application/pdf', size: 1 });
+  h.choose({ type: 'image/png', size: 3 * MiB }); h.view.switchTab('upload');
+  assert.equal(h.view.confirm(), false); assert.equal(h.reads.length, 0); assert.deepEqual(h.inserted, []);
+  h.view.destroy(); h.choose({ type: 'image/png', size: 1 }); assert.equal(h.reads.length, 0);
+});
+test('image URL and upload send one insertion command with the selected data', () => {
+  const h = imageHost(); h.root.querySelector('#image-url-input').value = ' https://example.test/a.png ';
+  assert.equal(h.view.confirm(), true); assert.equal(h.inserted[0][0], 'https://example.test/a.png');
+  h.view.open(); h.choose({ type: 'image/svg+xml', size: 1 }); assert.equal(h.view.confirm(), true);
+  assert.equal(h.inserted[1][0], 'data:image/png;base64,AA=='); h.view.destroy();
+});
+test('desktop web fetch uses native only; failure exposes manual HTML without public fallback', async () => {
+  for (const fail of [false, true]) {
+    const nodes = new Map(); const node = id => { if (!nodes.has(id)) nodes.set(id, { value: '', checked: false, classList: { toggle() {}, remove() {}, add() {} } }); return nodes.get(id); };
+    node('url-input').value = 'https://example.test/article'; const calls = [];
+    const context = vm.createContext({ document: { getElementById: node }, fetchedHtml: '',
+      webClipperPlatformPort: { supports: () => true, async call(...args) { calls.push(args); if (fail) throw new Error('denied'); return '<p>article</p>'; } },
+      t: key => key, fetch: () => { throw new Error('unexpected public fallback'); }
+    });
+    vm.runInContext(section(webSource, '    function setClipperHidden', '    function openUrlModal') + section(webSource, '    async function fetchWithNativeBackend', '    // 提取网页元信息'), context);
+    await context.fetchUrl(); assert.equal(calls.length, 1); assert.equal(context.fetchedHtml, fail ? '' : '<p>article</p>');
+    assert.equal(node('url-status').textContent, fail ? 'urlStatusFetching' : 'urlStatusLocalSuccess');
+    if (fail) assert.equal(node('url-status').innerHTML, 'urlStatusLocalFailed');
+  }
+});

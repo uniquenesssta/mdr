@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 12 已收官，R13 尚未开始：`agent/r12-stage`；历史见 [docs/README.md](docs/README.md)。
+Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-01：开始 R13.1，按“一大阶段一分支”从 `f6e8cfc` 创建 `agent/r13-stage`。建立 md/markdown/txt、图片 MIME/大小、浏览器/桌面及取消路径支持矩阵与旧实现行为回归；记录桌面图片 20 MiB 与浏览器 5 MiB 差异、2 MiB 确认及待迁移取消缺口。未改生产/模型/依赖；复用七组 Windows CI，待验收。[详情](docs/R13-01-DETAILS.md)。
 
 - 2026-10-01：`e5041b5` 的 [Windows CI 36735955251](https://github.com/uniquenesssta/mdr/actions/runs/36735955251) 7/7 job 及全部步骤通过；递归 Node 1490/1490（300 文件、16 目录）、Rust 268/268、浏览器 11/11+29/29、收官门禁 8/8。收官产物 accepted=true、eligibleForR13=true，R12-24 与 R12 正式收官，具备 R13 准入条件；本次未开始 R13。A04 → R15.4/15.7、A05 → R13-S01 仍未修复，保留截止与止损条件。[收官详情](docs/R12-24-DETAILS.md)。
 

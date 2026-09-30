@@ -19,9 +19,9 @@ test('historical workflow definitions retain their dispatch syntax and do not va
   }
 });
 
-test('R12-14 is the automatic Stage branch validation authority for workflow changes', async () => {
+test('the existing Windows workflow follows the current R13 stage branch for workflow changes', async () => {
   const workflow = await readFile('.github/workflows/r12-14.yml', 'utf8');
-  assert.match(workflow, /push:\s*\n\s*branches:\s*\[agent\/r12-stage\]/);
+  assert.match(workflow, /push:\s*\n\s*branches:\s*\[agent\/r13-stage\]/);
   assert.match(workflow, /- '\.github\/workflows\/\*\*'/);
   assert.doesNotMatch(workflow, /^\s*pull_request:\s*$/m);
 });
