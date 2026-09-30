@@ -172,7 +172,7 @@ fn concurrent_recovery_readers_consume_the_notice_exactly_once() {
 }
 
 #[test]
-fn io_failure_returns_the_owned_document_and_allows_a_retry() {
+fn io_failure_discards_uncommitted_document_and_allows_a_retry() {
     let root = TestRoot::new();
     let store = DocumentStore::default();
     let obstacle = root.0.join("snapshot-a.md.tmp");
@@ -190,14 +190,14 @@ fn io_failure_returns_the_owned_document_and_allows_a_retry() {
         send.send(worker.save(&path, full_request("重试😀")))
             .unwrap()
     });
-    // Existing error behavior retains the attempted in-memory version, so retry advances to 2.
-    assert_eq!(receive.recv_timeout(DEADLINE).unwrap().unwrap().version, 2);
+    // Failed initial snapshot never committed a version; retry starts from disk version zero.
+    assert_eq!(receive.recv_timeout(DEADLINE).unwrap().unwrap().version, 1);
     task.join().unwrap();
     let disk = DocumentStore::default()
         .load(&root.0, DOCUMENT_ID.into())
         .unwrap()
         .unwrap();
-    assert_eq!((disk.content.as_str(), disk.version), ("重试😀", 2));
+    assert_eq!((disk.content.as_str(), disk.version), ("重试😀", 1));
 }
 
 #[test]

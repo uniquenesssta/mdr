@@ -12,7 +12,7 @@ import {
 } from '../src/features/persistence/index.js';
 
 // Faults here are injected JS storage/IPC failures, not OS disk-failure evidence.
-function harness({ native = false, nativeSave = null } = {}) {
+function harness({ native = false, nativeBacked = native, nativeSave = null } = {}) {
   const values = new Map();
   let fault = () => false;
   let writes = 0;
@@ -23,7 +23,7 @@ function harness({ native = false, nativeSave = null } = {}) {
   };
   const editor = { value: '原正文', virtualEditor: { getTextLength: () => editor.value.length } };
   const model = new DocumentModel(editor);
-  const a = createDocumentRecord({ id: 'a', title: 'a.md', nativeBacked: native, nativeVersion: native ? 1 : 0 });
+  const a = createDocumentRecord({ id: 'a', title: 'a.md', nativeBacked, nativeVersion: nativeBacked ? 1 : 0 });
   const b = createDocumentRecord({ id: 'b', title: 'b.md' });
   const session = createDocumentSessionStore({ initialRecords: [a, b], activeId: 'a' });
   const requests = [];
@@ -55,7 +55,7 @@ function harness({ native = false, nativeSave = null } = {}) {
   browser.rememberContent('b', '邻居正文');
   browser.persistSession(session.records, 'a');
   model.activate(a, { content: editor.value });
-  repository.activate(model, a, native ? disk : null);
+  repository.activate(model, a, nativeBacked ? disk : null);
   let controller;
   const loadController = createLoadController({
     documents: session, model, editor: { getTextLength: () => model.getTextLength() }, repository,
@@ -66,7 +66,7 @@ function harness({ native = false, nativeSave = null } = {}) {
   const statusStore = createSaveStatusStore();
   const saver = createSaveController({ documentController: controller, model, statusStore });
   return {
-    model, controller, browser, repository, session, requests, events, saver, statusStore, values,
+    model, controller, browser, repository, session, requests, events, saver, statusStore, values, nativeStore,
     fail(fn) { writes = 0; fault = fn; },
     edit(content) {
       const previousLength = editor.value.length;
@@ -182,4 +182,37 @@ test('R12-19 ambiguous native failure forces a full snapshot on retry', async ()
   assert.equal(h.requests[0].fullContent, null);
   assert.equal(h.requests[1].fullContent, '幂等重试');
   assert.equal(h.disk.content, '幂等重试');
+});
+
+test('R12-19 unavailable native storage cannot falsely acknowledge an in-memory fallback', async () => {
+  const h = harness({ native: true });
+  h.edit('后端失联仍需保留');
+  h.nativeStore.nativeAvailable = false;
+  await assert.rejects(h.controller.saveActive(), /NATIVE_DOCUMENT_STORAGE_UNAVAILABLE/);
+  assert.equal(h.model.dirty, true);
+  assert.equal(h.model.createSnapshot(), '后端失联仍需保留');
+  h.nativeStore.nativeAvailable = true;
+  await h.controller.saveActive();
+  assert.equal(h.disk.content, '后端失联仍需保留');
+});
+
+test('R12-19 browser to native migration retains retry body until index commits', async () => {
+  const h = harness({ native: true, nativeBacked: false });
+  const body = '中'.repeat(100001);
+  h.edit(body);
+  let writes = 0;
+  h.fail(key => key === 'md_editor_documents' && ++writes === 2);
+  await assert.rejects(h.controller.saveActive(), /QUOTA_OR_DENIED/);
+  assert.equal(h.model.dirty, true);
+  assert.equal(h.browser.readContent('a'), body);
+  assert.equal(h.disk.content, body);
+  assert.equal(h.requests.length, 1);
+  h.fail(() => false);
+  await h.controller.saveActive();
+  assert.equal(h.model.dirty, false);
+  assert.equal(h.browser.hasContent('a'), false);
+  const stored = JSON.parse(h.values.get('md_editor_documents'))[0];
+  assert.equal(stored.nativeBacked, true);
+  assert.equal(Object.hasOwn(stored, 'content'), false);
+  assert.equal(h.requests.length, 1);
 });

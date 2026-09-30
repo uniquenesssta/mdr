@@ -155,21 +155,32 @@ fn windows_case_alias_read_save_delete_never_observe_stale_cache() {
     assert!(store.load(&upper, "CaseDoc".into()).unwrap().is_none());
 }
 
+#[cfg(windows)]
 #[test]
-fn case_spelling_eviction_keeps_distinct_directory_bodies_isolated() {
-    // Distinct roots emulate case-sensitive directory identities without merging bodies.
-    let first = TestRoot::new();
-    let second = TestRoot::new();
+fn windows_case_sensitive_directory_preserves_distinct_spelling_bodies() {
+    let parent = TestRoot::new();
+    let output = std::process::Command::new("fsutil.exe")
+        .args(["file", "setCaseSensitiveInfo"])
+        .arg(&parent.0)
+        .arg("enable")
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "case-sensitive test setup failed: {:?}", output);
+    let first = parent.0.join("CaseDoc");
+    let second = parent.0.join("casedoc");
+    fs::create_dir(&first).unwrap();
+    assert!(!second.exists(), "directory must really distinguish case");
+    fs::create_dir(&second).unwrap();
     let store = DocumentStore::default();
-    for (root, id, body) in [(&first.0, "CaseDoc", "甲"), (&second.0, "casedoc", "乙")] {
+    for (root, id, body) in [(&first, "CaseDoc", "甲"), (&second, "casedoc", "乙")] {
         let mut request = full_request(body);
         request.document_id = id.into();
         store.save(root, request).unwrap();
     }
-    for (root, id, body) in [(&first.0, "CaseDoc", "甲"), (&second.0, "casedoc", "乙")] {
+    for (root, id, body) in [(&first, "CaseDoc", "甲"), (&second, "casedoc", "乙")] {
         assert_eq!(store.load(root, id.into()).unwrap().unwrap().content, body);
         assert_eq!(store.inner.cached_len(), 1);
     }
-    store.delete(&first.0, "CaseDoc").unwrap();
-    assert_eq!(store.load(&second.0, "casedoc".into()).unwrap().unwrap().content, "乙");
+    store.delete(&first, "CaseDoc").unwrap();
+    assert_eq!(store.load(&second, "casedoc".into()).unwrap().unwrap().content, "乙");
 }

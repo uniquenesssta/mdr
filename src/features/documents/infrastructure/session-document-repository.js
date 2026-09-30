@@ -127,6 +127,7 @@ export function createSessionDocumentRepository({
     const contentLength = getDocumentLength(source);
     const useNative = Boolean(nativeStore?.shouldUse?.(record, contentLength));
     const wasNativeBacked = Boolean(record.nativeBacked);
+    if (wasNativeBacked && !useNative) throw new Error('NATIVE_DOCUMENT_STORAGE_UNAVAILABLE');
     if (!useNative || !wasNativeBacked) {
       browserRepository.rememberContent(record.id, createSnapshot(source, options.snapshotReason || 'document-storage'));
     }
@@ -134,6 +135,7 @@ export function createSessionDocumentRepository({
       return { native: false, editorVersion: getDocumentVersion(source) };
     }
     const result = await nativeStore.save(source, record, { forceSnapshot: Boolean(options.forceSnapshot) });
+    if (!result?.native) throw new Error('NATIVE_DOCUMENT_NOT_COMMITTED');
     return result;
   };
 

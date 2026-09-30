@@ -136,7 +136,7 @@ test('Atomic 10.10 loads metadata then activates model/editor before committing 
   assert.equal(documents.getRecord('a').nativeVersion, 7);
   assert.equal(model.documentId, 'a');
   assert.equal(model.createSnapshot(), 'native body');
-  assert.deepEqual(repository.calls.map(call => call[0]), ['load', 'activate', 'persistSession', 'persistTitle']);
+  assert.deepEqual(repository.calls.map(call => call[0]), ['load', 'persistTitle', 'persistSession', 'activate']);
 });
 
 test('Atomic 10.10 can prepare a close-neighbour runtime without committing active/metadata/session state', async () => {

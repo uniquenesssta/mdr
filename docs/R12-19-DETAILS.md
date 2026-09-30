@@ -23,10 +23,14 @@
 | Windows IO | 独占 journal 句柄拒绝打开、快照替换目标独占、三个阶段临时路径被目录占用 | 真实 OS 文件系统拒绝，非 mock |
 | Rust 失败后 | 同进程 cache/disk 一致、再次保存、新 Store 模拟重启读取 | 真实文件回读；未声称进程崩溃测试 |
 | Windows 别名 | 大小写别名读取/保存/删除无旧缓存 | 默认不区分大小写的真实路径 |
-| 大小写敏感身份 | 两个独立目录、大小写拼写键隔离 | 独立真实目录模拟身份；不声称启用 Windows 目录大小写敏感标志 |
+| Windows 大小写敏感身份 | 在临时父目录启用大小写敏感标志，创建 CaseDoc/casedoc 并验证正文及删除隔离 | 真实 fsutil 与 NTFS 目录；测试前强制断言两路径独立 |
 
 Context7 核对 Rust Windows OpenOptionsExt::share_mode(0) 的独占共享语义；项目 Rust 1.88。Mermaid Chart 梳理实际保存责任链。测试专用故障代码由 cfg(test) 排除于产品构建。
 
 ## Windows 结果
 
 待回填。原 R18-N01 Preview 循环依赖仍归 R12-22，架构门禁保留失败；不在本轮修复或豁免。
+
+Windows 目录大小写敏感测试依据 [Microsoft 官方说明](https://learn.microsoft.com/en-us/windows/wsl/case-sensitivity)，只设置测试拥有的临时目录。
+
+补充复核：原生后端不可用时禁止将内存缓存当成已持久化；Browser→Native 迁移时正文成功而索引失败，保留重试正文直到索引成功。R11 并发故障用例原先断言“失败的未提交版本也留在缓存”，本轮改验从磁盘版本重试；LoadController 顺序断言改验元数据落盘后发布运行状态。
