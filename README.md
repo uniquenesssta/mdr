@@ -4,6 +4,8 @@ Stage 12：`agent/r12-stage`；历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
 
+- 2026-09-30：R12-24 首轮 `ef9b542` Windows CI 失败：递归 Node 1485/1489，四条契约要求保留未完成的 R12-S01；收官脚本误拒绝正常为空的原生编译日志。已拆分安全实现与移交状态，改以原生签名测试成功及上游任务成功判定，新增回归；待 Windows 重验，R12/R13 准入仍未通过。[详情](docs/R12-24-DETAILS.md)。
+
 - 2026-09-30：R12-23 `89e8d57` Windows 6/6、递归 Node 1482/1482、Rust 268/268、浏览器 11/11+29/29、官方公告/TLS/WebView 通过，A10 当前处置验收；开始 R12-24，复用完整 Windows 回归并增加同运行精确证据收官判定，A04/A05 按条件移交但未修复，待 CI。未改生产源码、模型/格式、依赖与命令。[23 验收](docs/R12-23-DETAILS.md) · [24 详情](docs/R12-24-DETAILS.md)。
 
 - 2026-09-30：R12-22 `ccaf7af` Windows CI 5/5、Node 1474/1474、Rust 268/268、浏览器 11/11+29/29 通过，原生安全及两布局合法内容证据已核对，A03 当前渲染风险关闭；开始 R12-23，定向更新 rustls/time/quick-xml/quinn-proto 依赖链，新增官方公告验证与真实 TLS 1.3 回归，待 Windows CI。[22 验收](docs/R12-22-DETAILS.md) · [23 详情](docs/R12-23-DETAILS.md)。

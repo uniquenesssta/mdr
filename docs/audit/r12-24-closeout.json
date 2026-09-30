@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "stage": "R12-24",
   "branch": "agent/r12-stage",
-  "status": "handoff review implemented; full exact-commit Windows revalidation pending",
+  "status": "first Windows run failed; documentation and native evidence fixes implemented; exact-commit Windows revalidation pending",
   "accepted": false,
   "r13Allowed": false,
   "baselineCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
@@ -154,5 +154,38 @@
   },
   "implementationScope": "CI evidence aggregation and formal acceptance/handoff records only; no production or dependency changes",
   "finalMatrixOwner": "R17.8/17.9/17.17 and final Windows delivery matrix: installation, upgrade, association, real external browser, OS shutdown/power loss and large document performance",
-  "scopeLimits": "A03 current Markdown sinks, not whole virtual scrolling performance/new web sources; A10 current official database snapshot, not future database. A04/A05 transfer is not a repair."
+  "scopeLimits": "A03 current Markdown sinks, not whole virtual scrolling performance/new web sources; A10 current official database snapshot, not future database. A04/A05 transfer is not a repair.",
+  "firstWindowsRun": {
+    "commit": "ef9b542e34b2e289933a9a8e74432193d3b258df",
+    "run": 36733002491,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36733002491",
+    "conclusion": "failure",
+    "recursiveNode": {
+      "tests": 1489,
+      "passed": 1485,
+      "failed": 4
+    },
+    "rustFullPassed": 268,
+    "rustFormatting": "skipped after documentation contract failure",
+    "failures": [
+      "Four documentation contracts require an unchecked R12-S01 implementation item; completed handoff replaced that item.",
+      "Closeout incorrectly required a nonempty compile.log despite successful silent rustc execution."
+    ],
+    "nativeEvidence": {
+      "compileLogBytes": 0,
+      "signaturePassed": 1,
+      "signatureFailed": 0,
+      "signatureIgnored": 0
+    }
+  },
+  "repair": {
+    "status": "implemented; awaiting new Windows CI",
+    "changes": [
+      "Separate pending R12-S01 implementation from completed handoff; retain existing four contracts.",
+      "Require native compilation log existence and passing signature result; retain required upstream job success checks.",
+      "Add silent-compilation and invalid/missing native evidence regression coverage."
+    ],
+    "localValidation": "JavaScript syntax and static analysis of original Windows artifacts only; no Linux product tests",
+    "closeoutTestCount": 8
+  }
 }

@@ -27,7 +27,7 @@ A05 已复核当前本地桌面用户 URL 入口→显式平台 web fetch→norm
 
 复用现有六个 Windows job，不重复建设产品测试系统：前端接口/冻结模型、根 Node、递归全仓 Node、架构/真实清单/历史运行时/文档/生成门禁、生产构建、浏览器、Rust 全量/格式/Clippy/check、真实文件/日志/HTTP/TLS故障、release 无日志、原生链接、实际 Windows WebView、官方 RustSec。原生链接只证明编译链接，不冒充实际系统浏览器启动。
 
-新增 `audit-closeout` 等待六项结果，任何失败/取消/跳过均拒绝准入；使用 download-artifact v4 从当前运行下载精确 SHA/attempt 的各自目录，禁止合并同名文件。聚合脚本检查 commit.txt、动态递归清单与所有目录退出码、Rust 全量结果、浏览器结果、CSP/真实 canary/五面/两布局证据，解析原始 cargo-audit 和 Windows metadata 后复用既有判定，再核对锁文件 digest。检查 R12-01～23 已验收、A04/A05 后续正文与九个风险复核源码 Blob 未变；复核源变化必须重新评审。七项拒绝场景测试覆盖失败/缺失任务、旧 SHA、漏测、伪成功 WebView、错误移交及不完整 Rust 证据。
+新增 `audit-closeout` 等待六项结果，任何失败/取消/跳过均拒绝准入；使用 download-artifact v4 从当前运行下载精确 SHA/attempt 的各自目录，禁止合并同名文件。聚合脚本检查 commit.txt、动态递归清单与所有目录退出码、Rust 全量结果、浏览器结果、CSP/真实 canary/五面/两布局证据，解析原始 cargo-audit 和 Windows metadata 后复用既有判定，再核对锁文件 digest。检查 R12-01～23 已验收、A04/A05 后续正文与九个风险复核源码 Blob 未变；复核源变化必须重新评审。原七项收官测试覆盖失败/缺失任务、旧 SHA、漏测、伪成功 WebView、错误移交及不完整 Rust 证据。
 
 输出 `r12-24-closeout-<SHA>-<attempt>/closeout-verification.json`。失败仍归档 accepted=false；成功才写 accepted=true/eligibleForR13=true，保留 A04/A05 未修复记录。此输出是 CI 证据，正式仓库收官仍需按该运行归档、勾选 12.24 后才进入 R13，本轮不提前开始 R13。
 
@@ -38,3 +38,13 @@ A05 已复核当前本地桌面用户 URL 入口→显式平台 web fetch→norm
 A03 的证据是当前 sink/虚拟块工厂，不是完整虚拟滚动性能或新增网页来源；A10 对本次官方数据库快照成立。安装/升级/文件关联、真实系统外链、OS 关闭/断电恢复与大文档性能属于 R17 完整矩阵，不宣称已在本轮完成。R13 重新核对新增解析/抓取能力，R17.8/17.9/17.17 再扫当日公告和完整交付矩阵。
 
 推送启动 Actions 后结束，不轮询。约 15～20 分钟后发“查询 R12-24 CI”。
+
+## 首轮 Windows 失败与修正
+
+精确提交 `ef9b542e34b2e289933a9a8e74432193d3b258df` 的 [Windows CI 36733002491](https://github.com/uniquenesssta/mdr/actions/runs/36733002491) 失败，不能验收。递归 Node 为 1485/1489，四条失败均要求 R12-S01 安全实现保持未完成；上一轮把唯一对应勾选项改为“移交完成”，造成文档状态与契约冲突。现拆成未完成的安全实现与已完成的移交核对，保留原四条测试。A05 仍未修复，R13-S01 仍须先于 13.9 完成。
+
+原生 job 已通过，但 rustc 成功时 `compile.log` 正常为零字节，收官脚本错误要求非空。现在仍读取该文件以确认存在，要求签名测试明确为 1 passed / 0 failed / 0 ignored，同时保留所有上游任务成功门禁；缺失、失败或忽略测试均不能收官。新增一项回归，收官测试共八项，交由 Windows 执行。
+
+首轮 Rust 全量 268/268，格式步骤因前置文档契约失败而跳过，不能声称 Rust job 全通过。WebView、原生边界及依赖公告 job 通过。已校验六个下载产物 ZIP 的 SHA256，并从原始 Windows 日志核对原生签名、五面 WebView/两布局正常内容和依赖原始报告与汇总的一致性。本地仅完成语法与证据静态分析，没有执行 Linux 产品测试。
+
+本次只修正文档状态与收官判定，未更改生产实现、依赖或工作流。修正提交仍待完整 Windows CI；`accepted=false`、`r13Allowed=false` 保持不变，旧失败记录保留。

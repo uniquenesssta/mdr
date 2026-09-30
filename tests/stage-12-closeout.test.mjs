@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
-import { assessCloseout } from '../scripts/ci/verify-r12-closeout.mjs';
+import { assessCloseout, assessNativeBoundary } from '../scripts/ci/verify-r12-closeout.mjs';
 
 const policy = JSON.parse(await readFile(new URL('../docs/audit/r12-24-closeout.json', import.meta.url), 'utf8'));
 const dependencyPolicy = JSON.parse(await readFile(new URL('../docs/audit/r12-23-dependency-advisories.json', import.meta.url), 'utf8'));
@@ -102,4 +102,12 @@ test('failed, ignored and incomplete full Rust results block admission', () => {
     const input = fixture(); input.rustLog = log;
     assert.throws(() => assessCloseout(input));
   }
+});
+
+test('silent successful native compilation is valid only with a passing signature test', () => {
+  assert.doesNotThrow(() => assessNativeBoundary({ compileLog: '', signatureLog: 'test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured' }));
+  for (const signatureLog of ['', 'test result: FAILED. 0 passed; 1 failed', 'test result: ok. 0 passed; 0 failed; 1 ignored']) {
+    assert.throws(() => assessNativeBoundary({ compileLog: '', signatureLog }));
+  }
+  assert.throws(() => assessNativeBoundary({ signatureLog: 'test result: ok. 1 passed; 0 failed; 0 ignored' }), /Missing native compilation/);
 });

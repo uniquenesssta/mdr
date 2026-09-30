@@ -12,6 +12,14 @@ const requiredJobs = ['frontend', 'rust', 'native-boundary', 'repository-tests',
 const surfaces = ['preview-markdown', 'preview-full-html', 'preview-block-html', 'hybrid-html-widget', 'preview-virtual-block'];
 const closedIds = ['A01', 'A02', 'A03', 'A06', 'A07', 'A08', 'A09', 'A10'];
 
+export function assessNativeBoundary({ compileLog, signatureLog }) {
+  // rustc is silent on success. Reading compile.log still requires the artifact to exist.
+  assert.equal(typeof compileLog, 'string', 'Missing native compilation log.');
+  assert.equal(typeof signatureLog, 'string', 'Missing native signature test log.');
+  assert.match(signatureLog, /test result: ok\. 1 passed; 0 failed; 0 ignored/, 'Native signature test did not pass.');
+  assert.doesNotMatch(signatureLog, /test result: FAILED/);
+}
+
 export function assessCloseout(input) {
   const { commit, jobResults, policy, dependencyPolicy, inventory, currentTests, suites, dependency, webview, rustLog } = input;
   assert.match(commit, /^[a-f0-9]{40}$/);
@@ -101,7 +109,7 @@ async function runCloseout() {
     for (const directory of [frontend, rust, native, dependencyRoot, webviewRoot]) assert.equal((await read(join(directory, 'commit.txt'))).trim(), evidence.commit, 'Stale artifact source.');
     for (const name of ['architecture.log', 'no-legacy.log', 'generated.log', 'readme.log', 'npm-audit.log', 'build.log']) assert.ok((await read(join(frontend, name))).trim(), 'Missing frontend evidence: ' + name);
     for (const name of ['safe-user-writer.log', 'save-commit-rust.log', 'lifecycle-after.log', 'release-lifecycle.log', 'writer-after.log', 'release-writer.log', 'log-redaction.log', 'frontend-payload.log', 'redaction-pipeline.log', 'web-client-unit.log', 'web-http.log', 'clippy.log', 'cargo-check.log']) assert.ok((await read(join(rust, name))).trim(), 'Missing Rust evidence: ' + name);
-    for (const name of ['compile.log', 'signature.log']) assert.ok((await read(join(native, name))).trim());
+    assessNativeBoundary({ compileLog: await read(join(native, 'compile.log')), signatureLog: await read(join(native, 'signature.log')) });
     for (const name of ['browser-contract.log', 'browser-app.log']) {
       const match = (await read(join(frontend, name))).match(/Browser tests: (\d+), passed: (\d+), failed: (\d+)/);
       assert.ok(match && Number(match[1]) > 0 && match[1] === match[2] && Number(match[3]) === 0, 'Browser evidence failed: ' + name);
