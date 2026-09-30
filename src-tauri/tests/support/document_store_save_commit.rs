@@ -165,7 +165,7 @@ fn windows_case_sensitive_directory_preserves_distinct_spelling_bodies() {
         .arg("enable")
         .output()
         .unwrap();
-    assert!(output.status.success(), "case-sensitive test setup failed: {:?}", output);
+    assert!(output.status.success(), "case-sensitive test setup failed: {output:?}");
     let first = parent.0.join("CaseDoc");
     let second = parent.0.join("casedoc");
     fs::create_dir(&first).unwrap();
