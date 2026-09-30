@@ -6,7 +6,7 @@
   "platform": "Windows",
   "baselineCommit": "83583712c3038561b8c432394bff0c9213271319",
   "originalAcceptanceCommit": "3cf4b683255d1f6f6ade72ab3df9f3e0474e435f",
-  "status": "review and additional assertions implemented; current Windows CI pending",
+  "status": "accepted for R12-20; whole R12/product not accepted",
   "coreBlobComparison": [
     {
       "path": "src/runtime/performance.js",
@@ -58,7 +58,7 @@
     "workflow": ".github/workflows/r12-14.yml",
     "name": "R12-20 Log Redaction Review",
     "trigger": "push on agent/r12-stage",
-    "status": "pending",
+    "status": "accepted for R12-20",
     "required": [
       "R12-14 direct recursive redaction 14 of 14",
       "R12-14 actual frontend payload to Rust JSONL",
@@ -70,6 +70,48 @@
       "Full Clippy warnings-denied gate",
       "Full Node regression",
       "Architecture and documentation hard gates"
+    ],
+    "commit": "ed52b1045586ba8ed3e15c1e21b3d9283cc8d37e",
+    "run": 36675974377,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36675974377",
+    "workflowConclusion": "failure (known R18-N01 only)",
+    "results": {
+      "recursiveRedaction": 14,
+      "frontendPayload": 2,
+      "realJsonlReadback": 1,
+      "rustFull": 250,
+      "node": {
+        "tests": 1466,
+        "pass": 1465,
+        "fail": 1
+      },
+      "formatting": "passed",
+      "clippyWarningsDenied": "passed",
+      "rustCheck": "passed",
+      "build": "passed",
+      "browserContract": "passed",
+      "builtAppBrowser": "passed",
+      "nativeLinkage": "passed"
+    },
+    "jobs": [
+      {
+        "id": 109760913463,
+        "conclusion": "success"
+      },
+      {
+        "id": 109760913342,
+        "conclusion": "success"
+      },
+      {
+        "id": 109760913151,
+        "conclusion": "failure",
+        "cause": "R18-N01"
+      },
+      {
+        "id": 109760913331,
+        "conclusion": "failure",
+        "cause": "R18-N01"
+      }
     ]
   },
   "localStaticChecks": {
@@ -82,10 +124,8 @@
   },
   "limitations": [
     "No production implementation or dependency changes.",
-    "New assertions require Windows execution; local checks are static only.",
     "VM exercises real production frontend and adapter but not WebView IPC/native GUI.",
-    "A04 retry protocol remains assigned to R15; R18-N01 Preview cycle remains assigned to R12-22.",
-    "Do not accept R12-20 or advance to R12-21 before checking the new Windows result."
+    "A04 retry protocol remains assigned to R15; R18-N01 Preview cycle remains assigned to R12-22."
   ],
   "continuationPreference": "Once GitHub Actions is triggered, end the session without polling; user will ask for a result check after about 15 minutes."
 }
