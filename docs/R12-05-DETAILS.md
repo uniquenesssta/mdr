@@ -1,5 +1,7 @@
 # R12-05 — Text/Binary Writers
 
+> 后续整改：R12-21/A06 将两个 Writer 的字节提交统一到 `atomic_writer`，修复直接覆盖可能截断旧文件的风险；命令、编码及 byte-count 契约保留。本文保留 R12-05 历史拆分证据，现行提交/失败清理策略及待验收状态见 [R12-21](R12-21-DETAILS.md)。
+
 ## 状态与边界
 
 - 基线为已通过 R12-04 专属 Actions 的 `d92f8393b197544f3332da1e8324003e62d35ceb`，继续使用 `agent/r12-stage`。

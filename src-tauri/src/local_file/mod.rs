@@ -3,6 +3,7 @@
 //! Declares private policy, I/O, use-case and wire-type modules and exposes the stable command
 //! boundary and DTOs. This entry has no business branches, runtime state or side effects.
 
+mod atomic_writer;
 mod binary_writer;
 pub(crate) mod commands;
 mod directory_tree;

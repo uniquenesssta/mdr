@@ -5,8 +5,9 @@
 //! This module does not resolve paths, create parent directories, open dialogs, expose commands
 //! or construct DTOs.
 
+use super::atomic_writer::write_bytes;
 use base64::{engine::general_purpose, Engine as _};
-use std::{fs, path::Path};
+use std::path::Path;
 
 pub(super) fn decode_binary(content_base64: &str) -> Result<Vec<u8>, String> {
     general_purpose::STANDARD
@@ -16,7 +17,7 @@ pub(super) fn decode_binary(content_base64: &str) -> Result<Vec<u8>, String> {
 
 pub(super) fn write_binary(path: &Path, content: &[u8]) -> Result<usize, String> {
     let bytes = content.len();
-    fs::write(path, content).map_err(|err| format!("无法写入文件：{err}"))?;
+    write_bytes(path, content).map_err(|err| format!("无法写入文件：{err}"))?;
     Ok(bytes)
 }
 

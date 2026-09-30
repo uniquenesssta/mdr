@@ -4946,6 +4946,16 @@
       "Explicit terminal destroy; subscriptions are idempotently disposable.",
       "retain",
       false
+    ],
+    [
+      "src-tauri/src/local_file/atomic_writer.rs",
+      "rust-module",
+      "desktop-platform",
+      "Shared same-directory staged user-file commit, failure cleanup and Windows replacement/DACL boundary.",
+      "per-save temporary file and handle",
+      "filesystem-write",
+      "retain",
+      false
     ]
   ]
 }

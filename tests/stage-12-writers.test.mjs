@@ -16,7 +16,7 @@ function gitBlobSha(content) {
     .digest('hex');
 }
 
-test('R12-05 gives text and binary persistence separate Writer authorities', async () => {
+test('R12-05 keeps encoding-specific adapters over the R12-21 shared commit authority', async () => {
   const [entry, textWriter, binaryWriter] = await Promise.all([
     source('src-tauri/src/local_file/mod.rs'),
     source('src-tauri/src/local_file/text_writer.rs'),
@@ -40,6 +40,31 @@ test('R12-05 gives text and binary persistence separate Writer authorities', asy
     productionBinary,
     /read_to_string|#\[tauri::command\]|LocalWriteResult|tauri_plugin_dialog|dialog::|FileDialog|open_dialog|save_dialog|create_dir/,
   );
+});
+
+test('R12-21 has one staged byte commit and never truncates or unlinks the user target first', async () => {
+  const [entry, textWriter, binaryWriter, atomicWriter, workflow] = await Promise.all([
+    source('src-tauri/src/local_file/mod.rs'),
+    source('src-tauri/src/local_file/text_writer.rs'),
+    source('src-tauri/src/local_file/binary_writer.rs'),
+    source('src-tauri/src/local_file/atomic_writer.rs'),
+    source('.github/workflows/r12-14.yml')
+  ]);
+  assert.match(entry, /mod atomic_writer;/);
+  const adapters = [textWriter, binaryWriter].map(value => value.split('#[cfg(test)]')[0]);
+  assert.match(adapters[0], /write_bytes\(path, content\.as_bytes\(\)\)/);
+  assert.match(adapters[1], /write_bytes\(path, content\)/);
+  for (const adapter of adapters) assert.doesNotMatch(adapter, /fs::write|OpenOptions|\.truncate\(|\.rename\(|sync_all/);
+  assert.match(atomicWriter, /\.create_new\(true\)/);
+  assert.match(atomicWriter, /file\.write_all\(content\)\?/);
+  assert.ok(atomicWriter.indexOf('file.sync_all()?') < atomicWriter.indexOf('replace(temporary, &target)?'));
+  assert.ok(atomicWriter.indexOf('drop(pending.file.take())') < atomicWriter.indexOf('replace(temporary, &target)?'));
+  assert.doesNotMatch(atomicWriter, /fs::write|truncate\(true\)|remove_file\((?:&)?target\)|create_dir/);
+  assert.match(atomicWriter, /MoveFileExW/);
+  assert.match(atomicWriter, /copy_target_dacl/);
+  assert.match(atomicWriter, /可恢复文件/);
+  assert.match(workflow, /local_file::atomic_writer::tests/);
+  assert.match(workflow, /test result: ok\. 18 passed; 0 failed/);
 });
 
 test('R12-05 routes writes through Writers without duplicate file IO or Base64 decoding', async () => {

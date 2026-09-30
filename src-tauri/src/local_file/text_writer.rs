@@ -4,10 +4,11 @@
 //! frozen text-write error and byte-count semantics. This module does not resolve paths, create
 //! parent directories, open dialogs, expose commands or construct DTOs.
 
-use std::{fs, path::Path};
+use super::atomic_writer::write_bytes;
+use std::path::Path;
 
 pub(super) fn write_text(path: &Path, content: &str) -> Result<usize, String> {
-    fs::write(path, content.as_bytes()).map_err(|err| format!("无法写入文本文件：{err}"))?;
+    write_bytes(path, content.as_bytes()).map_err(|err| format!("无法写入文本文件：{err}"))?;
     Ok(content.len())
 }
 

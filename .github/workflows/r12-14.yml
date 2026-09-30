@@ -1,5 +1,5 @@
-name: R12-20 Log Redaction Review
-run-name: R12-20 log redaction review and cumulative regression · ${{ github.sha }}
+name: R12-21 Safe User File Writes
+run-name: R12-21 safe user file writes and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -95,7 +95,7 @@ defaults:
 
 jobs:
   frontend:
-    name: Log Redaction Review and frontend regression
+    name: Safe User File Writes and frontend regression
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
@@ -189,7 +189,7 @@ jobs:
           retention-days: 14
 
   rust:
-    name: Log Redaction Review and cumulative hard gates
+    name: Safe User File Writes and cumulative hard gates
     runs-on: windows-latest
     timeout-minutes: 60
     env:
@@ -259,6 +259,8 @@ jobs:
             src-tauri/src/local_file/commands.rs \
             src-tauri/src/local_file/operations.rs \
             src-tauri/src/local_file/types.rs \
+            src-tauri/src/local_file/atomic_writer.rs \
+            src-tauri/tests/local_file/atomic_writer.rs \
             src-tauri/src/local_file/binary_writer.rs \
             src-tauri/src/local_file/directory_tree.rs \
             src-tauri/src/local_file/file_kind.rs \
@@ -272,6 +274,11 @@ jobs:
             src-tauri/tests/local_file/commands.rs \
             src-tauri/tests/stage_12_security_compatibility.rs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rustfmt.log"
+      - name: R12-21 shared safe writer Windows failures 18 of 18
+        if: ${{ !cancelled() }}
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor local_file::atomic_writer::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/r12-14/safe-user-writer.log"
+          grep -Fq 'test result: ok. 18 passed; 0 failed' "$RUNNER_TEMP/r12-14/safe-user-writer.log"
       - name: R12-19 save cache and disk failures
         if: ${{ !cancelled() }}
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor document_store::store::save_commit_tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/r12-14/save-commit-rust.log"

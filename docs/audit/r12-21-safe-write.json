@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "repository": "uniquenesssta/mdr",
+  "branch": "agent/r12-stage",
+  "scope": "R12-21 / A06 safe user-file write",
+  "platform": "Windows",
+  "baselineCommit": "35dbb831a294c3762f8738f20dbbb6665ec85732",
+  "status": "implemented; Windows validation pending; A06 not accepted",
+  "sharedAuthority": "src-tauri/src/local_file/atomic_writer.rs",
+  "commandAndDtoChanged": false,
+  "dependenciesChanged": false,
+  "targetTruncatedBeforeCommit": false,
+  "temporaryFile": "exclusive create_new sibling; owned-file cleanup only; report recovery path on cleanup failure",
+  "windowsReplace": "MoveFileExW(REPLACE_EXISTING | WRITE_THROUGH), no copy or readonly-ignoring fallback",
+  "windowsAcl": "nontruncating write preflight plus DACL and inheritance protection copy; failure blocks commit",
+  "expectedFocusedTests": 18,
+  "expectedPreservedTextTests": 4,
+  "expectedPreservedBinaryTests": 6,
+  "expectedPreservedCommandTests": 12,
+  "expectedFullRustTests": 268,
+  "faultEvidence": {
+    "writeSyncReplaceStages": "cfg(test) phase injection, not claimed as physical disk-full or power-loss test",
+    "targetOccupation": "real Windows handle denying FILE_SHARE_DELETE",
+    "readonly": "real Windows file attributes including late readonly",
+    "permissionDenial": "real icacls current SID write/append denial on owned fixture",
+    "daclPreservation": "real protected DACL before/after replacement comparison",
+    "cleanupFailure": "real occupied complete temporary file plus injected replacement failure",
+    "base64": "actual Tauri command",
+    "concurrent": "real 8 concurrent complete payload writes",
+    "recovery": "original bytes preserved; full temporary bytes and path on late cleanup failure; prior recovery files retained"
+  },
+  "validation": {
+    "local": "static only: Rust 1.88 rustfmt, JS syntax, YAML/shell syntax, JSON/inventory/docs/diff checks",
+    "windows": "pending; no dynamic success claimed"
+  },
+  "knownPriorFailure": {
+    "id": "R18-N01",
+    "description": "Preview index/virtual controller cycle",
+    "owner": "R12-22",
+    "notSuppressed": true
+  },
+  "limitations": [
+    "not a universal power-loss guarantee",
+    "replacement changes file identity and hardlink alias behavior",
+    "DACL preservation does not preserve all other security/file metadata",
+    "crash recovery siblings require inspection; no automatic replay",
+    "no cross-process transaction or version conflict coordination"
+  ],
+  "next": "trigger Windows Actions then end turn; user query about 15 minutes later"
+}
