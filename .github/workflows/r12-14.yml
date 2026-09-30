@@ -1,5 +1,5 @@
-name: R12-21 Safe User File Writes
-run-name: R12-21 safe user file writes and cumulative regression · ${{ github.sha }}
+name: R12-22 Windows HTML Boundary Baseline
+run-name: R12-22 real WebView baseline and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -95,7 +95,7 @@ defaults:
 
 jobs:
   frontend:
-    name: Safe User File Writes and frontend regression
+    name: HTML boundary baseline and frontend regression
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
@@ -189,7 +189,7 @@ jobs:
           retention-days: 14
 
   rust:
-    name: Safe User File Writes and cumulative hard gates
+    name: Safe file writes and cumulative Rust hard gates
     runs-on: windows-latest
     timeout-minutes: 60
     env:
@@ -481,6 +481,67 @@ jobs:
         with:
           name: r12-14-native-${{ matrix.os }}-${{ github.sha }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/r12-14-native/
+          if-no-files-found: error
+          retention-days: 14
+
+  webview-baseline:
+    name: R12-22 actual Windows WebView baseline (A03 stays open)
+    runs-on: windows-2025
+    timeout-minutes: 90
+    env:
+      RUSTUP_TOOLCHAIN: '1.88.0'
+      CARGO_TERM_COLOR: never
+      MARKDOWN_EDITOR_BINARY: ../.cargo-target/markdown-editor-windows-driver-host/debug/markdown-editor.exe
+      MARKDOWN_EDITOR_LOG_DIR: ${{ runner.temp }}/r12-22-webview/performance-logs
+      NO_PROXY: 127.0.0.1,localhost
+    steps:
+      - name: Preserve repository LF bytes on Windows
+        run: git config --global core.autocrlf false
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Record exact source and install pinned Rust
+        run: |
+          mkdir -p "$RUNNER_TEMP/r12-22-webview"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/r12-22-webview/commit.txt"
+          rustup toolchain install 1.88.0 --profile minimal
+          rustc --version
+      - name: Install locked frontend and pinned transient WebDriver
+        run: npm run deps:prepare -- --add selenium-webdriver@4.34.0 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/dependencies.log"
+      - name: Verify baseline harness and native host contracts
+        run: node --test tests/stage-12-html-boundary.test.mjs tests/windows-window-automation.test.mjs tests/dependency-location.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/contracts.log"
+      - name: Build the exact production frontend
+        run: npm run build 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/build.log"
+      - name: Prepare isolated native host without changing production locked dependencies
+        shell: pwsh
+        run: |
+          ./scripts/stage-03/windows/prepare-embedded-driver-host.ps1 -PreserveProductionLock
+          Copy-Item '../.markdown-editor-windows-driver-host/driver-host.json' "$env:RUNNER_TEMP/r12-22-webview/driver-host.json"
+          Copy-Item '../.markdown-editor-windows-driver-host/src-tauri/Cargo.lock' "$env:RUNNER_TEMP/r12-22-webview/driver-host-Cargo.lock"
+      - name: Compile the embedded Windows WebView host
+        run: cargo build --locked --target-dir ../.cargo-target/markdown-editor-windows-driver-host --manifest-path ../.markdown-editor-windows-driver-host/src-tauri/Cargo.toml 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/native-build.log"
+      - name: Observe both actual sinks and owned-canary native IPC
+        run: node tests/e2e/windows/run-render-boundary-probe.mjs 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/probe.log"
+      - name: Validation leaves tracked sources unchanged
+        if: ${{ !cancelled() }}
+        run: |
+          git diff --check
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Retain baseline evidence even if native initialization fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r12-22-webview-baseline-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r12-22-webview/
           if-no-files-found: error
           retention-days: 14
 

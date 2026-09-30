@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "repository": "uniquenesssta/mdr",
+  "branch": "agent/r12-stage",
+  "scope": "R12-22 / A03 + R18-N01",
+  "platform": "Windows",
+  "productionBaseline": "cde35b8cd3f46d86791653cd7488bb77a40a19ae",
+  "previousAcceptanceRecord": "7dfab1822e452ec2bb81dfea0ef3304a96735bdd",
+  "phase": "real Windows WebView baseline before remediation",
+  "status": "baseline harness implemented; Windows pending; A03 remains open",
+  "acceptedSecurityBoundary": false,
+  "a03Closed": false,
+  "r18n01": "direct leaf imports implemented; actual Windows architecture validation pending",
+  "productionHtmlPolicyChanged": false,
+  "productionCsp": null,
+  "productionDependenciesChanged": false,
+  "observedSurfaces": ["preview-markdown", "preview-full-html", "preview-block-html", "hybrid-html-widget"],
+  "observations": ["event attributes retained", "event marker execution", "javascript URL retained/click marker", "srcdoc marker execution", "object/embed/style retained", "fixed loopback image/CSS requests", "owned canary native IPC control and markup access", "actual response/meta CSP and violations"],
+  "nativeCommand": "read_dropped_file on owned RUNNER_TEMP/canary.md only",
+  "driver": "existing embedded WebDriver isolated host; production manifest/config/capabilities unchanged",
+  "productionLockProtection": "all production registry name/version/source/checksum identities retained in isolated host lock; otherwise job fails",
+  "validation": {
+    "local": "static JS syntax, YAML/bash syntax, docs/JSON/file relation and git diff checks only",
+    "windows": "pending",
+    "entry": ".github/workflows/r12-14.yml",
+    "nativeJob": "webview-baseline",
+    "baselineSuccessIsSecurityAcceptance": false
+  },
+  "evidenceArtifact": "r12-22-webview-baseline-<commit>-<attempt>",
+  "next": "end turn after Actions starts; query about 20-30 minutes later; inspect baseline, then implement and validate both security boundaries",
+  "r12_23Started": false
+}

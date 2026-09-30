@@ -1,5 +1,6 @@
 param(
-  [string]$HostRoot = '..\.markdown-editor-windows-driver-host'
+  [string]$HostRoot = '..\.markdown-editor-windows-driver-host',
+  [switch]$PreserveProductionLock
 )
 
 $ErrorActionPreference = 'Stop'
@@ -90,9 +91,34 @@ version = "1"
   $tauriConfig.build.PSObject.Properties.Remove('beforeDevCommand')
   $tauriConfig | ConvertTo-Json -Depth 20 | Set-Content -Path $tauriConfigPath -Encoding utf8
 
-  & cargo generate-lockfile --manifest-path $manifestPath
+  if ($PreserveProductionLock) {
+    # Resolve the added test-only plugin from the existing production lock;
+    # unlike generate-lockfile, this keeps already locked versions if compatible.
+    & cargo metadata --format-version 1 --manifest-path $manifestPath | Out-Null
+  } else {
+    & cargo generate-lockfile --manifest-path $manifestPath
+  }
   if ($LASTEXITCODE -ne 0) {
     throw 'Cargo lock generation failed for the isolated Windows driver host.'
+  }
+
+  $protectedPackageCount = 0
+  if ($PreserveProductionLock) {
+    $productionLock = Get-Content (Join-Path $repositoryRoot 'src-tauri\Cargo.lock') -Raw
+    $hostLock = Get-Content (Join-Path $hostRootPath 'src-tauri\Cargo.lock') -Raw
+    $packagePattern = '(?ms)^\[\[package\]\]\r?\n(.*?)(?=^\[\[package\]\]|\z)'
+    $identityPattern = '(?m)^(?:name|version|source|checksum) = .+$'
+    $hostIdentities = @([regex]::Matches($hostLock, $packagePattern) | ForEach-Object {
+      ([regex]::Matches($_.Groups[1].Value, $identityPattern).Value -join "`n").Replace("`r", '')
+    })
+    foreach ($package in [regex]::Matches($productionLock, $packagePattern)) {
+      if ($package.Groups[1].Value -notmatch '(?m)^source = ') { continue }
+      $identity = ([regex]::Matches($package.Groups[1].Value, $identityPattern).Value -join "`n").Replace("`r", '')
+      if ($hostIdentities -cnotcontains $identity) {
+        throw "Windows probe host changed a production locked dependency: $identity"
+      }
+      $protectedPackageCount += 1
+    }
   }
 
   [pscustomobject]@{
@@ -103,6 +129,8 @@ version = "1"
     productionManifestUnchanged = $true
     productionCapabilityUnchanged = $true
     productionConfigUnchanged = $true
+    productionLockedDependenciesPreserved = [bool]$PreserveProductionLock
+    protectedPackageCount = $protectedPackageCount
     driverProvider = 'embedded'
     frontendSource = 'embedded-dist'
     removedDevUrl = [bool]$productionDevUrl

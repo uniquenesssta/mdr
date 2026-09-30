@@ -1,7 +1,5 @@
-import {
-  PREVIEW_BEHAVIOR_THRESHOLDS,
-  VirtualWindowController
-} from '../index.js';
+import { PREVIEW_BEHAVIOR_THRESHOLDS } from '../pipeline/preview-thresholds.js';
+import { VirtualWindowController } from '../render/virtual-window/virtual-window-controller.js';
 
 /**
  * Responsibility: Adapt the canonical VirtualWindowController to Preview runtime capabilities using explicit dependencies.
