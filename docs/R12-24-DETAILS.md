@@ -1,6 +1,6 @@
 # R12-24 R13 前完整 Windows 复验与审计交接
 
-状态：已开始，R12-23 精确提交 `89e8d57` 的 [Windows CI 36718273620](https://github.com/uniquenesssta/mdr/actions/runs/36718273620) 6/6 通过。12.24 当前准备与风险/接收核对完成，新一轮精确提交 Windows 结果待验收；R12 整体与 R13 准入尚未勾选。唯一分支 `agent/r12-stage`，回退点 `89e8d57bb58ac19facf035c574592e1b73cc9ee2`。
+状态：已正式验收（2026-10-01，Asia/Shanghai）。`e5041b5` 的 [Windows CI 36735955251](https://github.com/uniquenesssta/mdr/actions/runs/36735955251) 7/7 job 及全部步骤通过；递归 Node 1490/1490（300 文件、16 目录）、Rust 268/268、浏览器 11/11+29/29、收官门禁 8/8。收官产物 accepted=true、eligibleForR13=true，R12-24 与 R12 正式收官，具备 R13 准入条件；本次未开始 R13。A04 → R15.4/15.7、A05 → R13-S01 仍未修复，保留截止与止损条件。唯一分支 `agent/r12-stage`；验收基准为 `e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0`，首次失败与修正记录保留。
 
 ## 当前问题处置与范围
 
@@ -48,3 +48,13 @@ A03 的证据是当前 sink/虚拟块工厂，不是完整虚拟滚动性能或�
 首轮 Rust 全量 268/268，格式步骤因前置文档契约失败而跳过，不能声称 Rust job 全通过。WebView、原生边界及依赖公告 job 通过。已校验六个下载产物 ZIP 的 SHA256，并从原始 Windows 日志核对原生签名、五面 WebView/两布局正常内容和依赖原始报告与汇总的一致性。本地仅完成语法与证据静态分析，没有执行 Linux 产品测试。
 
 本次只修正文档状态与收官判定，未更改生产实现、依赖或工作流。修正提交仍待完整 Windows CI；`accepted=false`、`r13Allowed=false` 保持不变，旧失败记录保留。
+
+## 正式收官（2026-10-01）
+
+`e5041b5` 的 [Windows CI 36735955251](https://github.com/uniquenesssta/mdr/actions/runs/36735955251) 7/7 job 及全部步骤通过；递归 Node 1490/1490（300 文件、16 目录）、Rust 268/268、浏览器 11/11+29/29、收官门禁 8/8。收官产物 accepted=true、eligibleForR13=true，R12-24 与 R12 正式收官，具备 R13 准入条件；本次未开始 R13。A04 → R15.4/15.7、A05 → R13-S01 仍未修复，保留截止与止损条件。
+
+本次已核对 run 36735955251 attempt 1 的 7 个 Windows job 及全部步骤均成功，包括 Rust 格式/Clippy/check、官方 RustSec、实际 WebView 和跟踪文件洁净检查。收官 artifact `11106774272` 的 ZIP SHA256 为 `c69d138a76516ca3e5c7e67ea77805e8fd5f6818641b803a6b92328707db4eeb`，下载后校验一致，JSON 中 commit/run/attempt 与验收提交一致。机器记录保存该产物内容及七项任务结果，原首轮失败不覆盖。
+
+本次提交仅登记上述实现提交的验收与阶段状态，不改变生产源码、测试、工作流、依赖或命令；文档提交本身若触发 CI，其结果与上述已通过运行分开记录。后续功能改动必须重新验证，不能沿用本次绿色状态。
+
+公共 API、状态所有者与删除清单沿用 12.01～12.17 已验收记录：local_file 的 commands/operations 组合安全策略与读写器，external_link 分离 validation/opener，web_fetch 分离 validation/client/response/command，performance_log 分离 lifecycle/paths/redaction/writer；19 项命令契约不变，详见 [R12-17](R12-17-DETAILS.md)。本次无生产文件新增或删除。完整 Windows 交付矩阵仍归 R17；R13 尚未启动。

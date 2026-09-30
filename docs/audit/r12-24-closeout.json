@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "stage": "R12-24",
   "branch": "agent/r12-stage",
-  "status": "first Windows run failed; documentation and native evidence fixes implemented; exact-commit Windows revalidation pending",
-  "accepted": false,
-  "r13Allowed": false,
+  "status": "accepted on exact implementation commit; R12 closed; R13 eligible but not started",
+  "accepted": true,
+  "r13Allowed": true,
   "baselineCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
   "baselineRun": 36718273620,
   "requiredJobs": [
@@ -21,64 +21,64 @@
       "status": "closed-current-scope",
       "repairCommit": "3cf4b683255d1f6f6ade72ab3df9f3e0474e435f",
       "record": "docs/R12-14-DETAILS.md",
-      "regressionCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
-      "regressionRun": 36718273620
+      "regressionCommit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+      "regressionRun": 36735955251
     },
     {
       "id": "A02",
       "status": "closed-current-scope",
       "repairCommit": "601e3148b324d0a2401b1e0459e09a02fcb09d58",
       "record": "docs/R12-18-DETAILS.md",
-      "regressionCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
-      "regressionRun": 36718273620
+      "regressionCommit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+      "regressionRun": 36735955251
     },
     {
       "id": "A03",
       "status": "closed-current-scope",
       "repairCommit": "ccaf7afe95ff04828064232a4456a8b1fa1de65b",
       "record": "docs/R12-22-DETAILS.md",
-      "regressionCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
-      "regressionRun": 36718273620
+      "regressionCommit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+      "regressionRun": 36735955251
     },
     {
       "id": "A06",
       "status": "closed-current-scope",
       "repairCommit": "cde35b8cd3f46d86791653cd7488bb77a40a19ae",
       "record": "docs/R12-21-DETAILS.md",
-      "regressionCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
-      "regressionRun": 36718273620
+      "regressionCommit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+      "regressionRun": 36735955251
     },
     {
       "id": "A07",
       "status": "closed-current-scope",
       "repairCommit": "d269fad613ab85f9f36f474c87c2e53271aaa022",
       "record": "docs/R12-19-DETAILS.md",
-      "regressionCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
-      "regressionRun": 36718273620
+      "regressionCommit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+      "regressionRun": 36735955251
     },
     {
       "id": "A08",
       "status": "closed-current-scope",
       "repairCommit": "d269fad613ab85f9f36f474c87c2e53271aaa022",
       "record": "docs/R12-19-DETAILS.md",
-      "regressionCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
-      "regressionRun": 36718273620
+      "regressionCommit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+      "regressionRun": 36735955251
     },
     {
       "id": "A09",
       "status": "closed-current-scope",
       "repairCommit": "d269fad613ab85f9f36f474c87c2e53271aaa022",
       "record": "docs/R12-19-DETAILS.md",
-      "regressionCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
-      "regressionRun": 36718273620
+      "regressionCommit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+      "regressionRun": 36735955251
     },
     {
       "id": "A10",
       "status": "closed-current-scope",
       "repairCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
       "record": "docs/R12-23-DETAILS.md",
-      "regressionCommit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
-      "regressionRun": 36718273620
+      "regressionCommit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+      "regressionRun": 36735955251
     },
     {
       "id": "A04",
@@ -179,7 +179,7 @@
     }
   },
   "repair": {
-    "status": "implemented; awaiting new Windows CI",
+    "status": "validated by Windows run 36735955251",
     "changes": [
       "Separate pending R12-S01 implementation from completed handoff; retain existing four contracts.",
       "Require native compilation log existence and passing signature result; retain required upstream job success checks.",
@@ -187,5 +187,177 @@
     ],
     "localValidation": "JavaScript syntax and static analysis of original Windows artifacts only; no Linux product tests",
     "closeoutTestCount": 8
+  },
+  "acceptance": {
+    "date": "2026-10-01",
+    "timezone": "Asia/Shanghai",
+    "commit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+    "run": 36735955251,
+    "attempt": 1,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36735955251",
+    "jobs": [
+      {
+        "id": 109957581843,
+        "name": "R12-23 official RustSec and Windows dependency graph",
+        "conclusion": "success",
+        "allStepsSuccessful": true
+      },
+      {
+        "id": 109957581876,
+        "name": "HTML boundary baseline and frontend regression",
+        "conclusion": "success",
+        "allStepsSuccessful": true
+      },
+      {
+        "id": 109957581995,
+        "name": "Native opener compilation and linkage (windows-latest)",
+        "conclusion": "success",
+        "allStepsSuccessful": true
+      },
+      {
+        "id": 109957582079,
+        "name": "Safe file writes and cumulative Rust hard gates",
+        "conclusion": "success",
+        "allStepsSuccessful": true
+      },
+      {
+        "id": 109957582117,
+        "name": "All repository Node tests (Windows)",
+        "conclusion": "success",
+        "allStepsSuccessful": true
+      },
+      {
+        "id": 109957582185,
+        "name": "R12-22 actual Windows WebView security and content regression",
+        "conclusion": "success",
+        "allStepsSuccessful": true
+      },
+      {
+        "id": 109960743327,
+        "name": "R12-24 exact-commit Windows evidence and handoff",
+        "conclusion": "success",
+        "allStepsSuccessful": true
+      }
+    ],
+    "recursiveNode": {
+      "tests": 1490,
+      "passed": 1490,
+      "failed": 0,
+      "skipped": 0,
+      "files": 300,
+      "directories": 16
+    },
+    "rustFullPassed": 268,
+    "browser": {
+      "contracts": 11,
+      "builtApp": 29
+    },
+    "closeoutTestsPassed": 8,
+    "artifact": {
+      "id": 11106774272,
+      "digest": "sha256:c69d138a76516ca3e5c7e67ea77805e8fd5f6818641b803a6b92328707db4eeb",
+      "digestVerified": true,
+      "accepted": true,
+      "eligibleForR13": true,
+      "evidence": {
+        "schemaVersion": 1,
+        "commit": "e5041b5cbc8f2e5a8119e2e8dce8ad848d87c7b0",
+        "run": "36735955251",
+        "attempt": "1",
+        "accepted": true,
+        "eligibleForR13": true,
+        "results": {
+          "rustPassed": 268,
+          "nodeTestFiles": 300,
+          "nodeDirectories": 16,
+          "closedCurrentScope": [
+            "A01",
+            "A02",
+            "A03",
+            "A06",
+            "A07",
+            "A08",
+            "A09",
+            "A10"
+          ],
+          "deferredNotFixed": [
+            "A04",
+            "A05"
+          ]
+        },
+        "handoffs": [
+          {
+            "id": "A04",
+            "status": "deferred-not-fixed",
+            "receiver": [
+              "15.4",
+              "15.7"
+            ],
+            "record": "docs/markdown-main-full-rewrite-taskbook-18-docs/16-阶段15-遥测与 E2E 重写.md",
+            "risk": "debug append partial failure can replay batches and repeatedly schedule 50 ms retries; release backend sink remains disabled",
+            "deadline": "before R15 acceptance",
+            "acceptance": "shared batch acknowledgement, bounded retry/queue/backoff, real Windows partial write and readback; main save/close not blocked",
+            "stopCondition": "confirmed main application unavailability or uncontrolled disk growth requires immediate containment before transfer",
+            "reviewConclusion": "current release no-write regressions pass; no measured debug stress/partial-disk-failure proof of safety. Deferred risk remains open.",
+            "fixed": false
+          },
+          {
+            "id": "A05",
+            "status": "deferred-not-fixed",
+            "receiver": [
+              "R13-S01"
+            ],
+            "record": "docs/markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md",
+            "risk": "no streamed/decompressed body limit, no MIME policy and no target-by-target inner-network policy; timeout and redirect count are not security substitutes",
+            "deadline": "before 13.9 integration and R13 acceptance",
+            "acceptance": "confirm product thresholds/internal network support; real HTTP chunked/compressed/redirect/IPv6/MIME/timeout/cancel tests; webpage through both safe render paths",
+            "stopCondition": "confirmed current high-risk bypass must be contained before transfer; do not widen exposure while pending",
+            "reviewConclusion": "current path is explicit local desktop URL input; no new automatic source or backend network capability added. Current sink/CSP and TLS regressions pass; HTTP resource/address policy remains unresolved.",
+            "fixed": false
+          }
+        ],
+        "reviewedSources": [
+          {
+            "path": "src/runtime/performance.js",
+            "blobSha": "714900ce60868d013ba41d3d8e9b22949530de39"
+          },
+          {
+            "path": "src-tauri/src/performance_log/mod.rs",
+            "blobSha": "bb9675e0a37698100d91f82caa1e7fe96dc6b855"
+          },
+          {
+            "path": "src-tauri/src/performance_log/writer.rs",
+            "blobSha": "bfda8cb0e5209437e75dbe5dabe5896af2124dad"
+          },
+          {
+            "path": "src-tauri/src/web_fetch/command.rs",
+            "blobSha": "0c897a2fe9cc5bbbe29f1752e4ca4c62f4bc10fa"
+          },
+          {
+            "path": "src-tauri/src/web_fetch/client.rs",
+            "blobSha": "38f968f1c7bb3f2b1c84f0410c1101d238e08d0d"
+          },
+          {
+            "path": "src-tauri/src/web_fetch/validation.rs",
+            "blobSha": "7bec096f60dfb9c40cc6157156065ada7c00a602"
+          },
+          {
+            "path": "src-tauri/src/web_fetch/response.rs",
+            "blobSha": "cf40b5666da440f3165b80c4e01bfaea6277299f"
+          },
+          {
+            "path": "public/app/web-clipper.js",
+            "blobSha": "1e97286b558cf207629e116b1406be8fc6309750"
+          },
+          {
+            "path": "src-tauri/capabilities/default.json",
+            "blobSha": "49daac75abebdb88ccb3651e4d5b0f7dec59fd74"
+          }
+        ],
+        "scopeLimits": "A03 current Markdown sinks, not whole virtual scrolling performance/new web sources; A10 current official database snapshot, not future database. A04/A05 transfer is not a repair.",
+        "status": "same-commit Windows revalidation passed; formal repository acceptance must reference this run"
+      }
+    },
+    "r13Started": false
   }
 }

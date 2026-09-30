@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 12：`agent/r12-stage`；历史见 [docs/README.md](docs/README.md)。
+Stage 12 已收官，R13 尚未开始：`agent/r12-stage`；历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-01：`e5041b5` 的 [Windows CI 36735955251](https://github.com/uniquenesssta/mdr/actions/runs/36735955251) 7/7 job 及全部步骤通过；递归 Node 1490/1490（300 文件、16 目录）、Rust 268/268、浏览器 11/11+29/29、收官门禁 8/8。收官产物 accepted=true、eligibleForR13=true，R12-24 与 R12 正式收官，具备 R13 准入条件；本次未开始 R13。A04 → R15.4/15.7、A05 → R13-S01 仍未修复，保留截止与止损条件。[收官详情](docs/R12-24-DETAILS.md)。
 
 - 2026-09-30：R12-24 首轮 `ef9b542` Windows CI 失败：递归 Node 1485/1489，四条契约要求保留未完成的 R12-S01；收官脚本误拒绝正常为空的原生编译日志。已拆分安全实现与移交状态，改以原生签名测试成功及上游任务成功判定，新增回归；待 Windows 重验，R12/R13 准入仍未通过。[详情](docs/R12-24-DETAILS.md)。
 
