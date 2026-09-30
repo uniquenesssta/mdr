@@ -58,3 +58,19 @@ test('R12-22 Virtual Preview consumes canonical leaf responsibilities without im
   assert.match(source, /class VirtualPreviewController extends VirtualWindowController/);
   assert.doesNotMatch(source, /from '\.\.\/index\.js'/);
 });
+
+test('R12-22 runner-derived log path is set during execution, never in job-level env', async () => {
+  const workflow = await readFile('.github/workflows/r12-14.yml', 'utf8');
+  const envBlocks = [...workflow.matchAll(/^    env:\n((?:      [^\n]*\n)*)/gm)].map(match => match[1]);
+  assert.ok(envBlocks.some(block => block.includes('MARKDOWN_EDITOR_BINARY:')), 'Native job env must be inspected.');
+  for (const block of envBlocks) {
+    for (const expression of block.matchAll(/\$\{\{([\s\S]*?)\}\}/g)) {
+      assert.doesNotMatch(expression[1], /\b(?:runner|steps|job|env)\s*(?:\.|\[)/, 'Unavailable job-level env context.');
+    }
+  }
+  const job = workflow.split('  webview-baseline:')[1].split('  repository-tests:')[0];
+  const setup = job.split('      - name: Record exact source and install pinned Rust')[1]
+    .split('      - name: Install locked frontend')[0];
+  assert.ok(setup.includes("printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-22-webview/performance-logs\\n' \"$RUNNER_TEMP\" >> \"$GITHUB_ENV\""));
+  assert.ok(job.indexOf('"$GITHUB_ENV"') < job.indexOf('run-render-boundary-probe.mjs'), 'Path must be exported before launching the native app.');
+});

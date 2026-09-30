@@ -492,7 +492,6 @@ jobs:
       RUSTUP_TOOLCHAIN: '1.88.0'
       CARGO_TERM_COLOR: never
       MARKDOWN_EDITOR_BINARY: ../.cargo-target/markdown-editor-windows-driver-host/debug/markdown-editor.exe
-      MARKDOWN_EDITOR_LOG_DIR: ${{ runner.temp }}/r12-22-webview/performance-logs
       NO_PROXY: 127.0.0.1,localhost
     steps:
       - name: Preserve repository LF bytes on Windows
@@ -510,6 +509,7 @@ jobs:
       - name: Record exact source and install pinned Rust
         run: |
           mkdir -p "$RUNNER_TEMP/r12-22-webview"
+          printf 'MARKDOWN_EDITOR_LOG_DIR=%s/r12-22-webview/performance-logs\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git rev-parse HEAD | tee "$RUNNER_TEMP/r12-22-webview/commit.txt"
           rustup toolchain install 1.88.0 --profile minimal

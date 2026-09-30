@@ -7,26 +7,61 @@
   "productionBaseline": "cde35b8cd3f46d86791653cd7488bb77a40a19ae",
   "previousAcceptanceRecord": "7dfab1822e452ec2bb81dfea0ef3304a96735bdd",
   "phase": "real Windows WebView baseline before remediation",
-  "status": "baseline harness implemented; Windows pending; A03 remains open",
+  "status": "initial workflow rejected before jobs; job env repair implemented; Windows repair run pending; A03 remains open",
   "acceptedSecurityBoundary": false,
   "a03Closed": false,
   "r18n01": "direct leaf imports implemented; actual Windows architecture validation pending",
   "productionHtmlPolicyChanged": false,
   "productionCsp": null,
   "productionDependenciesChanged": false,
-  "observedSurfaces": ["preview-markdown", "preview-full-html", "preview-block-html", "hybrid-html-widget"],
-  "observations": ["event attributes retained", "event marker execution", "javascript URL retained/click marker", "srcdoc marker execution", "object/embed/style retained", "fixed loopback image/CSS requests", "owned canary native IPC control and markup access", "actual response/meta CSP and violations"],
+  "observedSurfaces": [
+    "preview-markdown",
+    "preview-full-html",
+    "preview-block-html",
+    "hybrid-html-widget"
+  ],
+  "observations": [
+    "event attributes retained",
+    "event marker execution",
+    "javascript URL retained/click marker",
+    "srcdoc marker execution",
+    "object/embed/style retained",
+    "fixed loopback image/CSS requests",
+    "owned canary native IPC control and markup access",
+    "actual response/meta CSP and violations"
+  ],
   "nativeCommand": "read_dropped_file on owned RUNNER_TEMP/canary.md only",
   "driver": "existing embedded WebDriver isolated host; production manifest/config/capabilities unchanged",
   "productionLockProtection": "all production registry name/version/source/checksum identities retained in isolated host lock; otherwise job fails",
   "validation": {
-    "local": "static JS syntax, YAML/bash syntax, docs/JSON/file relation and git diff checks only",
-    "windows": "pending",
+    "local": "static actionlint 1.7.12 semantic check reproduced original failure and passes after repair; JS/YAML/bash/JSON/docs/diff checks only",
+    "windows": "initial run rejected before execution; repair pending",
     "entry": ".github/workflows/r12-14.yml",
     "nativeJob": "webview-baseline",
     "baselineSuccessIsSecurityAcceptance": false
   },
   "evidenceArtifact": "r12-22-webview-baseline-<commit>-<attempt>",
   "next": "end turn after Actions starts; query about 20-30 minutes later; inspect baseline, then implement and validate both security boundaries",
-  "r12_23Started": false
+  "r12_23Started": false,
+  "firstWorkflowFailure": {
+    "commit": "f5a9ce7110ddcc3774ad5c6e42c5e9eae79042e9",
+    "run": 36695958389,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36695958389",
+    "conclusion": "failure",
+    "jobs": 0,
+    "artifacts": 0,
+    "line": 495,
+    "error": "Unrecognized named-value: 'runner' within expression runner.temp",
+    "productTestsExecuted": false
+  },
+  "workflowRepair": {
+    "scope": "workflow config, regression and progress records only",
+    "logDirectory": "RUNNER_TEMP/r12-22-webview/performance-logs written to GITHUB_ENV in initial executed step",
+    "productionChanged": false,
+    "regression": "reject unsupported contexts in job env; log directory exported before native app launch",
+    "actionlintVersion": "1.7.12",
+    "actionlintDigestVerified": true,
+    "staticSemanticCheck": "passed after reproducing the original context error",
+    "status": "Windows pending"
+  }
 }

@@ -1,6 +1,6 @@
 # R12-22 当前 HTML 渲染安全边界整改（A03）
 
-状态：已开始，当前批次为真实 Windows WebView 基线探测及 R18-N01 修复，等待 Windows Actions。A03 保持开放，12.22 不勾选；探测工作流全绿也不等于渲染安全边界已验收。分支 `agent/r12-stage`；生产基线 `cde35b8cd3f46d86791653cd7488bb77a40a19ae`，R12-21 验收记录提交 `7dfab1822e452ec2bb81dfea0ef3304a96735bdd`。
+状态：首轮 Windows Actions 因工作流上下文错误未启动任何 job；本轮已修正配置及补充回归，等待修正提交的 Windows Actions。A03 保持开放，12.22 不勾选；探测工作流全绿也不等于渲染安全边界已验收。分支 `agent/r12-stage`；生产基线 `cde35b8cd3f46d86791653cd7488bb77a40a19ae`，R12-21 验收记录提交 `7dfab1822e452ec2bb81dfea0ef3304a96735bdd`。
 
 ## 顺序与当前范围
 
@@ -33,6 +33,12 @@ IPC 只调用既有 `read_dropped_file` 读取本测试在 RUNNER_TEMP 新建的
 
 ## 验证状态与后续验收
 
+提交 `f5a9ce7110ddcc3774ad5c6e42c5e9eae79042e9` 的 [Actions 36695958389](https://github.com/uniquenesssta/mdr/actions/runs/36695958389) 在解析阶段失败：第 495 行 job 级 env 使用 `${{ runner.temp }}`，报 `Unrecognized named-value: runner`；0 个 job、0 个 artifact。因此原生探测及所有产品测试均未执行，R18-N01 也没有取得 Windows 复验证据。
+
+修正只涉及 CI 配置、回归及记录：移除 job 级 runner 表达式，在初始化运行步骤通过 `printf` 将 RUNNER_TEMP 下的日志目录写入 GITHUB_ENV，供后续原生应用启动使用。原探测内容、隔离 host、生产渲染、CSP、依赖及全部累计门禁保持。新增 Node 回归扫描本工作流全部 job env，拒绝不可用的 runner/steps/job/env 上下文，并验证目录在原生启动前已导出。
+
+官方 actionlint 1.7.12 静态检查已复现修正前错误，修正后整个 R12 工作流语义检查通过；下载包 SHA256 对照官方 release digest，未添加生产依赖。使用 `-shellcheck= -pyflakes=` 仅关闭本地未安装的外部脚本分析器；Actions 自身上下文/表达式语义检查保持。本地继续执行 JS/YAML/bash/JSON/文档及 diff 静态检查，不将这些结果记作 Windows 产品测试通过。修正提交结果仍待用户后续查询。
+
 本地仅进行修改 JS 的 node --check、YAML 和 shell block 静态语法、JSON/文件/文档关系及 diff 检查；未在 Linux 执行产品测试、编译、构建、浏览器或 WebView 验收。新增 Node 契约与所有动态检查由 Windows 执行。
 
 下一批必须依据原生结果选择公共边界，覆盖 Preview 全量/块/虚拟路径和 Hybrid HTML Widget；处理事件、危险 URL/嵌入、DOM clobbering、样式/资源与 native IPC，不只去掉 script。核对合法 Markdown、图片、公式和 Mermaid 的真实 Windows 显示回归，并验证恶意内容不能执行、导航或取得不应允许的原生命令访问。无法证明安全或已确认风险未修复则阻塞本项及 R13。当前不关闭 A03、不接受 12.22，也不启动 12.23。
@@ -45,6 +51,9 @@ IPC 只调用既有 `read_dropped_file` 读取本测试在 RUNNER_TEMP 新建的
 
 已使用 Context7 查询 DOMPurify、Tauri v2 CSP 及 Selenium async script API，并结合当前锁与代码检查。Context7 文档索引未提供精确锁版本分支，未声称查询结果等于精确版本证明；后续实现需继续核对锁定版本 API。DOMPurify 不净化 CSS，也不自动禁止资源请求，因此不能只接入默认 sanitizer 就宣称边界完整。已用 Mermaid Chart 绘制本批实际原生探测链路。
 
+- [GitHub Actions 上下文位置限制](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability)
+- [GitHub Actions GITHUB_ENV](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#setting-an-environment-variable)
+- [actionlint 1.7.12](https://github.com/rhysd/actionlint/releases/tag/v1.7.12)
 - [Tauri v2 CSP](https://v2.tauri.app/security/csp/)
 - [DOMPurify 官方文档与安全目标](https://github.com/cure53/DOMPurify)
 - [Selenium JavaScript WebDriver](https://www.selenium.dev/selenium/docs/api/javascript/WebDriver.html)
