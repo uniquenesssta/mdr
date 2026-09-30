@@ -78,7 +78,7 @@ test('Atomic 10.9 keeps browser storage failures explicit through the injected r
   storage.setItem = () => { throw failure; };
   const repository = createBrowserDocumentRepository({ storage, reportError: (message, error) => errors.push([message, error]) });
   repository.rememberContent('doc', 'body');
-  assert.equal(repository.persistSession([{ id: 'doc', nativeBacked: false }], 'doc'), false);
+  assert.throws(() => repository.persistSession([{ id: 'doc', nativeBacked: false }], 'doc'), error => error === failure);
   assert.equal(errors.length, 1);
   assert.equal(errors[0][1], failure);
 });
@@ -107,9 +107,9 @@ test('Atomic 10.9 SessionDocumentRepository delegates browser fallback reads and
     markPersisted(version, backendVersion) { this.persisted = [version, backendVersion]; }
   };
   const result = await repository.save(sourceModel, { id: 'doc', nativeBacked: false });
-  assert.deepEqual(result, { native: false });
+  assert.deepEqual(result, { native: false, editorVersion: 2 });
   assert.equal(browser.readContent('doc'), 'body');
-  assert.deepEqual(sourceModel.persisted, [2, 0]);
+  assert.equal(sourceModel.persisted, undefined);
   const loaded = await repository.load({ id: 'doc', nativeBacked: false });
   assert.equal(loaded.content, 'body');
 
@@ -117,7 +117,7 @@ test('Atomic 10.9 SessionDocumentRepository delegates browser fallback reads and
   assert.doesNotMatch(moduleSource, /md_editor_documents|md_editor_content|localStorage|storage\.setItem|storage\.getItem|bodyCache\s*=\s*new Map/);
 });
 
-test('Atomic 10.9 successful native persistence evicts browser fallback body and native load remains authoritative', async () => {
+test('Atomic 10.9 native body commit retains retry fallback until overall save, and native load remains authoritative', async () => {
   const browser = createBrowser();
   const nativeStore = {
     available: true,
@@ -131,7 +131,7 @@ test('Atomic 10.9 successful native persistence evicts browser fallback body and
   const record = { id: 'native', title: 'Native.md', nativeBacked: false };
   const saved = await repository.save(sourceModel, record);
   assert.equal(saved.native, true);
-  assert.equal(browser.hasContent('native'), false);
+  assert.equal(browser.hasContent('native'), true);
   const loaded = await repository.load({ ...record, nativeBacked: true });
   assert.equal(loaded.content, 'native body');
   assert.equal(loaded.metadataPatch.nativeVersion, 3);

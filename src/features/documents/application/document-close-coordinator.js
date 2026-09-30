@@ -54,13 +54,17 @@ export function createDocumentCloseCoordinator({ session, model, repository, loa
       activatedNext = activated.record;
       nextLoaded = activated.loaded || null;
       nextMetadataPatch = activated.metadataPatch || null;
-    } else if (closingActive) {
-      assertCurrent(operation);
-      model.activate(null, { content: '' });
-      assertCurrent(operation);
     }
 
     assertCurrent(operation);
+    const persistedRemaining = remaining.map(item =>
+      item.id === activatedNext?.id && nextMetadataPatch ? { ...item, ...nextMetadataPatch } : item);
+    if (closingActive) {
+      if (activatedNext) repository.persistLegacyActiveTitle(activatedNext.title || '');
+      else repository.clearLegacyActiveSnapshot();
+    }
+    repository.persistSession(persistedRemaining, closingActive ? activatedNext?.id || null : session.activeId);
+    if (closingActive && !activatedNext) model.activate(null, { content: '' });
     session.removeRecord(id, {
       ...(closingActive ? { activeId: activatedNext?.id || null } : {}),
       reason: 'close'
@@ -72,11 +76,6 @@ export function createDocumentCloseCoordinator({ session, model, repository, loa
       });
     }
     repository.forgetContent(id);
-    repository.persistSession(session.records, session.activeId);
-    if (closingActive) {
-      if (activatedNext) repository.persistLegacyActiveTitle(activatedNext.title || '');
-      else repository.clearLegacyActiveSnapshot();
-    }
 
     // Backend deletion is cleanup for the already committed close. It must finish even if a later lifecycle operation starts.
     await repository.remove(id);

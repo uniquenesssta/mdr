@@ -10,6 +10,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
+#[cfg(test)]
+#[path = "../../tests/support/document_store_faults.rs"]
+pub(crate) mod faults;
+
 pub(super) fn ensure_dir(path: &Path) -> Result<(), String> {
     fs::create_dir_all(path).map_err(|err| format!("无法创建文档存储目录：{err}"))
 }
@@ -36,15 +40,23 @@ fn write_temp_file(path: &Path, bytes: &[u8]) -> Result<PathBuf, String> {
             .and_then(|value| value.to_str())
             .unwrap_or("data")
     ));
+    #[cfg(test)]
+    faults::check(path, "create")?;
     let mut file = File::create(&temp).map_err(|err| format!("无法创建临时文件：{err}"))?;
+    #[cfg(test)]
+    faults::check(path, "write")?;
     file.write_all(bytes)
         .map_err(|err| format!("无法写入临时文件：{err}"))?;
+    #[cfg(test)]
+    faults::check(path, "sync")?;
     file.sync_all()
         .map_err(|err| format!("无法同步临时文件：{err}"))?;
     Ok(temp)
 }
 
 fn replace_file(temp: &Path, target: &Path) -> Result<(), String> {
+    #[cfg(test)]
+    faults::check(target, "replace")?;
     match fs::rename(temp, target) {
         Ok(()) => Ok(()),
         Err(first_error) => {

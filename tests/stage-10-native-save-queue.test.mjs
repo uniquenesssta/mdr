@@ -65,7 +65,7 @@ test('Atomic 10.5 serializes one document and merges same-version waiters covere
   assert.equal(batches.length, 1, 'covered same-version waiter must not create a redundant native write');
   assert.equal(queue.idle, true);
   assert.deepEqual(events.filter(event => event.state === 'queued').map(event => event.pending), [1, 2]);
-  assert.equal(events.at(-1).state, 'saved');
+  assert.equal(events.at(-1).state, 'body-saved');
   assert.equal(events.at(-1).pending, 0);
   queue.destroy();
 });

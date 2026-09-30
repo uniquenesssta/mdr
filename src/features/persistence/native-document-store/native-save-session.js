@@ -118,8 +118,11 @@ export function createNativeSaveSession(documentId) {
       lastEditorVersion = committedEditorVersion;
       initialized = true;
       title = normalizeTitle(nextTitle);
-      source?.markPersisted?.(committedEditorVersion, committedBackendVersion);
-      source?.acknowledge?.('storage', committedEditorVersion);
+      // This confirms durable native body only. The document controller owns
+      // markPersisted after the required session metadata has also committed.
+      if (!source?.documentId || source.documentId === id) {
+        source?.acknowledge?.('storage', committedEditorVersion);
+      }
       return snapshot();
     },
     destroy() {

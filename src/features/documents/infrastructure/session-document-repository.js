@@ -131,11 +131,9 @@ export function createSessionDocumentRepository({
       browserRepository.rememberContent(record.id, createSnapshot(source, options.snapshotReason || 'document-storage'));
     }
     if (!useNative) {
-      source?.markPersisted?.(getDocumentVersion(source), 0);
-      return { native: false };
+      return { native: false, editorVersion: getDocumentVersion(source) };
     }
     const result = await nativeStore.save(source, record, { forceSnapshot: Boolean(options.forceSnapshot) });
-    if (result?.native) browserRepository.forgetContent(record.id);
     return result;
   };
 

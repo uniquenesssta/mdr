@@ -82,6 +82,12 @@ impl DocumentCache {
         }
         state.active.insert(admission_key.clone());
         let document = state.documents.remove(&key);
+        // Never merge case-sensitive directories. An alternate spelling must reload
+        // its own path; evict sibling spellings so case-insensitive aliases cannot
+        // retain an independently stale cache after save or delete.
+        state.documents.retain(|cached_key, _| {
+            cached_key.to_ascii_lowercase() != admission_key
+        });
         drop(state);
         Ok(DocumentLease {
             cache: self,

@@ -169,9 +169,9 @@ export class NativeDocumentStore {
       && (document.title || '') === session.title
     ) {
       const native = normalizeDocumentNativeMetadata({ nativeBacked: true, nativeVersion: session.backendVersion });
-      const result = { native: true, version: session.backendVersion, ...native, skipped: true };
+      const result = { native: true, version: session.backendVersion, ...native, editorVersion: session.lastEditorVersion, skipped: true };
       this.emit({
-        state: 'saved',
+        state: 'body-saved',
         documentId: document.id,
         version: session.backendVersion,
         skipped: true,
@@ -237,6 +237,9 @@ export class NativeDocumentStore {
           session.invalidateInitialization();
           continue;
         }
+        // Even an error can follow a committed journal/snapshot. Retry from a
+        // complete snapshot instead of applying the same delta twice.
+        session.invalidateInitialization();
         throw error;
       }
 
@@ -257,7 +260,7 @@ export class NativeDocumentStore {
         version: session.backendVersion,
         snapshotCreated: Boolean(response?.snapshotCreated),
         journalEntries: Number(response?.journalEntries) || 0,
-        value: Object.freeze({ native: true, ...response, ...native })
+        value: Object.freeze({ native: true, ...response, ...native, editorVersion })
       });
     }
   }

@@ -133,7 +133,7 @@ export function createNativeSaveQueue(documentId, { executeBatch, notify = () =>
           : outcome;
         completed.forEach(waiter => waiter.resolve(value));
         publish({
-          state: 'saved',
+          state: 'body-saved',
           documentId: id,
           version: normalizeVersion(outcome?.version ?? completedVersion),
           snapshotCreated: Boolean(outcome?.snapshotCreated),

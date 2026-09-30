@@ -1,5 +1,5 @@
-name: R12-18 Audit Contracts
-run-name: R12-18 audit contracts and cumulative regression · ${{ github.sha }}
+name: R12-19 Save Commit Consistency
+run-name: R12-19 save commit and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -141,6 +141,9 @@ jobs:
             tests/unit/platform/file-system-client.test.mjs \
             tests/historical-workflow-routing.test.mjs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/tree-limits-contracts.log"
+      - name: R12-19 save commit fault contracts
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-12-save-commit.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/save-commit-js.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"
@@ -269,6 +272,9 @@ jobs:
             src-tauri/tests/local_file/commands.rs \
             src-tauri/tests/stage_12_security_compatibility.rs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rustfmt.log"
+      - name: R12-19 save cache and disk failures
+        if: ${{ !cancelled() }}
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor document_store::store::save_commit_tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/r12-14/save-commit-rust.log"
       - name: R12-16 extracted lifecycle 6 of 6
         if: ${{ !cancelled() }}
         run: |

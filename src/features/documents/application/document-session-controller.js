@@ -105,7 +105,7 @@ export function createDocumentSessionController({
     await loadController.loadExisting(activeRecord.id, operation, {
       commitActive: true,
       commitMetadata: true,
-      persist: true,
+      persist: false,
       reason: 'operation-rollback'
     });
   };
@@ -147,6 +147,7 @@ export function createDocumentSessionController({
     repository.persistSession(session.records, session.activeId);
     repository.persistLegacyActiveTitle(record.title);
 
+    const targetVersion = model.getDocumentVersion();
     const saveResult = await repository.save(model, record, { forceSnapshot, snapshotReason });
     assertCurrent(operation);
     if (saveResult?.native) {
@@ -157,6 +158,14 @@ export function createDocumentSessionController({
       repository.persistLegacyActiveSnapshot({ title: record.title, nativeBacked: true });
     }
     repository.persistSession(session.records, session.activeId);
+    const committedVersion = Number(saveResult?.editorVersion ?? targetVersion);
+    if (model.getDocumentVersion() > committedVersion || model.title !== record.title) {
+      const error = new Error('DOCUMENT_CHANGED_DURING_SAVE');
+      error.code = 'DOCUMENT_CHANGED_DURING_SAVE';
+      throw error;
+    }
+    model.markPersisted(committedVersion, Number(saveResult?.nativeVersion ?? saveResult?.version) || 0);
+    if (saveResult?.native) repository.forgetContent(record.id);
     return frozenResult(operation, {
       saved: true,
       native: Boolean(saveResult?.native),

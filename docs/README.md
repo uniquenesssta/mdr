@@ -461,3 +461,5 @@ Editor/preview text-selection synchronization is owned by `src/sync/selection-co
 - clean validation runner：GitHub Actions `31351876875`。专项 Stage 1 合并验证 27/27 PASS；架构门禁 PASS；Node 44/44 PASS；Browser Contract 10/10 PASS；生产 Build PASS；Built App 22/22 PASS；protected-surface diff 与 `git diff --check` PASS。
 - 本 clean validation runner 未执行 Cargo/Tauri 构建，因为 CR-01 未修改 Rust/Tauri 路径；正式 Stage 1/Stage 5 工作流将在 CR-01 clean commit 上继续作为发布门禁，未通过前不得推进 CR-02。
 
+
+- [R12-19 保存提交与缓存一致性](R12-19-DETAILS.md)：Windows 验证中。

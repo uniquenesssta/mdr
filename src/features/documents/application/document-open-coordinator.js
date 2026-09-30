@@ -41,10 +41,8 @@ export function createDocumentOpenCoordinator({ session, model, repository, asse
     repository.activate(model, record, restored?.loaded || null);
     if (typeof validate === 'function') validate(record, restored);
     assertCurrent(operation);
-    session.insertRecord(record, { index, activate: true, reason });
     const snapshot = model.createSnapshot?.('document-session-create') ?? restored?.content ?? '';
     repository.rememberContent(record.id, snapshot);
-    repository.persistSession(session.records, session.activeId);
     if (persistLegacySnapshot) {
       repository.persistLegacyActiveSnapshot({
         title: record.title || '',
@@ -54,6 +52,10 @@ export function createDocumentOpenCoordinator({ session, model, repository, asse
     } else {
       repository.persistLegacyActiveTitle(record.title || '');
     }
+    const records = [...session.records];
+    records.splice(index, 0, record);
+    repository.persistSession(records, record.id);
+    session.insertRecord(record, { index, activate: true, reason });
     return Object.freeze({ record: session.getRecord(record.id), loaded: restored?.loaded || null });
   };
 

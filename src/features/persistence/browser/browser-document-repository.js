@@ -96,23 +96,23 @@ export function createBrowserDocumentRepository({
       return true;
     } catch (error) {
       reportError('Document session storage failed:', error);
-      return false;
+      throw error;
     }
   };
 
   const resetLegacySession = () => {
     assertActive();
-    bodyCache.clear();
     try {
       storage.removeItem(DOCS_KEY);
       storage.removeItem(CURRENT_DOC_KEY);
       storage.removeItem(EMPTY_DOCUMENTS_KEY);
       storage.removeItem(STORAGE_KEY);
       storage.removeItem(FILENAME_KEY);
+      bodyCache.clear();
       return true;
     } catch (error) {
       reportError('Legacy document session cleanup failed:', error);
-      return false;
+      throw error;
     }
   };
 
@@ -124,7 +124,7 @@ export function createBrowserDocumentRepository({
       return true;
     } catch (error) {
       reportError('Legacy filename storage failed:', error);
-      return false;
+      throw error;
     }
   };
 
@@ -138,7 +138,7 @@ export function createBrowserDocumentRepository({
       return true;
     } catch (error) {
       reportError('Legacy active document storage failed:', error);
-      return false;
+      throw error;
     }
   };
 
@@ -150,7 +150,7 @@ export function createBrowserDocumentRepository({
       return true;
     } catch (error) {
       reportError('Legacy active document cleanup failed:', error);
-      return false;
+      throw error;
     }
   };
 

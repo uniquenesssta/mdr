@@ -75,6 +75,15 @@ export function createLoadController({
       ? resolveRecord(record, metadataPatch, { fallbackTitle: record.title || '未命名文档' })
       : record;
 
+    // Persist the prospective selection before publishing it to runtime/session.
+    // A storage failure must leave the current model and active record untouched.
+    if (persist) {
+      const records = documents.records.map(item =>
+        item.id === record.id && commitMetadata ? effectiveRecord : item);
+      repository.persistLegacyActiveTitle(effectiveRecord.title || '');
+      repository.persistSession(records, commitActive ? effectiveRecord.id : documents.activeId);
+    }
+
     // Generation is validated immediately before the only model/editor activation write.
     assertCurrent(operation);
     model.activate(effectiveRecord, activationOptions(restored));
@@ -90,10 +99,6 @@ export function createLoadController({
       });
     }
     if (commitActive) documents.setActive(committedRecord.id, { reason });
-    if (persist) {
-      repository.persistSession(documents.records, documents.activeId);
-      repository.persistLegacyActiveTitle(committedRecord.title || '');
-    }
 
     return Object.freeze({
       record: committedRecord,

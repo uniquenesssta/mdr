@@ -16,13 +16,25 @@ pub(in crate::document_store) fn append_journal(
     entry: &JournalEntry,
 ) -> Result<u64, String> {
     let encoded = encode_journal_entry(entry)?;
+    #[cfg(test)]
+    crate::document_store::repository::faults::check(&journal_path(root), "journal-open")?;
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
         .open(journal_path(root))
         .map_err(|err| format!("无法打开增量日志：{err}"))?;
+    #[cfg(test)]
+    {
+        if let Err(error) = crate::document_store::repository::faults::check(&journal_path(root), "journal-write") {
+            file.write_all(&encoded[..encoded.len() / 2]).unwrap();
+            file.sync_data().unwrap();
+            return Err(error);
+        }
+    }
     file.write_all(&encoded)
         .map_err(|err| format!("无法写入增量日志：{err}"))?;
+    #[cfg(test)]
+    crate::document_store::repository::faults::check(&journal_path(root), "journal-sync")?;
     file.sync_data()
         .map_err(|err| format!("无法同步增量日志：{err}"))?;
     Ok(encoded.len() as u64)

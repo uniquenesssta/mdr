@@ -2,7 +2,7 @@
 //!
 //! Commands call this module; snapshots, journal, index and chunks retain their own policies.
 //! Each operation checks out one document, performs IO and CPU work without a MutexGuard,
-//! then returns its sole in-memory state through the cache lease, including error exits.
+//! then caches committed state only; failed saves discard the lease for disk recovery.
 //! No Tauri runtime, second cache, serialization format or low-level atomic-write logic lives here.
 
 use super::{
@@ -50,7 +50,13 @@ impl DocumentStore {
             lease.document = Some(load_document_from_disk(root)?.unwrap_or_default());
         }
         let document = lease.document.as_mut().ok_or("无法初始化文档存储")?;
-        save_document_inner(root, document, request)
+        let result = save_document_inner(root, document, request);
+        if result.is_err() {
+            // A failed write may already have reached disk. Never publish the mutated
+            // candidate or assume rollback: the next operation must run disk recovery.
+            lease.document = None;
+        }
+        result
     }
 
     pub(super) fn load(
@@ -300,6 +306,10 @@ mod command_contract_tests;
 #[cfg(test)]
 #[path = "../../tests/support/document_store_concurrency.rs"]
 mod concurrency_tests;
+
+#[cfg(test)]
+#[path = "../../tests/support/document_store_save_commit.rs"]
+mod save_commit_tests;
 
 #[cfg(test)]
 mod tests {

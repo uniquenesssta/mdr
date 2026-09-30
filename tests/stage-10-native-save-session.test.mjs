@@ -44,7 +44,7 @@ test('Atomic 10.4 loaded metadata updates only backend initialization state', ()
   session.destroy();
 });
 
-test('Atomic 10.4 commit updates metadata before preserved model persistence acknowledgements', () => {
+test('Atomic 10.4 commit acknowledges durable body without clearing model dirty before session metadata', () => {
   const observations = [];
   const session = createNativeSaveSession('doc-1');
   const sourceRef = {
@@ -54,10 +54,9 @@ test('Atomic 10.4 commit updates metadata before preserved model persistence ack
   session.attachSource(sourceRef);
   session.commit({ editorVersion: 14, backendVersion: 9, title: 'Saved.md' });
   assert.deepEqual(session.snapshot(), { documentId: 'doc-1', backendVersion: 9, lastEditorVersion: 14, title: 'Saved.md', initialized: true });
-  assert.deepEqual(observations[0].slice(0, 3), ['markPersisted', 14, 9]);
+  assert.equal(observations.length, 1);
+  assert.deepEqual(observations[0].slice(0, 3), ['acknowledge', 'storage', 14]);
   assert.deepEqual(observations[0][3], session.snapshot());
-  assert.deepEqual(observations[1].slice(0, 3), ['acknowledge', 'storage', 14]);
-  assert.deepEqual(observations[1][3], session.snapshot());
   session.destroy();
 });
 
@@ -112,7 +111,7 @@ test('Atomic 10.4 NativeDocumentStore preserves skip and title-only native-save 
   assert.equal(requests[0].baseVersion, 4);
   assert.equal(requests[0].nextVersion, 5);
   assert.equal(requests[0].title, 'Renamed.md');
-  assert.deepEqual(persisted, [[2, 5]]);
+  assert.deepEqual(persisted, []);
   assert.deepEqual(acknowledgements, [['storage', 2]]);
   const session = store.getSession('doc-1');
   assert.deepEqual(session.snapshot(), { documentId: 'doc-1', backendVersion: 5, lastEditorVersion: 2, title: 'Renamed.md', initialized: true });
