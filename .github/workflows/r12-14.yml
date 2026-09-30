@@ -1,5 +1,5 @@
-name: R12-23 Windows Dependency Advisory Verification
-run-name: R12-23 dependency remediation and cumulative regression · ${{ github.sha }}
+name: R12-24 Windows Audit Closeout
+run-name: R12-24 complete Windows revalidation and audit handoff · ${{ github.sha }}
 
 on:
   push:
@@ -28,6 +28,10 @@ on:
       - 'docs/R12-14-DETAILS.md'
       - 'docs/R12-15-DETAILS.md'
       - 'docs/R12-23-DETAILS.md'
+      - 'docs/R12-24-DETAILS.md'
+      - 'docs/audit/r12-24-closeout.json'
+      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/14-*'
+      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/16-*'
       - 'docs/audit/r12-23-dependency-advisories.json'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/01-*'
       - 'src-tauri/src/external_link.rs'
@@ -623,5 +627,52 @@ jobs:
         with:
           name: repository-tests-windows-${{ github.sha }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/repository-audit/
+          if-no-files-found: error
+          retention-days: 14
+
+  audit-closeout:
+    name: R12-24 exact-commit Windows evidence and handoff
+    if: ${{ always() }}
+    needs: [frontend, rust, native-boundary, repository-tests, dependency-advisories, webview-baseline]
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Preserve repository LF bytes on Windows
+        run: git config --global core.autocrlf false
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify closeout rejection cases
+        run: node --test tests/stage-12-closeout.test.mjs
+      - name: Download current-run evidence without merging files
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-${{ github.sha }}-${{ github.run_attempt }}'
+          path: ${{ runner.temp }}/r12-24-inputs
+          merge-multiple: false
+      - name: Verify all cumulative jobs and actual same-commit evidence
+        if: ${{ !cancelled() }}
+        env:
+          R12_JOB_RESULTS: ${{ toJSON(needs) }}
+        run: node scripts/ci/verify-r12-closeout.mjs
+      - name: Validation leaves tracked sources unchanged
+        if: ${{ !cancelled() }}
+        run: |
+          git diff --check
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Retain final admission decision even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r12-24-closeout-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r12-24/
           if-no-files-found: error
           retention-days: 14

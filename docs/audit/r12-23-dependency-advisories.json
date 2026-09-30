@@ -5,9 +5,9 @@
   "branch": "agent/r12-stage",
   "implementationDate": "2026-09-30",
   "baselineCommit": "ccaf7afe95ff04828064232a4456a8b1fa1de65b",
-  "status": "lockfile remediation implemented; Windows advisory and cumulative verification pending",
-  "accepted": false,
-  "a10Closed": false,
+  "status": "accepted on Windows run 36718273620; A10 current dependency disposition closed",
+  "accepted": true,
+  "a10Closed": true,
   "target": "x86_64-pc-windows-msvc",
   "rustVersion": "1.88.0",
   "databaseCommit": "9b3a3b73a7f42606494c943e95f8196e9994df46",
@@ -103,7 +103,7 @@
       "patched": [
         ">= 0.11.15"
       ],
-      "disposition": "repaired locked version; Windows verification pending",
+      "disposition": "repaired locked version; Windows build and regression accepted",
       "source": "https://github.com/RustSec/advisory-db/blob/9b3a3b73a7f42606494c943e95f8196e9994df46/crates/quinn-proto/RUSTSEC-2026-0185.md"
     },
     {
@@ -125,7 +125,7 @@
       "patched": [
         ">= 0.41.0"
       ],
-      "disposition": "repaired locked version; Windows verification pending",
+      "disposition": "repaired locked version; Windows build and regression accepted",
       "source": "https://github.com/RustSec/advisory-db/blob/9b3a3b73a7f42606494c943e95f8196e9994df46/crates/quick-xml/RUSTSEC-2026-0195.md"
     },
     {
@@ -137,7 +137,7 @@
       "patched": [
         ">= 0.41.0"
       ],
-      "disposition": "repaired locked version; Windows verification pending",
+      "disposition": "repaired locked version; Windows build and regression accepted",
       "source": "https://github.com/RustSec/advisory-db/blob/9b3a3b73a7f42606494c943e95f8196e9994df46/crates/quick-xml/RUSTSEC-2026-0194.md"
     },
     {
@@ -169,7 +169,7 @@
       "patched": [
         ">= 0.23.45"
       ],
-      "disposition": "repaired locked version; Windows verification pending",
+      "disposition": "repaired locked version; Windows build and regression accepted",
       "source": "https://github.com/RustSec/advisory-db/blob/9b3a3b73a7f42606494c943e95f8196e9994df46/crates/rustls/RUSTSEC-2026-0285.md"
     },
     {
@@ -181,7 +181,7 @@
       "patched": [
         ">=0.20.0"
       ],
-      "disposition": "not applicable to Windows; target graph verification required",
+      "disposition": "not applicable to Windows normal/build graph; Windows verification passed",
       "source": "https://github.com/RustSec/advisory-db/blob/9b3a3b73a7f42606494c943e95f8196e9994df46/crates/glib/RUSTSEC-2024-0429.md"
     },
     {
@@ -203,13 +203,13 @@
       "patched": [
         ">= 0.3.47"
       ],
-      "disposition": "repaired locked version; Windows verification pending",
+      "disposition": "repaired locked version; Windows build and regression accepted",
       "source": "https://github.com/RustSec/advisory-db/blob/9b3a3b73a7f42606494c943e95f8196e9994df46/crates/time/RUSTSEC-2026-0009.md"
     }
   ],
   "verification": {
     "local": "Official Cargo 1.88 targeted lock updates and Windows-target metadata; official cargo-audit 0.22.2 static lock scan: zero vulnerabilities, six maintenance notices and non-Windows glib unsound notice. No Linux product tests/builds.",
-    "windows": "pending exact pushed SHA",
+    "windows": "passed exact commit 89e8d57bb58ac19facf035c574592e1b73cc9ee2",
     "tls": "existing client test exercises owned TLS 1.3 response with test-only CA; actual production client must reject the same untrusted CA",
     "entry": ".github/workflows/r12-14.yml",
     "artifact": "r12-23-dependencies-<SHA>-<attempt>"
@@ -226,5 +226,32 @@
     "windowsTargetMetadata": "--locked --filter-platform x86_64-pc-windows-msvc",
     "msrvReview": "no resolved normal/build package declares an MSRV above 1.88; native Windows rerun required",
     "productTestsExecuted": false
+  },
+  "acceptance": {
+    "commit": "89e8d57bb58ac19facf035c574592e1b73cc9ee2",
+    "run": 36718273620,
+    "url": "https://github.com/uniquenesssta/mdr/actions/runs/36718273620",
+    "jobs": "6/6",
+    "node": {
+      "tests": 1482,
+      "pass": 1482,
+      "fail": 0
+    },
+    "rust": {
+      "tests": 268,
+      "pass": 268,
+      "fail": 0
+    },
+    "browserContract": "11/11",
+    "builtAppBrowser": "29/29",
+    "advisoryContracts": "8/8",
+    "dependencyArtifact": {
+      "id": 11097426092,
+      "digest": "sha256:503baa0f922af68b493efcb5aaa0e12c150cc8404a2dac55386a1dcb3721ba54"
+    },
+    "evidenceBasis": "GitHub job and step results, decoded logs, scanner success path and artifact metadata; ZIP contents not read in this turn.",
+    "tls": "Windows focused and full client tests passed; real TLS 1.3 and production untrusted CA refusal included",
+    "webview": "five security surfaces and both/hybrid normal content passed",
+    "warnings": "six reviewed maintenance notices retained; no unconditional ignore; glib excluded by target graph"
   }
 }

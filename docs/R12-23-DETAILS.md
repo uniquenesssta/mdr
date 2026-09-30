@@ -1,6 +1,6 @@
 # R12-23 Windows 依赖公告处置（A10）
 
-状态：R12-22 的精确提交 `ccaf7af` 已通过 Windows 累计 5/5 与原生安全/合法内容验收；本项兼容依赖升级及验证已实施，待新的 Windows CI，A10 仍开放、12.23 不勾选、12.24 未开始。唯一分支 `agent/r12-stage`。
+状态：精确提交 `89e8d57bb58ac19facf035c574592e1b73cc9ee2` 的 Windows CI 6/6 全部通过，A10 当前依赖公告处置已验收，12.23 完成。维护提示与未来复核责任保留；R12 整体待 12.24。唯一分支 `agent/r12-stage`。
 
 ## 官方公告与兼容升级
 
@@ -31,11 +31,17 @@
 
 本地执行的是锁文件/依赖源静态核对：官方 Cargo 1.88 精确更新与 Windows-target metadata 均成功；官方 cargo-audit 0.22.2（发行 digest 已核对）针对当日库扫描完整锁文件，漏洞 0、维护提示 6、glib unsound 提示 1。目标 metadata 未出现 glib，已解析 normal/build 包的声明 MSRV 无超过 1.88。scanner 在 no-fetch 模式未填 last-commit，数据库身份另由 git rev-parse 的精确 SHA 验证，未将空值伪作证据。
 
-只进行 JS/Rust 语法与格式、actionlint/YAML/bash、JSON/证书签名/导入/差异等静态检查；未在 Linux 运行产品测试、构建或 TLS/WebView 行为验收。全部动态结果待本批精确提交的 Windows CI，不能提前关闭 A10。
+只进行 JS/Rust 语法与格式、actionlint/YAML/bash、JSON/证书签名/导入/差异等静态检查；未在 Linux 运行产品测试、构建或 TLS/WebView 行为验收。上述为实施时静态检查；下方 Windows 精确提交结果已完成对应动态验收，A10 当前处置关闭。
 
 Context7 查询 Cargo 定向更新/metadata 和 reqwest CA API；其索引为当前官方文档，reqwest 当前 master 的废弃提示不套到本仓库 0.12.28，已结合实际下载的精确包源码确认 API 无此废弃标记。Mermaid Chart 已绘制实际升级依赖链。后续 R13.1 新 XML/日期/HTTP3 调用须重新核对公告和特性，R17.8/17.9/17.17 重新扫当日官方库；已有接收文字保持。12.24 必须核对本项 Windows 结果才能收官。
 
-推送启动 Actions 后结束、不轮询；约 15～20 分钟后发起“查询 R12-23 CI”。
+## Windows 正式验收（2026-09-30）
+
+[Actions 36718273620](https://github.com/uniquenesssta/mdr/actions/runs/36718273620) 验证 `89e8d57bb58ac19facf035c574592e1b73cc9ee2`，6/6 job 和全部硬性步骤通过。递归全仓 Node **1482/1482**、Rust **268/268**（256+5+1+6）、公告判定 **8/8**、浏览器 **11/11+29/29**，Clippy `-D warnings`、cargo check、格式、锁定构建与架构/文档门禁通过。TLS 专项两项和全量客户端测试通过，真实 TLS 1.3 与生产不可信 CA 拒绝均在测试内；五个 WebView 安全面及 both/hybrid 正常内容回归通过。
+
+公告 job 日志明确打印 `Windows dependency advisory verification passed`；对应实现成功路径要求官方发行 digest、数据库 SHA、完整无 ignore 的 cargo-audit、Windows normal/build 图、MSRV、锁文件未变全部满足。依赖 artifact **11097426092**，SHA256 `503baa0f922af68b493efcb5aaa0e12c150cc8404a2dac55386a1dcb3721ba54`。本轮读取了 GitHub 逐 job/step 结果、解码日志和 artifact 元数据，执行环境连接失败，未解压 artifact，不声称直接读取了其中 JSON；R12-24 的同运行聚合将实际解析原始报告并重新判定。
+
+当前范围 A10 关闭，六条 unmaintained 继续复核，glib 的 Windows 排除不得外推到其他平台；进入 R13 新能力与 R17 最终公告扫描仍需重新确认。
 
 ```mermaid
 flowchart TD
