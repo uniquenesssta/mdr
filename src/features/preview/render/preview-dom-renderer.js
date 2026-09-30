@@ -1,10 +1,12 @@
 /**
  * Responsibility: Patch preview body/block DOM while preserving reusable nodes and render metadata.
- * Imports: None.
+ * Imports: Shared document HTML boundary.
  * Exports: createPreviewDomRenderer().
  * State/side effects: Owns only DOM replacement/reordering under the injected preview root; returns geometry-invalidating facts to callers.
  * Lifecycle: patch operations reject after destroy(); no observers, timers, scrolling or synchronization are owned here.
  */
+import { createDocumentHtmlFragment } from '../../../shared/security/document-html.js';
+
 function hashMarkup(value) {
   let hash = 2166136261;
   const text = String(value || '');
@@ -45,10 +47,9 @@ export function createPreviewDomRenderer({ root, documentRef, blockView } = {}) 
   return Object.freeze({
     patchHtml(html, { forceFullRebuild = false } = {}) {
       assertActive();
-      const template = documentRef.createElement('template');
-      template.innerHTML = '<div class="markdown-body">' + String(html || '') + '</div>';
-      const nextBody = template.content?.firstElementChild;
-      if (!nextBody) throw new Error('Preview DOM Renderer could not create markdown body.');
+      const nextBody = documentRef.createElement('div');
+      nextBody.className = 'markdown-body';
+      nextBody.append(createDocumentHtmlFragment(html, documentRef));
       assignRenderKeys(nextBody);
       const currentBody = root.querySelector('.markdown-body');
       if (!currentBody || currentBody.classList?.contains?.('preview-loading')) {

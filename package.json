@@ -30,6 +30,7 @@
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-fs": "^2.5.1",
     "dom-to-image-more": "^3.7.2",
+    "dompurify": "3.4.13",
     "katex": "^0.16.25",
     "marked": "^16.2.1",
     "mermaid": "^11.12.0"

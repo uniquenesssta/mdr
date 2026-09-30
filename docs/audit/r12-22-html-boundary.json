@@ -6,14 +6,29 @@
   "platform": "Windows",
   "productionBaseline": "cde35b8cd3f46d86791653cd7488bb77a40a19ae",
   "previousAcceptanceRecord": "7dfab1822e452ec2bb81dfea0ef3304a96735bdd",
-  "phase": "real Windows WebView baseline before remediation",
-  "status": "initial workflow rejected before jobs; job env repair implemented; Windows repair run pending; A03 remains open",
+  "phase": "post-baseline remediation",
+  "status": "shared HTML boundary and CSP implemented; actual Windows verification pending",
   "acceptedSecurityBoundary": false,
   "a03Closed": false,
-  "r18n01": "direct leaf imports implemented; actual Windows architecture validation pending",
-  "productionHtmlPolicyChanged": false,
-  "productionCsp": null,
-  "productionDependenciesChanged": false,
+  "r18n01": "resolved; architecture passed on Windows run 36704905753",
+  "productionHtmlPolicyChanged": true,
+  "productionCsp": {
+    "default-src": "'self'",
+    "script-src": "'self'",
+    "script-src-attr": "'none'",
+    "style-src": "'self' 'unsafe-inline'",
+    "img-src": "'self' asset: http://asset.localhost blob: data: http: https:",
+    "font-src": "'self' data:",
+    "connect-src": "'self' ipc: http://ipc.localhost",
+    "worker-src": "'self' blob:",
+    "object-src": "'none'",
+    "base-uri": "'none'",
+    "form-action": "'none'",
+    "frame-src": "http: https:",
+    "style-src-elem": "'self' 'unsafe-inline'",
+    "style-src-attr": "'unsafe-inline'"
+  },
+  "productionDependenciesChanged": "DOMPurify 3.4.13 promoted from locked transitive to pinned direct; resolved versions unchanged",
   "observedSurfaces": [
     "preview-markdown",
     "preview-full-html",
@@ -35,13 +50,24 @@
   "productionLockProtection": "all production registry name/version/source/checksum identities retained in isolated host lock; otherwise job fails",
   "validation": {
     "local": "static actionlint 1.7.12 semantic check reproduced original failure and passes after repair; JS/YAML/bash/JSON/docs/diff checks only",
-    "windows": "initial run rejected before execution; repair pending",
+    "windows": "baseline verified; remediation Windows pending",
     "entry": ".github/workflows/r12-14.yml",
     "nativeJob": "webview-baseline",
-    "baselineSuccessIsSecurityAcceptance": false
+    "baselineSuccessIsSecurityAcceptance": false,
+    "postRemediation": {
+      "mode": "--verify",
+      "securitySurfaces": 5,
+      "legalContentLayouts": [
+        "both",
+        "hybrid"
+      ],
+      "independentCspChallenge": true,
+      "nativeCanaryControl": true,
+      "rejectAnyAssertionFailure": true
+    }
   },
-  "evidenceArtifact": "r12-22-webview-baseline-<commit>-<attempt>",
-  "next": "end turn after Actions starts; query about 20-30 minutes later; inspect baseline, then implement and validate both security boundaries",
+  "evidenceArtifact": "r12-22-webview-verification-<commit>-<attempt>",
+  "next": "query Windows CI about 15-20 minutes after push; accept only security, normal content and cumulative gates all pass",
   "r12_23Started": false,
   "firstWorkflowFailure": {
     "commit": "f5a9ce7110ddcc3774ad5c6e42c5e9eae79042e9",
@@ -62,6 +88,20 @@
     "actionlintVersion": "1.7.12",
     "actionlintDigestVerified": true,
     "staticSemanticCheck": "passed after reproducing the original context error",
-    "status": "Windows pending"
+    "status": "passed Windows baseline"
+  },
+  "baseline": {
+    "commit": "631adcb9106e1e9b5031e4d91a84db0f5cb55bdc",
+    "run": 36704905753,
+    "conclusion": "success",
+    "jobs": "5/5",
+    "node": "1472/1472",
+    "rust": "268/268",
+    "webviewSurfaces": 4,
+    "artifact": 11092090676,
+    "baselineJsonInspected": true,
+    "securityAccepted": false,
+    "nativeMarkupIpc": "4/4 owned canary reads succeeded",
+    "cspPresent": false
   }
 }

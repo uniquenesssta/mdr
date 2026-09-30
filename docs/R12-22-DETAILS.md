@@ -1,12 +1,12 @@
 # R12-22 当前 HTML 渲染安全边界整改（A03）
 
-状态：首轮 Windows Actions 因工作流上下文错误未启动任何 job；本轮已修正配置及补充回归，等待修正提交的 Windows Actions。A03 保持开放，12.22 不勾选；探测工作流全绿也不等于渲染安全边界已验收。分支 `agent/r12-stage`；生产基线 `cde35b8cd3f46d86791653cd7488bb77a40a19ae`，R12-21 验收记录提交 `7dfab1822e452ec2bb81dfea0ef3304a96735bdd`。
+状态：基线提交 `631adcb9106e1e9b5031e4d91a84db0f5cb55bdc` 的 [Windows Actions 36704905753](https://github.com/uniquenesssta/mdr/actions/runs/36704905753) 已全绿，5/5 job、全仓 Node 1472/1472、Rust 268/268、架构/Clippy/构建通过。真实 WebView 四面均确认事件执行与测试自有文件原生 IPC 访问；没有 CSP。R18-N01 已通过 Windows 架构复验。本轮根据证据实施公共净化与 CSP，修复后 Windows 验收待 CI；A03 仍开放、12.22 不勾选，12.23 未开始。分支仅 `agent/r12-stage`。
 
 ## 顺序与当前范围
 
-任务书 12.22 明确要求“先在真实 Windows WebView 用无害标记确认 raw HTML 的事件属性、危险 URL/嵌入元素及 CSP/IPC 边界”。因此先提交可复核的原生探测，不在观察结果出现前宣称已修复或已排除 A03。用户要求启动 GitHub Actions 后立即结束会话，不轮询；后续查询本批证据，再确定并实现公共净化/隔离及 CSP，再做修复后安全与合法内容回归。12.23 尚未开始。
+任务书 12.22 明确要求“先在真实 Windows WebView 用无害标记确认 raw HTML 的事件属性、危险 URL/嵌入元素及 CSP/IPC 边界”。因此先提交可复核的原生探测，不在观察结果出现前宣称已修复或已排除 A03。用户要求启动 GitHub Actions 后立即结束会话，不轮询；基线已查询并读取原生 JSON，本批按真实结果实施公共净化/CSP，并提交修复后安全与合法内容回归。12.23 尚未开始。
 
-当前静态事实：Preview 的 `patchHtml` 及默认 Block View 解析、Hybrid 的 `renderHtmlBlockSource` 都把原始 HTML 经 template 插入主 DOM；`security.csp` 为 null。`withGlobalTauri:false` 没有证明内部 IPC 不可达。历史 HTML 冻结测试仍描述原始显示语义；它们不作为安全证明，本批没有以跳过或删除它们掩盖风险。
+整改前静态事实：Preview 的 `patchHtml` 及默认 Block View 解析、Hybrid 的 `renderHtmlBlockSource` 都把原始 HTML 经 template 插入主 DOM；`security.csp` 为 null。`withGlobalTauri:false` 没有证明内部 IPC 不可达。历史 HTML 显示契约在本轮明确改为安全 DOM；原始 Markdown 源码不改写，不再承诺执行原始 HTML。对应测试按本阶段安全要求更新，未跳过或删除门禁。
 
 ## 原生探测链路与证据
 
@@ -29,7 +29,7 @@ IPC 只调用既有 `read_dropped_file` 读取本测试在 RUNNER_TEMP 新建的
 
 ## R18-N01 循环依赖修复
 
-`VirtualPreviewController` 改为直接导入职责明确的 `preview-thresholds.js` 和 `virtual-window-controller.js`，不再回引自身所属公共 `index.js`。继承、阈值来源、公共导出与生命周期保持。新增回归固定此依赖方向；原全仓架构图/循环检测保持，实际 Windows 通过前仍记“已修正待验证”，不把静态审阅当通过证据。
+`VirtualPreviewController` 改为直接导入职责明确的 `preview-thresholds.js` 和 `virtual-window-controller.js`，不再回引自身所属公共 `index.js`。继承、阈值来源、公共导出与生命周期保持。新增回归固定此依赖方向；原全仓架构图/循环检测保持，提交 `631adcb` 已通过实际 Windows 架构门禁，R18-N01 已复验解决。
 
 ## 验证状态与后续验收
 
@@ -58,3 +58,27 @@ IPC 只调用既有 `read_dropped_file` 读取本测试在 RUNNER_TEMP 新建的
 - [DOMPurify 官方文档与安全目标](https://github.com/cure53/DOMPurify)
 - [Selenium JavaScript WebDriver](https://www.selenium.dev/selenium/docs/api/javascript/WebDriver.html)
 - [机器可读状态](audit/r12-22-html-boundary.json)
+
+## 本轮按原生证据实施的整改
+
+已读取基线 artifact `11092090676` 的 `render-boundary-baseline.json`：四面均保留 onerror/onclick/onload，执行 img error、button click 和 srcdoc 标记；四面 IPC 返回专用 canary 的固定文字；固定图片/CSS 各有请求；response CSP 为 null、meta CSP 为空。风险已复现，基线 job 的绿色仅证明探测完成。
+
+`src/shared/security/document-html.js` 是唯一文档 HTML 安全策略 owner，显式依赖锁定 DOMPurify 3.4.13（从已锁定的 Mermaid 传递依赖提升为直接依赖，不升级任何已解析包）。每个真实 document 使用独立 purifier，缺少真实 DOM 或不支持净化时直接拒绝，无 raw HTML 降级。返回 DOM fragment 并直接挂载，避免净化后重新序列化/解析。Preview 整体、默认 Block View（含虚拟窗口所用 createBlockNodes）和 Hybrid HTML View 均调用该 owner；源 Markdown、模型、source-range 和增量复用规则保留。
+
+策略使用 HTML 标签/属性允许清单，拒绝事件、script/SVG/MathML/iframe/object/embed/form/template/style、srcdoc/srcset/formaction/name，以及能伪装应用命令的 data 属性和 CSS 类。ID 由 DOMPurify 加 user-content 前缀，hash 链接对应前缀；应用自行设置的源范围/块标识在净化后赋予。raw HTML 仅保留六位十六进制 color/background-color；任意样式、URL、定位、覆盖和选择器不进入主 DOM。checkbox 只保留被动禁用显示。外链仅允许完整 http/https/mailto/tel，危险/相对导航移除；现有捕获处理器仍拥有链接预览及明确系统打开，未被处理的 click/auxclick 不直接导航 WebView。
+
+正常图片允许被动 http/https、已支持的 asset/blob 和限定 base64 位图 data URL，禁止 IPC host、凭据 URL、HTML data URL 和 srcset；图片不发 referrer。外部图片本身的下载是既有合法行为，因此固定 loopback image marker 可以出现，不能把它误判为脚本外传；CSS marker 必须为零。没有承诺离线或禁止所有图片网络请求。
+
+生产/开发 CSP 显式启用：script-src self、script-src-attr none，不放行 inline/eval 脚本；object/base/form 均 none，connect 只允许本应用与 native IPC，开发额外允许固定 Vite websocket；worker 保留 self/blob。图片保留正常来源，字体仅 self/data；style-src-elem/style-src-attr 允许可信 UI/KaTeX/Mermaid 的动态样式，文档 CSS 已由公共边界限制。frame-src 的 http/https 仅保留现有用户点击后创建的链接预览，文档 iframe 被净化移除；新增网页来源的完整验收仍属于 R13 已有任务。Tauri 自动注入 CSP nonces/hashes，不修改或削弱该机制。共享 Mermaid 明确 strict，并保护 securityLevel、dompurifyConfig、themeCSS 等配置键，禁止文档指令降低安全等级。
+
+## 修复后硬性 Windows 验证
+
+同一真实原生 host、前端 dist、生产 Cargo.lock 保护及全部累计门禁保持。现有 runner 增加 `--verify`，输出 `render-boundary-verification.json`；默认历史观察模式保留。四个原入口加实际 canonical createBlockNodes 虚拟块工厂，共五面；后者验证实际虚拟挂载所用工厂，不声称已运行大文档滚动性能验收。
+
+每面必须无事件属性/事件标记/危险 URL/嵌入/命令伪装/不受限 CSS，URL 不改变，IPC 未尝试且没有结果，CSS 标记请求为零，正常文字和有限颜色保留。增加编码 URL、HTML data URL、srcset、DOM clobbering、命令 data 属性、覆盖样式及 mutation-XSS 样例。驱动正常调用自有 canary 仍必须到达真实 Rust，用于排除 IPC 被整体禁用而造成的假通过。另由驱动创建绕过净化的测试 button，验证实际 CSP 独立阻断 inline handler，并记录 script-src-attr violation。随后在真实 both/hybrid 两种布局装载合法 Markdown，等待实际位图加载、KaTeX、Mermaid SVG、details/emphasis/bold，并保留截图。任何断言失败均失败退出，先持久化部分证据，保留 artifact；累计 Node/Rust/架构/编译等失败也阻止验收。
+
+本地只进行修改 JS 语法、actionlint、YAML/bash、JSON/清单/导入/差异等静态复核。当前不是 Windows 环境，不执行 Linux 产品测试或构建；所有动态验收由 Windows CI 执行。README/任务书暂记实施完待 Windows，不能提前关闭 A03。
+
+本轮 Context7 已查询 DOMPurify 返回 fragment/允许清单/资源策略和 Mermaid strict/secure；Tauri 的 Context7 库返回 library_not_finalized，改读官方 CSP 文档并核对当前配置。已使用 Mermaid Chart 更新实际公共净化链路图。版本索引不代表精确包实现，真实锁版本的动态行为由 Windows 回归核对。
+
+本次推送触发 Actions 后结束，不轮询；约 15～20 分钟后由用户发起“查询 R12-22 CI”。

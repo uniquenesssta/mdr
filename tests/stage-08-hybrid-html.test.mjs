@@ -25,24 +25,11 @@ test('Atomic 8.13 HTML widget keeps source normalization and source-derived fing
   assert.equal(widget.fingerprint, '42');
 });
 
-test('Atomic 8.13 HTML view preserves raw template.innerHTML rendering without transformation', () => {
-  let raw = null;
-  let published = null;
-  const template = {
-    set innerHTML(value) { raw = value; },
-    content: { cloneNode() { return { raw }; } }
-  };
-  const documentRef = {
-    createElement(tag) {
-      assert.equal(tag, 'template');
-      return template;
-    }
-  };
-  const target = { replaceChildren(node) { published = node; } };
-  const source = '<details open><summary>x</summary><em data-k="1">raw</em></details>';
-  renderHtmlBlockSource(target, source, documentRef);
-  assert.equal(raw, source);
-  assert.deepEqual(published, { raw: source });
+test('R12-22 HTML view fails closed when a real sanitizer DOM is unavailable', () => {
+  let published = false;
+  const target = { replaceChildren() { published = true; } };
+  assert.throws(() => renderHtmlBlockSource(target, '<img onerror="unsafe">', {}), /real DOM document/);
+  assert.equal(published, false);
 });
 
 test('Atomic 8.13 HTML widget continues to shield CodeMirror events', () => {

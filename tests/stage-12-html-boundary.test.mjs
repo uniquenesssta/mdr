@@ -15,7 +15,7 @@ test('R12-22 probe covers both production sinks and full/block Preview paths wit
   assert.throws(() => createRenderBoundaryProbe('x" onclick="x', 'http://127.0.0.1:4592'), /Invalid probe id/);
 });
 
-test('R12-22 baseline requires real native IPC, own canary, exact SHA and keeps A03 open', async () => {
+test('R12-22 baseline and repair verification require real native IPC, own canary and exact SHA', async () => {
   const runner = await readFile('tests/e2e/windows/run-render-boundary-probe.mjs', 'utf8');
   assert.match(runner, /process\.platform !== 'win32'/);
   assert.match(runner, /withEmbeddedSession/);
@@ -23,6 +23,12 @@ test('R12-22 baseline requires real native IPC, own canary, exact SHA and keeps 
   assert.match(runner, /nativeCanaryControlPassed, true/);
   assert.match(runner, /mkdtemp\(join\(resolve\(process\.env\.RUNNER_TEMP\)/);
   assert.match(runner, /acceptedSecurityBoundary: false/);
+  assert.match(runner, /evidence\.acceptedSecurityBoundary = verifyBoundary/);
+  assert.match(runner, /assert\.equal\(snapshot\.ipcAttempted, false/);
+  assert.match(runner, /assert\.deepEqual\(snapshot\.eventAttributes, \[\]/);
+  assert.match(runner, /assert\.equal\(evidence\.cspControl\.executed, false/);
+  assert.match(runner, /preview-virtual-block/);
+  assert.match(runner, /for \(const mode of \['both', 'hybrid'\]\)/);
   assert.match(runner, /await persist\(\)/);
   assert.match(runner, /saveScreenshot/);
   assert.match(runner, /await rm\(canaryRoot, \{ recursive: true, force: true \}\)/);
@@ -41,6 +47,7 @@ test('R12-22 automatic Windows baseline preserves cumulative gates and productio
   assert.match(job, /-PreserveProductionLock/);
   assert.match(job, /cargo build --locked/);
   assert.match(job, /run-render-boundary-probe\.mjs/);
+  assert.match(job, /run-render-boundary-probe\.mjs --verify/);
   assert.match(job, /if: always\(\)/);
   assert.match(host, /cargo metadata --format-version 1 --manifest-path/);
   assert.match(host, /hostIdentities -cnotcontains \$identity/);
@@ -49,6 +56,45 @@ test('R12-22 automatic Windows baseline preserves cumulative gates and productio
   for (const preserved of ['Full Node regression', 'Full Rust tests', 'Full Clippy warnings-denied gate', 'Built-app browser regression', 'Run every tracked Node test']) {
     assert.ok(workflow.includes(preserved), preserved);
   }
+});
+
+test('R12-22 all document HTML materialization uses the same fail-closed security owner', async () => {
+  for (const path of [
+    'src/features/preview/render/preview-dom-renderer.js',
+    'src/features/preview/render/preview-block-view.js',
+    'src/features/hybrid-editor/widgets/html/html-block-view.js'
+  ]) {
+    const source = await readFile(path, 'utf8');
+    assert.match(source, /shared\/security\/document-html\.js/);
+    assert.match(source, /createDocumentHtmlFragment\(/);
+    assert.doesNotMatch(source, /innerHTML\s*=/);
+  }
+  const policy = await readFile('src/shared/security/document-html.js', 'utf8');
+  for (const marker of ['ALLOWED_TAGS', 'ALLOWED_ATTR', 'ALLOW_DATA_ATTR: false', 'SANITIZE_NAMED_PROPS: true', 'RETURN_DOM_FRAGMENT: true', "anchor.addEventListener('auxclick'", 'real DOM document']) {
+    assert.ok(policy.includes(marker), marker);
+  }
+  assert.doesNotMatch(policy, /__TAURI|invoke\(|fetch\(|innerHTML\s*=/);
+});
+
+test('R12-22 CSP blocks inline code and active document resources while retaining desktop IPC and image rendering', async () => {
+  const config = JSON.parse(await readFile('src-tauri/tauri.conf.json', 'utf8'));
+  for (const csp of [config.app.security.csp, config.app.security.devCsp]) {
+    assert.equal(csp['script-src'], "'self'");
+    assert.equal(csp['script-src-attr'], "'none'");
+    assert.equal(csp['object-src'], "'none'");
+    assert.equal(csp['base-uri'], "'none'");
+    assert.equal(csp['form-action'], "'none'");
+    assert.match(csp['connect-src'], /ipc: http:\/\/ipc\.localhost/);
+    assert.match(csp['img-src'], /asset:.*data:.*http: https:/);
+    assert.doesNotMatch(csp['script-src'], /unsafe-inline|unsafe-eval|http:|https:/);
+  }
+  const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
+  const lock = JSON.parse(await readFile('package-lock.json', 'utf8'));
+  assert.equal(packageJson.dependencies.dompurify, lock.packages['node_modules/dompurify'].version);
+  assert.equal(lock.packages[''].dependencies.dompurify, packageJson.dependencies.dompurify);
+  const mermaid = await readFile('src/features/preview/render/presentation/mermaid-presentation.js', 'utf8');
+  assert.match(mermaid, /securityLevel: 'strict'/);
+  assert.match(mermaid, /secure: \[.*'securityLevel'.*'dompurifyConfig'/);
 });
 
 test('R12-22 Virtual Preview consumes canonical leaf responsibilities without importing its own public entry', async () => {

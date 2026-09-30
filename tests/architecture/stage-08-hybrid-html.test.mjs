@@ -30,13 +30,14 @@ test('Atomic 8.13 HTML feature graph is browser-direct-safe and receives WidgetT
   assert.match(sources[0], /options\.recordInteraction/);
 });
 
-test('Atomic 8.13 HTML View owns raw presentation only and does not introduce sanitizer or interaction authority', async () => {
+test('Atomic 8.13 HTML View delegates document security and retains presentation ownership', async () => {
   const [widget, view] = await Promise.all(htmlPaths.map(path => text(path)));
-  assert.match(view, /template\.innerHTML = String\(source \|\| ''\)/);
-  assert.match(view, /template\.content\.cloneNode\(true\)/);
+  assert.match(view, /createDocumentHtmlFragment\(source, documentRef\)/);
+  assert.match(view, /shared\/security\/document-html\.js/);
+  assert.doesNotMatch(view, /innerHTML|template\.content/);
   assert.match(view, /cm-hybrid-html-body markdown-body/);
   assert.match(view, /data|dataset\.hybridDoubleZone/);
-  assert.doesNotMatch(view, /DOMPurify|sanitize|transitionHybridComponent|bindWidgetSourceAction|openWidgetSource|attachHybridWidgetLifecycle/);
+  assert.doesNotMatch(view, /DOMPurify|addHook|transitionHybridComponent|bindWidgetSourceAction|openWidgetSource|attachHybridWidgetLifecycle/);
   assert.doesNotMatch(widget, /innerHTML|createElement\(['"]template['"]\)/);
 });
 

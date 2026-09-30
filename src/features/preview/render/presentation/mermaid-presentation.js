@@ -50,7 +50,10 @@ export async function loadMermaidRenderer() {
 
 function initializeMermaidRenderer(renderer, theme) {
   if (initializedRenderer === renderer && initializedTheme === theme) return;
-  renderer.initialize({ startOnLoad: false, theme });
+  renderer.initialize({
+    startOnLoad: false, theme, securityLevel: 'strict',
+    secure: ['secure', 'securityLevel', 'startOnLoad', 'maxTextSize', 'suppressErrorRendering', 'dompurifyConfig', 'themeCSS']
+  });
   initializedRenderer = renderer;
   initializedTheme = theme;
 }

@@ -1,14 +1,14 @@
 /**
  * Responsibility: Materialize one preview model block into DOM nodes and project its source range metadata.
- * Imports: None.
+ * Imports: Shared document HTML boundary.
  * Exports: createPreviewBlockView().
  * State/side effects: Creates detached nodes only; never mounts, measures, scrolls or schedules work.
  * Lifecycle: create/apply operations reject after destroy().
  */
+import { createDocumentHtmlFragment } from '../../../shared/security/document-html.js';
+
 function defaultParseHtml(documentRef, html) {
-  const template = documentRef.createElement('template');
-  template.innerHTML = String(html || '');
-  return Array.from(template.content?.childNodes || []);
+  return Array.from(createDocumentHtmlFragment(html, documentRef).childNodes);
 }
 
 export function createPreviewBlockView({ documentRef, parseHtml } = {}) {

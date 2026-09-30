@@ -1811,7 +1811,7 @@
       "src/features/hybrid-editor/widgets/html/html-block-view.js",
       "esm-module",
       "hybrid-editor-ui",
-      "HTML block DOM projection preserving existing raw template.innerHTML rendering semantics without sanitizer, source-edit or lifecycle ownership.",
+      "HTML block DOM projection through shared document HTML security policy; no source-edit or lifecycle ownership.",
       "none",
       "pure-view-build",
       "retain",
@@ -4954,6 +4954,16 @@
       "Shared same-directory staged user-file commit, failure cleanup and Windows replacement/DACL boundary.",
       "per-save temporary file and handle",
       "filesystem-write",
+      "retain",
+      false
+    ],
+    [
+      "src/shared/security/document-html.js",
+      "esm-module",
+      "shared",
+      "Passive document HTML sanitization, bounded styles and URLs, isolated DOMPurify instances and unhandled navigation guards.",
+      "per-document-purifier",
+      "document-fragments",
       "retain",
       false
     ]

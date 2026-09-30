@@ -1,15 +1,14 @@
 /**
  * Atomic 8.13 HTML block presentation.
- * Owns HTML block DOM projection only. Raw HTML rendering intentionally preserves the existing template.innerHTML semantics.
+ * Owns HTML block DOM projection through the shared passive document HTML boundary.
  * No markup-policy, Session, source-edit, CodeMirror or lifecycle authority belongs here.
  */
 import { createWidgetButton } from '../shared/widget-button.js';
 import { createWidgetToolbar } from '../shared/widget-toolbar.js';
+import { createDocumentHtmlFragment } from '../../../../shared/security/document-html.js';
 
 export function renderHtmlBlockSource(element, source, documentRef = globalThis.document) {
-  const template = documentRef.createElement('template');
-  template.innerHTML = String(source || '');
-  element.replaceChildren(template.content.cloneNode(true));
+  element.replaceChildren(createDocumentHtmlFragment(source, documentRef));
 }
 
 export function createHtmlBlockView(options = {}) {

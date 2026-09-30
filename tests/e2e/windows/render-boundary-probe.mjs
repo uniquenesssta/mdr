@@ -27,7 +27,13 @@ export function createRenderBoundaryProbe(id, markerOrigin) {
 <img data-r12-kind="ipc" src="/${id}-ipc-missing.png" onerror="${ipc}">
 <img data-r12-kind="remote-image" src="${origin.origin}/marker/${id}/image" alt="owned loopback marker">
 <style>[data-r12-probe="${id}"] [data-r12-kind="css"]{background-image:url('${origin.origin}/marker/${id}/css')}</style>
-<span data-r12-kind="css">CSS marker</span>
+<span data-r12-kind="css" style="background-image:url('${origin.origin}/marker/${id}/css');position:fixed;inset:0">CSS marker</span>
+<form id="__TAURI_INTERNALS__" name="document"><input name="invoke"><button formaction="javascript:${mark('form-url')}">form marker</button></form>
+<a data-r12-kind="encoded-url" href="java&#x09;script:${mark('encoded-url')}">encoded marker</a>
+<a data-r12-kind="data-url" href="data:text/html,marker">data URL marker</a>
+<img data-r12-kind="srcset" srcset="${origin.origin}/marker/${id}/css 1x" alt="srcset marker">
+<div data-r12-kind="spoof" class="cm-hybrid-widget-action" data-editor-action="saveCurrentFile" style="color:#123456;background-color:#abcdef">bounded color</div>
+<math><mtext><table><mglyph><style><!--</style><img title="--><img src=x onerror=${mark('mutation-xss')}>"/></table></mtext></math>
 </div>`;
   return Object.freeze({ id, html, markdown: `# R12 baseline\n\n${html}\n\nend of owned fixture\n` });
 }
