@@ -1,5 +1,5 @@
 import './styles/index.css';
-import { createDropImportController, createDropOverlayView, mountClassicDropImportPort } from './features/import/index.js';
+import { createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort } from './features/import/index.js';
 import { createFileImportController, mountClassicFileImportPort } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
@@ -141,15 +141,24 @@ const dropImportController = createDropImportController({
   subscribeNative: handler => platform.dragDrop.subscribe(handler),
   onSubscriptionError: error => console.warn('Native drag-drop subscription failed', error)
 });
+const dropImageController = createImageImportController({
+  readBrowserImage: (file, options) => browserImageReader.readDataUrl(file, options),
+  readNativeImage: path => platform.files.readImage(path, '')
+});
 const dropOverlayView = createDropOverlayView({ element: document.getElementById('drop-overlay') });
 const dropImportPort = mountClassicDropImportPort(compatibilityPlatformHost, {
   start: callbacks => dropImportController.start({ ...callbacks, setOverlayVisible: dropOverlayView.setVisible }),
   openPath: dropImportController.openPath
-});
+}, dropImageController);
 const browserImportReader = createBrowserFileReader({
   FileReaderClass: window.FileReader,
   readErrorMessage: '无法读取所选文档',
   cancelErrorMessage: '文档读取已取消'
+});
+const browserImageReader = createBrowserFileReader({
+  FileReaderClass: window.FileReader,
+  readErrorMessage: '无法读取所选图片',
+  cancelErrorMessage: '图片读取已取消'
 });
 const fileImportController = createFileImportController({
   readBrowserText: (file, options) => browserImportReader.readText(file, options),
@@ -285,6 +294,7 @@ window.addEventListener('pagehide', () => {
   backgroundTaskScheduler.destroy();
   void dropImportController.destroy();
   dropOverlayView.destroy();
+  dropImageController.destroy();
   dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();
@@ -988,6 +998,9 @@ async function loadAppModules() {
 
     const imageView = createImageDialogView({
       root: requireElement('#image-modal', 'Image dialog'),
+      imageController: createImageImportController({
+        readBrowserImage: (file, options) => browserImageReader.readDataUrl(file, options)
+      }),
       selection: editorSelectionService,
       fallbackAlt: t('image') || '图片',
       notify,
@@ -1549,6 +1562,7 @@ loadAppModules().then(() => {
 }).catch((error) => {
   void dropImportController.destroy();
   dropOverlayView.destroy();
+  dropImageController.destroy();
   dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();

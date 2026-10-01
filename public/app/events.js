@@ -37,28 +37,19 @@
     // R13.4 owns event routing; image policy/reading migrate in 13.6/13.7.
     eventsDropImportPort.register({
       openBrowserText: (file, request) => loadFile(file, request),
-      openBrowserImage(file, request) {
-        const decision = eventsDropImportPort.assessImage(file);
-        if (!decision.allowed) {
-          showToast(t(decision.reason === 'too-large' ? 'toastImageTooLarge' : 'toastDropUnsupported'));
-          return false;
+      async openBrowserImage(file, request) {
+        try {
+          const result = await eventsDropImportPort.readImage(file, { signal: request.signal });
+          if (!request.isCurrent()) return false;
+          insertImageMarkdown(result.name, result.url);
+          showToast(t('toastImageInserted'));
+          return true;
+        } catch (error) {
+          if (!request.isCurrent() || eventsDropImportPort.isImageCancelled(error)) return false;
+          if (error?.code === 'IMAGE_IMPORT_TOO_LARGE') { showToast(t('toastImageTooLarge')); return false; }
+          if (error?.code === 'IMAGE_IMPORT_UNSUPPORTED') { showToast(t('toastDropUnsupported')); return false; }
+          throw error;
         }
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          const finish = () => { reader.onload = null; reader.onerror = null; reader.onabort = null; };
-          reader.onload = event => {
-            finish();
-            if (!request.isCurrent()) { resolve(false); return; }
-            try {
-              insertImageMarkdown(file.name, event.target.result);
-              showToast(t('toastImageInserted'));
-              resolve(true);
-            } catch (error) { reject(error); }
-          };
-          reader.onerror = () => { const error = reader.error || new Error('无法读取所选图片'); finish(); reject(error); };
-          reader.onabort = () => { finish(); resolve(false); };
-          try { reader.readAsDataURL(file); } catch (error) { finish(); reject(error); }
-        });
       },
       async openNativeText(resolvedPath, request) {
         const name = resolvedPath.split(/[\\/]/).pop() || '';
@@ -76,12 +67,16 @@
         return opened;
       },
       async openNativeImage(resolvedPath, request) {
-        const name = resolvedPath.split(/[\\/]/).pop() || '';
-        const dataUrl = await eventsPlatformPort.call('files', 'readImage', resolvedPath, '');
-        if (!request.isCurrent()) return false;
-        insertImageMarkdown(name, dataUrl);
-        showToast(t('toastImageInserted'));
-        return true;
+        try {
+          const result = await eventsDropImportPort.readImagePath(resolvedPath, { signal: request.signal });
+          if (!request.isCurrent()) return false;
+          insertImageMarkdown(result.name, result.url);
+          showToast(t('toastImageInserted'));
+          return true;
+        } catch (error) {
+          if (!request.isCurrent() || eventsDropImportPort.isImageCancelled(error)) return false;
+          throw error;
+        }
       },
       unsupported: () => showToast(t('toastDropUnsupported')),
       onError: error => showToast(error?.message || String(error))

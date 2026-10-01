@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
-import { createDropImportController, createDropOverlayView, mountClassicDropImportPort } from '../../../src/features/import/index.js';
+import { createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort } from '../../../src/features/import/index.js';
 import {
   PLATFORM_PORT_NAMES,
   PlatformCapabilityUnavailableError,
-  createPlatform
+  createPlatform,
+  createBrowserFileReader
 } from '../../../src/platform/index.js';
 
 class FakeFileReader {
@@ -273,10 +274,11 @@ test('R13.4 main Drop Import composition executes against real browser and deskt
       assert.equal(id, 'drop-overlay');
       return { classList: { add: value => overlayClasses.add(value), remove: value => overlayClasses.delete(value) } };
     };
-    const { controller, port, view } = vm.runInNewContext(
-      source.slice(start, end) + '\n({ controller: dropImportController, port: dropImportPort, view: dropOverlayView })',
+    const { controller, port, view, imageController } = vm.runInNewContext(
+      source.slice(start, end) + '\n({ controller: dropImportController, port: dropImportPort, view: dropOverlayView, imageController: dropImageController })',
       { platform, document: runtime.document, compatibilityPlatformHost: {}, createDropImportController,
-        mountClassicDropImportPort, createDropOverlayView, console: { warn: (...args) => errors.push(args) } }
+        mountClassicDropImportPort, createDropOverlayView, createImageImportController,
+        browserImageReader: createBrowserFileReader({ FileReaderClass: runtime.FileReader }), console: { warn: (...args) => errors.push(args) } }
     );
     try {
       port.api.register({
@@ -289,6 +291,9 @@ test('R13.4 main Drop Import composition executes against real browser and deskt
       });
       await new Promise(resolve => setImmediate(resolve));
       assert.equal(subscribed, desktop ? 1 : 0);
+      const image = await port.api.readImage({ name: 'image.png', type: 'image/png', size: 1 });
+      assert.equal(image.url, 'data:image.png');
+      if (desktop) assert.equal((await port.api.readImagePath('native.png')).url, 'data:desktop');
       listeners.get('dragenter')({ preventDefault() {} });
       assert.equal(overlayClasses.has('show'), true);
       await listeners.get('drop')({ preventDefault() {}, dataTransfer: { files: [{ name: 'browser.md' }] } });
@@ -304,8 +309,10 @@ test('R13.4 main Drop Import composition executes against real browser and deskt
       assert.equal(overlayClasses.has('show'), false);
       listeners.get('dragenter')({ preventDefault() {} });
     } finally {
-      await controller.destroy(); view.destroy(); port.destroy(); await platform.destroy();
+      await controller.destroy(); view.destroy(); imageController.destroy(); port.destroy(); await platform.destroy();
       assert.equal(overlayClasses.has('show'), false);
+      assert.throws(() => port.api.readImage({}), /destroyed/);
+      assert.throws(() => port.api.readImagePath('native.png'), /destroyed/);
       view.setVisible(true);
       assert.equal(overlayClasses.has('show'), false);
     }

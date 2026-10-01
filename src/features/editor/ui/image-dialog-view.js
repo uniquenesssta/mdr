@@ -1,12 +1,12 @@
 /**
  * Responsibility: Own image-dialog tab/file-preview state and send one image insertion command after form validation.
- * Imports: Shared DOM event scope and public Import image policy only.
+ * Imports: Shared DOM event scope and public Import cancellation contract; injected Image Import Controller.
  * Exports: createImageDialogView.
  * State/side effects: Owns pending upload data URL and DOM listeners only; never owns editor text.
  * Lifecycle: Explicit View with idempotent destroy(); clears pending upload state, closes modal and removes listeners.
  */
 import { createEventScope } from '../../../ui/dom/index.js';
-import { assessBrowserImage } from '../../import/index.js';
+import { isImageImportCancelled } from '../../import/index.js';
 const OPEN_EVENT = 'markdown-editor:modal-shell-open';
 const CLOSE_EVENT = 'markdown-editor:modal-shell-close';
 function modal(root, type, detail) {
@@ -17,6 +17,7 @@ function modal(root, type, detail) {
 export function createImageDialogView({
   root,
   selection,
+  imageController,
   insertImage,
   notify = () => {},
   confirmLargeFile = () => true,
@@ -26,6 +27,7 @@ export function createImageDialogView({
   if (!root?.ownerDocument) throw new TypeError('Image Dialog View requires a modal root.');
   if (!selection || typeof selection.snapshot !== 'function') throw new TypeError('Image Dialog View requires Selection Service.');
   if (typeof insertImage !== 'function') throw new TypeError('Image Dialog View requires insertImage command.');
+  if (typeof imageController?.readFile !== 'function' || typeof imageController?.createInsertion !== 'function') throw new TypeError('Image Dialog View requires Image Import Controller.');
   const events = createEventScope();
   const text = Object.freeze({
     selectFile: messages.selectFile || '请选择图片文件',
@@ -38,39 +40,41 @@ export function createImageDialogView({
   let pendingDataUrl = '';
   let pendingSelection = null;
   let activeTab = 'url';
-  let destroyed = false;
+  let destroyed = false, generation = 0;
   const q = selector => root.querySelector(selector);
+  const clearUpload = () => {
+    generation++; imageController.cancel(); pendingDataUrl = '';
+    q('#image-upload-preview')?.replaceChildren?.();
+  };
   const switchTab = tab => {
+    if (destroyed) return;
+    if (tab !== 'upload') clearUpload();
     activeTab = tab === 'upload' ? 'upload' : 'url';
     root.querySelectorAll('.image-tab').forEach(button => button.classList.toggle('active', button.dataset.tab === activeTab));
     root.querySelectorAll('.image-tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === `image-tab-${activeTab}`));
   };
-  const close = () => modal(root, CLOSE_EVENT, { reason: 'feature-close' });
+  const close = () => { clearUpload(); pendingSelection = null; modal(root, CLOSE_EVENT, { reason: 'feature-close' }); };
   const open = () => {
-    pendingDataUrl = '';
+    if (destroyed) return;
+    clearUpload();
     pendingSelection = selection.snapshot();
     for (const selector of ['#image-url-input', '#image-url-alt', '#image-upload-alt', '#image-file-input']) {
       const element = q(selector); if (element) element.value = '';
     }
     q('#image-upload-preview')?.replaceChildren?.();
     switchTab('url');
-    modal(root, OPEN_EVENT, { options: { initialFocus: q('#image-url-input'), onClose: () => { pendingDataUrl = ''; pendingSelection = null; } } });
+    modal(root, OPEN_EVENT, { options: { initialFocus: q('#image-url-input'), onClose: () => { clearUpload(); pendingSelection = null; } } });
   };
-  const readFile = input => {
+  const readFile = async input => {
+    if (destroyed) return;
+    clearUpload();
+    const id = generation;
     const file = input?.files?.[0];
     if (!file) return;
-    const decision = assessBrowserImage(file, { source: 'dialog' });
-    if (!decision.allowed) {
-      notify(decision.reason === 'too-large' ? text.tooLarge : text.selectFile);
-      if (decision.reason === 'too-large') pendingDataUrl = '';
-      return;
-    }
-    if (decision.requiresConfirmation && !confirmLargeFile(file)) { pendingDataUrl = ''; return; }
-    const Reader = root.ownerDocument?.defaultView?.FileReader;
-    if (typeof Reader !== 'function') { notify(text.readFailed); return; }
-    const reader = new Reader();
-    reader.onload = event => {
-      pendingDataUrl = String(event?.target?.result || '');
+    try {
+      const result = await imageController.readFile(file, { source: 'dialog', confirmLargeFile });
+      if (destroyed || id !== generation) return;
+      pendingDataUrl = result.url;
       const preview = q('#image-upload-preview');
       if (preview) {
         const image = root.ownerDocument.createElement('img');
@@ -79,15 +83,20 @@ export function createImageDialogView({
         preview.replaceChildren(image);
       }
       switchTab('upload');
-    };
-    reader.onerror = () => notify(text.readFailed);
-    reader.readAsDataURL(file);
+    } catch (error) {
+      if (destroyed || id !== generation || isImageImportCancelled(error)) return;
+      notify(error?.code === 'IMAGE_IMPORT_TOO_LARGE' ? text.tooLarge
+        : error?.code === 'IMAGE_IMPORT_UNSUPPORTED' ? text.selectFile : text.readFailed);
+    }
   };
   const confirm = () => {
+    if (destroyed) return false;
     const url = activeTab === 'upload' ? pendingDataUrl : String(q('#image-url-input')?.value || '').trim();
     const alt = String((activeTab === 'upload' ? q('#image-upload-alt') : q('#image-url-alt'))?.value || '').trim() || fallbackAlt;
     if (!url) { notify(activeTab === 'upload' ? text.selectFirst : text.enterUrl); return false; }
-    insertImage(url, { alt, fallbackAlt, selection: pendingSelection || selection.snapshot() });
+    const request = imageController.createInsertion(url, { alt, fallbackAlt, selection: pendingSelection || selection.snapshot() });
+    if (!request) return false;
+    insertImage(request.url, request.options);
     close();
     return true;
   };
@@ -99,5 +108,5 @@ export function createImageDialogView({
     if (action === 'confirm') { event.preventDefault?.(); confirm(); }
   });
   events.listen(q('#image-file-input'), 'change', event => readFile(event.target));
-  return Object.freeze({ open, close, switchTab, confirm, destroy() { if (destroyed) return; destroyed = true; pendingDataUrl = ''; pendingSelection = null; try { close(); } catch (_) {} events.destroy(); } });
+  return Object.freeze({ open, close, switchTab, confirm, destroy() { if (destroyed) return; destroyed = true; try { close(); } catch (_) {} imageController.destroy(); events.destroy(); } });
 }

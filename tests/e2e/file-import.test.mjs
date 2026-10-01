@@ -13,7 +13,7 @@ try {
   const result = await browser.page.evaluate(`(async () => {
     const base = ${JSON.stringify(host.origin)};
     const { createBrowserFileReader } = await import(base + '/src/platform/browser/browser-file-reader.js');
-    const { createFileImportController } = await import(base + '/src/features/import/index.js');
+    const { createFileImportController, createImageImportController } = await import(base + '/src/features/import/index.js');
     const reader = createBrowserFileReader();
     const importer = createFileImportController({
       readBrowserText: (file, options) => reader.readText(file, options),
@@ -22,6 +22,15 @@ try {
     const body = '中文\\r\\n😀';
     const file = new File([body], 'note.md', { type: 'text/plain' });
     try {
+      const images = createImageImportController({ readBrowserImage: reader.readDataUrl });
+      let image, imageCancellation;
+      try {
+        const imageFile = new File([new Uint8Array([0, 1, 2])], 'a.png', { type: 'image/png' });
+        image = await images.readFile(imageFile);
+        const imagePending = images.readFile(imageFile).then(() => 'unexpected success', error => error.code);
+        images.destroy();
+        imageCancellation = await imagePending;
+      } finally { images.destroy(); }
       const imported = await importer.readBrowserFile(file);
       const empty = await importer.readBrowserFile(new File([], 'empty.md'));
       const abort = new AbortController();
@@ -31,10 +40,12 @@ try {
       const pending = importer.readBrowserFile(file).then(() => 'unexpected success', error => error.code);
       await Promise.resolve();
       importer.destroy();
-      return { imported, frozen: Object.isFrozen(imported), empty: empty.content, adapterCancellation, importCancellation: await pending };
+      return { image, imageCancellation, imported, frozen: Object.isFrozen(imported), empty: empty.content, adapterCancellation, importCancellation: await pending };
     } finally { importer.destroy(); }
   })()`);
   assert.deepEqual(result.imported, { kind: 'text', name: 'note.md', filePath: '', content: '中文\r\n😀' });
+  assert.deepEqual(result.image, { name: 'a.png', url: 'data:image/png;base64,AAEC' });
+  assert.equal(result.imageCancellation, 'IMAGE_IMPORT_CANCELLED');
   assert.equal(result.frozen, true);
   assert.equal(result.empty, '');
   assert.equal(result.adapterCancellation, 'BROWSER_FILE_READ_CANCELLED');
@@ -44,3 +55,4 @@ try {
 } finally {
   try { await host?.close(); } finally { await browser.close(); }
 }
+

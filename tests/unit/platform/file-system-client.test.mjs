@@ -170,7 +170,8 @@ test('the FileSystem client contains command mapping only and does not own docum
   const mainSource = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
   assert.match(eventSource, /eventsFileImportPort\.readPath\(resolvedPath\)/);
   assert.match(mainSource, /readNativeText: path => platform\.files\.readText\(path\)/);
-  assert.match(eventSource, /call\('files', 'readImage'/);
+  assert.match(eventSource, /eventsDropImportPort\.readImagePath\(resolvedPath/);
+  assert.match(mainSource, /readNativeImage: path => platform\.files\.readImage\(path, ''\)/);
   assert.match(eventSource, /showToast/);
   assert.match(exportSource, /showToast/);
   assert.match(rustFileKind, /FileKind::Image \{ mime: "image\/webp" \}/);
@@ -219,3 +220,4 @@ test('Stage 3 verification runs Atomic Task 3.7 after drag-drop and before later
   assert.match(workflow, /03-12-architecture-scan\.json/);
   assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });
+

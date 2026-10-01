@@ -71,7 +71,7 @@ test('native drag/drop keeps file classification in application code and MIME de
   assert.match(events, /eventsFileImportPort\.readPath\(resolvedPath\)/);
   const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
   assert.match(main, /readNativeText: path => platform\.files\.readText\(path\)/);
-  assert.match(events, /call\('files', 'readImage'/);
+  assert.match(events, /eventsDropImportPort\.readImagePath\(resolvedPath/);
   assert.doesNotMatch(events, /data:image\/png|data:image\/jpeg|image_mime/);
 });
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
-import { assessBrowserImage, isAllowedImageMime, classifyBrowserFile, IMPORT_KINDS, mountClassicDropImportPort } from '../src/features/import/index.js';
+import { assessBrowserImage, isAllowedImageMime, classifyBrowserFile, IMPORT_KINDS } from '../src/features/import/index.js';
 
 const MiB = 1024 * 1024;
 
@@ -47,26 +47,16 @@ test('policy is metadata-only and does not override text-first drop routing', ()
   assert.equal(assessBrowserImage(file).requiresConfirmation, false);
 });
 
-test('existing classic drop port exposes the same policy and rejects calls after teardown', () => {
-  const port = mountClassicDropImportPort({}, { start() {}, openPath() {} });
-  for (const size of [2 * MiB + 1, 5 * MiB, 5 * MiB + 1]) {
-    const file = { type: 'image/png', size };
-    assert.deepEqual(port.api.assessImage(file), assessBrowserImage(file));
-  }
-  port.destroy(); port.destroy();
-  assert.throws(() => port.api.assessImage({ type: 'image/png', size: 1 }), /destroyed/);
-});
-
 test('production callers use one browser policy while native byte enforcement stays in Rust', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
-  const [events, dialog, classifier, rust] = await Promise.all([
-    read('public/app/events.js'), read('src/features/editor/ui/image-dialog-view.js'),
+  const [events, controller, classifier, rust] = await Promise.all([
+    read('public/app/events.js'), read('src/features/import/images/image-import-controller.js'),
     read('src/features/import/files/file-type-classifier.js'), read('src-tauri/src/local_file/image_reader.rs')
   ]);
-  assert.match(events, /eventsDropImportPort\.assessImage\(file\)/);
-  assert.match(dialog, /assessBrowserImage\(file, \{ source: 'dialog' \}\)/);
-  assert.match(dialog, /decision\.requiresConfirmation && !confirmLargeFile\(file\)/);
-  assert.doesNotMatch(events + dialog, /file\.size\s*>/);
+  assert.match(events, /eventsDropImportPort\.readImage\(file/);
+  assert.match(controller, /assessBrowserImage\(file, \{ source \}\)/);
+  assert.match(controller, /decision\.requiresConfirmation && !confirmLargeFile\(file\)/);
+  assert.doesNotMatch(events + controller, /file\.size\s*>/);
   assert.match(classifier, /isAllowedImageMime\(file\.type\)/);
   assert.doesNotMatch(classifier, /startsWith\('image\/'\)/);
   assert.match(rust, /MAX_IMAGE_BYTES: u64 = 5 \* 1024 \* 1024/);

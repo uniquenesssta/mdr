@@ -5046,6 +5046,16 @@
       "pure-functions",
       "retain",
       false
+    ],
+    [
+      "src/features/import/images/image-import-controller.js",
+      "esm-module",
+      "feature",
+      "Coordinate cancellable image File/native reads and insertion requests without DOM or Markdown formatting.",
+      "active-image-read",
+      "create/cancel/destroy",
+      "retain",
+      false
     ]
   ]
 }

@@ -195,7 +195,7 @@ test('file interpretation remains in the application layer, not the DragDrop cli
   assert.match(eventsSource, /eventsFileImportPort\.readPath\(resolvedPath\)/);
   const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
   assert.match(main, /readNativeText: path => platform\.files\.readText\(path\)/);
-  assert.match(eventsSource, /call\('files', 'readImage'/);
+  assert.match(eventsSource, /eventsDropImportPort\.readImagePath\(resolvedPath/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.6 after window and before later adapters', async () => {
@@ -219,3 +219,4 @@ test('Stage 3 verification keeps Atomic Task 3.6 after window and before later a
   assert.match(workflow, /03-12-architecture-scan\.json/);
   assert.match(workflow, /Verify Atomic Task 3\.12 final Platform cutover/);
 });
+

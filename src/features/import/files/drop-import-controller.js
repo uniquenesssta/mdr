@@ -11,7 +11,7 @@ export function createDropImportController({ target, nativeDrop = false, nativeF
   }
   if (nativeDrop && typeof subscribeNative !== 'function') throw new TypeError('Drop Import requires a native subscriber.');
   let started = false, destroyed = false, counter = 0, generation = 0;
-  let commands = null, unsubscribe = null;
+  let commands = null, unsubscribe = null, pending = null;
   const assertActive = () => { if (destroyed) throw new Error('Drop Import is destroyed.'); };
   const visible = value => commands?.setOverlayVisible(value);
   const resetOverlay = () => { counter = 0; visible(false); };
@@ -22,7 +22,9 @@ export function createDropImportController({ target, nativeDrop = false, nativeF
   async function dispatch(kind, source, value) {
     if (!started || destroyed) return false;
     const id = ++generation;
-    const request = Object.freeze({ isCurrent: () => !destroyed && id === generation });
+    pending?.abort();
+    pending = new AbortController();
+    const request = Object.freeze({ signal: pending.signal, isCurrent: () => !destroyed && id === generation });
     const callbacks = commands;
     try {
       if (kind === IMPORT_KINDS.UNSUPPORTED) { callbacks.unsupported(value); return false; }
@@ -90,6 +92,7 @@ export function createDropImportController({ target, nativeDrop = false, nativeF
     destroy() {
       if (destroyed) return;
       destroyed = true; generation++;
+      pending?.abort(); pending = null;
       if (started) for (const [type, handler] of Object.entries(handlers)) target.removeEventListener(type, handler);
       resetOverlay(); commands = null;
       if (unsubscribe) { const disposer = unsubscribe; unsubscribe = null; return dispose(disposer); }

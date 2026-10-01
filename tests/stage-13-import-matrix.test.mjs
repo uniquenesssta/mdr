@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { createBrowserFileReader } from '../src/platform/browser/browser-file-reader.js';
-import { createDropImportController, createDropOverlayView, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
+import { createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
 import { createImageDialogView } from '../src/features/editor/ui/image-dialog-view.js';
 
 const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
@@ -33,12 +33,16 @@ function dropHost({ desktop = false, failRead = false, opened = true } = {}) {
     subscribeNative: handler => { handlers.set('native', handler); return () => handlers.delete('native'); }
   });
   const overlayView = createDropOverlayView({ element: document.getElementById('drop-overlay') });
+  const imageController = createImageImportController({
+    readBrowserImage: (file, options) => createBrowserFileReader({ FileReaderClass: context.FileReader }).readDataUrl(file, options),
+    readNativeImage: path => context.eventsPlatformPort.call('files', 'readImage', path, '')
+  });
   const context = vm.createContext({
     document,
     eventsDropImportPort: mountClassicDropImportPort({}, {
       start: callbacks => controller.start({ ...callbacks, setOverlayVisible: overlayView.setVisible }),
       openPath: controller.openPath
-    }).api,
+    }, imageController).api,
     eventsFileImportPort: mountClassicFileImportPort({}, createFileImportController({
       readBrowserText: async () => '',
       async readNativeText(path) {
@@ -61,30 +65,30 @@ function dropHost({ desktop = false, failRead = false, opened = true } = {}) {
     addRecentFile: (...args) => calls.push(['recent', ...args]),
     insertImageMarkdown: (...args) => calls.push(['image', ...args]),
     showToast: message => calls.push(['toast', message]), t: key => key, console,
-    FileReader: class { readAsDataURL(file) { calls.push(['dataUrl', file.name]); this.onload({ target: { result: 'data:image/png;base64,AA==' } }); } }
+    FileReader: class { readAsDataURL(file) { calls.push(['dataUrl', file.name]); this.result = 'data:image/png;base64,AA=='; this.onload(); } }
   });
   vm.runInContext(section(eventsSource, '    // R13.4 owns event routing;', '    // Settings menu trigger'), context);
   return { context, calls, handlers, overlay, controller, drop(files) { return handlers.get('drop')({ preventDefault() {}, dataTransfer: { files } }); } };
 }
 
 for (const extension of ['md', 'MARKDOWN', 'TxT']) {
-  test('browser text extension takes precedence over MIME: ' + extension, () => {
-    const h = dropHost(); h.drop([{ name: 'note.' + extension, type: 'image/png', size: 9 * MiB }]);
+  test('browser text extension takes precedence over MIME: ' + extension, async () => {
+    const h = dropHost(); await h.drop([{ name: 'note.' + extension, type: 'image/png', size: 9 * MiB }]);
     assert.deepEqual(h.calls, [['text', 'note.' + extension]]);
   });
 }
 for (const mime of ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp']) {
-  test('browser image MIME and inclusive 5 MiB boundary: ' + mime, () => {
-    const h = dropHost(); h.drop([{ name: 'photo.unknown', type: mime, size: 5 * MiB }]);
+  test('browser image MIME and inclusive 5 MiB boundary: ' + mime, async () => {
+    const h = dropHost(); await h.drop([{ name: 'photo.unknown', type: mime, size: 5 * MiB }]);
     assert.equal(h.calls[0][0], 'dataUrl'); assert.equal(h.calls[1][0], 'image');
     assert.deepEqual(h.calls[2], ['toast', 'toastImageInserted']);
   });
 }
-test('browser over-limit, unsupported MIME, empty and multiple drops', () => {
-  const h = dropHost(); h.drop([]); assert.deepEqual(h.calls, []);
-  h.drop([{ name: 'large.png', type: 'image/png', size: 5 * MiB + 1 }]);
-  h.drop([{ name: 'fake.png', type: '', size: 1 }]);
-  h.drop([{ name: 'a.pdf', type: 'application/pdf', size: 1 }, { name: 'b.md', type: '', size: 1 }]);
+test('browser over-limit, unsupported MIME, empty and multiple drops', async () => {
+  const h = dropHost(); await h.drop([]); assert.deepEqual(h.calls, []);
+  await h.drop([{ name: 'large.png', type: 'image/png', size: 5 * MiB + 1 }]);
+  await h.drop([{ name: 'fake.png', type: '', size: 1 }]);
+  await h.drop([{ name: 'a.pdf', type: 'application/pdf', size: 1 }, { name: 'b.md', type: '', size: 1 }]);
   assert.deepEqual(h.calls, [['toast', 'toastImageTooLarge'], ['toast', 'toastDropUnsupported'], ['toast', 'toastDropUnsupported']]);
 });
 test('native paths use extensions, preserve source path and add recents only after success', async () => {
@@ -118,7 +122,7 @@ test('native read failure and empty path do not insert or add a recent file', as
 });
 test('native drag-drop suppresses DOM duplicate and takes only first native path', async () => {
   const h = dropHost({ desktop: true });
-  h.drop([{ name: 'a.md', type: '', size: 1 }]); assert.deepEqual(h.calls, []);
+  await h.drop([{ name: 'a.md', type: '', size: 1 }]); assert.deepEqual(h.calls, []);
   await h.handlers.get('native')({ type: 'over' }); assert.ok(h.overlay.has('show'));
   await h.handlers.get('native')({ type: 'drop', paths: ['C:\\a.md', 'C:\\b.md'] });
   assert.equal(h.overlay.size, 0); assert.equal(h.calls.filter(x => x[0] === 'readText').length, 1);
@@ -180,40 +184,40 @@ function imageHost(confirmLargeFile = () => true) {
   }
   class CustomEvent extends Event { constructor(type, options) { super(type); this.detail = options.detail; } }
   const root = new Element(); root.ownerDocument = {
-    defaultView: { CustomEvent, FileReader: class { readAsDataURL(file) { reads.push(file); this.onload({ target: { result: 'data:image/png;base64,AA==' } }); } } },
+    defaultView: { CustomEvent, FileReader: class { readAsDataURL(file) { reads.push(file); this.result = 'data:image/png;base64,AA=='; this.onload(); } } },
     createElement: () => new Element()
   };
-  const view = createImageDialogView({ root, selection: { snapshot: () => ({ start: 1, end: 1 }) }, insertImage: (...args) => inserted.push(args), notify: x => messages.push(x), confirmLargeFile });
+  const view = createImageDialogView({ root, imageController: createImageImportController({ readBrowserImage: (file, options) => createBrowserFileReader({ FileReaderClass: root.ownerDocument.defaultView.FileReader }).readDataUrl(file, options) }), selection: { snapshot: () => ({ start: 1, end: 1 }) }, insertImage: (...args) => inserted.push(args), notify: x => messages.push(x), confirmLargeFile });
   view.open();
-  return { root, view, reads, inserted, messages, choose(file) { const input = root.querySelector('#image-file-input'); input.files = file ? [file] : []; input.dispatchEvent(new Event('change')); } };
+  return { root, view, reads, inserted, messages, async choose(file) { const input = root.querySelector('#image-file-input'); input.files = file ? [file] : []; input.dispatchEvent(new Event('change')); await new Promise(resolve => setImmediate(resolve)); } };
 }
-test('image dialog preserves 2 MiB confirmation and inclusive 5 MiB hard limit', () => {
+test('image dialog preserves 2 MiB confirmation and inclusive 5 MiB hard limit', async () => {
   for (const [size, confirmations, reads] of [[2 * MiB, 0, 1], [2 * MiB + 1, 1, 1], [5 * MiB, 1, 1], [5 * MiB + 1, 0, 0]]) {
     let asks = 0; const h = imageHost(() => { asks++; return true; });
-    h.choose({ name: 'a.png', type: 'image/png', size }); assert.equal(asks, confirmations); assert.equal(h.reads.length, reads);
+    await h.choose({ name: 'a.png', type: 'image/png', size }); assert.equal(asks, confirmations); assert.equal(h.reads.length, reads);
     h.view.destroy();
   }
 });
-test('image dialog refusal, empty selection, invalid MIME and destruction do not insert', () => {
-  const h = imageHost(() => false); h.choose(null); h.choose({ type: 'application/pdf', size: 1 });
-  h.choose({ type: 'image/png', size: 3 * MiB }); h.view.switchTab('upload');
+test('image dialog refusal, empty selection, invalid MIME and destruction do not insert', async () => {
+  const h = imageHost(() => false); await h.choose(null); await h.choose({ type: 'application/pdf', size: 1 });
+  await h.choose({ type: 'image/png', size: 3 * MiB }); h.view.switchTab('upload');
   assert.equal(h.view.confirm(), false); assert.equal(h.reads.length, 0); assert.deepEqual(h.inserted, []);
-  h.view.destroy(); h.choose({ type: 'image/png', size: 1 }); assert.equal(h.reads.length, 0);
+  h.view.destroy(); await h.choose({ type: 'image/png', size: 1 }); assert.equal(h.reads.length, 0);
 });
-test('image dialog MIME-only routing differs from text-first drop classification', () => {
+test('image dialog MIME-only routing differs from text-first drop classification', async () => {
   const h = imageHost();
-  h.choose({ name: 'note.md', type: '', size: 1 });
+  await h.choose({ name: 'note.md', type: '', size: 1 });
   assert.equal(h.reads.length, 0);
-  h.choose({ name: 'note.md', type: 'image/png', size: 1 });
+  await h.choose({ name: 'note.md', type: 'image/png', size: 1 });
   assert.equal(h.reads.length, 1);
   assert.equal(h.view.confirm(), true);
   assert.equal(h.inserted.length, 1);
   h.view.destroy();
 });
-test('image URL and upload send one insertion command with the selected data', () => {
+test('image URL and upload send one insertion command with the selected data', async () => {
   const h = imageHost(); h.root.querySelector('#image-url-input').value = ' https://example.test/a.png ';
   assert.equal(h.view.confirm(), true); assert.equal(h.inserted[0][0], 'https://example.test/a.png');
-  h.view.open(); h.choose({ type: 'image/svg+xml', size: 1 }); assert.equal(h.view.confirm(), true);
+  h.view.open(); await h.choose({ type: 'image/svg+xml', size: 1 }); assert.equal(h.view.confirm(), true);
   assert.equal(h.inserted[1][0], 'data:image/png;base64,AA=='); h.view.destroy();
 });
 test('desktop web fetch uses native only; failure exposes manual HTML without public fallback', async () => {
@@ -236,11 +240,12 @@ test('R13.4 browser image callbacks ignore superseded/destroyed reads and handle
     const h = dropHost(); let reader;
     h.context.FileReader = class { constructor() { reader = this; } readAsDataURL() {} };
     const pending = h.drop([{ name: 'slow.png', type: 'image/png', size: 1 }]);
+    const lateLoad = reader.onload;
     if (outcome === 'replace') await h.drop([{ name: 'new.md', type: '', size: 1 }]);
     if (outcome === 'destroy') h.controller.destroy();
     if (outcome === 'error') { reader.error = new Error('image denied'); reader.onerror(); }
     else if (outcome === 'abort') reader.onabort();
-    else reader.onload({ target: { result: 'data:image/png;base64,AA==' } });
+    else { reader.result = 'data:image/png;base64,AA=='; lateLoad(); }
     assert.equal(await pending, false);
     assert.equal(h.calls.some(x => x[0] === 'image'), false);
     assert.deepEqual(h.calls.filter(x => x[0] === 'toast'), outcome === 'error' ? [['toast', 'image denied']] : []);
