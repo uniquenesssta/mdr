@@ -59,31 +59,31 @@ fn parse_errors_keep_the_existing_prefix_and_error_kind() {
 }
 
 #[test]
-fn uppercase_prefix_keeps_legacy_https_fallback_instead_of_silent_repair() {
+fn uppercase_http_prefixes_are_normalized_without_reinterpreting_the_host() {
     for value in [
         "HTTP://example.com/path",
         "HTTPS://example.com/path",
         "HtTp://example.com/path",
     ] {
-        let expected = Url::parse(&format!("https://{value}")).expect("legacy candidate");
-        assert_eq!(normalize_url(value), Ok(expected));
+        assert_eq!(normalize_url(value).unwrap().host_str(), Some("example.com"));
     }
 }
 
 #[test]
-fn non_http_input_keeps_legacy_reinterpretation_not_external_link_policy() {
-    for (input, candidate) in [
-        ("ftp://example.com/path", "https://ftp://example.com/path"),
-        ("mailto:test@example.com", "https://mailto:test@example.com"),
-        ("//example.com/path", "https:////example.com/path"),
+fn non_http_schemes_credentials_controls_and_backslashes_are_rejected() {
+    for value in [
+        "ftp://example.com/path",
+        "mailto:test@example.com",
+        "javascript:alert(1)",
+        "https://user:pass@example.com",
+        "https://example.com/\\evil",
+        "https://exa\nmple.com",
     ] {
-        let expected = Url::parse(candidate).expect("legacy fallback candidate");
-        assert_eq!(expected.scheme(), "https");
-        assert_eq!(normalize_url(input), Ok(expected));
+        assert!(normalize_url(value).is_err(), "{value}");
     }
     assert_eq!(
-        normalize_url("javascript:alert(1)"),
-        Err(format!("Invalid URL: {}", ParseError::InvalidPort))
+        normalize_url("//example.com/path").unwrap().as_str(),
+        "https://example.com/path"
     );
 }
 
@@ -97,4 +97,94 @@ fn repeated_calls_have_no_shared_state() {
         );
         assert_eq!(normalize_url("http://example.com").expect("HTTP call").scheme(), "http");
     }
+}
+
+#[test]
+fn public_address_policy_rejects_all_special_and_encoded_local_forms() {
+    for address in [
+        "0.0.0.0",
+        "10.1.2.3",
+        "127.0.0.1",
+        "100.64.0.1",
+        "169.254.169.254",
+        "172.16.0.1",
+        "192.168.0.1",
+        "192.0.0.9",
+        "192.0.2.1",
+        "192.88.99.1",
+        "198.18.0.1",
+        "198.51.100.1",
+        "203.0.113.1",
+        "224.0.0.1",
+        "255.255.255.255",
+        "::",
+        "::1",
+        "fc00::1",
+        "fe80::1",
+        "ff02::1",
+        "::ffff:127.0.0.1",
+        "64:ff9b::7f00:1",
+        "2002:7f00:1::",
+        "2001:db8::1",
+        "2001::1",
+        "3fff::1",
+    ] {
+        assert!(
+            !super::validation::is_public_address(address.parse().unwrap()),
+            "{address}"
+        );
+    }
+    for address in [
+        "8.8.8.8",
+        "1.1.1.1",
+        "93.184.216.34",
+        "2606:4700:4700::1111",
+        "2001:4860:4860::8888",
+    ] {
+        assert!(
+            super::validation::is_public_address(address.parse().unwrap()),
+            "{address}"
+        );
+    }
+    for url in [
+        "http://2130706433",
+        "http://0x7f000001",
+        "http://127.1",
+        "http://[::ffff:127.0.0.1]",
+    ] {
+        let parsed = normalize_url(url).unwrap();
+        let address = match parsed.host().unwrap() {
+            url::Host::Ipv4(ip) => ip.into(),
+            url::Host::Ipv6(ip) => ip.into(),
+            _ => panic!("numeric address"),
+        };
+        assert!(!super::validation::is_public_address(address));
+    }
+    for name in [
+        "http://localhost",
+        "http://LOCALHOST.",
+        "http://other.localhost",
+        "http://printer.local",
+    ] {
+        assert!(normalize_url(name).is_err());
+    }
+}
+
+#[test]
+fn every_resolved_address_and_redirect_scheme_must_be_allowed() {
+    let public = "8.8.8.8:80".parse().unwrap();
+    let private = "127.0.0.1:80".parse().unwrap();
+    assert!(super::client::validate_addresses(&[]).is_err());
+    assert!(super::client::validate_addresses(&[public, private]).is_err());
+    assert!(super::client::validate_addresses(&[public]).is_ok());
+    let https = Url::parse("https://example.com").unwrap();
+    for next in [
+        "http://example.com",
+        "file:///etc/file",
+        "ftp://example.com",
+        "https://user@example.com",
+    ] {
+        assert!(super::validation::validate_redirect(&https, &Url::parse(next).unwrap()).is_err());
+    }
+    assert!(super::validation::validate_redirect(&https, &https).is_ok());
 }

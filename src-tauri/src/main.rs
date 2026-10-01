@@ -13,6 +13,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .manage(document_store::DocumentStore::default())
+        .manage(web_fetch::requests::WebFetchRequests::default())
         .invoke_handler(tauri::generate_handler![
             web_fetch::command::fetch_url,
             external_link::command::open_external_url,
@@ -32,7 +33,8 @@ pub fn run() {
             local_file::commands::write_local_text_file,
             local_file::commands::write_local_binary_file,
             local_file::commands::initial_file_path,
-            performance_log::command::write_performance_logs
+            performance_log::command::write_performance_logs,
+            web_fetch::command::cancel_fetch_url
         ])
         .run(tauri::generate_context!());
     performance_log::record_lifecycle("app.exit");

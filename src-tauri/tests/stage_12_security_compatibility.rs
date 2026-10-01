@@ -155,7 +155,7 @@ fn external_link_fixture_freezes_the_exact_protocol_allowlist() {
 }
 
 #[test]
-fn web_fetch_fixture_records_limits_response_fields_and_current_unfiltered_gaps() {
+fn web_fetch_fixture_keeps_history_and_checks_approved_current_hardening() {
     let fixture = manifest();
     assert_eq!(fixture["webFetch"]["redirectLimit"], 10);
     assert_eq!(fixture["webFetch"]["timeoutSeconds"], 30);
@@ -170,15 +170,16 @@ fn web_fetch_fixture_records_limits_response_fields_and_current_unfiltered_gaps(
         ["success", "url", "final_url", "status", "content_type", "html"]
     );
 
-    assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::limited(10)"));
+    assert!(SOURCE_WEB_FETCH_CLIENT.contains("Policy::none()"));
     assert!(SOURCE_WEB_FETCH_CLIENT.contains("Duration::from_secs(30)"));
     assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".get(CONTENT_TYPE)"));
-    assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".text()"));
+    assert!(SOURCE_WEB_FETCH_RESPONSE.contains(".chunk()"));
     assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if !status.is_success()"));
     assert!(SOURCE_WEB_FETCH_RESPONSE.contains("if html.trim().is_empty()"));
     assert!(!SOURCE_WEB_FETCH.contains("MAX_RESPONSE_BYTES"));
     assert!(!SOURCE_WEB_FETCH_CLIENT.contains("MAX_RESPONSE_BYTES"));
-    assert!(!SOURCE_WEB_FETCH_RESPONSE.contains("MAX_RESPONSE_BYTES"));
+    assert!(SOURCE_WEB_FETCH_RESPONSE.contains("MAX_ENCODED_BYTES"));
+    assert!(SOURCE_WEB_FETCH_RESPONSE.contains("MAX_DECODED_BYTES"));
 }
 
 #[test]

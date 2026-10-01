@@ -20,23 +20,24 @@ function dtoBlock(text) {
 
 
 
-test('R12-13 moves the exact frozen response DTO and response semantics to one private response owner', async () => {
+test('R12-13 moves the exact frozen response DTO with approved R13-S01 response limits to one private response owner', async () => {
   const before = frozen(entryPath);
   const response = await read(responsePath);
   assert.equal(dtoBlock(response), dtoBlock(before));
   await assertCurrentValidation();
-  assert.match(response, /pub\(super\) async fn read_response\(parsed: Url, response: reqwest::Response\) -> Result<FetchResponse, String>/);
+  assert.match(response, /pub\(super\) async fn read_response\(parsed: Url, mut response: reqwest::Response\) -> Result<FetchResponse, String>/);
   for (const code of [
-    'response.status()', 'response.url().to_string()', '.get(CONTENT_TYPE)', '.text()',
+    'response.status()', 'response.url().to_string()', '.get(CONTENT_TYPE)', '.chunk()',
     'HTTP request failed with status', 'Failed to read response body:', 'Response body is empty'
   ]) assert.ok(response.includes(code), `missing frozen response behavior: ${code}`);
   assert.doesNotMatch(response, /build_client|normalize_url|#\[tauri::command\]|measure_async|Policy::limited|Duration::from_secs/);
-  assert.doesNotMatch(response, /MAX_RESPONSE_BYTES|content_length\(|\.chunk\(|Policy::custom/);
+  assert.match(response, /MAX_ENCODED_BYTES: usize = 10 \* 1024 \* 1024/);
+  assert.match(response, /MAX_DECODED_BYTES: usize = 20 \* 1024 \* 1024/);
 });
 
 test('R12-13 command propagates transport errors and delegates response projection', async () => {
   const command = await read('src-tauri/src/web_fetch/command.rs');
-  assert.match(command, /let response = client[\s\S]*?\.map_err\(\|err\| format!\("Request failed: \{err\}"\)\)\?;/);
+  assert.match(command, /let response = fetch_response\(&parsed\)\.await\?/);
   assert.match(command, /read_response\(parsed, response\)\.await/);
   assert.match(command, /performance_log::measure_async/);
   assert.doesNotMatch(command, /CONTENT_TYPE|response\.status\(\)|\.text\(\)/);
@@ -44,7 +45,7 @@ test('R12-13 command propagates transport errors and delegates response projecti
 
 test('R12-13 retains the real HTTP response failure and gzip scenarios', async () => {
   const http = await read('src-tauri/tests/web_fetch/http_compatibility.rs');
-  for (const name of ['missing_and_non_html_types_still_report_without_filtering', 'status_empty_and_truncated_body_errors_keep_their_order_and_text', 'redirects_keep_initial_and_final_url_and_final_reported_type', 'automatic_gzip_decompression_remains_enabled_by_the_locked_reqwest_feature', 'real_request_retains_the_thirty_second_timeout']) assert.ok(http.includes(name), name);
+  for (const name of ['missing_and_non_html_types_are_rejected_before_body_read', 'status_empty_and_truncated_body_errors_keep_their_order_and_text', 'redirects_keep_initial_and_final_url_and_final_reported_type', 'bounded_gzip_decompression_preserves_existing_text', 'real_request_retains_the_thirty_second_timeout']) assert.ok(http.includes(name), name);
   assert.doesNotMatch(http, /#\[ignore\]/);
   await assertCurrentValidation();
 });

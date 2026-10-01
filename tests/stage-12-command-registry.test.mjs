@@ -12,9 +12,12 @@ const frozen = path => execFileSync('git', ['show', `${baseline}:${path.replace(
 const commands = [['external_link', 'open_external_url'], ['web_fetch', 'fetch_url'], ['performance_log', 'write_performance_logs']];
 const registry = text => text.match(/tauri::generate_handler!\[([\s\S]*?)\]/)[1].split(',').map(s => s.trim()).filter(Boolean);
 
-test('R12-17 preserves all nineteen registered names and their order without duplicates', async () => {
+test('R12-17 preserves all nineteen original commands plus the R13-S01 cancellation companion', async () => {
   const before = registry(frozen('src-tauri/src/main.rs'));
-  const after = registry(await read('src-tauri/src/main.rs'));
+  const all = registry(await read('src-tauri/src/main.rs'));
+  assert.equal(all.at(-1), 'web_fetch::command::cancel_fetch_url');
+  assert.equal(new Set(all).size, 20);
+  const after = all.slice(0, -1);
   assert.equal(before.length, 19);
   assert.deepEqual(after.map(p => p.split('::').at(-1)), before.map(p => p.split('::').at(-1)));
   assert.equal(new Set(after).size, 19);
@@ -25,8 +28,15 @@ test('R12-17 preserves command signatures payloads and asynchronous error propag
   for (const [module, name] of commands) {
     const before = frozen(`src-tauri/src/${module}.rs`);
     const after = await read(`src-tauri/src/${module}/command.rs`);
-    assert.equal(rustSignature(rustFunction(after, name)), rustSignature(rustFunction(before, name)), name);
-    assert.equal((after.match(/#\[tauri::command\]/g) || []).length, 1);
+    if (module === 'web_fetch') {
+      assert.match(after, /url: String/);
+      assert.match(after, /request_id: Option<String>/);
+      assert.match(after, /Result<FetchResponse, String>/);
+      assert.equal((after.match(/#\[tauri::command\]/g) || []).length, 2);
+    } else {
+      assert.equal(rustSignature(rustFunction(after, name)), rustSignature(rustFunction(before, name)), name);
+      assert.equal((after.match(/#\[tauri::command\]/g) || []).length, 1);
+    }
   }
   await assertCurrentValidation();
 });

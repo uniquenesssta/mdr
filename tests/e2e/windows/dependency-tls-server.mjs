@@ -8,6 +8,8 @@ const server = createServer({
   cert: await readFile(new URL('../../fixtures/dependency-tls/server-cert.pem', import.meta.url)),
   minVersion: 'TLSv1.3', maxVersion: 'TLSv1.3'
 }, (request, response) => {
+  if (request.url === '/html') { response.writeHead(200, { 'Content-Type': 'text/html' }).end('normal TLS HTML'); return; }
+  if (request.url === '/downgrade') { response.writeHead(302, { Location: 'http://127.0.0.1:9/forbidden' }).end(); return; }
   if (request.url !== '/owned') { response.writeHead(404).end(); return; }
   response.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
   response.end('R12-23 owned TLS 1.3 中文🙂');

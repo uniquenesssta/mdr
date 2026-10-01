@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：用户确认 R13-S01 网页策略并开始实施：10 MiB 原始/20 MiB 解压后上限、公网 HTTP(S)、HTML/XHTML、30 秒总截止与 10 次跳转、禁止 HTTPS 降级。后端逐跳解析并绑定连接地址、按实际字节读取和有界解压；新增原生取消配套命令及 AbortSignal 适配，旧 URL 调用与响应 DTO 保留。补真实 Windows HTTP/HTTPS、压缩/大小、私网/跳转与连接取消回归；历史 manifest 保留，新策略单独记录。仅本地静态检查，待七组 Windows CI；13.9 接入等待 R13-S01 验收。[详情](docs/R13-S01-DETAILS.md)。
+
 - 2026-10-01：R13.8 正式收尾：`54fe195` 的 [Windows CI 36864276840](https://github.com/uniquenesssta/mdr/actions/runs/36864276840) 七个 job 全部成功；生产/测试代码保持首轮实现不变，旧启动超时根因仍未确定。开始 13.9 前置策略准备；R13-S01 的网页响应上限与内网支持规则待用户明确确认，后端加固未实施，13.9 尚未接入。[详情](docs/R13-08-DETAILS.md)。
 
 - 2026-10-01：R13.8 首轮未验收：`12352d1` 的 Windows CI 36861368308 中，前端浏览器出现 CDP 未就绪与 app-ready 超时，收尾随之阻断；完整 Node、构建、架构、Rust、原生/WebView 和依赖检查通过。归档日志未包含启动页面诊断，不能确定根因；保持产品/测试实现不变，以本次失败记录触发新 runner 的完整重验，不把超时推定为工厂逻辑错误。[详情](docs/R13-08-DETAILS.md)。

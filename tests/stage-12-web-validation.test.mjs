@@ -29,7 +29,7 @@ test('R12-11 keeps a single pure URL policy behind the command', async () => {
   await assertCurrentValidation();
 });
 
-test('R12-11 URL behavior and command telemetry remain unchanged after later client and response extractions', async () => {
+test('R12-11 supported URL behavior and command telemetry remain protected after later client and response extractions', async () => {
   const before = frozen(entryPath);
   const after = await read(entryPath);
   for (const name of ['stage_12_preserves_url_normalization_and_scheme_policy', 'stage_12_preserves_browser_request_headers']) {
@@ -40,7 +40,7 @@ test('R12-11 URL behavior and command telemetry remain unchanged after later cli
     };
     assert.equal(fn(after), fn(before));
   }
-  assert.match(after, /let response = client[\s\S]*?\.map_err\(\|err\| format!\("Request failed: \{err\}"\)\)\?;/);
+  assert.match(after, /let response = fetch_response\(&parsed\)\.await\?/);
   assert.match(after, /read_response\(parsed, response\)\.await/);
   assert.match(after, /crate::performance_log::measure_async/);
   assert.match(after, /#\[tauri::command\]/);
@@ -51,7 +51,7 @@ test('R12-11 retains real URL and HTTP failure contracts without freezing depend
   await assertCurrentValidation();
 });
 
-test('R12-11 explicitly preserves unbounded reported-only response policy without claiming hardening', async () => {
+test('R12-11 preserves historical unbounded manifest separately from approved R13-S01 policy', async () => {
   const manifest = JSON.parse(await read('src-tauri/tests/fixtures/stage_12_security/manifest.json'));
   assert.equal(manifest.webFetch.responseBody.maximumBytes, null);
   assert.equal(manifest.webFetch.contentType.policy, 'reported-only-no-allowlist');
@@ -59,20 +59,21 @@ test('R12-11 explicitly preserves unbounded reported-only response policy withou
   const client = await read(clientPath);
   const response = await read(responsePath);
   const combined = `${entry}\n${client}\n${response}`;
-  for (const code of ['Policy::limited(10)', 'Duration::from_secs(30)', '.get(CONTENT_TYPE)', '.text()',
+  for (const code of ['Policy::none()', 'Duration::from_secs(30)', '.get(CONTENT_TYPE)', '.chunk()',
     'if !status.is_success()', 'if html.trim().is_empty()']) assert.ok(combined.includes(code), `missing preserved policy: ${code}`);
-  assert.doesNotMatch(combined, /MAX_RESPONSE_BYTES|content_length\(|\.chunk\(|Policy::custom/);
+  assert.match(combined, /MAX_ENCODED_BYTES/);
+  assert.match(combined, /MAX_DECODED_BYTES/);
 });
 
 test('R12-11 adds eight URL and eight actual loopback HTTP tests with owned cleanup', async () => {
   const unit = await read('src-tauri/tests/web_fetch/validation.rs');
   const http = await read('src-tauri/tests/web_fetch/http_compatibility.rs');
-  assert.equal((unit.match(/#\[test\]/g) || []).length, 8);
+  assert.ok((unit.match(/#\[test\]/g) || []).length >= 10);
   assert.ok((http.match(/#\[test\]/g) || []).length >= 8);
   assert.match(unit, /use super::normalize_url;/);
-  for (const code of ['TcpListener::bind("127.0.0.1:0")', 'tauri::async_runtime::block_on(fetch_url(value))',
+  for (const code of ['TcpListener::bind("127.0.0.1:0")', 'tauri::async_runtime::block_on(fetch_owned(value))',
     'impl Drop for Server', '.join()', 'set_read_timeout', 'set_write_timeout',
-    'real_request_retains_the_thirty_second_timeout', 'missing_and_non_html_types_still_report_without_filtering',
+    'real_request_retains_the_thirty_second_timeout', 'missing_and_non_html_types_are_rejected_before_body_read',
     'redirects_keep_initial_and_final_url_and_final_reported_type', 'backend_rejects_invalid_inputs_before_any_http_request']) {
     assert.ok(http.includes(code), `missing real chain coverage: ${code}`);
   }

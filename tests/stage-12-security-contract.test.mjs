@@ -80,7 +80,7 @@ test('R12-01 freezes external-link trimming validation order and four-scheme all
   assert.ok(rust.indexOf('validate_external_url(&url)?') < rust.indexOf('open_platform_url(&validated)'));
 });
 
-test('R12-01 records web timeout redirects response fields and the current unfiltered response gaps', async () => {
+test('R12-01 records web timeout redirects response fields and historical response gaps separately from R13-S01', async () => {
   const contract = await fixture();
   const rust = await source('src-tauri/src/web_fetch/mod.rs');
   const client = await source('src-tauri/src/web_fetch/client.rs');
@@ -90,12 +90,13 @@ test('R12-01 records web timeout redirects response fields and the current unfil
   assert.equal(contract.webFetch.contentType.policy, 'reported-only-no-allowlist');
   assert.equal(contract.webFetch.responseBody.maximumBytes, null);
   assert.deepEqual(contract.webFetch.responseFields, ['success', 'url', 'final_url', 'status', 'content_type', 'html']);
-  assert.match(client, /Policy::limited\(10\)/);
+  assert.match(client, /Policy::none\(\)/);
   assert.match(client, /Duration::from_secs\(30\)/);
-  assert.match(rust, /read_response\(parsed, response\)\.await/);
+  assert.match(await source('src-tauri/src/web_fetch/command.rs'), /read_response\(parsed, response\)\.await/);
   assert.match(response, /\.get\(CONTENT_TYPE\)/);
-  assert.match(response, /\.text\(\)/);
-  assert.doesNotMatch(`${rust}\n${client}\n${response}`, /MAX_RESPONSE_BYTES/);
+  assert.match(response, /\.chunk\(\)/);
+  assert.match(response, /MAX_ENCODED_BYTES/);
+  assert.match(response, /MAX_DECODED_BYTES/);
 });
 
 test('R12-01 preserves the historical performance-log limits fields modes and pre-redaction baseline', async () => {

@@ -1,10 +1,9 @@
 mod client;
 pub(crate) mod command;
+pub(crate) mod requests;
 mod response;
 mod validation;
 
-#[cfg(test)]
-use command::fetch_url;
 pub use response::FetchResponse;
 #[cfg(test)]
 use validation::normalize_url;

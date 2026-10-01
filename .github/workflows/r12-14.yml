@@ -1,5 +1,5 @@
 name: R13 Windows Import Revalidation
-run-name: R13.8 image Markdown factory and cumulative Windows regression · ${{ github.sha }}
+run-name: R13-S01 bounded public web fetch and cumulative Windows regression · ${{ github.sha }}
 
 on:
   push:
@@ -254,6 +254,7 @@ jobs:
             src-tauri/src/web_fetch/command.rs \
             src-tauri/src/web_fetch/client.rs \
             src-tauri/src/web_fetch/response.rs \
+            src-tauri/src/web_fetch/requests.rs \
             src-tauri/src/web_fetch/validation.rs \
             src-tauri/tests/web_fetch/validation.rs \
             src-tauri/tests/web_fetch/http_compatibility.rs \

@@ -25,8 +25,8 @@ test('R12-12 preserves the request headers and client-builder settings to one pr
   assert.match(client, /fn browser_headers\(\) -> HeaderMap/);
   for (const code of [
     '.default_headers(browser_headers())',
-    '.redirect(reqwest::redirect::Policy::limited(10))',
-    '.timeout(Duration::from_secs(30))',
+    '.redirect(reqwest::redirect::Policy::none())',
+    '.timeout(FETCH_TIMEOUT)',
     '.map_err(|err| format!("Failed to create HTTP client: {err}"))',
   ]) assert.ok(client.includes(code), `missing frozen client setting: ${code}`);
   assert.equal((client.match(/fn build_client/g) || []).length, 1);
@@ -36,34 +36,35 @@ test('R12-12 preserves the request headers and client-builder settings to one pr
 
 test('R12-12 command delegates transport and response handling to separate owners', async () => {
   const command = await read('src-tauri/src/web_fetch/command.rs');
-  assert.match(command, /let client = build_client\(\)\?/);
+  assert.match(command, /fetch_response\(&parsed\)\.await\?/);
   assert.match(command, /read_response\(parsed, response\)\.await/);
   assert.match(command, /crate::performance_log::measure_async/);
   assert.doesNotMatch(command, /Client::builder|Policy::limited|Duration::from_secs|fn browser_headers/);
 });
 
-test('R12-12 freezes reqwest rustls and automatic compression feature selection without dependency changes', async () => {
+test('R12-12 retains rustls and compression support with R13-S01 explicit bounded decoding', async () => {
   const cargo = await read('src-tauri/Cargo.toml');
   assert.match(cargo, /reqwest = \{ version = "0\.12", default-features = false, features = \["rustls-tls", "gzip", "brotli", "deflate", "json"\] \}/);
   const client = await read(clientPath);
-  assert.doesNotMatch(client, /native_tls|default_tls|no_gzip|no_brotli|no_deflate|\.gzip\(false\)|\.brotli\(false\)|\.deflate\(false\)/);
+  assert.doesNotMatch(client, /native_tls|default_tls/);
+  for (const flag of ['no_gzip()', 'no_brotli()', 'no_deflate()', 'no_proxy()']) assert.ok(client.includes(flag));
   const fixture = await read('src-tauri/tests/stage_12_security_compatibility.rs');
   assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT: &str = include_str!\("\.\.\/src\/web_fetch\/client\.rs"\)/);
-  assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT\.contains\("Policy::limited\(10\)"\)/);
+  assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT\.contains\("Policy::none\(\)"\)/);
   assert.match(fixture, /SOURCE_WEB_FETCH_CLIENT\.contains\("Duration::from_secs\(30\)"\)/);
   assert.match(fixture, /SOURCE_WEB_FETCH_RESPONSE\.contains\("\.get\(CONTENT_TYPE\)"\)/);
 });
 
 test('R12-12 verifies headers redirects timeout and gzip through the real locked reqwest path', async () => {
   const http = await read('src-tauri/tests/web_fetch/http_compatibility.rs');
-  assert.equal((http.match(/#\[test\]/g) || []).length, 9);
+  assert.ok((http.match(/#\[test\]/g) || []).length >= 16);
   for (const code of [
-    'automatic_gzip_decompression_remains_enabled_by_the_locked_reqwest_feature',
+    'bounded_gzip_decompression_preserves_existing_text',
     'Content-Encoding: gzip', 'compressed hello 中文🙂', 'accept-encoding: ',
     'redirect_loops_still_fail_with_the_existing_request_error',
     'real_request_retains_the_thirty_second_timeout',
     'real_http_preserves_payload_unicode_and_browser_headers',
-    'TcpListener::bind("127.0.0.1:0")', 'tauri::async_runtime::block_on(fetch_url(value))',
+    'TcpListener::bind("127.0.0.1:0")', 'tauri::async_runtime::block_on(fetch_owned(value))',
   ]) assert.ok(http.includes(code), `missing real-client regression: ${code}`);
   assert.doesNotMatch(http, /#\[ignore\]|mock!|set_var\(|set_current_dir\(/);
 });

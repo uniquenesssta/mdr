@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import test from 'node:test';
+import { assertProductionInventory } from './support/production-inventory.mjs';
+import { assertCurrentValidation } from './support/current-rust-contracts.mjs';
+const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
+
+test('approved R13-S01 policy is separate from the immutable R12 behavior manifest', async () => {
+  const policy = JSON.parse(await read('src-tauri/tests/fixtures/stage_13_web_fetch/policy.json'));
+  const history = JSON.parse(await read(policy.originalManifest));
+  assert.equal(history.webFetch.responseBody.maximumBytes, null);
+  assert.equal(policy.encodedBodyMaximumBytes, 10 * 1024 * 1024);
+  assert.equal(policy.decodedBodyMaximumBytes, 20 * 1024 * 1024);
+  assert.equal(policy.network, 'public-only');
+  assert.deepEqual(policy.mimeAllowlist, ['text/html', 'application/xhtml+xml']);
+  const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md');
+  assert.match(stage, /用户已确认/);
+  assert.match(stage, /\[ \] 13\.9 Web Fetch Coordinator/);
+});
+
+test('production entry owns the public resolver, whole-request deadline and cancellation registry', async () => {
+  const client = await read('src-tauri/src/web_fetch/client.rs');
+  const command = await read('src-tauri/src/web_fetch/command.rs');
+  const main = await read('src-tauri/src/main.rs');
+  assert.match(client, /fetch_with_resolver\(initial, resolve_public, client_builder\)/);
+  for (const token of ['validate_addresses(&addresses)?', '.resolve_to_addrs(', '.remote_addr()', '.no_proxy()', 'Policy::none()', 'validate_redirect']) assert.ok(client.includes(token), token);
+  assert.match(command, /tokio::time::timeout\(FETCH_TIMEOUT/);
+  assert.match(main, /manage\(web_fetch::requests::WebFetchRequests::default\(\)\)/);
+  assert.match(main, /web_fetch::command::cancel_fetch_url/);
+  assert.doesNotMatch(client.split('#[cfg(test)]\nmod tests')[0], /127\.0\.0\.1|web-fetch\.test|danger_accept_invalid/);
+  await assertProductionInventory();
+});
+
+test('real Windows HTTP boundaries and cumulative security gates remain mandatory', async () => {
+  const cases = await read('src-tauri/tests/web_fetch/http_compatibility.rs');
+  for (const name of ['encoded_limit_counts_actual_bytes_with_length_missing_and_chunked',
+    'compressed_limits_and_all_supported_codecs_use_real_http_bodies',
+    'misleading_lengths_mime_and_compression_do_not_bypass_limits',
+    'production_blocks_loopback_and_redirects_to_private_or_foreign_targets_before_connecting',
+    'each_hop_resolves_again_and_changed_dns_answers_are_rejected',
+    'ten_redirects_succeed_and_an_eleventh_is_rejected',
+    'native_cancel_drops_pending_headers_and_body_connections',
+    'actual_https_keeps_certificate_validation_and_blocks_downgrade',
+    'real_request_retains_the_thirty_second_timeout']) assert.ok(cases.includes(name), name);
+  assert.doesNotMatch(cases, /#\[ignore\]/);
+  await assertCurrentValidation();
+});

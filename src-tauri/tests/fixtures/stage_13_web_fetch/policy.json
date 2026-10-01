@@ -1,0 +1,16 @@
+{
+  "atomicTask": "R13-S01",
+  "approvedOn": "2026-10-01",
+  "encodedBodyMaximumBytes": 10485760,
+  "decodedBodyMaximumBytes": 20971520,
+  "equalLimitAllowed": true,
+  "network": "public-only",
+  "mimeAllowlist": ["text/html", "application/xhtml+xml"],
+  "missingMime": "reject-manual-html",
+  "maximumRedirects": 10,
+  "totalTimeoutSeconds": 30,
+  "httpsDowngrade": "reject",
+  "systemProxy": "disabled-to-preserve-address-pinning",
+  "compression": ["gzip", "br", "deflate"],
+  "originalManifest": "src-tauri/tests/fixtures/stage_12_security/manifest.json"
+}

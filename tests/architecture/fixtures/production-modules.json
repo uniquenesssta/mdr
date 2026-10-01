@@ -4401,7 +4401,7 @@
       "src-tauri/src/web_fetch/validation.rs",
       "rust-module",
       "desktop-platform",
-      "Web-fetch input normalization and parsed HTTP/HTTPS scheme validation with unchanged legacy behavior.",
+      "Pure HTTP(S) input, redirect scheme and public address policy.",
       "none",
       "pure-call",
       "retain",
@@ -4411,7 +4411,7 @@
       "src-tauri/src/web_fetch/client.rs",
       "rust-module",
       "desktop-platform",
-      "Stateless reqwest client construction with frozen browser headers, redirect limit and timeout over Cargo-selected rustls/compression features.",
+      "Per-hop DNS validation, pinned connection, explicit redirect and timeout transport.",
       "none",
       "per-call-client-builder",
       "retain",
@@ -4421,7 +4421,7 @@
       "src-tauri/src/web_fetch/response.rs",
       "rust-module",
       "desktop-platform",
-      "Web-fetch response projection with frozen status, final URL, Content-Type, text body and error mapping.",
+      "HTML MIME, actual encoded and decoded body limits, compression and response DTO.",
       "none",
       "per-response",
       "retain",
@@ -5064,6 +5064,16 @@
       "Pure Markdown image serialization for alt text and URL/Data URL syntax.",
       "none",
       "pure-functions",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/web_fetch/requests.rs",
+      "rust-module",
+      "desktop-platform",
+      "App-owned bounded cancellation registry and request guard cleanup.",
+      "web-fetch-requests",
+      "app-owned-request-lifecycle",
       "retain",
       false
     ]
