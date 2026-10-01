@@ -1,5 +1,5 @@
 name: R13 Windows Import Revalidation
-run-name: R13.7 image controller and cumulative Windows regression · ${{ github.sha }}
+run-name: R13.8 image Markdown factory and cumulative Windows regression · ${{ github.sha }}
 
 on:
   push:

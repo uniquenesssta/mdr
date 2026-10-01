@@ -5056,6 +5056,16 @@
       "create/cancel/destroy",
       "retain",
       false
+    ],
+    [
+      "src/features/import/images/image-markdown-factory.js",
+      "esm-module",
+      "feature",
+      "Pure Markdown image serialization for alt text and URL/Data URL syntax.",
+      "none",
+      "pure-functions",
+      "retain",
+      false
     ]
   ]
 }

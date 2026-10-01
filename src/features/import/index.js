@@ -7,3 +7,4 @@ export { mountClassicFileImportPort } from './compatibility/classic-file-import-
 export { createDropImportController } from './files/drop-import-controller.js';
 export { mountClassicDropImportPort } from './compatibility/classic-drop-import-port.js';
 export { createDropOverlayView } from './files/drop-overlay-view.js';
+export { createImageMarkdown } from './images/image-markdown-factory.js';
