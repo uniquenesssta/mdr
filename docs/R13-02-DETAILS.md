@@ -52,3 +52,11 @@ Mermaid Chart 已用于复核上述真实依赖关系；未引入第三方库/AP
 本次只修改上述两份测试及验收记录。旧断言目的“分类留在应用层，平台只搬运事件”改为：events 调用 scoped 分类接口；实际调用 Import 公共 API 验证原三种文本/六种图片、文本扩展名优先及 browser BMP/native BMP 差异；平台客户端不引入 Import 或分类函数。原文件读取端口、MIME 解码边界、原生事件/订阅/销毁、异常断言和全部测试场景保留，不恢复旧重复数组，不跳过失败，不放宽汇总门禁。
 
 本地仅做两份测试的语法与差异静态检查，不执行 Linux/macOS 产品测试。修正仍须新提交完整 Windows CI；13.2 保持未验收，未开始 13.3。
+
+## 第二轮布局 E2E 超时（2026-10-01）
+
+`d89e55fbb1e4c7f7b78f08e7c03ddc9600c7d0df` / [CI 36807508994](https://github.com/uniquenesssta/mdr/actions/runs/36807508994)：此前两项平台契约修正已通过；递归 Node 1520/1521，唯一失败为 `tests/e2e/preview-layout-stability.test.mjs` 首次可见预览稳定等待超过 3000 ms。其余五个独立 job 成功；汇总因递归失败被阻断。该 E2E 在上一轮相同生产代码下通过，本轮未改布局代码；现有日志没有渲染次数/尺寸/调度状态，不能据此断言产品布局缺陷或确定只是 runner 负载。
+
+本次针对验证边界：两处布局等待使用有界 10000 ms，等待几何发布且 layout 队列无待处理工作；等待完成后仍严格断言 renders === 1、尺寸非零、至少两次 viewport/invalidation/geometry 更新、resize 不重渲染、destroy 后不更新。等待阶段以 renders >= 1 判定可检查状态，重复渲染仍由紧随其后的 === 1 断言报错，不再只能给出含糊超时。未重试测试、未增加 job 总超时或降低这些产品断言。
+
+超时附带渲染/刷新计数、实际尺寸、collapsed、document.visibilityState、layout 待处理状态、浏览器异常和 console；额外检查未捕获浏览器异常为空。无生产代码改动；本地仅语法和差异静态检查，真实行为与本轮失败是否消除仍待 Windows CI，不宣称已确定或修复生产根因。13.2 保持未验收。

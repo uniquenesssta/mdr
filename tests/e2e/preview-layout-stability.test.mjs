@@ -9,6 +9,26 @@ const projectRoot = resolve(here, '../..');
 const browser = await launchChromium({ width: 900, height: 700 });
 const virtualHost = await installVirtualFileHost(browser.page, { root: projectRoot, origin: 'https://markdown-editor.test' });
 
+// CI browser scheduling is not a three-second performance contract. Keep the
+// behavioral assertions strict and report the actual page state on failure.
+async function waitForLayout(predicate, description) {
+  try {
+    await browser.page.waitFor(predicate, { timeoutMs: 10000, description });
+  } catch (error) {
+    const state = await browser.page.evaluate(`(() => ({
+      state: window.__layoutState,
+      width: document.getElementById('preview')?.clientWidth,
+      height: document.getElementById('preview')?.clientHeight,
+      collapsed: document.getElementById('pane')?.classList.contains('collapsed'),
+      visibility: document.visibilityState,
+      pending: window.__layoutScheduler?.hasPending('layout')
+    }))()`).catch(diagnosticError => ({ diagnosticError: diagnosticError.message }));
+    throw new Error(error.message + '\\nLayout diagnostics: ' + JSON.stringify({
+      ...state, exceptions: browser.page.exceptions, console: browser.page.consoleMessages
+    }), { cause: error });
+  }
+}
+
 try {
   await browser.page.setDocumentContent(`<!doctype html><html><head><base href="${virtualHost.origin}/"><style>
     html,body{margin:0;width:100%;height:100%}.preview-pane{width:420px;height:260px}.preview-pane.collapsed{display:none}#preview{width:100%;height:100%;overflow:auto}.markdown-body{min-height:40px}
@@ -50,10 +70,11 @@ try {
   assert.equal(await browser.page.evaluate(`window.__layoutState.renders`), 0, 'hidden preview must not render into zero geometry');
 
   await browser.page.evaluate(`document.getElementById('pane').classList.remove('collapsed')`);
-  await browser.page.waitFor(() => window.__layoutState?.renders === 1 && window.__layoutState?.geometry >= 2, {
-    timeoutMs: 3000,
-    description: 'first visible preview stabilized and geometry published'
-  });
+  await waitForLayout(
+    () => window.__layoutState?.renders >= 1 && window.__layoutState?.geometry >= 2
+      && !window.__layoutScheduler.hasPending('layout'),
+    'first visible preview stabilized and geometry published'
+  );
   const visible = await browser.page.evaluate(`(()=>({
     width:document.getElementById('preview').clientWidth,
     height:document.getElementById('preview').clientHeight,
@@ -65,10 +86,11 @@ try {
 
   const geometryBeforeResize = visible.geometry;
   await browser.page.evaluate(`window.__layoutGeometryTarget=${geometryBeforeResize + 2};document.getElementById('pane').style.width='520px'`);
-  await browser.page.waitFor(() => window.__layoutState?.geometry >= window.__layoutGeometryTarget, {
-    timeoutMs: 3000,
-    description: 'container resize geometry refresh'
-  });
+  await waitForLayout(
+    () => window.__layoutState?.geometry >= window.__layoutGeometryTarget
+      && !window.__layoutScheduler.hasPending('layout'),
+    'container resize geometry refresh'
+  );
   assert.equal(await browser.page.evaluate(`window.__layoutState.renders`), 1, 'stable populated preview should not rerender on size-only change');
 
   const beforeDestroy = await browser.page.evaluate(`window.__layoutState.geometry`);
@@ -76,6 +98,7 @@ try {
   await new Promise(resolvePromise => setTimeout(resolvePromise, 120));
   assert.equal(await browser.page.evaluate(`window.__layoutState.geometry`), beforeDestroy);
   assert.deepEqual(virtualHost.errors, []);
+  assert.deepEqual(browser.page.exceptions, [], 'layout must not raise uncaught browser errors');
   console.log('ok - Atomic 7.9 preview layout visibility/stability/geometry browser contract');
 } finally {
   await virtualHost.close();
