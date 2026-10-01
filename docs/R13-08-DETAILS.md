@@ -27,3 +27,9 @@ Editor image-command 经 Import 公共入口调用工厂，删除原归一化/�
 本地仅执行 JS/MJS 语法、JSON/导入与差异检查，不在 Linux/macOS 运行产品测试或构建。完整行为、架构、Windows WebView、浏览器、Rust 与依赖回归交由现有七组 Windows CI；启动后停止，不轮询，成功前不勾选 13.8。
 
 已用 Context7 核对 Marked 测试 API，并用 16.4.2 官方源码校核版本差异；未升级依赖。Mermaid Chart 已复核入口与单次编辑事务。A05 的 R13-S01 仍须先于 13.9 完成；本次未开始网页抓取或修改其限制。
+
+## 首轮 CI 与重验（2026-10-01）
+
+`12352d1992b13d21fab7ec9dba58228e745a1fe5` / [CI 36861368308](https://github.com/uniquenesssta/mdr/actions/runs/36861368308) 为 5 个 job 成功、前端与依赖前端的收尾 job 失败。前端 Node、架构、构建已通过；Browser preview contract 在 Chromium CDP 建连阶段报 `CDP endpoint did not become ready: fetch failed`，Built-app browser regression 报 `Timed out waiting for application ready`。完整仓库 Node、Rust、原生边界、实际 Windows WebView 和依赖检查均通过。
+
+已读取前端与收尾日志及前端产物 ZIP；产物只保存了上述超时日志，没有初始化页面异常详情，因此不能断言两个超时同根或已经定位产品缺陷。本次只补失败事实并触发全量新 runner 重验，不改生产代码、不改等待阈值、不增加重试掩盖断言，也不改冻结模型。完整重跑是为了保留收尾要求的同一运行轮次七组产物；只重跑失败 job 会缺少本轮其他 job 产物。R13.8 保持未验收，复杂转义限制保持原记录。
