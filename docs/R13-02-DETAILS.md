@@ -1,6 +1,6 @@
 # R13.2 导入类型分类器
 
-状态：**实现已提交，待本轮精确提交 Windows CI；尚未验收**。唯一分支 `agent/r13-stage`。前置 R13.1 已在 `3c299591b11dda238b212be68c9b6beb5b8a7726` / [Windows CI 36801548407](https://github.com/uniquenesssta/mdr/actions/runs/36801548407) 验收（7/7 job、Node 1513/1513、Rust 268/268）；该提交也是本项回退代码基线。
+状态：**已验收（2026-10-01）**。唯一分支 `agent/r13-stage`。前置 R13.1 已在 `3c299591b11dda238b212be68c9b6beb5b8a7726` / [Windows CI 36801548407](https://github.com/uniquenesssta/mdr/actions/runs/36801548407) 验收（7/7 job、Node 1513/1513、Rust 268/268）；该提交也是本项回退代码基线。
 
 ## 实际变更与公共契约
 
@@ -60,3 +60,7 @@ Mermaid Chart 已用于复核上述真实依赖关系；未引入第三方库/AP
 本次针对验证边界：两处布局等待使用有界 10000 ms，等待几何发布且 layout 队列无待处理工作；等待完成后仍严格断言 renders === 1、尺寸非零、至少两次 viewport/invalidation/geometry 更新、resize 不重渲染、destroy 后不更新。等待阶段以 renders >= 1 判定可检查状态，重复渲染仍由紧随其后的 === 1 断言报错，不再只能给出含糊超时。未重试测试、未增加 job 总超时或降低这些产品断言。
 
 超时附带渲染/刷新计数、实际尺寸、collapsed、document.visibilityState、layout 待处理状态、浏览器异常和 console；额外检查未捕获浏览器异常为空。无生产代码改动；本地仅语法和差异静态检查，真实行为与本轮失败是否消除仍待 Windows CI，不宣称已确定或修复生产根因。13.2 保持未验收。
+
+## 最终验收（2026-10-01）
+
+精确提交 `8da99a8ee8f88f67f4b44140922700e33b517f0e` 的 [Windows CI 36809102374](https://github.com/uniquenesssta/mdr/actions/runs/36809102374) 七个 job 全部成功：前端、递归 Node、Rust、原生链接、WebView、依赖公告及同提交证据汇总。此前两项分类测试与布局 E2E 不再失败，汇总明确同提交 Windows 重验通过。该结果支持本项验收，但不倒推旧布局超时的具体原因。13.2 正式收尾，可开始 13.3；13.4 的分类兼容端口删除责任和阶段安全移交保持。
