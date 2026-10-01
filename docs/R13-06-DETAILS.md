@@ -1,6 +1,6 @@
 # R13.6 Image Policy
 
-状态：实现已提交，**待精确提交 Windows CI，未验收**。唯一分支 `agent/r13-stage`；前置与回退代码基线 R13.5 `fd9c35d92d81c2cf3cd059c7e41797bfc37a962a`，Windows CI 36853092080 七个 job 全部成功。
+状态：**已验收**。实现提交 `073c59bb105f877913272ddc61860914a7a7386e` 的 [Windows CI 36855278836](https://github.com/uniquenesssta/mdr/actions/runs/36855278836) 七个 job 全部成功，具备 13.7 准入条件。唯一分支 `agent/r13-stage`；前置与回退代码基线 R13.5 `fd9c35d92d81c2cf3cd059c7e41797bfc37a962a`，Windows CI 36853092080 七个 job 全部成功。
 
 ## 入口规则与统一决策
 
@@ -29,6 +29,6 @@ Rust Image Reader 继续拥有原生实际文件字节限制；本项不在 JS �
 - 新增现有端口策略一致性及销毁后拒绝调用；静态契约保证生产调用者不再散落大小比较、Rust 5/20 MiB 限制仍存在。
 - 保留原完整导入矩阵：实际 events + Drop Import + scoped port 的读取/提示/失败/取消路径，以及真实 Image Dialog View 的确认、拒绝、边界、插入行为。分类器接线断言随职责迁移更新，不删除行为覆盖。
 - 生产模块清单追加一个纯策略模块；未新增依赖、模型、持久化格式或 Rust 改动。
-- 本地只执行 JS/MJS 语法、JSON、相对引用与差异静态检查，不在 Linux/macOS 跑产品测试或构建。完整行为、架构、浏览器启动、Windows WebView、Rust 和依赖验证交由七组 Windows CI；启动后停止，不轮询。成功前不勾选 13.6。
+- 本地只执行 JS/MJS 语法、JSON、相对引用与差异静态检查，不在 Linux/macOS 跑产品测试或构建。完整行为、架构、浏览器启动、Windows WebView、Rust 和依赖验证交由七组 Windows CI；启动后停止，不轮询。2026-10-01 应收尾请求核对精确提交，确认通过并勾选 13.6。
 
 已用 Mermaid Chart 复核策略调用与 Rust 字节限制边界；没有新增第三方 API。A05/R13-S01、A03 和 A10 原移交保持。
