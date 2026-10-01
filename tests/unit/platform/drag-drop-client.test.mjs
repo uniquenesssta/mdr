@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { classifyBrowserFile, classifyImportPath, IMPORT_KINDS } from '../../../src/features/import/index.js';
 import { createDragDropClient } from '../../../src/platform/index.js';
 
 function createNativeWebview(log, options = {}) {
@@ -174,9 +175,19 @@ test('desktop platform exposes DragDropPort directly and events consumes normali
 test('file interpretation remains in the application layer, not the DragDrop client', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/drag-drop-client.js', import.meta.url), 'utf8');
   const eventsSource = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(clientSource, /read_dropped_file|readDroppedFile|allowedText|\.markdown|image\//i);
-  assert.match(eventsSource, /\['md', 'markdown', 'txt'\]/);
-  assert.match(eventsSource, /\['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'\]/);
+  assert.doesNotMatch(clientSource, /read_dropped_file|readDroppedFile|allowedText|\.markdown|image\/|features\/import|classifyImportPath|classifyBrowserFile/i);
+  // R13.2 moves interpretation into Import; the platform still only transports paths.
+  assert.match(eventsSource, /eventsImportClassifierPort\.classifyFile\(file\)/);
+  assert.match(eventsSource, /eventsImportClassifierPort\.classifyPath\(resolvedPath\)/);
+  for (const extension of ['md', 'markdown', 'txt']) {
+    assert.equal(classifyImportPath('C:\\docs\\note.' + extension), IMPORT_KINDS.TEXT);
+    assert.equal(classifyBrowserFile({ name: 'note.' + extension, type: 'image/png' }), IMPORT_KINDS.TEXT);
+  }
+  for (const extension of ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']) {
+    assert.equal(classifyImportPath('C:\\images\\photo.' + extension), IMPORT_KINDS.IMAGE);
+  }
+  assert.equal(classifyImportPath('C:\\images\\photo.bmp'), IMPORT_KINDS.UNSUPPORTED);
+  assert.equal(classifyBrowserFile({ name: 'photo.bmp', type: 'image/bmp' }), IMPORT_KINDS.IMAGE);
   assert.match(eventsSource, /call\('files', 'readText'/);
   assert.match(eventsSource, /call\('files', 'readImage'/);
 });

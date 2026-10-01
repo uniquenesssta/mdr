@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { classifyBrowserFile, classifyImportPath, IMPORT_KINDS } from '../../../src/features/import/index.js';
 
 const migratedCallers = [
   'src/main.js', 'src/runtime/link-preview.js', 'src/runtime/performance.js',
@@ -54,8 +55,18 @@ test('ESM consumers receive responsibility-focused ports rather than native DTO 
 
 test('native drag/drop keeps file classification in application code and MIME decoding outside it', async () => {
   const events = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
-  assert.match(events, /\['md', 'markdown', 'txt'\]/);
-  assert.match(events, /\['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'\]/);
+  // R13.2 moves interpretation into Import; the platform still only transports paths.
+  assert.match(events, /eventsImportClassifierPort\.classifyFile\(file\)/);
+  assert.match(events, /eventsImportClassifierPort\.classifyPath\(resolvedPath\)/);
+  for (const extension of ['md', 'markdown', 'txt']) {
+    assert.equal(classifyImportPath('C:\\docs\\note.' + extension), IMPORT_KINDS.TEXT);
+    assert.equal(classifyBrowserFile({ name: 'note.' + extension, type: 'image/png' }), IMPORT_KINDS.TEXT);
+  }
+  for (const extension of ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']) {
+    assert.equal(classifyImportPath('C:\\images\\photo.' + extension), IMPORT_KINDS.IMAGE);
+  }
+  assert.equal(classifyImportPath('C:\\images\\photo.bmp'), IMPORT_KINDS.UNSUPPORTED);
+  assert.equal(classifyBrowserFile({ name: 'photo.bmp', type: 'image/bmp' }), IMPORT_KINDS.IMAGE);
   assert.match(events, /call\('files', 'readText'/);
   assert.match(events, /call\('files', 'readImage'/);
   assert.doesNotMatch(events, /data:image\/png|data:image\/jpeg|image_mime/);

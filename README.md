@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：修正 R13.2 两条遗漏的嵌套平台测试：不再要求类型数组留在旧 events 文件，改为验证 Import 公共分类接口、入口接线和浏览器/Windows 类型差异，保留平台层禁止分类、文件端口和 MIME 边界。首轮 Node 1519/1521，根 Node 545/545；其余五个 CI job 通过。本次未改生产代码，待 Windows 重验。[详情](docs/R13-02-DETAILS.md)。
+
 - 2026-10-01：开始 R13.2：新增无内容读取的 File/路径/返回 kind 分类器，切换浏览器 drop、Windows 路径和图片对话框，删除重复类型判断；保留文本优先/MIME-only 差异、大小警告和失败行为。新增分类/生命周期与入口回归，语法静态复核通过，待 Windows CI。[详情](docs/R13-02-DETAILS.md)。
 
 - 2026-10-01：R13.1 正式收尾：`3c29959` 的 [Windows CI 36801548407](https://github.com/uniquenesssta/mdr/actions/runs/36801548407) 7/7 job、递归 Node 1513/1513、Rust 268/268 全部通过，八个浏览器 E2E 文件正常退出，同提交证据汇总通过。支持矩阵已验收，可进入 13.2；后续已登记问题继续保留。[详情](docs/R13-01-DETAILS.md)。

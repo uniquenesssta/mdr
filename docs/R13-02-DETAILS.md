@@ -44,3 +44,11 @@ flowchart TD
 ```
 
 Mermaid Chart 已用于复核上述真实依赖关系；未引入第三方库/API，无需新增版本文档查询。
+
+## 首轮 CI 失败与修正（2026-10-01）
+
+`44bbbf294663d3dad6faecda3055f7e03716d035` 的 [Windows CI 36804994799](https://github.com/uniquenesssta/mdr/actions/runs/36804994799) 未通过。递归 Node 1519/1521；仅 `tests/unit/platform/drag-drop-client.test.mjs` 与 `platform-cutover.test.mjs` 两项仍断言 events 中存在 md/markdown/txt 和六种图片扩展名数组。13.2 已将这些规则迁入 Import 分类器，这两项文件位置断言遗漏迁移。根 Node 545/545（包含本项分类器与导入矩阵）、架构 372/372、浏览器 E2E 8/8 已通过；前端、Rust、原生链接、WebView、依赖公告五个 job 成功。收官 job 明确因 repository-tests 失败而阻断，不是第二个独立产品故障。
+
+本次只修改上述两份测试及验收记录。旧断言目的“分类留在应用层，平台只搬运事件”改为：events 调用 scoped 分类接口；实际调用 Import 公共 API 验证原三种文本/六种图片、文本扩展名优先及 browser BMP/native BMP 差异；平台客户端不引入 Import 或分类函数。原文件读取端口、MIME 解码边界、原生事件/订阅/销毁、异常断言和全部测试场景保留，不恢复旧重复数组，不跳过失败，不放宽汇总门禁。
+
+本地仅做两份测试的语法与差异静态检查，不执行 Linux/macOS 产品测试。修正仍须新提交完整 Windows CI；13.2 保持未验收，未开始 13.3。
