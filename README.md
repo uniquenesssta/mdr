@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：R13.7 正式收尾：`081a16b` 的 [Windows CI 36858258580](https://github.com/uniquenesssta/mdr/actions/runs/36858258580) 七个 job 全部成功，图片读取/取消与累计回归通过，具备 13.8 准入条件。[详情](docs/R13-07-DETAILS.md)。
+
 - 2026-10-01：开始 R13.7：图片 File/Windows 读取迁入可取消 Image Import Controller，URL/上传生成显式插入请求；移除 events/dialog 的 FileReader 实现。拖放代次传递取消信号，对话框换图/关闭/销毁清除旧状态，晚到结果不能复活或插入。补独立生命周期、实际 Platform 与真实浏览器读取回归；本地仅静态检查，待 Windows CI。[详情](docs/R13-07-DETAILS.md)。
 
 - 2026-10-01：R13.6 正式收尾：`073c59b` 的 [Windows CI 36855278836](https://github.com/uniquenesssta/mdr/actions/runs/36855278836) 七个 job 全部成功，图片策略与累计回归通过，具备 13.7 准入条件。[详情](docs/R13-06-DETAILS.md)。

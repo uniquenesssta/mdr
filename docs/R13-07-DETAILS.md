@@ -1,6 +1,6 @@
 # R13.7 Image Controller
 
-状态：实现已提交，**待精确提交 Windows CI，未验收**。唯一分支 `agent/r13-stage`；前置与回退代码基线 R13.6 `073c59bb105f877913272ddc61860914a7a7386e`，Windows CI 36855278836 七个 job 全部成功。
+状态：**已验收**。实现提交 `081a16bf79a85401b8fa1390d24b5fa46af472ef` 的 [Windows CI 36858258580](https://github.com/uniquenesssta/mdr/actions/runs/36858258580) 七个 job 全部成功，具备 13.8 准入条件。唯一分支 `agent/r13-stage`；前置与回退代码基线 R13.6 `073c59bb105f877913272ddc61860914a7a7386e`，Windows CI 36855278836 七个 job 全部成功。
 
 ## 实际所有权与调用链
 
@@ -25,7 +25,7 @@ Drop Import 在新 dispatch 和销毁时取消上次 request.signal；文本代�
 - 原导入矩阵改用真实 Image Controller + Browser File Reader；保留文本优先、MIME/阈值、确认、原生路径、错误提示与代次/最近文件场景，异步结果改为等待断言。
 - 更新三条平台旧接线断言，保留客户端命令映射、平台无业务状态与 Rust MIME 边界；实际 main 组合测试覆盖浏览器 Data URL 与 desktop readImage 接线和销毁后拒绝。
 - 既有 Windows 浏览器 FileReader E2E 增加真实 File 图片 Data URL 与销毁取消，不另建 CI；生产清单追加一个模块。
-- 本地仅 JS/MJS 语法、JSON/相对导入和差异静态检查。完整产品测试与构建只运行现有七组 Windows CI，启动即停止，不轮询，成功前不勾选 13.7。
+- 本地仅 JS/MJS 语法、JSON/相对导入和差异静态检查。完整产品测试与构建只运行现有七组 Windows CI，启动即停止，不轮询，2026-10-01 应收尾请求核对精确提交后确认通过并勾选 13.7。
 
 未改 Rust、依赖、模型或持久化格式；复用现有平台 API，无新增第三方 API。Mermaid Chart 已复核读取/取消所有权。R13.8 字符串工厂、13.13/13.14 桥删除与 A05/R13-S01、A03、A10 移交保持。
 
