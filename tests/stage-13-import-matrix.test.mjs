@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
-import { mountClassicImportClassifierPort } from '../src/features/import/index.js';
+import { createBrowserFileReader } from '../src/platform/browser/browser-file-reader.js';
+import { mountClassicImportClassifierPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
 import { createImageDialogView } from '../src/features/editor/ui/image-dialog-view.js';
 
 const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
@@ -28,6 +29,14 @@ function dropHost({ desktop = false, failRead = false, opened = true } = {}) {
       addEventListener: (name, handler) => handlers.set(name, handler)
     },
     eventsImportClassifierPort: mountClassicImportClassifierPort({}).api,
+    eventsFileImportPort: mountClassicFileImportPort({}, createFileImportController({
+      readBrowserText: async () => '',
+      async readNativeText(path) {
+        calls.push(['readText', path]);
+        if (failRead) throw new Error('read denied');
+        return '正文';
+      }
+    })).api,
     eventsPlatformPort: {
       supports: name => desktop && ['desktop.fileSystem', 'desktop.dragDrop'].includes(name),
       async call(group, operation, ...args) {
@@ -109,6 +118,15 @@ test('native drag-drop suppresses DOM duplicate and takes only first native path
 test('browser text read preserves text and rejects read error or cancellation before document commit', async () => {
   for (const outcome of ['load', 'error', 'abort']) {
     const committed = [], messages = [];
+    const reader = createBrowserFileReader({
+      cancelErrorMessage: '文档读取已取消',
+      FileReaderClass: class { readAsText() {
+        this.result = '中文\r\ntext'; this.error = new Error('read denied'); this['on' + outcome]();
+      } }
+    });
+    const fileImport = createFileImportController({
+      readBrowserText: (file, options) => reader.readText(file, options), readNativeText: async () => ''
+    });
     const context = vm.createContext({
       filenameInput: { value: 'existing' }, t: key => key, window: {},
       exportDocumentUiCommandPort: { invoke() {} },
@@ -118,7 +136,7 @@ test('browser text read preserves text and rejects read error or cancellation be
       },
       exportSidebarControllerPort: { select() {} }, applyDocumentLifecycleUi: async () => true,
       recordDocumentOperationError: (_, error) => error.message, showToast: x => messages.push(x),
-      FileReader: class { readAsText() { this.error = new Error('read denied'); this['on' + outcome]({ target: { result: '中文\r\ntext' } }); } }
+      exportFileImportPort: mountClassicFileImportPort({}, fileImport).api
     });
     vm.runInContext(section(exportSource, '    function getEditorNormalizedLength', '    // 切换主题'), context);
     assert.equal(await context.loadFile(null), false);

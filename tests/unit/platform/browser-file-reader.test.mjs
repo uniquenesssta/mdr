@@ -79,3 +79,37 @@ test('FileReader rejects missing files and unavailable implementations explicitl
   assert.throws(() => createBrowserFileReader(null), /options must be an object/);
   assert.throws(() => createBrowserFileReader({ FileReaderClass: {} }), /FileReader is unavailable/);
 });
+
+test('FileReader signal cancellation aborts active I/O, detaches handlers and ignores late callbacks', async () => {
+  let instance;
+  class PendingReader {
+    constructor() { instance = this; this.readyState = 0; }
+    readAsText() { this.readyState = 1; }
+    abort() { this.aborts = (this.aborts || 0) + 1; this.readyState = 2; this.onabort?.(); }
+  }
+  const adapter = createBrowserFileReader({ FileReaderClass: PendingReader });
+  const controller = new AbortController();
+  const pending = adapter.readText({ name: 'a.md' }, { signal: controller.signal });
+  const lateLoad = instance.onload;
+  const rejected = assert.rejects(pending, error => error.code === 'BROWSER_FILE_READ_CANCELLED');
+  controller.abort(); await rejected;
+  assert.equal(instance.aborts, 1);
+  assert.equal(instance.onload, null); assert.equal(instance.onerror, null); assert.equal(instance.onabort, null);
+  instance.result = 'late'; lateLoad(); assert.equal(instance.aborts, 1);
+});
+
+test('FileReader pre-aborted signal starts no reader and successful completion removes abort listener', async () => {
+  let created = 0, aborted = 0;
+  class Reader {
+    constructor() { created++; }
+    readAsText() { this.result = 'ok'; this.readyState = 2; this.onload(); }
+    abort() { aborted++; }
+  }
+  const adapter = createBrowserFileReader({ FileReaderClass: Reader });
+  const controller = new AbortController(); controller.abort();
+  await assert.rejects(adapter.readText({}, { signal: controller.signal }), error => error.code === 'BROWSER_FILE_READ_CANCELLED');
+  assert.equal(created, 0);
+  const next = new AbortController();
+  assert.equal(await adapter.readText({}, { signal: next.signal }), 'ok');
+  next.abort(); assert.equal(aborted, 0);
+});

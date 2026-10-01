@@ -67,7 +67,9 @@ test('native drag/drop keeps file classification in application code and MIME de
   }
   assert.equal(classifyImportPath('C:\\images\\photo.bmp'), IMPORT_KINDS.UNSUPPORTED);
   assert.equal(classifyBrowserFile({ name: 'photo.bmp', type: 'image/bmp' }), IMPORT_KINDS.IMAGE);
-  assert.match(events, /call\('files', 'readText'/);
+  assert.match(events, /eventsFileImportPort\.readPath\(resolvedPath\)/);
+  const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  assert.match(main, /readNativeText: path => platform\.files\.readText\(path\)/);
   assert.match(events, /call\('files', 'readImage'/);
   assert.doesNotMatch(events, /data:image\/png|data:image\/jpeg|image_mime/);
 });

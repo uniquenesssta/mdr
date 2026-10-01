@@ -1,6 +1,7 @@
 import './styles/index.css';
 import { mountClassicImportClassifierPort } from './features/import/index.js';
-import { createPlatform, mountClassicPlatformPort } from './platform/index.js';
+import { createFileImportController, mountClassicFileImportPort } from './features/import/index.js';
+import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
 import { configurePerformancePlatform, configurePerformanceRuntimeStats } from './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
@@ -134,6 +135,16 @@ const platform = createPlatform({
 });
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
 const importClassifierPort = mountClassicImportClassifierPort(compatibilityPlatformHost);
+const browserImportReader = createBrowserFileReader({
+  FileReaderClass: window.FileReader,
+  readErrorMessage: '无法读取所选文档',
+  cancelErrorMessage: '文档读取已取消'
+});
+const fileImportController = createFileImportController({
+  readBrowserText: (file, options) => browserImportReader.readText(file, options),
+  readNativeText: path => platform.files.readText(path)
+});
+const fileImportPort = mountClassicFileImportPort(compatibilityPlatformHost, fileImportController);
 const backgroundTaskScheduler = createTaskScheduler({ runtime: window });
 const backgroundTaskSchedulerPort = mountClassicTaskSchedulerPort(compatibilityPlatformHost, backgroundTaskScheduler);
 const markdownPresentation = createMarkdownPresentationApi();
@@ -261,6 +272,8 @@ window.addEventListener('pagehide', () => {
   previewPresentationPort.destroy();
   backgroundTaskSchedulerPort.destroy();
   backgroundTaskScheduler.destroy();
+  fileImportController.destroy();
+  fileImportPort.destroy();
   importClassifierPort.destroy();
   compatibilityPlatformPort.destroy();
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
@@ -1521,6 +1534,8 @@ loadAppModules().then(() => {
     details: { documentReadyState: document.readyState }
   });
 }).catch((error) => {
+  fileImportController.destroy();
+  fileImportPort.destroy();
   importClassifierPort.destroy();
   destroyLayoutStateFeature();
   console.error(error);

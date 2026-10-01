@@ -4991,10 +4991,30 @@
       "src/features/import/index.js",
       "esm-facade",
       "feature",
-      "Public metadata classification and scoped classic migration port.",
+      "Public classification, text read coordination and scoped classic migration ports.",
       "none",
       "module-import",
       "retain",
+      false
+    ],
+    [
+      "src/features/import/files/file-import-controller.js",
+      "esm-module",
+      "feature",
+      "Coordinate browser/native text reads into immutable results; cancel or quarantine late reads.",
+      "active-file-read",
+      "create/cancel/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/import/compatibility/classic-file-import-port.js",
+      "esm-module",
+      "feature",
+      "Scoped text import access for classic callers until Atomic 13.13/13.14.",
+      "classic-file-import-port",
+      "mount/destroy",
+      "remove-after-migration",
       false
     ]
   ]

@@ -1,5 +1,7 @@
     const eventsCompatibilityHost = document.getElementById('compatibility-business-ports');
     const eventsPlatformPort = eventsCompatibilityHost?.markdownEditorPlatformPort;
+    const eventsFileImportPort = eventsCompatibilityHost?.markdownEditorFileImportPort;
+    if (!eventsFileImportPort) throw new Error('File Import compatibility port is unavailable.');
     const eventsImportClassifierPort = eventsCompatibilityHost?.markdownEditorImportClassifierPort;
     if (!eventsImportClassifierPort) throw new Error('Import classifier compatibility port is unavailable.');
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
@@ -107,7 +109,7 @@
         if (kind === eventsImportClassifierPort.kinds.TEXT) {
           const opened = await loadDocumentFromContentLoader(
             name,
-            () => eventsPlatformPort.call('files', 'readText', resolvedPath),
+            async () => (await eventsFileImportPort.readPath(resolvedPath)).content,
             resolvedPath,
             { nativePath: resolvedPath }
           );

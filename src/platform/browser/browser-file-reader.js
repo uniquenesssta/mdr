@@ -1,6 +1,6 @@
 export class BrowserFileReadCancelledError extends Error {
-  constructor() {
-    super('Browser file read was cancelled');
+  constructor(message = 'Browser file read was cancelled') {
+    super(message);
     this.name = 'BrowserFileReadCancelledError';
     this.code = 'BROWSER_FILE_READ_CANCELLED';
   }
@@ -20,7 +20,9 @@ export function createBrowserFileReader(options = {}) {
 
   const FileReaderClass = resolveFileReaderClass(options.FileReaderClass);
 
-  function read(file, method) {
+  function read(file, method, { signal } = {}) {
+    const cancellation = () => new BrowserFileReadCancelledError(options.cancelErrorMessage);
+    if (signal?.aborted) return Promise.reject(cancellation());
     if (!file) return Promise.reject(new TypeError('browser file reader requires a file'));
     const reader = new FileReaderClass();
     if (typeof reader?.[method] !== 'function') {
@@ -32,14 +34,21 @@ export function createBrowserFileReader(options = {}) {
       const finish = (callback, value) => {
         if (settled) return;
         settled = true;
+        signal?.removeEventListener('abort', onSignalAbort);
         reader.onload = null;
         reader.onerror = null;
         reader.onabort = null;
         callback(value);
       };
+      const onSignalAbort = () => {
+        finish(reject, cancellation());
+        if (reader.readyState === 1) reader.abort();
+      };
+      signal?.addEventListener('abort', onSignalAbort, { once: true });
+      if (signal?.aborted) { onSignalAbort(); return; }
       reader.onload = () => finish(resolve, reader.result ?? '');
-      reader.onerror = () => finish(reject, reader.error || new Error('Browser file read failed'));
-      reader.onabort = () => finish(reject, new BrowserFileReadCancelledError());
+      reader.onerror = () => finish(reject, reader.error || new Error(options.readErrorMessage || 'Browser file read failed'));
+      reader.onabort = () => finish(reject, cancellation());
       try {
         reader[method](file);
       } catch (error) {
@@ -48,12 +57,12 @@ export function createBrowserFileReader(options = {}) {
     });
   }
 
-  function readText(file) {
-    return read(file, 'readAsText');
+  function readText(file, readOptions) {
+    return read(file, 'readAsText', readOptions);
   }
 
-  function readDataUrl(file) {
-    return read(file, 'readAsDataURL');
+  function readDataUrl(file, readOptions) {
+    return read(file, 'readAsDataURL', readOptions);
   }
 
   return Object.freeze({ readText, readDataUrl });

@@ -188,7 +188,9 @@ test('file interpretation remains in the application layer, not the DragDrop cli
   }
   assert.equal(classifyImportPath('C:\\images\\photo.bmp'), IMPORT_KINDS.UNSUPPORTED);
   assert.equal(classifyBrowserFile({ name: 'photo.bmp', type: 'image/bmp' }), IMPORT_KINDS.IMAGE);
-  assert.match(eventsSource, /call\('files', 'readText'/);
+  assert.match(eventsSource, /eventsFileImportPort\.readPath\(resolvedPath\)/);
+  const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  assert.match(main, /readNativeText: path => platform\.files\.readText\(path\)/);
   assert.match(eventsSource, /call\('files', 'readImage'/);
 });
 

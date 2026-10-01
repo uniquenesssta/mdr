@@ -1,5 +1,7 @@
     const exportCompatibilityHost = document.getElementById('compatibility-business-ports');
     const exportPlatformPort = exportCompatibilityHost?.markdownEditorPlatformPort;
+    const exportFileImportPort = exportCompatibilityHost?.markdownEditorFileImportPort;
+    if (!exportFileImportPort) throw new Error('File Import compatibility port is unavailable.');
     const exportDocumentDomainPort = exportCompatibilityHost?.markdownEditorDocumentDomainPort;
     const exportDocumentSessionPort = exportCompatibilityHost?.markdownEditorDocumentSessionPort;
     const exportDocumentControllerPort = exportCompatibilityHost?.markdownEditorDocumentControllerPort;
@@ -720,6 +722,7 @@ ${'</scr' + 'ipt>'}
         showToast(t('toastFileImported'));
         return true;
       } catch (error) {
+        if (error?.code === 'FILE_IMPORT_CANCELLED') return false;
         if (exportDocumentControllerPort.isStaleError(error)) return false;
         showToast(recordDocumentOperationError('import', error, {
           fileName: String(name || ''),
@@ -736,13 +739,10 @@ ${'</scr' + 'ipt>'}
 
     function loadFile(file) {
       if (!file) return Promise.resolve(false);
-      return loadDocumentFromContentLoader(file.name, () => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = event => resolve(event.target?.result ?? '');
-        reader.onerror = () => reject(reader.error || new Error('无法读取所选文档'));
-        reader.onabort = () => reject(new Error('文档读取已取消'));
-        reader.readAsText(file);
-      }), '', { fileBytes: Number(file.size) || 0 });
+      return loadDocumentFromContentLoader(file.name, async () => {
+        const result = await exportFileImportPort.readBrowserFile(file);
+        return result.content;
+      }, '', { fileBytes: Number(file.size) || 0 });
     }
 
     // 导入文件

@@ -1,3 +1,4 @@
+import { createFileImportController } from '../../../src/features/import/index.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -454,4 +455,36 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
   assert.doesNotMatch(exportModule, /exportDocumentSessionPort\.(?:insertRecord|updateRecord|setActive|removeRecord|reset)\s*\(/);
   const frozenHash = execFileSync('git', ['hash-object', 'src/document/document-model.js'], { cwd: ROOT, encoding: 'utf8' }).trim();
   assert.equal(frozenHash, 'd767d9025be05a6f6b87d7cd3527782db1c3303a');
+});
+
+test('R13.3 real Documents controller commits imported text only after read success', async () => {
+  const h = createHarness();
+  const original = await h.controller.newDocument({ title: 'Original', content: 'stable' });
+  const error = new Error('read denied'); let fail = true;
+  const importer = createFileImportController({
+    readBrowserText: async () => 'browser body',
+    readNativeText: async () => { if (fail) throw error; return 'native body'; }
+  });
+  const open = () => h.controller.openExternalDocument({ title: 'import.md', expectedTextLength: content => content.length, filePath: 'C:\\import.md', loadContent: async () => (await importer.readPath('C:\\import.md')).content });
+  await assert.rejects(open(), value => value === error);
+  assert.equal(h.session.records.length, 1); assert.equal(h.session.activeId, original.record.id);
+  assert.equal(h.model.createSnapshot(), 'stable');
+  fail = false; const result = await open();
+  assert.equal(h.session.records.length, 2); assert.equal(h.session.activeId, result.record.id);
+  assert.equal(h.model.createSnapshot(), 'native body'); importer.destroy();
+});
+
+test('R13.3 cancelled or superseded file reads never create an empty or stale document', async () => {
+  for (const cancel of [false, true]) {
+    const h = createHarness(); const source = deferred();
+    const importer = createFileImportController({ readBrowserText: () => source.promise, readNativeText: () => source.promise });
+    const pending = h.controller.openExternalDocument({ title: 'slow.md', expectedTextLength: content => content.length, loadContent: async () => (await importer.readBrowserFile({ name: 'slow.md' })).content });
+    const rejected = assert.rejects(pending, error => ['FILE_IMPORT_CANCELLED', 'DOCUMENT_OPERATION_STALE'].includes(error.code));
+    await tick();
+    if (cancel) importer.cancel();
+    const newer = await h.controller.newDocument({ title: 'Newer', content: 'new' });
+    source.resolve('old'); await rejected;
+    assert.equal(h.session.records.length, 1); assert.equal(h.session.activeId, newer.record.id);
+    assert.equal(h.model.createSnapshot(), 'new'); importer.destroy();
+  }
 });
