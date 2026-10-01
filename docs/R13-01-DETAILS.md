@@ -1,6 +1,6 @@
 # R13.1 导入支持矩阵与行为基线
 
-状态：支持矩阵与新增行为测试已建立，待精确提交 Windows CI；尚未勾选 13.1。阶段唯一分支 `agent/r13-stage`，来自 R12 收尾提交 `f6e8cfcdd618e138ec79cf6ed0296a679a2931a7`；其 Windows CI [36753976296](https://github.com/uniquenesssta/mdr/actions/runs/36753976296) 已成功，R12 收官原始产物及验收见 [R12-24](R12-24-DETAILS.md)。该提交也是本阶段回退基准。
+状态：**已验收**。修正提交 `3c299591b11dda238b212be68c9b6beb5b8a7726` 的 [Windows CI 36801548407](https://github.com/uniquenesssta/mdr/actions/runs/36801548407) 七个任务全部成功。阶段唯一分支 `agent/r13-stage`，来自 R12 收尾提交 `f6e8cfcdd618e138ec79cf6ed0296a679a2931a7`；其 Windows CI [36753976296](https://github.com/uniquenesssta/mdr/actions/runs/36753976296) 已成功，R12 收官原始产物及验收见 [R12-24](R12-24-DETAILS.md)。该提交也是本阶段回退基准。
 
 ## 范围与职责
 
@@ -54,3 +54,9 @@ A05 / R13-S01 仍未修复。响应原始/解压后上限、MIME 缺失与伪造
 递归运行器每完成一组即保存 suite-results，避免后续挂起抹去前组证据；缺目录、失败、取消仍阻止汇总通过。上一轮收官缺 suite-results.json 是递归任务超时的后果，不将缺失文件伪造为成功。本次不提高总超时、不跳过测试、不修改生产源码或 R13 后续范围。
 
 修正提交待 Windows CI。本地只做语法、改动范围与断言静态复核，不执行 Linux 产品测试；保留失败运行与已知待迁移问题。
+
+## 正式验收（2026-10-01）
+
+精确提交 `3c299591b11dda238b212be68c9b6beb5b8a7726`：Windows 七个 job 全部 success；递归 Node 1513/1513（302 文件、16 目录），根 Node 537/537，Rust 268/268。浏览器 E2E 八个文件完成，无清理挂起；官方公告、原生链接、真实 WebView、累计前端/架构与同提交证据汇总均通过。汇总日志明确 same-commit Windows revalidation passed，工件 `r12-24-closeout-3c299591b11dda238b212be68c9b6beb5b8a7726-1`（ID 11135737544）已归档。
+
+13.1 的支持矩阵与行为基线正式验收，准入 13.2。此前失败日志保留作为历史；后续图片大小差异、读取取消/晚回调和 A05/R13-S01 仍按既定子任务处理，不因本项通过而关闭。关闭本项不修改生产代码或依赖。

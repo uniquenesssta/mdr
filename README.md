@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：R13.1 正式收尾：`3c29959` 的 [Windows CI 36801548407](https://github.com/uniquenesssta/mdr/actions/runs/36801548407) 7/7 job、递归 Node 1513/1513、Rust 268/268 全部通过，八个浏览器 E2E 文件正常退出，同提交证据汇总通过。支持矩阵已验收，可进入 13.2；后续已登记问题继续保留。[详情](docs/R13-01-DETAILS.md)。
+
 - 2026-10-01：修正 R13.1 首轮 CI：14 条累计测试仍写死 R12 分支，现与 R13 自动入口一致；浏览器 E2E 完成断言后清理挂起，补 CDP 请求超时/关闭拒绝、Windows 测试浏览器进程树清理和分组结果及时归档。新增导入测试已通过，完整修正待 Windows 重验。[详情](docs/R13-01-DETAILS.md)。
 
 - 2026-10-01：开始 R13.1，按“一大阶段一分支”从 `f6e8cfc` 创建 `agent/r13-stage`。建立 md/markdown/txt、图片 MIME/大小、浏览器/桌面及取消路径支持矩阵与旧实现行为回归；记录桌面图片 20 MiB 与浏览器 5 MiB 差异、2 MiB 确认及待迁移取消缺口。未改生产/模型/依赖；复用七组 Windows CI，待验收。[详情](docs/R13-01-DETAILS.md)。
