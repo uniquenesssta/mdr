@@ -1,8 +1,9 @@
 /**
  * Responsibility: Classify import metadata without reading content or enforcing size policy.
- * Imports: None. Exports: IMPORT_KINDS and File/path/result classifiers.
+ * Imports: Image Policy MIME predicate. Exports: IMPORT_KINDS and File/path/result classifiers.
  * State/side effects: None. Lifecycle: Pure functions; no start/destroy required.
  */
+import { isAllowedImageMime } from '../images/image-policy.js';
 export const IMPORT_KINDS = Object.freeze({ TEXT: 'text', IMAGE: 'image', UNSUPPORTED: 'unsupported' });
 const TEXT_EXTENSIONS = Object.freeze(['md', 'markdown', 'txt']);
 const IMAGE_EXTENSIONS = Object.freeze(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']);
@@ -13,7 +14,7 @@ const extension = name => typeof name === 'string' ? name.split('.').pop().toLow
 export function classifyBrowserFile(file, { imageOnly = false } = {}) {
   if (!metadata(file)) return IMPORT_KINDS.UNSUPPORTED;
   if (!imageOnly && TEXT_EXTENSIONS.includes(extension(file.name))) return IMPORT_KINDS.TEXT;
-  return typeof file.type === 'string' && file.type.startsWith('image/')
+  return isAllowedImageMime(file.type)
     ? IMPORT_KINDS.IMAGE : IMPORT_KINDS.UNSUPPORTED;
 }
 

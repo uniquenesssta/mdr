@@ -5036,6 +5036,16 @@
       "create/destroy",
       "retain",
       false
+    ],
+    [
+      "src/features/import/images/image-policy.js",
+      "esm-module",
+      "feature",
+      "Pure browser image MIME, byte-limit and confirmation policy; native limits remain in Rust Image Reader.",
+      "none",
+      "pure-functions",
+      "retain",
+      false
     ]
   ]
 }

@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：开始 R13.6：浏览器图片 MIME、5 MiB 硬限制及对话框超过 2 MiB 确认集中到纯 Image Policy，分类器/拖放/对话框共用；保留 Windows readImage 20 MiB 与 dropped-file 5 MiB 的 Rust 权威。新增独立边界与端口销毁回归，原入口行为矩阵保留；本地仅静态检查，待 Windows CI。[详情](docs/R13-06-DETAILS.md)。
+
 - 2026-10-01：R13.5 正式收尾：`fd9c35d` 的 [Windows CI 36853092080](https://github.com/uniquenesssta/mdr/actions/runs/36853092080) 七个 job 全部成功，Drop Overlay 与累计回归通过，具备 13.6 准入条件。[详情](docs/R13-05-DETAILS.md)。
 
 - 2026-10-01：开始 R13.5：遮罩 DOM 显示迁入纯 Drop Overlay View，移除 events 渲染逻辑；显示时机仍由 Drop Import 决定，销毁隐藏并释放引用，晚到显示无效。现有 Platform 初始化与真实 DOM 拖放回归接入新 View，待 Windows CI。[详情](docs/R13-05-DETAILS.md)。

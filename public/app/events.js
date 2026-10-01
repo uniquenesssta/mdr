@@ -38,8 +38,9 @@
     eventsDropImportPort.register({
       openBrowserText: (file, request) => loadFile(file, request),
       openBrowserImage(file, request) {
-        if (file.size > 5 * 1024 * 1024) {
-          showToast(t('toastImageTooLarge'));
+        const decision = eventsDropImportPort.assessImage(file);
+        if (!decision.allowed) {
+          showToast(t(decision.reason === 'too-large' ? 'toastImageTooLarge' : 'toastDropUnsupported'));
           return false;
         }
         return new Promise((resolve, reject) => {

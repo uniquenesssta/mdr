@@ -1,4 +1,5 @@
 /** Scoped registration/path commands for classic consumers until 13.13/13.14; no routing state. */
+import { assessBrowserImage } from '../images/image-policy.js';
 const PROPERTY = 'markdownEditorDropImportPort';
 export function mountClassicDropImportPort(host, controller) {
   if (!host || typeof host !== 'object') throw new TypeError('Drop Import port requires a host.');
@@ -7,6 +8,7 @@ export function mountClassicDropImportPort(host, controller) {
   let destroyed = false;
   const active = () => { if (destroyed) throw new Error('Drop Import port is destroyed.'); };
   const api = Object.freeze({
+    assessImage(file) { active(); return assessBrowserImage(file); },
     register(callbacks) { active(); return controller.start(callbacks); },
     openPath(path) { active(); return controller.openPath(path); }
   });

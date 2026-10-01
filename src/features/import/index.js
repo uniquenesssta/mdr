@@ -1,4 +1,5 @@
 /** Public import boundary: metadata classification, text reads, drop routing and scoped classic migration ports. */
+export { isAllowedImageMime, assessBrowserImage } from './images/image-policy.js';
 export { IMPORT_KINDS, classifyBrowserFile, classifyImportPath, classifyImportResult } from './files/file-type-classifier.js';
 export { createFileImportController, FileImportCancelledError } from './files/file-import-controller.js';
 export { mountClassicFileImportPort } from './compatibility/classic-file-import-port.js';
