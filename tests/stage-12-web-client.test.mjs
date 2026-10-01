@@ -78,7 +78,7 @@ test('R12-12 remains cumulatively protected after R12-13 becomes the automatic S
   const original = frozen('.github/workflows/r12-11.yml');
   assert.equal(previous.replace(/^    if: \$\{\{ false \}\} # Retired: Windows-only validation policy, 2026-09-29\.\n/gm, ''), original.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
   const current = await read('.github/workflows/r12-14.yml');
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);
   await assertCurrentValidation();
 });

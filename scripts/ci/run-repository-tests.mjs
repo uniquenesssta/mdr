@@ -14,12 +14,15 @@ writeFileSync(join(evidence, 'test-inventory.json'), JSON.stringify(files, null,
 // Sequential groups also prevent browser suites competing for desktop resources.
 const groups = Map.groupBy(files, path => path.slice(0, path.lastIndexOf('/')));
 const results = [];
+const saveResults = () => writeFileSync(join(evidence, 'suite-results.json'), JSON.stringify(results, null, 2) + '\n');
+saveResults();
 for (const [directory, tests] of groups) {
   console.log(`\nRunning ${directory}: ${tests.length} files`);
   const result = spawnSync(process.execPath, ['--test', '--test-concurrency=1', ...tests], {
     stdio: 'inherit', env: process.env
   });
   results.push({ directory, files: tests.length, status: result.status, error: result.error?.message || null });
+  saveResults();
 }
 writeFileSync(join(evidence, 'suite-results.json'), JSON.stringify(results, null, 2) + '\n');
 if (results.some(result => result.status !== 0 || result.error)) process.exitCode = 1;

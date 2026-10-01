@@ -124,7 +124,7 @@ test('R12-06 records Directory Tree ownership and stays manual after R12-09 star
   assert.ok(record, 'Directory Tree ownership record is required');
   assert.equal(record[inventory.fields.indexOf('stateOwner')], 'none');
   assert.equal(record[inventory.fields.indexOf('lifecycle')], 'filesystem-scan');
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
   assert.match(current, /local_file::directory_tree::tests/);

@@ -89,7 +89,7 @@ test('R12-11 remains manually runnable while R12-12 carries its cumulative hard 
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*(?:push|pull_request):/m);
   const current = await read('.github/workflows/r12-14.yml');
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
   assert.match(current, /^\s+NO_PROXY: 127\.0\.0\.1,localhost$/m);
   assert.doesNotMatch(current, /^\s+no_proxy:/m, 'GitHub rejects case-insensitive duplicate mapping keys');
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);

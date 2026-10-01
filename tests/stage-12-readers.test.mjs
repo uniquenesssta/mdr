@@ -111,7 +111,7 @@ test('R12-04 records both Readers and stays manual after R12-09 starts', async (
     assert.ok(record, `missing Reader ownership record: ${path}`);
     assert.equal(record[lifecycleIndex], 'filesystem-read');
   }
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
   assert.match(current, /local_file::text_reader::tests/);

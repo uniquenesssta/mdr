@@ -3,7 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { delimiter, extname, isAbsolute, join, resolve } from 'node:path';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 
 function cleanCandidate(value) {
   return String(value || '').trim().replace(/^['"]|['"]$/g, '');
@@ -117,8 +117,9 @@ async function waitForJson(url, timeoutMs = 10000) {
   throw new Error(`CDP endpoint did not become ready: ${lastError?.message || url}`);
 }
 
-class CdpConnection {
-  constructor(url) {
+export class CdpConnection {
+  constructor(url, { commandTimeoutMs = 30000 } = {}) {
+    this.commandTimeoutMs = commandTimeoutMs;
     this.url = url;
     this.socket = null;
     this.nextId = 1;
@@ -134,7 +135,10 @@ class CdpConnection {
     });
     this.socket.addEventListener('message', event => this.#handleMessage(event.data));
     this.socket.addEventListener('close', () => {
-      for (const { reject } of this.pending.values()) reject(new Error('CDP connection closed'));
+      for (const { reject, timer } of this.pending.values()) {
+        clearTimeout(timer);
+        reject(new Error('CDP connection closed'));
+      }
       this.pending.clear();
     });
     return this;
@@ -146,6 +150,7 @@ class CdpConnection {
       const pending = this.pending.get(message.id);
       if (!pending) return;
       this.pending.delete(message.id);
+      clearTimeout(pending.timer);
       if (message.error) pending.reject(new Error(`${pending.method}: ${message.error.message}`));
       else pending.resolve(message.result || {});
       return;
@@ -160,8 +165,18 @@ class CdpConnection {
     }
     const id = this.nextId++;
     return new Promise((resolvePromise, reject) => {
-      this.pending.set(id, { resolve: resolvePromise, reject, method });
-      this.socket.send(JSON.stringify({ id, method, params }));
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(method + ': CDP response timed out'));
+      }, this.commandTimeoutMs);
+      this.pending.set(id, { resolve: resolvePromise, reject, method, timer });
+      try {
+        this.socket.send(JSON.stringify({ id, method, params }));
+      } catch (error) {
+        clearTimeout(timer);
+        this.pending.delete(id);
+        reject(error);
+      }
     });
   }
 
@@ -173,6 +188,12 @@ class CdpConnection {
   }
 
   close() {
+    for (const { reject, timer } of this.pending.values()) {
+      clearTimeout(timer);
+      reject(new Error('CDP connection closed'));
+    }
+    this.pending.clear();
+    this.listeners.clear();
     this.socket?.close();
   }
 }
@@ -398,6 +419,35 @@ async function removeProfileDirectory(path, attempts = 8) {
   if (lastError) throw lastError;
 }
 
+async function stopChromium(processHandle) {
+  // killed only means a signal was sent; it does not prove the process exited.
+  const exited = () => processHandle.exitCode !== null || processHandle.signalCode !== null;
+  try {
+    if (!exited()) {
+      if (process.platform === 'win32') {
+        // Kill only this test-owned browser and its descendants, before the parent exits.
+        execFileSync('taskkill', ['/PID', String(processHandle.pid), '/T', '/F'], {
+          stdio: 'pipe', timeout: 10000, windowsHide: true
+        });
+      } else {
+        processHandle.kill('SIGKILL');
+      }
+    }
+    if (!exited()) await new Promise((resolvePromise, reject) => {
+      const finish = () => { clearTimeout(timer); resolvePromise(); };
+      const timer = setTimeout(() => {
+        processHandle.removeListener('exit', finish);
+        reject(new Error('Test browser did not exit after termination'));
+      }, 5000);
+      processHandle.once('exit', finish);
+    });
+  } finally {
+    processHandle.stdout?.destroy();
+    processHandle.stderr?.destroy();
+    processHandle.unref();
+  }
+}
+
 export async function launchChromium(options = {}) {
   const executable = findChromiumExecutable();
   if (!executable) throw new Error('Chromium/Chrome was not found. Set CHROMIUM_PATH to its executable.');
@@ -441,18 +491,13 @@ export async function launchChromium(options = {}) {
       page,
       async close() {
         connection.close();
-        if (!processHandle.killed) processHandle.kill('SIGTERM');
-        await new Promise(resolvePromise => {
-          const timer = setTimeout(resolvePromise, 1500);
-          processHandle.once('exit', () => { clearTimeout(timer); resolvePromise(); });
-        });
-        if (!processHandle.killed) processHandle.kill('SIGKILL');
+        await stopChromium(processHandle);
         await removeProfileDirectory(profileDir);
       },
       get stderr() { return stderr; }
     };
   } catch (error) {
-    if (!processHandle.killed) processHandle.kill('SIGKILL');
+    await stopChromium(processHandle);
     await removeProfileDirectory(profileDir);
     throw new Error(`${error.message}${stderr ? `\nChromium: ${stderr.slice(-1200)}` : ''}`);
   }

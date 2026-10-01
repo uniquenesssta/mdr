@@ -74,7 +74,7 @@ test('R12-10 keeps the complete old workflow as manual history and every cumulat
   const before = frozen(oldPath);
   assert.equal((await read(oldPath)).replace(/^    if: \$\{\{ false \}\} # Retired: Windows-only validation policy, 2026-09-29\.\n/gm, ''), before.replace(/  push:\n[\s\S]*?(?=  workflow_dispatch:)/, ''));
   const current = await read('.github/workflows/r12-14.yml');
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git clean|git reset/);
   for (const text of ['external_link::validation::tests', 'external_link::validation_command_tests',
     'local_file::command_tests', 'local_file::tests', 'local_file::tree_limits::tests',

@@ -140,7 +140,7 @@ test('historical R12-01 through R12-07 stay manual while R12-10 owns cumulative 
     source('.github/workflows/r12-07.yml'),
     source('.github/workflows/r12-01.yml')
   ]);
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);

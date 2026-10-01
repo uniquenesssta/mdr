@@ -99,7 +99,7 @@ test('R12-02 records Path Policy ownership and stays manually runnable after R12
   assert.ok(record, 'Path Policy ownership record is required');
   assert.equal(record[inventory.fields.indexOf('stateOwner')], 'none');
   assert.equal(record[inventory.fields.indexOf('lifecycle')], 'filesystem-inspection');
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
   assert.match(current, /src-tauri\/src\/local_file\/path_policy\.rs/);

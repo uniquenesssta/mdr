@@ -71,7 +71,7 @@ test('R12-09 records one additional policy module with no state owner', async ()
 test('R12-09 coverage remains in the cumulative hard gates and R12-08 stays manual', async () => {
   const current = await source('.github/workflows/r12-14.yml');
   const previous = await source('.github/workflows/r12-08.yml');
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*(?:push|pull_request):/m);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify/);

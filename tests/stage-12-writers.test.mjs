@@ -141,7 +141,7 @@ test('R12-05 records both Writers and stays manual after R12-09 starts', async (
     assert.ok(record, `missing Writer ownership record: ${path}`);
     assert.equal(record[lifecycleIndex], 'filesystem-write');
   }
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r12-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
   assert.match(current, /local_file::text_writer::tests/);
