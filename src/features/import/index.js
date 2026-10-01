@@ -10,3 +10,6 @@ export { createDropOverlayView } from './files/drop-overlay-view.js';
 export { createImageMarkdown } from './images/image-markdown-factory.js';
 export { createWebFetchCoordinator } from './web-clipper/web-fetch-coordinator.js';
 export { mountClassicWebFetchPort } from './compatibility/classic-web-fetch-port.js';
+
+export { extractHtml } from './web-clipper/html-extractor.js';
+export { mountClassicHtmlExtractorPort } from './compatibility/classic-html-extractor-port.js';

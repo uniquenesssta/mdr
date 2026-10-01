@@ -1,5 +1,5 @@
 name: R13 Windows Import Revalidation
-run-name: R13.9 web fetch coordinator and cumulative Windows regression · ${{ github.sha }}
+run-name: R13.10 HTML extractor and cumulative Windows regression · ${{ github.sha }}
 
 on:
   push:

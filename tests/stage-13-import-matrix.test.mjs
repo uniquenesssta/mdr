@@ -231,7 +231,7 @@ test('desktop web fetch uses the coordinator; failure exposes manual HTML withou
     const context = vm.createContext({ document: { getElementById: node }, fetchedHtml: '',
       webClipperFetchPort: coordinator, t: key => key
     });
-    vm.runInContext(section(webSource, '    function setClipperHidden', '    webClipperFetchPort.watchInputs') + section(webSource, '    async function fetchUrl', '    // 提取网页元信息'), context);
+    vm.runInContext(section(webSource, '    function setClipperHidden', '    webClipperFetchPort.watchInputs') + section(webSource, '    async function fetchUrl', '    // 将提取的 HTML 转为 Markdown'), context);
     await context.fetchUrl(); assert.equal(calls.length, 1); assert.equal(context.fetchedHtml, fail ? '' : '<p>article</p>');
     assert.equal(node('url-status').textContent, fail ? 'urlStatusLocalFailed' : 'urlStatusLocalSuccess');
     assert.equal(node('url-status').innerHTML, undefined);

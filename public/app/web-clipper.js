@@ -1,5 +1,7 @@
     const webClipperCompatibilityHost = document.getElementById('compatibility-business-ports');
     const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
+    const webClipperHtmlExtractorPort = webClipperCompatibilityHost?.markdownEditorHtmlExtractorPort;
+    if (!webClipperHtmlExtractorPort) throw new Error('HTML extractor compatibility port is unavailable.');
     const webClipperFetchPort = webClipperCompatibilityHost?.markdownEditorWebFetchPort;
     if (!webClipperFetchPort) throw new Error('Web Fetch compatibility port is unavailable.');
     const webClipperEditorUiCommandPort = webClipperCompatibilityHost?.markdownEditorEditorUiCommandPort;
@@ -142,41 +144,6 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
       setClipperHidden(manualArea, false);
     }
 
-    // 提取网页元信息
-    function extractMeta(doc) {
-      const title = (doc.querySelector('title')?.textContent?.trim())
-        || (doc.querySelector('h1')?.textContent?.trim())
-        || '';
-      const author = (doc.querySelector('meta[name="author"]')?.content?.trim())
-        || (doc.querySelector('meta[property="article:author"]')?.content?.trim())
-        || (doc.querySelector('[rel="author"]')?.textContent?.trim())
-        || '';
-      let published = (doc.querySelector('meta[property="article:published_time"]')?.content?.trim())
-        || (doc.querySelector('meta[name="publishdate"]')?.content?.trim())
-        || (doc.querySelector('meta[name="date"]')?.content?.trim())
-        || (doc.querySelector('time')?.dateTime?.trim())
-        || (doc.querySelector('time')?.textContent?.trim())
-        || '';
-      return { title, author, published };
-    }
-
-    // 提取主内容区域
-    function extractMainContent(doc) {
-      const selectors = ['article', '[role="main"]', '.post-content', '.entry-content', '.article-content', '.content', '#content', 'main'];
-      for (const sel of selectors) {
-        const el = doc.querySelector(sel);
-        if (el) return el;
-      }
-      return doc.body;
-    }
-
-    // 清理无关元素
-    function stripUnwantedElements(root) {
-      const selectors = 'script, style, nav, aside, header, footer, form, iframe, img, svg, video, audio, canvas, .ad, .ads, .advertisement, .sidebar, .comments, .comment, #comments, [class*="ad-"], [class*="ads-"], [id*="ad-"], [class*="comment"], [id*="comment"]';
-      root.querySelectorAll(selectors).forEach(el => el.remove());
-      return root;
-    }
-
     // 将提取的 HTML 转为 Markdown
     function htmlToMarkdown(node) {
       if (node.nodeType === Node.TEXT_NODE) {
@@ -255,10 +222,7 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
         return;
       }
       try {
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const meta = extractMeta(doc);
-        const main = extractMainContent(doc);
-        const cleaned = stripUnwantedElements(main.cloneNode(true));
+        const { meta, content: cleaned } = webClipperHtmlExtractorPort.extract(html);
         let bodyMd = htmlToMarkdown(cleaned).replace(/\n{3,}/g, '\n\n').trim();
 
         // 避免 bodyMd 以 h1 开头与标题重复

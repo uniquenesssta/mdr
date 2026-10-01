@@ -81,7 +81,7 @@
       "public/app/web-clipper.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy webpage clipping workflow plus explicit native Find search and preview-sync compatibility callbacks; Atomic 5.12 Find/Replace modal ownership is delegated to the Editor View.",
+      "Classic clipper UI and pending Markdown conversion; fetch and extraction delegate to scoped Import ports.",
       "legacy-web-clipper-state",
       "classic-script",
       "split-and-remove",
@@ -5093,6 +5093,26 @@
       "feature",
       "Scoped web fetch access and input invalidation listener lifecycle until Atomic 13.12/13.14.",
       "classic-web-fetch-port-listeners",
+      "mount/destroy",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/import/web-clipper/html-extractor.js",
+      "esm-module",
+      "feature",
+      "Extract metadata and article content in inert template; reuse shared document HTML security boundary; no Markdown.",
+      "none",
+      "synchronous-call",
+      "retain",
+      false
+    ],
+    [
+      "src/features/import/compatibility/classic-html-extractor-port.js",
+      "esm-module",
+      "feature",
+      "Scoped extraction access for classic clipper until 13.12/13.14.",
+      "classic-html-extractor-port",
       "mount/destroy",
       "remove-after-migration",
       false

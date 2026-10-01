@@ -102,11 +102,11 @@
         "R13-S01"
       ],
       "record": "docs/markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md",
-      "risk": "R13-S01 backend limits/address policy and native cancellation accepted on 74abbd2 / 36890098604; R13.9 coordinator integration is pending Windows CI, and HTML extraction through both safe render paths is not yet accepted.",
+      "risk": "R13-S01 and R13.9 accepted on Windows; R13.10 inert extraction/shared sanitization pending CI; conversion and both safe render paths not yet accepted.",
       "deadline": "before 13.9 integration and R13 acceptance",
       "acceptance": "confirm product thresholds/internal network support; real HTTP chunked/compressed/redirect/IPv6/MIME/timeout/cancel tests; webpage through both safe render paths",
       "stopCondition": "confirmed current high-risk bypass must be contained before transfer; do not widen exposure while pending",
-      "reviewConclusion": "S01 seven-job Windows evidence passed. R13.9 current source review covers native-only desktop routing, browser proxy compatibility, scoped UI invalidation and cancellation. Full A05 closure still requires downstream R13 safe-render end-to-end acceptance; deferred-not-fixed remains intentional.",
+      "reviewConclusion": "13.9 seven-job Windows evidence passed. R13.10 removes old extraction authority and reuses shared sanitizer; full A05 closure still requires downstream safe-render end-to-end acceptance.",
       "fixed": false
     }
   ],
@@ -141,7 +141,7 @@
     },
     {
       "path": "public/app/web-clipper.js",
-      "blobSha": "133127fcfa615ac95990f5aebcb629baf843af7e"
+      "blobSha": "d128e7b8dbb5ef20d6d00d0d6e49e355c3f13927"
     },
     {
       "path": "src-tauri/capabilities/default.json",
@@ -170,6 +170,18 @@
     {
       "path": "src/features/import/compatibility/classic-web-fetch-port.js",
       "blobSha": "65dc75e8cf9b9b19a858aa8596878865f3033c66"
+    },
+    {
+      "path": "src/features/import/web-clipper/html-extractor.js",
+      "blobSha": "125b68a9c6069936744574f2a1b044733d74d019"
+    },
+    {
+      "path": "src/features/import/compatibility/classic-html-extractor-port.js",
+      "blobSha": "a3e2a4a0529fae25d0c3b5268ea771ac21032633"
+    },
+    {
+      "path": "src/shared/security/document-html.js",
+      "blobSha": "a4c33f495a2abd0897c060858e2db8c2a15ae19a"
     }
   ],
   "priorFailures": {
@@ -385,14 +397,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R13.9",
+    "stage": "R13.10",
     "date": "2026-10-02",
-    "reviewedCommit": "74abbd291c32bc125b4f151bd98d337f55e4e54e",
-    "record": "docs/R13-09-DETAILS.md",
-    "status": "R13-S01 accepted; current R13.9 working-tree source review pending exact-commit Windows CI",
-    "priorWindowsRun": 36890098604,
+    "reviewedCommit": "52b28a0aa8f110f29f712d1ccedbb64cb9ef5f21",
+    "record": "docs/R13-10-DETAILS.md",
+    "status": "R13.9 accepted; current R13.10 source review pending exact-commit Windows CI",
+    "priorWindowsRun": 36894947377,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 acceptance snapshot.",
-    "conclusion": "Reviewed R13.9 routing and cancellation changes relative to the accepted S01 commit. Top-level fingerprints cover the current working-tree implementation; reviewedCommit is its accepted baseline. Native rejection never falls back to browser proxies; UI errors are inert text. A05 remains open for downstream extraction/conversion/render integration. Historical R12 acceptance remains unchanged."
+    "conclusion": "Reviewed R13.10 inert template parsing, editorial candidate selection and shared document HTML sanitizer integration against accepted R13.9. No separate executable URL/attribute policy. Top-level fingerprints describe current implementation; reviewedCommit is the accepted baseline. A05 remains open for conversion and render integration; historical R12 acceptance is unchanged."
   }
 }

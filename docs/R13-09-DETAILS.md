@@ -1,6 +1,8 @@
 # R13.9 Web Fetch Coordinator
 
-状态：**已实现，待 Windows CI，未验收**。唯一分支 `agent/r13-stage`，基线为 R13-S01 已验收提交 `74abbd291c32bc125b4f151bd98d337f55e4e54e` / [Windows CI 36890098604](https://github.com/uniquenesssta/mdr/actions/runs/36890098604)，七组成功。用户于 2026-10-02 授权“S01 收尾并开始 09”。不实施 13.10 HTML 提取、13.11 转换或后续整体对话框迁移。
+状态：**已验收**。实现提交 `52b28a0aa8f110f29f712d1ccedbb64cb9ef5f21` / [Windows CI 36894947377](https://github.com/uniquenesssta/mdr/actions/runs/36894947377) 七个 job 全部成功；closeout 9/9 通过。以下保留实施时范围与验证记录。
+
+唯一分支 `agent/r13-stage`，基线为 R13-S01 已验收提交 `74abbd291c32bc125b4f151bd98d337f55e4e54e` / [Windows CI 36890098604](https://github.com/uniquenesssta/mdr/actions/runs/36890098604)，七组成功。用户于 2026-10-02 授权“S01 收尾并开始 09”。不实施 13.10 HTML 提取、13.11 转换或后续整体对话框迁移。
 
 ## 实际职责与调用链
 
@@ -40,3 +42,7 @@ flowchart TD
 ## 回退与剩余工作
 
 本项可整体回退到 `74abbd2`，无数据迁移。13.10/13.11 继续接收不可信 HTML 提取与转换，13.12/13.13 完成对话框及文档/Preview/Hybrid 全链路；13.14 删除剩余经典实现和受限迁移端口。新 CI 启动后结束会话，不轮询。
+
+## 正式收尾
+
+本轮已核对上述同提交七组 Windows 证据，13.9 勾选完成，用户授权开始 13.10。前文“待 CI”属于实施时记录；A05 全链路仍未关闭。

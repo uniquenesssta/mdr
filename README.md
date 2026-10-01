@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-02：13.9 在 `52b28a0` / [Windows CI 36894947377](https://github.com/uniquenesssta/mdr/actions/runs/36894947377) 七组通过并收尾。开始 13.10：HTML 提取迁入 Import，惰性模板解析、正文选择和公共净化边界接通，新增浏览器无执行/无资源请求与端口寿命回归，待 Windows CI；13.11 未开始，A05 全链路未关闭。[详情](docs/R13-10-DETAILS.md)。
+
 - 2026-10-02：R13-S01 后端专项在 `74abbd2` / [Windows CI 36890098604](https://github.com/uniquenesssta/mdr/actions/runs/36890098604) 七组通过并收尾；开始 13.9，将原生/浏览器代理/手动 HTML 协调迁入 Import，接通取消与过期结果拦截，错误和代理提示按纯文本展示。新增回归待 Windows CI；A05 全链路未提前关闭。[S01 验收](docs/R13-S01-DETAILS.md) · [13.9 实施](docs/R13-09-DETAILS.md)。
 
 - 2026-10-02：修复 R13-S01 收尾因旧风险复核指纹过期而失败：复核当前抓取/取消链并更新当前指纹，保留 R12 历史验收快照及全部硬门禁。前轮六组 Windows 测试已通过，本次待精确提交重验，A05 全链路仍未关闭。[详情](docs/R13-S01-DETAILS.md)。
