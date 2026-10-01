@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：R13.8 正式收尾：`54fe195` 的 [Windows CI 36864276840](https://github.com/uniquenesssta/mdr/actions/runs/36864276840) 七个 job 全部成功；生产/测试代码保持首轮实现不变，旧启动超时根因仍未确定。开始 13.9 前置策略准备；R13-S01 的网页响应上限与内网支持规则待用户明确确认，后端加固未实施，13.9 尚未接入。[详情](docs/R13-08-DETAILS.md)。
+
 - 2026-10-01：R13.8 首轮未验收：`12352d1` 的 Windows CI 36861368308 中，前端浏览器出现 CDP 未就绪与 app-ready 超时，收尾随之阻断；完整 Node、构建、架构、Rust、原生/WebView 和依赖检查通过。归档日志未包含启动页面诊断，不能确定根因；保持产品/测试实现不变，以本次失败记录触发新 runner 的完整重验，不把超时推定为工厂逻辑错误。[详情](docs/R13-08-DETAILS.md)。
 
 - 2026-10-01：开始 R13.8：图片 Markdown 拼接从 Editor 图片命令迁入 Import 纯工厂，统一 alt/默认值、URL/Data URL 与既有右括号转义；图片命令保留选区归一化和单次替换事务。补纯函数、解析器与命令边界回归，严格保留原输出语义；复杂转义增强涉及冻结 Hybrid 解析器，单独记录未修复。本地静态检查通过，待 Windows CI。[详情](docs/R13-08-DETAILS.md)。

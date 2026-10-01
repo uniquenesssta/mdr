@@ -1,6 +1,6 @@
 # R13.8 Image Markdown Factory
 
-状态：实现已提交，**待精确提交 Windows CI，未验收**。唯一分支 `agent/r13-stage`；前置与回退代码基线 R13.7 `081a16bf79a85401b8fa1390d24b5fa46af472ef`，Windows CI 36858258580 七个 job 全部成功。
+状态：**已验收**。精确提交 `54fe1955d2de9eedbc566f241a0c4dfcf6dcfc83` 的 [Windows CI 36864276840](https://github.com/uniquenesssta/mdr/actions/runs/36864276840) 七个 job 全部成功。唯一分支 `agent/r13-stage`；前置与回退代码基线 R13.7 `081a16bf79a85401b8fa1390d24b5fa46af472ef`，Windows CI 36858258580 七个 job 全部成功。
 
 ## 实际变更与范围
 
@@ -33,3 +33,11 @@ Editor image-command 经 Import 公共入口调用工厂，删除原归一化/�
 `12352d1992b13d21fab7ec9dba58228e745a1fe5` / [CI 36861368308](https://github.com/uniquenesssta/mdr/actions/runs/36861368308) 为 5 个 job 成功、前端与依赖前端的收尾 job 失败。前端 Node、架构、构建已通过；Browser preview contract 在 Chromium CDP 建连阶段报 `CDP endpoint did not become ready: fetch failed`，Built-app browser regression 报 `Timed out waiting for application ready`。完整仓库 Node、Rust、原生边界、实际 Windows WebView 和依赖检查均通过。
 
 已读取前端与收尾日志及前端产物 ZIP；产物只保存了上述超时日志，没有初始化页面异常详情，因此不能断言两个超时同根或已经定位产品缺陷。本次只补失败事实并触发全量新 runner 重验，不改生产代码、不改等待阈值、不增加重试掩盖断言，也不改冻结模型。完整重跑是为了保留收尾要求的同一运行轮次七组产物；只重跑失败 job 会缺少本轮其他 job 产物。R13.8 保持未验收，复杂转义限制保持原记录。
+
+## 正式收尾（2026-10-01）
+
+`54fe1955d2de9eedbc566f241a0c4dfcf6dcfc83` 的 Windows CI 36864276840 七个 job 全部成功：前端/架构/浏览器、全仓 Node、累计 Rust、安全写入、原生编译链接、实际 Windows WebView、官方依赖检查和同提交证据汇总均通过。R13.8 按兼容性提取范围正式验收；本次收尾仅修改文档。
+
+重验与首轮的生产/测试实现相同。通过证明本轮回归成功，不证明此前两个启动超时已定位或修复；首轮失败事实和复杂转义限制继续保留。
+
+13.9 开始前必须完成 R13-S01。现已核对既有 30 秒/10 次跳转、整包读取和未限制 MIME 的后端路径，具体响应上限与内网支持规则仍需按任务书明确确认；尚未实施抓取加固或 Coordinator。
