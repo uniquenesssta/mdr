@@ -25,3 +25,11 @@
 本地仅 `node --check`、JSON/生产清单/差异静态核对，不运行 Linux/macOS 产品测试或构建。行为与架构、浏览器、原生、Rust、依赖及汇总由现有七组 Windows CI 验证，CI 启动后不轮询；13.3 成功前不勾选，不推进 13.4。
 
 新 Web API 用法已通过 Context7 的 MDN 文档核对 FileReader.abort/readyState 与 AbortSignal 清理；跨模块调用链已使用 Mermaid Chart 复核。
+
+## 首轮失败与修正（2026-10-01）
+
+`e32b30411d5f8ab6e2cd9496f586be2799fc5ea4` 的 [Windows CI 36814310322](https://github.com/uniquenesssta/mdr/actions/runs/36814310322) 未通过。唯一测试失败为 `tests/unit/platform/file-system-client.test.mjs` 中仍要求 events 直接 `call('files', 'readText')` 的旧接线断言。该测试同时被前端与递归 Node job 执行，产生两个失败 job；收官 job 因上游失败被阻断。Rust、原生链接、实际 Windows WebView 与依赖公告四个 job 成功。
+
+根 Node 553/553、架构 372/372、浏览器 E2E 9/9（含真实 FileReader 读取/取消/销毁）成功，新增 Documents 读入成功、失败不建档及过时代次测试均通过。上轮迁移了同类 drag-drop/platform-cutover 断言，但漏掉此 FileSystem 文件，属于测试迁移遗漏。
+
+修正映射：旧“events 直接调用 FilesPort 文本读取”改为“events 调用 File Import.readPath，main 注入 platform.files.readText”。原 FileSystem 不含文档/Toast 行为、Rust 命令参数/错误/DTO、图片读取及 MIME 断言全部保留。检查同类引用，其他两处已在 R13.3 迁移；平台自身 readText 契约仍有效，不作无关修改。未修改生产代码、未跳过测试或降低 CI 门禁。本地仅语法和差异静态复核，修复提交仍须完整 Windows CI；13.3 保持未验收，不推进 13.4。

@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：修正 R13.3 遗漏的 FileSystem 平台测试接线断言：验证 events → Import 与 main → FilesPort，保留平台无文档/Toast 逻辑、命令映射及图片 MIME 边界。首轮唯一失败为该旧断言，根 Node 553/553、架构 372/372、浏览器 E2E 9/9 已通过；本次只改测试与记录，待 Windows 重验。[详情](docs/R13-03-DETAILS.md)。
+
 - 2026-10-01：开始 R13.3：浏览器/Windows 文本读取统一进入 File Import，文档创建继续由 Documents 命令负责；补充取消、销毁、晚到结果隔离及真实 FileReader 浏览器回归。保持原失败提示、最近文件登记和图片规则，本地仅静态检查，待 Windows CI。[详情](docs/R13-03-DETAILS.md)。
 
 - 2026-10-01：R13.2 正式收尾：`8da99a8` 的 [Windows CI 36809102374](https://github.com/uniquenesssta/mdr/actions/runs/36809102374) 七个 job 与同提交证据汇总全部成功，可进入 13.3。旧布局超时具体原因仍不作推定。[详情](docs/R13-02-DETAILS.md)。

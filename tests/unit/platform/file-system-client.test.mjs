@@ -166,7 +166,10 @@ test('the FileSystem client contains command mapping only and does not own docum
 
   assert.doesNotMatch(clientSource, /showToast|loadTextContentAsDocument|insertImageMarkdown|newDocument|createDocument|dropped\.kind/);
   assert.doesNotMatch(clientSource, /image\/png|image\/jpeg|image\/gif|image\/webp|image\/svg\+xml/);
-  assert.match(eventSource, /call\('files', 'readText'/);
+  // R13.3 moves text reads behind Import; the composition root still owns platform injection.
+  const mainSource = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  assert.match(eventSource, /eventsFileImportPort\.readPath\(resolvedPath\)/);
+  assert.match(mainSource, /readNativeText: path => platform\.files\.readText\(path\)/);
   assert.match(eventSource, /call\('files', 'readImage'/);
   assert.match(eventSource, /showToast/);
   assert.match(exportSource, /showToast/);
