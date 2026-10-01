@@ -1,6 +1,6 @@
 # R13.3 File Import
 
-状态：实现已提交，**待精确提交 Windows CI，未验收**。唯一分支 `agent/r13-stage`；前置及回退代码基线为 R13.2 `8da99a8ee8f88f67f4b44140922700e33b517f0e`，Windows CI 36809102374 七个 job 成功。
+状态：**已验收（2026-10-01）**。唯一分支 `agent/r13-stage`；前置及回退代码基线为 R13.2 `8da99a8ee8f88f67f4b44140922700e33b517f0e`，Windows CI 36809102374 七个 job 成功。
 
 ## 职责与调用链
 
@@ -33,3 +33,7 @@
 根 Node 553/553、架构 372/372、浏览器 E2E 9/9（含真实 FileReader 读取/取消/销毁）成功，新增 Documents 读入成功、失败不建档及过时代次测试均通过。上轮迁移了同类 drag-drop/platform-cutover 断言，但漏掉此 FileSystem 文件，属于测试迁移遗漏。
 
 修正映射：旧“events 直接调用 FilesPort 文本读取”改为“events 调用 File Import.readPath，main 注入 platform.files.readText”。原 FileSystem 不含文档/Toast 行为、Rust 命令参数/错误/DTO、图片读取及 MIME 断言全部保留。检查同类引用，其他两处已在 R13.3 迁移；平台自身 readText 契约仍有效，不作无关修改。未修改生产代码、未跳过测试或降低 CI 门禁。本地仅语法和差异静态复核，修复提交仍须完整 Windows CI；13.3 保持未验收，不推进 13.4。
+
+## 最终验收（2026-10-01）
+
+修复提交 `76735b48ddc83e9396ed3df9db91b9f82e82dac1` 的 [Windows CI 36821916874](https://github.com/uniquenesssta/mdr/actions/runs/36821916874) 七个 job 全部成功，包括前端、递归 Node、Rust、原生链接、WebView、依赖公告与同提交证据汇总。旧 FileSystem 接线断言已修正，本项正式收尾，可进入 13.4；底层原生 I/O 不可取消及兼容端口退出责任继续保留。
