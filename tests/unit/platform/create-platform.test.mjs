@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import vm from 'node:vm';
+import { createDropImportController, mountClassicDropImportPort } from '../../../src/features/import/index.js';
 import {
   PLATFORM_PORT_NAMES,
   PlatformCapabilityUnavailableError,
@@ -247,4 +249,56 @@ test('createPlatform rejects invalid options and invalid injected desktop compos
   const { runtime } = createBrowserRuntime();
   runtime.__TAURI_INTERNALS__ = {};
   assert.throws(() => createPlatform({ runtime, desktopPlatform: null }), /desktopPlatform must be an object/);
+});
+
+
+test('R13.4 main Drop Import composition executes against real browser and desktop Platform contracts', async () => {
+  const source = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  const start = source.indexOf('const dropImportController = ');
+  const end = source.indexOf('const browserImportReader = ', start);
+  assert.ok(start >= 0 && end > start, 'execute the production composition, not a copied option object');
+  for (const desktop of [false, true]) {
+    const { runtime, log, listeners } = createBrowserRuntime();
+    let nativeHandler, subscribed = 0, disposed = 0;
+    if (desktop) runtime.__TAURI_INTERNALS__ = {};
+    const desktopPlatform = {
+      ...createDesktopPortImplementations(log),
+      dragDrop: { async subscribe(handler) { subscribed++; nativeHandler = handler; return () => disposed++; } }
+    };
+    const platform = createPlatform({ runtime, ...(desktop ? { desktopPlatform } : {}) });
+    const calls = [], errors = [];
+    assert.equal(typeof platform.supports, 'undefined', 'supports belongs only to classic compatibility');
+    const { controller, port } = vm.runInNewContext(
+      source.slice(start, end) + '\n({ controller: dropImportController, port: dropImportPort })',
+      { platform, document: runtime.document, compatibilityPlatformHost: {}, createDropImportController,
+        mountClassicDropImportPort, console: { warn: (...args) => errors.push(args) } }
+    );
+    try {
+      port.api.register({
+        setOverlayVisible() {},
+        openBrowserText: file => { calls.push(['browser', file.name]); return true; },
+        openBrowserImage: () => assert.fail('unexpected image'),
+        openNativeText: path => { calls.push(['native', path]); return true; },
+        openNativeImage: () => assert.fail('unexpected image'),
+        unsupported: () => assert.fail('unexpected unsupported file'),
+        onError: error => { throw error; }
+      });
+      await new Promise(resolve => setImmediate(resolve));
+      assert.equal(subscribed, desktop ? 1 : 0);
+      await listeners.get('drop')({ preventDefault() {}, dataTransfer: { files: [{ name: 'browser.md' }] } });
+      if (desktop) {
+        assert.deepEqual(calls, [], 'desktop ignores duplicate DOM drop');
+        assert.equal(await nativeHandler({ type: 'drop', paths: ['native.md'] }), true);
+        assert.deepEqual(calls, [['native', 'native.md']]);
+      } else {
+        assert.deepEqual(calls, [['browser', 'browser.md']]);
+        assert.equal(await port.api.openPath('native.md'), false);
+      }
+      assert.deepEqual(errors, []);
+    } finally {
+      await controller.destroy(); port.destroy(); await platform.destroy();
+    }
+    assert.equal(disposed, desktop ? 1 : 0);
+    for (const type of ['dragenter', 'dragleave', 'dragover', 'drop']) assert.equal(listeners.has(type), false);
+  }
 });

@@ -136,8 +136,8 @@ const platform = createPlatform({
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
 const dropImportController = createDropImportController({
   target: document,
-  nativeDrop: platform.supports('desktop.dragDrop'),
-  nativeFiles: platform.supports('desktop.fileSystem'),
+  nativeDrop: platform.capabilities.desktop.dragDrop,
+  nativeFiles: platform.capabilities.desktop.fileSystem,
   subscribeNative: handler => platform.dragDrop.subscribe(handler),
   onSubscriptionError: error => console.warn('Native drag-drop subscription failed', error)
 });

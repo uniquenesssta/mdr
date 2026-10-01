@@ -212,7 +212,7 @@ test('Atomic 6.12 production integration keeps persistence in Documents and remo
   assert.doesNotMatch(core, /coreRecentFilesPort\.(load|clear|entries)/);
   assert.doesNotMatch(core, /function (loadRecentFiles|renderRecentFilesMenu|openRecentFile|clearRecentFiles)\s*\(/);
   assert.doesNotMatch(bootstrap, /loadRecentFiles\(|renderRecentFilesMenu\(/);
-  assert.ok(events.includes('if (opened) addRecentFile(resolvedPath, name)'));
+  assert.ok(events.includes('if (opened && request.isCurrent()) addRecentFile(resolvedPath, name)'));
   assert.match(main, /recentFilesRepository\.load\(\)/);
   assert.match(main, /createRecentFilesReadSource/);
   assert.match(main, /createRecentFilesMenuController/);

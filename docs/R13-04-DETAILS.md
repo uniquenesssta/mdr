@@ -28,3 +28,15 @@ R13.5 将剩余 overlay classList 回调迁入纯 View；R13.6/13.7 负责图片
 - 新增 Windows Chromium E2E：真实 DOM 冒泡 DragEvent/DataTransfer/File、嵌套 enter/leave、首文件与 MIME 路由、遮罩重置和 destroy 后无监听副作用；既有 FileReader、Documents、原生/WebView 回归继续运行。
 
 本地仅 `node --check`、JSON/模块清单、引用与差异静态复核，不运行 Linux/macOS 产品测试。全部真实行为仍须现有 Windows CI；启动后结束、不轮询，成功前不勾选 13.4，不开始 13.5。跨模块生命周期使用 Mermaid Chart 复核；未新增第三方 API 或依赖版本。
+
+## 首轮 CI 失败与修正（2026-10-01）
+
+`5dd60fbc121eb4cbd61edb23d211c7b34e074625` / [Windows CI 36829904130](https://github.com/uniquenesssta/mdr/actions/runs/36829904130) 未通过，不能验收。
+
+- 真实启动缺陷：main 新增 Drop Import 组合调用了 `platform.supports(...)`。源码核对确认 `createPlatform` 只公开 capabilities 与 ports，supports 仅存在于 classic-platform-port。该调用在设置应用初始化 Promise 前同步抛错，对应完整浏览器“application ready”超时及 WebView“initialization promise unavailable”。修正为 `platform.capabilities.desktop.dragDrop/fileSystem`，不新增重复能力 API，不增加等待时长。
+- 两条旧断言：architecture/stage-06-recent-files-menu 与 unit/documents/recent-files-repository 仍写死 `if (opened) addRecentFile`；13.4 已增加 request.isCurrent 条件。现要求成功且请求仍有效才登记，保留 Documents 唯一持久化权威及其他断言，不删代次保护。
+- 同运行根 Node 563/563、独立浏览器 E2E 10/10（含新 DOM 拖放测试）通过；架构 371/372、Documents 单测 39/40 的失败即上述旧断言。Rust、原生链接、依赖公告三个 job 成功；汇总被上游阻断。独立模块测试通过不能代替完整应用启动。
+
+新增 Platform 回归直接截取并执行 main 的 Drop Import 组合代码，使用真实 createPlatform 与真实 Drop Import/controller/port，分别覆盖浏览器和桌面能力、订阅、DOM/native 去重、路径路由与销毁；底层桌面端口使用测试替身，不声称是真实 Windows I/O。此测试会在原错误 supports 调用处失败。原导入矩阵追加“打开成功但后继请求已开始，不登记旧最近文件”的行为覆盖。
+
+本次生产修改仅 main 两处能力访问；其余是测试与说明。本地仅语法/差异静态复核，不执行 Linux/macOS 产品测试。修正提交交由原七组 Windows CI 验证，未通过前保持 13.4 未验收、不推进 13.5。

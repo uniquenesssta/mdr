@@ -272,3 +272,20 @@ test('R13.4 native image reads cannot insert or notify after another path wins o
     assert.equal(h.calls.some(x => x[0] === 'image' || x[0] === 'toast'), false); h.controller.destroy();
   }
 });
+
+
+test('R13.4 completed native open does not register recents after a newer request wins', async () => {
+  const h = dropHost({ desktop: true }); let finishOpen;
+  h.context.loadDocumentFromContentLoader = async (_name, loader) => {
+    await loader();
+    return new Promise(resolve => { finishOpen = resolve; });
+  };
+  const old = h.context.handleNativeDroppedPath('C:\\old.md');
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(typeof finishOpen, 'function');
+  assert.equal(await h.context.handleNativeDroppedPath('C:\\new.png'), true);
+  finishOpen(true);
+  assert.equal(await old, false);
+  assert.equal(h.calls.some(call => call[0] === 'recent'), false);
+  h.controller.destroy();
+});

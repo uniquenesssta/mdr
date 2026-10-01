@@ -45,7 +45,7 @@ test('Atomic 6.12 keeps Documents as the sole Recent Files persistence authority
   assert.doesNotMatch(core, /coreRecentFilesPort\.(load|clear|entries)/);
   assert.match(core, /coreRecentFilesPort\.add/);
   assert.doesNotMatch(classicBootstrap, /loadRecentFiles\(|renderRecentFilesMenu\(/);
-  assert.match(events, /if \(opened\) addRecentFile\(resolvedPath, name\)/);
+  assert.match(events, /if \(opened && request\.isCurrent\(\)\) addRecentFile\(resolvedPath, name\)/);
   assert.match(main, /recentFilesRepository\.load\(\)/);
   assert.match(main, /createRecentFilesReadSource\(recentFilesRepository\)/);
 });
