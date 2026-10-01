@@ -1,11 +1,27 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { assessCloseout, assessNativeBoundary } from '../scripts/ci/verify-r12-closeout.mjs';
 
 const policy = JSON.parse(await readFile(new URL('../docs/audit/r12-24-closeout.json', import.meta.url), 'utf8'));
 const dependencyPolicy = JSON.parse(await readFile(new URL('../docs/audit/r12-23-dependency-advisories.json', import.meta.url), 'utf8'));
 const sha = 'a'.repeat(40);
+
+test('current source review matches the checkout while archived R12 fingerprints remain historical', () => {
+  const git = args => execFileSync('git', args, { cwd: new URL('../', import.meta.url), encoding: 'utf8' }).trim();
+  assert.ok(policy.reviewedSources.length >= policy.acceptance.artifact.evidence.reviewedSources.length);
+  assert.equal(new Set(policy.reviewedSources.map(source => source.path)).size, policy.reviewedSources.length);
+  for (const source of policy.reviewedSources) {
+    assert.equal(git(['hash-object', source.path]), source.blobSha, source.path + ': risk review became stale.');
+  }
+  for (const source of policy.acceptance.artifact.evidence.reviewedSources) {
+    assert.ok(policy.reviewedSources.some(current => current.path === source.path), source.path + ': review coverage removed.');
+    assert.equal(git(['rev-parse', policy.acceptance.commit + ':' + source.path]), source.blobSha,
+      source.path + ': historical R12 review was rewritten.');
+  }
+});
+
 function fixture() {
   return {
     commit: sha, policy: structuredClone(policy), dependencyPolicy: structuredClone(dependencyPolicy),
