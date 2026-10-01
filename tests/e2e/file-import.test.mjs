@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { launchChromium } from './lib/cdp-browser.mjs';
@@ -9,7 +10,12 @@ const browser = await launchChromium({ width: 900, height: 700 });
 let host;
 try {
   host = await installVirtualFileHost(browser.page, { root: projectRoot, origin: 'https://markdown-editor.test' });
-  await browser.page.setDocumentContent(`<!doctype html><html><head><base href="${host.origin}/"></head><body></body></html>`);
+  // Source ESM has no Vite resolver; mirror the existing browser contract host.
+  const purifierSource = await readFile(new URL(import.meta.resolve('dompurify')));
+  const importMap = JSON.stringify({ imports: {
+    dompurify: `data:text/javascript;base64,${purifierSource.toString('base64')}`
+  } });
+  await browser.page.setDocumentContent(`<!doctype html><html><head><script type="importmap">${importMap}</script><base href="${host.origin}/"></head><body></body></html>`);
   const result = await browser.page.evaluate(`(async () => {
     const base = ${JSON.stringify(host.origin)};
     const { createBrowserFileReader } = await import(base + '/src/platform/browser/browser-file-reader.js');

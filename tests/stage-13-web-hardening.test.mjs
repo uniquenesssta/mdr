@@ -15,7 +15,12 @@ test('approved R13-S01 policy is separate from the immutable R12 behavior manife
   assert.deepEqual(policy.mimeAllowlist, ['text/html', 'application/xhtml+xml']);
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md');
   assert.match(stage, /用户已确认/);
-  assert.match(stage, /\[ \] 13\.9 Web Fetch Coordinator/);
+  // S01 is accepted; guard its evidence instead of freezing later tasks as unfinished.
+  const acceptance = await read('docs/R13-S01-DETAILS.md');
+  assert.match(acceptance, /74abbd291c32bc125b4f151bd98d337f55e4e54e/);
+  assert.match(acceptance, /actions\/runs\/36890098604/);
+  assert.match(stage, /74abbd291c32bc125b4f151bd98d337f55e4e54e/);
+  assert.match(stage, /actions\/runs\/36890098604/);
 });
 
 test('production entry owns the public resolver, whole-request deadline and cancellation registry', async () => {

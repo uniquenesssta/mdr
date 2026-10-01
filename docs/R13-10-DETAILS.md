@@ -33,3 +33,13 @@ flowchart TD
 本地仅运行语法、架构/旧运行时/生成文件/README、指纹与差异静态检查，不执行 Linux 产品测试或构建。产品回归交由 Windows CI，通过后再勾选13.10。回退可整体撤销本次实现，无数据迁移。
 
 已调用 Mermaid Chart 绘制本次真实调用链，并通过 Context7 查询 MDN 确认 template content 的独立 ownerDocument 与完整文档标签解析语义。惰性模板语义参考 [MDN template](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/template) 与 [W3C Web Components introduction](https://www.w3.org/TR/2012/WD-components-intro-20120522/)；DOMPurify 沿用锁定版本与现有封装，无新增库 API。CI 启动后结束会话，不轮询。
+
+## 首轮 CI 失败与修复（2026-10-02）
+
+`c0ab57b` / [CI 36900988188](https://github.com/uniquenesssta/mdr/actions/runs/36900988188) 未通过。四组 Rust/原生/WebView/依赖任务成功；frontend 与 repository-tests 失败，closeout 因前置任务失败正常阻断。新 HTML extractor 真实浏览器回归已经通过，但不代表整轮验收。
+
+确认两项根因：S01 旧测试仍强制要求 13.9 复选框为空，正式收尾后成为过期断言；Import 公共入口新增 extractor 导出后，原文件/拖放两个源码 ESM 浏览器用例传递加载 DOMPurify，却未配置裸模块映射。
+
+修复将旧断言迁移为 S01 精确验收提交与 Windows CI 证据检查，原历史 manifest 与策略断言完整保留；两个浏览器用例沿用既有 run-browser-tests 的 import map 方案，读取安装版本的 ESM 字节作为 data URL，继续通过 Import 公共入口执行所有原行为断言，不绕开导出、不扩大虚拟文件根、不访问 CDN。生产代码和依赖不变。
+
+本地仅进行语法、README 与差异静态核对；行为回归交给新一轮 Windows CI。13.10 保持未验收，未开始13.11。
