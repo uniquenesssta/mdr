@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：R13.4 正式收尾：`cd85861` 的 [Windows CI 36849373596](https://github.com/uniquenesssta/mdr/actions/runs/36849373596) 七个 job 全部成功，完整应用启动恢复，具备 13.5 准入条件。[详情](docs/R13-04-DETAILS.md)。
+
 - 2026-10-01：修正 R13.4 启动阻断：main 误把经典端口的 supports 方法用于原始 Platform，现读取正式 capabilities 字段；补充执行真实 main 组合代码的浏览器/桌面 Platform 回归。两条最近文件旧断言同步加入代次条件，并补过时成功不登记行为测试。首轮根 Node 563/563、独立浏览器 E2E 10/10 通过，但完整应用启动失败；修正待 Windows 重验。[详情](docs/R13-04-DETAILS.md)。
 
 - 2026-10-01：开始 R13.4：迁移浏览器/Windows 拖放计数、遮罩状态与首项分类路由，删除旧分类桥；补充监听解绑、晚到订阅释放及过时文本/图片结果保护。原类型、大小与最近文件行为保留，新增真实 DOM 拖放回归，待 Windows CI。[详情](docs/R13-04-DETAILS.md)。

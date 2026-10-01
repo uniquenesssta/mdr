@@ -1,6 +1,6 @@
 # R13.4 Drop Import
 
-状态：实现已提交，**待精确提交 Windows CI，尚未验收**。唯一分支 `agent/r13-stage`。前置/回退代码基线为 R13.3 `76735b48ddc83e9396ed3df9db91b9f82e82dac1`，Windows CI 36821916874 七个 job 成功。
+状态：**已验收（2026-10-01）**。唯一分支 `agent/r13-stage`。前置/回退代码基线为 R13.3 `76735b48ddc83e9396ed3df9db91b9f82e82dac1`，Windows CI 36821916874 七个 job 成功。
 
 ## 实际职责与入口
 
@@ -40,3 +40,7 @@ R13.5 将剩余 overlay classList 回调迁入纯 View；R13.6/13.7 负责图片
 新增 Platform 回归直接截取并执行 main 的 Drop Import 组合代码，使用真实 createPlatform 与真实 Drop Import/controller/port，分别覆盖浏览器和桌面能力、订阅、DOM/native 去重、路径路由与销毁；底层桌面端口使用测试替身，不声称是真实 Windows I/O。此测试会在原错误 supports 调用处失败。原导入矩阵追加“打开成功但后继请求已开始，不登记旧最近文件”的行为覆盖。
 
 本次生产修改仅 main 两处能力访问；其余是测试与说明。本地仅语法/差异静态复核，不执行 Linux/macOS 产品测试。修正提交交由原七组 Windows CI 验证，未通过前保持 13.4 未验收、不推进 13.5。
+
+## 最终验收（2026-10-01）
+
+修复提交 `cd85861536344d34f9f4b32ecabca217d0ad9550` 的 [Windows CI 36849373596](https://github.com/uniquenesssta/mdr/actions/runs/36849373596) 七个 job 全部成功，包含前端、递归 Node、Rust、原生链接、实际 WebView、依赖公告与同提交证据汇总。应用启动阻断及两项最近文件旧断言已消除，13.4 正式收尾，可进入 13.5；图片底层取消及兼容端口退出责任继续按任务书执行。
