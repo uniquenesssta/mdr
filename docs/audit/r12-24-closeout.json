@@ -102,11 +102,11 @@
         "R13-S01"
       ],
       "record": "docs/markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md",
-      "risk": "R13-S01 backend limits/address policy and native cancellation are implemented; exact-commit closeout is pending, and coordinator/UI/HTML extraction through both safe render paths is not yet accepted.",
+      "risk": "R13-S01 backend limits/address policy and native cancellation accepted on 74abbd2 / 36890098604; R13.9 coordinator integration is pending Windows CI, and HTML extraction through both safe render paths is not yet accepted.",
       "deadline": "before 13.9 integration and R13 acceptance",
       "acceptance": "confirm product thresholds/internal network support; real HTTP chunked/compressed/redirect/IPv6/MIME/timeout/cancel tests; webpage through both safe render paths",
       "stopCondition": "confirmed current high-risk bypass must be contained before transfer; do not widen exposure while pending",
-      "reviewConclusion": "Reviewed source at 21c47ad with six Windows jobs passing in run 36882317644. Approved backend constraints are present; historical R12 review is preserved under acceptance. A05 remains deferred-not-fixed until downstream R13 integration and real Windows end-to-end acceptance; no claim of full-chain closure.",
+      "reviewConclusion": "S01 seven-job Windows evidence passed. R13.9 current source review covers native-only desktop routing, browser proxy compatibility, scoped UI invalidation and cancellation. Full A05 closure still requires downstream R13 safe-render end-to-end acceptance; deferred-not-fixed remains intentional.",
       "fixed": false
     }
   ],
@@ -141,7 +141,7 @@
     },
     {
       "path": "public/app/web-clipper.js",
-      "blobSha": "1e97286b558cf207629e116b1406be8fc6309750"
+      "blobSha": "133127fcfa615ac95990f5aebcb629baf843af7e"
     },
     {
       "path": "src-tauri/capabilities/default.json",
@@ -162,6 +162,14 @@
     {
       "path": "src-tauri/src/main.rs",
       "blobSha": "fd7ed57a116b73f20762ec7c01b402df1d01c455"
+    },
+    {
+      "path": "src/features/import/web-clipper/web-fetch-coordinator.js",
+      "blobSha": "91007afb5d1f84443c9815f8df066d6ab475629a"
+    },
+    {
+      "path": "src/features/import/compatibility/classic-web-fetch-port.js",
+      "blobSha": "65dc75e8cf9b9b19a858aa8596878865f3033c66"
     }
   ],
   "priorFailures": {
@@ -377,14 +385,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R13-S01",
+    "stage": "R13.9",
     "date": "2026-10-02",
-    "reviewedCommit": "21c47ad1a731dc194c390ad59114ea83da95401c",
-    "record": "docs/R13-S01-DETAILS.md",
-    "status": "reviewed; pending exact-commit Windows closeout",
-    "priorWindowsRun": 36882317644,
-    "priorWindowsJobsPassed": 6,
+    "reviewedCommit": "74abbd291c32bc125b4f151bd98d337f55e4e54e",
+    "record": "docs/R13-09-DETAILS.md",
+    "status": "R13-S01 accepted; current R13.9 working-tree source review pending exact-commit Windows CI",
+    "priorWindowsRun": 36890098604,
+    "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 acceptance snapshot.",
-    "conclusion": "Approved public-only per-hop address binding, MIME and actual encoded/decoded byte limits, total deadline and app-owned cancellation were reviewed. A05 remains open for downstream UI and safe-render integration; A04 is unchanged. No production or gate logic changes in this repair."
+    "conclusion": "Reviewed R13.9 routing and cancellation changes relative to the accepted S01 commit. Top-level fingerprints cover the current working-tree implementation; reviewedCommit is its accepted baseline. Native rejection never falls back to browser proxies; UI errors are inert text. A05 remains open for downstream extraction/conversion/render integration. Historical R12 acceptance remains unchanged."
   }
 }

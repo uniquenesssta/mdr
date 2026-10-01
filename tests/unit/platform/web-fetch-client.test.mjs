@@ -59,11 +59,14 @@ test('invalid web-fetch client dependencies fail at the adapter boundary', () =>
   assert.throws(() => createWebFetchClient({ invoke: null }), /requires an invoke function/);
 });
 
-test('desktop platform maps WebPort through the dedicated client and web clipper consumes fetchText', async () => {
+test('desktop WebPort reaches the import coordinator through the application composition', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
   const clipper = await readFile(new URL('../../../public/app/web-clipper.js', import.meta.url), 'utf8');
   assert.match(desktop, /webFetchClient\.fetchUrl\(url, options\)/);
-  assert.match(clipper, /call\('web', 'fetchText', url\)/);
+  const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  assert.match(main, /nativeFetch: platform\.capabilities\.desktop\.webFetch \? \(url, options\) => platform\.web\.fetchText\(url, options\)/);
+  assert.match(clipper, /webClipperFetchPort\.fetchUrl\(/);
+  assert.doesNotMatch(clipper, /fetchWithNativeBackend|call\('web', 'fetchText'/);
   assert.doesNotMatch(clipper, /markdownEditorNative/);
 });
 

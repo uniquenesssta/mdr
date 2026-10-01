@@ -1,5 +1,7 @@
     const webClipperCompatibilityHost = document.getElementById('compatibility-business-ports');
     const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
+    const webClipperFetchPort = webClipperCompatibilityHost?.markdownEditorWebFetchPort;
+    if (!webClipperFetchPort) throw new Error('Web Fetch compatibility port is unavailable.');
     const webClipperEditorUiCommandPort = webClipperCompatibilityHost?.markdownEditorEditorUiCommandPort;
     const webClipperDocumentUiCommandPort = webClipperCompatibilityHost?.markdownEditorDocumentUiCommandPort;
 const webClipperPreviewCommandPort = webClipperCompatibilityHost?.markdownEditorPreviewCommandPort;
@@ -22,7 +24,14 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
       element.classList.add(tone === 'success' ? 'is-success' : tone === 'error' ? 'is-error' : 'is-muted');
     }
 
+    webClipperFetchPort.watchInputs(['url-input', 'proxy-url', 'use-local-proxy', 'manual-html'].map(id => document.getElementById(id)), () => {
+      fetchedHtml = '';
+      document.getElementById('url-status').textContent = '';
+      setClipperStatusTone(document.getElementById('url-status'), 'muted');
+    });
+
     function openUrlModal() {
+      webClipperFetchPort.cancel();
       document.getElementById('url-input').value = '';
       document.getElementById('url-status').textContent = '';
       setClipperStatusTone(document.getElementById('url-status'), 'muted');
@@ -36,7 +45,7 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
       const request = {
         options: {
           initialFocus: document.getElementById('url-input'),
-          onClose: () => { fetchedHtml = ''; }
+          onClose: () => { webClipperFetchPort.cancel(); fetchedHtml = ''; }
         }
       };
       modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
@@ -103,109 +112,32 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
       setClipperHidden(proxyInput, !checked);
     }
 
-    async function fetchWithNativeBackend(url) {
-      if (!webClipperPlatformPort?.supports('desktop.webFetch')) return null;
-      return webClipperPlatformPort.call('web', 'fetchText', url);
-    }
-
-    // 尝试通过 Tauri Rust 后端、本地代理或公共 CORS 代理获取网页
+    // UI only: source routing, cancellation and request generations belong to Import.
     async function fetchUrl() {
-      const urlInput = document.getElementById('url-input');
       const status = document.getElementById('url-status');
       const manualArea = document.getElementById('manual-area');
-      const useLocalProxy = document.getElementById('use-local-proxy').checked;
-      const proxyUrlInput = document.getElementById('proxy-url');
-      const url = urlInput.value.trim();
-
-      if (!url) {
+      fetchedHtml = '';
+      status.textContent = t('urlStatusFetching');
+      setClipperStatusTone(status, 'muted');
+      const result = await webClipperFetchPort.fetchUrl(document.getElementById('url-input').value, {
+        useLocalProxy: document.getElementById('use-local-proxy').checked,
+        proxyUrl: document.getElementById('proxy-url').value
+      });
+      if (!webClipperFetchPort.isCurrent(result)) return;
+      if (result.status === 'empty') {
         status.textContent = t('urlStatusEmptyUrl');
         setClipperStatusTone(status, 'error');
         return;
       }
-
-      status.textContent = t('urlStatusFetching');
-      setClipperStatusTone(status, 'muted');
-      fetchedHtml = '';
-
-      // 桌面版优先使用 Rust 后端，不再依赖 Python 代理或公网 CORS 服务。
-      if (webClipperPlatformPort?.supports('desktop.webFetch')) {
-        try {
-          const data = await fetchWithNativeBackend(url);
-          fetchedHtml = String(data || '');
-          if (!fetchedHtml) throw new Error('Native backend returned empty content');
-          status.textContent = t('urlStatusLocalSuccess');
-          setClipperStatusTone(status, 'success');
-          setClipperHidden(manualArea, true);
-          return;
-        } catch (err) {
-          status.innerHTML = t('urlStatusLocalFailed', err.message || String(err));
-          setClipperStatusTone(status, 'error');
-          setClipperHidden(manualArea, false);
-          return;
-        }
+      if (result.status === 'success') {
+        fetchedHtml = result.html;
+        status.textContent = t(result.source === 'public-proxy' ? 'urlStatusPublicSuccess' : 'urlStatusLocalSuccess');
+        setClipperStatusTone(status, 'success');
+        setClipperHidden(manualArea, true);
+        return;
       }
-
-      // 浏览器预览模式保留本地 HTTP 代理 fallback。
-      if (useLocalProxy) {
-        const proxyUrl = (proxyUrlInput.value.trim() || 'http://localhost:8765/fetch') + '?url=' + encodeURIComponent(url);
-        let data = null;
-        try {
-          const response = await fetch(proxyUrl);
-          if (!response.ok) throw new Error('Local proxy response not ok');
-          data = await response.json();
-          if (data.success === false) {
-            throw new Error(data.error || 'Unknown proxy error');
-          }
-          fetchedHtml = data.html || data.content || '';
-          if (!fetchedHtml) throw new Error('Local proxy returned empty content');
-          status.textContent = t('urlStatusLocalSuccess');
-          setClipperStatusTone(status, 'success');
-          setClipperHidden(manualArea, true);
-          return;
-        } catch (err) {
-          const hint = data?.hint ? data.hint : '';
-          status.innerHTML = t('urlStatusLocalFailed', err.message) + (hint ? '<br><small>' + hint + '</small>' : '');
-          setClipperStatusTone(status, 'error');
-          setClipperHidden(manualArea, false);
-          return;
-        }
-      }
-
-      // 公共代理 fallback
-      const proxies = [
-        { url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url), type: 'text' },
-        { url: 'https://api.allorigins.win/get?url=' + encodeURIComponent(url), type: 'json', field: 'contents' },
-        { url: 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url), type: 'text' }
-      ];
-
-      let lastError = '';
-      for (const proxy of proxies) {
-        try {
-          const response = await fetch(proxy.url);
-          if (!response.ok) throw new Error('Proxy response not ok');
-          let text;
-          if (proxy.type === 'json') {
-            const data = await response.json();
-            text = data[proxy.field];
-            // allorigins 有时返回 base64
-            if (typeof text === 'string' && /^[A-Za-z0-9+/=]+$/.test(text) && text.length % 4 === 0) {
-              try { text = atob(text); } catch (e) {}
-            }
-          } else {
-            text = await response.text();
-          }
-          if (!text || text.length < 100) throw new Error('Content too short');
-          fetchedHtml = text;
-          status.textContent = t('urlStatusPublicSuccess');
-          setClipperStatusTone(status, 'success');
-          setClipperHidden(manualArea, true);
-          return;
-        } catch (err) {
-          lastError = err.message;
-        }
-      }
-
-      status.textContent = t('urlStatusPublicFailed', lastError);
+      status.textContent = t(result.source === 'public-proxy' ? 'urlStatusPublicFailed' : 'urlStatusLocalFailed', result.error)
+        + (result.hint ? '\n' + result.hint : '');
       setClipperStatusTone(status, 'error');
       setClipperHidden(manualArea, false);
     }
@@ -317,7 +249,7 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
     // 转换并插入到编辑器
     function convertAndInsert() {
       const manualHtml = document.getElementById('manual-html').value.trim();
-      const html = fetchedHtml || manualHtml;
+      const html = fetchedHtml || webClipperFetchPort.manualHtml(manualHtml).html;
       if (!html) {
         showToast(t('toastNoContent'));
         return;

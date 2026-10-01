@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { createBrowserFileReader } from '../src/platform/browser/browser-file-reader.js';
-import { createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
+import { createWebFetchCoordinator, createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
 import { createImageDialogView } from '../src/features/editor/ui/image-dialog-view.js';
 
 const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
@@ -220,18 +220,23 @@ test('image URL and upload send one insertion command with the selected data', a
   h.view.open(); await h.choose({ type: 'image/svg+xml', size: 1 }); assert.equal(h.view.confirm(), true);
   assert.equal(h.inserted[1][0], 'data:image/png;base64,AA=='); h.view.destroy();
 });
-test('desktop web fetch uses native only; failure exposes manual HTML without public fallback', async () => {
+test('desktop web fetch uses the coordinator; failure exposes manual HTML without public fallback', async () => {
   for (const fail of [false, true]) {
     const nodes = new Map(); const node = id => { if (!nodes.has(id)) nodes.set(id, { value: '', checked: false, classList: { toggle() {}, remove() {}, add() {} } }); return nodes.get(id); };
     node('url-input').value = 'https://example.test/article'; const calls = [];
-    const context = vm.createContext({ document: { getElementById: node }, fetchedHtml: '',
-      webClipperPlatformPort: { supports: () => true, async call(...args) { calls.push(args); if (fail) throw new Error('denied'); return '<p>article</p>'; } },
-      t: key => key, fetch: () => { throw new Error('unexpected public fallback'); }
+    const coordinator = createWebFetchCoordinator({
+      nativeFetch: async (...args) => { calls.push(args); if (fail) throw new Error('denied'); return '<p>article</p>'; },
+      browserFetch: () => { throw new Error('unexpected public fallback'); }
     });
-    vm.runInContext(section(webSource, '    function setClipperHidden', '    function openUrlModal') + section(webSource, '    async function fetchWithNativeBackend', '    // 提取网页元信息'), context);
+    const context = vm.createContext({ document: { getElementById: node }, fetchedHtml: '',
+      webClipperFetchPort: coordinator, t: key => key
+    });
+    vm.runInContext(section(webSource, '    function setClipperHidden', '    webClipperFetchPort.watchInputs') + section(webSource, '    async function fetchUrl', '    // 提取网页元信息'), context);
     await context.fetchUrl(); assert.equal(calls.length, 1); assert.equal(context.fetchedHtml, fail ? '' : '<p>article</p>');
-    assert.equal(node('url-status').textContent, fail ? 'urlStatusFetching' : 'urlStatusLocalSuccess');
-    if (fail) assert.equal(node('url-status').innerHTML, 'urlStatusLocalFailed');
+    assert.equal(node('url-status').textContent, fail ? 'urlStatusLocalFailed' : 'urlStatusLocalSuccess');
+    assert.equal(node('url-status').innerHTML, undefined);
+    assert.ok(calls[0][1].signal);
+    coordinator.destroy();
   }
 });
 

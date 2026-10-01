@@ -4981,7 +4981,7 @@
       "src/features/import/index.js",
       "esm-facade",
       "feature",
-      "Public classification, text reads, drop routing and scoped classic migration ports.",
+      "Public file/image/drop/web import boundaries and scoped classic migration ports.",
       "none",
       "module-import",
       "retain",
@@ -5075,6 +5075,26 @@
       "web-fetch-requests",
       "app-owned-request-lifecycle",
       "retain",
+      false
+    ],
+    [
+      "src/features/import/web-clipper/web-fetch-coordinator.js",
+      "esm-module",
+      "feature",
+      "Own native/browser/manual web source routing, deadline, cancellation and request generation without DOM or conversion.",
+      "active-web-fetch-generation",
+      "fetch/cancel/manual/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/import/compatibility/classic-web-fetch-port.js",
+      "esm-module",
+      "feature",
+      "Scoped web fetch access and input invalidation listener lifecycle until Atomic 13.12/13.14.",
+      "classic-web-fetch-port-listeners",
+      "mount/destroy",
+      "remove-after-migration",
       false
     ]
   ]

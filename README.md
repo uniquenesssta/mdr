@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-02：R13-S01 后端专项在 `74abbd2` / [Windows CI 36890098604](https://github.com/uniquenesssta/mdr/actions/runs/36890098604) 七组通过并收尾；开始 13.9，将原生/浏览器代理/手动 HTML 协调迁入 Import，接通取消与过期结果拦截，错误和代理提示按纯文本展示。新增回归待 Windows CI；A05 全链路未提前关闭。[S01 验收](docs/R13-S01-DETAILS.md) · [13.9 实施](docs/R13-09-DETAILS.md)。
+
 - 2026-10-02：修复 R13-S01 收尾因旧风险复核指纹过期而失败：复核当前抓取/取消链并更新当前指纹，保留 R12 历史验收快照及全部硬门禁。前轮六组 Windows 测试已通过，本次待精确提交重验，A05 全链路仍未关闭。[详情](docs/R13-S01-DETAILS.md)。
 
 - 2026-10-01：R13-S01 重验 `ff2ed69` / CI 36877688203 的 Rust、前端、原生、WebView、依赖五组通过，根 Node 590/590；唯一直接失败为拖拽 E2E 启动 Chrome 后 CDP 持续拒绝连接，尚未执行拖拽断言。共享测试启动器现仅在未就绪、进程存活且清理成功的连接拒绝情况下恢复一次，以全新进程/端口/目录重启；每次仍限 30 秒，保留诊断，不重跑测试断言，连续失败仍阻断。新增恢复上限与错误保留回归，待 Windows 重验，底层 Chrome 卡住原因尚未确定。[详情](docs/R13-S01-DETAILS.md)。
