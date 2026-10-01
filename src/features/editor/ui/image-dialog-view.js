@@ -1,11 +1,12 @@
 /**
  * Responsibility: Own image-dialog tab/file-preview state and send one image insertion command after form validation.
- * Imports: Shared DOM event scope only.
+ * Imports: Shared DOM event scope and public Import metadata classification only.
  * Exports: createImageDialogView.
  * State/side effects: Owns pending upload data URL and DOM listeners only; never owns editor text.
  * Lifecycle: Explicit View with idempotent destroy(); clears pending upload state, closes modal and removes listeners.
  */
 import { createEventScope } from '../../../ui/dom/index.js';
+import { classifyBrowserFile, IMPORT_KINDS } from '../../import/index.js';
 const OPEN_EVENT = 'markdown-editor:modal-shell-open';
 const CLOSE_EVENT = 'markdown-editor:modal-shell-close';
 function modal(root, type, detail) {
@@ -58,7 +59,7 @@ export function createImageDialogView({
   const readFile = input => {
     const file = input?.files?.[0];
     if (!file) return;
-    if (!String(file.type || '').startsWith('image/')) { notify(text.selectFile); return; }
+    if (classifyBrowserFile(file, { imageOnly: true }) !== IMPORT_KINDS.IMAGE) { notify(text.selectFile); return; }
     if (file.size > 5 * 1024 * 1024) { notify(text.tooLarge); pendingDataUrl = ''; return; }
     if (file.size > 2 * 1024 * 1024 && !confirmLargeFile(file)) { pendingDataUrl = ''; return; }
     const Reader = root.ownerDocument?.defaultView?.FileReader;

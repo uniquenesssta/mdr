@@ -4966,6 +4966,36 @@
       "document-fragments",
       "retain",
       false
+    ],
+    [
+      "src/features/import/compatibility/classic-import-classifier-port.js",
+      "esm-module",
+      "feature",
+      "Scoped classifier access for classic drop callers until Atomic 13.4.",
+      "classic-import-classifier-port",
+      "mount/destroy",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/import/files/file-type-classifier.js",
+      "esm-module",
+      "feature",
+      "Pure File/path/returned-kind classification without content reads or size policy.",
+      "none",
+      "pure-functions",
+      "retain",
+      false
+    ],
+    [
+      "src/features/import/index.js",
+      "esm-facade",
+      "feature",
+      "Public metadata classification and scoped classic migration port.",
+      "none",
+      "module-import",
+      "retain",
+      false
     ]
   ]
 }

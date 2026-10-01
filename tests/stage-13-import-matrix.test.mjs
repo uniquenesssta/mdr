@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
+import { mountClassicImportClassifierPort } from '../src/features/import/index.js';
 import { createImageDialogView } from '../src/features/editor/ui/image-dialog-view.js';
 
 const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
@@ -11,7 +12,7 @@ const coreSource = await read('public/app/core.js');
 const webSource = await read('public/app/web-clipper.js');
 const MiB = 1024 * 1024;
 
-// Execute unchanged legacy sections; injected ports observe routing, not real native I/O.
+// Execute the remaining routing sections with the real public classifier; injected ports observe routing, not real native I/O.
 function section(source, start, end) {
   const first = source.indexOf(start);
   const last = source.indexOf(end, first);
@@ -26,6 +27,7 @@ function dropHost({ desktop = false, failRead = false, opened = true } = {}) {
       getElementById: () => ({ classList: { add: x => overlay.add(x), remove: x => overlay.delete(x) } }),
       addEventListener: (name, handler) => handlers.set(name, handler)
     },
+    eventsImportClassifierPort: mountClassicImportClassifierPort({}).api,
     eventsPlatformPort: {
       supports: name => desktop && ['desktop.fileSystem', 'desktop.dragDrop'].includes(name),
       async call(group, operation, ...args) {
@@ -169,6 +171,16 @@ test('image dialog refusal, empty selection, invalid MIME and destruction do not
   h.choose({ type: 'image/png', size: 3 * MiB }); h.view.switchTab('upload');
   assert.equal(h.view.confirm(), false); assert.equal(h.reads.length, 0); assert.deepEqual(h.inserted, []);
   h.view.destroy(); h.choose({ type: 'image/png', size: 1 }); assert.equal(h.reads.length, 0);
+});
+test('image dialog MIME-only routing differs from text-first drop classification', () => {
+  const h = imageHost();
+  h.choose({ name: 'note.md', type: '', size: 1 });
+  assert.equal(h.reads.length, 0);
+  h.choose({ name: 'note.md', type: 'image/png', size: 1 });
+  assert.equal(h.reads.length, 1);
+  assert.equal(h.view.confirm(), true);
+  assert.equal(h.inserted.length, 1);
+  h.view.destroy();
 });
 test('image URL and upload send one insertion command with the selected data', () => {
   const h = imageHost(); h.root.querySelector('#image-url-input').value = ' https://example.test/a.png ';

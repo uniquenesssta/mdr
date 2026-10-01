@@ -1,5 +1,7 @@
     const eventsCompatibilityHost = document.getElementById('compatibility-business-ports');
     const eventsPlatformPort = eventsCompatibilityHost?.markdownEditorPlatformPort;
+    const eventsImportClassifierPort = eventsCompatibilityHost?.markdownEditorImportClassifierPort;
+    if (!eventsImportClassifierPort) throw new Error('Import classifier compatibility port is unavailable.');
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
     const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
     const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
@@ -72,15 +74,14 @@
       const files = e.dataTransfer.files;
       if (!files.length) return;
       const file = files[0];
-      const ext = file.name.split('.').pop().toLowerCase();
+      const kind = eventsImportClassifierPort.classifyFile(file);
 
-      const allowedText = ['md', 'markdown', 'txt'];
-      if (allowedText.includes(ext)) {
+      if (kind === eventsImportClassifierPort.kinds.TEXT) {
         loadFile(file);
         return;
       }
 
-      if (file.type.startsWith('image/')) {
+      if (kind === eventsImportClassifierPort.kinds.IMAGE) {
         if (file.size > 5 * 1024 * 1024) {
           showToast(t('toastImageTooLarge'));
           return;
@@ -101,9 +102,9 @@
       const resolvedPath = String(path || '').trim();
       if (!resolvedPath || !eventsPlatformPort?.supports('desktop.fileSystem')) return false;
       const name = getFileNameFromPath(resolvedPath);
-      const ext = String(name.split('.').pop() || '').toLowerCase();
+      const kind = eventsImportClassifierPort.classifyPath(resolvedPath);
       try {
-        if (['md', 'markdown', 'txt'].includes(ext)) {
+        if (kind === eventsImportClassifierPort.kinds.TEXT) {
           const opened = await loadDocumentFromContentLoader(
             name,
             () => eventsPlatformPort.call('files', 'readText', resolvedPath),
@@ -113,7 +114,7 @@
           if (opened) addRecentFile(resolvedPath, name);
           return opened;
         }
-        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
+        if (kind === eventsImportClassifierPort.kinds.IMAGE) {
           const dataUrl = await eventsPlatformPort.call('files', 'readImage', resolvedPath, '');
           insertImageMarkdown(name, dataUrl);
           showToast(t('toastImageInserted'));
