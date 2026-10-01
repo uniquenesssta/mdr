@@ -56,3 +56,12 @@ Rust 的多处失败均由同一测试编译错误阻断：新 HTTPS 用例的 `
 前端唯一失败为 Browser preview contract 的 Chromium CDP 启动超时，尚未进入页面断言；Built-app browser regression 已通过。旧日志没有 Chromium stderr/退出原因，不能断言它是抓取逻辑错误或已经定位。现记录 executable/args/PID/退出码/连接 cause/有界 stdout、stderr，提前报告 spawn/进程退出；单次探测受剩余总预算约束，仍保留 30 秒总截止，不增加浏览器重试或吞掉断言。清理失败也保留原始启动诊断。新增受控探测无响应、进程退出、连接错误和正常 JSON 回归，真实浏览器仍由原 Windows 门禁验证。
 
 本地仅静态语法、Rust 格式、路径/数量与 diff 检查；本次生产抓取策略和实现不变，13.9 仍等待 R13-S01 验收。重验启动后停止查询。
+
+
+## 第二轮失败与启动恢复（2026-10-01）
+
+`ff2ed695f49600e05a56782aac1ab5e319eb49b8` 的 [Windows CI 36877688203](https://github.com/uniquenesssta/mdr/actions/runs/36877688203)：Rust 安全边界、前端/HTML、原生编译、真实 WebView、依赖五个 job 成功；完整 Node job 失败，收尾随之阻断。根 Node 590/590 全通过；直接失败为 `tests/e2e/drop-import.test.mjs`，启动尚未返回，没有执行拖拽断言。诊断为 Chrome PID 存活、退出码为空、stdout/stderr 为空，30 秒内 `/json/list` 持续 ECONNREFUSED。同组后续浏览器测试成功。这证明启动阶段未开放端口，但不能证明 Chrome 内部卡住的底层原因。
+
+共享 CDP 启动器仅对“尚未取得端点、进程仍存活、连接拒绝、进程树与临时目录均已清理成功”增加一次全新启动。每次仍有原 30 秒截止，第二次使用新的进程、端口、用户目录；首次诊断明确写入日志。清理失败、进程退出、非法目标、已连接后的 CDP 错误及测试断言均不恢复。第二次失败报告两个原始错误，不再启动第三次。此项是受限启动恢复，不宣称修复 Chrome 底层原因，也不将未执行用例算通过。
+
+新增受控回归验证一次恢复、连续失败保留两次证据、不恢复普通错误及测试体失败；连接错误原因链也纳入断言。本地仅 Node 语法和 diff 静态检查，全部测试继续由 Windows CI 运行。R13-S01 仍未验收，13.9 未开始。

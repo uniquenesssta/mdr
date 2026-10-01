@@ -125,7 +125,8 @@ export async function waitForJson(url, timeoutMs = 10000, options = {}) {
   }
   const cause = lastError?.cause;
   throw new Error(`CDP endpoint did not become ready: ${lastError?.message || url}`
-    + `; endpoint=${url}; cause=${cause?.code || cause?.message || 'unavailable'}`);
+    + `; endpoint=${url}; cause=${cause?.code || cause?.message || 'unavailable'}`,
+    { cause: lastError });
 }
 
 export class CdpConnection {
@@ -459,7 +460,27 @@ async function stopChromium(processHandle) {
   }
 }
 
+// Retry only a fully cleaned, refused CDP startup. Test bodies run after this returns.
+export async function recoverChromiumStartup(launch, report = console.warn) {
+  try {
+    return await launch();
+  } catch (firstError) {
+    if (firstError.code !== 'CDP_STARTUP_REFUSED_CLEANED') throw firstError;
+    report(`Chromium startup recovery (one fresh process): ${firstError.message}`);
+    try {
+      return await launch();
+    } catch (secondError) {
+      throw new AggregateError([firstError, secondError],
+        `Both Chromium startup attempts failed. First: ${firstError.message}\nSecond: ${secondError.message}`);
+    }
+  }
+}
+
 export async function launchChromium(options = {}) {
+  return recoverChromiumStartup(() => launchChromiumOnce(options));
+}
+
+async function launchChromiumOnce(options) {
   const executable = findChromiumExecutable();
   if (!executable) throw new Error('Chromium/Chrome was not found. Set CHROMIUM_PATH to its executable.');
   const port = await getFreePort();
@@ -499,8 +520,10 @@ export async function launchChromium(options = {}) {
     }
   };
 
+  let endpointReady = false;
   try {
     const targets = await waitForJson(`http://127.0.0.1:${port}/json/list`, 30000, { checkProcess });
+    endpointReady = true;
     const target = targets.find(item => item.type === 'page');
     if (!target?.webSocketDebuggerUrl) throw new Error('No page target was exposed by Chromium');
     const connection = await new CdpConnection(target.webSocketDebuggerUrl).open();
@@ -517,13 +540,18 @@ export async function launchChromium(options = {}) {
       get stderr() { return stderr; }
     };
   } catch (error) {
+    const refusedStartup = !endpointReady && !startupError
+      && processHandle.exitCode === null && processHandle.signalCode === null
+      && error.cause?.cause?.code === 'ECONNREFUSED';
     const diagnostics = JSON.stringify({ executable, args, pid: processHandle.pid,
       exitCode: processHandle.exitCode, signalCode: processHandle.signalCode,
       spawnError: startupError?.message, stdout, stderr });
     const cleanupErrors = [];
     try { await stopChromium(processHandle); } catch (cleanupError) { cleanupErrors.push(cleanupError.message); }
     try { await removeProfileDirectory(profileDir); } catch (cleanupError) { cleanupErrors.push(cleanupError.message); }
-    throw new Error(`${error.message}\nChromium startup: ${diagnostics}`
-      + (cleanupErrors.length ? `\nCleanup: ${cleanupErrors.join('; ')}` : ''));
+    const failure = new Error(`${error.message}\nChromium startup: ${diagnostics}`
+      + (cleanupErrors.length ? `\nCleanup: ${cleanupErrors.join('; ')}` : ''), { cause: error });
+    if (refusedStartup && cleanupErrors.length === 0) failure.code = 'CDP_STARTUP_REFUSED_CLEANED';
+    throw failure;
   }
 }
