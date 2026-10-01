@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { createBrowserFileReader } from '../src/platform/browser/browser-file-reader.js';
-import { createDropImportController, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
+import { createDropImportController, createDropOverlayView, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
 import { createImageDialogView } from '../src/features/editor/ui/image-dialog-view.js';
 
 const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
@@ -32,9 +32,13 @@ function dropHost({ desktop = false, failRead = false, opened = true } = {}) {
     target: document, nativeDrop: desktop, nativeFiles: desktop,
     subscribeNative: handler => { handlers.set('native', handler); return () => handlers.delete('native'); }
   });
+  const overlayView = createDropOverlayView({ element: document.getElementById('drop-overlay') });
   const context = vm.createContext({
     document,
-    eventsDropImportPort: mountClassicDropImportPort({}, controller).api,
+    eventsDropImportPort: mountClassicDropImportPort({}, {
+      start: callbacks => controller.start({ ...callbacks, setOverlayVisible: overlayView.setVisible }),
+      openPath: controller.openPath
+    }).api,
     eventsFileImportPort: mountClassicFileImportPort({}, createFileImportController({
       readBrowserText: async () => '',
       async readNativeText(path) {

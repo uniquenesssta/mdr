@@ -35,12 +35,7 @@
 
 
     // R13.4 owns event routing; image policy/reading migrate in 13.6/13.7.
-    const dropOverlay = document.getElementById('drop-overlay');
     eventsDropImportPort.register({
-      setOverlayVisible(visible) {
-        if (visible) dropOverlay?.classList.add('show');
-        else dropOverlay?.classList.remove('show');
-      },
       openBrowserText: (file, request) => loadFile(file, request),
       openBrowserImage(file, request) {
         if (file.size > 5 * 1024 * 1024) {

@@ -1,5 +1,5 @@
 import './styles/index.css';
-import { createDropImportController, mountClassicDropImportPort } from './features/import/index.js';
+import { createDropImportController, createDropOverlayView, mountClassicDropImportPort } from './features/import/index.js';
 import { createFileImportController, mountClassicFileImportPort } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
@@ -141,7 +141,11 @@ const dropImportController = createDropImportController({
   subscribeNative: handler => platform.dragDrop.subscribe(handler),
   onSubscriptionError: error => console.warn('Native drag-drop subscription failed', error)
 });
-const dropImportPort = mountClassicDropImportPort(compatibilityPlatformHost, dropImportController);
+const dropOverlayView = createDropOverlayView({ element: document.getElementById('drop-overlay') });
+const dropImportPort = mountClassicDropImportPort(compatibilityPlatformHost, {
+  start: callbacks => dropImportController.start({ ...callbacks, setOverlayVisible: dropOverlayView.setVisible }),
+  openPath: dropImportController.openPath
+});
 const browserImportReader = createBrowserFileReader({
   FileReaderClass: window.FileReader,
   readErrorMessage: '无法读取所选文档',
@@ -280,6 +284,7 @@ window.addEventListener('pagehide', () => {
   backgroundTaskSchedulerPort.destroy();
   backgroundTaskScheduler.destroy();
   void dropImportController.destroy();
+  dropOverlayView.destroy();
   dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();
@@ -1543,6 +1548,7 @@ loadAppModules().then(() => {
   });
 }).catch((error) => {
   void dropImportController.destroy();
+  dropOverlayView.destroy();
   dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();

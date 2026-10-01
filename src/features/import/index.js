@@ -4,3 +4,4 @@ export { createFileImportController, FileImportCancelledError } from './files/fi
 export { mountClassicFileImportPort } from './compatibility/classic-file-import-port.js';
 export { createDropImportController } from './files/drop-import-controller.js';
 export { mountClassicDropImportPort } from './compatibility/classic-drop-import-port.js';
+export { createDropOverlayView } from './files/drop-overlay-view.js';

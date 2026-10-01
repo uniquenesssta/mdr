@@ -11,13 +11,14 @@ try {
   host = await installVirtualFileHost(browser.page, { root, origin: 'https://markdown-editor.test' });
   await browser.page.setDocumentContent(`<!doctype html><html><head><base href="${host.origin}/"></head><body><div id="overlay"></div><div id="outer"><div id="inner"></div></div></body></html>`);
   const result = await browser.page.evaluate(`(async () => {
-    const { createDropImportController } = await import(${JSON.stringify(host.origin)} + '/src/features/import/index.js');
+    const { createDropImportController, createDropOverlayView } = await import(${JSON.stringify(host.origin)} + '/src/features/import/index.js');
     const overlay = document.getElementById('overlay');
     const outer = document.getElementById('outer'), inner = document.getElementById('inner');
     const calls = [], states = [];
+    const view = createDropOverlayView({ element: overlay });
     const c = createDropImportController({ target: document });
     c.start({
-      setOverlayVisible(value) { overlay.classList.toggle('show', value); },
+      setOverlayVisible: view.setVisible,
       openBrowserText(file) { calls.push(['text', file.name]); return true; },
       openBrowserImage(file) { calls.push(['image', file.name]); return true; },
       openNativeText() { throw new Error('unexpected native text'); },
@@ -34,11 +35,11 @@ try {
       const data = new DataTransfer(); data.items.add(new File(['body'], 'note.MD', { type: 'image/png' })); data.items.add(new File(['ignored'], 'ignored.md'));
       emit(outer, 'dragenter'); const prevented = emit(inner, 'drop', data); states.push(overlay.classList.contains('show'));
       const image = new DataTransfer(); image.items.add(new File(['image'], 'photo.bin', { type: 'image/png' })); emit(inner, 'drop', image);
-      emit(outer, 'dragenter'); c.destroy(); states.push(overlay.classList.contains('show'));
+      emit(outer, 'dragenter'); c.destroy(); view.destroy(); view.setVisible(true); states.push(overlay.classList.contains('show'));
       const latePrevented = emit(inner, 'drop', data); emit(inner, 'dragenter'); states.push(overlay.classList.contains('show'));
       await Promise.resolve();
       return { calls, states, prevented, latePrevented };
-    } finally { c.destroy(); }
+    } finally { c.destroy(); view.destroy(); }
   })()`);
   assert.deepEqual(result.calls, [['text', 'note.MD'], ['image', 'photo.bin']]);
   assert.deepEqual(result.states, [true, false, false, false, false]);

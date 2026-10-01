@@ -5026,6 +5026,16 @@
       "mount/destroy",
       "remove-after-migration",
       false
+    ],
+    [
+      "src/features/import/files/drop-overlay-view.js",
+      "esm-module",
+      "feature",
+      "Render Drop Import visibility commands; hide and release DOM reference on destroy without owning drag state.",
+      "drop-overlay-dom-reference",
+      "create/destroy",
+      "retain",
+      false
     ]
   ]
 }

@@ -78,8 +78,8 @@ test('production routing consumes one public classifier with startup and teardow
   assert.match(drop, /classifyImportPath\(resolvedPath\)/);
   assert.doesNotMatch(events, /allowedText|includes\(ext\)|file\.type\.startsWith|eventsImportClassifierPort/);
   assert.doesNotMatch(entry + main, /mountClassicImportClassifierPort|classic-import-classifier-port/);
-  assert.match(main, /mountClassicDropImportPort\(compatibilityPlatformHost, dropImportController\)/);
-  assert.ok(main.indexOf('mountClassicDropImportPort(compatibilityPlatformHost, dropImportController)') < main.indexOf('for (const src of APP_MODULES)'));
+  assert.match(main, /mountClassicDropImportPort\(compatibilityPlatformHost, \{/);
+  assert.ok(main.indexOf('mountClassicDropImportPort(compatibilityPlatformHost, {') < main.indexOf('for (const src of APP_MODULES)'));
   assert.equal(main.match(/dropImportPort\.destroy\(\)/g).length, 2);
   assert.match(image, /from '\.\.\/\.\.\/import\/index\.js'/);
   assert.match(image, /classifyBrowserFile\(file, \{ imageOnly: true \}\)/);
