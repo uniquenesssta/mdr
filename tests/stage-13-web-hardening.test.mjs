@@ -45,3 +45,19 @@ test('real Windows HTTP boundaries and cumulative security gates remain mandator
   assert.doesNotMatch(cases, /#\[ignore\]/);
   await assertCurrentValidation();
 });
+
+
+test('Windows gates count the current URL and HTTP tests and locate the shared TLS fixture', async () => {
+  const http = await read('src-tauri/tests/web_fetch/http_compatibility.rs');
+  const urls = await read('src-tauri/tests/web_fetch/validation.rs');
+  const workflow = await read('.github/workflows/r12-14.yml');
+  const count = source => (source.match(/^#\[test\]/gm) || []).length;
+  for (const [source, log] of [[http, 'web-response'], [http, 'web-http'], [urls, 'web-url']]) {
+    assert.ok(workflow.includes(`test result: ok. ${count(source)} passed; 0 failed' "$RUNNER_TEMP/r12-14/${log}.log"`), log);
+  }
+  assert.match(http, /env!\("CARGO_MANIFEST_DIR"\),\s*"\/\.\.\/tests\/fixtures\/dependency-tls\/root-ca\.pem"/);
+  assert.match(await read('tests/fixtures/dependency-tls/root-ca.pem'), /BEGIN CERTIFICATE/);
+  const guard = await read('scripts/ci/verify-windows-test-imports.mjs');
+  assert.match(guard, /4a60a0d3315456b2dd3b63e375fe09d32aa1275e/);
+  assert.match(guard, /webBaseline\.replace\(oldCertificate, correctedCertificate\)/);
+});

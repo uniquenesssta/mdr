@@ -320,27 +320,27 @@ jobs:
           node --test tests/stage-12-log-payload.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/frontend-payload.log"
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction_pipeline_tests 2>&1 | tee "$RUNNER_TEMP/r12-14/redaction-pipeline.log"
           grep -Fq 'test result: ok. 1 passed; 0 failed' "$RUNNER_TEMP/r12-14/redaction-pipeline.log"
-      - name: R12-13 extracted real HTTP response behavior 9 of 9
+      - name: R13-S01 hardened real HTTP and HTTPS behavior 17 of 17
         if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor web_fetch::http_compatibility_tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-response.log"
-          grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-response.log"
+          grep -Fq 'test result: ok. 17 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-response.log"
       - name: R12-12 direct client ownership tests 2 of 2
         if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor web_fetch::client::tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-client-unit.log"
           grep -Fq 'test result: ok. 2 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-client-unit.log"
-      - name: R12-11 extracted URL and real HTTP behavior 17 of 17
+      - name: R13-S01 URL and real HTTP behavior 27 of 27
         if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor web_fetch::validation_tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-url.log"
-          grep -Fq 'test result: ok. 8 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-url.log"
+          grep -Fq 'test result: ok. 10 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-url.log"
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor web_fetch::http_compatibility_tests \
             2>&1 | tee "$RUNNER_TEMP/r12-14/web-http.log"
-          grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-http.log"
+          grep -Fq 'test result: ok. 17 passed; 0 failed' "$RUNNER_TEMP/r12-14/web-http.log"
       - name: R12-09 direct URL validation 8 of 8
         if: ${{ !cancelled() }}
         run: |

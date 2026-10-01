@@ -599,7 +599,11 @@ mod tls_server {
 #[test]
 fn actual_https_keeps_certificate_validation_and_blocks_downgrade() {
     let server = tls_server::OwnedTlsServer::start();
-    let root = reqwest::Certificate::from_pem(include_bytes!("../fixtures/dependency-tls/root-ca.pem")).unwrap();
+    let root = reqwest::Certificate::from_pem(include_bytes!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../tests/fixtures/dependency-tls/root-ca.pem"
+    )))
+    .unwrap();
     for (path, expected) in [("/html", "normal TLS HTML"), ("/downgrade", "HTTPS to HTTP")] {
         let url = url::Url::parse(&server.url.replace("/owned", path)).unwrap();
         let result = tauri::async_runtime::block_on(async {

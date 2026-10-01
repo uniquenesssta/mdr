@@ -45,3 +45,14 @@ HTML 仍视为不可信。现有渲染净化/CSP 不变，正文提取/转换与
 没有升级第三方版本。把已有锁定的 async-compression 0.4.36、futures-util 0.3.32、tokio 1.52.3 声明为直接依赖，供有界解码、取消 Future 和总截止使用；Cargo.lock 仅增加应用直接依赖边。压缩算法沿用既有 gzip/br/zlib 能力，未启用新的算法、原生 TLS、证书绕过或外部命令。A10 仍运行官方 RustSec、Windows 依赖图及 TLS 门禁，本轮结果待 CI。
 
 Context7 已核对 reqwest DNS override/重定向设计，并以锁定 0.12.28 官方源码核对接口；async-compression 未在 Context7 命中，改读 0.4.36 官方 crate 源码，futures 取消按 0.3.32 官方源码核对。Mermaid Chart 已核对抓取/取消所有权链。本项可回退到前置 `fe90949`，无持久化格式迁移。
+
+
+## 首轮失败与修正（2026-10-01）
+
+`4a60a0d3315456b2dd3b63e375fe09d32aa1275e` / [CI 36873801315](https://github.com/uniquenesssta/mdr/actions/runs/36873801315) 为 4 个 job 成功、Rust/前端及依赖它们的收尾 job 失败。全仓 Node、官方 RustSec/Windows 依赖图、原生编译链接、实际 Windows WebView 已通过。
+
+Rust 的多处失败均由同一测试编译错误阻断：新 HTTPS 用例的 `include_bytes!` 指向 src-tauri/tests/fixtures 下不存在的证书，实际夹具位于仓库 tests/fixtures。现按 CARGO_MANIFEST_DIR 拼接仓库路径，补存在性契约；不能将此前未运行的 Rust 用例写为行为通过。旧 Windows portability 脚本仍把 HTTP 文件冻结在 R12 未加固版本，现明确采用用户已批准 S01 的提交作为该文件基线，只允许本次证书路径修正，其余两处旧冻结保持。同步 HTTP 17 项、URL 10 项固定成功计数，保留零失败硬门禁并补源用例数量匹配回归。
+
+前端唯一失败为 Browser preview contract 的 Chromium CDP 启动超时，尚未进入页面断言；Built-app browser regression 已通过。旧日志没有 Chromium stderr/退出原因，不能断言它是抓取逻辑错误或已经定位。现记录 executable/args/PID/退出码/连接 cause/有界 stdout、stderr，提前报告 spawn/进程退出；单次探测受剩余总预算约束，仍保留 30 秒总截止，不增加浏览器重试或吞掉断言。清理失败也保留原始启动诊断。新增受控探测无响应、进程退出、连接错误和正常 JSON 回归，真实浏览器仍由原 Windows 门禁验证。
+
+本地仅静态语法、Rust 格式、路径/数量与 diff 检查；本次生产抓取策略和实现不变，13.9 仍等待 R13-S01 验收。重验启动后停止查询。

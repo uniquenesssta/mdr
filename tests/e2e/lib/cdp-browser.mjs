@@ -101,20 +101,31 @@ async function getFreePort() {
   return port;
 }
 
-async function waitForJson(url, timeoutMs = 10000) {
-  const started = Date.now();
+export async function waitForJson(url, timeoutMs = 10000, options = {}) {
+  const deadline = Date.now() + timeoutMs;
+  const fetchJson = options.fetch || fetch;
+  const checkProcess = options.checkProcess || (() => {});
   let lastError = null;
-  while (Date.now() - started < timeoutMs) {
+  while (Date.now() < deadline) {
+    checkProcess();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), Math.min(1000, Math.max(1, deadline - Date.now())));
     try {
-      const response = await fetch(url, { cache: 'no-store' });
+      const response = await fetchJson(url, { cache: 'no-store', signal: controller.signal });
       if (response.ok) return await response.json();
       lastError = new Error(`${response.status} ${response.statusText}`);
     } catch (error) {
       lastError = error;
+    } finally {
+      clearTimeout(timer);
     }
-    await new Promise(resolvePromise => setTimeout(resolvePromise, 80));
+    checkProcess();
+    const remaining = deadline - Date.now();
+    if (remaining > 0) await new Promise(resolvePromise => setTimeout(resolvePromise, Math.min(80, remaining)));
   }
-  throw new Error(`CDP endpoint did not become ready: ${lastError?.message || url}`);
+  const cause = lastError?.cause;
+  throw new Error(`CDP endpoint did not become ready: ${lastError?.message || url}`
+    + `; endpoint=${url}; cause=${cause?.code || cause?.message || 'unavailable'}`);
 }
 
 export class CdpConnection {
@@ -476,11 +487,20 @@ export async function launchChromium(options = {}) {
     env: { ...process.env, PATH: process.env.PATH?.split(delimiter).join(delimiter) }
   });
   let stderr = '';
-  processHandle.stderr.on('data', chunk => { stderr += String(chunk); });
-  processHandle.stdout.on('data', () => {});
+  let stdout = '';
+  let startupError = null;
+  processHandle.once('error', error => { startupError = error; });
+  processHandle.stderr.on('data', chunk => { stderr = (stderr + String(chunk)).slice(-8000); });
+  processHandle.stdout.on('data', chunk => { stdout = (stdout + String(chunk)).slice(-8000); });
+  const checkProcess = () => {
+    if (startupError) throw startupError;
+    if (processHandle.exitCode !== null || processHandle.signalCode !== null) {
+      throw new Error(`Chromium exited before CDP readiness: code=${processHandle.exitCode}; signal=${processHandle.signalCode}`);
+    }
+  };
 
   try {
-    const targets = await waitForJson(`http://127.0.0.1:${port}/json/list`, 30000);
+    const targets = await waitForJson(`http://127.0.0.1:${port}/json/list`, 30000, { checkProcess });
     const target = targets.find(item => item.type === 'page');
     if (!target?.webSocketDebuggerUrl) throw new Error('No page target was exposed by Chromium');
     const connection = await new CdpConnection(target.webSocketDebuggerUrl).open();
@@ -497,8 +517,13 @@ export async function launchChromium(options = {}) {
       get stderr() { return stderr; }
     };
   } catch (error) {
-    await stopChromium(processHandle);
-    await removeProfileDirectory(profileDir);
-    throw new Error(`${error.message}${stderr ? `\nChromium: ${stderr.slice(-1200)}` : ''}`);
+    const diagnostics = JSON.stringify({ executable, args, pid: processHandle.pid,
+      exitCode: processHandle.exitCode, signalCode: processHandle.signalCode,
+      spawnError: startupError?.message, stdout, stderr });
+    const cleanupErrors = [];
+    try { await stopChromium(processHandle); } catch (cleanupError) { cleanupErrors.push(cleanupError.message); }
+    try { await removeProfileDirectory(profileDir); } catch (cleanupError) { cleanupErrors.push(cleanupError.message); }
+    throw new Error(`${error.message}\nChromium startup: ${diagnostics}`
+      + (cleanupErrors.length ? `\nCleanup: ${cleanupErrors.join('; ')}` : ''));
   }
 }

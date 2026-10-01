@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：修正 R13-S01 首轮 CI 遗漏：TLS 用例误指向 src-tauri/tests 下不存在的证书，统一从 Cargo 根定位仓库共享夹具；Windows 旧字节冻结改为保留已批准 S01 用例，仅放行本次路径修正，HTTP/URL 硬门禁同步 17/10 项。四个 job 已通过；Rust 测试编译被该路径阻断，浏览器契约另有 CDP 启动超时（根因未知）。补启动进程/连接诊断与单次探测取消截止，不增加总等待、不跳过断言，待 Windows 重验。[详情](docs/R13-S01-DETAILS.md)。
+
 - 2026-10-01：用户确认 R13-S01 网页策略并开始实施：10 MiB 原始/20 MiB 解压后上限、公网 HTTP(S)、HTML/XHTML、30 秒总截止与 10 次跳转、禁止 HTTPS 降级。后端逐跳解析并绑定连接地址、按实际字节读取和有界解压；新增原生取消配套命令及 AbortSignal 适配，旧 URL 调用与响应 DTO 保留。补真实 Windows HTTP/HTTPS、压缩/大小、私网/跳转与连接取消回归；历史 manifest 保留，新策略单独记录。仅本地静态检查，待七组 Windows CI；13.9 接入等待 R13-S01 验收。[详情](docs/R13-S01-DETAILS.md)。
 
 - 2026-10-01：R13.8 正式收尾：`54fe195` 的 [Windows CI 36864276840](https://github.com/uniquenesssta/mdr/actions/runs/36864276840) 七个 job 全部成功；生产/测试代码保持首轮实现不变，旧启动超时根因仍未确定。开始 13.9 前置策略准备；R13-S01 的网页响应上限与内网支持规则待用户明确确认，后端加固未实施，13.9 尚未接入。[详情](docs/R13-08-DETAILS.md)。
