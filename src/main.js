@@ -1,5 +1,5 @@
 import './styles/index.css';
-import { mountClassicImportClassifierPort } from './features/import/index.js';
+import { createDropImportController, mountClassicDropImportPort } from './features/import/index.js';
 import { createFileImportController, mountClassicFileImportPort } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
@@ -134,7 +134,14 @@ const platform = createPlatform({
   record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
 });
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
-const importClassifierPort = mountClassicImportClassifierPort(compatibilityPlatformHost);
+const dropImportController = createDropImportController({
+  target: document,
+  nativeDrop: platform.supports('desktop.dragDrop'),
+  nativeFiles: platform.supports('desktop.fileSystem'),
+  subscribeNative: handler => platform.dragDrop.subscribe(handler),
+  onSubscriptionError: error => console.warn('Native drag-drop subscription failed', error)
+});
+const dropImportPort = mountClassicDropImportPort(compatibilityPlatformHost, dropImportController);
 const browserImportReader = createBrowserFileReader({
   FileReaderClass: window.FileReader,
   readErrorMessage: '无法读取所选文档',
@@ -272,9 +279,10 @@ window.addEventListener('pagehide', () => {
   previewPresentationPort.destroy();
   backgroundTaskSchedulerPort.destroy();
   backgroundTaskScheduler.destroy();
+  void dropImportController.destroy();
+  dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();
-  importClassifierPort.destroy();
   compatibilityPlatformPort.destroy();
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
 }, { once: true });
@@ -1534,9 +1542,10 @@ loadAppModules().then(() => {
     details: { documentReadyState: document.readyState }
   });
 }).catch((error) => {
+  void dropImportController.destroy();
+  dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();
-  importClassifierPort.destroy();
   destroyLayoutStateFeature();
   console.error(error);
   const status = document.getElementById('status');

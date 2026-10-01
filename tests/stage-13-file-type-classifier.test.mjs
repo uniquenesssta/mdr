@@ -2,8 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import {
-  IMPORT_KINDS as K, classifyBrowserFile, classifyImportPath, classifyImportResult,
-  mountClassicImportClassifierPort
+  IMPORT_KINDS as K, classifyBrowserFile, classifyImportPath, classifyImportResult
 } from '../src/features/import/index.js';
 
 test('browser classification preserves text precedence and MIME-only image selection', () => {
@@ -68,37 +67,20 @@ test('classification never reads contents, size or platform capabilities', () =>
   assert.equal(classifyImportResult(result), K.TEXT);
 });
 
-test('scoped classic port uses the classifier and has terminal, idempotent teardown', () => {
-  assert.throws(() => mountClassicImportClassifierPort(null), /requires a host/);
-  const host = {}, mounted = mountClassicImportClassifierPort(host), api = mounted.api;
-  assert.equal(host.markdownEditorImportClassifierPort, api);
-  assert.equal(Object.isFrozen(api), true);
-  assert.deepEqual(Object.keys(host), []);
-  assert.throws(() => mountClassicImportClassifierPort(host), /already mounted/);
-  assert.equal(api.classifyFile({ name: 'a.md', type: 'image/png' }), K.TEXT);
-  assert.equal(api.classifyPath('C:\\a.SVG'), K.IMAGE);
-  mounted.destroy(); mounted.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorImportClassifierPort'), false);
-  assert.throws(() => api.classifyFile({ name: 'a.md' }), /destroyed/);
-  assert.throws(() => api.classifyPath('a.md'), /destroyed/);
-  const replacement = mountClassicImportClassifierPort(host);
-  mounted.destroy();
-  assert.equal(host.markdownEditorImportClassifierPort, replacement.api);
-  replacement.destroy();
-});
-
 test('production routing consumes one public classifier with startup and teardown wiring', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
-  const [events, main, image] = await Promise.all([
-    read('public/app/events.js'), read('src/main.js'), read('src/features/editor/ui/image-dialog-view.js')
+  const [events, main, image, drop, entry] = await Promise.all([
+    read('public/app/events.js'), read('src/main.js'), read('src/features/editor/ui/image-dialog-view.js'),
+    read('src/features/import/files/drop-import-controller.js'), read('src/features/import/index.js')
   ]);
-  assert.match(events, /eventsCompatibilityHost\?\.markdownEditorImportClassifierPort/);
-  assert.match(events, /eventsImportClassifierPort\.classifyFile\(file\)/);
-  assert.match(events, /eventsImportClassifierPort\.classifyPath\(resolvedPath\)/);
-  assert.doesNotMatch(events, /allowedText|includes\(ext\)|file\.type\.startsWith/);
-  assert.match(main, /import \{ mountClassicImportClassifierPort \} from '\.\/features\/import\/index\.js'/);
-  assert.ok(main.indexOf('mountClassicImportClassifierPort(compatibilityPlatformHost)') < main.indexOf('for (const src of APP_MODULES)'));
-  assert.equal(main.match(/importClassifierPort\.destroy\(\)/g).length, 2);
+  assert.match(events, /eventsDropImportPort\.register/);
+  assert.match(drop, /classifyBrowserFile\(file\)/);
+  assert.match(drop, /classifyImportPath\(resolvedPath\)/);
+  assert.doesNotMatch(events, /allowedText|includes\(ext\)|file\.type\.startsWith|eventsImportClassifierPort/);
+  assert.doesNotMatch(entry + main, /mountClassicImportClassifierPort|classic-import-classifier-port/);
+  assert.match(main, /mountClassicDropImportPort\(compatibilityPlatformHost, dropImportController\)/);
+  assert.ok(main.indexOf('mountClassicDropImportPort(compatibilityPlatformHost, dropImportController)') < main.indexOf('for (const src of APP_MODULES)'));
+  assert.equal(main.match(/dropImportPort\.destroy\(\)/g).length, 2);
   assert.match(image, /from '\.\.\/\.\.\/import\/index\.js'/);
   assert.match(image, /classifyBrowserFile\(file, \{ imageOnly: true \}\)/);
 });

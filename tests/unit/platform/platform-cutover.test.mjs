@@ -55,9 +55,10 @@ test('ESM consumers receive responsibility-focused ports rather than native DTO 
 
 test('native drag/drop keeps file classification in application code and MIME decoding outside it', async () => {
   const events = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
-  // R13.2 moves interpretation into Import; the platform still only transports paths.
-  assert.match(events, /eventsImportClassifierPort\.classifyFile\(file\)/);
-  assert.match(events, /eventsImportClassifierPort\.classifyPath\(resolvedPath\)/);
+  // R13.4 moves event routing into Import; Platform still only transports paths.
+  const drop = await readFile(new URL('../../../src/features/import/files/drop-import-controller.js', import.meta.url), 'utf8');
+  assert.match(drop, /classifyBrowserFile\(file\)/);
+  assert.match(drop, /classifyImportPath\(resolvedPath\)/);
   for (const extension of ['md', 'markdown', 'txt']) {
     assert.equal(classifyImportPath('C:\\docs\\note.' + extension), IMPORT_KINDS.TEXT);
     assert.equal(classifyBrowserFile({ name: 'note.' + extension, type: 'image/png' }), IMPORT_KINDS.TEXT);

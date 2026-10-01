@@ -737,10 +737,11 @@ ${'</scr' + 'ipt>'}
       return loadDocumentFromContentLoader(name, async () => source, filePath, { sourceCharacters: source.length });
     }
 
-    function loadFile(file) {
+    function loadFile(file, request = null) {
       if (!file) return Promise.resolve(false);
       return loadDocumentFromContentLoader(file.name, async () => {
         const result = await exportFileImportPort.readBrowserFile(file);
+        if (request && !request.isCurrent()) throw Object.assign(new Error('文档读取已取消'), { code: 'FILE_IMPORT_CANCELLED' });
         return result.content;
       }, '', { fileBytes: Number(file.size) || 0 });
     }

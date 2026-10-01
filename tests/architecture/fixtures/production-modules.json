@@ -4968,16 +4968,6 @@
       false
     ],
     [
-      "src/features/import/compatibility/classic-import-classifier-port.js",
-      "esm-module",
-      "feature",
-      "Scoped classifier access for classic drop callers until Atomic 13.4.",
-      "classic-import-classifier-port",
-      "mount/destroy",
-      "remove-after-migration",
-      false
-    ],
-    [
       "src/features/import/files/file-type-classifier.js",
       "esm-module",
       "feature",
@@ -4991,7 +4981,7 @@
       "src/features/import/index.js",
       "esm-facade",
       "feature",
-      "Public classification, text read coordination and scoped classic migration ports.",
+      "Public classification, text reads, drop routing and scoped classic migration ports.",
       "none",
       "module-import",
       "retain",
@@ -5013,6 +5003,26 @@
       "feature",
       "Scoped text import access for classic callers until Atomic 13.13/13.14.",
       "classic-file-import-port",
+      "mount/destroy",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/import/files/drop-import-controller.js",
+      "esm-module",
+      "feature",
+      "Own browser/native drag subscriptions, counter, overlay commands and first-item classification routing without file reads.",
+      "drop-counter-and-generation",
+      "start/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/import/compatibility/classic-drop-import-port.js",
+      "esm-module",
+      "feature",
+      "Scoped legacy command registration and path entry until Atomic 13.13/13.14.",
+      "classic-drop-import-port",
       "mount/destroy",
       "remove-after-migration",
       false

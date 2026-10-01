@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-01：开始 R13.4：迁移浏览器/Windows 拖放计数、遮罩状态与首项分类路由，删除旧分类桥；补充监听解绑、晚到订阅释放及过时文本/图片结果保护。原类型、大小与最近文件行为保留，新增真实 DOM 拖放回归，待 Windows CI。[详情](docs/R13-04-DETAILS.md)。
+
 - 2026-10-01：R13.3 正式收尾：`76735b4` 的 [Windows CI 36821916874](https://github.com/uniquenesssta/mdr/actions/runs/36821916874) 七个 job 全部成功，可开始 13.4。[详情](docs/R13-03-DETAILS.md)。
 
 - 2026-10-01：修正 R13.3 遗漏的 FileSystem 平台测试接线断言：验证 events → Import 与 main → FilesPort，保留平台无文档/Toast 逻辑、命令映射及图片 MIME 边界。首轮唯一失败为该旧断言，根 Node 553/553、架构 372/372、浏览器 E2E 9/9 已通过；本次只改测试与记录，待 Windows 重验。[详情](docs/R13-03-DETAILS.md)。

@@ -2,8 +2,8 @@
     const eventsPlatformPort = eventsCompatibilityHost?.markdownEditorPlatformPort;
     const eventsFileImportPort = eventsCompatibilityHost?.markdownEditorFileImportPort;
     if (!eventsFileImportPort) throw new Error('File Import compatibility port is unavailable.');
-    const eventsImportClassifierPort = eventsCompatibilityHost?.markdownEditorImportClassifierPort;
-    if (!eventsImportClassifierPort) throw new Error('Import classifier compatibility port is unavailable.');
+    const eventsDropImportPort = eventsCompatibilityHost?.markdownEditorDropImportPort;
+    if (!eventsDropImportPort) throw new Error('Drop Import compatibility port is unavailable.');
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
     const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
     const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
@@ -34,116 +34,66 @@
 
 
 
-    function getFileNameFromPath(path) {
-      return String(path || '').split(/[\\/]/).pop() || '';
-    }
-
-    // 拖放文件打开
+    // R13.4 owns event routing; image policy/reading migrate in 13.6/13.7.
     const dropOverlay = document.getElementById('drop-overlay');
-    let dragCounter = 0;
-
-    function showDropOverlay() {
-      if (dropOverlay) dropOverlay.classList.add('show');
-    }
-
-    function hideDropOverlay() {
-      if (dropOverlay) dropOverlay.classList.remove('show');
-    }
-
-    document.addEventListener('dragenter', (e) => {
-      e.preventDefault();
-      dragCounter++;
-      showDropOverlay();
-    });
-
-    document.addEventListener('dragleave', (e) => {
-      dragCounter--;
-      if (dragCounter <= 0) {
-        dragCounter = 0;
-        hideDropOverlay();
-      }
-    });
-
-    document.addEventListener('dragover', (e) => {
-      e.preventDefault();
-    });
-
-    document.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dragCounter = 0;
-      hideDropOverlay();
-      if (eventsPlatformPort?.supports('desktop.dragDrop')) return;
-      const files = e.dataTransfer.files;
-      if (!files.length) return;
-      const file = files[0];
-      const kind = eventsImportClassifierPort.classifyFile(file);
-
-      if (kind === eventsImportClassifierPort.kinds.TEXT) {
-        loadFile(file);
-        return;
-      }
-
-      if (kind === eventsImportClassifierPort.kinds.IMAGE) {
+    eventsDropImportPort.register({
+      setOverlayVisible(visible) {
+        if (visible) dropOverlay?.classList.add('show');
+        else dropOverlay?.classList.remove('show');
+      },
+      openBrowserText: (file, request) => loadFile(file, request),
+      openBrowserImage(file, request) {
         if (file.size > 5 * 1024 * 1024) {
           showToast(t('toastImageTooLarge'));
-          return;
+          return false;
         }
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          insertImageMarkdown(file.name, ev.target.result);
-          showToast(t('toastImageInserted'));
-        };
-        reader.readAsDataURL(file);
-        return;
-      }
-
-      showToast(t('toastDropUnsupported'));
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          const finish = () => { reader.onload = null; reader.onerror = null; reader.onabort = null; };
+          reader.onload = event => {
+            finish();
+            if (!request.isCurrent()) { resolve(false); return; }
+            try {
+              insertImageMarkdown(file.name, event.target.result);
+              showToast(t('toastImageInserted'));
+              resolve(true);
+            } catch (error) { reject(error); }
+          };
+          reader.onerror = () => { const error = reader.error || new Error('无法读取所选图片'); finish(); reject(error); };
+          reader.onabort = () => { finish(); resolve(false); };
+          try { reader.readAsDataURL(file); } catch (error) { finish(); reject(error); }
+        });
+      },
+      async openNativeText(resolvedPath, request) {
+        const name = resolvedPath.split(/[\\/]/).pop() || '';
+        const opened = await loadDocumentFromContentLoader(
+          name,
+          async () => {
+            const result = await eventsFileImportPort.readPath(resolvedPath);
+            if (!request.isCurrent()) throw Object.assign(new Error('文档读取已取消'), { code: 'FILE_IMPORT_CANCELLED' });
+            return result.content;
+          },
+          resolvedPath,
+          { nativePath: resolvedPath }
+        );
+        if (opened && request.isCurrent()) addRecentFile(resolvedPath, name);
+        return opened;
+      },
+      async openNativeImage(resolvedPath, request) {
+        const name = resolvedPath.split(/[\\/]/).pop() || '';
+        const dataUrl = await eventsPlatformPort.call('files', 'readImage', resolvedPath, '');
+        if (!request.isCurrent()) return false;
+        insertImageMarkdown(name, dataUrl);
+        showToast(t('toastImageInserted'));
+        return true;
+      },
+      unsupported: () => showToast(t('toastDropUnsupported')),
+      onError: error => showToast(error?.message || String(error))
     });
 
-    async function handleNativeDroppedPath(path) {
-      const resolvedPath = String(path || '').trim();
-      if (!resolvedPath || !eventsPlatformPort?.supports('desktop.fileSystem')) return false;
-      const name = getFileNameFromPath(resolvedPath);
-      const kind = eventsImportClassifierPort.classifyPath(resolvedPath);
-      try {
-        if (kind === eventsImportClassifierPort.kinds.TEXT) {
-          const opened = await loadDocumentFromContentLoader(
-            name,
-            async () => (await eventsFileImportPort.readPath(resolvedPath)).content,
-            resolvedPath,
-            { nativePath: resolvedPath }
-          );
-          if (opened) addRecentFile(resolvedPath, name);
-          return opened;
-        }
-        if (kind === eventsImportClassifierPort.kinds.IMAGE) {
-          const dataUrl = await eventsPlatformPort.call('files', 'readImage', resolvedPath, '');
-          insertImageMarkdown(name, dataUrl);
-          showToast(t('toastImageInserted'));
-          return true;
-        }
-        showToast(t('toastDropUnsupported'));
-        return false;
-      } catch (err) {
-        showToast(err?.message || String(err));
-        return false;
-      }
-    }
-
-    if (eventsPlatformPort?.supports('desktop.dragDrop')) {
-      Promise.resolve(eventsPlatformPort.call('dragDrop', 'subscribe', async payload => {
-        if (payload?.type === 'over') {
-          showDropOverlay();
-          return;
-        }
-        if (payload?.type === 'drop') {
-          hideDropOverlay();
-          const path = Array.isArray(payload.paths) ? payload.paths[0] : null;
-          if (path) await handleNativeDroppedPath(path);
-          return;
-        }
-        hideDropOverlay();
-      })).catch(err => console.warn('Failed to register native drag-drop listener', err));
+    // Existing picker/recent/startup commands share the same path router until 13.13.
+    function handleNativeDroppedPath(path) {
+      return eventsDropImportPort.openPath(path);
     }
 
     // Settings menu trigger preserves the legacy menu-close side effect without inline handlers.

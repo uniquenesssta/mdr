@@ -166,9 +166,12 @@ test('desktop platform exposes DragDropPort directly and events consumes normali
   const events = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
   assert.match(desktop, /createDragDropClient\(/);
   assert.match(desktop, /dragDrop: dragDropClient/);
-  assert.match(events, /call\('dragDrop', 'subscribe'/);
-  assert.match(events, /payload\?\.type === 'over'/);
-  assert.match(events, /payload\?\.type === 'drop'/);
+  const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  const drop = await readFile(new URL('../../../src/features/import/files/drop-import-controller.js', import.meta.url), 'utf8');
+  assert.match(main, /subscribeNative: handler => platform\.dragDrop\.subscribe\(handler\)/);
+  assert.match(events, /eventsDropImportPort\.register/);
+  assert.match(drop, /payload\?\.type === 'over'/);
+  assert.match(drop, /payload\?\.type === 'drop'/);
   assert.doesNotMatch(events, /markdownEditorNative/);
 });
 
@@ -176,9 +179,10 @@ test('file interpretation remains in the application layer, not the DragDrop cli
   const clientSource = await readFile(new URL('../../../src/platform/desktop/drag-drop-client.js', import.meta.url), 'utf8');
   const eventsSource = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
   assert.doesNotMatch(clientSource, /read_dropped_file|readDroppedFile|allowedText|\.markdown|image\/|features\/import|classifyImportPath|classifyBrowserFile/i);
-  // R13.2 moves interpretation into Import; the platform still only transports paths.
-  assert.match(eventsSource, /eventsImportClassifierPort\.classifyFile\(file\)/);
-  assert.match(eventsSource, /eventsImportClassifierPort\.classifyPath\(resolvedPath\)/);
+  // R13.4 moves event routing into Import; Platform still only transports paths.
+  const drop = await readFile(new URL('../../../src/features/import/files/drop-import-controller.js', import.meta.url), 'utf8');
+  assert.match(drop, /classifyBrowserFile\(file\)/);
+  assert.match(drop, /classifyImportPath\(resolvedPath\)/);
   for (const extension of ['md', 'markdown', 'txt']) {
     assert.equal(classifyImportPath('C:\\docs\\note.' + extension), IMPORT_KINDS.TEXT);
     assert.equal(classifyBrowserFile({ name: 'note.' + extension, type: 'image/png' }), IMPORT_KINDS.TEXT);

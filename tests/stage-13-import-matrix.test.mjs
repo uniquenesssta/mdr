@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { createBrowserFileReader } from '../src/platform/browser/browser-file-reader.js';
-import { mountClassicImportClassifierPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
+import { createDropImportController, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
 import { createImageDialogView } from '../src/features/editor/ui/image-dialog-view.js';
 
 const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
@@ -13,7 +13,7 @@ const coreSource = await read('public/app/core.js');
 const webSource = await read('public/app/web-clipper.js');
 const MiB = 1024 * 1024;
 
-// Execute the remaining routing sections with the real public classifier; injected ports observe routing, not real native I/O.
+// Execute remaining commands with the real Drop Import and File Import controllers; readers are injected.
 function section(source, start, end) {
   const first = source.indexOf(start);
   const last = source.indexOf(end, first);
@@ -23,12 +23,18 @@ function section(source, start, end) {
 function dropHost({ desktop = false, failRead = false, opened = true } = {}) {
   const calls = [], handlers = new Map();
   const overlay = new Set();
+  const document = {
+    getElementById: () => ({ classList: { add: x => overlay.add(x), remove: x => overlay.delete(x) } }),
+    addEventListener: (name, handler) => handlers.set(name, handler),
+    removeEventListener: (name, handler) => { if (handlers.get(name) === handler) handlers.delete(name); }
+  };
+  const controller = createDropImportController({
+    target: document, nativeDrop: desktop, nativeFiles: desktop,
+    subscribeNative: handler => { handlers.set('native', handler); return () => handlers.delete('native'); }
+  });
   const context = vm.createContext({
-    document: {
-      getElementById: () => ({ classList: { add: x => overlay.add(x), remove: x => overlay.delete(x) } }),
-      addEventListener: (name, handler) => handlers.set(name, handler)
-    },
-    eventsImportClassifierPort: mountClassicImportClassifierPort({}).api,
+    document,
+    eventsDropImportPort: mountClassicDropImportPort({}, controller).api,
     eventsFileImportPort: mountClassicFileImportPort({}, createFileImportController({
       readBrowserText: async () => '',
       async readNativeText(path) {
@@ -53,8 +59,8 @@ function dropHost({ desktop = false, failRead = false, opened = true } = {}) {
     showToast: message => calls.push(['toast', message]), t: key => key, console,
     FileReader: class { readAsDataURL(file) { calls.push(['dataUrl', file.name]); this.onload({ target: { result: 'data:image/png;base64,AA==' } }); } }
   });
-  vm.runInContext(section(eventsSource, '    function getFileNameFromPath', '    // Settings menu trigger'), context);
-  return { context, calls, handlers, overlay, drop(files) { handlers.get('drop')({ preventDefault() {}, dataTransfer: { files } }); } };
+  vm.runInContext(section(eventsSource, '    // R13.4 owns event routing;', '    // Settings menu trigger'), context);
+  return { context, calls, handlers, overlay, controller, drop(files) { return handlers.get('drop')({ preventDefault() {}, dataTransfer: { files } }); } };
 }
 
 for (const extension of ['md', 'MARKDOWN', 'TxT']) {
@@ -218,5 +224,51 @@ test('desktop web fetch uses native only; failure exposes manual HTML without pu
     await context.fetchUrl(); assert.equal(calls.length, 1); assert.equal(context.fetchedHtml, fail ? '' : '<p>article</p>');
     assert.equal(node('url-status').textContent, fail ? 'urlStatusFetching' : 'urlStatusLocalSuccess');
     if (fail) assert.equal(node('url-status').innerHTML, 'urlStatusLocalFailed');
+  }
+});
+
+test('R13.4 browser image callbacks ignore superseded/destroyed reads and handle failure/abort', async () => {
+  for (const outcome of ['replace', 'destroy', 'error', 'abort']) {
+    const h = dropHost(); let reader;
+    h.context.FileReader = class { constructor() { reader = this; } readAsDataURL() {} };
+    const pending = h.drop([{ name: 'slow.png', type: 'image/png', size: 1 }]);
+    if (outcome === 'replace') await h.drop([{ name: 'new.md', type: '', size: 1 }]);
+    if (outcome === 'destroy') h.controller.destroy();
+    if (outcome === 'error') { reader.error = new Error('image denied'); reader.onerror(); }
+    else if (outcome === 'abort') reader.onabort();
+    else reader.onload({ target: { result: 'data:image/png;base64,AA==' } });
+    assert.equal(await pending, false);
+    assert.equal(h.calls.some(x => x[0] === 'image'), false);
+    assert.deepEqual(h.calls.filter(x => x[0] === 'toast'), outcome === 'error' ? [['toast', 'image denied']] : []);
+    assert.equal(reader.onload, null); h.controller.destroy();
+  }
+});
+
+test('R13.4 browser text loader rejects a stale drop before Documents receives content', async () => {
+  const committed = [], messages = []; let resolve;
+  const context = vm.createContext({
+    filenameInput: { value: 'existing' }, t: key => key, window: {},
+    exportDocumentUiCommandPort: { invoke() {} },
+    exportDocumentControllerPort: {
+      async openExternalDocument({ loadContent }) { committed.push(await loadContent()); },
+      isStaleError: () => false
+    },
+    exportFileImportPort: { readBrowserFile: () => new Promise(done => { resolve = done; }) },
+    recordDocumentOperationError: (_, error) => error.message, showToast: value => messages.push(value)
+  });
+  vm.runInContext(section(exportSource, '    function getEditorNormalizedLength', '    // 切换主题'), context);
+  let current = true; const reading = context.loadFile({ name: 'a.md' }, { isCurrent: () => current });
+  current = false; resolve({ content: 'late' }); assert.equal(await reading, false);
+  assert.deepEqual(committed, []); assert.deepEqual(messages, []);
+});
+
+test('R13.4 native image reads cannot insert or notify after another path wins or teardown', async () => {
+  for (const mode of ['replace', 'destroy']) {
+    const h = dropHost({ desktop: true }); let resolve;
+    h.context.eventsPlatformPort.call = () => new Promise(done => { resolve = done; });
+    const reading = h.context.handleNativeDroppedPath('C:\\slow.png');
+    if (mode === 'replace') await h.context.handleNativeDroppedPath('C:\\new.md'); else h.controller.destroy();
+    resolve('data:image/png;base64,AA=='); assert.equal(await reading, false);
+    assert.equal(h.calls.some(x => x[0] === 'image' || x[0] === 'toast'), false); h.controller.destroy();
   }
 });
