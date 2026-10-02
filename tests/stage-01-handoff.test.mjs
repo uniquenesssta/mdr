@@ -153,7 +153,7 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   assert.match(stage1Section, /38 个业务全局写入/);
 
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 6);
-  assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 41);
+  assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 36);
   assert.deepEqual(await checkLegacyRuntime({ root: ROOT }), []);
   assert.equal(baseline.trackedGeneratedFiles.length, 4);
   assert.equal(baseline.policy.wildcardExemptions, false);

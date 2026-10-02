@@ -411,7 +411,7 @@ test('compatibility feature callers use the explicit modal event port without ne
   const mountSource = await readFile('src/ui/compatibility/business-content-port.js', 'utf8');
   const featureSources = await Promise.all([
     'public/app/export.js',
-    'public/app/web-clipper.js',
+    'src/features/import/web-clipper/web-clipper-view.js',
     'src/features/editor/ui/link-dialog-view.js',
     'src/features/editor/ui/find-replace-dialog-view.js',
     'src/features/editor/ui/image-dialog-view.js',
@@ -424,7 +424,7 @@ test('compatibility feature callers use the explicit modal event port without ne
   assert.match(mountSource, /mountCompatibilityModalShells\(slots\.overlay\)/);
   assert.doesNotMatch(bridgeSource, /windowRef|markdownEditorModalShells|window\.|globalThis\./);
   for (const source of featureSources) {
-    assert.match(source, /markdown-editor:modal-shell-open|markdown-editor:modal-shell-close/);
+    assert.match(source, /markdown-editor:modal-shell-open|markdown-editor:modal-shell-close|markdown-editor:modal-shell-' \+ name/);
     assert.doesNotMatch(source, /markdownEditorModalShells/);
   }
   assert.doesNotMatch(eventSource, /linkModal\?\.addEventListener|event\.key === 'Escape'/);

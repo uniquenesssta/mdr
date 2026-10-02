@@ -431,6 +431,22 @@ async function removeProfileDirectory(path, attempts = 8) {
   if (lastError) throw lastError;
 }
 
+// taskkill can report a child-termination race even after every reported target exited.
+// Accept that result only after probing every failed PID and the owned root; unknown errors fail.
+export async function confirmTaskkillExit(error, rootPid, {
+  isRunning = pid => { try { process.kill(pid, 0); return true; } catch (probeError) { if (probeError.code === 'ESRCH') return false; throw probeError; } },
+  wait = () => new Promise(resolvePromise => setTimeout(resolvePromise, 50)), attempts = 20
+} = {}) {
+  const failedPids = [...String(error?.stderr || '').matchAll(/\bPID\s+(\d+)\b/gi)].map(match => Number(match[1]));
+  if (!Number.isInteger(error?.status) || !failedPids.length) throw error;
+  const targets = new Set([rootPid, ...failedPids]);
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    await wait(); // Let child-process exit notifications catch up after execFileSync.
+    if ([...targets].every(pid => !isRunning(pid))) return;
+  }
+  throw error;
+}
+
 async function stopChromium(processHandle) {
   // killed only means a signal was sent; it does not prove the process exited.
   const exited = () => processHandle.exitCode !== null || processHandle.signalCode !== null;
@@ -438,9 +454,11 @@ async function stopChromium(processHandle) {
     if (!exited()) {
       if (process.platform === 'win32') {
         // Kill only this test-owned browser and its descendants, before the parent exits.
-        execFileSync('taskkill', ['/PID', String(processHandle.pid), '/T', '/F'], {
-          stdio: 'pipe', timeout: 10000, windowsHide: true
-        });
+        try {
+          execFileSync('taskkill', ['/PID', String(processHandle.pid), '/T', '/F'], {
+            stdio: 'pipe', timeout: 10000, windowsHide: true
+          });
+        } catch (error) { await confirmTaskkillExit(error, processHandle.pid); }
       } else {
         processHandle.kill('SIGKILL');
       }
