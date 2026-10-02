@@ -9,7 +9,7 @@ const purifiers = new WeakMap();
 const tags = 'a abbr b blockquote br button caption cite code col colgroup dd del details div dl dt em h1 h2 h3 h4 h5 h6 hr i img input ins kbd li mark ol p pre q s samp small span strong sub summary sup table tbody td th thead time tr u ul var'.split(' ');
 const attributes = 'alt checked class colspan datetime disabled height href id lang open reversed rowspan scope src start style title type width data-r12-probe data-r12-kind'.split(' ');
 
-function safeUrl(value, image) {
+export function isSafeDocumentUrl(value, image = false) {
   const text = String(value || '').trim();
   if (!text || /[\u0000-\u001f\u007f]/.test(text) || text.includes('\\')) return false;
   if (image && /^data:image\/(?:png|jpeg|gif|webp|bmp|avif);base64,[a-z0-9+/=]+$/i.test(text)) return true;
@@ -34,7 +34,7 @@ function getPurifier(documentRef) {
     for (const attribute of ['href', 'src']) {
       if (!node.hasAttribute(attribute)) continue;
       const permitted = attribute === 'src' ? tag === 'img' : tag === 'a';
-      if (!permitted || !safeUrl(node.getAttribute(attribute), attribute === 'src')) node.removeAttribute(attribute);
+      if (!permitted || !isSafeDocumentUrl(node.getAttribute(attribute), attribute === 'src')) node.removeAttribute(attribute);
       else if (attribute === 'href' && node.getAttribute(attribute).startsWith('#')) {
         node.setAttribute('href', '#user-content-' + node.getAttribute(attribute).slice(1));
       }

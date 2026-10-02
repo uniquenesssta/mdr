@@ -22,5 +22,6 @@ test('classic converter consumes sole extractor; fetch UI isolation ends at conv
   const source = await readFile(new URL('../public/app/web-clipper.js', import.meta.url), 'utf8');
   assert.match(source, /webClipperHtmlExtractorPort\.extract\(html\)/);
   assert.doesNotMatch(source, /DOMParser|function extractMeta|function extractMainContent|function stripUnwantedElements/);
-  assert.match(source, /function htmlToMarkdown/);
+  assert.doesNotMatch(source, /function htmlToMarkdown|function convertTable/);
+  assert.match(source, /webClipperHtmlMarkdownPort\.convert\(extracted\)/);
 });

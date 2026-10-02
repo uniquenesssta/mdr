@@ -1,5 +1,7 @@
     const webClipperCompatibilityHost = document.getElementById('compatibility-business-ports');
     const webClipperPlatformPort = webClipperCompatibilityHost?.markdownEditorPlatformPort;
+    const webClipperHtmlMarkdownPort = webClipperCompatibilityHost?.markdownEditorHtmlMarkdownPort;
+    if (!webClipperHtmlMarkdownPort) throw new Error('HTML Markdown compatibility port is unavailable.');
     const webClipperHtmlExtractorPort = webClipperCompatibilityHost?.markdownEditorHtmlExtractorPort;
     if (!webClipperHtmlExtractorPort) throw new Error('HTML extractor compatibility port is unavailable.');
     const webClipperFetchPort = webClipperCompatibilityHost?.markdownEditorWebFetchPort;
@@ -144,75 +146,6 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
       setClipperHidden(manualArea, false);
     }
 
-    // 将提取的 HTML 转为 Markdown
-    function htmlToMarkdown(node) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return node.textContent.replace(/\s+/g, ' ');
-      }
-      if (node.nodeType !== Node.ELEMENT_NODE) return '';
-      const tag = node.tagName.toLowerCase();
-      const children = Array.from(node.childNodes).map(htmlToMarkdown).join('');
-      switch (tag) {
-        case 'h1': return '# ' + children.trim() + '\n\n';
-        case 'h2': return '## ' + children.trim() + '\n\n';
-        case 'h3': return '### ' + children.trim() + '\n\n';
-        case 'h4': return '#### ' + children.trim() + '\n\n';
-        case 'h5': return '##### ' + children.trim() + '\n\n';
-        case 'h6': return '###### ' + children.trim() + '\n\n';
-        case 'p': return children.trim() + '\n\n';
-        case 'br': return '\n';
-        case 'a':
-          const href = node.getAttribute('href') || '';
-          return '[' + children + '](' + href + ')';
-        case 'strong':
-        case 'b': return '**' + children + '**';
-        case 'em':
-        case 'i': return '*' + children + '*';
-        case 'code': return '`' + children + '`';
-        case 'pre':
-          const code = node.querySelector('code');
-          if (code) {
-            let lang = '';
-            const cls = code.className || '';
-            const m = cls.match(/language-(\w+)/);
-            if (m) lang = m[1];
-            return '\n```' + lang + '\n' + code.textContent.trim() + '\n```\n\n';
-          }
-          return '\n```\n' + children.trim() + '\n```\n\n';
-        case 'ul':
-          return Array.from(node.children).map(li => '- ' + htmlToMarkdown(li).trim()).join('\n') + '\n\n';
-        case 'ol':
-          return Array.from(node.children).map((li, idx) => (idx + 1) + '. ' + htmlToMarkdown(li).trim()).join('\n') + '\n\n';
-        case 'li': return children.trim();
-        case 'blockquote':
-          return '> ' + children.trim().replace(/\n/g, '\n> ') + '\n\n';
-        case 'hr': return '---\n\n';
-        case 'table': return convertTable(node);
-        case 'div': return children.trim() + '\n\n';
-        case 'figure': return children.trim() + '\n\n';
-        case 'section': return children.trim() + '\n\n';
-        default: return children;
-      }
-    }
-
-    function convertTable(table) {
-      const rows = Array.from(table.querySelectorAll('tr'));
-      if (!rows.length) return '';
-      let md = '\n';
-      rows.forEach((tr, i) => {
-        const cells = Array.from(tr.querySelectorAll('td, th')).map(td => {
-          return htmlToMarkdown(td).trim().replace(/\|/g, '\\|');
-        });
-        if (cells.length) {
-          md += '| ' + cells.join(' | ') + ' |\n';
-          if (i === 0) {
-            md += '|' + cells.map(() => '---').join('|') + '|\n';
-          }
-        }
-      });
-      return md + '\n';
-    }
-
     // 转换并插入到编辑器
     function convertAndInsert() {
       const manualHtml = document.getElementById('manual-html').value.trim();
@@ -222,22 +155,8 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
         return;
       }
       try {
-        const { meta, content: cleaned } = webClipperHtmlExtractorPort.extract(html);
-        let bodyMd = htmlToMarkdown(cleaned).replace(/\n{3,}/g, '\n\n').trim();
-
-        // 避免 bodyMd 以 h1 开头与标题重复
-        if (meta.title && bodyMd.toLowerCase().startsWith('# ' + meta.title.toLowerCase())) {
-          bodyMd = bodyMd.replace(/^#\s+.+\n+/, '');
-        }
-
-        let markdown = '';
-        if (meta.title) markdown += '# ' + meta.title + '\n\n';
-        const metaParts = [];
-        if (meta.author) metaParts.push('作者：' + meta.author);
-        if (meta.published) metaParts.push('发布时间：' + meta.published);
-        if (metaParts.length) markdown += '> ' + metaParts.join(' | ') + '\n\n';
-        markdown += bodyMd;
-        markdown = markdown.trim();
+        const extracted = webClipperHtmlExtractorPort.extract(html);
+        const markdown = webClipperHtmlMarkdownPort.convert(extracted);
 
         if (!markdown) {
           showToast(t('toastExtractFailed'));

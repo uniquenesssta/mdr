@@ -1,6 +1,6 @@
 import './styles/index.css';
 import { createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort } from './features/import/index.js';
-import { extractHtml, mountClassicHtmlExtractorPort, createWebFetchCoordinator, mountClassicWebFetchPort, createFileImportController, mountClassicFileImportPort } from './features/import/index.js';
+import { convertExtractedHtml, mountClassicHtmlMarkdownPort, extractHtml, mountClassicHtmlExtractorPort, createWebFetchCoordinator, mountClassicWebFetchPort, createFileImportController, mountClassicFileImportPort } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
 import { configurePerformancePlatform, configurePerformanceRuntimeStats } from './runtime/performance.js';
@@ -170,6 +170,7 @@ const webFetchCoordinator = createWebFetchCoordinator({
   browserFetch: (url, options) => window.fetch(url, options)
 });
 const webFetchPort = mountClassicWebFetchPort(compatibilityPlatformHost, webFetchCoordinator);
+const htmlMarkdownPort = mountClassicHtmlMarkdownPort(compatibilityPlatformHost, convertExtractedHtml);
 const htmlExtractorPort = mountClassicHtmlExtractorPort(compatibilityPlatformHost, html => extractHtml(html, document));
 const backgroundTaskScheduler = createTaskScheduler({ runtime: window });
 const backgroundTaskSchedulerPort = mountClassicTaskSchedulerPort(compatibilityPlatformHost, backgroundTaskScheduler);
@@ -304,6 +305,7 @@ window.addEventListener('pagehide', () => {
   dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();
+  htmlMarkdownPort.destroy();
   htmlExtractorPort.destroy();
   webFetchPort.destroy();
   webFetchCoordinator.destroy();
@@ -1575,6 +1577,7 @@ loadAppModules().then(() => {
   dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();
+  htmlMarkdownPort.destroy();
   htmlExtractorPort.destroy();
   webFetchPort.destroy();
   webFetchCoordinator.destroy();

@@ -1,0 +1,57 @@
+[
+  {
+    "name": "headings and inline formatting",
+    "html": "<h1>标题</h1><h2>小节</h2><p>正文 <strong>加粗</strong> <em>斜体</em> <del>删除</del></p>",
+    "markdown": "# 标题\n\n## 小节\n\n正文 **加粗** *斜体* ~~删除~~"
+  },
+  {
+    "name": "lists and nested indentation",
+    "html": "<ul><li>甲<ul><li>子项</li></ul></li><li>乙</li></ul><ol start=\"3\"><li>丙</li><li>丁</li></ol>",
+    "markdown": "- 甲\n  - 子项\n- 乙\n\n3. 丙\n4. 丁"
+  },
+  {
+    "name": "links destinations and removed protocols",
+    "html": "<p><a href=\"https://example.test/a(b)?x=1&amp;y=2\">正常</a> <a href=\"javascript:alert(1)\">危险</a> <a href=\"/relative\">相对</a></p>",
+    "markdown": "[正常](https://example.test/a%28b%29?x=1&y=2) 危险 相对"
+  },
+  {
+    "name": "images",
+    "html": "<p><img src=\"data:image/png;base64,AAEC\" alt=\"图 [1]\"><img src=\"javascript:alert(1)\" alt=\"危险\"></p>",
+    "markdown": "![图 \\[1\\]](data:image/png;base64,AAEC)危险"
+  },
+  {
+    "name": "literal raw HTML and markdown",
+    "html": "<p>&lt;img src=x onerror=alert(1)&gt; [click](javascript:alert(1)) &amp; **literal**</p>",
+    "markdown": "&lt;img src=x onerror=alert\\(1\\)&gt; \\[click\\]\\(javascript:alert\\(1\\)\\) &amp; \\*\\*literal\\*\\*"
+  },
+  {
+    "name": "dynamic code fences preserve blank lines",
+    "html": "<pre><code class=\"language-js\">const s = `x`;\n```\n\n\nnext</code></pre>",
+    "markdown": "````js\nconst s = `x`;\n```\n\n\nnext\n````"
+  },
+  {
+    "name": "inline code",
+    "html": "<p><code>a`b</code> <code>`edge`</code></p>",
+    "markdown": "``a`b`` `` `edge` ``"
+  },
+  {
+    "name": "quote and break",
+    "html": "<blockquote><p>甲<br>乙</p></blockquote><hr>",
+    "markdown": "> 甲  \n> 乙\n\n---"
+  },
+  {
+    "name": "table rectangular and literal pipes",
+    "html": "<table><tr><th>名称</th><th>值</th></tr><tr><td>A|B</td><td><strong>好</strong></td></tr><tr><td>短行</td></tr></table>",
+    "markdown": "| 名称 | 值 |\n|---|---|\n| A\\|B | **好** |\n| 短行 |  |"
+  },
+  {
+    "name": "drop executable elements",
+    "html": "<script>alert(1)</script><iframe>bad</iframe><svg><text>bad</text></svg><p onclick=\"alert(1)\">安全</p>",
+    "markdown": "安全"
+  },
+  {
+    "name": "empty",
+    "html": "",
+    "markdown": ""
+  }
+]

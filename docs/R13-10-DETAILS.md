@@ -1,6 +1,8 @@
 # R13.10 HTML Extractor
 
-状态：**已实现，待 Windows CI，未验收**。沿用 `agent/r13-stage`；13.9 已在 `52b28a0aa8f110f29f712d1ccedbb64cb9ef5f21` / [Windows CI 36894947377](https://github.com/uniquenesssta/mdr/actions/runs/36894947377) 七组通过，closeout 9/9 通过。用户授权“13.9收尾开始13.10”。
+状态：**已验收**。修复提交 `325e5ccf5baf7d93e8c2a6ee4aad52a6a0d1ad42` / [Windows CI 36903572172](https://github.com/uniquenesssta/mdr/actions/runs/36903572172) 七组全部成功。以下保留实施与首轮失败记录。
+
+沿用 `agent/r13-stage`；13.9 已在 `52b28a0aa8f110f29f712d1ccedbb64cb9ef5f21` / [Windows CI 36894947377](https://github.com/uniquenesssta/mdr/actions/runs/36894947377) 七组通过，closeout 9/9 通过。用户授权“13.9收尾开始13.10”。
 
 ## 职责与边界
 
@@ -43,3 +45,7 @@ flowchart TD
 修复将旧断言迁移为 S01 精确验收提交与 Windows CI 证据检查，原历史 manifest 与策略断言完整保留；两个浏览器用例沿用既有 run-browser-tests 的 import map 方案，读取安装版本的 ESM 字节作为 data URL，继续通过 Import 公共入口执行所有原行为断言，不绕开导出、不扩大虚拟文件根、不访问 CDN。生产代码和依赖不变。
 
 本地仅进行语法、README 与差异静态核对；行为回归交给新一轮 Windows CI。13.10 保持未验收，未开始13.11。
+
+## 正式收尾（2026-10-02）
+
+已核对上述同提交七项 Windows job 全部成功，13.10 正式验收；用户授权开始13.11。首轮失败与修复记录保留，A05 全链路不提前关闭。

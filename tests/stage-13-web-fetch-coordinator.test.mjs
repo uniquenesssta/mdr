@@ -143,7 +143,7 @@ test('classic UI close/reopen and edited inputs cannot receive late HTML; errors
   const context = vm.createContext({ document: { getElementById: node }, fetchedHtml: '', webClipperFetchPort: port.api,
     webClipperPlatformPort: { supports: () => true }, CustomEvent: class extends Event { constructor(type, { detail }) { super(type); this.detail = detail; } },
     t: (key, error) => error || key });
-  vm.runInContext(source.slice(source.indexOf('    function setClipperHidden'), source.indexOf('    // 将提取的 HTML 转为 Markdown')), context);
+  vm.runInContext(source.slice(source.indexOf('    function setClipperHidden'), source.indexOf('    // 转换并插入到编辑器')), context);
   let onClose; node('url-modal').addEventListener('markdown-editor:modal-shell-open', event => { onClose = event.detail.options.onClose; });
   context.openUrlModal(); node('url-input').value = 'old'; const pending = context.fetchUrl();
   onClose(); context.openUrlModal(); waiting.resolve('late html'); await pending;

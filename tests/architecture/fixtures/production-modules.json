@@ -81,7 +81,7 @@
       "public/app/web-clipper.js",
       "legacy-classic-script",
       "legacy-app",
-      "Classic clipper UI and pending Markdown conversion; fetch and extraction delegate to scoped Import ports.",
+      "Classic clipper UI; fetch, extraction and Markdown conversion delegate to scoped Import ports.",
       "legacy-web-clipper-state",
       "classic-script",
       "split-and-remove",
@@ -5113,6 +5113,26 @@
       "feature",
       "Scoped extraction access for classic clipper until 13.12/13.14.",
       "classic-html-extractor-port",
+      "mount/destroy",
+      "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/import/web-clipper/html-to-markdown.js",
+      "esm-module",
+      "feature",
+      "Project HTML nodes and metadata into escaped Markdown; share document URL policy; no DOM writes or fetch.",
+      "none",
+      "synchronous-call",
+      "retain",
+      false
+    ],
+    [
+      "src/features/import/compatibility/classic-html-markdown-port.js",
+      "esm-module",
+      "feature",
+      "Scoped Markdown conversion access for classic clipper until 13.12/13.14.",
+      "classic-html-markdown-port",
       "mount/destroy",
       "remove-after-migration",
       false
