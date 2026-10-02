@@ -1,6 +1,6 @@
 import './styles/index.css';
 import { createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort } from './features/import/index.js';
-import { convertExtractedHtml, mountClassicHtmlMarkdownPort, extractHtml, mountClassicHtmlExtractorPort, createWebFetchCoordinator, mountClassicWebFetchPort, createFileImportController, mountClassicFileImportPort } from './features/import/index.js';
+import { createWebClipperController, createWebClipperView, mountClassicWebClipperPort, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController, mountClassicFileImportPort } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
 import { configurePerformancePlatform, configurePerformanceRuntimeStats } from './runtime/performance.js';
@@ -169,9 +169,13 @@ const webFetchCoordinator = createWebFetchCoordinator({
   nativeFetch: platform.capabilities.desktop.webFetch ? (url, options) => platform.web.fetchText(url, options) : undefined,
   browserFetch: (url, options) => window.fetch(url, options)
 });
-const webFetchPort = mountClassicWebFetchPort(compatibilityPlatformHost, webFetchCoordinator);
-const htmlMarkdownPort = mountClassicHtmlMarkdownPort(compatibilityPlatformHost, convertExtractedHtml);
-const htmlExtractorPort = mountClassicHtmlExtractorPort(compatibilityPlatformHost, html => extractHtml(html, document));
+const webClipperPort = mountClassicWebClipperPort(compatibilityPlatformHost, ({ insertMarkdown, translate, notify }) => {
+  const controller = createWebClipperController({ fetchCoordinator: webFetchCoordinator,
+    extract: html => extractHtml(html, document), convert: convertExtractedHtml, insertMarkdown,
+    native: platform.capabilities.desktop.webFetch });
+  try { return createWebClipperView({ root: document.getElementById('url-modal'), controller, translate, notify }); }
+  catch (error) { controller.destroy(); throw error; }
+});
 const backgroundTaskScheduler = createTaskScheduler({ runtime: window });
 const backgroundTaskSchedulerPort = mountClassicTaskSchedulerPort(compatibilityPlatformHost, backgroundTaskScheduler);
 const markdownPresentation = createMarkdownPresentationApi();
@@ -305,9 +309,7 @@ window.addEventListener('pagehide', () => {
   dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();
-  htmlMarkdownPort.destroy();
-  htmlExtractorPort.destroy();
-  webFetchPort.destroy();
+  webClipperPort.destroy();
   webFetchCoordinator.destroy();
   compatibilityPlatformPort.destroy();
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
@@ -1577,9 +1579,7 @@ loadAppModules().then(() => {
   dropImportPort.destroy();
   fileImportController.destroy();
   fileImportPort.destroy();
-  htmlMarkdownPort.destroy();
-  htmlExtractorPort.destroy();
-  webFetchPort.destroy();
+  webClipperPort.destroy();
   webFetchCoordinator.destroy();
   destroyLayoutStateFeature();
   console.error(error);

@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-02：13.11 在 `fb019d4` / [Windows CI 36966040484](https://github.com/uniquenesssta/mdr/actions/runs/36966040484) 七组通过并收尾；开始13.12，剪藏输入/源内容/会话迁入控制器，界面迁入 Import，移除旧全局状态和内联按钮事件，新增生命周期及真实 DOM 回归，待 Windows CI。[详情](docs/R13-12-DETAILS.md)。
+
 - 2026-10-02：13.10 在 `325e5cc` / [Windows CI 36903572172](https://github.com/uniquenesssta/mdr/actions/runs/36903572172) 七组通过并收尾；开始13.11，HTML→Markdown 与元信息组合迁入 Import，修正文字/地址转义、嵌套列表、代码围栏和表格输出，复用公共 URL 策略，新增固定夹具及 Preview/Hybrid HTML sink 回归。待 Windows CI，A05 未关闭。[详情](docs/R13-11-DETAILS.md)。
 
 - 2026-10-02：修复 13.10 首轮 CI 的两项测试接线遗漏：S01 过期“13.9 未完成”断言改查已验收证据，文件/拖放源码浏览器测试补齐 DOMPurify import map。保留公共入口和原行为覆盖；生产代码不变，待 Windows 重验。[详情](docs/R13-10-DETAILS.md)。

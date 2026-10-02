@@ -102,18 +102,18 @@
         "R13-S01"
       ],
       "record": "docs/markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md",
-      "risk": "R13-S01, R13.9 and R13.10 accepted on Windows; R13.11 conversion and sink regression pending CI; complete clipping UI/document/render chain not yet accepted.",
+      "risk": "R13-S01 through R13.11 accepted; R13.12 controller/UI pending CI and R13.13 complete clipping-to-document/render integration not yet accepted.",
       "deadline": "before 13.9 integration and R13 acceptance",
       "acceptance": "confirm product thresholds/internal network support; real HTTP chunked/compressed/redirect/IPv6/MIME/timeout/cancel tests; webpage through both safe render paths",
       "stopCondition": "confirmed current high-risk bypass must be contained before transfer; do not widen exposure while pending",
-      "reviewConclusion": "R13.10 seven-job Windows evidence passed. Conversion now reuses shared URL decisions and escapes source text/metadata. Full A05 closure still requires downstream end-to-end Windows acceptance.",
+      "reviewConclusion": "R13.11 seven-job Windows evidence passed. Current clipper state has one controller owner with cancellation and stale-result isolation. A05 remains open until complete Windows end-to-end acceptance.",
       "fixed": false
     }
   ],
   "reviewedSources": [
     {
       "path": "src/runtime/performance.js",
-      "blobSha": "714900ce60868d013ba41d3d8e9b22949530de39"
+      "blobSha": "49d5c5b15ecab64ee8b27eac528fa03205c082be"
     },
     {
       "path": "src-tauri/src/performance_log/mod.rs",
@@ -141,7 +141,7 @@
     },
     {
       "path": "public/app/web-clipper.js",
-      "blobSha": "5b2bb325e5ed3a34a147e4ef9f49198daf8c44c7"
+      "blobSha": "91a9e87b0875358c41e19b7378890daf6e476552"
     },
     {
       "path": "src-tauri/capabilities/default.json",
@@ -190,6 +190,26 @@
     {
       "path": "src/features/import/compatibility/classic-html-markdown-port.js",
       "blobSha": "3633a4b757564b98cc74a0500f4cc78d0318052e"
+    },
+    {
+      "path": "src/features/import/web-clipper/web-clipper-controller.js",
+      "blobSha": "64090489b8e01ac07f1e05fccef917725e693537"
+    },
+    {
+      "path": "src/features/import/web-clipper/web-clipper-view.js",
+      "blobSha": "3b9cbf2e0c723548be18bbe8b7cb66f854877115"
+    },
+    {
+      "path": "src/features/import/compatibility/classic-web-clipper-port.js",
+      "blobSha": "fdacde5af8915790b9b24f35debfc5cd88e9a15c"
+    },
+    {
+      "path": "public/app/core.js",
+      "blobSha": "50e5dae60eb3a779a393dcf1164c056960375d61"
+    },
+    {
+      "path": "public/compatibility/business-content.html",
+      "blobSha": "aeebbc7c6d627e6171ee292489ab5d8570aa6d6d"
     }
   ],
   "priorFailures": {
@@ -405,14 +425,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R13.11",
+    "stage": "R13.12",
     "date": "2026-10-02",
-    "reviewedCommit": "325e5ccf5baf7d93e8c2a6ee4aad52a6a0d1ad42",
-    "record": "docs/R13-11-DETAILS.md",
-    "status": "R13.10 accepted; R13.11 current source review pending exact-commit Windows CI",
-    "priorWindowsRun": 36903572172,
+    "reviewedCommit": "fb019d4adab4876baf01b5a8cecd12df1891e6a5",
+    "record": "docs/R13-12-DETAILS.md",
+    "status": "R13.11 accepted; R13.12 current source review pending exact-commit Windows CI",
+    "priorWindowsRun": 36966040484,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 acceptance snapshot.",
-    "conclusion": "Reviewed conversion grammar, literal metadata/text escaping, destination encoding, dynamic fences and reuse of unchanged shared URL policy. Top-level fingerprints cover current implementation; reviewedCommit is the accepted baseline. Full A05 end-to-end acceptance remains open. Historical R12 acceptance unchanged."
+    "conclusion": "Reviewed controller ownership, source invalidation on input/close/destroy and view text-only error projection; no new security policy. Prior separate fetch/extract/convert ports are unmounted. Historical R12 acceptance unchanged; full A05 integration remains open."
   }
 }

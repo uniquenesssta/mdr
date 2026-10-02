@@ -903,7 +903,6 @@ const editor = document.getElementById('editor');
       if (coreEditorUiCommandPort.has('invalidatePreviewAnchorMetrics')) coreEditorUiCommandPort.invoke('invalidatePreviewAnchorMetrics');
     }
 
-    let fetchedHtml = '';
 
 
     coreEditorUiCommandPort.register({

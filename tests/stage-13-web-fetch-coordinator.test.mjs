@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
-import { createWebFetchCoordinator, mountClassicWebFetchPort } from '../src/features/import/index.js';
+import { createWebClipperController, createWebFetchCoordinator, mountClassicWebFetchPort } from '../src/features/import/index.js';
 import { createWebFetchClient } from '../src/platform/desktop/web-fetch-client.js';
 import { assertProductionInventory } from './support/production-inventory.mjs';
 
@@ -130,33 +129,23 @@ test('scoped classic port cancels input changes, removes listeners and preserves
   assert.throws(() => port.api.manualHtml(html), /destroyed/); c.destroy();
 });
 
-test('classic UI close/reopen and edited inputs cannot receive late HTML; errors remain inert text', async () => {
-  const source = await readFile(new URL('../public/app/web-clipper.js', import.meta.url), 'utf8');
-  const waiting = deferred(), nodes = new Map();
-  class Element extends EventTarget {
-    value = ''; checked = false; textContent = ''; classList = { toggle() {}, remove() {}, add() {} };
-    set innerHTML(_) { assert.fail('untrusted fetch error inserted as HTML'); }
-  }
-  const node = id => { if (!nodes.has(id)) nodes.set(id, new Element()); return nodes.get(id); };
-  const c = createWebFetchCoordinator({ nativeFetch: url => url === 'bad' ? Promise.reject(new Error('<img onerror=bad()>')) : waiting.promise });
-  const port = mountClassicWebFetchPort({}, c);
-  const context = vm.createContext({ document: { getElementById: node }, fetchedHtml: '', webClipperFetchPort: port.api,
-    webClipperPlatformPort: { supports: () => true }, CustomEvent: class extends Event { constructor(type, { detail }) { super(type); this.detail = detail; } },
-    t: (key, error) => error || key });
-  vm.runInContext(source.slice(source.indexOf('    function setClipperHidden'), source.indexOf('    // 转换并插入到编辑器')), context);
-  let onClose; node('url-modal').addEventListener('markdown-editor:modal-shell-open', event => { onClose = event.detail.options.onClose; });
-  context.openUrlModal(); node('url-input').value = 'old'; const pending = context.fetchUrl();
-  onClose(); context.openUrlModal(); waiting.resolve('late html'); await pending;
-  assert.equal(context.fetchedHtml, ''); assert.equal(node('url-status').textContent, '');
-  node('url-input').value = 'bad'; await context.fetchUrl();
-  assert.equal(node('url-status').textContent, '<img onerror=bad()>');
-  context.fetchedHtml = 'previous'; node('url-input').dispatchEvent(new Event('input'));
-  assert.equal(context.fetchedHtml, ''); port.destroy(); c.destroy();
+test('clipper close/reopen and edited inputs reject late HTML', async () => {
+  const waiting = deferred();
+  const c = createWebFetchCoordinator({ nativeFetch: () => waiting.promise });
+  const controller = createWebClipperController({ fetchCoordinator: c, extract: value => value, convert: value => value, insertMarkdown() {} });
+  controller.open(); controller.setInput('url', 'old'); const pending = controller.fetch();
+  controller.close(); controller.open(); waiting.resolve('late html'); await pending;
+  assert.equal(controller.snapshot.hasContent, false); assert.equal(controller.snapshot.status, 'idle');
+  controller.setInput('url', 'new'); await controller.fetch(); assert.equal(controller.snapshot.hasContent, true);
+  controller.setInput('manualHtml', 'manual'); assert.equal(controller.snapshot.hasContent, false);
+  controller.destroy(); c.destroy();
 });
 
 test('web routing has one feature owner and the production inventory includes it', async () => {
   const source = await readFile(new URL('../public/app/web-clipper.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /await fetch\(|allorigins|codetabs|fetchWithNativeBackend|status\.innerHTML/);
-  assert.match(source, /webClipperFetchPort\.isCurrent\(result\)/);
+  assert.match(source, /webClipperPort\.open\(\)/);
+  const controller = await readFile(new URL('../src/features/import/web-clipper/web-clipper-controller.js', import.meta.url), 'utf8');
+  assert.match(controller, /fetchCoordinator\.isCurrent\(result\)/);
   await assertProductionInventory();
 });

@@ -3,14 +3,13 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { createBrowserFileReader } from '../src/platform/browser/browser-file-reader.js';
-import { createWebFetchCoordinator, createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
+import { createWebClipperController, createWebFetchCoordinator, createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
 import { createImageDialogView } from '../src/features/editor/ui/image-dialog-view.js';
 
 const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
 const eventsSource = await read('public/app/events.js');
 const exportSource = await read('public/app/export.js');
 const coreSource = await read('public/app/core.js');
-const webSource = await read('public/app/web-clipper.js');
 const MiB = 1024 * 1024;
 
 // Execute remaining commands with the real Drop Import and File Import controllers; readers are injected.
@@ -220,23 +219,19 @@ test('image URL and upload send one insertion command with the selected data', a
   h.view.open(); await h.choose({ type: 'image/svg+xml', size: 1 }); assert.equal(h.view.confirm(), true);
   assert.equal(h.inserted[1][0], 'data:image/png;base64,AA=='); h.view.destroy();
 });
-test('desktop web fetch uses the coordinator; failure exposes manual HTML without public fallback', async () => {
+test('desktop clipper routes through coordinator; failure exposes manual without public fallback', async () => {
   for (const fail of [false, true]) {
-    const nodes = new Map(); const node = id => { if (!nodes.has(id)) nodes.set(id, { value: '', checked: false, classList: { toggle() {}, remove() {}, add() {} } }); return nodes.get(id); };
-    node('url-input').value = 'https://example.test/article'; const calls = [];
-    const coordinator = createWebFetchCoordinator({
-      nativeFetch: async (...args) => { calls.push(args); if (fail) throw new Error('denied'); return '<p>article</p>'; },
-      browserFetch: () => { throw new Error('unexpected public fallback'); }
-    });
-    const context = vm.createContext({ document: { getElementById: node }, fetchedHtml: '',
-      webClipperFetchPort: coordinator, t: key => key
-    });
-    vm.runInContext(section(webSource, '    function setClipperHidden', '    webClipperFetchPort.watchInputs') + section(webSource, '    async function fetchUrl', '    // 转换并插入到编辑器'), context);
-    await context.fetchUrl(); assert.equal(calls.length, 1); assert.equal(context.fetchedHtml, fail ? '' : '<p>article</p>');
-    assert.equal(node('url-status').textContent, fail ? 'urlStatusLocalFailed' : 'urlStatusLocalSuccess');
-    assert.equal(node('url-status').innerHTML, undefined);
-    assert.ok(calls[0][1].signal);
-    coordinator.destroy();
+    const calls = [], inserted = [];
+    const fetchCoordinator = createWebFetchCoordinator({ nativeFetch: async (...args) => {
+      calls.push(args); if (fail) throw new Error('denied'); return '<p>article</p>';
+    }, browserFetch: () => { throw new Error('unexpected public fallback'); } });
+    const controller = createWebClipperController({ fetchCoordinator, extract: value => value, convert: value => value, insertMarkdown: value => inserted.push(value), native: true });
+    controller.open(); controller.setInput('url', 'https://example.test'); await controller.fetch();
+    assert.equal(calls.length, 1); assert.ok(calls[0][1].signal);
+    assert.equal(controller.snapshot.hasContent, !fail); assert.equal(controller.snapshot.showManual, fail);
+    assert.equal(controller.snapshot.status, fail ? 'manual-required' : 'success');
+    if (!fail) { controller.insert(); assert.deepEqual(inserted, ['<p>article</p>']); }
+    controller.destroy(); fetchCoordinator.destroy();
   }
 });
 

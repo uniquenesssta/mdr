@@ -1,6 +1,8 @@
 # R13.11 HTML to Markdown
 
-状态：**已实现，待 Windows CI，未验收**。唯一分支 `agent/r13-stage`，基线为已验收13.10提交 `325e5ccf5baf7d93e8c2a6ee4aad52a6a0d1ad42` / [Windows CI 36903572172](https://github.com/uniquenesssta/mdr/actions/runs/36903572172)，七组成功。用户授权“收尾10 开始11”。不推进13.12整体对话框迁移。
+状态：**已验收**。`fb019d4adab4876baf01b5a8cecd12df1891e6a5` / [Windows CI 36966040484](https://github.com/uniquenesssta/mdr/actions/runs/36966040484) 七组全部成功。以下保留实施时记录。
+
+唯一分支 `agent/r13-stage`，基线为已验收13.10提交 `325e5ccf5baf7d93e8c2a6ee4aad52a6a0d1ad42` / [Windows CI 36903572172](https://github.com/uniquenesssta/mdr/actions/runs/36903572172)，七组成功。用户授权“收尾10 开始11”。不推进13.12整体对话框迁移。
 
 ## 实现与安全边界
 
@@ -23,3 +25,7 @@ Windows 真实浏览器回归使用锁定 marked/DOMPurify，转换结果经 mar
 本地仅语法、架构、旧运行时、生成文件、README、风险指纹和差异静态检查；不执行 Linux/macOS 产品测试或构建。行为验证交给 Windows CI，成功前不勾选13.11。历史 R12 acceptance 不变，无新增依赖和数据迁移；可整体回退本次提交。
 
 已调用 Mermaid Chart 更新真实调用图：提取/净化→转换→文档→Preview/Hybrid→公共安全边界，转换复用公共 URL 判定。未涉及新第三方 API，沿用既有 DOM、marked 和净化封装。
+
+## 正式收尾（2026-10-02）
+
+已核对上述精确提交七个 Windows job 全部成功，13.11验收。用户授权开始13.12；A05整体剪藏链路仍保持未关闭。

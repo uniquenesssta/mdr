@@ -583,7 +583,6 @@ function installLegacyInstrumentation() {
       ['insertTable', false],
       ['confirmImageInsert', false],
       ['confirmMermaidInsert', false],
-      ['convertAndInsert', false],
       ['findNext', false],
       ['replaceOne', false],
       ['replaceAll', false]

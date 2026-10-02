@@ -65,7 +65,7 @@ test('desktop WebPort reaches the import coordinator through the application com
   assert.match(desktop, /webFetchClient\.fetchUrl\(url, options\)/);
   const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
   assert.match(main, /nativeFetch: platform\.capabilities\.desktop\.webFetch \? \(url, options\) => platform\.web\.fetchText\(url, options\)/);
-  assert.match(clipper, /webClipperFetchPort\.fetchUrl\(/);
+  assert.match(clipper, /webClipperPort\.open\(/);
   assert.doesNotMatch(clipper, /fetchWithNativeBackend|call\('web', 'fetchText'/);
   assert.doesNotMatch(clipper, /markdownEditorNative/);
 });

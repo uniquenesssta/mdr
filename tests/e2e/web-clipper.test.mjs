@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { launchChromium } from './lib/cdp-browser.mjs';
+import { installVirtualFileHost } from './lib/virtual-file-host.mjs';
+const source = await readFile(new URL('../../public/compatibility/business-content.html', import.meta.url), 'utf8');
+const markup = source.slice(source.indexOf('  <div class="modal-overlay" id="url-modal">'), source.indexOf('  <!-- 查找与替换模态框 -->'));
+const purifier = (await readFile(new URL(import.meta.resolve('dompurify')))).toString('base64');
+const browser = await launchChromium(); let host;
+try {
+  host = await installVirtualFileHost(browser.page, { root: fileURLToPath(new URL('../../', import.meta.url)) });
+  await browser.page.setDocumentContent('<!doctype html><head><script type="importmap">' + JSON.stringify({ imports: { dompurify: 'data:text/javascript;base64,' + purifier } }) + '</script></head><body>' + markup + '</body>');
+  const result = await browser.page.evaluate(`(async () => {
+    const { createWebClipperController, createWebClipperView, createWebFetchCoordinator, extractHtml, convertExtractedHtml } = await import(${JSON.stringify(host.origin)} + '/src/features/import/index.js');
+    const root = document.getElementById('url-modal'), inserted = [], notices = [];
+    let resolve, shellClose, closes = 0;
+    root.addEventListener('markdown-editor:modal-shell-open', event => { shellClose = event.detail.options.onClose; });
+    root.addEventListener('markdown-editor:modal-shell-close', () => { closes++; shellClose(); });
+    const coordinator = createWebFetchCoordinator({ nativeFetch: url => url === 'bad' ? Promise.reject(new Error('<img onerror=attack()>')) : new Promise(done => { resolve = done; }) });
+    const controller = createWebClipperController({ fetchCoordinator: coordinator, extract: extractHtml, convert: convertExtractedHtml, insertMarkdown: text => inserted.push(text), native: true });
+    const view = createWebClipperView({ root, controller, translate: (key, error) => error || key, notify: message => notices.push(message) });
+    const input = (id, value) => { const node = root.querySelector('#' + id); node.value = value; node.dispatchEvent(new Event('input')); };
+    view.open(); input('url-input', 'old'); const pending = controller.fetch(); shellClose(); view.open(); resolve('<p>late</p>'); await pending;
+    const late = controller.snapshot.hasContent;
+    input('url-input', 'bad'); await controller.fetch();
+    const errorText = root.querySelector('#url-status').textContent;
+    const active = Boolean(root.querySelector('#url-status img'));
+    input('manual-html', '<article><h1>Title</h1><p>Body</p></article>');
+    root.querySelector('[data-clipper-insert]').click(); root.querySelector('[data-clipper-insert]').click();
+    view.open(); view.destroy(); view.destroy();
+    input('manual-html', 'after destroy'); root.querySelector('[data-clipper-fetch]').click(); root.querySelector('[data-clipper-insert]').click();
+    coordinator.destroy();
+    return { inserted, notices, closes, late, errorText, active, closed: !controller.snapshot.open };
+  })()`);
+  assert.deepEqual(result.inserted, ['# Title\n\nBody']); assert.equal(result.late, false);
+  assert.equal(result.errorText, '<img onerror=attack()>'); assert.equal(result.active, false);
+  assert.deepEqual(result.notices, ['toastInsertedMd']); assert.equal(result.closes, 2); assert.equal(result.closed, true);
+  assert.deepEqual(host.errors, []);
+  console.log('ok - R13.12 actual clipper markup, inert errors, late fetch isolation, manual insertion and listener disposal');
+} finally { try { await host?.close(); } finally { await browser.close(); } }

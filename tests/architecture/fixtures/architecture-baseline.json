@@ -60,15 +60,6 @@
     },
     {
       "path": "public/compatibility/business-content.html",
-      "attribute": "onchange",
-      "handler": "toggleProxyInput()",
-      "count": 1,
-      "lines": [
-        347
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "cancelActiveExport()",
       "count": 1,
@@ -93,25 +84,6 @@
       "lines": [
         411,
         433
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeUrlModal()",
-      "count": 2,
-      "lines": [
-        341,
-        359
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "convertAndInsert()",
-      "count": 1,
-      "lines": [
-        360
       ]
     },
     {
@@ -157,15 +129,6 @@
       "count": 1,
       "lines": [
         25
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "fetchUrl()",
-      "count": 1,
-      "lines": [
-        351
       ]
     },
     {

@@ -15,3 +15,6 @@ export { extractHtml } from './web-clipper/html-extractor.js';
 export { mountClassicHtmlExtractorPort } from './compatibility/classic-html-extractor-port.js';
 export { htmlToMarkdown, convertExtractedHtml } from './web-clipper/html-to-markdown.js';
 export { mountClassicHtmlMarkdownPort } from './compatibility/classic-html-markdown-port.js';
+export { createWebClipperController } from './web-clipper/web-clipper-controller.js';
+export { createWebClipperView } from './web-clipper/web-clipper-view.js';
+export { mountClassicWebClipperPort } from './compatibility/classic-web-clipper-port.js';
