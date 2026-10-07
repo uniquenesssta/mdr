@@ -1,6 +1,6 @@
 # R13.12 Web Clipper Controller/UI
 
-状态：**已验收并收尾**。修复提交 `fabf0873269a220b88c58684d8196e996eb7926b` / [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组全部成功，用户于 2026-10-07 确认“13.12已通过”。沿用 `agent/r13-stage`；13.13 尚未开始。以下保留实施与首轮失败记录。
+状态：**功能验收及记录收尾已完成；后续依赖门禁补丁待 Windows 验证**。修复提交 `fabf0873269a220b88c58684d8196e996eb7926b` / [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组全部成功，用户于 2026-10-07 确认“13.12已通过”。沿用 `agent/r13-stage`。文档收尾提交 `59b0ba2` 的后续 CI 因新增依赖公告失败，当前状态见文末；以下保留实施与首轮失败记录。
 
 ## 实现与职责
 
@@ -41,3 +41,9 @@
 已核对上述精确提交的七个 Windows job 及全部步骤成功：完整 Node 回归、前端/浏览器与构建、架构/旧运行时/生成文件/README 门禁、Rust/Clippy/check、原生编译链接、真实 Windows WebView 和官方依赖公告检查均通过；同一运行的精确提交证据汇总成功，七份证据制品已归档。R13.12 的控制器/界面职责、取消与过期会话隔离、重复插入和销毁回归验收完成。
 
 本次仅更新验收与交接文档，不改变已验证的源码、测试、配置或依赖。R13.13 继续承接完整导入到文档链及受控网页抓取→提取/转换→文档→Preview/Hybrid 的真实 Windows WebView 联调；R13.14 负责旧实现和兼容端口清除。A03/A05 的本阶段全链路验收保持待办，R13 尚未整体收官，未启动后续任务。
+
+## 后续依赖门禁阻塞（2026-10-08）
+
+文档收尾提交 `59b0ba25b56134a804fc1caa6da078e147230bf8` 的 [CI 37606184822](https://github.com/uniquenesssta/mdr/actions/runs/37606184822) 未通过。唯一直接失败为 `npm audit --audit-level=high`：source-map-js 1.2.1 新增高危公告 GHSA-68fv-2mgg-jv7q；同轮发现 DOMPurify 两则 low 公告及 KaTeX 公告（含 Mermaid 传递影响），按受影响包计为 3 low、1 high。全部 Node、架构、浏览器、构建、Rust、原生和 WebView 行为检查成功，最终证据汇总因前端 job 失败而拒绝准入。没有把新依赖失败归类为可忽略的文档问题。
+
+R13.12 的 `fabf087` 功能验收保留为历史证据，不能用它声称当前依赖安全门禁通过。R13.13 启动授权已接收，先定向修补当前依赖并执行 Windows 回归，业务链路迁移等待前置补丁验证。[当前交接](R13-13-DETAILS.md)。

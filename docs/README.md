@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 和 [R13 任务书](markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md) 为准。R12 已收官；R13-S01 后端专项与 R13.1～13.12 已验收，R13.12 修复提交 `fabf087` 的 [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组成功，2026-10-07 正式收尾。R13.13 尚未开始，A03/A05 完整网页剪藏链路仍待联调，R13 尚未整体收官。[R13.12 详情](R13-12-DETAILS.md) · [R12 收官详情](R12-24-DETAILS.md) · [完整审计](FULL_CODE_AUDIT.md)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 和 [R13 任务书](markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md) 为准。R12 已收官；R13-S01 后端专项与 R13.1～13.12 的功能验收已完成。R13.12 文档收尾提交 `59b0ba2` 的后续 CI 被新增 npm 高危公告阻断，R13.13 启动授权已接收，前置依赖补丁待 Windows 回归，业务链路尚未实施。A03/A05 完整网页剪藏链路仍待联调，R13 尚未整体收官。[当前 R13.13 交接](R13-13-DETAILS.md) · [R13.12 详情](R13-12-DETAILS.md) · [R12 收官详情](R12-24-DETAILS.md) · [完整审计](FULL_CODE_AUDIT.md)。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

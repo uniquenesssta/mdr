@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-08：R13.13 前置核查发现上轮收尾 CI 被新增 npm 高危公告阻断；定向更新 source-map-js 1.2.2 与 DOMPurify 3.4.16，本地锁文件审计无高危/严重项。补丁待 Windows 累计回归，导入到文档链尚未实施；保留现有硬门禁和两项 KaTeX/Mermaid low 告警。[详情](docs/R13-13-DETAILS.md)。
+
 - 2026-10-07：R13.12 在 `fabf087` / [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组及全部步骤通过，控制器/界面、会话取消与重复插入回归验收并收尾。R13.13 尚未开始，A03/A05 完整剪藏链路仍待联调。[详情](docs/R13-12-DETAILS.md)。
 
 - 2026-10-02：修复13.12首轮CI：同步内联事件数量及Modal/Platform职责迁移断言；Windows浏览器清理遇到taskkill子进程竞争错误时，核实全部报错PID和根进程已退出后才允许通过，残留或不明错误继续失败。新增清理回归，生产代码不变，待Windows重验。[详情](docs/R13-12-DETAILS.md)。

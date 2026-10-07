@@ -1,5 +1,5 @@
 name: R13 Windows Import Revalidation
-run-name: R13.12 web clipper controller and UI and cumulative Windows regression · ${{ github.sha }}
+run-name: R13.13 prerequisite dependency patches and cumulative Windows regression · ${{ github.sha }}
 
 on:
   push:
