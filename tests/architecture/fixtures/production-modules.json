@@ -61,7 +61,7 @@
       "public/app/events.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy keyboard, drag/drop and remaining interaction wiring; edit persistence/save shortcuts dispatch explicit commands without owning save/autosave state or implementation.",
+      "Legacy keyboard and interaction wiring; picker/startup import intents invoke public commands. Drag/drop and source reads belong to Import.",
       "legacy-event-bindings",
       "classic-script",
       "split-and-remove",
@@ -71,7 +71,7 @@
       "public/app/export.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy export/import presentation workflows only; Stage 10 save/autosave implementation is removed and document-import persistence transitions are requested through an explicit command boundary.",
+      "Legacy export presentation workflows; imports belong to ESM Import and document lifecycle belongs to Documents.",
       "legacy-export-state",
       "classic-script",
       "split-and-remove",
@@ -81,8 +81,8 @@
       "public/app/web-clipper.js",
       "legacy-classic-script",
       "legacy-app",
-      "Classic document insertion and Find/Preview callbacks; clipper UI and state delegated to Import.",
-      "legacy-web-clipper-state",
+      "Legacy Find/Preview callbacks and menu-open delegate; web document insertion belongs to ESM Import.",
+      "legacy-find-preview-callbacks",
       "classic-script",
       "split-and-remove",
       false
@@ -1031,7 +1031,7 @@
       "src/features/editor/application/editor-controller.js",
       "esm-module",
       "editor-application",
-      "Model-authoritative editor transaction coordinator bridging the neutral adapter journal to application subscribers and routing whole-body writes through DocumentModel.",
+      "Own the model-authoritative transaction stream and single imported-Markdown append/blank replacement; no document or persistence authority.",
       "editor-controller-subscriptions",
       "explicit-instance",
       "retain",
@@ -4998,16 +4998,6 @@
       false
     ],
     [
-      "src/features/import/compatibility/classic-file-import-port.js",
-      "esm-module",
-      "feature",
-      "Scoped text import access for classic callers until Atomic 13.13/13.14.",
-      "classic-file-import-port",
-      "mount/destroy",
-      "remove-after-migration",
-      false
-    ],
-    [
       "src/features/import/files/drop-import-controller.js",
       "esm-module",
       "feature",
@@ -5015,16 +5005,6 @@
       "drop-counter-and-generation",
       "start/destroy",
       "retain",
-      false
-    ],
-    [
-      "src/features/import/compatibility/classic-drop-import-port.js",
-      "esm-module",
-      "feature",
-      "Scoped legacy command registration and path entry until Atomic 13.13/13.14.",
-      "classic-drop-import-port",
-      "mount/destroy",
-      "remove-after-migration",
       false
     ],
     [
@@ -5165,6 +5145,26 @@
       "classic-web-clipper-view",
       "mount/start/open/destroy",
       "remove-after-migration",
+      false
+    ],
+    [
+      "src/features/import/application/import-document-controller.js",
+      "esm-module",
+      "feature-import",
+      "Coordinate public Import readers with Documents opening and Editor insertion; reject cancelled/stale results and publish successful recent files.",
+      "import-intent-generation",
+      "explicit-create-destroy",
+      "rewrite",
+      false
+    ],
+    [
+      "src/features/import/ui/file-import-view.js",
+      "esm-module",
+      "feature-import",
+      "Own file input listeners and picker lifecycle; route selected sources through public import commands.",
+      "picker-generation",
+      "explicit-create-destroy",
+      "rewrite",
       false
     ]
   ]

@@ -3,9 +3,9 @@ export { createImageImportController, isImageImportCancelled } from './images/im
 export { isAllowedImageMime, assessBrowserImage } from './images/image-policy.js';
 export { IMPORT_KINDS, classifyBrowserFile, classifyImportPath, classifyImportResult } from './files/file-type-classifier.js';
 export { createFileImportController, FileImportCancelledError } from './files/file-import-controller.js';
-export { mountClassicFileImportPort } from './compatibility/classic-file-import-port.js';
 export { createDropImportController } from './files/drop-import-controller.js';
-export { mountClassicDropImportPort } from './compatibility/classic-drop-import-port.js';
+export { createImportDocumentController, getImportedTextLength } from './application/import-document-controller.js';
+export { createFileImportView } from './ui/file-import-view.js';
 export { createDropOverlayView } from './files/drop-overlay-view.js';
 export { createImageMarkdown } from './images/image-markdown-factory.js';
 export { createWebFetchCoordinator } from './web-clipper/web-fetch-coordinator.js';

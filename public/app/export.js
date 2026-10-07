@@ -1,7 +1,5 @@
     const exportCompatibilityHost = document.getElementById('compatibility-business-ports');
     const exportPlatformPort = exportCompatibilityHost?.markdownEditorPlatformPort;
-    const exportFileImportPort = exportCompatibilityHost?.markdownEditorFileImportPort;
-    if (!exportFileImportPort) throw new Error('File Import compatibility port is unavailable.');
     const exportDocumentDomainPort = exportCompatibilityHost?.markdownEditorDocumentDomainPort;
     const exportDocumentSessionPort = exportCompatibilityHost?.markdownEditorDocumentSessionPort;
     const exportDocumentControllerPort = exportCompatibilityHost?.markdownEditorDocumentControllerPort;
@@ -16,7 +14,6 @@
     if (!exportSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
     if (!exportPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
     if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
-    exportDocumentUiCommandPort.register({ importFile: () => triggerImportFile() });
     class ExportCancelledError extends Error {
       constructor() {
         super('EXPORT_CANCELLED');
@@ -676,81 +673,6 @@ ${'</scr' + 'ipt>'}
       } catch (error) {
         showToast('图片导出失败：' + (error?.message || String(error)));
       }
-    }
-
-    function getEditorNormalizedLength(text) {
-      const source = String(text ?? '');
-      let crlfPairs = 0;
-      for (let index = 0; index < source.length - 1; index += 1) {
-        if (source.charCodeAt(index) === 13 && source.charCodeAt(index + 1) === 10) {
-          crlfPairs += 1;
-          index += 1;
-        }
-      }
-      return source.length - crlfPairs;
-    }
-
-    async function loadDocumentFromContentLoader(name, loadContent, filePath = '', details = {}) {
-      const normalizedName = name || t('filenameDefault');
-      try {
-        exportDocumentUiCommandPort.invoke('prepareDocumentTransition', 'document-import');
-        const result = await exportDocumentControllerPort.openExternalDocument({
-          title: normalizedName,
-          filePath,
-          currentTitle: filenameInput.value,
-          fallbackTitle: t('filenameDefault'),
-          loadContent,
-          expectedTextLength: getEditorNormalizedLength
-        });
-        if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
-        filenameInput.value = result.record.title;
-        if (!await applyDocumentLifecycleUi(result)) return false;
-        if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
-        if (!exportDocumentControllerPort.isCurrentGeneration(result.generation)) return false;
-        void exportSidebarControllerPort.select('docs');
-        window.markdownEditorPerf?.record?.('document.imported', {
-          category: 'document.operation',
-          status: 'ok',
-          details: {
-            documentId: result.record.id,
-            sourceCharacters: result.sourceCharacters,
-            editorCharacters: result.editorCharacters,
-            normalizedCrLf: result.sourceCharacters - result.editorCharacters,
-            ...details
-          }
-        });
-        showToast(t('toastFileImported'));
-        return true;
-      } catch (error) {
-        if (error?.code === 'FILE_IMPORT_CANCELLED') return false;
-        if (exportDocumentControllerPort.isStaleError(error)) return false;
-        showToast(recordDocumentOperationError('import', error, {
-          fileName: String(name || ''),
-          ...details
-        }));
-        return false;
-      }
-    }
-
-    async function loadTextContentAsDocument(name, content, filePath = '') {
-      const source = String(content ?? '');
-      return loadDocumentFromContentLoader(name, async () => source, filePath, { sourceCharacters: source.length });
-    }
-
-    function loadFile(file, request = null) {
-      if (!file) return Promise.resolve(false);
-      return loadDocumentFromContentLoader(file.name, async () => {
-        const result = await exportFileImportPort.readBrowserFile(file);
-        if (request && !request.isCurrent()) throw Object.assign(new Error('文档读取已取消'), { code: 'FILE_IMPORT_CANCELLED' });
-        return result.content;
-      }, '', { fileBytes: Number(file.size) || 0 });
-    }
-
-    // 导入文件
-    function importFile(input) {
-      const file = input.files[0];
-      if (file) loadFile(file);
-      input.value = '';
     }
 
     // 切换主题

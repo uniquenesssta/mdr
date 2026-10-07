@@ -72,6 +72,30 @@ version = "1"
     -Description 'Tauri builder'
   Set-Content -Path $entryPath -Value $entry -Encoding utf8
 
+  # Only this archived test host resolves one reserved fixture hostname to its owned server.
+  # Production URL/redirect/response policy and all other public DNS resolution remain intact.
+  $fetchClientPath = Join-Path $hostRootPath 'src-tauri\src\web_fetch\client.rs'
+  $fetchClient = Get-Content $fetchClientPath -Raw
+  $fixtureTransport = @'
+    fetch_with_resolver(initial, |url| async move {
+        if url.host_str() == Some("r13-import.test") {
+            let port = std::env::var("MDR_R13_FIXTURE_PORT")
+                .map_err(|_| "Owned R13 fixture port is unavailable".to_string())?
+                .parse::<u16>().map_err(|_| "Invalid owned fixture port".to_string())?;
+            if url.scheme() != "http" || url.port() != Some(port) {
+                return Err("Owned fixture endpoint mismatch".into());
+            }
+            Ok(vec![std::net::SocketAddr::from(([127, 0, 0, 1], port))])
+        } else {
+            resolve_public(url).await
+        }
+    }, client_builder).await
+'@
+  $fetchClient = Assert-SingleReplacement -Content $fetchClient `
+    -Needle '    fetch_with_resolver(initial, resolve_public, client_builder).await' `
+    -Replacement $fixtureTransport -Description 'isolated R13 owned HTTP resolver'
+  Set-Content -Path $fetchClientPath -Value $fetchClient -Encoding utf8
+
   $capabilityPath = Join-Path $hostRootPath 'src-tauri\capabilities\default.json'
   $capability = Get-Content $capabilityPath -Raw | ConvertFrom-Json
   if ($capability.permissions -contains 'wdio-webdriver:default') {
@@ -131,6 +155,8 @@ version = "1"
     productionConfigUnchanged = $true
     productionLockedDependenciesPreserved = [bool]$PreserveProductionLock
     protectedPackageCount = $protectedPackageCount
+    r13FixtureTransport = 'private resolver in archived host; production resolver unchanged'
+    r13FixtureHost = 'r13-import.test'
     driverProvider = 'embedded'
     frontendSource = 'embedded-dist'
     removedDevUrl = [bool]$productionDevUrl

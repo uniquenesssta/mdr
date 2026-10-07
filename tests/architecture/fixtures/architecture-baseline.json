@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "stage-01-exact-migration-regression-baseline",
-  "sourceCommit": "4c9703a2474ecd89224d51417a6c5d16889ff3b6",
+  "sourceCommit": "927988119d3a4637b084eddeb032503d313363e1",
   "policy": {
     "exactEntriesOnly": true,
     "wildcardExemptions": false,
@@ -40,15 +40,6 @@
     }
   ],
   "inlineEvents": [
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onchange",
-      "handler": "importFile(this)",
-      "count": 1,
-      "lines": [
-        515
-      ]
-    },
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onchange",
@@ -346,15 +337,6 @@
       "lines": [
         76
       ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "triggerImportFile(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        11
-      ]
     }
   ],
   "businessGlobalWrites": [
@@ -363,7 +345,7 @@
       "global": "window.markdownEditorDocumentStatistics",
       "count": 1,
       "lines": [
-        346
+        324
       ]
     },
     {
@@ -371,7 +353,7 @@
       "global": "window.markdownEditorRuntimeContext",
       "count": 1,
       "lines": [
-        488
+        466
       ]
     },
     {
@@ -379,7 +361,7 @@
       "global": "window.__markdownEditorInitPromise",
       "count": 1,
       "lines": [
-        274
+        151
       ]
     },
     {
@@ -387,7 +369,7 @@
       "global": "window.markdownEditorDocumentModel",
       "count": 1,
       "lines": [
-        411
+        430
       ]
     },
     {
@@ -395,7 +377,7 @@
       "global": "window.markdownEditorDocumentStore",
       "count": 1,
       "lines": [
-        412
+        431
       ]
     },
     {
@@ -411,7 +393,7 @@
       "global": "window.markdownEditorPerf",
       "count": 1,
       "lines": [
-        640
+        634
       ]
     }
   ],

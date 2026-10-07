@@ -4,6 +4,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { withEmbeddedSession } from './embedded-webdriver-session.mjs';
+import { verifyImportDocumentChain } from './import-document-chain.mjs';
 import { createRenderBoundaryProbe, PROBE_SURFACES } from './render-boundary-probe.mjs';
 
 if (process.platform !== 'win32') throw new Error('R12-22 requires the real Windows WebView.');
@@ -20,8 +21,17 @@ await mkdir(evidenceRoot, { recursive: true });
 await writeFile(canaryPath, canaryText);
 const config = JSON.parse(await readFile(join(repositoryRoot, 'src-tauri/tauri.conf.json'), 'utf8'));
 const requests = [];
+let importArticleHtml = '';
 const server = createServer((request, response) => {
   const url = new URL(request.url, 'http://127.0.0.1');
+  if (['/r13/article', '/r13/slow', '/r13/non-html'].includes(url.pathname)) {
+    requests.push({ marker: url.pathname, at: new Date().toISOString(),
+      nativeBrowserHeaders: request.headers['user-agent']?.includes('Chrome/126.0.0.0') === true });
+    response.writeHead(200, { 'Content-Type': url.pathname === '/r13/non-html' ? 'application/json' : 'text/html', 'Cache-Control': 'no-store' });
+    if (url.pathname === '/r13/slow') setTimeout(() => { if (!response.destroyed) response.end(importArticleHtml); }, 1_000);
+    else response.end(url.pathname === '/r13/non-html' ? '{"fixture":"rejected"}' : importArticleHtml);
+    return;
+  }
   if (!/^\/marker\/r12-[a-z-]+\/(?:image|css)$/.test(url.pathname) || url.search) {
     response.writeHead(404).end();
     return;
@@ -36,6 +46,17 @@ await new Promise((accept, reject) => {
   server.listen(0, '127.0.0.1', accept);
 });
 const markerOrigin = `http://127.0.0.1:${server.address().port}`;
+const fixtureOrigin = `http://r13-import.test:${server.address().port}`;
+process.env.MDR_R13_FIXTURE_PORT = String(server.address().port);
+importArticleHtml = '<!doctype html><html><head><title>R13 imported article</title></head><body><article>'
+  + '<h1>R13 imported article</h1><p><strong>R13 harmless import text</strong> and <em>legal emphasis</em></p>'
+  + '<p>$$x^2$$</p><pre><code class="language-mermaid">flowchart TD\n A[Safe] --&gt; B[Import]\n</code></pre>'
+  + createRenderBoundaryProbe('r12-import-web', markerOrigin).html + '</article></body></html>';
+const importFilePath = join(canaryRoot, 'import-chain.md');
+await writeFile(importFilePath, '# R13 imported file\n\n**R13 harmless import text**\n\n'
+  + '![owned import image](data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7)\n\n'
+  + '$$\nx^2\n$$\n\n```mermaid\nflowchart TD\n A[Safe] --> B[Import]\n```\n\n'
+  + createRenderBoundaryProbe('r12-import-file', markerOrigin).html + '\n');
 const evidence = {
   schemaVersion: 1,
   phase: verifyBoundary ? 'post-remediation-security-regression' : 'baseline-probe-before-A03-remediation',
@@ -253,6 +274,9 @@ try {
         await browser.saveScreenshot(join(evidenceRoot, `normal-${mode}.png`));
         await persist();
       }
+      evidence.importDocumentChain = await verifyImportDocumentChain({ browser, fixtureOrigin,
+        filePath: importFilePath, missingPath: join(canaryRoot, 'missing.md'), requests, evidenceRoot });
+      await persist();
     }
   });
   assert.equal(evidence.surfaces.length, PROBE_SURFACES.length + (verifyBoundary ? 1 : 0));

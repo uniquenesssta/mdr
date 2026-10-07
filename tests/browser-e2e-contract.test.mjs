@@ -50,7 +50,8 @@ test('application installs the E2E bridge only through explicit opt-in', async (
 
 test('E2E fixture loading follows the application document lifecycle', async () => {
   const bridge = await readFile(new URL('../src/runtime/e2e-bridge.js', import.meta.url), 'utf8');
-  assert.match(bridge, /loadTextContentAsDocument/);
+  assert.match(bridge, /commands\.invoke\('importTextContent'/);
+  assert.doesNotMatch(bridge, /loadTextContentAsDocument/);
   assert.doesNotMatch(bridge, /virtualEditor\.loadDocument/);
   assert.doesNotMatch(bridge, /dispatchEditorInput/);
 });

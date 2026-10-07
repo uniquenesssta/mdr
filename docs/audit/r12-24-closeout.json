@@ -113,7 +113,7 @@
   "reviewedSources": [
     {
       "path": "src/runtime/performance.js",
-      "blobSha": "49d5c5b15ecab64ee8b27eac528fa03205c082be"
+      "blobSha": "b61842ebd30b2a8550f7854df7eb11f23f955970"
     },
     {
       "path": "src-tauri/src/performance_log/mod.rs",
@@ -141,7 +141,7 @@
     },
     {
       "path": "public/app/web-clipper.js",
-      "blobSha": "91a9e87b0875358c41e19b7378890daf6e476552"
+      "blobSha": "7e784323f269c0e544f7248a9d4e2813f87f4b8c"
     },
     {
       "path": "src-tauri/capabilities/default.json",
@@ -205,11 +205,59 @@
     },
     {
       "path": "public/app/core.js",
-      "blobSha": "50e5dae60eb3a779a393dcf1164c056960375d61"
+      "blobSha": "73dfb35d300c6b37cedc1a07884eeb055d58242c"
     },
     {
       "path": "public/compatibility/business-content.html",
-      "blobSha": "aeebbc7c6d627e6171ee292489ab5d8570aa6d6d"
+      "blobSha": "427c703f7484ee45aebceaf9f4f45b475d8901d2"
+    },
+    {
+      "path": "src/features/import/application/import-document-controller.js",
+      "blobSha": "17c1afffb321a0a03970b3b153e4fcb02ec83e28"
+    },
+    {
+      "path": "src/features/import/ui/file-import-view.js",
+      "blobSha": "b74b6d6f7ebe5d022db2c0646b68dedb28bb5b38"
+    },
+    {
+      "path": "src/features/import/files/file-import-controller.js",
+      "blobSha": "f4c49b22596089a806313aabc7b146dea0f55d89"
+    },
+    {
+      "path": "src/features/documents/application/document-session-controller.js",
+      "blobSha": "b054e4b14537ab5546ca3b74d22058fac75ac212"
+    },
+    {
+      "path": "src/features/editor/application/editor-controller.js",
+      "blobSha": "ee92c7a865bfee1f17dea5922515b8bccd8dd927"
+    },
+    {
+      "path": "src/features/menu/compatibility/classic-menu-command-adapter.js",
+      "blobSha": "ff8157155b8a9cbc57e6f0237bc79fa6ef641972"
+    },
+    {
+      "path": "src/main.js",
+      "blobSha": "071456294b7722e0125549778e98c788f1e861c2"
+    },
+    {
+      "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
+      "blobSha": "2db4ff5f14cd5c4e46c78618d0d146b12e10da8e"
+    },
+    {
+      "path": "tests/e2e/windows/import-document-chain.mjs",
+      "blobSha": "691a22217544376bb4805bda0278868efb662450"
+    },
+    {
+      "path": "scripts/ci/verify-r13-import-chain.mjs",
+      "blobSha": "13b71ff2d915362a98885957d8b6ca70b2c6ff50"
+    },
+    {
+      "path": "src/features/preview/render/presentation/math-presentation.js",
+      "blobSha": "932f2bf8e0c2942b202aeeb74bd765e3aecb8275"
+    },
+    {
+      "path": "src/features/preview/render/presentation/mermaid-presentation.js",
+      "blobSha": "67ff4b9c38b823a45e99960ada1fbb93384567dd"
     }
   ],
   "priorFailures": {
@@ -425,14 +473,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R13.12",
-    "date": "2026-10-02",
-    "reviewedCommit": "fb019d4adab4876baf01b5a8cecd12df1891e6a5",
-    "record": "docs/R13-12-DETAILS.md",
-    "status": "R13.11 accepted; R13.12 current source review pending exact-commit Windows CI",
-    "priorWindowsRun": 36966040484,
+    "stage": "R13.13",
+    "date": "2026-10-07",
+    "reviewedCommit": "927988119d3a4637b084eddeb032503d313363e1",
+    "record": "docs/R13-13-DETAILS.md",
+    "status": "R13.13 implementation and source review complete; exact-commit Windows validation pending",
+    "priorWindowsRun": 37651965466,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 acceptance snapshot.",
-    "conclusion": "Reviewed controller ownership, source invalidation on input/close/destroy and view text-only error projection; no new security policy. Prior separate fetch/extract/convert ports are unmounted. Historical R12 acceptance unchanged; full A05 integration remains open."
+    "conclusion": "Reviewed import intent cancellation, save-before-read, failed-read/no-record, successful recents and public Editor insertion. Native policy is unchanged; one private resolver is injected only into the archived Windows test host. Current full-chain evidence is mandatory alongside preserved CSP/IPC controls. Historical R12 acceptance unchanged. KaTeX prototype-pollution advisory remains a new unresolved low finding; no claim of dependency remediation from trust=false or import sanitization."
   }
 }

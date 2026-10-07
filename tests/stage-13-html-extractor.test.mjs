@@ -18,9 +18,11 @@ test('scoped extractor port preserves results/errors, rejects duplicates and rel
   other.destroy(); assert.equal(host.markdownEditorHtmlExtractorPort, 'new owner');
 });
 
-test('classic converter consumes sole extractor; fetch UI isolation ends at converter boundary', async () => {
+test('ESM composition injects the sole extractor and converter; classic code retains no conversion authority', async () => {
   const source = await readFile(new URL('../public/app/web-clipper.js', import.meta.url), 'utf8');
-  assert.match(source, /webClipperPort\.start\(/);
+  const main = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
+  assert.match(main, /extract: html => extractHtml\(html, document\), convert: convertExtractedHtml/);
+  assert.match(main, /insertMarkdown: markdown => importDocumentController\.insertWebMarkdown\(markdown\)/);
   assert.doesNotMatch(source, /DOMParser|function extractMeta|function extractMainContent|function stripUnwantedElements/);
   assert.doesNotMatch(source, /function htmlToMarkdown|function convertTable/);
   const controller = await readFile(new URL('../src/features/import/web-clipper/web-clipper-controller.js', import.meta.url), 'utf8');

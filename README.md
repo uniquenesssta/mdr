@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-07：R13.13 完整导入链已迁入 ESM：文件、拖放、picker/recent/startup 共用公开 Import→Documents/Editor；保留先保存再读取、失败不建档、取消/代次保护及成功登记最近文件。删除文件/拖放桥接和经典建档入口，扩展真实 Windows WebView 抓取→转换→文档→Preview/Hybrid 八类证据门槛。前置补丁 `9279881` / [CI 37651965466](https://github.com/uniquenesssta/mdr/actions/runs/37651965466) 七组通过；本项待新 Windows CI，13.14及阶段收官未推进，KaTeX low新风险仍未处置。[详情](docs/R13-13-DETAILS.md)。
+
 - 2026-10-08：R13.13 前置核查发现上轮收尾 CI 被新增 npm 高危公告阻断；定向更新 source-map-js 1.2.2 与 DOMPurify 3.4.16，本地锁文件审计无高危/严重项。补丁待 Windows 累计回归，导入到文档链尚未实施；保留现有硬门禁和两项 KaTeX/Mermaid low 告警。[详情](docs/R13-13-DETAILS.md)。
 
 - 2026-10-07：R13.12 在 `fabf087` / [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组及全部步骤通过，控制器/界面、会话取消与重复插入回归验收并收尾。R13.13 尚未开始，A03/A05 完整剪藏链路仍待联调。[详情](docs/R13-12-DETAILS.md)。

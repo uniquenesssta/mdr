@@ -1,5 +1,5 @@
 name: R13 Windows Import Revalidation
-run-name: R13.13 prerequisite dependency patches and cumulative Windows regression · ${{ github.sha }}
+run-name: R13.13 Import to Documents and real Windows WebView chain · ${{ github.sha }}
 
 on:
   push:
@@ -542,7 +542,7 @@ jobs:
           retention-days: 14
 
   webview-baseline:
-    name: R12-22 actual Windows WebView security and content regression
+    name: R13.13 real Windows WebView import chain and R12 security regression
     runs-on: windows-2025
     timeout-minutes: 90
     env:
@@ -585,7 +585,7 @@ jobs:
           Copy-Item '../.markdown-editor-windows-driver-host/src-tauri/Cargo.lock' "$env:RUNNER_TEMP/r12-22-webview/driver-host-Cargo.lock"
       - name: Compile the embedded Windows WebView host
         run: cargo build --locked --target-dir ../.cargo-target/markdown-editor-windows-driver-host --manifest-path ../.markdown-editor-windows-driver-host/src-tauri/Cargo.toml 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/native-build.log"
-      - name: Verify actual sinks, CSP and legal content with owned-canary IPC
+      - name: Verify Import to Documents to Preview/Hybrid, sinks, CSP and owned-canary IPC
         run: node tests/e2e/windows/run-render-boundary-probe.mjs --verify 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/probe.log"
       - name: Validation leaves tracked sources unchanged
         if: ${{ !cancelled() }}

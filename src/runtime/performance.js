@@ -554,9 +554,7 @@ function installLegacyInstrumentation() {
       ['saveCurrentDocumentState', true],
       ['saveToLocal', false],
       ['saveAsMarkdown', false],
-      ['autoSave', true],
-      ['loadFile', false],
-      ['loadTextContentAsDocument', false]
+      ['autoSave', true]
     ],
     'export.operation': [
       ['exportFile', false],

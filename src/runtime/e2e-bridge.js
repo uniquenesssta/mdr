@@ -158,11 +158,12 @@ async function revealText(text, options = {}) {
 }
 
 async function loadApplicationDocument(source, options = {}) {
-  if (typeof globalThis.loadTextContentAsDocument !== 'function') {
+  const commands = document.getElementById('compatibility-business-ports')?.markdownEditorDocumentUiCommandPort;
+  if (!commands?.has('importTextContent')) {
     throw new Error('application document import flow is unavailable');
   }
   const content = String(source || '');
-  const loaded = await globalThis.loadTextContentAsDocument(
+  const loaded = await commands.invoke('importTextContent',
     String(options.name || 'e2e-fixture.md'),
     content,
     ''

@@ -100,6 +100,15 @@ export function createEditorController({ model, adapter, reportError = (message,
       assertActive();
       model.replaceRange(String(value ?? ''), 0, model.getTextLength(), 'end');
     },
+    appendImportedMarkdown(markdown) {
+      assertActive();
+      const source = String(markdown || '');
+      if (!source.trim()) return false;
+      const length = model.getTextLength();
+      return model.getNonWhitespaceCount() === 0
+        ? model.replaceRange(source, 0, length, 'end')
+        : model.replaceRange('\n\n' + source, length, length, 'end');
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;

@@ -1,79 +1,72 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile } from 'node:fs/promises';
-import vm from 'node:vm';
 import { createBrowserFileReader } from '../src/platform/browser/browser-file-reader.js';
-import { createWebClipperController, createWebFetchCoordinator, createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort, createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
+import { createWebClipperController, createWebFetchCoordinator, createImageImportController, createDropImportController, createDropOverlayView, createFileImportController, createImportDocumentController, createFileImportView } from '../src/features/import/index.js';
 import { createImageDialogView } from '../src/features/editor/ui/image-dialog-view.js';
 
-const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
-const eventsSource = await read('public/app/events.js');
-const exportSource = await read('public/app/export.js');
-const coreSource = await read('public/app/core.js');
 const MiB = 1024 * 1024;
 
-// Execute remaining commands with the real Drop Import and File Import controllers; readers are injected.
-function section(source, start, end) {
-  const first = source.indexOf(start);
-  const last = source.indexOf(end, first);
-  assert.ok(first >= 0 && last > first, 'legacy section must still exist until its migration');
-  return source.slice(first, last);
+// The migration matrix now exercises the ESM application boundary; platform readers remain injected.
+function importHost({ files, documents = {}, notify = () => {}, afterDocumentOpen = async () => true } = {}) {
+  return createImportDocumentController({ files,
+    images: createImageImportController({ readBrowserImage: async () => '' }),
+    documents: { captureOperation: () => 1, isCurrentGeneration: () => true, ensureActiveForEditing() {}, ...documents },
+    editor: { insertImage() {}, appendMarkdown() {} }, notify, translate: key => key, afterDocumentOpen });
 }
 function dropHost({ desktop = false, failRead = false, opened = true } = {}) {
-  const calls = [], handlers = new Map();
-  const overlay = new Set();
+  const calls = [], handlers = new Map(), overlay = new Set();
   const document = {
     getElementById: () => ({ classList: { add: x => overlay.add(x), remove: x => overlay.delete(x) } }),
     addEventListener: (name, handler) => handlers.set(name, handler),
     removeEventListener: (name, handler) => { if (handlers.get(name) === handler) handlers.delete(name); }
   };
-  const controller = createDropImportController({
-    target: document, nativeDrop: desktop, nativeFiles: desktop,
-    subscribeNative: handler => { handlers.set('native', handler); return () => handlers.delete('native'); }
-  });
+  const controller = createDropImportController({ target: document, nativeDrop: desktop, nativeFiles: desktop,
+    subscribeNative: handler => { handlers.set('native', handler); return () => handlers.delete('native'); } });
   const overlayView = createDropOverlayView({ element: document.getElementById('drop-overlay') });
-  const imageController = createImageImportController({
+  const context = {
+    FileReader: class { readAsDataURL(file) { calls.push(['dataUrl', file.name]); this.result = 'data:image/png;base64,AA=='; this.onload(); } },
+    async readNativeImage(path) { calls.push(['readImage', path, '']); if (failRead) throw new Error('read denied'); return 'data:image/png;base64,AA=='; },
+    async loadDocumentFromContentLoader(name, loader, path) { await loader(); calls.push(['document', name, path]); return opened; }
+  };
+  const images = createImageImportController({
     readBrowserImage: (file, options) => createBrowserFileReader({ FileReaderClass: context.FileReader }).readDataUrl(file, options),
-    readNativeImage: path => context.eventsPlatformPort.call('files', 'readImage', path, '')
+    readNativeImage: path => context.readNativeImage(path)
   });
-  const context = vm.createContext({
-    document,
-    eventsDropImportPort: mountClassicDropImportPort({}, {
-      start: callbacks => controller.start({ ...callbacks, setOverlayVisible: overlayView.setVisible }),
-      openPath: controller.openPath
-    }, imageController).api,
-    eventsFileImportPort: mountClassicFileImportPort({}, createFileImportController({
-      readBrowserText: async () => '',
-      async readNativeText(path) {
-        calls.push(['readText', path]);
-        if (failRead) throw new Error('read denied');
-        return '正文';
-      }
-    })).api,
-    eventsPlatformPort: {
-      supports: name => desktop && ['desktop.fileSystem', 'desktop.dragDrop'].includes(name),
-      async call(group, operation, ...args) {
-        if (group === 'dragDrop') { handlers.set('native', args[0]); return; }
-        calls.push([operation, ...args]);
-        if (failRead) throw new Error('read denied');
-        return operation === 'readText' ? '正文' : 'data:image/png;base64,AA==';
-      }
-    },
-    loadFile: file => calls.push(['text', file.name]),
-    loadDocumentFromContentLoader: async (name, loader, path) => { await loader(); calls.push(['document', name, path]); return opened; },
+  const files = createFileImportController({
+    readBrowserText: async file => { calls.push(['text', file.name]); return '正文'; },
+    async readNativeText(path) { calls.push(['readText', path]); if (failRead) throw new Error('read denied'); return '正文'; }
+  });
+  let generation = 0;
+  const documents = {
+    captureOperation: () => generation, isCurrentGeneration: value => value === generation, ensureActiveForEditing() {},
+    async openExternalDocument({ title, filePath, loadContent }) {
+      const id = ++generation;
+      const accepted = await context.loadDocumentFromContentLoader(title, loadContent, filePath);
+      if (id !== generation) throw Object.assign(new Error('stale'), { code: 'DOCUMENT_OPERATION_STALE' });
+      return { generation: id, record: { title }, sourceCharacters: 2, editorCharacters: 2, accepted };
+    }
+  };
+  const application = createImportDocumentController({ files, images, documents,
+    editor: { insertImage: (...args) => calls.push(['image', ...args]), appendMarkdown() {} },
     addRecentFile: (...args) => calls.push(['recent', ...args]),
-    insertImageMarkdown: (...args) => calls.push(['image', ...args]),
-    showToast: message => calls.push(['toast', message]), t: key => key, console,
-    FileReader: class { readAsDataURL(file) { calls.push(['dataUrl', file.name]); this.result = 'data:image/png;base64,AA=='; this.onload(); } }
+    afterDocumentOpen: async result => result.accepted,
+    notify: message => calls.push(['toast', message]), translate: key => key
   });
-  vm.runInContext(section(eventsSource, '    // R13.4 owns event routing;', '    // Settings menu trigger'), context);
-  return { context, calls, handlers, overlay, controller, drop(files) { return handlers.get('drop')({ preventDefault() {}, dataTransfer: { files } }); } };
+  controller.start({ setOverlayVisible: overlayView.setVisible,
+    openBrowserText: (file, request) => application.openBrowserFile(file, request),
+    openNativeText: (path, request) => application.openNativeText(path, request),
+    openBrowserImage: (file, request) => application.insertBrowserImage(file, request),
+    openNativeImage: (path, request) => application.insertNativeImage(path, request),
+    unsupported: () => calls.push(['toast', 'toastDropUnsupported']), onError: error => calls.push(['toast', error.message]) });
+  return { context, calls, handlers, overlay, controller, application, openPath: controller.openPath,
+    drop(files) { return handlers.get('drop')({ preventDefault() {}, dataTransfer: { files } }); } };
 }
 
 for (const extension of ['md', 'MARKDOWN', 'TxT']) {
   test('browser text extension takes precedence over MIME: ' + extension, async () => {
     const h = dropHost(); await h.drop([{ name: 'note.' + extension, type: 'image/png', size: 9 * MiB }]);
-    assert.deepEqual(h.calls, [['text', 'note.' + extension]]);
+    assert.deepEqual(h.calls[0], ['text', 'note.' + extension]);
+    assert.equal(h.calls.filter(call => call[0] === 'document').length, 1);
   });
 }
 for (const mime of ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp']) {
@@ -93,29 +86,29 @@ test('browser over-limit, unsupported MIME, empty and multiple drops', async () 
 test('native paths use extensions, preserve source path and add recents only after success', async () => {
   for (const extension of ['MD', 'markdown', 'txt']) {
     const h = dropHost({ desktop: true }); const path = 'C:\\notes\\正文.' + extension;
-    assert.equal(await h.context.handleNativeDroppedPath(path), true);
-    assert.deepEqual(h.calls.map(x => x[0]), ['readText', 'document', 'recent']);
+    assert.equal(await h.openPath(path), true);
+    assert.deepEqual(h.calls.map(x => x[0]), ['readText', 'document', 'recent', 'toast']);
     assert.equal(h.calls[0][1], path);
   }
   const h = dropHost({ desktop: true, opened: false });
-  assert.equal(await h.context.handleNativeDroppedPath('C:\\a.md'), false);
+  assert.equal(await h.openPath('C:\\a.md'), false);
   assert.equal(h.calls.some(x => x[0] === 'recent'), false);
 });
 test('native image extensions route through readImage, including SVG, but not BMP', async () => {
   for (const extension of ['png', 'JPG', 'jpeg', 'gif', 'webp', 'svg']) {
     const h = dropHost({ desktop: true });
-    assert.equal(await h.context.handleNativeDroppedPath('C:\\photo.' + extension), true);
+    assert.equal(await h.openPath('C:\\photo.' + extension), true);
     assert.deepEqual(h.calls.map(x => x[0]), ['readImage', 'image', 'toast']);
     assert.equal(h.calls[0][2], '');
   }
   const h = dropHost({ desktop: true });
-  assert.equal(await h.context.handleNativeDroppedPath('C:\\photo.bmp'), false);
+  assert.equal(await h.openPath('C:\\photo.bmp'), false);
   assert.deepEqual(h.calls, [['toast', 'toastDropUnsupported']]);
 });
 test('native read failure and empty path do not insert or add a recent file', async () => {
   const h = dropHost({ desktop: true, failRead: true });
-  assert.equal(await h.context.handleNativeDroppedPath('  '), false);
-  assert.equal(await h.context.handleNativeDroppedPath('C:\\a.png'), false);
+  assert.equal(await h.openPath('  '), false);
+  assert.equal(await h.openPath('C:\\a.png'), false);
   assert.deepEqual(h.calls.map(x => x[0]), ['readImage', 'toast']);
   assert.equal(h.calls[1][1], 'read denied');
 });
@@ -131,46 +124,31 @@ test('native drag-drop suppresses DOM duplicate and takes only first native path
 test('browser text read preserves text and rejects read error or cancellation before document commit', async () => {
   for (const outcome of ['load', 'error', 'abort']) {
     const committed = [], messages = [];
-    const reader = createBrowserFileReader({
-      cancelErrorMessage: '文档读取已取消',
-      FileReaderClass: class { readAsText() {
-        this.result = '中文\r\ntext'; this.error = new Error('read denied'); this['on' + outcome]();
-      } }
-    });
-    const fileImport = createFileImportController({
-      readBrowserText: (file, options) => reader.readText(file, options), readNativeText: async () => ''
-    });
-    const context = vm.createContext({
-      filenameInput: { value: 'existing' }, t: key => key, window: {},
-      exportDocumentUiCommandPort: { invoke() {} },
-      exportDocumentControllerPort: {
-        async openExternalDocument({ loadContent }) { const content = await loadContent(); committed.push(content); return { generation: 1, record: { title: 'note.md' } }; },
-        isCurrentGeneration: () => true, isStaleError: () => false
-      },
-      exportSidebarControllerPort: { select() {} }, applyDocumentLifecycleUi: async () => true,
-      recordDocumentOperationError: (_, error) => error.message, showToast: x => messages.push(x),
-      exportFileImportPort: mountClassicFileImportPort({}, fileImport).api
-    });
-    vm.runInContext(section(exportSource, '    function getEditorNormalizedLength', '    // 切换主题'), context);
-    assert.equal(await context.loadFile(null), false);
-    assert.equal(await context.loadFile({ name: 'note.md', size: 1 }), outcome === 'load');
+    const reader = createBrowserFileReader({ cancelErrorMessage: '文档读取已取消', FileReaderClass: class {
+      readAsText() { this.result = '中文\r\ntext'; this.error = new Error('read denied'); this['on' + outcome](); }
+    } });
+    const files = createFileImportController({ readBrowserText: reader.readText, readNativeText: async () => '' });
+    const application = importHost({ files, notify: value => messages.push(value), documents: {
+      async openExternalDocument({ loadContent }) { committed.push(await loadContent()); return { generation: 1, record: { title: 'note.md' } }; }
+    } });
+    assert.equal(await application.openBrowserFile(null), false);
+    assert.equal(await application.openBrowserFile({ name: 'note.md', size: 1 }), outcome === 'load');
     assert.deepEqual(committed, outcome === 'load' ? ['中文\r\ntext'] : []);
-    if (outcome === 'abort') assert.deepEqual(messages, ['文档读取已取消']);
+    if (outcome === 'abort') assert.deepEqual(messages, []);
     if (outcome === 'error') assert.deepEqual(messages, ['read denied']);
-    const emptyInput = { files: [], value: 'old' }; context.importFile(emptyInput); assert.equal(emptyInput.value, '');
+    application.destroy(); files.destroy();
   }
 });
 test('picker cancellation is inert; browser picker resets for selecting the same file again', async () => {
   for (const desktop of [true, false]) {
-    const calls = [], input = { value: 'old', click() { calls.push('click'); } };
-    const context = vm.createContext({
-      corePlatformPort: { supports: () => desktop, async call(group, operation, options) { assert.deepEqual(Array.from(options.extensions), ['md', 'markdown', 'txt']); return null; } },
-      handleNativeDroppedPath: () => calls.push('open'), document: { getElementById: () => input },
-      recordDocumentOperationError: (_, e) => e.message, showToast: x => calls.push(x)
-    });
-    vm.runInContext(section(coreSource, '    async function triggerImportFile', '    function getCurrentTimestamp'), context);
-    await context.triggerImportFile(); assert.deepEqual(calls, desktop ? [] : ['click']);
+    const calls = [], input = Object.assign(new EventTarget(), { value: 'old', files: [], click() { calls.push('click'); } });
+    const view = createFileImportView({ input, chooseFile: desktop ? async options => {
+      assert.deepEqual(options.extensions, ['md', 'markdown', 'txt']); return null;
+    } : null, openPath: () => calls.push('open'), openBrowserFile: () => calls.push('browser') });
+    await view.open(); assert.deepEqual(calls, desktop ? [] : ['click']);
     if (!desktop) assert.equal(input.value, '');
+    input.dispatchEvent(new Event('change')); assert.equal(input.value, '');
+    view.destroy(); view.destroy(); await assert.rejects(view.open(), /destroyed/);
   }
 });
 
@@ -248,37 +226,31 @@ test('R13.4 browser image callbacks ignore superseded/destroyed reads and handle
     else { reader.result = 'data:image/png;base64,AA=='; lateLoad(); }
     assert.equal(await pending, false);
     assert.equal(h.calls.some(x => x[0] === 'image'), false);
-    assert.deepEqual(h.calls.filter(x => x[0] === 'toast'), outcome === 'error' ? [['toast', 'image denied']] : []);
+    assert.deepEqual(h.calls.filter(x => x[0] === 'toast' && x[1] !== 'toastFileImported'), outcome === 'error' ? [['toast', 'image denied']] : []);
     assert.equal(reader.onload, null); h.controller.destroy();
   }
 });
 
 test('R13.4 browser text loader rejects a stale drop before Documents receives content', async () => {
   const committed = [], messages = []; let resolve;
-  const context = vm.createContext({
-    filenameInput: { value: 'existing' }, t: key => key, window: {},
-    exportDocumentUiCommandPort: { invoke() {} },
-    exportDocumentControllerPort: {
-      async openExternalDocument({ loadContent }) { committed.push(await loadContent()); },
-      isStaleError: () => false
-    },
-    exportFileImportPort: { readBrowserFile: () => new Promise(done => { resolve = done; }) },
-    recordDocumentOperationError: (_, error) => error.message, showToast: value => messages.push(value)
-  });
-  vm.runInContext(section(exportSource, '    function getEditorNormalizedLength', '    // 切换主题'), context);
-  let current = true; const reading = context.loadFile({ name: 'a.md' }, { isCurrent: () => current });
-  current = false; resolve({ content: 'late' }); assert.equal(await reading, false);
-  assert.deepEqual(committed, []); assert.deepEqual(messages, []);
+  const files = createFileImportController({ readBrowserText: () => new Promise(done => { resolve = done; }), readNativeText: async () => '' });
+  const application = importHost({ files, notify: value => messages.push(value), documents: {
+    async openExternalDocument({ loadContent }) { committed.push(await loadContent()); }
+  } });
+  let current = true; const reading = application.openBrowserFile({ name: 'a.md' }, { isCurrent: () => current });
+  await new Promise(resolve => setImmediate(resolve));
+  current = false; resolve('late'); assert.equal(await reading, false);
+  assert.deepEqual(committed, []); assert.deepEqual(messages, []); application.destroy(); files.destroy();
 });
 
 test('R13.4 native image reads cannot insert or notify after another path wins or teardown', async () => {
   for (const mode of ['replace', 'destroy']) {
     const h = dropHost({ desktop: true }); let resolve;
-    h.context.eventsPlatformPort.call = () => new Promise(done => { resolve = done; });
-    const reading = h.context.handleNativeDroppedPath('C:\\slow.png');
-    if (mode === 'replace') await h.context.handleNativeDroppedPath('C:\\new.md'); else h.controller.destroy();
+    h.context.readNativeImage = () => new Promise(done => { resolve = done; });
+    const reading = h.openPath('C:\\slow.png');
+    if (mode === 'replace') await h.openPath('C:\\new.md'); else h.controller.destroy();
     resolve('data:image/png;base64,AA=='); assert.equal(await reading, false);
-    assert.equal(h.calls.some(x => x[0] === 'image' || x[0] === 'toast'), false); h.controller.destroy();
+    assert.equal(h.calls.some(x => x[0] === 'image' || x[0] === 'toast' && x[1] !== 'toastFileImported'), false); h.controller.destroy();
   }
 });
 
@@ -289,10 +261,10 @@ test('R13.4 completed native open does not register recents after a newer reques
     await loader();
     return new Promise(resolve => { finishOpen = resolve; });
   };
-  const old = h.context.handleNativeDroppedPath('C:\\old.md');
+  const old = h.openPath('C:\\old.md');
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(typeof finishOpen, 'function');
-  assert.equal(await h.context.handleNativeDroppedPath('C:\\new.png'), true);
+  assert.equal(await h.openPath('C:\\new.png'), true);
   finishOpen(true);
   assert.equal(await old, false);
   assert.equal(h.calls.some(call => call[0] === 'recent'), false);

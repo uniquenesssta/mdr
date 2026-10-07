@@ -1,6 +1,4 @@
     const webClipperCompatibilityHost = document.getElementById('compatibility-business-ports');
-    const webClipperPort = webClipperCompatibilityHost?.markdownEditorWebClipperPort;
-    if (!webClipperPort) throw new Error('Web clipper port is unavailable.');
     const webClipperEditorUiCommandPort = webClipperCompatibilityHost?.markdownEditorEditorUiCommandPort;
     const webClipperDocumentUiCommandPort = webClipperCompatibilityHost?.markdownEditorDocumentUiCommandPort;
 const webClipperPreviewCommandPort = webClipperCompatibilityHost?.markdownEditorPreviewCommandPort;
@@ -11,19 +9,7 @@ if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibilit
       getFindSearchOptions: setStatus => createFindSearchOptions(setStatus),
       afterFindMatch: match => afterFindMatch(match)
     });
-    webClipperDocumentUiCommandPort.register({ openWebClipper: () => openUrlModal() });
-
-    webClipperPort.start({ translate: (key, ...args) => t(key, ...args), notify: showToast,
-      insertMarkdown(markdown) {
-        const length = documentModel.getTextLength();
-        if (documentModel.getNonWhitespaceCount() === 0) documentModel.replaceRange(markdown, 0, length, 'end');
-        else documentModel.replaceRange('\n\n' + markdown, length, length, 'end');
-        webClipperPreviewCommandPort.update();
-        webClipperPreviewCommandPort.updateCount();
-        saveToLocal();
-      }
-    });
-    function openUrlModal() { webClipperPort.open(); }
+    function openUrlModal() { return webClipperDocumentUiCommandPort.invoke('openWebClipper'); }
 
     // Atomic 5.12：Find/Replace 对话框已迁移，classic 只保留 native 搜索与预览同步桥。
     function createFindSearchOptions(setStatus = () => {}) {

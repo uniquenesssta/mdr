@@ -1,9 +1,7 @@
     const eventsCompatibilityHost = document.getElementById('compatibility-business-ports');
     const eventsPlatformPort = eventsCompatibilityHost?.markdownEditorPlatformPort;
-    const eventsFileImportPort = eventsCompatibilityHost?.markdownEditorFileImportPort;
-    if (!eventsFileImportPort) throw new Error('File Import compatibility port is unavailable.');
-    const eventsDropImportPort = eventsCompatibilityHost?.markdownEditorDropImportPort;
-    if (!eventsDropImportPort) throw new Error('Drop Import compatibility port is unavailable.');
+    const eventsDocumentUiCommandPort = eventsCompatibilityHost?.markdownEditorDocumentUiCommandPort;
+    if (!eventsDocumentUiCommandPort) throw new Error('Document UI command port is unavailable.');
     const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
     const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
     const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
@@ -33,59 +31,6 @@
 
 
 
-
-    // R13.4 owns event routing; image policy/reading migrate in 13.6/13.7.
-    eventsDropImportPort.register({
-      openBrowserText: (file, request) => loadFile(file, request),
-      async openBrowserImage(file, request) {
-        try {
-          const result = await eventsDropImportPort.readImage(file, { signal: request.signal });
-          if (!request.isCurrent()) return false;
-          insertImageMarkdown(result.name, result.url);
-          showToast(t('toastImageInserted'));
-          return true;
-        } catch (error) {
-          if (!request.isCurrent() || eventsDropImportPort.isImageCancelled(error)) return false;
-          if (error?.code === 'IMAGE_IMPORT_TOO_LARGE') { showToast(t('toastImageTooLarge')); return false; }
-          if (error?.code === 'IMAGE_IMPORT_UNSUPPORTED') { showToast(t('toastDropUnsupported')); return false; }
-          throw error;
-        }
-      },
-      async openNativeText(resolvedPath, request) {
-        const name = resolvedPath.split(/[\\/]/).pop() || '';
-        const opened = await loadDocumentFromContentLoader(
-          name,
-          async () => {
-            const result = await eventsFileImportPort.readPath(resolvedPath);
-            if (!request.isCurrent()) throw Object.assign(new Error('文档读取已取消'), { code: 'FILE_IMPORT_CANCELLED' });
-            return result.content;
-          },
-          resolvedPath,
-          { nativePath: resolvedPath }
-        );
-        if (opened && request.isCurrent()) addRecentFile(resolvedPath, name);
-        return opened;
-      },
-      async openNativeImage(resolvedPath, request) {
-        try {
-          const result = await eventsDropImportPort.readImagePath(resolvedPath, { signal: request.signal });
-          if (!request.isCurrent()) return false;
-          insertImageMarkdown(result.name, result.url);
-          showToast(t('toastImageInserted'));
-          return true;
-        } catch (error) {
-          if (!request.isCurrent() || eventsDropImportPort.isImageCancelled(error)) return false;
-          throw error;
-        }
-      },
-      unsupported: () => showToast(t('toastDropUnsupported')),
-      onError: error => showToast(error?.message || String(error))
-    });
-
-    // Existing picker/recent/startup commands share the same path router until 13.13.
-    function handleNativeDroppedPath(path) {
-      return eventsDropImportPort.openPath(path);
-    }
 
     // Settings menu trigger preserves the legacy menu-close side effect without inline handlers.
     document.querySelector('[data-settings-open]')?.addEventListener('click', closeAppMenus);
@@ -166,7 +111,7 @@
       if (modifier) {
         if (key === 's' && e.shiftKey) action = () => eventsEditorUiCommandPort.invoke('saveAsMarkdown');
         else if (key === 's') action = () => eventsEditorUiCommandPort.invoke('saveCurrentFile');
-        else if (key === 'o') action = triggerImportFile;
+        else if (key === 'o') action = () => eventsDocumentUiCommandPort.invoke('importFile');
         else if (key === 'n') action = newDocument;
         else if (key === 'b' && e.shiftKey) action = toggleSidebar;
         else if (!outsideTextControl && key === 'z' && e.shiftKey) action = () => eventsEditorUiCommandPort.invoke('executeEditorAction', 'redo');
@@ -207,7 +152,7 @@
       const initialPath = eventsPlatformPort?.supports('desktop.fileSystem')
         ? await eventsPlatformPort.call('files', 'getInitialPath')
         : null;
-      if (initialPath) await handleNativeDroppedPath(initialPath);
+      if (initialPath) await eventsDocumentUiCommandPort.invoke('openImportPath', initialPath);
     }).catch(error => {
       console.error('Application initialization failed:', error);
       showToast(error?.message || String(error));

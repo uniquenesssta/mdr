@@ -6,6 +6,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { assessDependencyAudit } from './run-windows-dependency-audit.mjs';
+import { assessImportDocumentChain } from './verify-r13-import-chain.mjs';
 
 const repository = fileURLToPath(new URL('../../', import.meta.url));
 const requiredJobs = ['frontend', 'rust', 'native-boundary', 'repository-tests', 'dependency-advisories', 'webview-baseline'];
@@ -128,6 +129,8 @@ async function runCloseout() {
       webview: await json(join(webviewRoot, 'render-boundary-verification.json')),
       rustLog: await read(join(rust, 'rust-tests.log'))
     });
+    evidence.importDocumentChain = assessImportDocumentChain(
+      await json(join(webviewRoot, 'render-boundary-verification.json')), evidence.commit);
     evidence.handoffs = policy.records.filter(item => item.status === 'deferred-not-fixed');
     evidence.reviewedSources = policy.reviewedSources;
     evidence.scopeLimits = policy.scopeLimits;

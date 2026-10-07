@@ -33,3 +33,14 @@ test('Atomic 6.10 classic adapter keeps legacy calls outside Menu Model and pres
   assert.equal(bindings.has(C.DOCUMENT_SAVE), false);
   bindings.destroy();
 });
+
+
+test('R13.13 picker, recent and web menu intents invoke public document commands', () => {
+  const calls = [], bindings = createMenuCommandBindings();
+  const host = { markdownEditorDocumentUiCommandPort: commandPort(calls),
+    markdownEditorDocumentDomainPort: { normalizeRecentPath: value => value.trim() } };
+  const adapter = createClassicMenuCommandAdapter({ bindings, host, globalObject: {} }); adapter.start();
+  bindings.execute(C.FILE_OPEN); bindings.execute(C.RECENT_FILE_OPEN, { path: ' C:/a.md ' }); bindings.execute(C.IMPORT_WEB);
+  assert.deepEqual(calls, [['port', 'importFile'], ['port', 'openImportPath', 'C:/a.md'], ['port', 'openWebClipper']]);
+  adapter.destroy(); bindings.destroy();
+});

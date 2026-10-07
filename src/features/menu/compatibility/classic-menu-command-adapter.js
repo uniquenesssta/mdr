@@ -51,21 +51,21 @@ export function createClassicMenuCommandAdapter({ bindings, host, globalObject =
 
   const baseHandlers = {
     [C.DOCUMENT_NEW]: () => invokeDocument('newDocument'),
-    [C.FILE_OPEN]: () => invokeGlobal('triggerImportFile'),
+    [C.FILE_OPEN]: () => invokeDocument('importFile'),
     [C.DOCUMENT_SAVE]: () => invokeGlobal('saveCurrentFile'),
     [C.DOCUMENT_SAVE_AS]: () => invokeGlobal('saveAsMarkdown'),
     [C.DOCUMENT_RENAME_ACTIVE]: () => invokeGlobal('renameCurrentDocument'),
     [C.RECENT_FILE_OPEN]: payload => {
       const path = normalizeRecentPath(host, payload?.path);
       if (!path) return false;
-      return invokeGlobal('handleNativeDroppedPath', path);
+      return invokeDocument('openImportPath', path);
     },
     [C.RECENT_FILES_CLEAR]: () => {
       const result = requireRecentFilesPort(host).clear();
       invokeGlobal('showToast', '已清空最近打开记录');
       return result;
     },
-    [C.IMPORT_WEB]: () => invokeGlobal('openUrlModal'),
+    [C.IMPORT_WEB]: () => invokeDocument('openWebClipper'),
     [C.EXPORT_MARKDOWN]: () => invokeGlobal('exportFile'),
     [C.EXPORT_WORD]: () => invokeGlobal('exportWord'),
     [C.EXPORT_PDF]: () => invokeGlobal('exportPDF'),

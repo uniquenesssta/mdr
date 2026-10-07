@@ -1,4 +1,4 @@
-import { createFileImportController } from '../../../src/features/import/index.js';
+import { createFileImportController, createImportDocumentController, createImageImportController } from '../../../src/features/import/index.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -487,4 +487,88 @@ test('R13.3 cancelled or superseded file reads never create an empty or stale do
     assert.equal(h.session.records.length, 1); assert.equal(h.session.activeId, newer.record.id);
     assert.equal(h.model.createSnapshot(), 'new'); importer.destroy();
   }
+});
+
+
+function createImportHarness(h, { read = async () => '正文\r\ntext', imageRead = async () => 'data:image/png;base64,AA==', afterDocumentOpen = async () => true } = {}) {
+  const events = [], messages = [], recents = [];
+  const files = createFileImportController({ readBrowserText: read, readNativeText: read });
+  const images = createImageImportController({ readBrowserImage: imageRead, readNativeImage: imageRead });
+  const application = createImportDocumentController({ files, images, documents: h.controller,
+    editor: { insertImage: url => h.model.setContent(h.model.createSnapshot() + '![image](' + url + ')'),
+      appendMarkdown: value => h.model.setContent(h.model.createSnapshot() + value) },
+    prepareTransition: () => events.push('prepare'),
+    getDocumentOptions: () => ({ currentTitle: h.model.title, fallbackTitle: 'Untitled' }),
+    afterDocumentOpen, addRecentFile: (...args) => recents.push(args), notify: value => messages.push(value)
+  });
+  return { application, files, images, events, messages, recents,
+    destroy() { application.destroy(); application.destroy(); files.destroy(); images.destroy(); h.controller.destroy(); } };
+}
+
+test('R13.13 real Documents chain saves before read, normalizes CRLF, commits once and registers successful native paths', async () => {
+  const order = [];
+  const repository = createRepository({ saveImpl: async () => { order.push('save'); return { native: false }; } });
+  const h = createHarness({ repository });
+  const original = await h.controller.newDocument({ title: 'Original', content: 'unsaved body' });
+  const chain = createImportHarness(h, { read: async () => { order.push('read'); return '正文\r\ntext'; } });
+  assert.equal(await chain.application.openNativeText('C:\\notes\\import.md'), true);
+  assert.deepEqual(order, ['save', 'read']);
+  assert.equal(repository.content.get(original.record.id), 'unsaved body');
+  assert.equal(h.session.records.length, 2); assert.equal(h.model.createSnapshot(), '正文\ntext');
+  assert.equal(chain.recents.length, 1); assert.equal(chain.recents[0][0], 'C:\\notes\\import.md');
+  chain.destroy(); assert.throws(() => chain.application.openBrowserFile({ name: 'a.md' }), /destroyed/);
+});
+
+test('R13.13 save and read failures preserve the current document and never create empty records', async () => {
+  for (const phase of ['save', 'read']) {
+    const h = createHarness();
+    const original = await h.controller.newDocument({ title: 'Original', content: 'stable' });
+    let reads = 0;
+    if (phase === 'save') h.repository.save = async () => { throw new Error('save denied'); };
+    const chain = createImportHarness(h, { read: async () => { reads++; throw new Error('read denied'); } });
+    assert.equal(await chain.application.openNativeText('C:\\a.md'), false);
+    assert.equal(reads, phase === 'save' ? 0 : 1);
+    assert.equal(h.session.records.length, 1); assert.equal(h.session.activeId, original.record.id);
+    assert.equal(h.model.createSnapshot(), 'stable'); assert.deepEqual(chain.recents, []);
+    assert.equal(chain.messages.length, 1); chain.destroy();
+  }
+});
+
+test('R13.13 cancellation during save prevents source I/O and cancellation during read rejects late results', async () => {
+  for (const phase of ['save', 'read']) {
+    const h = createHarness(); const original = await h.controller.newDocument({ title: 'Original', content: 'stable' });
+    const waiting = deferred(); let reads = 0;
+    if (phase === 'save') h.repository.save = () => waiting.promise;
+    const chain = createImportHarness(h, { read: () => { reads++; return waiting.promise; } });
+    const pending = chain.application.openBrowserFile({ name: 'slow.md' });
+    await tick(); chain.application.cancel(); waiting.resolve(phase === 'save' ? { native: false } : 'late');
+    assert.equal(await pending, false); assert.equal(reads, phase === 'save' ? 0 : 1);
+    assert.equal(h.session.records.length, 1); assert.equal(h.session.activeId, original.record.id);
+    assert.equal(h.model.createSnapshot(), 'stable'); assert.deepEqual(chain.messages, []); chain.destroy();
+  }
+});
+
+test('R13.13 image imports cannot mutate a different document after switching and destroy cancels text', async () => {
+  const h = createHarness(); await h.controller.newDocument({ title: 'Original', content: 'stable' });
+  const waiting = deferred(); const chain = createImportHarness(h, { imageRead: () => waiting.promise });
+  const pending = chain.application.insertNativeImage('C:\\slow.png');
+  const current = await h.controller.newDocument({ title: 'Current', content: 'current' });
+  waiting.resolve('data:image/png;base64,AA=='); assert.equal(await pending, false);
+  assert.equal(h.session.activeId, current.record.id); assert.equal(h.model.createSnapshot(), 'current');
+  assert.deepEqual(chain.messages, []); chain.destroy();
+  const empty = createHarness(); const read = deferred(); const next = createImportHarness(empty, { read: () => read.promise });
+  const reading = next.application.openBrowserFile({ name: 'slow.md' }); await tick(); next.application.destroy();
+  read.resolve('late'); assert.equal(await reading, false); assert.equal(empty.session.records.length, 0);
+  next.destroy();
+});
+
+test('R13.13 successful empty text is a document; empty or failed web conversion is not', async () => {
+  const h = createHarness(); const chain = createImportHarness(h, { read: async () => '' });
+  assert.equal(chain.application.insertWebMarkdown('  '), false); assert.equal(h.session.records.length, 0);
+  assert.equal(await chain.application.openBrowserFile({ name: 'empty.md' }), true);
+  assert.equal(h.session.records.length, 1); assert.equal(h.model.createSnapshot(), '');
+  const id = h.session.activeId;
+  assert.equal(chain.application.insertWebMarkdown('web body'), true);
+  assert.equal(h.session.activeId, id); assert.equal(h.session.records.length, 1);
+  assert.equal(h.model.createSnapshot(), 'web body'); chain.destroy();
 });

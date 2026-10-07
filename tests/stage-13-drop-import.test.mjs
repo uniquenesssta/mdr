@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile, access } from 'node:fs/promises';
-import { createDropImportController, mountClassicDropImportPort } from '../src/features/import/index.js';
+import { createDropImportController } from '../src/features/import/index.js';
 
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -94,31 +94,25 @@ test('new drops and destruction invalidate pending commands and suppress stale f
   assert.equal(await h.fire('drop', [{ name: 'a.md' }]), false); assert.deepEqual(h.calls.at(-1), ['error', error]); h.c.destroy();
 });
 
-test('scoped drop bridge has duplicate protection, terminal teardown and safe remount', async () => {
-  const target = { addEventListener() {}, removeEventListener() {} };
-  const c = createDropImportController({ target });
+test('public Drop controller enforces activation and terminal teardown without a classic bridge', async () => {
+  const c = createDropImportController({ target: { addEventListener() {}, removeEventListener() {} } });
   assert.throws(() => c.openPath('a.md'), /not started/);
   assert.throws(() => c.start({}), /requires setOverlayVisible/);
-  assert.throws(() => mountClassicDropImportPort(null, c), /requires a host/);
-  const host = {}, mounted = mountClassicDropImportPort(host, c), api = mounted.api;
-  assert.equal(host.markdownEditorDropImportPort, api); assert.equal(Object.isFrozen(api), true); assert.deepEqual(Object.keys(host), []);
-  assert.throws(() => mountClassicDropImportPort(host, c), /already mounted/);
-  const h = harness(); api.register(h.callbacks); assert.equal(await api.openPath('a.md'), false);
-  assert.throws(() => api.register(h.callbacks), /already started/);
-  mounted.destroy(); mounted.destroy(); assert.equal(Object.hasOwn(host, 'markdownEditorDropImportPort'), false);
-  assert.throws(() => api.openPath('a.md'), /destroyed/); assert.throws(() => api.register({}), /destroyed/);
-  const replacement = mountClassicDropImportPort(host, c); mounted.destroy(); assert.equal(host.markdownEditorDropImportPort, replacement.api);
-  replacement.destroy(); c.destroy(); h.c.destroy();
+  const h = harness(); c.start(h.callbacks);
+  assert.throws(() => c.start(h.callbacks), /already started/);
+  c.destroy(); c.destroy(); assert.throws(() => c.openPath('a.md'), /destroyed/); h.c.destroy();
 });
 
 test('production routing has one owner and deletes the obsolete classifier bridge', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
   const [events, main, drop, fixture] = await Promise.all([read('public/app/events.js'), read('src/main.js'), read('src/features/import/files/drop-import-controller.js'), read('tests/architecture/fixtures/production-modules.json')]);
   assert.doesNotMatch(events, /dragCounter|addEventListener\('drag(?:enter|leave|over)'|addEventListener\('drop'|call\('dragDrop', 'subscribe'|eventsImportClassifierPort/);
-  assert.match(events, /return eventsDropImportPort\.openPath\(path\)/);
+  assert.doesNotMatch(events, /markdownEditorDropImportPort|handleNativeDroppedPath/);
+  assert.match(main, /openImportPath: path => dropImportController\.openPath\(path\)/);
   assert.doesNotMatch(drop, /FileReader|readAs|\.readText\(|\.readImage\(|showToast|classList/);
-  assert.equal(main.match(/dropImportController\.destroy\(\)/g).length, 2);
-  assert.equal(main.match(/dropImportPort\.destroy\(\)/g).length, 2);
+  assert.equal(main.match(/dropImportController\.destroy\(\)/g).length, 3);
+  assert.doesNotMatch(main + fixture, /classic-drop-import-port|mountClassicDropImportPort/);
+  await assert.rejects(access(new URL('../src/features/import/compatibility/classic-drop-import-port.js', import.meta.url)), { code: 'ENOENT' });
   assert.doesNotMatch(fixture, /classic-import-classifier-port/);
   await assert.rejects(access(new URL('../src/features/import/compatibility/classic-import-classifier-port.js', import.meta.url)), { code: 'ENOENT' });
 });

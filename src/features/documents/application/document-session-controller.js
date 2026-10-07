@@ -252,15 +252,22 @@ export function createDocumentSessionController({
     loadContent,
     currentTitle,
     fallbackTitle = '未命名文档',
-    expectedTextLength = null
+    expectedTextLength = null,
+    signal
   } = {}) => {
     if (typeof loadContent !== 'function') throw new TypeError('External document open requires a content loader.');
+    const assertNotCancelled = () => {
+      if (signal?.aborted) throw Object.assign(new Error('文档读取已取消'), { code: 'FILE_IMPORT_CANCELLED' });
+    };
+    assertNotCancelled();
     const operation = beginOperation('import');
     try {
       await saveActive({ operation, title: currentTitle, fallbackTitle, snapshotReason: 'document-import' });
       assertCurrent(operation);
+      assertNotCancelled();
       const content = String(await loadContent() ?? '');
       assertCurrent(operation);
+      assertNotCancelled();
       const expectedLengthValue = typeof expectedTextLength === 'function'
         ? expectedTextLength(content)
         : expectedTextLength;

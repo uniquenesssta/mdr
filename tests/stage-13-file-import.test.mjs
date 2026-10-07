@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
-import { createFileImportController, mountClassicFileImportPort } from '../src/features/import/index.js';
+import { createFileImportController } from '../src/features/import/index.js';
 
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
 const cancelled = error => error.code === 'FILE_IMPORT_CANCELLED';
@@ -79,24 +79,24 @@ test('cancel before the read microtask prevents I/O from starting', async () => 
   c.cancel(); await rejected; assert.equal(calls, 0); c.destroy();
 });
 
-test('classic File Import bridge is scoped, rejects duplicates and becomes terminal', async () => {
-  const c = createFileImportController({ readBrowserText: async () => 'browser', readNativeText: async () => 'native' });
-  const host = {}; const port = mountClassicFileImportPort(host, c);
-  assert.equal(host.markdownEditorFileImportPort, port.api); assert.deepEqual(Object.keys(host), []);
-  assert.throws(() => mountClassicFileImportPort(host, c), /already mounted/);
-  assert.equal((await port.api.readPath('a.md')).content, 'native');
-  port.destroy(); port.destroy(); assert.equal(Object.hasOwn(host, 'markdownEditorFileImportPort'), false);
-  assert.throws(() => port.api.readPath('a.md'), /destroyed/); c.destroy();
+test('public reader accepts external cancellation without starting or publishing I/O', async () => {
+  let calls = 0;
+  const controller = createFileImportController({ readBrowserText: async () => { calls++; return 'late'; }, readNativeText: async () => { calls++; return 'late'; } });
+  for (const method of ['readPath', 'readBrowserFile']) {
+    const abort = new AbortController(); abort.abort();
+    await assert.rejects(controller[method](method === 'readPath' ? 'a.md' : { name: 'a.md' }, { signal: abort.signal }), cancelled);
+  }
+  assert.equal(calls, 0); controller.destroy(); controller.destroy();
 });
 
 test('text callers use Import while Documents retains lazy load and document commit ownership', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
-  const [main, legacy, events] = await Promise.all([read('src/main.js'), read('public/app/export.js'), read('public/app/events.js')]);
+  const [main, legacy, events, coordinator] = await Promise.all([read('src/main.js'), read('public/app/export.js'), read('public/app/events.js'), read('src/features/import/application/import-document-controller.js')]);
   assert.match(main, /readNativeText: path => platform\.files\.readText\(path\)/);
-  assert.match(legacy, /exportFileImportPort\.readBrowserFile\(file\)/);
-  assert.match(legacy, /exportDocumentControllerPort\.openExternalDocument\(/);
-  assert.doesNotMatch(legacy.slice(legacy.indexOf('    function loadFile')), /new FileReader|readAsText/);
-  assert.match(events, /eventsFileImportPort\.readPath\(resolvedPath\)/);
+  assert.match(coordinator, /files\.readBrowserFile\(file, \{ signal \}\)/);
+  assert.match(coordinator, /documents\.openExternalDocument\(/);
+  assert.match(coordinator, /files\.readPath\(path, \{ signal \}\)/);
+  assert.doesNotMatch(legacy + events, /markdownEditorFileImportPort|function loadFile|loadDocumentFromContentLoader/);
+  assert.match(main, /createImportDocumentController/);
   assert.equal(main.match(/fileImportController\.destroy\(\)/g).length, 2);
-  assert.equal(main.match(/fileImportPort\.destroy\(\)/g).length, 2);
 });

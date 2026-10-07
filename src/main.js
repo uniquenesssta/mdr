@@ -1,6 +1,6 @@
 import './styles/index.css';
-import { createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort } from './features/import/index.js';
-import { createWebClipperController, createWebClipperView, mountClassicWebClipperPort, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController, mountClassicFileImportPort } from './features/import/index.js';
+import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
+import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
 import { configurePerformancePlatform, configurePerformanceRuntimeStats } from './runtime/performance.js';
@@ -146,10 +146,6 @@ const dropImageController = createImageImportController({
   readNativeImage: path => platform.files.readImage(path, '')
 });
 const dropOverlayView = createDropOverlayView({ element: document.getElementById('drop-overlay') });
-const dropImportPort = mountClassicDropImportPort(compatibilityPlatformHost, {
-  start: callbacks => dropImportController.start({ ...callbacks, setOverlayVisible: dropOverlayView.setVisible }),
-  openPath: dropImportController.openPath
-}, dropImageController);
 const browserImportReader = createBrowserFileReader({
   FileReaderClass: window.FileReader,
   readErrorMessage: '无法读取所选文档',
@@ -164,18 +160,11 @@ const fileImportController = createFileImportController({
   readBrowserText: (file, options) => browserImportReader.readText(file, options),
   readNativeText: path => platform.files.readText(path)
 });
-const fileImportPort = mountClassicFileImportPort(compatibilityPlatformHost, fileImportController);
 const webFetchCoordinator = createWebFetchCoordinator({
   nativeFetch: platform.capabilities.desktop.webFetch ? (url, options) => platform.web.fetchText(url, options) : undefined,
   browserFetch: (url, options) => window.fetch(url, options)
 });
-const webClipperPort = mountClassicWebClipperPort(compatibilityPlatformHost, ({ insertMarkdown, translate, notify }) => {
-  const controller = createWebClipperController({ fetchCoordinator: webFetchCoordinator,
-    extract: html => extractHtml(html, document), convert: convertExtractedHtml, insertMarkdown,
-    native: platform.capabilities.desktop.webFetch });
-  try { return createWebClipperView({ root: document.getElementById('url-modal'), controller, translate, notify }); }
-  catch (error) { controller.destroy(); throw error; }
-});
+let destroyImportFeature = () => {};
 const backgroundTaskScheduler = createTaskScheduler({ runtime: window });
 const backgroundTaskSchedulerPort = mountClassicTaskSchedulerPort(compatibilityPlatformHost, backgroundTaskScheduler);
 const markdownPresentation = createMarkdownPresentationApi();
@@ -303,13 +292,11 @@ window.addEventListener('pagehide', () => {
   previewPresentationPort.destroy();
   backgroundTaskSchedulerPort.destroy();
   backgroundTaskScheduler.destroy();
+  destroyImportFeature();
   void dropImportController.destroy();
   dropOverlayView.destroy();
   dropImageController.destroy();
-  dropImportPort.destroy();
   fileImportController.destroy();
-  fileImportPort.destroy();
-  webClipperPort.destroy();
   webFetchCoordinator.destroy();
   compatibilityPlatformPort.destroy();
   void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
@@ -647,6 +634,7 @@ async function loadAppModules() {
   const destroyDocumentFeatures = () => {
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
+    destroyImportFeature();
     destroySelectionSync();
     if (windowController) {
       const pendingWindowDestroy = windowController.destroy();
@@ -833,6 +821,65 @@ async function loadAppModules() {
     ? editorUiCommandPort.invoke('getLayoutMode')
     : 'both';
   const readCurrentDocumentTitle = () => requireElement('#filename', 'Document title input').value;
+  const importDocumentController = createImportDocumentController({
+    files: fileImportController, images: dropImageController, documents: documentController,
+    editor: {
+      insertImage: (url, options) => runMutation('insertImage', url, options),
+      appendMarkdown: markdown => editorController.appendImportedMarkdown(markdown)
+    },
+    prepareTransition: reason => autosaveController.cancelPending(reason),
+    getDocumentOptions: () => ({ currentTitle: readCurrentDocumentTitle(),
+      title: t('filenameDefault'), fallbackTitle: t('filenameDefault') }),
+    async afterDocumentOpen(result) {
+      if (!await documentUiCommandPort.invoke('applyDocumentLifecycleUi', result)) return false;
+      if (!documentController.isCurrentGeneration(result.generation)) return false;
+      void sidebarTabController.select('docs');
+      return true;
+    },
+    addRecentFile: (path, name) => recentFilesRepository.add(path, { name }),
+    notify, translate: t,
+    record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
+  });
+  let fileImportView = null, webClipperView = null, webClipperController = null, unregisterImportCommands = null;
+  let importFeatureDestroyed = false;
+  destroyImportFeature = () => {
+    if (importFeatureDestroyed) return;
+    importFeatureDestroyed = true;
+    unregisterImportCommands?.();
+    fileImportView?.destroy();
+    webClipperView?.destroy();
+    webClipperController?.destroy();
+    importDocumentController.destroy();
+    void dropImportController.destroy();
+  };
+  try {
+    fileImportView = createFileImportView({ input: requireElement('#importFile', 'File Import input'),
+      chooseFile: platform.capabilities.desktop.dialogs ? options => platform.dialogs.openFile(options) : null,
+      openPath: path => dropImportController.openPath(path),
+      openBrowserFile: file => importDocumentController.openBrowserFile(file), notify });
+    webClipperController = createWebClipperController({ fetchCoordinator: webFetchCoordinator,
+      extract: html => extractHtml(html, document), convert: convertExtractedHtml,
+      insertMarkdown: markdown => importDocumentController.insertWebMarkdown(markdown),
+      native: platform.capabilities.desktop.webFetch });
+    webClipperView = createWebClipperView({ root: requireElement('#url-modal', 'Web Clipper modal'),
+      controller: webClipperController, translate: t, notify });
+    unregisterImportCommands = documentUiCommandPort.register({
+      importFile: () => fileImportView.open(),
+      openImportPath: path => dropImportController.openPath(path),
+      importTextContent: (name, content, path = '') => importDocumentController.openTextContent(name, content, path),
+      openWebClipper: () => webClipperView.open(),
+      cancelImport: () => importDocumentController.cancel()
+    });
+    dropImportController.start({
+      openBrowserText: (file, request) => importDocumentController.openBrowserFile(file, request),
+      openNativeText: (path, request) => importDocumentController.openNativeText(path, request),
+      openBrowserImage: (file, request) => importDocumentController.insertBrowserImage(file, request),
+      openNativeImage: (path, request) => importDocumentController.insertNativeImage(path, request),
+      setOverlayVisible: dropOverlayView.setVisible,
+      unsupported: () => notify(t('toastDropUnsupported')),
+      onError: error => notify(String(error?.message || error))
+    });
+  } catch (error) { destroyImportFeature(); destroyDocumentFeatures(); throw error; }
   const saveCurrentFileFromUi = async () => {
     try {
       const result = await saveController.saveCurrentFile({
@@ -1573,13 +1620,11 @@ loadAppModules().then(() => {
     details: { documentReadyState: document.readyState }
   });
 }).catch((error) => {
+  destroyImportFeature();
   void dropImportController.destroy();
   dropOverlayView.destroy();
   dropImageController.destroy();
-  dropImportPort.destroy();
   fileImportController.destroy();
-  fileImportPort.destroy();
-  webClipperPort.destroy();
   webFetchCoordinator.destroy();
   destroyLayoutStateFeature();
   console.error(error);

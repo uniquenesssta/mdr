@@ -34,6 +34,7 @@ if (!coreTaskSchedulerPort) throw new Error('Task Scheduler compatibility port i
 if (!coreSaveStatusStorePort) throw new Error('Save Status Store compatibility port is unavailable.');
 const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
 coreDocumentUiCommandPort.register({
+  applyDocumentLifecycleUi: result => applyDocumentLifecycleUi(result),
   openDocument: documentId => openDocument(documentId),
   closeDocument: documentId => closeDocument(documentId),
   renameDocument: documentId => renameDocument(documentId),
@@ -310,26 +311,6 @@ const editor = document.getElementById('editor');
       });
     }
 
-    async function triggerImportFile() {
-      if (corePlatformPort?.supports('desktop.dialogs')) {
-        try {
-          const path = await corePlatformPort.call('dialogs', 'openFile', {
-            title: '打开 Markdown 或文本文件',
-            extensions: ['md', 'markdown', 'txt'],
-            filterName: 'Markdown 和文本文件'
-          });
-          if (path) await handleNativeDroppedPath(path);
-        } catch (error) {
-          showToast(recordDocumentOperationError('open-file-dialog', error));
-        }
-        return;
-      }
-      const input = document.getElementById('importFile');
-      if (!input) return;
-      input.value = '';
-      input.click();
-    }
-
     function getCurrentTimestamp() {
       return Date.now();
     }
@@ -547,8 +528,7 @@ const editor = document.getElementById('editor');
         void coreSidebarControllerPort.select('files');
         return true;
       }
-      if (typeof handleNativeDroppedPath !== 'function') return false;
-      const opened = await handleNativeDroppedPath(path);
+      const opened = await coreDocumentUiCommandPort.invoke('openImportPath', path);
       if (opened) void coreSidebarControllerPort.select('files');
       return opened;
     };

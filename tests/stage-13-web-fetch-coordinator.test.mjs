@@ -144,7 +144,7 @@ test('clipper close/reopen and edited inputs reject late HTML', async () => {
 test('web routing has one feature owner and the production inventory includes it', async () => {
   const source = await readFile(new URL('../public/app/web-clipper.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /await fetch\(|allorigins|codetabs|fetchWithNativeBackend|status\.innerHTML/);
-  assert.match(source, /webClipperPort\.open\(\)/);
+  assert.match(source, /webClipperDocumentUiCommandPort\.invoke\('openWebClipper'\)/);
   const controller = await readFile(new URL('../src/features/import/web-clipper/web-clipper-controller.js', import.meta.url), 'utf8');
   assert.match(controller, /fetchCoordinator\.isCurrent\(result\)/);
   await assertProductionInventory();

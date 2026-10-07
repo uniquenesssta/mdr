@@ -47,3 +47,8 @@
 文档收尾提交 `59b0ba25b56134a804fc1caa6da078e147230bf8` 的 [CI 37606184822](https://github.com/uniquenesssta/mdr/actions/runs/37606184822) 未通过。唯一直接失败为 `npm audit --audit-level=high`：source-map-js 1.2.1 新增高危公告 GHSA-68fv-2mgg-jv7q；同轮发现 DOMPurify 两则 low 公告及 KaTeX 公告（含 Mermaid 传递影响），按受影响包计为 3 low、1 high。全部 Node、架构、浏览器、构建、Rust、原生和 WebView 行为检查成功，最终证据汇总因前端 job 失败而拒绝准入。没有把新依赖失败归类为可忽略的文档问题。
 
 R13.12 的 `fabf087` 功能验收保留为历史证据，不能用它声称当前依赖安全门禁通过。R13.13 启动授权已接收，先定向修补当前依赖并执行 Windows 回归，业务链路迁移等待前置补丁验证。[当前交接](R13-13-DETAILS.md)。
+
+
+## 前置补丁验收与13.13续接
+
+`927988119d3a4637b084eddeb032503d313363e1` / [Windows CI 37651965466](https://github.com/uniquenesssta/mdr/actions/runs/37651965466) 七组已全部通过，前置依赖门禁恢复。R13.13 已依现有授权实施完整导入链，待新提交 Windows 验收；本记录中“待前置回归”描述保留作当时状态，不代表当前仍受阻。两项 KaTeX/Mermaid low 公告仍未修复，[当前13.13详情](R13-13-DETAILS.md)明确处置边界。13.12历史功能验收不改写。

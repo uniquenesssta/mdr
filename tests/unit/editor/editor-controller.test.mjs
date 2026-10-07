@@ -151,3 +151,15 @@ test('Atomic 5.8 production integration gives input one Controller transaction p
   assert.doesNotMatch(controller, /\b(?:undo|redo|history)\b/i);
   assert.equal(controller.includes('@codemirror/'), false);
 });
+
+
+test('R13.13 imported Markdown replaces blank content or appends in one model transaction', () => {
+  const h = createHarness();
+  assert.equal(h.controller.appendImportedMarkdown('  '), false); assert.deepEqual(h.replaceCalls, []);
+  h.controller.appendImportedMarkdown('# web');
+  assert.deepEqual(h.replaceCalls.pop(), { replacement: '\n\n# web', from: 5, to: 5, selectionMode: 'end' });
+  h.state.nonWhitespaceCount = 0;
+  h.controller.appendImportedMarkdown('# replacement');
+  assert.deepEqual(h.replaceCalls.pop(), { replacement: '# replacement', from: 0, to: 5, selectionMode: 'end' });
+  h.controller.destroy(); assert.throws(() => h.controller.appendImportedMarkdown('late'), /destroyed/);
+});

@@ -23,7 +23,7 @@ export function createFileImportController({ readBrowserText, readNativeText } =
     return true;
   };
 
-  function read(name, filePath, load) {
+  function read(name, filePath, load, signal) {
     assertActive();
     cancel();
     const operation = new AbortController();
@@ -34,11 +34,15 @@ export function createFileImportController({ readBrowserText, readNativeText } =
         if (settled) return;
         settled = true;
         operation.signal.removeEventListener('abort', onAbort);
+        signal?.removeEventListener('abort', forwardAbort);
         if (pending === operation) pending = null;
         callback(value);
       };
       const onAbort = () => finish(reject, new FileImportCancelledError());
+      const forwardAbort = () => operation.abort();
       operation.signal.addEventListener('abort', onAbort, { once: true });
+      signal?.addEventListener('abort', forwardAbort, { once: true });
+      if (signal?.aborted) operation.abort();
       Promise.resolve().then(() => {
         if (operation.signal.aborted) throw new FileImportCancelledError();
         return load(operation.signal);
@@ -54,18 +58,18 @@ export function createFileImportController({ readBrowserText, readNativeText } =
   }
 
   return Object.freeze({
-    readBrowserFile(file) {
+    readBrowserFile(file, { signal } = {}) {
       assertActive();
       if (!file) return Promise.reject(new TypeError('File Import requires a file.'));
-      return read(String(file.name || ''), '', signal => readBrowserText(file, { signal }));
+      return read(String(file.name || ''), '', ownSignal => readBrowserText(file, { signal: ownSignal }), signal);
     },
-    readPath(path) {
+    readPath(path, { signal } = {}) {
       assertActive();
       const filePath = typeof path === 'string' ? path.trim() : '';
       if (classifyImportPath(filePath) !== IMPORT_KINDS.TEXT) {
         return Promise.reject(new TypeError('File Import requires a supported text path.'));
       }
-      return read(filePath.split(/[\\/]/).pop(), filePath, () => readNativeText(filePath));
+      return read(filePath.split(/[\\/]/).pop(), filePath, ownSignal => readNativeText(filePath, { signal: ownSignal }), signal);
     },
     cancel() { assertActive(); return cancel(); },
     destroy() { if (destroyed) return; destroyed = true; cancel(); }
