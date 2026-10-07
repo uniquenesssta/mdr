@@ -1,6 +1,6 @@
 # R13.12 Web Clipper Controller/UI
 
-状态：**已实现，待 Windows CI，未验收**。沿用 `agent/r13-stage`。13.11已在 `fb019d4adab4876baf01b5a8cecd12df1891e6a5` / [CI 36966040484](https://github.com/uniquenesssta/mdr/actions/runs/36966040484) 七组 Windows 通过；用户授权“收尾11 开始12”。
+状态：**已验收并收尾**。修复提交 `fabf0873269a220b88c58684d8196e996eb7926b` / [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组全部成功，用户于 2026-10-07 确认“13.12已通过”。沿用 `agent/r13-stage`；13.13 尚未开始。以下保留实施与首轮失败记录。
 
 ## 实现与职责
 
@@ -35,3 +35,9 @@
 新增清理测试覆盖延迟退出、残留子进程、未知错误和权限拒绝。生产源与历史验收快照不变；仅本地语法/README/差异静态核对，行为交由Windows CI。13.12仍未验收，13.13未开始。
 
 已通过Context7核对Node.js 22官方文档：process.kill(pid, 0)仅探测存在性，不发送终止信号；Windows同样支持。
+
+## 正式收尾（2026-10-07）
+
+已核对上述精确提交的七个 Windows job 及全部步骤成功：完整 Node 回归、前端/浏览器与构建、架构/旧运行时/生成文件/README 门禁、Rust/Clippy/check、原生编译链接、真实 Windows WebView 和官方依赖公告检查均通过；同一运行的精确提交证据汇总成功，七份证据制品已归档。R13.12 的控制器/界面职责、取消与过期会话隔离、重复插入和销毁回归验收完成。
+
+本次仅更新验收与交接文档，不改变已验证的源码、测试、配置或依赖。R13.13 继续承接完整导入到文档链及受控网页抓取→提取/转换→文档→Preview/Hybrid 的真实 Windows WebView 联调；R13.14 负责旧实现和兼容端口清除。A03/A05 的本阶段全链路验收保持待办，R13 尚未整体收官，未启动后续任务。

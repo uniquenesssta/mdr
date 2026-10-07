@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-07：R13.12 在 `fabf087` / [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组及全部步骤通过，控制器/界面、会话取消与重复插入回归验收并收尾。R13.13 尚未开始，A03/A05 完整剪藏链路仍待联调。[详情](docs/R13-12-DETAILS.md)。
+
 - 2026-10-02：修复13.12首轮CI：同步内联事件数量及Modal/Platform职责迁移断言；Windows浏览器清理遇到taskkill子进程竞争错误时，核实全部报错PID和根进程已退出后才允许通过，残留或不明错误继续失败。新增清理回归，生产代码不变，待Windows重验。[详情](docs/R13-12-DETAILS.md)。
 
 - 2026-10-02：13.11 在 `fb019d4` / [Windows CI 36966040484](https://github.com/uniquenesssta/mdr/actions/runs/36966040484) 七组通过并收尾；开始13.12，剪藏输入/源内容/会话迁入控制器，界面迁入 Import，移除旧全局状态和内联按钮事件，新增生命周期及真实 DOM 回归，待 Windows CI。[详情](docs/R13-12-DETAILS.md)。
