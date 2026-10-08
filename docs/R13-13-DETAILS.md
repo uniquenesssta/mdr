@@ -1,8 +1,28 @@
 # R13.13 导入到文档链
 
-状态：**前置依赖补丁已通过七组 Windows CI；完整业务链与回归已实现，待本提交 Windows 验收**。
+状态：**完整导入链的真实 Windows WebView 已通过；首轮累计回归未完全通过，本轮修补测试迁移遗漏，待新提交 Windows 验收**。
 
 用户于 2026-10-08 授权“开始13.13”。沿用唯一阶段分支 `agent/r13-stage`，本轮基线 `59b0ba25b56134a804fc1caa6da078e147230bf8`，初始工作区干净。R13.12 的功能验收基于 `fabf0873269a220b88c58684d8196e996eb7926b` / [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组通过；后续文档收尾 CI 的当前依赖门禁曾失败。前置补丁 `927988119d3a4637b084eddeb032503d313363e1` / [Windows CI 37651965466](https://github.com/uniquenesssta/mdr/actions/runs/37651965466) 七组均成功，已依原启动授权续接完整导入链。用户本轮要求“收尾13”，按 R13.13 收尾实施；没有推进 R13.14 或宣布 R13 整体完成。
+
+## 首轮累计回归失败与本轮修复（2026-10-08）
+
+`92242e611793f4caee2ae42c0b3947c39fd7829e` / [Windows CI 37660954894](https://github.com/uniquenesssta/mdr/actions/runs/37660954894) 已结束：真实 Windows WebView 导入链与原有安全回归、Rust、原生编译链接、依赖四个 job 成功；全仓 Node 和前端 job 失败，最终汇总按原门禁拒绝验收。前端生产构建、built-app 浏览器回归、审计和四项静态门禁均成功。
+
+完整失败日志确认14个具名断言仍固定于已迁移的 classic 入口或旧事件数量，另有 `create-platform.test.mjs` 静态导入已删除的 `mountClassicDropImportPort`，使该文件无法加载。不存在以成功 job 替代失败 job 的准入。以下对应关系补齐首轮漏项；本轮没有修改产品源码、模型、锁文件、历史夹具、工作流或验收脚本。
+
+| 失败测试与原目的 | 当前接口/行为断言 | 保留场景 |
+| --- | --- | --- |
+| architecture/stage-05-legacy-path-removal：剪藏只修改唯一模型 | classic 打开委托→Import 插入→Editor Controller→model.replaceRange | 空白替换、正文末尾两换行追加、单次事务；原 Editor 行为回归仍执行 |
+| architecture/stage-06-recent-files-menu 与 unit/documents/recent-files-repository：Documents 独占最近文件持久化，仅成功登记 | Import 在 UI 完成、意图和 Documents 代次检查后调用注入回调；main 注入现有 repository.add | 仓库存储/订阅、Menu 只读、读取/保存失败、取消/过期结果不登记，冻结模型 fingerprint |
+| stage-01-handoff：历史事实与当前精确迁移清单 | 当前 inline events 为34，另检查移除的 input change/file-menu handler 不存在；历史67/9/38保持 | 实际生产清单、无新增全局、架构扫描与历史交接 |
+| stage-10-remove-legacy-save：导入准备不复制保存权威 | Import 准备先于 Documents.openExternalDocument；main 注入 autosave.cancelPending，export 无导入实现 | Export/Save/Autosave 边界、保存前后顺序及错误保护 |
+| stage-13-drop-overlay/file-type-classifier/image-policy：单一分类与策略及生命周期 | main 的 owned Drop callbacks、Import reader 调用、实际 destroy 路径 | 文本优先、原生扩展、MIME与大小/确认阈值、overlay 与晚到回调清理 |
+| unit/platform/create-platform：执行生产装配而非复制选项 | VM 执行 main 实际 reader/controller 装配和当前 start 回调，使用公开 Import controller | browser/desktop 文本和图片读取、原生/DOM去重、unsupported/error 不误触发、订阅清理、terminal 错误；原 Platform 其余测试恢复加载 |
+| unit/platform/dialog-client/drag-drop-client/file-system-client/platform-cutover：平台仅运输、业务归应用层 | main 注入 Dialogs/Files/DragDrop，Drop→Import→File/Image readers；classic clipper 使用 scoped Document UI port | dialog 参数与原生错误、normalized events、文字/图片扩展差异、DTO/MIME解码边界、无 native 全局替代门面 |
+
+本轮重新检索相关测试中的旧导出/接线引用；未删除测试用例、未新增 skip、未忽略失败退出码。现有 Import/真实 Documents 回归与八类真实 WebView 证据继续执行。平台装配测试仅提供隔离端口的单元验证，不能代替已要求的真实原生文件/HTTP/WebView链。Mermaid Chart 按当前公开调用链更新回归覆盖图；本轮没有新增第三方或系统接口。
+
+本轮四项静态门禁、13个变更脚本语法、99个文档相对链接、37项当前风险源blob与差异检查通过，历史acceptance及生产源码保持不变；不执行 Linux/macOS 产品测试或构建。新的全部行为/累计验证仍交由本提交 Windows CI。13.13、A03/A05完整验收继续未勾选，13.14未推进，KaTeX新low风险的处置条件保持。
 
 ## 前置失败与定向修补
 
@@ -69,9 +89,9 @@ R13.14 仍负责未在本项自然移除的历史模块（包括未挂载的 web
 
 现行 Math presentation 使用普通 options 对象，KaTeX 0.16.47 内部 `applySetting/getDefaultValue` 仍读取普通属性，Mermaid 也传递依赖同版本；输出增强后没有另加一次能完整保留数学/SVG 的净化层。因此不能用显式 trust=false 或本项净化结果声称公告已修复。修补0.18.2超出既有0.16兼容范围，自动升级和全局删除原型属性都未采用。两项 low 保持新风险，须在 R13 阶段安全收官前作兼容升级或完整处置决策并完成真实数学/Mermaid 回归；A10 历史 R12 验收不覆盖此新公告。
 
-## 本轮验证与准入状态
+## 首轮实现的静态验证与准入状态
 
-本地四项静态门禁、29个变更脚本语法、82个文档相对链接、37项当前风险源blob及差异检查通过，历史acceptance快照保持原值；不在Linux/macOS执行产品测试或构建。新增行为、真实 HTTP/文件读写、WebView、生产构建及累计回归交给同分支 Windows CI。
+首轮实现时本地四项静态门禁、29个变更脚本语法、82个文档相对链接、37项当前风险源blob及差异检查通过，历史acceptance快照保持原值；不在Linux/macOS执行产品测试或构建。新增行为、真实 HTTP/文件读写、WebView、生产构建及累计回归交给同分支 Windows CI。
 
 本项实现可提交，但13.13复选框和A03/A05本阶段全链验收继续未勾选，必须待新提交的七组Windows CI和八类链证据全部通过再收尾。前置成功不代替本项证据。推送启动CI后按用户要求结束会话，不轮询；约15～20分钟后查询。
 

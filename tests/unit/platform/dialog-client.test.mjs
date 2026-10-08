@@ -222,13 +222,18 @@ test('desktop platform exposes the dedicated DialogsPort and current callers kee
     new URL('../../../src/features/settings/application/settings-controller.js', import.meta.url),
     'utf8'
   );
+  const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  const fileView = await readFile(new URL('../../../src/features/import/ui/file-import-view.js', import.meta.url), 'utf8');
   assert.match(desktop, /createDialogClient\(/);
   assert.match(desktop, /dialogs: dialogClient/);
-  assert.match(core, /call\('dialogs', 'openFile'/);
+  assert.match(main, /chooseFile: platform\.capabilities\.desktop\.dialogs \? options => platform\.dialogs\.openFile\(options\) : null/);
+  assert.match(fileView, /await chooseFile\(\{ title:/);
+  assert.match(fileView, /return await openPath\(path\)/);
+  assert.doesNotMatch(core, /call\('dialogs', 'openFile'/);
   assert.match(core, /call\('dialogs', 'confirm'/);
   assert.match(exportSource, /call\('dialogs', 'saveFile'/);
   assert.match(settingsController, /platform\.call\('dialogs', 'openDirectory'/);
-  assert.doesNotMatch(core + exportSource + settingsController, /markdownEditorNative|@tauri-apps\/plugin-dialog/);
+  assert.doesNotMatch(core + exportSource + settingsController + main + fileView, /markdownEditorNative|@tauri-apps\/plugin-dialog/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.4 after invoke and before later adapters', async () => {

@@ -197,7 +197,7 @@ test('Atomic 6.12 classic port exposes write commands only and owns one scoped h
 });
 
 test('Atomic 6.12 production integration keeps persistence in Documents and removes classic Recent Files menu read authority', async () => {
-  const [core, bootstrap, events, main, index, repositorySource, portSource, menuController] = await Promise.all([
+  const [core, bootstrap, events, main, index, repositorySource, portSource, menuController, importer] = await Promise.all([
     readText('public/app/core.js'),
     readText('public/app/bootstrap.js'),
     readText('public/app/events.js'),
@@ -205,14 +205,18 @@ test('Atomic 6.12 production integration keeps persistence in Documents and remo
     readText('src/features/documents/index.js'),
     readText('src/features/documents/infrastructure/recent-files-repository.js'),
     readText('src/features/documents/compatibility/classic-recent-files-port.js'),
-    readText('src/features/menu/recent-files-menu-controller.js')
+    readText('src/features/menu/recent-files-menu-controller.js'),
+    readText('src/features/import/application/import-document-controller.js')
   ]);
   assert.match(core, /markdownEditorRecentFilesPort/);
   assert.ok(core.includes('coreRecentFilesPort.add('));
   assert.doesNotMatch(core, /coreRecentFilesPort\.(load|clear|entries)/);
   assert.doesNotMatch(core, /function (loadRecentFiles|renderRecentFilesMenu|openRecentFile|clearRecentFiles)\s*\(/);
   assert.doesNotMatch(bootstrap, /loadRecentFiles\(|renderRecentFilesMenu\(/);
-  assert.ok(events.includes('if (opened && request.isCurrent()) addRecentFile(resolvedPath, name)'));
+  assert.doesNotMatch(events, /addRecentFile\(/);
+  assert.match(main, /addRecentFile: \(path, name\) => recentFilesRepository\.add\(path, \{ name \}\)/);
+  assert.match(importer, /if \(filePath\) addRecentFile\(filePath, result\.record\.title\)/);
+  assert.match(importer, /operation\.assertCurrent\(\);\s*if \(!documents\.isCurrentGeneration\(result\.generation\)\) return false;\s*if \(filePath\) addRecentFile/);
   assert.match(main, /recentFilesRepository\.load\(\)/);
   assert.match(main, /createRecentFilesReadSource/);
   assert.match(main, /createRecentFilesMenuController/);

@@ -26,13 +26,14 @@ test('Atomic 6.12 Recent Files Menu has one dedicated controller behind public M
 });
 
 test('Atomic 6.12 keeps Documents as the sole Recent Files persistence authority and classic as write-only compatibility', async () => {
-  const [repository, classicPort, core, classicBootstrap, events, main] = await Promise.all([
+  const [repository, classicPort, core, classicBootstrap, events, main, importer] = await Promise.all([
     read('src/features/documents/infrastructure/recent-files-repository.js'),
     read('src/features/documents/compatibility/classic-recent-files-port.js'),
     read('public/app/core.js'),
     read('public/app/bootstrap.js'),
     read('public/app/events.js'),
-    read('src/main.js')
+    read('src/main.js'),
+    read('src/features/import/application/import-document-controller.js')
   ]);
   assert.match(repository, /md_editor_recent_files/);
   assert.match(repository, /storage\.getItem/);
@@ -45,7 +46,11 @@ test('Atomic 6.12 keeps Documents as the sole Recent Files persistence authority
   assert.doesNotMatch(core, /coreRecentFilesPort\.(load|clear|entries)/);
   assert.match(core, /coreRecentFilesPort\.add/);
   assert.doesNotMatch(classicBootstrap, /loadRecentFiles\(|renderRecentFilesMenu\(/);
-  assert.match(events, /if \(opened && request\.isCurrent\(\)\) addRecentFile\(resolvedPath, name\)/);
+  assert.doesNotMatch(events, /addRecentFile\(/);
+  assert.match(main, /addRecentFile: \(path, name\) => recentFilesRepository\.add\(path, \{ name \}\)/);
+  assert.match(importer, /if \(filePath\) addRecentFile\(filePath, result\.record\.title\)/);
+  assert.ok(importer.indexOf('if (!await afterDocumentOpen(result)) return false;') < importer.indexOf('if (filePath) addRecentFile('));
+  assert.match(importer, /operation\.assertCurrent\(\);\s*if \(!documents\.isCurrentGeneration\(result\.generation\)\) return false;\s*if \(filePath\) addRecentFile/);
   assert.match(main, /recentFilesRepository\.load\(\)/);
   assert.match(main, /createRecentFilesReadSource\(recentFilesRepository\)/);
 });

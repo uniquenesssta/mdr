@@ -52,11 +52,13 @@ test('controller owns counters; overlay teardown before late native callbacks ca
   assert.equal(node.writes.length, writes); assert.equal(handlers.size, 0); assert.equal(disposed, 1);
 });
 
-test('production composes the public view before classic callbacks and destroys it on both exit paths', async () => {
+test('production composes the public view before owned Import callbacks and destroys it on both exit paths', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
   const [main, events, view] = await Promise.all([read('src/main.js'), read('public/app/events.js'), read('src/features/import/files/drop-overlay-view.js')]);
   assert.match(main, /createDropOverlayView\(\{ element: document\.getElementById\('drop-overlay'\) \}\)/);
-  assert.match(main, /\.\.\.callbacks, setOverlayVisible: dropOverlayView\.setVisible/);
+  assert.match(main, /dropImportController\.start\(\{[\s\S]*?setOverlayVisible: dropOverlayView\.setVisible/);
+  assert.ok(main.indexOf('const dropOverlayView = ') < main.indexOf('dropImportController.start({'));
+  assert.match(main, /openBrowserText: \(file, request\) => importDocumentController\.openBrowserFile\(file, request\)/);
   assert.equal(main.match(/dropOverlayView\.destroy\(\)/g).length, 2);
   assert.doesNotMatch(events, /dropOverlay|drop-overlay|setOverlayVisible/);
   assert.doesNotMatch(view, /addEventListener|FileReader|readText|readImage|dragCounter|createDropImportController/);

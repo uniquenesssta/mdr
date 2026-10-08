@@ -161,7 +161,7 @@ test('the drag/drop client is the sole production owner of the Tauri webview imp
   assert.match(publicEntry, /desktop\/drag-drop-client\.js/);
 });
 
-test('desktop platform exposes DragDropPort directly and events consumes normalized Platform events', async () => {
+test('desktop platform exposes DragDropPort directly and Import consumes normalized Platform events', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
   const events = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
   assert.match(desktop, /createDragDropClient\(/);
@@ -169,7 +169,8 @@ test('desktop platform exposes DragDropPort directly and events consumes normali
   const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
   const drop = await readFile(new URL('../../../src/features/import/files/drop-import-controller.js', import.meta.url), 'utf8');
   assert.match(main, /subscribeNative: handler => platform\.dragDrop\.subscribe\(handler\)/);
-  assert.match(events, /eventsDropImportPort\.register/);
+  assert.match(main, /dropImportController\.start\(\{/);
+  assert.doesNotMatch(events, /eventsDropImportPort|dragDrop\.subscribe/);
   assert.match(drop, /payload\?\.type === 'over'/);
   assert.match(drop, /payload\?\.type === 'drop'/);
   assert.doesNotMatch(events, /markdownEditorNative/);
@@ -192,10 +193,14 @@ test('file interpretation remains in the application layer, not the DragDrop cli
   }
   assert.equal(classifyImportPath('C:\\images\\photo.bmp'), IMPORT_KINDS.UNSUPPORTED);
   assert.equal(classifyBrowserFile({ name: 'photo.bmp', type: 'image/bmp' }), IMPORT_KINDS.IMAGE);
-  assert.match(eventsSource, /eventsFileImportPort\.readPath\(resolvedPath\)/);
   const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  const importer = await readFile(new URL('../../../src/features/import/application/import-document-controller.js', import.meta.url), 'utf8');
+  assert.match(main, /openNativeText: \(path, request\) => importDocumentController\.openNativeText\(path, request\)/);
+  assert.match(importer, /files\.readPath\(path, \{ signal \}\)/);
   assert.match(main, /readNativeText: path => platform\.files\.readText\(path\)/);
-  assert.match(eventsSource, /eventsDropImportPort\.readImagePath\(resolvedPath/);
+  assert.match(main, /openNativeImage: \(path, request\) => importDocumentController\.insertNativeImage\(path, request\)/);
+  assert.match(importer, /images\.readPath\(path, \{ signal \}\)/);
+  assert.doesNotMatch(eventsSource, /eventsFileImportPort|eventsDropImportPort|readAsDataURL/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.6 after window and before later adapters', async () => {

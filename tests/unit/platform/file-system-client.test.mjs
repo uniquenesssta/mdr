@@ -168,12 +168,17 @@ test('the FileSystem client contains command mapping only and does not own docum
   assert.doesNotMatch(clientSource, /image\/png|image\/jpeg|image\/gif|image\/webp|image\/svg\+xml/);
   // R13.3 moves text reads behind Import; the composition root still owns platform injection.
   const mainSource = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
-  assert.match(eventSource, /eventsFileImportPort\.readPath\(resolvedPath\)/);
+  const importer = await readFile(new URL('../../../src/features/import/application/import-document-controller.js', import.meta.url), 'utf8');
+  assert.match(importer, /files\.readPath\(path, \{ signal \}\)/);
+  assert.match(mainSource, /openNativeText: \(path, request\) => importDocumentController\.openNativeText\(path, request\)/);
   assert.match(mainSource, /readNativeText: path => platform\.files\.readText\(path\)/);
-  assert.match(eventSource, /eventsDropImportPort\.readImagePath\(resolvedPath/);
+  assert.match(importer, /images\.readPath\(path, \{ signal \}\)/);
+  assert.match(mainSource, /openNativeImage: \(path, request\) => importDocumentController\.insertNativeImage\(path, request\)/);
+  assert.doesNotMatch(eventSource, /eventsFileImportPort|eventsDropImportPort/);
   assert.match(mainSource, /readNativeImage: path => platform\.files\.readImage\(path, ''\)/);
   assert.match(eventSource, /showToast/);
   assert.match(exportSource, /showToast/);
+  assert.match(importer, /notify\(translate\('toastFileImported'\)\)/);
   assert.match(rustFileKind, /FileKind::Image \{ mime: "image\/webp" \}/);
   assert.match(rustFileKind, /mime: "image\/svg\+xml"/);
 });

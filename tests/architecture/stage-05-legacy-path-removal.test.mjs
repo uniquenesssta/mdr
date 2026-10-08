@@ -85,10 +85,20 @@ test('Atomic 5.13 routes migrated menu actions through declarative Editor View c
   assert.match(main, /editorController\.setText\(''\)/);
 });
 
-test('Atomic 5.13 web clipper mutates only the authoritative DocumentModel path', async () => {
-  const clipper = await read('public/app/web-clipper.js');
-  assert.match(clipper, /documentModel\.replaceRange\(/);
-  assert.match(clipper, /documentModel\.getTextLength\(\)/);
+test('Atomic 5.13 web clipper still mutates only DocumentModel through the R13.13 public Editor command', async () => {
+  const [clipper, main, importer, editor] = await Promise.all([
+    read('public/app/web-clipper.js'), read('src/main.js'),
+    read('src/features/import/application/import-document-controller.js'),
+    read('src/features/editor/application/editor-controller.js')
+  ]);
+  assert.match(clipper, /invoke\('openWebClipper'\)/);
+  assert.doesNotMatch(clipper, /documentModel\.replaceRange\(/);
+  assert.match(main, /insertMarkdown: markdown => importDocumentController\.insertWebMarkdown\(markdown\)/);
+  assert.match(main, /appendMarkdown: markdown => editorController\.appendImportedMarkdown\(markdown\)/);
+  assert.match(importer, /editor\.appendMarkdown\(source\)/);
+  assert.match(editor, /appendImportedMarkdown\(markdown\)/);
+  assert.match(editor, /model\.replaceRange\(source, 0, length, 'end'\)/);
+  assert.match(editor, /model\.replaceRange\('\\n\\n' \+ source, length, length, 'end'\)/);
   assert.doesNotMatch(clipper, /webClipperEditorControllerPort|webClipperEditorCommandPort|\beditor\.value\s*(?:\+?=)/);
 });
 

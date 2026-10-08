@@ -81,11 +81,16 @@ test('Atomic 10.12 removes the explicitly temporary Save/Autosave classic bridge
   assert.doesNotMatch(entry, /mountClassicSaveControllerPort|mountClassicAutosaveControllerPort|classic-save-controller-port|classic-autosave-controller-port/);
 });
 
-test('Atomic 10.12 export.js contains export/import workflows but no save or autosave implementation', () => {
+test('Atomic 10.12 keeps export free of persistence policy after R13.13 moves import transition preparation', () => {
   const source = read('public/app/export.js');
   assert.match(source, /async function exportFile\(/);
   assert.match(source, /async function exportHTML\(/);
-  assert.match(source, /prepareDocumentTransition/);
+  const importer = read('src/features/import/application/import-document-controller.js');
+  const main = read('src/main.js');
+  assert.match(importer, /prepareTransition\('document-import'\)/);
+  assert.ok(importer.indexOf("prepareTransition('document-import')") < importer.indexOf('await documents.openExternalDocument('));
+  assert.match(main, /prepareTransition: reason => autosaveController\.cancelPending\(reason\)/);
+  assert.doesNotMatch(source, /function\s+(?:importFile|loadFile|loadTextContentAsDocument)\s*\(/);
   assert.doesNotMatch(source, /markdownEditorSaveControllerPort|markdownEditorAutosaveControllerPort|exportSaveControllerPort|exportAutosaveControllerPort/);
   assert.doesNotMatch(source, /async function saveToLocal|async function saveCurrentFile|async function saveAsMarkdown|saveMarkdownWithPicker|bindDocumentFilePath/);
 });

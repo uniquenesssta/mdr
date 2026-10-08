@@ -474,13 +474,23 @@
   },
   "currentSourceReview": {
     "stage": "R13.13",
-    "date": "2026-10-07",
-    "reviewedCommit": "927988119d3a4637b084eddeb032503d313363e1",
+    "date": "2026-10-08",
+    "reviewedCommit": "92242e611793f4caee2ae42c0b3947c39fd7829e",
     "record": "docs/R13-13-DETAILS.md",
-    "status": "R13.13 implementation and source review complete; exact-commit Windows validation pending",
+    "status": "R13.13 real WebView passed; cumulative validation failed on stale tests; regression migration repair pending exact-commit Windows validation",
     "priorWindowsRun": 37651965466,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 acceptance snapshot.",
-    "conclusion": "Reviewed import intent cancellation, save-before-read, failed-read/no-record, successful recents and public Editor insertion. Native policy is unchanged; one private resolver is injected only into the archived Windows test host. Current full-chain evidence is mandatory alongside preserved CSP/IPC controls. Historical R12 acceptance unchanged. KaTeX prototype-pollution advisory remains a new unresolved low finding; no claim of dependency remediation from trust=false or import sanitization."
+    "conclusion": "Reviewed import intent cancellation, save-before-read, failed-read/no-record, successful recents and public Editor insertion. Native policy is unchanged; one private resolver is injected only into the archived Windows test host. Current full-chain evidence is mandatory alongside preserved CSP/IPC controls. Historical R12 acceptance unchanged. KaTeX prototype-pollution advisory remains a new unresolved low finding; no claim of dependency remediation from trust=false or import sanitization. Run 37660954894 passed the actual Windows WebView import chain, Rust, native and dependency jobs, but cumulative admission failed on obsolete classic-entry/event-count assertions and a removed static export in the Platform suite. Current repair preserves all original scenarios and moves assertions to public Import/Documents/Editor/Platform contracts; production sources and historical acceptance are unchanged. New exact-commit Windows results remain required.",
+    "implementationWindowsRun": 37660954894,
+    "implementationWindowsJobs": {
+      "webview-baseline": "success",
+      "rust": "success",
+      "native-boundary": "success",
+      "dependency-advisories": "success",
+      "repository-tests": "failure",
+      "frontend": "failure",
+      "closeout": "failure"
+    }
   }
 }

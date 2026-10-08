@@ -73,14 +73,16 @@ test('production routing consumes one public classifier with startup and teardow
     read('public/app/events.js'), read('src/main.js'), read('src/features/editor/ui/image-dialog-view.js'),
     read('src/features/import/files/drop-import-controller.js'), read('src/features/import/index.js')
   ]);
-  assert.match(events, /eventsDropImportPort\.register/);
+  assert.doesNotMatch(events, /eventsDropImportPort|eventsFileImportPort/);
   assert.match(drop, /classifyBrowserFile\(file\)/);
   assert.match(drop, /classifyImportPath\(resolvedPath\)/);
   assert.doesNotMatch(events, /allowedText|includes\(ext\)|file\.type\.startsWith|eventsImportClassifierPort/);
   assert.doesNotMatch(entry + main, /mountClassicImportClassifierPort|classic-import-classifier-port/);
-  assert.match(main, /mountClassicDropImportPort\(compatibilityPlatformHost, \{/);
-  assert.ok(main.indexOf('mountClassicDropImportPort(compatibilityPlatformHost, {') < main.indexOf('for (const src of APP_MODULES)'));
-  assert.equal(main.match(/dropImportPort\.destroy\(\)/g).length, 2);
+  assert.match(main, /dropImportController\.start\(\{/);
+  assert.match(main, /openNativeText: \(path, request\) => importDocumentController\.openNativeText\(path, request\)/);
+  assert.ok(main.indexOf('dropImportController.start({') < main.indexOf('for (const src of APP_MODULES)'));
+  assert.equal(main.match(/dropImportController\.destroy\(\)/g).length, 3);
+  assert.doesNotMatch(entry + main, /mountClassicDropImportPort|classic-drop-import-port/);
   assert.match(image, /from '\.\.\/\.\.\/import\/index\.js'/);
   assert.match(image, /imageController\.readFile\(file, \{ source: 'dialog', confirmLargeFile \}\)/);
 });

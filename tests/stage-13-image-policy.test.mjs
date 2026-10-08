@@ -49,14 +49,17 @@ test('policy is metadata-only and does not override text-first drop routing', ()
 
 test('production callers use one browser policy while native byte enforcement stays in Rust', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
-  const [events, controller, classifier, rust] = await Promise.all([
+  const [events, controller, classifier, rust, main, importer] = await Promise.all([
     read('public/app/events.js'), read('src/features/import/images/image-import-controller.js'),
-    read('src/features/import/files/file-type-classifier.js'), read('src-tauri/src/local_file/image_reader.rs')
+    read('src/features/import/files/file-type-classifier.js'), read('src-tauri/src/local_file/image_reader.rs'),
+    read('src/main.js'), read('src/features/import/application/import-document-controller.js')
   ]);
-  assert.match(events, /eventsDropImportPort\.readImage\(file/);
+  assert.match(main, /openBrowserImage: \(file, request\) => importDocumentController\.insertBrowserImage\(file, request\)/);
+  assert.match(importer, /images\.readFile\(file, \{ signal \}\)/);
+  assert.doesNotMatch(events, /eventsDropImportPort|readAsDataURL/);
   assert.match(controller, /assessBrowserImage\(file, \{ source \}\)/);
   assert.match(controller, /decision\.requiresConfirmation && !confirmLargeFile\(file\)/);
-  assert.doesNotMatch(events + controller, /file\.size\s*>/);
+  assert.doesNotMatch(events + controller + importer + main, /file\.size\s*>/);
   assert.match(classifier, /isAllowedImageMime\(file\.type\)/);
   assert.doesNotMatch(classifier, /startsWith\('image\/'\)/);
   assert.match(rust, /MAX_IMAGE_BYTES: u64 = 5 \* 1024 \* 1024/);

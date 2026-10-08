@@ -26,7 +26,7 @@ test('classic callers use the scoped compatibility host instead of a replacement
   for (const path of ['public/app/core.js', 'public/app/events.js', 'public/app/export.js', 'public/app/web-clipper.js']) {
     const source = await readFile(new URL('../../../' + path, import.meta.url), 'utf8');
     assert.match(source, /compatibility-business-ports/);
-    assert.match(source, path === 'public/app/web-clipper.js' ? /markdownEditorWebClipperPort/ : /markdownEditorPlatformPort/);
+    assert.match(source, path === 'public/app/web-clipper.js' ? /markdownEditorDocumentUiCommandPort/ : /markdownEditorPlatformPort/);
     assert.doesNotMatch(source, /window\.markdownEditorPlatform|window\.markdownEditorNative/);
   }
   const bridge = await readFile(new URL('../../../src/platform/compatibility/classic-platform-port.js', import.meta.url), 'utf8');
@@ -68,10 +68,14 @@ test('native drag/drop keeps file classification in application code and MIME de
   }
   assert.equal(classifyImportPath('C:\\images\\photo.bmp'), IMPORT_KINDS.UNSUPPORTED);
   assert.equal(classifyBrowserFile({ name: 'photo.bmp', type: 'image/bmp' }), IMPORT_KINDS.IMAGE);
-  assert.match(events, /eventsFileImportPort\.readPath\(resolvedPath\)/);
   const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
+  const importer = await readFile(new URL('../../../src/features/import/application/import-document-controller.js', import.meta.url), 'utf8');
+  assert.match(main, /openNativeText: \(path, request\) => importDocumentController\.openNativeText\(path, request\)/);
+  assert.match(importer, /files\.readPath\(path, \{ signal \}\)/);
   assert.match(main, /readNativeText: path => platform\.files\.readText\(path\)/);
-  assert.match(events, /eventsDropImportPort\.readImagePath\(resolvedPath/);
+  assert.match(main, /openNativeImage: \(path, request\) => importDocumentController\.insertNativeImage\(path, request\)/);
+  assert.match(importer, /images\.readPath\(path, \{ signal \}\)/);
+  assert.doesNotMatch(events, /eventsFileImportPort|eventsDropImportPort/);
   assert.doesNotMatch(events, /data:image\/png|data:image\/jpeg|image_mime/);
 });
 

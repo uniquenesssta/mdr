@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
-import { createImageImportController, createDropImportController, createDropOverlayView, mountClassicDropImportPort } from '../../../src/features/import/index.js';
+import { createImageImportController, createDropImportController, createDropOverlayView, createFileImportController, createImportDocumentController } from '../../../src/features/import/index.js';
 import {
   PLATFORM_PORT_NAMES,
   PlatformCapabilityUnavailableError,
@@ -253,11 +253,14 @@ test('createPlatform rejects invalid options and invalid injected desktop compos
 });
 
 
-test('R13.4 main Drop Import composition executes against real browser and desktop Platform contracts', async () => {
+test('R13.4 Drop composition and R13.13 owned callbacks execute against real browser and desktop Platform contracts', async () => {
   const source = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
   const start = source.indexOf('const dropImportController = ');
-  const end = source.indexOf('const browserImportReader = ', start);
+  const end = source.indexOf('const webFetchCoordinator = ', start);
   assert.ok(start >= 0 && end > start, 'execute the production composition, not a copied option object');
+  const callbacksStart = source.indexOf('    dropImportController.start({');
+  const callbacksEnd = source.indexOf('\n  } catch (error)', callbacksStart);
+  assert.ok(callbacksStart >= 0 && callbacksEnd > callbacksStart, 'execute the current production callbacks');
   for (const desktop of [false, true]) {
     const { runtime, log, listeners } = createBrowserRuntime();
     let nativeHandler, subscribed = 0, disposed = 0;
@@ -267,52 +270,69 @@ test('R13.4 main Drop Import composition executes against real browser and deskt
       dragDrop: { async subscribe(handler) { subscribed++; nativeHandler = handler; return () => disposed++; } }
     };
     const platform = createPlatform({ runtime, ...(desktop ? { desktopPlatform } : {}) });
-    const calls = [], errors = [];
+    const calls = [], errors = [], notifications = [];
     assert.equal(typeof platform.supports, 'undefined', 'supports belongs only to classic compatibility');
     const overlayClasses = new Set();
     runtime.document.getElementById = id => {
       assert.equal(id, 'drop-overlay');
       return { classList: { add: value => overlayClasses.add(value), remove: value => overlayClasses.delete(value) } };
     };
-    const { controller, port, view, imageController } = vm.runInNewContext(
-      source.slice(start, end) + '\n({ controller: dropImportController, port: dropImportPort, view: dropOverlayView, imageController: dropImageController })',
-      { platform, document: runtime.document, compatibilityPlatformHost: {}, createDropImportController,
-        mountClassicDropImportPort, createDropOverlayView, createImageImportController,
-        browserImageReader: createBrowserFileReader({ FileReaderClass: runtime.FileReader }), console: { warn: (...args) => errors.push(args) } }
-    );
+    const context = vm.createContext({ platform, document: runtime.document, window: runtime,
+      createDropImportController, createDropOverlayView, createImageImportController,
+      createBrowserFileReader, createFileImportController,
+      notify: message => notifications.push(message), t: key => key,
+      console: { warn: (...args) => errors.push(args) } });
+    const { controller, view, imageController, files } = vm.runInContext(
+      source.slice(start, end) + '\n({ controller: dropImportController, view: dropOverlayView, imageController: dropImageController, files: fileImportController })', context);
+    let generation = 0;
+    const documents = {
+      async openExternalDocument(options) {
+        const current = ++generation;
+        const content = await options.loadContent();
+        calls.push([options.filePath ? 'native' : 'browser', options.filePath || options.title, content]);
+        return { generation: current, record: { id: 'imported', title: options.title },
+          sourceCharacters: content.length, editorCharacters: content.length };
+      },
+      captureOperation: () => generation, isCurrentGeneration: value => value === generation,
+      ensureActiveForEditing() {}
+    };
+    const importer = createImportDocumentController({ files, images: imageController, documents,
+      editor: { insertImage: (url, options) => calls.push(['image', url, options.alt]), appendMarkdown() {} } });
+    context.importDocumentController = importer;
     try {
-      port.api.register({
-        openBrowserText: file => { calls.push(['browser', file.name]); return true; },
-        openBrowserImage: () => assert.fail('unexpected image'),
-        openNativeText: path => { calls.push(['native', path]); return true; },
-        openNativeImage: () => assert.fail('unexpected image'),
-        unsupported: () => assert.fail('unexpected unsupported file'),
-        onError: error => { throw error; }
-      });
+      vm.runInContext(source.slice(callbacksStart, callbacksEnd), context);
       await new Promise(resolve => setImmediate(resolve));
       assert.equal(subscribed, desktop ? 1 : 0);
-      const image = await port.api.readImage({ name: 'image.png', type: 'image/png', size: 1 });
+      const image = await imageController.readFile({ name: 'image.png', type: 'image/png', size: 1 });
       assert.equal(image.url, 'data:image.png');
-      if (desktop) assert.equal((await port.api.readImagePath('native.png')).url, 'data:desktop');
+      if (desktop) assert.equal((await imageController.readPath('native.png')).url, 'data:desktop');
       listeners.get('dragenter')({ preventDefault() {} });
       assert.equal(overlayClasses.has('show'), true);
       await listeners.get('drop')({ preventDefault() {}, dataTransfer: { files: [{ name: 'browser.md' }] } });
       if (desktop) {
         assert.deepEqual(calls, [], 'desktop ignores duplicate DOM drop');
         assert.equal(await nativeHandler({ type: 'drop', paths: ['native.md'] }), true);
-        assert.deepEqual(calls, [['native', 'native.md']]);
+        assert.deepEqual(calls, [['native', 'native.md', 'desktop']]);
+        assert.equal(await nativeHandler({ type: 'drop', paths: ['native.png'] }), true);
+        assert.deepEqual(calls.at(-1), ['image', 'data:desktop', 'native.png']);
       } else {
-        assert.deepEqual(calls, [['browser', 'browser.md']]);
-        assert.equal(await port.api.openPath('native.md'), false);
+        assert.deepEqual(calls, [['browser', 'browser.md', 'text:browser.md']]);
+        assert.equal(await controller.openPath('native.md'), false);
+        assert.equal(await listeners.get('drop')({ preventDefault() {}, dataTransfer: {
+          files: [{ name: 'image.png', type: 'image/png', size: 1 }] } }), true);
+        assert.deepEqual(calls.at(-1), ['image', 'data:image.png', 'image.png']);
       }
       assert.deepEqual(errors, []);
+      assert.deepEqual(notifications, [], 'supported imports never enter production error/unsupported callbacks');
       assert.equal(overlayClasses.has('show'), false);
       listeners.get('dragenter')({ preventDefault() {} });
     } finally {
-      await controller.destroy(); view.destroy(); imageController.destroy(); port.destroy(); await platform.destroy();
+      importer.destroy(); await controller.destroy(); view.destroy(); imageController.destroy(); files.destroy(); await platform.destroy();
       assert.equal(overlayClasses.has('show'), false);
-      assert.throws(() => port.api.readImage({}), /destroyed/);
-      assert.throws(() => port.api.readImagePath('native.png'), /destroyed/);
+      assert.throws(() => importer.openBrowserFile({}), /destroyed/);
+      assert.throws(() => controller.openPath('native.md'), /destroyed/);
+      await assert.rejects(imageController.readFile({}), /destroyed/);
+      await assert.rejects(imageController.readPath('native.png'), /destroyed/);
       view.setVisible(true);
       assert.equal(overlayClasses.has('show'), false);
     }

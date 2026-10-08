@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-08：修复 R13.13 首轮累计回归遗漏：`92242e6` / [Windows CI 37660954894](https://github.com/uniquenesssta/mdr/actions/runs/37660954894) 的真实 WebView 导入链、Rust、原生与依赖四组通过；Node/前端因旧 classic 入口及固定事件数断言失败，汇总随之阻断。逐项迁移到当前 Import/Editor/Documents/Platform 契约，恢复执行 main 实际装配的 Platform 回归，保留原场景和硬门禁；产品源码不变，待新 Windows CI，不标验收、不推进13.14。[详情](docs/R13-13-DETAILS.md)。
+
 - 2026-10-07：R13.13 完整导入链已迁入 ESM：文件、拖放、picker/recent/startup 共用公开 Import→Documents/Editor；保留先保存再读取、失败不建档、取消/代次保护及成功登记最近文件。删除文件/拖放桥接和经典建档入口，扩展真实 Windows WebView 抓取→转换→文档→Preview/Hybrid 八类证据门槛。前置补丁 `9279881` / [CI 37651965466](https://github.com/uniquenesssta/mdr/actions/runs/37651965466) 七组通过；本项待新 Windows CI，13.14及阶段收官未推进，KaTeX low新风险仍未处置。[详情](docs/R13-13-DETAILS.md)。
 
 - 2026-10-08：R13.13 前置核查发现上轮收尾 CI 被新增 npm 高危公告阻断；定向更新 source-map-js 1.2.2 与 DOMPurify 3.4.16，本地锁文件审计无高危/严重项。补丁待 Windows 累计回归，导入到文档链尚未实施；保留现有硬门禁和两项 KaTeX/Mermaid low 告警。[详情](docs/R13-13-DETAILS.md)。
