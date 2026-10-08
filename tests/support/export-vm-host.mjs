@@ -4,12 +4,13 @@
 // supplyRetiredPreviewBindings=false reproduces the current application failure.
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { mountClassicExportRequestPort } from '../../src/features/export/index.js';
 
 const source = readFileSync(new URL('../../public/app/export.js', import.meta.url), 'utf8');
 const markdownSource = readFileSync(new URL('../../public/app/core.js', import.meta.url), 'utf8');
-const markdownDownload = markdownSource.slice(markdownSource.indexOf('    function exportMarkdownContent('), markdownSource.indexOf('    async function exportContextDocument('));
+const markdownDownload = markdownSource.slice(markdownSource.indexOf('    function exportMarkdownContent('), markdownSource.indexOf('    function copyContextDocumentTitle('));
 
-export function createExportVmHost({ desktop = false, sourceText = '原文 😀', name = 'report.md', savePath = 'C:\\exports\\report', failWrite = false, workerBlocks = null, workerVersion = 7, textLength = 20, parseError = false, imageHeight = 100, supplyRetiredPreviewBindings = true } = {}) {
+export function createExportVmHost({ desktop = false, sourceText = '原文 😀', name = 'report.md', savePath = 'C:\\exports\\report', failWrite = false, workerBlocks = null, workerVersion = 7, textLength = 20, parseError = false, imageHeight = 100, supplyRetiredPreviewBindings = true, documentId = 'export-doc', documentIds = [documentId] } = {}) {
   const calls = [], downloads = [], blobs = new Map(), timers = [], events = new Map(), nodes = new Map();
   let urlId = 0, frameCount = 0, onFrame = null;
   const node = (tag = 'div') => {
@@ -45,14 +46,16 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     markdownEditorPresentationPort: presentation, markdownEditorPreviewCommandPort: previewPort
   };
   for (const key of ['DocumentDomain', 'DocumentSession', 'DocumentController', 'DocumentUiCommand', 'SidebarController']) host['markdownEditor' + key + 'Port'] = {};
+  const requestMount = mountClassicExportRequestPort(host, { getActiveDocumentId: () => documentId, hasDocument: id => documentIds.includes(id) });
   const escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   const context = vm.createContext({
     document: { body, getElementById: id => id === 'compatibility-business-ports' ? host : getNode(id), createElement: node, createDocumentFragment() { const result = node(); result.fragment = true; return result; }, querySelectorAll: () => [], querySelector: () => null },
     documentModel: { getDocumentVersion: () => 7, createSnapshot(reason) { calls.push(['snapshot', reason]); return sourceText; } },
+    coreExportRequestPort: requestMount.port,
     editor: { textLength, value: 'stale editor value' }, filenameInput: { value: name }, exportDirectory: 'C:\\custom',
     previewWorkerClient: workerBlocks ? { blocks: workerBlocks, workerVersion } : null,
     createPreviewNodesForBlock(block) { calls.push(['block', block.id]); const result = node('p'); result.innerHTML = block.html; return [result]; },
-    preview: node(), observedPreviewBody: {}, escapeHtml, normalizeDocumentTitle: value => String(value).trim() || '未命名文档',
+    preview: node(), observedPreviewBody: {}, escapeHtml,
     requestAnimationFrame(callback) { frameCount++; onFrame?.(frameCount); queueMicrotask(callback); },
     setTimeout(callback, delay) { timers.push({ callback, delay }); return timers.length; },
     window: { addEventListener(name, callback) { events.set(name, callback); }, print() { calls.push(['print']); } },

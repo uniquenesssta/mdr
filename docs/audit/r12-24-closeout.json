@@ -207,7 +207,7 @@
     },
     {
       "path": "public/app/core.js",
-      "blobSha": "73dfb35d300c6b37cedc1a07884eeb055d58242c"
+      "blobSha": "9ce63cbf5b0f270041006bcb0c3e675bc11e2319"
     },
     {
       "path": "public/compatibility/business-content.html",
@@ -239,7 +239,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "91d7c49d916708d421429856e0a788c050aa10f4"
+      "blobSha": "3d0d0a553294a4201b179ff1a65f95c0ff04b6bc"
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
@@ -268,6 +268,22 @@
     {
       "path": "src/features/import/index.js",
       "blobSha": "1b10cc1e21c770aa2aa3bfc436acce5018c71567"
+    },
+    {
+      "path": "public/app/export.js",
+      "blobSha": "9e800c894f9b42ed822d98b59d5e6aadb2d5470e"
+    },
+    {
+      "path": "src/features/export/application/export-request.js",
+      "blobSha": "31da9dde6e427f13d91eedd09a67250d11ae0d64"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-export-request-port.js",
+      "blobSha": "9d26b278b0bf3c1bc6165f9dc91010259ba92d6c"
+    },
+    {
+      "path": "src/features/export/index.js",
+      "blobSha": "6eab4123a8763b3d528382db4788f428bebc2260"
     }
   ],
   "priorFailures": {
@@ -483,11 +499,11 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R14.1",
+    "stage": "R14.2",
     "date": "2026-10-08",
-    "reviewedCommit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
-    "record": "docs/R14-01-DETAILS.md",
-    "status": "R13.14 implementation and closeout accepted; R14.1 first Windows run failed on contract expectations, repaired pending exact-commit Windows revalidation; A10 remains unresolved",
+    "reviewedCommit": "7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f",
+    "record": "docs/R14-02-DETAILS.md",
+    "status": "R14.1 accepted on exact Windows commit; R14.2 request policy and all caller validation implemented, awaiting Windows; rendered-format findings and A10 remain open",
     "priorWindowsRun": 37737197913,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 snapshot. records status/fixed retain R12 closeout handoff semantics; A05 subsequentAcceptance records the current R13 closure separately.",
@@ -520,7 +536,7 @@
         "blobSha": "fdacde5af8915790b9b24f35debfc5cd88e9a15c"
       }
     ],
-    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation.",
+    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation.",
     "priorImplementationWindowsRun": 37660954894,
     "priorImplementationWindowsJobs": {
       "webview-baseline": "success",
@@ -542,6 +558,44 @@
       "closeout": "failure"
     },
     "currentStageAcceptance": {
+      "stage": "R14.1",
+      "commit": "7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f",
+      "run": 37801667677,
+      "status": "accepted",
+      "windowsJobsPassed": 7,
+      "allExecutionStepsPassed": true,
+      "record": "docs/R14-01-DETAILS.md",
+      "nodeTestsPassed": 1655,
+      "nodeTestDirectories": 16,
+      "frontendTestsPassed": 657,
+      "targetedExportTestsPassed": 41,
+      "contractBrowserPassed": 11,
+      "builtAppBrowserPassed": 33,
+      "closeoutArtifactId": 11560424919,
+      "closeoutArtifactDigest": "sha256:d71de78ee0a73828ae825578cc01e6cd42a9f97975a602fbcadf22e1ebfda164",
+      "webviewArtifactId": 11561895517,
+      "webviewArtifactDigest": "sha256:ec204989c05f474be327de34967ff3839ee7e0db71e778a0d0ab6f3553728c79",
+      "scope": "Characterization and accurate defect baseline only; F01-F04 and A10 were not fixed."
+    },
+    "currentStageImplementation": {
+      "stage": "R14.2",
+      "baselineCommit": "7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f",
+      "branch": "agent/r14-stage",
+      "status": "implemented-pending-windows",
+      "record": "docs/R14-02-DETAILS.md",
+      "productionChanged": true,
+      "remainingFindings": [
+        "R14-F01",
+        "R14-F02",
+        "R14-F03",
+        "R14-F04",
+        "A10"
+      ],
+      "namingFinding": "R14-F03 request/caller naming policy migrated, pending Windows; retain exact new mapping through 14.9/14.10/14.11 complete output validation. Original 14.1 fixture remains unchanged.",
+      "a10Deadline": "Before 14.7 acceptance; full offline HTML/Word/PDF/Image chains before R14 closure.",
+      "scope": "Pure immutable metadata and scoped document existence validation before every menu/image/context export task or read. No model, renderer, native command, dependency or persistence format changes."
+    },
+    "priorStageAcceptance": {
       "stage": "R13.14",
       "commit": "9c62844a349fe9dd60cf911676dbeeabb2d535d8",
       "run": 37751356061,
@@ -565,7 +619,7 @@
         "artifactDigest": "sha256:bcf8071b46c13388852a9e123b0ee9a141047bf58c517f9c05ba65f8192065a3"
       }
     },
-    "currentStageImplementation": {
+    "priorStageImplementation": {
       "stage": "R14.1",
       "baselineCommit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
       "branch": "agent/r14-stage",

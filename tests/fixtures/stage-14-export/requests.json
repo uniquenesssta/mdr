@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "priorContract": "contracts.json",
+  "names": [
+    { "input": "", "markdown": "未命名文档.md", "html": "未命名文档.html", "word": "未命名文档.doc", "pdf": "未命名文档.pdf", "image": "未命名文档.png" },
+    { "input": "  报告.MD  ", "markdown": "报告.MD", "html": "报告.html", "word": "报告.doc", "pdf": "报告.pdf", "image": "报告.png" },
+    { "input": "report.markdown", "markdown": "report.markdown", "html": "report.html", "word": "report.doc", "pdf": "report.pdf", "image": "report.png" },
+    { "input": "report.txt", "markdown": "report.md", "html": "report.html", "word": "report.doc", "pdf": "report.pdf", "image": "report.png" },
+    { "input": "report.html", "markdown": "report.md", "html": "report.html", "word": "report.doc", "pdf": "report.pdf", "image": "report.png" },
+    { "input": "A&B <title>.md", "markdown": "A&B _title_.md", "html": "A&B _title_.html", "word": "A&B _title_.doc", "pdf": "A&B _title_.pdf", "image": "A&B _title_.png" }
+  ]
+}

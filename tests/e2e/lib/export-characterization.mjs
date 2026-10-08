@@ -6,11 +6,12 @@ import { join } from 'node:path';
 
 export async function runExportCharacterization({ page, test, loadMarkdown, artifactRoot }) {
   const fixture = JSON.parse(await readFile(new URL('../../fixtures/stage-14-export/contracts.json', import.meta.url), 'utf8'));
+  const requests = JSON.parse(await readFile(new URL('../../fixtures/stage-14-export/requests.json', import.meta.url), 'utf8'));
 
-  await test('R14-01 built app preserves Markdown bytes and records the actual HTML/Word missing-preview dependency', async () => {
+  await test('R14-02 built app normalizes Markdown names and retains R14-01 bytes and HTML/Word missing-preview evidence', async () => {
     await loadMarkdown(fixture.source);
     const result = await page.evaluate(`(async () => {
-      const names = ${JSON.stringify(fixture.names)};
+      const names = ${JSON.stringify(requests.names)};
       const blobs = new Map(), captures = [], revoked = [], failures = [], errors = [];
       const error = console.error;
       console.error = (...args) => { errors.push(args.map(x=>String(x)).join(' ')); error.apply(console,args); };
@@ -45,7 +46,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     })()`);
     assert.equal(result.captures.length, fixture.names.length);
     for (const capture of result.captures) {
-      const row = fixture.names.find(x => x.input === capture.input);
+      const row = requests.names.find(x => x.input === capture.input);
       assert.equal(capture.name, row.markdown);
       assert.equal(capture.revoked, true);
       assert.equal(capture.content, fixture.source);
@@ -56,7 +57,42 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       assert.match(failure.error, /previewWorkerClient is not defined/);
       assert.equal(failure.progressVisible, false);
     }
-    await writeFile(join(artifactRoot, 'r14-01-text-exports.json'), JSON.stringify(result, null, 2));
+    await writeFile(join(artifactRoot, 'r14-02-text-exports.json'), JSON.stringify(result, null, 2));
+  });
+
+  await test('R14-02 actual request rejects bad inputs before any export task and remains scoped and immutable', async () => {
+    await loadMarkdown(fixture.source);
+    const result = await page.evaluate(`(async () => {
+      const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportRequestPort;
+      const input={format:'IMAGE',name:'request.txt',directory:' C:\\\\exports ',imageOptions:{ratio:'4:5',cropFit:true}};
+      const request=port.createRequest(input);
+      input.name='late';input.imageOptions.ratio='1:1';
+      const fields=[];
+      for(const bad of [{format:'exe'},{format:'markdown',documentId:'missing-export-doc'},{format:'image',imageOptions:{ratio:'invalid'}}]) {
+        try {port.createRequest(bad);throw new Error('Invalid request was accepted');}
+        catch(error) {if(error.code!=='EXPORT_REQUEST_INVALID')throw error;fields.push(error.field);}
+      }
+      const directory=exportDirectory,print=window.print,click=HTMLAnchorElement.prototype.click;
+      const before=exportTaskId;let prints=0,downloads=0;
+      window.print=()=>{prints++;};HTMLAnchorElement.prototype.click=function(){downloads++;};
+      try {
+        exportDirectory='bad'+String.fromCharCode(0);
+        for(const run of [exportFile,exportHTML,exportWord,exportPDF,renderExportImagePreview,downloadExportImage])await run();
+        await exportContextDocument('missing-export-doc');
+        return {request,fields,taskDelta:exportTaskId-before,active:activeExportTask,prints,downloads,
+          frozen:Object.isFrozen(request)&&Object.isFrozen(request.extensions)&&Object.isFrozen(request.imageOptions),
+          scoped:typeof window.markdownEditorExportRequestPort==='undefined',
+          progressVisible:document.getElementById('export-progress-modal').classList.contains('show')};
+      } finally {exportDirectory=directory;window.print=print;HTMLAnchorElement.prototype.click=click;}
+    })()`);
+    assert.equal(result.request.format, 'image'); assert.equal(result.request.name, 'request.png');
+    assert.equal(result.request.directory, 'C:\\exports'); assert.ok(result.request.documentId);
+    assert.deepEqual(result.request.imageOptions, { ratio:'4:5',width:1080,height:1350,cropFit:true });
+    assert.deepEqual(result.fields, ['format','documentId','imageOptions.ratio']);
+    assert.equal(result.taskDelta, 0); assert.equal(result.active, null);
+    assert.equal(result.prints, 0); assert.equal(result.downloads, 0);
+    assert.equal(result.frozen, true); assert.equal(result.scoped, true); assert.equal(result.progressVisible, false);
+    await writeFile(join(artifactRoot, 'r14-02-request-validation.json'), JSON.stringify(result, null, 2));
   });
 
   await test('R14-01 actual long-document export records the missing dependency without accepting partial output', async () => {

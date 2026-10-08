@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；13.14已验收，R14-01首轮CI断言修正待Windows复验；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01已验收，R14-02导出请求待Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-08：R14-01在 `7d0fd6a` / [Windows CI37801667677](https://github.com/uniquenesssta/mdr/actions/runs/37801667677) 七组及最终汇总通过：全仓1655/1655、前端657/657、导出夹具41/41、浏览器11/11＋33/33，正式收尾。继续同分支实施14.2：独立不可变Export Request统一格式/身份/名称/目录/图片选项，所有入口在任务前校验，异步准备固定参数；迁移重复后缀策略，保留旧夹具并记录新映射。补充真实入口无副作用与晚到改参回归；脚本/嵌入表达式和四项静态门禁通过，产品验证待新Windows CI，14.2不标验收，F01/F02/F04及A10保持接收排期。[14.1验收](docs/R14-01-DETAILS.md) · [14.2详情](docs/R14-02-DETAILS.md)。
 
 - 2026-10-08：修正 R14-01 首轮累计回归遗漏：`734ca2c` / [Windows CI37799043386](https://github.com/uniquenesssta/mdr/actions/runs/37799043386) 的真实WebView、原生、依赖通过，浏览器11/11+33/33；Node/前端被14条旧R13自动分支断言和2条桌面Markdown名称夹具误判阻断，Rust契约检查及最终汇总随之失败。补齐唯一R14分支断言，分别记录桌面对话框首选名称与浏览器下载名称；保留全部场景和门禁。产品/依赖未改，静态复核通过；待新Windows CI，不标14.1验收。[详情](docs/R14-01-DETAILS.md)。
 

@@ -23,6 +23,7 @@ test('the existing Windows workflow follows the current R14 stage branch for wor
   const workflow = await readFile('.github/workflows/r12-14.yml', 'utf8');
   assert.match(workflow, /push:\s*\n\s*branches:\s*\[agent\/r14-stage\]/);
   assert.match(workflow, /tests\/stage-14-export-characterization\.test\.mjs/);
+  assert.match(workflow, /tests\/stage-14-export-request\.test\.mjs/);
   assert.match(workflow, /docs\/markdown-main-full-rewrite-taskbook-18-docs\/15-\*/);
   assert.match(workflow, /- '\.github\/workflows\/\*\*'/);
   assert.doesNotMatch(workflow, /^\s*pull_request:\s*$/m);

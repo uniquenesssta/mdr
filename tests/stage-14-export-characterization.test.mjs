@@ -4,6 +4,7 @@ import test from 'node:test';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/stage-14-export/contracts.json', import.meta.url), 'utf8'));
+const requests = JSON.parse(readFileSync(new URL('./fixtures/stage-14-export/requests.json', import.meta.url), 'utf8'));
 const plain = value => JSON.parse(JSON.stringify(value));
 const operations = { markdown: 'exportFile', html: 'exportHTML', word: 'exportWord', image: 'downloadExportImage' };
 
@@ -22,17 +23,17 @@ test('R14-01 records the actual retired preview dependency instead of hiding it 
   assert.equal(h.calls.filter(x => x[0] === 'saveFile' || /^write/.test(x[0])).length, 0);
 });
 
-for (const item of fixture.names) {
+for (const item of requests.names) {
   for (const [format, operation] of Object.entries(operations)) {
-    test(`R14-01 unchanged ${format} desktop dialog preferred name/filter/directory: ${JSON.stringify(item.input)}`, async () => {
+    test(`R14-02 normalized ${format} desktop dialog name retains R14-01 filter/directory/write coverage: ${JSON.stringify(item.input)}`, async () => {
       const h = createExportVmHost({ desktop: true, sourceText: fixture.source, name: item.input });
       if (format === 'image') h.evaluate("currentImageDataUrl = 'data:image/png;base64,iVBORw0KGgo='");
       await h.invoke(operation);
       const dialog = h.calls.find(x => x[0] === 'saveFile');
       assert.ok(dialog, JSON.stringify(h.calls));
-      // This is the exporter's input to the dialog port. The desktop adapter
-      // normalizes its default path separately; browser download names are below.
-      assert.equal(dialog[1], format === 'markdown' ? item.markdownDialogPreferredName : item[format]);
+      // R14-01 contracts.json remains the immutable old name baseline.
+      // R14-02 requests.json defines the intentional normalized output mapping.
+      assert.equal(dialog[1], item[format]);
       assert.deepEqual(plain(dialog[2]), { ...fixture.saveOptions[format], defaultDirectory: 'C:\\custom' });
       const writes = h.calls.filter(x => /^write/.test(x[0]));
       assert.equal(writes.length, 1);
@@ -42,7 +43,7 @@ for (const item of fixture.names) {
       else {
         assert.ok(writes[0][2].startsWith('<!DOCTYPE html>'));
         assert.ok(writes[0][2].includes('<meta charset="utf-8">'));
-        if (item.input.includes('<title>')) assert.ok(writes[0][2].includes('<title>A&amp;B &lt;title&gt;</title>'));
+        if (item.input.includes('<title>')) assert.ok(writes[0][2].includes('<title>A&amp;B _title_</title>'));
       }
       assert.equal(h.downloads.length, 0);
     });
@@ -63,8 +64,8 @@ for (const format of Object.keys(operations)) {
   });
 }
 
-test('R14-01 browser Markdown preserves the exact model snapshot and actual download suffix policy', async () => {
-  for (const item of fixture.names) {
+test('R14-02 browser Markdown uses normalized names and retains exact R14-01 model bytes and URL cleanup', async () => {
+  for (const item of requests.names) {
     const h = createExportVmHost({ name: item.input, sourceText: fixture.source });
     await h.invoke('exportFile');
     assert.equal(h.downloads.length, 1);
@@ -176,7 +177,7 @@ test('R14-01 cancelled PDF preparation restores view before printing and never s
 });
 
 test('R14-01 PNG ratio/padding/crop/natural height, noncancelable encoding and generated binary are fixed', async () => {
-  assert.deepEqual(plain(createExportVmHost().evaluate('RATIO_PRESETS')), fixture.imageRatios);
+  assert.deepEqual(plain(createExportVmHost().evaluate('exportRequestPort.imageRatios')), fixture.imageRatios);
   for (const [imageHeight, crop, expected] of [[100, false, 1920], [2200, false, 2200], [2200, true, 1920]]) {
     const h = createExportVmHost({ imageHeight }); h.context.document.getElementById('image-crop-fit').checked = crop;
     await h.invoke('renderExportImagePreview');

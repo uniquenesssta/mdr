@@ -1,4 +1,5 @@
 import './styles/index.css';
+import { mountClassicExportRequestPort } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
@@ -134,6 +135,10 @@ const platform = createPlatform({
   record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
 });
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
+const exportRequestPort = mountClassicExportRequestPort(compatibilityPlatformHost, {
+  getActiveDocumentId: () => compatibilityPlatformHost.markdownEditorDocumentSessionPort?.activeId,
+  hasDocument: id => Boolean(compatibilityPlatformHost.markdownEditorDocumentSessionPort?.getRecord(id))
+});
 const dropImportController = createDropImportController({
   target: document,
   nativeDrop: platform.capabilities.desktop.dragDrop,
@@ -271,6 +276,7 @@ configureHybridImageSourcePlatform({
   getDocumentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {}
 });
 window.addEventListener('pagehide', () => {
+  exportRequestPort.destroy();
   destroyLayoutStateFeature();
   previewLayoutStabilityPort.destroy();
   previewLayoutStability.destroy();

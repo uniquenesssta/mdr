@@ -71,7 +71,7 @@
       "public/app/export.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy export presentation workflows; imports belong to ESM Import and document lifecycle belongs to Documents.",
+      "Legacy export task/render/format adapters consuming the public immutable Export Request; filename/extension and image ratio policy no longer belongs to the classic exporter.",
       "legacy-export-state",
       "classic-script",
       "split-and-remove",
@@ -3141,7 +3141,7 @@
       "src/main.js",
       "esm-entrypoint",
       "composition",
-      "Production composition root wiring Stage 10 Persistence save/autosave/load/close-save owners and explicit UI/document persistence commands while preserving Window port-only close admission and Stage 9 synchronization.",
+      "Production composition root wiring Stage 10 Persistence save/autosave/load/close-save owners and explicit UI/document persistence commands while preserving Window port-only close admission and Stage 9 synchronization. R14-02 mounts the scoped Export Request boundary with read-only Documents identity/existence readers.",
       "legacy-bootstrap-bridge",
       "module-load",
       "replace-with-composition-root",
@@ -5125,6 +5125,36 @@
       "picker-generation",
       "explicit-create-destroy",
       "rewrite",
+      false
+    ],
+    [
+      "src/features/export/application/export-request.js",
+      "esm-module",
+      "export-application",
+      "Pure immutable export request validation, filename/extension policy and canonical image options before any task or platform side effect.",
+      "none",
+      "pure",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-export-request-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Scoped request policy and document existence bridge for classic export callers; no document, task or renderer state is copied.",
+      "classic-export-request-port-mount",
+      "explicit-instance",
+      "remove-with-classic-callers",
+      false
+    ],
+    [
+      "src/features/export/index.js",
+      "esm-facade",
+      "feature",
+      "Public Export request and scoped migration boundary.",
+      "none",
+      "module-import",
+      "retain",
       false
     ]
   ]

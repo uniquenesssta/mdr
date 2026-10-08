@@ -7,6 +7,7 @@
     const exportSidebarControllerPort = exportCompatibilityHost?.markdownEditorSidebarControllerPort;
     const exportPreviewCommandPort = exportCompatibilityHost?.markdownEditorPreviewCommandPort;
     const exportPresentationPort = exportCompatibilityHost?.markdownEditorPresentationPort;
+    const exportRequestPort = exportCompatibilityHost?.markdownEditorExportRequestPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
@@ -14,6 +15,21 @@
     if (!exportSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
     if (!exportPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
     if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
+    if (!exportRequestPort) throw new Error('Export request compatibility port is unavailable.');
+
+    function readExportRequest(format) {
+      try {
+        return exportRequestPort.createRequest({
+          format,
+          name: filenameInput.value,
+          directory: exportDirectory,
+          ...(format === 'image' ? { imageOptions: { ratio: currentImageRatio, cropFit: document.getElementById('image-crop-fit').checked } } : {})
+        });
+      } catch (error) {
+        showToast('导出参数无效：' + (error?.message || String(error)));
+        return null;
+      }
+    }
     class ExportCancelledError extends Error {
       constructor() {
         super('EXPORT_CANCELLED');
@@ -178,13 +194,13 @@
     }
 
 
-    function getExportSaveOptions(title, extension, filterName, extensions = [extension]) {
+    function getExportSaveOptions(title, request, filterName) {
       return {
         title,
-        extension,
-        extensions,
+        extension: request.extension,
+        extensions: request.extensions,
         filterName,
-        defaultDirectory: exportDirectory
+        defaultDirectory: request.directory
       };
     }
 
@@ -213,14 +229,15 @@
 
     // 导出文件
     async function exportFile() {
+      const request = readExportRequest('markdown');
+      if (!request) return;
       try {
         const content = documentModel?.createSnapshot?.('export-markdown') ?? editor.value;
-        const name = filenameInput.value.trim() || '未命名文档.md';
+        const name = request.name;
         const savedPath = await exportTextContent(content, name, getExportSaveOptions(
           '导出 Markdown',
-          'md',
-          'Markdown 文档',
-          ['md', 'markdown']
+          request,
+          'Markdown 文档'
         ));
         if (savedPath === null) return;
         if (savedPath === false) exportMarkdownContent(content, name);
@@ -232,12 +249,12 @@
 
     // 导出 Word：将 Markdown 渲染为 HTML 并伪装成 .doc 下载
     async function exportWord() {
+      const request = readExportRequest('word');
+      if (!request) return;
       const task = beginExportTask('正在导出 Word');
       if (!task) return;
       try {
-        let name = filenameInput.value.trim();
-      if (!name) name = '未命名文档.md';
-      name = name.replace(/\.md$/i, '').replace(/\.markdown$/i, '') + '.doc';
+        const name = request.name;
 
         const bodyHtml = (await createFullPreviewBodyForExport(task)).innerHTML;
         task.throwIfCancelled();
@@ -276,9 +293,8 @@ ${bodyHtml}
 
       const savedPath = await exportTextContent(fullHtml, name, getExportSaveOptions(
         '导出 Word',
-        'doc',
-        'Word 文档',
-        ['doc']
+        request,
+        'Word 文档'
       ));
       if (savedPath === null) return;
       if (savedPath === false) {
@@ -306,12 +322,12 @@ ${bodyHtml}
 
     // 导出 HTML：将 Markdown 渲染为独立 HTML 页面并下载
     async function exportHTML() {
+      const request = readExportRequest('html');
+      if (!request) return;
       const task = beginExportTask('正在导出 HTML');
       if (!task) return;
       try {
-        let name = filenameInput.value.trim();
-      if (!name) name = '未命名文档.md';
-      name = name.replace(/\.md$/i, '').replace(/\.markdown$/i, '') + '.html';
+        const name = request.name;
 
         const bodyHtml = (await createFullPreviewBodyForExport(task)).innerHTML;
         task.throwIfCancelled();
@@ -374,9 +390,8 @@ ${'</scr' + 'ipt>'}
 
       const savedPath = await exportTextContent(fullHtml, name, getExportSaveOptions(
         '导出 HTML',
-        'html',
-        'HTML 文档',
-        ['html', 'htm']
+        request,
+        'HTML 文档'
       ));
       if (savedPath === null) return;
       if (savedPath === false) {
@@ -403,6 +418,8 @@ ${'</scr' + 'ipt>'}
     }
 
     async function exportPDF() {
+      const request = readExportRequest('pdf');
+      if (!request) return;
       const task = beginExportTask('正在准备 PDF');
       if (!task) return;
       const wasSource = exportPreviewCommandPort.getViewMode() === 'source';
@@ -465,14 +482,6 @@ ${'</scr' + 'ipt>'}
     // 导出图片
     let currentImageRatio = '9:16';
     let currentImageDataUrl = '';
-
-    const RATIO_PRESETS = {
-      '9:16':  { width: 1080, height: 1920 },
-      '4:5':   { width: 1080, height: 1350 },
-      '3:4':   { width: 1080, height: 1440 },
-      '1:1':   { width: 1080, height: 1080 },
-      '16:9':  { width: 1920, height: 1080 }
-    };
 
     const IMAGE_PLACEHOLDER = 'data:image/svg+xml;base64,' + btoa(
       '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">' +
@@ -539,6 +548,8 @@ ${'</scr' + 'ipt>'}
 
 
     async function renderExportImagePreview() {
+      const request = readExportRequest('image');
+      if (!request) return;
       const task = beginExportTask('正在生成图片预览');
       if (!task) return;
       let clone = null;
@@ -557,7 +568,7 @@ ${'</scr' + 'ipt>'}
           return;
         }
 
-        const preset = RATIO_PRESETS[currentImageRatio];
+        const preset = request.imageOptions;
         const stage = document.getElementById('export-image-stage');
         const container = document.getElementById('export-image-content');
 
@@ -591,7 +602,7 @@ ${'</scr' + 'ipt>'}
         await prepareExportImages(clone, task);
         task.throwIfCancelled();
 
-        const cropFit = document.getElementById('image-crop-fit').checked;
+        const cropFit = request.imageOptions.cropFit;
         const targetHeight = preset.height;
         const naturalHeight = clone.scrollHeight;
 
@@ -643,21 +654,20 @@ ${'</scr' + 'ipt>'}
 
 
     async function downloadExportImage() {
+      const request = readExportRequest('image');
+      if (!request) return;
       if (!currentImageDataUrl) {
         showToast(t('toastGeneratePreviewFirst'));
         return;
       }
-      let name = filenameInput.value.trim();
-      if (!name) name = '未命名文档.md';
-      name = name.replace(/\.(md|markdown|txt|html|doc)$/i, '') + '.png';
+      const name = request.name;
 
       try {
         if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
           const path = await exportPlatformPort.call('dialogs', 'saveFile', name, getExportSaveOptions(
             '导出图片',
-            'png',
-            'PNG 图片',
-            ['png']
+            request,
+            'PNG 图片'
           ));
           if (!path) return;
           await exportPlatformPort.call('files', 'writeBinary', path, dataUrlToBytes(currentImageDataUrl), { extension: 'png' });

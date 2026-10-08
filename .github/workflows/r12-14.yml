@@ -1,11 +1,13 @@
 name: R14 Windows Export Revalidation
-run-name: R14-01 export format characterization and cumulative Windows evidence · ${{ github.sha }}
+run-name: R14-02 export request validation and cumulative Windows evidence · ${{ github.sha }}
 
 on:
   push:
     branches: [agent/r14-stage]
     paths:
       - 'src/**'
+      - 'public/app/core.js'
+      - 'public/app/export.js'
       - 'src-tauri/**'
       - 'tests/**'
       - 'scripts/**'
@@ -31,6 +33,7 @@ on:
       - 'docs/R12-24-DETAILS.md'
       - 'docs/R13-01-DETAILS.md'
       - 'docs/R14-01-DETAILS.md'
+      - 'docs/R14-02-DETAILS.md'
       - 'docs/audit/r12-24-closeout.json'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/14-*'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/15-*'
@@ -156,6 +159,9 @@ jobs:
       - name: R14-01 offline export format and lifecycle characterization
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-export-characterization.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-characterization.log"
+      - name: R14-02 export request policy and pre-task validation
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-export-request.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-request.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"
