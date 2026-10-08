@@ -1,9 +1,9 @@
-name: R13 Windows Import Revalidation
-run-name: R13.13 Import to Documents and real Windows WebView chain · ${{ github.sha }}
+name: R14 Windows Export Revalidation
+run-name: R14-01 export format characterization and cumulative Windows evidence · ${{ github.sha }}
 
 on:
   push:
-    branches: [agent/r13-stage]
+    branches: [agent/r14-stage]
     paths:
       - 'src/**'
       - 'src-tauri/**'
@@ -30,8 +30,10 @@ on:
       - 'docs/R12-23-DETAILS.md'
       - 'docs/R12-24-DETAILS.md'
       - 'docs/R13-01-DETAILS.md'
+      - 'docs/R14-01-DETAILS.md'
       - 'docs/audit/r12-24-closeout.json'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/14-*'
+      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/15-*'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/16-*'
       - 'docs/audit/r12-23-dependency-advisories.json'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/01-*'
@@ -151,6 +153,9 @@ jobs:
       - name: R12-19 save commit fault contracts
         if: ${{ !cancelled() }}
         run: node --test tests/stage-12-save-commit.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/save-commit-js.log"
+      - name: R14-01 offline export format and lifecycle characterization
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-export-characterization.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-characterization.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

@@ -483,11 +483,11 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R13.14",
+    "stage": "R14.1",
     "date": "2026-10-08",
-    "reviewedCommit": "9c62844a349fe9dd60cf911676dbeeabb2d535d8",
-    "record": "docs/R13-14-DETAILS.md",
-    "status": "R13.14 accepted: all seven Windows jobs and exact-commit evidence passed; R13 overall A10 remains pending",
+    "reviewedCommit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
+    "record": "docs/R14-01-DETAILS.md",
+    "status": "R13.14 implementation and closeout accepted; R14.1 characterization implemented, pending exact-commit Windows validation; A10 and rendered-export defects remain unfixed",
     "priorWindowsRun": 37737197913,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 snapshot. records status/fixed retain R12 closeout handoff semantics; A05 subsequentAcceptance records the current R13 closure separately.",
@@ -520,7 +520,7 @@
         "blobSha": "fdacde5af8915790b9b24f35debfc5cd88e9a15c"
       }
     ],
-    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged.",
+    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation.",
     "priorImplementationWindowsRun": 37660954894,
     "priorImplementationWindowsJobs": {
       "webview-baseline": "success",
@@ -555,7 +555,32 @@
       "webviewArtifactId": 11538641642,
       "webviewArtifactDigest": "sha256:2b5d1e750d3e3cb36727b4d48cb433eaf3ab788936fa1dfc98da86a00232ee80",
       "overallR13Accepted": false,
-      "remainingStageItem": "A10: KaTeX/Mermaid new low findings require stage-end disposition"
+      "remainingStageItem": "A10: KaTeX/Mermaid new low findings require stage-end disposition",
+      "closeoutRevalidation": {
+        "commit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
+        "run": 37792105001,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "artifactId": 11557586586,
+        "artifactDigest": "sha256:bcf8071b46c13388852a9e123b0ee9a141047bf58c517f9c05ba65f8192065a3"
+      }
+    },
+    "currentStageImplementation": {
+      "stage": "R14.1",
+      "baselineCommit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
+      "branch": "agent/r14-stage",
+      "status": "implemented-pending-windows",
+      "record": "docs/R14-01-DETAILS.md",
+      "productionChanged": false,
+      "remainingFindings": [
+        "R14-F01",
+        "R14-F02",
+        "R14-F03",
+        "R14-F04",
+        "A10"
+      ],
+      "advanceBasis": "User explicitly requested R14-01 after accepting R13.14; only characterization begins. No risk is marked fixed or exempted.",
+      "a10Deadline": "Before 14.7 enhancement migration acceptance; complete HTML/Word/PDF/Image chain in 14.10/14.11/14.12/14.16 and no open finding at R14 closure."
     }
   }
 }

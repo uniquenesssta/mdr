@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；13.14已验收，R14-01夹具待Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-08：13.14收尾提交 `4340398` / [Windows CI37792105001](https://github.com/uniquenesssta/mdr/actions/runs/37792105001) 七组及全部步骤通过。按用户指令建立唯一R14分支，实施14.1五种导出格式夹具：名称/目录/失败/取消、137块分批、打印恢复及PNG算法；真实built-app固定Markdown产物和其他四格式缺失退休预览变量的断链，另用锁定数学/Mermaid及真实PNG作能力正控。登记F01～F04及A10具体接收门槛；不把替身或缺陷基线通过写成实际导出修复。产品/模型/依赖/格式未改；四项静态门禁、语法/嵌入表达式、116个相对链接及35项风险源通过，产品回归复用七组Windows CI待验收。[详情](docs/R14-01-DETAILS.md)。
 
 - 2026-10-08：13.14在 `9c62844` / [Windows CI37751356061](https://github.com/uniquenesssta/mdr/actions/runs/37751356061) 七组及最终同提交汇总通过并正式收尾：全仓1614/1614、前端616/616、浏览器11/11+29/29，实际剪藏DOM、翻译/图标、寿命与真实WebView导入链验收；原遗漏计数断言已闭环。仅登记文档和审计状态，13.1～13.14实现项全验收；A10的KaTeX/Mermaid两项low风险仍待阶段末处置，R13整体不标完成，未开始第14大阶段。[验收详情](docs/R13-14-DETAILS.md)。
 

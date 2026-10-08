@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "baselineCommit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
+  "source": "# Export baseline\n\n中文与 emoji 😀，**bold**。\n\n| Name | Value |\n| --- | --- |\n| A | 42 |\n\n- [x] done\n\nInline $x^2$ and block:\n\n$$\\frac{1}{2}$$\n\n```js\nconst answer = 42;\n```\n\n```mermaid\nflowchart TD\n  A[Start] --> B[End]\n```\n",
+  "names": [
+    { "input": "", "markdown": "未命名文档.md", "html": "未命名文档.html", "word": "未命名文档.doc", "image": "未命名文档.png" },
+    { "input": "  报告.MD  ", "markdown": "报告.MD", "html": "报告.html", "word": "报告.doc", "image": "报告.png" },
+    { "input": "report.markdown", "markdown": "report.markdown", "html": "report.html", "word": "report.doc", "image": "report.png" },
+    { "input": "report.txt", "markdown": "report.txt.md", "html": "report.txt.html", "word": "report.txt.doc", "image": "report.png" },
+    { "input": "report.html", "markdown": "report.html.md", "html": "report.html.html", "word": "report.html.doc", "image": "report.png" },
+    { "input": "A&B <title>.md", "markdown": "A&B <title>.md", "html": "A&B <title>.html", "word": "A&B <title>.doc", "image": "A&B <title>.png" }
+  ],
+  "saveOptions": {
+    "markdown": { "title": "导出 Markdown", "extension": "md", "extensions": ["md", "markdown"], "filterName": "Markdown 文档" },
+    "html": { "title": "导出 HTML", "extension": "html", "extensions": ["html", "htm"], "filterName": "HTML 文档" },
+    "word": { "title": "导出 Word", "extension": "doc", "extensions": ["doc"], "filterName": "Word 文档" },
+    "image": { "title": "导出图片", "extension": "png", "extensions": ["png"], "filterName": "PNG 图片" }
+  },
+  "longDocument": { "blocks": 137, "smallCharacters": 399999, "largeCharacters": 400000, "smallBatchEnds": [96, 137], "largeBatchEnds": [48, 96, 137], "version": 7 },
+  "imageRatios": {
+    "9:16": { "width": 1080, "height": 1920 },
+    "4:5": { "width": 1080, "height": 1350 },
+    "3:4": { "width": 1080, "height": 1440 },
+    "1:1": { "width": 1080, "height": 1080 },
+    "16:9": { "width": 1920, "height": 1080 }
+  },
+  "knownFindings": [
+    { "id": "R14-F04", "receiver": ["14.6", "14.7", "14.12", "14.16"], "status": "unfixed", "behavior": "The actual exporter reads retired previewWorkerClient/createPreviewNodesForBlock/styleTaskLists/renderMermaidBlocks/observedPreviewBody globals. Rendered formats fail before output; test-supplied bindings are not an application fix." },
+    { "id": "R14-F01", "receiver": ["14.7", "14.10", "14.11"], "status": "unfixed", "behavior": "HTML/Word serialize the unenhanced document; raw math and Mermaid code remain." },
+    { "id": "R14-F02", "receiver": ["14.10"], "status": "unfixed", "behavior": "HTML references KaTeX 0.16.9 CDN assets and an application-only exportPresentationPort variable." },
+    { "id": "R14-F03", "receiver": ["14.2", "14.9", "14.10", "14.11"], "status": "unfixed", "behavior": "Existing non-Markdown suffixes are appended to, rather than replaced, for text exports." },
+    { "id": "A10", "receiver": ["14.7", "14.10", "14.11", "14.12", "14.16"], "status": "unfixed", "behavior": "KaTeX/Mermaid low advisory remains open; format characterization is not security remediation." }
+  ]
+}

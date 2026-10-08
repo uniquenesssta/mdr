@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { launchChromium } from './lib/cdp-browser.mjs';
 import { installVirtualFileHost } from './lib/virtual-file-host.mjs';
 import { prepareBuiltApplicationDocument } from './lib/built-application-assets.mjs';
+import { runExportCharacterization } from './lib/export-characterization.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '../..');
@@ -1806,6 +1807,10 @@ async function runAppSuite() {
       const snapshot = await appSnapshot(browser.page);
       assert.equal(snapshot.selectedText.trim(), 'alpha beta');
       await setAppLayout(browser.page, 'hybrid');
+    });
+
+    await runExportCharacterization({ page: browser.page, test, artifactRoot,
+      loadMarkdown: source => browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)}, {layout:'both',codeVisualEditing:true,tableVisualEditing:true})`)
     });
 
     if (browser.page.exceptions.length) {
