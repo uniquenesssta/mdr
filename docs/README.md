@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。13.14实现与收尾提交均已七组Windows验收，最新基线 `4340398` / [CI37792105001](https://github.com/uniquenesssta/mdr/actions/runs/37792105001)。按用户指令在唯一 `agent/r14-stage` 分支开始14.1格式夹具，真实旧导出四种渲染格式断链F04及F01～F03明确保留、待匹配重写；A10仍未修复并接收至增强迁移前处置，R13整体安全收官未标完成。14.1待本提交Windows CI。[14.1详情](R14-01-DETAILS.md) · [13.14验收](R13-14-DETAILS.md)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。13.14实现与收尾提交均已七组Windows验收，最新基线 `4340398` / [CI37792105001](https://github.com/uniquenesssta/mdr/actions/runs/37792105001)。按用户指令在唯一 `agent/r14-stage` 分支开始14.1格式夹具，真实旧导出四种渲染格式断链F04及F01～F03明确保留、待匹配重写；A10仍未修复并接收至增强迁移前处置，R13整体安全收官未标完成。14.1首轮 [CI37799043386](https://github.com/uniquenesssta/mdr/actions/runs/37799043386) 浏览器11/11+33/33及真实WebView通过，累计门禁因14条旧分支断言与2条桌面名称夹具失败；已修正，待新Windows复验，仍未验收。[14.1详情](R14-01-DETAILS.md) · [13.14验收](R13-14-DETAILS.md)。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

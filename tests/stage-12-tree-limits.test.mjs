@@ -115,7 +115,7 @@ test('R12-07 records Tree Limits ownership and is revalidated by the sole automa
   assert.equal(record[inventory.fields.indexOf('stateOwner')], 'tree-limit-scan-call');
   assert.equal(record[inventory.fields.indexOf('lifecycle')], 'call-local-policy');
   assert.equal(directoryRecord[inventory.fields.indexOf('stateOwner')], 'none');
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r14-stage\]/);
   assert.match(current, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(current, /^\s*pull_request:\s*$/m);
   assert.match(current, /local_file::tree_limits::tests/);

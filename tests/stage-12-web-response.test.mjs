@@ -66,7 +66,7 @@ test('R12-13 remains historical while R12-14 owns the automatic cumulative Stage
   assert.match(previous, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(previous, /^\s*push:\s*$/m);
   const current = await read('.github/workflows/r12-14.yml');
-  assert.match(current, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
+  assert.match(current, /push:\s*\n\s*branches: \[agent\/r14-stage\]/);
   assert.doesNotMatch(current, /continue-on-error|\|\| true|--no-verify|git reset|git clean/);
   await assertCurrentValidation();
 });

@@ -3,12 +3,12 @@
   "baselineCommit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
   "source": "# Export baseline\n\n中文与 emoji 😀，**bold**。\n\n| Name | Value |\n| --- | --- |\n| A | 42 |\n\n- [x] done\n\nInline $x^2$ and block:\n\n$$\\frac{1}{2}$$\n\n```js\nconst answer = 42;\n```\n\n```mermaid\nflowchart TD\n  A[Start] --> B[End]\n```\n",
   "names": [
-    { "input": "", "markdown": "未命名文档.md", "html": "未命名文档.html", "word": "未命名文档.doc", "image": "未命名文档.png" },
-    { "input": "  报告.MD  ", "markdown": "报告.MD", "html": "报告.html", "word": "报告.doc", "image": "报告.png" },
-    { "input": "report.markdown", "markdown": "report.markdown", "html": "report.html", "word": "report.doc", "image": "report.png" },
-    { "input": "report.txt", "markdown": "report.txt.md", "html": "report.txt.html", "word": "report.txt.doc", "image": "report.png" },
-    { "input": "report.html", "markdown": "report.html.md", "html": "report.html.html", "word": "report.html.doc", "image": "report.png" },
-    { "input": "A&B <title>.md", "markdown": "A&B <title>.md", "html": "A&B <title>.html", "word": "A&B <title>.doc", "image": "A&B <title>.png" }
+    { "input": "", "markdown": "未命名文档.md", "markdownDialogPreferredName": "未命名文档.md", "html": "未命名文档.html", "word": "未命名文档.doc", "image": "未命名文档.png" },
+    { "input": "  报告.MD  ", "markdown": "报告.MD", "markdownDialogPreferredName": "报告.MD", "html": "报告.html", "word": "报告.doc", "image": "报告.png" },
+    { "input": "report.markdown", "markdown": "report.markdown", "markdownDialogPreferredName": "report.markdown", "html": "report.html", "word": "report.doc", "image": "report.png" },
+    { "input": "report.txt", "markdown": "report.txt.md", "markdownDialogPreferredName": "report.txt", "html": "report.txt.html", "word": "report.txt.doc", "image": "report.png" },
+    { "input": "report.html", "markdown": "report.html.md", "markdownDialogPreferredName": "report.html", "html": "report.html.html", "word": "report.html.doc", "image": "report.png" },
+    { "input": "A&B <title>.md", "markdown": "A&B <title>.md", "markdownDialogPreferredName": "A&B <title>.md", "html": "A&B <title>.html", "word": "A&B <title>.doc", "image": "A&B <title>.png" }
   ],
   "saveOptions": {
     "markdown": { "title": "导出 Markdown", "extension": "md", "extensions": ["md", "markdown"], "filterName": "Markdown 文档" },

@@ -487,7 +487,7 @@
     "date": "2026-10-08",
     "reviewedCommit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
     "record": "docs/R14-01-DETAILS.md",
-    "status": "R13.14 implementation and closeout accepted; R14.1 characterization implemented, pending exact-commit Windows validation; A10 and rendered-export defects remain unfixed",
+    "status": "R13.14 implementation and closeout accepted; R14.1 first Windows run failed on contract expectations, repaired pending exact-commit Windows revalidation; A10 remains unresolved",
     "priorWindowsRun": 37737197913,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 snapshot. records status/fixed retain R12 closeout handoff semantics; A05 subsequentAcceptance records the current R13 closure separately.",
@@ -520,7 +520,7 @@
         "blobSha": "fdacde5af8915790b9b24f35debfc5cd88e9a15c"
       }
     ],
-    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation.",
+    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation.",
     "priorImplementationWindowsRun": 37660954894,
     "priorImplementationWindowsJobs": {
       "webview-baseline": "success",
@@ -569,7 +569,7 @@
       "stage": "R14.1",
       "baselineCommit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
       "branch": "agent/r14-stage",
-      "status": "implemented-pending-windows",
+      "status": "contract-repair-pending-windows",
       "record": "docs/R14-01-DETAILS.md",
       "productionChanged": false,
       "remainingFindings": [
@@ -580,7 +580,51 @@
         "A10"
       ],
       "advanceBasis": "User explicitly requested R14-01 after accepting R13.14; only characterization begins. No risk is marked fixed or exempted.",
-      "a10Deadline": "Before 14.7 enhancement migration acceptance; complete HTML/Word/PDF/Image chain in 14.10/14.11/14.12/14.16 and no open finding at R14 closure."
+      "a10Deadline": "Before 14.7 enhancement migration acceptance; complete HTML/Word/PDF/Image chain in 14.10/14.11/14.12/14.16 and no open finding at R14 closure.",
+      "lastWindowsAttempt": {
+        "commit": "734ca2c193534a8b4fae47ccf867d81929cce039",
+        "run": 37799043386,
+        "status": "failure",
+        "jobs": {
+          "dependency-advisories": "success",
+          "repository-tests": "failure",
+          "rust": "failure",
+          "frontend": "failure",
+          "webview-baseline": "success",
+          "native-boundary": "success",
+          "closeout": "failure"
+        },
+        "recursiveNode": {
+          "tests": 1655,
+          "passed": 1639,
+          "failed": 16,
+          "directories": 16
+        },
+        "frontend": {
+          "tests": 657,
+          "passed": 641,
+          "failed": 16
+        },
+        "targetedExport": {
+          "tests": 41,
+          "passed": 39,
+          "failed": 2
+        },
+        "contractBrowserPassed": 11,
+        "builtAppBrowserPassed": 33,
+        "newExportBrowserProbesPassed": 4,
+        "failureClasses": [
+          {
+            "cause": "Fourteen R12 cumulative workflow assertions still required the previous R13 automatic branch.",
+            "count": 14
+          },
+          {
+            "cause": "Two Markdown fixtures confused desktop dialog preferred names with browser download names.",
+            "count": 2
+          }
+        ]
+      },
+      "contractRepair": "All fourteen branch assertions now require agent/r14-stage while retaining ownership, manual historical workflow and cumulative hard gates. Six explicit markdownDialogPreferredName values record exporter dialog-port inputs separately from unchanged browser names. No tests are skipped; product sources, browser probes, VM host, dependencies, historical acceptance and reviewedSources remain unchanged. Awaiting exact-commit Windows revalidation; R14.1 is not accepted and 14.2 is not started."
     }
   }
 }

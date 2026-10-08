@@ -109,7 +109,7 @@ test('R12-08 records unique module ownership and never exposes lower-level modul
 test('R12-08 combines R12-07 regression with command tests and every existing hard gate', async () => {
   const workflow = await source('.github/workflows/r12-14.yml');
   const previous = await source('.github/workflows/r12-07.yml');
-  assert.match(workflow, /push:\s*\n\s*branches: \[agent\/r13-stage\]/);
+  assert.match(workflow, /push:\s*\n\s*branches: \[agent\/r14-stage\]/);
   assert.match(workflow, /^\s*workflow_dispatch:\s*$/m);
   assert.doesNotMatch(workflow, /continue-on-error|\|\| true|--no-verify|#\[ignore\]/);
   // runner context is unavailable in job-level env; resolve this path inside the runner step.

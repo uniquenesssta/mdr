@@ -24,13 +24,15 @@ test('R14-01 records the actual retired preview dependency instead of hiding it 
 
 for (const item of fixture.names) {
   for (const [format, operation] of Object.entries(operations)) {
-    test(`R14-01 unchanged ${format} desktop name/filter/directory: ${JSON.stringify(item.input)}`, async () => {
+    test(`R14-01 unchanged ${format} desktop dialog preferred name/filter/directory: ${JSON.stringify(item.input)}`, async () => {
       const h = createExportVmHost({ desktop: true, sourceText: fixture.source, name: item.input });
       if (format === 'image') h.evaluate("currentImageDataUrl = 'data:image/png;base64,iVBORw0KGgo='");
       await h.invoke(operation);
       const dialog = h.calls.find(x => x[0] === 'saveFile');
       assert.ok(dialog, JSON.stringify(h.calls));
-      assert.equal(dialog[1], item[format]);
+      // This is the exporter's input to the dialog port. The desktop adapter
+      // normalizes its default path separately; browser download names are below.
+      assert.equal(dialog[1], format === 'markdown' ? item.markdownDialogPreferredName : item[format]);
       assert.deepEqual(plain(dialog[2]), { ...fixture.saveOptions[format], defaultDirectory: 'C:\\custom' });
       const writes = h.calls.filter(x => /^write/.test(x[0]));
       assert.equal(writes.length, 1);

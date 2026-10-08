@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；13.14已验收，R14-01夹具待Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；13.14已验收，R14-01首轮CI断言修正待Windows复验；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-08：修正 R14-01 首轮累计回归遗漏：`734ca2c` / [Windows CI37799043386](https://github.com/uniquenesssta/mdr/actions/runs/37799043386) 的真实WebView、原生、依赖通过，浏览器11/11+33/33；Node/前端被14条旧R13自动分支断言和2条桌面Markdown名称夹具误判阻断，Rust契约检查及最终汇总随之失败。补齐唯一R14分支断言，分别记录桌面对话框首选名称与浏览器下载名称；保留全部场景和门禁。产品/依赖未改，静态复核通过；待新Windows CI，不标14.1验收。[详情](docs/R14-01-DETAILS.md)。
 
 - 2026-10-08：13.14收尾提交 `4340398` / [Windows CI37792105001](https://github.com/uniquenesssta/mdr/actions/runs/37792105001) 七组及全部步骤通过。按用户指令建立唯一R14分支，实施14.1五种导出格式夹具：名称/目录/失败/取消、137块分批、打印恢复及PNG算法；真实built-app固定Markdown产物和其他四格式缺失退休预览变量的断链，另用锁定数学/Mermaid及真实PNG作能力正控。登记F01～F04及A10具体接收门槛；不把替身或缺陷基线通过写成实际导出修复。产品/模型/依赖/格式未改；四项静态门禁、语法/嵌入表达式、116个相对链接及35项风险源通过，产品回归复用七组Windows CI待验收。[详情](docs/R14-01-DETAILS.md)。
 
