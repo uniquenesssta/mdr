@@ -21,7 +21,7 @@ test('R14-03 owns immutable handles and snapshots, clamped progress and explicit
   assert.throws(() => task.update(5, 'bad', 'unknown'), TypeError);
   assert.equal(before.activeTask.phase, 'preparing'); assert.equal(before.activeTask.progress, 2);
   assert.equal(c.finish(task), true); assert.equal(task.phase, 'completed');
-  assert.equal(c.finish(task), false); assert.throws(() => task.throwIfCancelled(), ExportCancelledError);
+  assert.equal(c.finish(task), false); assert.throws(() => task.token.throwIfCancelled(), ExportCancelledError);
   c.destroy();
 });
 
@@ -35,16 +35,18 @@ test('R14-03 failed completion records a terminal failure without retaining auth
 test('R14-03 replacement invalidates every old mutation and cleanup without advancing blocked IDs', () => {
   const c = createExportTaskController(); const old = c.begin('old'), current = c.begin('current');
   assert.equal(old.cancelled, true); assert.equal(old.phase, 'replaced'); assert.equal(old.current, false);
-  assert.equal(old.update(100, 'late'), false); assert.equal(old.setCancelable(false), false);
+  assert.equal(old.update(100, 'late'), false); assert.equal(old.lockCancellation('encoding'), false);
   assert.equal(c.finish(old), false); assert.equal(c.getSnapshot().activeTask.id, current.id);
-  assert.throws(() => old.throwIfCancelled(), ExportCancelledError);
-  current.setCancelable(false);
+  assert.throws(() => old.token.throwIfCancelled(), ExportCancelledError);
+  current.lockCancellation('encoding');
   assert.equal(c.cancel(), false); assert.equal(c.begin('blocked'), null);
   assert.equal(c.getSnapshot().lastTaskId, 2); assert.equal(current.cancelled, false);
-  current.setCancelable(true); assert.equal(c.cancel(), true); assert.equal(c.cancel(), false);
-  assert.equal(current.phase, 'cancelled'); assert.equal(current.progress, 0);
-  assert.equal(current.update(100, 'late'), false); assert.equal(current.setCancelable(false), false);
-  c.finish(current); c.destroy();
+  // R14-04 removes arbitrary unlocking: finish the locked task, then cancel new preparatory work.
+  c.finish(current);
+  const cancellable = c.begin('cancellable'); assert.equal(c.cancel(), true); assert.equal(c.cancel(), false);
+  assert.equal(cancellable.phase, 'cancelled'); assert.equal(cancellable.progress, 0);
+  assert.equal(cancellable.update(100, 'late'), false); assert.equal(cancellable.lockCancellation('encoding'), false);
+  c.finish(cancellable); c.destroy();
 });
 
 test('R14-03 cancellation is instance scoped and forged or foreign completion cannot release a task', () => {
@@ -60,12 +62,12 @@ test('R14-03 cancellation is instance scoped and forged or foreign completion ca
 
 test('R14-03 destroy invalidates locked tasks, publishes cleanup once and rejects new work/subscriptions', () => {
   const c = createExportTaskController(), snapshots = [];
-  c.subscribe(s => snapshots.push(s)); const task = c.begin('png'); task.setCancelable(false);
+  c.subscribe(s => snapshots.push(s)); const task = c.begin('png'); task.lockCancellation('encoding');
   c.destroy(); const count = snapshots.length; c.destroy();
   assert.equal(snapshots.length, count); assert.deepEqual(snapshots.at(-1), { activeTask: null, lastTaskId: 1, destroyed: true });
   assert.equal(task.phase, 'destroyed'); assert.equal(task.cancelled, true);
-  assert.equal(task.update(100, 'late'), false); assert.equal(task.setCancelable(true), false); assert.equal(c.finish(task), false);
-  assert.throws(() => task.throwIfCancelled(), ExportCancelledError);
+  assert.equal(task.update(100, 'late'), false); assert.equal(task.lockCancellation('encoding'), false); assert.equal(c.finish(task), false);
+  assert.throws(() => task.token.throwIfCancelled(), ExportCancelledError);
   assert.throws(() => c.begin('late'), /destroyed/); assert.throws(() => c.subscribe(() => {}), /destroyed/);
 });
 
@@ -126,7 +128,7 @@ test('R14-03 classic modal opening errors abort before work and cleanup failures
 
 test('R14-03 stale lock/progress/finish cannot change the current classic dialog', () => {
   const h = createExportVmHost(), old = h.invoke('beginExportTask', 'old'), current = h.invoke('beginExportTask', 'current');
-  current.update(40, 'current', 'building'); old.setCancelable(false); old.update(99, 'stale'); h.invoke('finishExportTask', old);
+  current.update(40, 'current', 'building'); old.lockCancellation('encoding'); old.update(99, 'stale'); h.invoke('finishExportTask', old);
   assert.equal(h.nodes.get('export-progress-cancel').disabled, false);
   assert.equal(h.nodes.get('export-progress-status').textContent, 'current');
   assert.equal(h.taskPort.getSnapshot().activeTask.id, current.id);

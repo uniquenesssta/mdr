@@ -71,7 +71,7 @@
       "public/app/export.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy export format/render callers consuming public immutable requests and controller-owned task handles; DOM progress projection only, no task authority.",
+      "Legacy export format/render callers consuming public immutable requests and readonly task cancellation tokens; explicit commit locks and DOM progress projection only.",
       "legacy-image-preview-and-dom-projection",
       "classic-script",
       "split-and-remove",
@@ -5151,17 +5151,17 @@
       "src/features/export/index.js",
       "esm-facade",
       "feature",
-      "Public Export request/task controller and scoped migration boundaries.",
+      "Public Export request/task/cancellation and scoped migration boundaries.",
       "none",
       "module-import",
       "retain",
       false
     ],
     [
-      "src/features/export/application/export-task-controller.js",
+      "src/features/export/task/export-task-controller.js",
       "esm-module",
       "export-application",
-      "Own export task identity, active task, progress, cancelable/cancelled and phase; invalidate replacement and disposal without DOM or I/O.",
+      "Own export task identity, active task, progress, cancellation and irreversible phase locks; issue readonly cancellation tokens without copying authority.",
       "active-export-task",
       "begin/update/cancel/finish/destroy",
       "retain",
@@ -5175,6 +5175,16 @@
       "classic-export-task-port-mount-and-subscriptions",
       "explicit-instance",
       "remove-with-classic-callers",
+      false
+    ],
+    [
+      "src/features/export/task/export-cancellation.js",
+      "esm-module",
+      "export-task",
+      "Readonly cancellation capability, typed error and noncancelable phase policy; release wait subscriptions while task controller retains authority.",
+      "cancellation-subscription-lifecycle",
+      "token/onCancel/waitFor/dispose",
+      "retain",
       false
     ]
   ]

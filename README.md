@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01/02已验收，R14-03导出任务控制器待Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～03已验收，R14-04取消机制待Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-09：R14-03在 `751f012` / [Windows CI37818046855](https://github.com/uniquenesssta/mdr/actions/runs/37818046855) 七组及全部步骤通过，全仓1702/1702、前端704/704、任务16/16、请求31/31、导出基线41/41、浏览器11/11＋36/36，正式收尾。同分支实施14.4：任务/取消归入task目录，公开只读token实时消费唯一任务状态，可中断帧/库/增强/图片/对话框等待并拒绝晚到结果；文件写入、PNG编码与打印交接显式不可逆锁定，UI只发cancel。删除任意解锁和旧检查API，原解锁场景映射为结束锁定任务后取消新准备任务；补齐监听清理、晚到拒绝与实际按钮/pagehide回归。静态复核通过，待新Windows CI，14.4不标验收；F01/F02/F04与A10排期保持，已提交系统操作不能由token撤销。[14.3验收](docs/R14-03-DETAILS.md) · [14.4详情](docs/R14-04-DETAILS.md)。
 
 - 2026-10-09：R14-02在 `b85f74c` / [Windows CI37807608820](https://github.com/uniquenesssta/mdr/actions/runs/37807608820) 七组与全部步骤通过，全仓1686/1686、前端688/688、请求31/31、导出基线41/41、浏览器11/11＋34/34，正式收尾。同分支实施14.3：公开控制器独占任务身份/进度/取消/阶段，删除classic权威状态；新任务替换旧可取消任务，锁定阶段拒绝替换，过时及销毁结果不能写进度/预览或完成新任务。补齐开关弹窗异常、晚到库/保存对话框/PNG和实际按钮/pagehide回归；静态复核通过，待新Windows CI，14.3不标验收。F01/F02/F04及A10排期不变，F03完整产物仍待后续格式验收。[14.2验收](docs/R14-02-DETAILS.md) · [14.3详情](docs/R14-03-DETAILS.md)。
 

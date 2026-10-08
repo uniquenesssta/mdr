@@ -65,8 +65,9 @@
       }
     });
 
-    function waitForExportFrame() {
-      return new Promise(resolve => requestAnimationFrame(() => resolve()));
+    function waitForExportFrame(task = null) {
+      const frame = new Promise(resolve => requestAnimationFrame(() => resolve()));
+      return task ? task.token.waitFor(frame) : frame;
     }
 
     function beginExportTask(title) {
@@ -90,6 +91,7 @@
     }
 
     async function createFullPreviewBodyForExport(task = null) {
+      task?.token.throwIfCancelled();
       const body = document.createElement('div');
       body.className = 'markdown-body';
       const editorVersion = documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.();
@@ -102,7 +104,7 @@
       if (workerBlocks?.length) {
         const batchSize = editor.textLength >= 400000 ? 48 : 96;
         for (let start = 0; start < workerBlocks.length; start += batchSize) {
-          task?.throwIfCancelled();
+          task?.token.throwIfCancelled();
           const fragment = document.createDocumentFragment();
           const end = Math.min(workerBlocks.length, start + batchSize);
           for (let index = start; index < end; index += 1) {
@@ -110,14 +112,14 @@
           }
           body.append(fragment);
           task?.update(8 + Math.round((end / workerBlocks.length) * 52), `正在构建导出内容 ${end}/${workerBlocks.length} 块`, 'building');
-          if (end < workerBlocks.length) await waitForExportFrame();
+          if (end < workerBlocks.length) await waitForExportFrame(task);
         }
         return body;
       }
 
       task?.update(12, '正在解析完整文档…', 'building');
-      await waitForExportFrame();
-      task?.throwIfCancelled();
+      await waitForExportFrame(task);
+      task?.token.throwIfCancelled();
       const source = documentModel?.createSnapshot?.('full-preview-export') ?? editor.value;
       try {
         if (Boolean(exportPresentationPort.markdown?.parse)) {
@@ -136,22 +138,24 @@
         console.error('Export preview render error:', error);
         body.innerHTML = '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
       }
-      task?.throwIfCancelled();
+      task?.token.throwIfCancelled();
       task?.update(60, '完整文档已解析', 'building');
       return body;
     }
 
     async function enhanceFullPreviewForExport(root, task = null) {
+      task?.token.throwIfCancelled();
       const children = Array.from(root.children || []);
       const batchSize = 18;
       if (!children.length) return;
       for (let start = 0; start < children.length; start += batchSize) {
-        task?.throwIfCancelled();
+        task?.token.throwIfCancelled();
         const batch = children.slice(start, start + batchSize);
         styleTaskLists(batch);
         const mathRenderer = exportPresentationPort.math;
         if (mathRenderer?.renderTree || Boolean(exportPresentationPort.math?.renderTree)) {
           batch.forEach(node => {
+            task?.token.throwIfCancelled();
             if (!(mathRenderer?.containsMath?.(node.textContent) ?? node.textContent?.includes('$'))) return;
             if (mathRenderer?.renderTree) {
               mathRenderer.renderTree(node, { delimiters: mathRenderer.delimiters });
@@ -164,14 +168,16 @@
           });
         }
         for (const node of batch) {
-          task?.throwIfCancelled();
+          task?.token.throwIfCancelled();
           if (node.querySelector?.('pre code.language-mermaid') || node.matches?.('pre') && node.querySelector?.('code.language-mermaid')) {
-            await renderMermaidBlocks([node], () => Boolean(task?.cancelled));
+            const enhancement = renderMermaidBlocks([node], () => Boolean(task?.token.cancelled));
+            await (task ? task.token.waitFor(enhancement) : enhancement);
+            task?.token.throwIfCancelled();
           }
         }
         const end = Math.min(children.length, start + batchSize);
         task?.update(62 + Math.round((end / children.length) * 28), `正在增强导出内容 ${end}/${children.length}`, 'enhancing');
-        if (end < children.length) await waitForExportFrame();
+        if (end < children.length) await waitForExportFrame(task);
       }
     }
 
@@ -188,10 +194,15 @@
 
     async function exportTextContent(content, preferredName, options, task = null) {
       if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
-        const path = await exportPlatformPort.call('dialogs', 'saveFile', preferredName, options);
-        task?.throwIfCancelled();
+        task?.token.throwIfCancelled();
+        const selection = exportPlatformPort.call('dialogs', 'saveFile', preferredName, options);
+        const path = await (task ? task.token.waitFor(selection) : selection);
+        task?.token.throwIfCancelled();
         if (!path) return null;
-        await exportPlatformPort.call('files', 'writeText', path, content, { extension: options.extension, reason: 'export' });
+        task?.lockCancellation('writing');
+        task?.token.throwIfCancelled();
+        const writing = exportPlatformPort.call('files', 'writeText', path, content, { extension: options.extension, reason: 'export' });
+        await (task ? task.token.waitFor(writing) : writing);
         return path;
       }
       return false;
@@ -241,7 +252,7 @@
         const name = request.name;
 
         const bodyHtml = (await createFullPreviewBodyForExport(task)).innerHTML;
-        task.throwIfCancelled();
+        task.token.throwIfCancelled();
         task.update(92, '正在生成 Word 文件…', 'serializing');
 
         const fullHtml = `<!DOCTYPE html>
@@ -280,9 +291,11 @@ ${bodyHtml}
         request,
         'Word 文档'
       ), task);
-      task.throwIfCancelled();
+      task.token.throwIfCancelled();
       if (savedPath === null) return;
       if (savedPath === false) {
+        task.lockCancellation('writing');
+        task.token.throwIfCancelled();
         const blob = new Blob([fullHtml], { type: 'application/msword;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -317,7 +330,7 @@ ${bodyHtml}
         const name = request.name;
 
         const bodyHtml = (await createFullPreviewBodyForExport(task)).innerHTML;
-        task.throwIfCancelled();
+        task.token.throwIfCancelled();
         task.update(92, '正在生成 HTML 文件…', 'serializing');
 
         const fullHtml = `<!DOCTYPE html>
@@ -380,9 +393,11 @@ ${'</scr' + 'ipt>'}
         request,
         'HTML 文档'
       ), task);
-      task.throwIfCancelled();
+      task.token.throwIfCancelled();
       if (savedPath === null) return;
       if (savedPath === false) {
+        task.lockCancellation('writing');
+        task.token.throwIfCancelled();
         const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -422,12 +437,14 @@ ${'</scr' + 'ipt>'}
         if (wasSource) exportPreviewCommandPort.setViewMode('preview');
         exportPreviewCommandPort.deactivateVirtual();
         const fullBody = await createFullPreviewBodyForExport(task);
-        task.throwIfCancelled();
+        task.token.throwIfCancelled();
         preview.replaceChildren(fullBody);
         replacedPreview = true;
         observedPreviewBody = null;
         await enhanceFullPreviewForExport(fullBody, task);
-        task.throwIfCancelled();
+        task.token.throwIfCancelled();
+        task.lockCancellation('printing');
+        task.token.throwIfCancelled();
         task.update(100, 'PDF 内容已准备完成', 'printing');
         finishExportTask(task);
         showToast(t('toastChoosePdf'));
@@ -513,27 +530,33 @@ ${'</scr' + 'ipt>'}
     async function prepareExportImages(root, task = null) {
       const imgs = Array.from(root.querySelectorAll('img'));
       for (let index = 0; index < imgs.length; index += 1) {
-        task?.throwIfCancelled();
+        task?.token.throwIfCancelled();
         const img = imgs[index];
         if (img.src && !img.src.startsWith('data:')) {
-          await new Promise(resolve => {
-            const test = new Image();
-            test.crossOrigin = 'anonymous';
-            test.onload = () => {
-              img.crossOrigin = 'anonymous';
-              img.src = test.src;
+          let loader;
+          const loading = new Promise(resolve => {
+            loader = new Image();
+            loader.crossOrigin = 'anonymous';
+            loader.onload = () => {
+              if (!task?.token.cancelled) { img.crossOrigin = 'anonymous'; img.src = loader.src; }
               resolve();
             };
-            test.onerror = () => {
-              img.src = IMAGE_PLACEHOLDER;
+            loader.onerror = () => {
+              if (!task?.token.cancelled) img.src = IMAGE_PLACEHOLDER;
               resolve();
             };
             const sep = img.src.includes('?') ? '&' : '?';
-            test.src = img.src + sep + '_cors=' + Date.now();
+            loader.src = img.src + sep + '_cors=' + Date.now();
           });
+          try {
+            await (task ? task.token.waitFor(loading) : loading);
+            task?.token.throwIfCancelled();
+          } finally {
+            if (loader) { loader.onload = null; loader.onerror = null; }
+          }
         }
         task?.update(90 + Math.round(((index + 1) / Math.max(1, imgs.length)) * 5), `正在准备图片 ${index + 1}/${imgs.length}`, 'images');
-        if ((index + 1) % 8 === 0) await waitForExportFrame();
+        if ((index + 1) % 8 === 0) await waitForExportFrame(task);
       }
     }
 
@@ -550,12 +573,13 @@ ${'</scr' + 'ipt>'}
         if (!domToImageApi) {
           task.update(5, '正在加载图片导出模块…', 'loading');
           try {
-            domToImageApi = await exportPresentationPort.loadDomToImage();
+            domToImageApi = await task.token.waitFor(exportPresentationPort.loadDomToImage());
           } catch (error) {
+            if (exportTaskPort.isCancelled(error)) throw error;
             console.error('Image export library load error:', error);
           }
         }
-        task.throwIfCancelled();
+        task.token.throwIfCancelled();
         if (!domToImageApi) {
           outcome = 'failed';
           showToast(t('toastImageLibMissing'));
@@ -570,7 +594,7 @@ ${'</scr' + 'ipt>'}
         clone = document.createElement('div');
         clone.className = 'preview-content';
         const fullBody = await createFullPreviewBodyForExport(task);
-        task.throwIfCancelled();
+        task.token.throwIfCancelled();
         clone.replaceChildren(fullBody);
         clone.style.width = preset.width + 'px';
         clone.style.padding = Math.round(preset.width * 0.04) + 'px ' + Math.round(preset.width * 0.045) + 'px';
@@ -596,7 +620,7 @@ ${'</scr' + 'ipt>'}
 
         await enhanceFullPreviewForExport(clone, task);
         await prepareExportImages(clone, task);
-        task.throwIfCancelled();
+        task.token.throwIfCancelled();
 
         const cropFit = request.imageOptions.cropFit;
         const targetHeight = preset.height;
@@ -619,15 +643,16 @@ ${'</scr' + 'ipt>'}
 
         stage.style.height = captureHeight + 'px';
         task.update(96, '正在生成 PNG，此阶段完成前不能立即取消…', 'encoding');
-        task.setCancelable(false);
-        const dataUrl = await domToImageApi.toPng(clone, {
+        task.lockCancellation('encoding');
+        task.token.throwIfCancelled();
+        const dataUrl = await task.token.waitFor(domToImageApi.toPng(clone, {
           width: preset.width,
           height: captureHeight,
           bgcolor: getComputedStyle(clone).backgroundColor || '#ffffff',
           cacheBust: true,
           imagePlaceholder: IMAGE_PLACEHOLDER
-        });
-        task.throwIfCancelled();
+        }));
+        task.token.throwIfCancelled();
         task.update(100, '图片预览已生成');
         currentImageDataUrl = dataUrl;
         const previewImg = document.getElementById('export-image-preview');

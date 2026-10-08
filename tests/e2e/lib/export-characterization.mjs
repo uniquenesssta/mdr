@@ -166,36 +166,39 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     await writeFile(join(artifactRoot, 'r14-01-pdf-image-failure.json'), JSON.stringify({ ...result, finding:'R14-F04' }, null, 2));
   });
 
-  await test('R14-03 actual task port owns replacement, progress, lock and cancel button without classic authority', async () => {
+  await test('R14-04 irreversible lock retains R14-03 actual replacement, progress and cancel button coverage', async () => {
     const result = await page.evaluate(`(() => {
       const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort;
       const modal=document.getElementById('export-progress-modal'),button=document.getElementById('export-progress-cancel');
       const old=beginExportTask('old task'),current=beginExportTask('current task');
+      let cancellable;
       try {
         current.update(40,'current progress','building');
-        old.update(99,'stale');old.setCancelable(false);finishExportTask(old);
-        let cancelledError=false;try {old.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
+        old.update(99,'stale');old.lockCancellation('encoding');finishExportTask(old);
+        let cancelledError=false;try {old.token.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
         const projected={title:document.getElementById('export-progress-title').textContent,
           message:document.getElementById('export-progress-status').textContent,
           width:document.getElementById('export-progress-value').style.width,disabled:button.disabled,visible:modal.classList.contains('show')};
-        current.setCancelable(false);const locked=port.getSnapshot();
+        current.lockCancellation('encoding');const locked=port.getSnapshot();
         const blocked=beginExportTask('blocked');cancelActiveExport();
         const afterBlocked=port.getSnapshot();
-        current.setCancelable(true);button.click();
-        const cancelled=port.getSnapshot();current.update(100,'late');
+        // A locked task is terminal until finish; cancellation is exercised on new preparation.
+        finishExportTask(current);cancellable=beginExportTask('cancellable task');button.click();
+        const cancelled=port.getSnapshot();cancellable.update(100,'late');
         return {projected,locked,afterBlocked,cancelled,blocked:blocked===null,cancelledError,
           oldCancelled:old.cancelled,oldPhase:old.phase,oldUpdate:old.update(100,'late'),
-          currentId:current.id,afterLate:port.getSnapshot(),
+          currentId:current.id,cancellableId:cancellable.id,afterLate:port.getSnapshot(),
           immutable:Object.isFrozen(current)&&Object.isFrozen(cancelled)&&Object.isFrozen(cancelled.activeTask),
           scoped:typeof window.markdownEditorExportTaskPort==='undefined',
           retired:typeof activeExportTask==='undefined'&&typeof exportTaskId==='undefined'&&typeof ExportCancelledError==='undefined'};
-      } finally {finishExportTask(current);}
+      } finally {finishExportTask(cancellable);finishExportTask(current);}
     })()`);
     assert.deepEqual(result.projected, { title:'current task',message:'current progress',width:'40%',disabled:false,visible:true });
     assert.equal(result.oldCancelled, true); assert.equal(result.oldPhase, 'replaced'); assert.equal(result.oldUpdate, false);
     assert.equal(result.cancelledError, true); assert.equal(result.blocked, true);
     assert.equal(result.locked.activeTask.cancelable, false); assert.equal(result.afterBlocked.lastTaskId, result.locked.lastTaskId);
     assert.equal(result.afterBlocked.activeTask.id, result.currentId); assert.equal(result.afterBlocked.activeTask.cancelled, false);
+    assert.equal(result.cancelled.activeTask.id, result.cancellableId);
     assert.equal(result.cancelled.activeTask.phase, 'cancelled'); assert.equal(result.cancelled.activeTask.progress, 0);
     assert.deepEqual(result.afterLate, result.cancelled);
     assert.equal(result.immutable, true); assert.equal(result.scoped, true); assert.equal(result.retired, true);
@@ -203,22 +206,54 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     await writeFile(join(artifactRoot, 'r14-03-task-controller.json'), JSON.stringify(result, null, 2));
   });
 
+  await test('R14-04 actual cancel button terminates a token wait and rejects late publication', async () => {
+    const result = await page.evaluate(`(async () => {
+      const port=document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort;
+      const task=beginExportTask('token wait');task.update(5,'等待图片模块','loading');
+      const marker=document.createElement('div');marker.textContent='unchanged';document.body.append(marker);
+      let resolve;const pending=new Promise(done=>{resolve=done;});const reasons=[];
+      const dispose=task.token.onCancel(reason=>reasons.push(reason));
+      const work=(async()=>{
+        try {marker.textContent=await task.token.waitFor(pending);return {published:true};}
+        catch(error){if(!port.isCancelled(error))throw error;return {published:false,reason:error.reason};}
+        finally {finishExportTask(task);}
+      })();
+      try {
+        document.getElementById('export-progress-cancel').click();const outcome=await work;
+        const released=port.getSnapshot().activeTask===null;
+        resolve('late result');await Promise.resolve();await Promise.resolve();
+        return {outcome,released,reasons,content:marker.textContent,tokenId:task.token.taskId,taskId:task.id,
+          frozen:Object.isFrozen(task.token),readOnly:!('cancel' in task.token)&&!('setCancelable' in task),
+          progressVisible:document.getElementById('export-progress-modal').classList.contains('show')};
+      } finally {dispose();finishExportTask(task);marker.remove();}
+    })()`);
+    assert.deepEqual(result.outcome, { published:false,reason:'cancelled' });
+    assert.deepEqual(result.reasons, ['cancelled']); assert.equal(result.content, 'unchanged');
+    assert.equal(result.tokenId, result.taskId); assert.equal(result.progressVisible, false);
+    for (const field of ['released','frozen','readOnly']) assert.equal(result[field], true, field);
+    await writeFile(join(artifactRoot, 'r14-04-cancellation.json'), JSON.stringify(result, null, 2));
+  });
+
   // Final app probe: exercise the production pagehide owner after all other export probes.
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
-    const result = await page.evaluate(`(() => {
+    const result = await page.evaluate(`(async () => {
       const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort;
-      const task=beginExportTask('dispose locked task');task.update(96,'encoding','encoding');task.setCancelable(false);
+      const task=beginExportTask('dispose locked task');task.update(96,'encoding','encoding');task.lockCancellation('encoding');
       const seen=[];port.subscribe(s=>seen.push(s));
+      let rejectLate;const operation=new Promise((resolve,reject)=>{rejectLate=reject;});
+      const wait=task.token.waitFor(operation).then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       window.dispatchEvent(new Event('pagehide'));
+      const waiting=await wait;rejectLate(new Error('late encoder failure'));await Promise.resolve();
       let rejected=false;try {port.begin('late');}catch(error){rejected=/destroyed/.test(error.message);}
-      let cancelledError=false;try {task.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
-      return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,
-        lateUpdate:task.update(100,'late'),lateLock:task.setCancelable(true),lateFinish:finishExportTask(task),
+      let cancelledError=false;try {task.token.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
+      return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,
+        lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
         rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort'),
         progressVisible:document.getElementById('export-progress-modal').classList.contains('show')};
     })()`);
     assert.equal(result.snapshot.destroyed, true); assert.equal(result.snapshot.activeTask, null);
     assert.deepEqual(result.lastSeen, result.snapshot); assert.equal(result.cancelled, true); assert.equal(result.phase, 'destroyed');
+    assert.deepEqual(result.waiting, {cancelled:true,reason:'destroyed'});
     for (const field of ['lateUpdate','lateLock','lateFinish','progressVisible']) assert.equal(result[field], false, field);
     for (const field of ['rejected','cancelledError','removed']) assert.equal(result[field], true, field);
     await writeFile(join(artifactRoot, 'r14-03-task-disposal.json'), JSON.stringify(result, null, 2));

@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。14.2在 `b85f74c` / [CI37807608820](https://github.com/uniquenesssta/mdr/actions/runs/37807608820) 七组及全部步骤通过，全仓1686/1686、前端688/688、请求31/31、浏览器11/11＋34/34，已收尾。按用户指令继续唯一 `agent/r14-stage` 实施14.3独占任务控制器、过时/异常/销毁清理，待新Windows CI。14.4及后续项未验收；F01/F02/F04及A10仍待重写与处置，不标实际渲染格式修复或整体阶段收官。[14.2验收](R14-02-DETAILS.md) · [14.3详情](R14-03-DETAILS.md)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。14.3在 `751f012` / [CI37818046855](https://github.com/uniquenesssta/mdr/actions/runs/37818046855) 七组及全部步骤通过，全仓1702/1702、前端704/704、任务16/16、浏览器11/11＋36/36，已收尾。同一 `agent/r14-stage` 实施14.4只读取消token、等待清理和显式不可逆锁定，待本提交Windows CI；14.5未开始。实际格式缺口和A10保持接收，不标阶段整体收官。[14.3验收](R14-03-DETAILS.md) · [14.4详情](R14-04-DETAILS.md)。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

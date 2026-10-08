@@ -139,12 +139,12 @@ test('R14-01 task replacement, stale progress, explicit noncancelable phase and 
   const h = createExportVmHost();
   const old = h.invoke('beginExportTask', 'old');
   const current = h.invoke('beginExportTask', 'current');
-  assert.throws(() => old.throwIfCancelled(), { name: 'ExportCancelledError' });
+  assert.throws(() => old.token.throwIfCancelled(), { name: 'ExportCancelledError' });
   old.update(100, 'stale');
   assert.notEqual(h.nodes.get('export-progress-status').textContent, 'stale');
   current.update(300, 'current'); assert.equal(h.nodes.get('export-progress-value').style.width, '100%');
   current.update(-1, 'current'); assert.equal(h.nodes.get('export-progress-value').style.width, '0%');
-  current.setCancelable(false);
+  current.lockCancellation('encoding');
   h.invoke('cancelActiveExport'); assert.equal(current.cancelled, false);
   assert.equal(h.invoke('beginExportTask', 'blocked'), null);
   h.invoke('finishExportTask', old); assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask.id'), current.id);

@@ -1,4 +1,4 @@
-import { isExportCancelledError } from '../application/export-task-controller.js';
+import { isExportCancelledError } from '../task/export-cancellation.js';
 
 const PORT_KEY = 'markdownEditorExportTaskPort';
 

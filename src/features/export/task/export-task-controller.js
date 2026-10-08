@@ -1,13 +1,6 @@
-export class ExportCancelledError extends Error {
-  constructor() {
-    super('EXPORT_CANCELLED');
-    this.name = 'ExportCancelledError';
-  }
-}
+import { assertExportNonCancelablePhase, createExportCancellationToken } from './export-cancellation.js';
 
-export const isExportCancelledError = error => error instanceof ExportCancelledError;
-
-const workPhases = new Set(['preparing', 'building', 'enhancing', 'serializing', 'printing', 'loading', 'images', 'encoding']);
+const workPhases = new Set(['preparing', 'building', 'enhancing', 'serializing', 'printing', 'loading', 'images', 'encoding', 'writing']);
 
 /** Sole owner of export task identity, progress, cancellation and phase; no DOM or I/O. */
 export function createExportTaskController() {
@@ -21,6 +14,13 @@ export function createExportTaskController() {
   const requireAlive = () => { if (destroyed) throw new Error('Export task controller has been destroyed.'); };
   const isCurrent = state => !destroyed && active === state;
   const canUpdate = state => isCurrent(state) && !state.cancelled;
+  const subscribe = listener => {
+    requireAlive();
+    if (typeof listener !== 'function') throw new TypeError('Export task listener is required.');
+    listeners.add(listener);
+    try { listener(getSnapshot()); } catch (error) { listeners.delete(listener); throw error; }
+    return () => listeners.delete(listener);
+  };
   const notify = () => {
     const revision = ++notificationRevision;
     const snapshot = getSnapshot();
@@ -41,7 +41,13 @@ export function createExportTaskController() {
       if (active && !active.cancelable) return null;
       if (active) { active.cancelled = true; active.phase = 'replaced'; }
       const state = { id: ++lastTaskId, title, progress: 2, message: '正在准备文档…', cancelable: true, cancelled: false, phase: 'preparing' };
+      const token = createExportCancellationToken({
+        taskId: state.id,
+        readState: () => ({ cancelled: !canUpdate(state), reason: canUpdate(state) ? null : destroyed ? 'destroyed' : state.phase }),
+        subscribe
+      });
       const task = Object.freeze({
+        token,
         get id() { return state.id; }, get title() { return state.title; },
         get progress() { return state.progress; }, get message() { return state.message; },
         get cancelable() { return state.cancelable; }, get cancelled() { return state.cancelled; },
@@ -49,20 +55,24 @@ export function createExportTaskController() {
         update(progress, message, phase = state.phase) {
           if (!canUpdate(state)) return false;
           if (!workPhases.has(phase)) throw new TypeError('Unknown export task phase.');
+          if (!state.cancelable && phase !== state.phase) throw new Error('Locked export phase cannot be changed.');
           state.progress = Math.max(0, Math.min(100, Number(progress) || 0));
           state.message = message ? String(message) : '正在处理…';
           state.phase = phase;
           notify();
           return true;
         },
-        setCancelable(value) {
+        lockCancellation(phase) {
           if (!canUpdate(state)) return false;
-          state.cancelable = Boolean(value);
+          assertExportNonCancelablePhase(phase);
+          if (!state.cancelable) {
+            if (phase !== state.phase) throw new Error('Locked export phase cannot be changed.');
+            return true;
+          }
+          state.cancelable = false;
+          state.phase = phase;
           notify();
           return true;
-        },
-        throwIfCancelled() {
-          if (!canUpdate(state)) throw new ExportCancelledError();
         }
       });
       states.set(task, state);
@@ -94,13 +104,7 @@ export function createExportTaskController() {
       notify();
       return true;
     },
-    subscribe(listener) {
-      requireAlive();
-      if (typeof listener !== 'function') throw new TypeError('Export task listener is required.');
-      listeners.add(listener);
-      try { listener(getSnapshot()); } catch (error) { listeners.delete(listener); throw error; }
-      return () => listeners.delete(listener);
-    },
+    subscribe,
     destroy() {
       if (destroyed) return;
       destroyed = true;
