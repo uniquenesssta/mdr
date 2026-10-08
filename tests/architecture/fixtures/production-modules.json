@@ -81,7 +81,7 @@
       "public/app/web-clipper.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy Find/Preview callbacks and menu-open delegate; web document insertion belongs to ESM Import.",
+      "Legacy Find/Preview callbacks and toast helper; all import commands, state and views belong to ESM Import.",
       "legacy-find-preview-callbacks",
       "classic-script",
       "split-and-remove",
@@ -5068,16 +5068,6 @@
       false
     ],
     [
-      "src/features/import/compatibility/classic-web-fetch-port.js",
-      "esm-module",
-      "feature",
-      "Scoped web fetch access and input invalidation listener lifecycle until Atomic 13.12/13.14.",
-      "classic-web-fetch-port-listeners",
-      "mount/destroy",
-      "remove-after-migration",
-      false
-    ],
-    [
       "src/features/import/web-clipper/html-extractor.js",
       "esm-module",
       "feature",
@@ -5088,16 +5078,6 @@
       false
     ],
     [
-      "src/features/import/compatibility/classic-html-extractor-port.js",
-      "esm-module",
-      "feature",
-      "Scoped extraction access for classic clipper until 13.12/13.14.",
-      "classic-html-extractor-port",
-      "mount/destroy",
-      "remove-after-migration",
-      false
-    ],
-    [
       "src/features/import/web-clipper/html-to-markdown.js",
       "esm-module",
       "feature",
@@ -5105,16 +5085,6 @@
       "none",
       "synchronous-call",
       "retain",
-      false
-    ],
-    [
-      "src/features/import/compatibility/classic-html-markdown-port.js",
-      "esm-module",
-      "feature",
-      "Scoped Markdown conversion access for classic clipper until 13.12/13.14.",
-      "classic-html-markdown-port",
-      "mount/destroy",
-      "remove-after-migration",
       false
     ],
     [
@@ -5131,20 +5101,10 @@
       "src/features/import/web-clipper/web-clipper-view.js",
       "esm-module",
       "feature",
-      "Project clipper state into existing dialog; own DOM listeners and modal lifetime.",
-      "web-clipper-view-listeners",
-      "create/open/destroy",
+      "Own clipper DOM construction, translation subscription, state projection, ModalShell and complete listener/controller disposal.",
+      "web-clipper-dom-modal-locale-listeners",
+      "create/open/close/destroy",
       "retain",
-      false
-    ],
-    [
-      "src/features/import/compatibility/classic-web-clipper-port.js",
-      "esm-module",
-      "feature",
-      "Activate clipper view with classic insertion and translation callbacks; own view disposal.",
-      "classic-web-clipper-view",
-      "mount/start/open/destroy",
-      "remove-after-migration",
       false
     ],
     [

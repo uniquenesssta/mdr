@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile } from 'node:fs/promises';
-import { createWebClipperController, createWebFetchCoordinator, mountClassicWebFetchPort } from '../src/features/import/index.js';
+import { access, readFile } from 'node:fs/promises';
+import { createWebClipperController, createWebFetchCoordinator } from '../src/features/import/index.js';
 import { createWebFetchClient } from '../src/platform/desktop/web-fetch-client.js';
 import { assertProductionInventory } from './support/production-inventory.mjs';
 
@@ -116,17 +116,16 @@ test('native adapter receives the exact request cancellation; cancellation failu
   }
 });
 
-test('scoped classic port cancels input changes, removes listeners and preserves replacement owners', () => {
-  const c = createWebFetchCoordinator(), host = {}, input = new EventTarget();
-  const port = mountClassicWebFetchPort(host, c);
-  let changes = 0; port.api.watchInputs([input], () => changes++);
-  const old = c.manualHtml(html); input.dispatchEvent(new Event('input'));
-  assert.equal(c.isCurrent(old), false); assert.equal(changes, 1);
-  assert.throws(() => mountClassicWebFetchPort(host, c), /already mounted/);
-  Object.defineProperty(host, 'markdownEditorWebFetchPort', { value: 'replacement', configurable: true });
-  port.destroy(); port.destroy(); input.dispatchEvent(new Event('change'));
-  assert.equal(changes, 1); assert.equal(host.markdownEditorWebFetchPort, 'replacement');
-  assert.throws(() => port.api.manualHtml(html), /destroyed/); c.destroy();
+test('public clipper input changes cancel coordinator results and release subscriptions', () => {
+  const c = createWebFetchCoordinator();
+  const controller = createWebClipperController({ fetchCoordinator: c, extract: value => value, convert: value => value, insertMarkdown() {} });
+  controller.open(); const old = c.manualHtml(html);
+  let changes = 0; const off = controller.subscribe(() => changes++);
+  controller.setInput('url', 'changed');
+  assert.equal(c.isCurrent(old), false); assert.equal(changes, 2);
+  off(); controller.close(); assert.equal(changes, 2);
+  controller.destroy(); controller.destroy();
+  assert.throws(() => controller.setInput('manualHtml', html), /destroyed/); c.destroy();
 });
 
 test('clipper close/reopen and edited inputs reject late HTML', async () => {
@@ -144,8 +143,28 @@ test('clipper close/reopen and edited inputs reject late HTML', async () => {
 test('web routing has one feature owner and the production inventory includes it', async () => {
   const source = await readFile(new URL('../public/app/web-clipper.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /await fetch\(|allorigins|codetabs|fetchWithNativeBackend|status\.innerHTML/);
-  assert.match(source, /webClipperDocumentUiCommandPort\.invoke\('openWebClipper'\)/);
+  assert.doesNotMatch(source, /openUrlModal|markdownEditorWeb(?:Clipper|Fetch)Port|webClipperDocumentUiCommandPort/);
+  const main = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
+  const menu = await readFile(new URL('../src/features/menu/compatibility/classic-menu-command-adapter.js', import.meta.url), 'utf8');
+  assert.match(main, /openWebClipper: \(\) => webClipperView\.open\(\)/);
+  assert.match(menu, /\[C\.IMPORT_WEB\]: \(\) => invokeDocument\('openWebClipper'\)/);
   const controller = await readFile(new URL('../src/features/import/web-clipper/web-clipper-controller.js', import.meta.url), 'utf8');
   assert.match(controller, /fetchCoordinator\.isCurrent\(result\)/);
   await assertProductionInventory();
+});
+
+test('retired import ports, global opener and inline clipper markup cannot re-enter production', async () => {
+  for (const name of ['classic-web-fetch-port', 'classic-html-extractor-port', 'classic-html-markdown-port', 'classic-web-clipper-port']) {
+    await assert.rejects(access(new URL('../src/features/import/compatibility/' + name + '.js', import.meta.url)), { code: 'ENOENT' });
+  }
+  const entry = await readFile(new URL('../src/features/import/index.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(entry, /mountClassic|compatibility\//);
+  const html = await readFile(new URL('../public/compatibility/business-content.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /id="(?:url-modal|url-input|manual-html)"|openUrlModal/);
+  const registry = await readFile(new URL('../src/ui/compatibility/mount-modal-shells.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(registry, /url-modal/);
+  for (const name of ['web-clipper', 'events', 'editor-tools']) {
+    const source = await readFile(new URL('../public/app/' + name + '.js', import.meta.url), 'utf8');
+    assert.doesNotMatch(source, /function\s+(?:openUrlModal|triggerImportFile|importFile|fetchUrl|insertUrlMarkdown)\s*\(|mountClassic(?:Web|Html)/);
+  }
 });

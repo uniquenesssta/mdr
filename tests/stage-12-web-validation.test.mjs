@@ -104,7 +104,7 @@ test('R12-11 remains manually runnable while R12-12 carries its cumulative hard 
   ]) assert.ok(current.includes(code), `missing cumulative gate: ${code}`);
 });
 
-test('R12-11 documents user-approved equivalent extraction separately from pending R12-S01', async () => {
+test('R12-11 equivalent extraction remains separate from the historical R12-S01 handoff', async () => {
   const dir = 'docs/markdown-main-full-rewrite-taskbook-18-docs/';
   const paths = await readdir(dir);
   const stage = await read(dir + paths.find(path => path.startsWith('13-')));

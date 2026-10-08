@@ -84,7 +84,7 @@ test('R12-12 remains cumulatively protected after R12-13 becomes the automatic S
   await assertCurrentValidation();
 });
 
-test('R12-12 remains accepted after R12-13 while later work and R12-S01 stay pending', async () => {
+test('R12-12 acceptance and the historical R12-S01 handoff snapshot remain recorded', async () => {
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md');
   assert.match(stage, /- \[x\] 12\.11 Web Validation/);
   assert.match(stage, /- \[x\] 12\.12 Web Client/);

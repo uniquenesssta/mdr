@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "stage-01-exact-migration-regression-baseline",
-  "sourceCommit": "927988119d3a4637b084eddeb032503d313363e1",
+  "sourceCommit": "5efe460b6025b5af0de25ee917fa6dccd542c50d",
   "policy": {
     "exactEntriesOnly": true,
     "wildcardExemptions": false,
@@ -46,7 +46,7 @@
       "handler": "renderExportImagePreview()",
       "count": 1,
       "lines": [
-        423
+        394
       ]
     },
     {
@@ -55,7 +55,7 @@
       "handler": "cancelActiveExport()",
       "count": 1,
       "lines": [
-        402
+        373
       ]
     },
     {
@@ -73,8 +73,8 @@
       "handler": "closeExportImageModal()",
       "count": 2,
       "lines": [
-        411,
-        433
+        382,
+        404
       ]
     },
     {
@@ -83,7 +83,7 @@
       "handler": "downloadExportImage()",
       "count": 1,
       "lines": [
-        435
+        406
       ]
     },
     {
@@ -143,15 +143,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "openUrlModal(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        20
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "renameCurrentDocument(); closeAppMenus();",
       "count": 1,
       "lines": [
@@ -164,7 +155,7 @@
       "handler": "renderExportImagePreview()",
       "count": 1,
       "lines": [
-        434
+        405
       ]
     },
     {
@@ -173,7 +164,7 @@
       "handler": "selectImageRatio('1:1')",
       "count": 1,
       "lines": [
-        419
+        390
       ]
     },
     {
@@ -182,7 +173,7 @@
       "handler": "selectImageRatio('16:9')",
       "count": 1,
       "lines": [
-        420
+        391
       ]
     },
     {
@@ -191,7 +182,7 @@
       "handler": "selectImageRatio('3:4')",
       "count": 1,
       "lines": [
-        418
+        389
       ]
     },
     {
@@ -200,7 +191,7 @@
       "handler": "selectImageRatio('4:5')",
       "count": 1,
       "lines": [
-        417
+        388
       ]
     },
     {
@@ -209,7 +200,7 @@
       "handler": "selectImageRatio('9:16')",
       "count": 1,
       "lines": [
-        416
+        387
       ]
     },
     {

@@ -17,7 +17,7 @@
             <div class="menu-dropdown-list menu-submenu-list recent-files-menu" id="recent-files-menu"></div>
           </div>
           <div class="menu-separator"></div>
-          <div class="menu-item" onclick="openUrlModal(); closeAppMenus();"><span>从网页导入 Markdown...</span></div>
+          <div class="menu-item"><span>从网页导入 Markdown...</span></div>
           <div class="menu-separator"></div>
           <div class="menu-item menu-submenu"><span>导出</span><span class="menu-arrow">›</span>
             <div class="menu-dropdown-list menu-submenu-list">
@@ -329,35 +329,6 @@
       <div class="modal-footer">
         <button data-link-action="close" data-i18n="cancel">取消</button>
         <button data-link-action="confirm" class="primary" data-i18n="insert">插入</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 网页转 Markdown 模态框 -->
-  <div class="modal-overlay" id="url-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-globe"></use></svg> <span data-i18n="urlTitle">网页转 Markdown</span></h3>
-        <button data-clipper-close><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
-      </div>
-      <div class="modal-body">
-        <label for="url-input" data-i18n="urlLabel">网页地址</label>
-        <input type="url" id="url-input" data-i18n-placeholder="urlPlaceholder" placeholder="https://example.com/article">
-        <div class="c-form-inline-option">
-          <input type="checkbox" id="use-local-proxy" class="c-inline-checkbox" >
-          <label for="use-local-proxy" class="c-inline-label" data-i18n="useProxy">使用 Rust 本地后端（桌面版默认）</label>
-        </div>
-        <input type="url" id="proxy-url" value="http://localhost:8765/fetch" data-i18n-placeholder="proxyPlaceholder" placeholder="浏览器预览代理地址" class="c-proxy-input is-hidden">
-        <button data-clipper-fetch class="primary" data-i18n="fetchBtn">尝试获取</button>
-        <div id="url-status" class="c-form-status"></div>
-        <div id="manual-area" class="c-manual-input is-hidden">
-          <label for="manual-html" data-i18n="manualLabel">网页 HTML 源码（手动粘贴）</label>
-          <textarea id="manual-html" rows="6" data-i18n-placeholder="manualPlaceholder" placeholder="在浏览器中打开目标网页 → 右键「查看网页源代码」→ 全选复制 → 粘贴到此处"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button data-clipper-close data-i18n="cancel">取消</button>
-        <button data-clipper-insert class="primary" data-i18n="convertInsert">转换并插入</button>
       </div>
     </div>
   </div>

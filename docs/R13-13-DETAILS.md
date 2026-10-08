@@ -1,8 +1,26 @@
 # R13.13 导入到文档链
 
-状态：**完整导入链的真实 Windows WebView 已通过；首轮累计回归未完全通过，本轮修补测试迁移遗漏，待新提交 Windows 验收**。
+状态：**已通过完整 Windows 验收并正式收尾**（`5efe460b6025b5af0de25ee917fa6dccd542c50d` / [CI 37737197913](https://github.com/uniquenesssta/mdr/actions/runs/37737197913)，2026-10-08）。
 
-用户于 2026-10-08 授权“开始13.13”。沿用唯一阶段分支 `agent/r13-stage`，本轮基线 `59b0ba25b56134a804fc1caa6da078e147230bf8`，初始工作区干净。R13.12 的功能验收基于 `fabf0873269a220b88c58684d8196e996eb7926b` / [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组通过；后续文档收尾 CI 的当前依赖门禁曾失败。前置补丁 `927988119d3a4637b084eddeb032503d313363e1` / [Windows CI 37651965466](https://github.com/uniquenesssta/mdr/actions/runs/37651965466) 七组均成功，已依原启动授权续接完整导入链。用户本轮要求“收尾13”，按 R13.13 收尾实施；没有推进 R13.14 或宣布 R13 整体完成。
+用户于 2026-10-08 授权“开始13.13”。沿用唯一阶段分支 `agent/r13-stage`，本轮基线 `59b0ba25b56134a804fc1caa6da078e147230bf8`，初始工作区干净。R13.12 的功能验收基于 `fabf0873269a220b88c58684d8196e996eb7926b` / [Windows CI 36971353716](https://github.com/uniquenesssta/mdr/actions/runs/36971353716) 七组通过；后续文档收尾 CI 的当前依赖门禁曾失败。前置补丁 `927988119d3a4637b084eddeb032503d313363e1` / [Windows CI 37651965466](https://github.com/uniquenesssta/mdr/actions/runs/37651965466) 七组均成功，已依原启动授权续接完整导入链。首轮收尾请求按 R13.13 实施；下方保留当时的失败与待验收记录。当前已验收13.13，后续13.14见 [实施详情](R13-14-DETAILS.md)。
+
+## 正式验收与移交（2026-10-08）
+
+用户要求“收尾13开始14”。精确提交 `5efe460b6025b5af0de25ee917fa6dccd542c50d` 的七个 Windows job 及其执行步骤全部成功；最终汇总读取同一提交的六组证据并通过八类 Import→Documents→Preview/Hybrid 证据门禁。首轮累计失败已闭环，不以首轮部分通过代替最终验收。
+
+| Windows 证据 | Job ID | 结果 |
+| --- | --- | --- |
+| 全仓递归 Node | 113179338056 | success |
+| 原生编译、链接和签名 | 113179338219 | success |
+| 依赖与真实 TLS/公告 | 113179338255 | success |
+| 前端构建、浏览器与静态门禁 | 113179338263 | success |
+| 真实 Windows WebView、安全与八类导入链 | 113179338271 | success |
+| Rust 全套检查 | 113179338376 | success |
+| 精确提交证据汇总 | 113181708120 | success |
+
+[最终汇总产物](https://github.com/uniquenesssta/mdr/actions/runs/37737197913/artifacts/11532980143) ID为11532980143，SHA-256为 `d85d9efac977f848e3f5b9bd42aca953b0a6052f61847ef3df6f1b3bf097f5a7`。真实WebView产物ID11532626498，SHA-256为 `28cf467e4dc750c1ca4768277ee9e459ed64787ed710dafd939896b47a98b104`。
+
+任务书13.13、A03网页来源两个渲染sink回归及A05完整抓取/剪藏验收已勾选；R13-S01后端证据仍为 `74abbd2` / CI36890098604，原R12-S01移交号同步关闭。历史R12验收快照与其未修复移交语义不回写。13.14接收四个未挂载的旧ports、经典菜单打开函数与内联modal；本轮只登记13.13验收，13.14必须再经新提交Windows验证。KaTeX新low公告尚未处置，A10与R13整体收官保持未完成。
 
 ## 首轮累计回归失败与本轮修复（2026-10-08）
 

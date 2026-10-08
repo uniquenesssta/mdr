@@ -13,8 +13,11 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
       text: window.markdownEditorDocumentModel.createSnapshot('r13-chain-observation') };
   });
   const startFetch = url => browser.execute(value => {
-    const host = document.getElementById('compatibility-business-ports');
-    host.markdownEditorDocumentUiCommandPort.invoke('openWebClipper');
+    if (typeof window.openUrlModal !== 'undefined') throw new Error('Classic import global remains.');
+    document.querySelector('#file-menu-dropdown .menu-trigger').click();
+    const command = document.querySelector('[data-menu-command="import.web"]');
+    if (!command || command.hasAttribute('onclick')) throw new Error('Owned Import menu command is missing or inline.');
+    command.click();
     const input = document.getElementById('url-input');
     input.value = value; input.dispatchEvent(new Event('input', { bubbles: true }));
     document.querySelector('[data-clipper-fetch]').click();

@@ -861,8 +861,9 @@ async function loadAppModules() {
       extract: html => extractHtml(html, document), convert: convertExtractedHtml,
       insertMarkdown: markdown => importDocumentController.insertWebMarkdown(markdown),
       native: platform.capabilities.desktop.webFetch });
-    webClipperView = createWebClipperView({ root: requireElement('#url-modal', 'Web Clipper modal'),
-      controller: webClipperController, translate: t, notify });
+    webClipperView = createWebClipperView({ overlayRoot: requireElement('#overlay-root', 'Web Clipper overlay'),
+      controller: webClipperController, translate: t, notify,
+      subscribeLocale: listener => compatibilityPlatformHost.markdownEditorI18nPort.subscribe(listener) });
     unregisterImportCommands = documentUiCommandPort.register({
       importFile: () => fileImportView.open(),
       openImportPath: path => dropImportController.openPath(path),

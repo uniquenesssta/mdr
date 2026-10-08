@@ -91,7 +91,8 @@ test('Atomic 5.13 web clipper still mutates only DocumentModel through the R13.1
     read('src/features/import/application/import-document-controller.js'),
     read('src/features/editor/application/editor-controller.js')
   ]);
-  assert.match(clipper, /invoke\('openWebClipper'\)/);
+  assert.doesNotMatch(clipper, /openUrlModal|openWebClipper/);
+  assert.match(main, /openWebClipper: \(\) => webClipperView\.open\(\)/);
   assert.doesNotMatch(clipper, /documentModel\.replaceRange\(/);
   assert.match(main, /insertMarkdown: markdown => importDocumentController\.insertWebMarkdown\(markdown\)/);
   assert.match(main, /appendMarkdown: markdown => editorController\.appendImportedMarkdown\(markdown\)/);

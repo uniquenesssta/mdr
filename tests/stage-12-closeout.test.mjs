@@ -41,7 +41,7 @@ function fixture() {
   };
 }
 
-test('all same-commit evidence passes while A04/A05 remain explicitly unfixed', () => {
+test('same-commit evidence passes while the historical R12 A04/A05 handoff remains explicitly unfixed', () => {
   const result = assessCloseout(fixture());
   assert.equal(result.rustPassed, 268);
   assert.equal(result.nodeTestFiles, 2);

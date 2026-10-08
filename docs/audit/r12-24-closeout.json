@@ -102,12 +102,30 @@
         "R13-S01"
       ],
       "record": "docs/markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md",
-      "risk": "R13-S01 through R13.11 accepted; R13.12 controller/UI pending CI and R13.13 complete clipping-to-document/render integration not yet accepted.",
+      "risk": "Historical R12 closeout handed off A05 without repair. Subsequent R13-S01 backend and R13.13 complete-chain acceptance closed the tracking item; the R12 handoff status is not retroactively rewritten.",
       "deadline": "before 13.9 integration and R13 acceptance",
       "acceptance": "confirm product thresholds/internal network support; real HTTP chunked/compressed/redirect/IPv6/MIME/timeout/cancel tests; webpage through both safe render paths",
       "stopCondition": "confirmed current high-risk bypass must be contained before transfer; do not widen exposure while pending",
-      "reviewConclusion": "R13.11 seven-job Windows evidence passed. Current clipper state has one controller owner with cancellation and stale-result isolation. A05 remains open until complete Windows end-to-end acceptance.",
-      "fixed": false
+      "reviewConclusion": "R13-S01 backend accepted at 74abbd291c32bc125b4f151bd98d337f55e4e54e / run 36890098604; R13.13 exact-commit seven-job Windows and eight-scenario real WebView acceptance at 5efe460b6025b5af0de25ee917fa6dccd542c50d / run 37737197913. See subsequentAcceptance for current closure, while fixed=false retains R12 historical handoff semantics.",
+      "fixed": false,
+      "subsequentAcceptance": {
+        "stage": "R13.13",
+        "commit": "5efe460b6025b5af0de25ee917fa6dccd542c50d",
+        "run": 37737197913,
+        "status": "accepted",
+        "windowsJobsPassed": 7,
+        "record": "docs/R13-13-DETAILS.md",
+        "closeoutArtifactId": 11532980143,
+        "closeoutArtifactDigest": "sha256:d85d9efac977f848e3f5b9bd42aca953b0a6052f61847ef3df6f1b3bf097f5a7",
+        "importChainScenariosPassed": 8,
+        "backendCommit": "74abbd291c32bc125b4f151bd98d337f55e4e54e",
+        "backendRun": 36890098604,
+        "trackingIdsClosed": [
+          "A05",
+          "R13-S01",
+          "R12-S01"
+        ]
+      }
     }
   ],
   "reviewedSources": [
@@ -141,7 +159,7 @@
     },
     {
       "path": "public/app/web-clipper.js",
-      "blobSha": "7e784323f269c0e544f7248a9d4e2813f87f4b8c"
+      "blobSha": "eaf503c1cda07e7746edcb035c26775614e6223c"
     },
     {
       "path": "src-tauri/capabilities/default.json",
@@ -168,16 +186,8 @@
       "blobSha": "91007afb5d1f84443c9815f8df066d6ab475629a"
     },
     {
-      "path": "src/features/import/compatibility/classic-web-fetch-port.js",
-      "blobSha": "65dc75e8cf9b9b19a858aa8596878865f3033c66"
-    },
-    {
       "path": "src/features/import/web-clipper/html-extractor.js",
       "blobSha": "125b68a9c6069936744574f2a1b044733d74d019"
-    },
-    {
-      "path": "src/features/import/compatibility/classic-html-extractor-port.js",
-      "blobSha": "a3e2a4a0529fae25d0c3b5268ea771ac21032633"
     },
     {
       "path": "src/shared/security/document-html.js",
@@ -188,20 +198,12 @@
       "blobSha": "9bab98428e492f024cb426783e7e13cf6da0d4dd"
     },
     {
-      "path": "src/features/import/compatibility/classic-html-markdown-port.js",
-      "blobSha": "3633a4b757564b98cc74a0500f4cc78d0318052e"
-    },
-    {
       "path": "src/features/import/web-clipper/web-clipper-controller.js",
       "blobSha": "64090489b8e01ac07f1e05fccef917725e693537"
     },
     {
       "path": "src/features/import/web-clipper/web-clipper-view.js",
-      "blobSha": "3b9cbf2e0c723548be18bbe8b7cb66f854877115"
-    },
-    {
-      "path": "src/features/import/compatibility/classic-web-clipper-port.js",
-      "blobSha": "fdacde5af8915790b9b24f35debfc5cd88e9a15c"
+      "blobSha": "8e33056a5431d03848358d87282d58cace1c0c44"
     },
     {
       "path": "public/app/core.js",
@@ -209,7 +211,7 @@
     },
     {
       "path": "public/compatibility/business-content.html",
-      "blobSha": "427c703f7484ee45aebceaf9f4f45b475d8901d2"
+      "blobSha": "0e539e8c15b005ea954540bab8871ea9e1385703"
     },
     {
       "path": "src/features/import/application/import-document-controller.js",
@@ -237,7 +239,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "071456294b7722e0125549778e98c788f1e861c2"
+      "blobSha": "91d7c49d916708d421429856e0a788c050aa10f4"
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
@@ -245,7 +247,7 @@
     },
     {
       "path": "tests/e2e/windows/import-document-chain.mjs",
-      "blobSha": "691a22217544376bb4805bda0278868efb662450"
+      "blobSha": "a74808a47dcd8bc2440139b286017d8b53dcabe4"
     },
     {
       "path": "scripts/ci/verify-r13-import-chain.mjs",
@@ -258,6 +260,14 @@
     {
       "path": "src/features/preview/render/presentation/mermaid-presentation.js",
       "blobSha": "67ff4b9c38b823a45e99960ada1fbb93384567dd"
+    },
+    {
+      "path": "src/ui/compatibility/mount-modal-shells.js",
+      "blobSha": "3247aed10abda3c3f380064d6644e0b92c2b439c"
+    },
+    {
+      "path": "src/features/import/index.js",
+      "blobSha": "1b10cc1e21c770aa2aa3bfc436acce5018c71567"
     }
   ],
   "priorFailures": {
@@ -473,17 +483,46 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R13.13",
+    "stage": "R13.14",
     "date": "2026-10-08",
-    "reviewedCommit": "92242e611793f4caee2ae42c0b3947c39fd7829e",
-    "record": "docs/R13-13-DETAILS.md",
-    "status": "R13.13 real WebView passed; cumulative validation failed on stale tests; regression migration repair pending exact-commit Windows validation",
-    "priorWindowsRun": 37651965466,
+    "reviewedCommit": "5efe460b6025b5af0de25ee917fa6dccd542c50d",
+    "record": "docs/R13-14-DETAILS.md",
+    "status": "owned clipper DOM and retired-port cleanup pending exact-commit Windows validation",
+    "priorWindowsRun": 37737197913,
     "priorWindowsJobsPassed": 7,
-    "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 acceptance snapshot.",
-    "conclusion": "Reviewed import intent cancellation, save-before-read, failed-read/no-record, successful recents and public Editor insertion. Native policy is unchanged; one private resolver is injected only into the archived Windows test host. Current full-chain evidence is mandatory alongside preserved CSP/IPC controls. Historical R12 acceptance unchanged. KaTeX prototype-pollution advisory remains a new unresolved low finding; no claim of dependency remediation from trust=false or import sanitization. Run 37660954894 passed the actual Windows WebView import chain, Rust, native and dependency jobs, but cumulative admission failed on obsolete classic-entry/event-count assertions and a removed static export in the Platform suite. Current repair preserves all original scenarios and moves assertions to public Import/Documents/Editor/Platform contracts; production sources and historical acceptance are unchanged. New exact-commit Windows results remain required.",
-    "implementationWindowsRun": 37660954894,
-    "implementationWindowsJobs": {
+    "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 snapshot. records status/fixed retain R12 closeout handoff semantics; A05 subsequentAcceptance records the current R13 closure separately.",
+    "acceptedPriorStage": {
+      "stage": "R13.13",
+      "commit": "5efe460b6025b5af0de25ee917fa6dccd542c50d",
+      "run": 37737197913,
+      "status": "accepted",
+      "windowsJobsPassed": 7,
+      "record": "docs/R13-13-DETAILS.md",
+      "closeoutArtifactId": 11532980143,
+      "closeoutArtifactDigest": "sha256:d85d9efac977f848e3f5b9bd42aca953b0a6052f61847ef3df6f1b3bf097f5a7",
+      "importChainScenariosPassed": 8
+    },
+    "removedReviewedSources": [
+      {
+        "path": "src/features/import/compatibility/classic-web-fetch-port.js",
+        "blobSha": "65dc75e8cf9b9b19a858aa8596878865f3033c66"
+      },
+      {
+        "path": "src/features/import/compatibility/classic-html-extractor-port.js",
+        "blobSha": "a3e2a4a0529fae25d0c3b5268ea771ac21032633"
+      },
+      {
+        "path": "src/features/import/compatibility/classic-html-markdown-port.js",
+        "blobSha": "3633a4b757564b98cc74a0500f4cc78d0318052e"
+      },
+      {
+        "path": "src/features/import/compatibility/classic-web-clipper-port.js",
+        "blobSha": "fdacde5af8915790b9b24f35debfc5cd88e9a15c"
+      }
+    ],
+    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 still needs exact-commit Windows results. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed.",
+    "priorImplementationWindowsRun": 37660954894,
+    "priorImplementationWindowsJobs": {
       "webview-baseline": "success",
       "rust": "success",
       "native-boundary": "success",

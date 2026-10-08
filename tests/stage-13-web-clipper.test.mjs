@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createWebClipperController, createWebFetchCoordinator, mountClassicWebClipperPort } from '../src/features/import/index.js';
+import { createWebClipperController, createWebFetchCoordinator } from '../src/features/import/index.js';
 
 function host(overrides = {}) {
   const inserted = [];
@@ -34,11 +34,14 @@ test('unexpected fetch errors expose manual input; empty conversion performs no 
   h.controller.open(); await h.controller.fetch(); assert.equal(h.controller.snapshot.error, 'network'); assert.equal(h.controller.snapshot.showManual, true);
   h.controller.setInput('manualHtml', 'x'); assert.equal(h.controller.insert().status, 'no-content'); assert.deepEqual(h.inserted, []); h.destroy();
 });
-test('activation bridge starts once and disposes the owned view', () => {
-  const host = {}; let opened = 0, disposed = 0;
-  const port = mountClassicWebClipperPort(host, () => ({ open() { opened++; }, destroy() { disposed++; } }));
-  const api = host.markdownEditorWebClipperPort;
-  assert.throws(() => api.open(), /unavailable/); api.start({}); api.open(); assert.equal(opened, 1);
-  assert.throws(() => api.start({}), /cannot start/); port.destroy(); port.destroy();
-  assert.equal(disposed, 1); assert.equal(Object.hasOwn(host, 'markdownEditorWebClipperPort'), false); assert.throws(() => api.open(), /unavailable/);
+test('public clipper owns open sessions and disposes subscriptions without an activation bridge', () => {
+  const h = host(); let updates = 0;
+  const off = h.controller.subscribe(() => updates++);
+  h.controller.open(); h.controller.setInput('manualHtml', 'first');
+  h.controller.open(); assert.equal(h.controller.snapshot.manualHtml, '');
+  off(); const before = updates;
+  h.controller.close(); assert.equal(updates, before);
+  h.destroy(); h.destroy();
+  assert.throws(() => h.controller.open(), /destroyed/);
+  assert.throws(() => h.controller.subscribe(() => {}), /destroyed/);
 });

@@ -1,15 +1,12 @@
     const webClipperCompatibilityHost = document.getElementById('compatibility-business-ports');
     const webClipperEditorUiCommandPort = webClipperCompatibilityHost?.markdownEditorEditorUiCommandPort;
-    const webClipperDocumentUiCommandPort = webClipperCompatibilityHost?.markdownEditorDocumentUiCommandPort;
 const webClipperPreviewCommandPort = webClipperCompatibilityHost?.markdownEditorPreviewCommandPort;
     if (!webClipperEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
-    if (!webClipperDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
 if (!webClipperPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
     webClipperEditorUiCommandPort.register({
       getFindSearchOptions: setStatus => createFindSearchOptions(setStatus),
       afterFindMatch: match => afterFindMatch(match)
     });
-    function openUrlModal() { return webClipperDocumentUiCommandPort.invoke('openWebClipper'); }
 
     // Atomic 5.12：Find/Replace 对话框已迁移，classic 只保留 native 搜索与预览同步桥。
     function createFindSearchOptions(setStatus = () => {}) {

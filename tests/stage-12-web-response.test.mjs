@@ -71,7 +71,7 @@ test('R12-13 remains historical while R12-14 owns the automatic cumulative Stage
   await assertCurrentValidation();
 });
 
-test('R12-13 documentation records acceptance after R12-14 acceptance while R12-S01 remains pending', async () => {
+test('R12-13 acceptance and the historical R12-S01 handoff snapshot remain recorded', async () => {
   const stage = await read('docs/markdown-main-full-rewrite-taskbook-18-docs/13-阶段12-本地文件、链接、网页与日志 Rust 重写.md');
   assert.match(stage, /- \[x\] 12\.12 Web Client/);
   assert.match(stage, /- \[x\] 12\.13 Web Response/);

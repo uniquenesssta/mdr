@@ -1,21 +1,22 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
-import { mountClassicHtmlExtractorPort } from '../src/features/import/compatibility/classic-html-extractor-port.js';
+import { createWebClipperController, createWebFetchCoordinator } from '../src/features/import/index.js';
 
-test('scoped extractor port preserves results/errors, rejects duplicates and releases ownership', () => {
-  const host = {};
-  const expected = { meta: {}, content: {} };
-  const port = mountClassicHtmlExtractorPort(host, html => { if (html === 'bad') throw new Error('parse failure'); return expected; });
-  assert.equal(host.markdownEditorHtmlExtractorPort.extract('html'), expected);
-  assert.throws(() => port.api.extract('bad'), /parse failure/);
-  assert.throws(() => mountClassicHtmlExtractorPort(host, () => {}), /already mounted/);
-  port.destroy(); port.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorHtmlExtractorPort'), false);
-  assert.throws(() => port.api.extract('html'), /destroyed/);
-  const other = mountClassicHtmlExtractorPort(host, () => expected);
-  Object.defineProperty(host, 'markdownEditorHtmlExtractorPort', { value: 'new owner' });
-  other.destroy(); assert.equal(host.markdownEditorHtmlExtractorPort, 'new owner');
+test('public clipper preserves extraction result identity and parse errors before insertion', () => {
+  const expected = { meta: {}, content: {} }, inserted = [];
+  const fetchCoordinator = createWebFetchCoordinator();
+  const controller = createWebClipperController({ fetchCoordinator,
+    extract: html => { if (html === 'bad') throw new Error('parse failure'); return expected; },
+    convert: value => { assert.equal(value, expected); return '# extracted'; },
+    insertMarkdown: value => inserted.push(value) });
+  controller.open(); controller.setInput('manualHtml', 'bad');
+  assert.deepEqual(controller.insert(), { status: 'error', error: 'parse failure' });
+  assert.deepEqual(inserted, []);
+  controller.setInput('manualHtml', 'html');
+  assert.equal(controller.insert().status, 'inserted'); assert.deepEqual(inserted, ['# extracted']);
+  controller.destroy(); controller.destroy();
+  assert.throws(() => controller.insert(), /destroyed/); fetchCoordinator.destroy();
 });
 
 test('ESM composition injects the sole extractor and converter; classic code retains no conversion authority', async () => {

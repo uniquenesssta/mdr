@@ -154,9 +154,11 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
 
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 6);
   // R13.13 removes the file input change and file-menu import handlers; the historical handoff above stays frozen.
-  assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 34);
+  // R13.14 also removes the webpage import menu handler; MenuView owns that command.
+  assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 33);
   const currentHtml = await readText('public/compatibility/business-content.html');
   assert.doesNotMatch(currentHtml, /onchange="importFile\(|onclick="triggerImportFile\(/);
+  assert.doesNotMatch(currentHtml, /onclick="openUrlModal\(/);
   assert.deepEqual(await checkLegacyRuntime({ root: ROOT }), []);
   assert.equal(baseline.trackedGeneratedFiles.length, 4);
   assert.equal(baseline.policy.wildcardExemptions, false);

@@ -1,20 +1,21 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mountClassicHtmlMarkdownPort } from '../src/features/import/compatibility/classic-html-markdown-port.js';
+import { createWebClipperController, createWebFetchCoordinator } from '../src/features/import/index.js';
 import { isSafeDocumentUrl } from '../src/shared/security/document-html.js';
 
-test('conversion port preserves input/results/errors and releases scoped ownership', () => {
-  const host = {}, input = { content: {} };
-  const port = mountClassicHtmlMarkdownPort(host, value => { assert.equal(value, input); return '# converted'; });
-  assert.equal(port.api.convert(input), '# converted');
-  assert.throws(() => mountClassicHtmlMarkdownPort(host, () => ''), /already mounted/);
-  port.destroy(); port.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorHtmlMarkdownPort'), false);
-  assert.throws(() => port.api.convert(input), /destroyed/);
-  const failed = mountClassicHtmlMarkdownPort(host, () => { throw new Error('conversion failure'); });
-  assert.throws(() => failed.api.convert(input), /conversion failure/);
-  Object.defineProperty(host, 'markdownEditorHtmlMarkdownPort', { value: 'successor' });
-  failed.destroy(); assert.equal(host.markdownEditorHtmlMarkdownPort, 'successor');
+test('public clipper preserves conversion input/results/errors and releases source ownership', () => {
+  const input = { content: {} }, inserted = []; let failed = true;
+  const fetchCoordinator = createWebFetchCoordinator();
+  const controller = createWebClipperController({ fetchCoordinator, extract: () => input,
+    convert: value => { assert.equal(value, input); if (failed) throw new Error('conversion failure'); return '# converted'; },
+    insertMarkdown: value => inserted.push(value) });
+  controller.open(); controller.setInput('manualHtml', 'html');
+  assert.deepEqual(controller.insert(), { status: 'error', error: 'conversion failure' });
+  assert.deepEqual(inserted, []); failed = false;
+  assert.equal(controller.insert().status, 'inserted'); assert.deepEqual(inserted, ['# converted']);
+  controller.open(); assert.equal(controller.snapshot.hasContent, false);
+  controller.destroy(); controller.destroy();
+  assert.throws(() => controller.insert(), /destroyed/); fetchCoordinator.destroy();
 });
 
 test('conversion shares the existing document URL policy without widening schemes', () => {
