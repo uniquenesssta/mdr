@@ -1,5 +1,5 @@
 import './styles/index.css';
-import { mountClassicExportRequestPort } from './features/export/index.js';
+import { createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
@@ -139,6 +139,8 @@ const exportRequestPort = mountClassicExportRequestPort(compatibilityPlatformHos
   getActiveDocumentId: () => compatibilityPlatformHost.markdownEditorDocumentSessionPort?.activeId,
   hasDocument: id => Boolean(compatibilityPlatformHost.markdownEditorDocumentSessionPort?.getRecord(id))
 });
+const exportTaskController = createExportTaskController();
+const exportTaskPort = mountClassicExportTaskPort(compatibilityPlatformHost, exportTaskController);
 const dropImportController = createDropImportController({
   target: document,
   nativeDrop: platform.capabilities.desktop.dragDrop,
@@ -276,6 +278,8 @@ configureHybridImageSourcePlatform({
   getDocumentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {}
 });
 window.addEventListener('pagehide', () => {
+  try { exportTaskController.destroy(); } catch (error) { console.error('Export task disposal failed:', error); }
+  exportTaskPort.destroy();
   exportRequestPort.destroy();
   destroyLayoutStateFeature();
   previewLayoutStabilityPort.destroy();

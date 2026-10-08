@@ -95,15 +95,15 @@ test('R14-02 every actual classic entry rejects invalid inputs before task, snap
       const h = createExportVmHost(options);
       h.evaluate("currentImageDataUrl = 'data:image/png;base64,iVBORw0KGgo='");
       await h.invoke(operation);
-      assert.equal(h.evaluate('exportTaskId'), 0, operation);
-      assert.equal(h.evaluate('activeExportTask'), null);
+      assert.equal(h.evaluate('exportTaskPort.getSnapshot().lastTaskId'), 0, operation);
+      assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
       assert.deepEqual(h.calls.map(x => x[0]), ['toast'], operation);
       assert.equal(h.downloads.length, 0); assert.equal(h.timers.length, 0);
     }
   }
   const h = createExportVmHost(); h.evaluate("currentImageRatio = 'invalid'");
   await h.invoke('renderExportImagePreview');
-  assert.equal(h.evaluate('exportTaskId'), 0); assert.deepEqual(h.calls.map(x => x[0]), ['toast']);
+  assert.equal(h.evaluate('exportTaskPort.getSnapshot().lastTaskId'), 0); assert.deepEqual(h.calls.map(x => x[0]), ['toast']);
 });
 
 test('R14-02 HTML/Word freeze names and directories before long-document frames', async () => {

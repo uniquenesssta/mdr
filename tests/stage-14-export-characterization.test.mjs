@@ -17,7 +17,7 @@ test('R14-01 records the actual retired preview dependency instead of hiding it 
   for (const operation of ['exportHTML', 'exportWord', 'exportPDF', 'renderExportImagePreview']) {
     await h.invoke(operation);
     assert.equal(h.downloads.length, 0);
-    assert.equal(h.evaluate('activeExportTask'), null);
+    assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
   }
   assert.equal(h.timers.length, 0);
   assert.equal(h.calls.filter(x => x[0] === 'saveFile' || /^write/.test(x[0])).length, 0);
@@ -59,7 +59,7 @@ for (const format of Object.keys(operations)) {
       assert.equal(h.downloads.length, 0);
       assert.equal(h.calls.filter(x => /^write/.test(x[0])).length, mode === 'cancel' ? 0 : 1);
       if (mode === 'error') assert.ok(h.calls.some(x => x[0] === 'toast' && String(x[1]).includes('write denied')));
-      if (['html', 'word'].includes(format)) assert.equal(h.evaluate('activeExportTask'), null);
+      if (['html', 'word'].includes(format)) assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
     }
   });
 }
@@ -92,7 +92,7 @@ for (const [format, mime] of [['html', 'text/html;charset=utf-8'], ['word', 'app
       assert.ok(text.includes('https://cdn.jsdelivr.net/npm/katex@0.16.9/'));
       assert.ok(text.includes('exportPresentationPort.math?.renderTree'), 'R14-F02 records a broken standalone reference, not a supported contract.');
     }
-    assert.equal(h.evaluate('activeExportTask'), null);
+    assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
     assert.ok(h.calls.some(x => x[0] === 'revoke'));
   });
 }
@@ -109,7 +109,7 @@ for (const size of ['small', 'large']) {
     assert.equal(h.calls.some(x => ['snapshot', 'parse'].includes(x[0])), false);
     assert.equal(h.frameCount, spec[size + 'BatchEnds'].length - 1);
     h.invoke('finishExportTask', task);
-    assert.equal(h.evaluate('activeExportTask'), null);
+    assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
   });
 }
 
@@ -131,7 +131,7 @@ test('R14-01 cancellation during a long-document frame prevents all later blocks
   assert.equal(h.calls.filter(x => x[0] === 'block').length, 96);
   assert.equal(h.downloads.length, 0);
   assert.equal(h.calls.some(x => x[0] === 'saveFile'), false);
-  assert.equal(h.evaluate('activeExportTask'), null);
+  assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
   assert.ok(h.calls.some(x => x[0] === 'modal' && x[1] === 'markdown-editor:modal-shell-close'));
 });
 
@@ -147,15 +147,15 @@ test('R14-01 task replacement, stale progress, explicit noncancelable phase and 
   current.setCancelable(false);
   h.invoke('cancelActiveExport'); assert.equal(current.cancelled, false);
   assert.equal(h.invoke('beginExportTask', 'blocked'), null);
-  h.invoke('finishExportTask', old); assert.equal(h.evaluate('activeExportTask.id'), current.id);
-  h.invoke('finishExportTask', current); assert.equal(h.evaluate('activeExportTask'), null);
+  h.invoke('finishExportTask', old); assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask.id'), current.id);
+  h.invoke('finishExportTask', current); assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
 });
 
 test('R14-01 PDF afterprint and timeout restore exactly once, preserving the source view', async () => {
   for (const afterprint of [true, false]) {
     const h = createExportVmHost();
     await h.invoke('exportPDF');
-    assert.equal(h.evaluate('activeExportTask'), null);
+    assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
     assert.equal(h.context.observedPreviewBody, null);
     assert.equal(h.timers[0].delay, 80);
     h.timers[0].callback();
@@ -173,7 +173,7 @@ test('R14-01 cancelled PDF preparation restores view before printing and never s
   await h.invoke('exportPDF');
   assert.equal(h.timers.length, 0);
   assert.equal(h.calls.filter(x => x[0] === 'reset').length, 1);
-  assert.equal(h.evaluate('activeExportTask'), null);
+  assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
 });
 
 test('R14-01 PNG ratio/padding/crop/natural height, noncancelable encoding and generated binary are fixed', async () => {
@@ -189,7 +189,7 @@ test('R14-01 PNG ratio/padding/crop/natural height, noncancelable encoding and g
     assert.equal(h.evaluate('currentImageDataUrl'), 'data:image/png;base64,iVBORw0KGgo=');
     await h.invoke('downloadExportImage');
     assert.equal(h.downloads[0].name, 'report.png');
-    assert.equal(h.evaluate('activeExportTask'), null);
+    assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
   }
 });
 

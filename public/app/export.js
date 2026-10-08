@@ -8,6 +8,7 @@
     const exportPreviewCommandPort = exportCompatibilityHost?.markdownEditorPreviewCommandPort;
     const exportPresentationPort = exportCompatibilityHost?.markdownEditorPresentationPort;
     const exportRequestPort = exportCompatibilityHost?.markdownEditorExportRequestPort;
+    const exportTaskPort = exportCompatibilityHost?.markdownEditorExportTaskPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
@@ -16,6 +17,7 @@
     if (!exportPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
     if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
     if (!exportRequestPort) throw new Error('Export request compatibility port is unavailable.');
+    if (!exportTaskPort) throw new Error('Export task compatibility port is unavailable.');
 
     function readExportRequest(format) {
       try {
@@ -30,81 +32,61 @@
         return null;
       }
     }
-    class ExportCancelledError extends Error {
-      constructor() {
-        super('EXPORT_CANCELLED');
-        this.name = 'ExportCancelledError';
+    // UI projection only; task/progress/cancellation/phase authority is the public controller.
+    // This classic DOM adapter is received by 14.5 and removed with callers in 14.18.
+    let exportProgressModalOpened = false;
+    exportTaskPort.subscribe(snapshot => {
+      const task = snapshot.activeTask;
+      const modal = document.getElementById('export-progress-modal');
+      if (!task) {
+        if (!exportProgressModalOpened) return;
+        exportProgressModalOpened = false;
+        const request = { reason: snapshot.destroyed ? 'export-destroyed' : 'export-finished' };
+        modal?.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
+        if (request.error) throw request.error;
+        return;
       }
-    }
-
-    let exportTaskId = 0;
-    let activeExportTask = null;
+      const value = document.getElementById('export-progress-value');
+      const status = document.getElementById('export-progress-status');
+      const heading = document.getElementById('export-progress-title');
+      const button = document.getElementById('export-progress-cancel');
+      if (heading) heading.textContent = task.title;
+      if (value) value.style.width = task.progress + '%';
+      if (status) status.textContent = task.message;
+      if (button) {
+        button.disabled = !task.cancelable;
+        button.textContent = task.cancelable ? '取消导出' : '正在生成文件…';
+      }
+      if (modal && !exportProgressModalOpened) {
+        exportProgressModalOpened = true;
+        const request = { options: { initialFocus: button } };
+        modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
+        if (request.error) throw request.error;
+      }
+    });
 
     function waitForExportFrame() {
       return new Promise(resolve => requestAnimationFrame(() => resolve()));
     }
 
     function beginExportTask(title) {
-      if (activeExportTask && !activeExportTask.cancelable) {
-        showToast('当前导出正在生成文件，请稍候');
+      try {
+        const task = exportTaskPort.begin(title);
+        if (!task) showToast('当前导出正在生成文件，请稍候');
+        return task;
+      } catch (error) {
+        showToast('导出失败：' + (error?.message || String(error)));
         return null;
       }
-      if (activeExportTask) activeExportTask.cancelled = true;
-      const task = {
-        id: ++exportTaskId,
-        title,
-        cancelled: false,
-        cancelable: true,
-        modalOpened: false,
-        update(progress, message) {
-          if (activeExportTask !== task) return;
-          const modal = document.getElementById('export-progress-modal');
-          const value = document.getElementById('export-progress-value');
-          const status = document.getElementById('export-progress-status');
-          const heading = document.getElementById('export-progress-title');
-          if (heading) heading.textContent = task.title;
-          if (value) value.style.width = Math.max(0, Math.min(100, Number(progress) || 0)) + '%';
-          if (status) status.textContent = message || '正在处理…';
-          if (modal && !task.modalOpened) {
-            task.modalOpened = true;
-            const request = {
-              options: { initialFocus: document.getElementById('export-progress-cancel') }
-            };
-            modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
-            if (request.error) throw request.error;
-          }
-        },
-        setCancelable(value) {
-          task.cancelable = Boolean(value);
-          const button = document.getElementById('export-progress-cancel');
-          if (button) {
-            button.disabled = !task.cancelable;
-            button.textContent = task.cancelable ? '取消导出' : '正在生成文件…';
-          }
-        },
-        throwIfCancelled() {
-          if (task.cancelled || activeExportTask !== task) throw new ExportCancelledError();
-        }
-      };
-      activeExportTask = task;
-      task.setCancelable(true);
-      task.update(2, '正在准备文档…');
-      return task;
     }
 
-    function finishExportTask(task) {
-      if (!task || activeExportTask !== task) return;
-      activeExportTask = null;
-      const modal = document.getElementById('export-progress-modal');
-      const request = { reason: 'export-finished' };
-      modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
-      if (request.error) throw request.error;
+    function finishExportTask(task, outcome) {
+      try { return exportTaskPort.finish(task, outcome); }
+      catch (error) { showToast('导出清理失败：' + (error?.message || String(error))); return false; }
     }
 
     function cancelActiveExport() {
-      if (!activeExportTask?.cancelable) return;
-      activeExportTask.cancelled = true;
-      activeExportTask.update(0, '正在取消导出…');
+      exportTaskPort.cancel();
     }
 
     async function createFullPreviewBodyForExport(task = null) {
@@ -127,13 +109,13 @@
             fragment.append(...createPreviewNodesForBlock(workerBlocks[index]));
           }
           body.append(fragment);
-          task?.update(8 + Math.round((end / workerBlocks.length) * 52), `正在构建导出内容 ${end}/${workerBlocks.length} 块`);
+          task?.update(8 + Math.round((end / workerBlocks.length) * 52), `正在构建导出内容 ${end}/${workerBlocks.length} 块`, 'building');
           if (end < workerBlocks.length) await waitForExportFrame();
         }
         return body;
       }
 
-      task?.update(12, '正在解析完整文档…');
+      task?.update(12, '正在解析完整文档…', 'building');
       await waitForExportFrame();
       task?.throwIfCancelled();
       const source = documentModel?.createSnapshot?.('full-preview-export') ?? editor.value;
@@ -155,7 +137,7 @@
         body.innerHTML = '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
       }
       task?.throwIfCancelled();
-      task?.update(60, '完整文档已解析');
+      task?.update(60, '完整文档已解析', 'building');
       return body;
     }
 
@@ -188,7 +170,7 @@
           }
         }
         const end = Math.min(children.length, start + batchSize);
-        task?.update(62 + Math.round((end / children.length) * 28), `正在增强导出内容 ${end}/${children.length}`);
+        task?.update(62 + Math.round((end / children.length) * 28), `正在增强导出内容 ${end}/${children.length}`, 'enhancing');
         if (end < children.length) await waitForExportFrame();
       }
     }
@@ -204,9 +186,10 @@
       };
     }
 
-    async function exportTextContent(content, preferredName, options) {
+    async function exportTextContent(content, preferredName, options, task = null) {
       if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
         const path = await exportPlatformPort.call('dialogs', 'saveFile', preferredName, options);
+        task?.throwIfCancelled();
         if (!path) return null;
         await exportPlatformPort.call('files', 'writeText', path, content, { extension: options.extension, reason: 'export' });
         return path;
@@ -253,12 +236,13 @@
       if (!request) return;
       const task = beginExportTask('正在导出 Word');
       if (!task) return;
+      let outcome = 'completed';
       try {
         const name = request.name;
 
         const bodyHtml = (await createFullPreviewBodyForExport(task)).innerHTML;
         task.throwIfCancelled();
-        task.update(92, '正在生成 Word 文件…');
+        task.update(92, '正在生成 Word 文件…', 'serializing');
 
         const fullHtml = `<!DOCTYPE html>
 <html>
@@ -295,7 +279,8 @@ ${bodyHtml}
         '导出 Word',
         request,
         'Word 文档'
-      ));
+      ), task);
+      task.throwIfCancelled();
       if (savedPath === null) return;
       if (savedPath === false) {
         const blob = new Blob([fullHtml], { type: 'application/msword;charset=utf-8' });
@@ -311,12 +296,13 @@ ${bodyHtml}
         task.update(100, 'Word 文件已生成');
         showToast(t('toastWordExported'));
       } catch (error) {
-        if (!(error instanceof ExportCancelledError)) {
+        outcome = 'failed';
+        if (!exportTaskPort.isCancelled(error)) {
           console.error('Word export failed:', error);
           showToast(error?.message || String(error));
         }
       } finally {
-        finishExportTask(task);
+        finishExportTask(task, outcome);
       }
     }
 
@@ -326,12 +312,13 @@ ${bodyHtml}
       if (!request) return;
       const task = beginExportTask('正在导出 HTML');
       if (!task) return;
+      let outcome = 'completed';
       try {
         const name = request.name;
 
         const bodyHtml = (await createFullPreviewBodyForExport(task)).innerHTML;
         task.throwIfCancelled();
-        task.update(92, '正在生成 HTML 文件…');
+        task.update(92, '正在生成 HTML 文件…', 'serializing');
 
         const fullHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -392,7 +379,8 @@ ${'</scr' + 'ipt>'}
         '导出 HTML',
         request,
         'HTML 文档'
-      ));
+      ), task);
+      task.throwIfCancelled();
       if (savedPath === null) return;
       if (savedPath === false) {
         const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
@@ -408,12 +396,13 @@ ${'</scr' + 'ipt>'}
         task.update(100, 'HTML 文件已生成');
         showToast(t('toastHtmlExported'));
       } catch (error) {
-        if (!(error instanceof ExportCancelledError)) {
+        outcome = 'failed';
+        if (!exportTaskPort.isCancelled(error)) {
           console.error('HTML export failed:', error);
           showToast(error?.message || String(error));
         }
       } finally {
-        finishExportTask(task);
+        finishExportTask(task, outcome);
       }
     }
 
@@ -422,14 +411,15 @@ ${'</scr' + 'ipt>'}
       if (!request) return;
       const task = beginExportTask('正在准备 PDF');
       if (!task) return;
-      const wasSource = exportPreviewCommandPort.getViewMode() === 'source';
-      if (wasSource) exportPreviewCommandPort.setViewMode('preview');
+      let wasSource = false;
       const restorePreview = () => {
         exportPreviewCommandPort.reset();
         if (wasSource) exportPreviewCommandPort.setViewMode('source');
       };
       let replacedPreview = false;
       try {
+        wasSource = exportPreviewCommandPort.getViewMode() === 'source';
+        if (wasSource) exportPreviewCommandPort.setViewMode('preview');
         exportPreviewCommandPort.deactivateVirtual();
         const fullBody = await createFullPreviewBodyForExport(task);
         task.throwIfCancelled();
@@ -438,7 +428,7 @@ ${'</scr' + 'ipt>'}
         observedPreviewBody = null;
         await enhanceFullPreviewForExport(fullBody, task);
         task.throwIfCancelled();
-        task.update(100, 'PDF 内容已准备完成');
+        task.update(100, 'PDF 内容已准备完成', 'printing');
         finishExportTask(task);
         showToast(t('toastChoosePdf'));
         let restored = false;
@@ -453,12 +443,13 @@ ${'</scr' + 'ipt>'}
           setTimeout(restoreOnce, 1200);
         }, 80);
       } catch (error) {
-        if (!(error instanceof ExportCancelledError)) {
+        if (!exportTaskPort.isCancelled(error)) {
           console.error('PDF export failed:', error);
           showToast(error?.message || String(error));
         }
-        if (replacedPreview || error instanceof ExportCancelledError) restorePreview();
-        finishExportTask(task);
+        try {
+          if (task.current && (replacedPreview || exportTaskPort.isCancelled(error))) restorePreview();
+        } finally { finishExportTask(task, 'failed'); }
       }
     }
 
@@ -541,7 +532,7 @@ ${'</scr' + 'ipt>'}
             test.src = img.src + sep + '_cors=' + Date.now();
           });
         }
-        task?.update(90 + Math.round(((index + 1) / Math.max(1, imgs.length)) * 5), `正在准备图片 ${index + 1}/${imgs.length}`);
+        task?.update(90 + Math.round(((index + 1) / Math.max(1, imgs.length)) * 5), `正在准备图片 ${index + 1}/${imgs.length}`, 'images');
         if ((index + 1) % 8 === 0) await waitForExportFrame();
       }
     }
@@ -552,18 +543,21 @@ ${'</scr' + 'ipt>'}
       if (!request) return;
       const task = beginExportTask('正在生成图片预览');
       if (!task) return;
+      let outcome = 'completed';
       let clone = null;
       try {
         let domToImageApi = null;
         if (!domToImageApi) {
-          task.update(5, '正在加载图片导出模块…');
+          task.update(5, '正在加载图片导出模块…', 'loading');
           try {
             domToImageApi = await exportPresentationPort.loadDomToImage();
           } catch (error) {
             console.error('Image export library load error:', error);
           }
         }
+        task.throwIfCancelled();
         if (!domToImageApi) {
+          outcome = 'failed';
           showToast(t('toastImageLibMissing'));
           return;
         }
@@ -575,7 +569,9 @@ ${'</scr' + 'ipt>'}
         container.innerHTML = '';
         clone = document.createElement('div');
         clone.className = 'preview-content';
-        clone.replaceChildren(await createFullPreviewBodyForExport(task));
+        const fullBody = await createFullPreviewBodyForExport(task);
+        task.throwIfCancelled();
+        clone.replaceChildren(fullBody);
         clone.style.width = preset.width + 'px';
         clone.style.padding = Math.round(preset.width * 0.04) + 'px ' + Math.round(preset.width * 0.045) + 'px';
         clone.style.fontSize = Math.round(preset.width / 36) + 'px';
@@ -622,7 +618,7 @@ ${'</scr' + 'ipt>'}
         }
 
         stage.style.height = captureHeight + 'px';
-        task.update(96, '正在生成 PNG，此阶段完成前不能立即取消…');
+        task.update(96, '正在生成 PNG，此阶段完成前不能立即取消…', 'encoding');
         task.setCancelable(false);
         const dataUrl = await domToImageApi.toPng(clone, {
           width: preset.width,
@@ -631,6 +627,7 @@ ${'</scr' + 'ipt>'}
           cacheBust: true,
           imagePlaceholder: IMAGE_PLACEHOLDER
         });
+        task.throwIfCancelled();
         task.update(100, '图片预览已生成');
         currentImageDataUrl = dataUrl;
         const previewImg = document.getElementById('export-image-preview');
@@ -638,7 +635,8 @@ ${'</scr' + 'ipt>'}
         previewImg.classList.remove('is-hidden');
         showToast(t('toastPreviewGenerated'));
       } catch (error) {
-        if (!(error instanceof ExportCancelledError)) {
+        outcome = 'failed';
+        if (!exportTaskPort.isCancelled(error)) {
           console.error(error);
           showToast(t('toastImageGenFailed', error?.message || String(error)));
         }
@@ -648,7 +646,7 @@ ${'</scr' + 'ipt>'}
           clone.style.minHeight = '';
           clone.style.overflow = '';
         }
-        finishExportTask(task);
+        finishExportTask(task, outcome);
       }
     }
 

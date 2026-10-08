@@ -73,13 +73,13 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
         catch(error) {if(error.code!=='EXPORT_REQUEST_INVALID')throw error;fields.push(error.field);}
       }
       const directory=exportDirectory,print=window.print,click=HTMLAnchorElement.prototype.click;
-      const before=exportTaskId;let prints=0,downloads=0;
+      const before=exportTaskPort.getSnapshot().lastTaskId;let prints=0,downloads=0;
       window.print=()=>{prints++;};HTMLAnchorElement.prototype.click=function(){downloads++;};
       try {
         exportDirectory='bad'+String.fromCharCode(0);
         for(const run of [exportFile,exportHTML,exportWord,exportPDF,renderExportImagePreview,downloadExportImage])await run();
         await exportContextDocument('missing-export-doc');
-        return {request,fields,taskDelta:exportTaskId-before,active:activeExportTask,prints,downloads,
+        return {request,fields,taskDelta:exportTaskPort.getSnapshot().lastTaskId-before,active:exportTaskPort.getSnapshot().activeTask,prints,downloads,
           frozen:Object.isFrozen(request)&&Object.isFrozen(request.extensions)&&Object.isFrozen(request.imageOptions),
           scoped:typeof window.markdownEditorExportRequestPort==='undefined',
           progressVisible:document.getElementById('export-progress-modal').classList.contains('show')};
@@ -164,5 +164,63 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.equal(result.after, result.before);
     assert.equal(result.progressVisible, false);
     await writeFile(join(artifactRoot, 'r14-01-pdf-image-failure.json'), JSON.stringify({ ...result, finding:'R14-F04' }, null, 2));
+  });
+
+  await test('R14-03 actual task port owns replacement, progress, lock and cancel button without classic authority', async () => {
+    const result = await page.evaluate(`(() => {
+      const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort;
+      const modal=document.getElementById('export-progress-modal'),button=document.getElementById('export-progress-cancel');
+      const old=beginExportTask('old task'),current=beginExportTask('current task');
+      try {
+        current.update(40,'current progress','building');
+        old.update(99,'stale');old.setCancelable(false);finishExportTask(old);
+        let cancelledError=false;try {old.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
+        const projected={title:document.getElementById('export-progress-title').textContent,
+          message:document.getElementById('export-progress-status').textContent,
+          width:document.getElementById('export-progress-value').style.width,disabled:button.disabled,visible:modal.classList.contains('show')};
+        current.setCancelable(false);const locked=port.getSnapshot();
+        const blocked=beginExportTask('blocked');cancelActiveExport();
+        const afterBlocked=port.getSnapshot();
+        current.setCancelable(true);button.click();
+        const cancelled=port.getSnapshot();current.update(100,'late');
+        return {projected,locked,afterBlocked,cancelled,blocked:blocked===null,cancelledError,
+          oldCancelled:old.cancelled,oldPhase:old.phase,oldUpdate:old.update(100,'late'),
+          currentId:current.id,afterLate:port.getSnapshot(),
+          immutable:Object.isFrozen(current)&&Object.isFrozen(cancelled)&&Object.isFrozen(cancelled.activeTask),
+          scoped:typeof window.markdownEditorExportTaskPort==='undefined',
+          retired:typeof activeExportTask==='undefined'&&typeof exportTaskId==='undefined'&&typeof ExportCancelledError==='undefined'};
+      } finally {finishExportTask(current);}
+    })()`);
+    assert.deepEqual(result.projected, { title:'current task',message:'current progress',width:'40%',disabled:false,visible:true });
+    assert.equal(result.oldCancelled, true); assert.equal(result.oldPhase, 'replaced'); assert.equal(result.oldUpdate, false);
+    assert.equal(result.cancelledError, true); assert.equal(result.blocked, true);
+    assert.equal(result.locked.activeTask.cancelable, false); assert.equal(result.afterBlocked.lastTaskId, result.locked.lastTaskId);
+    assert.equal(result.afterBlocked.activeTask.id, result.currentId); assert.equal(result.afterBlocked.activeTask.cancelled, false);
+    assert.equal(result.cancelled.activeTask.phase, 'cancelled'); assert.equal(result.cancelled.activeTask.progress, 0);
+    assert.deepEqual(result.afterLate, result.cancelled);
+    assert.equal(result.immutable, true); assert.equal(result.scoped, true); assert.equal(result.retired, true);
+    assert.equal(await page.evaluate(`document.getElementById('export-progress-modal').classList.contains('show')`), false);
+    await writeFile(join(artifactRoot, 'r14-03-task-controller.json'), JSON.stringify(result, null, 2));
+  });
+
+  // Final app probe: exercise the production pagehide owner after all other export probes.
+  await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
+    const result = await page.evaluate(`(() => {
+      const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort;
+      const task=beginExportTask('dispose locked task');task.update(96,'encoding','encoding');task.setCancelable(false);
+      const seen=[];port.subscribe(s=>seen.push(s));
+      window.dispatchEvent(new Event('pagehide'));
+      let rejected=false;try {port.begin('late');}catch(error){rejected=/destroyed/.test(error.message);}
+      let cancelledError=false;try {task.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
+      return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,
+        lateUpdate:task.update(100,'late'),lateLock:task.setCancelable(true),lateFinish:finishExportTask(task),
+        rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort'),
+        progressVisible:document.getElementById('export-progress-modal').classList.contains('show')};
+    })()`);
+    assert.equal(result.snapshot.destroyed, true); assert.equal(result.snapshot.activeTask, null);
+    assert.deepEqual(result.lastSeen, result.snapshot); assert.equal(result.cancelled, true); assert.equal(result.phase, 'destroyed');
+    for (const field of ['lateUpdate','lateLock','lateFinish','progressVisible']) assert.equal(result[field], false, field);
+    for (const field of ['rejected','cancelledError','removed']) assert.equal(result[field], true, field);
+    await writeFile(join(artifactRoot, 'r14-03-task-disposal.json'), JSON.stringify(result, null, 2));
   });
 }

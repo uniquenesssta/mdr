@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01已验收，R14-02导出请求待Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01/02已验收，R14-03导出任务控制器待Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-09：R14-02在 `b85f74c` / [Windows CI37807608820](https://github.com/uniquenesssta/mdr/actions/runs/37807608820) 七组与全部步骤通过，全仓1686/1686、前端688/688、请求31/31、导出基线41/41、浏览器11/11＋34/34，正式收尾。同分支实施14.3：公开控制器独占任务身份/进度/取消/阶段，删除classic权威状态；新任务替换旧可取消任务，锁定阶段拒绝替换，过时及销毁结果不能写进度/预览或完成新任务。补齐开关弹窗异常、晚到库/保存对话框/PNG和实际按钮/pagehide回归；静态复核通过，待新Windows CI，14.3不标验收。F01/F02/F04及A10排期不变，F03完整产物仍待后续格式验收。[14.2验收](docs/R14-02-DETAILS.md) · [14.3详情](docs/R14-03-DETAILS.md)。
 
 - 2026-10-08：R14-01在 `7d0fd6a` / [Windows CI37801667677](https://github.com/uniquenesssta/mdr/actions/runs/37801667677) 七组及最终汇总通过：全仓1655/1655、前端657/657、导出夹具41/41、浏览器11/11＋33/33，正式收尾。继续同分支实施14.2：独立不可变Export Request统一格式/身份/名称/目录/图片选项，所有入口在任务前校验，异步准备固定参数；迁移重复后缀策略，保留旧夹具并记录新映射。补充真实入口无副作用与晚到改参回归；脚本/嵌入表达式和四项静态门禁通过，产品验证待新Windows CI，14.2不标验收，F01/F02/F04及A10保持接收排期。[14.1验收](docs/R14-01-DETAILS.md) · [14.2详情](docs/R14-02-DETAILS.md)。
 

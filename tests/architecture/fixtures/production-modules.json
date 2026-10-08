@@ -71,8 +71,8 @@
       "public/app/export.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy export task/render/format adapters consuming the public immutable Export Request; filename/extension and image ratio policy no longer belongs to the classic exporter.",
-      "legacy-export-state",
+      "Legacy export format/render callers consuming public immutable requests and controller-owned task handles; DOM progress projection only, no task authority.",
+      "legacy-image-preview-and-dom-projection",
       "classic-script",
       "split-and-remove",
       false
@@ -3141,7 +3141,7 @@
       "src/main.js",
       "esm-entrypoint",
       "composition",
-      "Production composition root wiring Stage 10 Persistence save/autosave/load/close-save owners and explicit UI/document persistence commands while preserving Window port-only close admission and Stage 9 synchronization. R14-02 mounts the scoped Export Request boundary with read-only Documents identity/existence readers.",
+      "Production composition root wiring Stage 10 Persistence save/autosave/load/close-save owners and explicit UI/document persistence commands while preserving Window port-only close admission and Stage 9 synchronization. R14-02 mounts the scoped Export Request boundary with read-only Documents identity/existence readers. R14-03 composes the sole Export Task Controller and scoped task subscriptions with pagehide disposal.",
       "legacy-bootstrap-bridge",
       "module-load",
       "replace-with-composition-root",
@@ -5151,10 +5151,30 @@
       "src/features/export/index.js",
       "esm-facade",
       "feature",
-      "Public Export request and scoped migration boundary.",
+      "Public Export request/task controller and scoped migration boundaries.",
       "none",
       "module-import",
       "retain",
+      false
+    ],
+    [
+      "src/features/export/application/export-task-controller.js",
+      "esm-module",
+      "export-application",
+      "Own export task identity, active task, progress, cancelable/cancelled and phase; invalidate replacement and disposal without DOM or I/O.",
+      "active-export-task",
+      "begin/update/cancel/finish/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-export-task-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Scoped task commands and subscription disposal for classic callers; controller retains all task authority.",
+      "classic-export-task-port-mount-and-subscriptions",
+      "explicit-instance",
+      "remove-with-classic-callers",
       false
     ]
   ]

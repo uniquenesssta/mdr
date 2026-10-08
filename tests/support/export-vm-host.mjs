@@ -4,7 +4,7 @@
 // supplyRetiredPreviewBindings=false reproduces the current application failure.
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { mountClassicExportRequestPort } from '../../src/features/export/index.js';
+import { createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
 
 const source = readFileSync(new URL('../../public/app/export.js', import.meta.url), 'utf8');
 const markdownSource = readFileSync(new URL('../../public/app/core.js', import.meta.url), 'utf8');
@@ -46,6 +46,8 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     markdownEditorPresentationPort: presentation, markdownEditorPreviewCommandPort: previewPort
   };
   for (const key of ['DocumentDomain', 'DocumentSession', 'DocumentController', 'DocumentUiCommand', 'SidebarController']) host['markdownEditor' + key + 'Port'] = {};
+  const taskController = createExportTaskController();
+  const taskMount = mountClassicExportTaskPort(host, taskController);
   const requestMount = mountClassicExportRequestPort(host, { getActiveDocumentId: () => documentId, hasDocument: id => documentIds.includes(id) });
   const escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   const context = vm.createContext({
@@ -70,7 +72,8 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     for (const key of ['previewWorkerClient', 'createPreviewNodesForBlock', 'styleTaskLists', 'renderMermaidBlocks', 'observedPreviewBody']) delete context[key];
   }
   return {
-    context, calls, downloads, nodes, timers, events,
+    context, calls, downloads, nodes, timers, events, taskController, taskPort: taskMount.port,
+    destroy() { try { taskController.destroy(); } finally { taskMount.destroy(); requestMount.destroy(); } },
     invoke: (name, ...args) => context[name](...args),
     evaluate: expression => vm.runInContext(expression, context),
     setFrameHook(callback) { onFrame = callback; },
