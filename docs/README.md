@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 和 [R13任务书](markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md) 为准。R12已收官；R13-S01与13.1～13.13已验收，13.13精确提交 `5efe460` / [Windows CI37737197913](https://github.com/uniquenesssta/mdr/actions/runs/37737197913) 七组及最终汇总通过，A03/A05完整链和原R12-S01追踪号关闭。13.14按授权完成旧网页ports、全局函数与内联modal清理，DOM/翻译/弹窗寿命归Import，待新Windows CI；13.14及R13整体未标完成，KaTeX新low公告保留。[13.13验收](R13-13-DETAILS.md) · [13.14实施](R13-14-DETAILS.md) · [后端专项](R13-S01-DETAILS.md)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 和 [R13任务书](markdown-main-full-rewrite-taskbook-18-docs/14-阶段13-导入与网页剪藏重写.md) 为准。R12已收官；R13-S01与13.1～13.13已验收，13.13精确提交 `5efe460` / [Windows CI37737197913](https://github.com/uniquenesssta/mdr/actions/runs/37737197913) 七组及最终汇总通过，A03/A05完整链和原R12-S01追踪号关闭。13.14旧实现清理和实际弹窗/完整WebView链已在 `513b2cc` / CI37740940984通过；累计Node/前端仍被只扫描旧模板的图标/翻译计数阻断，本轮补齐静态与动态View覆盖，产品源码不变，待新Windows CI；13.14及R13整体未标完成，KaTeX新low公告保留。[13.13验收](R13-13-DETAILS.md) · [13.14实施](R13-14-DETAILS.md) · [后端专项](R13-S01-DETAILS.md)。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

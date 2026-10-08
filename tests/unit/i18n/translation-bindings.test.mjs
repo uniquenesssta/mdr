@@ -164,15 +164,17 @@ test('refresh continues through binding failures and reports them after remainin
   bindings.destroy();
 });
 
-test('production integration has one declarative translation owner and preserves the 113 current bindings', async () => {
+test('production integration preserves 113 bindings across shell, Help and the owned clipper view', async () => {
   const { readFile } = await import('node:fs/promises');
-  const [moduleEntry, core, bootstrap, index, markup, helpDialog] = await Promise.all([
+  const [moduleEntry, core, bootstrap, index, markup, helpDialog, clipperView, main] = await Promise.all([
     readFile('src/bootstrap/module-entry.js', 'utf8'),
     readFile('public/app/core.js', 'utf8'),
     readFile('public/app/bootstrap.js', 'utf8'),
     readFile('src/i18n/index.js', 'utf8'),
     readFile('public/compatibility/business-content.html', 'utf8'),
-    readFile('src/features/help/ui/help-dialog-view.js', 'utf8')
+    readFile('src/features/help/ui/help-dialog-view.js', 'utf8'),
+    readFile('src/features/import/web-clipper/web-clipper-view.js', 'utf8'),
+    readFile('src/main.js', 'utf8')
   ]);
 
   assert.match(index, /translation-bindings\.js/);
@@ -190,7 +192,18 @@ test('production integration has one declarative translation owner and preserves
 
   const markupBindings = markup.match(/\sdata-i18n(?:-title|-placeholder|-alt)?="[^"]+"/g) || [];
   const helpBindings = helpDialog.match(/['"]data-i18n['"]\s*:\s*['"][^'"]+['"]/g) || [];
-  assert.equal(markupBindings.length, 111);
+  const clipperBindings = [...clipperView.matchAll(/'(data-i18n(?:-placeholder)?)'\s*:\s*'([^']+)'/g)].map(match => [match[1], match[2]]);
+  assert.equal(markupBindings.length, 101);
   assert.equal(helpBindings.length, 2);
-  assert.equal(markupBindings.length + helpBindings.length, 113);
+  assert.deepEqual(clipperBindings, [
+    ['data-i18n', 'urlTitle'], ['data-i18n', 'urlLabel'],
+    ['data-i18n-placeholder', 'urlPlaceholder'], ['data-i18n', 'useProxy'],
+    ['data-i18n-placeholder', 'proxyPlaceholder'], ['data-i18n', 'fetchBtn'],
+    ['data-i18n', 'manualLabel'], ['data-i18n-placeholder', 'manualPlaceholder'],
+    ['data-i18n', 'cancel'], ['data-i18n', 'convertInsert']
+  ]);
+  assert.equal(markupBindings.length + helpBindings.length + clipperBindings.length, 113);
+  assert.match(main, /subscribeLocale: listener => compatibilityPlatformHost\.markdownEditorI18nPort\.subscribe\(listener\)/);
+  assert.match(clipperView, /subscribeLocale\(renderTranslations\)/);
+  assert.doesNotMatch(markup, /id="url-modal"/);
 });

@@ -14,10 +14,18 @@ try {
     let resolve, localeListener, locale = 'zh', localeDisposals = 0;
     const coordinator = createWebFetchCoordinator({ nativeFetch: url => url === 'bad' ? Promise.reject(new Error('<img onerror=attack()>')) : new Promise(done => { resolve = done; }) });
     const controller = createWebClipperController({ fetchCoordinator: coordinator, extract: extractHtml, convert: convertExtractedHtml, insertMarkdown: text => inserted.push(text), native: true });
-    const translate = (key, error) => error || (key === 'urlTitle' ? locale + ':' + key : key);
+    const translate = (key, error) => error || locale + ':' + key;
     const view = createWebClipperView({ overlayRoot, controller, translate, notify: message => notices.push(message),
       subscribeLocale: listener => { localeListener = listener; return () => { localeDisposals++; localeListener = null; }; } });
     const root = view.root;
+    const translations = () => ({
+      text: Object.fromEntries([...root.querySelectorAll('[data-i18n]')].map(node => [node.dataset.i18n, node.textContent])),
+      placeholders: Object.fromEntries([...root.querySelectorAll('[data-i18n-placeholder]')].map(node => [node.dataset.i18nPlaceholder, node.placeholder])),
+      closeLabel: root.querySelector('[data-clipper-close]').getAttribute('aria-label')
+    });
+    const initialTranslations = translations();
+    const iconHrefs = [...root.querySelectorAll('svg use')].map(node => node.getAttribute('href'));
+    const inlineGeometry = Boolean(root.querySelector('symbol,path,circle,ellipse,line,polygon,polyline,rect'));
     let duplicate = false;
     try { createWebClipperView({ overlayRoot, controller, translate, notify() {} }); } catch (error) { duplicate = /already mounted/.test(error.message); }
     const input = (id, value) => { const node = root.querySelector('#' + id); node.value = value; node.dispatchEvent(new Event('input')); };
@@ -29,6 +37,7 @@ try {
     root.querySelector('[data-clipper-close]').dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }));
     const trapped = document.activeElement.matches('[data-clipper-insert]');
     locale = 'en'; localeListener(); const translated = root.querySelector('#url-modal-title span').textContent === 'en:urlTitle';
+    const changedTranslations = translations();
     input('url-input', 'old'); const pending = controller.fetch();
     root.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
     const escaped = !controller.snapshot.open && !view.isOpen();
@@ -67,11 +76,21 @@ try {
     const cleanup = cleanupError && !cleanupController.snapshot.open && !document.getElementById('url-modal');
     coordinator.destroy();
     return { inserted, notices, duplicate, focus, repeatedOpen, trapped, translated, escaped, returnedFocus, backdrop,
-      late, errorText, active, removed, terminal, destroyedError, localeDisposals, successorOwned, rollback, cleanup };
+      late, errorText, active, removed, terminal, destroyedError, localeDisposals, successorOwned, rollback, cleanup,
+      initialTranslations, changedTranslations, iconHrefs, inlineGeometry };
   })()`);
   assert.deepEqual(result.inserted, ['# Title\n\nBody']); assert.equal(result.late, false);
   assert.equal(result.errorText, '<img onerror=attack()>'); assert.equal(result.active, false);
-  assert.deepEqual(result.notices, ['toastInsertedMd']); assert.equal(result.localeDisposals, 1);
+  assert.deepEqual(result.notices, ['en:toastInsertedMd']); assert.equal(result.localeDisposals, 1);
+  assert.deepEqual(result.iconHrefs, ['/assets/icons.svg#icon-globe', '/assets/icons.svg#icon-close']);
+  assert.equal(result.inlineGeometry, false);
+  for (const [name, locale] of [['initialTranslations', 'zh'], ['changedTranslations', 'en']]) {
+    assert.deepEqual(result[name], {
+      text: Object.fromEntries(['urlTitle', 'urlLabel', 'useProxy', 'fetchBtn', 'manualLabel', 'cancel', 'convertInsert'].map(key => [key, locale + ':' + key])),
+      placeholders: Object.fromEntries(['urlPlaceholder', 'proxyPlaceholder', 'manualPlaceholder'].map(key => [key, locale + ':' + key])),
+      closeLabel: locale + ':cancel'
+    });
+  }
   for (const key of ['duplicate', 'focus', 'repeatedOpen', 'trapped', 'translated', 'escaped', 'returnedFocus', 'backdrop', 'removed', 'terminal', 'destroyedError', 'successorOwned', 'rollback', 'cleanup']) assert.equal(result[key], true, key);
   assert.deepEqual(host.errors, []);
   assert.deepEqual(browser.page.exceptions, [], 'owned clipper and dead DOM events must not raise uncaught errors');

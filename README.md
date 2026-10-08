@@ -4,6 +4,8 @@ Stage 13：`agent/r13-stage`；R12 已收官；历史见 [docs/README.md](docs/R
 
 ## Change Log
 
+- 2026-10-08：修复13.14首轮累计回归遗漏：`513b2cc` / [Windows CI37740940984](https://github.com/uniquenesssta/mdr/actions/runs/37740940984) 的实际剪藏弹窗、built-app浏览器、真实WebView、Rust/原生/依赖通过；图标与翻译契约仍只数旧模板，阻断Node/前端及最终汇总。改为旧模板+Import拥有的2个图标/10个绑定，保留47个图标引用与113个翻译绑定总量，补充实际DOM图标及全部文案/占位符语言切换验证；产品源码不变，待新Windows CI。[详情](docs/R13-14-DETAILS.md)。
+
 - 2026-10-08：R13.13在 `5efe460` / [Windows CI37737197913](https://github.com/uniquenesssta/mdr/actions/runs/37737197913) 七组及同提交证据汇总通过，正式收尾并关闭A03/A05全链项、原R12-S01追踪号。开始13.14：删除四个未挂载网页ports、全局打开函数和内联modal，Import独占DOM/翻译/ModalShell及清理；迁移旧回归，补充实际菜单、焦点、关闭、晚到抓取、重复插入、构造回滚与销毁失败场景。待新Windows CI，13.14与R13整体不标完成，KaTeX新low风险保持。[13.13验收](docs/R13-13-DETAILS.md) · [13.14详情](docs/R13-14-DETAILS.md)。
 
 - 2026-10-08：修复 R13.13 首轮累计回归遗漏：`92242e6` / [Windows CI 37660954894](https://github.com/uniquenesssta/mdr/actions/runs/37660954894) 的真实 WebView 导入链、Rust、原生与依赖四组通过；Node/前端因旧 classic 入口及固定事件数断言失败，汇总随之阻断。逐项迁移到当前 Import/Editor/Documents/Platform 契约，恢复执行 main 实际装配的 Platform 回归，保留原场景和硬门禁；产品源码不变，待新 Windows CI，不标验收、不推进13.14。[详情](docs/R13-13-DETAILS.md)。

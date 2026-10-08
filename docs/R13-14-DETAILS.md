@@ -1,6 +1,17 @@
 # R13.14 删除旧导入实现
 
-状态：**实现与回归迁移已完成，待本提交 Windows 验收**。2026-10-08用户要求“收尾13开始14”，承接13.13并开始13.14；不启动第14大阶段。唯一分支 `agent/r13-stage`，基线 `5efe460b6025b5af0de25ee917fa6dccd542c50d` / [Windows CI37737197913](https://github.com/uniquenesssta/mdr/actions/runs/37737197913)。前置七组与精确提交汇总全部成功，13.13、A03/A05完整链及原R12-S01追踪号已关闭，见 [13.13正式验收](R13-13-DETAILS.md)。
+状态：**实际剪藏与Windows WebView已通过，首轮累计回归未完全通过；补齐图标/翻译契约迁移，待新提交Windows验收**。2026-10-08用户要求“收尾13开始14”，承接13.13并开始13.14；不启动第14大阶段。唯一分支 `agent/r13-stage`，基线 `5efe460b6025b5af0de25ee917fa6dccd542c50d` / [Windows CI37737197913](https://github.com/uniquenesssta/mdr/actions/runs/37737197913)。前置七组与精确提交汇总全部成功，13.13、A03/A05完整链及原R12-S01追踪号已关闭，见 [13.13正式验收](R13-13-DETAILS.md)。
+
+## 首轮失败与修复（2026-10-08）
+
+精确提交 `513b2cce14627b0a09f4223ece99185b3b6948fa` / [Windows CI37740940984](https://github.com/uniquenesssta/mdr/actions/runs/37740940984) 已结束。Rust、原生、依赖与真实Windows WebView四个job成功；全仓16个目录累计1612/1614通过，Node/前端因下方两条断言失败，最终汇总按原门禁拒绝验收。前端生产构建、11/11契约浏览器、29/29 built-app浏览器和四项静态门禁通过；全仓测试中的14/14独立浏览器脚本也通过，含本项真实剪藏DOM、焦点、语言、关闭与销毁场景。
+
+| 原目的与失败位置 | 实际迁移与修复断言 | 保留验证 |
+| --- | --- | --- |
+| svg-sprite：所有图标引用公共sprite，无第二份几何。旧模板硬编码47，实际45（第76行） | 模板45+Import View的globe/close两项=47；确认两项均调用现有IconView，禁止内联几何/另造sprite | 原35个symbol、全部旧静态/动态调用者与可访问性断言保持；真实Clipper DOM检查两个完整href且没有内联图形 |
+| translation-bindings：生产声明式翻译完整及寿命。旧模板111，实际101（第193行） | 模板101+Help2+Import View10=113；逐键保留7个文本和3个placeholder，检查组合根I18n订阅与View消费 | 原通用翻译text/title/placeholder/alt/aria、缓存不重扫、错误继续与退订/终止场景保持；真实Clipper检查全部10项及关闭按钮aria-label切换前后的受控zh/en翻译结果，保留销毁退订 |
+
+只修改上述两个契约、现有真实浏览器回归及项目记录；没有产品源码、依赖、模型、数据格式、抓取策略或工作流变化。没有以静态数量放宽代替动态验证，没有skip或忽略失败退出码。当前风险源35项blob不变，历史acceptance快照不变；新提交仍必须重跑七组完整Windows验收，13.14保持未勾选。Mermaid Chart已更新静态模板与owned View的实际回归覆盖关系；本项不涉及未核实的第三方API。 本轮四项静态门禁、三个变更脚本及浏览器evaluate正文语法、104个文档相对链接、35项当前风险源blob和差异检查通过；未运行Linux/macOS产品测试或构建。
 
 ## 责任与删除边界
 
