@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～04已验收，R14-05首轮CI因旧计数断言失败，迁移校验已修正，待新Windows CI；14.6未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～04已验收，R14-05第二轮CI真实WebView渲染超时，预览增强竞态修复待新Windows CI；14.6未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-09：R14-05第二轮 `2dbfc2b` / [CI37897676407](https://github.com/uniquenesssta/mdr/actions/runs/37897676407) 全仓1744/1744、前端746/746、进度20/20及浏览器11/11＋38/38通过；唯一直接失败为真实WebView本地文件导入后的双栏渲染超时。修复Preview重复更新时取消旧增强队列却漏补复用节点的竞态，保留已完成预览快速路径，新增四项强制交错回归及分项DOM/失败截图证据；旧产物未记录缺失项，本次超时根因仍待重验。待新Windows七组CI，14.5未验收、14.6未开始。[详情](docs/R14-05-DETAILS.md)。
 
 - 2026-10-09：修复R14-05首轮CI漏同步的旧迁移计数断言：`2bbd773` / [CI37890617533](https://github.com/uniquenesssta/mdr/actions/runs/37890617533) 进度20/20、取消22/22、任务16/16、请求31/31、导出41/41、浏览器11/11＋38/38及Rust/原生/WebView通过；全仓1743/1744、前端745/746唯一直接失败是Stage 1仍固定内联事件33，而迁出进度按钮后已为32。改查现有每个处理器及数量与精确基线一致，并证明退役按钮已移除、迁移记录保留；原历史交接与全部场景/硬门禁保持，生产代码不变，待新Windows累计验收，14.5未验收、14.6未开始。[详情](docs/R14-05-DETAILS.md)。
 

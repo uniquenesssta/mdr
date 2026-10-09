@@ -274,8 +274,10 @@ try {
         await browser.saveScreenshot(join(evidenceRoot, `normal-${mode}.png`));
         await persist();
       }
+      evidence.importDocumentChainDiagnostics = { commit: process.env.GITHUB_SHA };
       evidence.importDocumentChain = await verifyImportDocumentChain({ browser, fixtureOrigin,
-        filePath: importFilePath, missingPath: join(canaryRoot, 'missing.md'), requests, evidenceRoot });
+        filePath: importFilePath, missingPath: join(canaryRoot, 'missing.md'), requests, evidenceRoot,
+        diagnostics: evidence.importDocumentChainDiagnostics });
       await persist();
     }
   });

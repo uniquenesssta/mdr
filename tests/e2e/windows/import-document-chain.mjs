@@ -3,8 +3,10 @@ import { join } from 'node:path';
 
 // Drive production UI and public document commands in the real embedded Windows WebView.
 // Native HTTP uses the existing Rust command/transport/response pipeline in the archived host.
-export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePath, missingPath, requests, evidenceRoot }) {
+export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePath, missingPath, requests, evidenceRoot, diagnostics = {} }) {
   const observations = [];
+  diagnostics.observations = observations;
+  diagnostics.renders = [];
   const baseHref = await browser.execute(() => location.href);
   const fingerprint = () => browser.execute(() => {
     const host = document.getElementById('compatibility-business-ports');
@@ -69,14 +71,45 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
         if (layout === 'both') await host.markdownEditorPreviewCommandPort.update();
       }, mode);
       const selector = mode === 'both' ? '#preview' : '#editor';
-      await browser.waitUntil(() => browser.execute((rootSelector, needsImage) => {
-        const root = document.querySelector(rootSelector);
-        const image = root?.querySelector('img[alt="owned import image"]');
-        return Boolean(root?.textContent.includes('R13 harmless import text')
-          && root.querySelector('.katex') && root.querySelector('[data-mermaid-rendered="true"] svg')
-          && root.querySelector('strong, .cm-hybrid-strong')
-          && (!needsImage || image?.complete && image.naturalWidth > 0 && root.querySelector('[data-r12-probe]')));
-      }, selector, requireImage), { timeout: 30_000, timeoutMsg: `${source}/${mode}: imported legal content did not render.` });
+      const renderObservation = { source, mode, status: 'waiting' };
+      diagnostics.renders.push(renderObservation);
+      try {
+        await browser.waitUntil(async () => {
+          renderObservation.snapshot = await browser.execute((rootSelector, needsImage) => {
+            const root = document.querySelector(rootSelector);
+            const image = root?.querySelector('img[alt="owned import image"]');
+            const host = document.getElementById('compatibility-business-ports');
+            const preview = host.markdownEditorPreviewCommandPort.snapshot;
+            return {
+              checks: {
+                markdown: Boolean(root?.textContent.includes('R13 harmless import text')),
+                math: Boolean(root?.querySelector('.katex')),
+                mermaid: Boolean(root?.querySelector('[data-mermaid-rendered="true"] svg')),
+                strong: Boolean(root?.querySelector('strong, .cm-hybrid-strong')),
+                image: !needsImage || Boolean(image?.complete && image.naturalWidth > 0),
+                htmlProbe: !needsImage || Boolean(root?.querySelector('[data-r12-probe]'))
+              },
+              image: image ? { complete: image.complete, naturalWidth: image.naturalWidth, naturalHeight: image.naturalHeight } : null,
+              fences: [...(root?.querySelectorAll('pre > code.language-mermaid') || [])].map(code => ({
+                source: code.textContent.slice(0, 200), busy: code.parentElement.dataset.mermaidRendering === 'true',
+                error: code.parentElement.dataset.mermaidError === 'true'
+              })),
+              preview: { status: preview.status, version: preview.version, lastStableResult: preview.lastStableResult, error: preview.error },
+              documentVersion: window.markdownEditorDocumentModel.getDocumentVersion(),
+              text: root?.textContent.slice(0, 600) || ''
+            };
+          }, selector, requireImage);
+          return Object.values(renderObservation.snapshot.checks).every(value => value === true);
+        }, { timeout: 30_000, timeoutMsg: `${source}/${mode}: imported legal content did not render.` });
+        renderObservation.status = 'passed';
+      } catch (error) {
+        renderObservation.status = 'failed';
+        renderObservation.error = error.stack || String(error);
+        try { await browser.saveScreenshot(join(evidenceRoot, `r13-import-${source}-${mode}-failed.png`)); }
+        catch (screenshotError) { renderObservation.screenshotError = String(screenshotError); }
+        const missing = Object.entries(renderObservation.snapshot?.checks || {}).filter(([, value]) => value !== true).map(([key]) => key);
+        throw new Error(`${source}/${mode}: imported legal content did not render; missing=${missing.join(',') || 'snapshot unavailable'}.`, { cause: error });
+      }
       const snapshot = await browser.execute(rootSelector => {
         const root = document.querySelector(rootSelector);
         const body = rootSelector === '#preview' ? root.querySelector('.markdown-body') : root;

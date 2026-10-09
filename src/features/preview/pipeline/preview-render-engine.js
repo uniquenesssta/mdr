@@ -209,6 +209,8 @@ export function createPreviewRenderEngine(options = {}) {
   async function update() {
     assertActive();
     scheduler.cancel('input');
+    const previousEnhancements = enhancementCoordinator.getStats();
+    const interruptedEnhancements = previousEnhancements.pending > 0 || previousEnhancements.running;
     const renderVersion = state.beginRender();
     enhancementCoordinator.begin(renderVersion);
     let resolvedMode = state.snapshot.mode;
@@ -322,7 +324,9 @@ export function createPreviewRenderEngine(options = {}) {
             const body = root.querySelector('.markdown-body');
             const target = recoveryView.inspect();
             if (!state.snapshot.lastStableResult || !body || target.recovery) return null;
-            const pending = collectPendingMermaidRoots(body);
+            // begin() cancelled the old generation, including queued math and in-flight Mermaid.
+            // Reused nodes must receive new jobs even while the old Mermaid renderer still owns its busy flag.
+            const pending = interruptedEnhancements ? Array.from(body.children) : collectPendingMermaidRoots(body);
             sourceAlreadyAnnotated = true;
             skipEnhancements = pending.length === 0;
             return {
@@ -460,7 +464,7 @@ export function createPreviewRenderEngine(options = {}) {
 
     const retryEnhancements = patchResult.mode === 'unchanged-enhancement-retry';
     if (!patchResult.virtualized || retryEnhancements) {
-      enhanceNodes(patchResult.changedNodes, patchResult.changedNodes);
+      enhanceNodes(patchResult.changedNodes, retryEnhancements ? [] : patchResult.changedNodes);
       if (!patchResult.virtualized) selectionController?.notifyPreviewReplaced?.('preview-dom-patch');
     }
     if (!skipEnhancements) {
