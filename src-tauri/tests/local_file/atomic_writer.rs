@@ -428,12 +428,18 @@ fn concurrent_saves_publish_one_complete_payload_and_leave_no_siblings() {
         8
     );
     for sibling in &siblings {
-        assert_ne!(sibling.0, foreign.0, "existing directory is never owned by a new fixture");
+        assert_ne!(
+            sibling.0, foreign.0,
+            "existing directory is never owned by a new fixture"
+        );
         assert_eq!(fs::read_dir(&sibling.0).expect("new empty fixture").count(), 0);
     }
     drop(siblings);
     foreign.assert_clean(ORIGINAL);
-    assert_eq!(fs::read_dir(&fixture.0).expect("only foreign fixture remains").count(), 1);
+    assert_eq!(
+        fs::read_dir(&fixture.0).expect("only foreign fixture remains").count(),
+        1
+    );
     drop(foreign);
 
     let target = fixture.original();

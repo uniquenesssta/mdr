@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～03已验收，R14-04首轮被测试目录碰撞阻断，修复待新Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～03已验收，R14-04目录碰撞修复已通过专项，格式修正待新Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-09：修复R14-04第二轮CI格式遗漏：`e050ff4` / [Windows CI37883007228](https://github.com/uniquenesssta/mdr/actions/runs/37883007228) 安全写入18/18（含强制同一时刻/已有目录并发回归）、全量Rust269＋5＋1＋6、取消22/22、全仓1724/1724、前端726/726、浏览器11/11＋37/37通过；唯一失败是Rust 1.88格式门禁要求新增两处断言换行，最终汇总正确阻断。按CI完整rustfmt输出修正两处布局，确认仅空白变化，四项静态门禁及文档/证据复核通过，生产行为、测试及工作流保持；本地Rust运行库不完整，采用CI输出逐项静态复核，完整格式门禁与累计Windows回归待新CI，R14-04未验收、14.5未开始。[详情](docs/R14-04-DETAILS.md)。
 
 - 2026-10-09：修复R14-04首轮CI：`0e09d62` / [Windows CI37824900026](https://github.com/uniquenesssta/mdr/actions/runs/37824900026) 的取消22/22、全仓1724/1724、前端726/726、浏览器11/11＋37/37及真实WebView通过；安全写入专项17/18，测试Fixture仅用PID和时间戳，在同一Windows时钟刻度下目录重名（错误183），最终汇总正确阻断。测试目录新增原子序号与独占创建碰撞重试；原并发场景强制相同时间戳及已有目录，验证八个目录独立、已有内容保留和清理，仍保留八路实际写入完整性与18/18硬门禁。生产代码与工作流不变，四项静态门禁及文档/证据复核通过，待新Windows验证，R14-04不标验收，14.5未开始。[详情](docs/R14-04-DETAILS.md)。
 
