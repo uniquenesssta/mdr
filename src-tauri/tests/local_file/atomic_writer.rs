@@ -3,25 +3,43 @@
 use super::{commit, write_bytes, Phase};
 use crate::local_file::{binary_writer, commands, text_writer};
 use std::{
+    collections::HashSet,
     fs::{self, File, OpenOptions},
     io,
     os::windows::fs::OpenOptionsExt,
     path::{Path, PathBuf},
     process::Command,
+    sync::{
+        atomic::{AtomicU64, Ordering},
+        Barrier,
+    },
     time::{SystemTime, UNIX_EPOCH},
 };
 
 const ORIGINAL: &[u8] = b"recoverable original\0\xff";
 const REPLACEMENT: &[u8] = b"complete new content\0\x80";
+static NEXT_FIXTURE: AtomicU64 = AtomicU64::new(0);
 
 struct Fixture(PathBuf);
 
 impl Fixture {
     fn new() -> Self {
         let nonce = SystemTime::now().duration_since(UNIX_EPOCH).expect("clock").as_nanos();
-        let root = std::env::temp_dir().join(format!("mdr-safe-write-{}-{nonce}", std::process::id()));
-        fs::create_dir(&root).expect("owned fixture");
-        Self(root)
+        Self::create(&std::env::temp_dir(), nonce, &NEXT_FIXTURE)
+    }
+
+    fn create(parent: &Path, nonce: u128, sequence: &AtomicU64) -> Self {
+        // Concurrent tests can observe the same Windows clock tick. Only create_dir grants ownership.
+        for _ in 0..64 {
+            let serial = sequence.fetch_add(1, Ordering::Relaxed);
+            let root = parent.join(format!("mdr-safe-write-{}-{nonce}-{serial}", std::process::id()));
+            match fs::create_dir(&root) {
+                Ok(()) => return Self(root),
+                Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
+                Err(error) => panic!("owned fixture: {error}"),
+            }
+        }
+        panic!("could not exclusively create fixture directory after 64 attempts");
     }
 
     fn target(&self) -> PathBuf {
@@ -381,6 +399,43 @@ fn panicking_fault_hook_closes_handle_and_removes_owned_sibling() {
 #[test]
 fn concurrent_saves_publish_one_complete_payload_and_leave_no_siblings() {
     let fixture = Fixture::new();
+    // Force identical clock values and a pre-existing directory instead of waiting for a flaky tick.
+    let foreign_path = fixture.0.join(format!("mdr-safe-write-{}-0-0", std::process::id()));
+    fs::create_dir(&foreign_path).expect("pre-existing fixture directory");
+    let foreign = Fixture(foreign_path);
+    fs::write(foreign.target(), ORIGINAL).expect("foreign fixture bytes");
+    let sequence = AtomicU64::new(0);
+    let barrier = Barrier::new(8);
+    let siblings: Vec<Fixture> = std::thread::scope(|scope| {
+        let threads: Vec<_> = (0..8)
+            .map(|_| {
+                let parent = &fixture.0;
+                let barrier = &barrier;
+                let sequence = &sequence;
+                scope.spawn(move || {
+                    barrier.wait();
+                    Fixture::create(parent, 0, sequence)
+                })
+            })
+            .collect();
+        threads
+            .into_iter()
+            .map(|thread| thread.join().expect("fixture thread"))
+            .collect()
+    });
+    assert_eq!(
+        siblings.iter().map(|sibling| &sibling.0).collect::<HashSet<_>>().len(),
+        8
+    );
+    for sibling in &siblings {
+        assert_ne!(sibling.0, foreign.0, "existing directory is never owned by a new fixture");
+        assert_eq!(fs::read_dir(&sibling.0).expect("new empty fixture").count(), 0);
+    }
+    drop(siblings);
+    foreign.assert_clean(ORIGINAL);
+    assert_eq!(fs::read_dir(&fixture.0).expect("only foreign fixture remains").count(), 1);
+    drop(foreign);
+
     let target = fixture.original();
     let payloads: Vec<Vec<u8>> = (0..8).map(|byte| vec![byte; 131_072]).collect();
     std::thread::scope(|scope| {

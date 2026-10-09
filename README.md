@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～03已验收，R14-04取消机制待Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～03已验收，R14-04首轮被测试目录碰撞阻断，修复待新Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-09：修复R14-04首轮CI：`0e09d62` / [Windows CI37824900026](https://github.com/uniquenesssta/mdr/actions/runs/37824900026) 的取消22/22、全仓1724/1724、前端726/726、浏览器11/11＋37/37及真实WebView通过；安全写入专项17/18，测试Fixture仅用PID和时间戳，在同一Windows时钟刻度下目录重名（错误183），最终汇总正确阻断。测试目录新增原子序号与独占创建碰撞重试；原并发场景强制相同时间戳及已有目录，验证八个目录独立、已有内容保留和清理，仍保留八路实际写入完整性与18/18硬门禁。生产代码与工作流不变，四项静态门禁及文档/证据复核通过，待新Windows验证，R14-04不标验收，14.5未开始。[详情](docs/R14-04-DETAILS.md)。
 
 - 2026-10-09：R14-03在 `751f012` / [Windows CI37818046855](https://github.com/uniquenesssta/mdr/actions/runs/37818046855) 七组及全部步骤通过，全仓1702/1702、前端704/704、任务16/16、请求31/31、导出基线41/41、浏览器11/11＋36/36，正式收尾。同分支实施14.4：任务/取消归入task目录，公开只读token实时消费唯一任务状态，可中断帧/库/增强/图片/对话框等待并拒绝晚到结果；文件写入、PNG编码与打印交接显式不可逆锁定，UI只发cancel。删除任意解锁和旧检查API，原解锁场景映射为结束锁定任务后取消新准备任务；补齐监听清理、晚到拒绝与实际按钮/pagehide回归。静态复核通过，待新Windows CI，14.4不标验收；F01/F02/F04与A10排期保持，已提交系统操作不能由token撤销。[14.3验收](docs/R14-03-DETAILS.md) · [14.4详情](docs/R14-04-DETAILS.md)。
 

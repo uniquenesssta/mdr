@@ -513,9 +513,9 @@
   "currentSourceReview": {
     "stage": "R14.4",
     "date": "2026-10-09",
-    "reviewedCommit": "751f012f8aab277d7b7dbcbe26b2cff0f8801ff2",
+    "reviewedCommit": "0e09d62ec545d7d70d33d67175b1c9fbe4b31c70",
     "record": "docs/R14-04-DETAILS.md",
-    "status": "R14.3 accepted on exact Windows commit; R14.4 readonly cancellation and explicit locks implemented, awaiting Windows; rendered formats and A10 remain open",
+    "status": "R14.3 accepted; R14.4 cancellation passed frontend validation, but Windows safe-writer fixture collision blocked admission; fixture repair awaits a new exact-commit Windows run",
     "priorWindowsRun": 37737197913,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 snapshot. records status/fixed retain R12 closeout handoff semantics; A05 subsequentAcceptance records the current R13 closure separately.",
@@ -554,7 +554,7 @@
         "replacement": "src/features/export/task/export-task-controller.js"
       }
     ],
-    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open.",
+    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open. Run 37824900026 at 0e09d62ec545d7d70d33d67175b1c9fbe4b31c70 passed cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; WebView, native and dependency jobs passed. The safe-writer targeted step failed 17/18 because parallel test fixtures used the same PID and clock value, causing Windows AlreadyExists before any write. Later full Rust success does not supersede the failed step; closeout correctly rejected the commit. Only the test fixture allocator now adds an atomic sequence and bounded exclusive-create collision handling. The retained concurrent-save scenario forces a shared clock value and a pre-existing directory, checks isolation and ownership, then runs the original eight actual writes. All 18 scenarios, production fingerprints, workflow gates and historical acceptance remain unchanged. R14.4 awaits revalidation; 14.5 is not started.",
     "priorImplementationWindowsRun": 37660954894,
     "priorImplementationWindowsJobs": {
       "webview-baseline": "success",
@@ -601,7 +601,7 @@
       "stage": "R14.4",
       "baselineCommit": "751f012f8aab277d7b7dbcbe26b2cff0f8801ff2",
       "branch": "agent/r14-stage",
-      "status": "implemented-pending-windows",
+      "status": "ci-fixture-repair-pending-windows",
       "record": "docs/R14-04-DETAILS.md",
       "productionChanged": true,
       "remainingFindings": [
@@ -613,7 +613,61 @@
       ],
       "namingFinding": "R14.2 request naming accepted; complete format outputs remain 14.9/14.10/14.11.",
       "a10Deadline": "Before 14.7 acceptance; complete offline format chains before R14 closure.",
-      "scope": "Readonly cancellation tokens over one task owner, cancellable waits, irreversible write/encode/print locks and all current task callers. No renderer, model, dependency, native command or persistence changes."
+      "scope": "Readonly cancellation tokens over one task owner, cancellable waits, irreversible write/encode/print locks and all current task callers. No renderer, model, dependency, native command or persistence changes.",
+      "lastWindowsAttempt": {
+        "commit": "0e09d62ec545d7d70d33d67175b1c9fbe4b31c70",
+        "run": 37824900026,
+        "status": "failure",
+        "jobs": {
+          "rust": "failure",
+          "frontend": "success",
+          "webview-baseline": "success",
+          "native-boundary": "success",
+          "repository-tests": "success",
+          "dependency-advisories": "success",
+          "closeout": "failure"
+        },
+        "targetedCancellationTestsPassed": 22,
+        "targetedTaskTestsPassed": 16,
+        "targetedRequestTestsPassed": 31,
+        "targetedExportTestsPassed": 41,
+        "nodeTestsPassed": 1724,
+        "nodeTestDirectories": 16,
+        "frontendTestsPassed": 726,
+        "contractBrowserPassed": 11,
+        "builtAppBrowserPassed": 37,
+        "safeWriter": {
+          "jobId": 113475095038,
+          "tests": 18,
+          "passed": 17,
+          "failed": 1,
+          "failure": "concurrent_saves_publish_one_complete_payload_and_leave_no_siblings fixture creation: Windows error 183 AlreadyExists"
+        },
+        "laterFullRust": {
+          "unitTestsPassed": 269,
+          "integrationTestsPassed": [
+            5,
+            1,
+            6
+          ]
+        },
+        "closeoutJobId": 113478324322
+      },
+      "ciFixtureRepair": {
+        "productionChanged": false,
+        "source": "src-tauri/tests/local_file/atomic_writer.rs",
+        "scope": "Atomic fixture sequence and bounded exclusive directory creation; deterministic equal-clock concurrent fixture isolation and pre-existing directory preservation; original eight-writer scenario and all 18 gates retained.",
+        "status": "pending-new-exact-commit-windows",
+        "staticReview": {
+          "architectureAndDocumentationGatesPassed": 4,
+          "relativeLinksChecked": 77,
+          "productionFingerprintsUnchanged": 42,
+          "originalRustTestNamesRetained": 18,
+          "originalEightWriterBodyUnchanged": true,
+          "historicalAcceptanceUnchanged": true,
+          "localRustBuildOrTestsRun": false
+        }
+      }
     },
     "priorStageAcceptance": {
       "stage": "R13.14",
