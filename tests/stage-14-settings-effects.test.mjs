@@ -86,10 +86,10 @@ test('R14-06 editor and toolbar changes apply their preferences without rebuildi
 
 test('R14-06 locale, autosave and export-directory commits preserve Preview and route their committed values', t => {
   const h = harness(t);
-  h.coordinator.commit({ language: 'en-US' });
+  h.coordinator.commit({ language: 'en' });
   h.coordinator.commit({ autoSaveEnabled: !SETTING_DEFAULTS.autoSaveEnabled });
   h.coordinator.commit({ exportDirectory: 'C:\\exports' });
-  assert.equal(h.store.get('language'), 'en-US');
+  assert.equal(h.store.get('language'), 'en');
   assert.equal(h.store.get('autoSaveEnabled'), !SETTING_DEFAULTS.autoSaveEnabled);
   assert.equal(h.context.exportDirectory, 'C:\\exports');
   assert.equal(h.preview.firstElementChild, h.first);

@@ -1,8 +1,20 @@
 # R14-06 Document Builder
 
-状态：**第二轮Windows未完全通过；主题接线修复已实施，待新精确提交累计重验**。继续 `agent/r14-stage`，基线 `45bcdd14debf2ab030df66f44e6588d29915a440`；14.6保持未勾选，14.7未开始。
+状态：**第三轮Windows未完全通过；新增测试的语言夹具已修正，待新精确提交累计重验**。继续 `agent/r14-stage`，基线 `45bcdd14debf2ab030df66f44e6588d29915a440`；14.6保持未勾选，14.7未开始。
 
 R14-05正式实现验收仍为 `11d2eb4` / CI37929409192，历史两次失败与对应修复不变。文档收尾 `45bcdd1` / [CI37931528219](https://github.com/uniquenesssta/mdr/actions/runs/37931528219) 七组及全部执行步骤成功，已核对精确head、job和step；审计记录追加该收尾重验，不覆盖正式实现证据。新一轮不能继承05的成功作为06验收。
+
+## 第三轮证据与语言夹具修复
+
+`a3dadd6a9e186be39e09ab101d426f5c0ab74b1f` / [CI37955921182](https://github.com/uniquenesssta/mdr/actions/runs/37955921182)，attempt1：浏览器契约11/11、built-app39/39、导出43/43、Builder20/20及生产构建通过；两个主题身份场景和前三个实际导出场景均通过。Rust、原生、WebView、依赖四组成功，frontend、递归Node与最终收尾未通过。
+
+直接失败只有新增Settings专项第5项：`stage-14-settings-effects.test.mjs:89`提交`language: 'en-US'`，实际Settings Schema通过Locale Registry校验语言，而注册值为`en`，因此抛出`Invalid value for setting language.`。同一用例在专项、根Node与递归Node重复报告，分别为4/5、775/776、1780/1781；它在第一条语言提交即退出，尚未执行后续自动保存与导出目录断言。
+
+本次只把该用例的语言输入和存储预期两处改为`en`。继续使用真实公共Store/Apply Coordinator和实际classic监听器；保留后续自动保存、目录、Preview节点身份及零布局/偏好/侧栏副作用检查，5项场景均保留。既有语言枚举、校验器、产品代码、39项浏览器场景、工作流与47项风险源指纹不变。没有把尚未执行到的断言算作通过。
+
+已核对精确提交的jobs/steps与前端、递归Node日志；前端artifact11627663380的服务端SHA-256为`7f3616d78bf400d9d8984b14eab199a997b1447776db7571b836489f3435c84e`，本次以日志定位，未下载该压缩包，不宣称复核其内部探针。历史失败与修复、R14-05正式验收、原始格式夹具及开放问题保留。
+
+本地四项静态门禁、改动脚本语法、112个相对链接、47项现有源码指纹和历史证据保持检查通过；精确差异确认测试仅修改两处语言值。不运行产品Node测试、浏览器或构建。完整验证继续交同分支Windows CI；14.6仍未勾选，14.7未开始，F01/F02/剩余F04、A10和独立Editor指标问题不在本次宣称关闭。此次是单测试文件的既有枚举修正，无第三方API或架构变化，不触发Context7/Mermaid Chart。
 
 ## 第二轮证据与主题接线修复
 

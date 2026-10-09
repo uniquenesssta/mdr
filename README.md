@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～05已验收，R14-05在11d2eb4 / CI37929409192七组及全部步骤通过；14.5收尾45bcdd1 / CI37931528219七组通过；14.6第二轮导出专项已通过，主题接线修复待Windows累计重验，14.7未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～05已验收，R14-05在11d2eb4 / CI37929409192七组及全部步骤通过；14.5收尾45bcdd1 / CI37931528219七组通过；14.6第三轮a3dadd6 / CI37955921182浏览器11/11＋39/39及导出专项通过；唯一直接失败是新增Settings测试误用en-US，已按现有语言契约修正为en，待Windows累计重验，14.7未开始。A10保持接收。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-10：R14-06第三轮 `a3dadd6` / [CI37955921182](https://github.com/uniquenesssta/mdr/actions/runs/37955921182) 浏览器11/11＋39/39、导出43/43、Builder20/20及Rust/原生/WebView/依赖通过，前两轮实际导出与主题失败均已通过。全仓1780/1781、前端775/776、Settings专项4/5的唯一直接失败是新增测试使用不受支持的语言en-US；按现有Locale Registry修正输入与预期为en，保留全部场景和断言，产品与工作流不变。待同分支Windows累计重验，14.6未验收、14.7未开始。[详情](docs/R14-06-DETAILS.md)。
 
 - 2026-10-09：R14-06第二轮 `4d5831e` / [CI37943920538](https://github.com/uniquenesssta/mdr/actions/runs/37943920538) 未完全通过：全仓1776/1776、前端771/771、导出43/43、Builder20/20及其余五组成功；上轮三个导出失败全部通过，实际18份文本产物、137段长文无快照、48/96分批与取消后重建均有归档。built-app37/39，两个主题场景失败：旧Settings监听对theme-only也重应用布局，清掉混合Preview；失败测试未恢复浅色，连带污染下一场景。按变更字段限定布局/偏好/侧栏刷新，追加5项实际监听器与公共Settings/Theme联动回归；原39场景和身份断言保持，补显式预览准备、状态JSON与finally恢复。静态复核后在同分支重验；14.6不验收、14.7未开始。[详情](docs/R14-06-DETAILS.md)。
 
