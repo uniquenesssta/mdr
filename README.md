@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～05已验收，R14-05在11d2eb4 / CI37929409192七组及全部步骤通过；14.5收尾45bcdd1 / CI37931528219七组通过；14.6第三轮a3dadd6 / CI37955921182浏览器11/11＋39/39及导出专项通过；唯一直接失败是新增Settings测试误用en-US，已按现有语言契约修正为en，待Windows累计重验，14.7未开始。A10保持接收。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～06已验收，R14-05在11d2eb4 / CI37929409192七组及全部步骤通过；14.5收尾45bcdd1 / CI37931528219七组通过；14.6在1f49956 / CI37958151064七组Windows及全部步骤通过，全仓1781/1781、前端776/776、Builder20/20、Settings5/5、浏览器11/11＋39/39，正式验收；14.7未开始。A10保持接收。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-10：R14-06在 `1f49956` / [Windows CI37958151064](https://github.com/uniquenesssta/mdr/actions/runs/37958151064) 七组及全部步骤通过，正式验收：全仓1781/1781、前端776/776、Builder20/20、Settings5/5、导出43/43、浏览器11/11＋39/39及实际Windows导入链8/8成功。已校验最终汇总与前端归档摘要，实际137段长文无全文快照、48/96/138分批、首批取消后重建和两项主题身份检查均通过；保留三次失败与修复。仅登记验收、勾选14.6，14.7未开始；完整格式缺口、A10及独立Editor指标问题保持接收。[验收详情](docs/R14-06-DETAILS.md)。
 
 - 2026-10-10：R14-06第三轮 `a3dadd6` / [CI37955921182](https://github.com/uniquenesssta/mdr/actions/runs/37955921182) 浏览器11/11＋39/39、导出43/43、Builder20/20及Rust/原生/WebView/依赖通过，前两轮实际导出与主题失败均已通过。全仓1780/1781、前端775/776、Settings专项4/5的唯一直接失败是新增测试使用不受支持的语言en-US；按现有Locale Registry修正输入与预期为en，保留全部场景和断言，产品与工作流不变。待同分支Windows累计重验，14.6未验收、14.7未开始。[详情](docs/R14-06-DETAILS.md)。
 
