@@ -25,6 +25,7 @@ export function createExportDocumentBuilder({ documentRef, documentModel, getAct
     throw new TypeError('Export Document Builder requires public document, Preview and DOM capabilities.');
   }
   let destroyed = false;
+  let sourceContexts = new WeakMap();
   const builds = new Set();
 
   async function build({ task = null, documentId } = {}) {
@@ -56,6 +57,7 @@ export function createExportDocumentBuilder({ documentRef, documentModel, getAct
       assertCurrent();
       const body = documentRef.createElement('div');
       body.className = 'markdown-body';
+      sourceContexts.set(body, Object.freeze({ documentId, documentVersion: version }));
       const source = preview.capture();
       assertCurrent();
       if (source?.blockCount > 0 && source.isCurrent()) {
@@ -110,9 +112,16 @@ export function createExportDocumentBuilder({ documentRef, documentModel, getAct
 
   return Object.freeze({
     build,
+    getSourceContext(body) {
+      if (destroyed) throw new ExportCancelledError('destroyed');
+      const context = sourceContexts.get(body);
+      if (!context) throw new TypeError('Export body must originate from this Document Builder.');
+      return context;
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      sourceContexts = new WeakMap();
       for (const entry of builds) entry.stop?.();
     }
   });

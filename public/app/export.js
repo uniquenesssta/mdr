@@ -10,6 +10,7 @@
     const exportRequestPort = exportCompatibilityHost?.markdownEditorExportRequestPort;
     const exportTaskPort = exportCompatibilityHost?.markdownEditorExportTaskPort;
     const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
+    const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
@@ -20,6 +21,7 @@
     if (!exportRequestPort) throw new Error('Export request compatibility port is unavailable.');
     if (!exportTaskPort) throw new Error('Export task compatibility port is unavailable.');
     if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
+    if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
 
     function readExportRequest(format) {
       try {
@@ -54,45 +56,6 @@
       try { return exportTaskPort.finish(task, outcome); }
       catch (error) { showToast('导出清理失败：' + (error?.message || String(error))); return false; }
     }
-
-    async function enhanceFullPreviewForExport(root, task = null) {
-      task?.token.throwIfCancelled();
-      const children = Array.from(root.children || []);
-      const batchSize = 18;
-      if (!children.length) return;
-      for (let start = 0; start < children.length; start += batchSize) {
-        task?.token.throwIfCancelled();
-        const batch = children.slice(start, start + batchSize);
-        styleTaskLists(batch);
-        const mathRenderer = exportPresentationPort.math;
-        if (mathRenderer?.renderTree || Boolean(exportPresentationPort.math?.renderTree)) {
-          batch.forEach(node => {
-            task?.token.throwIfCancelled();
-            if (!(mathRenderer?.containsMath?.(node.textContent) ?? node.textContent?.includes('$'))) return;
-            if (mathRenderer?.renderTree) {
-              mathRenderer.renderTree(node, { delimiters: mathRenderer.delimiters });
-              return;
-            }
-            exportPresentationPort.math.renderTree(node, {
-              delimiters: exportPresentationPort.math.delimiters,
-              throwOnError: false
-            });
-          });
-        }
-        for (const node of batch) {
-          task?.token.throwIfCancelled();
-          if (node.querySelector?.('pre code.language-mermaid') || node.matches?.('pre') && node.querySelector?.('code.language-mermaid')) {
-            const enhancement = renderMermaidBlocks([node], () => Boolean(task?.token.cancelled));
-            await (task ? task.token.waitFor(enhancement) : enhancement);
-            task?.token.throwIfCancelled();
-          }
-        }
-        const end = Math.min(children.length, start + batchSize);
-        task?.update(62 + Math.round((end / children.length) * 28), `正在增强导出内容 ${end}/${children.length}`, 'enhancing');
-        if (end < children.length) await waitForExportFrame(task);
-      }
-    }
-
 
     function getExportSaveOptions(title, request, filterName) {
       return {
@@ -163,7 +126,9 @@
       try {
         const name = request.name;
 
-        const bodyHtml = (await exportDocumentPort.build({ task, documentId: request.documentId })).innerHTML;
+        const body = await exportDocumentPort.build({ task, documentId: request.documentId });
+        await exportEnhancementPort.enhance({ root: body, task, documentId: request.documentId });
+        const bodyHtml = body.innerHTML;
         task.token.throwIfCancelled();
         task.update(92, '正在生成 Word 文件…', 'serializing');
 
@@ -247,7 +212,9 @@ ${bodyHtml}
       try {
         const name = request.name;
 
-        const bodyHtml = (await exportDocumentPort.build({ task, documentId: request.documentId })).innerHTML;
+        const body = await exportDocumentPort.build({ task, documentId: request.documentId });
+        await exportEnhancementPort.enhance({ root: body, task, documentId: request.documentId });
+        const bodyHtml = body.innerHTML;
         task.token.throwIfCancelled();
         task.update(92, '正在生成 HTML 文件…', 'serializing');
 
@@ -356,10 +323,10 @@ ${'</scr' + 'ipt>'}
         exportPreviewCommandPort.deactivateVirtual();
         const fullBody = await exportDocumentPort.build({ task, documentId: request.documentId });
         task.token.throwIfCancelled();
+        await exportEnhancementPort.enhance({ root: fullBody, task, documentId: request.documentId });
+        task.token.throwIfCancelled();
         preview.replaceChildren(fullBody);
         replacedPreview = true;
-        observedPreviewBody = null;
-        await enhanceFullPreviewForExport(fullBody, task);
         task.token.throwIfCancelled();
         task.lockCancellation('printing');
         task.token.throwIfCancelled();
@@ -536,7 +503,7 @@ ${'</scr' + 'ipt>'}
         stage.style.width = preset.width + 'px';
         stage.style.height = 'auto';
 
-        await enhanceFullPreviewForExport(clone, task);
+        await exportEnhancementPort.enhance({ root: fullBody, task, documentId: request.documentId });
         await prepareExportImages(clone, task);
         task.token.throwIfCancelled();
 

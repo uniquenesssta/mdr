@@ -130,13 +130,19 @@ test('R14-04 enhancement cancellation prevents later math nodes and releases a p
     const h = createExportVmHost(), task = h.invoke('beginExportTask', 'math'), math = h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.math;
     let rendered = 0; math.containsMath = () => true;
     math.renderTree = () => { rendered++; h.cancel(); };
-    await assert.rejects(h.invoke('enhanceFullPreviewForExport', { children: [{ textContent: '$x$' }, { textContent: '$y$' }] }, task), cancellation('cancelled'));
+    const root = await h.build(task);
+    root.replaceChildren({ textContent: '$x$' }, { textContent: '$y$' });
+    await assert.rejects(h.enhance(root, task), cancellation('cancelled'));
     assert.equal(rendered, 1); h.invoke('finishExportTask', task); h.destroy();
   }
   {
     const h = createExportVmHost(), task = h.invoke('beginExportTask', 'mermaid'), pending = deferred(); let predicate;
-    h.context.renderMermaidBlocks = (nodes, isCancelled) => { predicate = isCancelled; return pending.promise; };
-    const work = h.invoke('enhanceFullPreviewForExport', { children: [{ querySelector: () => ({}) }] }, task);
+    const root = await h.build(task);
+    const pre = { matches: selector => selector === 'pre', querySelector: () => code, querySelectorAll: () => [code] };
+    const code = { className: 'language-mermaid', textContent: 'flowchart TD\n A-->B', closest: () => pre, matches: selector => selector === 'code.language-mermaid' };
+    root.replaceChildren(pre);
+    h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.mermaid.renderDiagram = (_container, _source, options) => { predicate = options.isCancelled; return pending.promise; };
+    const work = h.enhance(root, task);
     const rejected = assert.rejects(work, cancellation('cancelled')); h.cancel(); await rejected;
     assert.equal(predicate(), true); pending.resolve(); h.invoke('finishExportTask', task); h.destroy();
   }

@@ -9,32 +9,34 @@ const plain = value => JSON.parse(JSON.stringify(value));
 const operations = { markdown: 'exportFile', html: 'exportHTML', word: 'exportWord', image: 'downloadExportImage' };
 
 // Immutable R14-01 findings stay in contracts.json; current acceptance maps the repaired
-// builder to public capabilities and retains later enhancer/print defects as failures.
+// builder/enhancer to public capabilities. Historical findings are never rewritten.
 test('R14-01 records the actual retired preview dependency instead of hiding it behind the VM host', async () => {
   assert.match(fixture.knownFindings.find(x => x.id === 'R14-F04').behavior, /previewWorkerClient/);
-  const h = createExportVmHost({ supplyRetiredPreviewBindings: false });
+  const h = createExportVmHost();
   const body = await h.build();
   assert.ok(body.innerHTML.includes('原文'));
   assert.equal(h.evaluate('typeof previewWorkerClient'), 'undefined');
   assert.equal(h.evaluate('typeof createPreviewNodesForBlock'), 'undefined');
   assert.equal(h.evaluate('typeof escapeHtml'), 'undefined');
   for (const operation of ['exportHTML', 'exportWord']) await h.invoke(operation);
-  assert.equal(h.downloads.length, 2, 'R14-06 repairs body construction only.');
+  assert.equal(h.downloads.length, 2, 'R14-06/07 use the actual public Builder and Enhancer without retired bindings.');
   h.downloads.length = 0;
   for (const operation of ['exportPDF', 'renderExportImagePreview']) {
     await h.invoke(operation);
     assert.equal(h.downloads.length, 0);
     assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
   }
-  assert.equal(h.timers.length, 0);
+  assert.equal(h.timers.length, 1, 'R14-07 prepares PDF through the actual public enhancer.');
+  assert.equal(h.calls.filter(x => x[0] === 'png').length, 1);
   assert.equal(h.calls.filter(x => x[0] === 'saveFile' || /^write/.test(x[0])).length, 0);
-  assert.ok(h.calls.some(x => x[0] === 'error'));
+  assert.equal(h.calls.some(x => x[0] === 'error'), false);
+  for (const name of ['styleTaskLists', 'renderMermaidBlocks', 'observedPreviewBody', 'enhanceFullPreviewForExport']) assert.equal(h.evaluate('typeof '+name), 'undefined');
   h.destroy();
 });
 
 for (const [format, operation] of [['html', 'exportHTML'], ['word', 'exportWord']]) {
   test(`R14-06 ${format} serializes an escaped title without retired Preview escapeHtml`, async () => {
-    const h = createExportVmHost({ name: "A&B' report.md", supplyRetiredPreviewBindings: false });
+    const h = createExportVmHost({ name: "A&B' report.md" });
     try {
       assert.equal(h.evaluate('typeof escapeHtml'), 'undefined');
       await h.invoke(operation);
@@ -103,7 +105,7 @@ test('R14-02 browser Markdown uses normalized names and retains exact R14-01 mod
 });
 
 for (const [format, mime] of [['html', 'text/html;charset=utf-8'], ['word', 'application/msword;charset=utf-8']]) {
-  test(`R14-01 browser ${format} output captures raw math/Mermaid gap without fetching exported CDN assets`, async () => {
+  test(`R14-01 browser ${format} keeps R14-01 body/MIME coverage and calls the public enhancer without fetching template CDN assets`, async () => {
     const h = createExportVmHost({ sourceText: fixture.source });
     await h.invoke(operations[format]);
     assert.equal(h.downloads.length, 1);
@@ -111,7 +113,7 @@ for (const [format, mime] of [['html', 'text/html;charset=utf-8'], ['word', 'app
     const text = await h.downloads[0].blob.text();
     assert.ok(text.includes('$x^2$'));
     assert.ok(text.includes('flowchart TD'));
-    assert.equal(h.calls.some(x => ['math', 'mermaid'].includes(x[0])), false, 'Current HTML/Word do not call the enhancer; R14-F01 remains open.');
+    assert.ok(h.calls.some(x => x[0] === 'math'), 'R14-07 executes actual Enhancer; this VM vendor double retains raw text. Actual rendered DOM is checked by the built app.');
     if (format === 'html') {
       assert.ok(text.includes('https://cdn.jsdelivr.net/npm/katex@0.16.9/'));
       assert.ok(text.includes('exportPresentationPort.math?.renderTree'), 'R14-F02 records a broken standalone reference, not a supported contract.');
@@ -180,7 +182,8 @@ test('R14-01 PDF afterprint and timeout restore exactly once, preserving the sou
     const h = createExportVmHost();
     await h.invoke('exportPDF');
     assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
-    assert.equal(h.context.observedPreviewBody, null);
+    assert.equal(h.evaluate('typeof observedPreviewBody'), 'undefined');
+    assert.equal(h.context.preview.children[0].className, 'markdown-body');
     assert.equal(h.timers[0].delay, 80);
     h.timers[0].callback();
     assert.equal(h.calls.filter(x => x[0] === 'print').length, 1);

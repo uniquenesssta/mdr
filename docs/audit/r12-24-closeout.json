@@ -239,7 +239,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "7949ab054072f5d9bbb564d20792d2a723b85abb"
+      "blobSha": "bd9d3c6ba063840421c5c694ed823e8026fb0e91"
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
@@ -255,7 +255,7 @@
     },
     {
       "path": "src/features/preview/render/presentation/math-presentation.js",
-      "blobSha": "932f2bf8e0c2942b202aeeb74bd765e3aecb8275"
+      "blobSha": "ff6713c454f5073075c92350f3f72948769d57aa"
     },
     {
       "path": "src/features/preview/render/presentation/mermaid-presentation.js",
@@ -271,7 +271,7 @@
     },
     {
       "path": "public/app/export.js",
-      "blobSha": "1f8f661f352a20c3a9bb3a3d5a15ffb1c7299a84"
+      "blobSha": "7811338c1dbf2846613e0e631de4e6f8619c0240"
     },
     {
       "path": "src/features/export/application/export-request.js",
@@ -283,7 +283,7 @@
     },
     {
       "path": "src/features/export/index.js",
-      "blobSha": "8b177e3ff6b9aa723b308c19c84fb86d80511991"
+      "blobSha": "b436338bb9d378679d74e209dd16b2405ba04002"
     },
     {
       "path": "src/features/export/compatibility/classic-export-task-port.js",
@@ -311,11 +311,19 @@
     },
     {
       "path": "src/features/export/document/export-document-builder.js",
-      "blobSha": "ef37a131b489bfd173def61f3a0a8f40bed4823a"
+      "blobSha": "a45e5b9b34b077f318f5a121059f729085a8d62e"
     },
     {
       "path": "src/features/export/compatibility/classic-export-document-port.js",
-      "blobSha": "fd9481fff51e72df3eb79153ba8bc154e1de5466"
+      "blobSha": "69295036335591ebe9332bb2954e517d240d6a0d"
+    },
+    {
+      "path": "src/features/export/document/export-preview-enhancer.js",
+      "blobSha": "df1d3ccbce735dcca126eefc1c239c99d8b735de"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-export-enhancement-port.js",
+      "blobSha": "e4fa2b47bc302cc0924642eb321a47f63f51bb42"
     }
   ],
   "priorFailures": {
@@ -531,11 +539,11 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R14.6",
+    "stage": "R14.7",
     "date": "2026-10-10",
-    "reviewedCommit": "1f49956e3df45726f96b582084c3456c44ddc901",
-    "record": "docs/R14-06-DETAILS.md",
-    "status": "R14.6 accepted at exact commit1f49956/run37958151064 after all seven Windows jobs and steps passed. Documentation-only closeout; 14.7 not started.",
+    "reviewedCommit": "f8d2312534e0487868a9cba034e882ba78318dce",
+    "record": "docs/R14-07-DETAILS.md",
+    "status": "R14.6 implementation and documentation closeout accepted. R14.7 public enhancement and separately decided KaTeX safety patch implemented pending exact-commit Windows validation;14.8 not started.",
     "priorWindowsRun": 37737197913,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 snapshot. records status/fixed retain R12 closeout handoff semantics; A05 subsequentAcceptance records the current R13 closure separately.",
@@ -574,8 +582,8 @@
         "replacement": "src/features/export/task/export-task-controller.js"
       }
     ],
-    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open. Run 37824900026 at 0e09d62ec545d7d70d33d67175b1c9fbe4b31c70 passed cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; WebView, native and dependency jobs passed. The safe-writer targeted step failed 17/18 because parallel test fixtures used the same PID and clock value, causing Windows AlreadyExists before any write. Later full Rust success does not supersede the failed step; closeout correctly rejected the commit. Only the test fixture allocator now adds an atomic sequence and bounded exclusive-create collision handling. The retained concurrent-save scenario forces a shared clock value and a pre-existing directory, checks isolation and ownership, then runs the original eight actual writes. All 18 scenarios, production fingerprints, workflow gates and historical acceptance remain unchanged. R14.4 awaits revalidation; 14.5 is not started. Run 37883007228 at e050ff4bb1e5f78e960344031d229cba336e8662 passed the safe-writer 18/18 including forced equal-clock fixture ownership, full Rust 269 plus integration 5/1/6, Clippy/check, cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; other independent Windows jobs passed. Only the Rust formatting step failed on two new assertion layouts, repeated in the formatter log by module traversal. Closeout correctly rejected it. Current repair exactly applies the complete CI rustfmt diff; source is identical after removing whitespace. Local formatter runtime is incomplete, so full formatter and cumulative Windows admission remain pending; historical acceptance and all production fingerprints are unchanged. Run 37886068643 at f631d2639b811ab6db071c08edf26fcbb75c59ce passed all seven Windows jobs and every step, including safe-writer 18/18, Rust format, cancellation 22/22, Node 1724/1724, frontend 726/726 and actual browser 11/11 plus 37/37. R14.4 is accepted; both failed attempts and test-only repairs remain recorded. User requested R14.5. Current review covers the readonly Progress Store over one task authority, safe text-only DOM view, direct ModalShell focus/visibility, guarded cancellation button, end-state reset and independent pagehide cleanup. Classic progress subscription, inline cancel global and compatibility progress registration are removed. Existing cancellation/task/characterization scenarios are retained through the real new store/view composition; a test-only ModalShell fault adapter preserves open/close error injection. Rendered format findings and A10 remain open; R14.5 awaits its own exact-commit Windows validation. Run 37890617533 at 2bbd7733b9c14b4639cf64bde04c21840a7b449d passed progress 20/20, cancellation 22/22, task 16/16, request 31/31, characterization 41/41, browser 11/11 plus 38/38 and Rust/native/WebView/dependency jobs. Node 1743/1744 and frontend 745/746 failed solely because the Stage 1 current-baseline assertion still expected 33 inline handlers after the progress handler was removed, leaving 32. Closeout correctly blocked it. Repair replaces that stale total with exact path/attribute/handler/count equality and explicit retired-handler proof; all historical handoff and product scenarios, production fingerprints and admission gates remain unchanged. R14.5 remains pending; 14.6 is not started. Run 37897676407 at 2dbfc2ba3117d1924cceca40d4dd57e04078265a validated the Stage 1 repair: Node 1744/1744, frontend 746/746, progress 20/20, existing 22/16/31/41 scenarios and browser 11/11 plus 38/38 passed. Rust/native/dependency jobs succeeded. Only actual WebView file/both rendering timed out; closeout correctly failed. The old artifact lacked per-check DOM failure diagnostics, so the precise missing content and causal link remain unknown. Source review identified a deterministic interrupted-enhancement gap during unchanged DOM reuse: cancelled queued math and busy Mermaid were not re-enqueued. This repair captures prior pending/running state and schedules current-generation jobs for reused nodes, with settled reuse and cancellation ownership preserved. Four controlled regression scenarios and retained hard checks plus partial-state/failure screenshot diagnostics await Windows execution. Current review adds the changed Preview engine fingerprint; All prior 44 paths remain covered, 43 hashes are unchanged and the changed import probe hash is updated with its prior value retained; historical acceptance is preserved. R14.5 is pending; 14.6 is not started. Run 37929409192 at 11d2eb4befff4b06a13e2f4f00075ca1db2d056f passed all seven Windows jobs and every step, Node 1748/1748, frontend 746/746, progress 20/20, all four controlled Preview enhancement regressions, cancellation 22/22, task/request/export 16/31/41 and browser 11/11 plus 38/38. Digest-checked exact-commit WebView and final closeout artifacts passed all eight import-chain scenarios and four six-check render snapshots, including the previously failing file/both path. The old failure had no per-check snapshot, so its precise missing predicate or sole cause is not retroactively confirmed. R14.5 is formally accepted; both failed attempts and their repairs are preserved. This closeout changes documentation only; all 45 current fingerprints, production, tests, workflow and historical acceptance remain unchanged. 14.6 is not started; rendered-format findings and new A10 low-risk disposition remain open. R14.5 documentation closeout 45bcdd14debf2ab030df66f44e6588d29915a440 passed all seven Windows jobs and steps in run37931528219. User requested finish05/start06. R14.6 replaces the complete classic body builder with a public scoped Document Builder, synchronized readonly Preview capture, explicit model snapshot fallback and safe DOM materialization. All HTML/Word/PDF/Image body callers migrate; cancellation, stale document/version/reset, errors and independent frame disposal are covered by new contracts and actual built-app probes. Historical findings and tests retain purpose with explicit new behavior mappings. F01/F02 and remaining F04 enhancer/print/image gaps plus A10 remain received; no complete enhanced-format acceptance is claimed. Current source coverage grows from45 to47 with old paths retained and changed fingerprints preserved separately. R14.6 awaits its own exact-commit Windows admission; 14.7 has not started. R14.6 first attempt ccef6988/run37935424278 failed only three built-app scenes and consequential closeout; all1771 recursive Node tests,766 frontend tests,20 builder contracts and five other Windows jobs passed. Source review confirms the missing escapeHtml title binding masked by the VM and the opaque-origin/page-only built-app asset host, so repair owns title escaping, removes VM injection and uses an actual same-origin loopback server with retained failure artifacts. All old scenarios and current47 risk paths remain; only the export caller fingerprint changes. New Windows admission is pending; R14.6 is not accepted. R14.6 second attempt4d5831e/run37943920538 passed all prior three export failures, including18 actual text downloads,137 ordered long paragraphs without a full snapshot,138 actual Worker blocks in48/96/138 batches and first-batch cancellation followed by a complete next build. Recursive Node1776/1776, frontend771/771, export43/43 and builder20/20 passed; only two cumulative theme probes failed and closeout correctly blocked. Actual classic Settings listener applies hybrid layout on theme-only events, clearing the populated Preview; missing finally cleanup leaves dark theme for the second probe. Repair makes legacy effects depend on changed fields, retains original identity assertions and adds actual-listener regressions plus native Preview readiness and finally cleanup. All47 current risk paths and past acceptance/failures remain; only core.js fingerprint changes. Separate existing Editor metrics console error is recorded open, outside this confirmed theme/Builder failure chain. R14.6 remains unaccepted. R14.6 third attempt a3dadd6/run37955921182 passed browser11/11 plus39/39, export43/43, builder20/20 and production build. All prior real export and theme failures pass. One added Settings test uses unsupported en-US instead of canonical en, causing Settings4/5, frontend775/776 and recursive1780/1781; closeout correctly blocks. Only its input and expected stored locale change to en. Production, workflow, all47 fingerprints and assertions are preserved; R14.6 remains unaccepted and14.7 not started. R14.6 accepted at1f49956/run37958151064: all seven Windows jobs/steps pass, Node1781/1781, frontend776/776, builder20/20, Settings5/5, export43/43 and browser11/11 plus39/39. Digest-checked closeout and frontend archives match the exact commit and all47 current source fingerprints; native Worker long-body/no-snapshot/cancel recovery and theme identities pass. All three failures/repairs remain. Documentation-only acceptance update; 14.7 not started and received format/A10/Editor findings remain open.",
-    "priorImplementationWindowsRun": 37660954894,
+    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open. Run 37824900026 at 0e09d62ec545d7d70d33d67175b1c9fbe4b31c70 passed cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; WebView, native and dependency jobs passed. The safe-writer targeted step failed 17/18 because parallel test fixtures used the same PID and clock value, causing Windows AlreadyExists before any write. Later full Rust success does not supersede the failed step; closeout correctly rejected the commit. Only the test fixture allocator now adds an atomic sequence and bounded exclusive-create collision handling. The retained concurrent-save scenario forces a shared clock value and a pre-existing directory, checks isolation and ownership, then runs the original eight actual writes. All 18 scenarios, production fingerprints, workflow gates and historical acceptance remain unchanged. R14.4 awaits revalidation; 14.5 is not started. Run 37883007228 at e050ff4bb1e5f78e960344031d229cba336e8662 passed the safe-writer 18/18 including forced equal-clock fixture ownership, full Rust 269 plus integration 5/1/6, Clippy/check, cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; other independent Windows jobs passed. Only the Rust formatting step failed on two new assertion layouts, repeated in the formatter log by module traversal. Closeout correctly rejected it. Current repair exactly applies the complete CI rustfmt diff; source is identical after removing whitespace. Local formatter runtime is incomplete, so full formatter and cumulative Windows admission remain pending; historical acceptance and all production fingerprints are unchanged. Run 37886068643 at f631d2639b811ab6db071c08edf26fcbb75c59ce passed all seven Windows jobs and every step, including safe-writer 18/18, Rust format, cancellation 22/22, Node 1724/1724, frontend 726/726 and actual browser 11/11 plus 37/37. R14.4 is accepted; both failed attempts and test-only repairs remain recorded. User requested R14.5. Current review covers the readonly Progress Store over one task authority, safe text-only DOM view, direct ModalShell focus/visibility, guarded cancellation button, end-state reset and independent pagehide cleanup. Classic progress subscription, inline cancel global and compatibility progress registration are removed. Existing cancellation/task/characterization scenarios are retained through the real new store/view composition; a test-only ModalShell fault adapter preserves open/close error injection. Rendered format findings and A10 remain open; R14.5 awaits its own exact-commit Windows validation. Run 37890617533 at 2bbd7733b9c14b4639cf64bde04c21840a7b449d passed progress 20/20, cancellation 22/22, task 16/16, request 31/31, characterization 41/41, browser 11/11 plus 38/38 and Rust/native/WebView/dependency jobs. Node 1743/1744 and frontend 745/746 failed solely because the Stage 1 current-baseline assertion still expected 33 inline handlers after the progress handler was removed, leaving 32. Closeout correctly blocked it. Repair replaces that stale total with exact path/attribute/handler/count equality and explicit retired-handler proof; all historical handoff and product scenarios, production fingerprints and admission gates remain unchanged. R14.5 remains pending; 14.6 is not started. Run 37897676407 at 2dbfc2ba3117d1924cceca40d4dd57e04078265a validated the Stage 1 repair: Node 1744/1744, frontend 746/746, progress 20/20, existing 22/16/31/41 scenarios and browser 11/11 plus 38/38 passed. Rust/native/dependency jobs succeeded. Only actual WebView file/both rendering timed out; closeout correctly failed. The old artifact lacked per-check DOM failure diagnostics, so the precise missing content and causal link remain unknown. Source review identified a deterministic interrupted-enhancement gap during unchanged DOM reuse: cancelled queued math and busy Mermaid were not re-enqueued. This repair captures prior pending/running state and schedules current-generation jobs for reused nodes, with settled reuse and cancellation ownership preserved. Four controlled regression scenarios and retained hard checks plus partial-state/failure screenshot diagnostics await Windows execution. Current review adds the changed Preview engine fingerprint; All prior 44 paths remain covered, 43 hashes are unchanged and the changed import probe hash is updated with its prior value retained; historical acceptance is preserved. R14.5 is pending; 14.6 is not started. Run 37929409192 at 11d2eb4befff4b06a13e2f4f00075ca1db2d056f passed all seven Windows jobs and every step, Node 1748/1748, frontend 746/746, progress 20/20, all four controlled Preview enhancement regressions, cancellation 22/22, task/request/export 16/31/41 and browser 11/11 plus 38/38. Digest-checked exact-commit WebView and final closeout artifacts passed all eight import-chain scenarios and four six-check render snapshots, including the previously failing file/both path. The old failure had no per-check snapshot, so its precise missing predicate or sole cause is not retroactively confirmed. R14.5 is formally accepted; both failed attempts and their repairs are preserved. This closeout changes documentation only; all 45 current fingerprints, production, tests, workflow and historical acceptance remain unchanged. 14.6 is not started; rendered-format findings and new A10 low-risk disposition remain open. R14.5 documentation closeout 45bcdd14debf2ab030df66f44e6588d29915a440 passed all seven Windows jobs and steps in run37931528219. User requested finish05/start06. R14.6 replaces the complete classic body builder with a public scoped Document Builder, synchronized readonly Preview capture, explicit model snapshot fallback and safe DOM materialization. All HTML/Word/PDF/Image body callers migrate; cancellation, stale document/version/reset, errors and independent frame disposal are covered by new contracts and actual built-app probes. Historical findings and tests retain purpose with explicit new behavior mappings. F01/F02 and remaining F04 enhancer/print/image gaps plus A10 remain received; no complete enhanced-format acceptance is claimed. Current source coverage grows from45 to47 with old paths retained and changed fingerprints preserved separately. R14.6 awaits its own exact-commit Windows admission; 14.7 has not started. R14.6 first attempt ccef6988/run37935424278 failed only three built-app scenes and consequential closeout; all1771 recursive Node tests,766 frontend tests,20 builder contracts and five other Windows jobs passed. Source review confirms the missing escapeHtml title binding masked by the VM and the opaque-origin/page-only built-app asset host, so repair owns title escaping, removes VM injection and uses an actual same-origin loopback server with retained failure artifacts. All old scenarios and current47 risk paths remain; only the export caller fingerprint changes. New Windows admission is pending; R14.6 is not accepted. R14.6 second attempt4d5831e/run37943920538 passed all prior three export failures, including18 actual text downloads,137 ordered long paragraphs without a full snapshot,138 actual Worker blocks in48/96/138 batches and first-batch cancellation followed by a complete next build. Recursive Node1776/1776, frontend771/771, export43/43 and builder20/20 passed; only two cumulative theme probes failed and closeout correctly blocked. Actual classic Settings listener applies hybrid layout on theme-only events, clearing the populated Preview; missing finally cleanup leaves dark theme for the second probe. Repair makes legacy effects depend on changed fields, retains original identity assertions and adds actual-listener regressions plus native Preview readiness and finally cleanup. All47 current risk paths and past acceptance/failures remain; only core.js fingerprint changes. Separate existing Editor metrics console error is recorded open, outside this confirmed theme/Builder failure chain. R14.6 remains unaccepted. R14.6 third attempt a3dadd6/run37955921182 passed browser11/11 plus39/39, export43/43, builder20/20 and production build. All prior real export and theme failures pass. One added Settings test uses unsupported en-US instead of canonical en, causing Settings4/5, frontend775/776 and recursive1780/1781; closeout correctly blocks. Only its input and expected stored locale change to en. Production, workflow, all47 fingerprints and assertions are preserved; R14.6 remains unaccepted and14.7 not started. R14.6 accepted at1f49956/run37958151064: all seven Windows jobs/steps pass, Node1781/1781, frontend776/776, builder20/20, Settings5/5, export43/43 and browser11/11 plus39/39. Digest-checked closeout and frontend archives match the exact commit and all47 current source fingerprints; native Worker long-body/no-snapshot/cancel recovery and theme identities pass. All three failures/repairs remain. Documentation-only acceptance update; 14.7 not started and received format/A10/Editor findings remain open. R14.6 documentation closeout atf8d2312/run37961049857 passed all seven jobs and every execution step; formal implementation acceptance stays1f49956. User requested finish06/start07. R14.7 routes all four rendered formats through public batched task/code/math/Mermaid enhancement and removes retired enhancement globals. Builder owns immutable origin context; enhancement guards document/version, task/body replacement and independent disposal, rejecting late Mermaid commits. Separately reviewed A10 compatibility patch pins KaTeX0.18.2 with a transitive override; Mermaid11.16.1 and every other lock package stay unchanged, metadata npm audit reports zero advisories. Public math wrapper rejects inherited trust. All original fixtures, scenario purposes and historical acceptance/failures remain. Current risk coverage grows47 to49, six prior fingerprints recorded separately. Actual renderer/security/export and cumulative Windows evidence is pending, so14.7 and A10 final format closure are not accepted;14.8 not started.",
+    "priorImplementationWindowsRun": 37740940984,
     "priorImplementationWindowsJobs": {
       "webview-baseline": "success",
       "rust": "success",
@@ -585,17 +593,232 @@
       "frontend": "failure",
       "closeout": "failure"
     },
-    "implementationWindowsRun": 37740940984,
-    "implementationWindowsJobs": {
-      "webview-baseline": "success",
-      "rust": "success",
-      "native-boundary": "success",
-      "dependency-advisories": "success",
-      "repository-tests": "failure",
-      "frontend": "failure",
-      "closeout": "failure"
-    },
+    "implementationWindowsRun": null,
+    "implementationWindowsJobs": [],
     "currentStageAcceptance": {
+      "stage": "R14.6",
+      "commit": "1f49956e3df45726f96b582084c3456c44ddc901",
+      "run": 37958151064,
+      "status": "accepted",
+      "windowsJobsPassed": 7,
+      "allExecutionStepsPassed": true,
+      "record": "docs/R14-06-DETAILS.md",
+      "nodeTestsPassed": 1781,
+      "nodeTestDirectories": 16,
+      "nodeTestFiles": 330,
+      "frontendTestsPassed": 776,
+      "targetedExportTestsPassed": 43,
+      "targetedRequestTestsPassed": 31,
+      "targetedTaskTestsPassed": 16,
+      "targetedCancellationTestsPassed": 22,
+      "targetedProgressTestsPassed": 20,
+      "documentBuilderTestsPassed": 20,
+      "settingsEffectsTestsPassed": 5,
+      "contractBrowserPassed": 11,
+      "builtAppBrowserPassed": 39,
+      "rustTestsPassed": 281,
+      "importChainScenariosPassed": 8,
+      "closeoutArtifactId": 11631111653,
+      "closeoutArtifactDigest": "sha256:73531985528d0b0833833869f7e104c995cd14123e5f9725cbea9b6d332bed56",
+      "frontendArtifactId": 11630665511,
+      "frontendArtifactDigest": "sha256:dc4907908c92f1957bca8bc6d158563bf016554560a7490245b55c2541e7f126",
+      "artifactDigestsChecked": true,
+      "jobIds": {
+        "dependency-advisories": 113913838388,
+        "native-boundary": 113913838612,
+        "webview-baseline": 113913838711,
+        "repository-tests": 113913838731,
+        "frontend": 113913838788,
+        "rust": 113913838990,
+        "closeout": 113916914591
+      },
+      "actualBrowserEvidence": {
+        "textDownloads": 18,
+        "longParagraphsOrdered": 137,
+        "longDocumentCharacters": 413096,
+        "workerBlockProgress": [
+          48,
+          96,
+          138
+        ],
+        "fullSnapshotReasons": [],
+        "workerAssetHttpStatus": 200,
+        "firstBatchCancelled": true,
+        "taskReleased": true,
+        "nextBuildParagraphs": 137,
+        "themeToggleAndServiceIdentityChecksPassed": true
+      },
+      "scope": "Public Document Builder, synchronized readonly Preview capture, complete detached body, guarded fallback, cancellation/stale/disposal and cumulative Settings effects accepted. All three failed attempts and repairs retained. F01/F02, complete rendered formats, remaining F04 enhancer/print/image, A10 new low-risk disposition and separately observed Editor metrics issue remain open. 14.7 not started.",
+      "closeoutRevalidation": {
+        "commit": "f8d2312534e0487868a9cba034e882ba78318dce",
+        "run": 37961049857,
+        "attempt": 1,
+        "conclusion": "success",
+        "windowsJobsPassed": 7,
+        "allExecutionStepsPassed": true,
+        "jobIds": {
+          "dependency-advisories": 113923667307,
+          "rust": 113923667715,
+          "repository-tests": 113923667846,
+          "native-boundary": 113923667848,
+          "frontend": 113923667885,
+          "webview-baseline": 113923667912,
+          "closeout": 113926800431
+        },
+        "evidence": "Exact run head, seven job conclusions and every executed step checked; implementation acceptance remains1f49956/run37958151064."
+      }
+    },
+    "currentStageImplementation": {
+      "stage": "R14.7",
+      "baselineCommit": "f8d2312534e0487868a9cba034e882ba78318dce",
+      "branch": "agent/r14-stage",
+      "status": "implemented-pending-windows",
+      "record": "docs/R14-07-DETAILS.md",
+      "productionChanged": true,
+      "scope": "Complete Builder body enhanced via public task-list/code/math/Mermaid presentation,18-node batches, immutable original document ID/version, cancellable waits, detached Mermaid staging, per-body supersession and independent/pagehide disposal. All HTML/Word/PDF/Image callers migrated, old enhancement function and retired bindings removed.",
+      "priorStageCloseout": {
+        "commit": "f8d2312534e0487868a9cba034e882ba78318dce",
+        "run": 37961049857,
+        "attempt": 1,
+        "conclusion": "success",
+        "windowsJobsPassed": 7,
+        "allExecutionStepsPassed": true,
+        "jobIds": {
+          "dependency-advisories": 113923667307,
+          "rust": 113923667715,
+          "repository-tests": 113923667846,
+          "native-boundary": 113923667848,
+          "frontend": 113923667885,
+          "webview-baseline": 113923667912,
+          "closeout": 113926800431
+        },
+        "evidence": "Exact run head, seven job conclusions and every executed step checked; implementation acceptance remains1f49956/run37958151064."
+      },
+      "remainingFindings": [
+        "R14-F01-complete-offline-format",
+        "R14-F02",
+        "R14-F03-complete-output",
+        "R14-F04-print-image-lifecycle",
+        "A10-final-offline-format-validation"
+      ],
+      "changedSourceFingerprints": [
+        {
+          "path": "src/main.js",
+          "priorBlobSha": "7949ab054072f5d9bbb564d20792d2a723b85abb",
+          "blobSha": "bd9d3c6ba063840421c5c694ed823e8026fb0e91"
+        },
+        {
+          "path": "src/features/preview/render/presentation/math-presentation.js",
+          "priorBlobSha": "932f2bf8e0c2942b202aeeb74bd765e3aecb8275",
+          "blobSha": "ff6713c454f5073075c92350f3f72948769d57aa"
+        },
+        {
+          "path": "public/app/export.js",
+          "priorBlobSha": "1f8f661f352a20c3a9bb3a3d5a15ffb1c7299a84",
+          "blobSha": "7811338c1dbf2846613e0e631de4e6f8619c0240"
+        },
+        {
+          "path": "src/features/export/index.js",
+          "priorBlobSha": "8b177e3ff6b9aa723b308c19c84fb86d80511991",
+          "blobSha": "b436338bb9d378679d74e209dd16b2405ba04002"
+        },
+        {
+          "path": "src/features/export/document/export-document-builder.js",
+          "priorBlobSha": "ef37a131b489bfd173def61f3a0a8f40bed4823a",
+          "blobSha": "a45e5b9b34b077f318f5a121059f729085a8d62e"
+        },
+        {
+          "path": "src/features/export/compatibility/classic-export-document-port.js",
+          "priorBlobSha": "fd9481fff51e72df3eb79153ba8bc154e1de5466",
+          "blobSha": "69295036335591ebe9332bb2954e517d240d6a0d"
+        }
+      ],
+      "newReviewedSources": [
+        "src/features/export/document/export-preview-enhancer.js",
+        "src/features/export/compatibility/classic-export-enhancement-port.js"
+      ],
+      "newEnhancementScenariosDefined": 27,
+      "newRendererSecurityScenariosDefined": 6,
+      "newBuilderOriginScenariosDefined": 1,
+      "retainedTargetedScenarios": [
+        43,
+        31,
+        16,
+        22,
+        20
+      ],
+      "documentBuilderScenariosDefined": 21,
+      "settingsScenariosRetained": 5,
+      "builtAppScenariosRetained": 39,
+      "newBuiltAppScenariosDefined": 3,
+      "builtAppScenariosDefined": 42,
+      "compatibilityMapping": "Immutable R14-01 fixtures retained. Original text exports retain all18 names/MIME/source/download checks and now require actual KaTeX/task/code/SVG bodies; original PDF/Image failure scenario now requires actual enhanced print DOM, afterprint restoration and real decoded PNG. VM calls actual Builder/Enhancer but vendor doubles prove orchestration only. Original cancellation scenarios move to the public enhancer without injecting retired names. F02 offline template and later print/image disposal retain explicit receivers.",
+      "a10Disposition": {
+        "advisory": "GHSA-238p-pmpm-9mq7",
+        "decision": "targeted-compatibility-safety-patch-with-mandatory-windows-regression",
+        "priorKaTeX": "0.16.47",
+        "fixedKaTeX": "0.18.2",
+        "override": "$katex",
+        "mermaidUnchanged": "11.16.1",
+        "otherLockPackagesUnchanged": true,
+        "publicMathTrust": "own property equal to true only",
+        "metadataAuditVulnerabilities": 0,
+        "apiReview": "Context7 plus official0.18.2 package exports/default/auto-render and rendering options checked;Commander^8.3.0 unchanged;no added support runtime/MSRV/platform requirements.0.x compatibility still requires actual regressions.",
+        "status": "implemented-pending-exact-commit-windows-not-final-format-closure",
+        "requiredWindowsEvidence": "Real engine inherited trust/settings/macro tests, actual canonical math and Mermaid bodies, Preview/Hybrid contracts, real PNG and printing preparation, all cumulative seven jobs.",
+        "laterReceivers": [
+          "14.10",
+          "14.11",
+          "14.12",
+          "14.16"
+        ],
+        "npmLockSha256": "9a551677548f3f96338d392caf6237c980da2e35babf26dbb09ffe32074a64b9"
+      },
+      "additionalObservedIssues": [
+        {
+          "path": "public/app/events.js",
+          "message": "scheduleEditorMetricsRebuild is not defined",
+          "status": "observed-open-separate-Editor-UI-compatibility-follow-up",
+          "source": "37943920538 frontend browser-artifacts/built-app-diagnostics.json",
+          "note": "Interactive Editor listener reports this unrelated pre-existing error; it is not either theme assertion or a Builder failure and is not repaired or claimed closed in this task."
+        }
+      ],
+      "staticReview": {
+        "status": "passed",
+        "architectureAndDocumentationGatesPassed": 4,
+        "changedJavaScriptSyntaxChecked": 16,
+        "embeddedBrowserExpressionsSyntaxChecked": 16,
+        "relativeLinksChecked": 111,
+        "reviewedSources": 49,
+        "changedFingerprints": 6,
+        "newSources": 2,
+        "frozenFilesUnchanged": 9,
+        "immutableFixturesUnchanged": 2,
+        "lockPackagesChanged": [
+          "",
+          "node_modules/katex"
+        ],
+        "historyPreserved": true,
+        "workflowJobs": 7,
+        "retainedTargetedScenarios": [
+          43,
+          31,
+          16,
+          22,
+          20
+        ],
+        "newEnhancementScenariosDefined": 27,
+        "newRendererSecurityScenariosDefined": 6,
+        "newBuilderOriginScenariosDefined": 1,
+        "localProductTestsOrBuildsRun": false,
+        "windowsValidation": "pending"
+      },
+      "tools": {
+        "Context7": "Resolved real KaTeX/Mermaid libraries and queried separate API/security questions;checked actual0.18.2 release/package metadata against returned general docs.",
+        "MermaidChart": "Displayed actual Chinese Builder/enhancement/four-format/token/version/pagehide flow."
+      }
+    },
+    "priorStageAcceptance": {
       "stage": "R14.6",
       "commit": "1f49956e3df45726f96b582084c3456c44ddc901",
       "run": 37958151064,
@@ -650,7 +873,7 @@
       },
       "scope": "Public Document Builder, synchronized readonly Preview capture, complete detached body, guarded fallback, cancellation/stale/disposal and cumulative Settings effects accepted. All three failed attempts and repairs retained. F01/F02, complete rendered formats, remaining F04 enhancer/print/image, A10 new low-risk disposition and separately observed Editor metrics issue remain open. 14.7 not started."
     },
-    "currentStageImplementation": {
+    "priorStageImplementation": {
       "stage": "R14.6",
       "baselineCommit": "45bcdd14debf2ab030df66f44e6588d29915a440",
       "branch": "agent/r14-stage",
@@ -1239,135 +1462,25 @@
         "windowsValidation": "accepted implementation at1f49956; documentation revalidation pending",
         "architectureAndDocumentationGatesPassed": 4,
         "relativeLinksChecked": 113
-      }
-    },
-    "priorStageAcceptance": {
-      "stage": "R14.5",
-      "commit": "11d2eb4befff4b06a13e2f4f00075ca1db2d056f",
-      "run": 37929409192,
-      "status": "accepted",
-      "windowsJobsPassed": 7,
-      "allExecutionStepsPassed": true,
-      "record": "docs/R14-05-DETAILS.md",
-      "nodeTestsPassed": 1748,
-      "nodeTestDirectories": 16,
-      "frontendTestsPassed": 746,
-      "targetedExportTestsPassed": 41,
-      "targetedRequestTestsPassed": 31,
-      "targetedTaskTestsPassed": 16,
-      "targetedCancellationTestsPassed": 22,
-      "targetedProgressTestsPassed": 20,
-      "previewEnhancementRaceTestsPassed": 4,
-      "safeWriterTestsPassed": 18,
-      "rustUnitTestsPassed": 269,
-      "rustIntegrationTestsPassed": [
-        5,
-        1,
-        6
-      ],
-      "rustfmtPassed": true,
-      "clippyPassed": true,
-      "cargoCheckPassed": true,
-      "contractBrowserPassed": 11,
-      "builtAppBrowserPassed": 38,
-      "importChainScenariosPassed": 8,
-      "importRenderCheckSetsPassed": 4,
-      "closeoutArtifactId": 11616041430,
-      "closeoutArtifactDigest": "sha256:85e9bf1dce20377de340a93d353948f35cb5e779c978bd3b3ba44144264864d4",
-      "webviewArtifactId": 11615926993,
-      "webviewArtifactDigest": "sha256:f3336036ae218e6bfd5adf3f8f177c05b9c1370144b8fe256bb7dcf023ad95b3",
-      "scope": "Readonly Progress Store, independent ModalShell view, guarded cancel, terminal reset/disposal and interrupted Preview enhancement repair accepted. Prior file/both timeout specific cause remains unconfirmed; rendered-format findings and A10 stay open. 14.6 not started.",
-      "jobIds": {
-        "native-boundary": 113816147444,
-        "webview-baseline": 113816147566,
-        "rust": 113816147598,
-        "frontend": 113816147622,
-        "repository-tests": 113816147639,
-        "dependency-advisories": 113816147655,
-        "closeout": 113819220874
       },
       "closeoutRevalidation": {
-        "commit": "45bcdd14debf2ab030df66f44e6588d29915a440",
-        "run": 37931528219,
-        "status": "accepted",
+        "commit": "f8d2312534e0487868a9cba034e882ba78318dce",
+        "run": 37961049857,
+        "attempt": 1,
+        "conclusion": "success",
         "windowsJobsPassed": 7,
         "allExecutionStepsPassed": true,
         "jobIds": {
-          "rust": 113823173909,
-          "repository-tests": 113823174251,
-          "dependency-advisories": 113823174267,
-          "webview-baseline": 113823174282,
-          "native-boundary": 113823174350,
-          "frontend": 113823174370,
-          "closeout": 113825272230
+          "dependency-advisories": 113923667307,
+          "rust": 113923667715,
+          "repository-tests": 113923667846,
+          "native-boundary": 113923667848,
+          "frontend": 113923667885,
+          "webview-baseline": 113923667912,
+          "closeout": 113926800431
         },
-        "closeoutArtifactId": 11617076306,
-        "closeoutArtifactDigest": "sha256:d6d8f24af8a0add0868f21f541aea6841127050957c8c81239a8bcf947737dfe",
-        "webviewArtifactId": 11616821617,
-        "webviewArtifactDigest": "sha256:a41417d610b0ad08f07a5b30c23a82f75bc2af09f7cd426c05fd3f63bc1c8ea4",
-        "evidence": "GitHub run, seven jobs and every execution step checked; artifact digests listed in GitHub metadata. Formal R14.5 implementation acceptance and digest-checked evidence remain at 11d2eb4/run37929409192."
+        "evidence": "Exact run head, seven job conclusions and every executed step checked; implementation acceptance remains1f49956/run37958151064."
       }
-    },
-    "priorStageImplementation": {
-      "stage": "R14.1",
-      "baselineCommit": "4340398e220e729ae7c5912cbdfbc20513031ce4",
-      "branch": "agent/r14-stage",
-      "status": "contract-repair-pending-windows",
-      "record": "docs/R14-01-DETAILS.md",
-      "productionChanged": false,
-      "remainingFindings": [
-        "R14-F01",
-        "R14-F02",
-        "R14-F03",
-        "R14-F04",
-        "A10"
-      ],
-      "advanceBasis": "User explicitly requested R14-01 after accepting R13.14; only characterization begins. No risk is marked fixed or exempted.",
-      "a10Deadline": "Before 14.7 enhancement migration acceptance; complete HTML/Word/PDF/Image chain in 14.10/14.11/14.12/14.16 and no open finding at R14 closure.",
-      "lastWindowsAttempt": {
-        "commit": "734ca2c193534a8b4fae47ccf867d81929cce039",
-        "run": 37799043386,
-        "status": "failure",
-        "jobs": {
-          "dependency-advisories": "success",
-          "repository-tests": "failure",
-          "rust": "failure",
-          "frontend": "failure",
-          "webview-baseline": "success",
-          "native-boundary": "success",
-          "closeout": "failure"
-        },
-        "recursiveNode": {
-          "tests": 1655,
-          "passed": 1639,
-          "failed": 16,
-          "directories": 16
-        },
-        "frontend": {
-          "tests": 657,
-          "passed": 641,
-          "failed": 16
-        },
-        "targetedExport": {
-          "tests": 41,
-          "passed": 39,
-          "failed": 2
-        },
-        "contractBrowserPassed": 11,
-        "builtAppBrowserPassed": 33,
-        "newExportBrowserProbesPassed": 4,
-        "failureClasses": [
-          {
-            "cause": "Fourteen R12 cumulative workflow assertions still required the previous R13 automatic branch.",
-            "count": 14
-          },
-          {
-            "cause": "Two Markdown fixtures confused desktop dialog preferred names with browser download names.",
-            "count": 2
-          }
-        ]
-      },
-      "contractRepair": "All fourteen branch assertions now require agent/r14-stage while retaining ownership, manual historical workflow and cumulative hard gates. Six explicit markdownDialogPreferredName values record exporter dialog-port inputs separately from unchanged browser names. No tests are skipped; product sources, browser probes, VM host, dependencies, historical acceptance and reviewedSources remain unchanged. Awaiting exact-commit Windows revalidation; R14.1 is not accepted and 14.2 is not started."
     },
     "stageAcceptanceHistory": [
       {
@@ -1541,6 +1654,61 @@
           "webviewArtifactDigest": "sha256:a41417d610b0ad08f07a5b30c23a82f75bc2af09f7cd426c05fd3f63bc1c8ea4",
           "evidence": "GitHub run, seven jobs and every execution step checked; artifact digests listed in GitHub metadata. Formal R14.5 implementation acceptance and digest-checked evidence remain at 11d2eb4/run37929409192."
         }
+      },
+      {
+        "stage": "R14.6",
+        "commit": "1f49956e3df45726f96b582084c3456c44ddc901",
+        "run": 37958151064,
+        "status": "accepted",
+        "windowsJobsPassed": 7,
+        "allExecutionStepsPassed": true,
+        "record": "docs/R14-06-DETAILS.md",
+        "nodeTestsPassed": 1781,
+        "nodeTestDirectories": 16,
+        "nodeTestFiles": 330,
+        "frontendTestsPassed": 776,
+        "targetedExportTestsPassed": 43,
+        "targetedRequestTestsPassed": 31,
+        "targetedTaskTestsPassed": 16,
+        "targetedCancellationTestsPassed": 22,
+        "targetedProgressTestsPassed": 20,
+        "documentBuilderTestsPassed": 20,
+        "settingsEffectsTestsPassed": 5,
+        "contractBrowserPassed": 11,
+        "builtAppBrowserPassed": 39,
+        "rustTestsPassed": 281,
+        "importChainScenariosPassed": 8,
+        "closeoutArtifactId": 11631111653,
+        "closeoutArtifactDigest": "sha256:73531985528d0b0833833869f7e104c995cd14123e5f9725cbea9b6d332bed56",
+        "frontendArtifactId": 11630665511,
+        "frontendArtifactDigest": "sha256:dc4907908c92f1957bca8bc6d158563bf016554560a7490245b55c2541e7f126",
+        "artifactDigestsChecked": true,
+        "jobIds": {
+          "dependency-advisories": 113913838388,
+          "native-boundary": 113913838612,
+          "webview-baseline": 113913838711,
+          "repository-tests": 113913838731,
+          "frontend": 113913838788,
+          "rust": 113913838990,
+          "closeout": 113916914591
+        },
+        "actualBrowserEvidence": {
+          "textDownloads": 18,
+          "longParagraphsOrdered": 137,
+          "longDocumentCharacters": 413096,
+          "workerBlockProgress": [
+            48,
+            96,
+            138
+          ],
+          "fullSnapshotReasons": [],
+          "workerAssetHttpStatus": 200,
+          "firstBatchCancelled": true,
+          "taskReleased": true,
+          "nextBuildParagraphs": 137,
+          "themeToggleAndServiceIdentityChecksPassed": true
+        },
+        "scope": "Public Document Builder, synchronized readonly Preview capture, complete detached body, guarded fallback, cancellation/stale/disposal and cumulative Settings effects accepted. All three failed attempts and repairs retained. F01/F02, complete rendered formats, remaining F04 enhancer/print/image, A10 new low-risk disposition and separately observed Editor metrics issue remain open. 14.7 not started."
       }
     ],
     "stageImplementationHistory": [
@@ -1960,6 +2128,615 @@
         },
         "acceptedCommit": "11d2eb4befff4b06a13e2f4f00075ca1db2d056f",
         "acceptedRun": 37929409192
+      },
+      {
+        "stage": "R14.6",
+        "baselineCommit": "45bcdd14debf2ab030df66f44e6588d29915a440",
+        "branch": "agent/r14-stage",
+        "status": "accepted",
+        "record": "docs/R14-06-DETAILS.md",
+        "productionChanged": true,
+        "scope": "Complete detached body builder and all four rendered-format callers migrated. Prefer readonly synchronized Preview blocks with 96/48 frame batches, otherwise explicit full-preview-export model snapshot, protected Markdown and safe DOM materialization. Guard document identity/version, task invalidation and reset/destroy. No Worker globals, hidden editor value read, duplicated task state or old builder fallback.",
+        "remainingFindings": [
+          "R14-F01",
+          "R14-F02",
+          "R14-F03-complete-output",
+          "R14-F04-enhancer-print-image",
+          "A10"
+        ],
+        "a10Deadline": "Before 14.7 acceptance; complete offline format chains before R14 closure.",
+        "newDocumentBuilderScenariosDefined": 20,
+        "newPreviewCaptureScenariosDefined": 3,
+        "retainedTargetedScenarios": [
+          41,
+          31,
+          16,
+          22,
+          20
+        ],
+        "changedSourceFingerprints": [
+          {
+            "path": "src/main.js",
+            "priorBlobSha": "568c5ea6c0e5f2cc4ab075a3b1d09c40733f0bd8",
+            "blobSha": "7949ab054072f5d9bbb564d20792d2a723b85abb"
+          },
+          {
+            "path": "public/app/export.js",
+            "priorBlobSha": "c2dbc2f2b0004ac7a8f8e083f09c9c73ffddb229",
+            "blobSha": "4e23a9a4c50ad0861ce270ca087b8441cfd3b5b5"
+          },
+          {
+            "path": "src/features/export/index.js",
+            "priorBlobSha": "4d0822bf4dd9a74cc3f1445459f45ab416fd4abd",
+            "blobSha": "8b177e3ff6b9aa723b308c19c84fb86d80511991"
+          },
+          {
+            "path": "src/features/preview/pipeline/preview-render-engine.js",
+            "priorBlobSha": "14be871ac9e19dd6b4d618d0edaa5905d2ca1dee",
+            "blobSha": "938ff541e630f3bcb01df3da06101a81942f563c"
+          }
+        ],
+        "newReviewedSources": [
+          "src/features/export/document/export-document-builder.js",
+          "src/features/export/compatibility/classic-export-document-port.js"
+        ],
+        "compatibilityMapping": "Immutable R14-01 contracts.json preserved. Actual HTML/Word must now emit complete unenhanced bodies; PDF/Image still fail at received enhancer/print globals. Long body must contain all ordered paragraphs and avoid a model snapshot. Scope does not claim enhanced or portable formats are complete.",
+        "staticReview": {
+          "architectureAndDocumentationGatesPassed": 4,
+          "changedJavaScriptSyntaxChecked": 11,
+          "embeddedBrowserExpressionsSyntaxChecked": 11,
+          "relativeLinksChecked": 110,
+          "currentSourceFingerprintsChecked": 47,
+          "retainedTargetedScenarios": [
+            41,
+            31,
+            16,
+            22,
+            20
+          ],
+          "newDocumentBuilderScenariosDefined": 20,
+          "newPreviewCaptureScenariosDefined": 3,
+          "historicalAcceptancePreserved": true,
+          "fixtureBytesUnchanged": true,
+          "localProductTestsOrBuildsRun": false,
+          "windowsValidation": "pending"
+        },
+        "windowsAttemptHistory": [
+          {
+            "commit": "ccef6988c079968407c61e949d024d93f31cb0f9",
+            "run": 37935424278,
+            "attempt": 1,
+            "conclusion": "failure",
+            "passedWindowsJobs": 5,
+            "totalWindowsJobs": 7,
+            "jobs": [
+              {
+                "id": 113836137674,
+                "name": "frontend",
+                "conclusion": "failure",
+                "directFailure": "Built-app browser regression"
+              },
+              {
+                "id": 113836138089,
+                "name": "webview-baseline",
+                "conclusion": "success"
+              },
+              {
+                "id": 113836138122,
+                "name": "dependency-advisories",
+                "conclusion": "success"
+              },
+              {
+                "id": 113836138125,
+                "name": "rust",
+                "conclusion": "success"
+              },
+              {
+                "id": 113836138252,
+                "name": "repository-tests",
+                "conclusion": "success"
+              },
+              {
+                "id": 113836138269,
+                "name": "native-boundary",
+                "conclusion": "success"
+              },
+              {
+                "id": 113839287680,
+                "name": "closeout",
+                "conclusion": "failure",
+                "directFailure": "Browser evidence failed: browser-app.log"
+              }
+            ],
+            "results": {
+              "recursiveNodePassed": 1771,
+              "recursiveNodeFailed": 0,
+              "frontendNodePassed": 766,
+              "frontendNodeFailed": 0,
+              "documentBuilderPassed": 20,
+              "documentBuilderFailed": 0,
+              "browserContractPassed": 11,
+              "browserAppPassed": 36,
+              "browserAppFailed": 3,
+              "productionBuild": "success"
+            },
+            "failedBrowserScenarios": [
+              "HTML emits no actual download on the first blank-name input; Word is not reached.",
+              "Long-document body is complete but uses full-preview-export instead of synchronized Worker blocks.",
+              "Long-document cancellation sees no block batch and returns an uncancelled body."
+            ],
+            "frontendArtifact": {
+              "id": 11618016915,
+              "sha256": "f9eb33fbdf8f4c2f45f6144e19dd832836a924bb7a5be7378e70d4e5dfa37108",
+              "digestChecked": true
+            },
+            "evidenceLimits": "Old artifact contains browser logs but no screenshot/probe JSON. Missing-download probe discards its captured underlying console error. Findings below are source-confirmed defects; the next same-commit Windows run must verify their effect on all three observed failures."
+          },
+          {
+            "commit": "4d5831e4c4c49e8f21abab3f11f4412c56c2c78a",
+            "run": 37943920538,
+            "attempt": 1,
+            "conclusion": "failure",
+            "passedWindowsJobs": 5,
+            "totalWindowsJobs": 7,
+            "jobs": [
+              {
+                "id": 113865116518,
+                "name": "frontend",
+                "conclusion": "failure",
+                "directFailure": "Built-app browser regression"
+              },
+              {
+                "id": 113865116600,
+                "name": "webview-baseline",
+                "conclusion": "success"
+              },
+              {
+                "id": 113865116305,
+                "name": "dependency-advisories",
+                "conclusion": "success"
+              },
+              {
+                "id": 113865116747,
+                "name": "rust",
+                "conclusion": "success"
+              },
+              {
+                "id": 113865116631,
+                "name": "repository-tests",
+                "conclusion": "success"
+              },
+              {
+                "id": 113865116558,
+                "name": "native-boundary",
+                "conclusion": "success"
+              },
+              {
+                "id": 113868500255,
+                "name": "closeout",
+                "conclusion": "failure",
+                "directFailure": "Browser evidence failed: browser-app.log"
+              }
+            ],
+            "results": {
+              "recursiveNodePassed": 1776,
+              "recursiveNodeFailed": 0,
+              "frontendNodePassed": 771,
+              "frontendNodeFailed": 0,
+              "documentBuilderPassed": 20,
+              "documentBuilderFailed": 0,
+              "exportCharacterizationPassed": 43,
+              "exportCharacterizationFailed": 0,
+              "browserContractPassed": 11,
+              "browserAppPassed": 37,
+              "browserAppFailed": 2,
+              "productionBuild": "success"
+            },
+            "failedBrowserScenarios": [
+              "Theme Toggle: all identities and stored dark theme pass except samePreviewFirst=false.",
+              "Theme Service: before.theme=dark rather than light after the failed prior toggle left its committed theme unrestored."
+            ],
+            "frontendArtifact": {
+              "id": 11622623114,
+              "sha256": "e4b029ad41c79c77797e7d6492413f0251ecaaa6c3338a7e1f5b2950eb79fd7f",
+              "digestChecked": true
+            },
+            "repairedPriorFailures": {
+              "actualTextDownloads": 18,
+              "textDownloadErrors": 0,
+              "retiredTitleBindingAbsent": true,
+              "longDocumentParagraphsOrdered": 137,
+              "longDocumentCharacters": 413096,
+              "workerBlocks": 138,
+              "firstBatches": [
+                48,
+                96,
+                138
+              ],
+              "fullSnapshotReasons": [],
+              "workerAssetHttpStatus": 200,
+              "cancellation": {
+                "cancelled": true,
+                "reason": "cancelled"
+              },
+              "cancelBatches": 1,
+              "taskReleased": true,
+              "nextBuildParagraphs": 137
+            },
+            "evidenceLimits": "Artifact includes actual probes, two failure screenshots, page console, exception list and native asset requests. Settings listener source unconditionally reapplies layout even for theme-only commits; hybrid presentation clears Preview. The second test exits at its initial theme check because the first test had no finally restoration. New exact-commit Windows validation remains required."
+          },
+          {
+            "commit": "a3dadd6a9e186be39e09ab101d426f5c0ab74b1f",
+            "run": 37955921182,
+            "attempt": 1,
+            "conclusion": "failure",
+            "passedWindowsJobs": 4,
+            "totalWindowsJobs": 7,
+            "results": {
+              "recursiveNodePassed": 1780,
+              "recursiveNodeFailed": 1,
+              "frontendNodePassed": 775,
+              "frontendNodeFailed": 1,
+              "settingsEffectsPassed": 4,
+              "settingsEffectsFailed": 1,
+              "documentBuilderPassed": 20,
+              "documentBuilderFailed": 0,
+              "exportCharacterizationPassed": 43,
+              "exportCharacterizationFailed": 0,
+              "browserContractPassed": 11,
+              "browserAppPassed": 39,
+              "browserAppFailed": 0,
+              "productionBuild": "success"
+            },
+            "directFailure": "Added Settings effects test commits unsupported language en-US; actual Locale Registry exposes en. Same test fails in dedicated, root and recursive Node runs. Autosave/export assertions later in this test were not reached.",
+            "frontendArtifact": {
+              "id": 11627663380,
+              "sha256": "7f3616d78bf400d9d8984b14eab199a997b1447776db7571b836489f3435c84e",
+              "digestChecked": false
+            },
+            "evidenceLimits": "Verified exact-commit jobs/steps and frontend/recursive job logs. Artifact metadata recorded only; ZIP not downloaded or internally inspected this turn.",
+            "jobs": [
+              {
+                "id": 113906292015,
+                "name": "Native opener compilation and linkage (windows-latest)",
+                "conclusion": "success",
+                "failedSteps": []
+              },
+              {
+                "id": 113906292119,
+                "name": "All repository Node tests (Windows)",
+                "conclusion": "failure",
+                "failedSteps": [
+                  "Run every tracked Node test including nested suites"
+                ]
+              },
+              {
+                "id": 113906292121,
+                "name": "HTML boundary baseline and frontend regression",
+                "conclusion": "failure",
+                "failedSteps": [
+                  "R14-06 cumulative Settings changes preserve theme-only Preview identity",
+                  "Full Node regression"
+                ]
+              },
+              {
+                "id": 113906292130,
+                "name": "Safe file writes and cumulative Rust hard gates",
+                "conclusion": "success",
+                "failedSteps": []
+              },
+              {
+                "id": 113906292139,
+                "name": "R12-23 official RustSec and Windows dependency graph",
+                "conclusion": "success",
+                "failedSteps": []
+              },
+              {
+                "id": 113906292877,
+                "name": "R13.13 real Windows WebView import chain and R12 security regression",
+                "conclusion": "success",
+                "failedSteps": []
+              },
+              {
+                "id": 113909008443,
+                "name": "R12-24 exact-commit Windows evidence and handoff",
+                "conclusion": "failure",
+                "failedSteps": [
+                  "Verify all cumulative jobs and actual same-commit evidence"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "1f49956e3df45726f96b582084c3456c44ddc901",
+            "run": 37958151064,
+            "attempt": 1,
+            "conclusion": "success",
+            "passedWindowsJobs": 7,
+            "totalWindowsJobs": 7,
+            "allExecutionStepsPassed": true,
+            "jobIds": {
+              "dependency-advisories": 113913838388,
+              "native-boundary": 113913838612,
+              "webview-baseline": 113913838711,
+              "repository-tests": 113913838731,
+              "frontend": 113913838788,
+              "rust": 113913838990,
+              "closeout": 113916914591
+            },
+            "results": {
+              "recursiveNodePassed": 1781,
+              "recursiveNodeFailed": 0,
+              "frontendNodePassed": 776,
+              "frontendNodeFailed": 0,
+              "settingsEffectsPassed": 5,
+              "settingsEffectsFailed": 0,
+              "documentBuilderPassed": 20,
+              "documentBuilderFailed": 0,
+              "exportCharacterizationPassed": 43,
+              "exportCharacterizationFailed": 0,
+              "browserContractPassed": 11,
+              "browserAppPassed": 39,
+              "browserAppFailed": 0,
+              "productionBuild": "success"
+            },
+            "frontendArtifact": {
+              "id": 11630665511,
+              "sha256": "dc4907908c92f1957bca8bc6d158563bf016554560a7490245b55c2541e7f126",
+              "digestChecked": true
+            },
+            "closeoutArtifact": {
+              "id": 11631111653,
+              "sha256": "73531985528d0b0833833869f7e104c995cd14123e5f9725cbea9b6d332bed56",
+              "digestChecked": true
+            },
+            "evidence": "Exact run head/jobs/steps, Node logs, digest-checked frontend probes and final accepted closeout with all47 fingerprints verified."
+          }
+        ],
+        "lastWindowsAttempt": {
+          "commit": "1f49956e3df45726f96b582084c3456c44ddc901",
+          "run": 37958151064,
+          "attempt": 1,
+          "conclusion": "success",
+          "passedWindowsJobs": 7,
+          "totalWindowsJobs": 7,
+          "allExecutionStepsPassed": true,
+          "jobIds": {
+            "dependency-advisories": 113913838388,
+            "native-boundary": 113913838612,
+            "webview-baseline": 113913838711,
+            "repository-tests": 113913838731,
+            "frontend": 113913838788,
+            "rust": 113913838990,
+            "closeout": 113916914591
+          },
+          "results": {
+            "recursiveNodePassed": 1781,
+            "recursiveNodeFailed": 0,
+            "frontendNodePassed": 776,
+            "frontendNodeFailed": 0,
+            "settingsEffectsPassed": 5,
+            "settingsEffectsFailed": 0,
+            "documentBuilderPassed": 20,
+            "documentBuilderFailed": 0,
+            "exportCharacterizationPassed": 43,
+            "exportCharacterizationFailed": 0,
+            "browserContractPassed": 11,
+            "browserAppPassed": 39,
+            "browserAppFailed": 0,
+            "productionBuild": "success"
+          },
+          "frontendArtifact": {
+            "id": 11630665511,
+            "sha256": "dc4907908c92f1957bca8bc6d158563bf016554560a7490245b55c2541e7f126",
+            "digestChecked": true
+          },
+          "closeoutArtifact": {
+            "id": 11631111653,
+            "sha256": "73531985528d0b0833833869f7e104c995cd14123e5f9725cbea9b6d332bed56",
+            "digestChecked": true
+          },
+          "evidence": "Exact run head/jobs/steps, Node logs, digest-checked frontend probes and final accepted closeout with all47 fingerprints verified."
+        },
+        "repair": {
+          "baselineCommit": "a3dadd6a9e186be39e09ab101d426f5c0ab74b1f",
+          "status": "accepted",
+          "productionChanged": false,
+          "productionScope": "None. Actual Settings locale schema/validation, classic effects, Builder, Preview and all47 current fingerprints unchanged.",
+          "testScope": "Correct only language input and expected stored value from en-US to canonical en in the existing fifth Settings-effects scenario. Preserve all five tests and autosave/export/Preview identity/zero-effect assertions. Browser and workflow unchanged.",
+          "sourceConfirmedDefects": [
+            "The new test used an unregistered locale; settings-schema.js validates against LOCALE_IDS and locale-registry.js explicitly registers en."
+          ],
+          "newScenariosDefined": 0,
+          "retainedSettingsScenarios": 5,
+          "staticReview": {
+            "localProductTestsOrBuildsRun": false,
+            "windowsValidation": "pending",
+            "architectureAndDocumentationGatesPassed": 4,
+            "changedJavaScriptSyntaxChecked": 1,
+            "relativeLinksChecked": 112,
+            "currentSourceFingerprintsChecked": 47,
+            "changedCurrentFingerprintCount": 0,
+            "historicalAcceptancePreserved": true,
+            "priorFailureAndRepairPreserved": true,
+            "fixtureProductionWorkflowAndBrowserBytesUnchanged": true,
+            "retainedSettingsScenarios": 5,
+            "builtAppScenariosRetained": 39
+          },
+          "windowsAcceptance": {
+            "commit": "1f49956e3df45726f96b582084c3456c44ddc901",
+            "run": 37958151064,
+            "settingsScenariosPassed": 5
+          }
+        },
+        "repairHistory": [
+          {
+            "baselineCommit": "ccef6988c079968407c61e949d024d93f31cb0f9",
+            "status": "implemented-pending-windows",
+            "productionScope": "HTML and Word use Export-owned title escaping; no retired Preview escapeHtml binding. Document Builder, Preview capture, model and Worker algorithms stay unchanged.",
+            "testScope": "Remove hidden escapeHtml injection from VM. Serve actual dist HTML/modules/Worker via one native loopback HTTP origin, with native browser storage and document-start preference setup. Preserve all 39 app scenarios and no-snapshot, 48/96 progress and cancel requirements. Add actual Worker asset 200 assertion, pre-assert probe writes and retained console/requests/screenshots.",
+            "newScenariosDefined": 5,
+            "characterizationScenariosDefined": 43,
+            "changedSourceFingerprints": [
+              {
+                "path": "public/app/export.js",
+                "priorBlobSha": "4e23a9a4c50ad0861ce270ca087b8441cfd3b5b5",
+                "blobSha": "1f8f661f352a20c3a9bb3a3d5a15ffb1c7299a84"
+              }
+            ],
+            "sourceConfirmedDefects": [
+              "HTML/Word title interpolation calls undefined escapeHtml; VM context injects the missing binding.",
+              "Built-app tests inject dist into opaque about:blank, dynamically importing modules from a synthetic HTTPS host served by page-only CDP Fetch; native Worker creation/loading lacks a same-origin real asset host."
+            ],
+            "staticReview": {
+              "localProductTestsOrBuildsRun": false,
+              "windowsValidation": "pending",
+              "architectureAndDocumentationGatesPassed": 4,
+              "changedJavaScriptSyntaxChecked": 7,
+              "embeddedBrowserExpressionsSyntaxChecked": 11,
+              "relativeLinksChecked": 110,
+              "currentSourceFingerprintsChecked": 47,
+              "changedCurrentFingerprintCount": 1,
+              "historicalAcceptancePreserved": true,
+              "fixtureBytesUnchanged": true,
+              "newScenariosDefined": 5,
+              "builtAppScenariosRetained": 39
+            },
+            "tools": {
+              "Context7": "Node.js 22 HTTP listen/address/close/closeAllConnections documentation checked.",
+              "MermaidChart": "Displayed actual Chinese HTTP-page/Worker/Builder/title/file-boundary and cancellation graph."
+            }
+          },
+          {
+            "baselineCommit": "4d5831e4c4c49e8f21abab3f11f4412c56c2c78a",
+            "status": "implemented-pending-windows",
+            "productionScope": "The actual classic committed-Settings listener applies sidebar only for sidebar changes, layout for layout/Preview-performance changes, and editor/toolbar preferences only for their changed fields. Theme-only, language and save commits preserve model and Preview nodes. Existing Theme Service/Store, Document Builder, Worker and model algorithms are unchanged.",
+            "testScope": "Five regressions compile the actual classic listener and connect actual public Settings Store, coordinator, Theme Service and Toggle Controller. Preserve both original browser test names and every identity check, explicitly finish native Preview preparation, require a nonempty body in the toggle fixture, record before/dark/light states and restore committed light theme in finally. Retain all39 app scenes and every repaired export probe.",
+            "newScenariosDefined": 5,
+            "changedSourceFingerprints": [
+              {
+                "path": "public/app/core.js",
+                "priorBlobSha": "9ce63cbf5b0f270041006bcb0c3e675bc11e2319",
+                "blobSha": "7dbbf281f46aa8054c9e788ed4c6df387b9f4618"
+              }
+            ],
+            "sourceConfirmedDefects": [
+              "Classic SettingsChanged listener ignores changedIds and reapplies layout/preferences for theme-only commits, clearing populated hybrid Preview DOM.",
+              "Both theme browser tests delete probes/restore light only on success, so a failed dark assertion contaminates the next fixture."
+            ],
+            "staticReview": {
+              "localProductTestsOrBuildsRun": false,
+              "windowsValidation": "pending",
+              "architectureAndDocumentationGatesPassed": 4,
+              "changedJavaScriptSyntaxChecked": 3,
+              "themeBrowserExpressionsSyntaxChecked": 12,
+              "actualClassicListenerExtractionSyntaxChecked": true,
+              "relativeLinksChecked": 111,
+              "currentSourceFingerprintsChecked": 47,
+              "changedCurrentFingerprintCount": 1,
+              "historicalAcceptancePreserved": true,
+              "priorFailureAndRepairPreserved": true,
+              "fixtureAndRepairedExportBytesUnchanged": true,
+              "newScenariosDefined": 5,
+              "builtAppScenariosRetained": 39
+            },
+            "tools": {
+              "MermaidChart": "Displayed actual committed Settings event, Theme Service and field-specific legacy effects flow.",
+              "Context7": "No new third-party API or version change; reused existing validated public Settings and browser APIs."
+            }
+          }
+        ],
+        "additionalObservedIssues": [
+          {
+            "path": "public/app/events.js",
+            "message": "scheduleEditorMetricsRebuild is not defined",
+            "status": "observed-open-separate-Editor-UI-compatibility-follow-up",
+            "source": "37943920538 frontend browser-artifacts/built-app-diagnostics.json",
+            "note": "Interactive Editor listener reports this unrelated pre-existing error; it is not either theme assertion or a Builder failure and is not repaired or claimed closed in this task."
+          }
+        ],
+        "acceptance": {
+          "stage": "R14.6",
+          "commit": "1f49956e3df45726f96b582084c3456c44ddc901",
+          "run": 37958151064,
+          "status": "accepted",
+          "windowsJobsPassed": 7,
+          "allExecutionStepsPassed": true,
+          "record": "docs/R14-06-DETAILS.md",
+          "nodeTestsPassed": 1781,
+          "nodeTestDirectories": 16,
+          "nodeTestFiles": 330,
+          "frontendTestsPassed": 776,
+          "targetedExportTestsPassed": 43,
+          "targetedRequestTestsPassed": 31,
+          "targetedTaskTestsPassed": 16,
+          "targetedCancellationTestsPassed": 22,
+          "targetedProgressTestsPassed": 20,
+          "documentBuilderTestsPassed": 20,
+          "settingsEffectsTestsPassed": 5,
+          "contractBrowserPassed": 11,
+          "builtAppBrowserPassed": 39,
+          "rustTestsPassed": 281,
+          "importChainScenariosPassed": 8,
+          "closeoutArtifactId": 11631111653,
+          "closeoutArtifactDigest": "sha256:73531985528d0b0833833869f7e104c995cd14123e5f9725cbea9b6d332bed56",
+          "frontendArtifactId": 11630665511,
+          "frontendArtifactDigest": "sha256:dc4907908c92f1957bca8bc6d158563bf016554560a7490245b55c2541e7f126",
+          "artifactDigestsChecked": true,
+          "jobIds": {
+            "dependency-advisories": 113913838388,
+            "native-boundary": 113913838612,
+            "webview-baseline": 113913838711,
+            "repository-tests": 113913838731,
+            "frontend": 113913838788,
+            "rust": 113913838990,
+            "closeout": 113916914591
+          },
+          "actualBrowserEvidence": {
+            "textDownloads": 18,
+            "longParagraphsOrdered": 137,
+            "longDocumentCharacters": 413096,
+            "workerBlockProgress": [
+              48,
+              96,
+              138
+            ],
+            "fullSnapshotReasons": [],
+            "workerAssetHttpStatus": 200,
+            "firstBatchCancelled": true,
+            "taskReleased": true,
+            "nextBuildParagraphs": 137,
+            "themeToggleAndServiceIdentityChecksPassed": true
+          },
+          "scope": "Public Document Builder, synchronized readonly Preview capture, complete detached body, guarded fallback, cancellation/stale/disposal and cumulative Settings effects accepted. All three failed attempts and repairs retained. F01/F02, complete rendered formats, remaining F04 enhancer/print/image, A10 new low-risk disposition and separately observed Editor metrics issue remain open. 14.7 not started."
+        },
+        "closeoutStaticReview": {
+          "productionTestsWorkflowFixturesUnchanged": true,
+          "currentSourceFingerprintsUnchanged": 47,
+          "priorAcceptanceFailuresAndRepairsPreserved": true,
+          "localProductTestsOrBuildsRun": false,
+          "windowsValidation": "accepted implementation at1f49956; documentation revalidation pending",
+          "architectureAndDocumentationGatesPassed": 4,
+          "relativeLinksChecked": 113
+        },
+        "closeoutRevalidation": {
+          "commit": "f8d2312534e0487868a9cba034e882ba78318dce",
+          "run": 37961049857,
+          "attempt": 1,
+          "conclusion": "success",
+          "windowsJobsPassed": 7,
+          "allExecutionStepsPassed": true,
+          "jobIds": {
+            "dependency-advisories": 113923667307,
+            "rust": 113923667715,
+            "repository-tests": 113923667846,
+            "native-boundary": 113923667848,
+            "frontend": 113923667885,
+            "webview-baseline": 113923667912,
+            "closeout": 113926800431
+          },
+          "evidence": "Exact run head, seven job conclusions and every executed step checked; implementation acceptance remains1f49956/run37958151064."
+        }
       }
     ]
   }

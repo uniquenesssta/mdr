@@ -8,7 +8,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
   const fixture = JSON.parse(await readFile(new URL('../../fixtures/stage-14-export/contracts.json', import.meta.url), 'utf8'));
   const requests = JSON.parse(await readFile(new URL('../../fixtures/stage-14-export/requests.json', import.meta.url), 'utf8'));
 
-  await test('R14-02 built app normalizes Markdown names and retains R14-01 bytes and HTML/Word missing-preview evidence', async () => {
+  await test('R14-02 built app normalizes Markdown names and retains R14-01 bytes and HTML/Word complete enhanced-body evidence', async () => {
     await loadMarkdown(fixture.source);
     const result = await page.evaluate(`(async () => {
       const names = ${JSON.stringify(requests.names)};
@@ -33,6 +33,12 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
             const capture = captures.at(-1), content = await capture.blob.text();
             capture.format = format; capture.input = row.input; capture.content = content; capture.mime = capture.blob.type;
             capture.revoked = revoked.includes(capture.url);
+            if(format !== 'markdown') {
+              const parsed=new DOMParser().parseFromString(content,'text/html');
+              capture.rendered={math:parsed.querySelectorAll('.katex').length,diagrams:parsed.querySelectorAll('svg.f-mermaid-svg').length,
+                task:parsed.querySelectorAll('li.task-item input[type="checkbox"]').length,code:parsed.querySelectorAll('.markdown-code-token').length,
+                rawDiagrams:parsed.querySelectorAll('pre > code.language-mermaid').length,copyButtons:parsed.querySelectorAll('.preview-code-copy').length};
+            }
 
           }
         }
@@ -55,9 +61,9 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       } else {
         assert.equal(capture.mime, capture.format === 'html' ? 'text/html;charset=utf-8' : 'application/msword;charset=utf-8');
         assert.ok(capture.content.startsWith('<!DOCTYPE html>'));
-        assert.ok(capture.content.includes('$x^2$'));
-        assert.ok(capture.content.includes('flowchart TD'));
-        assert.equal(capture.content.includes('f-mermaid-svg'), false);
+        assert.ok(capture.rendered.math >= 2); assert.equal(capture.rendered.diagrams, 1);
+        assert.equal(capture.rendered.task, 1); assert.ok(capture.rendered.code > 0);
+        assert.equal(capture.rendered.rawDiagrams, 0); assert.equal(capture.rendered.copyButtons, 0);
         if (capture.format === 'html') {
           assert.ok(capture.content.includes('https://cdn.jsdelivr.net/npm/katex@0.16.9/'));
           assert.ok(capture.content.includes('exportPresentationPort.math?.renderTree'));
@@ -66,7 +72,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     }
     assert.equal(result.failures.length, fixture.names.length * 2);
     for (const failure of result.failures) {
-      assert.equal(failure.error, null, 'R14-06 repairs the builder; original defect fixture stays immutable.');
+      assert.equal(failure.error, null, 'R14-07 enhances all rendered bodies; original defect fixture stays immutable.');
       assert.equal(failure.progressVisible, false);
     }
   });
@@ -184,27 +190,85 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     await writeFile(join(artifactRoot, 'r14-01-renderer-baseline.json'), JSON.stringify({ ...result, png:undefined, bytes:png.length, scope:'locked capability control, not successful PDF/Image export' }, null, 2));
   });
 
-  await test('R14-01 actual PDF/Image fail before print or file creation and release the progress dialog', async () => {
+  await test('R14-07 actual PDF/Image retain R14-01 file-boundary and cleanup coverage with enhanced bodies', async () => {
     await loadMarkdown(fixture.source);
     const result = await page.evaluate(`(async () => {
       const print=window.print,error=console.error;
-      const port=document.getElementById('compatibility-business-ports').markdownEditorPreviewCommandPort;
-      const before=port.getViewMode(), oldImage=document.getElementById('export-image-preview').getAttribute('src');
-      let prints=0;const errors=[];
-      window.print=()=>{prints++;};
+      const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorPreviewCommandPort;
+      const before=port.getViewMode();let prints=0,printed;const errors=[],phases=[];
+      const unsubscribe=host.markdownEditorExportTaskPort.subscribe(s=>{if(s.activeTask)phases.push({phase:s.activeTask.phase,cancelable:s.activeTask.cancelable});});
+      window.print=()=>{prints++;printed={math:preview.querySelectorAll('.katex').length,diagrams:preview.querySelectorAll('svg.f-mermaid-svg').length,
+        heading:preview.querySelector('h1')?.textContent};window.dispatchEvent(new Event('afterprint'));};
       console.error=(...args)=>{errors.push(args.map(x=>String(x)).join(' '));error.apply(console,args);};
       try {
-        await exportPDF();await renderExportImagePreview();
-        await new Promise(resolve=>setTimeout(resolve,100));
-        return {prints,errors,before,after:port.getViewMode(),oldImage,image:document.getElementById('export-image-preview').getAttribute('src'),progressVisible:document.getElementById('export-progress-modal').classList.contains('show')};
-      } finally {window.print=print;console.error=error;}
+        await exportPDF();await new Promise(resolve=>setTimeout(resolve,160));
+        await port.update();const afterPrint=port.getViewMode();
+        await renderExportImagePreview();
+        const png=document.getElementById('export-image-preview').getAttribute('src'),image=new Image();
+        if(!png?.startsWith('data:image/png'))throw new Error('Actual image export produced no PNG: '+JSON.stringify(errors));
+        await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Exported PNG decode failed'));image.src=png;});
+        return {prints,printed,errors,before,afterPrint,after:port.getViewMode(),width:image.naturalWidth,height:image.naturalHeight,png,phases,
+          progressVisible:document.getElementById('export-progress-modal').classList.contains('show'),stageChildren:document.getElementById('export-image-content').children.length,
+          stageStylesCleared:['height','minHeight','overflow'].every(key=>document.getElementById('export-image-content').firstElementChild.style[key]===''),
+          retired:typeof styleTaskLists==='undefined'&&typeof renderMermaidBlocks==='undefined'&&typeof observedPreviewBody==='undefined'&&typeof enhanceFullPreviewForExport==='undefined'};
+      } finally {unsubscribe();window.print=print;console.error=error;}
     })()`);
-    assert.equal(result.prints, 0);
-    assert.equal(result.errors.filter(x=>/styleTaskLists is not defined|observedPreviewBody is not defined/.test(x)).length, 2);
-    assert.equal(result.image, result.oldImage);
-    assert.equal(result.after, result.before);
-    assert.equal(result.progressVisible, false);
-    await writeFile(join(artifactRoot, 'r14-01-pdf-image-failure.json'), JSON.stringify({ ...result, finding:'R14-F04' }, null, 2));
+    const png=result.png?.startsWith('data:image/png')?Buffer.from(result.png.split(',')[1],'base64'):null;
+    await writeFile(join(artifactRoot,'r14-07-pdf-image.json'),JSON.stringify({...result,png:undefined,pngBytes:png?.length,mapping:'R14-F04 receiving enhancer; original failure fixture retained'},null,2));
+    if(png)await writeFile(join(artifactRoot,'r14-07-export.png'),png);
+    assert.equal(result.prints,1);assert.ok(result.printed.math>=2);assert.equal(result.printed.diagrams,1);assert.equal(result.printed.heading,'Export baseline');
+    assert.equal(result.errors.length,0);assert.equal(result.afterPrint,result.before);
+    assert.equal(result.progressVisible,false);assert.equal(result.stageChildren,1);assert.equal(result.stageStylesCleared,true);assert.equal(result.retired,true);
+    assert.equal(result.width,1080);assert.ok(result.height>=1920);
+    assert.ok(result.phases.some(x=>x.phase==='encoding'&&x.cancelable===false));
+    assert.deepEqual(Array.from(png.subarray(0,8)),[137,80,78,71,13,10,26,10]);
+  });
+
+  await test('R14-07 actual public enhancer cancels a long batch and independently enhances the next complete body', async () => {
+    const source='# Enhancement batches\n\n'+Array.from({length:40},(_,i)=>'Enhance-'+i+' $x^2$').join('\n\n');
+    await loadMarkdown(source);
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),tasks=host.markdownEditorExportTaskPort,
+        builder=host.markdownEditorExportDocumentPort,enhancer=host.markdownEditorExportEnhancementPort;
+      const task=tasks.begin('cancel enhancement'),root=await builder.build({task});let batches=0,error;
+      const dispose=tasks.subscribe(s=>{if(s.activeTask?.id===task.id&&s.activeTask.phase==='enhancing'&&!s.activeTask.cancelled){batches++;tasks.cancel();}});
+      try{await enhancer.enhance({root,task});throw new Error('Cancelled enhancement returned a body');}
+      catch(e){error={cancelled:tasks.isCancelled(e),reason:e.reason};}
+      finally{dispose();tasks.finish(task);}
+      const next=await builder.build();await enhancer.enhance({root:next});
+      return {error,batches,released:tasks.getSnapshot().activeTask===null,paragraphs:next.querySelectorAll('p').length,
+        math:next.querySelectorAll('.katex').length,detached:!next.isConnected,source:builder.getSourceContext(next),frozen:Object.isFrozen(builder.getSourceContext(next))};
+    })()`);
+    await writeFile(join(artifactRoot,'r14-07-enhancement-cancellation.json'),JSON.stringify(result,null,2));
+    assert.deepEqual(result.error,{cancelled:true,reason:'cancelled'});assert.equal(result.batches,1);assert.equal(result.released,true);
+    assert.equal(result.paragraphs,40);assert.equal(result.math,40);assert.equal(result.detached,true);assert.equal(result.frozen,true);
+  });
+
+  await test('R14-07 actual model edits invalidate a previously built export body before enhancement', async () => {
+    await loadMarkdown('# Previous export\n\n$x^2$');
+    await page.evaluate(`(async()=>{const host=document.getElementById('compatibility-business-ports');host.__r1407Body=await host.markdownEditorExportDocumentPort.build();host.__r1407Html=host.__r1407Body.innerHTML;})()`);
+    try {
+      await loadMarkdown('# Edited export\n\n$y^2$');
+      const result=await page.evaluate(`(async()=>{const host=document.getElementById('compatibility-business-ports');let error;
+        try{await host.markdownEditorExportEnhancementPort.enhance({root:host.__r1407Body});throw new Error('Stale enhancement returned a body');}
+        catch(e){error={cancelled:host.markdownEditorExportTaskPort.isCancelled(e),reason:e.reason};}
+        return {error,unchanged:host.__r1407Body.innerHTML===host.__r1407Html};})()`);
+      await writeFile(join(artifactRoot,'r14-07-stale-body.json'),JSON.stringify(result,null,2));
+      assert.deepEqual(result.error,{cancelled:true,reason:'document-changed'});assert.equal(result.unchanged,true);
+    } finally {await page.evaluate(`(()=>{const host=document.getElementById('compatibility-business-ports');delete host.__r1407Body;delete host.__r1407Html;})()`);}
+  });
+
+  await test('R14-07 actual canonical math renderer rejects inherited trust and retains safe rendering', async () => {
+    const result=await page.evaluate(`(()=>{
+      const math=document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.math;
+      const root=document.createElement('div'),options=Object.create({trust:true});
+      const unsafe=String.fromCharCode(92)+'href{javascript:alert(1)}{click}';
+      math.renderFormula(root,unsafe,options);const links=root.querySelectorAll('a,img').length;
+      const normal=math.renderFormula(root,'x^2',{displayMode:true});
+      return {links,normal:normal.ok,math:root.querySelectorAll('.katex').length,block:root.querySelectorAll('.katex-display').length};
+    })()`);
+    await writeFile(join(artifactRoot,'r14-07-math-security.json'),JSON.stringify(result,null,2));
+    assert.deepEqual(result,{links:0,normal:true,math:1,block:1});
   });
 
   await test('R14-04 irreversible lock retains R14-03 actual replacement, progress and cancel button coverage', async () => {
@@ -315,6 +379,13 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort;
       const progressRoot=document.getElementById('export-progress-modal');
       const builder=host.markdownEditorExportDocumentPort;
+      const enhancer=host.markdownEditorExportEnhancementPort;
+      const enhancementBody=await builder.build();
+      enhancementBody.replaceChildren(...Array.from({length:25},()=>{const node=document.createElement('p');node.textContent='dispose enhancement';return node;}));
+      const raf=window.requestAnimationFrame;let interceptedFrames=0;
+      window.requestAnimationFrame=()=>{interceptedFrames++;return 999999;};
+      const enhancementWait=enhancer.enhance({root:enhancementBody}).then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
+      window.requestAnimationFrame=raf;
       await host.markdownEditorPreviewCommandPort.reset();
       const buildWait=builder.build().then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       const task=beginExportTask('dispose locked task');task.update(96,'encoding','encoding');task.lockCancellation('encoding');
@@ -322,12 +393,12 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       let rejectLate;const operation=new Promise((resolve,reject)=>{rejectLate=reject;});
       const wait=task.token.waitFor(operation).then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       window.dispatchEvent(new Event('pagehide'));
-      const building=await buildWait;const waiting=await wait;rejectLate(new Error('late encoder failure'));await Promise.resolve();
+      const building=await buildWait;const enhancing=await enhancementWait;const waiting=await wait;rejectLate(new Error('late encoder failure'));await Promise.resolve();
       let rejected=false;try {port.begin('late');}catch(error){rejected=/destroyed/.test(error.message);}
       let cancelledError=false;try {task.token.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
-      return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,
+      return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
-        rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort'),
+        rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort'),
         progressVisible:progressRoot.classList.contains('show'),progressRemoved:!document.getElementById('export-progress-modal')};
     })()`);
     assert.equal(result.progressRemoved, true);
@@ -335,6 +406,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.deepEqual(result.lastSeen, result.snapshot); assert.equal(result.cancelled, true); assert.equal(result.phase, 'destroyed');
     assert.deepEqual(result.waiting, {cancelled:true,reason:'destroyed'});
     assert.deepEqual(result.building, {cancelled:true,reason:'destroyed'});
+    assert.deepEqual(result.enhancing, {cancelled:true,reason:'destroyed'});assert.equal(result.interceptedFrames,1);
     for (const field of ['lateUpdate','lateLock','lateFinish','progressVisible']) assert.equal(result[field], false, field);
     for (const field of ['rejected','cancelledError','removed']) assert.equal(result[field], true, field);
     await writeFile(join(artifactRoot, 'r14-03-task-disposal.json'), JSON.stringify(result, null, 2));

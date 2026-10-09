@@ -158,3 +158,14 @@ test('R14-06 missing public dependencies and invalid bridge fail at construction
   assert.throws(()=>mountClassicExportDocumentPort(null,h.builder),TypeError);
   assert.throws(()=>mountClassicExportDocumentPort({},{}),TypeError);h.dispose();
 });
+
+test('R14-07 Builder source context binds the original complete body to its document/version without DOM metadata', async () => {
+  const h = harness({ count: 1 }), body = await h.builder.build({ documentId: 'a' });
+  const source = h.builder.getSourceContext(body);
+  assert.deepEqual(source, { documentId: 'a', documentVersion: 7 }); assert.ok(Object.isFrozen(source));
+  h.setVersion(8); assert.equal(h.builder.getSourceContext(body), source);
+  assert.throws(() => h.builder.getSourceContext({}), TypeError);
+  const host = {}, mount = mountClassicExportDocumentPort(host, h.builder);
+  assert.equal(mount.port.getSourceContext(body), source); mount.destroy();
+  h.builder.destroy(); assert.throws(() => h.builder.getSourceContext(body), cancelled('destroyed')); h.dispose();
+});

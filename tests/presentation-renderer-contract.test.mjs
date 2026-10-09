@@ -65,7 +65,10 @@ test('hybrid Preview and export math rendering use the canonical math presentati
   assert.match(previewRenderer, /presentation\?\.math/);
   assert.match(previewRenderer, /math\.renderTree/);
   assert.match(previewController, /renderer\.renderMath/);
-  assert.match(exportSource, /exportPresentationPort\.math/);
+  const enhancer = await source('../src/features/export/document/export-preview-enhancer.js');
+  assert.match(exportSource, /exportEnhancementPort\.enhance/);
+  assert.match(enhancer, /presentation\.math\.renderTree/);
+  assert.doesNotMatch(exportSource, /enhanceFullPreviewForExport|styleTaskLists|renderMermaidBlocks/);
   assert.match(math, /MARKDOWN_MATH_DELIMITERS/);
   assert.match(math, /renderMathTree/);
   assert.doesNotMatch(controller + inlinePresentation + htmlWidget, /katex\.render/);

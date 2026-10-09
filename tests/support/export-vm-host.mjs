@@ -1,9 +1,9 @@
 // Characterization host: execute classic format callers with the actual public Export Builder.
-// DOM/vendor/platform doubles prove orchestration only. Enhancement/print bindings
-// remain isolated historical adapters until their receiving tasks; Worker globals are never supplied.
+// DOM/vendor/platform doubles prove orchestration only; actual Builder/Enhancer own the complete body.
+// Retired Worker/enhancement globals are never supplied. Actual renderer output is checked in built-app tests.
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
 
@@ -11,17 +11,19 @@ const source = readFileSync(new URL('../../public/app/export.js', import.meta.ur
 const markdownSource = readFileSync(new URL('../../public/app/core.js', import.meta.url), 'utf8');
 const markdownDownload = markdownSource.slice(markdownSource.indexOf('    function exportMarkdownContent('), markdownSource.indexOf('    function copyContextDocumentTitle('));
 
-export function createExportVmHost({ desktop = false, sourceText = '原文 😀', name = 'report.md', savePath = 'C:\\exports\\report', failWrite = false, workerBlocks = null, workerVersion = 7, textLength = 20, parseError = false, imageHeight = 100, supplyRetiredPreviewBindings = true, documentId = 'export-doc', documentIds = [documentId] } = {}) {
+export function createExportVmHost({ desktop = false, sourceText = '原文 😀', name = 'report.md', savePath = 'C:\\exports\\report', failWrite = false, workerBlocks = null, workerVersion = 7, textLength = 20, parseError = false, imageHeight = 100, documentId = 'export-doc', documentIds = [documentId] } = {}) {
   const calls = [], downloads = [], blobs = new Map(), timers = [], events = new Map(), nodes = new Map();
   let urlId = 0, frameCount = 0, onFrame = null;
   const node = (tag = 'div') => {
     let html = '', children = [];
     const classes = new Set();
     return {
-      tagName: tag.toUpperCase(), style: {}, dataset: {}, textContent: '', value: '', disabled: false, checked: false, scrollHeight: imageHeight,
+      tagName: tag.toUpperCase(), style: {}, dataset: {}, value: '', disabled: false, checked: false, scrollHeight: imageHeight,
       classList: { add: x => classes.add(x), remove: x => classes.delete(x), contains: x => classes.has(x), toggle(x, force) { const next = force ?? !classes.has(x); next ? classes.add(x) : classes.delete(x); return next; } },
       get children() { return children; },
-      get innerHTML() { return html + (this.textContent ? escapeHtml(this.textContent) : '') + children.map(x => x.tagName === 'PRE' ? '<pre class="' + x.className + '">' + x.innerHTML + '</pre>' : x.innerHTML || '').join(''); },
+      get textContent() { return html.replace(/<[^>]*>/g, '') + children.map(x => x.textContent || '').join(''); },
+      set textContent(value) { html = escapeHtml(value); children = []; },
+      get innerHTML() { return html + children.map(x => x.tagName === 'PRE' ? '<pre class="' + x.className + '">' + x.innerHTML + '</pre>' : x.innerHTML || '').join(''); },
       set innerHTML(value) { html = String(value); children = []; },
       append(...items) { for (const item of items) { if (item.fragment) children.push(...item.children); else children.push(item); } },
       appendChild(item) { this.append(item); return item; },
@@ -29,6 +31,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
       replaceChildren(...items) { html = ''; children = []; this.append(...items); },
       querySelector(selector) { return selector === '.markdown-body' ? children.find(x => x.className === 'markdown-body') || null : null; },
       querySelectorAll() { return []; }, matches() { return false; },
+      contains(item) { return this === item || children.some(x => x === item || x.contains?.(item)); },
       dispatchEvent(event) { calls.push(['modal', event.type, event.detail?.reason || '']); return true; },
       click() { downloads.push({ name: this.download, href: this.href, blob: blobs.get(this.href) || null }); }
     };
@@ -37,7 +40,9 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   const body = node('body');
   const presentation = {
     markdown: { parse(value) { calls.push(['parse', value]); if (parseError) throw new Error('parse failed'); return '<p>' + escapeHtml(value) + '</p>'; } },
-    math: { protectSource: text => ({ text, placeholders: [] }), restoreSource: html => html, containsMath: () => false, renderTree: () => calls.push(['math']), delimiters: [] },
+    code: { renderHighlightedCodeRows: () => calls.push(['code']) },
+    math: { protectSource: text => ({ text, placeholders: [] }), restoreSource: html => html, containsMath: text => String(text || '').includes('$'), renderTree: () => calls.push(['math']), delimiters: [] },
+    mermaid: { getTheme: () => 'default', async renderDiagram() { calls.push(['mermaid']); return { status: 'rendered' }; } },
     async loadDomToImage() { return { async toPng(root, options) { calls.push(['png', { ...options }, root.innerHTML]); return 'data:image/png;base64,iVBORw0KGgo='; } }; }
   };
   let viewMode = 'source';
@@ -75,7 +80,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     documentModel: { getDocumentVersion: () => 7, createSnapshot(reason) { calls.push(['snapshot', reason]); return sourceText; } },
     coreExportRequestPort: requestMount.port,
     editor: { textLength, value: 'stale editor value' }, filenameInput: { value: name }, exportDirectory: 'C:\\custom',
-    preview: node(), observedPreviewBody: {},
+    preview: node(),
     requestAnimationFrame(callback) { frameCount++; onFrame?.(frameCount); queueMicrotask(callback); },
     setTimeout(callback, delay) { timers.push({ callback, delay }); return timers.length; },
     window: { addEventListener(name, callback) { events.set(name, callback); }, print() { calls.push(['print']); } },
@@ -83,7 +88,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     Blob, TextEncoder, Uint8Array, atob, btoa, console: { error: (...args) => calls.push(['error', String(args[0])]) },
     URL: { createObjectURL(blob) { const url = 'blob:fixture-' + ++urlId; blobs.set(url, blob); calls.push(['objectURL', url]); return url; }, revokeObjectURL: url => calls.push(['revoke', url]) },
     showToast: message => calls.push(['toast', message]), t: key => key,
-    styleTaskLists: () => calls.push(['taskLists']), renderMermaidBlocks: async () => calls.push(['mermaid']), getComputedStyle: () => ({ backgroundColor: '#ffffff' })
+    getComputedStyle: () => ({ backgroundColor: '#ffffff' })
   });
   const documentBuilder = createExportDocumentBuilder({
     documentRef: context.document, documentModel: { ...context.documentModel, getTextLength: () => textLength },
@@ -97,15 +102,18 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     reportError: (...args) => context.console.error(...args)
   });
   const documentMount = mountClassicExportDocumentPort(host, documentBuilder);
+  const enhancer = createExportPreviewEnhancer({ documentRef: context.document,
+    documentModel: context.documentModel, getActiveDocumentId: () => documentId,
+    builder: documentBuilder, presentation,
+    requestFrame: callback => context.requestAnimationFrame(callback), cancelFrame: () => {} });
+  const enhancementMount = mountClassicExportEnhancementPort(host, enhancer);
   vm.runInContext(markdownDownload + '\n' + source, context, { filename: 'public/app/export.js', timeout: 1000 });
-  if (!supplyRetiredPreviewBindings) {
-    for (const key of ['styleTaskLists', 'renderMermaidBlocks', 'observedPreviewBody']) delete context[key];
-  }
   return {
     context, calls, downloads, nodes, timers, events, taskController, documentBuilder,
+    enhance: (root, task) => enhancementMount.port.enhance({ root, task, documentId }), createNode: node,
     build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,
     cancel: () => nodes.get('export-progress-cancel').click(),
-    destroy() { try { taskController.destroy(); } finally { documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    destroy() { try { taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
     invoke: (name, ...args) => context[name](...args),
     evaluate: expression => vm.runInContext(expression, context),
     setFrameHook(callback) { onFrame = callback; },

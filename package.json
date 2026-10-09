@@ -31,9 +31,12 @@
     "@tauri-apps/plugin-fs": "^2.5.1",
     "dom-to-image-more": "^3.7.2",
     "dompurify": "3.4.16",
-    "katex": "^0.16.25",
+    "katex": "0.18.2",
     "marked": "^16.2.1",
     "mermaid": "^11.12.0"
+  },
+  "overrides": {
+    "katex": "$katex"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.4",

@@ -1,5 +1,5 @@
 import './styles/index.css';
-import { createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
+import { createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
@@ -141,6 +141,8 @@ const exportRequestPort = mountClassicExportRequestPort(compatibilityPlatformHos
 });
 let exportDocumentBuilder = null;
 let exportDocumentPort = null;
+let exportPreviewEnhancer = null;
+let exportEnhancementPort = null;
 const exportTaskController = createExportTaskController();
 const exportProgressStore = createExportProgressStore(exportTaskController);
 const exportProgressView = createExportProgressDialogView({
@@ -284,7 +286,8 @@ configureHybridImageSourcePlatform({
   getDocumentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {}
 });
 window.addEventListener('pagehide', () => {
-  for (const release of [() => exportTaskController.destroy(), () => exportDocumentBuilder?.destroy(),
+  for (const release of [() => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
+    () => exportEnhancementPort?.destroy(), () => exportDocumentBuilder?.destroy(),
     () => exportDocumentPort?.destroy(), () => exportProgressView.destroy(),
     () => exportProgressStore.destroy(), () => exportTaskPort.destroy(), () => exportRequestPort.destroy()]) {
     try { release(); } catch (error) { console.error('Export disposal failed:', error); }
@@ -708,6 +711,10 @@ async function loadAppModules() {
     destroyPreviewScrollMapper();
     unregisterPreviewEditorCommands?.();
     unregisterPreviewEditorCommands = null;
+    exportPreviewEnhancer?.destroy();
+    exportPreviewEnhancer = null;
+    exportEnhancementPort?.destroy();
+    exportEnhancementPort = null;
     exportDocumentBuilder?.destroy();
     exportDocumentBuilder = null;
     exportDocumentPort?.destroy();
@@ -1355,6 +1362,14 @@ async function loadAppModules() {
       cancelFrame: handle => window.cancelAnimationFrame(handle)
     });
     exportDocumentPort = mountClassicExportDocumentPort(compatibilityPlatformHost, exportDocumentBuilder);
+    exportPreviewEnhancer = createExportPreviewEnhancer({
+      documentRef: document, documentModel,
+      getActiveDocumentId: () => documentSessionPort.activeId,
+      builder: exportDocumentBuilder, presentation: markdownPresentation,
+      requestFrame: callback => window.requestAnimationFrame(callback),
+      cancelFrame: handle => window.cancelAnimationFrame(handle)
+    });
+    exportEnhancementPort = mountClassicExportEnhancementPort(compatibilityPlatformHost, exportPreviewEnhancer);
     const scrollPreviewToLine = (line, behavior = 'auto', viewportRatio = 0.38) => {
       const ratio = Math.max(0.05, Math.min(0.95, Number(viewportRatio) || 0.38));
       const contentY = previewScrollMapper.getContentYForLine(line);

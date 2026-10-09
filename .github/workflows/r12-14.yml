@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-06 document builder repair and cumulative Windows evidence · ${{ github.sha }}
+run-name: R14-07 cancellable preview enhancement and patched renderer evidence · ${{ github.sha }}
 
 on:
   push:
@@ -180,6 +180,12 @@ jobs:
       - name: R14-06 cumulative Settings changes preserve theme-only Preview identity
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-settings-effects.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/settings-effects.log"
+      - name: R14-07 cancellable document enhancement and late-result isolation
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-export-enhancement.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-enhancement.log"
+      - name: R14-07 A10 patched direct and transitive math renderer
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-renderer-security.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/renderer-security.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

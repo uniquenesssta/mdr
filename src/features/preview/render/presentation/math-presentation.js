@@ -24,7 +24,7 @@ export function renderMathFormula(element, formula, options = {}) {
       displayMode: Boolean(options.displayMode),
       throwOnError: true,
       strict: options.strict || 'ignore',
-      trust: Boolean(options.trust)
+      trust: Object.hasOwn(options, 'trust') && options.trust === true
     });
     element.dataset.mathRenderState = 'ready';
     return { ok: true, error: null };
@@ -44,7 +44,7 @@ export function renderMathTree(root, options = {}) {
     delimiters: options.delimiters || MARKDOWN_MATH_DELIMITERS,
     throwOnError: false,
     strict: options.strict || 'ignore',
-    trust: Boolean(options.trust)
+    trust: Object.hasOwn(options, 'trust') && options.trust === true
   };
   if (Array.isArray(options.ignoredTags)) renderOptions.ignoredTags = options.ignoredTags;
   if (Array.isArray(options.ignoredClasses)) renderOptions.ignoredClasses = options.ignoredClasses;

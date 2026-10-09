@@ -8,3 +8,5 @@ export { createExportProgressStore } from './task/export-progress-store.js';
 export { createExportProgressDialogView } from './ui/export-progress-dialog-view.js';
 export { createExportDocumentBuilder, ExportDocumentStaleError } from './document/export-document-builder.js';
 export { mountClassicExportDocumentPort } from './compatibility/classic-export-document-port.js';
+export { createExportPreviewEnhancer } from './document/export-preview-enhancer.js';
+export { mountClassicExportEnhancementPort } from './compatibility/classic-export-enhancement-port.js';
