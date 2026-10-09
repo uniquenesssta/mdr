@@ -17,6 +17,7 @@ test('R14-01 records the actual retired preview dependency instead of hiding it 
   assert.ok(body.innerHTML.includes('原文'));
   assert.equal(h.evaluate('typeof previewWorkerClient'), 'undefined');
   assert.equal(h.evaluate('typeof createPreviewNodesForBlock'), 'undefined');
+  assert.equal(h.evaluate('typeof escapeHtml'), 'undefined');
   for (const operation of ['exportHTML', 'exportWord']) await h.invoke(operation);
   assert.equal(h.downloads.length, 2, 'R14-06 repairs body construction only.');
   h.downloads.length = 0;
@@ -30,6 +31,21 @@ test('R14-01 records the actual retired preview dependency instead of hiding it 
   assert.ok(h.calls.some(x => x[0] === 'error'));
   h.destroy();
 });
+
+for (const [format, operation] of [['html', 'exportHTML'], ['word', 'exportWord']]) {
+  test(`R14-06 ${format} serializes an escaped title without retired Preview escapeHtml`, async () => {
+    const h = createExportVmHost({ name: "A&B' report.md", supplyRetiredPreviewBindings: false });
+    try {
+      assert.equal(h.evaluate('typeof escapeHtml'), 'undefined');
+      await h.invoke(operation);
+      assert.equal(h.downloads.length, 1, JSON.stringify(h.calls));
+      const html = await h.downloads[0].blob.text();
+      assert.ok(html.includes('<title>A&amp;B&#39; report</title>'));
+      assert.equal(h.calls.some(x => x[0] === 'error'), false);
+      assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
+    } finally { h.destroy(); }
+  });
+}
 
 for (const item of requests.names) {
   for (const [format, operation] of Object.entries(operations)) {

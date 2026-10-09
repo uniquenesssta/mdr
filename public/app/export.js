@@ -171,7 +171,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>${escapeHtml(name.replace(/\.doc$/i, ''))}</title>
+  <title>${escapeExportTitle(name.replace(/\.doc$/i, ''))}</title>
   <style>
     body { font-family: "Microsoft YaHei", "SimSun", "PingFang SC", sans-serif; font-size: 12pt; line-height: 1.6; color: #000; }
     h1 { font-size: 20pt; font-weight: bold; margin: 18pt 0 10pt; }
@@ -231,6 +231,12 @@ ${bodyHtml}
       }
     }
 
+    // Export 自有文本转义；不依赖已退役的 Preview 全局绑定。
+    function escapeExportTitle(value) {
+      return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    }
+
     // 导出 HTML：将 Markdown 渲染为独立 HTML 页面并下载
     async function exportHTML() {
       const request = readExportRequest('html');
@@ -250,7 +256,7 @@ ${bodyHtml}
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(name.replace(/\.html$/i, ''))}</title>
+  <title>${escapeExportTitle(name.replace(/\.html$/i, ''))}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.7; max-width: 820px; margin: 40px auto; padding: 0 20px; color: #212529; background: #fff; }

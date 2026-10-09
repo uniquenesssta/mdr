@@ -75,7 +75,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     documentModel: { getDocumentVersion: () => 7, createSnapshot(reason) { calls.push(['snapshot', reason]); return sourceText; } },
     coreExportRequestPort: requestMount.port,
     editor: { textLength, value: 'stale editor value' }, filenameInput: { value: name }, exportDirectory: 'C:\\custom',
-    preview: node(), observedPreviewBody: {}, escapeHtml,
+    preview: node(), observedPreviewBody: {},
     requestAnimationFrame(callback) { frameCount++; onFrame?.(frameCount); queueMicrotask(callback); },
     setTimeout(callback, delay) { timers.push({ callback, delay }); return timers.length; },
     window: { addEventListener(name, callback) { events.set(name, callback); }, print() { calls.push(['print']); } },

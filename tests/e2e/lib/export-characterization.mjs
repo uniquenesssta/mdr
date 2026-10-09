@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export async function runExportCharacterization({ page, test, loadMarkdown, artifactRoot }) {
+export async function runExportCharacterization({ page, test, loadMarkdown, artifactRoot, applicationHost }) {
   const fixture = JSON.parse(await readFile(new URL('../../fixtures/stage-14-export/contracts.json', import.meta.url), 'utf8'));
   const requests = JSON.parse(await readFile(new URL('../../fixtures/stage-14-export/requests.json', import.meta.url), 'utf8'));
 
@@ -29,19 +29,21 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
             if(format !== 'markdown') {
               failures.push({format,input:row.input,error:errors.at(-1) || null,progressVisible:document.getElementById('export-progress-modal').classList.contains('show')});
             }
-            if(captures.length !== start+1) throw new Error('Expected one actual '+format+' download: '+row.input);
+            if(captures.length !== start+1) throw new Error('Expected one actual '+format+' download: '+row.input+'; '+JSON.stringify({errors,failures,task:exportTaskPort.getSnapshot()}));
             const capture = captures.at(-1), content = await capture.blob.text();
             capture.format = format; capture.input = row.input; capture.content = content; capture.mime = capture.blob.type;
             capture.revoked = revoked.includes(capture.url);
 
           }
         }
-        return {captures:captures.map(({blob,url,...capture})=>capture),failures};
+        return {captures:captures.map(({blob,url,...capture})=>capture),failures,retiredTitleBinding:typeof escapeHtml==='undefined'};
       } finally {
         URL.createObjectURL=create; URL.revokeObjectURL=revoke; HTMLAnchorElement.prototype.click=click;
         input.value=originalName;console.error=error;
       }
     })()`);
+    await writeFile(join(artifactRoot, 'r14-02-text-exports.json'), JSON.stringify(result, null, 2));
+    assert.equal(result.retiredTitleBinding, true);
     assert.equal(result.captures.length, fixture.names.length * 3);
     for (const capture of result.captures) {
       const row = requests.names.find(x => x.input === capture.input);
@@ -67,7 +69,6 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       assert.equal(failure.error, null, 'R14-06 repairs the builder; original defect fixture stays immutable.');
       assert.equal(failure.progressVisible, false);
     }
-    await writeFile(join(artifactRoot, 'r14-02-text-exports.json'), JSON.stringify(result, null, 2));
   });
 
   await test('R14-02 actual request rejects bad inputs before any export task and remains scoped and immutable', async () => {
@@ -125,12 +126,14 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
           detached:!root.isConnected,retired:typeof previewWorkerClient==='undefined'&&typeof createPreviewNodesForBlock==='undefined',snapshotObserved:typeof snapshot==='function'};
       } finally {unsubscribe();if(descriptor)Object.defineProperty(model,'createSnapshot',descriptor);else delete model.createSnapshot;finishExportTask(task);}
     })()`);
+    const workerRequests=applicationHost?.requests.filter(x=>/\/assets\/preview-worker-[^/]+\.js(?:\?|$)/.test(x.url)) || [];
+    await writeFile(join(artifactRoot, 'r14-01-long-document.json'), JSON.stringify({ ...result, workerRequests, sourceCharacters:source.length, expectedParagraphs:count, mapping:'R14-06 public builder; original R14-F04 fixture preserved' }, null, 2));
+    if (applicationHost) assert.ok(workerRequests.some(x=>x.status===200), 'The actual built Worker asset must load from the page origin.');
     assert.deepEqual(result.paragraphs, Array.from({length:count},(_,i)=>i));
     assert.equal(result.heading, 'Large export');assert.equal(result.detached, true);assert.equal(result.retired, true);assert.equal(result.snapshotObserved,true);
     assert.equal(result.records.includes('full-preview-export'), false, 'Synchronized Worker path cannot snapshot the whole document.');
     const batches=result.progress.filter(x=>x.includes(' 块')).map(x=>Number(x.match(/ (\d+)\//)[1]));
     assert.equal(batches[0],48);assert.equal(batches[1],96);assert.ok(batches.at(-1)>=count);
-    await writeFile(join(artifactRoot, 'r14-01-long-document.json'), JSON.stringify({ ...result, sourceCharacters:source.length, expectedParagraphs:count, mapping:'R14-06 public builder; original R14-F04 fixture preserved' }, null, 2));
   });
 
   await test('R14-06 actual long-document cancellation stops public body construction and next build remains usable', async () => {
@@ -145,9 +148,9 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const next=await host.markdownEditorExportDocumentPort.build();
       return {error,batches,released:port.getSnapshot().activeTask===null,paragraphs:next.querySelectorAll('p').length,detached:!next.isConnected};
     })()`);
+    await writeFile(join(artifactRoot,'r14-06-builder-cancellation.json'),JSON.stringify(result,null,2));
     assert.deepEqual(result.error,{cancelled:true,reason:'cancelled'});assert.equal(result.batches,1);
     assert.equal(result.released,true);assert.equal(result.detached,true);assert.equal(result.paragraphs,fixture.longDocument.blocks);
-    await writeFile(join(artifactRoot,'r14-06-builder-cancellation.json'),JSON.stringify(result,null,2));
   });
 
   await test('R14-01 locked offline renderer produces real math/Mermaid DOM and a decodable PNG independent of the broken exporter', async () => {

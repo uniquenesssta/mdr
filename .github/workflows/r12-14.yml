@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-05 export progress UI and cumulative Windows evidence · ${{ github.sha }}
+run-name: R14-06 document builder repair and cumulative Windows evidence · ${{ github.sha }}
 
 on:
   push:
@@ -204,7 +204,7 @@ jobs:
         run: npm run build 2>&1 | tee "$RUNNER_TEMP/r12-14/build.log"
       - name: Built-app browser regression
         if: ${{ !cancelled() }}
-        run: npm run test:browser 2>&1 | tee "$RUNNER_TEMP/r12-14/browser-app.log"
+        run: E2E_ARTIFACT_DIR="$RUNNER_TEMP/r12-14/browser-artifacts" npm run test:browser 2>&1 | tee "$RUNNER_TEMP/r12-14/browser-app.log"
       - name: Validation leaves tracked sources unchanged
         if: ${{ !cancelled() }}
         run: |

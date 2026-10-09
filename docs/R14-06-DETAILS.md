@@ -1,8 +1,28 @@
 # R14-06 Document Builder
 
-状态：**已实施，待本项精确提交的 Windows 累计验收**。继续 `agent/r14-stage`，基线 `45bcdd14debf2ab030df66f44e6588d29915a440`；14.6保持未勾选，14.7未开始。
+状态：**首轮Windows未通过；本轮修复已实施，待新精确提交累计重验**。继续 `agent/r14-stage`，基线 `45bcdd14debf2ab030df66f44e6588d29915a440`；14.6保持未勾选，14.7未开始。
 
 R14-05正式实现验收仍为 `11d2eb4` / CI37929409192，历史两次失败与对应修复不变。文档收尾 `45bcdd1` / [CI37931528219](https://github.com/uniquenesssta/mdr/actions/runs/37931528219) 七组及全部执行步骤成功，已核对精确head、job和step；审计记录追加该收尾重验，不覆盖正式实现证据。新一轮不能继承05的成功作为06验收。
+
+## 首轮失败与本轮修复
+
+`ccef6988c079968407c61e949d024d93f31cb0f9` / [Windows CI37935424278](https://github.com/uniquenesssta/mdr/actions/runs/37935424278)，attempt1：七组中五组成功，frontend与最终收尾失败。全仓递归Node1771/1771、前端Node766/766、Builder20/20、原导出41/41、请求31/31、任务16/16、取消22/22、进度20/20、浏览器契约11/11和生产构建通过。直接失败只在built-app的三个场景（36/39）；收尾正确拒绝失败的browser-app.log。其余WebView、依赖、Rust、全仓Node和原生组均成功，不能因此接受本项。
+
+前端artifact11618016915的SHA-256 `f9eb33fbdf8f4c2f45f6144e19dd832836a924bb7a5be7378e70d4e5dfa37108` 已校验。旧归档只有日志，没有实际探针JSON或失败截图；首次HTML下载探针也没有返回已捕获的底层console错误。下面区分已观察失败与源码确证的缺口，不把缺失的原始错误补写成日志证据。
+
+| 实际失败 | 源码复核与修复 | 保留门槛 |
+| --- | --- | --- |
+| 首个空名称HTML没有下载，Word尚未执行 | HTML/Word标题调用的escapeHtml已无生产定义，而VM上下文偷偷注入它。增加Export自有escapeExportTitle，两个调用者切换；移除VM注入 | 每个名称三种格式真实Blob、MIME、正文、转义标题、URL回收与任务结束全部保持；缺少退休全局也必须成功 |
+| 长文137段完整但发生full-preview-export | built-app原来把HTML注入不透明about:blank页面，再从假HTTPS来源导入模块；仅页面CDP Fetch无法承载独立Worker目标，同来源Worker条件也不成立。新增回环HTTP服务，原始dist页面、模块、CSS、字体与Worker统一从真实来源加载，使用浏览器原生存储 | 实际Worker资源请求须200；仍要求全部137段、标题、有序、离屏、无全文快照，首两批48/96 |
+| 取消探针没有块批次，返回未取消正文 | 保留原取消监听与完整正文要求，在真实Worker链路重验；不强制返回快照或绕过公共Builder | 第一批取消必须拒绝正文，释放任务后下一次build仍包含全部段落 |
+
+仅生产变更为经典Export调用者的标题转义；Builder、Preview捕获、Worker算法、冻结模型、进度/取消实现不改。这里的源码缺口已确认，但修复是否消除三个观察失败仍必须由新Windows实际运行确认。F01增强、F02独立HTML旧脚本/CDN、剩余F04增强/打印与A10仍按原接收项处理。
+
+原41/31/16/22/20专项及39个built-app场景保留。导出基线追加HTML与Word两项无退休escapeHtml的转义标题回归（41→43），新增HTTP测试服务三项（页面/模块/Worker字节及MIME、越界/坏路径/缺失/方法拒绝、HEAD与端口幂等释放）。旧构建产物解析工具及其历史三项测试保留；本轮actual built-app直接加载原dist页面。服务仅绑定127.0.0.1随机端口，finally关闭浏览器再关闭服务器和全部连接。
+
+浏览器三项探针JSON改为先写证据再断言；下载缺失错误附带已捕获错误与任务状态，最终保存实际页面console、exception与资源请求。工作流设置E2E_ARTIFACT_DIR到既有前端归档目录，失败截图和JSON不会再遗留在未上传的临时目录。全部七组、退出门槛、关闭风险判据和旧夹具字节保持。
+
+Context7已查项目Windows Node22对应HTTP listen/address/close/closeAllConnections文档，关闭所有连接放在停止接收之后；Mermaid Chart已呈现真实中文HTTP页面、Worker、Builder、标题和文件边界链。本轮四项静态门禁、7个JavaScript脚本与11个嵌入表达式语法、JSON/YAML、110个相对链接、47个源指纹及历史/夹具字节复核通过。新测试/真实页面/构建仅在Windows运行，本环境不运行产品测试或构建。当前累计47个风险源路径全部保留，只有public/app/export.js本轮指纹更新并保留先前值；R12根验收、05验收和两次失败、06首轮失败均不覆盖。
 
 ## 公共构建职责
 
@@ -48,7 +68,7 @@ VM仅测试DOM编排、Presentation和文件边界，不能代替安全DOM、真
 
 本环境仅执行架构/文档/旧运行时/生成文件门禁、JavaScript与嵌入浏览器表达式语法、JSON/YAML、相对链接、源指纹、历史证据与diff静态复核。Node产品测试、浏览器、构建、Rust和实际WebView只在Windows执行；本地静态通过不代表20＋3项或累计产品测试通过。
 
-四项静态门禁通过，11个变更JavaScript/测试脚本与11个嵌入浏览器表达式语法通过；JSON/YAML、110个相对链接、47个当前源指纹、原场景/夹具字节、历史验收及diff复核通过。原45个风险路径全部保留，41个指纹不变；R12根验收和05实施/失败历史原样保存。
+首轮实施历史静态记录：四项静态门禁通过，11个变更JavaScript/测试脚本与11个嵌入浏览器表达式语法通过；JSON/YAML、110个相对链接、47个当前源指纹、原场景/夹具字节、历史验收及diff复核通过。原45个风险路径全部保留，41个指纹不变；R12根验收和05实施/失败历史原样保存。
 
 完整Windows证据待推送后的同提交七组CI，14.6不能勾选。R14-F04本项构建部分已切换，但后续styleTaskLists/renderMermaidBlocks/observedPreviewBody由14.7/14.12/14.16接收；F01增强和F02独立HTML模板、F03完整格式产物仍待各接收项。A10新low风险不因本项测试通过而关闭，处置截止仍为14.7验收前，全部离线格式链截止R14收官。
 

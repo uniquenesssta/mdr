@@ -5,7 +5,7 @@ import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { launchChromium } from './lib/cdp-browser.mjs';
 import { installVirtualFileHost } from './lib/virtual-file-host.mjs';
-import { prepareBuiltApplicationDocument } from './lib/built-application-assets.mjs';
+import { startBuiltApplicationHost } from './lib/built-application-host.mjs';
 import { runExportCharacterization } from './lib/export-characterization.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -542,34 +542,16 @@ async function inspectResponsiveShell(page, viewport) {
 
 async function runAppSuite() {
   const browser = await launchChromium({ width: 1440, height: 1000 });
-  const virtualHost = externalUrl ? null : await installVirtualFileHost(browser.page, {
-    root: resolve(projectRoot, 'dist'),
-    origin: 'https://markdown-editor-app.test'
-  });
-  const baseUrl = externalUrl || virtualHost.origin;
+  let applicationHost = null;
   activePage = browser.page;
   try {
-    if (externalUrl) {
-      await browser.page.navigate(`${baseUrl.replace(/\/$/, '')}/?e2e=1`);
-    } else {
-      let appHtml = await readFile(resolve(projectRoot, 'dist/index.html'), 'utf8');
-      const preparedApplication = prepareBuiltApplicationDocument(appHtml, virtualHost.origin);
-      const { moduleUrl, stylesheetUrl } = preparedApplication;
-      appHtml = preparedApplication.html;
-      await browser.page.setDocumentContent(appHtml);
-      await browser.page.evaluate(`(()=>{
-        const values=new Map();
-        const storage={getItem:key=>values.has(String(key))?values.get(String(key)):null,setItem:(key,value)=>values.set(String(key),String(value)),removeItem:key=>values.delete(String(key)),clear:()=>values.clear(),key:index=>Array.from(values.keys())[index]??null,get length(){return values.size;}};
-        Object.defineProperty(window,'localStorage',{configurable:true,value:storage});
-        window.__MARKDOWN_EDITOR_E2E__=true;
-        localStorage.setItem('md_editor_help_shown','true');
-        localStorage.setItem('md_editor_sidebar_visible','false');
-      })()`);
-      if (stylesheetUrl) {
-        await browser.page.evaluate(`new Promise((resolve,reject)=>{const link=document.createElement('link');link.rel='stylesheet';link.href=${JSON.stringify(stylesheetUrl)};link.onload=resolve;link.onerror=()=>reject(new Error('stylesheet failed'));document.head.appendChild(link);})`);
-      }
-      await browser.page.evaluate(`import(${JSON.stringify(moduleUrl)}).then(()=>true)`);
-    }
+    applicationHost = externalUrl ? null : await startBuiltApplicationHost(resolve(projectRoot, 'dist'));
+    const baseUrl = externalUrl || applicationHost.origin;
+    if (!externalUrl) await browser.page.addInitScript(`
+      localStorage.setItem('md_editor_help_shown','true');
+      localStorage.setItem('md_editor_sidebar_visible','false');
+    `);
+    await browser.page.navigate(`${baseUrl.replace(/\/$/, '')}/?e2e=1`);
     await browser.page.waitFor(() => document.documentElement.classList.contains('app-ready'), { timeoutMs: 20000, description: 'application ready' });
     const bridgeAvailable = await browser.page.evaluate('Boolean(window.__markdownEditorE2E)');
     if (!externalUrl && !bridgeAvailable) {
@@ -1799,7 +1781,7 @@ async function runAppSuite() {
       await setAppLayout(browser.page, 'hybrid');
     });
 
-    await runExportCharacterization({ page: browser.page, test, artifactRoot,
+    await runExportCharacterization({ page: browser.page, test, artifactRoot, applicationHost,
       loadMarkdown: source => browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)}, {layout:'both',codeVisualEditing:true,tableVisualEditing:true})`)
     });
 
@@ -1808,8 +1790,14 @@ async function runAppSuite() {
     }
   } finally {
     activePage = null;
-    await virtualHost?.close();
-    await browser.close();
+    try {
+      await writeFile(join(artifactRoot, 'built-app-diagnostics.json'), JSON.stringify({
+        console: browser.page.consoleMessages, exceptions: browser.page.exceptions,
+        requests: applicationHost?.requests || [], origin: applicationHost?.origin || externalUrl
+      }, null, 2));
+    } finally {
+      try { await browser.close(); } finally { await applicationHost?.close(); }
+    }
   }
 }
 

@@ -71,7 +71,7 @@
       "public/app/export.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy export format/render callers consuming public immutable requests and readonly cancellation tokens with explicit commit locks; progress DOM and UI event ownership migrated to Export. R14-06 body construction removed; all rendered format callers use the scoped public Document Builder.",
+      "Legacy export format/render callers consuming public immutable requests and readonly cancellation tokens with explicit commit locks; progress DOM and UI event ownership migrated to Export. R14-06 body construction removed; all rendered format callers use the scoped public Document Builder. HTML/Word title text uses Export-owned escaping without retired Preview globals.",
       "legacy-image-preview-state",
       "classic-script",
       "split-and-remove",
