@@ -825,7 +825,8 @@ const editor = document.getElementById('editor');
     document.addEventListener('markdown-editor:settings-changed', event => {
       const applied = event?.detail?.snapshot;
       if (!applied || !Array.isArray(event?.detail?.changedIds)) return;
-      coreLayoutStatePort.sidebarVisible = applied.sidebarVisible;
+      const changedIds = event.detail.changedIds;
+      if (changedIds.includes('sidebarVisible')) coreLayoutStatePort.sidebarVisible = applied.sidebarVisible;
       editorFontSize = applied.editorFontSize;
       editorTextColor = applied.editorTextColor;
       activeLineColor = applied.activeLineColor;
@@ -833,8 +834,12 @@ const editor = document.getElementById('editor');
       toolbarVisible = applied.toolbarVisible;
       toolbarHiddenItems = new Set(applied.toolbarHiddenItems);
       previewPerformanceMode = applied.previewPerformanceMode;
-      setLayoutMode(applied.layoutMode, false, false);
-      applyEditorPreferences();
+      if (changedIds.includes('layoutMode') || changedIds.includes('previewPerformanceMode')) {
+        setLayoutMode(applied.layoutMode, false, false);
+      }
+      if (['editorFontSize', 'editorTextColor', 'activeLineColor', 'toolbarVisible', 'toolbarHiddenItems'].some(id => changedIds.includes(id))) {
+        applyEditorPreferences();
+      }
       updateStatusBar();
       showToast('设置已保存');
     });

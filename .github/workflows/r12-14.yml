@@ -177,6 +177,9 @@ jobs:
       - name: R14-06 detached document builder, stale source and frame disposal
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-export-document.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-document.log"
+      - name: R14-06 cumulative Settings changes preserve theme-only Preview identity
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-settings-effects.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/settings-effects.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

@@ -41,7 +41,7 @@
       "public/app/core.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy layout/sidebar/document UI coordination with Stage 10 save implementation removed; persistence intents are dispatched through explicit document/editor command boundaries.",
+      "Legacy layout/sidebar/document UI coordination with Stage 10 save implementation removed; persistence intents are dispatched through explicit document/editor command boundaries. Committed Settings effects apply layout, sidebar and editor preferences only for their changed fields, preserving Preview nodes on theme-only commits.",
       "legacy-ui-state",
       "classic-script",
       "split-and-remove",

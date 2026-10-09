@@ -1,8 +1,29 @@
 # R14-06 Document Builder
 
-状态：**首轮Windows未通过；本轮修复已实施，待新精确提交累计重验**。继续 `agent/r14-stage`，基线 `45bcdd14debf2ab030df66f44e6588d29915a440`；14.6保持未勾选，14.7未开始。
+状态：**第二轮Windows未完全通过；主题接线修复已实施，待新精确提交累计重验**。继续 `agent/r14-stage`，基线 `45bcdd14debf2ab030df66f44e6588d29915a440`；14.6保持未勾选，14.7未开始。
 
 R14-05正式实现验收仍为 `11d2eb4` / CI37929409192，历史两次失败与对应修复不变。文档收尾 `45bcdd1` / [CI37931528219](https://github.com/uniquenesssta/mdr/actions/runs/37931528219) 七组及全部执行步骤成功，已核对精确head、job和step；审计记录追加该收尾重验，不覆盖正式实现证据。新一轮不能继承05的成功作为06验收。
+
+## 第二轮证据与主题接线修复
+
+`4d5831e4c4c49e8f21abab3f11f4412c56c2c78a` / [CI37943920538](https://github.com/uniquenesssta/mdr/actions/runs/37943920538)，attempt1：全仓Node1776/1776、前端771/771、导出43/43、Builder20/20、请求/任务/取消/进度31/16/22/20、浏览器契约11/11与生产构建通过；WebView、依赖、Rust、全仓Node及原生五组全部成功。built-app37/39，frontend与最终收尾未通过。
+
+上一轮三个直接导出失败已消除。已校验前端artifact11622623114 SHA-256 `e4b029ad41c79c77797e7d6492413f0251ecaaa6c3338a7e1f5b2950eb79fd7f`；这轮包含所有实际探针JSON、两张失败截图、控制台与111条真实资源请求。18份Markdown/HTML/Word产物成功，退休escapeHtml不存在且12个HTML/Word检查无错误/进度残留。413096字符长文包含全部137段和标题；实际Worker资产200，138块分批48/96/138，全文快照记录为空。首批取消得到cancelled错误、任务释放，下一次build仍返回全部137段；不以VM结果代替这些页面证据。
+
+| 本轮直接失败 | 证据与原因 | 修复与保留门槛 |
+| --- | --- | --- |
+| Theme Toggle的samePreviewFirst=false | 其他编辑器/模型/文档身份、正文/版本、根Preview节点和已存dark主题均通过。实际classic Settings监听忽略changedIds，对仅theme变更也调用setLayoutMode；混合布局的applyEditorPresentationMode会suspendForHybridMode并清空现有Preview | 仅布局/预览性能变化才调用布局，仅编辑器/工具栏变化应用偏好，仅侧栏变化投影侧栏。主题仍由既有Theme Service管理；原节点身份断言全部保持 |
+| 下一项Theme Service前置theme=dark，而预期light | 前一个测试在dark断言失败后跳过恢复/删除探针；第二项尚未测试Theme Service提交便退出。源码与两次实际日志顺序一致 | 两项测试都在finally写before/dark/light证据并经实际主题按钮恢复已提交light，删除自己的身份探针，阻断场景污染 |
+
+两个主题场景都在取身份之前等待实际公开PreviewCommandPort.update完成；首项仍测试hybrid布局，另项仍测试preview布局。首项增加非空预览要求，避免null身份比较空过；没有删除samePreviewFirst、改变目标主题、跳过或将失败改成成功。原39个页面场景及已修好的导出长文/取消断言全部保留。
+
+新增5项 `stage-14-settings-effects.test.mjs`：编译实际core.js监听代码，接入真实公开Settings Store/提交协调器/Theme Service/Toggle；测试按钮和draft提交保持已有正文节点、混合字段按职责只刷新一次、预览性能刷新保留、编辑器/工具栏不重布局、语言/保存/导出目录不重建预览。测试不复制监听逻辑，不注入退休Preview/Editor接口。工作流追加独立settings-effects.log；旧Builder20项与所有累计门禁保持。
+
+本轮只修复确认的Settings事件副作用链与两项测试生命周期；不改Builder、Worker算法、模型、Theme Service/Store、依赖、原生命令或写入格式。风险源47个路径保留，只更新core.js本轮指纹并存旧值；首轮标题/服务修复与两个失败尝试、R12/05历史验收均保留。Mermaid Chart已更新实际中文提交事件、Theme Service与各字段副作用链；未引入第三方API或版本变化，无新增Context7查询。
+
+附带页面控制台仍记录public/app/events.js的scheduleEditorMetricsRebuild未定义；此为另列未修复的Editor/UI兼容接线问题，不是这两个主题断言或Builder失败。PDF/Image的styleTaskLists缺失仍属既有F04后续接收项。上述观测不冒充本项修复成功或扩大本轮生产修改，14.6与完整格式仍不能提前验收。
+
+本轮四项静态门禁、3个变更脚本、12个主题嵌入表达式及实际监听器截取语法、JSON/YAML、111个相对链接、47个源指纹与历史/原产物夹具一致性检查通过。本环境未运行5项产品回归、浏览器或构建；新提交需完整Windows累计重验。下面首轮记录为历史，不覆盖第二轮证据。
 
 ## 首轮失败与本轮修复
 
