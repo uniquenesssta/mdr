@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～04已验收，R14-05 Progress Store/UI已实施，待精确提交Windows CI；14.6未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～04已验收，R14-05首轮CI因旧计数断言失败，迁移校验已修正，待新Windows CI；14.6未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-09：修复R14-05首轮CI漏同步的旧迁移计数断言：`2bbd773` / [CI37890617533](https://github.com/uniquenesssta/mdr/actions/runs/37890617533) 进度20/20、取消22/22、任务16/16、请求31/31、导出41/41、浏览器11/11＋38/38及Rust/原生/WebView通过；全仓1743/1744、前端745/746唯一直接失败是Stage 1仍固定内联事件33，而迁出进度按钮后已为32。改查现有每个处理器及数量与精确基线一致，并证明退役按钮已移除、迁移记录保留；原历史交接与全部场景/硬门禁保持，生产代码不变，待新Windows累计验收，14.5未验收、14.6未开始。[详情](docs/R14-05-DETAILS.md)。
 
 - 2026-10-09：R14-04在 `f631d26` / [Windows CI37886068643](https://github.com/uniquenesssta/mdr/actions/runs/37886068643) 七组及全部步骤通过，安全写入18/18、Rust格式、取消22/22、全仓1724/1724、前端726/726、浏览器11/11＋37/37，正式收尾。按用户“收尾04开始05”继续同分支实施14.5：Progress Store只读投影唯一任务状态，独立View接管进度DOM、ModalShell焦点/关闭、受控取消按钮和结束清空；移除经典订阅、进度模板/注册及内联取消全局入口，pagehide逐项清理。保留原41/31/16/22场景并接入新视图，新增20项生命周期专项和实际页面探针；静态自检后交Windows累计验收，14.5未勾选、14.6未开始。[04验收](docs/R14-04-DETAILS.md) · [05实施](docs/R14-05-DETAILS.md)。
 

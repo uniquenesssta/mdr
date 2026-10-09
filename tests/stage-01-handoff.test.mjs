@@ -1,4 +1,5 @@
 import { checkLegacyRuntime } from '../scripts/architecture/checks.mjs';
+import { collectInlineEvents } from '../scripts/architecture/source-analysis.mjs';
 import { assertProductionInventory } from './support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -155,10 +156,22 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 6);
   // R13.13 removes the file input change and file-menu import handlers; the historical handoff above stays frozen.
   // R13.14 also removes the webpage import menu handler; MenuView owns that command.
-  assert.equal(baseline.inlineEvents.reduce((sum, item) => sum + item.count, 0), 33);
-  const currentHtml = await readText('public/compatibility/business-content.html');
+  // R14.5 retires the progress cancel handler. Compare exact remaining handlers/counts,
+  // rather than treating a past migration total as a permanent product contract.
+  const compatibilityPath = 'public/compatibility/business-content.html';
+  const currentHtml = await readText(compatibilityPath);
+  const inlineContract = records => records.map(({ path, attribute, handler, count }) =>
+    JSON.stringify([path, attribute, handler, count])).sort();
+  assert.deepEqual(inlineContract(collectInlineEvents(compatibilityPath, currentHtml)),
+    inlineContract(baseline.inlineEvents.filter(item => item.path === compatibilityPath)));
+  const progressMigration = baseline.auditCorrections.r14ProgressMigration;
+  assert.equal(progressMigration.atomic, 'R14-05');
+  assert.deepEqual(inlineContract(progressMigration.removedInlineEvents),
+    [JSON.stringify([compatibilityPath, 'onclick', 'cancelActiveExport()', 1])]);
+  assert.equal(baseline.inlineEvents.some(item => item.handler === 'cancelActiveExport()'), false);
   assert.doesNotMatch(currentHtml, /onchange="importFile\(|onclick="triggerImportFile\(/);
   assert.doesNotMatch(currentHtml, /onclick="openUrlModal\(/);
+  assert.doesNotMatch(currentHtml, /cancelActiveExport|id="export-progress-modal"/);
   assert.deepEqual(await checkLegacyRuntime({ root: ROOT }), []);
   assert.equal(baseline.trackedGeneratedFiles.length, 4);
   assert.equal(baseline.policy.wildcardExemptions, false);
