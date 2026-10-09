@@ -1,6 +1,6 @@
 # R14-05 Progress Store/UI
 
-状态：**已在精确提交 `11d2eb4befff4b06a13e2f4f00075ca1db2d056f` / [Windows CI37929409192](https://github.com/uniquenesssta/mdr/actions/runs/37929409192) 七组及全部步骤通过，正式收尾**。同一 `agent/r14-stage`，14.6 DocumentBuilder未开始；下面保留实施与两轮失败/修复记录，其历史“待验收”不代表当前状态。
+状态：**已在精确提交 `11d2eb4befff4b06a13e2f4f00075ca1db2d056f` / [Windows CI37929409192](https://github.com/uniquenesssta/mdr/actions/runs/37929409192) 七组及全部步骤通过，正式收尾**。同一 `agent/r14-stage`，文档收尾 `45bcdd1` / [Windows CI37931528219](https://github.com/uniquenesssta/mdr/actions/runs/37931528219) 七组及全部步骤成功；按用户“收尾05开始06”启动 [14.6 Document Builder](R14-06-DETAILS.md)，待其独立Windows验收；下面保留实施与两轮失败/修复记录，其历史“待验收”不代表当前状态。
 
 ## 正式 Windows 验收（2026-10-09）
 

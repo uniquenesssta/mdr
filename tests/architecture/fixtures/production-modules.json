@@ -71,7 +71,7 @@
       "public/app/export.js",
       "legacy-classic-script",
       "legacy-app",
-      "Legacy export format/render callers consuming public immutable requests and readonly cancellation tokens with explicit commit locks; progress DOM and UI event ownership migrated to Export.",
+      "Legacy export format/render callers consuming public immutable requests and readonly cancellation tokens with explicit commit locks; progress DOM and UI event ownership migrated to Export. R14-06 body construction removed; all rendered format callers use the scoped public Document Builder.",
       "legacy-image-preview-state",
       "classic-script",
       "split-and-remove",
@@ -2251,7 +2251,7 @@
       "src/features/preview/pipeline/preview-render-engine.js",
       "esm-module",
       "preview-pipeline",
-      "Canonical single Preview render-cycle orchestrator composing model/Worker results, render coordinator, DOM renderer, virtual window, enhancements and recovery.",
+      "Canonical single Preview render-cycle orchestrator composing model/Worker results, render coordinator, DOM renderer, virtual window, enhancements and recovery. Public export capture reads only synchronized Worker blocks and creates detached nodes without exposing Worker/model state; document/version/reset guard the capability.",
       "preview-render-engine-worker-virtual-runtime",
       "explicit-instance",
       "retain",
@@ -3141,7 +3141,7 @@
       "src/main.js",
       "esm-entrypoint",
       "composition",
-      "Production composition root wiring Stage 10 Persistence save/autosave/load/close-save owners and explicit UI/document persistence commands while preserving Window port-only close admission and Stage 9 synchronization. R14-02 mounts the scoped Export Request boundary with read-only Documents identity/existence readers. R14-03 composes the sole Export Task Controller and scoped task subscriptions with pagehide disposal. R14-05 composes readonly Export Progress Store and its independent ModalShell view; pagehide releases every Export owner even if one disposal fails.",
+      "Production composition root wiring Stage 10 Persistence save/autosave/load/close-save owners and explicit UI/document persistence commands while preserving Window port-only close admission and Stage 9 synchronization. R14-02 mounts the scoped Export Request boundary with read-only Documents identity/existence readers. R14-03 composes the sole Export Task Controller and scoped task subscriptions with pagehide disposal. R14-05 composes readonly Export Progress Store and its independent ModalShell view; pagehide releases every Export owner even if one disposal fails. R14-06 composes Document Builder with public Preview capture, model identity and safe renderer capabilities, and releases it before Preview/model destruction.",
       "legacy-bootstrap-bridge",
       "module-load",
       "replace-with-composition-root",
@@ -5204,6 +5204,26 @@
       "Construct and project progress DOM; own ModalShell focus/visibility, controller-command cancel button, terminal reset and view disposal.",
       "progress-dom-and-modal-lifecycle",
       "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/document/export-document-builder.js",
+      "esm-module",
+      "export-application",
+      "Detached complete document construction from synchronized readonly Preview source or explicit model snapshot; guards identity/version, batches work and releases canceled frames.",
+      "active-builds-and-frame-handles",
+      "explicit-idempotent-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-export-document-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Scoped immutable build delegation to the public Document Builder.",
+      "none",
+      "explicit-idempotent-destroy",
       "retain",
       false
     ]

@@ -1,10 +1,9 @@
-// Characterization host only: execute the unchanged classic exporter in a fresh VM.
-// DOM/vendor/platform doubles expose orchestration, not native I/O or rendered pixels.
-// Default hosts supply retired preview bindings to preserve old algorithm contracts;
-// supplyRetiredPreviewBindings=false reproduces the current application failure.
+// Characterization host: execute classic format callers with the actual public Export Builder.
+// DOM/vendor/platform doubles prove orchestration only. Enhancement/print bindings
+// remain isolated historical adapters until their receiving tasks; Worker globals are never supplied.
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
 
@@ -22,7 +21,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
       tagName: tag.toUpperCase(), style: {}, dataset: {}, textContent: '', value: '', disabled: false, checked: false, scrollHeight: imageHeight,
       classList: { add: x => classes.add(x), remove: x => classes.delete(x), contains: x => classes.has(x), toggle(x, force) { const next = force ?? !classes.has(x); next ? classes.add(x) : classes.delete(x); return next; } },
       get children() { return children; },
-      get innerHTML() { return html + children.map(x => x.innerHTML || '').join(''); },
+      get innerHTML() { return html + (this.textContent ? escapeHtml(this.textContent) : '') + children.map(x => x.tagName === 'PRE' ? '<pre class="' + x.className + '">' + x.innerHTML + '</pre>' : x.innerHTML || '').join(''); },
       set innerHTML(value) { html = String(value); children = []; },
       append(...items) { for (const item of items) { if (item.fragment) children.push(...item.children); else children.push(item); } },
       appendChild(item) { this.append(item); return item; },
@@ -76,8 +75,6 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     documentModel: { getDocumentVersion: () => 7, createSnapshot(reason) { calls.push(['snapshot', reason]); return sourceText; } },
     coreExportRequestPort: requestMount.port,
     editor: { textLength, value: 'stale editor value' }, filenameInput: { value: name }, exportDirectory: 'C:\\custom',
-    previewWorkerClient: workerBlocks ? { blocks: workerBlocks, workerVersion } : null,
-    createPreviewNodesForBlock(block) { calls.push(['block', block.id]); const result = node('p'); result.innerHTML = block.html; return [result]; },
     preview: node(), observedPreviewBody: {}, escapeHtml,
     requestAnimationFrame(callback) { frameCount++; onFrame?.(frameCount); queueMicrotask(callback); },
     setTimeout(callback, delay) { timers.push({ callback, delay }); return timers.length; },
@@ -88,14 +85,27 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     showToast: message => calls.push(['toast', message]), t: key => key,
     styleTaskLists: () => calls.push(['taskLists']), renderMermaidBlocks: async () => calls.push(['mermaid']), getComputedStyle: () => ({ backgroundColor: '#ffffff' })
   });
+  const documentBuilder = createExportDocumentBuilder({
+    documentRef: context.document, documentModel: { ...context.documentModel, getTextLength: () => textLength },
+    getActiveDocumentId: () => documentId, presentation,
+    preview: { capture: () => workerVersion === 7 && workerBlocks?.length ? Object.freeze({
+      blockCount: workerBlocks.length, isCurrent: () => workerVersion === 7,
+      createBlockNodes(index) { const block = workerBlocks[index]; calls.push(['block', block.id]); const result = node('p'); result.innerHTML = block.html; return [result]; }
+    }) : null },
+    createHtmlNodes(html) { const result = node('p'); result.innerHTML = html; return [result]; },
+    requestFrame: callback => context.requestAnimationFrame(callback), cancelFrame: handle => context.cancelAnimationFrame?.(handle),
+    reportError: (...args) => context.console.error(...args)
+  });
+  const documentMount = mountClassicExportDocumentPort(host, documentBuilder);
   vm.runInContext(markdownDownload + '\n' + source, context, { filename: 'public/app/export.js', timeout: 1000 });
   if (!supplyRetiredPreviewBindings) {
-    for (const key of ['previewWorkerClient', 'createPreviewNodesForBlock', 'styleTaskLists', 'renderMermaidBlocks', 'observedPreviewBody']) delete context[key];
+    for (const key of ['styleTaskLists', 'renderMermaidBlocks', 'observedPreviewBody']) delete context[key];
   }
   return {
-    context, calls, downloads, nodes, timers, events, taskController, taskPort: taskMount.port,
+    context, calls, downloads, nodes, timers, events, taskController, documentBuilder,
+    build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,
     cancel: () => nodes.get('export-progress-cancel').click(),
-    destroy() { try { taskController.destroy(); } finally { progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    destroy() { try { taskController.destroy(); } finally { documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
     invoke: (name, ...args) => context[name](...args),
     evaluate: expression => vm.runInContext(expression, context),
     setFrameHook(callback) { onFrame = callback; },

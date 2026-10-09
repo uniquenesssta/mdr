@@ -8,19 +8,27 @@ const requests = JSON.parse(readFileSync(new URL('./fixtures/stage-14-export/req
 const plain = value => JSON.parse(JSON.stringify(value));
 const operations = { markdown: 'exportFile', html: 'exportHTML', word: 'exportWord', image: 'downloadExportImage' };
 
-// These legacy algorithm contracts deliberately supply retired preview bindings.
-// The unpatched built-app probes and the missing-binding tests below are the
-// application baseline; passing these isolated contracts does not repair R14-F04.
+// Immutable R14-01 findings stay in contracts.json; current acceptance maps the repaired
+// builder to public capabilities and retains later enhancer/print defects as failures.
 test('R14-01 records the actual retired preview dependency instead of hiding it behind the VM host', async () => {
+  assert.match(fixture.knownFindings.find(x => x.id === 'R14-F04').behavior, /previewWorkerClient/);
   const h = createExportVmHost({ supplyRetiredPreviewBindings: false });
-  await assert.rejects(h.invoke('createFullPreviewBodyForExport'), { name: 'ReferenceError', message: 'previewWorkerClient is not defined' });
-  for (const operation of ['exportHTML', 'exportWord', 'exportPDF', 'renderExportImagePreview']) {
+  const body = await h.build();
+  assert.ok(body.innerHTML.includes('原文'));
+  assert.equal(h.evaluate('typeof previewWorkerClient'), 'undefined');
+  assert.equal(h.evaluate('typeof createPreviewNodesForBlock'), 'undefined');
+  for (const operation of ['exportHTML', 'exportWord']) await h.invoke(operation);
+  assert.equal(h.downloads.length, 2, 'R14-06 repairs body construction only.');
+  h.downloads.length = 0;
+  for (const operation of ['exportPDF', 'renderExportImagePreview']) {
     await h.invoke(operation);
     assert.equal(h.downloads.length, 0);
     assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
   }
   assert.equal(h.timers.length, 0);
   assert.equal(h.calls.filter(x => x[0] === 'saveFile' || /^write/.test(x[0])).length, 0);
+  assert.ok(h.calls.some(x => x[0] === 'error'));
+  h.destroy();
 });
 
 for (const item of requests.names) {
@@ -103,7 +111,7 @@ for (const size of ['small', 'large']) {
     const blocks = Array.from({ length: spec.blocks }, (_, id) => ({ id, html: `<p>block-${id}</p>` }));
     const h = createExportVmHost({ workerBlocks: blocks, textLength: spec[size + 'Characters'] });
     const task = h.invoke('beginExportTask', 'fixture');
-    const body = await h.invoke('createFullPreviewBodyForExport', task);
+    const body = await h.build(task);
     assert.equal(body.innerHTML, blocks.map(x => x.html).join(''));
     assert.deepEqual(h.calls.filter(x => x[0] === 'block').map(x => x[1]), blocks.map(x => x.id));
     assert.equal(h.calls.some(x => ['snapshot', 'parse'].includes(x[0])), false);
@@ -116,7 +124,7 @@ for (const size of ['small', 'large']) {
 test('R14-01 stale Worker version/empty blocks use an explicit full snapshot; parser failure preserves raw source', async () => {
   for (const options of [{ workerBlocks: [{ id: 0, html: 'STALE' }], workerVersion: 6 }, { workerBlocks: [] }, { parseError: true }]) {
     const h = createExportVmHost({ ...options, sourceText: '<safe> $x$ 😀' });
-    const body = await h.invoke('createFullPreviewBodyForExport');
+    const body = await h.build();
     assert.deepEqual(h.calls.filter(x => x[0] === 'snapshot'), [['snapshot', 'full-preview-export']]);
     assert.equal(h.calls.some(x => x[0] === 'block'), false);
     assert.ok(body.innerHTML.includes('&lt;safe&gt; $x$ 😀'));

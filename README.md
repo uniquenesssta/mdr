@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～05已验收，R14-05在11d2eb4 / CI37929409192七组及全部步骤通过；14.6未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～05已验收，R14-05在11d2eb4 / CI37929409192七组及全部步骤通过；14.5收尾45bcdd1 / CI37931528219七组通过；14.6 Document Builder已实施待Windows验收，14.7未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-09：R14-05收尾提交 `45bcdd1` / [Windows CI37931528219](https://github.com/uniquenesssta/mdr/actions/runs/37931528219) 七组及全部步骤通过。按“收尾05开始06”在同分支迁入公共Document Builder：优先复用已同步Preview块按96/48块分帧，回退显式模型快照与安全HTML节点；检查身份/版本/取消并释放待执行帧，pagehide先卸载构建能力再销毁依赖。删除旧全文构建函数，HTML/Word/PDF/Image全部切换；原41/31/16/22/20场景保留并映射新接口，新增20项构建、3项Preview捕获及实际长文/取消/销毁探针。四项静态门禁与语法/指纹/历史复核后提交Windows累计CI；本环境未运行产品测试、浏览器或构建。14.6未勾选、14.7未开始；原缺陷夹具不变，HTML/Word仍有未增强/独立模板缺口，PDF/Image旧增强/打印链及A10继续接收。[06实施](docs/R14-06-DETAILS.md) · [05验收](docs/R14-05-DETAILS.md)。
 
 - 2026-10-09：R14-05在 `11d2eb4` / [Windows CI37929409192](https://github.com/uniquenesssta/mdr/actions/runs/37929409192) 七组及全部步骤通过，正式收尾：全仓1748/1748、前端746/746、进度20/20、新增预览竞态4/4、取消22/22、浏览器11/11＋38/38与实际WebView导入链8/8成功。上轮文件双栏渲染检查已通过，保留失败历史及其因果证据限制；进度状态、界面、取消和结束清理已验收，完整格式缺口及A10保持接收。仅更新验收文档和任务勾选，14.6未开始。[验收详情](docs/R14-05-DETAILS.md)。
 

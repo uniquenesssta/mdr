@@ -27,9 +27,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
             const start = captures.length;
             await run();
             if(format !== 'markdown') {
-              if(captures.length !== start)throw new Error('Unexpected repaired output: update R14-F04 with a new verified mapping');
-              failures.push({format,input:row.input,error:errors.at(-1),progressVisible:document.getElementById('export-progress-modal').classList.contains('show')});
-              continue;
+              failures.push({format,input:row.input,error:errors.at(-1) || null,progressVisible:document.getElementById('export-progress-modal').classList.contains('show')});
             }
             if(captures.length !== start+1) throw new Error('Expected one actual '+format+' download: '+row.input);
             const capture = captures.at(-1), content = await capture.blob.text();
@@ -44,17 +42,29 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
         input.value=originalName;console.error=error;
       }
     })()`);
-    assert.equal(result.captures.length, fixture.names.length);
+    assert.equal(result.captures.length, fixture.names.length * 3);
     for (const capture of result.captures) {
       const row = requests.names.find(x => x.input === capture.input);
-      assert.equal(capture.name, row.markdown);
+      assert.equal(capture.name, row[capture.format]);
       assert.equal(capture.revoked, true);
-      assert.equal(capture.content, fixture.source);
-      assert.equal(capture.mime, 'text/markdown;charset=utf-8');
+      if (capture.format === 'markdown') {
+        assert.equal(capture.content, fixture.source);
+        assert.equal(capture.mime, 'text/markdown;charset=utf-8');
+      } else {
+        assert.equal(capture.mime, capture.format === 'html' ? 'text/html;charset=utf-8' : 'application/msword;charset=utf-8');
+        assert.ok(capture.content.startsWith('<!DOCTYPE html>'));
+        assert.ok(capture.content.includes('$x^2$'));
+        assert.ok(capture.content.includes('flowchart TD'));
+        assert.equal(capture.content.includes('f-mermaid-svg'), false);
+        if (capture.format === 'html') {
+          assert.ok(capture.content.includes('https://cdn.jsdelivr.net/npm/katex@0.16.9/'));
+          assert.ok(capture.content.includes('exportPresentationPort.math?.renderTree'));
+        }
+      }
     }
     assert.equal(result.failures.length, fixture.names.length * 2);
     for (const failure of result.failures) {
-      assert.match(failure.error, /previewWorkerClient is not defined/);
+      assert.equal(failure.error, null, 'R14-06 repairs the builder; original defect fixture stays immutable.');
       assert.equal(failure.progressVisible, false);
     }
     await writeFile(join(artifactRoot, 'r14-02-text-exports.json'), JSON.stringify(result, null, 2));
@@ -101,15 +111,43 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.ok(source.length >= fixture.longDocument.largeCharacters);
     await loadMarkdown(source);
     const result = await page.evaluate(`(async () => {
-      const task = beginExportTask('R14 long-document baseline');
+      const host=document.getElementById('compatibility-business-ports');
+      await host.markdownEditorPreviewCommandPort.update();
+      const task = beginExportTask('R14 long-document public builder');
+      const records=[],progress=[],model=window.markdownEditorDocumentModel,snapshot=model.createSnapshot;
+      const descriptor=Object.getOwnPropertyDescriptor(model,'createSnapshot');
+      Object.defineProperty(model,'createSnapshot',{configurable:true,writable:true,value:function(reason){records.push(reason);return snapshot.call(this,reason);}});
+      const unsubscribe=host.markdownEditorExportTaskPort.subscribe(value=>{if(value.activeTask?.phase==='building')progress.push(value.activeTask.message);});
       try {
-        const root = await createFullPreviewBodyForExport(task);
-        return {unexpectedOutput:root.textContent};
-      } catch(error) {return {name:error.name,message:error.message};}
-      finally { finishExportTask(task); }
+        const root=await host.markdownEditorExportDocumentPort.build({task});
+        return {paragraphs:Array.from(root.querySelectorAll('p')).map(x=>x.textContent.match(/^R14-block-(\\d+)/)?.[1]).filter(Boolean).map(Number),
+          heading:root.querySelector('h1')?.textContent,records,progress,
+          detached:!root.isConnected,retired:typeof previewWorkerClient==='undefined'&&typeof createPreviewNodesForBlock==='undefined',snapshotObserved:typeof snapshot==='function'};
+      } finally {unsubscribe();if(descriptor)Object.defineProperty(model,'createSnapshot',descriptor);else delete model.createSnapshot;finishExportTask(task);}
     })()`);
-    assert.deepEqual(result, {name:'ReferenceError',message:'previewWorkerClient is not defined'});
-    await writeFile(join(artifactRoot, 'r14-01-long-document.json'), JSON.stringify({ ...result, sourceCharacters:source.length, expectedParagraphs:count, finding:'R14-F04' }, null, 2));
+    assert.deepEqual(result.paragraphs, Array.from({length:count},(_,i)=>i));
+    assert.equal(result.heading, 'Large export');assert.equal(result.detached, true);assert.equal(result.retired, true);assert.equal(result.snapshotObserved,true);
+    assert.equal(result.records.includes('full-preview-export'), false, 'Synchronized Worker path cannot snapshot the whole document.');
+    const batches=result.progress.filter(x=>x.includes(' 块')).map(x=>Number(x.match(/ (\d+)\//)[1]));
+    assert.equal(batches[0],48);assert.equal(batches[1],96);assert.ok(batches.at(-1)>=count);
+    await writeFile(join(artifactRoot, 'r14-01-long-document.json'), JSON.stringify({ ...result, sourceCharacters:source.length, expectedParagraphs:count, mapping:'R14-06 public builder; original R14-F04 fixture preserved' }, null, 2));
+  });
+
+  await test('R14-06 actual long-document cancellation stops public body construction and next build remains usable', async () => {
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort;
+      const task=port.begin('cancel long builder');let batches=0;
+      const dispose=port.subscribe(s=>{if(s.activeTask?.id===task.id&&s.activeTask.message.includes(' 块')&&!s.activeTask.cancelled){batches++;port.cancel();}});
+      let error;
+      try{await host.markdownEditorExportDocumentPort.build({task});throw new Error('Cancelled build returned a body');}
+      catch(e){error={cancelled:port.isCancelled(e),reason:e.reason};}
+      finally{dispose();port.finish(task);}
+      const next=await host.markdownEditorExportDocumentPort.build();
+      return {error,batches,released:port.getSnapshot().activeTask===null,paragraphs:next.querySelectorAll('p').length,detached:!next.isConnected};
+    })()`);
+    assert.deepEqual(result.error,{cancelled:true,reason:'cancelled'});assert.equal(result.batches,1);
+    assert.equal(result.released,true);assert.equal(result.detached,true);assert.equal(result.paragraphs,fixture.longDocument.blocks);
+    await writeFile(join(artifactRoot,'r14-06-builder-cancellation.json'),JSON.stringify(result,null,2));
   });
 
   await test('R14-01 locked offline renderer produces real math/Mermaid DOM and a decodable PNG independent of the broken exporter', async () => {
@@ -159,7 +197,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       } finally {window.print=print;console.error=error;}
     })()`);
     assert.equal(result.prints, 0);
-    assert.equal(result.errors.filter(x=>x.includes('previewWorkerClient is not defined')).length, 2);
+    assert.equal(result.errors.filter(x=>/styleTaskLists is not defined|observedPreviewBody is not defined/.test(x)).length, 2);
     assert.equal(result.image, result.oldImage);
     assert.equal(result.after, result.before);
     assert.equal(result.progressVisible, false);
@@ -273,23 +311,27 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     const result = await page.evaluate(`(async () => {
       const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort;
       const progressRoot=document.getElementById('export-progress-modal');
+      const builder=host.markdownEditorExportDocumentPort;
+      await host.markdownEditorPreviewCommandPort.reset();
+      const buildWait=builder.build().then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       const task=beginExportTask('dispose locked task');task.update(96,'encoding','encoding');task.lockCancellation('encoding');
       const seen=[];port.subscribe(s=>seen.push(s));
       let rejectLate;const operation=new Promise((resolve,reject)=>{rejectLate=reject;});
       const wait=task.token.waitFor(operation).then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       window.dispatchEvent(new Event('pagehide'));
-      const waiting=await wait;rejectLate(new Error('late encoder failure'));await Promise.resolve();
+      const building=await buildWait;const waiting=await wait;rejectLate(new Error('late encoder failure'));await Promise.resolve();
       let rejected=false;try {port.begin('late');}catch(error){rejected=/destroyed/.test(error.message);}
       let cancelledError=false;try {task.token.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
-      return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,
+      return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
-        rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort'),
+        rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort'),
         progressVisible:progressRoot.classList.contains('show'),progressRemoved:!document.getElementById('export-progress-modal')};
     })()`);
     assert.equal(result.progressRemoved, true);
     assert.equal(result.snapshot.destroyed, true); assert.equal(result.snapshot.activeTask, null);
     assert.deepEqual(result.lastSeen, result.snapshot); assert.equal(result.cancelled, true); assert.equal(result.phase, 'destroyed');
     assert.deepEqual(result.waiting, {cancelled:true,reason:'destroyed'});
+    assert.deepEqual(result.building, {cancelled:true,reason:'destroyed'});
     for (const field of ['lateUpdate','lateLock','lateFinish','progressVisible']) assert.equal(result[field], false, field);
     for (const field of ['rejected','cancelledError','removed']) assert.equal(result[field], true, field);
     await writeFile(join(artifactRoot, 'r14-03-task-disposal.json'), JSON.stringify(result, null, 2));

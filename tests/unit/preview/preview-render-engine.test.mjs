@@ -28,6 +28,7 @@ function createHarness({ sourceLength = 32, workerFailure = false, stable = fals
     createSnapshot() { calls.push('model.snapshot'); return '# preview'; },
     getDocumentVersion() { return 7; }
   };
+  const documentSession = { activeId: 'doc-a' };
   const snapshot = {
     mode: 'full',
     status: 'idle',
@@ -79,7 +80,7 @@ function createHarness({ sourceLength = 32, workerFailure = false, stable = fals
       return { body: previewBody, changedNodes: body ? [...body.children] : [], reused: 0, parsedChars: result.parsedChars, virtualized: false };
     },
     patchHtml() { calls.push('renderer.patchHtml'); return { body: previewBody, changedNodes: [], reused: 0, virtualized: false }; },
-    createBlockNodes() { return []; },
+    createBlockNodes(block, renderFallback) { calls.push(['export.block',block.id]); return [{ html: block.html ?? renderFallback(block.raw) }]; },
     applyBlockSourceRange() {}
   };
   const enhancementCoordinator = enhancements || {
@@ -107,10 +108,13 @@ function createHarness({ sourceLength = 32, workerFailure = false, stable = fals
   let workerDestroyCalls = 0;
   const createWorkerClient = () => {
     workerFactoryCalls += 1;
+    const session = { snapshot: { initialized: false, syncedVersion: 7 } };
     return {
+      session, documentSource: documentModel, blocks: modelResult.blocks,
       async update() {
         calls.push('worker.update');
         if (workerFailure) throw new Error('worker failed');
+        session.snapshot.initialized = true;
         return modelResult;
       },
       destroy() { workerDestroyCalls += 1; calls.push('worker.destroy'); }
@@ -134,6 +138,7 @@ function createHarness({ sourceLength = 32, workerFailure = false, stable = fals
     root,
     editor,
     documentModel,
+    documentSession,
     state,
     scheduler,
     renderCoordinator,
@@ -153,6 +158,7 @@ function createHarness({ sourceLength = 32, workerFailure = false, stable = fals
 
   return {
     engine,
+    documentModel, documentSession,
     calls,
     previewBody,
     state,
@@ -324,4 +330,28 @@ test('R14-05 settled unchanged preview keeps its fast path without replaying enh
   await h.scheduler.drain();
   assert.equal(h.mathCalls, 1); assert.equal(h.diagramCalls, 1);
   assert.deepEqual(h.events, before);
+});
+
+
+test('R14-06 Preview export source is absent without a synchronized Worker and never creates one for export', () => {
+  const h=createHarness();assert.equal(h.engine.captureExportSource(),null);assert.equal(h.workerFactoryCalls,0);
+  h.engine.destroy();assert.throws(()=>h.engine.captureExportSource(),/destroyed/);
+});
+
+test('R14-06 Preview captures a bounded readonly source and rejects same-version document switches and stale versions', async () => {
+  const h=createHarness({sourceLength:400000});await h.engine.update();
+  const source=h.engine.captureExportSource();assert.ok(Object.isFrozen(source));assert.equal(source.blockCount,1);
+  assert.equal(source.blocks,undefined);assert.equal(source.worker,undefined);assert.equal(source.isCurrent(),true);
+  assert.deepEqual(source.createBlockNodes(0),[{html:''}]);assert.throws(()=>source.createBlockNodes(1),RangeError);
+  h.documentSession.activeId='doc-b';assert.equal(source.isCurrent(),false);assert.equal(h.engine.captureExportSource(),null);
+  assert.throws(()=>source.createBlockNodes(0),/stale/);
+  h.documentSession.activeId='doc-a';h.documentModel.getDocumentVersion=()=>8;
+  assert.equal(source.isCurrent(),false);assert.equal(h.engine.captureExportSource(),null);h.engine.destroy();
+});
+
+test('R14-06 reset and destroy invalidate already captured Preview export capabilities', async () => {
+  const h=createHarness({sourceLength:400000});await h.engine.update();const old=h.engine.captureExportSource();
+  await h.engine.reset();assert.equal(old.isCurrent(),false);assert.throws(()=>old.createBlockNodes(0),/stale/);
+  const current=h.engine.captureExportSource();assert.equal(current.isCurrent(),true);
+  h.engine.destroy();assert.equal(current.isCurrent(),false);assert.throws(()=>current.createBlockNodes(0),/stale/);
 });

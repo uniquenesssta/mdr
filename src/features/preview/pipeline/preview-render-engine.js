@@ -65,6 +65,7 @@ export function createPreviewRenderEngine(options = {}) {
   const show = typeof notify === 'function' ? notify : () => {};
   const thresholds = PREVIEW_BEHAVIOR_THRESHOLDS;
   let workerClient = null;
+  let workerDocumentId = null;
   let virtualController = null;
   let renderTheme = '';
   let prewarmVersion = 0;
@@ -244,11 +245,13 @@ export function createPreviewRenderEngine(options = {}) {
       || sourceLength >= thresholds.mode.workerChars
       || requestedMode === 'virtual'
       || requestedMode === 'chapter';
+    const renderingDocumentId = documentSession?.activeId;
 
     try {
       if (useWorker) {
         modelResult = await getWorkerClient().update(documentModel || editor, getSourceText, forceFullRebuild, { indexOnly: hybrid });
         if (modelResult?.cancelled || !state.isCurrentVersion(renderVersion)) return;
+        workerDocumentId = renderingDocumentId;
         workerDurationMs = modelResult.workerDurationMs || 0;
         blockTokens = modelResult.tokens || [];
         markdownRenderer.resetIncremental();
@@ -527,6 +530,7 @@ export function createPreviewRenderEngine(options = {}) {
     markdownRenderer.resetIncremental();
     workerClient?.destroy?.();
     workerClient = null;
+    workerDocumentId = null;
     virtualController?.deactivate?.();
     enhancementCoordinator.cancel();
     root.replaceChildren();
@@ -535,6 +539,28 @@ export function createPreviewRenderEngine(options = {}) {
   }
 
   return Object.freeze({
+    // Public detached materialization capability; never exposes Worker or mutable block objects.
+    captureExportSource() {
+      assertActive();
+      const client = workerClient;
+      const documentId = documentSession?.activeId;
+      const version = documentModel.getDocumentVersion();
+      const isCurrent = () => !destroyed && workerClient === client
+        && client?.documentSource === documentModel && workerDocumentId === documentId
+        && documentSession?.activeId === documentId && documentModel.getDocumentVersion() === version
+        && client?.session?.snapshot?.initialized && client.session.snapshot.syncedVersion === version;
+      if (!client || !isCurrent() || !Array.isArray(client.blocks) || !client.blocks.length) return null;
+      const blocks = client.blocks;
+      return Object.freeze({
+        blockCount: blocks.length,
+        isCurrent,
+        createBlockNodes(index) {
+          if (!isCurrent()) throw new Error('Preview export source is stale.');
+          if (!Number.isInteger(index) || index < 0 || index >= blocks.length) throw new RangeError('Preview export block index is invalid.');
+          return renderer.createBlockNodes(blocks[index], raw => markdownRenderer.renderFragment(raw));
+        }
+      });
+    },
     update,
     reset,
     deactivateVirtual,
@@ -559,6 +585,7 @@ export function createPreviewRenderEngine(options = {}) {
       backgroundScheduler?.cancelPrefix?.('preview-');
       workerClient?.destroy?.();
       workerClient = null;
+      workerDocumentId = null;
       virtualController?.destroy?.();
       virtualController = null;
       markdownRenderer.destroy();

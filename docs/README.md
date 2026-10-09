@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～05已验收，同一 `agent/r14-stage` 的14.5在 `11d2eb4` / [CI37929409192](https://github.com/uniquenesssta/mdr/actions/runs/37929409192) 七组及全部步骤通过，全仓1748/1748、前端746/746、进度20/20、新增预览竞态4/4、浏览器11/11＋38/38与实际WebView导入链8/8成功，正式收尾；14.6未开始。两次失败与修复记录保留。完整格式缺口和A10保持接收，不标阶段整体收官。[14.5验收](R14-05-DETAILS.md)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～05已验收，同一 `agent/r14-stage` 的14.5在 `11d2eb4` / [CI37929409192](https://github.com/uniquenesssta/mdr/actions/runs/37929409192) 七组及全部步骤通过，全仓1748/1748、前端746/746、进度20/20、新增预览竞态4/4、浏览器11/11＋38/38与实际WebView导入链8/8成功，正式收尾；收尾45bcdd1 / CI37931528219七组及全部步骤通过。14.6公共Document Builder已实施待Windows验收，14.7未开始。[06实施](R14-06-DETAILS.md)。两次失败与修复记录保留。完整格式缺口和A10保持接收，不标阶段整体收官。[14.5验收](R14-05-DETAILS.md)。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

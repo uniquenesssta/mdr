@@ -1,4 +1,4 @@
-/** Public Export request/task/cancellation/progress boundary; format rendering migrates separately. */
+/** Public Export request/task/cancellation/progress/document boundary; format rendering migrates separately. */
 export { createExportRequest, EXPORT_IMAGE_RATIOS, ExportRequestValidationError } from './application/export-request.js';
 export { mountClassicExportRequestPort } from './compatibility/classic-export-request-port.js';
 export { createExportTaskController } from './task/export-task-controller.js';
@@ -6,3 +6,5 @@ export { createExportCancellationToken, ExportCancelledError, isExportCancelledE
 export { mountClassicExportTaskPort } from './compatibility/classic-export-task-port.js';
 export { createExportProgressStore } from './task/export-progress-store.js';
 export { createExportProgressDialogView } from './ui/export-progress-dialog-view.js';
+export { createExportDocumentBuilder, ExportDocumentStaleError } from './document/export-document-builder.js';
+export { mountClassicExportDocumentPort } from './compatibility/classic-export-document-port.js';

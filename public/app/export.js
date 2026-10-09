@@ -9,6 +9,7 @@
     const exportPresentationPort = exportCompatibilityHost?.markdownEditorPresentationPort;
     const exportRequestPort = exportCompatibilityHost?.markdownEditorExportRequestPort;
     const exportTaskPort = exportCompatibilityHost?.markdownEditorExportTaskPort;
+    const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
@@ -18,6 +19,7 @@
     if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
     if (!exportRequestPort) throw new Error('Export request compatibility port is unavailable.');
     if (!exportTaskPort) throw new Error('Export task compatibility port is unavailable.');
+    if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
 
     function readExportRequest(format) {
       try {
@@ -51,59 +53,6 @@
     function finishExportTask(task, outcome) {
       try { return exportTaskPort.finish(task, outcome); }
       catch (error) { showToast('导出清理失败：' + (error?.message || String(error))); return false; }
-    }
-
-    async function createFullPreviewBodyForExport(task = null) {
-      task?.token.throwIfCancelled();
-      const body = document.createElement('div');
-      body.className = 'markdown-body';
-      const editorVersion = documentModel?.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.();
-      const workerBlocks = previewWorkerClient
-        && previewWorkerClient.workerVersion === editorVersion
-        && Array.isArray(previewWorkerClient.blocks)
-        ? previewWorkerClient.blocks
-        : null;
-
-      if (workerBlocks?.length) {
-        const batchSize = editor.textLength >= 400000 ? 48 : 96;
-        for (let start = 0; start < workerBlocks.length; start += batchSize) {
-          task?.token.throwIfCancelled();
-          const fragment = document.createDocumentFragment();
-          const end = Math.min(workerBlocks.length, start + batchSize);
-          for (let index = start; index < end; index += 1) {
-            fragment.append(...createPreviewNodesForBlock(workerBlocks[index]));
-          }
-          body.append(fragment);
-          task?.update(8 + Math.round((end / workerBlocks.length) * 52), `正在构建导出内容 ${end}/${workerBlocks.length} 块`, 'building');
-          if (end < workerBlocks.length) await waitForExportFrame(task);
-        }
-        return body;
-      }
-
-      task?.update(12, '正在解析完整文档…', 'building');
-      await waitForExportFrame(task);
-      task?.token.throwIfCancelled();
-      const source = documentModel?.createSnapshot?.('full-preview-export') ?? editor.value;
-      try {
-        if (Boolean(exportPresentationPort.markdown?.parse)) {
-          const mathApi = exportPresentationPort.math;
-          const protectedMath = typeof mathApi?.protectSource === 'function'
-            ? mathApi.protectSource(source, 'EXPORT_MATH')
-            : { text: source, placeholders: [] };
-          const rendered = exportPresentationPort.markdown.parse(protectedMath.text);
-          body.innerHTML = typeof mathApi?.restoreSource === 'function'
-            ? mathApi.restoreSource(rendered, protectedMath.placeholders)
-            : rendered;
-        } else {
-          body.innerHTML = '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
-        }
-      } catch (error) {
-        console.error('Export preview render error:', error);
-        body.innerHTML = '<pre class="f-raw-fallback">' + escapeHtml(source) + '</pre>';
-      }
-      task?.token.throwIfCancelled();
-      task?.update(60, '完整文档已解析', 'building');
-      return body;
     }
 
     async function enhanceFullPreviewForExport(root, task = null) {
@@ -214,7 +163,7 @@
       try {
         const name = request.name;
 
-        const bodyHtml = (await createFullPreviewBodyForExport(task)).innerHTML;
+        const bodyHtml = (await exportDocumentPort.build({ task, documentId: request.documentId })).innerHTML;
         task.token.throwIfCancelled();
         task.update(92, '正在生成 Word 文件…', 'serializing');
 
@@ -292,7 +241,7 @@ ${bodyHtml}
       try {
         const name = request.name;
 
-        const bodyHtml = (await createFullPreviewBodyForExport(task)).innerHTML;
+        const bodyHtml = (await exportDocumentPort.build({ task, documentId: request.documentId })).innerHTML;
         task.token.throwIfCancelled();
         task.update(92, '正在生成 HTML 文件…', 'serializing');
 
@@ -399,7 +348,7 @@ ${'</scr' + 'ipt>'}
         wasSource = exportPreviewCommandPort.getViewMode() === 'source';
         if (wasSource) exportPreviewCommandPort.setViewMode('preview');
         exportPreviewCommandPort.deactivateVirtual();
-        const fullBody = await createFullPreviewBodyForExport(task);
+        const fullBody = await exportDocumentPort.build({ task, documentId: request.documentId });
         task.token.throwIfCancelled();
         preview.replaceChildren(fullBody);
         replacedPreview = true;
@@ -556,7 +505,7 @@ ${'</scr' + 'ipt>'}
         container.innerHTML = '';
         clone = document.createElement('div');
         clone.className = 'preview-content';
-        const fullBody = await createFullPreviewBodyForExport(task);
+        const fullBody = await exportDocumentPort.build({ task, documentId: request.documentId });
         task.token.throwIfCancelled();
         clone.replaceChildren(fullBody);
         clone.style.width = preset.width + 'px';
