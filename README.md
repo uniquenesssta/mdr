@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～03已验收，R14-04目录碰撞修复已通过专项，格式修正待新Windows CI；A10新low风险未修复。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～04已验收，R14-05 Progress Store/UI已实施，待精确提交Windows CI；14.6未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-09：R14-04在 `f631d26` / [Windows CI37886068643](https://github.com/uniquenesssta/mdr/actions/runs/37886068643) 七组及全部步骤通过，安全写入18/18、Rust格式、取消22/22、全仓1724/1724、前端726/726、浏览器11/11＋37/37，正式收尾。按用户“收尾04开始05”继续同分支实施14.5：Progress Store只读投影唯一任务状态，独立View接管进度DOM、ModalShell焦点/关闭、受控取消按钮和结束清空；移除经典订阅、进度模板/注册及内联取消全局入口，pagehide逐项清理。保留原41/31/16/22场景并接入新视图，新增20项生命周期专项和实际页面探针；静态自检后交Windows累计验收，14.5未勾选、14.6未开始。[04验收](docs/R14-04-DETAILS.md) · [05实施](docs/R14-05-DETAILS.md)。
 
 - 2026-10-09：修复R14-04第二轮CI格式遗漏：`e050ff4` / [Windows CI37883007228](https://github.com/uniquenesssta/mdr/actions/runs/37883007228) 安全写入18/18（含强制同一时刻/已有目录并发回归）、全量Rust269＋5＋1＋6、取消22/22、全仓1724/1724、前端726/726、浏览器11/11＋37/37通过；唯一失败是Rust 1.88格式门禁要求新增两处断言换行，最终汇总正确阻断。按CI完整rustfmt输出修正两处布局，确认仅空白变化，四项静态门禁及文档/证据复核通过，生产行为、测试及工作流保持；本地Rust运行库不完整，采用CI输出逐项静态复核，完整格式门禁与累计Windows回归待新CI，R14-04未验收、14.5未开始。[详情](docs/R14-04-DETAILS.md)。
 

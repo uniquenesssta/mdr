@@ -32,39 +32,6 @@
         return null;
       }
     }
-    // UI projection only; task/progress/cancellation/phase authority is the public controller.
-    // This classic DOM adapter is received by 14.5 and removed with callers in 14.18.
-    let exportProgressModalOpened = false;
-    exportTaskPort.subscribe(snapshot => {
-      const task = snapshot.activeTask;
-      const modal = document.getElementById('export-progress-modal');
-      if (!task) {
-        if (!exportProgressModalOpened) return;
-        exportProgressModalOpened = false;
-        const request = { reason: snapshot.destroyed ? 'export-destroyed' : 'export-finished' };
-        modal?.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close', { detail: request }));
-        if (request.error) throw request.error;
-        return;
-      }
-      const value = document.getElementById('export-progress-value');
-      const status = document.getElementById('export-progress-status');
-      const heading = document.getElementById('export-progress-title');
-      const button = document.getElementById('export-progress-cancel');
-      if (heading) heading.textContent = task.title;
-      if (value) value.style.width = task.progress + '%';
-      if (status) status.textContent = task.message;
-      if (button) {
-        button.disabled = !task.cancelable;
-        button.textContent = task.cancelable ? '取消导出' : '正在生成文件…';
-      }
-      if (modal && !exportProgressModalOpened) {
-        exportProgressModalOpened = true;
-        const request = { options: { initialFocus: button } };
-        modal.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open', { detail: request }));
-        if (request.error) throw request.error;
-      }
-    });
-
     function waitForExportFrame(task = null) {
       const frame = new Promise(resolve => requestAnimationFrame(() => resolve()));
       return task ? task.token.waitFor(frame) : frame;
@@ -84,10 +51,6 @@
     function finishExportTask(task, outcome) {
       try { return exportTaskPort.finish(task, outcome); }
       catch (error) { showToast('导出清理失败：' + (error?.message || String(error))); return false; }
-    }
-
-    function cancelActiveExport() {
-      exportTaskPort.cancel();
     }
 
     async function createFullPreviewBodyForExport(task = null) {

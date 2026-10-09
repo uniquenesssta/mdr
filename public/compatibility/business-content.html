@@ -357,24 +357,6 @@
   </div>
 
   <!-- 导出图片模态框 -->
-  <div class="modal-overlay export-progress-overlay" id="export-progress-modal" aria-live="polite">
-    <div class="modal export-progress-modal" role="dialog" aria-modal="true" aria-labelledby="export-progress-title">
-      <div class="modal-header">
-        <h3 id="export-progress-title">正在准备导出</h3>
-      </div>
-      <div class="modal-body">
-        <div class="export-progress-track" aria-hidden="true">
-          <div class="export-progress-value" id="export-progress-value"></div>
-        </div>
-        <p class="export-progress-status" id="export-progress-status">正在准备文档…</p>
-        <p class="hint">超大文档会分批构建导出内容，编辑器不会长时间无响应。</p>
-      </div>
-      <div class="modal-footer">
-        <button id="export-progress-cancel" onclick="cancelActiveExport()">取消导出</button>
-      </div>
-    </div>
-  </div>
-
   <div class="modal-overlay" id="export-image-modal">
     <div class="modal c-modal c-modal--preview">
       <div class="modal-header">

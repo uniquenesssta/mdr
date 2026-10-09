@@ -86,7 +86,7 @@ test('R14-04 pending frame cancellation releases export without resolving the fr
   const h = createExportVmHost(), frames = [];
   h.context.requestAnimationFrame = callback => { frames.push(callback); };
   const work = h.invoke('exportHTML'); assert.equal(frames.length, 1);
-  h.invoke('cancelActiveExport'); await work;
+  h.cancel(); await work;
   assert.equal(h.taskPort.getSnapshot().activeTask, null);
   frames[0](); await Promise.resolve();
   assert.equal(h.calls.some(x => ['snapshot', 'parse', 'saveFile'].includes(x[0])), false);
@@ -97,7 +97,7 @@ test('R14-04 image library cancellation releases progress and consumes a late mo
   const h = createExportVmHost(), pending = deferred(), entered = deferred();
   h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.loadDomToImage = () => { entered.resolve(); return pending.promise; };
   const work = h.invoke('renderExportImagePreview'); await entered.promise;
-  h.invoke('cancelActiveExport'); await work;
+  h.cancel(); await work;
   assert.equal(h.taskPort.getSnapshot().activeTask, null);
   pending.reject(new Error('late module failure')); await Promise.resolve();
   assert.equal(h.calls.some(x => x[0] === 'png' || x[0] === 'error'), false); h.destroy();
@@ -108,7 +108,7 @@ test('R14-04 remote image cancellation detaches callbacks and late success canno
   h.context.Image = class { constructor() { loaders.push(this); } };
   const image = { src: 'https://image.test/a.png' }, root = { querySelectorAll: () => [image] };
   const work = h.invoke('prepareExportImages', root, task), loaded = loaders[0].onload;
-  const rejected = assert.rejects(work, cancellation('cancelled')); h.invoke('cancelActiveExport'); await rejected;
+  const rejected = assert.rejects(work, cancellation('cancelled')); h.cancel(); await rejected;
   assert.equal(loaders[0].onload, null); assert.equal(loaders[0].onerror, null);
   loaded(); await Promise.resolve();
   assert.equal(image.src, 'https://image.test/a.png'); assert.equal(image.crossOrigin, undefined);
@@ -129,7 +129,7 @@ test('R14-04 enhancement cancellation prevents later math nodes and releases a p
   {
     const h = createExportVmHost(), task = h.invoke('beginExportTask', 'math'), math = h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.math;
     let rendered = 0; math.containsMath = () => true;
-    math.renderTree = () => { rendered++; h.invoke('cancelActiveExport'); };
+    math.renderTree = () => { rendered++; h.cancel(); };
     await assert.rejects(h.invoke('enhanceFullPreviewForExport', { children: [{ textContent: '$x$' }, { textContent: '$y$' }] }, task), cancellation('cancelled'));
     assert.equal(rendered, 1); h.invoke('finishExportTask', task); h.destroy();
   }
@@ -137,7 +137,7 @@ test('R14-04 enhancement cancellation prevents later math nodes and releases a p
     const h = createExportVmHost(), task = h.invoke('beginExportTask', 'mermaid'), pending = deferred(); let predicate;
     h.context.renderMermaidBlocks = (nodes, isCancelled) => { predicate = isCancelled; return pending.promise; };
     const work = h.invoke('enhanceFullPreviewForExport', { children: [{ querySelector: () => ({}) }] }, task);
-    const rejected = assert.rejects(work, cancellation('cancelled')); h.invoke('cancelActiveExport'); await rejected;
+    const rejected = assert.rejects(work, cancellation('cancelled')); h.cancel(); await rejected;
     assert.equal(predicate(), true); pending.resolve(); h.invoke('finishExportTask', task); h.destroy();
   }
 });
@@ -149,7 +149,7 @@ for (const operation of ['exportHTML', 'exportWord']) test(`R14-04 ${operation} 
     h.context.document.getElementById('compatibility-business-ports').markdownEditorPlatformPort.call = (capability, op) => {
       if (op === 'saveFile') { entered.resolve(); return pending.promise; } writes++;
     };
-    const work = h.invoke(operation); await entered.promise; h.invoke('cancelActiveExport'); await work;
+    const work = h.invoke(operation); await entered.promise; h.cancel(); await work;
     assert.equal(h.taskPort.getSnapshot().activeTask, null); pending.resolve('C:\\late.doc'); await Promise.resolve();
     assert.equal(writes, 0); assert.equal(h.downloads.length, 0); h.destroy();
   }
@@ -162,7 +162,7 @@ for (const operation of ['exportHTML', 'exportWord']) test(`R14-04 ${operation} 
     const work = h.invoke(operation); await entered.promise;
     const before = h.taskPort.getSnapshot(); assert.equal(before.activeTask.phase, 'writing'); assert.equal(before.activeTask.cancelable, false);
     assert.equal(h.nodes.get('export-progress-cancel').disabled, true);
-    h.invoke('cancelActiveExport'); assert.equal(h.invoke('beginExportTask', 'blocked'), null);
+    h.cancel(); assert.equal(h.invoke('beginExportTask', 'blocked'), null);
     assert.equal(h.taskPort.getSnapshot().activeTask.cancelled, false); assert.equal(h.taskPort.getSnapshot().lastTaskId, before.lastTaskId);
     pending.resolve(); await work; assert.equal(writes, 1); assert.equal(h.taskPort.getSnapshot().activeTask, null); h.destroy();
   }

@@ -126,7 +126,7 @@ test('R14-01 stale Worker version/empty blocks use an explicit full snapshot; pa
 
 test('R14-01 cancellation during a long-document frame prevents all later blocks and file commits', async () => {
   const h = createExportVmHost({ workerBlocks: Array.from({ length: 137 }, (_, id) => ({ id, html: `<p>${id}</p>` })) });
-  h.setFrameHook(() => h.invoke('cancelActiveExport'));
+  h.setFrameHook(() => h.cancel());
   await h.invoke('exportHTML');
   assert.equal(h.calls.filter(x => x[0] === 'block').length, 96);
   assert.equal(h.downloads.length, 0);
@@ -145,7 +145,7 @@ test('R14-01 task replacement, stale progress, explicit noncancelable phase and 
   current.update(300, 'current'); assert.equal(h.nodes.get('export-progress-value').style.width, '100%');
   current.update(-1, 'current'); assert.equal(h.nodes.get('export-progress-value').style.width, '0%');
   current.lockCancellation('encoding');
-  h.invoke('cancelActiveExport'); assert.equal(current.cancelled, false);
+  h.cancel(); assert.equal(current.cancelled, false);
   assert.equal(h.invoke('beginExportTask', 'blocked'), null);
   h.invoke('finishExportTask', old); assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask.id'), current.id);
   h.invoke('finishExportTask', current); assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
@@ -169,7 +169,7 @@ test('R14-01 PDF afterprint and timeout restore exactly once, preserving the sou
 });
 
 test('R14-01 cancelled PDF preparation restores view before printing and never schedules print', async () => {
-  const h = createExportVmHost(); h.setFrameHook(() => h.invoke('cancelActiveExport'));
+  const h = createExportVmHost(); h.setFrameHook(() => h.cancel());
   await h.invoke('exportPDF');
   assert.equal(h.timers.length, 0);
   assert.equal(h.calls.filter(x => x[0] === 'reset').length, 1);

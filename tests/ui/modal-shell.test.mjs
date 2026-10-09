@@ -334,7 +334,6 @@ test('ModalShell accepts feature content, validates accessibility options and re
 const COMPATIBILITY_MODAL_IDS = [
   'link-modal',
   'find-modal',
-  'export-progress-modal',
   'export-image-modal',
   'image-modal',
   'mermaid-modal'
@@ -346,7 +345,6 @@ function addCompatibilityModal(overlayRoot, id) {
   const controls = {
     'link-modal': ['input', 'link-url-input'],
     'find-modal': ['input', 'find-input'],
-    'export-progress-modal': ['button', 'export-progress-cancel'],
     'export-image-modal': ['button', 'export-image-ratio'],
     'image-modal': ['input', 'image-url-input'],
     'mermaid-modal': ['textarea', 'mermaid-code']
@@ -359,12 +357,11 @@ function addCompatibilityModal(overlayRoot, id) {
   }
   panel.append(control);
   if (id === 'link-modal') panel.querySelector(`#${id}-title`).id = 'link-modal-title';
-  if (id === 'export-progress-modal') panel.querySelector(`#${id}-title`).id = 'export-progress-title';
   overlayRoot.append(root);
   return { root, panel, control };
 }
 
-test('compatibility modal bridge installs one authoritative registry for the remaining six compatibility feature modals', () => {
+test('compatibility modal bridge installs one authoritative registry for the remaining five compatibility feature modals', () => {
   const documentRef = new FakeDocument();
   const overlayRoot = documentRef.createElement('div');
   overlayRoot.id = 'overlay-root';
@@ -382,18 +379,19 @@ test('compatibility modal bridge installs one authoritative registry for the rem
   documentRef.flushFrames();
   assert.equal(bridge.isOpen('link-modal'), false);
 
-  bridge.open('export-progress-modal');
+  assert.throws(() => bridge.open('export-progress-modal'), /Unknown compatibility modal/);
+  bridge.open('export-image-modal', { closeOnEscape: false, closeOnBackdrop: false });
   documentRef.flushFrames();
-  records.get('export-progress-modal').root.dispatch('keydown', createEvent('Escape'));
-  records.get('export-progress-modal').root.dispatch('mousedown', {
-    target: records.get('export-progress-modal').root,
+  records.get('export-image-modal').root.dispatch('keydown', createEvent('Escape'));
+  records.get('export-image-modal').root.dispatch('mousedown', {
+    target: records.get('export-image-modal').root,
     preventDefault() {},
     stopPropagation() {}
   });
-  assert.equal(bridge.isOpen('export-progress-modal'), true);
+  assert.equal(bridge.isOpen('export-image-modal'), true);
   const closeProgress = { reason: 'finished' };
-  records.get('export-progress-modal').root.dispatch(COMPATIBILITY_MODAL_CLOSE_EVENT, {
-    target: records.get('export-progress-modal').root,
+  records.get('export-image-modal').root.dispatch(COMPATIBILITY_MODAL_CLOSE_EVENT, {
+    target: records.get('export-image-modal').root,
     detail: closeProgress
   });
   assert.equal(closeProgress.error, null);
@@ -432,7 +430,7 @@ test('compatibility feature callers use the explicit modal event port without ne
 
   const joined = featureSources.join('\n');
   for (const id of COMPATIBILITY_MODAL_IDS) assert.match(bridgeSource, new RegExp(`id: '${id}'`));
-  assert.doesNotMatch(bridgeSource, /id: '(?:help|settings|url)-modal'/);
+  assert.doesNotMatch(bridgeSource, /id: '(?:help|settings|url|export-progress)-modal'/);
   assert.match(helpDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'help-modal'/);
   assert.match(helpDialogSource, /new ModalShell\(root,/);
   assert.match(settingsDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'settings-modal'/);

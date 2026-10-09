@@ -7,13 +7,6 @@ export const COMPATIBILITY_MODAL_CLOSE_EVENT = 'markdown-editor:modal-shell-clos
 const MODAL_DEFINITIONS = Object.freeze([
   Object.freeze({ id: 'link-modal', labelledBy: 'link-modal-title', initialFocus: '#link-url-input' }),
   Object.freeze({ id: 'find-modal', ariaLabel: '查找与替换', initialFocus: '#find-input' }),
-  Object.freeze({
-    id: 'export-progress-modal',
-    labelledBy: 'export-progress-title',
-    initialFocus: '#export-progress-cancel',
-    closeOnEscape: false,
-    closeOnBackdrop: false
-  }),
   Object.freeze({ id: 'export-image-modal', ariaLabel: '导出图片', initialFocus: '.ratio-btn.active' }),
   Object.freeze({ id: 'image-modal', ariaLabel: '插入图片', initialFocus: '#image-url-input' }),
   Object.freeze({ id: 'mermaid-modal', ariaLabel: '插入 Mermaid 图表', initialFocus: '#mermaid-code' })

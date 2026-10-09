@@ -996,12 +996,7 @@ async function runAppSuite() {
           && document.activeElement?.id === 'modal-shell-focus-source'
       ), { description: 'settings backdrop close and focus restoration' });
 
-      await browser.page.evaluate(`(()=>{
-        const root=document.getElementById('export-progress-modal');
-        const detail={options:{initialFocus:document.getElementById('export-progress-cancel')}};
-        root.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-open',{detail}));
-        if(detail.error)throw detail.error;
-      })()`);
+      await browser.page.evaluate(`window.__progressProbeTask=document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort.begin('进度弹窗');`);
       await browser.page.waitFor(() => document.getElementById('export-progress-modal')?.classList.contains('show'));
       await browser.page.pressKey('Escape');
       await browser.page.evaluate(`(()=>{
@@ -1012,12 +1007,7 @@ async function runAppSuite() {
         await browser.page.evaluate("document.getElementById('export-progress-modal')?.classList.contains('show')"),
         true
       );
-      await browser.page.evaluate(`(()=>{
-        const root=document.getElementById('export-progress-modal');
-        const detail={reason:'browser-test'};
-        root.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close',{detail}));
-        if(detail.error)throw detail.error;
-      })()`);
+      await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort.finish(window.__progressProbeTask);delete window.__progressProbeTask;`);
       await browser.page.waitFor(() => document.getElementById('export-progress-modal')?.style.display === 'none');
       await browser.page.evaluate(`(()=>{
         const source=document.getElementById('modal-shell-focus-source');

@@ -180,7 +180,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
           message:document.getElementById('export-progress-status').textContent,
           width:document.getElementById('export-progress-value').style.width,disabled:button.disabled,visible:modal.classList.contains('show')};
         current.lockCancellation('encoding');const locked=port.getSnapshot();
-        const blocked=beginExportTask('blocked');cancelActiveExport();
+        const blocked=beginExportTask('blocked');button.click();
         const afterBlocked=port.getSnapshot();
         // A locked task is terminal until finish; cancellation is exercised on new preparation.
         finishExportTask(current);cancellable=beginExportTask('cancellable task');button.click();
@@ -234,10 +234,45 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     await writeFile(join(artifactRoot, 'r14-04-cancellation.json'), JSON.stringify(result, null, 2));
   });
 
+  await test('R14-05 actual progress view clears terminal content, preserves focus and owns cancel without inline events', async () => {
+    const result = await page.evaluate(`(async () => {
+      const port=document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort;
+      const root=document.getElementById('export-progress-modal'),button=document.getElementById('export-progress-cancel');
+      const title=document.getElementById('export-progress-title'),status=document.getElementById('export-progress-status'),value=document.getElementById('export-progress-value');
+      const source=document.createElement('button');document.body.append(source);source.focus();
+      const frame=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      let current;
+      try {
+        current=port.begin('<img src=x onerror=bad()>');current.update(52,'<script>literal message</script>','building');await frame();
+        const opened={focused:document.activeElement===button,title:title.textContent,message:status.textContent,width:value.style.width,
+          literal:title.children.length===0&&status.children.length===0,inline:button.hasAttribute('onclick'),retired:typeof cancelActiveExport==='undefined'};
+        root.dispatchEvent(new CustomEvent('markdown-editor:modal-shell-close',{detail:{reason:'old bridge'}}));
+        root.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+        root.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));
+        const protectedOpen=root.classList.contains('show');
+        current.lockCancellation('encoding');button.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+        const locked={disabled:button.disabled,cancelled:current.cancelled,label:button.textContent};
+        port.finish(current,'failed');await frame();
+        const ended={visible:root.classList.contains('show'),title:title.textContent,message:status.textContent,width:value.style.width,
+          disabled:button.disabled,focusRestored:document.activeElement===source};
+        current=port.begin('next');button.click();const cancelled={disabled:button.disabled,label:button.textContent,cancelled:current.cancelled};
+        port.finish(current);
+        return {opened,protectedOpen,locked,ended,cancelled,unique:document.querySelectorAll('#export-progress-modal').length===1};
+      } finally {port.finish(current);source.remove();}
+    })()`);
+    assert.deepEqual(result.opened, { focused:true,title:'<img src=x onerror=bad()>',message:'<script>literal message</script>',width:'52%',literal:true,inline:false,retired:true });
+    assert.equal(result.protectedOpen, true); assert.equal(result.unique, true);
+    assert.deepEqual(result.locked, { disabled:true,cancelled:false,label:'正在生成文件…' });
+    assert.deepEqual(result.ended, { visible:false,title:'正在准备导出',message:'',width:'0%',disabled:true,focusRestored:true });
+    assert.deepEqual(result.cancelled, { disabled:true,label:'正在取消…',cancelled:true });
+    await writeFile(join(artifactRoot, 'r14-05-progress-view.json'), JSON.stringify(result, null, 2));
+  });
+
   // Final app probe: exercise the production pagehide owner after all other export probes.
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
     const result = await page.evaluate(`(async () => {
       const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort;
+      const progressRoot=document.getElementById('export-progress-modal');
       const task=beginExportTask('dispose locked task');task.update(96,'encoding','encoding');task.lockCancellation('encoding');
       const seen=[];port.subscribe(s=>seen.push(s));
       let rejectLate;const operation=new Promise((resolve,reject)=>{rejectLate=reject;});
@@ -249,8 +284,9 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
         rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort'),
-        progressVisible:document.getElementById('export-progress-modal').classList.contains('show')};
+        progressVisible:progressRoot.classList.contains('show'),progressRemoved:!document.getElementById('export-progress-modal')};
     })()`);
+    assert.equal(result.progressRemoved, true);
     assert.equal(result.snapshot.destroyed, true); assert.equal(result.snapshot.activeTask, null);
     assert.deepEqual(result.lastSeen, result.snapshot); assert.equal(result.cancelled, true); assert.equal(result.phase, 'destroyed');
     assert.deepEqual(result.waiting, {cancelled:true,reason:'destroyed'});

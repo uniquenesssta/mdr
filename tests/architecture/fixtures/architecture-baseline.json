@@ -52,15 +52,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "cancelActiveExport()",
-      "count": 1,
-      "lines": [
-        373
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "closeAppMenus();",
       "count": 1,
       "lines": [
@@ -414,6 +405,21 @@
           42
         ]
       }
-    ]
+    ],
+    "r14ProgressMigration": {
+      "atomic": "R14-05",
+      "reason": "Progress dialog and cancel listener are now constructed by Export View; the classic inline handler and global are deleted, not exempted.",
+      "removedInlineEvents": [
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "cancelActiveExport()",
+          "count": 1,
+          "lines": [
+            373
+          ]
+        }
+      ]
+    }
   }
 }

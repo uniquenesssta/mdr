@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-04 export cancellation and cumulative Windows evidence · ${{ github.sha }}
+run-name: R14-05 export progress UI and cumulative Windows evidence · ${{ github.sha }}
 
 on:
   push:
@@ -36,6 +36,7 @@ on:
       - 'docs/R14-02-DETAILS.md'
       - 'docs/R14-03-DETAILS.md'
       - 'docs/R14-04-DETAILS.md'
+      - 'docs/R14-05-DETAILS.md'
       - 'docs/audit/r12-24-closeout.json'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/14-*'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/15-*'
@@ -170,6 +171,9 @@ jobs:
       - name: R14-04 export cancellation tokens and irreversible locks
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-export-cancellation.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-cancellation.log"
+      - name: R14-05 progress projection, modal lifecycle and disposal
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-export-progress.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-progress.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

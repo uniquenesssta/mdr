@@ -153,7 +153,7 @@ test('R14-03 locked PNG encoding rejects replacement/cancel and a late result af
   h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.loadDomToImage = async () => ({ toPng: () => { entered.resolve(); return pending.promise; } });
   const work = h.invoke('renderExportImagePreview'); await entered.promise;
   assert.equal(h.taskPort.getSnapshot().activeTask.phase, 'encoding');
-  assert.equal(h.invoke('beginExportTask', 'blocked'), null); h.invoke('cancelActiveExport');
+  assert.equal(h.invoke('beginExportTask', 'blocked'), null); h.cancel();
   assert.equal(h.taskPort.getSnapshot().activeTask.cancelled, false);
   h.destroy(); pending.resolve('data:image/png;base64,LATE'); await work;
   assert.equal(h.evaluate('currentImageDataUrl'), '');
@@ -175,7 +175,7 @@ test('R14-03 PDF view initialization error and failing cancellation restore both
   for (const failure of ['init', 'restore']) {
     const h = createExportVmHost(), preview = h.context.document.getElementById('compatibility-business-ports').markdownEditorPreviewCommandPort;
     if (failure === 'init') preview.setViewMode = () => { throw new Error('view failed'); };
-    else { h.setFrameHook(() => h.invoke('cancelActiveExport')); preview.reset = () => { throw new Error('restore failed'); }; }
+    else { h.setFrameHook(() => h.cancel()); preview.reset = () => { throw new Error('restore failed'); }; }
     if (failure === 'restore') await assert.rejects(h.invoke('exportPDF'), /restore failed/);
     else await h.invoke('exportPDF');
     assert.equal(h.taskPort.getSnapshot().activeTask, null); assert.equal(h.timers.length, 0); h.destroy();

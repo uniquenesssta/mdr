@@ -4,7 +4,9 @@
 // supplyRetiredPreviewBindings=false reproduces the current application failure.
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { ModalShell } from '../../src/ui/components/modal-shell.js';
+import { ExportProgressDocument } from './export-progress-dom.mjs';
 
 const source = readFileSync(new URL('../../public/app/export.js', import.meta.url), 'utf8');
 const markdownSource = readFileSync(new URL('../../public/app/core.js', import.meta.url), 'utf8');
@@ -47,6 +49,25 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   };
   for (const key of ['DocumentDomain', 'DocumentSession', 'DocumentController', 'DocumentUiCommand', 'SidebarController']) host['markdownEditor' + key + 'Port'] = {};
   const taskController = createExportTaskController();
+  const progressDocument = new ExportProgressDocument();
+  const progressStore = createExportProgressStore(taskController);
+  const progressView = createExportProgressDialogView({ overlayRoot: progressDocument.body, store: progressStore,
+    onCancel: () => taskController.cancel(), createModalShell(root, options) {
+      const shell = new ModalShell(root, options);
+      // Fault adapter preserves opening/closing failure scenarios; production uses ModalShell directly.
+      root.dispatchEvent = event => { calls.push(['modal', event.type, event.detail?.reason || '']); return true; };
+      const request = (type, detail) => {
+        root.dispatchEvent({ type: 'markdown-editor:modal-shell-' + type, detail });
+        if (detail.error) throw detail.error;
+      };
+      return { isOpen: () => shell.isOpen(), destroy: () => shell.destroy(),
+        open(content, options) { request('open', { options }); return shell.open(content, options); },
+        close(reason) { const result = shell.close(reason); request('close', { reason }); return result; } };
+    }
+  });
+  for (const id of ['export-progress-modal', 'export-progress-title', 'export-progress-value', 'export-progress-status', 'export-progress-cancel']) {
+    nodes.set(id, progressDocument.getElementById(id));
+  }
   const taskMount = mountClassicExportTaskPort(host, taskController);
   const requestMount = mountClassicExportRequestPort(host, { getActiveDocumentId: () => documentId, hasDocument: id => documentIds.includes(id) });
   const escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
@@ -73,7 +94,8 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   }
   return {
     context, calls, downloads, nodes, timers, events, taskController, taskPort: taskMount.port,
-    destroy() { try { taskController.destroy(); } finally { taskMount.destroy(); requestMount.destroy(); } },
+    cancel: () => nodes.get('export-progress-cancel').click(),
+    destroy() { try { taskController.destroy(); } finally { progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
     invoke: (name, ...args) => context[name](...args),
     evaluate: expression => vm.runInContext(expression, context),
     setFrameHook(callback) { onFrame = callback; },

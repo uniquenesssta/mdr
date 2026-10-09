@@ -9,7 +9,7 @@ import { collectInlineEvents } from '../../scripts/architecture/source-analysis.
 const root = process.cwd();
 const readText = path => readFile(resolve(root, path), 'utf8');
 const readJson = async path => JSON.parse(await readText(path));
-const CURRENT_COMPATIBILITY_INLINE_EVENT_CAP = 158;
+const CURRENT_COMPATIBILITY_INLINE_EVENT_CAP = 157;
 
 const expectedIndex = `<!DOCTYPE html>
 <html lang="zh-CN">
