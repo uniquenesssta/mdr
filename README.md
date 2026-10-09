@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～04已验收，R14-05第二轮CI真实WebView渲染超时，预览增强竞态修复待新Windows CI；14.6未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～05已验收，R14-05在11d2eb4 / CI37929409192七组及全部步骤通过；14.6未开始，A10保持接收。历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-09：R14-05在 `11d2eb4` / [Windows CI37929409192](https://github.com/uniquenesssta/mdr/actions/runs/37929409192) 七组及全部步骤通过，正式收尾：全仓1748/1748、前端746/746、进度20/20、新增预览竞态4/4、取消22/22、浏览器11/11＋38/38与实际WebView导入链8/8成功。上轮文件双栏渲染检查已通过，保留失败历史及其因果证据限制；进度状态、界面、取消和结束清理已验收，完整格式缺口及A10保持接收。仅更新验收文档和任务勾选，14.6未开始。[验收详情](docs/R14-05-DETAILS.md)。
 
 - 2026-10-09：R14-05第二轮 `2dbfc2b` / [CI37897676407](https://github.com/uniquenesssta/mdr/actions/runs/37897676407) 全仓1744/1744、前端746/746、进度20/20及浏览器11/11＋38/38通过；唯一直接失败为真实WebView本地文件导入后的双栏渲染超时。修复Preview重复更新时取消旧增强队列却漏补复用节点的竞态，保留已完成预览快速路径，新增四项强制交错回归及分项DOM/失败截图证据；旧产物未记录缺失项，本次超时根因仍待重验。待新Windows七组CI，14.5未验收、14.6未开始。[详情](docs/R14-05-DETAILS.md)。
 
