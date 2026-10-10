@@ -1,6 +1,6 @@
 # R14-08 Export Styles
 
-状态：**已实施，待本提交 Windows 七组累计验证与实际 PNG 核对**；14.8不勾选，14.9未开始。继续 `agent/r14-stage`，基线为07正式验收提交 `c532cd1aaf4995cf01a25243f89addb5d1cf87df` / [CI38021008368](https://github.com/uniquenesssta/mdr/actions/runs/38021008368)。
+状态：**首轮未通过，验证接线与 Windows 启动恢复已修正，待新提交七组累计验证**；14.8不勾选，14.9未开始。继续 `agent/r14-stage`，基线为07正式验收提交 `c532cd1aaf4995cf01a25243f89addb5d1cf87df` / [CI38021008368](https://github.com/uniquenesssta/mdr/actions/runs/38021008368)。
 
 ## 07收尾与本项范围
 
@@ -55,3 +55,24 @@ pagehide逐项释放任务、增强器/Builder、进度与样式owner/端口，�
 Context7已核对KaTeX双输出/样式职责与Vite7导入文本/字体重定位，并结合锁定KaTeX0.18.2源码与Vite7.3.6本地解析实现核对；Mermaid Chart已显示实际中文共享样式、四格式、Preview/Hybrid及释放链。CI新增export-styles.log，保留原七组与全部累计门禁。启动后结束会话，不轮询，约15～20分钟后查询。
 
 F02旧HTML CDN/应用内变量引用、离线字体、14.12打印隔离和14.16图片完整资源释放保持接收；独立Editor指标错误继续开放。07验收、R12历史公告/交接以及所有失败/修复事实均不重写。
+
+
+## 首轮失败与修复（2026-10-11）
+
+精确提交 `b9a565d1d7b86fb25bc9816710d6de92e6ff0f19` / [CI38057924490](https://github.com/uniquenesssta/mdr/actions/runs/38057924490)，attempt1，未验收。依赖、全仓Node、Rust和原生四组成功；前端与真实WebView两个直接失败，最终汇总正确阻断。前端831/831、样式21/21、浏览器契约11/11、built-app44/45；原42个built-app场景和新增独立HTML/Word、PNG场景均通过。
+
+| 失败 | 实际证据与原因 | 本次修复与保持的门槛 |
+| --- | --- | --- |
+| Preview/Hybrid数学隔离 | JSON为preview4/hybrid0。`.preview-content`还包含隐藏图片正文；`.virtual-editor-host`无真实根，而且测试始终双栏模式 | 分别切换实际both/hybrid布局，读取真实#preview/#editor。标准多行块公式夹具，每个可见界面必须恰好两公式，挂载/释放前中后比较实际节点引用、连接及裁剪；原45项保留，无放宽计数 |
+| 实际Windows WebView无窗口 | job114230087956，Builder会话前报No window could be found；没有产品断言执行。应用日志空，性能日志只有PID9212的app.start；不能据此推定产品初始化/CSS/驱动版本是原因 | WebDriver HTTP就绪后先确认本次PID非零原生窗口，保存快照。仅窗口启动超时且进程存活允许一次新进程恢复，原进程必须确认退出，首轮日志/诊断不能覆盖。准备/产品断言、退出进程、协议错误、缺失诊断或清理失败均不重试；连续失败仍阻断 |
+| 最终汇总 | job114231428329，Browser evidence failed: browser-app.log | 保留七组及同提交全部成功要求，无更改汇总规则 |
+
+两个归档已经下载并核对SHA256：frontend artifact11672059372为`acc0fb2b8e1f748a67e4cf026a72f3882148158fa0a18f32de70d3552140272b`；webview artifact11672305369为`51f04fb089bb58957d012ac9d0214019ea0d51b3fb0e512e501e1a626be62b92`。首轮Windows已证明实际HTML/Word只用自身CSS仍有两公式、MathML可访问裁剪、一SVG及代码/任务/表格样式。浅深色实际PNG均1080×2355，对移除MathML的同正文参考零像素差异；浅色可见额外文本正控改变525252像素。两张实际图片均已视觉核对，无原额外x2/21。该部分证据不替代失败的Preview/Hybrid及WebView，不宣称14.8整体验收。
+
+修复只修改测试编排与工作流接线，产品共享Styles、KaTeX0.18.2、其余锁包、冻结模型/存储、原始导出夹具及历史验收均保持。`embedded-session-lifecycle.mjs`独立拥有测试进程启动尝试与退出责任，Selenium/native细节仍由原session adapter负责；无生产插件或权限扩展。12项新回归验证正常顺序、先记录/停止再重启、两次失败保留、进程已退出/协议/界面准备/产品断言禁止恢复、清理失败/仍存活/诊断失败禁止恢复以及spawn失败；Windows目标运行前追加同文件，完整Node和前端仍执行它。
+
+部分已创建WebDriver会话若attach或timeout初始化失败，会先quit；quit失败保留原错误且不允许恢复。停止host注册退出监听后kill，确认exitCode/signalCode并刷出日志。正常native关闭使会话失效时，仅在host已经退出才接受quit错误。新归档含`*-application.log.native-window.json`和`*-startup-1/2.json`及原应用日志，恢复日志使用独立recovery标签。底层首次无窗口原因仍未确定，恢复与所有新验证必须通过Windows实跑后才能确认。
+
+本地只执行静态门禁及语法/嵌入表达式、文档、差异与保持检查；没有运行本地产品Node/浏览器/构建/Rust。Context7核对Selenium会话创建和finally quit语义，结合实际测试client4.34.0及归档plugin1.5.0、同版本官方源码核对：HTTP服务器启动不表示Tauri webview窗口已登记。Mermaid Chart显示真实两界面核对与一次启动恢复/释放链。14.8待新CI、14.9未开始；此前Editor指标错误和14.10/11/12/16完整格式门槛保持。
+
+本轮最终静态复核：四项门禁通过；4个修改/新增脚本及20个嵌入页面表达式语法通过，5段共享CSS与6个本地令牌声明保持；JSON/YAML、130个相对链接、52项风险源指纹、9个冻结文件及11个额外受保护文件字节保持、R12根历史与各阶段验收/失败历史保持、diff复核通过。12项新生命周期测试尚未在本地执行，其通过状态只由新Windows CI决定。

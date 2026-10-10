@@ -463,23 +463,38 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
   });
 
   await test('R14-08 Preview/Hybrid retain accessible math and unchanged nodes through export-style leases', async () => {
-    await loadMarkdown('# Math styles\n\nInline $x^2$.\n\n$$\\frac{1}{2}$$');
-    const result=await page.evaluate(`(async()=>{
+    await loadMarkdown('# Math styles\n\nInline $x^2$.\n\n$$\n\\frac{1}{2}\n$$');
+    const result=[];
+    try {for(const mode of ['both','hybrid']) {
+      await page.evaluate(`window.__markdownEditorE2E.setLayout(${JSON.stringify(mode)})`);
+      if(mode==='both')await page.evaluate('document.getElementById("compatibility-business-ports").markdownEditorPreviewCommandPort.update()');
+      await page.waitFor(mode==='both'
+        ?()=>document.querySelectorAll('#preview .katex').length===2
+        :()=>document.querySelectorAll('#editor .katex').length===2,
+      {timeoutMs:10000,description:`${mode} two rendered math nodes`});
+      result.push(await page.evaluate(`(async()=>{
       const host=document.getElementById('compatibility-business-ports'),styles=host.markdownEditorExportStylePort;
-      await host.markdownEditorPreviewCommandPort.update();await document.fonts.ready;
-      const nodes={preview:Array.from(document.querySelectorAll('.preview-content .katex')),hybrid:Array.from(document.querySelectorAll('.virtual-editor-host .katex'))};
-      const inspect=()=>Object.fromEntries(Object.entries(nodes).map(([surface,list])=>[surface,list.map(node=>{
+      await document.fonts.ready;
+      const surface=${JSON.stringify(mode==='both'?'preview':'hybrid')},surfaceRoot=document.getElementById(${JSON.stringify(mode==='both'?'preview':'editor')}),
+        nodes=Array.from(surfaceRoot.querySelectorAll('.katex'));
+      const inspect=()=>({sameNodes:Array.from(surfaceRoot.querySelectorAll('.katex')).every((node,index)=>node===nodes[index])&&surfaceRoot.querySelectorAll('.katex').length===nodes.length,
+        math:nodes.map(node=>{
         const math=node.querySelector('.katex-mathml'),visual=node.querySelector('.katex-html'),css=getComputedStyle(math);
         return {connected:node.isConnected,position:css.position,clip:css.clipPath,width:css.width,height:css.height,display:css.display,visual:getComputedStyle(visual).display};
-      })]));
+      })});
       const before=inspect(),root=document.createElement('div');document.body.append(root);
-      try{const lease=styles.apply(root,'image');const during=inspect();lease.release();return {before,during,after:inspect(),count:{preview:nodes.preview.length,hybrid:nodes.hybrid.length},unscoped:!document.querySelector('.virtual-editor-host.export-document')&&!preview.classList.contains('export-document')};}
-      finally{root.remove();}
-    })()`);
+      let lease;
+      try{lease=styles.apply(root,'image');const during=inspect();lease.release();return {surface,before,during,after:inspect(),count:nodes.length,
+        visible:surfaceRoot.getBoundingClientRect().width>0&&surfaceRoot.getBoundingClientRect().height>0,
+        unscoped:!surfaceRoot.classList.contains('export-document')&&!surfaceRoot.hasAttribute('data-export-format')};}
+      finally{lease?.release();root.remove();}
+    })()`));
+    }} finally {await page.evaluate('window.__markdownEditorE2E.setLayout("both")');}
     await writeFile(join(artifactRoot,'r14-08-preview-hybrid-math.json'),JSON.stringify(result,null,2));
-    assert.equal(result.count.preview,2);assert.equal(result.count.hybrid,2);assert.equal(result.unscoped,true);
-    assert.deepEqual(result.during,result.before);assert.deepEqual(result.after,result.before);
-    for(const list of Object.values(result.before))for(const math of list){assert.equal(math.connected,true);assert.equal(math.position,'absolute');assert.equal(math.clip,'inset(50%)');assert.equal(math.width,'1px');assert.equal(math.height,'1px');assert.notEqual(math.display,'none');assert.notEqual(math.visual,'none');}
+    assert.deepEqual(result.map(row=>row.surface),['preview','hybrid']);
+    for(const row of result){assert.equal(row.count,2);assert.equal(row.visible,true);assert.equal(row.unscoped,true);assert.equal(row.before.sameNodes,true);
+      assert.deepEqual(row.during,row.before);assert.deepEqual(row.after,row.before);
+      for(const math of row.before.math){assert.equal(math.connected,true);assert.equal(math.position,'absolute');assert.equal(math.clip,'inset(50%)');assert.equal(math.width,'1px');assert.equal(math.height,'1px');assert.notEqual(math.display,'none');assert.notEqual(math.visual,'none');}}
   });
 
   // Final app probe: exercise the production pagehide owner after all other export probes.

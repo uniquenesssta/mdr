@@ -1,16 +1,18 @@
 import { createWriteStream } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import { Builder, By, Capabilities } from 'selenium-webdriver';
 import { prepareWindowTestSurface } from './window-test-surface.mjs';
+import { getWindowSnapshot, waitForWindowSnapshot } from './native-window-system.mjs';
+import { runEmbeddedSession } from './embedded-session-lifecycle.mjs';
 
 function pause(milliseconds) {
   return new Promise(resolvePromise => setTimeout(resolvePromise, milliseconds));
 }
 
 function assertApplicationRunning(process, logPath, stage) {
-  if (process.exitCode === null) return;
+  if (process.exitCode === null && process.signalCode === null) return;
   throw new Error(
     `Markdown Editor exited during ${stage} (code ${process.exitCode}). See ${logPath}.`
   );
@@ -63,24 +65,30 @@ async function startApplication({ binaryPath, repositoryRoot, artifactDirectory,
     startupError = error;
   });
 
-  await pause(250);
-  if (startupError) throw startupError;
-  await waitForEmbeddedServer({ port, process: child, logPath });
-
-  return {
+  const application = {
     child,
     logPath,
+    isRunning: () => child.exitCode === null && child.signalCode === null,
     async stop() {
-      if (child.exitCode === null && !child.killed) child.kill();
-      if (child.exitCode === null) {
-        await Promise.race([
-          new Promise(resolvePromise => child.once('exit', resolvePromise)),
-          pause(5_000)
-        ]);
+      try {
+        if (child.pid && application.isRunning()) {
+          // Register before kill so a quick native exit cannot be missed.
+          const stopped = new Promise(resolvePromise => child.once('exit', resolvePromise));
+          child.kill();
+          await Promise.race([stopped, pause(5_000)]);
+          if (application.isRunning()) throw new Error(`Native test host ${child.pid} did not exit; restart is blocked. See ${logPath}.`);
+        }
+      } finally {
+        await new Promise((accept, reject) => {
+          if (log.writableFinished) return accept();
+          log.once('finish', accept);log.once('error', reject);log.end();
+        });
       }
-      log.end();
     }
   };
+  await pause(250);
+  if (startupError) { await application.stop();throw startupError; }
+  return application;
 }
 
 function createBrowserAdapter(driver) {
@@ -158,16 +166,19 @@ async function waitForWindowHandle({ driver, process, logPath, timeout = 20_000 
       }
       lastError = new Error('WebDriver session returned no window handles.');
     } catch (error) {
+      if (!isWindowStartupRace(error)) throw error;
       lastError = error;
     }
 
     await pause(150);
   }
 
-  throw new Error(
+  const error = new Error(
     `WebDriver session did not attach to a Tauri window. `
     + `Last error: ${lastError?.message || 'unknown error'}. See ${logPath}.`
   );
+  error.code = 'EMBEDDED_WINDOW_STARTUP_TIMEOUT';
+  throw error;
 }
 
 function isWindowStartupRace(error) {
@@ -197,50 +208,61 @@ async function buildDriver({ port, process, logPath, timeout = 20_000 }) {
     }
   }
 
-  throw new Error(
+  const error = new Error(
     `Embedded WebDriver session was not created after the native window became available. `
     + `Last error: ${lastError?.message || 'unknown error'}. See ${logPath}.`
   );
+  error.code = 'EMBEDDED_WINDOW_STARTUP_TIMEOUT';
+  throw error;
 }
 
 async function createSession({ port, process, logPath }) {
   const driver = await buildDriver({ port, process, logPath });
-  await waitForWindowHandle({ driver, process, logPath });
-  await driver.manage().setTimeouts({
-    implicit: 0,
-    pageLoad: 30_000,
-    script: 30_000
-  });
-
-  return createBrowserAdapter(driver);
-}
-
-async function closeSession(browser) {
-  if (!browser) return;
   try {
-    await browser.deleteSession();
-  } catch (_) {
-    // Native close and force-close tests intentionally invalidate the WebDriver session.
+    await waitForWindowHandle({ driver, process, logPath });
+    await driver.manage().setTimeouts({implicit:0,pageLoad:30_000,script:30_000});
+    const adapter = createBrowserAdapter(driver);
+    return Object.freeze({...adapter,async deleteSession(){
+      try {await adapter.deleteSession();}
+      catch(error){
+        // Close-button/force-close cases legitimately invalidate an exited host's session.
+        if(process.exitCode===null&&process.signalCode===null)throw error;
+      }
+    }});
+  } catch(error) {
+    try {await driver.quit();}
+    catch(cleanupError){throw new AggregateError([error,cleanupError],'Partial WebDriver session cleanup failed.');}
+    throw error;
   }
 }
 
 export async function withEmbeddedSession(options, run) {
-  const application = await startApplication(options);
-  let browser = null;
-
-  try {
-    if (typeof options.waitForNativeWindow === 'function') {
-      await options.waitForNativeWindow(application.child);
+  return runEmbeddedSession({
+    start:attempt=>startApplication({...options,label:attempt===1?options.label:`${options.label}-recovery`}),
+    async connect(application) {
+      await waitForEmbeddedServer({port:options.port,process:application.child,logPath:application.logPath});
+      try {
+        const snapshot = typeof options.waitForNativeWindow === 'function'
+          ? await options.waitForNativeWindow(application.child)
+          : await waitForWindowSnapshot(snapshot=>snapshot.pid===application.child.pid&&snapshot.handle!==0,{timeoutMs:30_000,intervalMs:150});
+        await writeFile(`${application.logPath}.native-window.json`,JSON.stringify(snapshot??{customBarrierPassed:true},null,2));
+      } catch(error) {
+        assertApplicationRunning(application.child,application.logPath,'native window readiness');
+        if(!/Timed out waiting for native window state/.test(error.message))throw error;
+        error.code='EMBEDDED_WINDOW_STARTUP_TIMEOUT';throw error;
+      }
+      return createSession({port:options.port,process:application.child,logPath:application.logPath});
+    },
+    prepare:async browser=>await prepareWindowTestSurface(browser),
+    isRecoverable:error=>error.code==='EMBEDDED_WINDOW_STARTUP_TIMEOUT',
+    async recordFailure({attempt,stage,application,error,recover}) {
+      let nativeWindow=null,nativeWindowError=null;
+      try {nativeWindow=getWindowSnapshot();}catch(error){nativeWindowError=error.message;}
+      await writeFile(resolve(options.artifactDirectory,`${options.label}-startup-${attempt}.json`),JSON.stringify({
+        attempt,stage,recover,port:options.port,pid:application?.child.pid??null,
+        exitCode:application?.child.exitCode??null,signalCode:application?.child.signalCode??null,
+        applicationLog:application?.logPath??null,error:String(error.stack||error),nativeWindow,nativeWindowError
+      },null,2));
     }
-    browser = await createSession({
-      port: options.port,
-      process: application.child,
-      logPath: application.logPath
-    });
-    const startupSurface = await prepareWindowTestSurface(browser);
-    return await run(browser, startupSurface);
-  } finally {
-    await closeSession(browser);
-    await application.stop();
-  }
+  },run);
 }

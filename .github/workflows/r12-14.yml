@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-08 shared document styles and actual PNG math evidence · ${{ github.sha }}
+run-name: R14-08 Preview Hybrid scope and Windows session startup repair · ${{ github.sha }}
 
 on:
   push:
@@ -612,7 +612,7 @@ jobs:
       - name: Install locked frontend and pinned transient WebDriver
         run: npm run deps:prepare -- --add selenium-webdriver@4.34.0 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/dependencies.log"
       - name: Verify security harness and native host contracts
-        run: node --test tests/stage-12-html-boundary.test.mjs tests/windows-window-automation.test.mjs tests/dependency-location.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/contracts.log"
+        run: node --test tests/stage-12-html-boundary.test.mjs tests/windows-window-automation.test.mjs tests/dependency-location.test.mjs tests/embedded-session-lifecycle.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/contracts.log"
       - name: Build the exact production frontend
         run: npm run build 2>&1 | tee "$RUNNER_TEMP/r12-22-webview/build.log"
       - name: Prepare isolated native host without changing production locked dependencies
