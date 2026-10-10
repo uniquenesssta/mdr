@@ -71,7 +71,7 @@
       "public/app/export.js",
       "legacy-classic-script",
       "legacy-app",
-      "Classic format orchestration using public request/task/complete-body/enhancement ports; remaining format serializers, print and image chain await planned migration.",
+      "Classic format orchestration consumes public Export request/task/body/enhancement/style capabilities; HTML/Word reuse authoritative document CSS and PDF/Image own reversible style leases.",
       "legacy-image-preview-state",
       "classic-script",
       "split-and-remove",
@@ -3761,7 +3761,7 @@
       "src/styles/features/export.css",
       "stylesheet",
       "presentation-feature",
-      "Export-image and print/export presentation.",
+      "Export-image controls, offscreen staging shell and print shell geometry; document content is owned by Export Styles.",
       "none",
       "stylesheet-load",
       "retain",
@@ -5151,7 +5151,7 @@
       "src/features/export/index.js",
       "esm-facade",
       "feature",
-      "Public Export request, task, cancellation, readonly progress, complete document construction and cancellable presentation enhancement with scoped migration boundaries.",
+      "Public Export request, task, cancellation, progress, complete document, enhancement and shared document-style boundary.",
       "none",
       "module-import",
       "retain",
@@ -5244,6 +5244,26 @@
       "Scoped immutable enhancement delegation; mounting and removal do not own renderer or task state.",
       "none",
       "explicit-idempotent-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-export-style-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Scoped immutable stylesheet and root-lease capabilities for classic format callers; unmount does not destroy the style owner.",
+      "export-style-port-mount",
+      "mount-to-destroy",
+      "remove-with-classic-callers",
+      false
+    ],
+    [
+      "src/features/export/document/export-style-sheet.js",
+      "esm-module",
+      "export-document",
+      "Authoritative shared document CSS and format profiles with trusted locked KaTeX layout, scoped reversible live-root leases and owned style-node disposal.",
+      "export-style-sheet",
+      "factory-to-destroy",
       "retain",
       false
     ]

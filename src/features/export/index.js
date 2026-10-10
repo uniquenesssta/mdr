@@ -10,3 +10,5 @@ export { createExportDocumentBuilder, ExportDocumentStaleError } from './documen
 export { mountClassicExportDocumentPort } from './compatibility/classic-export-document-port.js';
 export { createExportPreviewEnhancer } from './document/export-preview-enhancer.js';
 export { mountClassicExportEnhancementPort } from './compatibility/classic-export-enhancement-port.js';
+export { createExportStyleSheet } from './document/export-style-sheet.js';
+export { mountClassicExportStylePort } from './compatibility/classic-export-style-port.js';

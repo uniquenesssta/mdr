@@ -1,4 +1,4 @@
-/* Responsibility: Export-image and print/export presentation. */
+/* Responsibility: Export-image controls and print shell; document content belongs to Export Styles. */
 
 /* 打印 / 导出 PDF */
 @media print {
@@ -18,14 +18,6 @@
         max-width: none !important;
         color: var(--color-export-ink) !important;
       }
-      .preview-content .markdown-body {
-        max-width: none !important;
-        padding: 0 !important;
-      }
-      .preview-content h1, .preview-content h2, .preview-content h3,
-      .preview-content h4, .preview-content h5, .preview-content h6,
-      .preview-content p, .preview-content li, .preview-content td, .preview-content th { color: var(--color-export-ink) !important; }
-      .preview-content pre, .preview-content code { background: var(--color-export-code-background) !important; color: var(--color-export-ink) !important; }
       html, body, .l-app-shell, .l-workspace, .l-split-pane {
         height: auto !important;
         overflow: visible !important;

@@ -3,7 +3,10 @@
 // Retired Worker/enhancement globals are never supplied. Actual renderer output is checked in built-app tests.
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+const mathCss = readFileSync(join(dirname(createRequire(import.meta.url).resolve('katex')), 'katex.css'), 'utf8');
+import { createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
 
@@ -25,9 +28,9 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
       set textContent(value) { html = escapeHtml(value); children = []; },
       get innerHTML() { return html + children.map(x => x.tagName === 'PRE' ? '<pre class="' + x.className + '">' + x.innerHTML + '</pre>' : x.innerHTML || '').join(''); },
       set innerHTML(value) { html = String(value); children = []; },
-      append(...items) { for (const item of items) { if (item.fragment) children.push(...item.children); else children.push(item); } },
+      append(...items) { for (const item of items) { if (item.fragment) this.append(...item.children); else { children.push(item); item.parentNode = this; } } },
       appendChild(item) { this.append(item); return item; },
-      removeChild(item) { children = children.filter(x => x !== item); },
+      removeChild(item) { children = children.filter(x => x !== item); item.parentNode = null; },
       replaceChildren(...items) { html = ''; children = []; this.append(...items); },
       querySelector(selector) { return selector === '.markdown-body' ? children.find(x => x.className === 'markdown-body') || null : null; },
       querySelectorAll() { return []; }, matches() { return false; },
@@ -37,7 +40,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     };
   };
   const getNode = id => { if (!nodes.has(id)) nodes.set(id, node()); return nodes.get(id); };
-  const body = node('body');
+  const body = node('body'), head = node('head');
   const presentation = {
     markdown: { parse(value) { calls.push(['parse', value]); if (parseError) throw new Error('parse failed'); return '<p>' + escapeHtml(value) + '</p>'; } },
     code: { renderHighlightedCodeRows: () => calls.push(['code']) },
@@ -76,7 +79,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   const requestMount = mountClassicExportRequestPort(host, { getActiveDocumentId: () => documentId, hasDocument: id => documentIds.includes(id) });
   const escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   const context = vm.createContext({
-    document: { body, getElementById: id => id === 'compatibility-business-ports' ? host : getNode(id), createElement: node, createDocumentFragment() { const result = node(); result.fragment = true; return result; }, querySelectorAll: () => [], querySelector: () => null },
+    document: { body, head, getElementById: id => id === 'compatibility-business-ports' ? host : getNode(id), createElement: node, createDocumentFragment() { const result = node(); result.fragment = true; return result; }, querySelectorAll: () => [], querySelector: () => null },
     documentModel: { getDocumentVersion: () => 7, createSnapshot(reason) { calls.push(['snapshot', reason]); return sourceText; } },
     coreExportRequestPort: requestMount.port,
     editor: { textLength, value: 'stale editor value' }, filenameInput: { value: name }, exportDirectory: 'C:\\custom',
@@ -90,6 +93,8 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     showToast: message => calls.push(['toast', message]), t: key => key,
     getComputedStyle: () => ({ backgroundColor: '#ffffff' })
   });
+  const styles = createExportStyleSheet({ documentRef: context.document, mathCss });
+  const styleMount = mountClassicExportStylePort(host, styles);
   const documentBuilder = createExportDocumentBuilder({
     documentRef: context.document, documentModel: { ...context.documentModel, getTextLength: () => textLength },
     getActiveDocumentId: () => documentId, presentation,
@@ -109,11 +114,11 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   const enhancementMount = mountClassicExportEnhancementPort(host, enhancer);
   vm.runInContext(markdownDownload + '\n' + source, context, { filename: 'public/app/export.js', timeout: 1000 });
   return {
-    context, calls, downloads, nodes, timers, events, taskController, documentBuilder,
+    context, calls, downloads, nodes, timers, events, taskController, documentBuilder, styles,
     enhance: (root, task) => enhancementMount.port.enhance({ root, task, documentId }), createNode: node,
     build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,
     cancel: () => nodes.get('export-progress-cancel').click(),
-    destroy() { try { taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    destroy() { try { taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
     invoke: (name, ...args) => context[name](...args),
     evaluate: expression => vm.runInContext(expression, context),
     setFrameHook(callback) { onFrame = callback; },

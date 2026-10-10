@@ -1,5 +1,7 @@
+import 'katex/dist/katex.css';
 import './styles/index.css';
-import { createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
+import katexStyleSheetText from 'katex/dist/katex.css?raw';
+import { createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
@@ -143,6 +145,8 @@ let exportDocumentBuilder = null;
 let exportDocumentPort = null;
 let exportPreviewEnhancer = null;
 let exportEnhancementPort = null;
+const exportStyles = createExportStyleSheet({ documentRef: document, mathCss: katexStyleSheetText });
+const exportStylePort = mountClassicExportStylePort(compatibilityPlatformHost, exportStyles);
 const exportTaskController = createExportTaskController();
 const exportProgressStore = createExportProgressStore(exportTaskController);
 const exportProgressView = createExportProgressDialogView({
@@ -289,7 +293,8 @@ window.addEventListener('pagehide', () => {
   for (const release of [() => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
     () => exportEnhancementPort?.destroy(), () => exportDocumentBuilder?.destroy(),
     () => exportDocumentPort?.destroy(), () => exportProgressView.destroy(),
-    () => exportProgressStore.destroy(), () => exportTaskPort.destroy(), () => exportRequestPort.destroy()]) {
+    () => exportProgressStore.destroy(), () => exportStyles.destroy(), () => exportStylePort.destroy(),
+    () => exportTaskPort.destroy(), () => exportRequestPort.destroy()]) {
     try { release(); } catch (error) { console.error('Export disposal failed:', error); }
   }
   destroyLayoutStateFeature();

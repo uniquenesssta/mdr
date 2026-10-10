@@ -197,7 +197,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorPreviewCommandPort;
       const before=port.getViewMode();let prints=0,printed;const errors=[],phases=[];
       const unsubscribe=host.markdownEditorExportTaskPort.subscribe(s=>{if(s.activeTask)phases.push({phase:s.activeTask.phase,cancelable:s.activeTask.cancelable});});
-      window.print=()=>{prints++;printed={math:preview.querySelectorAll('.katex').length,diagrams:preview.querySelectorAll('svg.f-mermaid-svg').length,
+      window.print=()=>{prints++;printed={format:preview.querySelector('.export-document')?.dataset.exportFormat,math:preview.querySelectorAll('.katex').length,diagrams:preview.querySelectorAll('svg.f-mermaid-svg').length,
         heading:preview.querySelector('h1')?.textContent};window.dispatchEvent(new Event('afterprint'));};
       console.error=(...args)=>{errors.push(args.map(x=>String(x)).join(' '));error.apply(console,args);};
       try {
@@ -216,7 +216,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     const png=result.png?.startsWith('data:image/png')?Buffer.from(result.png.split(',')[1],'base64'):null;
     await writeFile(join(artifactRoot,'r14-07-pdf-image.json'),JSON.stringify({...result,png:undefined,pngBytes:png?.length,mapping:'R14-F04 receiving enhancer; original failure fixture retained'},null,2));
     if(png)await writeFile(join(artifactRoot,'r14-07-export.png'),png);
-    assert.equal(result.prints,1);assert.ok(result.printed.math>=2);assert.equal(result.printed.diagrams,1);assert.equal(result.printed.heading,'Export baseline');
+    assert.equal(result.prints,1);assert.equal(result.printed.format,'pdf');assert.ok(result.printed.math>=2);assert.equal(result.printed.diagrams,1);assert.equal(result.printed.heading,'Export baseline');
     assert.equal(result.errors.length,0);assert.equal(result.afterPrint,result.before);
     assert.equal(result.progressVisible,false);assert.equal(result.stageChildren,1);assert.equal(result.stageStylesCleared,true);assert.equal(result.retired,true);
     assert.equal(result.width,1080);assert.ok(result.height>=1920);
@@ -373,6 +373,115 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     await writeFile(join(artifactRoot, 'r14-05-progress-view.json'), JSON.stringify(result, null, 2));
   });
 
+  await test('R14-08 actual HTML/Word styles render in isolated documents without application CSS or scripts', async () => {
+    await loadMarkdown(fixture.source);
+    const result=await page.evaluate(`(async()=>{
+      const captures=[],blobs=new Map(),create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click;
+      const styles=document.getElementById('compatibility-business-ports').markdownEditorExportStylePort;
+      URL.createObjectURL=blob=>{const url=create.call(URL,blob);blobs.set(url,blob);return url;};
+      HTMLAnchorElement.prototype.click=function(){if(this.download)captures.push(blobs.get(this.href));else click.call(this);};
+      const results=[];
+      try {
+        for(const [format,run] of [['html',exportHTML],['word',exportWord]]) {
+          await run();const content=await captures.at(-1).text(),parsed=new DOMParser().parseFromString(content,'text/html');
+          const shared=parsed.querySelector('style').textContent===styles.getCss(format);
+          parsed.querySelectorAll('script,link').forEach(node=>node.remove());
+          const frame=document.createElement('iframe');frame.setAttribute('sandbox','allow-same-origin');
+          frame.style.cssText='position:fixed;left:-99999px;top:0;width:900px;height:700px';
+          const ready=new Promise((resolve,reject)=>{frame.onload=resolve;frame.onerror=()=>reject(new Error('Isolated export document failed'));});
+          frame.srcdoc=parsed.documentElement.outerHTML;document.body.append(frame);
+          try {
+            await ready;const doc=frame.contentDocument,view=frame.contentWindow;
+            const mathml=Array.from(doc.querySelectorAll('.katex-mathml')).map(node=>{const css=view.getComputedStyle(node);return {position:css.position,clip:css.clipPath,width:css.width,height:css.height,display:css.display};});
+            results.push({format,shared,root:doc.body.dataset.exportFormat,font:view.getComputedStyle(doc.body).fontSize,
+              mathml,math:doc.querySelectorAll('.katex').length,diagrams:doc.querySelectorAll('svg.f-mermaid-svg').length,
+              row:view.getComputedStyle(doc.querySelector('.preview-code-row')).display,
+              task:view.getComputedStyle(doc.querySelector('li.task-item')).listStyleType,
+              table:view.getComputedStyle(doc.querySelector('table')).borderCollapse,scripts:doc.scripts.length});
+          } finally {frame.remove();}
+        }
+        return results;
+      } finally {URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-08-isolated-document-styles.json'),JSON.stringify(result,null,2));
+    for(const row of result) {
+      assert.equal(row.shared,true);assert.equal(row.root,row.format);assert.equal(row.scripts,0);
+      assert.equal(row.font,'16px');assert.equal(row.math,2);assert.equal(row.diagrams,1);
+      assert.equal(row.row,row.format==='word'?'block':'grid');assert.equal(row.task,'none');assert.equal(row.table,'collapse');
+      assert.equal(row.mathml.length,2);
+      for(const math of row.mathml){assert.equal(math.position,'absolute');assert.equal(math.clip,'inset(50%)');assert.equal(math.width,'1px');assert.equal(math.height,'1px');assert.notEqual(math.display,'none');}
+    }
+  });
+
+  await test('R14-08 actual light/dark PNG equals a MathML-removed reference and detects visible duplicate-text control', async () => {
+    await loadMarkdown(fixture.source);
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),styles=host.markdownEditorExportStylePort,
+        presentation=host.markdownEditorPresentationPort,oldTheme=document.body.getAttribute('data-theme');
+      const decode=async png=>{const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('PNG reference decode failed'));image.src=png;});
+        const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;const context=canvas.getContext('2d');context.drawImage(image,0,0);
+        return {width:canvas.width,height:canvas.height,pixels:context.getImageData(0,0,canvas.width,canvas.height).data};};
+      const difference=(a,b)=>{if(a.width!==b.width||a.height!==b.height)throw new Error('PNG reference dimensions differ');let pixels=0;
+        for(let i=0;i<a.pixels.length;i+=4)if(a.pixels[i]!==b.pixels[i]||a.pixels[i+1]!==b.pixels[i+1]||a.pixels[i+2]!==b.pixels[i+2]||a.pixels[i+3]!==b.pixels[i+3])pixels++;
+        return pixels;};
+      const results=[];
+      try {
+        for(const theme of ['light','dark']) {
+          document.body.setAttribute('data-theme',theme);await document.fonts.ready;await renderExportImagePreview();
+          const png=document.getElementById('export-image-preview').src,actual=await decode(png),root=document.getElementById('export-image-content').firstElementChild;
+          const released=!root.classList.contains('export-document')&&!root.hasAttribute('data-export-format');
+          const lease=styles.apply(root,'image'),previousHeight=root.style.height;
+          root.style.height=actual.height+'px';
+          const mathml=Array.from(root.querySelectorAll('.katex-mathml')),hidden=mathml.every(node=>getComputedStyle(node).display==='none');
+          const retained=mathml.map(node=>({node,parent:node.parentNode,next:node.nextSibling}));
+          let control=null;
+          try {
+            const renderer=await presentation.loadDomToImage(),options={width:actual.width,height:actual.height,bgcolor:getComputedStyle(root).backgroundColor,cacheBust:true};
+            mathml.forEach(node=>node.remove());const reference=await renderer.toPng(root,options),referenceDecoded=await decode(reference);
+            const diff=difference(actual,referenceDecoded);
+            if(theme==='light') {
+              control=document.createElement('p');control.textContent='x2 21 VISIBLE MATHML CONTROL';root.prepend(control);
+              const controlPng=await renderer.toPng(root,options);const controlDiff=difference(actual,await decode(controlPng));
+              results.push({theme,width:actual.width,height:actual.height,hidden,mathml:mathml.length,released,diff,controlDiff,png,reference});
+            } else results.push({theme,width:actual.width,height:actual.height,hidden,mathml:mathml.length,released,diff,png,reference});
+          } finally {
+            control?.remove();for(const item of retained)item.parent.insertBefore(item.node,item.next);
+            root.style.height=previousHeight;lease.release();
+          }
+        }
+        return results;
+      } finally {if(oldTheme===null)document.body.removeAttribute('data-theme');else document.body.setAttribute('data-theme',oldTheme);}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-08-png-math-pixels.json'),JSON.stringify(result.map(({png,reference,...row})=>row),null,2));
+    for(const row of result) {
+      await writeFile(join(artifactRoot,`r14-08-export-${row.theme}.png`),Buffer.from(row.png.split(',')[1],'base64'));
+      await writeFile(join(artifactRoot,`r14-08-reference-${row.theme}.png`),Buffer.from(row.reference.split(',')[1],'base64'));
+      assert.equal(row.width,1080);assert.ok(row.height>=1920);assert.equal(row.mathml,2);assert.equal(row.hidden,true);assert.equal(row.released,true);
+      assert.equal(row.diff,0,'Visible math and the complete PNG must be unchanged when auxiliary MathML is removed.');
+      if(row.theme==='light')assert.ok(row.controlDiff>100,'A visible duplicate-text control must change actual PNG pixels.');
+    }
+  });
+
+  await test('R14-08 Preview/Hybrid retain accessible math and unchanged nodes through export-style leases', async () => {
+    await loadMarkdown('# Math styles\n\nInline $x^2$.\n\n$$\\frac{1}{2}$$');
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),styles=host.markdownEditorExportStylePort;
+      await host.markdownEditorPreviewCommandPort.update();await document.fonts.ready;
+      const nodes={preview:Array.from(document.querySelectorAll('.preview-content .katex')),hybrid:Array.from(document.querySelectorAll('.virtual-editor-host .katex'))};
+      const inspect=()=>Object.fromEntries(Object.entries(nodes).map(([surface,list])=>[surface,list.map(node=>{
+        const math=node.querySelector('.katex-mathml'),visual=node.querySelector('.katex-html'),css=getComputedStyle(math);
+        return {connected:node.isConnected,position:css.position,clip:css.clipPath,width:css.width,height:css.height,display:css.display,visual:getComputedStyle(visual).display};
+      })]));
+      const before=inspect(),root=document.createElement('div');document.body.append(root);
+      try{const lease=styles.apply(root,'image');const during=inspect();lease.release();return {before,during,after:inspect(),count:{preview:nodes.preview.length,hybrid:nodes.hybrid.length},unscoped:!document.querySelector('.virtual-editor-host.export-document')&&!preview.classList.contains('export-document')};}
+      finally{root.remove();}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-08-preview-hybrid-math.json'),JSON.stringify(result,null,2));
+    assert.equal(result.count.preview,2);assert.equal(result.count.hybrid,2);assert.equal(result.unscoped,true);
+    assert.deepEqual(result.during,result.before);assert.deepEqual(result.after,result.before);
+    for(const list of Object.values(result.before))for(const math of list){assert.equal(math.connected,true);assert.equal(math.position,'absolute');assert.equal(math.clip,'inset(50%)');assert.equal(math.width,'1px');assert.equal(math.height,'1px');assert.notEqual(math.display,'none');assert.notEqual(math.visual,'none');}
+  });
+
   // Final app probe: exercise the production pagehide owner after all other export probes.
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
     const result = await page.evaluate(`(async () => {
@@ -380,6 +489,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const progressRoot=document.getElementById('export-progress-modal');
       const builder=host.markdownEditorExportDocumentPort;
       const enhancer=host.markdownEditorExportEnhancementPort;
+      const styles=host.markdownEditorExportStylePort,styleRoot=document.createElement('div');document.body.append(styleRoot);styles.apply(styleRoot,'image');
       const enhancementBody=await builder.build();
       enhancementBody.replaceChildren(...Array.from({length:25},()=>{const node=document.createElement('p');node.textContent='dispose enhancement';return node;}));
       const raf=window.requestAnimationFrame;let interceptedFrames=0;
@@ -398,10 +508,12 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       let cancelledError=false;try {task.token.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
       return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
-        rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort'),
+        stylesRemoved:!document.querySelector('style[data-export-style-sheet="document"]')&&!styleRoot.classList.contains('export-document')&&!styleRoot.hasAttribute('data-export-format'),
+        rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
         progressVisible:progressRoot.classList.contains('show'),progressRemoved:!document.getElementById('export-progress-modal')};
     })()`);
     assert.equal(result.progressRemoved, true);
+    assert.equal(result.stylesRemoved, true);
     assert.equal(result.snapshot.destroyed, true); assert.equal(result.snapshot.activeTask, null);
     assert.deepEqual(result.lastSeen, result.snapshot); assert.equal(result.cancelled, true); assert.equal(result.phase, 'destroyed');
     assert.deepEqual(result.waiting, {cancelled:true,reason:'destroyed'});

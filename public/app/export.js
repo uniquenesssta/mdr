@@ -11,6 +11,7 @@
     const exportTaskPort = exportCompatibilityHost?.markdownEditorExportTaskPort;
     const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
     const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
+    const exportStylePort = exportCompatibilityHost?.markdownEditorExportStylePort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
@@ -22,6 +23,7 @@
     if (!exportTaskPort) throw new Error('Export task compatibility port is unavailable.');
     if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
     if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
+    if (!exportStylePort) throw new Error('Export style compatibility port is unavailable.');
 
     function readExportRequest(format) {
       try {
@@ -137,28 +139,9 @@
 <head>
   <meta charset="utf-8">
   <title>${escapeExportTitle(name.replace(/\.doc$/i, ''))}</title>
-  <style>
-    body { font-family: "Microsoft YaHei", "SimSun", "PingFang SC", sans-serif; font-size: 12pt; line-height: 1.6; color: #000; }
-    h1 { font-size: 20pt; font-weight: bold; margin: 18pt 0 10pt; }
-    h2 { font-size: 16pt; font-weight: bold; margin: 14pt 0 8pt; }
-    h3 { font-size: 14pt; font-weight: bold; margin: 12pt 0 6pt; }
-    h4, h5, h6 { font-size: 12pt; font-weight: bold; margin: 10pt 0 6pt; }
-    p { margin: 6pt 0; }
-    pre, code { font-family: Consolas, "Courier New", monospace; }
-    pre { background: #f5f5f5; padding: 8pt; border-radius: 4px; overflow-x: auto; }
-    code { background: #f5f5f5; padding: 1pt 3pt; border-radius: 2px; }
-    blockquote { border-left: 3px solid #ccc; margin: 6pt 0; padding: 4pt 10pt; color: #555; }
-    table { border-collapse: collapse; width: 100%; margin: 8pt 0; }
-    th, td { border: 1px solid #ccc; padding: 5pt 8pt; }
-    th { background: #f5f5f5; font-weight: bold; }
-    ul, ol { margin: 6pt 0; padding-left: 24pt; }
-    li { margin: 3pt 0; }
-    img { max-width: 100%; height: auto; }
-    hr { border: none; border-top: 1px solid #ccc; margin: 12pt 0; }
-    a { color: #0563c1; text-decoration: underline; }
-  </style>
+  <style>${exportStylePort.getCss('word')}</style>
 </head>
-<body>
+<body class="export-document" data-export-format="word">
 ${bodyHtml}
 </body>
 </html>`;
@@ -225,33 +208,9 @@ ${bodyHtml}
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeExportTitle(name.replace(/\.html$/i, ''))}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.7; max-width: 820px; margin: 40px auto; padding: 0 20px; color: #212529; background: #fff; }
-    h1, h2, h3, h4, h5, h6 { margin: 24px 0 12px; font-weight: 600; line-height: 1.25; color: #212529; }
-    h1 { font-size: 2em; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; }
-    h2 { font-size: 1.5em; border-bottom: 1px solid #dee2e6; padding-bottom: 6px; }
-    h3 { font-size: 1.25em; }
-    p { margin: 0 0 14px; }
-    a { color: #0d6efd; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    ul, ol { margin: 0 0 14px; padding-left: 2em; }
-    li { margin: 4px 0; }
-    li.task-item { list-style: none; margin-left: -1.4em; }
-    ul.task-list { padding-left: 1.8em; }
-    code { background: #f1f3f5; padding: 2px 6px; border-radius: 4px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.9em; }
-    pre { background: #f1f3f5; padding: 14px; border-radius: 8px; overflow-x: auto; margin: 0 0 14px; }
-    pre code { background: transparent; padding: 0; font-size: 0.9em; }
-    blockquote { margin: 0 0 14px; padding: 8px 16px; border-left: 4px solid #8a93a1; background: #f1f3f5; color: #6c757d; font-size: 0.95em; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 14px; }
-    th, td { border: 1px solid #dee2e6; padding: 8px 12px; text-align: left; }
-    th { background: #f1f3f5; font-weight: 600; }
-    img { max-width: 100%; height: auto; border-radius: 6px; }
-    hr { border: none; border-top: 1px solid #dee2e6; margin: 20px 0; }
-    .katex { font-size: 1.1em; }
-    .katex-display { margin: 16px 0; padding: .45em 2px; overflow: visible; }
-  </style>
+  <style>${exportStylePort.getCss('html')}</style>
 </head>
-<body>
+<body class="export-document" data-export-format="html">
 ${bodyHtml}
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js">${'</scr' + 'ipt>'}
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js">${'</scr' + 'ipt>'}
@@ -312,7 +271,10 @@ ${'</scr' + 'ipt>'}
       const task = beginExportTask('正在准备 PDF');
       if (!task) return;
       let wasSource = false;
+      let printStyleLease = null;
       const restorePreview = () => {
+        printStyleLease?.release();
+        printStyleLease = null;
         exportPreviewCommandPort.reset();
         if (wasSource) exportPreviewCommandPort.setViewMode('source');
       };
@@ -325,6 +287,7 @@ ${'</scr' + 'ipt>'}
         task.token.throwIfCancelled();
         await exportEnhancementPort.enhance({ root: fullBody, task, documentId: request.documentId });
         task.token.throwIfCancelled();
+        printStyleLease = exportStylePort.apply(fullBody, 'pdf');
         preview.replaceChildren(fullBody);
         replacedPreview = true;
         task.token.throwIfCancelled();
@@ -350,6 +313,8 @@ ${'</scr' + 'ipt>'}
           showToast(error?.message || String(error));
         }
         try {
+          printStyleLease?.release();
+          printStyleLease = null;
           if (task.current && (replacedPreview || exportTaskPort.isCancelled(error))) restorePreview();
         } finally { finishExportTask(task, 'failed'); }
       }
@@ -453,6 +418,7 @@ ${'</scr' + 'ipt>'}
       if (!task) return;
       let outcome = 'completed';
       let clone = null;
+      let imageStyleLease = null;
       try {
         let domToImageApi = null;
         if (!domToImageApi) {
@@ -484,21 +450,8 @@ ${'</scr' + 'ipt>'}
         clone.style.width = preset.width + 'px';
         clone.style.padding = Math.round(preset.width * 0.04) + 'px ' + Math.round(preset.width * 0.045) + 'px';
         clone.style.fontSize = Math.round(preset.width / 36) + 'px';
-        clone.style.lineHeight = '1.7';
-        clone.style.boxSizing = 'border-box';
-        clone.style.background = 'var(--color-surface-raised)';
-        clone.style.color = 'var(--color-text-primary)';
-        clone.style.overflow = 'visible';
-        clone.style.maxWidth = 'none';
-        clone.style.margin = '0';
+        imageStyleLease = exportStylePort.apply(clone, 'image');
         container.appendChild(clone);
-
-        const markdownBody = clone.querySelector('.markdown-body');
-        if (markdownBody) {
-          markdownBody.style.maxWidth = 'none';
-          markdownBody.style.width = '100%';
-          markdownBody.style.margin = '0';
-        }
 
         stage.style.width = preset.width + 'px';
         stage.style.height = 'auto';
@@ -551,6 +504,7 @@ ${'</scr' + 'ipt>'}
           showToast(t('toastImageGenFailed', error?.message || String(error)));
         }
       } finally {
+        imageStyleLease?.release();
         if (clone) {
           clone.style.height = '';
           clone.style.minHeight = '';

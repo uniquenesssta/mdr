@@ -66,7 +66,10 @@ test('Atomic Task 2.7 keeps one ordered stylesheet entry and one semantic token 
 
   assert.equal(entrySource, expectedStyleEntry());
   assert.equal(styles.length, STYLE_IMPORTS.length);
-  assert.match(mainEntrySource, /^import '\.\/styles\/index\.css';/);
+  // R14-08 loads the locked renderer CSS before application overrides; the one app entry remains.
+  assert.equal(mainEntrySource.match(/import '\.\/styles\/index\.css';/g)?.length, 1);
+  assert.equal(mainEntrySource.match(/import 'katex\/dist\/katex\.css';/g)?.length, 1);
+  assert.ok(mainEntrySource.indexOf("import 'katex/dist/katex.css';") < mainEntrySource.indexOf("import './styles/index.css';"));
   assert.doesNotMatch(mainEntrySource, /styles\/main\.css/);
   assert.match(tokenSource, /^:root\s*\{/);
   assert.match(lightSource, /^:root\s*\{/);
@@ -127,8 +130,11 @@ test('production callers use semantic tokens and layered CSS has no visual color
     for (const name of legacyTokens) {
       assert.doesNotMatch(source, new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![a-z0-9-])`, 'i'), `${path}: ${name}`);
     }
+    // Export document tokens are scoped to its own stylesheet, never application/theme authority.
+    const localExportTokens = path.replaceAll('\\', '/') === 'src/features/export/document/export-style-sheet.js'
+      ? new Set([...collectDefinitions(source).keys()].filter(name => name.startsWith('--export-'))) : new Set();
     for (const match of source.matchAll(/var\((--[a-z0-9-]+)/gi)) {
-      assert.ok(available.has(match[1]) || runtimeOwned.has(match[1]), `${path}: undefined ${match[1]}`);
+      assert.ok(available.has(match[1]) || runtimeOwned.has(match[1]) || localExportTokens.has(match[1]), `${path}: undefined ${match[1]}`);
     }
   }
 });
