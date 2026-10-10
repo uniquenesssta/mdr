@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～07已验收（07：c532cd1 / CI38021008368）。14.8首轮b9a565d / CI38057924490未通过：831项前端与21项样式契约、独立HTML/Word及浅深色PNG像素对照通过；实际页面44/45，Preview/Hybrid测试根/布局错误，真实WebView在窗口启动阶段失败，汇总阻断。当前修正实际根与布局接线，补Windows原生窗口屏障、失败诊断/清理与仅启动阶段的一次新进程恢复；待新Windows累计验证，14.8不勾选，14.9未开始。原验收/失败证据和A10最终离线完整格式门槛保持。 [07正式验收](R14-07-DETAILS.md) · [08实施](R14-08-DETAILS.md)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～08已验收（08：22cbd68 / CI38072508148），七组及全部步骤通过，全仓1848/1848、前端843/843、样式21/21、启动生命周期12/12、浏览器11/11＋45/45，最终同提交准入accepted=true。首轮失败与修复证据保留。按用户指令收尾08并实施14.9：唯一公共Markdown Exporter接管原文快照/非当前文档读取、统一文件名与平台输出，补取消/过时/销毁边界；09待本提交Windows累计验收，14.10未开始。A10最终离线完整格式门槛及其余已接收职责保持。 [08正式验收](R14-08-DETAILS.md) · [09实施](R14-09-DETAILS.md)。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

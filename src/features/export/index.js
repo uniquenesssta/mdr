@@ -12,3 +12,5 @@ export { createExportPreviewEnhancer } from './document/export-preview-enhancer.
 export { mountClassicExportEnhancementPort } from './compatibility/classic-export-enhancement-port.js';
 export { createExportStyleSheet } from './document/export-style-sheet.js';
 export { mountClassicExportStylePort } from './compatibility/classic-export-style-port.js';
+export { createMarkdownExporter } from './formats/markdown-exporter.js';
+export { mountClassicMarkdownExportPort } from './compatibility/classic-markdown-export-port.js';

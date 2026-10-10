@@ -12,6 +12,7 @@
     const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
     const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
     const exportStylePort = exportCompatibilityHost?.markdownEditorExportStylePort;
+    const exportMarkdownPort = exportCompatibilityHost?.markdownEditorMarkdownExportPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
     if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
@@ -24,6 +25,7 @@
     if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
     if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
     if (!exportStylePort) throw new Error('Export style compatibility port is unavailable.');
+    if (!exportMarkdownPort) throw new Error('Markdown export compatibility port is unavailable.');
 
     function readExportRequest(format) {
       try {
@@ -103,18 +105,11 @@
       const request = readExportRequest('markdown');
       if (!request) return;
       try {
-        const content = documentModel?.createSnapshot?.('export-markdown') ?? editor.value;
-        const name = request.name;
-        const savedPath = await exportTextContent(content, name, getExportSaveOptions(
-          '导出 Markdown',
-          request,
-          'Markdown 文档'
-        ));
-        if (savedPath === null) return;
-        if (savedPath === false) exportMarkdownContent(content, name);
-        showToast(t('toastExported'));
+        const result = await exportMarkdownPort.export({ request });
+        if (result.status === 'busy') showToast('当前导出正在生成文件，请稍候');
+        if (['written', 'downloaded'].includes(result.status)) showToast(t('toastExported'));
       } catch (error) {
-        showToast('导出失败：' + (error?.message || String(error)));
+        if (!exportTaskPort.isCancelled(error)) showToast('导出失败：' + (error?.message || String(error)));
       }
     }
 

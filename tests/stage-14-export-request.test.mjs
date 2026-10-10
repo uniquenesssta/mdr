@@ -129,14 +129,16 @@ test('R14-02 image ratio and crop remain the pre-task snapshot after asynchronou
 test('R14-02 context export validates the selected document before read and preserves stale generation rejection', async () => {
   const h = createExportVmHost({ desktop: true, documentIds: ['export-doc', 'other'] });
   const record = { id: 'other', title: 'selected.txt' };
-  let reads = 0, current = true;
+  let reads = 0, current = true, rejectNext = false;
   h.context.coreDocumentSessionPort = { getRecord: id => id === record.id ? record : null };
   h.context.getCurrentDocument = () => ({ id: 'export-doc', title: 'active.md' });
   h.context.getActiveDocumentId = () => 'export-doc';
   h.context.coreDocumentControllerPort = {
+    generation: 1, isStaleError: () => false,
     isCurrentGeneration: () => current,
     async readDocumentContent(id) {
       assert.equal(id, 'other'); reads++;
+      if (rejectNext) current = false;
       record.title = 'late.md'; h.evaluate("exportDirectory = 'C:\\\\late'");
       return { generation: 1, content: 'selected body 😀' };
     }
@@ -147,7 +149,7 @@ test('R14-02 context export validates the selected document before read and pres
   const dialog = h.calls.find(x => x[0] === 'saveFile');
   assert.equal(dialog[1], 'selected.md'); assert.equal(dialog[2].defaultDirectory, 'C:\\custom');
   assert.equal(h.calls.find(x => x[0] === 'writeText')[2], 'selected body 😀');
-  h.calls.length = 0; current = false;
+  h.calls.length = 0; rejectNext = true;
   await h.invoke('exportContextDocument', 'other');
   assert.equal(reads, 2); assert.equal(h.calls.some(x => x[0] === 'saveFile'), false);
 });

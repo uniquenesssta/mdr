@@ -1,7 +1,7 @@
 import 'katex/dist/katex.css';
 import './styles/index.css';
 import katexStyleSheetText from 'katex/dist/katex.css?raw';
-import { createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
+import { createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
@@ -141,6 +141,8 @@ const exportRequestPort = mountClassicExportRequestPort(compatibilityPlatformHos
   getActiveDocumentId: () => compatibilityPlatformHost.markdownEditorDocumentSessionPort?.activeId,
   hasDocument: id => Boolean(compatibilityPlatformHost.markdownEditorDocumentSessionPort?.getRecord(id))
 });
+let markdownExporter = null;
+let markdownExportPort = null;
 let exportDocumentBuilder = null;
 let exportDocumentPort = null;
 let exportPreviewEnhancer = null;
@@ -290,7 +292,7 @@ configureHybridImageSourcePlatform({
   getDocumentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {}
 });
 window.addEventListener('pagehide', () => {
-  for (const release of [() => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
+  for (const release of [() => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
     () => exportEnhancementPort?.destroy(), () => exportDocumentBuilder?.destroy(),
     () => exportDocumentPort?.destroy(), () => exportProgressView.destroy(),
     () => exportProgressStore.destroy(), () => exportStyles.destroy(), () => exportStylePort.destroy(),
@@ -504,6 +506,8 @@ async function loadAppModules() {
     loadController
   });
   const documentControllerPort = mountClassicDocumentControllerPort(compatibilityPlatformHost, documentController);
+  markdownExporter = createMarkdownExporter({ documentModel, documents: documentControllerPort, taskController: exportTaskController, platform });
+  markdownExportPort = mountClassicMarkdownExportPort(compatibilityPlatformHost, markdownExporter);
   const recentFilesRepository = createRecentFilesRepository({
     storage: window.localStorage,
     reportError(message, error) {
@@ -531,6 +535,10 @@ async function loadAppModules() {
     documentUiCommandPort?.destroy?.();
     recentFilesPort?.destroy?.();
     recentFilesRepository.destroy();
+    markdownExporter?.destroy();
+    markdownExportPort?.destroy();
+    markdownExporter = null;
+    markdownExportPort = null;
     documentControllerPort.destroy();
     documentController.destroy();
     loadController.destroy();
@@ -701,6 +709,10 @@ async function loadAppModules() {
     documentUiCommandPort.destroy();
     recentFilesPort.destroy();
     recentFilesRepository.destroy();
+    markdownExporter?.destroy();
+    markdownExportPort?.destroy();
+    markdownExporter = null;
+    markdownExportPort = null;
     documentControllerPort.destroy();
     documentController.destroy();
     loadController.destroy();

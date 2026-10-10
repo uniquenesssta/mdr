@@ -1,6 +1,8 @@
 const coreCompatibilityHost = document.getElementById('compatibility-business-ports');
 const corePlatformPort = coreCompatibilityHost?.markdownEditorPlatformPort;
 const coreExportRequestPort = coreCompatibilityHost?.markdownEditorExportRequestPort;
+const coreMarkdownExportPort = coreCompatibilityHost?.markdownEditorMarkdownExportPort;
+const coreExportTaskPort = coreCompatibilityHost?.markdownEditorExportTaskPort;
 const coreI18nPort = coreCompatibilityHost?.markdownEditorI18nPort;
 const coreSettingsStorePort = coreCompatibilityHost?.markdownEditorSettingsStorePort;
 const coreDocumentDomainPort = coreCompatibilityHost?.markdownEditorDocumentDomainPort;
@@ -34,6 +36,8 @@ if (!corePreviewCommandPort) throw new Error('Preview Command compatibility port
 if (!coreTaskSchedulerPort) throw new Error('Task Scheduler compatibility port is unavailable.');
 if (!coreSaveStatusStorePort) throw new Error('Save Status Store compatibility port is unavailable.');
 if (!coreExportRequestPort) throw new Error('Export request compatibility port is unavailable.');
+if (!coreMarkdownExportPort) throw new Error('Markdown export compatibility port is unavailable.');
+if (!coreExportTaskPort) throw new Error('Export task compatibility port is unavailable.');
 const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
 coreDocumentUiCommandPort.register({
   applyDocumentLifecycleUi: result => applyDocumentLifecycleUi(result),
@@ -704,41 +708,16 @@ const editor = document.getElementById('editor');
       if (menu) menu.style.display = 'none';
     }
 
-    function exportMarkdownContent(content, preferredName) {
-      const blob = new Blob([content || ''], { type: 'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = preferredName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
     async function exportContextDocument(documentId) {
       try {
         const targetId = documentId === undefined ? getActiveDocumentId() : documentId;
         const doc = coreDocumentSessionPort.getRecord(targetId);
         const request = coreExportRequestPort.createRequest({ format: 'markdown', documentId: targetId, name: doc?.title || '', directory: exportDirectory });
-        if (!doc) throw new Error('要导出的文档已不存在');
-        const contentResult = doc.id === getActiveDocumentId()
-          ? { generation: coreDocumentControllerPort.generation, content: documentModel?.createSnapshot?.('context-export') ?? editor.value }
-          : await coreDocumentControllerPort.readDocumentContent(doc.id);
-        if (!coreDocumentControllerPort.isCurrentGeneration(contentResult.generation)) return;
-        const content = contentResult.content;
-        const name = request.name;
-        const savedPath = await exportTextContent(content, name, getExportSaveOptions(
-          '导出 Markdown',
-          request,
-          'Markdown 文档'
-        ));
-        if (savedPath === null) return;
-        if (savedPath === false) exportMarkdownContent(content, name);
-        if (!coreDocumentControllerPort.isCurrentGeneration(contentResult.generation)) return;
-        showToast('已导出 Markdown');
+        const result = await coreMarkdownExportPort.export({ request, snapshotReason: 'context-export' });
+        if (result.status === 'busy') showToast('当前导出正在生成文件，请稍候');
+        if (['written', 'downloaded'].includes(result.status)) showToast('已导出 Markdown');
       } catch (error) {
-        showToast(error?.message || String(error));
+        if (!coreExportTaskPort.isCancelled(error) && !coreDocumentControllerPort.isStaleError(error)) showToast(error?.message || String(error));
       }
     }
 

@@ -497,6 +497,90 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       for(const math of row.before.math){assert.equal(math.connected,true);assert.equal(math.position,'absolute');assert.equal(math.clip,'inset(50%)');assert.equal(math.width,'1px');assert.equal(math.height,'1px');assert.notEqual(math.display,'none');assert.notEqual(math.visual,'none');}}
   });
 
+  await test('R14-09 actual active Markdown exports preserve complete raw model bytes including empty and large documents', async () => {
+    const results=[];
+    for(const source of ['', '# Raw 😀\r\n\r\n$x^2$  \n```mermaid\nflowchart TD\n A-->B\n```\n<script>raw</script>\n', 'Markdown 原文 😀  \n'.repeat(30000)]) {
+      await loadMarkdown(source);
+      results.push(await page.evaluate(`(async()=>{
+        const host=document.getElementById('compatibility-business-ports'),model=window.markdownEditorDocumentModel;
+        const expected=new TextEncoder().encode(model.createSnapshot('r14-09-expected')),captures=[],blobs=new Map(),revoked=[];
+        const create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click;
+        const input=document.getElementById('filename'),name=input.value,preview=document.getElementById('preview'),nodes=Array.from(preview.childNodes);
+        URL.createObjectURL=function(blob){const url=create.call(URL,blob);blobs.set(url,blob);return url;};
+        URL.revokeObjectURL=function(url){revoked.push(url);return revoke.call(URL,url);};
+        HTMLAnchorElement.prototype.click=function(){if(this.download)captures.push({name:this.download,url:this.href,blob:blobs.get(this.href)});else return click.call(this);};
+        try {
+          input.value='原文 report.docx';await exportFile();await exportContextDocument();
+          const files=[];
+          for(const capture of captures){const bytes=new Uint8Array(await capture.blob.arrayBuffer());files.push({name:capture.name,mime:capture.blob.type,bytes:bytes.length,
+            exact:bytes.length===expected.length&&bytes.every((value,index)=>value===expected[index]),revoked:revoked.includes(capture.url)});}
+          return {files,expectedBytes:expected.length,taskReleased:host.markdownEditorExportTaskPort.getSnapshot().activeTask===null,
+            scoped:typeof window.markdownEditorMarkdownExportPort==='undefined'&&Object.isFrozen(host.markdownEditorMarkdownExportPort),
+            samePreview:preview.childNodes.length===nodes.length&&nodes.every((node,index)=>preview.childNodes[index]===node),
+            oldDownloadRetired:typeof exportMarkdownContent==='undefined'};
+        } finally {input.value=name;URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;}
+      })()`));
+    }
+    await writeFile(join(artifactRoot,'r14-09-raw-model-exports.json'),JSON.stringify(results,null,2));
+    assert.equal(results[0].expectedBytes,0);assert.ok(results[2].expectedBytes>400000);
+    for(const row of results){assert.equal(row.files.length,2);assert.equal(row.files[0].name,'原文 report.md');
+      for(const file of row.files){assert.equal(file.exact,true);assert.equal(file.revoked,true);assert.equal(file.mime,'text/markdown;charset=utf-8');}
+      for(const field of ['taskReleased','scoped','samePreview','oldDownloadRetired'])assert.equal(row[field],true,field);}
+  });
+
+  await test('R14-09 actual document context command exports an inactive source without changing the active model', async () => {
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),docs=host.markdownEditorDocumentControllerPort,ui=host.markdownEditorDocumentUiCommandPort;
+      const initial=docs.activeId,create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click;
+      const blobs=new Map(),captures=[],revoked=[];let selected,active;
+      URL.createObjectURL=function(blob){const url=create.call(URL,blob);blobs.set(url,blob);return url;};
+      URL.revokeObjectURL=function(url){revoked.push(url);return revoke.call(URL,url);};
+      HTMLAnchorElement.prototype.click=function(){if(this.download)captures.push({name:this.download,url:this.href,blob:blobs.get(this.href)});else return click.call(this);};
+      try {
+        selected=await docs.newDocument({title:'selected source.docx',content:'Selected 原文 😀  \\n$x^2$\\n',fallbackTitle:'未命名文档'});
+        await applyDocumentLifecycleUi(selected);
+        active=await docs.newDocument({title:'active source.md',content:'Active body stays here',fallbackTitle:'未命名文档'});
+        await applyDocumentLifecycleUi(active);
+        const model=window.markdownEditorDocumentModel,before=model.createSnapshot('r14-09-active-before'),version=model.getDocumentVersion();
+        await ui.invoke('exportDocument',selected.record.id);
+        if(captures.length!==1)throw new Error('Expected one selected-context Markdown file');
+        const capture=captures[0];
+        return {name:capture.name,content:await capture.blob.text(),mime:capture.blob.type,revoked:revoked.includes(capture.url),
+          activeUnchanged:docs.activeId===active.record.id&&model.createSnapshot('r14-09-active-after')===before&&model.getDocumentVersion()===version,
+          taskReleased:host.markdownEditorExportTaskPort.getSnapshot().activeTask===null};
+      } finally {
+        URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;
+        if(initial){await openDocument(initial);if(selected)await closeDocument(selected.record.id);if(active)await closeDocument(active.record.id);}
+      }
+    })()`);
+    await writeFile(join(artifactRoot,'r14-09-inactive-document-export.json'),JSON.stringify(result,null,2));
+    assert.equal(result.name,'selected source.md');assert.equal(result.content,'Selected 原文 😀  \n$x^2$\n');assert.equal(result.mime,'text/markdown;charset=utf-8');
+    for(const field of ['revoked','activeUnchanged','taskReleased'])assert.equal(result[field],true,field);
+  });
+
+  await test('R14-09 actual pre-write source changes block publication and the next raw export succeeds', async () => {
+    await loadMarkdown('# Original raw source');
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),tasks=host.markdownEditorExportTaskPort,editor=host.markdownEditorEditorControllerPort;
+      const create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click,blobs=new Map(),captures=[],revoked=[];
+      URL.createObjectURL=function(blob){const url=create.call(URL,blob);blobs.set(url,blob);return url;};
+      URL.revokeObjectURL=function(url){revoked.push(url);return revoke.call(URL,url);};
+      HTMLAnchorElement.prototype.click=function(){if(this.download)captures.push({url:this.href,blob:blobs.get(this.href)});else return click.call(this);};
+      let changed=false;
+      const dispose=tasks.subscribe(s=>{if(!changed&&s.activeTask?.phase==='serializing'){changed=true;editor.setText('new raw line\\n'+window.markdownEditorDocumentModel.createSnapshot('r14-09-stale-mutation'));}});
+      try {
+        await exportFile();const first=captures.length,releasedAfterStale=tasks.getSnapshot().activeTask===null;
+        dispose();await exportFile();
+        if(captures.length!==1)throw new Error('Expected only the next raw export');
+        const capture=captures[0];return {changed,first,releasedAfterStale,second:captures.length,revoked:revoked.includes(capture.url),
+          content:await capture.blob.text(),expected:window.markdownEditorDocumentModel.createSnapshot('r14-09-after-stale'),released:tasks.getSnapshot().activeTask===null};
+      } finally {dispose();URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-09-stale-source-export.json'),JSON.stringify(result,null,2));
+    assert.equal(result.changed,true);assert.equal(result.first,0);assert.equal(result.second,1);assert.equal(result.content,result.expected);
+    assert.ok(result.content.startsWith('new raw line\n'));for(const field of ['releasedAfterStale','revoked','released'])assert.equal(result[field],true,field);
+  });
+
   // Final app probe: exercise the production pagehide owner after all other export probes.
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
     const result = await page.evaluate(`(async () => {
@@ -504,6 +588,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const progressRoot=document.getElementById('export-progress-modal');
       const builder=host.markdownEditorExportDocumentPort;
       const enhancer=host.markdownEditorExportEnhancementPort;
+      const markdown=host.markdownEditorMarkdownExportPort;
       const styles=host.markdownEditorExportStylePort,styleRoot=document.createElement('div');document.body.append(styleRoot);styles.apply(styleRoot,'image');
       const enhancementBody=await builder.build();
       enhancementBody.replaceChildren(...Array.from({length:25},()=>{const node=document.createElement('p');node.textContent='dispose enhancement';return node;}));
@@ -521,10 +606,11 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const building=await buildWait;const enhancing=await enhancementWait;const waiting=await wait;rejectLate(new Error('late encoder failure'));await Promise.resolve();
       let rejected=false;try {port.begin('late');}catch(error){rejected=/destroyed/.test(error.message);}
       let cancelledError=false;try {task.token.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
+      let markdownRejected=false;try {await markdown.export({});}catch(error){markdownRejected=/destroyed/.test(error.message);}
       return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
         stylesRemoved:!document.querySelector('style[data-export-style-sheet="document"]')&&!styleRoot.classList.contains('export-document')&&!styleRoot.hasAttribute('data-export-format'),
-        rejected,cancelledError,removed:!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
+        rejected,cancelledError,markdownRejected,removed:!Object.hasOwn(host,'markdownEditorMarkdownExportPort')&&!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
         progressVisible:progressRoot.classList.contains('show'),progressRemoved:!document.getElementById('export-progress-modal')};
     })()`);
     assert.equal(result.progressRemoved, true);
@@ -535,7 +621,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.deepEqual(result.building, {cancelled:true,reason:'destroyed'});
     assert.deepEqual(result.enhancing, {cancelled:true,reason:'destroyed'});assert.equal(result.interceptedFrames,1);
     for (const field of ['lateUpdate','lateLock','lateFinish','progressVisible']) assert.equal(result[field], false, field);
-    for (const field of ['rejected','cancelledError','removed']) assert.equal(result[field], true, field);
+    for (const field of ['rejected','cancelledError','markdownRejected','removed']) assert.equal(result[field], true, field);
     await writeFile(join(artifactRoot, 'r14-03-task-disposal.json'), JSON.stringify(result, null, 2));
   });
 }

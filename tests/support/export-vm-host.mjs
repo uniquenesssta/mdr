@@ -6,13 +6,14 @@ import vm from 'node:vm';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 const mathCss = readFileSync(join(dirname(createRequire(import.meta.url).resolve('katex')), 'katex.css'), 'utf8');
-import { createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createBrowserFileDownload } from '../../src/platform/index.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
 
 const source = readFileSync(new URL('../../public/app/export.js', import.meta.url), 'utf8');
 const markdownSource = readFileSync(new URL('../../public/app/core.js', import.meta.url), 'utf8');
-const markdownDownload = markdownSource.slice(markdownSource.indexOf('    function exportMarkdownContent('), markdownSource.indexOf('    function copyContextDocumentTitle('));
+const markdownDownload = markdownSource.slice(markdownSource.indexOf('    async function exportContextDocument('), markdownSource.indexOf('    function copyContextDocumentTitle('));
 
 export function createExportVmHost({ desktop = false, sourceText = '原文 😀', name = 'report.md', savePath = 'C:\\exports\\report', failWrite = false, workerBlocks = null, workerVersion = 7, textLength = 20, parseError = false, imageHeight = 100, documentId = 'export-doc', documentIds = [documentId] } = {}) {
   const calls = [], downloads = [], blobs = new Map(), timers = [], events = new Map(), nodes = new Map();
@@ -81,7 +82,11 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   const context = vm.createContext({
     document: { body, head, getElementById: id => id === 'compatibility-business-ports' ? host : getNode(id), createElement: node, createDocumentFragment() { const result = node(); result.fragment = true; return result; }, querySelectorAll: () => [], querySelector: () => null },
     documentModel: { getDocumentVersion: () => 7, createSnapshot(reason) { calls.push(['snapshot', reason]); return sourceText; } },
-    coreExportRequestPort: requestMount.port,
+    coreExportRequestPort: requestMount.port, coreExportTaskPort: taskMount.port,
+    getActiveDocumentId: () => documentId,
+    coreDocumentSessionPort: { getRecord: id => documentIds.includes(id) ? { id, title: name } : null },
+    coreDocumentControllerPort: { generation: 1, isCurrentGeneration: generation => generation === 1, isStaleError: () => false,
+      async readDocumentContent() { return { generation: 1, content: sourceText }; } },
     editor: { textLength, value: 'stale editor value' }, filenameInput: { value: name }, exportDirectory: 'C:\\custom',
     preview: node(),
     requestAnimationFrame(callback) { frameCount++; onFrame?.(frameCount); queueMicrotask(callback); },
@@ -93,6 +98,26 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     showToast: message => calls.push(['toast', message]), t: key => key,
     getComputedStyle: () => ({ backgroundColor: '#ffffff' })
   });
+  const browserDownload = createBrowserFileDownload({ documentObject: context.document, urlApi: context.URL });
+  const markdownExporter = createMarkdownExporter({
+    documentModel: context.documentModel, taskController,
+    documents: {
+      get activeId() { return context.getActiveDocumentId(); },
+      get generation() { return context.coreDocumentControllerPort.generation; },
+      getRecord: id => context.coreDocumentSessionPort.getRecord(id),
+      isCurrentGeneration: generation => context.coreDocumentControllerPort.isCurrentGeneration(generation),
+      readDocumentContent: id => context.coreDocumentControllerPort.readDocumentContent(id)
+    },
+    platform: {
+      capabilities: { desktop: { dialogs: desktop, fileSystem: desktop }, browser: { fileDownload: !desktop } },
+      dialogs: { saveFile: (...args) => host.markdownEditorPlatformPort.call('dialogs', 'saveFile', ...args) },
+      files: { writeText: (path, content, options) => desktop
+        ? host.markdownEditorPlatformPort.call('files', 'writeText', path, content, options)
+        : browserDownload.downloadBlob(new Blob([content], { type: options.mimeType }), path) }
+    }
+  });
+  const markdownMount = mountClassicMarkdownExportPort(host, markdownExporter);
+  context.coreMarkdownExportPort = markdownMount.port;
   const styles = createExportStyleSheet({ documentRef: context.document, mathCss });
   const styleMount = mountClassicExportStylePort(host, styles);
   const documentBuilder = createExportDocumentBuilder({
@@ -114,11 +139,11 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   const enhancementMount = mountClassicExportEnhancementPort(host, enhancer);
   vm.runInContext(markdownDownload + '\n' + source, context, { filename: 'public/app/export.js', timeout: 1000 });
   return {
-    context, calls, downloads, nodes, timers, events, taskController, documentBuilder, styles,
+    context, calls, downloads, nodes, timers, events, taskController, documentBuilder, styles, markdownExporter,
     enhance: (root, task) => enhancementMount.port.enhance({ root, task, documentId }), createNode: node,
     build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,
     cancel: () => nodes.get('export-progress-cancel').click(),
-    destroy() { try { taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    destroy() { try { markdownExporter.destroy(); markdownMount.destroy(); taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
     invoke: (name, ...args) => context[name](...args),
     evaluate: expression => vm.runInContext(expression, context),
     setFrameHook(callback) { onFrame = callback; },
