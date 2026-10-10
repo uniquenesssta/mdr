@@ -31,8 +31,15 @@ test('R14-07 inherited default/processor/trust pollution cannot turn an untruste
 test('R14-07 polluted namespace is not accepted as a macro definition', () => {
   const key = '\\pollutedMacro', descriptor = Object.getOwnPropertyDescriptor(Object.prototype, key);
   try {
-    Object.defineProperty(Object.prototype, key, { value: 'POLLUTED', configurable: true, writable: true });
-    assert.throws(() => katex.renderToString(key), /Undefined control sequence/);
+    Object.defineProperty(Object.prototype, key, { value: '\\text{POLLUTEDTOKEN}', configurable: true, writable: true });
+    // A polluted name can reach the function parser and get a different diagnostic.
+    // The contract is a ParseError rejection, never an inherited macro expansion.
+    assert.throws(() => katex.renderToString(key), error => error instanceof katex.ParseError && error.message.includes(key));
+    const rejected = katex.renderToString(key, { throwOnError: false });
+    assert.match(rejected, /katex-error/); assert.doesNotMatch(rejected, /POLLUTEDTOKEN/);
+    // Explicit own macros must still work under the same inherited pollution.
+    const own = katex.renderToString(key, { macros: { [key]: '\\text{OWNMACRO}' } });
+    assert.match(own, /OWNMACRO/); assert.doesNotMatch(own, /POLLUTEDTOKEN/);
   } finally { descriptor ? Object.defineProperty(Object.prototype, key, descriptor) : delete Object.prototype[key]; }
 });
 test('R14-07 patched engine retains ordinary inline/block math, TeX errors and explicit untrusted links', () => {

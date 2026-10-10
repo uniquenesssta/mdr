@@ -1,10 +1,25 @@
 # R14-07 Preview Enhancer
 
-状态：**已实施，待精确提交 Windows 累计验收**。继续 `agent/r14-stage`，基线 `f8d2312534e0487868a9cba034e882ba78318dce`。14.7不勾选，14.8未开始。
+状态：**首轮未通过；宏污染测试断言修复待精确提交 Windows 重验**。继续 `agent/r14-stage`，基线 `f8d2312534e0487868a9cba034e882ba78318dce`。14.7不勾选，14.8未开始。
 
 ## 06收尾证据
 
 06正式实现验收保持 `1f49956` / [CI37958151064](https://github.com/uniquenesssta/mdr/actions/runs/37958151064)：七组及全部步骤通过，全仓1781/1781、前端776/776、Builder20/20、Settings5/5、导出43/43、浏览器11/11＋39/39。三次失败及对应修复保留。文档收尾 `f8d2312` / [CI37961049857](https://github.com/uniquenesssta/mdr/actions/runs/37961049857) 的精确head、七个job及全部执行步骤本轮核对成功，不替代正式实现验收。用户随后要求“收尾06开始07”。
+
+
+## 首轮失败证据与测试修复（2026-10-10）
+
+`a8b830283e7cff1328472c65a4518db5552358ac` / [CI37967189292](https://github.com/uniquenesssta/mdr/actions/runs/37967189292)，attempt1：已核对精确head、全部job与步骤、前端/全仓Node/最终汇总日志。增强27/27、Builder21/21、Settings5/5、导出/请求/任务/取消/进度43/31/16/22/20；浏览器契约11/11、built-app42/42与生产构建成功。Rust、原生、WebView和依赖四组成功；安全5/6、前端809/810、332文件16目录的全仓1814/1815未通过，最终汇总正确拒绝。
+
+唯一直接失败是安全测试第5项：对原型继承的\pollutedMacro，实际引擎已经抛ParseError，错误为“No function handler for \pollutedMacro”；测试要求“Undefined control sequence”，导致专项、前端和全仓重复报告同一断言。官方0.18.2的 [Namespace.ts](https://github.com/KaTeX/KaTeX/blob/v0.18.2/src/Namespace.ts) 确实只接受自有宏；[Parser.ts](https://github.com/KaTeX/KaTeX/blob/v0.18.2/src/Parser.ts) 在读取该继承名字时可转到函数解析并抛另一条ParseError，[katex.ts](https://github.com/KaTeX/KaTeX/blob/v0.18.2/katex.ts) 公开同一ParseError类。拒绝污染宏才是原安全契约，固定诊断文本没有公共保证。
+
+只修改原第5项测试：继承值使用可观察文本宏POLLUTEDTOKEN，要求真实katex.ParseError且关联原命令；throwOnError=false仍须返回错误标记、不输出污染内容；显式自有宏OWNMACRO须正常渲染，证明没有把所有宏禁用。finally恢复原属性描述符保持，六项场景全保留。其他公式/信任/元数据安全用例、增强27项和42项实际页面用例保持，生产代码、依赖、工作流与全部49项风险源指纹不变。不是忽略异常、放宽类型或将缺陷基线标为成功。
+
+已下载并校验前端artifact11633977819（SHA-256 c7f866e840b8be9359346ffb012424f30fe6c686987f1f3caef22c73bdfbea28）与全仓artifact11633683077（3496aa5c88bdb97a1c32b4bae8f311c472de078fb328498559a370ffe03b67d0）。18份实际文本产物中的12份HTML/Word各有2个KaTeX、1个SVG、1项任务列表和4个代码token，无原始图表/复制按钮；打印调用1次且增强正文含2个公式/1张图、afterprint视图恢复、错误为空。真实PNG为126235字节、1080×2563，签名与尺寸核对；40段增强首批取消/释放后重建得到40个数学节点，旧正文编辑后保持未改变并拒绝document-changed，公共math继承trust探针无链接且普通块公式成功。这些实际证据不覆盖唯一安全断言失败，也不等同07正式验收。
+
+另已查看实际PNG：公式旁出现额外x2/21文本，疑似MathML辅助内容可见；具体样式原因待查，已在14.8/14.16登记共享样式与实际图片视觉回归。这里的解码/内容链成功不代表公式布局完整。完整离线格式、打印隔离、图片释放和独立Editor指标项仍保留原接收范围，不在本次测试修复关闭。
+
+Context7核对renderToString/ParseError/错误HTML契约，并与官方0.18.2源码核对；仅改一项测试和证据记录，无产品架构变化，不新增Mermaid Chart调用。本地四项静态门禁、1个脚本语法、111个相对链接、49项源指纹及9个冻结文件、原始夹具与历史保持检查通过；只有原安全测试第5项改动，产品/依赖/工作流/页面测试字节保持。未运行本地产品测试，产品验证继续交同分支新Windows CI；14.7仍不勾选，14.8未开始，A10补丁验收与后续完整格式门槛不豁免。
 
 ## 公共职责与完整调用链
 
@@ -56,7 +71,7 @@ Builder新增私有WeakMap来源记录与只读 `getSourceContext(body)`，保�
 
 当前不宣称HTML离线可携带、Word样式完整、系统PDF已生成、打印计时器竞态已解决或图片资产/容器寿命全部完成。F02中的旧CDN与应用内变量引用仍由14.10接收；共享样式14.8未开始。独立Editor指标错误 `scheduleEditorMetricsRebuild is not defined` 保持原开放记录，不在本项关闭。
 
-## 本轮验证
+## 首轮实施静态自检
 
 四项架构/退休运行时/生成文件/README静态门禁通过；16个改动JavaScript脚本和16个实际页面嵌入表达式语法通过；JSON/YAML、111个相对链接、49项源指纹、9个冻结文件（8个JS模型加Rust文档存储）、两份原始夹具、Cargo锁、历史验收与全部失败/修复记录保持检查通过。锁文件包差异仅根KaTeX要求与node_modules/katex条目。产品Node、浏览器、构建、Rust和安全引擎测试只交本提交Windows CI；本环境不运行这些产品测试。当前累积风险源从47增至49，两项新增源加入，改动源的旧指纹保存在本项实施记录。冻结模型、原始夹具及R12/历次阶段验收、失败与修复历史须复核保持。
 
