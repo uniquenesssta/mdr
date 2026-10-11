@@ -26,6 +26,9 @@ test('R14-02 all formats have an explicit name mapping from the unchanged R14-01
 test('R14-02 preserves accepted extensions, Unicode and unknown suffixes while cleaning Windows filenames', () => {
   for (const [name, format, expected] of [
     ['中文 😀.MD', 'markdown', '中文 😀.MD'], ['notes.markdown', 'markdown', 'notes.markdown'],
+    ['selected source.docx', 'markdown', 'selected source.md'],
+    ['selected source.docx.md', 'markdown', 'selected source.docx.md'],
+    ['notes.pdf.markdown', 'markdown', 'notes.pdf.markdown'],
     ['page.HTM', 'html', 'page.HTM'], ['report.DOC', 'word', 'report.DOC'],
     ['report.docx', 'image', 'report.png'], ['data.custom', 'markdown', 'data.custom.md'],
     ['a/b:c?.md', 'markdown', 'a_b_c_.md'], ['CON.txt', 'markdown', '_CON.md'],

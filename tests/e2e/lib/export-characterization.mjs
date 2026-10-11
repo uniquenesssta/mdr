@@ -537,7 +537,8 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       URL.revokeObjectURL=function(url){revoked.push(url);return revoke.call(URL,url);};
       HTMLAnchorElement.prototype.click=function(){if(this.download)captures.push({name:this.download,url:this.href,blob:blobs.get(this.href)});else return click.call(this);};
       try {
-        selected=await docs.newDocument({title:'selected source.docx',content:'Selected 原文 😀  \\n$x^2$\\n',fallbackTitle:'未命名文档'});
+        const inputTitle='selected source.docx';
+        selected=await docs.newDocument({title:inputTitle,content:'Selected 原文 😀  \\n$x^2$\\n',fallbackTitle:'未命名文档'});
         await applyDocumentLifecycleUi(selected);
         active=await docs.newDocument({title:'active source.md',content:'Active body stays here',fallbackTitle:'未命名文档'});
         await applyDocumentLifecycleUi(active);
@@ -545,7 +546,8 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
         await ui.invoke('exportDocument',selected.record.id);
         if(captures.length!==1)throw new Error('Expected one selected-context Markdown file');
         const capture=captures[0];
-        return {name:capture.name,content:await capture.blob.text(),mime:capture.blob.type,revoked:revoked.includes(capture.url),
+        return {inputTitle,createdTitle:selected.record.title,storedTitle:docs.getRecord(selected.record.id).title,
+          name:capture.name,content:await capture.blob.text(),mime:capture.blob.type,revoked:revoked.includes(capture.url),
           activeUnchanged:docs.activeId===active.record.id&&model.createSnapshot('r14-09-active-after')===before&&model.getDocumentVersion()===version,
           taskReleased:host.markdownEditorExportTaskPort.getSnapshot().activeTask===null};
       } finally {
@@ -554,7 +556,9 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       }
     })()`);
     await writeFile(join(artifactRoot,'r14-09-inactive-document-export.json'),JSON.stringify(result,null,2));
-    assert.equal(result.name,'selected source.md');assert.equal(result.content,'Selected 原文 😀  \n$x^2$\n');assert.equal(result.mime,'text/markdown;charset=utf-8');
+    assert.equal(result.inputTitle,'selected source.docx');
+    assert.equal(result.createdTitle,'selected source.docx.md');assert.equal(result.storedTitle,'selected source.docx.md');
+    assert.equal(result.name,'selected source.docx.md');assert.equal(result.content,'Selected 原文 😀  \n$x^2$\n');assert.equal(result.mime,'text/markdown;charset=utf-8');
     for(const field of ['revoked','activeUnchanged','taskReleased'])assert.equal(result[field],true,field);
   });
 
