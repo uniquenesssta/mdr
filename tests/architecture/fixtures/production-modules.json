@@ -5384,7 +5384,7 @@
       "PDF identity/version preparation and shared task authority until print completion; no Preview mutation.",
       "pdf-export-owner",
       "create-to-destroy",
-      "public-feature-owner",
+      "retain",
       false
     ],
     [
@@ -5394,7 +5394,7 @@
       "Same-origin isolated print DOM, complete resource readiness, afterprint/timeout and idempotent frame/listener/timer disposal.",
       "pdf-print-surfaces",
       "create-to-destroy",
-      "public-feature-owner",
+      "retain",
       false
     ],
     [

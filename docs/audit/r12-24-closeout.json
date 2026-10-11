@@ -615,7 +615,7 @@
     "date": "2026-10-12",
     "reviewedCommit": "6d0f822973f8452c7b84e11916b7c59e30979e3d",
     "record": "docs/R14-12-DETAILS.md",
-    "status": "R14.11 formally accepted at6d0f822/run38146793150;R14.12 isolated PDF print implemented pending exact-head Windows admission;14.13 not started.",
+    "status": "R14.11 remains formally accepted at6d0f822/run38146793150; R14.12 first da4c309/run38155745041 failed two inventory/DOM probe mistakes, repaired pending exact-head Windows admission;14.13 not started.",
     "priorWindowsRun": 37737197913,
     "priorWindowsJobsPassed": 7,
     "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 snapshot. records status/fixed retain R12 closeout handoff semantics; A05 subsequentAcceptance records the current R13 closure separately.",
@@ -654,7 +654,7 @@
         "replacement": "src/features/export/task/export-task-controller.js"
       }
     ],
-    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open. Run 37824900026 at 0e09d62ec545d7d70d33d67175b1c9fbe4b31c70 passed cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; WebView, native and dependency jobs passed. The safe-writer targeted step failed 17/18 because parallel test fixtures used the same PID and clock value, causing Windows AlreadyExists before any write. Later full Rust success does not supersede the failed step; closeout correctly rejected the commit. Only the test fixture allocator now adds an atomic sequence and bounded exclusive-create collision handling. The retained concurrent-save scenario forces a shared clock value and a pre-existing directory, checks isolation and ownership, then runs the original eight actual writes. All 18 scenarios, production fingerprints, workflow gates and historical acceptance remain unchanged. R14.4 awaits revalidation; 14.5 is not started. Run 37883007228 at e050ff4bb1e5f78e960344031d229cba336e8662 passed the safe-writer 18/18 including forced equal-clock fixture ownership, full Rust 269 plus integration 5/1/6, Clippy/check, cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; other independent Windows jobs passed. Only the Rust formatting step failed on two new assertion layouts, repeated in the formatter log by module traversal. Closeout correctly rejected it. Current repair exactly applies the complete CI rustfmt diff; source is identical after removing whitespace. Local formatter runtime is incomplete, so full formatter and cumulative Windows admission remain pending; historical acceptance and all production fingerprints are unchanged. Run 37886068643 at f631d2639b811ab6db071c08edf26fcbb75c59ce passed all seven Windows jobs and every step, including safe-writer 18/18, Rust format, cancellation 22/22, Node 1724/1724, frontend 726/726 and actual browser 11/11 plus 37/37. R14.4 is accepted; both failed attempts and test-only repairs remain recorded. User requested R14.5. Current review covers the readonly Progress Store over one task authority, safe text-only DOM view, direct ModalShell focus/visibility, guarded cancellation button, end-state reset and independent pagehide cleanup. Classic progress subscription, inline cancel global and compatibility progress registration are removed. Existing cancellation/task/characterization scenarios are retained through the real new store/view composition; a test-only ModalShell fault adapter preserves open/close error injection. Rendered format findings and A10 remain open; R14.5 awaits its own exact-commit Windows validation. Run 37890617533 at 2bbd7733b9c14b4639cf64bde04c21840a7b449d passed progress 20/20, cancellation 22/22, task 16/16, request 31/31, characterization 41/41, browser 11/11 plus 38/38 and Rust/native/WebView/dependency jobs. Node 1743/1744 and frontend 745/746 failed solely because the Stage 1 current-baseline assertion still expected 33 inline handlers after the progress handler was removed, leaving 32. Closeout correctly blocked it. Repair replaces that stale total with exact path/attribute/handler/count equality and explicit retired-handler proof; all historical handoff and product scenarios, production fingerprints and admission gates remain unchanged. R14.5 remains pending; 14.6 is not started. Run 37897676407 at 2dbfc2ba3117d1924cceca40d4dd57e04078265a validated the Stage 1 repair: Node 1744/1744, frontend 746/746, progress 20/20, existing 22/16/31/41 scenarios and browser 11/11 plus 38/38 passed. Rust/native/dependency jobs succeeded. Only actual WebView file/both rendering timed out; closeout correctly failed. The old artifact lacked per-check DOM failure diagnostics, so the precise missing content and causal link remain unknown. Source review identified a deterministic interrupted-enhancement gap during unchanged DOM reuse: cancelled queued math and busy Mermaid were not re-enqueued. This repair captures prior pending/running state and schedules current-generation jobs for reused nodes, with settled reuse and cancellation ownership preserved. Four controlled regression scenarios and retained hard checks plus partial-state/failure screenshot diagnostics await Windows execution. Current review adds the changed Preview engine fingerprint; All prior 44 paths remain covered, 43 hashes are unchanged and the changed import probe hash is updated with its prior value retained; historical acceptance is preserved. R14.5 is pending; 14.6 is not started. Run 37929409192 at 11d2eb4befff4b06a13e2f4f00075ca1db2d056f passed all seven Windows jobs and every step, Node 1748/1748, frontend 746/746, progress 20/20, all four controlled Preview enhancement regressions, cancellation 22/22, task/request/export 16/31/41 and browser 11/11 plus 38/38. Digest-checked exact-commit WebView and final closeout artifacts passed all eight import-chain scenarios and four six-check render snapshots, including the previously failing file/both path. The old failure had no per-check snapshot, so its precise missing predicate or sole cause is not retroactively confirmed. R14.5 is formally accepted; both failed attempts and their repairs are preserved. This closeout changes documentation only; all 45 current fingerprints, production, tests, workflow and historical acceptance remain unchanged. 14.6 is not started; rendered-format findings and new A10 low-risk disposition remain open. R14.5 documentation closeout 45bcdd14debf2ab030df66f44e6588d29915a440 passed all seven Windows jobs and steps in run37931528219. User requested finish05/start06. R14.6 replaces the complete classic body builder with a public scoped Document Builder, synchronized readonly Preview capture, explicit model snapshot fallback and safe DOM materialization. All HTML/Word/PDF/Image body callers migrate; cancellation, stale document/version/reset, errors and independent frame disposal are covered by new contracts and actual built-app probes. Historical findings and tests retain purpose with explicit new behavior mappings. F01/F02 and remaining F04 enhancer/print/image gaps plus A10 remain received; no complete enhanced-format acceptance is claimed. Current source coverage grows from45 to47 with old paths retained and changed fingerprints preserved separately. R14.6 awaits its own exact-commit Windows admission; 14.7 has not started. R14.6 first attempt ccef6988/run37935424278 failed only three built-app scenes and consequential closeout; all1771 recursive Node tests,766 frontend tests,20 builder contracts and five other Windows jobs passed. Source review confirms the missing escapeHtml title binding masked by the VM and the opaque-origin/page-only built-app asset host, so repair owns title escaping, removes VM injection and uses an actual same-origin loopback server with retained failure artifacts. All old scenarios and current47 risk paths remain; only the export caller fingerprint changes. New Windows admission is pending; R14.6 is not accepted. R14.6 second attempt4d5831e/run37943920538 passed all prior three export failures, including18 actual text downloads,137 ordered long paragraphs without a full snapshot,138 actual Worker blocks in48/96/138 batches and first-batch cancellation followed by a complete next build. Recursive Node1776/1776, frontend771/771, export43/43 and builder20/20 passed; only two cumulative theme probes failed and closeout correctly blocked. Actual classic Settings listener applies hybrid layout on theme-only events, clearing the populated Preview; missing finally cleanup leaves dark theme for the second probe. Repair makes legacy effects depend on changed fields, retains original identity assertions and adds actual-listener regressions plus native Preview readiness and finally cleanup. All47 current risk paths and past acceptance/failures remain; only core.js fingerprint changes. Separate existing Editor metrics console error is recorded open, outside this confirmed theme/Builder failure chain. R14.6 remains unaccepted. R14.6 third attempt a3dadd6/run37955921182 passed browser11/11 plus39/39, export43/43, builder20/20 and production build. All prior real export and theme failures pass. One added Settings test uses unsupported en-US instead of canonical en, causing Settings4/5, frontend775/776 and recursive1780/1781; closeout correctly blocks. Only its input and expected stored locale change to en. Production, workflow, all47 fingerprints and assertions are preserved; R14.6 remains unaccepted and14.7 not started. R14.6 accepted at1f49956/run37958151064: all seven Windows jobs/steps pass, Node1781/1781, frontend776/776, builder20/20, Settings5/5, export43/43 and browser11/11 plus39/39. Digest-checked closeout and frontend archives match the exact commit and all47 current source fingerprints; native Worker long-body/no-snapshot/cancel recovery and theme identities pass. All three failures/repairs remain. Documentation-only acceptance update; 14.7 not started and received format/A10/Editor findings remain open. R14.6 documentation closeout atf8d2312/run37961049857 passed all seven jobs and every execution step; formal implementation acceptance stays1f49956. User requested finish06/start07. R14.7 routes all four rendered formats through public batched task/code/math/Mermaid enhancement and removes retired enhancement globals. Builder owns immutable origin context; enhancement guards document/version, task/body replacement and independent disposal, rejecting late Mermaid commits. Separately reviewed A10 compatibility patch pins KaTeX0.18.2 with a transitive override; Mermaid11.16.1 and every other lock package stay unchanged, metadata npm audit reports zero advisories. Public math wrapper rejects inherited trust. All original fixtures, scenario purposes and historical acceptance/failures remain. Current risk coverage grows47 to49, six prior fingerprints recorded separately. Actual renderer/security/export and cumulative Windows evidence is pending, so14.7 and A10 final format closure are not accepted;14.8 not started. R14.7 first attempta8b8302/run37967189292 passed enhancement27/27,builder21/21,export43/43,contract browser11/11 and actual app42/42 plus build and four independent Windows jobs. Security5/6,frontend809/810,recursive1814/1815 fail only because an inherited macro is correctly rejected with ParseError/No function handler while the test demands Undefined control sequence. Exact tagged source confirms own-property namespace checks and the alternate parser diagnostic. Test-only repair preserves the six scenarios and requires typed rejection,zero inherited payload in error markup and a legitimate own macro positive control. Digest-checked archives verify all18 text downloads,enhanced print body,actual1080x2563 PNG,40-node cancel/rebuild and stale/public-math probes. Visual PNG also shows extra math text, explicitly received by14.8/14.16 with cause pending. All49 fingerprints,production,dependencies,workflow,fixtures and historical acceptance remain unchanged;R14.7 and A10 are not accepted. Subsequent2026-10-10 acceptance supersedes the preceding07 pending status: c532cd1/run38021008368 all seven jobs/all executed steps passed, real security6/6/enhancement27/27 and cumulative1815/1815 accepted. User requests07 closeout and08; one shared style owner and scoped port replace all four content-style paths, explicit locked KaTeX CSS fixes missing canonical presentation, PNG auxiliary hiding is raster-only.21 defined style scenarios plus3 actual-browser cases;Current52 risk fingerprints include3 new sources. Repaired PNG pixels and08 cumulativeWindows acceptance remain pending;original07 observed image defect and14.10/11/12/16/A10 complete format gates and separate Editor metrics remain open. R14.8 first attemptb9a565d/run38057924490 has four successful jobs, frontend831/831 and styles21/21, browser11/11 and44/45. Isolated HTML/Word and actual light/dark1080x2355 zero-diff PNG with525252-pixel positive control passed; both images visually inspected. Preview4/hybrid0 is a test selector/layout error including hidden image staging. Native WebView fails before session/any assertion with No window and app.start-only logs; underlying cause remains undetermined. Test-only repair scopes actual both/Hybrid roots and preserves strict two formulas/live identities/clipping. Startup owner records both attempts, verifies host stop, never retries assertions, and permits one fresh process only for missing-window startup while alive.12 new lifecycle scenarios awaitWindows. All52 production risk hashes, dependencies, frozen model/storage, original fixtures and earlier acceptance/failures are unchanged.14.8 is not accepted;14.9 not started. R14.8 subsequent exact repair22cbd68/run38072508148 all seven jobs/steps succeed;1848 recursive Node,843 frontend,21 styles,12 startup lifecycle,11+45 browsers,real8-chain and finalaccepted=true verified. Four downloaded ZIP SHA256 match exact commit; both actual1080x2355 light/dark images visually inspected,zero reference pixel diff and525252 positive control;true Preview/Hybrid two-node identity/accessibility passes. First no-window underlying cause remains undetermined. User requests finish08/start09. Public raw Markdown owner replaces active/context snapshot/read/download orchestration and uses existing accepted Platform safe writer/browser URL cleanup without rendering. Immutable shared names/directories,document generation/version/identity and task cancellation/locking protect all waits;independent destroy suppresses late results.30 defined contracts plus3 real-browser scenes retain all prior scenario purposes and fixtures. Current54 risk paths preserve all52 earlier paths and record changed hashes.09 awaits exact-commit Windows;complete offline formats/A10,printing/image/file-writer receivers and unrelatedEditor finding stay open. R14.9 first exact-head run38075521977 at135f431 passed1878/1878 recursive Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and five other direct Windows jobs;built-app47/48 failed solely because its inactive test confused raw creation input with the stored Documents title. The final aggregator correctly rejected browser-app.log. Repair explicitly asserts input,created/stored title and actual download and adds three exact name rows;all48 built-app cases,31 request cases,30 Markdown cases,original fixtures,production,workflow and previous acceptance history are preserved. R14.9 remains pending its repaired-head Windows validation;14.10 is not started. R14.9 repair637091b passed all seven Windows jobs and execution steps in run38107902440;1878/1878 Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and48/48 actual app probes. Four archive SHA-256 digests and same-commit evidence are checked,including exact0/76/690000-byte raw outputs,inactive record title/state and stale first0/next1 publication. First failed run38075521977 and its repair remain in accepted history. R14.9 formally closes;user requests14.10 on the same branch. Current HTML migration removes the old template CDN/private scripts/direct Blob,uses public complete body/enhancement/shared CSS and lazy embedded locked fonts,retains all48 original probes and adds3 offline/full-body/stale-publication probes plus36 contracts. Authored image/link URLs retain existing policy,no dependency/budget/permission widening;R14.10 awaits its exact-head Windows run and14.11 is not started. R14.10 first run38110755648 at40349cb passed actual unmodified offline HTML/font/math/SVG and build, but four cancellation predicates expected user instead of existing cancelled and two actual output probes queried absent markdown-body.1910/1914 recursive,905/909 frontend,32/36 HTML and49/51 actual app;four other independent Windows jobs succeeded;aggregate correctly rejects. Repair changes two test files only,strictly asserts cancelled and actual body.export-document[data-export-format=html],retains every36/51 case and full-body/stale-output/ownership/disposal/admission checks. Production59 risk hashes,dependencies,workflow,original fixtures and prior history remain unchanged;10 awaits repaired exact head,11 not started. R14.10 repair00930e0/run38135455053 passed all seven Windows jobs/steps,1914 recursive Node,909 frontend,36 HTML and11+51 browser probes,Rust281/actual8 import and finalaccepted=true. Four archive SHA256/exact commit match;20offline fonts,450024-character body and stale first0/next1 evidence verified.10 closes with first failure/repair retained. User starts11 on samebranch. Accepted HTML lifecycle and passive template are extracted to two shared owners;fixed Word/HTML factories retain public capability boundaries,Word reuses original Builder/Enhancer/Styles/20fonts/Platform and removes classic template/downloader/text-save/escape authority.29Word contracts plus3 table-driven actual Word probes keep allHTML36 and previous51 cases. Existing HTML .doc container retained;browser evidence is not actual Microsoft Word compatibility validation.64risk paths preserve all59 predecessors and536module inventory preserves531rows;dependencies,budget,fixtures and historicalroot/acceptance preserved.11awaits new exacthead Windows;12notstarted and overallA10/futureformat/Editor receivers remain. R14.11 exact6d0f822/run38146793150 seven jobs/all steps,1943 Node/938 frontend/29 Word/54 actual cases and four digests accepted. R14.12 isolated printing implemented; new33 contracts/3 actual cases pending exact-head Windows; no native dialog/PDF save proof or overall A10 closure.",
+    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open. Run 37824900026 at 0e09d62ec545d7d70d33d67175b1c9fbe4b31c70 passed cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; WebView, native and dependency jobs passed. The safe-writer targeted step failed 17/18 because parallel test fixtures used the same PID and clock value, causing Windows AlreadyExists before any write. Later full Rust success does not supersede the failed step; closeout correctly rejected the commit. Only the test fixture allocator now adds an atomic sequence and bounded exclusive-create collision handling. The retained concurrent-save scenario forces a shared clock value and a pre-existing directory, checks isolation and ownership, then runs the original eight actual writes. All 18 scenarios, production fingerprints, workflow gates and historical acceptance remain unchanged. R14.4 awaits revalidation; 14.5 is not started. Run 37883007228 at e050ff4bb1e5f78e960344031d229cba336e8662 passed the safe-writer 18/18 including forced equal-clock fixture ownership, full Rust 269 plus integration 5/1/6, Clippy/check, cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; other independent Windows jobs passed. Only the Rust formatting step failed on two new assertion layouts, repeated in the formatter log by module traversal. Closeout correctly rejected it. Current repair exactly applies the complete CI rustfmt diff; source is identical after removing whitespace. Local formatter runtime is incomplete, so full formatter and cumulative Windows admission remain pending; historical acceptance and all production fingerprints are unchanged. Run 37886068643 at f631d2639b811ab6db071c08edf26fcbb75c59ce passed all seven Windows jobs and every step, including safe-writer 18/18, Rust format, cancellation 22/22, Node 1724/1724, frontend 726/726 and actual browser 11/11 plus 37/37. R14.4 is accepted; both failed attempts and test-only repairs remain recorded. User requested R14.5. Current review covers the readonly Progress Store over one task authority, safe text-only DOM view, direct ModalShell focus/visibility, guarded cancellation button, end-state reset and independent pagehide cleanup. Classic progress subscription, inline cancel global and compatibility progress registration are removed. Existing cancellation/task/characterization scenarios are retained through the real new store/view composition; a test-only ModalShell fault adapter preserves open/close error injection. Rendered format findings and A10 remain open; R14.5 awaits its own exact-commit Windows validation. Run 37890617533 at 2bbd7733b9c14b4639cf64bde04c21840a7b449d passed progress 20/20, cancellation 22/22, task 16/16, request 31/31, characterization 41/41, browser 11/11 plus 38/38 and Rust/native/WebView/dependency jobs. Node 1743/1744 and frontend 745/746 failed solely because the Stage 1 current-baseline assertion still expected 33 inline handlers after the progress handler was removed, leaving 32. Closeout correctly blocked it. Repair replaces that stale total with exact path/attribute/handler/count equality and explicit retired-handler proof; all historical handoff and product scenarios, production fingerprints and admission gates remain unchanged. R14.5 remains pending; 14.6 is not started. Run 37897676407 at 2dbfc2ba3117d1924cceca40d4dd57e04078265a validated the Stage 1 repair: Node 1744/1744, frontend 746/746, progress 20/20, existing 22/16/31/41 scenarios and browser 11/11 plus 38/38 passed. Rust/native/dependency jobs succeeded. Only actual WebView file/both rendering timed out; closeout correctly failed. The old artifact lacked per-check DOM failure diagnostics, so the precise missing content and causal link remain unknown. Source review identified a deterministic interrupted-enhancement gap during unchanged DOM reuse: cancelled queued math and busy Mermaid were not re-enqueued. This repair captures prior pending/running state and schedules current-generation jobs for reused nodes, with settled reuse and cancellation ownership preserved. Four controlled regression scenarios and retained hard checks plus partial-state/failure screenshot diagnostics await Windows execution. Current review adds the changed Preview engine fingerprint; All prior 44 paths remain covered, 43 hashes are unchanged and the changed import probe hash is updated with its prior value retained; historical acceptance is preserved. R14.5 is pending; 14.6 is not started. Run 37929409192 at 11d2eb4befff4b06a13e2f4f00075ca1db2d056f passed all seven Windows jobs and every step, Node 1748/1748, frontend 746/746, progress 20/20, all four controlled Preview enhancement regressions, cancellation 22/22, task/request/export 16/31/41 and browser 11/11 plus 38/38. Digest-checked exact-commit WebView and final closeout artifacts passed all eight import-chain scenarios and four six-check render snapshots, including the previously failing file/both path. The old failure had no per-check snapshot, so its precise missing predicate or sole cause is not retroactively confirmed. R14.5 is formally accepted; both failed attempts and their repairs are preserved. This closeout changes documentation only; all 45 current fingerprints, production, tests, workflow and historical acceptance remain unchanged. 14.6 is not started; rendered-format findings and new A10 low-risk disposition remain open. R14.5 documentation closeout 45bcdd14debf2ab030df66f44e6588d29915a440 passed all seven Windows jobs and steps in run37931528219. User requested finish05/start06. R14.6 replaces the complete classic body builder with a public scoped Document Builder, synchronized readonly Preview capture, explicit model snapshot fallback and safe DOM materialization. All HTML/Word/PDF/Image body callers migrate; cancellation, stale document/version/reset, errors and independent frame disposal are covered by new contracts and actual built-app probes. Historical findings and tests retain purpose with explicit new behavior mappings. F01/F02 and remaining F04 enhancer/print/image gaps plus A10 remain received; no complete enhanced-format acceptance is claimed. Current source coverage grows from45 to47 with old paths retained and changed fingerprints preserved separately. R14.6 awaits its own exact-commit Windows admission; 14.7 has not started. R14.6 first attempt ccef6988/run37935424278 failed only three built-app scenes and consequential closeout; all1771 recursive Node tests,766 frontend tests,20 builder contracts and five other Windows jobs passed. Source review confirms the missing escapeHtml title binding masked by the VM and the opaque-origin/page-only built-app asset host, so repair owns title escaping, removes VM injection and uses an actual same-origin loopback server with retained failure artifacts. All old scenarios and current47 risk paths remain; only the export caller fingerprint changes. New Windows admission is pending; R14.6 is not accepted. R14.6 second attempt4d5831e/run37943920538 passed all prior three export failures, including18 actual text downloads,137 ordered long paragraphs without a full snapshot,138 actual Worker blocks in48/96/138 batches and first-batch cancellation followed by a complete next build. Recursive Node1776/1776, frontend771/771, export43/43 and builder20/20 passed; only two cumulative theme probes failed and closeout correctly blocked. Actual classic Settings listener applies hybrid layout on theme-only events, clearing the populated Preview; missing finally cleanup leaves dark theme for the second probe. Repair makes legacy effects depend on changed fields, retains original identity assertions and adds actual-listener regressions plus native Preview readiness and finally cleanup. All47 current risk paths and past acceptance/failures remain; only core.js fingerprint changes. Separate existing Editor metrics console error is recorded open, outside this confirmed theme/Builder failure chain. R14.6 remains unaccepted. R14.6 third attempt a3dadd6/run37955921182 passed browser11/11 plus39/39, export43/43, builder20/20 and production build. All prior real export and theme failures pass. One added Settings test uses unsupported en-US instead of canonical en, causing Settings4/5, frontend775/776 and recursive1780/1781; closeout correctly blocks. Only its input and expected stored locale change to en. Production, workflow, all47 fingerprints and assertions are preserved; R14.6 remains unaccepted and14.7 not started. R14.6 accepted at1f49956/run37958151064: all seven Windows jobs/steps pass, Node1781/1781, frontend776/776, builder20/20, Settings5/5, export43/43 and browser11/11 plus39/39. Digest-checked closeout and frontend archives match the exact commit and all47 current source fingerprints; native Worker long-body/no-snapshot/cancel recovery and theme identities pass. All three failures/repairs remain. Documentation-only acceptance update; 14.7 not started and received format/A10/Editor findings remain open. R14.6 documentation closeout atf8d2312/run37961049857 passed all seven jobs and every execution step; formal implementation acceptance stays1f49956. User requested finish06/start07. R14.7 routes all four rendered formats through public batched task/code/math/Mermaid enhancement and removes retired enhancement globals. Builder owns immutable origin context; enhancement guards document/version, task/body replacement and independent disposal, rejecting late Mermaid commits. Separately reviewed A10 compatibility patch pins KaTeX0.18.2 with a transitive override; Mermaid11.16.1 and every other lock package stay unchanged, metadata npm audit reports zero advisories. Public math wrapper rejects inherited trust. All original fixtures, scenario purposes and historical acceptance/failures remain. Current risk coverage grows47 to49, six prior fingerprints recorded separately. Actual renderer/security/export and cumulative Windows evidence is pending, so14.7 and A10 final format closure are not accepted;14.8 not started. R14.7 first attempta8b8302/run37967189292 passed enhancement27/27,builder21/21,export43/43,contract browser11/11 and actual app42/42 plus build and four independent Windows jobs. Security5/6,frontend809/810,recursive1814/1815 fail only because an inherited macro is correctly rejected with ParseError/No function handler while the test demands Undefined control sequence. Exact tagged source confirms own-property namespace checks and the alternate parser diagnostic. Test-only repair preserves the six scenarios and requires typed rejection,zero inherited payload in error markup and a legitimate own macro positive control. Digest-checked archives verify all18 text downloads,enhanced print body,actual1080x2563 PNG,40-node cancel/rebuild and stale/public-math probes. Visual PNG also shows extra math text, explicitly received by14.8/14.16 with cause pending. All49 fingerprints,production,dependencies,workflow,fixtures and historical acceptance remain unchanged;R14.7 and A10 are not accepted. Subsequent2026-10-10 acceptance supersedes the preceding07 pending status: c532cd1/run38021008368 all seven jobs/all executed steps passed, real security6/6/enhancement27/27 and cumulative1815/1815 accepted. User requests07 closeout and08; one shared style owner and scoped port replace all four content-style paths, explicit locked KaTeX CSS fixes missing canonical presentation, PNG auxiliary hiding is raster-only.21 defined style scenarios plus3 actual-browser cases;Current52 risk fingerprints include3 new sources. Repaired PNG pixels and08 cumulativeWindows acceptance remain pending;original07 observed image defect and14.10/11/12/16/A10 complete format gates and separate Editor metrics remain open. R14.8 first attemptb9a565d/run38057924490 has four successful jobs, frontend831/831 and styles21/21, browser11/11 and44/45. Isolated HTML/Word and actual light/dark1080x2355 zero-diff PNG with525252-pixel positive control passed; both images visually inspected. Preview4/hybrid0 is a test selector/layout error including hidden image staging. Native WebView fails before session/any assertion with No window and app.start-only logs; underlying cause remains undetermined. Test-only repair scopes actual both/Hybrid roots and preserves strict two formulas/live identities/clipping. Startup owner records both attempts, verifies host stop, never retries assertions, and permits one fresh process only for missing-window startup while alive.12 new lifecycle scenarios awaitWindows. All52 production risk hashes, dependencies, frozen model/storage, original fixtures and earlier acceptance/failures are unchanged.14.8 is not accepted;14.9 not started. R14.8 subsequent exact repair22cbd68/run38072508148 all seven jobs/steps succeed;1848 recursive Node,843 frontend,21 styles,12 startup lifecycle,11+45 browsers,real8-chain and finalaccepted=true verified. Four downloaded ZIP SHA256 match exact commit; both actual1080x2355 light/dark images visually inspected,zero reference pixel diff and525252 positive control;true Preview/Hybrid two-node identity/accessibility passes. First no-window underlying cause remains undetermined. User requests finish08/start09. Public raw Markdown owner replaces active/context snapshot/read/download orchestration and uses existing accepted Platform safe writer/browser URL cleanup without rendering. Immutable shared names/directories,document generation/version/identity and task cancellation/locking protect all waits;independent destroy suppresses late results.30 defined contracts plus3 real-browser scenes retain all prior scenario purposes and fixtures. Current54 risk paths preserve all52 earlier paths and record changed hashes.09 awaits exact-commit Windows;complete offline formats/A10,printing/image/file-writer receivers and unrelatedEditor finding stay open. R14.9 first exact-head run38075521977 at135f431 passed1878/1878 recursive Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and five other direct Windows jobs;built-app47/48 failed solely because its inactive test confused raw creation input with the stored Documents title. The final aggregator correctly rejected browser-app.log. Repair explicitly asserts input,created/stored title and actual download and adds three exact name rows;all48 built-app cases,31 request cases,30 Markdown cases,original fixtures,production,workflow and previous acceptance history are preserved. R14.9 remains pending its repaired-head Windows validation;14.10 is not started. R14.9 repair637091b passed all seven Windows jobs and execution steps in run38107902440;1878/1878 Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and48/48 actual app probes. Four archive SHA-256 digests and same-commit evidence are checked,including exact0/76/690000-byte raw outputs,inactive record title/state and stale first0/next1 publication. First failed run38075521977 and its repair remain in accepted history. R14.9 formally closes;user requests14.10 on the same branch. Current HTML migration removes the old template CDN/private scripts/direct Blob,uses public complete body/enhancement/shared CSS and lazy embedded locked fonts,retains all48 original probes and adds3 offline/full-body/stale-publication probes plus36 contracts. Authored image/link URLs retain existing policy,no dependency/budget/permission widening;R14.10 awaits its exact-head Windows run and14.11 is not started. R14.10 first run38110755648 at40349cb passed actual unmodified offline HTML/font/math/SVG and build, but four cancellation predicates expected user instead of existing cancelled and two actual output probes queried absent markdown-body.1910/1914 recursive,905/909 frontend,32/36 HTML and49/51 actual app;four other independent Windows jobs succeeded;aggregate correctly rejects. Repair changes two test files only,strictly asserts cancelled and actual body.export-document[data-export-format=html],retains every36/51 case and full-body/stale-output/ownership/disposal/admission checks. Production59 risk hashes,dependencies,workflow,original fixtures and prior history remain unchanged;10 awaits repaired exact head,11 not started. R14.10 repair00930e0/run38135455053 passed all seven Windows jobs/steps,1914 recursive Node,909 frontend,36 HTML and11+51 browser probes,Rust281/actual8 import and finalaccepted=true. Four archive SHA256/exact commit match;20offline fonts,450024-character body and stale first0/next1 evidence verified.10 closes with first failure/repair retained. User starts11 on samebranch. Accepted HTML lifecycle and passive template are extracted to two shared owners;fixed Word/HTML factories retain public capability boundaries,Word reuses original Builder/Enhancer/Styles/20fonts/Platform and removes classic template/downloader/text-save/escape authority.29Word contracts plus3 table-driven actual Word probes keep allHTML36 and previous51 cases. Existing HTML .doc container retained;browser evidence is not actual Microsoft Word compatibility validation.64risk paths preserve all59 predecessors and536module inventory preserves531rows;dependencies,budget,fixtures and historicalroot/acceptance preserved.11awaits new exacthead Windows;12notstarted and overallA10/futureformat/Editor receivers remain. R14.11 exact6d0f822/run38146793150 seven jobs/all steps,1943 Node/938 frontend/29 Word/54 actual cases and four digests accepted. R14.12 isolated printing implemented; new33 contracts/3 actual cases pending exact-head Windows; no native dialog/PDF save proof or overall A10 closure. R14.12 first da4c309/run38155745041 passed33 PDF/971 frontend but1975 of1976 recursive and56 of57 actual;undefined migration value blocked three guards and absent virtualEditor.root stopped the four-layout probe before print. Four artifact SHA-256 checked; aggregate accepted=false. Two test/fixture repairs use established retain and actual connected .cm-content after stable focus, retaining every33/57 purpose/identity/resource/disposal gate. Production67 fingerprints,workflow,dependencies and accepted history unchanged. Rust formatting skipped is not counted passed.12 pending repaired Windows,13 not started.",
     "priorImplementationWindowsRun": 38146793150,
     "priorImplementationWindowsJobs": [
       {
@@ -700,8 +700,76 @@
         "failedSteps": []
       }
     ],
-    "implementationWindowsRun": null,
-    "implementationWindowsJobs": [],
+    "implementationWindowsRun": 38155745041,
+    "implementationWindowsJobs": [
+      {
+        "id": 114518246322,
+        "name": "R13.13 real Windows WebView import chain and R12 security regression",
+        "conclusion": "success",
+        "failedSteps": [],
+        "skippedSteps": []
+      },
+      {
+        "id": 114518246449,
+        "name": "Native opener compilation and linkage (windows-latest)",
+        "conclusion": "success",
+        "failedSteps": [],
+        "skippedSteps": []
+      },
+      {
+        "id": 114518246456,
+        "name": "R12-23 official RustSec and Windows dependency graph",
+        "conclusion": "success",
+        "failedSteps": [],
+        "skippedSteps": []
+      },
+      {
+        "id": 114518246507,
+        "name": "All repository Node tests (Windows)",
+        "conclusion": "failure",
+        "failedSteps": [
+          "Run every tracked Node test including nested suites"
+        ],
+        "skippedSteps": [
+          "Post Run actions/setup-node@v4"
+        ]
+      },
+      {
+        "id": 114518246508,
+        "name": "HTML boundary baseline and frontend regression",
+        "conclusion": "failure",
+        "failedSteps": [
+          "R12-08 command boundaries and R12-07 compatibility contracts",
+          "Built-app browser regression"
+        ],
+        "skippedSteps": [
+          "Post Setup Node 22"
+        ]
+      },
+      {
+        "id": 114518246582,
+        "name": "Safe file writes and cumulative Rust hard gates",
+        "conclusion": "failure",
+        "failedSteps": [
+          "Guard current model and interface contracts"
+        ],
+        "skippedSteps": [
+          "Rust formatting",
+          "Post Setup Node for the actual frontend to Rust log regression"
+        ]
+      },
+      {
+        "id": 114519898642,
+        "name": "R12-24 exact-commit Windows evidence and handoff",
+        "conclusion": "failure",
+        "failedSteps": [
+          "Verify all cumulative jobs and actual same-commit evidence"
+        ],
+        "skippedSteps": [
+          "Post Setup Node 22"
+        ]
+      }
+    ],
     "currentStageAcceptance": {
       "stage": "R14.11",
       "date": "2026-10-12",
@@ -1055,7 +1123,7 @@
       "stage": "R14.12",
       "baselineCommit": "6d0f822973f8452c7b84e11916b7c59e30979e3d",
       "branch": "agent/r14-stage",
-      "status": "implemented-pending-exact-head-Windows-admission",
+      "status": "first-Windows-failed-repaired-pending-exact-head-Windows-admission",
       "record": "docs/R14-12-DETAILS.md",
       "productionChanged": true,
       "dependenciesChanged": false,
@@ -1156,7 +1224,224 @@
         "GitHub accepted11 exact seven jobs/all steps, four SHA-256 archives and actual offline Word screenshot",
         "Context7 MDN Window.print blocking return/afterprint/iframe disposal; reconciled with existing public browser-print adapter; no dependency changes",
         "Mermaid Chart Chinese implemented isolated-print/task/resources/platform/disposal chain"
-      ]
+      ],
+      "firstWindowsAttempt": {
+        "commit": "da4c3092a09fa02a0423c08b22367d322c372df5",
+        "runId": 38155745041,
+        "attempt": 1,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38155745041",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "id": 114518246322,
+            "name": "R13.13 real Windows WebView import chain and R12 security regression",
+            "conclusion": "success",
+            "failedSteps": [],
+            "skippedSteps": []
+          },
+          {
+            "id": 114518246449,
+            "name": "Native opener compilation and linkage (windows-latest)",
+            "conclusion": "success",
+            "failedSteps": [],
+            "skippedSteps": []
+          },
+          {
+            "id": 114518246456,
+            "name": "R12-23 official RustSec and Windows dependency graph",
+            "conclusion": "success",
+            "failedSteps": [],
+            "skippedSteps": []
+          },
+          {
+            "id": 114518246507,
+            "name": "All repository Node tests (Windows)",
+            "conclusion": "failure",
+            "failedSteps": [
+              "Run every tracked Node test including nested suites"
+            ],
+            "skippedSteps": [
+              "Post Run actions/setup-node@v4"
+            ]
+          },
+          {
+            "id": 114518246508,
+            "name": "HTML boundary baseline and frontend regression",
+            "conclusion": "failure",
+            "failedSteps": [
+              "R12-08 command boundaries and R12-07 compatibility contracts",
+              "Built-app browser regression"
+            ],
+            "skippedSteps": [
+              "Post Setup Node 22"
+            ]
+          },
+          {
+            "id": 114518246582,
+            "name": "Safe file writes and cumulative Rust hard gates",
+            "conclusion": "failure",
+            "failedSteps": [
+              "Guard current model and interface contracts"
+            ],
+            "skippedSteps": [
+              "Rust formatting",
+              "Post Setup Node for the actual frontend to Rust log regression"
+            ]
+          },
+          {
+            "id": 114519898642,
+            "name": "R12-24 exact-commit Windows evidence and handoff",
+            "conclusion": "failure",
+            "failedSteps": [
+              "Verify all cumulative jobs and actual same-commit evidence"
+            ],
+            "skippedSteps": [
+              "Post Setup Node 22"
+            ]
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 11708253436,
+            "name": "repository-tests-windows-da4c3092a09fa02a0423c08b22367d322c372df5-1",
+            "digest": "sha256:3c11e5cf5060e84acb1abb33d3564881e83d9612e96d336297ea9e3fb1f611a1",
+            "sha256Verified": true,
+            "exactCommitVerified": true
+          },
+          {
+            "id": 11708169126,
+            "name": "r12-24-closeout-da4c3092a09fa02a0423c08b22367d322c372df5-1",
+            "digest": "sha256:9d49eaebd899f9efafa54350d455ea10a5c7369ee31d33ad303cde25faf07637",
+            "sha256Verified": true,
+            "exactCommitVerified": true
+          },
+          {
+            "id": 11708063672,
+            "name": "r12-14-frontend-da4c3092a09fa02a0423c08b22367d322c372df5-1",
+            "digest": "sha256:d3f2e28c0473d58edf46585708c497a16bf16a87d4fedce4ba614f0c5af1912e",
+            "sha256Verified": true,
+            "exactCommitVerified": true
+          },
+          {
+            "id": 11708019613,
+            "name": "r12-14-rust-da4c3092a09fa02a0423c08b22367d322c372df5-1",
+            "digest": "sha256:6d7d67416b741da5ccb5562771ff759f85b841425614a3c994abf8b730e09891",
+            "sha256Verified": true,
+            "exactCommitVerified": true
+          }
+        ],
+        "metrics": {
+          "recursiveNode": {
+            "tests": 1976,
+            "passed": 1975,
+            "failed": 1,
+            "files": 338,
+            "directories": 16
+          },
+          "frontendNode": {
+            "tests": 971,
+            "passed": 971,
+            "failed": 0
+          },
+          "pdfContracts": {
+            "tests": 33,
+            "passed": 33,
+            "failed": 0
+          },
+          "browserContracts": {
+            "tests": 11,
+            "passed": 11,
+            "failed": 0
+          },
+          "builtApp": {
+            "tests": 57,
+            "passed": 56,
+            "failed": 1
+          },
+          "rust": {
+            "unit": 269,
+            "documentStore": 5,
+            "nativeOpener": 1,
+            "securityCompatibility": 6,
+            "allPassed": true,
+            "formatting": "skipped-after-contract-failure"
+          }
+        },
+        "directFailures": [
+          {
+            "file": "tests/architecture/fixtures/production-modules.json",
+            "cause": "Two new PDF modules used undefined migration public-feature-owner; exact production module inventory rejects it in recursive Node, frontend compatibility and Rust guard.",
+            "repair": "Use existing retain migration, consistent with established format/document owners; preserve allowed migration vocabulary and exact inventory test."
+          },
+          {
+            "file": "tests/e2e/lib/export-characterization.mjs",
+            "cause": "Four-layout probe read absent editor.virtualEditor.root.childNodes before starting exportPDF.",
+            "repair": "Select actual mounted .cm-content inside editor, require connected nonempty root and settled focus, then preserve strict root and child node identity checks."
+          }
+        ],
+        "actualPassedEvidence": {
+          "printRecovery": "timeout/failure/recovery: each one print, frame removed, task released, progress closed; only injected failure reports one error",
+          "stalePrint": "cancel/change/recovery: prints0/0/1; next body Current PDF 原文 😀; each releases task and frame",
+          "pagehide": "pending real PDF frame removed; old callback zero print; late PDF command rejects; original task/Builder/Enhancer cancellation and port disposal passed"
+        },
+        "missingEvidence": "Four-layout resource/identity assertions did not run because root lookup threw before print; no r14-12-isolated-print.json. Repaired exact-head Windows proof required.",
+        "finalAdmission": {
+          "accepted": false,
+          "error": "Browser evidence failed: browser-app.log"
+        },
+        "failureScreenshotReviewed": true
+      },
+      "repair": {
+        "date": "2026-10-12",
+        "parentCommit": "da4c3092a09fa02a0423c08b22367d322c372df5",
+        "status": "implemented-pending-repaired-exact-head-Windows-admission",
+        "changedTestFiles": [
+          "tests/architecture/fixtures/production-modules.json",
+          "tests/e2e/lib/export-characterization.mjs"
+        ],
+        "productionChanged": false,
+        "dependenciesChanged": false,
+        "workflowChanged": false,
+        "riskFingerprintCountUnchanged": 67,
+        "retainedPdfScenarios": 33,
+        "retainedBuiltAppScenarios": 57,
+        "retainedAllAdmissionGates": true,
+        "changes": [
+          "Use existing retain migration, consistent with established format/document owners; preserve allowed migration vocabulary and exact inventory test.",
+          "Select actual mounted .cm-content inside editor, require connected nonempty root and settled focus, then preserve strict root and child node identity checks."
+        ],
+        "staticReview": {
+          "status": "passed",
+          "architectureGate": "passed",
+          "legacyRuntimeGate": "passed",
+          "generatedFilesGate": "passed",
+          "readmeRecordGate": "passed",
+          "javascriptSyntaxFiles": 1,
+          "embeddedBrowserExpressionsCompiled": 33,
+          "cssLiteralsParsed": 5,
+          "localCssTokensVerified": 6,
+          "jsonYamlParsed": true,
+          "relativeLinksChecked": 151,
+          "riskFingerprintsUnchanged": 67,
+          "productionModuleCount": 539,
+          "migrationValuesValidatedAgainstExistingVocabulary": 539,
+          "moduleRowsOnlyTwoMigrationValuesChanged": true,
+          "priorModuleRowsPreserved": 537,
+          "allOriginalBrowserTestLabelsPreserved": true,
+          "builtAppScenariosDefined": 57,
+          "pdfScenariosUnchanged": 33,
+          "trackedFilesUnchangedExceptAuthorizedFiles": 1278,
+          "historicalRootAndAcceptanceUnchanged": true,
+          "productionWorkflowDependenciesUnchanged": true,
+          "actualCodeMirrorMountReviewed": true,
+          "diffWhitespaceCheck": "passed",
+          "productTestsRunLocally": false
+        },
+        "tools": [
+          "GitHub exact failed jobs/logs and four verified SHA-256 artifacts; actual JSON and screenshot reviewed",
+          "Context7/Mermaid not invoked: no framework/API, production architecture or lifecycle changes"
+        ]
+      }
     },
     "priorStageAcceptance": {
       "stage": "R14.10",

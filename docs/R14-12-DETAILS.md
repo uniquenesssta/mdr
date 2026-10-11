@@ -1,6 +1,6 @@
 # R14-12 PDF Exporter
 
-状态：**实施完成，待本提交 Windows 累计验收**；14.12不勾选，14.13未开始。唯一分支`agent/r14-stage`，基线为11正式验收提交`6d0f822973f8452c7b84e11916b7c59e30979e3d` / [CI38146793150](https://github.com/uniquenesssta/mdr/actions/runs/38146793150)。
+状态：**首轮 Windows 未通过，两处清单/探针错误已修复，待修复提交累计重验**；14.12不勾选，14.13未开始。唯一分支`agent/r14-stage`，基线为11正式验收提交`6d0f822973f8452c7b84e11916b7c59e30979e3d` / [CI38146793150](https://github.com/uniquenesssta/mdr/actions/runs/38146793150)。
 
 ## 11收尾
 
@@ -43,4 +43,31 @@ afterprint在对应iframe Window监听；同步事件仅记录完成信号，直
 
 Context7查询MDN print阻塞、afterprint和iframe生命周期，与项目既有平台适配器核对，无新增/升级依赖。Mermaid Chart展示真实中文独立打印/共享资源/唯一任务/平台/清理链。GitHub核对11七组、同提交最终准入及四归档。新产品Node、浏览器、构建与Rust仅交Windows执行；Actions启动后结束，不轮询，约15～20分钟后查询。
 
-静态四项门禁全部通过；14份脚本语法、33段浏览器内嵌表达式、5份CSS/6个本地令牌、JSON/YAML、150个相对文档链接、67项风险指纹和diff空白检查通过。539行生产模块登记保留原536行，1263个受保护跟踪文件原样保留；R12历史根数据、阶段历史前缀及11实施内容保留，旧54项实际页面目的和旧PDF场景经映射保留、新增3项。七组Windows定义仅追加PDF专项步骤；没有在本地执行产品Node/浏览器/构建/Rust。33项新契约与57项实际页面仍待新精确head Windows验证，12保持未验收，13未开始。
+静态四项门禁全部通过；14份脚本语法、33段浏览器内嵌表达式、5份CSS/6个本地令牌、JSON/YAML、150个相对文档链接、67项风险指纹和diff空白检查通过。539行生产模块登记保留原536行，1263个受保护跟踪文件原样保留；R12历史根数据、阶段历史前缀及11实施内容保留，旧54项实际页面目的和旧PDF场景经映射保留、新增3项。七组Windows定义仅追加PDF专项步骤；没有在本地执行产品Node/浏览器/构建/Rust。这是初次实施的静态记录；首轮Windows PDF33/33、实际页面56/57结果与失败原因见下方，修复后的完整33/57及七组准入仍待新精确head验证。12保持未验收，13未开始。
+
+
+## 首轮失败与修复（2026-10-12）
+
+`da4c3092a09fa02a0423c08b22367d322c372df5` / [CI38155745041](https://github.com/uniquenesssta/mdr/actions/runs/38155745041) attempt1 未通过，最终同提交汇总准确记录accepted=false和`Browser evidence failed: browser-app.log`。实际WebView、原生链接、依赖三组通过；全仓、前端、Rust守卫及最终汇总四组失败，直接原因只有以下两处。
+
+| 失败位置 | 证据与修复 | 保留要求 |
+|---|---|---|
+| 模块清单校验 | PDF exporter和print surface的migration误填`public-feature-owner`，不属于既有合法值；module-inventory同一断言在递归Node、前端兼容、Rust接口守卫三处失败。两行改为既有`retain`，与HTML/Word所有者及共享文档模块一致 | 不添加迁移豁免，不修改测试合法词表/精确生产路径/缺失重复幽灵文件校验；539行及其余537行原样保留 |
+| 实际四布局探针 | `editor.virtualEditor.root`从未属于当前适配器接口，读取childNodes时抛TypeError，发生在exportPDF调用之前；改查editor内真实`.cm-content`，要求连接且非空，文件名焦点切换后等现有idle屏障，再采样原节点 | 四个edit/preview/hybrid/both布局全部保留，补实际根仍相同的检查；原子节点身份、视图/布局/选择/滚动/焦点、完整数学/MathML/SVG/代码/任务/字体及清理断言保持 |
+
+递归Node1975/1976（338文件16目录）唯一失败是清单；前端971/971、PDF33/33、其余已验收专项通过，浏览器契约11/11、实际built-app56/57。Rust269＋5＋1＋6、Clippy/check、安全写入等执行步骤通过，但Rust formatting因前序接口守卫失败跳过，不能声称Rust七组全部通过。真实Windows导入/安全组、原生组及依赖组全部步骤成功。
+
+已核对实际JSON：打印timeout/failure/recovery均一次平台调用并移除frame、释放task、关闭进度，只有注入错误一次报告；取消/正文变化/恢复打印次数0/0/1，恢复内容为当前原文，每次均释放；pagehide准备的真实PDF frame移除，旧延迟零打印、晚到PDF拒绝及原任务/Builder/Enhancer释放通过。四布局失败截图已查看，但它只证明失败现场；该用例在打印前中止、没有生成`r14-12-isolated-print.json`，完整四布局资源与节点证据仍须新Windows提交验证。
+
+下载ZIP计算SHA-256与GitHub摘要一致，并核对日志/commit及run metadata的精确提交：
+
+| 归档 | artifact ID | SHA-256 |
+|---|---|---|
+| 前端 | 11708063672 | d3f2e28c0473d58edf46585708c497a16bf16a87d4fedce4ba614f0c5af1912e |
+| 递归Node | 11708253436 | 3c11e5cf5060e84acb1abb33d3564881e83d9612e96d336297ea9e3fb1f611a1 |
+| Rust | 11708019613 | 6d7d67416b741da5ccb5562771ff759f85b841425614a3c994abf8b730e09891 |
+| 最终汇总 | 11708169126 | 9d49eaebd899f9efafa54350d455ea10a5c7369ee31d33ad303cde25faf07637 |
+
+本次修复只改两份清单/浏览器测试文件及必要状态/审计文档；产品源和67项风险指纹、依赖锁、workflow、原始夹具、已验收历史、全部33/57场景保持。初次语法/架构静态检查不能证明清单合法值或真实DOM接口；本次静态额外逐行核对既有清单合法迁移词表与真实CodeMirror挂载路径。新精确head完整Windows证据到达前，14.12保持未通过，14.13未开始，整体A10未收官。Actions启动后结束，不轮询。
+
+修复后静态四门禁全部通过；脚本语法、33段内嵌浏览器表达式、5份CSS/6个令牌、JSON/YAML、151个相对链接及67项风险指纹通过。539行清单按既有surface/migration词表逐条核对，仅两行迁移值更正、其余537行完整保留；原浏览器用例名称顺序及33/57场景不变，另1278个跟踪文件、历史审计根与正式验收内容保持。本地未执行产品测试、浏览器、构建或Rust；完整通过状态须新提交Windows七组结果决定。

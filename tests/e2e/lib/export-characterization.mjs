@@ -704,9 +704,11 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       await page.evaluate(`window.__markdownEditorE2E.setLayout(${JSON.stringify(mode)})`);
       rows.push(await page.evaluate(`(async()=>{
         const host=document.getElementById('compatibility-business-ports'),tasks=host.markdownEditorExportTaskPort,port=host.markdownEditorPreviewCommandPort;
-        const editor=document.getElementById('editor'),preview=document.getElementById('preview'),hybrid=editor.virtualEditor.root;
-        const previewNodes=Array.from(preview.childNodes),hybridNodes=Array.from(hybrid.childNodes),view=port.getViewMode(),layout=host.markdownEditorLayoutStatePort.snapshot.mode;
+        const editor=document.getElementById('editor'),preview=document.getElementById('preview');
         const input=document.getElementById('filename');input.focus();const focus=document.activeElement;
+        if(!await window.__markdownEditorE2E.waitForIdle())throw new Error('Editor did not settle after focus change');
+        const hybrid=editor.querySelector('.cm-content');if(!hybrid?.isConnected||!hybrid.childNodes.length)throw new Error('Mounted CodeMirror content is unavailable');
+        const previewNodes=Array.from(preview.childNodes),hybridNodes=Array.from(hybrid.childNodes),view=port.getViewMode(),layout=host.markdownEditorLayoutStatePort.snapshot.mode;
         const before={previewScroll:preview.scrollTop,editorScroll:editor.scrollTop,start:editor.selectionStart,end:editor.selectionEnd};
         let printed,prints=0;const frames=[];
         const observer=new MutationObserver(records=>{for(const record of records)for(const frame of record.addedNodes)if(frame.matches?.('iframe[data-export-print="pdf"]')){
@@ -719,7 +721,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
             frame.contentWindow.dispatchEvent(new Event('afterprint'));};}});observer.observe(document.body,{childList:true});
         try {await exportPDF();return {mode:${JSON.stringify(mode)},layout,prints,printed,before,after:{previewScroll:preview.scrollTop,editorScroll:editor.scrollTop,start:editor.selectionStart,end:editor.selectionEnd},
           samePreview:preview.childNodes.length===previewNodes.length&&previewNodes.every((node,index)=>preview.childNodes[index]===node),
-          sameHybrid:hybrid.childNodes.length===hybridNodes.length&&hybridNodes.every((node,index)=>hybrid.childNodes[index]===node),sameView:port.getViewMode()===view,sameLayout:host.markdownEditorLayoutStatePort.snapshot.mode===layout,
+          sameHybrid:editor.querySelector('.cm-content')===hybrid&&hybrid.childNodes.length===hybridNodes.length&&hybridNodes.every((node,index)=>hybrid.childNodes[index]===node),sameView:port.getViewMode()===view,sameLayout:host.markdownEditorLayoutStatePort.snapshot.mode===layout,
           focusRestored:document.activeElement===focus,removed:frames.length===1&&!frames[0].isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),released:tasks.getSnapshot().activeTask===null,
           scoped:typeof window.markdownEditorPdfExportPort==='undefined'&&Object.isFrozen(host.markdownEditorPdfExportPort)};
         }finally{observer.disconnect();}
