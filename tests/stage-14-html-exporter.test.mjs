@@ -56,6 +56,7 @@ test('R14-10 standalone template escapes the full title and preserves trusted bo
   assert.ok(html.includes('<meta charset="utf-8">')); assert.ok(html.includes('name="viewport"'));
   assert.ok(html.includes('<title>&lt;title&gt;&amp;&#39;&quot; 😀</title>')); assert.ok(html.includes(source));
   assert.ok(html.includes('<style>'+h.styles.getCss('html')+'</style>'));
+  assert.ok(html.includes('<body class="export-document" data-export-format="html">'));
   assert.doesNotMatch(html, /<script[\s>]|<link[\s>]|cdn\.jsdelivr|exportPresentationPort/i);
   assert.throws(() => h.serializer.serialize({ name: 'x', bodyHtml: source, fontCss: '</style>' }), TypeError);
   assert.throws(() => h.serializer.serialize({ name: 'x', bodyHtml: null, fontCss }), TypeError);
@@ -111,8 +112,8 @@ for (const phase of ['build', 'enhance', 'assets', 'save']) for (const action of
     if (phase === 'assets') h.assets.load = replacementFn;
     if (phase === 'save') h.platform.dialogs.saveFile = replacementFn;
     const operation = h.owner.export({ request: h.request() }); await reached.promise;
-    let next; if (action === 'cancel') h.tasks.cancel(); else if (action === 'replace') next = h.tasks.begin('new'); else h.owner.destroy();
-    await assert.rejects(operation, cancelled(action === 'cancel' ? 'user' : action === 'replace' ? 'replaced' : 'destroyed'));
+    let next; if (action === 'cancel') assert.equal(h.tasks.cancel(), true); else if (action === 'replace') next = h.tasks.begin('new'); else h.owner.destroy();
+    await assert.rejects(operation, cancelled(action === 'cancel' ? 'cancelled' : action === 'replace' ? 'replaced' : 'destroyed'));
     assert.equal(h.calls.some(x => x[0] === 'write'), false);
     assert.equal(h.tasks.getSnapshot().activeTask?.id ?? null, next?.id ?? null);
     gate.reject(new Error('late failure')); await Promise.resolve();

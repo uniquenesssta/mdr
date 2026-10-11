@@ -652,7 +652,8 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
         HTMLAnchorElement.prototype.click=function(){if(this.download)captures.push({name:this.download,url:this.href,blob:blobs.get(this.href)});else click.call(this);};
         try {
           await exportHTML();if(captures.length!==1)throw new Error('Expected one complete HTML file');
-          const capture=captures[0],html=await capture.blob.text(),doc=new DOMParser().parseFromString(html,'text/html'),body=doc.querySelector('.markdown-body');
+          const capture=captures[0],html=await capture.blob.text(),doc=new DOMParser().parseFromString(html,'text/html'),body=doc.body;
+          if(!body.matches('.export-document[data-export-format="html"]'))throw new Error('Missing standalone HTML body');
           const payload=expected.startsWith('# Large HTML')?expected.split('\\n\\n')[1]:expected?'完整正文':'';
           return {sourceLength:expected.length,bodyComplete:body.textContent.includes(payload)&&(!expected||body.textContent.includes(expected.startsWith('# Large HTML')?'END-HTML':'Unicode 中文 😀')),
             empty:expected.length===0&&body.textContent.trim()==='',mime:capture.blob.type,revoked:revoked.includes(capture.url),scripts:doc.scripts.length,
@@ -679,8 +680,9 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       try {
         await exportHTML();const first=captures.length,releasedAfterStale=tasks.getSnapshot().activeTask===null;unsubscribe();
         await exportHTML();if(captures.length!==1)throw new Error('Expected only the current HTML publication');
-        const doc=new DOMParser().parseFromString(await captures[0].text(),'text/html');
-        return {changed,first,releasedAfterStale,second:captures.length,current:doc.querySelector('.markdown-body').textContent.includes('New body 原文 😀'),released:tasks.getSnapshot().activeTask===null};
+        const doc=new DOMParser().parseFromString(await captures[0].text(),'text/html'),body=doc.body;
+        if(!body.matches('.export-document[data-export-format="html"]'))throw new Error('Missing standalone HTML body');
+        return {changed,first,releasedAfterStale,second:captures.length,current:body.textContent.includes('New body 原文 😀'),released:tasks.getSnapshot().activeTask===null};
       } finally {unsubscribe();URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;}
     })()`);
     await writeFile(join(artifactRoot,'r14-10-stale-html-source.json'),JSON.stringify(result,null,2));

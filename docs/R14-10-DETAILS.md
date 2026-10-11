@@ -1,6 +1,6 @@
 # R14-10 HTML Exporter
 
-状态：**实施完成，待本提交 Windows 累计验收**；14.10不勾选，14.11未开始。继续唯一分支 `agent/r14-stage`，基线为09正式验收提交 `637091b835226248070ace536b99062dd74d2c86` / [CI38107902440](https://github.com/uniquenesssta/mdr/actions/runs/38107902440)。
+状态：**首轮验收失败，测试契约修复完成，待修复提交 Windows 累计重验**；14.10不勾选，14.11未开始。继续唯一分支 `agent/r14-stage`，基线为09正式验收提交 `637091b835226248070ace536b99062dd74d2c86` / [CI38107902440](https://github.com/uniquenesssta/mdr/actions/runs/38107902440)。
 
 ## 09收尾
 
@@ -62,3 +62,23 @@ VM实际挂载公共HTML owner/serializer/assets＋原Builder/Enhancer/Styles，
 Context7核对Vite7官方资产?inline和glob异步/default语义，结合父目录依赖策略与实际配置；Mermaid Chart显示真实中文Builder/Enhancer/Styles/字体/序列化/任务/平台链。Actions启动后结束，不轮询，约15～20分钟后查询。静态最终结果补下方。
 
 最终静态复核：四项门禁通过；12份新增/修改脚本语法、29个实际页面嵌入表达式、5段CSS与6个本地令牌通过。JSON/YAML、140个相对链接、59项风险源指纹通过；9个冻结文件及169个其他受保护文件字节保持，531模块清单原527行完整保留。R12根历史/阶段历史前缀、09首轮失败与修复保持；diff复核通过。36项HTML契约与51项built-app定义均未在本地执行，只交Windows新精确head验收。
+
+## 首轮失败与修复（2026-10-11）
+
+精确提交`40349cbf5e2cd23916ddf0091094fb719f8ab0dc` / [Windows CI38110755648](https://github.com/uniquenesssta/mdr/actions/runs/38110755648)，attempt1完成失败。HTML契约32/36、前端905/909、全仓1910/1914（336文件16目录）、浏览器契约11/11、实际页面49/51；Rust/安全写入、原生链接、官方依赖图与真实WebView四组成功。前端和全仓两组失败，最终汇总以`Browser evidence failed: browser-app.log`正确拒绝，不能用独立离线场景成功代替完整验收。
+
+| 失败链 | 日志与真实契约 | 当前修复 |
+| --- | --- | --- |
+| build/enhance/assets/save四阶段主动取消 | 测试期望reason=user；已验收公共Task Controller设置phase/reason=cancelled，原22项取消契约保持 | 明确assert cancel返回true，随后严格确认ExportCancelledError及reason=cancelled，保留零写入、任务归属和迟到失败观察 |
+| 空/Unicode/大正文与过时零输出后重试两项页面 | TypeError读取null.textContent；生成文件使用body.export-document，Builder内层内容不包含markdown-body根 | 使用DOMParser结果的doc.body，并严格检查.export-document[data-export-format="html"]；保留完整正文、450000+字符、首次零输出/下一次正确正文、MIME、20字体、Preview身份、任务/URL释放 |
+
+断网独立HTML场景已通过：未经重写的399663字节原文件、HTTP失败正控、20项WOFF2均loaded、两个可见公式及两个MathML、一个SVG、任务列表与代码，脚本/链接/私有全局为零，额外网络请求与拦截错误为空。独立页面截图已核对。Windows构建成功，katex-vendor296.70 kB、字体异步包349.19 kB，原500000/700000字节门槛保持。此证据只说明首轮已通过的场景，不提前关闭10或整体A10。
+
+以下归档已下载并复核SHA-256；前端commit.txt精确匹配40349cb，全仓suite-results显示仅tests目录失败，其余15目录成功。
+
+| 归档 | ID | SHA-256 |
+| --- | --- | --- |
+| frontend | 11691128441 | 3397ceccb9fa0eb03201a3d1e33d72a19f0568425f001fd40085d4cc999cd5e0 |
+| repository-tests | 11692025019 | 61ccd5e99df2a9902a989dee237fe748ce98558f628a3882cfcd82dd387b7bc3 |
+
+只修改两份测试及必要交接/审计记录；产品、锁定依赖、工作流、531模块清单、59风险源指纹、原始夹具、此前验收与失败记录保持。36项HTML契约、51项实际页面及所有准入门禁保留，没有运行本地产品测试/浏览器/构建/Rust。GitHub用于核查七组/步骤/日志与两份归档；这次小范围契约修正不涉及新的第三方API或架构，不重复调用Context7或Mermaid Chart。修复静态复核：四项门禁、两份脚本语法、29个嵌入表达式、5段CSS与6个本地令牌通过；JSON/YAML与141个相对链接、59风险源指纹通过，1265个其他Git跟踪文件字节保持，R12根历史、阶段验收/实施历史及09首轮失败/修复保持。差异复核通过；10待新精确head Windows重验，11未开始。
