@@ -14,3 +14,7 @@ export { createExportStyleSheet } from './document/export-style-sheet.js';
 export { mountClassicExportStylePort } from './compatibility/classic-export-style-port.js';
 export { createMarkdownExporter } from './formats/markdown-exporter.js';
 export { mountClassicMarkdownExportPort } from './compatibility/classic-markdown-export-port.js';
+export { createHtmlFontStyle, createHtmlFontAssets } from './document/html-font-assets.js';
+export { createHtmlDocumentSerializer } from './document/html-document.js';
+export { createHtmlExporter } from './formats/html-exporter.js';
+export { mountClassicHtmlExportPort } from './compatibility/classic-html-export-port.js';

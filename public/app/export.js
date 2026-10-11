@@ -12,6 +12,7 @@
     const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
     const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
     const exportStylePort = exportCompatibilityHost?.markdownEditorExportStylePort;
+    const exportHtmlPort = exportCompatibilityHost?.markdownEditorHtmlExportPort;
     const exportMarkdownPort = exportCompatibilityHost?.markdownEditorMarkdownExportPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
     if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
@@ -25,6 +26,7 @@
     if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
     if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
     if (!exportStylePort) throw new Error('Export style compatibility port is unavailable.');
+    if (!exportHtmlPort) throw new Error('HTML export compatibility port is unavailable.');
     if (!exportMarkdownPort) throw new Error('Markdown export compatibility port is unavailable.');
 
     function readExportRequest(format) {
@@ -184,79 +186,15 @@ ${bodyHtml}
     async function exportHTML() {
       const request = readExportRequest('html');
       if (!request) return;
-      const task = beginExportTask('正在导出 HTML');
-      if (!task) return;
-      let outcome = 'completed';
       try {
-        const name = request.name;
-
-        const body = await exportDocumentPort.build({ task, documentId: request.documentId });
-        await exportEnhancementPort.enhance({ root: body, task, documentId: request.documentId });
-        const bodyHtml = body.innerHTML;
-        task.token.throwIfCancelled();
-        task.update(92, '正在生成 HTML 文件…', 'serializing');
-
-        const fullHtml = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeExportTitle(name.replace(/\.html$/i, ''))}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <style>${exportStylePort.getCss('html')}</style>
-</head>
-<body class="export-document" data-export-format="html">
-${bodyHtml}
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js">${'</scr' + 'ipt>'}
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js">${'</scr' + 'ipt>'}
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    if (Boolean(exportPresentationPort.math?.renderTree)) {
-      renderMathInElement(document.body, {
-        delimiters: [
-          { left: '$$', right: '$$', display: true },
-          { left: '\\[', right: '\\]', display: true },
-          { left: '$', right: '$', display: false },
-          { left: '\\(', right: '\\)', display: false }
-        ],
-        throwOnError: false
-      });
-    }
-  });
-${'</scr' + 'ipt>'}
-</body>
-</html>`;
-
-      const savedPath = await exportTextContent(fullHtml, name, getExportSaveOptions(
-        '导出 HTML',
-        request,
-        'HTML 文档'
-      ), task);
-      task.token.throwIfCancelled();
-      if (savedPath === null) return;
-      if (savedPath === false) {
-        task.lockCancellation('writing');
-        task.token.throwIfCancelled();
-        const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-        task.update(100, 'HTML 文件已生成');
-        showToast(t('toastHtmlExported'));
+        const result = await exportHtmlPort.export({ request });
+        if (result.status === 'busy') showToast('当前导出正在生成文件，请稍候');
+        if (['written', 'downloaded'].includes(result.status)) showToast(t('toastHtmlExported'));
       } catch (error) {
-        outcome = 'failed';
         if (!exportTaskPort.isCancelled(error)) {
           console.error('HTML export failed:', error);
           showToast(error?.message || String(error));
         }
-      } finally {
-        finishExportTask(task, outcome);
       }
     }
 

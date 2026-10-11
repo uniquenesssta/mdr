@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-09 raw Markdown exporter and R14-08 acceptance · ${{ github.sha }}
+run-name: R14-10 standalone HTML exporter and R14-09 acceptance · ${{ github.sha }}
 
 on:
   push:
@@ -192,6 +192,9 @@ jobs:
       - name: R14-09 raw Markdown exporter and guarded file boundaries
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-markdown-exporter.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/markdown-exporter.log"
+      - name: R14-10 standalone HTML exporter contracts
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-html-exporter.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/html-exporter.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

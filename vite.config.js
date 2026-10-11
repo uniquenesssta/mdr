@@ -14,6 +14,7 @@ function vendorChunkName(id) {
 
   if (path.includes('/node_modules/@codemirror/')) return 'codemirror-vendor';
   if (path.includes('/node_modules/@lezer/')) return 'lezer-vendor';
+  if (path.includes('/node_modules/katex/') && /\.woff2(?:\?|$)/.test(path)) return 'katex-export-fonts';
   if (path.includes('/node_modules/katex/')) return 'katex-vendor';
   if (path.includes('/node_modules/marked/')) return 'marked-vendor';
   if (path.includes('/node_modules/@tauri-apps/')) return 'tauri-vendor';

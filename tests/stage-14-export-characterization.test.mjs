@@ -115,8 +115,8 @@ for (const [format, mime] of [['html', 'text/html;charset=utf-8'], ['word', 'app
     assert.ok(text.includes('flowchart TD'));
     assert.ok(h.calls.some(x => x[0] === 'math'), 'R14-07 executes actual Enhancer; this VM vendor double retains raw text. Actual rendered DOM is checked by the built app.');
     if (format === 'html') {
-      assert.ok(text.includes('https://cdn.jsdelivr.net/npm/katex@0.16.9/'));
-      assert.ok(text.includes('exportPresentationPort.math?.renderTree'), 'R14-F02 records a broken standalone reference, not a supported contract.');
+      assert.doesNotMatch(text, /cdn\.jsdelivr|exportPresentationPort|<script[\s>]/i);
+      assert.ok(text.includes('data:font/woff2;base64,'), 'R14-10 replaces the F02 defect with passive HTML and embedded locked fonts; original baseline remains immutable.');
     }
     assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
     assert.ok(h.calls.some(x => x[0] === 'revoke'));

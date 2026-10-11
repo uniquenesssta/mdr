@@ -1,5 +1,5 @@
 // Exercise the actual built application and locked renderers. Capture file/print
-// boundaries only; detached exported HTML is never executed or loaded from a CDN.
+// boundaries only; R14-10 loads the unmodified standalone HTML with network blocked.
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -65,8 +65,8 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
         assert.equal(capture.rendered.task, 1); assert.ok(capture.rendered.code > 0);
         assert.equal(capture.rendered.rawDiagrams, 0); assert.equal(capture.rendered.copyButtons, 0);
         if (capture.format === 'html') {
-          assert.ok(capture.content.includes('https://cdn.jsdelivr.net/npm/katex@0.16.9/'));
-          assert.ok(capture.content.includes('exportPresentationPort.math?.renderTree'));
+          assert.doesNotMatch(capture.content, /cdn\.jsdelivr|exportPresentationPort|<script[\s>]/i);
+          assert.ok(capture.content.includes('data:font/woff2;base64,'));
         }
       }
     }
@@ -585,6 +585,108 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.ok(result.content.startsWith('new raw line\n'));for(const field of ['releasedAfterStale','revoked','released'])assert.equal(result[field],true,field);
   });
 
+  await test('R14-10 unmodified standalone HTML renders complete math/code/tasks/diagrams with networking disabled', async () => {
+    await loadMarkdown(fixture.source);
+    const html=await page.evaluate(`(async()=>{
+      const blobs=new Map(),captures=[],create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click;
+      const input=document.getElementById('filename'),name=input.value;
+      URL.createObjectURL=blob=>{const url=create.call(URL,blob);blobs.set(url,blob);return url;};
+      HTMLAnchorElement.prototype.click=function(){if(this.download)captures.push(blobs.get(this.href));else click.call(this);};
+      try {input.value="Standalone A&B' source.docx";await exportHTML();if(captures.length!==1)throw new Error('Missing standalone HTML');return await captures[0].text();}
+      finally {input.value=name;URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-10-standalone.html'),html);
+    assert.doesNotMatch(html,/<script[\s>]|cdn\.jsdelivr|exportPresentationPort/i);
+    const networkRequests=[],blockedRequests=[],networkErrors=[];
+    const controlUrl='https://r14-10-offline.invalid/control';
+    const unsubscribe=page.connection.on('Fetch.requestPaused',event=>{
+      blockedRequests.push(event.request.url);
+      if(event.request.url!==controlUrl)networkRequests.push(event.request.url);
+      void page.connection.send('Fetch.failRequest',{requestId:event.requestId,errorReason:'Failed'}).catch(error=>networkErrors.push(String(error)));
+    });
+    let result;
+    try {
+      await page.connection.send('Fetch.enable',{patterns:[{urlPattern:'http://*',requestStage:'Request'},{urlPattern:'https://*',requestStage:'Request'}]});
+      const controlBlocked=await page.evaluate(`fetch(${JSON.stringify(controlUrl)}).then(()=>false,()=>true)`);
+      assert.equal(controlBlocked,true);assert.deepEqual(blockedRequests,[controlUrl]);
+      result=await page.evaluate(`(async()=>{
+        const html=${JSON.stringify(html)},frame=document.createElement('iframe');frame.id='r14-10-standalone-frame';
+        frame.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:2147483647;background:white;border:0';
+        const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));frame.dataset.exportUrl=url;
+        const loaded=new Promise((resolve,reject)=>{frame.onload=resolve;frame.onerror=()=>reject(new Error('Standalone document failed'));});
+        frame.src=url;document.body.append(frame);await loaded;
+        const doc=frame.contentDocument,view=frame.contentWindow;
+        await Promise.race([Promise.all(Array.from(doc.fonts,face=>face.load())),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Offline font loading timed out')),10000))]);
+        await doc.fonts.ready;
+        const fonts=Array.from(doc.fonts,face=>({family:face.family,style:face.style,weight:face.weight,status:face.status}));
+        const math=Array.from(doc.querySelectorAll('.katex-html'),node=>({width:node.getBoundingClientRect().width,height:node.getBoundingClientRect().height}));
+        return {title:doc.title,scripts:doc.scripts.length,links:doc.querySelectorAll('link').length,
+          privateGlobal:typeof view.exportPresentationPort,fonts,math,mathml:doc.querySelectorAll('.katex-mathml').length,
+          diagrams:doc.querySelectorAll('svg.f-mermaid-svg').length,task:doc.querySelectorAll('li.task-item input[type="checkbox"]').length,
+          code:doc.querySelectorAll('.markdown-code-token').length,styles:doc.querySelector('style').textContent,
+          fontUrls:Array.from(doc.querySelector('style[data-export-fonts]').sheet.cssRules,rule=>rule.style.getPropertyValue('src'))};
+      })()`);
+      await page.screenshot(join(artifactRoot,'r14-10-offline-html.png'));
+    } finally {
+      try {await page.evaluate(`(()=>{const frame=document.getElementById('r14-10-standalone-frame');if(frame){URL.revokeObjectURL(frame.dataset.exportUrl);frame.remove();}})()`);}
+      finally {try {await page.connection.send('Fetch.disable');}finally {unsubscribe();}}
+    }
+    await writeFile(join(artifactRoot,'r14-10-offline-html.json'),JSON.stringify({...result,fontUrls:result.fontUrls.map(url=>({inline:/data:font\/woff2;base64,/.test(url)})),networkRequests,blockedRequests,networkErrors},null,2));
+    assert.equal(result.title,"Standalone A&B' source");assert.equal(result.scripts,0);assert.equal(result.links,0);assert.equal(result.privateGlobal,'undefined');
+    assert.equal(result.fonts.length,20);assert.ok(result.fonts.every(face=>face.status==='loaded'));
+    assert.equal(result.fontUrls.length,20);assert.ok(result.fontUrls.every(url=>/data:font\/woff2;base64,/.test(url)));
+    assert.equal(result.math.length,2);assert.ok(result.math.every(rect=>rect.width>0&&rect.height>0));assert.equal(result.mathml,2);
+    assert.equal(result.diagrams,1);assert.equal(result.task,1);assert.ok(result.code>0);assert.deepEqual(networkRequests,[]);assert.deepEqual(networkErrors,[]);assert.deepEqual(blockedRequests,[controlUrl]);
+  });
+
+  await test('R14-10 actual HTML export preserves empty Unicode and complete large bodies without replacing Preview', async () => {
+    const results=[];
+    for(const source of ['', '# Unicode 中文 😀\n\n完整正文', '# Large HTML\n\n'+'原文 😀'.repeat(90000)+'\n\nEND-HTML']) {
+      await loadMarkdown(source);
+      results.push(await page.evaluate(`(async()=>{
+        const host=document.getElementById('compatibility-business-ports'),preview=document.getElementById('preview'),nodes=Array.from(preview.childNodes);
+        const expected=window.markdownEditorDocumentModel.createSnapshot('r14-10-expected'),blobs=new Map(),captures=[],revoked=[];
+        const create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click;
+        URL.createObjectURL=blob=>{const url=create.call(URL,blob);blobs.set(url,blob);return url;};
+        URL.revokeObjectURL=url=>{revoked.push(url);return revoke.call(URL,url);};
+        HTMLAnchorElement.prototype.click=function(){if(this.download)captures.push({name:this.download,url:this.href,blob:blobs.get(this.href)});else click.call(this);};
+        try {
+          await exportHTML();if(captures.length!==1)throw new Error('Expected one complete HTML file');
+          const capture=captures[0],html=await capture.blob.text(),doc=new DOMParser().parseFromString(html,'text/html'),body=doc.querySelector('.markdown-body');
+          const payload=expected.startsWith('# Large HTML')?expected.split('\\n\\n')[1]:expected?'完整正文':'';
+          return {sourceLength:expected.length,bodyComplete:body.textContent.includes(payload)&&(!expected||body.textContent.includes(expected.startsWith('# Large HTML')?'END-HTML':'Unicode 中文 😀')),
+            empty:expected.length===0&&body.textContent.trim()==='',mime:capture.blob.type,revoked:revoked.includes(capture.url),scripts:doc.scripts.length,
+            embeddedFonts:doc.querySelector('style[data-export-fonts]').textContent.match(/@font-face/g).length,
+            samePreview:preview.childNodes.length===nodes.length&&nodes.every((node,index)=>preview.childNodes[index]===node),
+            released:host.markdownEditorExportTaskPort.getSnapshot().activeTask===null,scoped:typeof window.markdownEditorHtmlExportPort==='undefined'&&Object.isFrozen(host.markdownEditorHtmlExportPort)};
+        } finally {URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;}
+      })()`));
+    }
+    await writeFile(join(artifactRoot,'r14-10-complete-html-bodies.json'),JSON.stringify(results,null,2));
+    assert.equal(results[0].empty,true);assert.ok(results[2].sourceLength>400000);
+    for(const row of results){assert.equal(row.bodyComplete,true);assert.equal(row.mime,'text/html;charset=utf-8');assert.equal(row.scripts,0);assert.equal(row.embeddedFonts,20);
+      for(const field of ['revoked','samePreview','released','scoped'])assert.equal(row[field],true,field);}
+  });
+
+  await test('R14-10 actual pre-write model changes block HTML publication and the next export succeeds', async () => {
+    await loadMarkdown('# Original HTML\n\nOld body');
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),tasks=host.markdownEditorExportTaskPort,editor=host.markdownEditorEditorControllerPort;
+      const blobs=new Map(),captures=[],create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click;
+      URL.createObjectURL=blob=>{const url=create.call(URL,blob);blobs.set(url,blob);return url;};
+      HTMLAnchorElement.prototype.click=function(){if(this.download)captures.push(blobs.get(this.href));else click.call(this);};
+      let changed=false;const unsubscribe=tasks.subscribe(snapshot=>{if(!changed&&snapshot.activeTask?.phase==='serializing'){changed=true;editor.setText('# Current HTML\\n\\nNew body 原文 😀');}});
+      try {
+        await exportHTML();const first=captures.length,releasedAfterStale=tasks.getSnapshot().activeTask===null;unsubscribe();
+        await exportHTML();if(captures.length!==1)throw new Error('Expected only the current HTML publication');
+        const doc=new DOMParser().parseFromString(await captures[0].text(),'text/html');
+        return {changed,first,releasedAfterStale,second:captures.length,current:doc.querySelector('.markdown-body').textContent.includes('New body 原文 😀'),released:tasks.getSnapshot().activeTask===null};
+      } finally {unsubscribe();URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-10-stale-html-source.json'),JSON.stringify(result,null,2));
+    assert.equal(result.first,0);assert.equal(result.second,1);for(const field of ['changed','releasedAfterStale','current','released'])assert.equal(result[field],true,field);
+  });
+
   // Final app probe: exercise the production pagehide owner after all other export probes.
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
     const result = await page.evaluate(`(async () => {
@@ -592,7 +694,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const progressRoot=document.getElementById('export-progress-modal');
       const builder=host.markdownEditorExportDocumentPort;
       const enhancer=host.markdownEditorExportEnhancementPort;
-      const markdown=host.markdownEditorMarkdownExportPort;
+      const markdown=host.markdownEditorMarkdownExportPort,html=host.markdownEditorHtmlExportPort;
       const styles=host.markdownEditorExportStylePort,styleRoot=document.createElement('div');document.body.append(styleRoot);styles.apply(styleRoot,'image');
       const enhancementBody=await builder.build();
       enhancementBody.replaceChildren(...Array.from({length:25},()=>{const node=document.createElement('p');node.textContent='dispose enhancement';return node;}));
@@ -611,10 +713,11 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       let rejected=false;try {port.begin('late');}catch(error){rejected=/destroyed/.test(error.message);}
       let cancelledError=false;try {task.token.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
       let markdownRejected=false;try {await markdown.export({});}catch(error){markdownRejected=/destroyed/.test(error.message);}
+      let htmlRejected=false;try {await html.export({});}catch(error){htmlRejected=/destroyed/.test(error.message);}
       return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
         stylesRemoved:!document.querySelector('style[data-export-style-sheet="document"]')&&!styleRoot.classList.contains('export-document')&&!styleRoot.hasAttribute('data-export-format'),
-        rejected,cancelledError,markdownRejected,removed:!Object.hasOwn(host,'markdownEditorMarkdownExportPort')&&!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
+        rejected,cancelledError,markdownRejected,htmlRejected,removed:!Object.hasOwn(host,'markdownEditorHtmlExportPort')&&!Object.hasOwn(host,'markdownEditorMarkdownExportPort')&&!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
         progressVisible:progressRoot.classList.contains('show'),progressRemoved:!document.getElementById('export-progress-modal')};
     })()`);
     assert.equal(result.progressRemoved, true);
@@ -625,7 +728,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.deepEqual(result.building, {cancelled:true,reason:'destroyed'});
     assert.deepEqual(result.enhancing, {cancelled:true,reason:'destroyed'});assert.equal(result.interceptedFrames,1);
     for (const field of ['lateUpdate','lateLock','lateFinish','progressVisible']) assert.equal(result[field], false, field);
-    for (const field of ['rejected','cancelledError','markdownRejected','removed']) assert.equal(result[field], true, field);
+    for (const field of ['rejected','cancelledError','markdownRejected','htmlRejected','removed']) assert.equal(result[field], true, field);
     await writeFile(join(artifactRoot, 'r14-03-task-disposal.json'), JSON.stringify(result, null, 2));
   });
 }

@@ -1,12 +1,12 @@
 // Characterization host: execute classic format callers with the actual public Export Builder.
 // DOM/vendor/platform doubles prove orchestration only; actual Builder/Enhancer own the complete body.
 // Retired Worker/enhancement globals are never supplied. Actual renderer output is checked in built-app tests.
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import vm from 'node:vm';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 const mathCss = readFileSync(join(dirname(createRequire(import.meta.url).resolve('katex')), 'katex.css'), 'utf8');
-import { createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
 import { createBrowserFileDownload } from '../../src/platform/index.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
@@ -99,22 +99,23 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     getComputedStyle: () => ({ backgroundColor: '#ffffff' })
   });
   const browserDownload = createBrowserFileDownload({ documentObject: context.document, urlApi: context.URL });
+  const documents = {
+    get activeId() { return context.getActiveDocumentId(); },
+    get generation() { return context.coreDocumentControllerPort.generation; },
+    getRecord: id => context.coreDocumentSessionPort.getRecord(id),
+    isCurrentGeneration: generation => context.coreDocumentControllerPort.isCurrentGeneration(generation),
+    readDocumentContent: id => context.coreDocumentControllerPort.readDocumentContent(id)
+  };
+  const outputPlatform = {
+    capabilities: { desktop: { dialogs: desktop, fileSystem: desktop }, browser: { fileDownload: !desktop } },
+    dialogs: { saveFile: (...args) => host.markdownEditorPlatformPort.call('dialogs', 'saveFile', ...args) },
+    files: { writeText: (path, content, options) => desktop
+      ? host.markdownEditorPlatformPort.call('files', 'writeText', path, content, options)
+      : browserDownload.downloadBlob(new Blob([content], { type: options.mimeType }), path) }
+  };
   const markdownExporter = createMarkdownExporter({
     documentModel: context.documentModel, taskController,
-    documents: {
-      get activeId() { return context.getActiveDocumentId(); },
-      get generation() { return context.coreDocumentControllerPort.generation; },
-      getRecord: id => context.coreDocumentSessionPort.getRecord(id),
-      isCurrentGeneration: generation => context.coreDocumentControllerPort.isCurrentGeneration(generation),
-      readDocumentContent: id => context.coreDocumentControllerPort.readDocumentContent(id)
-    },
-    platform: {
-      capabilities: { desktop: { dialogs: desktop, fileSystem: desktop }, browser: { fileDownload: !desktop } },
-      dialogs: { saveFile: (...args) => host.markdownEditorPlatformPort.call('dialogs', 'saveFile', ...args) },
-      files: { writeText: (path, content, options) => desktop
-        ? host.markdownEditorPlatformPort.call('files', 'writeText', path, content, options)
-        : browserDownload.downloadBlob(new Blob([content], { type: options.mimeType }), path) }
-    }
+    documents, platform: outputPlatform
   });
   const markdownMount = mountClassicMarkdownExportPort(host, markdownExporter);
   context.coreMarkdownExportPort = markdownMount.port;
@@ -137,13 +138,20 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     builder: documentBuilder, presentation,
     requestFrame: callback => context.requestAnimationFrame(callback), cancelFrame: () => {} });
   const enhancementMount = mountClassicExportEnhancementPort(host, enhancer);
+  const fontRoot = join(dirname(createRequire(import.meta.url).resolve('katex')), 'fonts');
+  const assets = createHtmlFontAssets({ mathCss, loaders: Object.fromEntries(readdirSync(fontRoot)
+    .filter(name => name.endsWith('.woff2')).map(name => [name, async () => 'data:font/woff2;base64,' + readFileSync(join(fontRoot, name)).toString('base64')])) });
+  const htmlExporter = createHtmlExporter({ documentModel: context.documentModel, documents,
+    builder: documentBuilder, enhancer, assets, serializer: createHtmlDocumentSerializer({ styles }),
+    taskController, platform: outputPlatform });
+  const htmlMount = mountClassicHtmlExportPort(host, htmlExporter);
   vm.runInContext(markdownDownload + '\n' + source, context, { filename: 'public/app/export.js', timeout: 1000 });
   return {
-    context, calls, downloads, nodes, timers, events, taskController, documentBuilder, styles, markdownExporter,
+    context, calls, downloads, nodes, timers, events, taskController, documentBuilder, styles, markdownExporter, htmlExporter,
     enhance: (root, task) => enhancementMount.port.enhance({ root, task, documentId }), createNode: node,
     build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,
     cancel: () => nodes.get('export-progress-cancel').click(),
-    destroy() { try { markdownExporter.destroy(); markdownMount.destroy(); taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    destroy() { try { htmlExporter.destroy(); htmlMount.destroy(); markdownExporter.destroy(); markdownMount.destroy(); taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
     invoke: (name, ...args) => context[name](...args),
     evaluate: expression => vm.runInContext(expression, context),
     setFrameHook(callback) { onFrame = callback; },

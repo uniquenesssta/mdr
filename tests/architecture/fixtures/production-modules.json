@@ -5286,6 +5286,46 @@
       "factory-to-destroy",
       "retain",
       false
+    ],
+    [
+      "src/features/export/document/html-font-assets.js",
+      "esm-module",
+      "export-document",
+      "Trusted locked math font-face packaging as inline WOFF2 CSS through injected lazy asset imports; cache immutable results and retry failed imports.",
+      "html-font-asset-promise",
+      "factory-cache",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/document/html-document.js",
+      "esm-module",
+      "export-document",
+      "Passive standalone HTML metadata/title escaping, shared document CSS and embedded math font serialization; no runtime scripts or document authority.",
+      "none",
+      "pure-factory",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/formats/html-exporter.js",
+      "esm-module",
+      "export-format",
+      "HTML task workflow over public complete Builder/Enhancer/asset/serializer capabilities; guard original identity/version/generation and use existing Platform file output.",
+      "html-export-pending-waits",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-html-export-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Scoped frozen HTML command bridge; terminal unmount without owning shared document/format resources.",
+      "html-export-port-mount",
+      "mount-to-destroy",
+      "remove-with-classic-callers",
+      false
     ]
   ]
 }
