@@ -6,10 +6,11 @@ import vm from 'node:vm';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 const mathCss = readFileSync(join(dirname(createRequire(import.meta.url).resolve('katex')), 'katex.css'), 'utf8');
-import { createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
-import { createBrowserFileDownload } from '../../src/platform/index.js';
+import { createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createBrowserPrint, createBrowserFileDownload } from '../../src/platform/index.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
+import { createExportPrintDom } from './export-print-dom.mjs';
 
 const source = readFileSync(new URL('../../public/app/export.js', import.meta.url), 'utf8');
 const markdownSource = readFileSync(new URL('../../public/app/core.js', import.meta.url), 'utf8');
@@ -18,6 +19,7 @@ const markdownDownload = markdownSource.slice(markdownSource.indexOf('    async 
 export function createExportVmHost({ desktop = false, sourceText = '原文 😀', name = 'report.md', savePath = 'C:\\exports\\report', failWrite = false, workerBlocks = null, workerVersion = 7, textLength = 20, parseError = false, imageHeight = 100, documentId = 'export-doc', documentIds = [documentId] } = {}) {
   const calls = [], downloads = [], blobs = new Map(), timers = [], events = new Map(), nodes = new Map();
   let urlId = 0, frameCount = 0, onFrame = null;
+  const printDom = createExportPrintDom({ onPrint: () => calls.push(['print']) });
   const node = (tag = 'div') => {
     let html = '', children = [];
     const classes = new Set();
@@ -80,7 +82,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   const requestMount = mountClassicExportRequestPort(host, { getActiveDocumentId: () => documentId, hasDocument: id => documentIds.includes(id) });
   const escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   const context = vm.createContext({
-    document: { body, head, getElementById: id => id === 'compatibility-business-ports' ? host : getNode(id), createElement: node, createDocumentFragment() { const result = node(); result.fragment = true; return result; }, querySelectorAll: () => [], querySelector: () => null },
+    document: { body, head, getElementById: id => id === 'compatibility-business-ports' ? host : getNode(id), createElement: tag => tag === 'iframe' ? printDom.document.createElement(tag) : node(tag), createDocumentFragment() { const result = node(); result.fragment = true; return result; }, querySelectorAll: () => [], querySelector: () => null },
     documentModel: { getDocumentVersion: () => 7, createSnapshot(reason) { calls.push(['snapshot', reason]); return sourceText; } },
     coreExportRequestPort: requestMount.port, coreExportTaskPort: taskMount.port,
     getActiveDocumentId: () => documentId,
@@ -149,13 +151,19 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     builder: documentBuilder, enhancer, assets, serializer: createWordDocumentSerializer({ styles }),
     taskController, platform: outputPlatform });
   const wordMount = mountClassicWordExportPort(host, wordExporter);
+  const printSurface = createPdfPrintSurface({ documentRef: context.document, styles,
+    printWindow: frameWindow => createBrowserPrint({ windowObject: frameWindow }).print(), setTimer: printDom.setTimer, clearTimer: printDom.clearTimer });
+  const pdfExporter = createPdfExporter({ documentModel: context.documentModel, documents,
+    builder: documentBuilder, enhancer, assets, surface: printSurface, taskController });
+  const pdfMount = mountClassicPdfExportPort(host, pdfExporter);
   vm.runInContext(markdownDownload + '\n' + source, context, { filename: 'public/app/export.js', timeout: 1000 });
   return {
-    context, calls, downloads, nodes, timers, events, taskController, documentBuilder, styles, markdownExporter, htmlExporter, wordExporter,
+    context, calls, downloads, nodes, timers, events, printDom, pdfExporter, printSurface, taskController, documentBuilder, styles, markdownExporter, htmlExporter, wordExporter,
     enhance: (root, task) => enhancementMount.port.enhance({ root, task, documentId }), createNode: node,
     build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,
     cancel: () => nodes.get('export-progress-cancel').click(),
-    destroy() { try { wordExporter.destroy(); wordMount.destroy(); htmlExporter.destroy(); htmlMount.destroy(); markdownExporter.destroy(); markdownMount.destroy(); taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    destroy() { try { pdfExporter.destroy(); pdfMount.destroy(); printSurface.destroy(); wordExporter.destroy(); wordMount.destroy(); htmlExporter.destroy(); htmlMount.destroy(); markdownExporter.destroy(); markdownMount.destroy(); taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    async runPdf() { const work = context.exportPDF(); await printDom.untilScheduled(); await printDom.fire(80); printDom.frames.at(-1).contentWindow.dispatchEvent({ type: 'afterprint' }); await work; },
     invoke: (name, ...args) => context[name](...args),
     evaluate: expression => vm.runInContext(expression, context),
     setFrameHook(callback) { onFrame = callback; },

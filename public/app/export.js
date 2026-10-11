@@ -12,6 +12,7 @@
     const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
     const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
     const exportStylePort = exportCompatibilityHost?.markdownEditorExportStylePort;
+    const exportPdfPort = exportCompatibilityHost?.markdownEditorPdfExportPort;
     const exportWordPort = exportCompatibilityHost?.markdownEditorWordExportPort;
     const exportHtmlPort = exportCompatibilityHost?.markdownEditorHtmlExportPort;
     const exportMarkdownPort = exportCompatibilityHost?.markdownEditorMarkdownExportPort;
@@ -27,6 +28,7 @@
     if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
     if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
     if (!exportStylePort) throw new Error('Export style compatibility port is unavailable.');
+    if (!exportPdfPort) throw new Error('PDF export compatibility port is unavailable.');
     if (!exportWordPort) throw new Error('Word export compatibility port is unavailable.');
     if (!exportHtmlPort) throw new Error('HTML export compatibility port is unavailable.');
     if (!exportMarkdownPort) throw new Error('Markdown export compatibility port is unavailable.');
@@ -136,58 +138,16 @@
     async function exportPDF() {
       const request = readExportRequest('pdf');
       if (!request) return;
-      const task = beginExportTask('正在准备 PDF');
-      if (!task) return;
-      let wasSource = false;
-      let printStyleLease = null;
-      const restorePreview = () => {
-        printStyleLease?.release();
-        printStyleLease = null;
-        exportPreviewCommandPort.reset();
-        if (wasSource) exportPreviewCommandPort.setViewMode('source');
-      };
-      let replacedPreview = false;
       try {
-        wasSource = exportPreviewCommandPort.getViewMode() === 'source';
-        if (wasSource) exportPreviewCommandPort.setViewMode('preview');
-        exportPreviewCommandPort.deactivateVirtual();
-        const fullBody = await exportDocumentPort.build({ task, documentId: request.documentId });
-        task.token.throwIfCancelled();
-        await exportEnhancementPort.enhance({ root: fullBody, task, documentId: request.documentId });
-        task.token.throwIfCancelled();
-        printStyleLease = exportStylePort.apply(fullBody, 'pdf');
-        preview.replaceChildren(fullBody);
-        replacedPreview = true;
-        task.token.throwIfCancelled();
-        task.lockCancellation('printing');
-        task.token.throwIfCancelled();
-        task.update(100, 'PDF 内容已准备完成', 'printing');
-        finishExportTask(task);
-        showToast(t('toastChoosePdf'));
-        let restored = false;
-        const restoreOnce = () => {
-          if (restored) return;
-          restored = true;
-          restorePreview();
-        };
-        window.addEventListener('afterprint', restoreOnce, { once: true });
-        setTimeout(() => {
-          window.print();
-          setTimeout(restoreOnce, 1200);
-        }, 80);
+        const result = await exportPdfPort.export({ request });
+        if (result.status === 'busy') showToast('当前导出正在生成文件，请稍候');
       } catch (error) {
         if (!exportTaskPort.isCancelled(error)) {
           console.error('PDF export failed:', error);
           showToast(error?.message || String(error));
         }
-        try {
-          printStyleLease?.release();
-          printStyleLease = null;
-          if (task.current && (replacedPreview || exportTaskPort.isCancelled(error))) restorePreview();
-        } finally { finishExportTask(task, 'failed'); }
       }
     }
-
 
     function toggleExportMenu() {
       document.getElementById('export-menu').classList.toggle('show');

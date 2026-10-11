@@ -22,11 +22,11 @@ test('R14-01 records the actual retired preview dependency instead of hiding it 
   assert.equal(h.downloads.length, 2, 'R14-06/07 use the actual public Builder and Enhancer without retired bindings.');
   h.downloads.length = 0;
   for (const operation of ['exportPDF', 'renderExportImagePreview']) {
-    await h.invoke(operation);
+    if (operation === 'exportPDF') await h.runPdf(); else await h.invoke(operation);
     assert.equal(h.downloads.length, 0);
     assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
   }
-  assert.equal(h.timers.length, 1, 'R14-07 prepares PDF through the actual public enhancer.');
+  assert.equal(h.calls.filter(x => x[0] === 'print').length, 1, 'R14-12 prepares isolated PDF through the actual public enhancer.');
   assert.equal(h.calls.filter(x => x[0] === 'png').length, 1);
   assert.equal(h.calls.filter(x => x[0] === 'saveFile' || /^write/.test(x[0])).length, 0);
   assert.equal(h.calls.some(x => x[0] === 'error'), false);
@@ -177,30 +177,31 @@ test('R14-01 task replacement, stale progress, explicit noncancelable phase and 
   h.invoke('finishExportTask', current); assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
 });
 
-test('R14-01 PDF afterprint and timeout restore exactly once, preserving the source view', async () => {
+test('R14-01 PDF afterprint and timeout release once, preserving the source view and preview identity', async () => {
   for (const afterprint of [true, false]) {
-    const h = createExportVmHost();
-    await h.invoke('exportPDF');
-    assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
-    assert.equal(h.evaluate('typeof observedPreviewBody'), 'undefined');
-    assert.equal(h.context.preview.children[0].className, 'markdown-body');
-    assert.equal(h.timers[0].delay, 80);
-    h.timers[0].callback();
-    assert.equal(h.calls.filter(x => x[0] === 'print').length, 1);
-    assert.equal(h.timers[1].delay, 1200);
-    if (afterprint) h.events.get('afterprint')();
-    h.timers[1].callback();
-    assert.equal(h.calls.filter(x => x[0] === 'reset').length, 1);
-    assert.deepEqual(h.calls.filter(x => x[0] === 'view'), [['view', 'preview'], ['view', 'source']]);
+    const h = createExportVmHost(), original = h.context.preview;
+    try {
+      const work = h.invoke('exportPDF'); await h.printDom.untilScheduled();
+      assert.ok(h.taskPort.getSnapshot().activeTask); assert.equal(h.evaluate('typeof observedPreviewBody'), 'undefined');
+      assert.equal(h.context.preview, original); assert.equal(h.context.preview.children.length, 0);
+      const frame = h.printDom.frames[0]; assert.equal(frame.contentDocument.body.children[0].className, 'markdown-body');
+      await h.printDom.fire(80); assert.equal(h.calls.filter(x => x[0] === 'print').length, 1);
+      assert.equal(h.taskPort.getSnapshot().activeTask.cancelable, false);
+      if (afterprint) frame.contentWindow.dispatchEvent({ type: 'afterprint' }); else await h.printDom.fire(1200);
+      await work; assert.equal(frame.parentNode, null); assert.equal(frame.listeners.size, 0);
+      assert.equal(h.taskPort.getSnapshot().activeTask, null); assert.equal(h.calls.filter(x => x[0] === 'reset').length, 0);
+      assert.deepEqual(h.calls.filter(x => x[0] === 'view'), []);
+    } finally { h.destroy(); }
   }
 });
 
-test('R14-01 cancelled PDF preparation restores view before printing and never schedules print', async () => {
+test('R14-01 cancelled PDF preparation preserves view and preview before printing and never schedules print', async () => {
   const h = createExportVmHost(); h.setFrameHook(() => h.cancel());
-  await h.invoke('exportPDF');
-  assert.equal(h.timers.length, 0);
-  assert.equal(h.calls.filter(x => x[0] === 'reset').length, 1);
-  assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
+  try {
+    await h.invoke('exportPDF');
+    assert.equal(h.printDom.timers.length, 0); assert.equal(h.calls.filter(x => x[0] === 'reset').length, 0);
+    assert.deepEqual(h.calls.filter(x => x[0] === 'view'), []); assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
+  } finally { h.destroy(); }
 });
 
 test('R14-01 PNG ratio/padding/crop/natural height, noncancelable encoding and generated binary are fixed', async () => {

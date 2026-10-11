@@ -1,10 +1,10 @@
 import 'katex/dist/katex.css';
 import './styles/index.css';
 import katexStyleSheetText from 'katex/dist/katex.css?raw';
-import { createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
+import { createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
-import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
+import { createBrowserPrint, createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
 import { configurePerformancePlatform, configurePerformanceRuntimeStats } from './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
@@ -141,6 +141,9 @@ const exportRequestPort = mountClassicExportRequestPort(compatibilityPlatformHos
   getActiveDocumentId: () => compatibilityPlatformHost.markdownEditorDocumentSessionPort?.activeId,
   hasDocument: id => Boolean(compatibilityPlatformHost.markdownEditorDocumentSessionPort?.getRecord(id))
 });
+let pdfExporter = null;
+let pdfExportPort = null;
+let pdfPrintSurface = null;
 let wordExporter = null;
 let wordExportPort = null;
 let htmlExporter = null;
@@ -300,7 +303,7 @@ configureHybridImageSourcePlatform({
   getDocumentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {}
 });
 window.addEventListener('pagehide', () => {
-  for (const release of [() => wordExporter?.destroy(), () => wordExportPort?.destroy(), () => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
+  for (const release of [() => pdfExporter?.destroy(), () => pdfExportPort?.destroy(), () => pdfPrintSurface?.destroy(), () => wordExporter?.destroy(), () => wordExportPort?.destroy(), () => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
     () => exportEnhancementPort?.destroy(), () => exportDocumentBuilder?.destroy(),
     () => exportDocumentPort?.destroy(), () => exportProgressView.destroy(),
     () => exportProgressStore.destroy(), () => exportStyles.destroy(), () => exportStylePort.destroy(),
@@ -543,6 +546,12 @@ async function loadAppModules() {
     documentUiCommandPort?.destroy?.();
     recentFilesPort?.destroy?.();
     recentFilesRepository.destroy();
+    pdfExporter?.destroy();
+    pdfExportPort?.destroy();
+    pdfPrintSurface?.destroy();
+    pdfExporter = null;
+    pdfExportPort = null;
+    pdfPrintSurface = null;
     wordExporter?.destroy();
     wordExportPort?.destroy();
     wordExporter = null;
@@ -725,6 +734,12 @@ async function loadAppModules() {
     documentUiCommandPort.destroy();
     recentFilesPort.destroy();
     recentFilesRepository.destroy();
+    pdfExporter?.destroy();
+    pdfExportPort?.destroy();
+    pdfPrintSurface?.destroy();
+    pdfExporter = null;
+    pdfExportPort = null;
+    pdfPrintSurface = null;
     wordExporter?.destroy();
     wordExportPort?.destroy();
     wordExporter = null;
@@ -1419,6 +1434,13 @@ async function loadAppModules() {
       builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: htmlFontAssets,
       serializer: wordDocumentSerializer, taskController: exportTaskController, platform });
     wordExportPort = mountClassicWordExportPort(compatibilityPlatformHost, wordExporter);
+    pdfPrintSurface = createPdfPrintSurface({ documentRef: document, styles: exportStyles,
+      printWindow: frameWindow => createBrowserPrint({ windowObject: frameWindow }).print(),
+      setTimer: (callback, delay) => window.setTimeout(callback, delay), clearTimer: handle => window.clearTimeout(handle) });
+    pdfExporter = createPdfExporter({ documentModel, documents: documentControllerPort,
+      builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: htmlFontAssets,
+      surface: pdfPrintSurface, taskController: exportTaskController });
+    pdfExportPort = mountClassicPdfExportPort(compatibilityPlatformHost, pdfExporter);
     const scrollPreviewToLine = (line, behavior = 'auto', viewportRatio = 0.38) => {
       const ratio = Math.max(0.05, Math.min(0.95, Number(viewportRatio) || 0.38));
       const contentY = previewScrollMapper.getContentYForLine(line);

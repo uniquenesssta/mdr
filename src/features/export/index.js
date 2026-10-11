@@ -21,3 +21,6 @@ export { mountClassicHtmlExportPort } from './compatibility/classic-html-export-
 export { createWordDocumentSerializer } from './document/word-document.js';
 export { createWordExporter } from './formats/word-exporter.js';
 export { mountClassicWordExportPort } from './compatibility/classic-word-export-port.js';
+export { createPdfExporter } from './formats/pdf-exporter.js';
+export { createPdfPrintSurface } from './document/pdf-print-surface.js';
+export { mountClassicPdfExportPort } from './compatibility/classic-pdf-export-port.js';

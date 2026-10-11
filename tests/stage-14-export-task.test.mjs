@@ -171,13 +171,18 @@ for (const operation of ['exportHTML', 'exportWord']) test(`R14-03 ${operation} 
   assert.equal(h.calls.some(x => x[0] === 'toast' && /Exported/.test(x[1])), false); h.destroy();
 });
 
-test('R14-03 PDF view initialization error and failing cancellation restore both release the task', async () => {
-  for (const failure of ['init', 'restore']) {
+test('R14-03 PDF isolated-document initialization and print failures release the task without preview recovery', async () => {
+  for (const failure of ['init', 'print']) {
     const h = createExportVmHost(), preview = h.context.document.getElementById('compatibility-business-ports').markdownEditorPreviewCommandPort;
-    if (failure === 'init') preview.setViewMode = () => { throw new Error('view failed'); };
-    else { h.setFrameHook(() => h.cancel()); preview.reset = () => { throw new Error('restore failed'); }; }
-    if (failure === 'restore') await assert.rejects(h.invoke('exportPDF'), /restore failed/);
-    else await h.invoke('exportPDF');
-    assert.equal(h.taskPort.getSnapshot().activeTask, null); assert.equal(h.timers.length, 0); h.destroy();
+    preview.reset = () => { throw new Error('Preview must not be reset'); };
+    preview.setViewMode = () => { throw new Error('Preview must not change'); };
+    if (failure === 'init') h.context.document.createElement = () => { throw new Error('print document failed'); };
+    const work = h.invoke('exportPDF');
+    if (failure === 'print') {
+      await h.printDom.untilScheduled(); h.printDom.frames[0].contentWindow.print = () => { throw new Error('print failed'); };
+      await h.printDom.fire(80);
+    }
+    await work; assert.equal(h.taskPort.getSnapshot().activeTask, null);
+    assert.ok(h.printDom.frames.every(frame => frame.parentNode === null)); assert.equal(h.calls.some(x => x[0] === 'reset'), false); h.destroy();
   }
 });

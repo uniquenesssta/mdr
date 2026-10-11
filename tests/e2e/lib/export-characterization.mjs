@@ -193,12 +193,13 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
   await test('R14-07 actual PDF/Image retain R14-01 file-boundary and cleanup coverage with enhanced bodies', async () => {
     await loadMarkdown(fixture.source);
     const result = await page.evaluate(`(async () => {
-      const print=window.print,error=console.error;
+      const error=console.error;
       const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorPreviewCommandPort;
       const before=port.getViewMode();let prints=0,printed;const errors=[],phases=[];
       const unsubscribe=host.markdownEditorExportTaskPort.subscribe(s=>{if(s.activeTask)phases.push({phase:s.activeTask.phase,cancelable:s.activeTask.cancelable});});
-      window.print=()=>{prints++;printed={format:preview.querySelector('.export-document')?.dataset.exportFormat,math:preview.querySelectorAll('.katex').length,diagrams:preview.querySelectorAll('svg.f-mermaid-svg').length,
-        heading:preview.querySelector('h1')?.textContent};window.dispatchEvent(new Event('afterprint'));};
+      const observer=new MutationObserver(records=>{for(const record of records)for(const frame of record.addedNodes){if(frame.matches?.('iframe[data-export-print="pdf"]'))frame.contentWindow.print=()=>{
+        const doc=frame.contentDocument;prints++;printed={format:doc.querySelector('.export-document')?.dataset.exportFormat,math:doc.querySelectorAll('.katex').length,diagrams:doc.querySelectorAll('svg.f-mermaid-svg').length,
+          heading:doc.querySelector('h1')?.textContent};frame.contentWindow.dispatchEvent(new Event('afterprint'));};}});observer.observe(document.body,{childList:true});
       console.error=(...args)=>{errors.push(args.map(x=>String(x)).join(' '));error.apply(console,args);};
       try {
         await exportPDF();await new Promise(resolve=>setTimeout(resolve,160));
@@ -211,7 +212,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
           progressVisible:document.getElementById('export-progress-modal').classList.contains('show'),stageChildren:document.getElementById('export-image-content').children.length,
           stageStylesCleared:['height','minHeight','overflow'].every(key=>document.getElementById('export-image-content').firstElementChild.style[key]===''),
           retired:typeof styleTaskLists==='undefined'&&typeof renderMermaidBlocks==='undefined'&&typeof observedPreviewBody==='undefined'&&typeof enhanceFullPreviewForExport==='undefined'};
-      } finally {unsubscribe();window.print=print;console.error=error;}
+      } finally {unsubscribe();observer.disconnect();console.error=error;}
     })()`);
     const png=result.png?.startsWith('data:image/png')?Buffer.from(result.png.split(',')[1],'base64'):null;
     await writeFile(join(artifactRoot,'r14-07-pdf-image.json'),JSON.stringify({...result,png:undefined,pngBytes:png?.length,mapping:'R14-F04 receiving enhancer; original failure fixture retained'},null,2));
@@ -697,6 +698,71 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
 
   }
 
+  await test('R14-12 actual isolated print preserves edit preview hybrid and both identities with complete resources', async () => {
+    await loadMarkdown(fixture.source);const rows=[];
+    try {for(const mode of ['edit','preview','hybrid','both']) {
+      await page.evaluate(`window.__markdownEditorE2E.setLayout(${JSON.stringify(mode)})`);
+      rows.push(await page.evaluate(`(async()=>{
+        const host=document.getElementById('compatibility-business-ports'),tasks=host.markdownEditorExportTaskPort,port=host.markdownEditorPreviewCommandPort;
+        const editor=document.getElementById('editor'),preview=document.getElementById('preview'),hybrid=editor.virtualEditor.root;
+        const previewNodes=Array.from(preview.childNodes),hybridNodes=Array.from(hybrid.childNodes),view=port.getViewMode(),layout=host.markdownEditorLayoutStatePort.snapshot.mode;
+        const input=document.getElementById('filename');input.focus();const focus=document.activeElement;
+        const before={previewScroll:preview.scrollTop,editorScroll:editor.scrollTop,start:editor.selectionStart,end:editor.selectionEnd};
+        let printed,prints=0;const frames=[];
+        const observer=new MutationObserver(records=>{for(const record of records)for(const frame of record.addedNodes)if(frame.matches?.('iframe[data-export-print="pdf"]')){
+          frames.push(frame);frame.contentWindow.print=()=>{prints++;const doc=frame.contentDocument,root=doc.querySelector('.export-document'),css=frame.contentWindow.getComputedStyle(root);
+            printed={format:root.dataset.exportFormat,heading:root.querySelector('h1')?.textContent,math:Array.from(doc.querySelectorAll('.katex'),node=>({width:node.getBoundingClientRect().width,height:node.getBoundingClientRect().height})),
+              mathml:doc.querySelectorAll('.katex-mathml').length,diagrams:doc.querySelectorAll('svg.f-mermaid-svg').length,task:doc.querySelectorAll('li.task-item input').length,code:doc.querySelectorAll('.markdown-code-token').length,
+              fonts:Array.from(doc.fonts,face=>face.status),scripts:doc.scripts.length,privateGlobal:typeof frame.contentWindow.markdownEditorPresentationPort,
+              color:css.color,paper:css.backgroundColor,locked:tasks.getSnapshot().activeTask?.phase==='printing'&&tasks.getSnapshot().activeTask?.cancelable===false,
+              parentUnscoped:!preview.classList.contains('export-document')&&!hybrid.classList.contains('export-document')};
+            frame.contentWindow.dispatchEvent(new Event('afterprint'));};}});observer.observe(document.body,{childList:true});
+        try {await exportPDF();return {mode:${JSON.stringify(mode)},layout,prints,printed,before,after:{previewScroll:preview.scrollTop,editorScroll:editor.scrollTop,start:editor.selectionStart,end:editor.selectionEnd},
+          samePreview:preview.childNodes.length===previewNodes.length&&previewNodes.every((node,index)=>preview.childNodes[index]===node),
+          sameHybrid:hybrid.childNodes.length===hybridNodes.length&&hybridNodes.every((node,index)=>hybrid.childNodes[index]===node),sameView:port.getViewMode()===view,sameLayout:host.markdownEditorLayoutStatePort.snapshot.mode===layout,
+          focusRestored:document.activeElement===focus,removed:frames.length===1&&!frames[0].isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),released:tasks.getSnapshot().activeTask===null,
+          scoped:typeof window.markdownEditorPdfExportPort==='undefined'&&Object.isFrozen(host.markdownEditorPdfExportPort)};
+        }finally{observer.disconnect();}
+      })()`));
+    }} finally {await page.evaluate('window.__markdownEditorE2E.setLayout("both")');}
+    await writeFile(join(artifactRoot,'r14-12-isolated-print.json'),JSON.stringify(rows,null,2));
+    for(const row of rows){assert.equal(row.layout,row.mode);assert.equal(row.prints,1);assert.deepEqual(row.after,row.before);for(const key of ['samePreview','sameHybrid','sameView','sameLayout','focusRestored','removed','released','scoped'])assert.equal(row[key],true,key);
+      const out=row.printed;assert.equal(out.format,'pdf');assert.equal(out.heading,'Export baseline');assert.equal(out.math.length,2);assert.ok(out.math.every(x=>x.width>0&&x.height>0));assert.equal(out.mathml,2);assert.equal(out.diagrams,1);assert.equal(out.task,1);assert.ok(out.code>0);
+      assert.equal(out.fonts.length,20);assert.ok(out.fonts.every(x=>x==='loaded'));assert.equal(out.scripts,0);assert.equal(out.privateGlobal,'undefined');assert.equal(out.color,'rgb(0, 0, 0)');assert.equal(out.paper,'rgb(255, 255, 255)');assert.equal(out.locked,true);assert.equal(out.parentUnscoped,true);}
+  });
+
+  await test('R14-12 actual print timeout and platform failure clean the surface and allow the next command', async () => {
+    await loadMarkdown(fixture.source);
+    const rows=await page.evaluate(`(async()=>{
+      const tasks=document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort,originalTimer=window.setTimeout,originalError=console.error;
+      const rows=[];let mode='timeout',prints=0,errors=[],frames=[];
+      window.setTimeout=(callback,delay,...args)=>originalTimer(callback,delay===1200?25:delay,...args);console.error=(...args)=>errors.push(args.map(String).join(' '));
+      const observer=new MutationObserver(records=>{for(const record of records)for(const frame of record.addedNodes)if(frame.matches?.('iframe[data-export-print="pdf"]')){
+        frames.push(frame);frame.contentWindow.print=()=>{prints++;if(mode==='failure')throw new Error('R14-12 injected print boundary failure');if(mode==='recovery')frame.contentWindow.dispatchEvent(new Event('afterprint'));};}});observer.observe(document.body,{childList:true});
+      try {for(mode of ['timeout','failure','recovery']){const before=prints;errors=[];frames=[];await exportPDF();rows.push({mode,prints:prints-before,errors:[...errors],removed:frames.length===1&&!frames[0].isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),released:tasks.getSnapshot().activeTask===null,progressClosed:!document.getElementById('export-progress-modal').classList.contains('show')});}return rows;
+      }finally{observer.disconnect();window.setTimeout=originalTimer;console.error=originalError;}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-12-print-recovery.json'),JSON.stringify(rows,null,2));
+    for(const row of rows){assert.equal(row.prints,1);for(const key of ['removed','released','progressClosed'])assert.equal(row[key],true,key);if(row.mode==='failure'){assert.equal(row.errors.length,1);assert.match(row.errors[0],/injected print boundary failure/);}else assert.deepEqual(row.errors,[]);}
+  });
+
+  await test('R14-12 actual cancellation and source change during the print delay give zero prints before recovery', async () => {
+    await loadMarkdown(fixture.source);
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),tasks=host.markdownEditorExportTaskPort,editor=host.markdownEditorEditorControllerPort;
+      const originalTimer=window.setTimeout;let queued,prints=0,body;const rows=[];
+      window.setTimeout=(callback,delay,...args)=>{if(delay===80){queued=callback;return -1412;}return originalTimer(callback,delay,...args);};
+      const observer=new MutationObserver(records=>{for(const record of records)for(const frame of record.addedNodes)if(frame.matches?.('iframe[data-export-print="pdf"]'))frame.contentWindow.print=()=>{prints++;body=frame.contentDocument.body.textContent;frame.contentWindow.dispatchEvent(new Event('afterprint'));};});observer.observe(document.body,{childList:true});
+      try {for(const action of ['cancel','changed','recovery']){
+        queued=null;const before=prints,work=exportPDF();for(let i=0;i<1000&&!queued;i++)await new Promise(resolve=>originalTimer(resolve,5));if(!queued)throw new Error('PDF did not reach its real print delay');
+        let cancelled=null;if(action==='cancel')cancelled=tasks.cancel();if(action==='changed')editor.setText('# Current print\\n\\nCurrent PDF 原文 😀');
+        await queued();await work;rows.push({action,prints:prints-before,cancelled,released:tasks.getSnapshot().activeTask===null,removed:!document.querySelector('iframe[data-export-print="pdf"]')});
+      }return {rows,body,current:body?.includes('Current PDF 原文 😀')===true};}finally{observer.disconnect();window.setTimeout=originalTimer;}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-12-stale-print.json'),JSON.stringify(result,null,2));
+    assert.deepEqual(result.rows.map(x=>x.prints),[0,0,1]);assert.equal(result.rows[0].cancelled,true);assert.equal(result.current,true);for(const row of result.rows){assert.equal(row.released,true);assert.equal(row.removed,true);}
+  });
+
   // Final app probe: exercise the production pagehide owner after all other export probes.
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
     const result = await page.evaluate(`(async () => {
@@ -704,7 +770,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const progressRoot=document.getElementById('export-progress-modal');
       const builder=host.markdownEditorExportDocumentPort;
       const enhancer=host.markdownEditorExportEnhancementPort;
-      const markdown=host.markdownEditorMarkdownExportPort,html=host.markdownEditorHtmlExportPort,word=host.markdownEditorWordExportPort;
+      const markdown=host.markdownEditorMarkdownExportPort,html=host.markdownEditorHtmlExportPort,word=host.markdownEditorWordExportPort,pdf=host.markdownEditorPdfExportPort;
       const styles=host.markdownEditorExportStylePort,styleRoot=document.createElement('div');document.body.append(styleRoot);styles.apply(styleRoot,'image');
       const enhancementBody=await builder.build();
       enhancementBody.replaceChildren(...Array.from({length:25},()=>{const node=document.createElement('p');node.textContent='dispose enhancement';return node;}));
@@ -712,6 +778,11 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       window.requestAnimationFrame=()=>{interceptedFrames++;return 999999;};
       const enhancementWait=enhancer.enhance({root:enhancementBody}).then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       window.requestAnimationFrame=raf;
+      const nativeTimer=window.setTimeout;let pendingPrint,printCount=0;
+      window.setTimeout=(callback,delay,...args)=>{if(delay===80){pendingPrint=callback;return -1412;}return nativeTimer(callback,delay,...args);};
+      const pdfWork=exportPDF();for(let i=0;i<1000&&!pendingPrint;i++)await new Promise(resolve=>nativeTimer(resolve,5));
+      if(!pendingPrint)throw new Error('Pending PDF frame was not prepared before pagehide');
+      const pendingFrame=document.querySelector('iframe[data-export-print="pdf"]');pendingFrame.contentWindow.print=()=>{printCount++;};
       await host.markdownEditorPreviewCommandPort.reset();
       const buildWait=builder.build().then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       const task=beginExportTask('dispose locked task');task.update(96,'encoding','encoding');task.lockCancellation('encoding');
@@ -719,18 +790,21 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       let rejectLate;const operation=new Promise((resolve,reject)=>{rejectLate=reject;});
       const wait=task.token.waitFor(operation).then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       window.dispatchEvent(new Event('pagehide'));
+      window.setTimeout=nativeTimer;await pdfWork;await pendingPrint();
       const building=await buildWait;const enhancing=await enhancementWait;const waiting=await wait;rejectLate(new Error('late encoder failure'));await Promise.resolve();
       let rejected=false;try {port.begin('late');}catch(error){rejected=/destroyed/.test(error.message);}
       let cancelledError=false;try {task.token.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
       let markdownRejected=false;try {await markdown.export({});}catch(error){markdownRejected=/destroyed/.test(error.message);}
       let htmlRejected=false;try {await html.export({});}catch(error){htmlRejected=/destroyed/.test(error.message);}
       let wordRejected=false;try {await word.export({});}catch(error){wordRejected=/destroyed/.test(error.message);}
-      return {snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
+      let pdfRejected=false;try {await pdf.export({});}catch(error){pdfRejected=/destroyed/.test(error.message);}
+      return {pdfRejected,printCount,printRemoved:!pendingFrame.isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
         stylesRemoved:!document.querySelector('style[data-export-style-sheet="document"]')&&!styleRoot.classList.contains('export-document')&&!styleRoot.hasAttribute('data-export-format'),
-        rejected,cancelledError,markdownRejected,htmlRejected,wordRejected,removed:!Object.hasOwn(host,'markdownEditorWordExportPort')&&!Object.hasOwn(host,'markdownEditorHtmlExportPort')&&!Object.hasOwn(host,'markdownEditorMarkdownExportPort')&&!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
+        rejected,cancelledError,markdownRejected,htmlRejected,wordRejected,removed:!Object.hasOwn(host,'markdownEditorPdfExportPort')&&!Object.hasOwn(host,'markdownEditorWordExportPort')&&!Object.hasOwn(host,'markdownEditorHtmlExportPort')&&!Object.hasOwn(host,'markdownEditorMarkdownExportPort')&&!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
         progressVisible:progressRoot.classList.contains('show'),progressRemoved:!document.getElementById('export-progress-modal')};
     })()`);
+    assert.equal(result.printCount,0);
     assert.equal(result.progressRemoved, true);
     assert.equal(result.stylesRemoved, true);
     assert.equal(result.snapshot.destroyed, true); assert.equal(result.snapshot.activeTask, null);
@@ -739,7 +813,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.deepEqual(result.building, {cancelled:true,reason:'destroyed'});
     assert.deepEqual(result.enhancing, {cancelled:true,reason:'destroyed'});assert.equal(result.interceptedFrames,1);
     for (const field of ['lateUpdate','lateLock','lateFinish','progressVisible']) assert.equal(result[field], false, field);
-    for (const field of ['rejected','cancelledError','markdownRejected','htmlRejected','wordRejected','removed']) assert.equal(result[field], true, field);
+    for (const field of ['pdfRejected','printRemoved','rejected','cancelledError','markdownRejected','htmlRejected','wordRejected','removed']) assert.equal(result[field], true, field);
     await writeFile(join(artifactRoot, 'r14-03-task-disposal.json'), JSON.stringify(result, null, 2));
   });
 }

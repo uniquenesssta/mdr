@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～10已验收（10：00930e0 / CI38135455053），七组及全部步骤通过，全仓1914/1914、前端909/909、HTML36/36、浏览器11/11＋51/51，最终同提交准入accepted=true，四份归档SHA-256一致。10首轮失败和测试修复保留。按用户指令收尾10并实施14.11：Word固定入口复用共享正文导出所有者、被动文档序列化和原Builder/Enhancer/Styles/20字体；移除经典Word模板/直下与重复编排，保留HTML公共入口及全部已验收场景。新增29项Word契约和3项实际页面（累计54），11待本提交Windows累计验证，14.12未开始。既有HTML .doc容器沿用，真实Office应用版式不作为本轮浏览器证据宣称。A10整体和后续打印/图片职责保持。 [09正式验收](R14-09-DETAILS.md) · [10验收](R14-10-DETAILS.md) · [11实施](R14-11-DETAILS.md)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～11已验收（11：6d0f822 / CI38146793150），七组及全部步骤通过，全仓1943/1943（337文件16目录）、前端938/938、Word29/29、HTML36/36、浏览器11/11＋54/54，最终同提交accepted=true，四归档SHA-256一致。Word独立HTML .doc容器的20字体/完整450024字符/过时零输出与释放通过，不推断真实Office版式。按用户指令收尾11并实施14.12：PDF迁至公共所有者和隔离iframe打印文档，复用Builder/Enhancer/Styles/20字体及平台打印适配器；删除预览替换、视图切换、reset与经典打印编排。任务锁保持至打印结束，afterprint/返回后的1200ms回退/异常/取消/过时/销毁统一清理；原预览与Hybrid节点、布局/选择/滚动保持。新增33项PDF契约和3项实际页面（累计57），12待本提交Windows验证，14.13未开始。整体A10及后续图片链职责保持。 [11验收](R14-11-DETAILS.md) · [12范围](R14-12-DETAILS.md)。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

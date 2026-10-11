@@ -5376,6 +5376,36 @@
       "mount-to-destroy",
       "remove-with-classic-callers",
       false
+    ],
+    [
+      "src/features/export/formats/pdf-exporter.js",
+      "esm-module",
+      "export-format",
+      "PDF identity/version preparation and shared task authority until print completion; no Preview mutation.",
+      "pdf-export-owner",
+      "create-to-destroy",
+      "public-feature-owner",
+      false
+    ],
+    [
+      "src/features/export/document/pdf-print-surface.js",
+      "esm-module",
+      "export-document",
+      "Same-origin isolated print DOM, complete resource readiness, afterprint/timeout and idempotent frame/listener/timer disposal.",
+      "pdf-print-surfaces",
+      "create-to-destroy",
+      "public-feature-owner",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-pdf-export-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Scoped readonly PDF command bridge; independent terminal unmount preserving replacement property.",
+      "pdf-export-port-mount",
+      "create-to-destroy",
+      "remove-with-classic-callers",
+      false
     ]
   ]
 }

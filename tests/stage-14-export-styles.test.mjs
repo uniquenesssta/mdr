@@ -139,14 +139,17 @@ for (const [format, operation] of [['html', 'exportHTML'], ['word', 'exportWord'
   });
 }
 
-test('R14-08 actual PDF caller releases document styles on afterprint and fallback', async () => {
+test('R14-08 actual PDF caller isolates document styles and releases on afterprint and fallback', async () => {
   for (const boundary of ['afterprint', 'fallback']) {
     const h = createExportVmHost();
     try {
-      await h.invoke('exportPDF'); const root = h.context.preview.children[0];
-      assert.equal(root.dataset.exportFormat, 'pdf'); h.timers[0].callback();
-      if (boundary === 'afterprint') h.events.get('afterprint')(); else h.timers.at(-1).callback();
-      assert.equal(root.dataset.exportFormat, undefined); assert.equal(root.classList.contains('export-document'), false);
+      const work = h.invoke('exportPDF'); await h.printDom.untilScheduled();
+      const frame = h.printDom.frames[0], root = frame.contentDocument.body.children[0];
+      assert.equal(root.dataset.exportFormat, 'pdf'); assert.ok(frame.contentDocument.head.children.some(node => node.textContent === h.styles.getCss('pdf')));
+      assert.equal(h.context.document.head.children.length, 0); assert.equal(h.context.preview.children.length, 0);
+      await h.printDom.fire(80);
+      if (boundary === 'afterprint') frame.contentWindow.dispatchEvent({ type: 'afterprint' }); else await h.printDom.fire(1200);
+      await work; assert.equal(frame.parentNode, null); assert.equal(frame.listeners.size, 0);
       assert.equal(h.taskPort.getSnapshot().activeTask, null);
     } finally { h.destroy(); }
   }

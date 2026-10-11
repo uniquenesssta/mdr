@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-11 shared Word exporter and R14-10 acceptance · ${{ github.sha }}
+run-name: R14-12 isolated PDF print and R14-11 acceptance · ${{ github.sha }}
 
 on:
   push:
@@ -198,6 +198,9 @@ jobs:
       - name: R14-11 shared Word exporter contracts
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-word-exporter.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/word-exporter.log"
+      - name: R14-12 isolated PDF exporter contracts
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-pdf-exporter.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/pdf-exporter.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

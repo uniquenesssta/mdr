@@ -20,10 +20,13 @@ test('browser print preserves the original browser error identity', () => {
 
 test('print preparation and after-print restoration remain outside the adapter', async () => {
   const adapterSource = await readFile(new URL('../../../src/platform/browser/browser-print.js', import.meta.url), 'utf8');
-  const exportSource = await readFile(new URL('../../../public/app/export.js', import.meta.url), 'utf8');
+  const surfaceSource = await readFile(new URL('../../../src/features/export/document/pdf-print-surface.js', import.meta.url), 'utf8');
+  const exportSource = await readFile(new URL('../../../src/features/export/formats/pdf-exporter.js', import.meta.url), 'utf8');
   assert.doesNotMatch(adapterSource, /afterprint|restorePreview|setTimeout|markdown-body|public\/app\/export/);
-  assert.match(exportSource, /afterprint/);
-  assert.match(exportSource, /restorePreview/);
+  assert.match(surfaceSource, /afterprint/);
+  assert.match(surfaceSource, /removeChild\(frame\)/);
+  assert.match(exportSource, /lease\?\.release\(\)/);
+  assert.doesNotMatch(exportSource + surfaceSource, /restorePreview|preview\.replaceChildren|setViewMode/);
 });
 
 test('browser print rejects unavailable surfaces explicitly', () => {

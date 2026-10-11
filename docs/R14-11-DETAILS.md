@@ -1,6 +1,6 @@
 # R14-11 Word Exporter
 
-状态：**实施完成，待本提交 Windows 累计验收**；14.11不勾选，14.12未开始。唯一分支`agent/r14-stage`，基线为10正式验收提交`00930e00114a921f89a7d37ac3b3fb159ed20778` / [CI38135455053](https://github.com/uniquenesssta/mdr/actions/runs/38135455053)。
+状态：**正式验收并收尾**（2026-10-12）；实施提交`6d0f822973f8452c7b84e11916b7c59e30979e3d` / [CI38146793150](https://github.com/uniquenesssta/mdr/actions/runs/38146793150) 七组与全部步骤成功，14.11勾选；按用户指令开始14.12。下方实施段落保留验收前的真实状态。唯一分支`agent/r14-stage`，基线为10正式验收提交`00930e00114a921f89a7d37ac3b3fb159ed20778` / [CI38135455053](https://github.com/uniquenesssta/mdr/actions/runs/38135455053)。
 
 ## 10收尾
 
@@ -51,3 +51,20 @@ Windows CI验证的是实际生成的.doc字节、保存/MIME/名称契约和其
 Context7核对官方KaTeX静态htmlAndMathml输出仍需要CSS/字体但无需客户端脚本；文档未标明0.18.2专用快照，故结合已锁定源码与10实际字体证据，仅用于静态资源原则，不推断Office支持。Mermaid Chart展示真实中文两入口/共享所有者/Builder/Enhancer/字体/序列化/任务/平台/清理链。GitHub核对10七组和四归档精确提交。Actions启动后结束，不轮询，约15～20分钟后查询。
 
 静态四项门禁（architecture、no-legacy-runtime、generated-files、readme-record）全部通过；13份脚本语法、29段浏览器内嵌表达式、5份CSS/6个本地令牌、JSON/YAML、149个文档链接、64项风险指纹及diff空白检查通过。536行生产模块登记含原531行原样保留；1258个受保护跟踪文件未改动，原HTML工作流与模板机械等价，原51项实际页面回归保留并新增3项Word。历史R12记录、阶段历史前缀、10首次失败和修复记录保留。以上是静态结果，29项新Word契约及新精确head的Windows产品验证尚未运行；11保持未验收，12未开始。
+
+## 正式验收（2026-10-12）
+
+精确提交`6d0f822973f8452c7b84e11916b7c59e30979e3d` / [Windows CI38146793150](https://github.com/uniquenesssta/mdr/actions/runs/38146793150)，attempt 1，七组Windows与全部执行步骤成功；最终同提交/同run `accepted=true`。全仓1943/1943（337文件16目录，全部16个目录退出0）、前端938/938、Word29/29、HTML36/36、Markdown30/30、原导出43/43、请求31/31、任务16/16、取消22/22、进度20/20、Builder21/21、增强27/27、Styles21/21、安全6/6、Settings5/5；浏览器11/11＋54/54、Rust281及真实Windows导入8/8通过。
+
+四份归档已下载并核对SHA-256，前端/真实WebView的commit.txt以及最终准入commit/run与实施提交一致。
+
+| 归档 | ID | SHA-256 |
+|---|---:|---|
+| repository-tests-windows | 11705292270 | `5199ea158b51db410ec34e32272e9e9fab562975db0967737f3ffb5bdd0d96a8` |
+| r12-24-closeout | 11705263222 | `1dccd06c2b2acdbe65508dd31147bd6bcbfdb714deb6062c12b358c2df5d0bad` |
+| r12-22-webview-verification | 11705127968 | `eb804e6bcc9e15aed1545bd311204bf26bf7dc2ef8ab8e536279ffd8ff3d6a9a` |
+| r12-14-frontend | 11704653300 | `64d57ec452a1111969f3d44c9f25b7c7cbd63f187b9674785eee0c2ada120905` |
+
+实际Word原始.doc内容按HTML容器在HTTP/HTTPS拦截下加载；请求正控被阻断且无额外请求，20项WOFF2字体逐项loaded，2个可见数学节点和2个MathML、1 SVG、任务项及4个代码token完整；无脚本/私有全局。独立截图可见标题、Unicode、表格、任务、公式、代码和图表起部，与JSON资源证据相互核对。真实0/21/450024字符正文均完整，Word MIME正确、20字体内嵌、URL撤销、原Preview节点与作用域保留且任务释放；serializing期间模型改变时首次零输出，下一次仅当前正文一份。
+
+这些是既有HTML .doc容器与浏览器资源/正文证据，未启动Microsoft Word或Office COM，不推断具体Office版本的字体/SVG/版式支持。整体A10的打印/图片完整链仍接14.12/14.16，不将此验收写为R14收官。
