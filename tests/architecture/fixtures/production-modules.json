@@ -5326,6 +5326,56 @@
       "mount-to-destroy",
       "remove-with-classic-callers",
       false
+    ],
+    [
+      "src/features/export/formats/rendered-document-exporter.js",
+      "esm-module",
+      "export-format",
+      "One real HTML/Word lifecycle over public Builder/Enhancer/fonts/serializer and existing Platform output; preserve source/task/write barriers without duplicated format workflows.",
+      "rendered-export-pending-waits",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/formats/word-exporter.js",
+      "esm-module",
+      "export-format",
+      "Fixed Word request/output capability over the shared rendered-file owner; does not call or copy the HTML format owner.",
+      "word-export-pending-waits",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/document/export-document-serializer.js",
+      "esm-module",
+      "export-document",
+      "One passive HTML container and title escape authority shared by the two actual HTML/Word profiles; public shared CSS and embedded locked fonts.",
+      "none",
+      "pure-factory",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/document/word-document.js",
+      "esm-module",
+      "export-document",
+      "Fixed Word .doc HTML container profile with authoritative point-based stylesheet and doc title suffix.",
+      "none",
+      "pure-factory",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-word-export-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Scoped readonly Word command bridge; terminal independent unmount preserving replacement property and shared owner.",
+      "word-export-port-mount",
+      "mount-to-destroy",
+      "remove-with-classic-callers",
+      false
     ]
   ]
 }

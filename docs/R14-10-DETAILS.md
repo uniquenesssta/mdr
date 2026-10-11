@@ -1,6 +1,6 @@
 # R14-10 HTML Exporter
 
-状态：**首轮验收失败，测试契约修复完成，待修复提交 Windows 累计重验**；14.10不勾选，14.11未开始。继续唯一分支 `agent/r14-stage`，基线为09正式验收提交 `637091b835226248070ace536b99062dd74d2c86` / [CI38107902440](https://github.com/uniquenesssta/mdr/actions/runs/38107902440)。
+状态：**已正式验收收尾**；修复提交`00930e00114a921f89a7d37ac3b3fb159ed20778` / [CI38135455053](https://github.com/uniquenesssta/mdr/actions/runs/38135455053) 七组与所有步骤通过；14.10勾选，按用户指令开始14.11。继续唯一分支 `agent/r14-stage`，基线为09正式验收提交 `637091b835226248070ace536b99062dd74d2c86` / [CI38107902440](https://github.com/uniquenesssta/mdr/actions/runs/38107902440)。
 
 ## 09收尾
 
@@ -82,3 +82,20 @@ Context7核对Vite7官方资产?inline和glob异步/default语义，结合父目
 | repository-tests | 11692025019 | 61ccd5e99df2a9902a989dee237fe748ce98558f628a3882cfcd82dd387b7bc3 |
 
 只修改两份测试及必要交接/审计记录；产品、锁定依赖、工作流、531模块清单、59风险源指纹、原始夹具、此前验收与失败记录保持。36项HTML契约、51项实际页面及所有准入门禁保留，没有运行本地产品测试/浏览器/构建/Rust。GitHub用于核查七组/步骤/日志与两份归档；这次小范围契约修正不涉及新的第三方API或架构，不重复调用Context7或Mermaid Chart。修复静态复核：四项门禁、两份脚本语法、29个嵌入表达式、5段CSS与6个本地令牌通过；JSON/YAML与141个相对链接、59风险源指纹通过，1265个其他Git跟踪文件字节保持，R12根历史、阶段验收/实施历史及09首轮失败/修复保持。差异复核通过；10待新精确head Windows重验，11未开始。
+
+## 正式验收（2026-10-11）
+
+`00930e00114a921f89a7d37ac3b3fb159ed20778` / [CI38135455053](https://github.com/uniquenesssta/mdr/actions/runs/38135455053)，attempt1，七组和所有执行步骤成功。全仓1914/1914（336文件16目录）、前端909/909、HTML36/36、原文30/30、原格式43/请求31/任务16/取消22/进度20、Builder21/增强27/Styles21/安全6/Settings5、浏览器11/11＋51/51、Rust281、真实Windows导入8/8通过；最终精确提交准入accepted=true。
+
+四份归档已下载并复核SHA-256；frontend/WebView的commit.txt和final JSON均为00930e0，递归16目录全部退出0。
+
+| 归档 | ID | SHA-256 |
+| --- | --- | --- |
+| frontend | 11700468724 | 32dee77d85817abe471d0813371e4a713de9a5499ebb50086966e9be453bec6d |
+| repository-tests | 11700174188 | 34d6d1393f6a7d10ef934c7b3ad00fb252cb898394946a6f32e3b141e6bc2788 |
+| exact-commit closeout | 11700938065 | e9e7c3f24653cb7c0b7b58f4395d8b873e002d6dfa6aaa53f6d7d19ffa82692b |
+| actual Windows WebView | 11700843105 | 5efa9bd4d7128aafa9d65f8539124252440f225624d92b5b06e4051dea8c2e3e |
+
+独立HTML原文件与截图已核对：20字体全部loaded，两个可见公式/两个MathML、一个SVG、任务/代码完整，HTTP失败正控成功且没有额外资源请求。空、中文/emoji与450024字符正文均完整，MIME正确，URL撤销、Preview原节点身份、任务释放、端口作用域全部true。过时原文首次零输出、下一次只生成新正文且清理成功。F02旧HTML运行时与本格式离线字体/完整正文要求通过此提交；用户自带图片URL策略、Word/打印/图片后续职责、整体A10及独立Editor问题保持。
+
+首轮40349cb / CI38110755648失败及其修复原样保留为历史。14.10正式收尾，用户要求开始14.11，仍使用唯一分支agent/r14-stage。

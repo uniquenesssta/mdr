@@ -1,7 +1,7 @@
 import 'katex/dist/katex.css';
 import './styles/index.css';
 import katexStyleSheetText from 'katex/dist/katex.css?raw';
-import { createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
+import { createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
@@ -141,6 +141,8 @@ const exportRequestPort = mountClassicExportRequestPort(compatibilityPlatformHos
   getActiveDocumentId: () => compatibilityPlatformHost.markdownEditorDocumentSessionPort?.activeId,
   hasDocument: id => Boolean(compatibilityPlatformHost.markdownEditorDocumentSessionPort?.getRecord(id))
 });
+let wordExporter = null;
+let wordExportPort = null;
 let htmlExporter = null;
 let htmlExportPort = null;
 let markdownExporter = null;
@@ -154,6 +156,7 @@ const exportStylePort = mountClassicExportStylePort(compatibilityPlatformHost, e
 const htmlFontAssets = createHtmlFontAssets({ mathCss: katexStyleSheetText,
   loaders: import.meta.glob('../../node_modules/katex/dist/fonts/*.woff2', { query: '?inline', import: 'default' }) });
 const htmlDocumentSerializer = createHtmlDocumentSerializer({ styles: exportStyles });
+const wordDocumentSerializer = createWordDocumentSerializer({ styles: exportStyles });
 const exportTaskController = createExportTaskController();
 const exportProgressStore = createExportProgressStore(exportTaskController);
 const exportProgressView = createExportProgressDialogView({
@@ -297,7 +300,7 @@ configureHybridImageSourcePlatform({
   getDocumentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {}
 });
 window.addEventListener('pagehide', () => {
-  for (const release of [() => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
+  for (const release of [() => wordExporter?.destroy(), () => wordExportPort?.destroy(), () => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
     () => exportEnhancementPort?.destroy(), () => exportDocumentBuilder?.destroy(),
     () => exportDocumentPort?.destroy(), () => exportProgressView.destroy(),
     () => exportProgressStore.destroy(), () => exportStyles.destroy(), () => exportStylePort.destroy(),
@@ -540,6 +543,10 @@ async function loadAppModules() {
     documentUiCommandPort?.destroy?.();
     recentFilesPort?.destroy?.();
     recentFilesRepository.destroy();
+    wordExporter?.destroy();
+    wordExportPort?.destroy();
+    wordExporter = null;
+    wordExportPort = null;
     htmlExporter?.destroy();
     htmlExportPort?.destroy();
     htmlExporter = null;
@@ -718,6 +725,10 @@ async function loadAppModules() {
     documentUiCommandPort.destroy();
     recentFilesPort.destroy();
     recentFilesRepository.destroy();
+    wordExporter?.destroy();
+    wordExportPort?.destroy();
+    wordExporter = null;
+    wordExportPort = null;
     htmlExporter?.destroy();
     htmlExportPort?.destroy();
     htmlExporter = null;
@@ -1404,6 +1415,10 @@ async function loadAppModules() {
       builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: htmlFontAssets,
       serializer: htmlDocumentSerializer, taskController: exportTaskController, platform });
     htmlExportPort = mountClassicHtmlExportPort(compatibilityPlatformHost, htmlExporter);
+    wordExporter = createWordExporter({ documentModel, documents: documentControllerPort,
+      builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: htmlFontAssets,
+      serializer: wordDocumentSerializer, taskController: exportTaskController, platform });
+    wordExportPort = mountClassicWordExportPort(compatibilityPlatformHost, wordExporter);
     const scrollPreviewToLine = (line, behavior = 'auto', viewportRatio = 0.38) => {
       const ratio = Math.max(0.05, Math.min(0.95, Number(viewportRatio) || 0.38));
       const contentY = previewScrollMapper.getContentYForLine(line);

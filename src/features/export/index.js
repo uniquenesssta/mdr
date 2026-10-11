@@ -18,3 +18,6 @@ export { createHtmlFontStyle, createHtmlFontAssets } from './document/html-font-
 export { createHtmlDocumentSerializer } from './document/html-document.js';
 export { createHtmlExporter } from './formats/html-exporter.js';
 export { mountClassicHtmlExportPort } from './compatibility/classic-html-export-port.js';
+export { createWordDocumentSerializer } from './document/word-document.js';
+export { createWordExporter } from './formats/word-exporter.js';
+export { mountClassicWordExportPort } from './compatibility/classic-word-export-port.js';

@@ -12,6 +12,7 @@
     const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
     const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
     const exportStylePort = exportCompatibilityHost?.markdownEditorExportStylePort;
+    const exportWordPort = exportCompatibilityHost?.markdownEditorWordExportPort;
     const exportHtmlPort = exportCompatibilityHost?.markdownEditorHtmlExportPort;
     const exportMarkdownPort = exportCompatibilityHost?.markdownEditorMarkdownExportPort;
     if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
@@ -26,6 +27,7 @@
     if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
     if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
     if (!exportStylePort) throw new Error('Export style compatibility port is unavailable.');
+    if (!exportWordPort) throw new Error('Word export compatibility port is unavailable.');
     if (!exportHtmlPort) throw new Error('HTML export compatibility port is unavailable.');
     if (!exportMarkdownPort) throw new Error('Markdown export compatibility port is unavailable.');
 
@@ -73,22 +75,6 @@
       };
     }
 
-    async function exportTextContent(content, preferredName, options, task = null) {
-      if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
-        task?.token.throwIfCancelled();
-        const selection = exportPlatformPort.call('dialogs', 'saveFile', preferredName, options);
-        const path = await (task ? task.token.waitFor(selection) : selection);
-        task?.token.throwIfCancelled();
-        if (!path) return null;
-        task?.lockCancellation('writing');
-        task?.token.throwIfCancelled();
-        const writing = exportPlatformPort.call('files', 'writeText', path, content, { extension: options.extension, reason: 'export' });
-        await (task ? task.token.waitFor(writing) : writing);
-        return path;
-      }
-      return false;
-    }
-
     function dataUrlToBytes(dataUrl) {
       const value = String(dataUrl || '');
       const comma = value.indexOf(',');
@@ -115,71 +101,20 @@
       }
     }
 
-    // 导出 Word：将 Markdown 渲染为 HTML 并伪装成 .doc 下载
+    // Word 命令只提交不可变请求；正文、资源、任务和输出由公共 owner 管理。
     async function exportWord() {
       const request = readExportRequest('word');
       if (!request) return;
-      const task = beginExportTask('正在导出 Word');
-      if (!task) return;
-      let outcome = 'completed';
       try {
-        const name = request.name;
-
-        const body = await exportDocumentPort.build({ task, documentId: request.documentId });
-        await exportEnhancementPort.enhance({ root: body, task, documentId: request.documentId });
-        const bodyHtml = body.innerHTML;
-        task.token.throwIfCancelled();
-        task.update(92, '正在生成 Word 文件…', 'serializing');
-
-        const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>${escapeExportTitle(name.replace(/\.doc$/i, ''))}</title>
-  <style>${exportStylePort.getCss('word')}</style>
-</head>
-<body class="export-document" data-export-format="word">
-${bodyHtml}
-</body>
-</html>`;
-
-      const savedPath = await exportTextContent(fullHtml, name, getExportSaveOptions(
-        '导出 Word',
-        request,
-        'Word 文档'
-      ), task);
-      task.token.throwIfCancelled();
-      if (savedPath === null) return;
-      if (savedPath === false) {
-        task.lockCancellation('writing');
-        task.token.throwIfCancelled();
-        const blob = new Blob([fullHtml], { type: 'application/msword;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-        task.update(100, 'Word 文件已生成');
-        showToast(t('toastWordExported'));
+        const result = await exportWordPort.export({ request });
+        if (result.status === 'busy') showToast('当前导出正在生成文件，请稍候');
+        if (['written', 'downloaded'].includes(result.status)) showToast(t('toastWordExported'));
       } catch (error) {
-        outcome = 'failed';
         if (!exportTaskPort.isCancelled(error)) {
           console.error('Word export failed:', error);
           showToast(error?.message || String(error));
         }
-      } finally {
-        finishExportTask(task, outcome);
       }
-    }
-
-    // Export 自有文本转义；不依赖已退役的 Preview 全局绑定。
-    function escapeExportTitle(value) {
-      return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
     }
 
     // 导出 HTML：将 Markdown 渲染为独立 HTML 页面并下载
