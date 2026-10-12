@@ -5281,7 +5281,7 @@
       "src/features/export/formats/markdown-exporter.js",
       "esm-module",
       "export-format",
-      "Authoritative raw Markdown snapshot and immutable name/directory request; public Documents generation/version guards, Task ownership and accepted Platform writes, without rendering.",
+      "Authoritative raw Markdown snapshot and immutable name/directory request; public Documents generation/version guards, Task ownership and accepted Platform writes, without rendering. Destination and text/binary publication delegate to the shared public Export File Writer.",
       "markdown-export-pending-waits",
       "factory-to-destroy",
       "retain",
@@ -5331,7 +5331,7 @@
       "src/features/export/formats/rendered-document-exporter.js",
       "esm-module",
       "export-format",
-      "One real HTML/Word lifecycle over public Builder/Enhancer/fonts/serializer and existing Platform output; preserve source/task/write barriers without duplicated format workflows.",
+      "One real HTML/Word lifecycle over public Builder/Enhancer/fonts/serializer and existing Platform output; preserve source/task/write barriers without duplicated format workflows. Destination and text/binary publication delegate to the shared public Export File Writer.",
       "rendered-export-pending-waits",
       "factory-to-destroy",
       "retain",
@@ -5481,7 +5481,7 @@
       "src/features/export/formats/image/image-exporter.js",
       "esm-module",
       "export-image",
-      "Final image render/save orchestration, source-bound private PNG bytes, irreversible stage locks, late-result barriers and independent terminal disposal.",
+      "Final image render/save orchestration, source-bound private PNG bytes, irreversible stage locks, late-result barriers and independent terminal disposal. Destination and text/binary publication delegate to the shared public Export File Writer.",
       "image-workflow-cache-and-operations",
       "factory-to-destroy",
       "retain",
@@ -5504,6 +5504,16 @@
       "Scoped immutable render/save/read-preview capabilities; terminal unmount without owning image workflow state.",
       "image-export-port-mount",
       "mount-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/application/export-file-writer.js",
+      "esm-module",
+      "export-application",
+      "Unified destination/dialog/MIME policy and guarded text/binary publication over existing Platform; formats retain source/content/task authority.",
+      "pending-dialog-waits",
+      "factory-to-destroy",
       "retain",
       false
     ]

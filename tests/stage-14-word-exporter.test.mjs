@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort,
+import { createExportFileWriter, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort,
   createHtmlExporter, createHtmlDocumentSerializer, createExportRequest, createExportTaskController,
   isExportCancelledError } from '../src/features/export/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
@@ -20,7 +20,7 @@ function setup({ desktop=true, body='<h1>中文 😀</h1><p>complete Word</p>' }
   const serializer=createWordDocumentSerializer({styles}),platform={capabilities:{desktop:{dialogs:desktop,fileSystem:desktop},browser:{fileDownload:!desktop}},
     dialogs:{async saveFile(name,options){calls.push(['save',name,options]);return 'C:\\selected.doc';}},
     files:{async writeText(path,content,options){calls.push(['write',path,content,options]);}}};
-  const deps={documentModel,documents,builder,enhancer,assets,serializer,taskController:tasks,platform};
+  const deps={documentModel,documents,builder,enhancer,assets,serializer,taskController:tasks,fileWriter:createExportFileWriter({platform})};
   const owner=createWordExporter(deps),request=input=>createExportRequest({format:'word',documentId:'doc',name:'report.docx',directory:'C:\\custom',...input});
   return {calls,tasks,state,root,builder,enhancer,assets,styles,serializer,platform,deps,owner,request};
 }
@@ -123,7 +123,8 @@ test('R14-11 issued Word writes stay locked and owner destruction observes late 
   const h=setup(),gate=deferred(),reached=deferred();h.platform.files.writeText=(...args)=>{h.calls.push(['write',...args]);reached.resolve();return gate.promise;};
   const work=h.owner.export({request:h.request()});await reached.promise;assert.equal(h.tasks.cancel(),false);assert.equal(h.tasks.begin('other'),null);
   assert.equal((await h.owner.export({request:h.request()})).status,'busy');h.owner.destroy();h.owner.destroy();
-  await assert.rejects(work,cancelled('destroyed'));gate.reject(new Error('late writer failure'));await Promise.resolve();
+  const rejected=assert.rejects(work,cancelled('destroyed'));assert.equal(h.tasks.getSnapshot().activeTask.phase,'writing');
+  assert.equal(h.tasks.begin('competing'),null);gate.reject(new Error('late writer failure'));await rejected;
   assert.equal(h.calls.filter(x=>x[0]==='write').length,1);assert.equal(h.tasks.getSnapshot().activeTask,null);
 });
 

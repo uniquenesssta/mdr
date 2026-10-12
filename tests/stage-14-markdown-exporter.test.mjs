@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { createExportRequest, createExportTaskController, createMarkdownExporter, mountClassicMarkdownExportPort, isExportCancelledError } from '../src/features/export/index.js';
+import { createExportFileWriter, createExportRequest, createExportTaskController, createMarkdownExporter, mountClassicMarkdownExportPort, isExportCancelledError } from '../src/features/export/index.js';
 import { createBrowserFileDownload } from '../src/platform/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
@@ -28,7 +28,7 @@ function setup({ desktop = true, content = source, savePath = 'C:\\exports\\chos
     dialogs: { async saveFile(name, options) { calls.push(['save', name, options]); return savePath; } },
     files: { async writeText(path, body, options) { calls.push(['write', path, body, options]); } }
   };
-  const owner = createMarkdownExporter({ documentModel: model, documents, taskController: tasks, platform });
+  const owner = createMarkdownExporter({ documentModel: model, documents, taskController: tasks, fileWriter: createExportFileWriter({ platform }) });
   const request = input => createExportRequest({ format: 'markdown', documentId: 'active', name: 'report.txt', directory: 'C:\\custom', ...input });
   return { owner, tasks, state, calls, documents, model, platform, request };
 }
@@ -147,9 +147,10 @@ test('R14-09 destroying an in-flight write suppresses late completion without is
   const h = setup(), gate = deferred(), reached = deferred();
   h.platform.files.writeText = () => { reached.resolve(); return gate.promise; };
   const operation = h.owner.export({ request: h.request() }); await reached.promise;
-  h.owner.destroy(); h.owner.destroy(); await assert.rejects(operation, cancelled('destroyed'));
-  assert.equal(h.tasks.getSnapshot().activeTask, null);
-  gate.resolve(); await Promise.resolve();
+  const rejected = assert.rejects(operation, cancelled('destroyed'));
+  h.owner.destroy(); h.owner.destroy();
+  assert.equal(h.tasks.getSnapshot().activeTask.phase, 'writing'); assert.equal(h.tasks.begin('competing'), null);
+  gate.resolve(); await rejected; assert.equal(h.tasks.getSnapshot().activeTask, null);
   await assert.rejects(h.owner.export({ request: h.request() }), cancelled('destroyed'));
 });
 

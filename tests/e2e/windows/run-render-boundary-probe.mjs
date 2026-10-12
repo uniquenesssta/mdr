@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { withEmbeddedSession } from './embedded-webdriver-session.mjs';
 import { verifyImportDocumentChain } from './import-document-chain.mjs';
 import { verifyImageDataExport } from './image-data-export.mjs';
+import { verifyFileWriterChain } from './file-writer-chain.mjs';
 import { verifyImageExportChain } from './image-export-chain.mjs';
 import { createRenderBoundaryProbe, PROBE_SURFACES } from './render-boundary-probe.mjs';
 
@@ -285,6 +286,8 @@ try {
       await writeFile(join(evidenceRoot, 'r14-15-native-image-data.json'), JSON.stringify(evidence.imageDataExport, null, 2));
       evidence.imageExportChain = await verifyImageExportChain({ browser, ownedRoot: canaryRoot, evidenceRoot, commit: process.env.GITHUB_SHA });
       await writeFile(join(evidenceRoot, 'r14-16-native-image-export.json'), JSON.stringify(evidence.imageExportChain, null, 2));
+      evidence.fileWriterChain = await verifyFileWriterChain({ browser, ownedRoot: canaryRoot, evidenceRoot, commit: process.env.GITHUB_SHA });
+      await writeFile(join(evidenceRoot, 'r14-17-native-file-writer.json'), JSON.stringify(evidence.fileWriterChain, null, 2));
       await persist();
     }
   });

@@ -1,7 +1,7 @@
 import 'katex/dist/katex.css';
 import './styles/index.css';
 import katexStyleSheetText from 'katex/dist/katex.css?raw';
-import { createImageExporter, createImageExportSurface, mountClassicImageExportPort, imageDataUrlToBytes, mountClassicImageDataPort, createImageAssetPreloader, mountClassicImageAssetPort, createImageExportLayout, mountClassicImageLayoutPort, createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
+import { createExportFileWriter, createImageExporter, createImageExportSurface, mountClassicImageExportPort, imageDataUrlToBytes, mountClassicImageDataPort, createImageAssetPreloader, mountClassicImageAssetPort, createImageExportLayout, mountClassicImageLayoutPort, createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createBrowserPrint, createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
@@ -136,6 +136,7 @@ const platform = createPlatform({
   now: () => performance.now(),
   record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
 });
+const exportFileWriter = createExportFileWriter({ platform });
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
 const exportRequestPort = mountClassicExportRequestPort(compatibilityPlatformHost, {
   getActiveDocumentId: () => compatibilityPlatformHost.markdownEditorDocumentSessionPort?.activeId,
@@ -315,7 +316,7 @@ configureHybridImageSourcePlatform({
   getDocumentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {}
 });
 window.addEventListener('pagehide', () => {
-  for (const release of [() => imageExporter?.destroy(), () => imageExportPort?.destroy(), () => imageExportSurface?.destroy(), () => pdfExporter?.destroy(), () => pdfExportPort?.destroy(), () => pdfPrintSurface?.destroy(), () => wordExporter?.destroy(), () => wordExportPort?.destroy(), () => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
+  for (const release of [() => imageExporter?.destroy(), () => imageExportPort?.destroy(), () => imageExportSurface?.destroy(), () => pdfExporter?.destroy(), () => pdfExportPort?.destroy(), () => pdfPrintSurface?.destroy(), () => wordExporter?.destroy(), () => wordExportPort?.destroy(), () => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportFileWriter.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
     () => exportEnhancementPort?.destroy(), () => exportDocumentBuilder?.destroy(),
     () => exportDocumentPort?.destroy(), () => exportProgressView.destroy(),
     () => exportProgressStore.destroy(), () => imageAssetPreloader.destroy(), () => imageAssetPort.destroy(), () => imageDataPort.destroy(), () => imageExportLayout.destroy(), () => imageLayoutPort.destroy(),
@@ -530,7 +531,7 @@ async function loadAppModules() {
     loadController
   });
   const documentControllerPort = mountClassicDocumentControllerPort(compatibilityPlatformHost, documentController);
-  markdownExporter = createMarkdownExporter({ documentModel, documents: documentControllerPort, taskController: exportTaskController, platform });
+  markdownExporter = createMarkdownExporter({ documentModel, documents: documentControllerPort, taskController: exportTaskController, fileWriter: exportFileWriter });
   markdownExportPort = mountClassicMarkdownExportPort(compatibilityPlatformHost, markdownExporter);
   const recentFilesRepository = createRecentFilesRepository({
     storage: window.localStorage,
@@ -583,6 +584,7 @@ async function loadAppModules() {
     markdownExportPort?.destroy();
     markdownExporter = null;
     markdownExportPort = null;
+    exportFileWriter.destroy();
     documentControllerPort.destroy();
     documentController.destroy();
     loadController.destroy();
@@ -777,6 +779,7 @@ async function loadAppModules() {
     markdownExportPort?.destroy();
     markdownExporter = null;
     markdownExportPort = null;
+    exportFileWriter.destroy();
     documentControllerPort.destroy();
     documentController.destroy();
     loadController.destroy();
@@ -1453,11 +1456,11 @@ async function loadAppModules() {
     exportEnhancementPort = mountClassicExportEnhancementPort(compatibilityPlatformHost, exportPreviewEnhancer);
     htmlExporter = createHtmlExporter({ documentModel, documents: documentControllerPort,
       builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: htmlFontAssets,
-      serializer: htmlDocumentSerializer, taskController: exportTaskController, platform });
+      serializer: htmlDocumentSerializer, taskController: exportTaskController, fileWriter: exportFileWriter });
     htmlExportPort = mountClassicHtmlExportPort(compatibilityPlatformHost, htmlExporter);
     wordExporter = createWordExporter({ documentModel, documents: documentControllerPort,
       builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: htmlFontAssets,
-      serializer: wordDocumentSerializer, taskController: exportTaskController, platform });
+      serializer: wordDocumentSerializer, taskController: exportTaskController, fileWriter: exportFileWriter });
     wordExportPort = mountClassicWordExportPort(compatibilityPlatformHost, wordExporter);
     pdfPrintSurface = createPdfPrintSurface({ documentRef: document, styles: exportStyles,
       printWindow: frameWindow => createBrowserPrint({ windowObject: frameWindow }).print(),
@@ -1474,7 +1477,7 @@ async function loadAppModules() {
     imageExporter = createImageExporter({ documentModel, documents: documentControllerPort,
       builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: imageAssetPreloader,
       surface: imageExportSurface, encodeDataUrl: imageDataUrlToBytes, loadDomToImage,
-      taskController: exportTaskController, platform });
+      taskController: exportTaskController, fileWriter: exportFileWriter });
     imageExportPort = mountClassicImageExportPort(compatibilityPlatformHost, imageExporter);
     const scrollPreviewToLine = (line, behavior = 'auto', viewportRatio = 0.38) => {
       const ratio = Math.max(0.05, Math.min(0.95, Number(viewportRatio) || 0.38));

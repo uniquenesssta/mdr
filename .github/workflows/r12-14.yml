@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-16 final image lifecycle and actual Windows PNG file writes · ${{ github.sha }}
+run-name: R14-17 shared file writer and actual Windows occupied-target recovery · ${{ github.sha }}
 
 on:
   push:
@@ -213,6 +213,8 @@ jobs:
       - name: R14-16 final image owner, source barriers and irreversible lifecycle
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-image-exporter.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/image-exporter.log"
+      - name: R14-17 unified File Writer contracts
+        run: node --test tests/stage-14-file-writer.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/file-writer.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

@@ -32,7 +32,9 @@ test('classic callers use the scoped compatibility host instead of a replacement
     if (path === 'public/app/export.js') {
       assert.match(source, /exportImagePort\.(?:render|save)\(\{ request \}\)/);
       const owner = await readFile(new URL('../../../src/features/export/formats/image/image-exporter.js', import.meta.url), 'utf8');
-      assert.match(owner, /platform\.dialogs\.saveFile/); assert.match(owner, /platform\.files\.writeBinary/);
+      assert.match(owner, /fileWriter\.write/);
+      const writer = await readFile('src/features/export/application/export-file-writer.js', 'utf8');
+      assert.match(writer, /platform\.dialogs\.saveFile/); assert.match(writer, /platform\.files\.writeBinary/);
       assert.doesNotMatch(owner, /window\.markdownEditorPlatform|window\.markdownEditorNative|__TAURI/);
     }
     assert.doesNotMatch(source, /window\.markdownEditorPlatform|window\.markdownEditorNative/);

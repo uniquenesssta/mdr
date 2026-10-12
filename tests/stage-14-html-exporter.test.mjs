@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { createExportRequest, createExportTaskController, createHtmlFontStyle, createHtmlFontAssets,
+import { createExportFileWriter, createExportRequest, createExportTaskController, createHtmlFontStyle, createHtmlFontAssets,
   createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, isExportCancelledError } from '../src/features/export/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 import config from '../vite.config.js';
@@ -27,7 +27,7 @@ function setup({ desktop = true, body = source, path = 'C:\\exports\\chosen.html
   const platform = { capabilities: { desktop: { dialogs: desktop, fileSystem: desktop }, browser: { fileDownload: !desktop } },
     dialogs: { async saveFile(name, options) { calls.push(['save', name, options]); return path; } },
     files: { async writeText(path, content, options) { calls.push(['write', path, content, options]); } } };
-  const owner = createHtmlExporter({ documentModel: model, documents: docs, builder, enhancer, assets, serializer, taskController: tasks, platform });
+  const owner = createHtmlExporter({ documentModel: model, documents: docs, builder, enhancer, assets, serializer, taskController: tasks, fileWriter: createExportFileWriter({ platform }) });
   const request = input => createExportRequest({ format: 'html', documentId: 'doc', name: 'report.docx', directory: 'C:\\custom', ...input });
   return { owner, tasks, state, docs, model, root, builder, enhancer, assets, styles, serializer, platform, calls, request };
 }
@@ -157,7 +157,7 @@ test('R14-10 body/enhancement/assets/serializer/dialog/write errors preserve ide
   for (const phase of ['build', 'enhance', 'load', 'serialize', 'saveFile', 'writeText']) {
     const h = setup(), error = new Error(phase), bad = () => { throw error; };
     const deps = { documentModel: h.model, documents: h.docs, builder: h.builder, enhancer: h.enhancer,
-      assets: h.assets, serializer: h.serializer, taskController: h.tasks, platform: h.platform };
+      assets: h.assets, serializer: h.serializer, taskController: h.tasks, fileWriter: createExportFileWriter({ platform: h.platform }) };
     if (phase === 'serialize') deps.serializer = { serialize: bad };
     else ({ build: h.builder, enhance: h.enhancer, load: h.assets, saveFile: h.platform.dialogs, writeText: h.platform.files })[phase][phase] = bad;
     const owner = createHtmlExporter(deps); await assert.rejects(owner.export({ request: h.request() }), e => e === error);
@@ -178,8 +178,9 @@ test('R14-10 destroy during an issued write rejects late completion without retr
   const h = setup(), gate = deferred(), reached = deferred();
   h.platform.files.writeText = (...args) => { h.calls.push(['write', ...args]); reached.resolve(); return gate.promise; };
   const operation = h.owner.export({ request: h.request() }); await reached.promise;
-  h.owner.destroy(); h.owner.destroy(); await assert.rejects(operation, cancelled('destroyed'));
-  gate.reject(new Error('late write')); await Promise.resolve();
+  const rejected = assert.rejects(operation, cancelled('destroyed'));
+  h.owner.destroy(); h.owner.destroy(); assert.equal(h.tasks.getSnapshot().activeTask.phase, 'writing');
+  assert.equal(h.tasks.begin('competing'), null); gate.reject(new Error('late write')); await rejected;
   assert.equal(h.calls.filter(x => x[0] === 'write').length, 1); assert.equal(h.tasks.getSnapshot().activeTask, null);
 });
 

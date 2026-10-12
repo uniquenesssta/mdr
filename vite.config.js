@@ -13,7 +13,7 @@ function vendorChunkName(id) {
   // This dependency-closed set imports only the request/task/image modules in
   // this same chunk. Shared UI, Preview and Platform stay in their own graph;
   // no main -> feature -> main chunk cycle or changed vendor merge policy.
-  if (!path.includes('/node_modules/') && /\/src\/features\/export\/(?:formats\/image\/|task\/|application\/export-request\.js(?:\?|$)|compatibility\/classic-image-[^/]+\.js(?:\?|$))/.test(path)) return 'export-image';
+  if (!path.includes('/node_modules/') && /\/src\/features\/export\/(?:formats\/image\/|task\/|application\/export-(?:request|file-writer)\.js(?:\?|$)|compatibility\/classic-image-[^/]+\.js(?:\?|$))/.test(path)) return 'export-image';
   if (!path.includes('/node_modules/')) return undefined;
 
   if (path.includes('/node_modules/@codemirror/')) return 'codemirror-vendor';

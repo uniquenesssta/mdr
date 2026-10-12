@@ -1,5 +1,6 @@
 /** Public Export request/task/cancellation/progress/document boundary; format rendering migrates separately. */
 export { createExportRequest, EXPORT_IMAGE_RATIOS, ExportRequestValidationError } from './application/export-request.js';
+export { createExportFileWriter } from './application/export-file-writer.js';
 export { mountClassicExportRequestPort } from './compatibility/classic-export-request-port.js';
 export { createExportTaskController } from './task/export-task-controller.js';
 export { createExportCancellationToken, ExportCancelledError, isExportCancelledError, EXPORT_NONCANCELABLE_PHASES } from './task/export-cancellation.js';

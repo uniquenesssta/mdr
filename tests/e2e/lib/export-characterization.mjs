@@ -1098,6 +1098,39 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.equal(result.status,'downloaded');assert.equal(result.name,'完整恢复😀.png');assert.equal(result.mime,'image/png');assert.ok(result.bytes>100);assert.equal(result.width,1080);assert.ok(result.height>=1920);
   });
 
+  await test('R14-17 all four actual file formats recover from anchor failure with exact Blob payload and cleanup', async () => {
+    await loadMarkdown('# R14-17 原文😀\n\n公式 $x^2$\n\nKEEP WRITER TAIL');
+    const result = await page.evaluate(`(async () => {
+      const blobs = new Map(), revoked = [], outputs = [], oldCreate = URL.createObjectURL, oldRevoke = URL.revokeObjectURL;
+      const oldClick = HTMLAnchorElement.prototype.click, oldError = console.error;
+      let deny = false, sequence = 0;
+      URL.createObjectURL = blob => { const url = 'blob:r14-17-' + ++sequence; blobs.set(url, blob); return url; };
+      URL.revokeObjectURL = url => revoked.push(url);
+      HTMLAnchorElement.prototype.click = function () { if (deny) throw new Error('R14-17 anchor denied'); outputs.push({name:this.download,url:this.href}); };
+      console.error = () => {};
+      try {
+        filenameInput.value = '共享Writer😀.md';
+        await renderExportImagePreview();
+        const rows = [];
+        for (const [format, command, mime] of [['markdown',exportFile,'text/markdown;charset=utf-8'],['html',exportHTML,'text/html;charset=utf-8'],['word',exportWord,'application/msword;charset=utf-8'],['image',downloadExportImage,'image/png']]) {
+          const before = sequence; deny = true; await command();
+          const failedClean = outputs.length === rows.length && revoked.includes('blob:r14-17-' + (before+1)) && !document.querySelector('a[download][href^="blob:r14-17-"]');
+          deny = false; await command(); const output = outputs.at(-1), blob = blobs.get(output.url);
+          const bytes = new Uint8Array(await blob.arrayBuffer());
+          const decoded = format === 'image' ? document.getElementById('compatibility-business-ports').markdownEditorImageDataPort.encode(document.getElementById('compatibility-business-ports').markdownEditorImageExportPort.getPreview().dataUrl) : null;
+          const text = format === 'image' ? '' : await blob.text();
+          rows.push({format,name:output.name,mime:blob.type,expectedMime:mime,failedClean,revoked:revoked.includes(output.url),bytes:bytes.length,
+            complete:format==='image'?decoded.length===bytes.length&&decoded.every((v,i)=>v===bytes[i]):text.includes('KEEP WRITER TAIL')&&text.includes('R14-17 原文'),
+            taskReleased:document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort.getSnapshot().activeTask===null});
+        }
+        return rows;
+      } finally {URL.createObjectURL=oldCreate;URL.revokeObjectURL=oldRevoke;HTMLAnchorElement.prototype.click=oldClick;console.error=oldError;}
+    })()`);
+    assert.equal(result.length,4);
+    for (const row of result) {assert.equal(row.mime,row.expectedMime);assert.ok(row.bytes>0);for(const key of ['failedClean','revoked','complete','taskReleased'])assert.equal(row[key],true,row.format+':'+key);}
+    await writeFile(join(artifactRoot,'r14-17-shared-writer-browser.json'),JSON.stringify(result,null,2));
+  });
+
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
     const result = await page.evaluate(`(async () => {
       const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort,encoder=host.markdownEditorImageDataPort,imageExporter=host.markdownEditorImageExportPort;

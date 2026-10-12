@@ -2,13 +2,13 @@ import { createExportRequest } from '../../application/export-request.js';
 import { ExportCancelledError } from '../../task/export-cancellation.js';
 
 /** Final image workflow owner: source-bound PNG cache, preparation, irreversible
- * conversion and guarded binary publication. Surface owns DOM/leases; Platform
- * owns dialogs and binary I/O. No classic globals, model internals or vendor import.
+ * conversion and guarded binary publication. Surface owns DOM/leases; File Writer
+ * owns dialog/output policy over existing Platform binary I/O. No classic globals, model internals or vendor import.
  * destroy interrupts cancellable waits, suppresses late results and observes
  * already-started PNG/write promises through settlement (it cannot abort them).
  */
 export function createImageExporter({ documentModel, documents, builder, enhancer, assets, surface,
-  encodeDataUrl, loadDomToImage, taskController, platform } = {}) {
+  encodeDataUrl, loadDomToImage, taskController, fileWriter } = {}) {
   if (typeof documentModel?.getDocumentVersion !== 'function'
     || !['getRecord', 'isCurrentGeneration'].every(key => typeof documents?.[key] === 'function')
     || !['build', 'getSourceContext'].every(key => typeof builder?.[key] === 'function')
@@ -16,8 +16,7 @@ export function createImageExporter({ documentModel, documents, builder, enhance
     || !['mount', 'publish', 'clearPreview'].every(key => typeof surface?.[key] === 'function')
     || typeof encodeDataUrl !== 'function' || typeof loadDomToImage !== 'function'
     || !['begin', 'finish', 'cancel'].every(key => typeof taskController?.[key] === 'function')
-    || !platform?.capabilities || typeof platform.dialogs?.saveFile !== 'function'
-    || typeof platform.files?.writeBinary !== 'function') throw new TypeError('Image exporter requires public image, document, task and output capabilities.');
+    || typeof fileWriter?.write !== 'function') throw new TypeError('Image exporter requires public image, document, task and output capabilities.');
   let destroyed = false, revision = 0, preview = null;
   const pending = new Set();
   const alive = () => { if (destroyed) throw new ExportCancelledError('destroyed'); };
@@ -114,21 +113,13 @@ export function createImageExporter({ documentModel, documents, builder, enhance
     let outcome = 'completed';
     try {
       op.assertCurrent();
-      const nativeDialogs = Boolean(platform.capabilities.desktop?.dialogs), nativeFiles = Boolean(platform.capabilities.desktop?.fileSystem);
-      let path = request.name;
-      if (nativeDialogs && nativeFiles) {
-        task.update(70, '请选择图片保存路径…', 'preparing'); op.assertCurrent();
-        path = await op.wait(platform.dialogs.saveFile(request.name, { title: '导出图片', extension: request.extension,
-          extensions: request.extensions, filterName: 'PNG 图片', defaultDirectory: request.directory }));
-        op.assertCurrent();
-        if (path === null || path === '') return Object.freeze({ status: 'cancelled', name: request.name });
-        if (typeof path !== 'string') throw new TypeError('图片保存路径无效');
-      } else if (nativeDialogs || nativeFiles || !platform.capabilities.browser?.fileDownload) throw new Error('图片文件导出能力不可用');
-      op.assertCurrent(); task.lockCancellation('writing'); op.assertCurrent();
-      task.update(96, '正在写入图片，此阶段完成前不能立即取消…', 'writing'); op.assertCurrent();
-      await platform.files.writeBinary(path, bytes, { extension: request.extension, reason: 'export', ...(!nativeFiles ? { mimeType: 'image/png' } : {}) });
+      task.update(70, '请选择图片保存路径…', 'preparing'); op.assertCurrent();
+      const result = await fileWriter.write({ request, content: bytes, task,
+        assertCurrent: op.assertCurrent, wait: op.wait });
+      op.assertCurrent();
+      if (result.status === 'cancelled') return result;
       op.assertCurrent(); task.update(100, '图片已保存'); op.assertCurrent();
-      return Object.freeze({ status: nativeFiles ? 'written' : 'downloaded', name: request.name, path });
+      return result;
     } catch (error) {
       outcome = 'failed';
       try { op.assertCurrent(); } catch (cancelled) { error = cancelled; }

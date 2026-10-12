@@ -239,7 +239,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "a8225e61836b8fb1f78f3a4f58d29647e71fef68"
+      "blobSha": "629a7b419a75482db037aed541de63aa9f6943ce"
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
@@ -283,7 +283,7 @@
     },
     {
       "path": "src/features/export/index.js",
-      "blobSha": "4f5b45631e54cf55c98cd97c3bacb5e7783a35f4"
+      "blobSha": "b3802b97093bcc2c265ab4591b6e05780bc0b0a1"
     },
     {
       "path": "src/features/export/compatibility/classic-export-task-port.js",
@@ -339,7 +339,7 @@
     },
     {
       "path": "src/features/export/formats/markdown-exporter.js",
-      "blobSha": "baeee8c92a4f1b422025f61892f5a497391a6ac8"
+      "blobSha": "0fbc72d1285df1c5ef511aa7ef97af7aeb624caa"
     },
     {
       "path": "src/features/export/compatibility/classic-markdown-export-port.js",
@@ -363,11 +363,11 @@
     },
     {
       "path": "vite.config.js",
-      "blobSha": "4d580fe6e864d52e2a8619963e7f1ad544f8bd00"
+      "blobSha": "410d0b8d7d65f295798705433517d2c5c532dcf1"
     },
     {
       "path": "src/features/export/formats/rendered-document-exporter.js",
-      "blobSha": "b37ed678ff6a22ca2a0ff5a692053663132690bd"
+      "blobSha": "a5e667955d73d757019292b87e8b2dcbddb44e42"
     },
     {
       "path": "src/features/export/formats/word-exporter.js",
@@ -431,11 +431,11 @@
     },
     {
       "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
-      "blobSha": "5976f7b1c851cfae43c2b71d603428e07de54ddd"
+      "blobSha": "025d6df0392c26aa17400a4ce907a5d6189f1172"
     },
     {
       "path": "src/features/export/formats/image/image-exporter.js",
-      "blobSha": "ea94f8ab544838aaf30b634415e36441b9caff5e"
+      "blobSha": "fb007f36b9e381fbc96e6e66e653253f1965bb57"
     },
     {
       "path": "src/features/export/formats/image/image-export-surface.js",
@@ -448,6 +448,14 @@
     {
       "path": "tests/e2e/windows/image-export-chain.mjs",
       "blobSha": "f9959d69ab7cd7e519e7edbb516292165a268546"
+    },
+    {
+      "path": "src/features/export/application/export-file-writer.js",
+      "blobSha": "61c54f2048370fa647dc8689afb94c008c160281"
+    },
+    {
+      "path": "tests/e2e/windows/file-writer-chain.mjs",
+      "blobSha": "2dfdfabf3ab35a7b95df76a841fda8b39f0ce7ed"
     }
   ],
   "priorFailures": {
@@ -667,7 +675,7 @@
     "date": "2026-10-12",
     "reviewedCommit": "b1c236b3326357c1c0f8d991d1f282dcd5582f77",
     "record": "docs/R14-16-DETAILS.md",
-    "status": "R14.16 accepted and closed; R14.17 authorized next",
+    "status": "R14.16 accepted; R14.17 implemented pending exact Windows admission",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "Pure Data URL decoder, scalar-value/percent-octet/base64 byte safety, scoped conversion port, fixed bytes before image save dialog and existing Platform binary output for native and browser paths; actual Windows file readback and actual PNG/Blob evidence defined. No image rendering owner or new writer, dependency, model, data format or native permission changes.",
@@ -825,6 +833,408 @@
       ]
     },
     "currentStageImplementation": {
+      "stage": "R14.17",
+      "baselineCommit": "19de94351498a64ba13af704c00c51a65e14c718",
+      "branch": "agent/r14-stage",
+      "status": "implemented-pending-exact-head-Windows-admission",
+      "record": "docs/R14-17-DETAILS.md",
+      "scope": "One File Writer owns dialog/destination/profile and guarded text/binary publication for Markdown/HTML/Word/Image, formats retain source/task/content. Original Platform/Rust/Blob implementations remain; issued text writes retain lock until real settlement.",
+      "productionChanged": true,
+      "dependenciesChanged": false,
+      "nativeProductionChanged": false,
+      "changedSourceFingerprints": [
+        {
+          "path": "src/main.js",
+          "priorBlobSha": "a8225e61836b8fb1f78f3a4f58d29647e71fef68",
+          "blobSha": "629a7b419a75482db037aed541de63aa9f6943ce"
+        },
+        {
+          "path": "src/features/export/index.js",
+          "priorBlobSha": "4f5b45631e54cf55c98cd97c3bacb5e7783a35f4",
+          "blobSha": "b3802b97093bcc2c265ab4591b6e05780bc0b0a1"
+        },
+        {
+          "path": "src/features/export/formats/markdown-exporter.js",
+          "priorBlobSha": "baeee8c92a4f1b422025f61892f5a497391a6ac8",
+          "blobSha": "0fbc72d1285df1c5ef511aa7ef97af7aeb624caa"
+        },
+        {
+          "path": "vite.config.js",
+          "priorBlobSha": "4d580fe6e864d52e2a8619963e7f1ad544f8bd00",
+          "blobSha": "410d0b8d7d65f295798705433517d2c5c532dcf1"
+        },
+        {
+          "path": "src/features/export/formats/rendered-document-exporter.js",
+          "priorBlobSha": "b37ed678ff6a22ca2a0ff5a692053663132690bd",
+          "blobSha": "a5e667955d73d757019292b87e8b2dcbddb44e42"
+        },
+        {
+          "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
+          "priorBlobSha": "5976f7b1c851cfae43c2b71d603428e07de54ddd",
+          "blobSha": "025d6df0392c26aa17400a4ce907a5d6189f1172"
+        },
+        {
+          "path": "src/features/export/formats/image/image-exporter.js",
+          "priorBlobSha": "ea94f8ab544838aaf30b634415e36441b9caff5e",
+          "blobSha": "fb007f36b9e381fbc96e6e66e653253f1965bb57"
+        }
+      ],
+      "newReviewedSources": [
+        {
+          "path": "src/features/export/application/export-file-writer.js",
+          "blobSha": "61c54f2048370fa647dc8689afb94c008c160281"
+        },
+        {
+          "path": "tests/e2e/windows/file-writer-chain.mjs",
+          "blobSha": "2dfdfabf3ab35a7b95df76a841fda8b39f0ce7ed"
+        }
+      ],
+      "newFileWriterScenariosDefined": 29,
+      "imageExporterScenariosRetained": 34,
+      "imageDataScenariosRetained": 58,
+      "builtAppScenariosRetained": 65,
+      "newBuiltAppScenariosDefined": 1,
+      "builtAppScenariosDefined": 66,
+      "productionModuleCount": 550,
+      "riskReviewedSourceCount": 82,
+      "compatibilityMapping": [
+        {
+          "prior": "Each file format duplicates platform capability/dialog/name/filter/MIME/write dispatch.",
+          "current": "Actual public writer injected once from composition root; all format test fixtures use actual writer and original platform doubles.",
+          "retained": "Original normalized names/dialog filters/directories/cancellation/error identity/raw bytes/complete documents/PNG scenarios preserved, no second platform fallback or writer."
+        },
+        {
+          "prior": "Markdown/HTML/Word destroy races an already-issued irreversible write and releases task early.",
+          "current": "Writer awaits the original write through settlement, normalizes late completion/error to destruction, and only then format owner finishes its task.",
+          "retained": "Same three destruction scenarios/names and late resolve/reject inputs retained; task remains locked before settlement, late false success and overlap forbidden."
+        },
+        {
+          "prior": "Platform source contract expects image format directly invokes dialog/write.",
+          "current": "Classic command -> Image public owner -> injected File Writer -> original Platform checked.",
+          "retained": "All old facade/global/plugin bans and dialog-only ownership checks retained."
+        }
+      ],
+      "nativeEvidenceDefined": "Real four-format exports, exact Rust payload bytes readback, null picker quiet cancellation, existing owned target held with Windows FileShare.None fails/preserves original, handle release then write recovers, temp files absent; dialog protocol result only automated; originals saved as artifact md/html/doc/png.",
+      "staticReview": {
+        "status": "passed",
+        "productTestsRunLocally": false,
+        "staticSourceConfigDocumentationTestsPassed": 10,
+        "architectureGate": "passed",
+        "legacyRuntimeGate": "passed",
+        "generatedFilesGate": "passed",
+        "readmeRecordGate": "passed",
+        "javascriptSyntaxFiles": 17,
+        "modifiedEmbeddedBrowserExpressionsCompiled": 3,
+        "newWriterCallbacksStaticallyRegistered": 29,
+        "productCallbacksExecutedLocally": 0,
+        "relativeLinksChecked": 183,
+        "riskFingerprintsChecked": 82,
+        "priorRiskPathsPreserved": 80,
+        "productionModuleCount": 550,
+        "priorProductionPathsPreserved": 549,
+        "changedFormatResponsibilityDescriptions": 3,
+        "allOriginalTestNamesAndOrderPreserved": true,
+        "prior16AcceptanceAndFailuresAndRepairHistoriesPreserved": true,
+        "existingPlatformRustModelsDependenciesUnchanged": true,
+        "budgetsPreserved": {
+          "initialBytes": 500000,
+          "asyncBytes": 700000
+        },
+        "manualFeatureImportsClosed": true,
+        "sevenWindowsJobsPreserved": true,
+        "diffWhitespaceCheck": "passed",
+        "changedFiles": [
+          ".github/workflows/r12-14.yml",
+          "AGENTS.md",
+          "README.md",
+          "docs/R14-17-DETAILS.md",
+          "docs/README.md",
+          "docs/audit/r12-24-closeout.json",
+          "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
+          "src/features/export/application/export-file-writer.js",
+          "src/features/export/formats/image/image-exporter.js",
+          "src/features/export/formats/markdown-exporter.js",
+          "src/features/export/formats/rendered-document-exporter.js",
+          "src/features/export/index.js",
+          "src/main.js",
+          "tests/architecture/fixtures/production-modules.json",
+          "tests/e2e/lib/export-characterization.mjs",
+          "tests/e2e/windows/file-writer-chain.mjs",
+          "tests/e2e/windows/run-render-boundary-probe.mjs",
+          "tests/stage-14-file-writer.test.mjs",
+          "tests/stage-14-html-exporter.test.mjs",
+          "tests/stage-14-markdown-exporter.test.mjs",
+          "tests/stage-14-word-exporter.test.mjs",
+          "tests/support/export-vm-host.mjs",
+          "tests/unit/platform/dialog-client.test.mjs",
+          "tests/unit/platform/platform-cutover.test.mjs",
+          "vite.config.js"
+        ],
+        "limitations": "Static checks only locally. New functional writer callbacks and actual four-format browser/native occupied-file evidence await exact-head Windows CI."
+      },
+      "notClaimed": [
+        "R14.17 Windows acceptance/A06 closure until exact new head seven jobs and all four native rows pass.",
+        "Actual interactive dialog/user-selected path not claimed.",
+        "Started encoding/disk write has no abort/rollback guarantee.",
+        "PDF remains print owner, document Save/Autosave remains separate, classic total removal and UI remain later."
+      ]
+    },
+    "priorStageAcceptance": {
+      "stage": "R14.15",
+      "date": "2026-10-12",
+      "commit": "463af967b39d80b716ec6125985688e8db2b2ac0",
+      "run": 38226523614,
+      "status": "all-seven-Windows-jobs-and-all-steps-passed",
+      "record": "docs/R14-15-DETAILS.md",
+      "windowsJobsPassed": 7,
+      "allWindowsStepsPassed": true,
+      "recursiveNodeTestsPassed": 2109,
+      "recursiveNodeDirectories": 16,
+      "recursiveNodeTestFiles": 341,
+      "frontendTestsPassed": 1103,
+      "imageDataTestsPassed": 58,
+      "contractBrowserPassed": 11,
+      "builtAppBrowserPassed": 63,
+      "rustTestsPassed": 281,
+      "importChainScenariosPassed": 8,
+      "finalExactCommitAdmissionAccepted": true,
+      "artifactDigestsChecked": true,
+      "artifacts": [
+        {
+          "id": 11736718861,
+          "name": "frontend",
+          "digest": "sha256:0300c1ce6ca7f7622c32376ceb9dbb818a4ba417b2445cc1a7420527a1982d7e"
+        },
+        {
+          "id": 11736754030,
+          "name": "WebView",
+          "digest": "sha256:dd006ba86c6f820d64333324be485eff3b88cf42a86e1d85e10977f5d1405903"
+        },
+        {
+          "id": 11736247800,
+          "name": "recursive-Node",
+          "digest": "sha256:f0f3153fc77bce532f06a4f6bae6d59032e5b34a2d25c12cb9798a37c5bf5089"
+        },
+        {
+          "id": 11735794189,
+          "name": "closeout",
+          "digest": "sha256:236b5d46cce89a4a07de557790ad724bf1c1b8f32fa91220a9ba3b9608bd79ba"
+        }
+      ],
+      "actualBrowserImageData": {
+        "name": "编码😀.png",
+        "mime": "image/png",
+        "bytes": 72994,
+        "digest": "9fc17c543398bf2b8112675cd0d2bb978fabb270c67f2b84976c5f492897225e",
+        "dimensions": {
+          "width": 1080,
+          "height": 1920
+        },
+        "exactBytes": true,
+        "revoked": true,
+        "signature": [
+          137,
+          80,
+          78,
+          71,
+          13,
+          10,
+          26,
+          10
+        ],
+        "retired": true
+      },
+      "actualDataRecovery": {
+        "unicode": [
+          230,
+          177,
+          137,
+          240,
+          159,
+          152,
+          128,
+          239,
+          191,
+          189
+        ],
+        "binary": [
+          0,
+          128,
+          255
+        ],
+        "rejected": true,
+        "invalidCreates": 0,
+        "failedRevoked": true,
+        "recovered": true,
+        "recoveryBytes": [
+          0,
+          255
+        ],
+        "recoveryRevoked": true,
+        "readonly": true
+      },
+      "actualNativeReadback": {
+        "commit": "463af967b39d80b716ec6125985688e8db2b2ac0",
+        "status": "passed",
+        "transport": "public encoder -> actual Platform binary adapter -> Rust safe writer -> actual Windows file readback",
+        "observations": [
+          {
+            "name": "base64-全字节😀.png",
+            "byteLength": 65537,
+            "sha256": "2deb0bd2129a9d3aed91e3cff58b3993752be549642890a3e853ec1065f9b617",
+            "exactBytes": true
+          },
+          {
+            "name": "percent-全字节.png",
+            "byteLength": 256,
+            "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880",
+            "exactBytes": true
+          },
+          {
+            "name": "unicode.png",
+            "byteLength": 20,
+            "sha256": "6e0c0af6574243794a2006fedec3ae23e279ff2ffb0722abc281b5bd2f52c92b",
+            "exactBytes": true
+          },
+          {
+            "name": "actual-pixels.png",
+            "byteLength": 93,
+            "sha256": "fa3b0769667a47ed741d5b37a073d042394ef259fe11b3315d50c28f6bf9a52e",
+            "exactBytes": true,
+            "realPng": true
+          }
+        ],
+        "directoryRejected": true,
+        "nextWriteRecovered": true
+      },
+      "largeBodySourceUtf16Length": 450024,
+      "completeHtmlWordBodiesPassed": true,
+      "all48PreparationAndExportStepsPassed": true,
+      "largeBodyTimings": {
+        "html": [
+          {
+            "sourceLength": 450024,
+            "step": "import",
+            "status": "passed",
+            "elapsedMs": 612
+          },
+          {
+            "sourceLength": 450024,
+            "step": "initial-position",
+            "status": "passed",
+            "elapsedMs": 6686
+          },
+          {
+            "sourceLength": 450024,
+            "step": "visual-editing",
+            "status": "passed",
+            "elapsedMs": 131
+          },
+          {
+            "sourceLength": 450024,
+            "step": "layout",
+            "status": "passed",
+            "elapsedMs": 13036
+          },
+          {
+            "sourceLength": 450024,
+            "step": "final-position",
+            "status": "passed",
+            "elapsedMs": 197
+          },
+          {
+            "sourceLength": 450024,
+            "step": "idle",
+            "status": "passed",
+            "elapsedMs": 134
+          },
+          {
+            "sourceLength": 450024,
+            "step": "identity",
+            "status": "passed",
+            "observation": {
+              "ready": true,
+              "layout": "both",
+              "documentLength": 450024,
+              "selectionStart": 0,
+              "selectionEnd": 0,
+              "editorMatches": true,
+              "modelMatches": true
+            },
+            "elapsedMs": 21
+          },
+          {
+            "sourceLength": 450024,
+            "step": "export-and-readback",
+            "status": "passed",
+            "elapsedMs": 25
+          }
+        ],
+        "word": [
+          {
+            "sourceLength": 450024,
+            "step": "import",
+            "status": "passed",
+            "elapsedMs": 552
+          },
+          {
+            "sourceLength": 450024,
+            "step": "initial-position",
+            "status": "passed",
+            "elapsedMs": 6263
+          },
+          {
+            "sourceLength": 450024,
+            "step": "visual-editing",
+            "status": "passed",
+            "elapsedMs": 149
+          },
+          {
+            "sourceLength": 450024,
+            "step": "layout",
+            "status": "passed",
+            "elapsedMs": 12403
+          },
+          {
+            "sourceLength": 450024,
+            "step": "final-position",
+            "status": "passed",
+            "elapsedMs": 210
+          },
+          {
+            "sourceLength": 450024,
+            "step": "idle",
+            "status": "passed",
+            "elapsedMs": 151
+          },
+          {
+            "sourceLength": 450024,
+            "step": "identity",
+            "status": "passed",
+            "observation": {
+              "ready": true,
+              "layout": "both",
+              "documentLength": 450024,
+              "selectionStart": 0,
+              "selectionEnd": 0,
+              "editorMatches": true,
+              "modelMatches": true
+            },
+            "elapsedMs": 24
+          },
+          {
+            "sourceLength": 450024,
+            "step": "export-and-readback",
+            "status": "passed",
+            "elapsedMs": 23
+          }
+        ]
+      },
+      "independentPngSamplesVerified": true,
+      "reviewedSourceFingerprintsMatched": 76,
+      "scope": "R14.15 byte conversion and existing Platform binary paths accepted. Final image orchestration/source identity and full A10 PNG chain remain14.16."
+    },
+    "priorStageImplementation": {
       "stage": "R14.16",
       "baselineCommit": "b1c236b3326357c1c0f8d991d1f282dcd5582f77",
       "branch": "agent/r14-stage",
@@ -1300,733 +1710,6 @@
             "downloadedAndVerified": true
           }
         ]
-      }
-    },
-    "priorStageAcceptance": {
-      "stage": "R14.15",
-      "date": "2026-10-12",
-      "commit": "463af967b39d80b716ec6125985688e8db2b2ac0",
-      "run": 38226523614,
-      "status": "all-seven-Windows-jobs-and-all-steps-passed",
-      "record": "docs/R14-15-DETAILS.md",
-      "windowsJobsPassed": 7,
-      "allWindowsStepsPassed": true,
-      "recursiveNodeTestsPassed": 2109,
-      "recursiveNodeDirectories": 16,
-      "recursiveNodeTestFiles": 341,
-      "frontendTestsPassed": 1103,
-      "imageDataTestsPassed": 58,
-      "contractBrowserPassed": 11,
-      "builtAppBrowserPassed": 63,
-      "rustTestsPassed": 281,
-      "importChainScenariosPassed": 8,
-      "finalExactCommitAdmissionAccepted": true,
-      "artifactDigestsChecked": true,
-      "artifacts": [
-        {
-          "id": 11736718861,
-          "name": "frontend",
-          "digest": "sha256:0300c1ce6ca7f7622c32376ceb9dbb818a4ba417b2445cc1a7420527a1982d7e"
-        },
-        {
-          "id": 11736754030,
-          "name": "WebView",
-          "digest": "sha256:dd006ba86c6f820d64333324be485eff3b88cf42a86e1d85e10977f5d1405903"
-        },
-        {
-          "id": 11736247800,
-          "name": "recursive-Node",
-          "digest": "sha256:f0f3153fc77bce532f06a4f6bae6d59032e5b34a2d25c12cb9798a37c5bf5089"
-        },
-        {
-          "id": 11735794189,
-          "name": "closeout",
-          "digest": "sha256:236b5d46cce89a4a07de557790ad724bf1c1b8f32fa91220a9ba3b9608bd79ba"
-        }
-      ],
-      "actualBrowserImageData": {
-        "name": "编码😀.png",
-        "mime": "image/png",
-        "bytes": 72994,
-        "digest": "9fc17c543398bf2b8112675cd0d2bb978fabb270c67f2b84976c5f492897225e",
-        "dimensions": {
-          "width": 1080,
-          "height": 1920
-        },
-        "exactBytes": true,
-        "revoked": true,
-        "signature": [
-          137,
-          80,
-          78,
-          71,
-          13,
-          10,
-          26,
-          10
-        ],
-        "retired": true
-      },
-      "actualDataRecovery": {
-        "unicode": [
-          230,
-          177,
-          137,
-          240,
-          159,
-          152,
-          128,
-          239,
-          191,
-          189
-        ],
-        "binary": [
-          0,
-          128,
-          255
-        ],
-        "rejected": true,
-        "invalidCreates": 0,
-        "failedRevoked": true,
-        "recovered": true,
-        "recoveryBytes": [
-          0,
-          255
-        ],
-        "recoveryRevoked": true,
-        "readonly": true
-      },
-      "actualNativeReadback": {
-        "commit": "463af967b39d80b716ec6125985688e8db2b2ac0",
-        "status": "passed",
-        "transport": "public encoder -> actual Platform binary adapter -> Rust safe writer -> actual Windows file readback",
-        "observations": [
-          {
-            "name": "base64-全字节😀.png",
-            "byteLength": 65537,
-            "sha256": "2deb0bd2129a9d3aed91e3cff58b3993752be549642890a3e853ec1065f9b617",
-            "exactBytes": true
-          },
-          {
-            "name": "percent-全字节.png",
-            "byteLength": 256,
-            "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880",
-            "exactBytes": true
-          },
-          {
-            "name": "unicode.png",
-            "byteLength": 20,
-            "sha256": "6e0c0af6574243794a2006fedec3ae23e279ff2ffb0722abc281b5bd2f52c92b",
-            "exactBytes": true
-          },
-          {
-            "name": "actual-pixels.png",
-            "byteLength": 93,
-            "sha256": "fa3b0769667a47ed741d5b37a073d042394ef259fe11b3315d50c28f6bf9a52e",
-            "exactBytes": true,
-            "realPng": true
-          }
-        ],
-        "directoryRejected": true,
-        "nextWriteRecovered": true
-      },
-      "largeBodySourceUtf16Length": 450024,
-      "completeHtmlWordBodiesPassed": true,
-      "all48PreparationAndExportStepsPassed": true,
-      "largeBodyTimings": {
-        "html": [
-          {
-            "sourceLength": 450024,
-            "step": "import",
-            "status": "passed",
-            "elapsedMs": 612
-          },
-          {
-            "sourceLength": 450024,
-            "step": "initial-position",
-            "status": "passed",
-            "elapsedMs": 6686
-          },
-          {
-            "sourceLength": 450024,
-            "step": "visual-editing",
-            "status": "passed",
-            "elapsedMs": 131
-          },
-          {
-            "sourceLength": 450024,
-            "step": "layout",
-            "status": "passed",
-            "elapsedMs": 13036
-          },
-          {
-            "sourceLength": 450024,
-            "step": "final-position",
-            "status": "passed",
-            "elapsedMs": 197
-          },
-          {
-            "sourceLength": 450024,
-            "step": "idle",
-            "status": "passed",
-            "elapsedMs": 134
-          },
-          {
-            "sourceLength": 450024,
-            "step": "identity",
-            "status": "passed",
-            "observation": {
-              "ready": true,
-              "layout": "both",
-              "documentLength": 450024,
-              "selectionStart": 0,
-              "selectionEnd": 0,
-              "editorMatches": true,
-              "modelMatches": true
-            },
-            "elapsedMs": 21
-          },
-          {
-            "sourceLength": 450024,
-            "step": "export-and-readback",
-            "status": "passed",
-            "elapsedMs": 25
-          }
-        ],
-        "word": [
-          {
-            "sourceLength": 450024,
-            "step": "import",
-            "status": "passed",
-            "elapsedMs": 552
-          },
-          {
-            "sourceLength": 450024,
-            "step": "initial-position",
-            "status": "passed",
-            "elapsedMs": 6263
-          },
-          {
-            "sourceLength": 450024,
-            "step": "visual-editing",
-            "status": "passed",
-            "elapsedMs": 149
-          },
-          {
-            "sourceLength": 450024,
-            "step": "layout",
-            "status": "passed",
-            "elapsedMs": 12403
-          },
-          {
-            "sourceLength": 450024,
-            "step": "final-position",
-            "status": "passed",
-            "elapsedMs": 210
-          },
-          {
-            "sourceLength": 450024,
-            "step": "idle",
-            "status": "passed",
-            "elapsedMs": 151
-          },
-          {
-            "sourceLength": 450024,
-            "step": "identity",
-            "status": "passed",
-            "observation": {
-              "ready": true,
-              "layout": "both",
-              "documentLength": 450024,
-              "selectionStart": 0,
-              "selectionEnd": 0,
-              "editorMatches": true,
-              "modelMatches": true
-            },
-            "elapsedMs": 24
-          },
-          {
-            "sourceLength": 450024,
-            "step": "export-and-readback",
-            "status": "passed",
-            "elapsedMs": 23
-          }
-        ]
-      },
-      "independentPngSamplesVerified": true,
-      "reviewedSourceFingerprintsMatched": 76,
-      "scope": "R14.15 byte conversion and existing Platform binary paths accepted. Final image orchestration/source identity and full A10 PNG chain remain14.16."
-    },
-    "priorStageImplementation": {
-      "stage": "R14.15",
-      "baselineCommit": "37920adbddd87d400440b131266ba943c95500b9",
-      "branch": "agent/r14-stage",
-      "status": "accepted-on-exact-repair-head-Windows",
-      "record": "docs/R14-15-DETAILS.md",
-      "productionChanged": true,
-      "dependenciesChanged": false,
-      "nativeProductionChanged": false,
-      "scope": "Pure Data URL decoder, scalar-value/percent-octet/base64 byte safety, scoped conversion port, fixed bytes before image save dialog and existing Platform binary output for native and browser paths; actual Windows file readback and actual PNG/Blob evidence defined. No image rendering owner or new writer, dependency, model, data format or native permission changes.",
-      "changedSourceFingerprints": [
-        {
-          "path": "src/main.js",
-          "priorBlobSha": "a69bf09ce6356f9a2264574e836d8f373ac67ffe",
-          "blobSha": "0c3f141788934b654222b974f5003097fca14418"
-        },
-        {
-          "path": "public/app/export.js",
-          "priorBlobSha": "1414316bd79e9d0025361e49906c9c1bae799b9a",
-          "blobSha": "c1c485deaa8b02c82718fa79189990aaa2b60ccc"
-        },
-        {
-          "path": "src/features/export/index.js",
-          "priorBlobSha": "c1e4355857e5ceed6fbe8e40d7a3423e58ed8c5f",
-          "blobSha": "c65306ea041afad41fd616d7bedb6f14f874db0e"
-        }
-      ],
-      "newReviewedSources": [
-        {
-          "path": "src/features/export/formats/image/image-data-encoder.js",
-          "blobSha": "98d646579c2e05870041eaeabee586dfc50de39d"
-        },
-        {
-          "path": "src/features/export/compatibility/classic-image-data-port.js",
-          "blobSha": "6dfe5a6953151cbb5829c3cc4144219f90980217"
-        },
-        {
-          "path": "tests/e2e/windows/image-data-export.mjs",
-          "blobSha": "c8e78a4685c98fd1c6c64cbf2d45ce422b0f505c"
-        },
-        {
-          "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
-          "blobSha": "b1aacad22789fd969ed84cbc2afde22fdb2629ae"
-        }
-      ],
-      "newImageDataScenariosDefined": 58,
-      "builtAppScenariosRetained": 61,
-      "newBuiltAppScenariosDefined": 2,
-      "builtAppScenariosDefined": 63,
-      "productionModuleCount": 546,
-      "riskReviewedSourceCount": 76,
-      "compatibilityMapping": [
-        {
-          "prior": "Classic converter used UTF-8 decodeURIComponent for binary percent data and treated any base64 substring as encoded; browser image saved the raw Data URL directly. Native byte conversion occurred after dialog completion.",
-          "current": "Public pure decoder follows parsed Data URL/percent octets/final base64 marker with safe UTF-8 scalar handling; image save freezes decoded bytes before dialog and uses existing binary Platform ports.",
-          "retained": "Original43 characterization names/scenarios unchanged;3 private converter assertions call the mounted public decoder and keep exact PNG/percent/error expectations. Accepted naming/filter/directory/cancel/write-error tests and original61 real-page purposes remain."
-        }
-      ],
-      "actualEvidenceDefined": [
-        "Real rendered PNG converted and downloaded through unmodified browser Platform/Blob adapter;exact byte comparison,pixel decode,MIME,normalized Unicode filename and object-URL cleanup.",
-        "Real renderer-free boundary test for Unicode/lone surrogate and percent binary,invalid data before URL creation,actual anchor fault cleanup and next output recovery;original pagehide adds data port terminal checks.",
-        "Actual embedded Windows public encoder -> established Platform/Rust binary writer -> Node file readback:all256 octets over65537 bytes,percent bytes,Unicode/lone-surrogate normalization,actual Canvas PNG,directory rejection and successful subsequent replacement. Only harness-owned temporary files touched."
-      ],
-      "staticReview": {
-        "status": "passed",
-        "productTestsRunLocally": false,
-        "priorProductionModuleRowsPreserved": 544,
-        "priorRiskPathsPreserved": 72,
-        "architectureGate": "passed",
-        "legacyRuntimeGate": "passed",
-        "generatedFilesGate": "passed",
-        "readmeRecordGate": "passed",
-        "javascriptSyntaxFiles": 11,
-        "modifiedEmbeddedBrowserExpressionsCompiled": 3,
-        "jsonYamlParsed": true,
-        "relativeLinksChecked": 166,
-        "riskFingerprintsChecked": 76,
-        "productionModuleCount": 546,
-        "historicalStageHistoryPrefixesPreserved": true,
-        "prior14AcceptancePreserved": true,
-        "retainedBuiltAppScenarios": 61,
-        "newBuiltAppScenarios": 2,
-        "builtAppScenariosDefined": 63,
-        "newImageDataScenariosDefined": 58,
-        "classicPrivateEncoderRemoved": true,
-        "browserDirectDataUrlDownloadRemoved": true,
-        "sevenWindowsJobsPreservedWithOneTargetedStep": true,
-        "nativeBinaryProbeUsesExistingOwnedRoot": true,
-        "dependenciesAndRustProductionUnchanged": true,
-        "diffWhitespaceCheck": "passed",
-        "limitations": "New Node contracts,actualPNG/Blob and native Windows file readback await exact-head Windows CI; no local product tests executed."
-      },
-      "notClaimed": [
-        "New Windows Node/browser/build/Rust and native binary acceptance remain pending exact new head.",
-        "Captured download boundaries prove Blob bytes/lifecycle;only the actual native readback proves written disk bytes.",
-        "Existing image modal orchestration/source identity owner migrates in14.16;write task cancellation lifecycle belongs to14.16/14.17.",
-        "Overall A10 final image closure remains pending14.16."
-      ],
-      "firstWindowsRun": {
-        "commit": "c3e6a6a7a4500e7d24ed9288522691268a1a0efd",
-        "run": 38223327955,
-        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38223327955",
-        "conclusion": "failure",
-        "jobsPassed": 5,
-        "frontendNodePassed": 1103,
-        "imageDataPassed": 58,
-        "browserContractPassed": 11,
-        "builtApp": {
-          "total": 63,
-          "passed": 61,
-          "failed": 2,
-          "newImageDataScenariosPassed": 2
-        },
-        "failures": [
-          {
-            "stage": "R14-10",
-            "scenario": "complete HTML body",
-            "error": "Runtime.evaluate: CDP response timed out"
-          },
-          {
-            "stage": "R14-11",
-            "scenario": "complete Word body",
-            "error": "Runtime.evaluate: CDP response timed out"
-          }
-        ],
-        "nativeBinaryReadback": {
-          "status": "passed",
-          "cases": [
-            {
-              "name": "base64-all-octets",
-              "bytes": 65537,
-              "sha256": "2deb0bd2129a9d3aed91e3cff58b3993752be549642890a3e853ec1065f9b617"
-            },
-            {
-              "name": "percent-all-octets",
-              "bytes": 256,
-              "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880"
-            },
-            {
-              "name": "unicode",
-              "bytes": 20,
-              "sha256": "6e0c0af6574243794a2006fedec3ae23e279ff2ffb0722abc281b5bd2f52c92b"
-            },
-            {
-              "name": "actual-png",
-              "bytes": 93,
-              "sha256": "fa3b0769667a47ed741d5b37a073d042394ef259fe11b3315d50c28f6bf9a52e"
-            }
-          ],
-          "directoryRejected": true,
-          "nextWriteRecovered": true
-        },
-        "verifiedArtifacts": [
-          {
-            "id": 11735447667,
-            "sha256": "2d219892bb8d5455a34a27f1c65fc42862a2679a3257441b5e8edd7dd28842cb"
-          },
-          {
-            "id": 11735287618,
-            "sha256": "8df4eca497c5592fe2a2b33481bbf457e34a6553963c8c4c712bee141fe19d05"
-          }
-        ],
-        "accepted": false
-      },
-      "repair": {
-        "status": "accepted-on-exact-repair-head-Windows",
-        "scope": "Split only complete HTML/Word fixture preparation into real import, initial reveal, visual editing, both layout, final reveal and strict idle CDP requests in the original order and with original per-step budgets; full Editor/model identity checks and persistent per-step/export timing evidence.",
-        "diagnosis": "Five existing idle budgets total25s plus real import/layout/frame work inside one30s CDP request. Screenshots show large loaded document; old logs cannot uniquely identify the timed-out phase. Repair request boundary and add phase evidence; do not claim proven product export performance.",
-        "productionChanged": false,
-        "workflowChanged": false,
-        "dependenciesChanged": false,
-        "rustChanged": false,
-        "cdpTimeoutMsUnchanged": 30000,
-        "originalIdleBudgetsMs": [
-          5000,
-          4000,
-          4000,
-          6000,
-          6000
-        ],
-        "sameLargeSourceUtf16Length": 450024,
-        "sameLargeSingleLineUtf16Length": 450000,
-        "sameScenarioNamesOrderAndExportAssertions": true,
-        "builtAppScenariosDefined": 63,
-        "newStrictReadinessChecks": true,
-        "retriesOrSkipsAdded": false,
-        "priorAcceptancePreserved": true,
-        "staticReview": {
-          "status": "passed",
-          "productTestsRunLocally": false,
-          "architectureGate": "passed",
-          "legacyRuntimeGate": "passed",
-          "generatedFilesGate": "passed",
-          "readmeRecordGate": "passed",
-          "javascriptSyntaxFiles": 1,
-          "embeddedPreparationTemplatesCompiled": 7,
-          "compiledInputVariants": 3,
-          "relativeLinksChecked": 169,
-          "riskFingerprintsChecked": 76,
-          "riskPathsAndFingerprintsUnchanged": true,
-          "historicalStageHistoryAndPriorAcceptanceUnchanged": true,
-          "originalFixtureSourceExportExpressionAssertionsAndScenarioNamesUnchanged": true,
-          "changedFiles": [
-            "AGENTS.md",
-            "README.md",
-            "docs/R14-15-DETAILS.md",
-            "docs/README.md",
-            "docs/audit/r12-24-closeout.json",
-            "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
-            "tests/e2e/lib/export-characterization.mjs"
-          ],
-          "productionWorkflowDependenciesAndTimeoutUnchanged": true,
-          "diffWhitespaceCheck": "passed",
-          "limitations": "Only static checks locally; repair awaits exact-head Windows7 jobs and63 actual-page scenarios."
-        }
-      },
-      "acceptance": {
-        "stage": "R14.15",
-        "date": "2026-10-12",
-        "commit": "463af967b39d80b716ec6125985688e8db2b2ac0",
-        "run": 38226523614,
-        "status": "all-seven-Windows-jobs-and-all-steps-passed",
-        "record": "docs/R14-15-DETAILS.md",
-        "windowsJobsPassed": 7,
-        "allWindowsStepsPassed": true,
-        "recursiveNodeTestsPassed": 2109,
-        "recursiveNodeDirectories": 16,
-        "recursiveNodeTestFiles": 341,
-        "frontendTestsPassed": 1103,
-        "imageDataTestsPassed": 58,
-        "contractBrowserPassed": 11,
-        "builtAppBrowserPassed": 63,
-        "rustTestsPassed": 281,
-        "importChainScenariosPassed": 8,
-        "finalExactCommitAdmissionAccepted": true,
-        "artifactDigestsChecked": true,
-        "artifacts": [
-          {
-            "id": 11736718861,
-            "name": "frontend",
-            "digest": "sha256:0300c1ce6ca7f7622c32376ceb9dbb818a4ba417b2445cc1a7420527a1982d7e"
-          },
-          {
-            "id": 11736754030,
-            "name": "WebView",
-            "digest": "sha256:dd006ba86c6f820d64333324be485eff3b88cf42a86e1d85e10977f5d1405903"
-          },
-          {
-            "id": 11736247800,
-            "name": "recursive-Node",
-            "digest": "sha256:f0f3153fc77bce532f06a4f6bae6d59032e5b34a2d25c12cb9798a37c5bf5089"
-          },
-          {
-            "id": 11735794189,
-            "name": "closeout",
-            "digest": "sha256:236b5d46cce89a4a07de557790ad724bf1c1b8f32fa91220a9ba3b9608bd79ba"
-          }
-        ],
-        "actualBrowserImageData": {
-          "name": "编码😀.png",
-          "mime": "image/png",
-          "bytes": 72994,
-          "digest": "9fc17c543398bf2b8112675cd0d2bb978fabb270c67f2b84976c5f492897225e",
-          "dimensions": {
-            "width": 1080,
-            "height": 1920
-          },
-          "exactBytes": true,
-          "revoked": true,
-          "signature": [
-            137,
-            80,
-            78,
-            71,
-            13,
-            10,
-            26,
-            10
-          ],
-          "retired": true
-        },
-        "actualDataRecovery": {
-          "unicode": [
-            230,
-            177,
-            137,
-            240,
-            159,
-            152,
-            128,
-            239,
-            191,
-            189
-          ],
-          "binary": [
-            0,
-            128,
-            255
-          ],
-          "rejected": true,
-          "invalidCreates": 0,
-          "failedRevoked": true,
-          "recovered": true,
-          "recoveryBytes": [
-            0,
-            255
-          ],
-          "recoveryRevoked": true,
-          "readonly": true
-        },
-        "actualNativeReadback": {
-          "commit": "463af967b39d80b716ec6125985688e8db2b2ac0",
-          "status": "passed",
-          "transport": "public encoder -> actual Platform binary adapter -> Rust safe writer -> actual Windows file readback",
-          "observations": [
-            {
-              "name": "base64-全字节😀.png",
-              "byteLength": 65537,
-              "sha256": "2deb0bd2129a9d3aed91e3cff58b3993752be549642890a3e853ec1065f9b617",
-              "exactBytes": true
-            },
-            {
-              "name": "percent-全字节.png",
-              "byteLength": 256,
-              "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880",
-              "exactBytes": true
-            },
-            {
-              "name": "unicode.png",
-              "byteLength": 20,
-              "sha256": "6e0c0af6574243794a2006fedec3ae23e279ff2ffb0722abc281b5bd2f52c92b",
-              "exactBytes": true
-            },
-            {
-              "name": "actual-pixels.png",
-              "byteLength": 93,
-              "sha256": "fa3b0769667a47ed741d5b37a073d042394ef259fe11b3315d50c28f6bf9a52e",
-              "exactBytes": true,
-              "realPng": true
-            }
-          ],
-          "directoryRejected": true,
-          "nextWriteRecovered": true
-        },
-        "largeBodySourceUtf16Length": 450024,
-        "completeHtmlWordBodiesPassed": true,
-        "all48PreparationAndExportStepsPassed": true,
-        "largeBodyTimings": {
-          "html": [
-            {
-              "sourceLength": 450024,
-              "step": "import",
-              "status": "passed",
-              "elapsedMs": 612
-            },
-            {
-              "sourceLength": 450024,
-              "step": "initial-position",
-              "status": "passed",
-              "elapsedMs": 6686
-            },
-            {
-              "sourceLength": 450024,
-              "step": "visual-editing",
-              "status": "passed",
-              "elapsedMs": 131
-            },
-            {
-              "sourceLength": 450024,
-              "step": "layout",
-              "status": "passed",
-              "elapsedMs": 13036
-            },
-            {
-              "sourceLength": 450024,
-              "step": "final-position",
-              "status": "passed",
-              "elapsedMs": 197
-            },
-            {
-              "sourceLength": 450024,
-              "step": "idle",
-              "status": "passed",
-              "elapsedMs": 134
-            },
-            {
-              "sourceLength": 450024,
-              "step": "identity",
-              "status": "passed",
-              "observation": {
-                "ready": true,
-                "layout": "both",
-                "documentLength": 450024,
-                "selectionStart": 0,
-                "selectionEnd": 0,
-                "editorMatches": true,
-                "modelMatches": true
-              },
-              "elapsedMs": 21
-            },
-            {
-              "sourceLength": 450024,
-              "step": "export-and-readback",
-              "status": "passed",
-              "elapsedMs": 25
-            }
-          ],
-          "word": [
-            {
-              "sourceLength": 450024,
-              "step": "import",
-              "status": "passed",
-              "elapsedMs": 552
-            },
-            {
-              "sourceLength": 450024,
-              "step": "initial-position",
-              "status": "passed",
-              "elapsedMs": 6263
-            },
-            {
-              "sourceLength": 450024,
-              "step": "visual-editing",
-              "status": "passed",
-              "elapsedMs": 149
-            },
-            {
-              "sourceLength": 450024,
-              "step": "layout",
-              "status": "passed",
-              "elapsedMs": 12403
-            },
-            {
-              "sourceLength": 450024,
-              "step": "final-position",
-              "status": "passed",
-              "elapsedMs": 210
-            },
-            {
-              "sourceLength": 450024,
-              "step": "idle",
-              "status": "passed",
-              "elapsedMs": 151
-            },
-            {
-              "sourceLength": 450024,
-              "step": "identity",
-              "status": "passed",
-              "observation": {
-                "ready": true,
-                "layout": "both",
-                "documentLength": 450024,
-                "selectionStart": 0,
-                "selectionEnd": 0,
-                "editorMatches": true,
-                "modelMatches": true
-              },
-              "elapsedMs": 24
-            },
-            {
-              "sourceLength": 450024,
-              "step": "export-and-readback",
-              "status": "passed",
-              "elapsedMs": 23
-            }
-          ]
-        },
-        "independentPngSamplesVerified": true,
-        "reviewedSourceFingerprintsMatched": 76,
-        "scope": "R14.15 byte conversion and existing Platform binary paths accepted. Final image orchestration/source identity and full A10 PNG chain remain14.16."
       }
     },
     "stageAcceptanceHistory": [
@@ -10051,6 +9734,484 @@
           "independentPngSamplesVerified": true,
           "reviewedSourceFingerprintsMatched": 76,
           "scope": "R14.15 byte conversion and existing Platform binary paths accepted. Final image orchestration/source identity and full A10 PNG chain remain14.16."
+        }
+      },
+      {
+        "stage": "R14.16",
+        "baselineCommit": "b1c236b3326357c1c0f8d991d1f282dcd5582f77",
+        "branch": "agent/r14-stage",
+        "status": "accepted on exact Windows commit/run",
+        "record": "docs/R14-16-DETAILS.md",
+        "productionChanged": true,
+        "dependenciesChanged": false,
+        "nativeProductionChanged": false,
+        "scope": "One final Image Exporter owns source/version/generation-bound PNG/byte cache, render/save task orchestration and source barriers. Separate Surface owns capture nodes/leases and preview projection. Locked encoding/write promises observed through real settlement; preparation/dialog waits cancellable; no late publication after destroy, stale source or replacement. Existing Platform adapters and Rust safe writer retained; shared File Writer migration remains14.17.",
+        "changedSourceFingerprints": [
+          {
+            "path": "src/main.js",
+            "priorBlobSha": "0c3f141788934b654222b974f5003097fca14418",
+            "blobSha": "a8225e61836b8fb1f78f3a4f58d29647e71fef68"
+          },
+          {
+            "path": "public/app/export.js",
+            "priorBlobSha": "c1c485deaa8b02c82718fa79189990aaa2b60ccc",
+            "blobSha": "0c1423c41dfbf2c229a223758875e9c508f24042"
+          },
+          {
+            "path": "src/features/export/index.js",
+            "priorBlobSha": "c65306ea041afad41fd616d7bedb6f14f874db0e",
+            "blobSha": "4f5b45631e54cf55c98cd97c3bacb5e7783a35f4"
+          },
+          {
+            "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
+            "priorBlobSha": "b1aacad22789fd969ed84cbc2afde22fdb2629ae",
+            "blobSha": "e93fb5b40c915c59c3cda84c47c3aa18a9cc47e9"
+          }
+        ],
+        "newReviewedSources": [
+          {
+            "path": "src/features/export/formats/image/image-exporter.js",
+            "blobSha": "ea94f8ab544838aaf30b634415e36441b9caff5e"
+          },
+          {
+            "path": "src/features/export/formats/image/image-export-surface.js",
+            "blobSha": "b2576dbf0f9af3074e4a439d96da8d70a9269806"
+          },
+          {
+            "path": "src/features/export/compatibility/classic-image-export-port.js",
+            "blobSha": "6bb0aff064add9dc247b428350a71f97adfad17a"
+          },
+          {
+            "path": "tests/e2e/windows/image-export-chain.mjs",
+            "blobSha": "5e354ff8b6ce691a763fbf289e7cc08a71f9bf2a"
+          }
+        ],
+        "newImageExporterScenariosDefined": 34,
+        "builtAppScenariosRetained": 63,
+        "newBuiltAppScenariosDefined": 2,
+        "builtAppScenariosDefined": 65,
+        "productionModuleCount": 549,
+        "riskReviewedSourceCount": 80,
+        "compatibilityMapping": [
+          {
+            "prior": "Private classic currentImageDataUrl was directly overwritten by fixtures; image save had no task/source barriers; capture root remained mounted after encoding.",
+            "current": "Fixtures prepare through actual public render and inspect frozen getPreview. Save snapshots private bytes before dialog, rejects stale source/geometry/replacement, locks actual write. Surface releases every lease and removes capture nodes before publication.",
+            "retained": "All original scenario names/order preserved,43 characterization and58 byte contract definitions retained. Failure/ratio/pixels/MathML-reference/Preview identity/cancel/write/URL cleanup purposes remain; fixture setters become real renderer inputs and disposal checks strengthen to removed owned nodes."
+          },
+          {
+            "prior": "R14-13 release-failure test allowed a PNG cache published before cleanup;R14-14 observed only per-image91..95 progress.",
+            "current": "Cleanup failure refuses PNG publication and next render recovers; explicit90 resource preparation phase precedes original91..95 progress.",
+            "retained": "Same failure injection, task/lease restoration and recovery; original5 asset completion values retained with one visible phase entry."
+          },
+          {
+            "prior": "R14-15 other-preview-during-dialog fixture mutated private data and expected old bytes; actual binary-failure page used arbitrary two-byte data as cached PNG.",
+            "current": "Readonly snapshot cannot mutate bytes; actual replacing render cancels the pending save and a new save writes correct frozen bytes. Arbitrary binary/Unicode remains verified through public encoder plus actual Platform boundary; PNG command tests render real or explicit vendor-fault input.",
+            "retained": "Original pre-dialog byte snapshot/no malformed side effect/fault cleanup/recovery purposes retained and stronger source/task safety asserted; original fixture data unchanged."
+          }
+        ],
+        "actualEvidenceDefined": [
+          "Actual vendor PNG (math/Mermaid/Unicode) remains locked with mounted capture; edit during pending conversion rejects publication; next real PNG recovers with current version and unchanged Preview.",
+          "Injected vendor and anchor failures verify real DOM/lease/task/URL cleanup,then actual renderer/Blob byte-equal PNG output recovers.",
+          "Actual embedded Windows import -> Image Exporter -> real dom-to-image -> public bytes -> actual Platform/Rust safe writer -> actual Node file readback; native dialog result alone automated to owned paths;directory rejection and subsequent replacement,stale source rejected before another dialog."
+        ],
+        "staticReview": {
+          "status": "passed",
+          "productTestsRunLocally": false,
+          "architectureGate": "passed",
+          "legacyRuntimeGate": "passed",
+          "generatedFilesGate": "passed",
+          "readmeRecordGate": "passed",
+          "javascriptSyntaxFiles": 20,
+          "modifiedEmbeddedBrowserExpressionsCompiled": 9,
+          "staticallyRegisteredNewImageExporterCallbacks": 34,
+          "callbacksExecutedLocally": 0,
+          "jsonYamlParsed": true,
+          "relativeLinksChecked": 173,
+          "riskFingerprintsChecked": 80,
+          "productionModuleCount": 549,
+          "priorProductionModuleRowsPreserved": 546,
+          "priorRiskPathsPreserved": 76,
+          "historicalStageHistoryPrefixesPreserved": true,
+          "prior15AcceptancePreserved": true,
+          "retainedBuiltAppScenarios": 63,
+          "newBuiltAppScenarios": 2,
+          "builtAppScenariosDefined": 65,
+          "allRetainedTestDeclarationsAndOrderPreserved": true,
+          "classicPrivateImageCacheAndEncodingBinaryOrchestrationRemoved": true,
+          "existingPlatformRustBlobImplementationsUnchanged": true,
+          "onlyNativeDialogResultAutomatedForFullImageProbe": true,
+          "nativeFullImageProbeUsesExistingOwnedRoot": true,
+          "sevenWindowsJobsPreservedWithOneTargetedStep": true,
+          "dependenciesAndRustProductionAndFrozenModelsUnchanged": true,
+          "diffWhitespaceCheck": "passed",
+          "changedFiles": [
+            ".github/workflows/r12-14.yml",
+            "AGENTS.md",
+            "README.md",
+            "docs/R14-15-DETAILS.md",
+            "docs/R14-16-DETAILS.md",
+            "docs/README.md",
+            "docs/audit/r12-24-closeout.json",
+            "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
+            "public/app/export.js",
+            "src/features/export/compatibility/classic-image-export-port.js",
+            "src/features/export/formats/image/image-export-surface.js",
+            "src/features/export/formats/image/image-exporter.js",
+            "src/features/export/index.js",
+            "src/main.js",
+            "tests/architecture/fixtures/production-modules.json",
+            "tests/e2e/lib/export-characterization.mjs",
+            "tests/e2e/windows/image-export-chain.mjs",
+            "tests/e2e/windows/run-render-boundary-probe.mjs",
+            "tests/presentation-renderer-contract.test.mjs",
+            "tests/stage-14-export-cancellation.test.mjs",
+            "tests/stage-14-export-characterization.test.mjs",
+            "tests/stage-14-export-request.test.mjs",
+            "tests/stage-14-export-styles.test.mjs",
+            "tests/stage-14-export-task.test.mjs",
+            "tests/stage-14-image-assets.test.mjs",
+            "tests/stage-14-image-data.test.mjs",
+            "tests/stage-14-image-exporter.test.mjs",
+            "tests/stage-14-image-layout.test.mjs",
+            "tests/support/export-vm-host.mjs"
+          ],
+          "limitations": "All new or modified product Node/renderer/browser/native tests await exact-head Windows CI; local checks are static only."
+        },
+        "notClaimed": [
+          "R14.16 Windows acceptance and whole A10 PNG closure await exact new head seven jobs and65 actual-page cases plus native full image evidence.",
+          "Only automated dialog result is covered in native harness; actual interactive save dialog/user-selected path is not claimed.",
+          "Started PNG conversion or disk write has no abort guarantee;destroy suppresses late success but cannot undo an invoked side effect.",
+          "Shared cross-format File Writer remains14.17;ratio/modal UI migration remains14.19;classic total removal later."
+        ],
+        "firstWindowsRun": {
+          "commit": "43bc086a98ae1456ad5307fd94f63b1faa801d5a",
+          "run": 38238244716,
+          "url": "https://github.com/uniquenesssta/mdr/actions/runs/38238244716",
+          "conclusion": "failure",
+          "accepted": false,
+          "windowsJobsPassed": 3,
+          "imageExporterPassed": 34,
+          "imageDataPassed": 58,
+          "originalCharacterizationPassed": 43,
+          "contractBrowserPassed": 11,
+          "frontendNode": {
+            "total": 1137,
+            "passed": 1132,
+            "failed": 5
+          },
+          "recursiveNode": {
+            "total": 2143,
+            "passed": 2134,
+            "failed": 9,
+            "directories": 16
+          },
+          "actualBuiltAppScenariosExecuted": 0,
+          "actualNativeFullImageProbeExecuted": false,
+          "bundle": {
+            "mainBytes": 704049,
+            "asyncLimitBytes": 700000,
+            "overBudgetBytes": 4049
+          },
+          "browserBlockedEvidence": {
+            "error": "Timed out waiting for application ready",
+            "requests": [
+              {
+                "url": "/?e2e=1",
+                "status": 404
+              },
+              {
+                "url": "/favicon.ico",
+                "status": 404
+              }
+            ],
+            "console": [],
+            "exceptions": []
+          },
+          "directFailures": [
+            "invalid-input fixture invokes render before tested command",
+            "asset fallback/success fixture attaches image to first Builder div instead of capture root",
+            "README lost docs index and15 closeout entry",
+            "old DocumentSession/Controller assertions require direct classic ports",
+            "old Dialog/Cutover assertions require direct classic Platform calls",
+            "main async chunk exceeds unchanged budget"
+          ],
+          "artifact": {
+            "id": 11740719752,
+            "bytes": 2346951,
+            "digest": "sha256:b4ea8913e40b8cba54dc5b21a8060c8ff8d78d3ecdf48be3981a534102997d39",
+            "downloadedAndVerified": true
+          },
+          "rustTestsPassed": 281
+        },
+        "repair": {
+          "status": "implemented-pending-exact-head-Windows-admission",
+          "scope": "Correct invalid-input setup and actual capture-root asset injection,retain all old cases/assertions; migrate stale document/platform source checks to the complete public owner chain; restore exact15 README ChangeLog prefix and docs index; dependency-closed Image/Request/Task manual chunk with unchanged budgets/vendor policy.",
+          "changedSourceFingerprints": [
+            {
+              "path": "vite.config.js",
+              "priorBlobSha": "3921a4fb81d46dd55396a88b4e2bbbd0613036af",
+              "blobSha": "4d580fe6e864d52e2a8619963e7f1ad544f8bd00"
+            }
+          ],
+          "applicationRuntimeChanged": false,
+          "dependenciesChanged": false,
+          "rustChanged": false,
+          "modelsChanged": false,
+          "workflowChanged": false,
+          "productionModuleCount": 549,
+          "riskSourcePathsRetained": 80,
+          "imageExporterScenariosRetained": 34,
+          "newStaticBundleAuditScenarios": 2,
+          "imageDataScenariosRetained": 58,
+          "builtAppScenariosRetained": 65,
+          "budgetsUnchanged": {
+            "initialBytes": 500000,
+            "asyncBytes": 700000
+          },
+          "vendorMergePolicyUnchanged": true,
+          "manualFeatureImportsClosed": true,
+          "UIAndPreviewAndPlatformOutsideManualFeature": true,
+          "readmePrior15HistoryPrefixRestored": true,
+          "readmeDocsIndexRestored": true,
+          "staticAuditTestsPassed": 9,
+          "productTestsRunLocally": false,
+          "staticReview": {
+            "status": "passed",
+            "productTestsRunLocally": false,
+            "staticAuditTestsPassed": 9,
+            "architectureGate": "passed",
+            "legacyRuntimeGate": "passed",
+            "generatedFilesGate": "passed",
+            "readmeRecordGate": "passed",
+            "javascriptSyntaxFiles": 8,
+            "relativeLinksChecked": 172,
+            "riskFingerprintsChecked": 80,
+            "riskPathsUnchanged": true,
+            "productionModuleRowsUnchanged": 549,
+            "sevenWindowsJobsAndWorkflowUnchanged": true,
+            "allPriorTestDeclarationsAndScenarioNamesRetained": true,
+            "newConfigAuditScenarios": 2,
+            "imageExporterScenariosRetained": 34,
+            "builtAppScenariosRetained": 65,
+            "prior15AcceptanceAndHistoryPreserved": true,
+            "readme15ChangeLogExactPrefixRestored": true,
+            "applicationRuntimeRustModelsAndDependenciesUnchanged": true,
+            "diffWhitespaceCheck": "passed",
+            "changedFiles": [
+              "AGENTS.md",
+              "README.md",
+              "docs/R14-16-DETAILS.md",
+              "docs/README.md",
+              "docs/audit/r12-24-closeout.json",
+              "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
+              "tests/stage-14-export-request.test.mjs",
+              "tests/stage-14-image-assets.test.mjs",
+              "tests/unit/documents/document-session-controller.test.mjs",
+              "tests/unit/documents/document-session-store.test.mjs",
+              "tests/unit/platform/dialog-client.test.mjs",
+              "tests/unit/platform/platform-cutover.test.mjs",
+              "tests/vite-config.test.mjs",
+              "vite.config.js"
+            ],
+            "limitations": "Only static source/document/config auditing locally; no application behavior tests, build, browser or Rust execution. Actual bundle sizes/65 pages/native PNG readback pending exact-head Windows CI."
+          },
+          "invalidInputsHaveExplicitValidationToast": true
+        },
+        "secondWindowsRun": {
+          "commit": "b7bfe8610402360173c9d442b04bb4fbae7d91f4",
+          "run": 38245940820,
+          "url": "https://github.com/uniquenesssta/mdr/actions/runs/38245940820",
+          "conclusion": "failure",
+          "accepted": false,
+          "windowsJobsPassed": 4,
+          "frontendNodePassed": 1139,
+          "recursiveNodePassed": 2145,
+          "directories": 16,
+          "imageExporterPassed": 34,
+          "imageDataPassed": 58,
+          "originalCharacterizationPassed": 43,
+          "contractBrowserPassed": 11,
+          "actualBuiltAppScenariosPassed": 65,
+          "rustTestsPassed": 281,
+          "buildPassed": true,
+          "directFailures": [
+            "official scanner download HTTP504 before RustSec scan",
+            "native full-image harness cannot replace read-only Tauri invoke after real PNG rendering"
+          ],
+          "prior15NativeByteReadbacksPassed": 4,
+          "actualNativeFullImageProbePassed": false,
+          "artifacts": [
+            {
+              "id": 11746631052,
+              "sha256": "5fc8f934d96fab89ed8d18c8559738171860ff2883eddf9869917ff450e03c12",
+              "downloadedAndVerified": true
+            },
+            {
+              "id": 11745387592,
+              "sha256": "b790f949ba8b0063871c8b68e1ebf6a369a745b1ea550615d5bf03688d09aa03",
+              "downloadedAndVerified": true
+            }
+          ],
+          "actualRecoveredAndDownloadedPngVisuallyChecked": true,
+          "actualNativePngReadbackPending": true
+        },
+        "secondRepair": {
+          "status": "implemented-pending-exact-head-Windows-admission",
+          "scope": "Bounded same-release transport retry with pinned checksum and all failures blocking; native full-image dialog-only fetch protocol response while invoke/callback/native writer stay real; archive actual readback PNG.",
+          "changedSourceFingerprints": [
+            {
+              "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
+              "priorBlobSha": "e93fb5b40c915c59c3cda84c47c3aa18a9cc47e9",
+              "blobSha": "5976f7b1c851cfae43c2b71d603428e07de54ddd"
+            },
+            {
+              "path": "tests/e2e/windows/image-export-chain.mjs",
+              "priorBlobSha": "5e354ff8b6ce691a763fbf289e7cc08a71f9bf2a",
+              "blobSha": "f9959d69ab7cd7e519e7edbb516292165a268546"
+            }
+          ],
+          "scannerSourceFingerprint": {
+            "path": "scripts/ci/run-windows-dependency-audit.mjs",
+            "blobSha": "e2b0ad86f0b57fb19680bb5e72a267f0918272a3"
+          },
+          "newScannerDownloadScenarios": 5,
+          "priorScannerScenariosRetained": 8,
+          "applicationRuntimeChanged": false,
+          "dependenciesChanged": false,
+          "rustChanged": false,
+          "modelsChanged": false,
+          "workflowChanged": false,
+          "productionModuleCount": 549,
+          "riskSourcePathsRetained": 80,
+          "imageExporterScenariosRetained": 34,
+          "imageDataScenariosRetained": 58,
+          "builtAppScenariosRetained": 65,
+          "onlyDialogProtocolResponseAutomated": true,
+          "nativeBinaryRequestsRequired": 3,
+          "originalFetchRestorationRequired": true,
+          "actualNativeReadbackPngArtifactDefined": "r14-16-native-image-export.png",
+          "lockedTauriVersions": {
+            "jsApi": "2.11.1",
+            "dialog": "2.7.1",
+            "rust": "2.11.5"
+          },
+          "scannerAttempts": 4,
+          "timeoutPerAttemptMs": 120000,
+          "retryDelaysMs": [
+            1000,
+            2000,
+            4000
+          ],
+          "staticReview": {
+            "status": "passed",
+            "productTestsRunLocally": false,
+            "staticAuditTestsPassed": 8,
+            "architectureGate": "passed",
+            "legacyRuntimeGate": "passed",
+            "generatedFilesGate": "passed",
+            "readmeRecordGate": "passed",
+            "javascriptSyntaxFiles": 4,
+            "modifiedEmbeddedBrowserExpressionsCompiled": 1,
+            "callbacksExecutedLocally": 0,
+            "relativeLinksChecked": 174,
+            "riskFingerprintsChecked": 80,
+            "riskPathsUnchanged": true,
+            "productionModuleRowsUnchanged": 549,
+            "prior15AcceptanceAndAllHistoriesPreserved": true,
+            "prior16FailuresAndRepairPreserved": true,
+            "oldScannerDeclarationsAndOrderRetained": 8,
+            "newScannerDeclarations": 5,
+            "imageExporterAndImageDataAndBuiltAppScenariosUnchanged": true,
+            "applicationRuntimeRustModelsDependenciesWorkflowAndBudgetsUnchanged": true,
+            "diffWhitespaceCheck": "passed",
+            "changedFiles": [
+              "AGENTS.md",
+              "README.md",
+              "docs/R14-16-DETAILS.md",
+              "docs/README.md",
+              "docs/audit/r12-24-closeout.json",
+              "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
+              "scripts/ci/run-windows-dependency-audit.mjs",
+              "tests/e2e/windows/image-export-chain.mjs",
+              "tests/e2e/windows/run-render-boundary-probe.mjs",
+              "tests/stage-12-dependency-advisories.test.mjs"
+            ],
+            "limitations": "Only source/config/document static checks locally; download retry behavior and full native image transport/readback await exact-head Windows. Initial parser lookup unavailable; embedded expression compiled with built-in vm.Script without executing it."
+          }
+        },
+        "finalAcceptance": {
+          "stage": "R14.16",
+          "date": "2026-10-12",
+          "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
+          "run": 38257846018,
+          "url": "https://github.com/uniquenesssta/mdr/actions/runs/38257846018",
+          "accepted": true,
+          "windowsJobsPassed": 7,
+          "allStepsPassed": true,
+          "frontendNodePassed": 1144,
+          "recursiveNodePassed": 2150,
+          "directories": 16,
+          "imageExporterPassed": 34,
+          "imageDataPassed": 58,
+          "characterizationPassed": 43,
+          "contractBrowserPassed": 11,
+          "builtAppPassed": 65,
+          "rustTestsPassed": 281,
+          "nativeFullImage": {
+            "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
+            "status": "passed",
+            "transport": "actual WebView PNG -> final Image Exporter -> actual Platform/Rust safe writer -> real file readback",
+            "automatedBoundary": "Only native save dialog returns harness-owned paths; no actual interactive dialog acceptance claimed.",
+            "byteLength": 80632,
+            "sha256": "00a08f3da872e29575e1367b2de31c540a64a79cf76af954c65ccfcc02710e37",
+            "exactBytes": true,
+            "cacheCleared": true,
+            "captureReleased": true,
+            "dialogs": 3,
+            "dimensions": {
+              "height": 1920,
+              "width": 1080
+            },
+            "directoryRejected": true,
+            "invokeUnchanged": true,
+            "nativeBinaryRequests": 3,
+            "recovered": true,
+            "staleDialogDelta": 0,
+            "staleRejected": true,
+            "taskReleased": true
+          },
+          "actualPngVisuallyChecked": true,
+          "finalExactCommitAccepted": true,
+          "dependenciesAccepted": true,
+          "formatPngA10EvidenceComplete": true,
+          "a06UnifiedWriterPendingR14_17": true,
+          "artifacts": [
+            {
+              "id": 11751606174,
+              "sha256": "78118a5352328a23ab3d1d8ba0afff7c12e7c8d4871f72a779201c9869614663",
+              "downloadedAndVerified": true
+            },
+            {
+              "id": 11751131669,
+              "sha256": "cec8f5ad19147cd95d0327d564096dd51ff2a32c6e5648ad77d7ed76f4f88c4d",
+              "downloadedAndVerified": true
+            },
+            {
+              "id": 11751041402,
+              "sha256": "04cd7ca1dd4933b27945053a0fa4027c1c3c7e1b7d5468e97843a0c8699c4925",
+              "downloadedAndVerified": true
+            },
+            {
+              "id": 11750824151,
+              "sha256": "6d3486f035a260c9c0412cc398e7d5be55c6ee1eb14250dff102401973acac9a",
+              "downloadedAndVerified": true
+            },
+            {
+              "id": 11752120542,
+              "sha256": "3df4253ce01f7d139ec678b1ccefc25683a8d517cc85113cb8b84a4b59e54de1",
+              "downloadedAndVerified": true
+            }
+          ]
         }
       }
     ]

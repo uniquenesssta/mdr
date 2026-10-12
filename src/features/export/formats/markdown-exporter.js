@@ -4,15 +4,14 @@ import { ExportCancelledError } from '../task/export-cancellation.js';
 /**
  * Responsibility: Export exactly one raw model/document snapshot with the shared name policy.
  * State/lifecycle: Owns pending export waits only; destroy rejects them and suppresses late results.
- * Dependencies: Public Documents/model, Task Controller and the accepted Platform save/write ports.
+ * Dependencies: Public Documents/model, Task Controller and the shared public Export File Writer.
  * Rendering, browser URL cleanup and native safe replacement remain with their existing owners.
  */
-export function createMarkdownExporter({ documentModel, documents, taskController, platform } = {}) {
+export function createMarkdownExporter({ documentModel, documents, taskController, fileWriter } = {}) {
   if (typeof documentModel?.createSnapshot !== 'function' || typeof documentModel?.getDocumentVersion !== 'function'
     || !['getRecord', 'isCurrentGeneration', 'readDocumentContent'].every(key => typeof documents?.[key] === 'function')
     || !['begin', 'finish'].every(key => typeof taskController?.[key] === 'function')
-    || !platform?.capabilities || typeof platform?.dialogs?.saveFile !== 'function'
-    || typeof platform?.files?.writeText !== 'function') {
+    || typeof fileWriter?.write !== 'function') {
     throw new TypeError('Markdown Exporter requires public document, task and platform capabilities.');
   }
   let destroyed = false;
@@ -62,32 +61,15 @@ export function createMarkdownExporter({ documentModel, documents, taskControlle
       if (typeof content !== 'string') throw new TypeError('Markdown 原文必须是文本');
       task.update(70, '正在准备 Markdown 文件…', 'serializing');
       assertCurrent();
-      const nativeDialogs = Boolean(platform.capabilities.desktop?.dialogs);
-      const nativeFiles = Boolean(platform.capabilities.desktop?.fileSystem);
-      let path = request.name;
-      if (nativeDialogs && nativeFiles) {
-        path = await wait(platform.dialogs.saveFile(request.name, {
-          title: '导出 Markdown', extension: request.extension, extensions: request.extensions,
-          filterName: 'Markdown 文档', defaultDirectory: request.directory
-        }));
-        assertCurrent();
-        if (path === null || path === '') return Object.freeze({ status: 'cancelled', name: request.name });
-        if (typeof path !== 'string') throw new TypeError('Markdown 保存路径无效');
-      } else if (nativeDialogs || nativeFiles || !platform.capabilities.browser?.fileDownload) {
-        throw new Error('Markdown 文件导出能力不可用');
-      }
+      const result = await fileWriter.write({ request, content, task, assertCurrent, wait });
       assertCurrent();
-      task.lockCancellation('writing');
-      assertCurrent();
-      const options = nativeFiles ? { extension: request.extension, reason: 'export' }
-        : { extension: request.extension, reason: 'export', mimeType: 'text/markdown;charset=utf-8' };
-      await wait(platform.files.writeText(path, content, options));
-      assertCurrent();
+      if (result.status === 'cancelled') return result;
       task.update(100, 'Markdown 文件已生成');
       assertCurrent();
-      return Object.freeze({ status: nativeFiles ? 'written' : 'downloaded', name: request.name, path });
+      return result;
     } catch (error) {
       outcome = 'failed';
+      try { assertCurrent(); } catch (cancelled) { error = cancelled; }
       throw error;
     } finally {
       pending.delete(stop);
