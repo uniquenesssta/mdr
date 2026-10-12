@@ -96,7 +96,7 @@ test('R14-02 every actual classic entry rejects invalid inputs before task, snap
   for (const operation of operations) {
     for (const options of [{ name: 'bad\0.md' }, { documentId: '' }]) {
       const h = createExportVmHost(options);
-      h.evaluate("currentImageDataUrl = 'data:image/png;base64,iVBORw0KGgo='");
+      await h.renderImage();
       await h.invoke(operation);
       assert.equal(h.evaluate('exportTaskPort.getSnapshot().lastTaskId'), 0, operation);
       assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);

@@ -80,7 +80,7 @@ test('R14-15 actual desktop adapter preserves every decoded octet at the Rust co
 });
 
 for (const desktop of [false,true]) test('R14-15 classic image command uses decoded binary output: '+(desktop?'desktop':'browser'), async () => {
-  const h=createExportVmHost({desktop,name:'原文😀.md'});h.evaluate('currentImageDataUrl='+JSON.stringify(PNG));
+  const h=createExportVmHost({desktop,name:'原文😀.md'});await h.renderImage(PNG);
   await h.invoke('downloadExportImage');const write=h.calls.find(x=>x[0]==='writeBinary');assert.ok(write);
   assert.deepEqual(Array.from(write[2]),signature);assert.equal(write[3].extension,'png');assert.equal(write[3].reason,'export');
   assert.equal(h.calls.some(x=>x[0]==='saveFile'),desktop);
@@ -91,33 +91,33 @@ for (const desktop of [false,true]) test('R14-15 classic image command uses deco
 });
 
 test('R14-15 invalid data fails before dialog or binary write and later valid export recovers', async () => {
-  const h=createExportVmHost({desktop:true});h.evaluate('currentImageDataUrl="data:;base64,!"');await h.invoke('downloadExportImage');
-  assert.equal(h.calls.some(x=>x[0]==='saveFile'||x[0]==='writeBinary'),false);assert.match(h.calls.at(-1)[1],/图片数据无效/);
-  h.evaluate('currentImageDataUrl='+JSON.stringify(PNG));await h.invoke('downloadExportImage');assert.equal(h.calls.filter(x=>x[0]==='writeBinary').length,1);h.destroy();
+  const h=createExportVmHost({desktop:true});await h.renderImage('data:image/png;base64,!');await h.invoke('downloadExportImage');
+  assert.equal(h.calls.some(x=>x[0]==='saveFile'||x[0]==='writeBinary'),false);assert.ok(h.calls.some(row => ['toast','error'].includes(row[0]) && /图片数据无效/.test(row[1])));
+  await h.renderImage(PNG);await h.invoke('downloadExportImage');assert.equal(h.calls.filter(x=>x[0]==='writeBinary').length,1);h.destroy();
 });
 
 test('R14-15 image bytes are fixed before save dialog even if another preview arrives', async () => {
-  const h=createExportVmHost({desktop:true});h.evaluate('currentImageDataUrl='+JSON.stringify(PNG));
+  const h=createExportVmHost({desktop:true});await h.renderImage(PNG);
   const port=h.context.document.getElementById('compatibility-business-ports').markdownEditorPlatformPort,original=port.call;
   let finish,entered;const ready=new Promise(r=>entered=r);port.call=(surface,operation,...args)=>{
     if(operation==='saveFile'){entered();return new Promise(r=>finish=r);}return original(surface,operation,...args);
   };
-  const work=h.invoke('downloadExportImage');await ready;h.evaluate('currentImageDataUrl="data:;base64,AA=="');finish('C:\\chosen.png');await work;
-  assert.deepEqual(Array.from(h.calls.find(x=>x[0]==='writeBinary')[2]),signature);h.destroy();
+  const work=h.invoke('downloadExportImage');await ready;const snapshot=h.imageMount.port.getPreview();assert.equal(Object.isFrozen(snapshot),true);assert.throws(()=>{snapshot.dataUrl='data:;base64,AA==';},TypeError);await h.renderImage();finish('C:\\chosen.png');await work;
+  assert.equal(h.calls.some(x=>x[0]==='writeBinary'),false,'Replacing a cancellable dialog task suppresses stale output');port.call=original;await h.invoke('downloadExportImage');assert.deepEqual(Array.from(h.calls.find(x=>x[0]==='writeBinary')[2]),signature);h.destroy();
 });
 
 for(const savePath of [null,'',false,123,{}]) test('R14-15 cancelled or invalid save path never writes: '+JSON.stringify(savePath), async()=>{
-  const h=createExportVmHost({desktop:true,savePath});h.evaluate('currentImageDataUrl='+JSON.stringify(PNG));await h.invoke('downloadExportImage');
+  const h=createExportVmHost({desktop:true,savePath});await h.renderImage(PNG);await h.invoke('downloadExportImage');
   assert.equal(h.calls.some(x=>x[0]==='writeBinary'),false);
   assert.equal(h.calls.some(x=>x[0]==='toast'&&x[1]==='toastImageDownloaded'),false);h.destroy();
 });
 
 for(const boundary of ['write','dialog','capability','destroyed-port'])test('R14-15 '+boundary+' failure has no success toast or leaked browser URL',async()=>{
-  const h=createExportVmHost({desktop:boundary!=='write',failWrite:boundary==='write'});h.evaluate('currentImageDataUrl='+JSON.stringify(PNG));
+  const h=createExportVmHost({desktop:boundary!=='write',failWrite:boundary==='write'});await h.renderImage(PNG);
   const port=h.context.document.getElementById('compatibility-business-ports').markdownEditorPlatformPort;
   if(boundary==='dialog')port.call=async()=>{throw new Error('dialog denied');};
   if(boundary==='capability')port.supports=()=>false;
-  if(boundary==='destroyed-port')h.dataMount.destroy();
+  if(boundary==='destroyed-port')h.imageMount.destroy();
   await h.invoke('downloadExportImage');assert.equal(h.calls.some(x=>x[0]==='toast'&&x[1]==='toastImageDownloaded'),false);
   assert.equal(h.downloads.length,0);h.destroy();
 });

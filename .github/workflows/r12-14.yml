@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-15 Data URL bytes and actual Windows binary writes · ${{ github.sha }}
+run-name: R14-16 final image lifecycle and actual Windows PNG file writes · ${{ github.sha }}
 
 on:
   push:
@@ -210,6 +210,9 @@ jobs:
       - name: R14-15 exact Data URL bytes, Unicode and binary output contracts
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-image-data.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-image-data.log"
+      - name: R14-16 final image owner, source barriers and irreversible lifecycle
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-image-exporter.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/image-exporter.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

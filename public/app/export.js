@@ -1,39 +1,16 @@
     const exportCompatibilityHost = document.getElementById('compatibility-business-ports');
-    const exportPlatformPort = exportCompatibilityHost?.markdownEditorPlatformPort;
-    const exportDocumentDomainPort = exportCompatibilityHost?.markdownEditorDocumentDomainPort;
-    const exportDocumentSessionPort = exportCompatibilityHost?.markdownEditorDocumentSessionPort;
-    const exportDocumentControllerPort = exportCompatibilityHost?.markdownEditorDocumentControllerPort;
-    const exportDocumentUiCommandPort = exportCompatibilityHost?.markdownEditorDocumentUiCommandPort;
-    const exportSidebarControllerPort = exportCompatibilityHost?.markdownEditorSidebarControllerPort;
     const exportPreviewCommandPort = exportCompatibilityHost?.markdownEditorPreviewCommandPort;
-    const exportPresentationPort = exportCompatibilityHost?.markdownEditorPresentationPort;
     const exportRequestPort = exportCompatibilityHost?.markdownEditorExportRequestPort;
     const exportTaskPort = exportCompatibilityHost?.markdownEditorExportTaskPort;
-    const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
-    const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
-    const exportStylePort = exportCompatibilityHost?.markdownEditorExportStylePort;
-    const exportImageAssetPort = exportCompatibilityHost?.markdownEditorImageAssetPort;
-    const exportImageDataPort = exportCompatibilityHost?.markdownEditorImageDataPort;
-    const exportImageLayoutPort = exportCompatibilityHost?.markdownEditorImageLayoutPort;
+    const exportImagePort = exportCompatibilityHost?.markdownEditorImageExportPort;
     const exportPdfPort = exportCompatibilityHost?.markdownEditorPdfExportPort;
     const exportWordPort = exportCompatibilityHost?.markdownEditorWordExportPort;
     const exportHtmlPort = exportCompatibilityHost?.markdownEditorHtmlExportPort;
     const exportMarkdownPort = exportCompatibilityHost?.markdownEditorMarkdownExportPort;
-    if (!exportDocumentDomainPort) throw new Error('Document domain compatibility port is unavailable.');
-    if (!exportDocumentSessionPort) throw new Error('Document session compatibility port is unavailable.');
-    if (!exportDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
-    if (!exportDocumentUiCommandPort) throw new Error('Document UI command compatibility port is unavailable.');
-    if (!exportSidebarControllerPort) throw new Error('Sidebar controller compatibility port is unavailable.');
     if (!exportPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
-    if (!exportPresentationPort) throw new Error('Presentation compatibility port is unavailable.');
     if (!exportRequestPort) throw new Error('Export request compatibility port is unavailable.');
     if (!exportTaskPort) throw new Error('Export task compatibility port is unavailable.');
-    if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
-    if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
-    if (!exportStylePort) throw new Error('Export style compatibility port is unavailable.');
-    if (!exportImageAssetPort) throw new Error('Image asset compatibility port is unavailable.');
-    if (!exportImageDataPort) throw new Error('Image data compatibility port is unavailable.');
-    if (!exportImageLayoutPort) throw new Error('Image layout compatibility port is unavailable.');
+    if (!exportImagePort) throw new Error('Image exporter compatibility port is unavailable.');
     if (!exportPdfPort) throw new Error('PDF export compatibility port is unavailable.');
     if (!exportWordPort) throw new Error('Word export compatibility port is unavailable.');
     if (!exportHtmlPort) throw new Error('HTML export compatibility port is unavailable.');
@@ -66,16 +43,6 @@
     function finishExportTask(task, outcome) {
       try { return exportTaskPort.finish(task, outcome); }
       catch (error) { showToast('导出清理失败：' + (error?.message || String(error))); return false; }
-    }
-
-    function getExportSaveOptions(title, request, filterName) {
-      return {
-        title,
-        extension: request.extension,
-        extensions: request.extensions,
-        filterName,
-        defaultDirectory: request.directory
-      };
     }
 
     // 导出文件
@@ -155,7 +122,6 @@
 
     // 导出图片
     let currentImageRatio = '9:16';
-    let currentImageDataUrl = '';
 
     function openExportImageModal() {
       if (exportPreviewCommandPort.getViewMode() !== 'preview') {
@@ -189,120 +155,28 @@
     async function renderExportImagePreview() {
       const request = readExportRequest('image');
       if (!request) return;
-      const task = beginExportTask('正在生成图片预览');
-      if (!task) return;
-      let outcome = 'completed';
-      let clone = null;
-      let imageStyleLease = null;
-      let imageLayoutLease = null;
       try {
-        let domToImageApi = null;
-        if (!domToImageApi) {
-          task.update(5, '正在加载图片导出模块…', 'loading');
-          try {
-            domToImageApi = await task.token.waitFor(exportPresentationPort.loadDomToImage());
-          } catch (error) {
-            if (exportTaskPort.isCancelled(error)) throw error;
-            console.error('Image export library load error:', error);
-          }
-        }
-        task.token.throwIfCancelled();
-        if (!domToImageApi) {
-          outcome = 'failed';
-          showToast(t('toastImageLibMissing'));
-          return;
-        }
-
-        const stage = document.getElementById('export-image-stage');
-        const container = document.getElementById('export-image-content');
-
-        container.innerHTML = '';
-        clone = document.createElement('div');
-        clone.className = 'preview-content';
-        const fullBody = await exportDocumentPort.build({ task, documentId: request.documentId });
-        task.token.throwIfCancelled();
-        clone.replaceChildren(fullBody);
-        imageStyleLease = exportStylePort.apply(clone, 'image');
-        container.appendChild(clone);
-        imageLayoutLease = exportImageLayoutPort.mount({ root: clone, stage, options: request.imageOptions });
-
-        await exportEnhancementPort.enhance({ root: fullBody, task, documentId: request.documentId });
-        const source = exportDocumentPort.getSourceContext(fullBody);
-        await exportImageAssetPort.prepare({ root: clone, task, isCurrent: () =>
-          source.documentId === exportDocumentSessionPort.activeId && source.documentVersion === documentModel.getDocumentVersion() });
-        task.token.throwIfCancelled();
-
-        const layout = imageLayoutLease.measure();
-        task.update(96, '正在生成 PNG，此阶段完成前不能立即取消…', 'encoding');
-        task.lockCancellation('encoding');
-        task.token.throwIfCancelled();
-        const dataUrl = await task.token.waitFor(domToImageApi.toPng(clone, {
-          width: layout.width,
-          height: layout.captureHeight,
-          bgcolor: getComputedStyle(clone).backgroundColor || '#ffffff',
-          cacheBust: true,
-          imagePlaceholder: exportImageAssetPort.placeholder
-        }));
-        task.token.throwIfCancelled();
-        task.update(100, '图片预览已生成');
-        currentImageDataUrl = dataUrl;
-        const previewImg = document.getElementById('export-image-preview');
-        previewImg.src = dataUrl;
-        previewImg.classList.remove('is-hidden');
-        showToast(t('toastPreviewGenerated'));
+        const result = await exportImagePort.render({ request });
+        if (result.status === 'busy') showToast('当前导出正在生成文件，请稍候');
+        if (result.status === 'ready') showToast(t('toastPreviewGenerated'));
       } catch (error) {
-        outcome = 'failed';
         if (!exportTaskPort.isCancelled(error)) {
           console.error(error);
           showToast(t('toastImageGenFailed', error?.message || String(error)));
         }
-      } finally {
-        let cleanupError;
-        for (const release of [() => imageLayoutLease?.release(), () => imageStyleLease?.release()]) {
-          try { release(); } catch (error) { cleanupError ??= error; }
-        }
-        if (cleanupError) {
-          outcome = 'failed';
-          console.error(cleanupError);
-          showToast(t('toastImageGenFailed', cleanupError?.message || String(cleanupError)));
-        }
-        finishExportTask(task, outcome);
       }
     }
-
 
     async function downloadExportImage() {
       const request = readExportRequest('image');
       if (!request) return;
-      if (!currentImageDataUrl) {
-        showToast(t('toastGeneratePreviewFirst'));
-        return;
-      }
-      const name = request.name;
-
       try {
-        // Decode once before any await; a later preview cannot change these bytes.
-        const bytes = exportImageDataPort.encode(currentImageDataUrl);
-        const nativeDialogs = exportPlatformPort.supports('desktop.dialogs');
-        const nativeFiles = exportPlatformPort.supports('desktop.fileSystem');
-        let path = name;
-        if (nativeDialogs && nativeFiles) {
-          path = await exportPlatformPort.call('dialogs', 'saveFile', name, getExportSaveOptions(
-            '导出图片',
-            request,
-            'PNG 图片'
-          ));
-          if (path === null || path === '') return;
-          if (typeof path !== 'string') throw new TypeError('图片保存路径无效');
-        } else if (nativeDialogs || nativeFiles || !exportPlatformPort.supports('browser.fileDownload')) {
-          throw new Error('图片文件导出能力不可用');
-        }
-        await exportPlatformPort.call('files', 'writeBinary', path, bytes, {
-          extension: request.extension, reason: 'export', ...(!nativeFiles ? { mimeType: 'image/png' } : {})
-        });
-        showToast(t('toastImageDownloaded'));
+        const result = await exportImagePort.save({ request });
+        if (result.status === 'no-preview') showToast(t('toastGeneratePreviewFirst'));
+        if (result.status === 'busy') showToast('当前导出正在生成文件，请稍候');
+        if (['written', 'downloaded'].includes(result.status)) showToast(t('toastImageDownloaded'));
       } catch (error) {
-        showToast('图片导出失败：' + (error?.message || String(error)));
+        if (!exportTaskPort.isCancelled(error)) showToast('图片导出失败：' + (error?.message || String(error)));
       }
     }
 

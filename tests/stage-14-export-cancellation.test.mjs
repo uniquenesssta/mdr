@@ -185,6 +185,6 @@ test('R14-04 PNG encoding rejection releases the lock and a subsequent task can 
   const h = createExportVmHost();
   h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.loadDomToImage = async () => ({ toPng: async () => { throw new Error('encoding failed'); } });
   await h.invoke('renderExportImagePreview'); assert.equal(h.taskPort.getSnapshot().activeTask, null);
-  assert.equal(h.evaluate('currentImageDataUrl'), '');
+  assert.equal(h.imageData(), '');
   const next = h.invoke('beginExportTask', 'next'); assert.equal(next.cancelable, true); assert.equal(h.nodes.get('export-progress-cancel').disabled, false); h.destroy();
 });

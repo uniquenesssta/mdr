@@ -166,7 +166,7 @@ test('R14-08 actual image caller applies styles through encoding and releases on
     } });
     if (boundary === 'cancelled') presentation.math.renderTree = () => h.cancel();
     try {
-      await h.invoke('renderExportImagePreview'); const root = h.nodes.get('export-image-content').children[0];
+      await h.invoke('renderExportImagePreview'); const root = h.captureRoots.at(-1);
       assert.equal(encoded, boundary !== 'cancelled'); assert.equal(root.dataset.exportFormat, undefined);
       assert.equal(root.classList.contains('export-document'), false); assert.equal(h.taskPort.getSnapshot().activeTask, null);
     } finally { h.destroy(); }

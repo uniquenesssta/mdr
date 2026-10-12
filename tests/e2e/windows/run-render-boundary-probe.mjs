@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { withEmbeddedSession } from './embedded-webdriver-session.mjs';
 import { verifyImportDocumentChain } from './import-document-chain.mjs';
 import { verifyImageDataExport } from './image-data-export.mjs';
+import { verifyImageExportChain } from './image-export-chain.mjs';
 import { createRenderBoundaryProbe, PROBE_SURFACES } from './render-boundary-probe.mjs';
 
 if (process.platform !== 'win32') throw new Error('R12-22 requires the real Windows WebView.');
@@ -282,6 +283,8 @@ try {
       await persist();
       evidence.imageDataExport = await verifyImageDataExport({ browser, ownedRoot: canaryRoot, commit: process.env.GITHUB_SHA });
       await writeFile(join(evidenceRoot, 'r14-15-native-image-data.json'), JSON.stringify(evidence.imageDataExport, null, 2));
+      evidence.imageExportChain = await verifyImageExportChain({ browser, ownedRoot: canaryRoot, commit: process.env.GITHUB_SHA });
+      await writeFile(join(evidenceRoot, 'r14-16-native-image-export.json'), JSON.stringify(evidence.imageExportChain, null, 2));
       await persist();
     }
   });

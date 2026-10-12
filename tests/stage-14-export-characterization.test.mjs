@@ -53,7 +53,7 @@ for (const item of requests.names) {
   for (const [format, operation] of Object.entries(operations)) {
     test(`R14-02 normalized ${format} desktop dialog name retains R14-01 filter/directory/write coverage: ${JSON.stringify(item.input)}`, async () => {
       const h = createExportVmHost({ desktop: true, sourceText: fixture.source, name: item.input });
-      if (format === 'image') h.evaluate("currentImageDataUrl = 'data:image/png;base64,iVBORw0KGgo='");
+      if (format === 'image') await h.renderImage();
       await h.invoke(operation);
       const dialog = h.calls.find(x => x[0] === 'saveFile');
       assert.ok(dialog, JSON.stringify(h.calls));
@@ -80,7 +80,7 @@ for (const format of Object.keys(operations)) {
   test(`R14-01 ${format} dialog cancellation and failed write never fall back to browser download`, async () => {
     for (const mode of ['cancel', 'error']) {
       const h = createExportVmHost({ desktop: true, savePath: mode === 'cancel' ? null : 'C:\\occupied', failWrite: mode === 'error' });
-      if (format === 'image') h.evaluate("currentImageDataUrl = 'data:image/png;base64,iVBORw0KGgo='");
+      if (format === 'image') await h.renderImage();
       await h.invoke(operations[format]);
       assert.equal(h.downloads.length, 0);
       assert.equal(h.calls.filter(x => /^write/.test(x[0])).length, mode === 'cancel' ? 0 : 1);
@@ -215,7 +215,7 @@ test('R14-01 PNG ratio/padding/crop/natural height, noncancelable encoding and g
     assert.equal(h.nodes.get('export-image-stage').style.getPropertyValue('--export-image-height'), '');
     assert.equal(h.nodes.get('export-image-stage').hasAttribute('data-export-image-layout'), false);
     assert.equal(h.nodes.get('export-progress-cancel').disabled, true);
-    assert.equal(h.evaluate('currentImageDataUrl'), 'data:image/png;base64,iVBORw0KGgo=');
+    assert.equal(h.imageData(), 'data:image/png;base64,iVBORw0KGgo=');
     await h.invoke('downloadExportImage');
     assert.equal(h.downloads[0].name, 'report.png');
     assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
@@ -224,7 +224,7 @@ test('R14-01 PNG ratio/padding/crop/natural height, noncancelable encoding and g
 
 test('R14-01 malformed image data errors before write; percent/base64 encodings preserve exact bytes', () => {
   const h = createExportVmHost();
-  assert.throws(() => h.evaluate('exportImageDataPort').encode('not-data'), /图片数据无效/);
-  assert.deepEqual(Array.from(h.evaluate('exportImageDataPort').encode('data:text/plain,hello%20world')), Array.from(new TextEncoder().encode('hello world')));
-  assert.deepEqual(Array.from(h.evaluate('exportImageDataPort').encode('data:image/png;base64,iVBORw0KGgo=')), [137, 80, 78, 71, 13, 10, 26, 10]);
+  assert.throws(() => h.context.document.getElementById('compatibility-business-ports').markdownEditorImageDataPort.encode('not-data'), /图片数据无效/);
+  assert.deepEqual(Array.from(h.context.document.getElementById('compatibility-business-ports').markdownEditorImageDataPort.encode('data:text/plain,hello%20world')), Array.from(new TextEncoder().encode('hello world')));
+  assert.deepEqual(Array.from(h.context.document.getElementById('compatibility-business-ports').markdownEditorImageDataPort.encode('data:image/png;base64,iVBORw0KGgo=')), [137, 80, 78, 71, 13, 10, 26, 10]);
 });

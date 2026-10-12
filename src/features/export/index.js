@@ -30,3 +30,6 @@ export { createImageAssetPreloader, EXPORT_IMAGE_PLACEHOLDER } from './formats/i
 export { mountClassicImageAssetPort } from './compatibility/classic-image-asset-port.js';
 export { imageDataUrlToBytes, ImageDataEncodingError } from './formats/image/image-data-encoder.js';
 export { mountClassicImageDataPort } from './compatibility/classic-image-data-port.js';
+export { createImageExporter } from './formats/image/image-exporter.js';
+export { createImageExportSurface } from './formats/image/image-export-surface.js';
+export { mountClassicImageExportPort } from './compatibility/classic-image-export-port.js';

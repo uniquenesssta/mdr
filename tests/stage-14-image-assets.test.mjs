@@ -205,7 +205,9 @@ test('R14-14 classic command uses the public asset boundary before measurement a
   // Observe public call inputs using a mounted capability rather than rewriting the production function.
   const source = readFileSync(new URL('../public/app/export.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /prepareExportImages|IMAGE_PLACEHOLDER|new Image\(|_cors=/);
-  assert.match(source, /await exportImageAssetPort\.prepare\(\{ root: clone, task, isCurrent:/);
+  assert.match(source, /await exportImagePort\.render/);
+  const ownerSource = readFileSync(new URL('../src/features/export/formats/image/image-exporter.js', import.meta.url), 'utf8');
+  assert.match(ownerSource, /assets\.prepare\(\{ root: capture\.root, task, isCurrent:/);
   const host = h.context.document.getElementById('compatibility-business-ports');
   host.markdownEditorPresentationPort.loadDomToImage = async () => ({ async toPng() {
     prepared = true; assert.equal(h.assetTimers.size, 0); return PNG;

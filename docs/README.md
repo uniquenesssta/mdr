@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～15已验收；15：463af96 / CI38226523614，七组Windows及全部步骤通过，全仓2109/2109、前端1103/1103、编码58/58、浏览器11/11＋63/63、Rust281、实际Windows二进制写入读回成功。15正式收尾，首轮失败与修复保留；16未开始，最终图片所有者与整体A10仍由16接收。 [15验收](R14-15-DETAILS.md#正式验收2026-10-12)。
+当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～15已验收；15：463af96 / CI38226523614，七组Windows及全部步骤通过，全仓2109/2109、前端1103/1103、编码58/58、浏览器11/11＋63/63、Rust281及实际Windows字节读回成功，首轮失败/修复保留。按用户指令以b1c236b收尾基线在唯一agent/r14-stage开始14.16：独立Image Exporter与捕获Surface接管来源绑定PNG/字节缓存、准备/编码/保存编排与节点/租约释放；编码/写入前锁定不可取消，异步结束/弹窗后复核来源、版本与generation，过时不发布，晚到销毁结果不成功。经典私有PNG缓存与布局/转换/二进制编排删除，复用原Platform/Rust/Blob链。新增34项契约、2项真实页面（累计65）及真实Windows完整PNG保存/读回/目录失败恢复；16待新head七组累计验收，17未开始，A10完整图片链待本项证据。 [16范围](R14-16-DETAILS.md)。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

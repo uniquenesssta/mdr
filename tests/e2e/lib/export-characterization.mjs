@@ -263,7 +263,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
         await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Exported PNG decode failed'));image.src=png;});
         return {prints,printed,errors,before,afterPrint,after:port.getViewMode(),width:image.naturalWidth,height:image.naturalHeight,png,phases,
           progressVisible:document.getElementById('export-progress-modal').classList.contains('show'),stageChildren:document.getElementById('export-image-content').children.length,
-          stageStylesCleared:['height','minHeight','overflow'].every(key=>document.getElementById('export-image-content').firstElementChild.style[key]===''),
+          stageStylesCleared:document.getElementById('export-image-content').children.length===0&&!document.getElementById('export-image-stage').hasAttribute('data-export-image-layout'),
           retired:typeof styleTaskLists==='undefined'&&typeof renderMermaidBlocks==='undefined'&&typeof observedPreviewBody==='undefined'&&typeof enhanceFullPreviewForExport==='undefined'};
       } finally {unsubscribe();observer.disconnect();console.error=error;}
     })()`);
@@ -272,7 +272,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     if(png)await writeFile(join(artifactRoot,'r14-07-export.png'),png);
     assert.equal(result.prints,1);assert.equal(result.printed.format,'pdf');assert.ok(result.printed.math>=2);assert.equal(result.printed.diagrams,1);assert.equal(result.printed.heading,'Export baseline');
     assert.equal(result.errors.length,0);assert.equal(result.afterPrint,result.before);
-    assert.equal(result.progressVisible,false);assert.equal(result.stageChildren,1);assert.equal(result.stageStylesCleared,true);assert.equal(result.retired,true);
+    assert.equal(result.progressVisible,false);assert.equal(result.stageChildren,0);assert.equal(result.stageStylesCleared,true);assert.equal(result.retired,true);
     assert.equal(result.width,1080);assert.ok(result.height>=1920);
     assert.ok(result.phases.some(x=>x.phase==='encoding'&&x.cancelable===false));
     assert.deepEqual(Array.from(png.subarray(0,8)),[137,80,78,71,13,10,26,10]);
@@ -478,12 +478,15 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const difference=(a,b)=>{if(a.width!==b.width||a.height!==b.height)throw new Error('PNG reference dimensions differ');let pixels=0;
         for(let i=0;i<a.pixels.length;i+=4)if(a.pixels[i]!==b.pixels[i]||a.pixels[i+1]!==b.pixels[i+1]||a.pixels[i+2]!==b.pixels[i+2]||a.pixels[i+3]!==b.pixels[i+3])pixels++;
         return pixels;};
+      const renderer=await presentation.loadDomToImage(),originalPng=renderer.toPng;let capturedRoot;
+      renderer.toPng=(root,options)=>{capturedRoot=root;return originalPng.call(renderer,root,options);};
       const results=[];
       try {
         for(const theme of ['light','dark']) {
           document.body.setAttribute('data-theme',theme);await document.fonts.ready;await renderExportImagePreview();
-          const png=document.getElementById('export-image-preview').src,actual=await decode(png),root=document.getElementById('export-image-content').firstElementChild;
-          const released=!root.classList.contains('export-document')&&!root.hasAttribute('data-export-format');
+          const png=document.getElementById('export-image-preview').src,actual=await decode(png),root=capturedRoot;
+          const released=!root.isConnected&&document.getElementById('export-image-content').children.length===0&&!root.classList.contains('export-document')&&!root.hasAttribute('data-export-format');
+          document.getElementById('export-image-content').append(root);
           const lease=styles.apply(root,'image'),previousHeight=root.style.height;
           const geometry=host.markdownEditorImageLayoutPort.mount({root,stage:document.getElementById('export-image-stage'),
             options:host.markdownEditorExportRequestPort.createRequest({format:'image',imageOptions:{ratio:'9:16',cropFit:false}}).imageOptions});
@@ -503,11 +506,11 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
             } else results.push({theme,width:actual.width,height:actual.height,hidden,mathml:mathml.length,released,diff,png,reference});
           } finally {
             control?.remove();for(const item of retained)item.parent.insertBefore(item.node,item.next);
-            root.style.height=previousHeight;geometry.release();lease.release();
+            root.style.height=previousHeight;geometry.release();lease.release();root.remove();
           }
         }
         return results;
-      } finally {if(oldTheme===null)document.body.removeAttribute('data-theme');else document.body.setAttribute('data-theme',oldTheme);}
+      } finally {renderer.toPng=originalPng;capturedRoot?.remove();if(oldTheme===null)document.body.removeAttribute('data-theme');else document.body.setAttribute('data-theme',oldTheme);}
     })()`);
     await writeFile(join(artifactRoot,'r14-08-png-math-pixels.json'),JSON.stringify(result.map(({png,reference,...row})=>row),null,2));
     for(const row of result) {
@@ -853,7 +856,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const run=async ratio=>{capture=null;const prior=tasks.getSnapshot().lastTaskId;document.querySelector('.ratio-btn[data-ratio="'+ratio+'"]').click();if(tasks.getSnapshot().lastTaskId===prior)throw new Error('Ratio button did not start the real image task');
         const started=performance.now();while(tasks.getSnapshot().activeTask){if(performance.now()-started>15000)throw new Error('Image ratio task did not finish');await new Promise(resolve=>requestAnimationFrame(resolve));}
         if(!capture?.png||preview.src!==capture.png)throw new Error('Ratio command did not publish its actual encoded PNG');const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Ratio PNG decode failed'));image.src=capture.png;});
-        const root=document.getElementById('export-image-content').firstElementChild;return {ratio,...capture,pixelWidth:image.naturalWidth,pixelHeight:image.naturalHeight,released:!root.hasAttribute('data-export-image-layout')&&!stage.hasAttribute('data-export-image-layout')&&root.style.getPropertyValue('--export-image-width')===''&&stage.style.getPropertyValue('--export-image-height')==='',
+        const root=document.getElementById('export-image-content').firstElementChild;return {ratio,...capture,pixelWidth:image.naturalWidth,pixelHeight:image.naturalHeight,released:root===null&&!stage.hasAttribute('data-export-image-layout')&&stage.style.getPropertyValue('--export-image-height')==='',
           samePreview:appPreview.childNodes.length===originalNodes.length&&originalNodes.every((node,index)=>appPreview.childNodes[index]===node),scoped:typeof window.markdownEditorImageLayoutPort==='undefined'&&Object.isFrozen(host.markdownEditorImageLayoutPort)};};
       try {checkbox.checked=false;for(const ratio of ['9:16','4:5','3:4','1:1','16:9'])rows.push(await run(ratio));
         let replaced=false;const beforeEncodes=encodes,unsubscribe=tasks.subscribe(snapshot=>{if(!replaced&&snapshot.activeTask?.phase==='enhancing'&&document.getElementById('export-image-content').firstElementChild?.hasAttribute('data-export-image-layout')){replaced=true;document.querySelector('.ratio-btn[data-ratio="1:1"]').click();}});
@@ -879,7 +882,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const decode=async png=>{const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Long/crop PNG decode failed'));image.src=png;});const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;const context=canvas.getContext('2d');context.drawImage(image,0,0);return {width:canvas.width,height:canvas.height,context};};
       try {for(const cropFit of [false,true]){captured=null;checkbox.checked=cropFit;document.querySelector('.ratio-btn[data-ratio="9:16"]').click();const started=performance.now();while(tasks.getSnapshot().activeTask){if(performance.now()-started>15000)throw new Error('Long/crop task did not finish');await new Promise(resolve=>requestAnimationFrame(resolve));}
           if(!captured?.png||document.getElementById('export-image-preview').src!==captured.png)throw new Error('Long/crop image did not publish the real PNG');const decoded=await decode(captured.png),root=document.getElementById('export-image-content').firstElementChild;
-          rows.push({cropFit,...captured,pixelWidth:decoded.width,pixelHeight:decoded.height,released:tasks.getSnapshot().activeTask===null&&!root.hasAttribute('data-export-image-layout')&&!document.getElementById('export-image-stage').hasAttribute('data-export-image-layout')});}
+          rows.push({cropFit,...captured,pixelWidth:decoded.width,pixelHeight:decoded.height,released:tasks.getSnapshot().activeTask===null&&root===null&&!document.getElementById('export-image-stage').hasAttribute('data-export-image-layout')});}
         const long=await decode(rows[0].png),crop=await decode(rows[1].png),a=long.context.getImageData(0,0,crop.width,crop.height).data,b=crop.context.getImageData(0,0,crop.width,crop.height).data;let differentPixels=0;
         for(let i=0;i<a.length;i+=4)if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]||a[i+3]!==b[i+3])differentPixels++;return {rows,differentPixels};
       }finally{checkbox.checked=oldCrop;renderer.toPng=originalPng;selectImageRatio(oldRatio);const started=performance.now();while(tasks.getSnapshot().activeTask){if(performance.now()-started>15000)throw new Error('Long/crop restore did not finish');await new Promise(resolve=>requestAnimationFrame(resolve));}}
@@ -934,7 +937,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     for(const field of ['complete','locked','taskEnded','previewPreserved','layoutReleased','published'])assert.equal(result[field],true,field);
     assert.equal(result.pixelWidth,1080);assert.equal(result.pixelHeight,1920);
     for(const item of result.images){assert.equal(item.ready,true);assert.equal(item.srcset,null);assert.deepEqual(item.pixel,item.alt==='inline'||item.alt==='good'?[17,131,211,255]:[233,236,239,255]);}
-    assert.deepEqual(result.progress,[91,92,93,94,95]);assert.ok(result.duration>=9000&&result.duration<25000);
+    assert.deepEqual(result.progress,[90,91,92,93,94,95]);assert.ok(result.duration>=9000&&result.duration<25000);
     const corsRequests=requests.filter(item=>new URL(item.url,origin).searchParams.has('_cors'));
     assert.equal(corsRequests.length,4,'Already inlined assets must not cause another remote request in PNG encoding.');
     assert.equal(corsRequests.every(item=>item.origin===applicationHost.origin&&item.cookie===null),true);
@@ -970,7 +973,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     await loadMarkdown('# R14-15 编码😀\n\nActual PNG binary download.');
     const result = await page.evaluate(`(async()=>{
       const host=document.getElementById('compatibility-business-ports'),encoder=host.markdownEditorImageDataPort;
-      const input=document.getElementById('filename'),oldName=input.value,previousData=currentImageDataUrl;
+      const input=document.getElementById('filename'),oldName=input.value;
       const create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click;
       const blobs=new Map(),captures=[],revoked=[];
       URL.createObjectURL=function(blob){const url=create.call(URL,blob);blobs.set(url,blob);return url;};
@@ -978,7 +981,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       HTMLAnchorElement.prototype.click=function(){if(this.download){captures.push({name:this.download,url:this.href,blob:blobs.get(this.href)});return;}return click.call(this);};
       try{
         input.value='编码😀.md';await renderExportImagePreview();
-        const png=currentImageDataUrl;if(!png.startsWith('data:image/png;base64,'))throw new Error('Missing actual PNG.');
+        const png=host.markdownEditorImageExportPort.getPreview()?.dataUrl;if(!png.startsWith('data:image/png;base64,'))throw new Error('Missing actual PNG.');
         const raw=atob(png.split(',')[1]),expected=Uint8Array.from(raw,c=>c.charCodeAt(0)),encoded=encoder.encode(png);
         if(encoded.length!==expected.length||!encoded.every((v,i)=>v===expected[i]))throw new Error('Encoder altered PNG bytes.');
         await downloadExportImage();if(captures.length!==1||!captures[0].blob)throw new Error('Missing actual Blob output.');
@@ -987,7 +990,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
         const decoded=await createImageBitmap(capture.blob);const dimensions={width:decoded.width,height:decoded.height};decoded.close();
         const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');
         return {name:capture.name,mime:capture.blob.type,bytes:bytes.length,digest,dimensions,exactBytes:true,revoked:revoked.includes(capture.url),signature:Array.from(bytes.slice(0,8)),retired:typeof dataUrlToBytes==='undefined'};
-      }finally{URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;input.value=oldName;currentImageDataUrl=previousData;}
+      }finally{URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;input.value=oldName;}
     })()`);
     assert.equal(result.name,'编码😀.png');assert.equal(result.mime,'image/png');assert.ok(result.bytes>100);
     assert.deepEqual(result.signature,[137,80,78,71,13,10,26,10]);
@@ -999,7 +1002,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
   await test('R14-15 actual Unicode and binary decoding reject malformed input and failed download releases URL before recovery', async () => {
     const result=await page.evaluate(`(async()=>{
       const host=document.getElementById('compatibility-business-ports'),encoder=host.markdownEditorImageDataPort;
-      const previous=currentImageDataUrl,create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click;
+      const platform=host.markdownEditorPlatformPort,create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click;
       const urls=[],revoked=[],captures=[],blobs=new Map();
       URL.createObjectURL=function(blob){const url=create.call(URL,blob);urls.push(url);blobs.set(url,blob);return url;};
       URL.revokeObjectURL=function(url){revoked.push(url);return revoke.call(URL,url);};
@@ -1007,14 +1010,14 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
         const unicode=Array.from(encoder.encode('data:,汉😀'+String.fromCharCode(0xD800)));
         const binary=Array.from(encoder.encode('data:,%00%80%FF'));
         let rejected=false;try{encoder.encode('data:;base64,!');}catch(error){rejected=error.name==='ImageDataEncodingError';}
-        currentImageDataUrl='data:;base64,!';await downloadExportImage();const invalidCreates=urls.length;
-        currentImageDataUrl='data:;base64,AP8=';
+        try{await platform.call('files','writeBinary','invalid.png',encoder.encode('data:;base64,!'),{extension:'png',mimeType:'image/png',reason:'export'});}catch{}const invalidCreates=urls.length;
+        const bytesToSave=encoder.encode('data:;base64,AP8=');
         HTMLAnchorElement.prototype.click=function(){throw new Error('R14-15 owned download fault');};
-        await downloadExportImage();const failedRevoked=urls.length===1&&revoked.includes(urls[0]);
+        try{await platform.call('files','writeBinary','binary-recovery.png',bytesToSave,{extension:'png',mimeType:'image/png',reason:'export'});}catch{}const failedRevoked=urls.length===1&&revoked.includes(urls[0]);
         HTMLAnchorElement.prototype.click=function(){captures.push({url:this.href,blob:blobs.get(this.href)});};
-        await downloadExportImage();const bytes=Array.from(new Uint8Array(await captures[0].blob.arrayBuffer()));
+        await platform.call('files','writeBinary','binary-recovery.png',bytesToSave,{extension:'png',mimeType:'image/png',reason:'export'});const bytes=Array.from(new Uint8Array(await captures[0].blob.arrayBuffer()));
         return {unicode,binary,rejected,invalidCreates,failedRevoked,recovered:captures.length===1,recoveryBytes:bytes,recoveryRevoked:revoked.includes(captures[0].url),readonly:!Object.getOwnPropertyDescriptor(host,'markdownEditorImageDataPort').writable};
-      }finally{URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;currentImageDataUrl=previous;}
+      }finally{URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;}
     })()`);
     assert.deepEqual(result.unicode,[230,177,137,240,159,152,128,239,191,189]);assert.deepEqual(result.binary,[0,128,255]);
     assert.equal(result.invalidCreates,0);assert.deepEqual(result.recoveryBytes,[0,255]);
@@ -1022,9 +1025,82 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     await writeFile(join(artifactRoot,'r14-15-data-recovery.json'),JSON.stringify(result,null,2));
   });
 
+  await test('R14-16 actual PNG encoding stays locked, discards edited-source output and recovers complete enhanced bytes', async () => {
+    await loadMarkdown(fixture.source);
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),images=host.markdownEditorImageExportPort,tasks=host.markdownEditorExportTaskPort;
+      const renderer=await host.markdownEditorPresentationPort.loadDomToImage(),original=renderer.toPng,editor=host.markdownEditorEditorControllerPort;
+      const requests=host.markdownEditorExportRequestPort,request=()=>requests.createRequest({format:'image',imageOptions:{ratio:'9:16',cropFit:false}});
+      let entered=false,release,capture,stalePng;const gate=new Promise(resolve=>release=resolve);
+      renderer.toPng=async(root,options)=>{capture={root,math:root.querySelectorAll('.katex').length,diagrams:root.querySelectorAll('svg.f-mermaid-svg').length,
+        hidden:Array.from(root.querySelectorAll('.katex-mathml')).every(node=>getComputedStyle(node).display==='none')};entered=true;
+        stalePng=await original.call(renderer,root,options);await gate;return stalePng;};
+      const work=images.render({request:request()}).then(()=>({unexpected:true}),error=>({cancelled:tasks.isCancelled(error),reason:error.reason}));
+      try{
+        const started=performance.now();while(!entered){if(performance.now()-started>10000)throw new Error('Actual PNG phase was not reached');await new Promise(resolve=>requestAnimationFrame(resolve));}
+        const locked=tasks.getSnapshot().activeTask?.phase==='encoding'&&tasks.getSnapshot().activeTask?.cancelable===false;
+        const cancelRejected=tasks.cancel()===false,replacementBusy=(await images.render({request:request()})).status==='busy';
+        const retained=capture.root.isConnected&&capture.root.getAttribute('data-export-format')==='image';
+        const current=window.markdownEditorDocumentModel.createSnapshot('r14-16-source').replace('Export baseline','R14-16 Current 原文😀');editor.setText(current);
+        release();const stale=await work;
+        const blocked=images.getPreview()===null&&!document.getElementById('export-image-preview').hasAttribute('src');
+        const released=!capture.root.isConnected&&document.getElementById('export-image-content').children.length===0&&tasks.getSnapshot().activeTask===null;
+        renderer.toPng=original;await window.__markdownEditorE2E.waitForIdle();let recoveryBody;
+        renderer.toPng=(root,options)=>{recoveryBody={heading:root.querySelector('h1')?.textContent,math:root.querySelectorAll('.katex').length,diagrams:root.querySelectorAll('svg.f-mermaid-svg').length,complete:root.textContent.includes('R14-16 Current 原文😀')&&root.textContent.includes('answer = 42')};return original.call(renderer,root,options);};
+        const preview=document.getElementById('preview'),nodes=Array.from(preview.childNodes);
+        const recovered=await images.render({request:request()}),png=images.getPreview().dataUrl;
+        const image=new Image();image.src=png;await image.decode();
+        return {locked,cancelRejected,replacementBusy,retained,stale,blocked,released,math:capture.math,diagrams:capture.diagrams,hidden:capture.hidden,
+          recoveryBody,recovered:recovered.status==='ready',currentVersion:images.getPreview().documentVersion===window.markdownEditorDocumentModel.getDocumentVersion(),
+          samePreview:nodes.length===preview.childNodes.length&&nodes.every((node,index)=>preview.childNodes[index]===node),
+          width:image.naturalWidth,height:image.naturalHeight,stalePng,png,retired:typeof currentImageDataUrl==='undefined',scoped:typeof window.markdownEditorImageExportPort==='undefined'&&Object.isFrozen(images)};
+      }finally{release();renderer.toPng=original;await work;}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-16-stale-encoding.json'),JSON.stringify({...result,png:undefined,stalePng:undefined},null,2));
+    for(const [name,png] of [['discarded',result.stalePng],['recovered',result.png]])await writeFile(join(artifactRoot,'r14-16-'+name+'.png'),Buffer.from(png.split(',')[1],'base64'));
+    for(const field of ['locked','cancelRejected','replacementBusy','retained','blocked','released','hidden','recovered','currentVersion','samePreview','retired','scoped'])assert.equal(result[field],true,field);
+    assert.deepEqual(result.stale,{cancelled:true,reason:'document-changed'});assert.ok(result.math>=2);assert.equal(result.diagrams,1);
+    assert.equal(result.recoveryBody.heading,'R14-16 Current 原文😀');assert.equal(result.recoveryBody.complete,true);assert.ok(result.recoveryBody.math>=2);assert.equal(result.recoveryBody.diagrams,1);
+    assert.equal(result.width,1080);assert.ok(result.height>=1920);
+  });
+
+  await test('R14-16 actual encoder and browser write failures clean owned DOM and URLs before the next complete PNG download', async () => {
+    await loadMarkdown('# R14-16 recovery 原文😀\n\nInline $x^2$ and complete tail.');
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),images=host.markdownEditorImageExportPort,tasks=host.markdownEditorExportTaskPort;
+      const renderer=await host.markdownEditorPresentationPort.loadDomToImage(),original=renderer.toPng;
+      const request=host.markdownEditorExportRequestPort.createRequest({format:'image',name:'完整恢复😀.png',imageOptions:{ratio:'9:16',cropFit:false}});
+      const preview=document.getElementById('preview'),nodes=Array.from(preview.childNodes);let failedRoot;
+      renderer.toPng=async root=>{failedRoot=root;throw new Error('R14-16 injected encoder failure');};
+      let encoderRejected=false;try{await images.render({request});}catch(error){encoderRejected=error.message==='R14-16 injected encoder failure';}finally{renderer.toPng=original;}
+      const encoderClean=images.getPreview()===null&&!failedRoot.isConnected&&document.getElementById('export-image-content').children.length===0&&tasks.getSnapshot().activeTask===null;
+      await images.render({request});const png=images.getPreview().dataUrl,expected=host.markdownEditorImageDataPort.encode(png);
+      const create=URL.createObjectURL,revoke=URL.revokeObjectURL,click=HTMLAnchorElement.prototype.click,urls=[],revoked=[],blobs=new Map(),captures=[];
+      URL.createObjectURL=blob=>{const url=create.call(URL,blob);urls.push(url);blobs.set(url,blob);return url;};
+      URL.revokeObjectURL=url=>{revoked.push(url);return revoke.call(URL,url);};
+      try{
+        HTMLAnchorElement.prototype.click=function(){if(this.download)throw new Error('R14-16 injected browser write failure');return click.call(this);};
+        let writeRejected=false;try{await images.save({request});}catch(error){writeRejected=error.message==='R14-16 injected browser write failure';}
+        const failedRevoked=urls.length===1&&revoked.includes(urls[0]),failedTaskReleased=tasks.getSnapshot().activeTask===null;
+        HTMLAnchorElement.prototype.click=function(){if(this.download){captures.push({name:this.download,url:this.href,blob:blobs.get(this.href)});return;}return click.call(this);};
+        const saved=await images.save({request});if(captures.length!==1)throw new Error('Expected one recovered actual PNG Blob');
+        const capture=captures[0],bytes=new Uint8Array(await capture.blob.arrayBuffer());
+        const exactBytes=bytes.length===expected.length&&bytes.every((value,index)=>value===expected[index]);const decoded=await createImageBitmap(capture.blob);
+        const width=decoded.width,height=decoded.height;decoded.close();
+        return {encoderRejected,encoderClean,writeRejected,failedRevoked,failedTaskReleased,status:saved.status,name:capture.name,mime:capture.blob.type,
+          bytes:bytes.length,exactBytes,width,height,revoked:revoked.includes(capture.url),taskReleased:tasks.getSnapshot().activeTask===null,
+          captureReleased:document.getElementById('export-image-content').children.length===0,samePreview:nodes.length===preview.childNodes.length&&nodes.every((node,index)=>preview.childNodes[index]===node),png};
+      }finally{URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;renderer.toPng=original;}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-16-output-recovery.json'),JSON.stringify({...result,png:undefined},null,2));
+    await writeFile(join(artifactRoot,'r14-16-downloaded.png'),Buffer.from(result.png.split(',')[1],'base64'));
+    for(const field of ['encoderRejected','encoderClean','writeRejected','failedRevoked','failedTaskReleased','exactBytes','revoked','taskReleased','captureReleased','samePreview'])assert.equal(result[field],true,field);
+    assert.equal(result.status,'downloaded');assert.equal(result.name,'完整恢复😀.png');assert.equal(result.mime,'image/png');assert.ok(result.bytes>100);assert.equal(result.width,1080);assert.ok(result.height>=1920);
+  });
+
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
     const result = await page.evaluate(`(async () => {
-      const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort;
+      const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorExportTaskPort,encoder=host.markdownEditorImageDataPort,imageExporter=host.markdownEditorImageExportPort;
       const progressRoot=document.getElementById('export-progress-modal');
       const builder=host.markdownEditorExportDocumentPort;
       const enhancer=host.markdownEditorExportEnhancementPort;
@@ -1056,7 +1132,8 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const wait=task.token.waitFor(operation).then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       window.dispatchEvent(new Event('pagehide'));
       window.setTimeout=nativeTimer;await pdfWork;await pendingPrint();
-      let dataRejected=false;try{exportImageDataPort.encode('data:,a');}catch(error){dataRejected=/destroyed/.test(error.message);}
+      let imageRejected=false;try{imageExporter.getPreview();}catch(error){imageRejected=/destroyed/.test(error.message);}
+      let dataRejected=false;try{encoder.encode('data:,a');}catch(error){dataRejected=/destroyed/.test(error.message);}
       const assetResult=await assetWait;const assetBefore=assetImage.src;assetLate();await Promise.resolve();const assetPreserved=assetImage.src===assetBefore;assetRoot.remove();
       const building=await buildWait;const enhancing=await enhancementWait;const waiting=await wait;rejectLate(new Error('late encoder failure'));await Promise.resolve();
       let rejected=false;try {port.begin('late');}catch(error){rejected=/destroyed/.test(error.message);}
@@ -1067,12 +1144,13 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       let pdfRejected=false;try {await pdf.export({});}catch(error){pdfRejected=/destroyed/.test(error.message);}
       let layoutRejected=false;try {layout.mount({});}catch(error){layoutRejected=/destroyed/.test(error.message);}
       let assetRejected=false;try{await assets.prepare({});}catch(error){assetRejected=/destroyed/.test(error.message);}
-      return {dataRejected,dataRemoved:!Object.hasOwn(host,'markdownEditorImageDataPort'),assetResult,assetPreserved,assetRejected,assetRemoved:!Object.hasOwn(host,'markdownEditorImageAssetPort'),layoutRejected,layoutReleased:!layoutRoot.hasAttribute('data-export-image-layout')&&!layoutStage.hasAttribute('data-export-image-layout')&&layoutRoot.style.getPropertyValue('--export-image-width')===''&&!Object.hasOwn(host,'markdownEditorImageLayoutPort'),pdfRejected,printCount,printRemoved:!pendingFrame.isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
+      return {imageRejected,imageRemoved:!Object.hasOwn(host,'markdownEditorImageExportPort'),imageNodesRemoved:document.getElementById('export-image-content').children.length===0&&!document.getElementById('export-image-preview').hasAttribute('src'),dataRejected,dataRemoved:!Object.hasOwn(host,'markdownEditorImageDataPort'),assetResult,assetPreserved,assetRejected,assetRemoved:!Object.hasOwn(host,'markdownEditorImageAssetPort'),layoutRejected,layoutReleased:!layoutRoot.hasAttribute('data-export-image-layout')&&!layoutStage.hasAttribute('data-export-image-layout')&&layoutRoot.style.getPropertyValue('--export-image-width')===''&&!Object.hasOwn(host,'markdownEditorImageLayoutPort'),pdfRejected,printCount,printRemoved:!pendingFrame.isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
         stylesRemoved:!document.querySelector('style[data-export-style-sheet="document"]')&&!styleRoot.classList.contains('export-document')&&!styleRoot.hasAttribute('data-export-format'),
         rejected,cancelledError,markdownRejected,htmlRejected,wordRejected,removed:!Object.hasOwn(host,'markdownEditorPdfExportPort')&&!Object.hasOwn(host,'markdownEditorWordExportPort')&&!Object.hasOwn(host,'markdownEditorHtmlExportPort')&&!Object.hasOwn(host,'markdownEditorMarkdownExportPort')&&!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
         progressVisible:progressRoot.classList.contains('show'),progressRemoved:!document.getElementById('export-progress-modal')};
     })()`);
+    assert.equal(result.imageRejected,true);assert.equal(result.imageRemoved,true);assert.equal(result.imageNodesRemoved,true);
     assert.equal(result.dataRejected,true);assert.equal(result.dataRemoved,true);
     assert.deepEqual(result.assetResult,{cancelled:true,reason:'destroyed'});assert.equal(result.assetPreserved,true);assert.equal(result.assetRejected,true);assert.equal(result.assetRemoved,true);
     assert.equal(result.printCount,0);

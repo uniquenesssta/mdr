@@ -156,7 +156,7 @@ test('R14-03 locked PNG encoding rejects replacement/cancel and a late result af
   assert.equal(h.invoke('beginExportTask', 'blocked'), null); h.cancel();
   assert.equal(h.taskPort.getSnapshot().activeTask.cancelled, false);
   h.destroy(); pending.resolve('data:image/png;base64,LATE'); await work;
-  assert.equal(h.evaluate('currentImageDataUrl'), '');
+  assert.throws(() => h.imageData(), /EXPORT_CANCELLED/);
   assert.equal(h.context.document.getElementById('export-image-preview').src, undefined);
   assert.equal(h.calls.some(x => x[0] === 'toast' && x[1] === 'toastPreviewGenerated'), false);
 });

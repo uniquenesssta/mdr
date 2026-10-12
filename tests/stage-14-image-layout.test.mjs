@@ -118,7 +118,7 @@ test('R14-13 actual classic image encoding uses canonical layout for every ratio
     h.evaluate('currentImageRatio='+JSON.stringify(ratio));h.context.document.getElementById('image-crop-fit').checked=true;
     presentation.loadDomToImage=async()=>({async toPng(root,input){assert.equal(input.width,width);assert.equal(input.height,height);assert.equal(root.getAttribute(marker),'crop');assert.equal(root.style.getPropertyValue('--export-image-font-size'),Math.round(width/36)+'px');
       assert.equal(h.taskPort.getSnapshot().activeTask.cancelable,false);assert.equal(h.context.document.getElementById('export-image-stage').style.getPropertyValue('--export-image-height'),height+'px');return 'data:image/png;base64,iVBORw0KGgo=';}});
-    try{await h.invoke('renderExportImagePreview');empty(h.nodes.get('export-image-content').children[0]);empty(h.nodes.get('export-image-stage'));assert.equal(h.taskPort.getSnapshot().activeTask,null);assert.equal(h.evaluate('currentImageDataUrl'),'data:image/png;base64,iVBORw0KGgo=');}finally{h.destroy();}
+    try{await h.invoke('renderExportImagePreview');empty(h.captureRoots.at(-1));empty(h.nodes.get('export-image-stage'));assert.equal(h.taskPort.getSnapshot().activeTask,null);assert.equal(h.imageData(),'data:image/png;base64,iVBORw0KGgo=');}finally{h.destroy();}
   }
 });
 
@@ -126,13 +126,13 @@ test('R14-13 classic measurement, cancellation, encoder and cleanup failures fin
   for(const boundary of ['read','cancel','encoding','release']) {
     const h=createExportVmHost({sourceText:'$x^2$'}),presentation=h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort;let first=true,encodes=0;
     const create=h.context.document.createElement;
-    if(boundary==='read')h.context.document.createElement=tag=>{const root=create(tag);if(tag==='div'&&first){first=false;Object.defineProperty(root,'scrollHeight',{get(){throw new Error('measure failure');}});}return root;};
+    if(boundary==='read')h.context.document.createElement=tag=>{const root=create(tag),height=root.scrollHeight;if(tag==='div')Object.defineProperty(root,'scrollHeight',{get(){if(first&&root.className==='preview-content'){first=false;throw new Error('measure failure');}return height;}});return root;};
     if(boundary==='cancel')presentation.math.renderTree=()=>{if(first){first=false;h.cancel();}};
     presentation.loadDomToImage=async()=>({async toPng(root){encodes++;if(boundary==='encoding'&&first){first=false;throw new Error('encoding failure');}
       if(boundary==='release'&&first){const remove=root.style.removeProperty.bind(root.style);root.style.removeProperty=name=>{if(first&&name==='--export-image-width'){first=false;throw new Error('release failure');}return remove(name);};}
       return 'data:image/png;base64,iVBORw0KGgo=';}});
-    try{await h.invoke('renderExportImagePreview');const root=h.nodes.get('export-image-content').children[0];if(boundary==='release'){assert.equal(root.hasAttribute(marker),false);assert.equal(root.style.getPropertyValue('--export-image-height'),'');assert.ok(h.calls.some(x=>x[0]==='error'&&x[1].includes('release image layout')));}else empty(root);
-      empty(h.nodes.get('export-image-stage'));assert.equal(root.dataset.exportFormat,undefined);assert.equal(h.taskPort.getSnapshot().activeTask,null);assert.equal(h.evaluate('currentImageDataUrl'),boundary==='release'?'data:image/png;base64,iVBORw0KGgo=':'');
-      h.context.document.createElement=create;await h.invoke('renderExportImagePreview');assert.equal(h.evaluate('currentImageDataUrl'),'data:image/png;base64,iVBORw0KGgo=');assert.equal(h.taskPort.getSnapshot().activeTask,null);assert.equal(encodes,['encoding','release'].includes(boundary)?2:1);}finally{h.destroy();}
+    try{await h.invoke('renderExportImagePreview');const root=h.captureRoots.at(-1);if(boundary==='release'){assert.equal(root.hasAttribute(marker),false);assert.equal(root.style.getPropertyValue('--export-image-height'),'');assert.ok(h.calls.some(x=>x[0]==='error'&&x[1].includes('release image layout')));}else empty(root);
+      empty(h.nodes.get('export-image-stage'));assert.equal(root.dataset.exportFormat,undefined);assert.equal(h.taskPort.getSnapshot().activeTask,null);assert.equal(h.imageData(),'');
+      h.context.document.createElement=create;await h.invoke('renderExportImagePreview');assert.equal(h.imageData(),'data:image/png;base64,iVBORw0KGgo=');assert.equal(h.taskPort.getSnapshot().activeTask,null);assert.equal(encodes,['encoding','release'].includes(boundary)?2:1);}finally{h.destroy();}
   }
 });

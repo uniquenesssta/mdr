@@ -5476,6 +5476,36 @@
       "mount-to-destroy",
       "retain",
       false
+    ],
+    [
+      "src/features/export/formats/image/image-exporter.js",
+      "esm-module",
+      "export-image",
+      "Final image render/save orchestration, source-bound private PNG bytes, irreversible stage locks, late-result barriers and independent terminal disposal.",
+      "image-workflow-cache-and-operations",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/formats/image/image-export-surface.js",
+      "esm-module",
+      "export-image",
+      "Owned capture DOM, scoped layout/style leases and preview projection with complete release and independent disposal.",
+      "image-capture-leases",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-image-export-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Scoped immutable render/save/read-preview capabilities; terminal unmount without owning image workflow state.",
+      "image-export-port-mount",
+      "mount-to-destroy",
+      "retain",
+      false
     ]
   ]
 }
