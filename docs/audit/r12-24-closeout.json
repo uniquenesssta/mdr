@@ -667,7 +667,7 @@
     "date": "2026-10-12",
     "reviewedCommit": "b1c236b3326357c1c0f8d991d1f282dcd5582f77",
     "record": "docs/R14-16-DETAILS.md",
-    "status": "R14.14 formally accepted; R14.15 Data URL bytes and binary output implemented pending exact-head Windows admission;14.16 not started.",
+    "status": "R14.16 accepted and closed; R14.17 authorized next",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "Pure Data URL decoder, scalar-value/percent-octet/base64 byte safety, scoped conversion port, fixed bytes before image save dialog and existing Platform binary output for native and browser paths; actual Windows file readback and actual PNG/Blob evidence defined. No image rendering owner or new writer, dependency, model, data format or native permission changes.",
@@ -751,265 +751,84 @@
     "implementationWindowsRun": 38217129135,
     "implementationWindowsJobs": 7,
     "currentStageAcceptance": {
-      "stage": "R14.15",
+      "stage": "R14.16",
       "date": "2026-10-12",
-      "commit": "463af967b39d80b716ec6125985688e8db2b2ac0",
-      "run": 38226523614,
-      "status": "all-seven-Windows-jobs-and-all-steps-passed",
-      "record": "docs/R14-15-DETAILS.md",
+      "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
+      "run": 38257846018,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/38257846018",
+      "accepted": true,
       "windowsJobsPassed": 7,
-      "allWindowsStepsPassed": true,
-      "recursiveNodeTestsPassed": 2109,
-      "recursiveNodeDirectories": 16,
-      "recursiveNodeTestFiles": 341,
-      "frontendTestsPassed": 1103,
-      "imageDataTestsPassed": 58,
+      "allStepsPassed": true,
+      "frontendNodePassed": 1144,
+      "recursiveNodePassed": 2150,
+      "directories": 16,
+      "imageExporterPassed": 34,
+      "imageDataPassed": 58,
+      "characterizationPassed": 43,
       "contractBrowserPassed": 11,
-      "builtAppBrowserPassed": 63,
+      "builtAppPassed": 65,
       "rustTestsPassed": 281,
-      "importChainScenariosPassed": 8,
-      "finalExactCommitAdmissionAccepted": true,
-      "artifactDigestsChecked": true,
+      "nativeFullImage": {
+        "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
+        "status": "passed",
+        "transport": "actual WebView PNG -> final Image Exporter -> actual Platform/Rust safe writer -> real file readback",
+        "automatedBoundary": "Only native save dialog returns harness-owned paths; no actual interactive dialog acceptance claimed.",
+        "byteLength": 80632,
+        "sha256": "00a08f3da872e29575e1367b2de31c540a64a79cf76af954c65ccfcc02710e37",
+        "exactBytes": true,
+        "cacheCleared": true,
+        "captureReleased": true,
+        "dialogs": 3,
+        "dimensions": {
+          "height": 1920,
+          "width": 1080
+        },
+        "directoryRejected": true,
+        "invokeUnchanged": true,
+        "nativeBinaryRequests": 3,
+        "recovered": true,
+        "staleDialogDelta": 0,
+        "staleRejected": true,
+        "taskReleased": true
+      },
+      "actualPngVisuallyChecked": true,
+      "finalExactCommitAccepted": true,
+      "dependenciesAccepted": true,
+      "formatPngA10EvidenceComplete": true,
+      "a06UnifiedWriterPendingR14_17": true,
       "artifacts": [
         {
-          "id": 11736718861,
-          "name": "frontend",
-          "digest": "sha256:0300c1ce6ca7f7622c32376ceb9dbb818a4ba417b2445cc1a7420527a1982d7e"
+          "id": 11751606174,
+          "sha256": "78118a5352328a23ab3d1d8ba0afff7c12e7c8d4871f72a779201c9869614663",
+          "downloadedAndVerified": true
         },
         {
-          "id": 11736754030,
-          "name": "WebView",
-          "digest": "sha256:dd006ba86c6f820d64333324be485eff3b88cf42a86e1d85e10977f5d1405903"
+          "id": 11751131669,
+          "sha256": "cec8f5ad19147cd95d0327d564096dd51ff2a32c6e5648ad77d7ed76f4f88c4d",
+          "downloadedAndVerified": true
         },
         {
-          "id": 11736247800,
-          "name": "recursive-Node",
-          "digest": "sha256:f0f3153fc77bce532f06a4f6bae6d59032e5b34a2d25c12cb9798a37c5bf5089"
+          "id": 11751041402,
+          "sha256": "04cd7ca1dd4933b27945053a0fa4027c1c3c7e1b7d5468e97843a0c8699c4925",
+          "downloadedAndVerified": true
         },
         {
-          "id": 11735794189,
-          "name": "closeout",
-          "digest": "sha256:236b5d46cce89a4a07de557790ad724bf1c1b8f32fa91220a9ba3b9608bd79ba"
+          "id": 11750824151,
+          "sha256": "6d3486f035a260c9c0412cc398e7d5be55c6ee1eb14250dff102401973acac9a",
+          "downloadedAndVerified": true
+        },
+        {
+          "id": 11752120542,
+          "sha256": "3df4253ce01f7d139ec678b1ccefc25683a8d517cc85113cb8b84a4b59e54de1",
+          "downloadedAndVerified": true
         }
-      ],
-      "actualBrowserImageData": {
-        "name": "编码😀.png",
-        "mime": "image/png",
-        "bytes": 72994,
-        "digest": "9fc17c543398bf2b8112675cd0d2bb978fabb270c67f2b84976c5f492897225e",
-        "dimensions": {
-          "width": 1080,
-          "height": 1920
-        },
-        "exactBytes": true,
-        "revoked": true,
-        "signature": [
-          137,
-          80,
-          78,
-          71,
-          13,
-          10,
-          26,
-          10
-        ],
-        "retired": true
-      },
-      "actualDataRecovery": {
-        "unicode": [
-          230,
-          177,
-          137,
-          240,
-          159,
-          152,
-          128,
-          239,
-          191,
-          189
-        ],
-        "binary": [
-          0,
-          128,
-          255
-        ],
-        "rejected": true,
-        "invalidCreates": 0,
-        "failedRevoked": true,
-        "recovered": true,
-        "recoveryBytes": [
-          0,
-          255
-        ],
-        "recoveryRevoked": true,
-        "readonly": true
-      },
-      "actualNativeReadback": {
-        "commit": "463af967b39d80b716ec6125985688e8db2b2ac0",
-        "status": "passed",
-        "transport": "public encoder -> actual Platform binary adapter -> Rust safe writer -> actual Windows file readback",
-        "observations": [
-          {
-            "name": "base64-全字节😀.png",
-            "byteLength": 65537,
-            "sha256": "2deb0bd2129a9d3aed91e3cff58b3993752be549642890a3e853ec1065f9b617",
-            "exactBytes": true
-          },
-          {
-            "name": "percent-全字节.png",
-            "byteLength": 256,
-            "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880",
-            "exactBytes": true
-          },
-          {
-            "name": "unicode.png",
-            "byteLength": 20,
-            "sha256": "6e0c0af6574243794a2006fedec3ae23e279ff2ffb0722abc281b5bd2f52c92b",
-            "exactBytes": true
-          },
-          {
-            "name": "actual-pixels.png",
-            "byteLength": 93,
-            "sha256": "fa3b0769667a47ed741d5b37a073d042394ef259fe11b3315d50c28f6bf9a52e",
-            "exactBytes": true,
-            "realPng": true
-          }
-        ],
-        "directoryRejected": true,
-        "nextWriteRecovered": true
-      },
-      "largeBodySourceUtf16Length": 450024,
-      "completeHtmlWordBodiesPassed": true,
-      "all48PreparationAndExportStepsPassed": true,
-      "largeBodyTimings": {
-        "html": [
-          {
-            "sourceLength": 450024,
-            "step": "import",
-            "status": "passed",
-            "elapsedMs": 612
-          },
-          {
-            "sourceLength": 450024,
-            "step": "initial-position",
-            "status": "passed",
-            "elapsedMs": 6686
-          },
-          {
-            "sourceLength": 450024,
-            "step": "visual-editing",
-            "status": "passed",
-            "elapsedMs": 131
-          },
-          {
-            "sourceLength": 450024,
-            "step": "layout",
-            "status": "passed",
-            "elapsedMs": 13036
-          },
-          {
-            "sourceLength": 450024,
-            "step": "final-position",
-            "status": "passed",
-            "elapsedMs": 197
-          },
-          {
-            "sourceLength": 450024,
-            "step": "idle",
-            "status": "passed",
-            "elapsedMs": 134
-          },
-          {
-            "sourceLength": 450024,
-            "step": "identity",
-            "status": "passed",
-            "observation": {
-              "ready": true,
-              "layout": "both",
-              "documentLength": 450024,
-              "selectionStart": 0,
-              "selectionEnd": 0,
-              "editorMatches": true,
-              "modelMatches": true
-            },
-            "elapsedMs": 21
-          },
-          {
-            "sourceLength": 450024,
-            "step": "export-and-readback",
-            "status": "passed",
-            "elapsedMs": 25
-          }
-        ],
-        "word": [
-          {
-            "sourceLength": 450024,
-            "step": "import",
-            "status": "passed",
-            "elapsedMs": 552
-          },
-          {
-            "sourceLength": 450024,
-            "step": "initial-position",
-            "status": "passed",
-            "elapsedMs": 6263
-          },
-          {
-            "sourceLength": 450024,
-            "step": "visual-editing",
-            "status": "passed",
-            "elapsedMs": 149
-          },
-          {
-            "sourceLength": 450024,
-            "step": "layout",
-            "status": "passed",
-            "elapsedMs": 12403
-          },
-          {
-            "sourceLength": 450024,
-            "step": "final-position",
-            "status": "passed",
-            "elapsedMs": 210
-          },
-          {
-            "sourceLength": 450024,
-            "step": "idle",
-            "status": "passed",
-            "elapsedMs": 151
-          },
-          {
-            "sourceLength": 450024,
-            "step": "identity",
-            "status": "passed",
-            "observation": {
-              "ready": true,
-              "layout": "both",
-              "documentLength": 450024,
-              "selectionStart": 0,
-              "selectionEnd": 0,
-              "editorMatches": true,
-              "modelMatches": true
-            },
-            "elapsedMs": 24
-          },
-          {
-            "sourceLength": 450024,
-            "step": "export-and-readback",
-            "status": "passed",
-            "elapsedMs": 23
-          }
-        ]
-      },
-      "independentPngSamplesVerified": true,
-      "reviewedSourceFingerprintsMatched": 76,
-      "scope": "R14.15 byte conversion and existing Platform binary paths accepted. Final image orchestration/source identity and full A10 PNG chain remain14.16."
+      ]
     },
     "currentStageImplementation": {
       "stage": "R14.16",
       "baselineCommit": "b1c236b3326357c1c0f8d991d1f282dcd5582f77",
       "branch": "agent/r14-stage",
-      "status": "implemented-pending-exact-head-Windows-admission",
+      "status": "accepted on exact Windows commit/run",
       "record": "docs/R14-16-DETAILS.md",
       "productionChanged": true,
       "dependenciesChanged": false,
@@ -1407,6 +1226,80 @@
           ],
           "limitations": "Only source/config/document static checks locally; download retry behavior and full native image transport/readback await exact-head Windows. Initial parser lookup unavailable; embedded expression compiled with built-in vm.Script without executing it."
         }
+      },
+      "finalAcceptance": {
+        "stage": "R14.16",
+        "date": "2026-10-12",
+        "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
+        "run": 38257846018,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38257846018",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "frontendNodePassed": 1144,
+        "recursiveNodePassed": 2150,
+        "directories": 16,
+        "imageExporterPassed": 34,
+        "imageDataPassed": 58,
+        "characterizationPassed": 43,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 65,
+        "rustTestsPassed": 281,
+        "nativeFullImage": {
+          "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
+          "status": "passed",
+          "transport": "actual WebView PNG -> final Image Exporter -> actual Platform/Rust safe writer -> real file readback",
+          "automatedBoundary": "Only native save dialog returns harness-owned paths; no actual interactive dialog acceptance claimed.",
+          "byteLength": 80632,
+          "sha256": "00a08f3da872e29575e1367b2de31c540a64a79cf76af954c65ccfcc02710e37",
+          "exactBytes": true,
+          "cacheCleared": true,
+          "captureReleased": true,
+          "dialogs": 3,
+          "dimensions": {
+            "height": 1920,
+            "width": 1080
+          },
+          "directoryRejected": true,
+          "invokeUnchanged": true,
+          "nativeBinaryRequests": 3,
+          "recovered": true,
+          "staleDialogDelta": 0,
+          "staleRejected": true,
+          "taskReleased": true
+        },
+        "actualPngVisuallyChecked": true,
+        "finalExactCommitAccepted": true,
+        "dependenciesAccepted": true,
+        "formatPngA10EvidenceComplete": true,
+        "a06UnifiedWriterPendingR14_17": true,
+        "artifacts": [
+          {
+            "id": 11751606174,
+            "sha256": "78118a5352328a23ab3d1d8ba0afff7c12e7c8d4871f72a779201c9869614663",
+            "downloadedAndVerified": true
+          },
+          {
+            "id": 11751131669,
+            "sha256": "cec8f5ad19147cd95d0327d564096dd51ff2a32c6e5648ad77d7ed76f4f88c4d",
+            "downloadedAndVerified": true
+          },
+          {
+            "id": 11751041402,
+            "sha256": "04cd7ca1dd4933b27945053a0fa4027c1c3c7e1b7d5468e97843a0c8699c4925",
+            "downloadedAndVerified": true
+          },
+          {
+            "id": 11750824151,
+            "sha256": "6d3486f035a260c9c0412cc398e7d5be55c6ee1eb14250dff102401973acac9a",
+            "downloadedAndVerified": true
+          },
+          {
+            "id": 11752120542,
+            "sha256": "3df4253ce01f7d139ec678b1ccefc25683a8d517cc85113cb8b84a4b59e54de1",
+            "downloadedAndVerified": true
+          }
+        ]
       }
     },
     "priorStageAcceptance": {

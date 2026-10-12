@@ -1,6 +1,6 @@
 # R14-16 Image Exporter
 
-状态：**两轮未通过，本轮修复待新精确提交Windows累计验证**；16未勾选，17未开始。唯一分支`agent/r14-stage`，基线为15收尾`b1c236b3326357c1c0f8d991d1f282dcd5582f77`。15已在`463af96` / [CI38226523614](https://github.com/uniquenesssta/mdr/actions/runs/38226523614)七组及全部步骤验收，首轮失败和修复保留。[15正式验收](R14-15-DETAILS.md#正式验收2026-10-12)。
+状态：**正式验收收尾**；16已勾选，17按用户指令准备开始。唯一分支`agent/r14-stage`，基线为15收尾`b1c236b3326357c1c0f8d991d1f282dcd5582f77`。15已在`463af96` / [CI38226523614](https://github.com/uniquenesssta/mdr/actions/runs/38226523614)七组及全部步骤验收，首轮失败和修复保留。[15正式验收](R14-15-DETAILS.md#正式验收2026-10-12)。
 
 ## 职责与真实调用链
 
@@ -107,3 +107,20 @@ Mermaid Chart已展示实际关系。Context7返回官方README的通用toPng Pr
 本地仅进行源码/配置/文档静态审计及语法编译，不运行应用产品测试、build、PNG或Rust。新下载行为和原生fetch响应包装必须在新精确head Windows复验，所有65页面/34图片/58字节场景、七组及预算保持。Mermaid Chart展示修复后的真实传输边界，完整所有者架构不变；16未勾选、17未开始，启动Actions后结束不轮询。
 
 本轮静态复核：8项配置/文档/源码门槛、四架构门禁通过，4脚本语法及1个修改后的WebView表达式只编译不执行，174链接和80指纹一致；549模块清单、原场景与前置验收历史不变。新下载5项和原生链未在本地执行；第一次外部解析器查找不可用，改用内建vm.Script完成表达式编译。
+
+
+## 正式验收（2026-10-12）
+
+`1c211b961f1ef725ce51bf84bdee217a690a1b12` / [CI38257846018](https://github.com/uniquenesssta/mdr/actions/runs/38257846018)七组Windows及全部步骤成功：全仓2150/2150（16目录）、前端1144/1144、Image34/34、Data58/58、旧characterization43/43、浏览器11/11＋65/65、Rust281和Clippy、最终accepted=true。固定官方扫描器200返回且摘要一致，原完整RustSec/Windows graph判断成功；新5项下载契约通过。
+
+实际原生PNG80632字节，1080×1920，SHA256 `00a08f3da872e29575e1367b2de31c540a64a79cf76af954c65ccfcc02710e37`；读回与原真实renderer PNG逐字节一致，目录失败/下一次替换、过时来源零新dialog、原invoke保持、三个实际二进制传输及所有缓存/任务/节点释放通过。已检查实际PNG，包含Windows完整图片标题、Unicode、正确公式与KEEP NATIVE TAIL，无重复MathML辅助文本。原14.15四文件读回和导入/安全链继续通过。
+
+| 已下载校验归档 | SHA256 |
+|---|---|
+| 11751606174 前端 | 78118a5352328a23ab3d1d8ba0afff7c12e7c8d4871f72a779201c9869614663 |
+| 11751131669 WebView | cec8f5ad19147cd95d0327d564096dd51ff2a32c6e5648ad77d7ed76f4f88c4d |
+| 11751041402 全仓 | 04cd7ca1dd4933b27945053a0fa4027c1c3c7e1b7d5468e97843a0c8699c4925 |
+| 11750824151 依赖 | 6d3486f035a260c9c0412cc398e7d5be55c6ee1eb14250dff102401973acac9a |
+| 11752120542 最终汇总 | 3df4253ce01f7d139ec678b1ccefc25683a8d517cc85113cb8b84a4b59e54de1 |
+
+16验收完成，完整PNG/增强来源与A10图片子门槛有真实证据；A06统一格式File Writer由17补齐，整个R14收官仍有后续职责。两轮失败及各修复保留；仅自动化dialog结果不代表交互式选路通过，已开始编码/写入的abort或回滚保证仍不成立。
