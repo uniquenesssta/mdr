@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～14已验收（14：b3d38cc / CI38217129135），七组Windows及全部步骤通过，全仓2051/2051、预载41/41、浏览器11/11＋61/61。按用户指令在唯一agent/r14-stage实施14.15：独立Data URL→bytes编码及只读端口，保留UTF-8代理对与百分号二进制，保存弹窗前固定字节，原Platform二进制端口同时接管Windows写入与浏览器Blob下载；旧转换和直接Data URL下载删除。新增58项契约、2项真实页面（累计63）及真实Windows字节写入/读回、失败恢复；首轮c3e6a6a / CI38223327955未通过：编码58/58、前端1103/1103、新增实际PNG/Blob与Windows字节读回成功，旧HTML/Word大正文两场景CDP超时（实际页面61/63）；已拆分真实导入/布局/定位准备请求并增加逐步证据，数据及导出断言保持，CDP上限仍30秒，待修复head七组Windows重验。15待新提交Windows验收，14.16未开始，整体A10与最终Image Exporter/File Writer职责保持。 [14验收](R14-14-DETAILS.md#正式验收2026-10-12) · [15范围](R14-15-DETAILS.md)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～15已验收；15：463af96 / CI38226523614，七组Windows及全部步骤通过，全仓2109/2109、前端1103/1103、编码58/58、浏览器11/11＋63/63、Rust281、实际Windows二进制写入读回成功。15正式收尾，首轮失败与修复保留；16未开始，最终图片所有者与整体A10仍由16接收。 [15验收](R14-15-DETAILS.md#正式验收2026-10-12)。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 
