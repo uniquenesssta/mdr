@@ -705,8 +705,14 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       rows.push(await page.evaluate(`(async()=>{
         const host=document.getElementById('compatibility-business-ports'),tasks=host.markdownEditorExportTaskPort,port=host.markdownEditorPreviewCommandPort;
         const editor=document.getElementById('editor'),preview=document.getElementById('preview');
-        const input=document.getElementById('filename');input.focus();const focus=document.activeElement;
+        const focus=document.querySelector('button[data-theme-toggle]');
+        if(!focus||focus.hidden||focus.disabled||!focus.getClientRects().length)throw new Error('Visible focus source is unavailable');
+        focus.focus({preventScroll:true});
+        if(document.activeElement!==focus)throw new Error('Focus source did not receive focus');
         if(!await window.__markdownEditorE2E.waitForIdle())throw new Error('Editor did not settle after focus change');
+        if(document.activeElement!==focus)throw new Error('Focus source changed before PDF export');
+        const describeFocus=()=>({tag:document.activeElement?.tagName,id:document.activeElement?.id||null,themeToggle:document.activeElement===focus});
+        const focusBefore=describeFocus();
         const hybrid=editor.querySelector('.cm-content');if(!hybrid?.isConnected||!hybrid.childNodes.length)throw new Error('Mounted CodeMirror content is unavailable');
         const previewNodes=Array.from(preview.childNodes),hybridNodes=Array.from(hybrid.childNodes),view=port.getViewMode(),layout=host.markdownEditorLayoutStatePort.snapshot.mode;
         const before={previewScroll:preview.scrollTop,editorScroll:editor.scrollTop,start:editor.selectionStart,end:editor.selectionEnd};
@@ -717,18 +723,22 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
               mathml:doc.querySelectorAll('.katex-mathml').length,diagrams:doc.querySelectorAll('svg.f-mermaid-svg').length,task:doc.querySelectorAll('li.task-item input').length,code:doc.querySelectorAll('.markdown-code-token').length,
               fonts:Array.from(doc.fonts,face=>face.status),scripts:doc.scripts.length,privateGlobal:typeof frame.contentWindow.markdownEditorPresentationPort,
               color:css.color,paper:css.backgroundColor,locked:tasks.getSnapshot().activeTask?.phase==='printing'&&tasks.getSnapshot().activeTask?.cancelable===false,
-              parentUnscoped:!preview.classList.contains('export-document')&&!hybrid.classList.contains('export-document')};
+              parentUnscoped:!preview.classList.contains('export-document')&&!hybrid.classList.contains('export-document'),focus:describeFocus()};
             frame.contentWindow.dispatchEvent(new Event('afterprint'));};}});observer.observe(document.body,{childList:true});
-        try {await exportPDF();return {mode:${JSON.stringify(mode)},layout,prints,printed,before,after:{previewScroll:preview.scrollTop,editorScroll:editor.scrollTop,start:editor.selectionStart,end:editor.selectionEnd},
+        try {await exportPDF();const focusAfterCommand=describeFocus();
+          // ModalShell restores returnFocus in its scheduled close frame, after the export command resolves.
+          await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+          return {mode:${JSON.stringify(mode)},layout,prints,printed,before,after:{previewScroll:preview.scrollTop,editorScroll:editor.scrollTop,start:editor.selectionStart,end:editor.selectionEnd},
           samePreview:preview.childNodes.length===previewNodes.length&&previewNodes.every((node,index)=>preview.childNodes[index]===node),
           sameHybrid:editor.querySelector('.cm-content')===hybrid&&hybrid.childNodes.length===hybridNodes.length&&hybridNodes.every((node,index)=>hybrid.childNodes[index]===node),sameView:port.getViewMode()===view,sameLayout:host.markdownEditorLayoutStatePort.snapshot.mode===layout,
-          focusRestored:document.activeElement===focus,removed:frames.length===1&&!frames[0].isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),released:tasks.getSnapshot().activeTask===null,
+          focusRestored:document.activeElement===focus,focusEvidence:{before:focusBefore,afterCommand:focusAfterCommand,afterModalFrame:describeFocus()},
+          progressClosed:!document.getElementById('export-progress-modal').classList.contains('show'),removed:frames.length===1&&!frames[0].isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),released:tasks.getSnapshot().activeTask===null,
           scoped:typeof window.markdownEditorPdfExportPort==='undefined'&&Object.isFrozen(host.markdownEditorPdfExportPort)};
         }finally{observer.disconnect();}
       })()`));
     }} finally {await page.evaluate('window.__markdownEditorE2E.setLayout("both")');}
     await writeFile(join(artifactRoot,'r14-12-isolated-print.json'),JSON.stringify(rows,null,2));
-    for(const row of rows){assert.equal(row.layout,row.mode);assert.equal(row.prints,1);assert.deepEqual(row.after,row.before);for(const key of ['samePreview','sameHybrid','sameView','sameLayout','focusRestored','removed','released','scoped'])assert.equal(row[key],true,key);
+    for(const row of rows){assert.equal(row.layout,row.mode);assert.equal(row.prints,1);assert.deepEqual(row.after,row.before);assert.equal(row.focusEvidence.before.themeToggle,true);assert.deepEqual(row.focusEvidence.afterModalFrame,row.focusEvidence.before);for(const key of ['samePreview','sameHybrid','sameView','sameLayout','focusRestored','progressClosed','removed','released','scoped'])assert.equal(row[key],true,key);
       const out=row.printed;assert.equal(out.format,'pdf');assert.equal(out.heading,'Export baseline');assert.equal(out.math.length,2);assert.ok(out.math.every(x=>x.width>0&&x.height>0));assert.equal(out.mathml,2);assert.equal(out.diagrams,1);assert.equal(out.task,1);assert.ok(out.code>0);
       assert.equal(out.fonts.length,20);assert.ok(out.fonts.every(x=>x==='loaded'));assert.equal(out.scripts,0);assert.equal(out.privateGlobal,'undefined');assert.equal(out.color,'rgb(0, 0, 0)');assert.equal(out.paper,'rgb(255, 255, 255)');assert.equal(out.locked,true);assert.equal(out.parentUnscoped,true);}
   });
