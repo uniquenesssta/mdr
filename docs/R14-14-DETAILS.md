@@ -1,6 +1,6 @@
 # R14-14 Asset Preloader
 
-状态：**已实现；首轮 Windows 累计验证未通过，修复架构误报后待复验**；14.14不勾选，14.15未开始。唯一分支`agent/r14-stage`，基线为13正式验收提交`f4e5d5ed64e27216a0152736ff8d0f21f87f488e` / [CI38197683019](https://github.com/uniquenesssta/mdr/actions/runs/38197683019)。[13正式验收](R14-13-DETAILS.md#正式验收2026-10-12)与原实施历史保留。
+状态：**已验收并正式收尾**（b3d38cc / CI38217129135）；14.14已勾选，14.15未开始。唯一分支`agent/r14-stage`，基线为13正式验收提交`f4e5d5ed64e27216a0152736ff8d0f21f87f488e` / [CI38197683019](https://github.com/uniquenesssta/mdr/actions/runs/38197683019)。[13正式验收](R14-13-DETAILS.md#正式验收2026-10-12)与原实施历史保留。
 
 ## 13收尾证据
 
@@ -77,3 +77,13 @@ Context7仅查询dom-to-image-more图片内联与imagePlaceholder；返回main�
 | 组合根只注入几何能力，不恢复编辑器指标所有者 | 原EditorScrollMapper公共工厂、几何委托、销毁及无window权威断言保持；允许组合根向独立图片预载注入DOM工厂 | 实际导出Canvas注入仍受新增静态正控核对；41项预载与61个真实页面场景保留 |
 
 本轮只修改该架构检查及项目记录，未新增例外名单、跳过场景或修改产品、依赖、工作流。执行`node --test tests/architecture/stage-09-editor-scroll-mapper.test.mjs tests/architecture/stage-09-final-sync-legacy-removal.test.mjs`：17/17通过，这是源代码/清单静态审计，不能代替Windows产品复验。其余累计测试、真实图片和Rust由修复提交的七组Windows CI重验；14.14仍不勾选，14.15未开始。
+
+## 正式验收（2026-10-12）
+
+精确提交`b3d38ccb77163070af5e230432d19df82d050f09` / [CI38217129135](https://github.com/uniquenesssta/mdr/actions/runs/38217129135)七组Windows及全部步骤通过。全仓2051/2051（340文件16目录）、前端1045/1045、图片预载41/41、图片布局33/33、PDF33/33、Word29/29、HTML36/36、Markdown30/30、浏览器11/11＋61/61、Rust281/格式/Clippy/check与实际Windows导入8/8通过；最终JSON为同提交`accepted=true`。首轮失败及正控修复保持原记录，不改写为首轮通过。
+
+实际下载前端、递归Node、Rust和最终验收四ZIP并逐一核对SHA-256，全部与服务端摘要一致；独立解码归档PNG为1080×1920，按证据坐标读取两张正常图片像素`[17,131,211,255]`、无CORS/404/超时三张占位图像素`[233,236,239,255]`，均与真实页面报告一致。原Data URL保留，尾段完整、95进度后encoding锁、原Preview身份与布局释放成立；等待约10.27秒后正常完成。实际匿名请求保留query、带Origin且不带cookie，编码没有重复CORS请求。
+
+取消/任务替换/源过时三种目标decode等待均拒绝晚到结果并保留新src，下一次成功预载返回inline=1且任务结束。最终pagehide拒绝pending decode、保留晚到隔离并移除端口，原布局/打印/样式/任务清理断言同时通过。全部72个验收源码指纹与精确提交逐项匹配；旧59个真实场景、完整格式、数学像素、长图/裁剪及架构正控保持。
+
+四归档ID/摘要和实际资源/恢复/pagehideJSON摘要存入[精确证据记录](audit/r12-24-closeout.json)的`currentSourceReview.stageAcceptanceHistory`；原实施状态与首次失败另保留历史快照。14.14正式收尾；本次仅更新记录和验收勾选，不改产品、测试、依赖或工作流。14.15 Data Encoder未开始，最终Image Exporter/整体A10图片链仍待14.16，不把资源预载通过写为整个R14阶段结束。
