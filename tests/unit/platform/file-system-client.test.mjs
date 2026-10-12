@@ -158,7 +158,7 @@ test('invalid client options fail at the adapter boundary', () => {
 test('the FileSystem client contains command mapping only and does not own document or Toast behavior', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/file-system-client.js', import.meta.url), 'utf8');
   const eventSource = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
-  const exportSource = await readFile(new URL('../../../public/app/export.js', import.meta.url), 'utf8');
+  const exportSource = await readFile(new URL('../../../src/features/export/application/export-controller.js', import.meta.url), 'utf8');
   const rustFileKind = await readFile(
     new URL('../../../src-tauri/src/local_file/file_kind.rs', import.meta.url),
     'utf8'
@@ -177,7 +177,7 @@ test('the FileSystem client contains command mapping only and does not own docum
   assert.doesNotMatch(eventSource, /eventsFileImportPort|eventsDropImportPort/);
   assert.match(mainSource, /readNativeImage: path => platform\.files\.readImage\(path, ''\)/);
   assert.match(eventSource, /showToast/);
-  assert.match(exportSource, /showToast/);
+  assert.match(exportSource, /notify/);
   assert.match(importer, /notify\(translate\('toastFileImported'\)\)/);
   assert.match(rustFileKind, /FileKind::Image \{ mime: "image\/webp" \}/);
   assert.match(rustFileKind, /mime: "image\/svg\+xml"/);

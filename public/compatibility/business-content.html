@@ -21,11 +21,11 @@
           <div class="menu-separator"></div>
           <div class="menu-item menu-submenu"><span>导出</span><span class="menu-arrow">›</span>
             <div class="menu-dropdown-list menu-submenu-list">
-              <div class="menu-item" onclick="exportFile(); closeAppMenus();"><span>Markdown</span></div>
-              <div class="menu-item" onclick="exportWord(); closeAppMenus();"><span>Word</span></div>
-              <div class="menu-item" onclick="exportPDF(); closeAppMenus();"><span>PDF</span></div>
-              <div class="menu-item" onclick="exportHTML(); closeAppMenus();"><span>HTML</span></div>
-              <div class="menu-item" onclick="openExportImageModal(); closeAppMenus();"><span>图片...</span></div>
+              <div class="menu-item"><span>Markdown</span></div>
+              <div class="menu-item"><span>Word</span></div>
+              <div class="menu-item"><span>PDF</span></div>
+              <div class="menu-item"><span>HTML</span></div>
+              <div class="menu-item"><span>图片...</span></div>
             </div>
           </div>
         </div>
@@ -356,40 +356,6 @@
     </div>
   </div>
 
-  <!-- 导出图片模态框 -->
-  <div class="modal-overlay" id="export-image-modal">
-    <div class="modal c-modal c-modal--preview">
-      <div class="modal-header">
-        <h3><svg class="icon icon-lg"><use href="/assets/icons.svg#icon-image"></use></svg> <span data-i18n="exportImageTitle">导出图片</span></h3>
-        <button onclick="closeExportImageModal()"><svg class="icon"><use href="/assets/icons.svg#icon-close"></use></svg></button>
-      </div>
-      <div class="modal-body">
-        <label data-i18n="ratioLabel">分享比例</label>
-        <div class="ratio-grid">
-          <button class="ratio-btn active" data-ratio="9:16" onclick="selectImageRatio('9:16')">9:16<br><small data-i18n="ratio9_16">手机竖屏/故事</small></button>
-          <button class="ratio-btn" data-ratio="4:5" onclick="selectImageRatio('4:5')">4:5<br><small data-i18n="ratio4_5">小红书/IG</small></button>
-          <button class="ratio-btn" data-ratio="3:4" onclick="selectImageRatio('3:4')">3:4<br><small data-i18n="ratio3_4">竖图</small></button>
-          <button class="ratio-btn" data-ratio="1:1" onclick="selectImageRatio('1:1')">1:1<br><small data-i18n="ratio1_1">方形</small></button>
-          <button class="ratio-btn" data-ratio="16:9" onclick="selectImageRatio('16:9')">16:9<br><small data-i18n="ratio16_9">横图</small></button>
-        </div>
-        <div class="option-row">
-          <input type="checkbox" id="image-crop-fit" onchange="renderExportImagePreview()">
-          <label for="image-crop-fit" data-i18n="cropLabel">过长时裁剪为固定比例（默认生成长图）</label>
-        </div>
-        <label data-i18n="previewLabel">预览</label>
-        <div id="export-image-preview-wrap" class="f-export-image-preview-wrap">
-          <img id="export-image-preview" alt="导出预览" data-i18n-alt="exportImagePreviewAlt" class="f-export-image-preview is-hidden">
-        </div>
-        <p class="hint" data-i18n="exportImageHint">内容较长时将按内容高度生成长图，方便手机阅读。</p>
-      </div>
-      <div class="modal-footer">
-        <button onclick="closeExportImageModal()" data-i18n="cancel">取消</button>
-        <button onclick="renderExportImagePreview()" data-i18n="refreshPreview">刷新预览</button>
-        <button onclick="downloadExportImage()" class="primary" data-i18n="downloadPng">下载 PNG</button>
-      </div>
-    </div>
-  </div>
-
   <!-- 插入图片模态框 -->
   <div class="modal-overlay" id="image-modal">
     <div class="modal c-modal c-modal--medium">
@@ -457,10 +423,6 @@
 
 
 
-<!-- 导出图片隐藏舞台 -->
-  <div id="export-image-stage" class="export-image-stage" aria-hidden="true">
-    <div id="export-image-content"></div>
-  </div>
 </template>
 
 <template data-compat-slot="ports">

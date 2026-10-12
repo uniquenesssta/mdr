@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-17 shared file writer and actual Windows occupied-target recovery · ${{ github.sha }}
+run-name: R14-18 sole export command and image dialog chain · retired classic script · ${{ github.sha }}
 
 on:
   push:
@@ -215,6 +215,9 @@ jobs:
         run: node --test tests/stage-14-image-exporter.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/image-exporter.log"
       - name: R14-17 unified File Writer contracts
         run: node --test tests/stage-14-file-writer.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/file-writer.log"
+      - name: R14-18 command ownership and image dialog lifecycle
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-export-controller.test.mjs tests/stage-14-image-dialog-view.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-controller-view.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

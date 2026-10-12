@@ -1,4 +1,5 @@
-// Characterization host: execute classic format callers with the actual public Export Builder.
+// Characterization host: invoke actual public Export Controller and format owners.
+// Old scenario names map to explicit test-only command aliases; no retired product script/global is supplied.
 // DOM/vendor/platform doubles prove orchestration only; actual Builder/Enhancer own the complete body.
 // Retired Worker/enhancement globals are never supplied. Actual renderer output is checked in built-app tests.
 import { readFileSync, readdirSync } from 'node:fs';
@@ -6,13 +7,12 @@ import vm from 'node:vm';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 const mathCss = readFileSync(join(dirname(createRequire(import.meta.url).resolve('katex')), 'katex.css'), 'utf8');
-import { createExportFileWriter, createImageExporter, createImageExportSurface, mountClassicImageExportPort, imageDataUrlToBytes, mountClassicImageDataPort, createImageAssetPreloader, mountClassicImageAssetPort, createImageExportLayout, mountClassicImageLayoutPort, createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createExportController, mountClassicExportCommandPort, createExportFileWriter, createImageExporter, createImageExportSurface, mountClassicImageExportPort, imageDataUrlToBytes, mountClassicImageDataPort, createImageAssetPreloader, mountClassicImageAssetPort, createImageExportLayout, mountClassicImageLayoutPort, createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
 import { createBrowserPrint, createBrowserFileDownload } from '../../src/platform/index.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
 import { createExportPrintDom } from './export-print-dom.mjs';
 
-const source = readFileSync(new URL('../../public/app/export.js', import.meta.url), 'utf8');
 const markdownSource = readFileSync(new URL('../../public/app/core.js', import.meta.url), 'utf8');
 const markdownDownload = markdownSource.slice(markdownSource.indexOf('    async function exportContextDocument('), markdownSource.indexOf('    function copyContextDocumentTitle('));
 
@@ -184,14 +184,30 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     encodeDataUrl: data => dataMount.port.encode(data), loadDomToImage: () => presentation.loadDomToImage(),
     taskController, fileWriter, ...imageOverrides });
   const imageMount = mountClassicImageExportPort(host, imageExporter);
-  vm.runInContext(markdownDownload + '\n' + source, context, { filename: 'public/app/export.js', timeout: 1000 });
+  context.currentImageRatio = '9:16';
+  const imageView = { getOptions: () => ({ratio:context.currentImageRatio,cropFit:Boolean(getNode('image-crop-fit').checked)}),
+    setRatio(value) { context.currentImageRatio=value; }, resetCrop() { getNode('image-crop-fit').checked=false; },
+    open() { calls.push(['modal','open']); }, close() { return false; } };
+  const controller = createExportController({ requests:requestMount.port, tasks:taskMount.port,
+    owners:{markdown:markdownExporter,html:htmlExporter,word:wordExporter,pdf:pdfExporter,image:imageExporter},
+    imageView,preview:host.markdownEditorPreviewCommandPort,
+    readInput:()=>({name:context.filenameInput.value,directory:context.exportDirectory}),
+    notify:message=>context.showToast(message),translate:(...args)=>context.t(...args),reportError:error=>context.console.error(error) });
+  const commandMount = mountClassicExportCommandPort(host,controller);
+  const aliases={exportFile:'exportMarkdown',exportHTML:'exportHtml',exportWord:'exportWord',exportPDF:'exportPdf',renderExportImagePreview:'renderImage',downloadExportImage:'saveImage',openExportImageModal:'openImage',closeExportImageModal:'closeImage'};
+  for(const [name,action]of Object.entries(aliases))context[name]=()=>commandMount.port.invoke(action);
+  context.selectImageRatio=ratio=>commandMount.port.invoke('selectRatio',{ratio});
+  context.exportTaskPort=taskMount.port;context.exportRequestPort=requestMount.port;
+  context.beginExportTask=title=>{const task=taskMount.port.begin(title);if(!task)context.showToast('当前导出正在生成文件，请稍候');return task;};
+  context.finishExportTask=(...args)=>{try{return taskMount.port.finish(...args);}catch(error){context.showToast('导出清理失败：'+(error?.message||String(error)));return false;}};
+  vm.runInContext(markdownDownload, context, {filename:'context-export-fixture',timeout:1000});
   return {
     context, calls, downloads, nodes, timers, events, printDom, imageExporter, imageSurface, imageMount, captureRoots, imageAssets, assetMount, dataMount, assetTimers, pdfExporter, printSurface, imageLayout, layoutMount, taskController, documentBuilder, styles, markdownExporter, htmlExporter, wordExporter,
     preload: (root, task) => assetMount.port.prepare({ root, task }),
     enhance: (root, task) => enhancementMount.port.enhance({ root, task, documentId }), createNode: node,
     build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,
     cancel: () => nodes.get('export-progress-cancel').click(),
-    destroy() { try { imageExporter.destroy(); imageMount.destroy(); imageSurface.destroy(); pdfExporter.destroy(); pdfMount.destroy(); printSurface.destroy(); wordExporter.destroy(); wordMount.destroy(); htmlExporter.destroy(); htmlMount.destroy(); markdownExporter.destroy(); markdownMount.destroy(); fileWriter.destroy(); taskController.destroy(); } finally { imageAssets.destroy(); assetMount.destroy(); dataMount.destroy(); imageLayout.destroy(); layoutMount.destroy(); enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    destroy() { try { controller.destroy(); commandMount.destroy(); imageExporter.destroy(); imageMount.destroy(); imageSurface.destroy(); pdfExporter.destroy(); pdfMount.destroy(); printSurface.destroy(); wordExporter.destroy(); wordMount.destroy(); htmlExporter.destroy(); htmlMount.destroy(); markdownExporter.destroy(); markdownMount.destroy(); fileWriter.destroy(); taskController.destroy(); } finally { imageAssets.destroy(); assetMount.destroy(); dataMount.destroy(); imageLayout.destroy(); layoutMount.destroy(); enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
     async runPdf() { const work = context.exportPDF(); await printDom.untilScheduled(); await printDom.fire(80); printDom.frames.at(-1).contentWindow.dispatchEvent({ type: 'afterprint' }); await work; },
     async renderImage(dataUrl) {
       if (dataUrl !== undefined) presentation.loadDomToImage = async () => ({ async toPng() { return dataUrl; } });

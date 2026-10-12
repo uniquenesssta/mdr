@@ -30,11 +30,6 @@
     },
     {
       "loader": "src/main.js",
-      "script": "public/app/export.js",
-      "count": 1
-    },
-    {
-      "loader": "src/main.js",
       "script": "public/app/web-clipper.js",
       "count": 1
     }
@@ -42,75 +37,11 @@
   "inlineEvents": [
     {
       "path": "public/compatibility/business-content.html",
-      "attribute": "onchange",
-      "handler": "renderExportImagePreview()",
-      "count": 1,
-      "lines": [
-        394
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
       "handler": "closeAppMenus();",
       "count": 1,
       "lines": [
         96
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeExportImageModal()",
-      "count": 2,
-      "lines": [
-        382,
-        404
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "downloadExportImage()",
-      "count": 1,
-      "lines": [
-        406
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "exportFile(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        24
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "exportHTML(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        27
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "exportPDF(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        26
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "exportWord(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        25
       ]
     },
     {
@@ -125,73 +56,10 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "openExportImageModal(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        28
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "renameCurrentDocument(); closeAppMenus();",
       "count": 1,
       "lines": [
         14
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "renderExportImagePreview()",
-      "count": 1,
-      "lines": [
-        405
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('1:1')",
-      "count": 1,
-      "lines": [
-        390
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('16:9')",
-      "count": 1,
-      "lines": [
-        391
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('3:4')",
-      "count": 1,
-      "lines": [
-        389
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('4:5')",
-      "count": 1,
-      "lines": [
-        388
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "selectImageRatio('9:16')",
-      "count": 1,
-      "lines": [
-        387
       ]
     },
     {
@@ -417,6 +285,146 @@
           "count": 1,
           "lines": [
             373
+          ]
+        }
+      ]
+    },
+    "r14ExportRetirement": {
+      "atomic": "R14-18",
+      "reason": "Actual retired classic script and image-modal inline handlers deleted; public Controller/View own one command/UI chain. No new exemptions or globals.",
+      "removedClassicScripts": [
+        {
+          "loader": "src/main.js",
+          "script": "public/app/export.js",
+          "count": 1
+        }
+      ],
+      "removedInlineEvents": [
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onchange",
+          "handler": "renderExportImagePreview()",
+          "count": 1,
+          "lines": [
+            394
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "closeExportImageModal()",
+          "count": 2,
+          "lines": [
+            382,
+            404
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "downloadExportImage()",
+          "count": 1,
+          "lines": [
+            406
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "renderExportImagePreview()",
+          "count": 1,
+          "lines": [
+            405
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "selectImageRatio('1:1')",
+          "count": 1,
+          "lines": [
+            390
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "selectImageRatio('16:9')",
+          "count": 1,
+          "lines": [
+            391
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "selectImageRatio('3:4')",
+          "count": 1,
+          "lines": [
+            389
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "selectImageRatio('4:5')",
+          "count": 1,
+          "lines": [
+            388
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "selectImageRatio('9:16')",
+          "count": 1,
+          "lines": [
+            387
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "exportFile(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            24
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "exportHTML(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            27
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "exportPDF(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            26
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "exportWord(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            25
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "openExportImageModal(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            28
           ]
         }
       ]

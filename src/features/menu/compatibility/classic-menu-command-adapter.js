@@ -47,6 +47,7 @@ export function createClassicMenuCommandAdapter({ bindings, host, globalObject =
     return handler(...args);
   };
   const invokeEditor = (name, ...args) => requirePort(host, 'markdownEditorEditorUiCommandPort', name).invoke(name, ...args);
+  const invokeExport = (name, payload) => requirePort(host, 'markdownEditorExportCommandPort', name).invoke(name, payload);
   const invokeDocument = (name, ...args) => requirePort(host, 'markdownEditorDocumentUiCommandPort', name).invoke(name, ...args);
 
   const baseHandlers = {
@@ -66,11 +67,11 @@ export function createClassicMenuCommandAdapter({ bindings, host, globalObject =
       return result;
     },
     [C.IMPORT_WEB]: () => invokeDocument('openWebClipper'),
-    [C.EXPORT_MARKDOWN]: () => invokeGlobal('exportFile'),
-    [C.EXPORT_WORD]: () => invokeGlobal('exportWord'),
-    [C.EXPORT_PDF]: () => invokeGlobal('exportPDF'),
-    [C.EXPORT_HTML]: () => invokeGlobal('exportHTML'),
-    [C.EXPORT_IMAGE]: () => invokeGlobal('openExportImageModal'),
+    [C.EXPORT_MARKDOWN]: () => invokeExport('exportMarkdown'),
+    [C.EXPORT_WORD]: () => invokeExport('exportWord'),
+    [C.EXPORT_PDF]: () => invokeExport('exportPdf'),
+    [C.EXPORT_HTML]: () => invokeExport('exportHtml'),
+    [C.EXPORT_IMAGE]: () => invokeExport('openImage'),
     [C.EDITOR_UNDO]: () => invokeEditor('executeEditorAction', 'undo'),
     [C.EDITOR_REDO]: () => invokeEditor('executeEditorAction', 'redo'),
     [C.EDITOR_BOLD]: () => invokeEditor('executeEditorAction', 'bold'),

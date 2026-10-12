@@ -127,7 +127,7 @@ test('Atomic 10.1 composition gives status authority to Persistence and UI only 
     source('src/features/persistence/index.js'),
     source('src/main.js'),
     source('public/app/core.js'),
-    source('public/app/export.js'),
+    source('src/features/export/application/export-controller.js'),
     source('tests/architecture/fixtures/production-modules.json')
   ]);
   assert.doesNotMatch(storeSource, /\bwindow\b|\bdocument\b|localStorage|sessionStorage|setTimeout|setInterval|requestAnimationFrame|Worker\s*\(/);

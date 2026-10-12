@@ -39,15 +39,18 @@ const bridge = await readFile('src/platform/compatibility/classic-platform-port.
 const workflow = await readFile('.github/workflows/stage-03-atomic.yml', 'utf8');
 const windowsAutomation = await readFile('tests/e2e/windows/run-window-automation.mjs', 'utf8');
 const classicCallers = Object.fromEntries(await Promise.all(
-  ['public/app/core.js', 'public/app/events.js', 'public/app/export.js', 'public/app/web-clipper.js']
+  ['public/app/core.js', 'public/app/events.js', 'public/app/web-clipper.js']
     .map(async path => [path, await readFile(path, 'utf8')])
 ));
 const esmCallers = Object.fromEntries(await Promise.all(
-  ['src/runtime/link-preview.js', 'src/runtime/performance.js', 'src/sidebar/folder-file-tree.js', 'src/storage/native-document-store.js', 'src/editor/hybrid/image-source.js']
+  ['src/features/export/application/export-controller.js', 'src/features/export/application/export-file-writer.js', 'src/runtime/link-preview.js', 'src/runtime/performance.js', 'src/sidebar/folder-file-tree.js', 'src/storage/native-document-store.js', 'src/editor/hybrid/image-source.js']
     .map(async path => [path, await readFile(path, 'utf8')])
 ));
 
 if (!facadeDeleted) process.exit(1);
+if (!esmCallers['src/features/export/application/export-controller.js'].includes('owners[format][method]')) process.exit(1);
+if (!esmCallers['src/features/export/application/export-file-writer.js'].includes('platform.files.writeText')) process.exit(1);
+if (!esmCallers['src/features/export/application/export-file-writer.js'].includes('platform.files.writeBinary')) process.exit(1);
 if (nativeGlobalOwners.length) process.exit(1);
 if (tauriImportsOutsidePlatform.length) process.exit(1);
 if (platformModules.length !== STAGE_3_PLATFORM_MODULE_COUNT) process.exit(1);

@@ -217,7 +217,7 @@ test('the desktop dialog client is the sole production owner of the Tauri dialog
 test('desktop platform exposes the dedicated DialogsPort and current callers keep dialog ownership behind Platform', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
   const core = await readFile(new URL('../../../public/app/core.js', import.meta.url), 'utf8');
-  const exportSource = await readFile(new URL('../../../public/app/export.js', import.meta.url), 'utf8');
+  const exportSource = await readFile(new URL('../../../src/features/export/application/export-controller.js', import.meta.url), 'utf8');
   const settingsController = await readFile(
     new URL('../../../src/features/settings/application/settings-controller.js', import.meta.url),
     'utf8'
@@ -231,8 +231,8 @@ test('desktop platform exposes the dedicated DialogsPort and current callers kee
   assert.match(fileView, /return await openPath\(path\)/);
   assert.doesNotMatch(core, /call\('dialogs', 'openFile'/);
   assert.match(core, /call\('dialogs', 'confirm'/);
-  assert.match(exportSource, /markdownEditorImageExportPort/);
-  assert.match(exportSource, /exportImagePort\.save\(\{ request \}\)/);
+  assert.match(exportSource, /owners\[format\]\[method\]/);
+  assert.match(main, /mountClassicExportCommandPort/);
   const imageOwner = await readFile(new URL('../../../src/features/export/formats/image/image-exporter.js', import.meta.url), 'utf8');
   assert.match(imageOwner, /fileWriter\.write/);
   const writer = await readFile(new URL('../../../src/features/export/application/export-file-writer.js', import.meta.url), 'utf8');

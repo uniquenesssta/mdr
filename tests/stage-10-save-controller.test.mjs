@@ -212,7 +212,7 @@ test('Atomic 10.2 SaveController remains the single manual-save authority after 
   const [entry, main, exportSource, core, eventsSource, fixtureText] = await Promise.all([
     source('src/features/persistence/index.js'),
     source('src/main.js'),
-    source('public/app/export.js'),
+    source('src/features/export/application/export-controller.js'),
     source('public/app/core.js'),
     source('public/app/events.js'),
     source('tests/architecture/fixtures/production-modules.json')

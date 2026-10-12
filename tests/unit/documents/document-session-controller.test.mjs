@@ -421,7 +421,7 @@ test('Atomic 5.3 classic controller port exposes only controller commands and ha
 test('Atomic 5.3 production integration removes classic lifecycle/body-cache authority and keeps the frozen DocumentModel exact', async () => {
   const [core, exportModule, events, main, nativeStore, segmentedLoader, entry, loadControllerSource, persistenceEntry, sessionControllerSource] = await Promise.all([
     readText('public/app/core.js'),
-    readText('public/app/export.js'),
+    readText('src/features/export/application/export-controller.js'),
     readText('public/app/events.js'),
     readText('src/main.js'),
     readText('src/storage/native-document-store.js'),
@@ -436,8 +436,8 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
   assert.doesNotMatch(core, /function\s+loadDocumentContent\b/);
   assert.doesNotMatch(core, /function\s+saveDocumentsToStorage\b/);
   assert.match(core, /markdownEditorDocumentControllerPort/);
-  assert.match(exportModule, /markdownEditorImageExportPort/);
-  assert.match(exportModule, /exportImagePort\.(?:render|save)\(\{ request \}\)/);
+  assert.match(exportModule, /owners\[format\]\[method\]/);
+  assert.match(main, /owners: \{ markdown: markdownExporter, html: htmlExporter, word: wordExporter, pdf: pdfExporter, image: imageExporter \}/);
   assert.match(main, /createImageExporter\(\{ documentModel, documents: documentControllerPort/);
   const imageOwner = await readText('src/features/export/formats/image/image-exporter.js');
   assert.match(imageOwner, /documents\.isCurrentGeneration/);

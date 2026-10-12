@@ -131,7 +131,7 @@
   "reviewedSources": [
     {
       "path": "src/runtime/performance.js",
-      "blobSha": "b61842ebd30b2a8550f7854df7eb11f23f955970"
+      "blobSha": "70ea60286f423d9b65964253056b6a95511517f2"
     },
     {
       "path": "src-tauri/src/performance_log/mod.rs",
@@ -211,7 +211,7 @@
     },
     {
       "path": "public/compatibility/business-content.html",
-      "blobSha": "8104c148910531c6e26bb4dfe893dd954b662647"
+      "blobSha": "8fd66980c759edcb6641038eec983eca601e2da3"
     },
     {
       "path": "src/features/import/application/import-document-controller.js",
@@ -235,11 +235,11 @@
     },
     {
       "path": "src/features/menu/compatibility/classic-menu-command-adapter.js",
-      "blobSha": "ff8157155b8a9cbc57e6f0237bc79fa6ef641972"
+      "blobSha": "a1983946638640854012d708139509a6f9557c6e"
     },
     {
       "path": "src/main.js",
-      "blobSha": "629a7b419a75482db037aed541de63aa9f6943ce"
+      "blobSha": "603bbf40ae28691a0f00f3a3ef05203ed2e385ec"
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
@@ -263,15 +263,11 @@
     },
     {
       "path": "src/ui/compatibility/mount-modal-shells.js",
-      "blobSha": "fd15087c2b9b6e3f2806bb9febaff0e7e2689fd1"
+      "blobSha": "3f6321e52149059c8a8c8594e0997ca863d2f3b7"
     },
     {
       "path": "src/features/import/index.js",
       "blobSha": "1b10cc1e21c770aa2aa3bfc436acce5018c71567"
-    },
-    {
-      "path": "public/app/export.js",
-      "blobSha": "0c1423c41dfbf2c229a223758875e9c508f24042"
     },
     {
       "path": "src/features/export/application/export-request.js",
@@ -283,7 +279,7 @@
     },
     {
       "path": "src/features/export/index.js",
-      "blobSha": "b3802b97093bcc2c265ab4591b6e05780bc0b0a1"
+      "blobSha": "9a5de2f434c98d7d3d80c55c8d65ccc6544e38b3"
     },
     {
       "path": "src/features/export/compatibility/classic-export-task-port.js",
@@ -456,6 +452,18 @@
     {
       "path": "tests/e2e/windows/file-writer-chain.mjs",
       "blobSha": "2dfdfabf3ab35a7b95df76a841fda8b39f0ce7ed"
+    },
+    {
+      "path": "src/features/export/application/export-controller.js",
+      "blobSha": "a9fae567fc99ed8379e66bc1395323d47d1e766b"
+    },
+    {
+      "path": "src/features/export/ui/export-image-dialog-view.js",
+      "blobSha": "778a34b797233652f9d18807dc74ffcdea48efd7"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-export-command-port.js",
+      "blobSha": "7e419360cc4e8ebeae31c3ef69181888003257e7"
     }
   ],
   "priorFailures": {
@@ -671,19 +679,19 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R14.16",
+    "stage": "R14.18",
     "date": "2026-10-12",
-    "reviewedCommit": "b1c236b3326357c1c0f8d991d1f282dcd5582f77",
-    "record": "docs/R14-16-DETAILS.md",
-    "status": "R14.17 accepted and closed; R14.18 authorized next",
+    "reviewedCommit": "b6aa0cf11610dd15e1a4b880ac9cfa585a2902a6",
+    "record": "docs/R14-18-DETAILS.md",
+    "status": "R14.17 accepted and closed; R14.18 implemented pending exact-head Windows",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
-    "scope": "Pure Data URL decoder, scalar-value/percent-octet/base64 byte safety, scoped conversion port, fixed bytes before image save dialog and existing Platform binary output for native and browser paths; actual Windows file readback and actual PNG/Blob evidence defined. No image rendering owner or new writer, dependency, model, data format or native permission changes.",
+    "scope": "Sole Export Controller/command capability and owned image modal/options/stage replace retired classic script/template/inline handlers. Existing format/task/Writer/Platform/Rust authorities retained.",
     "acceptedPriorStage": {
-      "stage": "R14.14",
-      "commit": "b3d38ccb77163070af5e230432d19df82d050f09",
-      "run": 38217129135,
-      "record": "docs/R14-14-DETAILS.md",
+      "stage": "R14.17",
+      "commit": "1e6f4aee12f086f2557f90862db61d7043792b0c",
+      "run": 38268106587,
+      "record": "docs/R14-17-DETAILS.md",
       "accepted": true
     },
     "removedReviewedSources": [
@@ -708,9 +716,15 @@
         "blobSha": "09dc9fa8faf8bdf607f955a4e6138378b1d64ad5",
         "stage": "R14.4",
         "replacement": "src/features/export/task/export-task-controller.js"
+      },
+      {
+        "path": "public/app/export.js",
+        "blobSha": "0c1423c41dfbf2c229a223758875e9c508f24042",
+        "stage": "R14.18",
+        "replacement": "public Export Controller + owned image View + scoped command capability"
       }
     ],
-    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open. Run 37824900026 at 0e09d62ec545d7d70d33d67175b1c9fbe4b31c70 passed cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; WebView, native and dependency jobs passed. The safe-writer targeted step failed 17/18 because parallel test fixtures used the same PID and clock value, causing Windows AlreadyExists before any write. Later full Rust success does not supersede the failed step; closeout correctly rejected the commit. Only the test fixture allocator now adds an atomic sequence and bounded exclusive-create collision handling. The retained concurrent-save scenario forces a shared clock value and a pre-existing directory, checks isolation and ownership, then runs the original eight actual writes. All 18 scenarios, production fingerprints, workflow gates and historical acceptance remain unchanged. R14.4 awaits revalidation; 14.5 is not started. Run 37883007228 at e050ff4bb1e5f78e960344031d229cba336e8662 passed the safe-writer 18/18 including forced equal-clock fixture ownership, full Rust 269 plus integration 5/1/6, Clippy/check, cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; other independent Windows jobs passed. Only the Rust formatting step failed on two new assertion layouts, repeated in the formatter log by module traversal. Closeout correctly rejected it. Current repair exactly applies the complete CI rustfmt diff; source is identical after removing whitespace. Local formatter runtime is incomplete, so full formatter and cumulative Windows admission remain pending; historical acceptance and all production fingerprints are unchanged. Run 37886068643 at f631d2639b811ab6db071c08edf26fcbb75c59ce passed all seven Windows jobs and every step, including safe-writer 18/18, Rust format, cancellation 22/22, Node 1724/1724, frontend 726/726 and actual browser 11/11 plus 37/37. R14.4 is accepted; both failed attempts and test-only repairs remain recorded. User requested R14.5. Current review covers the readonly Progress Store over one task authority, safe text-only DOM view, direct ModalShell focus/visibility, guarded cancellation button, end-state reset and independent pagehide cleanup. Classic progress subscription, inline cancel global and compatibility progress registration are removed. Existing cancellation/task/characterization scenarios are retained through the real new store/view composition; a test-only ModalShell fault adapter preserves open/close error injection. Rendered format findings and A10 remain open; R14.5 awaits its own exact-commit Windows validation. Run 37890617533 at 2bbd7733b9c14b4639cf64bde04c21840a7b449d passed progress 20/20, cancellation 22/22, task 16/16, request 31/31, characterization 41/41, browser 11/11 plus 38/38 and Rust/native/WebView/dependency jobs. Node 1743/1744 and frontend 745/746 failed solely because the Stage 1 current-baseline assertion still expected 33 inline handlers after the progress handler was removed, leaving 32. Closeout correctly blocked it. Repair replaces that stale total with exact path/attribute/handler/count equality and explicit retired-handler proof; all historical handoff and product scenarios, production fingerprints and admission gates remain unchanged. R14.5 remains pending; 14.6 is not started. Run 37897676407 at 2dbfc2ba3117d1924cceca40d4dd57e04078265a validated the Stage 1 repair: Node 1744/1744, frontend 746/746, progress 20/20, existing 22/16/31/41 scenarios and browser 11/11 plus 38/38 passed. Rust/native/dependency jobs succeeded. Only actual WebView file/both rendering timed out; closeout correctly failed. The old artifact lacked per-check DOM failure diagnostics, so the precise missing content and causal link remain unknown. Source review identified a deterministic interrupted-enhancement gap during unchanged DOM reuse: cancelled queued math and busy Mermaid were not re-enqueued. This repair captures prior pending/running state and schedules current-generation jobs for reused nodes, with settled reuse and cancellation ownership preserved. Four controlled regression scenarios and retained hard checks plus partial-state/failure screenshot diagnostics await Windows execution. Current review adds the changed Preview engine fingerprint; All prior 44 paths remain covered, 43 hashes are unchanged and the changed import probe hash is updated with its prior value retained; historical acceptance is preserved. R14.5 is pending; 14.6 is not started. Run 37929409192 at 11d2eb4befff4b06a13e2f4f00075ca1db2d056f passed all seven Windows jobs and every step, Node 1748/1748, frontend 746/746, progress 20/20, all four controlled Preview enhancement regressions, cancellation 22/22, task/request/export 16/31/41 and browser 11/11 plus 38/38. Digest-checked exact-commit WebView and final closeout artifacts passed all eight import-chain scenarios and four six-check render snapshots, including the previously failing file/both path. The old failure had no per-check snapshot, so its precise missing predicate or sole cause is not retroactively confirmed. R14.5 is formally accepted; both failed attempts and their repairs are preserved. This closeout changes documentation only; all 45 current fingerprints, production, tests, workflow and historical acceptance remain unchanged. 14.6 is not started; rendered-format findings and new A10 low-risk disposition remain open. R14.5 documentation closeout 45bcdd14debf2ab030df66f44e6588d29915a440 passed all seven Windows jobs and steps in run37931528219. User requested finish05/start06. R14.6 replaces the complete classic body builder with a public scoped Document Builder, synchronized readonly Preview capture, explicit model snapshot fallback and safe DOM materialization. All HTML/Word/PDF/Image body callers migrate; cancellation, stale document/version/reset, errors and independent frame disposal are covered by new contracts and actual built-app probes. Historical findings and tests retain purpose with explicit new behavior mappings. F01/F02 and remaining F04 enhancer/print/image gaps plus A10 remain received; no complete enhanced-format acceptance is claimed. Current source coverage grows from45 to47 with old paths retained and changed fingerprints preserved separately. R14.6 awaits its own exact-commit Windows admission; 14.7 has not started. R14.6 first attempt ccef6988/run37935424278 failed only three built-app scenes and consequential closeout; all1771 recursive Node tests,766 frontend tests,20 builder contracts and five other Windows jobs passed. Source review confirms the missing escapeHtml title binding masked by the VM and the opaque-origin/page-only built-app asset host, so repair owns title escaping, removes VM injection and uses an actual same-origin loopback server with retained failure artifacts. All old scenarios and current47 risk paths remain; only the export caller fingerprint changes. New Windows admission is pending; R14.6 is not accepted. R14.6 second attempt4d5831e/run37943920538 passed all prior three export failures, including18 actual text downloads,137 ordered long paragraphs without a full snapshot,138 actual Worker blocks in48/96/138 batches and first-batch cancellation followed by a complete next build. Recursive Node1776/1776, frontend771/771, export43/43 and builder20/20 passed; only two cumulative theme probes failed and closeout correctly blocked. Actual classic Settings listener applies hybrid layout on theme-only events, clearing the populated Preview; missing finally cleanup leaves dark theme for the second probe. Repair makes legacy effects depend on changed fields, retains original identity assertions and adds actual-listener regressions plus native Preview readiness and finally cleanup. All47 current risk paths and past acceptance/failures remain; only core.js fingerprint changes. Separate existing Editor metrics console error is recorded open, outside this confirmed theme/Builder failure chain. R14.6 remains unaccepted. R14.6 third attempt a3dadd6/run37955921182 passed browser11/11 plus39/39, export43/43, builder20/20 and production build. All prior real export and theme failures pass. One added Settings test uses unsupported en-US instead of canonical en, causing Settings4/5, frontend775/776 and recursive1780/1781; closeout correctly blocks. Only its input and expected stored locale change to en. Production, workflow, all47 fingerprints and assertions are preserved; R14.6 remains unaccepted and14.7 not started. R14.6 accepted at1f49956/run37958151064: all seven Windows jobs/steps pass, Node1781/1781, frontend776/776, builder20/20, Settings5/5, export43/43 and browser11/11 plus39/39. Digest-checked closeout and frontend archives match the exact commit and all47 current source fingerprints; native Worker long-body/no-snapshot/cancel recovery and theme identities pass. All three failures/repairs remain. Documentation-only acceptance update; 14.7 not started and received format/A10/Editor findings remain open. R14.6 documentation closeout atf8d2312/run37961049857 passed all seven jobs and every execution step; formal implementation acceptance stays1f49956. User requested finish06/start07. R14.7 routes all four rendered formats through public batched task/code/math/Mermaid enhancement and removes retired enhancement globals. Builder owns immutable origin context; enhancement guards document/version, task/body replacement and independent disposal, rejecting late Mermaid commits. Separately reviewed A10 compatibility patch pins KaTeX0.18.2 with a transitive override; Mermaid11.16.1 and every other lock package stay unchanged, metadata npm audit reports zero advisories. Public math wrapper rejects inherited trust. All original fixtures, scenario purposes and historical acceptance/failures remain. Current risk coverage grows47 to49, six prior fingerprints recorded separately. Actual renderer/security/export and cumulative Windows evidence is pending, so14.7 and A10 final format closure are not accepted;14.8 not started. R14.7 first attempta8b8302/run37967189292 passed enhancement27/27,builder21/21,export43/43,contract browser11/11 and actual app42/42 plus build and four independent Windows jobs. Security5/6,frontend809/810,recursive1814/1815 fail only because an inherited macro is correctly rejected with ParseError/No function handler while the test demands Undefined control sequence. Exact tagged source confirms own-property namespace checks and the alternate parser diagnostic. Test-only repair preserves the six scenarios and requires typed rejection,zero inherited payload in error markup and a legitimate own macro positive control. Digest-checked archives verify all18 text downloads,enhanced print body,actual1080x2563 PNG,40-node cancel/rebuild and stale/public-math probes. Visual PNG also shows extra math text, explicitly received by14.8/14.16 with cause pending. All49 fingerprints,production,dependencies,workflow,fixtures and historical acceptance remain unchanged;R14.7 and A10 are not accepted. Subsequent2026-10-10 acceptance supersedes the preceding07 pending status: c532cd1/run38021008368 all seven jobs/all executed steps passed, real security6/6/enhancement27/27 and cumulative1815/1815 accepted. User requests07 closeout and08; one shared style owner and scoped port replace all four content-style paths, explicit locked KaTeX CSS fixes missing canonical presentation, PNG auxiliary hiding is raster-only.21 defined style scenarios plus3 actual-browser cases;Current52 risk fingerprints include3 new sources. Repaired PNG pixels and08 cumulativeWindows acceptance remain pending;original07 observed image defect and14.10/11/12/16/A10 complete format gates and separate Editor metrics remain open. R14.8 first attemptb9a565d/run38057924490 has four successful jobs, frontend831/831 and styles21/21, browser11/11 and44/45. Isolated HTML/Word and actual light/dark1080x2355 zero-diff PNG with525252-pixel positive control passed; both images visually inspected. Preview4/hybrid0 is a test selector/layout error including hidden image staging. Native WebView fails before session/any assertion with No window and app.start-only logs; underlying cause remains undetermined. Test-only repair scopes actual both/Hybrid roots and preserves strict two formulas/live identities/clipping. Startup owner records both attempts, verifies host stop, never retries assertions, and permits one fresh process only for missing-window startup while alive.12 new lifecycle scenarios awaitWindows. All52 production risk hashes, dependencies, frozen model/storage, original fixtures and earlier acceptance/failures are unchanged.14.8 is not accepted;14.9 not started. R14.8 subsequent exact repair22cbd68/run38072508148 all seven jobs/steps succeed;1848 recursive Node,843 frontend,21 styles,12 startup lifecycle,11+45 browsers,real8-chain and finalaccepted=true verified. Four downloaded ZIP SHA256 match exact commit; both actual1080x2355 light/dark images visually inspected,zero reference pixel diff and525252 positive control;true Preview/Hybrid two-node identity/accessibility passes. First no-window underlying cause remains undetermined. User requests finish08/start09. Public raw Markdown owner replaces active/context snapshot/read/download orchestration and uses existing accepted Platform safe writer/browser URL cleanup without rendering. Immutable shared names/directories,document generation/version/identity and task cancellation/locking protect all waits;independent destroy suppresses late results.30 defined contracts plus3 real-browser scenes retain all prior scenario purposes and fixtures. Current54 risk paths preserve all52 earlier paths and record changed hashes.09 awaits exact-commit Windows;complete offline formats/A10,printing/image/file-writer receivers and unrelatedEditor finding stay open. R14.9 first exact-head run38075521977 at135f431 passed1878/1878 recursive Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and five other direct Windows jobs;built-app47/48 failed solely because its inactive test confused raw creation input with the stored Documents title. The final aggregator correctly rejected browser-app.log. Repair explicitly asserts input,created/stored title and actual download and adds three exact name rows;all48 built-app cases,31 request cases,30 Markdown cases,original fixtures,production,workflow and previous acceptance history are preserved. R14.9 remains pending its repaired-head Windows validation;14.10 is not started. R14.9 repair637091b passed all seven Windows jobs and execution steps in run38107902440;1878/1878 Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and48/48 actual app probes. Four archive SHA-256 digests and same-commit evidence are checked,including exact0/76/690000-byte raw outputs,inactive record title/state and stale first0/next1 publication. First failed run38075521977 and its repair remain in accepted history. R14.9 formally closes;user requests14.10 on the same branch. Current HTML migration removes the old template CDN/private scripts/direct Blob,uses public complete body/enhancement/shared CSS and lazy embedded locked fonts,retains all48 original probes and adds3 offline/full-body/stale-publication probes plus36 contracts. Authored image/link URLs retain existing policy,no dependency/budget/permission widening;R14.10 awaits its exact-head Windows run and14.11 is not started. R14.10 first run38110755648 at40349cb passed actual unmodified offline HTML/font/math/SVG and build, but four cancellation predicates expected user instead of existing cancelled and two actual output probes queried absent markdown-body.1910/1914 recursive,905/909 frontend,32/36 HTML and49/51 actual app;four other independent Windows jobs succeeded;aggregate correctly rejects. Repair changes two test files only,strictly asserts cancelled and actual body.export-document[data-export-format=html],retains every36/51 case and full-body/stale-output/ownership/disposal/admission checks. Production59 risk hashes,dependencies,workflow,original fixtures and prior history remain unchanged;10 awaits repaired exact head,11 not started. R14.10 repair00930e0/run38135455053 passed all seven Windows jobs/steps,1914 recursive Node,909 frontend,36 HTML and11+51 browser probes,Rust281/actual8 import and finalaccepted=true. Four archive SHA256/exact commit match;20offline fonts,450024-character body and stale first0/next1 evidence verified.10 closes with first failure/repair retained. User starts11 on samebranch. Accepted HTML lifecycle and passive template are extracted to two shared owners;fixed Word/HTML factories retain public capability boundaries,Word reuses original Builder/Enhancer/Styles/20fonts/Platform and removes classic template/downloader/text-save/escape authority.29Word contracts plus3 table-driven actual Word probes keep allHTML36 and previous51 cases. Existing HTML .doc container retained;browser evidence is not actual Microsoft Word compatibility validation.64risk paths preserve all59 predecessors and536module inventory preserves531rows;dependencies,budget,fixtures and historicalroot/acceptance preserved.11awaits new exacthead Windows;12notstarted and overallA10/futureformat/Editor receivers remain. R14.11 exact6d0f822/run38146793150 seven jobs/all steps,1943 Node/938 frontend/29 Word/54 actual cases and four digests accepted. R14.12 isolated printing implemented; new33 contracts/3 actual cases pending exact-head Windows; no native dialog/PDF save proof or overall A10 closure. R14.12 first da4c309/run38155745041 passed33 PDF/971 frontend but1975 of1976 recursive and56 of57 actual;undefined migration value blocked three guards and absent virtualEditor.root stopped the four-layout probe before print. Four artifact SHA-256 checked; aggregate accepted=false. Two test/fixture repairs use established retain and actual connected .cm-content after stable focus, retaining every33/57 purpose/identity/resource/disposal gate. Production67 fingerprints,workflow,dependencies and accepted history unchanged. Rust formatting skipped is not counted passed.12 pending repaired Windows,13 not started. R14.12 second3956c07/run38157286512 passes1976 recursive/971 frontend/33 PDF/five direct jobs including formatting;actual56of57 fails only focusRestored. All four JSON rows independently preserve full PDF20font/math/MathML/SVG/task/code resources,root/child identity,layout/selection/scroll and frame/task cleanup,but old focus identity/timing diagnostics absent. Probe used hidden filename and sampled before scheduled ModalShell close restoration;repair establishes actual visible button focus and waits original double-frame contract,keeps strict same-focus assertion and adds phase diagnostics/progress closure. No product67 fingerprints,inventory539,workflow,dependency or accepted history changes. Four archive digests verified;aggregate accepted=false;12awaits new Windows,13notstarted. R14.12 repaired0ea72e2/run38190752844 passes every seven job/step,1976 Node/971 frontend/33 PDF/57 actual and finalaccepted=true;four digests and four phase focus/resource/identity rows verified. Both failed attempts/repairs remain accepted history. User starts14.13 on samebranch. One ratio table and pure numeric geometry with reversible CSS leases replace classic inline layout;33 contracts and2 real PNG scenes retain all57/old pixel controls.70 reviewed paths preserve67 predecessors,542 inventory preserves539rows;no dependencies/frozen model/workflow gate weakening.13 pending exact-head Windows,14notstarted and overallA10 image handoff remains. R14.13 f4e5d5e/run38197683019 passes all seven Windows jobs/steps,2009 recursive/1004 frontend/33 layout/59 actual/Rust281 and finalaccepted=true. Four ZIP digests and actual five ratios/rapid replacement/1080x3538 long versus1080x1920 crop/zero differing prefix pixels verified. User starts14.14 on the same branch: one public asset owner and scoped port replaces classic loader; images/dataURLs/CORS/pixels/placeholder/decode/timeouts/progress and late cleanup are scoped there.41 new contracts and2 actual cases defined; all59 predecessor actual names/purposes remain.14.14 awaits exact-head Windows;14.15 unstarted;14.16 A10 image closure remains. Run38217129135 at b3d38ccb77163070af5e230432d19df82d050f09 passed all seven Windows jobs and all steps: recursiveNode2051/2051,frontend1045/1045,imageAssets41/41,browser11/11+61/61,Rust281 and exact-commit accepted=true. Four archive SHA-256 digests and actual PNG asset samples/recovery/pagehide JSON independently checked;72 reviewed source fingerprints match. R14.14 formally closed on user request;14.15 not started. Earlier first-run failure and implementation states remain in history; overall A10 final image chain stays with14.16. User starts R14.15 on the sole agent/r14-stage at37920ad after formal14.14 acceptance. Pure image-data encoder replaces classic conversion, preserves percent octets and Unicode scalar-value semantics, validates data/base64 and outputs owned Uint8Array. The image save command captures bytes before the dialog and calls the established Platform writeBinary for both paths; browser Blob/URL lifecycle stays in the existing adapter.58 new contracts,2 built-app cases plus real native WebView->Platform->Rust safe binary writes/readback and failure/recovery defined; original61 actual scenes and43 characterization retained. New code awaits exact-head Windows;14.16 final Image Exporter and14.17 writer remain unstarted.",
+    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open. Run 37824900026 at 0e09d62ec545d7d70d33d67175b1c9fbe4b31c70 passed cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; WebView, native and dependency jobs passed. The safe-writer targeted step failed 17/18 because parallel test fixtures used the same PID and clock value, causing Windows AlreadyExists before any write. Later full Rust success does not supersede the failed step; closeout correctly rejected the commit. Only the test fixture allocator now adds an atomic sequence and bounded exclusive-create collision handling. The retained concurrent-save scenario forces a shared clock value and a pre-existing directory, checks isolation and ownership, then runs the original eight actual writes. All 18 scenarios, production fingerprints, workflow gates and historical acceptance remain unchanged. R14.4 awaits revalidation; 14.5 is not started. Run 37883007228 at e050ff4bb1e5f78e960344031d229cba336e8662 passed the safe-writer 18/18 including forced equal-clock fixture ownership, full Rust 269 plus integration 5/1/6, Clippy/check, cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; other independent Windows jobs passed. Only the Rust formatting step failed on two new assertion layouts, repeated in the formatter log by module traversal. Closeout correctly rejected it. Current repair exactly applies the complete CI rustfmt diff; source is identical after removing whitespace. Local formatter runtime is incomplete, so full formatter and cumulative Windows admission remain pending; historical acceptance and all production fingerprints are unchanged. Run 37886068643 at f631d2639b811ab6db071c08edf26fcbb75c59ce passed all seven Windows jobs and every step, including safe-writer 18/18, Rust format, cancellation 22/22, Node 1724/1724, frontend 726/726 and actual browser 11/11 plus 37/37. R14.4 is accepted; both failed attempts and test-only repairs remain recorded. User requested R14.5. Current review covers the readonly Progress Store over one task authority, safe text-only DOM view, direct ModalShell focus/visibility, guarded cancellation button, end-state reset and independent pagehide cleanup. Classic progress subscription, inline cancel global and compatibility progress registration are removed. Existing cancellation/task/characterization scenarios are retained through the real new store/view composition; a test-only ModalShell fault adapter preserves open/close error injection. Rendered format findings and A10 remain open; R14.5 awaits its own exact-commit Windows validation. Run 37890617533 at 2bbd7733b9c14b4639cf64bde04c21840a7b449d passed progress 20/20, cancellation 22/22, task 16/16, request 31/31, characterization 41/41, browser 11/11 plus 38/38 and Rust/native/WebView/dependency jobs. Node 1743/1744 and frontend 745/746 failed solely because the Stage 1 current-baseline assertion still expected 33 inline handlers after the progress handler was removed, leaving 32. Closeout correctly blocked it. Repair replaces that stale total with exact path/attribute/handler/count equality and explicit retired-handler proof; all historical handoff and product scenarios, production fingerprints and admission gates remain unchanged. R14.5 remains pending; 14.6 is not started. Run 37897676407 at 2dbfc2ba3117d1924cceca40d4dd57e04078265a validated the Stage 1 repair: Node 1744/1744, frontend 746/746, progress 20/20, existing 22/16/31/41 scenarios and browser 11/11 plus 38/38 passed. Rust/native/dependency jobs succeeded. Only actual WebView file/both rendering timed out; closeout correctly failed. The old artifact lacked per-check DOM failure diagnostics, so the precise missing content and causal link remain unknown. Source review identified a deterministic interrupted-enhancement gap during unchanged DOM reuse: cancelled queued math and busy Mermaid were not re-enqueued. This repair captures prior pending/running state and schedules current-generation jobs for reused nodes, with settled reuse and cancellation ownership preserved. Four controlled regression scenarios and retained hard checks plus partial-state/failure screenshot diagnostics await Windows execution. Current review adds the changed Preview engine fingerprint; All prior 44 paths remain covered, 43 hashes are unchanged and the changed import probe hash is updated with its prior value retained; historical acceptance is preserved. R14.5 is pending; 14.6 is not started. Run 37929409192 at 11d2eb4befff4b06a13e2f4f00075ca1db2d056f passed all seven Windows jobs and every step, Node 1748/1748, frontend 746/746, progress 20/20, all four controlled Preview enhancement regressions, cancellation 22/22, task/request/export 16/31/41 and browser 11/11 plus 38/38. Digest-checked exact-commit WebView and final closeout artifacts passed all eight import-chain scenarios and four six-check render snapshots, including the previously failing file/both path. The old failure had no per-check snapshot, so its precise missing predicate or sole cause is not retroactively confirmed. R14.5 is formally accepted; both failed attempts and their repairs are preserved. This closeout changes documentation only; all 45 current fingerprints, production, tests, workflow and historical acceptance remain unchanged. 14.6 is not started; rendered-format findings and new A10 low-risk disposition remain open. R14.5 documentation closeout 45bcdd14debf2ab030df66f44e6588d29915a440 passed all seven Windows jobs and steps in run37931528219. User requested finish05/start06. R14.6 replaces the complete classic body builder with a public scoped Document Builder, synchronized readonly Preview capture, explicit model snapshot fallback and safe DOM materialization. All HTML/Word/PDF/Image body callers migrate; cancellation, stale document/version/reset, errors and independent frame disposal are covered by new contracts and actual built-app probes. Historical findings and tests retain purpose with explicit new behavior mappings. F01/F02 and remaining F04 enhancer/print/image gaps plus A10 remain received; no complete enhanced-format acceptance is claimed. Current source coverage grows from45 to47 with old paths retained and changed fingerprints preserved separately. R14.6 awaits its own exact-commit Windows admission; 14.7 has not started. R14.6 first attempt ccef6988/run37935424278 failed only three built-app scenes and consequential closeout; all1771 recursive Node tests,766 frontend tests,20 builder contracts and five other Windows jobs passed. Source review confirms the missing escapeHtml title binding masked by the VM and the opaque-origin/page-only built-app asset host, so repair owns title escaping, removes VM injection and uses an actual same-origin loopback server with retained failure artifacts. All old scenarios and current47 risk paths remain; only the export caller fingerprint changes. New Windows admission is pending; R14.6 is not accepted. R14.6 second attempt4d5831e/run37943920538 passed all prior three export failures, including18 actual text downloads,137 ordered long paragraphs without a full snapshot,138 actual Worker blocks in48/96/138 batches and first-batch cancellation followed by a complete next build. Recursive Node1776/1776, frontend771/771, export43/43 and builder20/20 passed; only two cumulative theme probes failed and closeout correctly blocked. Actual classic Settings listener applies hybrid layout on theme-only events, clearing the populated Preview; missing finally cleanup leaves dark theme for the second probe. Repair makes legacy effects depend on changed fields, retains original identity assertions and adds actual-listener regressions plus native Preview readiness and finally cleanup. All47 current risk paths and past acceptance/failures remain; only core.js fingerprint changes. Separate existing Editor metrics console error is recorded open, outside this confirmed theme/Builder failure chain. R14.6 remains unaccepted. R14.6 third attempt a3dadd6/run37955921182 passed browser11/11 plus39/39, export43/43, builder20/20 and production build. All prior real export and theme failures pass. One added Settings test uses unsupported en-US instead of canonical en, causing Settings4/5, frontend775/776 and recursive1780/1781; closeout correctly blocks. Only its input and expected stored locale change to en. Production, workflow, all47 fingerprints and assertions are preserved; R14.6 remains unaccepted and14.7 not started. R14.6 accepted at1f49956/run37958151064: all seven Windows jobs/steps pass, Node1781/1781, frontend776/776, builder20/20, Settings5/5, export43/43 and browser11/11 plus39/39. Digest-checked closeout and frontend archives match the exact commit and all47 current source fingerprints; native Worker long-body/no-snapshot/cancel recovery and theme identities pass. All three failures/repairs remain. Documentation-only acceptance update; 14.7 not started and received format/A10/Editor findings remain open. R14.6 documentation closeout atf8d2312/run37961049857 passed all seven jobs and every execution step; formal implementation acceptance stays1f49956. User requested finish06/start07. R14.7 routes all four rendered formats through public batched task/code/math/Mermaid enhancement and removes retired enhancement globals. Builder owns immutable origin context; enhancement guards document/version, task/body replacement and independent disposal, rejecting late Mermaid commits. Separately reviewed A10 compatibility patch pins KaTeX0.18.2 with a transitive override; Mermaid11.16.1 and every other lock package stay unchanged, metadata npm audit reports zero advisories. Public math wrapper rejects inherited trust. All original fixtures, scenario purposes and historical acceptance/failures remain. Current risk coverage grows47 to49, six prior fingerprints recorded separately. Actual renderer/security/export and cumulative Windows evidence is pending, so14.7 and A10 final format closure are not accepted;14.8 not started. R14.7 first attempta8b8302/run37967189292 passed enhancement27/27,builder21/21,export43/43,contract browser11/11 and actual app42/42 plus build and four independent Windows jobs. Security5/6,frontend809/810,recursive1814/1815 fail only because an inherited macro is correctly rejected with ParseError/No function handler while the test demands Undefined control sequence. Exact tagged source confirms own-property namespace checks and the alternate parser diagnostic. Test-only repair preserves the six scenarios and requires typed rejection,zero inherited payload in error markup and a legitimate own macro positive control. Digest-checked archives verify all18 text downloads,enhanced print body,actual1080x2563 PNG,40-node cancel/rebuild and stale/public-math probes. Visual PNG also shows extra math text, explicitly received by14.8/14.16 with cause pending. All49 fingerprints,production,dependencies,workflow,fixtures and historical acceptance remain unchanged;R14.7 and A10 are not accepted. Subsequent2026-10-10 acceptance supersedes the preceding07 pending status: c532cd1/run38021008368 all seven jobs/all executed steps passed, real security6/6/enhancement27/27 and cumulative1815/1815 accepted. User requests07 closeout and08; one shared style owner and scoped port replace all four content-style paths, explicit locked KaTeX CSS fixes missing canonical presentation, PNG auxiliary hiding is raster-only.21 defined style scenarios plus3 actual-browser cases;Current52 risk fingerprints include3 new sources. Repaired PNG pixels and08 cumulativeWindows acceptance remain pending;original07 observed image defect and14.10/11/12/16/A10 complete format gates and separate Editor metrics remain open. R14.8 first attemptb9a565d/run38057924490 has four successful jobs, frontend831/831 and styles21/21, browser11/11 and44/45. Isolated HTML/Word and actual light/dark1080x2355 zero-diff PNG with525252-pixel positive control passed; both images visually inspected. Preview4/hybrid0 is a test selector/layout error including hidden image staging. Native WebView fails before session/any assertion with No window and app.start-only logs; underlying cause remains undetermined. Test-only repair scopes actual both/Hybrid roots and preserves strict two formulas/live identities/clipping. Startup owner records both attempts, verifies host stop, never retries assertions, and permits one fresh process only for missing-window startup while alive.12 new lifecycle scenarios awaitWindows. All52 production risk hashes, dependencies, frozen model/storage, original fixtures and earlier acceptance/failures are unchanged.14.8 is not accepted;14.9 not started. R14.8 subsequent exact repair22cbd68/run38072508148 all seven jobs/steps succeed;1848 recursive Node,843 frontend,21 styles,12 startup lifecycle,11+45 browsers,real8-chain and finalaccepted=true verified. Four downloaded ZIP SHA256 match exact commit; both actual1080x2355 light/dark images visually inspected,zero reference pixel diff and525252 positive control;true Preview/Hybrid two-node identity/accessibility passes. First no-window underlying cause remains undetermined. User requests finish08/start09. Public raw Markdown owner replaces active/context snapshot/read/download orchestration and uses existing accepted Platform safe writer/browser URL cleanup without rendering. Immutable shared names/directories,document generation/version/identity and task cancellation/locking protect all waits;independent destroy suppresses late results.30 defined contracts plus3 real-browser scenes retain all prior scenario purposes and fixtures. Current54 risk paths preserve all52 earlier paths and record changed hashes.09 awaits exact-commit Windows;complete offline formats/A10,printing/image/file-writer receivers and unrelatedEditor finding stay open. R14.9 first exact-head run38075521977 at135f431 passed1878/1878 recursive Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and five other direct Windows jobs;built-app47/48 failed solely because its inactive test confused raw creation input with the stored Documents title. The final aggregator correctly rejected browser-app.log. Repair explicitly asserts input,created/stored title and actual download and adds three exact name rows;all48 built-app cases,31 request cases,30 Markdown cases,original fixtures,production,workflow and previous acceptance history are preserved. R14.9 remains pending its repaired-head Windows validation;14.10 is not started. R14.9 repair637091b passed all seven Windows jobs and execution steps in run38107902440;1878/1878 Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and48/48 actual app probes. Four archive SHA-256 digests and same-commit evidence are checked,including exact0/76/690000-byte raw outputs,inactive record title/state and stale first0/next1 publication. First failed run38075521977 and its repair remain in accepted history. R14.9 formally closes;user requests14.10 on the same branch. Current HTML migration removes the old template CDN/private scripts/direct Blob,uses public complete body/enhancement/shared CSS and lazy embedded locked fonts,retains all48 original probes and adds3 offline/full-body/stale-publication probes plus36 contracts. Authored image/link URLs retain existing policy,no dependency/budget/permission widening;R14.10 awaits its exact-head Windows run and14.11 is not started. R14.10 first run38110755648 at40349cb passed actual unmodified offline HTML/font/math/SVG and build, but four cancellation predicates expected user instead of existing cancelled and two actual output probes queried absent markdown-body.1910/1914 recursive,905/909 frontend,32/36 HTML and49/51 actual app;four other independent Windows jobs succeeded;aggregate correctly rejects. Repair changes two test files only,strictly asserts cancelled and actual body.export-document[data-export-format=html],retains every36/51 case and full-body/stale-output/ownership/disposal/admission checks. Production59 risk hashes,dependencies,workflow,original fixtures and prior history remain unchanged;10 awaits repaired exact head,11 not started. R14.10 repair00930e0/run38135455053 passed all seven Windows jobs/steps,1914 recursive Node,909 frontend,36 HTML and11+51 browser probes,Rust281/actual8 import and finalaccepted=true. Four archive SHA256/exact commit match;20offline fonts,450024-character body and stale first0/next1 evidence verified.10 closes with first failure/repair retained. User starts11 on samebranch. Accepted HTML lifecycle and passive template are extracted to two shared owners;fixed Word/HTML factories retain public capability boundaries,Word reuses original Builder/Enhancer/Styles/20fonts/Platform and removes classic template/downloader/text-save/escape authority.29Word contracts plus3 table-driven actual Word probes keep allHTML36 and previous51 cases. Existing HTML .doc container retained;browser evidence is not actual Microsoft Word compatibility validation.64risk paths preserve all59 predecessors and536module inventory preserves531rows;dependencies,budget,fixtures and historicalroot/acceptance preserved.11awaits new exacthead Windows;12notstarted and overallA10/futureformat/Editor receivers remain. R14.11 exact6d0f822/run38146793150 seven jobs/all steps,1943 Node/938 frontend/29 Word/54 actual cases and four digests accepted. R14.12 isolated printing implemented; new33 contracts/3 actual cases pending exact-head Windows; no native dialog/PDF save proof or overall A10 closure. R14.12 first da4c309/run38155745041 passed33 PDF/971 frontend but1975 of1976 recursive and56 of57 actual;undefined migration value blocked three guards and absent virtualEditor.root stopped the four-layout probe before print. Four artifact SHA-256 checked; aggregate accepted=false. Two test/fixture repairs use established retain and actual connected .cm-content after stable focus, retaining every33/57 purpose/identity/resource/disposal gate. Production67 fingerprints,workflow,dependencies and accepted history unchanged. Rust formatting skipped is not counted passed.12 pending repaired Windows,13 not started. R14.12 second3956c07/run38157286512 passes1976 recursive/971 frontend/33 PDF/five direct jobs including formatting;actual56of57 fails only focusRestored. All four JSON rows independently preserve full PDF20font/math/MathML/SVG/task/code resources,root/child identity,layout/selection/scroll and frame/task cleanup,but old focus identity/timing diagnostics absent. Probe used hidden filename and sampled before scheduled ModalShell close restoration;repair establishes actual visible button focus and waits original double-frame contract,keeps strict same-focus assertion and adds phase diagnostics/progress closure. No product67 fingerprints,inventory539,workflow,dependency or accepted history changes. Four archive digests verified;aggregate accepted=false;12awaits new Windows,13notstarted. R14.12 repaired0ea72e2/run38190752844 passes every seven job/step,1976 Node/971 frontend/33 PDF/57 actual and finalaccepted=true;four digests and four phase focus/resource/identity rows verified. Both failed attempts/repairs remain accepted history. User starts14.13 on samebranch. One ratio table and pure numeric geometry with reversible CSS leases replace classic inline layout;33 contracts and2 real PNG scenes retain all57/old pixel controls.70 reviewed paths preserve67 predecessors,542 inventory preserves539rows;no dependencies/frozen model/workflow gate weakening.13 pending exact-head Windows,14notstarted and overallA10 image handoff remains. R14.13 f4e5d5e/run38197683019 passes all seven Windows jobs/steps,2009 recursive/1004 frontend/33 layout/59 actual/Rust281 and finalaccepted=true. Four ZIP digests and actual five ratios/rapid replacement/1080x3538 long versus1080x1920 crop/zero differing prefix pixels verified. User starts14.14 on the same branch: one public asset owner and scoped port replaces classic loader; images/dataURLs/CORS/pixels/placeholder/decode/timeouts/progress and late cleanup are scoped there.41 new contracts and2 actual cases defined; all59 predecessor actual names/purposes remain.14.14 awaits exact-head Windows;14.15 unstarted;14.16 A10 image closure remains. Run38217129135 at b3d38ccb77163070af5e230432d19df82d050f09 passed all seven Windows jobs and all steps: recursiveNode2051/2051,frontend1045/1045,imageAssets41/41,browser11/11+61/61,Rust281 and exact-commit accepted=true. Four archive SHA-256 digests and actual PNG asset samples/recovery/pagehide JSON independently checked;72 reviewed source fingerprints match. R14.14 formally closed on user request;14.15 not started. Earlier first-run failure and implementation states remain in history; overall A10 final image chain stays with14.16. User starts R14.15 on the sole agent/r14-stage at37920ad after formal14.14 acceptance. Pure image-data encoder replaces classic conversion, preserves percent octets and Unicode scalar-value semantics, validates data/base64 and outputs owned Uint8Array. The image save command captures bytes before the dialog and calls the established Platform writeBinary for both paths; browser Blob/URL lifecycle stays in the existing adapter.58 new contracts,2 built-app cases plus real native WebView->Platform->Rust safe binary writes/readback and failure/recovery defined; original61 actual scenes and43 characterization retained. New code awaits exact-head Windows;14.16 final Image Exporter and14.17 writer remain unstarted. R14.17 formal closeout retained. User starts14.18 atb6aa0cf on soleagent/r14-stage: retired export.js, image modal/stage and export inline handlers deleted; actual Menu/owned controls use public Controller/Request/formats.32 new Node and1 actual UI scenario defined; old66 names/order/output/preservation gates retained.47icons/113bindings migrate their actual View owners, no threshold changes. Current14.18 pending exact-head Windows; overallR14/A10 closure not claimed.",
     "priorImplementationWindowsRun": 38197683019,
     "priorImplementationWindowsJobs": [
       {
@@ -857,6 +871,249 @@
       ]
     },
     "currentStageImplementation": {
+      "stage": "R14.18",
+      "baselineCommit": "b6aa0cf11610dd15e1a4b880ac9cfa585a2902a6",
+      "branch": "agent/r14-stage",
+      "status": "implemented pending exact-head Windows",
+      "record": "docs/R14-18-DETAILS.md",
+      "scope": "Sole Export Controller/command capability and owned image modal/options/stage replace retired classic script/template/inline handlers. Existing format/task/Writer/Platform/Rust authorities retained.",
+      "productionChanged": true,
+      "dependenciesChanged": false,
+      "nativeProductionChanged": false,
+      "changedSourceFingerprints": [
+        {
+          "path": "src/runtime/performance.js",
+          "priorBlobSha": "b61842ebd30b2a8550f7854df7eb11f23f955970",
+          "blobSha": "70ea60286f423d9b65964253056b6a95511517f2"
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "priorBlobSha": "8104c148910531c6e26bb4dfe893dd954b662647",
+          "blobSha": "8fd66980c759edcb6641038eec983eca601e2da3"
+        },
+        {
+          "path": "src/features/menu/compatibility/classic-menu-command-adapter.js",
+          "priorBlobSha": "ff8157155b8a9cbc57e6f0237bc79fa6ef641972",
+          "blobSha": "a1983946638640854012d708139509a6f9557c6e"
+        },
+        {
+          "path": "src/main.js",
+          "priorBlobSha": "629a7b419a75482db037aed541de63aa9f6943ce",
+          "blobSha": "603bbf40ae28691a0f00f3a3ef05203ed2e385ec"
+        },
+        {
+          "path": "src/ui/compatibility/mount-modal-shells.js",
+          "priorBlobSha": "fd15087c2b9b6e3f2806bb9febaff0e7e2689fd1",
+          "blobSha": "3f6321e52149059c8a8c8594e0997ca863d2f3b7"
+        },
+        {
+          "path": "src/features/export/index.js",
+          "priorBlobSha": "b3802b97093bcc2c265ab4591b6e05780bc0b0a1",
+          "blobSha": "9a5de2f434c98d7d3d80c55c8d65ccc6544e38b3"
+        }
+      ],
+      "newReviewedSources": [
+        {
+          "path": "src/features/export/application/export-controller.js",
+          "blobSha": "a9fae567fc99ed8379e66bc1395323d47d1e766b"
+        },
+        {
+          "path": "src/features/export/ui/export-image-dialog-view.js",
+          "blobSha": "778a34b797233652f9d18807dc74ffcdea48efd7"
+        },
+        {
+          "path": "src/features/export/compatibility/classic-export-command-port.js",
+          "blobSha": "7e419360cc4e8ebeae31c3ef69181888003257e7"
+        }
+      ],
+      "removedReviewedSources": [
+        {
+          "path": "public/app/export.js",
+          "blobSha": "0c1423c41dfbf2c229a223758875e9c508f24042",
+          "stage": "R14.18",
+          "replacement": "public Export Controller + owned image View + scoped command capability"
+        }
+      ],
+      "newControllerScenariosDefined": 26,
+      "newImageViewScenariosDefined": 5,
+      "newMenuScenariosDefined": 1,
+      "newNodeScenariosDefined": 32,
+      "builtAppScenariosRetained": 66,
+      "newBuiltAppScenariosDefined": 1,
+      "builtAppScenariosDefined": 67,
+      "productionModuleCount": 552,
+      "riskReviewedSourceCount": 84,
+      "compatibilityMapping": {
+        "record": "docs/R14-18-DETAILS.md#删除与验证替代映射",
+        "oldScenarioNamesAndOrder": "retained",
+        "testAliases": "test-only VM/evaluation lexical adapter calls actual commands, no restored production globals",
+        "iconReferences": 47,
+        "translationBindings": 113,
+        "nativeWriterAndImageEvidence": "All four unchanged actual Windows file output/original-preservation/recovery gates retained"
+      },
+      "staticReview": {
+        "javascriptSyntaxFiles": 37,
+        "relativeLinksChecked": 189,
+        "riskFingerprintsChecked": 84,
+        "priorRiskPathsPreserved": 81,
+        "productionModuleCount": 552,
+        "priorProductionPathsPreserved": 549,
+        "allOriginalTestNamesAndOrderPreserved": true,
+        "prior17AcceptanceAndFailuresAndRepairHistoriesPreserved": true,
+        "existingPlatformRustModelsDependenciesUnchanged": true,
+        "budgetsPreserved": {
+          "initialBytes": 500000,
+          "asyncBytes": 700000
+        },
+        "sevenWindowsJobsAndAllOldStepsPreserved": true,
+        "diffWhitespaceCheck": "passed",
+        "changedFiles": [
+          ".github/workflows/r10-12.yml",
+          ".github/workflows/r12-14.yml",
+          ".github/workflows/stage-06-atomic.yml",
+          ".github/workflows/stage-07-atomic.yml",
+          "AGENTS.md",
+          "README.md",
+          "docs/README.md",
+          "docs/audit/r12-24-closeout.json",
+          "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
+          "public/app/events.js",
+          "public/app/export.js",
+          "public/compatibility/business-content.html",
+          "scripts/stage-03/record-platform-cutover-evidence.mjs",
+          "src/features/export/application/export-controller.js",
+          "src/features/export/compatibility/classic-export-command-port.js",
+          "src/features/export/index.js",
+          "src/features/export/ui/export-image-dialog-view.js",
+          "src/features/menu/compatibility/classic-menu-command-adapter.js",
+          "src/main.js",
+          "src/runtime/performance.js",
+          "src/ui/compatibility/mount-modal-shells.js",
+          "tests/architecture/fixtures/architecture-baseline.json",
+          "tests/architecture/fixtures/production-modules.json",
+          "tests/e2e/lib/export-characterization.mjs",
+          "tests/e2e/lib/export-test-commands.mjs",
+          "tests/presentation-renderer-contract.test.mjs",
+          "tests/stage-10-autosave-controller.test.mjs",
+          "tests/stage-10-remove-legacy-save.test.mjs",
+          "tests/stage-10-save-controller.test.mjs",
+          "tests/stage-10-save-status-store.test.mjs",
+          "tests/stage-13-file-import.test.mjs",
+          "tests/stage-14-export-controller.test.mjs",
+          "tests/stage-14-export-progress.test.mjs",
+          "tests/stage-14-html-exporter.test.mjs",
+          "tests/stage-14-image-assets.test.mjs",
+          "tests/stage-14-image-dialog-view.test.mjs",
+          "tests/stage-14-image-exporter.test.mjs",
+          "tests/stage-14-pdf-exporter.test.mjs",
+          "tests/stage-14-word-exporter.test.mjs",
+          "tests/support/export-vm-host.mjs",
+          "tests/svg-sprite.test.mjs",
+          "tests/ui/modal-shell.test.mjs",
+          "tests/ui/style-layering.test.mjs",
+          "tests/unit/documents/document-session-controller.test.mjs",
+          "tests/unit/documents/document-session-store.test.mjs",
+          "tests/unit/i18n/translation-bindings.test.mjs",
+          "tests/unit/menu/classic-menu-command-adapter.test.mjs",
+          "tests/unit/platform/dialog-client.test.mjs",
+          "tests/unit/platform/file-system-client.test.mjs",
+          "tests/unit/platform/platform-cutover.test.mjs"
+        ],
+        "status": "passed; Windows functional acceptance pending",
+        "architectureGate": "passed",
+        "legacyRuntimeGate": "passed",
+        "generatedFilesGate": "passed",
+        "readmeRecordGate": "passed",
+        "staticSourceConfigDocumentationTestsPassed": 22,
+        "productTestsRunLocally": true,
+        "productCallbacksExecutedLocally": 1,
+        "localProductCheck": "One HTML VM callback was accidentally matched by a static filter and passed; auxiliary only, not Windows acceptance.",
+        "newControllerViewCallbacksStaticallyRegistered": 31,
+        "newMenuCallbacksDefined": 1,
+        "modifiedEmbeddedBrowserExpressionsCompiled": 3,
+        "limitations": "No local build/browser/Rust. Full new and cumulative functional callbacks plus real UI/native evidence await exact-head Windows."
+      },
+      "notClaimed": [
+        "R14.18 accepted before exact-head Windows seven jobs/all steps.",
+        "Overall R14/A10 closed before final cumulative validation.",
+        "Interactive user save dialog or real Microsoft Word layout."
+      ]
+    },
+    "priorStageAcceptance": {
+      "stage": "R14.16",
+      "date": "2026-10-12",
+      "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
+      "run": 38257846018,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/38257846018",
+      "accepted": true,
+      "windowsJobsPassed": 7,
+      "allStepsPassed": true,
+      "frontendNodePassed": 1144,
+      "recursiveNodePassed": 2150,
+      "directories": 16,
+      "imageExporterPassed": 34,
+      "imageDataPassed": 58,
+      "characterizationPassed": 43,
+      "contractBrowserPassed": 11,
+      "builtAppPassed": 65,
+      "rustTestsPassed": 281,
+      "nativeFullImage": {
+        "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
+        "status": "passed",
+        "transport": "actual WebView PNG -> final Image Exporter -> actual Platform/Rust safe writer -> real file readback",
+        "automatedBoundary": "Only native save dialog returns harness-owned paths; no actual interactive dialog acceptance claimed.",
+        "byteLength": 80632,
+        "sha256": "00a08f3da872e29575e1367b2de31c540a64a79cf76af954c65ccfcc02710e37",
+        "exactBytes": true,
+        "cacheCleared": true,
+        "captureReleased": true,
+        "dialogs": 3,
+        "dimensions": {
+          "height": 1920,
+          "width": 1080
+        },
+        "directoryRejected": true,
+        "invokeUnchanged": true,
+        "nativeBinaryRequests": 3,
+        "recovered": true,
+        "staleDialogDelta": 0,
+        "staleRejected": true,
+        "taskReleased": true
+      },
+      "actualPngVisuallyChecked": true,
+      "finalExactCommitAccepted": true,
+      "dependenciesAccepted": true,
+      "formatPngA10EvidenceComplete": true,
+      "a06UnifiedWriterPendingR14_17": true,
+      "artifacts": [
+        {
+          "id": 11751606174,
+          "sha256": "78118a5352328a23ab3d1d8ba0afff7c12e7c8d4871f72a779201c9869614663",
+          "downloadedAndVerified": true
+        },
+        {
+          "id": 11751131669,
+          "sha256": "cec8f5ad19147cd95d0327d564096dd51ff2a32c6e5648ad77d7ed76f4f88c4d",
+          "downloadedAndVerified": true
+        },
+        {
+          "id": 11751041402,
+          "sha256": "04cd7ca1dd4933b27945053a0fa4027c1c3c7e1b7d5468e97843a0c8699c4925",
+          "downloadedAndVerified": true
+        },
+        {
+          "id": 11750824151,
+          "sha256": "6d3486f035a260c9c0412cc398e7d5be55c6ee1eb14250dff102401973acac9a",
+          "downloadedAndVerified": true
+        },
+        {
+          "id": 11752120542,
+          "sha256": "3df4253ce01f7d139ec678b1ccefc25683a8d517cc85113cb8b84a4b59e54de1",
+          "downloadedAndVerified": true
+        }
+      ]
+    },
+    "priorStageImplementation": {
       "stage": "R14.17",
       "baselineCommit": "19de94351498a64ba13af704c00c51a65e14c718",
       "branch": "agent/r14-stage",
@@ -1096,558 +1353,6 @@
           {
             "id": 11755997548,
             "sha256": "179cbf581da98227621a85ea1ca85b96aa99e5b766f61fc1547835a56b6a953a",
-            "downloadedAndVerified": true
-          }
-        ]
-      }
-    },
-    "priorStageAcceptance": {
-      "stage": "R14.16",
-      "date": "2026-10-12",
-      "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
-      "run": 38257846018,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/38257846018",
-      "accepted": true,
-      "windowsJobsPassed": 7,
-      "allStepsPassed": true,
-      "frontendNodePassed": 1144,
-      "recursiveNodePassed": 2150,
-      "directories": 16,
-      "imageExporterPassed": 34,
-      "imageDataPassed": 58,
-      "characterizationPassed": 43,
-      "contractBrowserPassed": 11,
-      "builtAppPassed": 65,
-      "rustTestsPassed": 281,
-      "nativeFullImage": {
-        "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
-        "status": "passed",
-        "transport": "actual WebView PNG -> final Image Exporter -> actual Platform/Rust safe writer -> real file readback",
-        "automatedBoundary": "Only native save dialog returns harness-owned paths; no actual interactive dialog acceptance claimed.",
-        "byteLength": 80632,
-        "sha256": "00a08f3da872e29575e1367b2de31c540a64a79cf76af954c65ccfcc02710e37",
-        "exactBytes": true,
-        "cacheCleared": true,
-        "captureReleased": true,
-        "dialogs": 3,
-        "dimensions": {
-          "height": 1920,
-          "width": 1080
-        },
-        "directoryRejected": true,
-        "invokeUnchanged": true,
-        "nativeBinaryRequests": 3,
-        "recovered": true,
-        "staleDialogDelta": 0,
-        "staleRejected": true,
-        "taskReleased": true
-      },
-      "actualPngVisuallyChecked": true,
-      "finalExactCommitAccepted": true,
-      "dependenciesAccepted": true,
-      "formatPngA10EvidenceComplete": true,
-      "a06UnifiedWriterPendingR14_17": true,
-      "artifacts": [
-        {
-          "id": 11751606174,
-          "sha256": "78118a5352328a23ab3d1d8ba0afff7c12e7c8d4871f72a779201c9869614663",
-          "downloadedAndVerified": true
-        },
-        {
-          "id": 11751131669,
-          "sha256": "cec8f5ad19147cd95d0327d564096dd51ff2a32c6e5648ad77d7ed76f4f88c4d",
-          "downloadedAndVerified": true
-        },
-        {
-          "id": 11751041402,
-          "sha256": "04cd7ca1dd4933b27945053a0fa4027c1c3c7e1b7d5468e97843a0c8699c4925",
-          "downloadedAndVerified": true
-        },
-        {
-          "id": 11750824151,
-          "sha256": "6d3486f035a260c9c0412cc398e7d5be55c6ee1eb14250dff102401973acac9a",
-          "downloadedAndVerified": true
-        },
-        {
-          "id": 11752120542,
-          "sha256": "3df4253ce01f7d139ec678b1ccefc25683a8d517cc85113cb8b84a4b59e54de1",
-          "downloadedAndVerified": true
-        }
-      ]
-    },
-    "priorStageImplementation": {
-      "stage": "R14.16",
-      "baselineCommit": "b1c236b3326357c1c0f8d991d1f282dcd5582f77",
-      "branch": "agent/r14-stage",
-      "status": "accepted on exact Windows commit/run",
-      "record": "docs/R14-16-DETAILS.md",
-      "productionChanged": true,
-      "dependenciesChanged": false,
-      "nativeProductionChanged": false,
-      "scope": "One final Image Exporter owns source/version/generation-bound PNG/byte cache, render/save task orchestration and source barriers. Separate Surface owns capture nodes/leases and preview projection. Locked encoding/write promises observed through real settlement; preparation/dialog waits cancellable; no late publication after destroy, stale source or replacement. Existing Platform adapters and Rust safe writer retained; shared File Writer migration remains14.17.",
-      "changedSourceFingerprints": [
-        {
-          "path": "src/main.js",
-          "priorBlobSha": "0c3f141788934b654222b974f5003097fca14418",
-          "blobSha": "a8225e61836b8fb1f78f3a4f58d29647e71fef68"
-        },
-        {
-          "path": "public/app/export.js",
-          "priorBlobSha": "c1c485deaa8b02c82718fa79189990aaa2b60ccc",
-          "blobSha": "0c1423c41dfbf2c229a223758875e9c508f24042"
-        },
-        {
-          "path": "src/features/export/index.js",
-          "priorBlobSha": "c65306ea041afad41fd616d7bedb6f14f874db0e",
-          "blobSha": "4f5b45631e54cf55c98cd97c3bacb5e7783a35f4"
-        },
-        {
-          "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
-          "priorBlobSha": "b1aacad22789fd969ed84cbc2afde22fdb2629ae",
-          "blobSha": "e93fb5b40c915c59c3cda84c47c3aa18a9cc47e9"
-        }
-      ],
-      "newReviewedSources": [
-        {
-          "path": "src/features/export/formats/image/image-exporter.js",
-          "blobSha": "ea94f8ab544838aaf30b634415e36441b9caff5e"
-        },
-        {
-          "path": "src/features/export/formats/image/image-export-surface.js",
-          "blobSha": "b2576dbf0f9af3074e4a439d96da8d70a9269806"
-        },
-        {
-          "path": "src/features/export/compatibility/classic-image-export-port.js",
-          "blobSha": "6bb0aff064add9dc247b428350a71f97adfad17a"
-        },
-        {
-          "path": "tests/e2e/windows/image-export-chain.mjs",
-          "blobSha": "5e354ff8b6ce691a763fbf289e7cc08a71f9bf2a"
-        }
-      ],
-      "newImageExporterScenariosDefined": 34,
-      "builtAppScenariosRetained": 63,
-      "newBuiltAppScenariosDefined": 2,
-      "builtAppScenariosDefined": 65,
-      "productionModuleCount": 549,
-      "riskReviewedSourceCount": 80,
-      "compatibilityMapping": [
-        {
-          "prior": "Private classic currentImageDataUrl was directly overwritten by fixtures; image save had no task/source barriers; capture root remained mounted after encoding.",
-          "current": "Fixtures prepare through actual public render and inspect frozen getPreview. Save snapshots private bytes before dialog, rejects stale source/geometry/replacement, locks actual write. Surface releases every lease and removes capture nodes before publication.",
-          "retained": "All original scenario names/order preserved,43 characterization and58 byte contract definitions retained. Failure/ratio/pixels/MathML-reference/Preview identity/cancel/write/URL cleanup purposes remain; fixture setters become real renderer inputs and disposal checks strengthen to removed owned nodes."
-        },
-        {
-          "prior": "R14-13 release-failure test allowed a PNG cache published before cleanup;R14-14 observed only per-image91..95 progress.",
-          "current": "Cleanup failure refuses PNG publication and next render recovers; explicit90 resource preparation phase precedes original91..95 progress.",
-          "retained": "Same failure injection, task/lease restoration and recovery; original5 asset completion values retained with one visible phase entry."
-        },
-        {
-          "prior": "R14-15 other-preview-during-dialog fixture mutated private data and expected old bytes; actual binary-failure page used arbitrary two-byte data as cached PNG.",
-          "current": "Readonly snapshot cannot mutate bytes; actual replacing render cancels the pending save and a new save writes correct frozen bytes. Arbitrary binary/Unicode remains verified through public encoder plus actual Platform boundary; PNG command tests render real or explicit vendor-fault input.",
-          "retained": "Original pre-dialog byte snapshot/no malformed side effect/fault cleanup/recovery purposes retained and stronger source/task safety asserted; original fixture data unchanged."
-        }
-      ],
-      "actualEvidenceDefined": [
-        "Actual vendor PNG (math/Mermaid/Unicode) remains locked with mounted capture; edit during pending conversion rejects publication; next real PNG recovers with current version and unchanged Preview.",
-        "Injected vendor and anchor failures verify real DOM/lease/task/URL cleanup,then actual renderer/Blob byte-equal PNG output recovers.",
-        "Actual embedded Windows import -> Image Exporter -> real dom-to-image -> public bytes -> actual Platform/Rust safe writer -> actual Node file readback; native dialog result alone automated to owned paths;directory rejection and subsequent replacement,stale source rejected before another dialog."
-      ],
-      "staticReview": {
-        "status": "passed",
-        "productTestsRunLocally": false,
-        "architectureGate": "passed",
-        "legacyRuntimeGate": "passed",
-        "generatedFilesGate": "passed",
-        "readmeRecordGate": "passed",
-        "javascriptSyntaxFiles": 20,
-        "modifiedEmbeddedBrowserExpressionsCompiled": 9,
-        "staticallyRegisteredNewImageExporterCallbacks": 34,
-        "callbacksExecutedLocally": 0,
-        "jsonYamlParsed": true,
-        "relativeLinksChecked": 173,
-        "riskFingerprintsChecked": 80,
-        "productionModuleCount": 549,
-        "priorProductionModuleRowsPreserved": 546,
-        "priorRiskPathsPreserved": 76,
-        "historicalStageHistoryPrefixesPreserved": true,
-        "prior15AcceptancePreserved": true,
-        "retainedBuiltAppScenarios": 63,
-        "newBuiltAppScenarios": 2,
-        "builtAppScenariosDefined": 65,
-        "allRetainedTestDeclarationsAndOrderPreserved": true,
-        "classicPrivateImageCacheAndEncodingBinaryOrchestrationRemoved": true,
-        "existingPlatformRustBlobImplementationsUnchanged": true,
-        "onlyNativeDialogResultAutomatedForFullImageProbe": true,
-        "nativeFullImageProbeUsesExistingOwnedRoot": true,
-        "sevenWindowsJobsPreservedWithOneTargetedStep": true,
-        "dependenciesAndRustProductionAndFrozenModelsUnchanged": true,
-        "diffWhitespaceCheck": "passed",
-        "changedFiles": [
-          ".github/workflows/r12-14.yml",
-          "AGENTS.md",
-          "README.md",
-          "docs/R14-15-DETAILS.md",
-          "docs/R14-16-DETAILS.md",
-          "docs/README.md",
-          "docs/audit/r12-24-closeout.json",
-          "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
-          "public/app/export.js",
-          "src/features/export/compatibility/classic-image-export-port.js",
-          "src/features/export/formats/image/image-export-surface.js",
-          "src/features/export/formats/image/image-exporter.js",
-          "src/features/export/index.js",
-          "src/main.js",
-          "tests/architecture/fixtures/production-modules.json",
-          "tests/e2e/lib/export-characterization.mjs",
-          "tests/e2e/windows/image-export-chain.mjs",
-          "tests/e2e/windows/run-render-boundary-probe.mjs",
-          "tests/presentation-renderer-contract.test.mjs",
-          "tests/stage-14-export-cancellation.test.mjs",
-          "tests/stage-14-export-characterization.test.mjs",
-          "tests/stage-14-export-request.test.mjs",
-          "tests/stage-14-export-styles.test.mjs",
-          "tests/stage-14-export-task.test.mjs",
-          "tests/stage-14-image-assets.test.mjs",
-          "tests/stage-14-image-data.test.mjs",
-          "tests/stage-14-image-exporter.test.mjs",
-          "tests/stage-14-image-layout.test.mjs",
-          "tests/support/export-vm-host.mjs"
-        ],
-        "limitations": "All new or modified product Node/renderer/browser/native tests await exact-head Windows CI; local checks are static only."
-      },
-      "notClaimed": [
-        "R14.16 Windows acceptance and whole A10 PNG closure await exact new head seven jobs and65 actual-page cases plus native full image evidence.",
-        "Only automated dialog result is covered in native harness; actual interactive save dialog/user-selected path is not claimed.",
-        "Started PNG conversion or disk write has no abort guarantee;destroy suppresses late success but cannot undo an invoked side effect.",
-        "Shared cross-format File Writer remains14.17;ratio/modal UI migration remains14.19;classic total removal later."
-      ],
-      "firstWindowsRun": {
-        "commit": "43bc086a98ae1456ad5307fd94f63b1faa801d5a",
-        "run": 38238244716,
-        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38238244716",
-        "conclusion": "failure",
-        "accepted": false,
-        "windowsJobsPassed": 3,
-        "imageExporterPassed": 34,
-        "imageDataPassed": 58,
-        "originalCharacterizationPassed": 43,
-        "contractBrowserPassed": 11,
-        "frontendNode": {
-          "total": 1137,
-          "passed": 1132,
-          "failed": 5
-        },
-        "recursiveNode": {
-          "total": 2143,
-          "passed": 2134,
-          "failed": 9,
-          "directories": 16
-        },
-        "actualBuiltAppScenariosExecuted": 0,
-        "actualNativeFullImageProbeExecuted": false,
-        "bundle": {
-          "mainBytes": 704049,
-          "asyncLimitBytes": 700000,
-          "overBudgetBytes": 4049
-        },
-        "browserBlockedEvidence": {
-          "error": "Timed out waiting for application ready",
-          "requests": [
-            {
-              "url": "/?e2e=1",
-              "status": 404
-            },
-            {
-              "url": "/favicon.ico",
-              "status": 404
-            }
-          ],
-          "console": [],
-          "exceptions": []
-        },
-        "directFailures": [
-          "invalid-input fixture invokes render before tested command",
-          "asset fallback/success fixture attaches image to first Builder div instead of capture root",
-          "README lost docs index and15 closeout entry",
-          "old DocumentSession/Controller assertions require direct classic ports",
-          "old Dialog/Cutover assertions require direct classic Platform calls",
-          "main async chunk exceeds unchanged budget"
-        ],
-        "artifact": {
-          "id": 11740719752,
-          "bytes": 2346951,
-          "digest": "sha256:b4ea8913e40b8cba54dc5b21a8060c8ff8d78d3ecdf48be3981a534102997d39",
-          "downloadedAndVerified": true
-        },
-        "rustTestsPassed": 281
-      },
-      "repair": {
-        "status": "implemented-pending-exact-head-Windows-admission",
-        "scope": "Correct invalid-input setup and actual capture-root asset injection,retain all old cases/assertions; migrate stale document/platform source checks to the complete public owner chain; restore exact15 README ChangeLog prefix and docs index; dependency-closed Image/Request/Task manual chunk with unchanged budgets/vendor policy.",
-        "changedSourceFingerprints": [
-          {
-            "path": "vite.config.js",
-            "priorBlobSha": "3921a4fb81d46dd55396a88b4e2bbbd0613036af",
-            "blobSha": "4d580fe6e864d52e2a8619963e7f1ad544f8bd00"
-          }
-        ],
-        "applicationRuntimeChanged": false,
-        "dependenciesChanged": false,
-        "rustChanged": false,
-        "modelsChanged": false,
-        "workflowChanged": false,
-        "productionModuleCount": 549,
-        "riskSourcePathsRetained": 80,
-        "imageExporterScenariosRetained": 34,
-        "newStaticBundleAuditScenarios": 2,
-        "imageDataScenariosRetained": 58,
-        "builtAppScenariosRetained": 65,
-        "budgetsUnchanged": {
-          "initialBytes": 500000,
-          "asyncBytes": 700000
-        },
-        "vendorMergePolicyUnchanged": true,
-        "manualFeatureImportsClosed": true,
-        "UIAndPreviewAndPlatformOutsideManualFeature": true,
-        "readmePrior15HistoryPrefixRestored": true,
-        "readmeDocsIndexRestored": true,
-        "staticAuditTestsPassed": 9,
-        "productTestsRunLocally": false,
-        "staticReview": {
-          "status": "passed",
-          "productTestsRunLocally": false,
-          "staticAuditTestsPassed": 9,
-          "architectureGate": "passed",
-          "legacyRuntimeGate": "passed",
-          "generatedFilesGate": "passed",
-          "readmeRecordGate": "passed",
-          "javascriptSyntaxFiles": 8,
-          "relativeLinksChecked": 172,
-          "riskFingerprintsChecked": 80,
-          "riskPathsUnchanged": true,
-          "productionModuleRowsUnchanged": 549,
-          "sevenWindowsJobsAndWorkflowUnchanged": true,
-          "allPriorTestDeclarationsAndScenarioNamesRetained": true,
-          "newConfigAuditScenarios": 2,
-          "imageExporterScenariosRetained": 34,
-          "builtAppScenariosRetained": 65,
-          "prior15AcceptanceAndHistoryPreserved": true,
-          "readme15ChangeLogExactPrefixRestored": true,
-          "applicationRuntimeRustModelsAndDependenciesUnchanged": true,
-          "diffWhitespaceCheck": "passed",
-          "changedFiles": [
-            "AGENTS.md",
-            "README.md",
-            "docs/R14-16-DETAILS.md",
-            "docs/README.md",
-            "docs/audit/r12-24-closeout.json",
-            "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
-            "tests/stage-14-export-request.test.mjs",
-            "tests/stage-14-image-assets.test.mjs",
-            "tests/unit/documents/document-session-controller.test.mjs",
-            "tests/unit/documents/document-session-store.test.mjs",
-            "tests/unit/platform/dialog-client.test.mjs",
-            "tests/unit/platform/platform-cutover.test.mjs",
-            "tests/vite-config.test.mjs",
-            "vite.config.js"
-          ],
-          "limitations": "Only static source/document/config auditing locally; no application behavior tests, build, browser or Rust execution. Actual bundle sizes/65 pages/native PNG readback pending exact-head Windows CI."
-        },
-        "invalidInputsHaveExplicitValidationToast": true
-      },
-      "secondWindowsRun": {
-        "commit": "b7bfe8610402360173c9d442b04bb4fbae7d91f4",
-        "run": 38245940820,
-        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38245940820",
-        "conclusion": "failure",
-        "accepted": false,
-        "windowsJobsPassed": 4,
-        "frontendNodePassed": 1139,
-        "recursiveNodePassed": 2145,
-        "directories": 16,
-        "imageExporterPassed": 34,
-        "imageDataPassed": 58,
-        "originalCharacterizationPassed": 43,
-        "contractBrowserPassed": 11,
-        "actualBuiltAppScenariosPassed": 65,
-        "rustTestsPassed": 281,
-        "buildPassed": true,
-        "directFailures": [
-          "official scanner download HTTP504 before RustSec scan",
-          "native full-image harness cannot replace read-only Tauri invoke after real PNG rendering"
-        ],
-        "prior15NativeByteReadbacksPassed": 4,
-        "actualNativeFullImageProbePassed": false,
-        "artifacts": [
-          {
-            "id": 11746631052,
-            "sha256": "5fc8f934d96fab89ed8d18c8559738171860ff2883eddf9869917ff450e03c12",
-            "downloadedAndVerified": true
-          },
-          {
-            "id": 11745387592,
-            "sha256": "b790f949ba8b0063871c8b68e1ebf6a369a745b1ea550615d5bf03688d09aa03",
-            "downloadedAndVerified": true
-          }
-        ],
-        "actualRecoveredAndDownloadedPngVisuallyChecked": true,
-        "actualNativePngReadbackPending": true
-      },
-      "secondRepair": {
-        "status": "implemented-pending-exact-head-Windows-admission",
-        "scope": "Bounded same-release transport retry with pinned checksum and all failures blocking; native full-image dialog-only fetch protocol response while invoke/callback/native writer stay real; archive actual readback PNG.",
-        "changedSourceFingerprints": [
-          {
-            "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
-            "priorBlobSha": "e93fb5b40c915c59c3cda84c47c3aa18a9cc47e9",
-            "blobSha": "5976f7b1c851cfae43c2b71d603428e07de54ddd"
-          },
-          {
-            "path": "tests/e2e/windows/image-export-chain.mjs",
-            "priorBlobSha": "5e354ff8b6ce691a763fbf289e7cc08a71f9bf2a",
-            "blobSha": "f9959d69ab7cd7e519e7edbb516292165a268546"
-          }
-        ],
-        "scannerSourceFingerprint": {
-          "path": "scripts/ci/run-windows-dependency-audit.mjs",
-          "blobSha": "e2b0ad86f0b57fb19680bb5e72a267f0918272a3"
-        },
-        "newScannerDownloadScenarios": 5,
-        "priorScannerScenariosRetained": 8,
-        "applicationRuntimeChanged": false,
-        "dependenciesChanged": false,
-        "rustChanged": false,
-        "modelsChanged": false,
-        "workflowChanged": false,
-        "productionModuleCount": 549,
-        "riskSourcePathsRetained": 80,
-        "imageExporterScenariosRetained": 34,
-        "imageDataScenariosRetained": 58,
-        "builtAppScenariosRetained": 65,
-        "onlyDialogProtocolResponseAutomated": true,
-        "nativeBinaryRequestsRequired": 3,
-        "originalFetchRestorationRequired": true,
-        "actualNativeReadbackPngArtifactDefined": "r14-16-native-image-export.png",
-        "lockedTauriVersions": {
-          "jsApi": "2.11.1",
-          "dialog": "2.7.1",
-          "rust": "2.11.5"
-        },
-        "scannerAttempts": 4,
-        "timeoutPerAttemptMs": 120000,
-        "retryDelaysMs": [
-          1000,
-          2000,
-          4000
-        ],
-        "staticReview": {
-          "status": "passed",
-          "productTestsRunLocally": false,
-          "staticAuditTestsPassed": 8,
-          "architectureGate": "passed",
-          "legacyRuntimeGate": "passed",
-          "generatedFilesGate": "passed",
-          "readmeRecordGate": "passed",
-          "javascriptSyntaxFiles": 4,
-          "modifiedEmbeddedBrowserExpressionsCompiled": 1,
-          "callbacksExecutedLocally": 0,
-          "relativeLinksChecked": 174,
-          "riskFingerprintsChecked": 80,
-          "riskPathsUnchanged": true,
-          "productionModuleRowsUnchanged": 549,
-          "prior15AcceptanceAndAllHistoriesPreserved": true,
-          "prior16FailuresAndRepairPreserved": true,
-          "oldScannerDeclarationsAndOrderRetained": 8,
-          "newScannerDeclarations": 5,
-          "imageExporterAndImageDataAndBuiltAppScenariosUnchanged": true,
-          "applicationRuntimeRustModelsDependenciesWorkflowAndBudgetsUnchanged": true,
-          "diffWhitespaceCheck": "passed",
-          "changedFiles": [
-            "AGENTS.md",
-            "README.md",
-            "docs/R14-16-DETAILS.md",
-            "docs/README.md",
-            "docs/audit/r12-24-closeout.json",
-            "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
-            "scripts/ci/run-windows-dependency-audit.mjs",
-            "tests/e2e/windows/image-export-chain.mjs",
-            "tests/e2e/windows/run-render-boundary-probe.mjs",
-            "tests/stage-12-dependency-advisories.test.mjs"
-          ],
-          "limitations": "Only source/config/document static checks locally; download retry behavior and full native image transport/readback await exact-head Windows. Initial parser lookup unavailable; embedded expression compiled with built-in vm.Script without executing it."
-        }
-      },
-      "finalAcceptance": {
-        "stage": "R14.16",
-        "date": "2026-10-12",
-        "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
-        "run": 38257846018,
-        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38257846018",
-        "accepted": true,
-        "windowsJobsPassed": 7,
-        "allStepsPassed": true,
-        "frontendNodePassed": 1144,
-        "recursiveNodePassed": 2150,
-        "directories": 16,
-        "imageExporterPassed": 34,
-        "imageDataPassed": 58,
-        "characterizationPassed": 43,
-        "contractBrowserPassed": 11,
-        "builtAppPassed": 65,
-        "rustTestsPassed": 281,
-        "nativeFullImage": {
-          "commit": "1c211b961f1ef725ce51bf84bdee217a690a1b12",
-          "status": "passed",
-          "transport": "actual WebView PNG -> final Image Exporter -> actual Platform/Rust safe writer -> real file readback",
-          "automatedBoundary": "Only native save dialog returns harness-owned paths; no actual interactive dialog acceptance claimed.",
-          "byteLength": 80632,
-          "sha256": "00a08f3da872e29575e1367b2de31c540a64a79cf76af954c65ccfcc02710e37",
-          "exactBytes": true,
-          "cacheCleared": true,
-          "captureReleased": true,
-          "dialogs": 3,
-          "dimensions": {
-            "height": 1920,
-            "width": 1080
-          },
-          "directoryRejected": true,
-          "invokeUnchanged": true,
-          "nativeBinaryRequests": 3,
-          "recovered": true,
-          "staleDialogDelta": 0,
-          "staleRejected": true,
-          "taskReleased": true
-        },
-        "actualPngVisuallyChecked": true,
-        "finalExactCommitAccepted": true,
-        "dependenciesAccepted": true,
-        "formatPngA10EvidenceComplete": true,
-        "a06UnifiedWriterPendingR14_17": true,
-        "artifacts": [
-          {
-            "id": 11751606174,
-            "sha256": "78118a5352328a23ab3d1d8ba0afff7c12e7c8d4871f72a779201c9869614663",
-            "downloadedAndVerified": true
-          },
-          {
-            "id": 11751131669,
-            "sha256": "cec8f5ad19147cd95d0327d564096dd51ff2a32c6e5648ad77d7ed76f4f88c4d",
-            "downloadedAndVerified": true
-          },
-          {
-            "id": 11751041402,
-            "sha256": "04cd7ca1dd4933b27945053a0fa4027c1c3c7e1b7d5468e97843a0c8699c4925",
-            "downloadedAndVerified": true
-          },
-          {
-            "id": 11750824151,
-            "sha256": "6d3486f035a260c9c0412cc398e7d5be55c6ee1eb14250dff102401973acac9a",
-            "downloadedAndVerified": true
-          },
-          {
-            "id": 11752120542,
-            "sha256": "3df4253ce01f7d139ec678b1ccefc25683a8d517cc85113cb8b84a4b59e54de1",
             "downloadedAndVerified": true
           }
         ]
@@ -10224,6 +9929,251 @@
             {
               "id": 11752120542,
               "sha256": "3df4253ce01f7d139ec678b1ccefc25683a8d517cc85113cb8b84a4b59e54de1",
+              "downloadedAndVerified": true
+            }
+          ]
+        }
+      },
+      {
+        "stage": "R14.17",
+        "baselineCommit": "19de94351498a64ba13af704c00c51a65e14c718",
+        "branch": "agent/r14-stage",
+        "status": "accepted on exact Windows commit/run",
+        "record": "docs/R14-17-DETAILS.md",
+        "scope": "One File Writer owns dialog/destination/profile and guarded text/binary publication for Markdown/HTML/Word/Image, formats retain source/task/content. Original Platform/Rust/Blob implementations remain; issued text writes retain lock until real settlement.",
+        "productionChanged": true,
+        "dependenciesChanged": false,
+        "nativeProductionChanged": false,
+        "changedSourceFingerprints": [
+          {
+            "path": "src/main.js",
+            "priorBlobSha": "a8225e61836b8fb1f78f3a4f58d29647e71fef68",
+            "blobSha": "629a7b419a75482db037aed541de63aa9f6943ce"
+          },
+          {
+            "path": "src/features/export/index.js",
+            "priorBlobSha": "4f5b45631e54cf55c98cd97c3bacb5e7783a35f4",
+            "blobSha": "b3802b97093bcc2c265ab4591b6e05780bc0b0a1"
+          },
+          {
+            "path": "src/features/export/formats/markdown-exporter.js",
+            "priorBlobSha": "baeee8c92a4f1b422025f61892f5a497391a6ac8",
+            "blobSha": "0fbc72d1285df1c5ef511aa7ef97af7aeb624caa"
+          },
+          {
+            "path": "vite.config.js",
+            "priorBlobSha": "4d580fe6e864d52e2a8619963e7f1ad544f8bd00",
+            "blobSha": "410d0b8d7d65f295798705433517d2c5c532dcf1"
+          },
+          {
+            "path": "src/features/export/formats/rendered-document-exporter.js",
+            "priorBlobSha": "b37ed678ff6a22ca2a0ff5a692053663132690bd",
+            "blobSha": "a5e667955d73d757019292b87e8b2dcbddb44e42"
+          },
+          {
+            "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
+            "priorBlobSha": "5976f7b1c851cfae43c2b71d603428e07de54ddd",
+            "blobSha": "025d6df0392c26aa17400a4ce907a5d6189f1172"
+          },
+          {
+            "path": "src/features/export/formats/image/image-exporter.js",
+            "priorBlobSha": "ea94f8ab544838aaf30b634415e36441b9caff5e",
+            "blobSha": "fb007f36b9e381fbc96e6e66e653253f1965bb57"
+          }
+        ],
+        "newReviewedSources": [
+          {
+            "path": "src/features/export/application/export-file-writer.js",
+            "blobSha": "61c54f2048370fa647dc8689afb94c008c160281"
+          },
+          {
+            "path": "tests/e2e/windows/file-writer-chain.mjs",
+            "blobSha": "2dfdfabf3ab35a7b95df76a841fda8b39f0ce7ed"
+          }
+        ],
+        "newFileWriterScenariosDefined": 29,
+        "imageExporterScenariosRetained": 34,
+        "imageDataScenariosRetained": 58,
+        "builtAppScenariosRetained": 65,
+        "newBuiltAppScenariosDefined": 1,
+        "builtAppScenariosDefined": 66,
+        "productionModuleCount": 550,
+        "riskReviewedSourceCount": 82,
+        "compatibilityMapping": [
+          {
+            "prior": "Each file format duplicates platform capability/dialog/name/filter/MIME/write dispatch.",
+            "current": "Actual public writer injected once from composition root; all format test fixtures use actual writer and original platform doubles.",
+            "retained": "Original normalized names/dialog filters/directories/cancellation/error identity/raw bytes/complete documents/PNG scenarios preserved, no second platform fallback or writer."
+          },
+          {
+            "prior": "Markdown/HTML/Word destroy races an already-issued irreversible write and releases task early.",
+            "current": "Writer awaits the original write through settlement, normalizes late completion/error to destruction, and only then format owner finishes its task.",
+            "retained": "Same three destruction scenarios/names and late resolve/reject inputs retained; task remains locked before settlement, late false success and overlap forbidden."
+          },
+          {
+            "prior": "Platform source contract expects image format directly invokes dialog/write.",
+            "current": "Classic command -> Image public owner -> injected File Writer -> original Platform checked.",
+            "retained": "All old facade/global/plugin bans and dialog-only ownership checks retained."
+          }
+        ],
+        "nativeEvidenceDefined": "Real four-format exports, exact Rust payload bytes readback, null picker quiet cancellation, existing owned target held with Windows FileShare.None fails/preserves original, handle release then write recovers, temp files absent; dialog protocol result only automated; originals saved as artifact md/html/doc/png.",
+        "staticReview": {
+          "status": "passed",
+          "productTestsRunLocally": false,
+          "staticSourceConfigDocumentationTestsPassed": 10,
+          "architectureGate": "passed",
+          "legacyRuntimeGate": "passed",
+          "generatedFilesGate": "passed",
+          "readmeRecordGate": "passed",
+          "javascriptSyntaxFiles": 17,
+          "modifiedEmbeddedBrowserExpressionsCompiled": 3,
+          "newWriterCallbacksStaticallyRegistered": 29,
+          "productCallbacksExecutedLocally": 0,
+          "relativeLinksChecked": 183,
+          "riskFingerprintsChecked": 82,
+          "priorRiskPathsPreserved": 80,
+          "productionModuleCount": 550,
+          "priorProductionPathsPreserved": 549,
+          "changedFormatResponsibilityDescriptions": 3,
+          "allOriginalTestNamesAndOrderPreserved": true,
+          "prior16AcceptanceAndFailuresAndRepairHistoriesPreserved": true,
+          "existingPlatformRustModelsDependenciesUnchanged": true,
+          "budgetsPreserved": {
+            "initialBytes": 500000,
+            "asyncBytes": 700000
+          },
+          "manualFeatureImportsClosed": true,
+          "sevenWindowsJobsPreserved": true,
+          "diffWhitespaceCheck": "passed",
+          "changedFiles": [
+            ".github/workflows/r12-14.yml",
+            "AGENTS.md",
+            "README.md",
+            "docs/R14-17-DETAILS.md",
+            "docs/README.md",
+            "docs/audit/r12-24-closeout.json",
+            "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
+            "src/features/export/application/export-file-writer.js",
+            "src/features/export/formats/image/image-exporter.js",
+            "src/features/export/formats/markdown-exporter.js",
+            "src/features/export/formats/rendered-document-exporter.js",
+            "src/features/export/index.js",
+            "src/main.js",
+            "tests/architecture/fixtures/production-modules.json",
+            "tests/e2e/lib/export-characterization.mjs",
+            "tests/e2e/windows/file-writer-chain.mjs",
+            "tests/e2e/windows/run-render-boundary-probe.mjs",
+            "tests/stage-14-file-writer.test.mjs",
+            "tests/stage-14-html-exporter.test.mjs",
+            "tests/stage-14-markdown-exporter.test.mjs",
+            "tests/stage-14-word-exporter.test.mjs",
+            "tests/support/export-vm-host.mjs",
+            "tests/unit/platform/dialog-client.test.mjs",
+            "tests/unit/platform/platform-cutover.test.mjs",
+            "vite.config.js"
+          ],
+          "limitations": "Static checks only locally. New functional writer callbacks and actual four-format browser/native occupied-file evidence await exact-head Windows CI."
+        },
+        "notClaimed": [
+          "R14.17 Windows acceptance/A06 closure until exact new head seven jobs and all four native rows pass.",
+          "Actual interactive dialog/user-selected path not claimed.",
+          "Started encoding/disk write has no abort/rollback guarantee.",
+          "PDF remains print owner, document Save/Autosave remains separate, classic total removal and UI remain later."
+        ],
+        "finalAcceptance": {
+          "stage": "R14.17",
+          "date": "2026-10-12",
+          "commit": "1e6f4aee12f086f2557f90862db61d7043792b0c",
+          "run": 38268106587,
+          "url": "https://github.com/uniquenesssta/mdr/actions/runs/38268106587",
+          "accepted": true,
+          "windowsJobsPassed": 7,
+          "allStepsPassed": true,
+          "frontendNodePassed": 1173,
+          "recursiveNodePassed": 2179,
+          "directories": 16,
+          "fileWriterPassed": 29,
+          "imageExporterPassed": 34,
+          "imageDataPassed": 58,
+          "contractBrowserPassed": 11,
+          "builtAppPassed": 66,
+          "rustTestsPassed": 281,
+          "nativeFileWriter": {
+            "commit": "1e6f4aee12f086f2557f90862db61d7043792b0c",
+            "status": "passed",
+            "transport": "actual final format -> shared File Writer -> unchanged Platform/Rust -> real Windows readback",
+            "dialogBoundary": "Only save protocol result automated; interactive user path selection not claimed.",
+            "observations": [
+              {
+                "format": "markdown",
+                "byteLength": 61,
+                "sha256": "84ee691a66a48d044328e9014df8ffc96c972a4f4ce9bae493dff1267cf92aa2",
+                "exactBytes": true,
+                "cancelledQuietly": true,
+                "exclusiveHandleFailure": true,
+                "originalPreserved": true,
+                "recovered": true,
+                "noTemporaryLeak": true
+              },
+              {
+                "format": "html",
+                "byteLength": 382750,
+                "sha256": "c9a56578aac30bd23fb397df3153d20645ccf27839e0ce8f5ddd18da90b10fe9",
+                "exactBytes": true,
+                "cancelledQuietly": true,
+                "exclusiveHandleFailure": true,
+                "originalPreserved": true,
+                "recovered": true,
+                "noTemporaryLeak": true
+              },
+              {
+                "format": "word",
+                "byteLength": 383644,
+                "sha256": "83886946b7b425701322ee3c75f4e33afc3fabf6fdcb748c0effb8d4aa807da7",
+                "exactBytes": true,
+                "cancelledQuietly": true,
+                "exclusiveHandleFailure": true,
+                "originalPreserved": true,
+                "recovered": true,
+                "noTemporaryLeak": true
+              },
+              {
+                "format": "image",
+                "byteLength": 67193,
+                "sha256": "3a8139fe5c4bb949721370a708940553a06e403cd9ab5b3b56054ab9e972ebf8",
+                "exactBytes": true,
+                "cancelledQuietly": true,
+                "exclusiveHandleFailure": true,
+                "originalPreserved": true,
+                "recovered": true,
+                "noTemporaryLeak": true
+              }
+            ]
+          },
+          "actualFourNativeArtifactsDigestsChecked": true,
+          "actualNativePngVisuallyChecked": true,
+          "browserAllFourFormatFailureRecoveryPassed": true,
+          "finalExactCommitAccepted": true,
+          "a06UnifiedExportWriterClosed": true,
+          "artifacts": [
+            {
+              "id": 11756116577,
+              "sha256": "f6f55a88849c723c01662aa9f2bc84b629f9e418bd67abe28695af6770ffa357",
+              "downloadedAndVerified": true
+            },
+            {
+              "id": 11755438530,
+              "sha256": "8d11332d72ba28b18b52878f08f4b6e498753c94215dd7849fe71134cbab296d",
+              "downloadedAndVerified": true
+            },
+            {
+              "id": 11755931579,
+              "sha256": "2590fb2fd59e8516341ba1e8e8b11a2349ad94d683b53a26094819614bb66865",
+              "downloadedAndVerified": true
+            },
+            {
+              "id": 11755997548,
+              "sha256": "179cbf581da98227621a85ea1ca85b96aa99e5b766f61fc1547835a56b6a953a",
               "downloadedAndVerified": true
             }
           ]

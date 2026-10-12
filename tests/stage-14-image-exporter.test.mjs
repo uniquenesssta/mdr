@@ -157,8 +157,8 @@ test('R14-16 scoped command/cache port is immutable, preserves replacements and 
 });
 
 test('R14-16 classic commands retain only immutable requests and no PNG, layout, encoding or binary writer owner',()=>{
-  const source=readFileSync(new URL('../public/app/export.js',import.meta.url),'utf8');
-  assert.match(source,/exportImagePort\.render\(\{ request \}\)/);assert.match(source,/exportImagePort\.save\(\{ request \}\)/);
+  const source=readFileSync(new URL('../src/features/export/application/export-controller.js',import.meta.url),'utf8');
+  assert.match(source,/owners\[format\]\[method\]\(\{request\}\)/);assert.match(source,/renderImage.*render/);assert.match(source,/saveImage.*save/);
   assert.doesNotMatch(source,/currentImageDataUrl|\.toPng\(|writeBinary|ImageLayoutPort|ImageAssetPort|ImageDataPort|imageLayoutLease|imageStyleLease/);
   assert.throws(()=>createImageExporter({}),TypeError);
 });

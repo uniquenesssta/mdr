@@ -1,4 +1,4 @@
-/** Public Export request/task/cancellation/progress/document boundary; format rendering migrates separately. */
+/** Public Export command, request, task, document, format, writer and UI capabilities; composition injects owners. */
 export { createExportRequest, EXPORT_IMAGE_RATIOS, ExportRequestValidationError } from './application/export-request.js';
 export { createExportFileWriter } from './application/export-file-writer.js';
 export { mountClassicExportRequestPort } from './compatibility/classic-export-request-port.js';
@@ -34,3 +34,7 @@ export { mountClassicImageDataPort } from './compatibility/classic-image-data-po
 export { createImageExporter } from './formats/image/image-exporter.js';
 export { createImageExportSurface } from './formats/image/image-export-surface.js';
 export { mountClassicImageExportPort } from './compatibility/classic-image-export-port.js';
+
+export { createExportController } from './application/export-controller.js';
+export { createExportImageDialogView } from './ui/export-image-dialog-view.js';
+export { mountClassicExportCommandPort } from './compatibility/classic-export-command-port.js';

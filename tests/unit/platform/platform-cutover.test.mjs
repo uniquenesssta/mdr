@@ -7,7 +7,7 @@ const migratedCallers = [
   'src/main.js', 'src/runtime/link-preview.js', 'src/runtime/performance.js',
   'src/features/sidebar/folder-tree/folder-tree-controller.js', 'src/storage/native-document-store.js',
   'src/features/hybrid-editor/image/image-source-resolver.js', 'public/app/core.js', 'public/app/events.js',
-  'public/app/export.js', 'public/app/web-clipper.js'
+  'public/app/web-clipper.js'
 ];
 
 test('Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-global caller', async () => {
@@ -23,22 +23,20 @@ test('Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-
 });
 
 test('classic callers use the scoped compatibility host instead of a replacement global facade', async () => {
-  for (const path of ['public/app/core.js', 'public/app/events.js', 'public/app/export.js', 'public/app/web-clipper.js']) {
+  for (const path of ['public/app/core.js', 'public/app/events.js', 'public/app/web-clipper.js']) {
     const source = await readFile(new URL('../../../' + path, import.meta.url), 'utf8');
     assert.match(source, /compatibility-business-ports/);
     const boundary = path === 'public/app/web-clipper.js' ? /markdownEditorEditorUiCommandPort/
-      : path === 'public/app/export.js' ? /markdownEditorImageExportPort/ : /markdownEditorPlatformPort/;
+      : /markdownEditorPlatformPort/;
     assert.match(source, boundary);
-    if (path === 'public/app/export.js') {
-      assert.match(source, /exportImagePort\.(?:render|save)\(\{ request \}\)/);
-      const owner = await readFile(new URL('../../../src/features/export/formats/image/image-exporter.js', import.meta.url), 'utf8');
-      assert.match(owner, /fileWriter\.write/);
-      const writer = await readFile('src/features/export/application/export-file-writer.js', 'utf8');
-      assert.match(writer, /platform\.dialogs\.saveFile/); assert.match(writer, /platform\.files\.writeBinary/);
-      assert.doesNotMatch(owner, /window\.markdownEditorPlatform|window\.markdownEditorNative|__TAURI/);
-    }
+
     assert.doesNotMatch(source, /window\.markdownEditorPlatform|window\.markdownEditorNative/);
   }
+  const exportCommands = await readFile('src/features/export/application/export-controller.js', 'utf8');
+  const writer = await readFile('src/features/export/application/export-file-writer.js', 'utf8');
+  assert.match(exportCommands, /owners\[format\]\[method\]/);
+  assert.match(writer, /platform\.dialogs\.saveFile/);assert.match(writer, /platform\.files\.writeBinary/);
+  assert.doesNotMatch(exportCommands + writer, /window\.markdownEditorNative|__TAURI/);
   const bridge = await readFile(new URL('../../../src/platform/compatibility/classic-platform-port.js', import.meta.url), 'utf8');
   assert.match(bridge, /call\(portName, methodName/);
   assert.match(bridge, /supports\(capability\)/);

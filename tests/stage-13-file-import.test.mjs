@@ -91,7 +91,7 @@ test('public reader accepts external cancellation without starting or publishing
 
 test('text callers use Import while Documents retains lazy load and document commit ownership', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
-  const [main, legacy, events, coordinator] = await Promise.all([read('src/main.js'), read('public/app/export.js'), read('public/app/events.js'), read('src/features/import/application/import-document-controller.js')]);
+  const [main, legacy, events, coordinator] = await Promise.all([read('src/main.js'), read('src/features/export/application/export-controller.js'), read('public/app/events.js'), read('src/features/import/application/import-document-controller.js')]);
   assert.match(main, /readNativeText: path => platform\.files\.readText\(path\)/);
   assert.match(coordinator, /files\.readBrowserFile\(file, \{ signal \}\)/);
   assert.match(coordinator, /documents\.openExternalDocument\(/);

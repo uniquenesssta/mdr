@@ -131,20 +131,22 @@ test('stable compatibility presentation has no inline style authority', async ()
       'src/ui/shell/overlay-root.js'
     ].map(readText)),
     readText('public/app/web-clipper.js'),
-    readText('public/app/export.js')
+    readText('src/features/export/application/export-controller.js')
   ]);
 
   assert.doesNotMatch(markup, /\sstyle\s*=/i);
   assert.match(markup, /class="modal c-modal c-modal--narrow"/);
   assert.match(markup, /class="color-swatch c-color-swatch--text-blue"/);
-  assert.match(markup, /id="export-image-preview"[^>]+class="f-export-image-preview is-hidden"/);
+  const imageViewSource = await readText('src/features/export/ui/export-image-dialog-view.js');
+  assert.match(imageViewSource, /id:'export-image-preview',className:'f-export-image-preview is-hidden'/);
+  assert.doesNotMatch(markup, /id="export-image-modal"|id="export-image-preview"/);
   for (const source of shellSources) assert.doesNotMatch(source, /\.style\b|style\s*:/);
   assert.doesNotMatch(clipperSource, /\.style\.(?:display|color)\s*=/);
   assert.doesNotMatch(exportSource, /getElementById\('export-image-preview'\)[\s\S]{0,120}\.style\.display/);
 
   const stableStyleSources = await Promise.all([
     'src/features/preview/render/preview-markdown-renderer.js',
-    'public/app/export.js',
+    'src/features/export/application/export-controller.js',
     'src/features/preview/worker/preview-worker.js',
     'src/features/preview/render/presentation/mermaid-presentation.js',
     'src/features/hybrid-editor/widgets/code-block/code-block-actions.js',

@@ -44,3 +44,10 @@ test('R13.13 picker, recent and web menu intents invoke public document commands
   assert.deepEqual(calls, [['port', 'importFile'], ['port', 'openImportPath', 'C:/a.md'], ['port', 'openWebClipper']]);
   adapter.destroy(); bindings.destroy();
 });
+
+test('R14-18 all five real Menu export intents use the scoped command port without retired globals',()=>{
+  const calls=[],bindings=createMenuCommandBindings(),host={markdownEditorExportCommandPort:commandPort(calls)};
+  const adapter=createClassicMenuCommandAdapter({bindings,host,globalObject:new Proxy({},{get(){throw new Error('Retired export global accessed');}})});adapter.start();
+  for(const command of [C.EXPORT_MARKDOWN,C.EXPORT_WORD,C.EXPORT_PDF,C.EXPORT_HTML,C.EXPORT_IMAGE])bindings.execute(command);
+  assert.deepEqual(calls.map(row=>row.slice(0,2)),[['port','exportMarkdown'],['port','exportWord'],['port','exportPdf'],['port','exportHtml'],['port','openImage']]);adapter.destroy();bindings.destroy();
+});

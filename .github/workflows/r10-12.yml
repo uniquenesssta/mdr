@@ -56,7 +56,7 @@ jobs:
 
           ! grep -Eq 'mountClassicSaveControllerPort|mountClassicAutosaveControllerPort|classic-save-controller-port|classic-autosave-controller-port' src/features/persistence/index.js
           ! grep -Eq 'markdownEditorSaveControllerPort|markdownEditorAutosaveControllerPort|mountClassicSaveControllerPort|mountClassicAutosaveControllerPort' src/main.js
-          ! grep -Eq 'markdownEditorSaveControllerPort|markdownEditorAutosaveControllerPort|exportSaveControllerPort|exportAutosaveControllerPort|async function saveToLocal|async function saveCurrentFile|async function saveAsMarkdown|saveMarkdownWithPicker|bindDocumentFilePath' public/app/export.js
+          ! grep -Eq 'markdownEditorSaveControllerPort|markdownEditorAutosaveControllerPort|exportSaveControllerPort|exportAutosaveControllerPort|async function saveToLocal|async function saveCurrentFile|async function saveAsMarkdown|saveMarkdownWithPicker|bindDocumentFilePath' src/features/export/application/export-controller.js
           ! grep -Eq 'markdownEditorAutosaveControllerPort|coreAutosaveControllerPort|async function saveCurrentDocumentState|async function saveAsContextDocument' public/app/core.js
           ! grep -Eq 'markdownEditorAutosaveControllerPort|eventsAutosaveControllerPort|function saveCurrentFile|function saveAsMarkdown|function autoSave' public/app/events.js
           grep -q 'requestDocumentPersistence' public/app/core.js

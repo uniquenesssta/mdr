@@ -60,7 +60,7 @@ test('Atomic Task 2.3 sprite has one stable definition for every preserved icon 
 });
 
 test('compatibility and dynamic callers reference the external sprite without a second geometry authority', async () => {
-  const [shell, core, splitPane, events, windowControls, helpDialog, settingsDialog, linkPreview, folderTree, browserTest, clipperView] = await Promise.all([
+  const [shell, core, splitPane, events, windowControls, helpDialog, settingsDialog, linkPreview, folderTree, browserTest, clipperView, exportImageView] = await Promise.all([
     readText('public/compatibility/business-content.html'),
     readText('public/app/core.js'),
     readText('src/features/layout/split/split-pane-controller.js'),
@@ -71,14 +71,18 @@ test('compatibility and dynamic callers reference the external sprite without a 
     readText('src/runtime/link-preview.js'),
     readText('src/features/sidebar/folder-tree/folder-tree-node-view.js'),
     readText('tests/e2e/run-browser-tests.mjs'),
-    readText('src/features/import/web-clipper/web-clipper-view.js')
+    readText('src/features/import/web-clipper/web-clipper-view.js'),
+    readText('src/features/export/ui/export-image-dialog-view.js')
   ]);
   const shellReferences = collectIconReferences(shell);
   // R13.14 moves the two clipper icons from the template to its owned view.
   const clipperIcons = [...clipperView.matchAll(/createIconView\(documentRef, '(icon-[a-z-]+)'/g)].map(match => match[1]);
-  assert.equal(shellReferences.length, 45);
+  const imageIcons = [...exportImageView.matchAll(/createIcon\(doc,'(icon-[a-z-]+)'/g)].map(match => match[1]);
+  assert.equal(shellReferences.length, 43);
+  assert.deepEqual(imageIcons, ['icon-image', 'icon-close']);
+  assert.doesNotMatch(exportImageView, /createElementNS|<svg\b|<use\b|\/assets\/icons\.svg#icon-/i);
   assert.deepEqual(clipperIcons, ['icon-globe', 'icon-close']);
-  assert.equal(shellReferences.length + clipperIcons.length, 47);
+  assert.equal(shellReferences.length + clipperIcons.length + imageIcons.length, 47);
   assert.ok(shellReferences.every(record => record.href === `${ICON_SPRITE_URL}#${record.iconId}`));
   assert.ok(shellReferences.every(record => expectedIconIds.includes(record.iconId)));
   assert.doesNotMatch(shell, /<symbol\b|class="icon-sprite"|href="#icon-/i);

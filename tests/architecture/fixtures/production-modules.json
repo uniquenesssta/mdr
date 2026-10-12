@@ -68,16 +68,6 @@
       false
     ],
     [
-      "public/app/export.js",
-      "legacy-classic-script",
-      "legacy-app",
-      "Classic rendered-format orchestration consumes public Export request/task/body/enhancement/style capabilities; raw Markdown command delegates entirely to the public Markdown Exporter. HTML/Word shared CSS and PDF/Image reversible leases remain.",
-      "legacy-image-preview-state",
-      "classic-script",
-      "split-and-remove",
-      false
-    ],
-    [
       "public/app/web-clipper.js",
       "legacy-classic-script",
       "legacy-app",
@@ -91,7 +81,7 @@
       "public/compatibility/business-content.html",
       "html-shell",
       "ui-compatibility",
-      "Temporary compatibility templates for unmigrated business content; Atomic 5.12 document/editor owned surfaces expose declarative data-action hooks with no inline event ownership. R14-05 progress dialog markup and inline cancel handler removed; Export View constructs that surface.",
+      "Existing business DOM slots excluding independently owned image export modal/stage; Menu structure retained without export inline handlers.",
       "none",
       "fetched-template",
       "remove-after-migration",
@@ -4191,7 +4181,7 @@
       "src/ui/compatibility/mount-modal-shells.js",
       "esm-module",
       "ui-compatibility",
-      "Bridge the remaining five compatibility modals through element-scoped events; Export Progress, Import Clipper, Help and Settings own independent feature ModalShell lifecycles.",
+      "Own four remaining classic ModalShell instances for link/find/image-insert/Mermaid; image export owns its independent View.",
       "compatibility-modal-registry",
       "explicit-instance",
       "remove-after-migration",
@@ -4631,7 +4621,7 @@
       "src/features/menu/compatibility/classic-menu-command-adapter.js",
       "esm-module",
       "feature-menu",
-      "Adapt canonical Menu command IDs to the remaining classic application command surface during staged rewrite.",
+      "Bind existing Menu command IDs to explicit public feature ports; all five exports use the sole scoped Export Controller command port.",
       "Owns only registrations in MenuCommandBindings; it never owns document/editor/layout state.",
       "Explicit start/destroy; classic global lookup is lazy and therefore never copied into Menu Model state.",
       "remove-after-migration",
@@ -5513,6 +5503,36 @@
       "export-application",
       "Unified destination/dialog/MIME policy and guarded text/binary publication over existing Platform; formats retain source/content/task authority.",
       "pending-dialog-waits",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/application/export-controller.js",
+      "esm-module",
+      "export-application",
+      "Public export command validation and status notifications over injected format owners; no file/render/model implementation.",
+      "command-terminal-lifetime",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/ui/export-image-dialog-view.js",
+      "esm-module",
+      "export-ui",
+      "Single image modal/options/capture-stage DOM and event/focus lifetime over ModalShell and injected commands.",
+      "image-options-and-modal-dom",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-export-command-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Scoped public command capability for Menu and remaining classic callers without window aliases or cloned state.",
+      "scoped-command-mount",
       "factory-to-destroy",
       "retain",
       false

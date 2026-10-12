@@ -160,7 +160,7 @@ test('R14-12 actual classic command shares resources and preserves Preview/Hybri
       await h.printDom.fire(80);frame.contentWindow.dispatchEvent({type:'afterprint'});await work;
       assert.equal(port.getViewMode(),view);assert.equal(h.context.preview,preview);assert.equal(h.calls.slice(before).some(x=>['view','reset','deactivateVirtual'].includes(x[0])),false);
       assert.equal(h.taskPort.getSnapshot().activeTask,null);
-      const classic=readFileSync(new URL('../public/app/export.js',import.meta.url),'utf8').split('async function exportPDF()')[1].split('function toggleExportMenu()')[0];
+      const classic=readFileSync(new URL('../src/features/export/application/export-controller.js',import.meta.url),'utf8');
       assert.doesNotMatch(classic,/replaceChildren|afterprint|setTimeout|\.print\(|\.reset\(|\.build\(|\.enhance\(/);
     }finally{h.destroy();}
   }

@@ -341,7 +341,7 @@ jobs:
           node --check public/app/editor-tools.js &&
           node --check public/app/web-clipper.js &&
           node --check public/app/scroll-sync.js &&
-          node --check public/app/export.js &&
+          node --check src/features/export/application/export-controller.js &&
           node --check src/features/documents/application/recent-files-read-source.js &&
           node --check src/features/documents/infrastructure/recent-files-repository.js &&
           node --check src/features/documents/compatibility/classic-recent-files-port.js &&

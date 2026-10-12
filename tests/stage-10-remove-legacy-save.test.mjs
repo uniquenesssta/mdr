@@ -82,9 +82,9 @@ test('Atomic 10.12 removes the explicitly temporary Save/Autosave classic bridge
 });
 
 test('Atomic 10.12 keeps export free of persistence policy after R13.13 moves import transition preparation', () => {
-  const source = read('public/app/export.js');
-  assert.match(source, /async function exportFile\(/);
-  assert.match(source, /async function exportHTML\(/);
+  const source = read('src/features/export/application/export-controller.js');
+  assert.match(source, /exportMarkdown/);
+  assert.match(source, /exportHtml/);
   const importer = read('src/features/import/application/import-document-controller.js');
   const main = read('src/main.js');
   assert.match(importer, /prepareTransition\('document-import'\)/);

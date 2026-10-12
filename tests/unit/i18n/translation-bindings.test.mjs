@@ -166,7 +166,7 @@ test('refresh continues through binding failures and reports them after remainin
 
 test('production integration preserves 113 bindings across shell, Help and the owned clipper view', async () => {
   const { readFile } = await import('node:fs/promises');
-  const [moduleEntry, core, bootstrap, index, markup, helpDialog, clipperView, main] = await Promise.all([
+  const [moduleEntry, core, bootstrap, index, markup, helpDialog, clipperView, main, exportImageView] = await Promise.all([
     readFile('src/bootstrap/module-entry.js', 'utf8'),
     readFile('public/app/core.js', 'utf8'),
     readFile('public/app/bootstrap.js', 'utf8'),
@@ -174,7 +174,8 @@ test('production integration preserves 113 bindings across shell, Help and the o
     readFile('public/compatibility/business-content.html', 'utf8'),
     readFile('src/features/help/ui/help-dialog-view.js', 'utf8'),
     readFile('src/features/import/web-clipper/web-clipper-view.js', 'utf8'),
-    readFile('src/main.js', 'utf8')
+    readFile('src/main.js', 'utf8'),
+    readFile('src/features/export/ui/export-image-dialog-view.js', 'utf8')
   ]);
 
   assert.match(index, /translation-bindings\.js/);
@@ -193,7 +194,13 @@ test('production integration preserves 113 bindings across shell, Help and the o
   const markupBindings = markup.match(/\sdata-i18n(?:-title|-placeholder|-alt)?="[^"]+"/g) || [];
   const helpBindings = helpDialog.match(/['"]data-i18n['"]\s*:\s*['"][^'"]+['"]/g) || [];
   const clipperBindings = [...clipperView.matchAll(/'(data-i18n(?:-placeholder)?)'\s*:\s*'([^']+)'/g)].map(match => [match[1], match[2]]);
-  assert.equal(markupBindings.length, 101);
+  // R14-18 moves fourteen existing bindings to the sole image View.
+  const imageBindings = [...exportImageView.matchAll(/i18n(?:Alt)?:'([^']+)'/g)].map(match => match[1]);
+  for (const loop of exportImageView.matchAll(/for\(const \[([^\]]+)\]of \[([\s\S]*?)\]\)node|for\(const \[([^\]]+)\]of \[([\s\S]*?)\]\)\{/g)) {
+    for (const entry of (loop[2] || loop[4]).matchAll(/\['[^']+','([^']+)'/g)) imageBindings.push(entry[1]);
+  }
+  assert.deepEqual(imageBindings.sort(), ['cancel','exportImageTitle','ratioLabel','ratio9_16','ratio4_5','ratio3_4','ratio1_1','ratio16_9','cropLabel','previewLabel','exportImagePreviewAlt','exportImageHint','refreshPreview','downloadPng'].sort());
+  assert.equal(markupBindings.length, 87);
   assert.equal(helpBindings.length, 2);
   assert.deepEqual(clipperBindings, [
     ['data-i18n', 'urlTitle'], ['data-i18n', 'urlLabel'],
@@ -202,7 +209,7 @@ test('production integration preserves 113 bindings across shell, Help and the o
     ['data-i18n', 'manualLabel'], ['data-i18n-placeholder', 'manualPlaceholder'],
     ['data-i18n', 'cancel'], ['data-i18n', 'convertInsert']
   ]);
-  assert.equal(markupBindings.length + helpBindings.length + clipperBindings.length, 113);
+  assert.equal(markupBindings.length + helpBindings.length + clipperBindings.length + imageBindings.length, 113);
   assert.match(main, /subscribeLocale: listener => compatibilityPlatformHost\.markdownEditorI18nPort\.subscribe\(listener\)/);
   assert.match(clipperView, /subscribeLocale\(renderTranslations\)/);
   assert.doesNotMatch(markup, /id="url-modal"/);

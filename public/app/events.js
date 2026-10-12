@@ -43,14 +43,7 @@
       if (!e.target.closest('.menu-dropdown')) {
         closeAppMenus();
       }
-      const exportDropdown = document.getElementById('export-dropdown');
-      if (exportDropdown && !exportDropdown.contains(e.target)) {
-        closeExportMenu();
-      }
-      const importDropdown = document.getElementById('import-dropdown');
-      if (importDropdown && !importDropdown.contains(e.target)) {
-        closeImportMenu();
-      }
+
     });
 
 

@@ -230,7 +230,7 @@ test('Atomic 10.3 AutosaveController remains the single autosave authority after
     source('src/main.js'),
     source('public/app/core.js'),
     source('public/app/bootstrap.js'),
-    source('public/app/export.js'),
+    source('src/features/export/application/export-controller.js'),
     source('public/app/events.js'),
     source('tests/architecture/fixtures/production-modules.json')
   ]);

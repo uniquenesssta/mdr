@@ -556,13 +556,6 @@ function installLegacyInstrumentation() {
       ['saveAsMarkdown', false],
       ['autoSave', true]
     ],
-    'export.operation': [
-      ['exportFile', false],
-      ['exportWord', false],
-      ['exportHTML', false],
-      ['exportPDF', false],
-      ['downloadExportImage', false]
-    ],
     'ui.layout': [
       ['applySplit', true],
       ['setLayoutMode', false],

@@ -200,7 +200,7 @@ test('R14-10 actual classic HTML entry delegates without template CDN, direct bl
     await h.invoke('exportHTML'); assert.equal(h.downloads.length, 1);
     const html = await h.downloads[0].blob.text(); assert.doesNotMatch(html, /<script[\s>]|cdn\.jsdelivr|exportPresentationPort/i);
     assert.ok(html.includes('data:font/woff2;base64,')); assert.equal(h.taskPort.getSnapshot().activeTask, null);
-    const classic = readFileSync(new URL('../public/app/export.js', import.meta.url), 'utf8').split('async function exportHTML()')[1].split('async function exportPDF()')[0];
+    const classic = readFileSync(new URL('../src/features/export/application/export-controller.js', import.meta.url), 'utf8');
     assert.doesNotMatch(classic, /new Blob|URL\.|\.build\(|\.enhance\(|<html|exportTextContent/);
   } finally { h.destroy(); }
 });

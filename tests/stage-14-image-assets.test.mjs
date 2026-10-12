@@ -203,9 +203,9 @@ test('R14-14 scoped port is read-only, independently removable and preserves rep
 test('R14-14 classic command uses the public asset boundary before measurement and encoding', async () => {
   const h = createExportVmHost(); let prepared = false;
   // Observe public call inputs using a mounted capability rather than rewriting the production function.
-  const source = readFileSync(new URL('../public/app/export.js', import.meta.url), 'utf8');
+  const source = readFileSync(new URL('../src/features/export/application/export-controller.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /prepareExportImages|IMAGE_PLACEHOLDER|new Image\(|_cors=/);
-  assert.match(source, /await exportImagePort\.render/);
+  assert.match(source, /owners\[format\]\[method\]\(\{request\}\)/);
   const ownerSource = readFileSync(new URL('../src/features/export/formats/image/image-exporter.js', import.meta.url), 'utf8');
   assert.match(ownerSource, /assets\.prepare\(\{ root: capture\.root, task, isCurrent:/);
   const host = h.context.document.getElementById('compatibility-business-ports');

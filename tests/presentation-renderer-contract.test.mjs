@@ -53,7 +53,7 @@ test('hybrid Preview and export math rendering use the canonical math presentati
   const blockMathWidget = await source('../src/features/hybrid-editor/widgets/math/block-math-widget.js');
   const previewRenderer = await source('../src/features/preview/render/math-renderer.js');
   const previewController = await source('../src/features/preview/application/preview-controller.js');
-  const exportSource = await source('../public/app/export.js');
+  const exportSource = await source('../src/features/export/application/export-controller.js');
   const math = await source('../src/features/preview/render/presentation/math-presentation.js');
   assert.match(controller, /features\/preview\/render\/presentation\/math-presentation\.js/);
   assert.match(controller, /renderMathFormula/);
@@ -66,7 +66,7 @@ test('hybrid Preview and export math rendering use the canonical math presentati
   assert.match(previewRenderer, /math\.renderTree/);
   assert.match(previewController, /renderer\.renderMath/);
   const enhancer = await source('../src/features/export/document/export-preview-enhancer.js');
-  assert.match(exportSource, /exportImagePort\.render/);
+  assert.match(exportSource, /owners\[format\]\[method\]/);
   const imageSource = await source('../src/features/export/formats/image/image-exporter.js');
   assert.match(imageSource, /enhancer\.enhance/);
   assert.match(enhancer, /presentation\.math\.renderTree/);

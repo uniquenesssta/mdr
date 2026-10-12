@@ -1,3 +1,5 @@
+import { createExportImageDialogView } from '../../src/features/export/index.js';
+import { ExportProgressDocument } from '../support/export-progress-dom.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
@@ -334,7 +336,6 @@ test('ModalShell accepts feature content, validates accessibility options and re
 const COMPATIBILITY_MODAL_IDS = [
   'link-modal',
   'find-modal',
-  'export-image-modal',
   'image-modal',
   'mermaid-modal'
 ];
@@ -380,22 +381,15 @@ test('compatibility modal bridge installs one authoritative registry for the rem
   assert.equal(bridge.isOpen('link-modal'), false);
 
   assert.throws(() => bridge.open('export-progress-modal'), /Unknown compatibility modal/);
-  bridge.open('export-image-modal', { closeOnEscape: false, closeOnBackdrop: false });
-  documentRef.flushFrames();
-  records.get('export-image-modal').root.dispatch('keydown', createEvent('Escape'));
-  records.get('export-image-modal').root.dispatch('mousedown', {
-    target: records.get('export-image-modal').root,
-    preventDefault() {},
-    stopPropagation() {}
-  });
-  assert.equal(bridge.isOpen('export-image-modal'), true);
-  const closeProgress = { reason: 'finished' };
-  records.get('export-image-modal').root.dispatch(COMPATIBILITY_MODAL_CLOSE_EVENT, {
-    target: records.get('export-image-modal').root,
-    detail: closeProgress
-  });
-  assert.equal(closeProgress.error, null);
-  assert.equal(closeProgress.result, true);
+  assert.throws(() => bridge.open('export-image-modal'), /Unknown compatibility modal/);
+  const imageDocument = new ExportProgressDocument(), imageOverlay = imageDocument.createElement('div');
+  imageDocument.body.append(imageOverlay);
+  const imageView = createExportImageDialogView({overlayRoot:imageOverlay,onCommand:()=>{},createIcon:doc=>doc.createElement('span')});
+  imageView.open({closeOnEscape:false,closeOnBackdrop:false});imageDocument.flushFrames();
+  imageView.root.dispatch('keydown',createEvent('Escape'));
+  imageView.root.dispatch('mousedown',{target:imageView.root,preventDefault(){},stopPropagation(){}});
+  assert.equal(imageView.isOpen(),true);assert.equal(imageView.close('finished'),true);
+  imageView.destroy();imageView.destroy();assert.equal(imageDocument.getElementById('export-image-modal'),null);
 
   bridge.destroy();
   bridge.destroy();
@@ -407,7 +401,6 @@ test('compatibility feature callers use the explicit modal event port without ne
   const bridgeSource = await readFile('src/ui/compatibility/mount-modal-shells.js', 'utf8');
   const mountSource = await readFile('src/ui/compatibility/business-content-port.js', 'utf8');
   const featureSources = await Promise.all([
-    'public/app/export.js',
     'src/features/editor/ui/link-dialog-view.js',
     'src/features/editor/ui/find-replace-dialog-view.js',
     'src/features/editor/ui/image-dialog-view.js',
@@ -428,7 +421,11 @@ test('compatibility feature callers use the explicit modal event port without ne
   }
   assert.doesNotMatch(eventSource, /linkModal\?\.addEventListener|event\.key === 'Escape'/);
 
-  const joined = featureSources.join('\n');
+  const imageViewSource = await readFile('src/features/export/ui/export-image-dialog-view.js', 'utf8');
+  assert.match(imageViewSource,/createModalShell\(root,\{panel\}\)/);
+  assert.doesNotMatch(imageViewSource,/markdown-editor:modal-shell-/);
+  assert.doesNotMatch(bridgeSource,/id: 'export-image-modal'/);
+  const joined = featureSources.join('\n') + imageViewSource;
   for (const id of COMPATIBILITY_MODAL_IDS) assert.match(bridgeSource, new RegExp(`id: '${id}'`));
   assert.doesNotMatch(bridgeSource, /id: '(?:help|settings|url|export-progress)-modal'/);
   assert.match(helpDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'help-modal'/);

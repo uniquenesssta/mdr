@@ -155,7 +155,7 @@ test('R14-11 actual classic Word command uses complete public pipeline with no p
       assert.ok(file.includes('data-export-format="word"'));assert.doesNotMatch(file,/<script[\s>]|cdn\.jsdelivr|exportPresentationPort/);
       if(!desktop){assert.equal(h.downloads[0].name,'source.doc');assert.equal(h.downloads[0].blob.type,'application/msword;charset=utf-8');assert.ok(h.calls.some(x=>x[0]==='revoke'));}
       assert.equal(h.taskPort.getSnapshot().activeTask,null);
-      const classic=readFileSync(new URL('../public/app/export.js',import.meta.url),'utf8').split('async function exportWord()')[1].split('async function exportHTML()')[0];
+      const classic=readFileSync(new URL('../src/features/export/application/export-controller.js',import.meta.url),'utf8');
       assert.doesNotMatch(classic,/new Blob|URL\.|\.build\(|\.enhance\(|<html|exportTextContent|escapeExportTitle/);
     }finally{h.destroy();}
   }

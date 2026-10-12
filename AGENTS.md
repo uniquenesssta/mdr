@@ -1,4 +1,4 @@
-> 阶段分支规则：每个大阶段沿用唯一分支，不为Atomic另开分支。R14基线4340398，唯一agent/r14-stage。R14-01～17已验收；17：1e6f4ae / CI38268106587七组Windows及全部步骤通过，全仓2179/2179、前端1173/1173、Writer29/29、图片34/34、编码58/58、浏览器11/11＋66/66、Rust281与四格式实际文件精确读回/占用失败原件保留/恢复通过。17正式收尾，18按用户指令准备开始；继续唯一agent/r14-stage。 [17验收](docs/R14-17-DETAILS.md#正式验收2026-10-12)。启动Actions后结束，不轮询，约15～20分钟后查询。
+> 阶段分支规则：每个大阶段沿用唯一分支，不为Atomic另开分支。R14基线4340398，唯一agent/r14-stage。R14-01～17已验收，17正式收尾（1e6f4ae / CI38268106587七组Windows及全部步骤通过）。18从收尾b6aa0cf在唯一agent/r14-stage实施：删除旧export.js、图片modal/stage模板及内联导出事件；Menu/图片控件统一公共Controller，唯一View拥有弹窗与选项，原格式/任务/Writer保持。新增32项Node回归和1项真实菜单/PNG/翻译/销毁场景（累计67）；18待精确head七组Windows验收，整体R14与A10暂不收官。 [18范围与验证映射](docs/R14-18-DETAILS.md)。 启动Actions后结束，不轮询，约15～20分钟后查询。
 
 > 当前平台范围（2026-09-29，用户明确要求）：全部阶段只验收 Windows；取消 Linux/macOS 验证要求。以 [Windows 验证策略](docs/WINDOWS_VALIDATION_POLICY.md) 为准，历史多平台记录只保留作历史证据。
 

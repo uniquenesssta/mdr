@@ -141,7 +141,7 @@ test('Atomic 5.2 NativeDocumentStore accepts frozen records and returns native m
 test('Atomic 5.2 production integration removes classic session-state authority and keeps the frozen DocumentModel exact', async () => {
   const [core, exportModule, previewEngine, bootstrap, nativeStore, entry] = await Promise.all([
     readText('public/app/core.js'),
-    readText('public/app/export.js'),
+    readText('src/features/export/application/export-controller.js'),
     readText('src/features/preview/pipeline/preview-render-engine.js'),
     readText('src/bootstrap/module-entry.js'),
     readText('src/storage/native-document-store.js'),
@@ -150,7 +150,7 @@ test('Atomic 5.2 production integration removes classic session-state authority 
   assert.doesNotMatch(core, /\blet\s+documents\b/);
   assert.doesNotMatch(core, /\blet\s+currentDocumentId\b/);
   assert.match(core, /markdownEditorDocumentSessionPort/);
-  assert.match(exportModule, /markdownEditorImageExportPort/);
+  assert.match(exportModule, /owners\[format\]\[method\]/);
   const [main, imageOwner] = await Promise.all([
     readText('src/main.js'), readText('src/features/export/formats/image/image-exporter.js')
   ]);
