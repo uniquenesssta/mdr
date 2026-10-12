@@ -26,3 +26,5 @@ export { createPdfPrintSurface } from './document/pdf-print-surface.js';
 export { mountClassicPdfExportPort } from './compatibility/classic-pdf-export-port.js';
 export { calculateImageLayout, createImageExportLayout } from './formats/image/image-export-layout.js';
 export { mountClassicImageLayoutPort } from './compatibility/classic-image-layout-port.js';
+export { createImageAssetPreloader, EXPORT_IMAGE_PLACEHOLDER } from './formats/image/image-asset-preloader.js';
+export { mountClassicImageAssetPort } from './compatibility/classic-image-asset-port.js';

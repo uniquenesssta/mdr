@@ -5436,6 +5436,26 @@
       "mount-to-destroy",
       "remove-with-classic-callers",
       false
+    ],
+    [
+      "src/features/export/formats/image/image-asset-preloader.js",
+      "esm-module",
+      "export-format",
+      "Anonymous resource loading, Data URL validation, inline pixels, bounded placeholder fallback and cancellable asset-job disposal.",
+      "image-asset-jobs",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-image-asset-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Read-only scoped asset preparation capability with independent terminal unmount.",
+      "image-asset-port-mount",
+      "mount-to-destroy",
+      "retain",
+      false
     ]
   ]
 }

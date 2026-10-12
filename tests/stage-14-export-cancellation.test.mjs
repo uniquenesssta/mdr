@@ -107,7 +107,7 @@ test('R14-04 remote image cancellation detaches callbacks and late success canno
   const h = createExportVmHost(), task = h.invoke('beginExportTask', 'images'), loaders = [];
   h.context.Image = class { constructor() { loaders.push(this); } };
   const image = { src: 'https://image.test/a.png' }, root = { querySelectorAll: () => [image] };
-  const work = h.invoke('prepareExportImages', root, task), loaded = loaders[0].onload;
+  const work = h.preload(root, task), loaded = loaders[0].onload;
   const rejected = assert.rejects(work, cancellation('cancelled')); h.cancel(); await rejected;
   assert.equal(loaders[0].onload, null); assert.equal(loaders[0].onerror, null);
   loaded(); await Promise.resolve();
@@ -119,8 +119,8 @@ test('R14-04 remote image failure preserves placeholder fallback and releases ev
   const h = createExportVmHost(), task = h.invoke('beginExportTask', 'images'), loaders = [];
   h.context.Image = class { constructor() { loaders.push(this); } };
   const image = { src: 'https://image.test/a.png' }, root = { querySelectorAll: () => [image] };
-  const work = h.invoke('prepareExportImages', root, task); loaders[0].onerror(); await work;
-  assert.equal(image.src, h.evaluate('IMAGE_PLACEHOLDER'));
+  const work = h.preload(root, task); loaders[0].onerror(); await work;
+  assert.equal(image.src, h.assetMount.port.placeholder);
   assert.equal(loaders[0].onload, null); assert.equal(loaders[0].onerror, null);
   h.invoke('finishExportTask', task); h.destroy();
 });

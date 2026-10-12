@@ -1,6 +1,6 @@
 # R14-13 Image Layout
 
-状态：**实施完成，待本提交 Windows 累计验证**；14.13不勾选，14.14未开始。唯一分支`agent/r14-stage`，基线为12正式验收提交`0ea72e288f336c37ee42fa4fe19f8862ff73271c` / [CI38190752844](https://github.com/uniquenesssta/mdr/actions/runs/38190752844)。
+状态：**已正式验收**；14.13已勾选，按用户要求收尾并开始14.14。唯一分支`agent/r14-stage`，基线为12正式验收提交`0ea72e288f336c37ee42fa4fe19f8862ff73271c` / [CI38190752844](https://github.com/uniquenesssta/mdr/actions/runs/38190752844)。
 
 ## 12收尾
 
@@ -55,3 +55,11 @@ GitHub核对12的精确提交七组及全部步骤、四SHA-256归档、实际�
 14.14图片资源预载、14.15 Data Encoder、14.16最终Image Exporter及14.17 UI/经典删除职责保持原接收，当前Image流程的其余旧编排未误记为已迁移。A10整体收官仍待后续图片完整链；已登记的无关Editor监听器问题不扩展本次范围。14.13必须取得新精确head Windows七组累计证据后才能勾选，14.14未开始。Actions启动后结束，不轮询，约15～20分钟后查询。
 
 静态四门禁全部通过；11份脚本语法、35段浏览器表达式、5份共享CSS/6个共享令牌、图片布局CSS/5个局部变量、JSON/YAML、158个相对链接、70项风险指纹和diff空白检查通过。542行生产清单保留原539行，70风险路径保留原67路径；1270个受保护跟踪文件、R12历史根、既有阶段历史前缀及12实施内容/两次失败与修复保留。原57项实际页面名称/顺序、原43/31/33等场景目的及像素正控保持，新增两场景/33契约均待新精确head Windows验证。本地没有运行产品Node、浏览器、构建或Rust；13未验收，14未开始。
+
+## 正式验收（2026-10-12）
+
+精确提交`f4e5d5ed64e27216a0152736ff8d0f21f87f488e` / [CI38197683019](https://github.com/uniquenesssta/mdr/actions/runs/38197683019)七组及全部步骤通过；全仓2009/2009（339文件16目录）、前端1004/1004、图片布局33/33、PDF33/33、Word29/29、HTML36/36、Markdown30/30、浏览器11/11＋59/59、Rust281/格式/Clippy/check、实际Windows导入8/8及最终`accepted=true`。下载前端、递归Node、Rust与收尾四ZIP逐一校验SHA-256，均与服务端摘要一致；实际比例/长图/裁剪JSON独立核对。
+
+五比例像素、CSS尺寸/边距/字号、完整正文、原Preview节点与独立释放均通过；实际enhancing中4:5→1:1替换只有一个当前PNG。50段长图1080×3538、裁剪1080×1920、原尾段仍在DOM，裁剪可见前缀`differentPixels=0`；原数学PNG零差/可见重复文本正控、打印与所有旧实际目的保持。
+
+四ZIP ID/摘要保存在[精确证据记录](audit/r12-24-closeout.json)的`currentSourceReview.stageAcceptanceHistory`，历史实施状态按当时情况保留。14.13正式收尾，在同一`agent/r14-stage`开始[14.14资源预载](R14-14-DETAILS.md)，14.15不开始；A10最终Image完整链仍由14.16接收。

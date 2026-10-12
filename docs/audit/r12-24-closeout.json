@@ -239,7 +239,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "e8cc4a4be3c207d65b992783b2f0e574482fa0d8"
+      "blobSha": "a69bf09ce6356f9a2264574e836d8f373ac67ffe"
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
@@ -271,7 +271,7 @@
     },
     {
       "path": "public/app/export.js",
-      "blobSha": "4fb4e937edfc4f4310c4048080927542bbecbed3"
+      "blobSha": "1414316bd79e9d0025361e49906c9c1bae799b9a"
     },
     {
       "path": "src/features/export/application/export-request.js",
@@ -283,7 +283,7 @@
     },
     {
       "path": "src/features/export/index.js",
-      "blobSha": "74f1c6ca4bc320daa8afada084fd37a8407b7417"
+      "blobSha": "c1e4355857e5ceed6fbe8e40d7a3423e58ed8c5f"
     },
     {
       "path": "src/features/export/compatibility/classic-export-task-port.js",
@@ -408,6 +408,14 @@
     {
       "path": "src/features/export/compatibility/classic-image-layout-port.js",
       "blobSha": "df2ddca16525d7610466c5a618a0f1fffc7ff4e9"
+    },
+    {
+      "path": "src/features/export/formats/image/image-asset-preloader.js",
+      "blobSha": "af7106ee9a84fcdb7b4d5d044bbe8a82ed811652"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-image-asset-port.js",
+      "blobSha": "fd8995d6931684c24ba22f7967dc1d151c8becf8"
     }
   ],
   "priorFailures": {
@@ -623,24 +631,20 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R14.13",
+    "stage": "R14.14",
     "date": "2026-10-12",
-    "reviewedCommit": "0ea72e288f336c37ee42fa4fe19f8862ff73271c",
-    "record": "docs/R14-13-DETAILS.md",
-    "status": "R14.12 formally accepted at0ea72e2/run38190752844; R14.13 public image geometry and scoped CSS lease implemented pending exact-head Windows admission;14.14 not started.",
-    "priorWindowsRun": 37737197913,
+    "reviewedCommit": "f4e5d5ed64e27216a0152736ff8d0f21f87f488e",
+    "record": "docs/R14-14-DETAILS.md",
+    "status": "R14.13 formally accepted; R14.14 isolated image assets implemented pending exact-head Windows admission;14.15 not started.",
+    "priorWindowsRun": 38197683019,
     "priorWindowsJobsPassed": 7,
-    "scope": "Top-level reviewedSources is the current cumulative risk review. acceptance and acceptance.artifact.evidence retain the immutable R12 snapshot. records status/fixed retain R12 closeout handoff semantics; A05 subsequentAcceptance records the current R13 closure separately.",
+    "scope": "Independent image asset preloader, anonymous load and pixels, bounded inline decode/placeholder fallback, existing90-95 progress and every cancellation/stale/disposal path; old resource implementation removed. No new dependency, network privilege or encoder/file migration.",
     "acceptedPriorStage": {
-      "stage": "R13.13",
-      "commit": "5efe460b6025b5af0de25ee917fa6dccd542c50d",
-      "run": 37737197913,
-      "status": "accepted",
-      "windowsJobsPassed": 7,
-      "record": "docs/R13-13-DETAILS.md",
-      "closeoutArtifactId": 11532980143,
-      "closeoutArtifactDigest": "sha256:d85d9efac977f848e3f5b9bd42aca953b0a6052f61847ef3df6f1b3bf097f5a7",
-      "importChainScenariosPassed": 8
+      "stage": "R14.13",
+      "commit": "f4e5d5ed64e27216a0152736ff8d0f21f87f488e",
+      "run": 38197683019,
+      "record": "docs/R14-13-DETAILS.md",
+      "accepted": true
     },
     "removedReviewedSources": [
       {
@@ -666,8 +670,8 @@
         "replacement": "src/features/export/task/export-task-controller.js"
       }
     ],
-    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open. Run 37824900026 at 0e09d62ec545d7d70d33d67175b1c9fbe4b31c70 passed cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; WebView, native and dependency jobs passed. The safe-writer targeted step failed 17/18 because parallel test fixtures used the same PID and clock value, causing Windows AlreadyExists before any write. Later full Rust success does not supersede the failed step; closeout correctly rejected the commit. Only the test fixture allocator now adds an atomic sequence and bounded exclusive-create collision handling. The retained concurrent-save scenario forces a shared clock value and a pre-existing directory, checks isolation and ownership, then runs the original eight actual writes. All 18 scenarios, production fingerprints, workflow gates and historical acceptance remain unchanged. R14.4 awaits revalidation; 14.5 is not started. Run 37883007228 at e050ff4bb1e5f78e960344031d229cba336e8662 passed the safe-writer 18/18 including forced equal-clock fixture ownership, full Rust 269 plus integration 5/1/6, Clippy/check, cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; other independent Windows jobs passed. Only the Rust formatting step failed on two new assertion layouts, repeated in the formatter log by module traversal. Closeout correctly rejected it. Current repair exactly applies the complete CI rustfmt diff; source is identical after removing whitespace. Local formatter runtime is incomplete, so full formatter and cumulative Windows admission remain pending; historical acceptance and all production fingerprints are unchanged. Run 37886068643 at f631d2639b811ab6db071c08edf26fcbb75c59ce passed all seven Windows jobs and every step, including safe-writer 18/18, Rust format, cancellation 22/22, Node 1724/1724, frontend 726/726 and actual browser 11/11 plus 37/37. R14.4 is accepted; both failed attempts and test-only repairs remain recorded. User requested R14.5. Current review covers the readonly Progress Store over one task authority, safe text-only DOM view, direct ModalShell focus/visibility, guarded cancellation button, end-state reset and independent pagehide cleanup. Classic progress subscription, inline cancel global and compatibility progress registration are removed. Existing cancellation/task/characterization scenarios are retained through the real new store/view composition; a test-only ModalShell fault adapter preserves open/close error injection. Rendered format findings and A10 remain open; R14.5 awaits its own exact-commit Windows validation. Run 37890617533 at 2bbd7733b9c14b4639cf64bde04c21840a7b449d passed progress 20/20, cancellation 22/22, task 16/16, request 31/31, characterization 41/41, browser 11/11 plus 38/38 and Rust/native/WebView/dependency jobs. Node 1743/1744 and frontend 745/746 failed solely because the Stage 1 current-baseline assertion still expected 33 inline handlers after the progress handler was removed, leaving 32. Closeout correctly blocked it. Repair replaces that stale total with exact path/attribute/handler/count equality and explicit retired-handler proof; all historical handoff and product scenarios, production fingerprints and admission gates remain unchanged. R14.5 remains pending; 14.6 is not started. Run 37897676407 at 2dbfc2ba3117d1924cceca40d4dd57e04078265a validated the Stage 1 repair: Node 1744/1744, frontend 746/746, progress 20/20, existing 22/16/31/41 scenarios and browser 11/11 plus 38/38 passed. Rust/native/dependency jobs succeeded. Only actual WebView file/both rendering timed out; closeout correctly failed. The old artifact lacked per-check DOM failure diagnostics, so the precise missing content and causal link remain unknown. Source review identified a deterministic interrupted-enhancement gap during unchanged DOM reuse: cancelled queued math and busy Mermaid were not re-enqueued. This repair captures prior pending/running state and schedules current-generation jobs for reused nodes, with settled reuse and cancellation ownership preserved. Four controlled regression scenarios and retained hard checks plus partial-state/failure screenshot diagnostics await Windows execution. Current review adds the changed Preview engine fingerprint; All prior 44 paths remain covered, 43 hashes are unchanged and the changed import probe hash is updated with its prior value retained; historical acceptance is preserved. R14.5 is pending; 14.6 is not started. Run 37929409192 at 11d2eb4befff4b06a13e2f4f00075ca1db2d056f passed all seven Windows jobs and every step, Node 1748/1748, frontend 746/746, progress 20/20, all four controlled Preview enhancement regressions, cancellation 22/22, task/request/export 16/31/41 and browser 11/11 plus 38/38. Digest-checked exact-commit WebView and final closeout artifacts passed all eight import-chain scenarios and four six-check render snapshots, including the previously failing file/both path. The old failure had no per-check snapshot, so its precise missing predicate or sole cause is not retroactively confirmed. R14.5 is formally accepted; both failed attempts and their repairs are preserved. This closeout changes documentation only; all 45 current fingerprints, production, tests, workflow and historical acceptance remain unchanged. 14.6 is not started; rendered-format findings and new A10 low-risk disposition remain open. R14.5 documentation closeout 45bcdd14debf2ab030df66f44e6588d29915a440 passed all seven Windows jobs and steps in run37931528219. User requested finish05/start06. R14.6 replaces the complete classic body builder with a public scoped Document Builder, synchronized readonly Preview capture, explicit model snapshot fallback and safe DOM materialization. All HTML/Word/PDF/Image body callers migrate; cancellation, stale document/version/reset, errors and independent frame disposal are covered by new contracts and actual built-app probes. Historical findings and tests retain purpose with explicit new behavior mappings. F01/F02 and remaining F04 enhancer/print/image gaps plus A10 remain received; no complete enhanced-format acceptance is claimed. Current source coverage grows from45 to47 with old paths retained and changed fingerprints preserved separately. R14.6 awaits its own exact-commit Windows admission; 14.7 has not started. R14.6 first attempt ccef6988/run37935424278 failed only three built-app scenes and consequential closeout; all1771 recursive Node tests,766 frontend tests,20 builder contracts and five other Windows jobs passed. Source review confirms the missing escapeHtml title binding masked by the VM and the opaque-origin/page-only built-app asset host, so repair owns title escaping, removes VM injection and uses an actual same-origin loopback server with retained failure artifacts. All old scenarios and current47 risk paths remain; only the export caller fingerprint changes. New Windows admission is pending; R14.6 is not accepted. R14.6 second attempt4d5831e/run37943920538 passed all prior three export failures, including18 actual text downloads,137 ordered long paragraphs without a full snapshot,138 actual Worker blocks in48/96/138 batches and first-batch cancellation followed by a complete next build. Recursive Node1776/1776, frontend771/771, export43/43 and builder20/20 passed; only two cumulative theme probes failed and closeout correctly blocked. Actual classic Settings listener applies hybrid layout on theme-only events, clearing the populated Preview; missing finally cleanup leaves dark theme for the second probe. Repair makes legacy effects depend on changed fields, retains original identity assertions and adds actual-listener regressions plus native Preview readiness and finally cleanup. All47 current risk paths and past acceptance/failures remain; only core.js fingerprint changes. Separate existing Editor metrics console error is recorded open, outside this confirmed theme/Builder failure chain. R14.6 remains unaccepted. R14.6 third attempt a3dadd6/run37955921182 passed browser11/11 plus39/39, export43/43, builder20/20 and production build. All prior real export and theme failures pass. One added Settings test uses unsupported en-US instead of canonical en, causing Settings4/5, frontend775/776 and recursive1780/1781; closeout correctly blocks. Only its input and expected stored locale change to en. Production, workflow, all47 fingerprints and assertions are preserved; R14.6 remains unaccepted and14.7 not started. R14.6 accepted at1f49956/run37958151064: all seven Windows jobs/steps pass, Node1781/1781, frontend776/776, builder20/20, Settings5/5, export43/43 and browser11/11 plus39/39. Digest-checked closeout and frontend archives match the exact commit and all47 current source fingerprints; native Worker long-body/no-snapshot/cancel recovery and theme identities pass. All three failures/repairs remain. Documentation-only acceptance update; 14.7 not started and received format/A10/Editor findings remain open. R14.6 documentation closeout atf8d2312/run37961049857 passed all seven jobs and every execution step; formal implementation acceptance stays1f49956. User requested finish06/start07. R14.7 routes all four rendered formats through public batched task/code/math/Mermaid enhancement and removes retired enhancement globals. Builder owns immutable origin context; enhancement guards document/version, task/body replacement and independent disposal, rejecting late Mermaid commits. Separately reviewed A10 compatibility patch pins KaTeX0.18.2 with a transitive override; Mermaid11.16.1 and every other lock package stay unchanged, metadata npm audit reports zero advisories. Public math wrapper rejects inherited trust. All original fixtures, scenario purposes and historical acceptance/failures remain. Current risk coverage grows47 to49, six prior fingerprints recorded separately. Actual renderer/security/export and cumulative Windows evidence is pending, so14.7 and A10 final format closure are not accepted;14.8 not started. R14.7 first attempta8b8302/run37967189292 passed enhancement27/27,builder21/21,export43/43,contract browser11/11 and actual app42/42 plus build and four independent Windows jobs. Security5/6,frontend809/810,recursive1814/1815 fail only because an inherited macro is correctly rejected with ParseError/No function handler while the test demands Undefined control sequence. Exact tagged source confirms own-property namespace checks and the alternate parser diagnostic. Test-only repair preserves the six scenarios and requires typed rejection,zero inherited payload in error markup and a legitimate own macro positive control. Digest-checked archives verify all18 text downloads,enhanced print body,actual1080x2563 PNG,40-node cancel/rebuild and stale/public-math probes. Visual PNG also shows extra math text, explicitly received by14.8/14.16 with cause pending. All49 fingerprints,production,dependencies,workflow,fixtures and historical acceptance remain unchanged;R14.7 and A10 are not accepted. Subsequent2026-10-10 acceptance supersedes the preceding07 pending status: c532cd1/run38021008368 all seven jobs/all executed steps passed, real security6/6/enhancement27/27 and cumulative1815/1815 accepted. User requests07 closeout and08; one shared style owner and scoped port replace all four content-style paths, explicit locked KaTeX CSS fixes missing canonical presentation, PNG auxiliary hiding is raster-only.21 defined style scenarios plus3 actual-browser cases;Current52 risk fingerprints include3 new sources. Repaired PNG pixels and08 cumulativeWindows acceptance remain pending;original07 observed image defect and14.10/11/12/16/A10 complete format gates and separate Editor metrics remain open. R14.8 first attemptb9a565d/run38057924490 has four successful jobs, frontend831/831 and styles21/21, browser11/11 and44/45. Isolated HTML/Word and actual light/dark1080x2355 zero-diff PNG with525252-pixel positive control passed; both images visually inspected. Preview4/hybrid0 is a test selector/layout error including hidden image staging. Native WebView fails before session/any assertion with No window and app.start-only logs; underlying cause remains undetermined. Test-only repair scopes actual both/Hybrid roots and preserves strict two formulas/live identities/clipping. Startup owner records both attempts, verifies host stop, never retries assertions, and permits one fresh process only for missing-window startup while alive.12 new lifecycle scenarios awaitWindows. All52 production risk hashes, dependencies, frozen model/storage, original fixtures and earlier acceptance/failures are unchanged.14.8 is not accepted;14.9 not started. R14.8 subsequent exact repair22cbd68/run38072508148 all seven jobs/steps succeed;1848 recursive Node,843 frontend,21 styles,12 startup lifecycle,11+45 browsers,real8-chain and finalaccepted=true verified. Four downloaded ZIP SHA256 match exact commit; both actual1080x2355 light/dark images visually inspected,zero reference pixel diff and525252 positive control;true Preview/Hybrid two-node identity/accessibility passes. First no-window underlying cause remains undetermined. User requests finish08/start09. Public raw Markdown owner replaces active/context snapshot/read/download orchestration and uses existing accepted Platform safe writer/browser URL cleanup without rendering. Immutable shared names/directories,document generation/version/identity and task cancellation/locking protect all waits;independent destroy suppresses late results.30 defined contracts plus3 real-browser scenes retain all prior scenario purposes and fixtures. Current54 risk paths preserve all52 earlier paths and record changed hashes.09 awaits exact-commit Windows;complete offline formats/A10,printing/image/file-writer receivers and unrelatedEditor finding stay open. R14.9 first exact-head run38075521977 at135f431 passed1878/1878 recursive Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and five other direct Windows jobs;built-app47/48 failed solely because its inactive test confused raw creation input with the stored Documents title. The final aggregator correctly rejected browser-app.log. Repair explicitly asserts input,created/stored title and actual download and adds three exact name rows;all48 built-app cases,31 request cases,30 Markdown cases,original fixtures,production,workflow and previous acceptance history are preserved. R14.9 remains pending its repaired-head Windows validation;14.10 is not started. R14.9 repair637091b passed all seven Windows jobs and execution steps in run38107902440;1878/1878 Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and48/48 actual app probes. Four archive SHA-256 digests and same-commit evidence are checked,including exact0/76/690000-byte raw outputs,inactive record title/state and stale first0/next1 publication. First failed run38075521977 and its repair remain in accepted history. R14.9 formally closes;user requests14.10 on the same branch. Current HTML migration removes the old template CDN/private scripts/direct Blob,uses public complete body/enhancement/shared CSS and lazy embedded locked fonts,retains all48 original probes and adds3 offline/full-body/stale-publication probes plus36 contracts. Authored image/link URLs retain existing policy,no dependency/budget/permission widening;R14.10 awaits its exact-head Windows run and14.11 is not started. R14.10 first run38110755648 at40349cb passed actual unmodified offline HTML/font/math/SVG and build, but four cancellation predicates expected user instead of existing cancelled and two actual output probes queried absent markdown-body.1910/1914 recursive,905/909 frontend,32/36 HTML and49/51 actual app;four other independent Windows jobs succeeded;aggregate correctly rejects. Repair changes two test files only,strictly asserts cancelled and actual body.export-document[data-export-format=html],retains every36/51 case and full-body/stale-output/ownership/disposal/admission checks. Production59 risk hashes,dependencies,workflow,original fixtures and prior history remain unchanged;10 awaits repaired exact head,11 not started. R14.10 repair00930e0/run38135455053 passed all seven Windows jobs/steps,1914 recursive Node,909 frontend,36 HTML and11+51 browser probes,Rust281/actual8 import and finalaccepted=true. Four archive SHA256/exact commit match;20offline fonts,450024-character body and stale first0/next1 evidence verified.10 closes with first failure/repair retained. User starts11 on samebranch. Accepted HTML lifecycle and passive template are extracted to two shared owners;fixed Word/HTML factories retain public capability boundaries,Word reuses original Builder/Enhancer/Styles/20fonts/Platform and removes classic template/downloader/text-save/escape authority.29Word contracts plus3 table-driven actual Word probes keep allHTML36 and previous51 cases. Existing HTML .doc container retained;browser evidence is not actual Microsoft Word compatibility validation.64risk paths preserve all59 predecessors and536module inventory preserves531rows;dependencies,budget,fixtures and historicalroot/acceptance preserved.11awaits new exacthead Windows;12notstarted and overallA10/futureformat/Editor receivers remain. R14.11 exact6d0f822/run38146793150 seven jobs/all steps,1943 Node/938 frontend/29 Word/54 actual cases and four digests accepted. R14.12 isolated printing implemented; new33 contracts/3 actual cases pending exact-head Windows; no native dialog/PDF save proof or overall A10 closure. R14.12 first da4c309/run38155745041 passed33 PDF/971 frontend but1975 of1976 recursive and56 of57 actual;undefined migration value blocked three guards and absent virtualEditor.root stopped the four-layout probe before print. Four artifact SHA-256 checked; aggregate accepted=false. Two test/fixture repairs use established retain and actual connected .cm-content after stable focus, retaining every33/57 purpose/identity/resource/disposal gate. Production67 fingerprints,workflow,dependencies and accepted history unchanged. Rust formatting skipped is not counted passed.12 pending repaired Windows,13 not started. R14.12 second3956c07/run38157286512 passes1976 recursive/971 frontend/33 PDF/five direct jobs including formatting;actual56of57 fails only focusRestored. All four JSON rows independently preserve full PDF20font/math/MathML/SVG/task/code resources,root/child identity,layout/selection/scroll and frame/task cleanup,but old focus identity/timing diagnostics absent. Probe used hidden filename and sampled before scheduled ModalShell close restoration;repair establishes actual visible button focus and waits original double-frame contract,keeps strict same-focus assertion and adds phase diagnostics/progress closure. No product67 fingerprints,inventory539,workflow,dependency or accepted history changes. Four archive digests verified;aggregate accepted=false;12awaits new Windows,13notstarted. R14.12 repaired0ea72e2/run38190752844 passes every seven job/step,1976 Node/971 frontend/33 PDF/57 actual and finalaccepted=true;four digests and four phase focus/resource/identity rows verified. Both failed attempts/repairs remain accepted history. User starts14.13 on samebranch. One ratio table and pure numeric geometry with reversible CSS leases replace classic inline layout;33 contracts and2 real PNG scenes retain all57/old pixel controls.70 reviewed paths preserve67 predecessors,542 inventory preserves539rows;no dependencies/frozen model/workflow gate weakening.13 pending exact-head Windows,14notstarted and overallA10 image handoff remains.",
-    "priorImplementationWindowsRun": 38190752844,
+    "conclusion": "Reviewed direct Menu/Document UI to Import-owned DOM and ModalShell, locale updates, input and close cancellation, duplicate ownership, constructor rollback and complete disposal despite disposer errors. Four retired source fingerprints are retained in removedReviewedSources; no archived R12 source coverage was removed. No changes to extraction/conversion, frozen model, native fetch policy, dependency options, data formats or CSP/IPC gates. Historical R12 acceptance is unchanged. R13.13 A03/A05 complete-chain acceptance is recorded separately; R13.14 subsequently passed exact-commit Windows validation; currentStageAcceptance records the formal closure. KaTeX prototype-pollution advisory remains a new unresolved low finding and A10 stage closure is not claimed. Run 37740940984 passed the actual owned-clipper browser lifecycle, built-app browser and real Windows WebView chain, Rust, native and dependency jobs. Two retained contracts still counted only the retired template: 45 versus 47 sprite references, and 101 versus 111 template translation bindings. This repair accounts for the two icons and ten translation bindings in the owned Import view while preserving totals 47 and 113 including Help. Actual browser assertions now cover both icon hrefs and every text/placeholder translation before and after locale changes. Production sources, reviewedSources fingerprints and historical acceptance remain unchanged; no assertion skips or admission gate changes. Run 37751356061 at 9c62844a349fe9dd60cf911676dbeeabb2d535d8 passed all seven jobs and all execution steps, including 1614/1614 recursive Node tests, actual clipper icon/translation and lifecycle assertions, real Windows WebView import/security evidence and final same-commit aggregation. R13.14 is accepted. The current npm high-threshold audit still reports two low KaTeX/Mermaid findings; A10 and overall R13 closure remain pending. This closeout changes documentation only; current fingerprints, production and all tests remain unchanged. R13.14 closeout documentation commit 4340398e220e729ae7c5912cbdfbc20513031ce4 also passed all seven Windows jobs and steps in run 37792105001. User subsequently requested R14-01. Current R14.1 changes only fixed export inputs, isolated historical algorithm contracts, actual built-app failure/presentation controls and workflow/documentation routing. Actual rendered exports still fail on retired previewWorkerClient; R14-F04 requires public Preview/model/presentation migration. A10 is explicitly received before 14.7 acceptance, not fixed or silently waived. Current R14.1 awaits its own exact-commit Windows validation. R14.1 first run 37799043386 at 734ca2c193534a8b4fae47ccf867d81929cce039 passed actual browser 33/33 including four export probes, real Windows WebView, native and dependency jobs, but fourteen old workflow branch assertions and two desktop preferred-name fixtures failed. This repair preserves every scenario and hard gate, separates dialog inputs from browser names and awaits new Windows validation. Run 37801667677 at 7d0fd6aa09a78cb31188e8e628c6c1194d3c9a0f passed all seven jobs and execution steps, recursive Node 1655/1655 and browser 11/11 plus 33/33; R14.1 is formally accepted. User requested R14.2. Current review covers the pure request policy, scoped lifecycle and document identity checks, all classic caller validation before side effects, immutable asynchronous option snapshots and explicit naming mappings. Model/dependency/native/storage contracts and historical acceptance are unchanged; rendering defects and A10 remain open. R14.2 awaits exact-commit Windows validation. Run 37807608820 at b85f74cfa6766407de3f72b193a349e87e7f606f passed all seven jobs and execution steps, recursive Node 1686/1686, frontend 688/688, request 31/31, characterization 41/41 and browser 11/11 plus 34/34. R14.2 is formally accepted. User requested R14.3. Current review covers one task/progress/cancellation/phase authority, readonly handles/snapshots, scoped command and subscription disposal, stale caller guards before write/DOM publication, opening rollback and closing/pagehide failures. Previous source evidence and acceptance are preserved in stage histories; frozen model, native command, dependency and persistence contracts remain unchanged. Rendered-format findings and A10 are still open; R14.3 awaits exact-commit Windows validation. Run 37818046855 at 751f012f8aab277d7b7dbcbe26b2cff0f8801ff2 passed all seven jobs and steps, Node 1702/1702, frontend 704/704, task 16/16, request 31/31, characterization 41/41 and browser 11/11 plus 36/36. R14.3 is formally accepted; user requested R14.4. Task ownership moves into the task directory required by the taskbook; retired source fingerprint is recorded separately. Cancellation tokens read the same owner, release frame/library/enhancement/image/dialog waits, consume late errors and detach image callbacks. Actual file/PNG/print submission is explicitly locked; already submitted system operations cannot be revoked. UI sends cancel only. Model, dependency, native and persistence contracts plus historical acceptance remain unchanged. R14.4 awaits exact-commit Windows validation; F01/F02/F04, complete naming outputs and A10 stay open. Run 37824900026 at 0e09d62ec545d7d70d33d67175b1c9fbe4b31c70 passed cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; WebView, native and dependency jobs passed. The safe-writer targeted step failed 17/18 because parallel test fixtures used the same PID and clock value, causing Windows AlreadyExists before any write. Later full Rust success does not supersede the failed step; closeout correctly rejected the commit. Only the test fixture allocator now adds an atomic sequence and bounded exclusive-create collision handling. The retained concurrent-save scenario forces a shared clock value and a pre-existing directory, checks isolation and ownership, then runs the original eight actual writes. All 18 scenarios, production fingerprints, workflow gates and historical acceptance remain unchanged. R14.4 awaits revalidation; 14.5 is not started. Run 37883007228 at e050ff4bb1e5f78e960344031d229cba336e8662 passed the safe-writer 18/18 including forced equal-clock fixture ownership, full Rust 269 plus integration 5/1/6, Clippy/check, cancellation 22/22, Node 1724/1724, frontend 726/726 and browser 11/11 plus 37/37; other independent Windows jobs passed. Only the Rust formatting step failed on two new assertion layouts, repeated in the formatter log by module traversal. Closeout correctly rejected it. Current repair exactly applies the complete CI rustfmt diff; source is identical after removing whitespace. Local formatter runtime is incomplete, so full formatter and cumulative Windows admission remain pending; historical acceptance and all production fingerprints are unchanged. Run 37886068643 at f631d2639b811ab6db071c08edf26fcbb75c59ce passed all seven Windows jobs and every step, including safe-writer 18/18, Rust format, cancellation 22/22, Node 1724/1724, frontend 726/726 and actual browser 11/11 plus 37/37. R14.4 is accepted; both failed attempts and test-only repairs remain recorded. User requested R14.5. Current review covers the readonly Progress Store over one task authority, safe text-only DOM view, direct ModalShell focus/visibility, guarded cancellation button, end-state reset and independent pagehide cleanup. Classic progress subscription, inline cancel global and compatibility progress registration are removed. Existing cancellation/task/characterization scenarios are retained through the real new store/view composition; a test-only ModalShell fault adapter preserves open/close error injection. Rendered format findings and A10 remain open; R14.5 awaits its own exact-commit Windows validation. Run 37890617533 at 2bbd7733b9c14b4639cf64bde04c21840a7b449d passed progress 20/20, cancellation 22/22, task 16/16, request 31/31, characterization 41/41, browser 11/11 plus 38/38 and Rust/native/WebView/dependency jobs. Node 1743/1744 and frontend 745/746 failed solely because the Stage 1 current-baseline assertion still expected 33 inline handlers after the progress handler was removed, leaving 32. Closeout correctly blocked it. Repair replaces that stale total with exact path/attribute/handler/count equality and explicit retired-handler proof; all historical handoff and product scenarios, production fingerprints and admission gates remain unchanged. R14.5 remains pending; 14.6 is not started. Run 37897676407 at 2dbfc2ba3117d1924cceca40d4dd57e04078265a validated the Stage 1 repair: Node 1744/1744, frontend 746/746, progress 20/20, existing 22/16/31/41 scenarios and browser 11/11 plus 38/38 passed. Rust/native/dependency jobs succeeded. Only actual WebView file/both rendering timed out; closeout correctly failed. The old artifact lacked per-check DOM failure diagnostics, so the precise missing content and causal link remain unknown. Source review identified a deterministic interrupted-enhancement gap during unchanged DOM reuse: cancelled queued math and busy Mermaid were not re-enqueued. This repair captures prior pending/running state and schedules current-generation jobs for reused nodes, with settled reuse and cancellation ownership preserved. Four controlled regression scenarios and retained hard checks plus partial-state/failure screenshot diagnostics await Windows execution. Current review adds the changed Preview engine fingerprint; All prior 44 paths remain covered, 43 hashes are unchanged and the changed import probe hash is updated with its prior value retained; historical acceptance is preserved. R14.5 is pending; 14.6 is not started. Run 37929409192 at 11d2eb4befff4b06a13e2f4f00075ca1db2d056f passed all seven Windows jobs and every step, Node 1748/1748, frontend 746/746, progress 20/20, all four controlled Preview enhancement regressions, cancellation 22/22, task/request/export 16/31/41 and browser 11/11 plus 38/38. Digest-checked exact-commit WebView and final closeout artifacts passed all eight import-chain scenarios and four six-check render snapshots, including the previously failing file/both path. The old failure had no per-check snapshot, so its precise missing predicate or sole cause is not retroactively confirmed. R14.5 is formally accepted; both failed attempts and their repairs are preserved. This closeout changes documentation only; all 45 current fingerprints, production, tests, workflow and historical acceptance remain unchanged. 14.6 is not started; rendered-format findings and new A10 low-risk disposition remain open. R14.5 documentation closeout 45bcdd14debf2ab030df66f44e6588d29915a440 passed all seven Windows jobs and steps in run37931528219. User requested finish05/start06. R14.6 replaces the complete classic body builder with a public scoped Document Builder, synchronized readonly Preview capture, explicit model snapshot fallback and safe DOM materialization. All HTML/Word/PDF/Image body callers migrate; cancellation, stale document/version/reset, errors and independent frame disposal are covered by new contracts and actual built-app probes. Historical findings and tests retain purpose with explicit new behavior mappings. F01/F02 and remaining F04 enhancer/print/image gaps plus A10 remain received; no complete enhanced-format acceptance is claimed. Current source coverage grows from45 to47 with old paths retained and changed fingerprints preserved separately. R14.6 awaits its own exact-commit Windows admission; 14.7 has not started. R14.6 first attempt ccef6988/run37935424278 failed only three built-app scenes and consequential closeout; all1771 recursive Node tests,766 frontend tests,20 builder contracts and five other Windows jobs passed. Source review confirms the missing escapeHtml title binding masked by the VM and the opaque-origin/page-only built-app asset host, so repair owns title escaping, removes VM injection and uses an actual same-origin loopback server with retained failure artifacts. All old scenarios and current47 risk paths remain; only the export caller fingerprint changes. New Windows admission is pending; R14.6 is not accepted. R14.6 second attempt4d5831e/run37943920538 passed all prior three export failures, including18 actual text downloads,137 ordered long paragraphs without a full snapshot,138 actual Worker blocks in48/96/138 batches and first-batch cancellation followed by a complete next build. Recursive Node1776/1776, frontend771/771, export43/43 and builder20/20 passed; only two cumulative theme probes failed and closeout correctly blocked. Actual classic Settings listener applies hybrid layout on theme-only events, clearing the populated Preview; missing finally cleanup leaves dark theme for the second probe. Repair makes legacy effects depend on changed fields, retains original identity assertions and adds actual-listener regressions plus native Preview readiness and finally cleanup. All47 current risk paths and past acceptance/failures remain; only core.js fingerprint changes. Separate existing Editor metrics console error is recorded open, outside this confirmed theme/Builder failure chain. R14.6 remains unaccepted. R14.6 third attempt a3dadd6/run37955921182 passed browser11/11 plus39/39, export43/43, builder20/20 and production build. All prior real export and theme failures pass. One added Settings test uses unsupported en-US instead of canonical en, causing Settings4/5, frontend775/776 and recursive1780/1781; closeout correctly blocks. Only its input and expected stored locale change to en. Production, workflow, all47 fingerprints and assertions are preserved; R14.6 remains unaccepted and14.7 not started. R14.6 accepted at1f49956/run37958151064: all seven Windows jobs/steps pass, Node1781/1781, frontend776/776, builder20/20, Settings5/5, export43/43 and browser11/11 plus39/39. Digest-checked closeout and frontend archives match the exact commit and all47 current source fingerprints; native Worker long-body/no-snapshot/cancel recovery and theme identities pass. All three failures/repairs remain. Documentation-only acceptance update; 14.7 not started and received format/A10/Editor findings remain open. R14.6 documentation closeout atf8d2312/run37961049857 passed all seven jobs and every execution step; formal implementation acceptance stays1f49956. User requested finish06/start07. R14.7 routes all four rendered formats through public batched task/code/math/Mermaid enhancement and removes retired enhancement globals. Builder owns immutable origin context; enhancement guards document/version, task/body replacement and independent disposal, rejecting late Mermaid commits. Separately reviewed A10 compatibility patch pins KaTeX0.18.2 with a transitive override; Mermaid11.16.1 and every other lock package stay unchanged, metadata npm audit reports zero advisories. Public math wrapper rejects inherited trust. All original fixtures, scenario purposes and historical acceptance/failures remain. Current risk coverage grows47 to49, six prior fingerprints recorded separately. Actual renderer/security/export and cumulative Windows evidence is pending, so14.7 and A10 final format closure are not accepted;14.8 not started. R14.7 first attempta8b8302/run37967189292 passed enhancement27/27,builder21/21,export43/43,contract browser11/11 and actual app42/42 plus build and four independent Windows jobs. Security5/6,frontend809/810,recursive1814/1815 fail only because an inherited macro is correctly rejected with ParseError/No function handler while the test demands Undefined control sequence. Exact tagged source confirms own-property namespace checks and the alternate parser diagnostic. Test-only repair preserves the six scenarios and requires typed rejection,zero inherited payload in error markup and a legitimate own macro positive control. Digest-checked archives verify all18 text downloads,enhanced print body,actual1080x2563 PNG,40-node cancel/rebuild and stale/public-math probes. Visual PNG also shows extra math text, explicitly received by14.8/14.16 with cause pending. All49 fingerprints,production,dependencies,workflow,fixtures and historical acceptance remain unchanged;R14.7 and A10 are not accepted. Subsequent2026-10-10 acceptance supersedes the preceding07 pending status: c532cd1/run38021008368 all seven jobs/all executed steps passed, real security6/6/enhancement27/27 and cumulative1815/1815 accepted. User requests07 closeout and08; one shared style owner and scoped port replace all four content-style paths, explicit locked KaTeX CSS fixes missing canonical presentation, PNG auxiliary hiding is raster-only.21 defined style scenarios plus3 actual-browser cases;Current52 risk fingerprints include3 new sources. Repaired PNG pixels and08 cumulativeWindows acceptance remain pending;original07 observed image defect and14.10/11/12/16/A10 complete format gates and separate Editor metrics remain open. R14.8 first attemptb9a565d/run38057924490 has four successful jobs, frontend831/831 and styles21/21, browser11/11 and44/45. Isolated HTML/Word and actual light/dark1080x2355 zero-diff PNG with525252-pixel positive control passed; both images visually inspected. Preview4/hybrid0 is a test selector/layout error including hidden image staging. Native WebView fails before session/any assertion with No window and app.start-only logs; underlying cause remains undetermined. Test-only repair scopes actual both/Hybrid roots and preserves strict two formulas/live identities/clipping. Startup owner records both attempts, verifies host stop, never retries assertions, and permits one fresh process only for missing-window startup while alive.12 new lifecycle scenarios awaitWindows. All52 production risk hashes, dependencies, frozen model/storage, original fixtures and earlier acceptance/failures are unchanged.14.8 is not accepted;14.9 not started. R14.8 subsequent exact repair22cbd68/run38072508148 all seven jobs/steps succeed;1848 recursive Node,843 frontend,21 styles,12 startup lifecycle,11+45 browsers,real8-chain and finalaccepted=true verified. Four downloaded ZIP SHA256 match exact commit; both actual1080x2355 light/dark images visually inspected,zero reference pixel diff and525252 positive control;true Preview/Hybrid two-node identity/accessibility passes. First no-window underlying cause remains undetermined. User requests finish08/start09. Public raw Markdown owner replaces active/context snapshot/read/download orchestration and uses existing accepted Platform safe writer/browser URL cleanup without rendering. Immutable shared names/directories,document generation/version/identity and task cancellation/locking protect all waits;independent destroy suppresses late results.30 defined contracts plus3 real-browser scenes retain all prior scenario purposes and fixtures. Current54 risk paths preserve all52 earlier paths and record changed hashes.09 awaits exact-commit Windows;complete offline formats/A10,printing/image/file-writer receivers and unrelatedEditor finding stay open. R14.9 first exact-head run38075521977 at135f431 passed1878/1878 recursive Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and five other direct Windows jobs;built-app47/48 failed solely because its inactive test confused raw creation input with the stored Documents title. The final aggregator correctly rejected browser-app.log. Repair explicitly asserts input,created/stored title and actual download and adds three exact name rows;all48 built-app cases,31 request cases,30 Markdown cases,original fixtures,production,workflow and previous acceptance history are preserved. R14.9 remains pending its repaired-head Windows validation;14.10 is not started. R14.9 repair637091b passed all seven Windows jobs and execution steps in run38107902440;1878/1878 Node,873/873 frontend,30/30 Markdown,11/11 browser contracts and48/48 actual app probes. Four archive SHA-256 digests and same-commit evidence are checked,including exact0/76/690000-byte raw outputs,inactive record title/state and stale first0/next1 publication. First failed run38075521977 and its repair remain in accepted history. R14.9 formally closes;user requests14.10 on the same branch. Current HTML migration removes the old template CDN/private scripts/direct Blob,uses public complete body/enhancement/shared CSS and lazy embedded locked fonts,retains all48 original probes and adds3 offline/full-body/stale-publication probes plus36 contracts. Authored image/link URLs retain existing policy,no dependency/budget/permission widening;R14.10 awaits its exact-head Windows run and14.11 is not started. R14.10 first run38110755648 at40349cb passed actual unmodified offline HTML/font/math/SVG and build, but four cancellation predicates expected user instead of existing cancelled and two actual output probes queried absent markdown-body.1910/1914 recursive,905/909 frontend,32/36 HTML and49/51 actual app;four other independent Windows jobs succeeded;aggregate correctly rejects. Repair changes two test files only,strictly asserts cancelled and actual body.export-document[data-export-format=html],retains every36/51 case and full-body/stale-output/ownership/disposal/admission checks. Production59 risk hashes,dependencies,workflow,original fixtures and prior history remain unchanged;10 awaits repaired exact head,11 not started. R14.10 repair00930e0/run38135455053 passed all seven Windows jobs/steps,1914 recursive Node,909 frontend,36 HTML and11+51 browser probes,Rust281/actual8 import and finalaccepted=true. Four archive SHA256/exact commit match;20offline fonts,450024-character body and stale first0/next1 evidence verified.10 closes with first failure/repair retained. User starts11 on samebranch. Accepted HTML lifecycle and passive template are extracted to two shared owners;fixed Word/HTML factories retain public capability boundaries,Word reuses original Builder/Enhancer/Styles/20fonts/Platform and removes classic template/downloader/text-save/escape authority.29Word contracts plus3 table-driven actual Word probes keep allHTML36 and previous51 cases. Existing HTML .doc container retained;browser evidence is not actual Microsoft Word compatibility validation.64risk paths preserve all59 predecessors and536module inventory preserves531rows;dependencies,budget,fixtures and historicalroot/acceptance preserved.11awaits new exacthead Windows;12notstarted and overallA10/futureformat/Editor receivers remain. R14.11 exact6d0f822/run38146793150 seven jobs/all steps,1943 Node/938 frontend/29 Word/54 actual cases and four digests accepted. R14.12 isolated printing implemented; new33 contracts/3 actual cases pending exact-head Windows; no native dialog/PDF save proof or overall A10 closure. R14.12 first da4c309/run38155745041 passed33 PDF/971 frontend but1975 of1976 recursive and56 of57 actual;undefined migration value blocked three guards and absent virtualEditor.root stopped the four-layout probe before print. Four artifact SHA-256 checked; aggregate accepted=false. Two test/fixture repairs use established retain and actual connected .cm-content after stable focus, retaining every33/57 purpose/identity/resource/disposal gate. Production67 fingerprints,workflow,dependencies and accepted history unchanged. Rust formatting skipped is not counted passed.12 pending repaired Windows,13 not started. R14.12 second3956c07/run38157286512 passes1976 recursive/971 frontend/33 PDF/five direct jobs including formatting;actual56of57 fails only focusRestored. All four JSON rows independently preserve full PDF20font/math/MathML/SVG/task/code resources,root/child identity,layout/selection/scroll and frame/task cleanup,but old focus identity/timing diagnostics absent. Probe used hidden filename and sampled before scheduled ModalShell close restoration;repair establishes actual visible button focus and waits original double-frame contract,keeps strict same-focus assertion and adds phase diagnostics/progress closure. No product67 fingerprints,inventory539,workflow,dependency or accepted history changes. Four archive digests verified;aggregate accepted=false;12awaits new Windows,13notstarted. R14.12 repaired0ea72e2/run38190752844 passes every seven job/step,1976 Node/971 frontend/33 PDF/57 actual and finalaccepted=true;four digests and four phase focus/resource/identity rows verified. Both failed attempts/repairs remain accepted history. User starts14.13 on samebranch. One ratio table and pure numeric geometry with reversible CSS leases replace classic inline layout;33 contracts and2 real PNG scenes retain all57/old pixel controls.70 reviewed paths preserve67 predecessors,542 inventory preserves539rows;no dependencies/frozen model/workflow gate weakening.13 pending exact-head Windows,14notstarted and overallA10 image handoff remains. R14.13 f4e5d5e/run38197683019 passes all seven Windows jobs/steps,2009 recursive/1004 frontend/33 layout/59 actual/Rust281 and finalaccepted=true. Four ZIP digests and actual five ratios/rapid replacement/1080x3538 long versus1080x1920 crop/zero differing prefix pixels verified. User starts14.14 on the same branch: one public asset owner and scoped port replaces classic loader; images/dataURLs/CORS/pixels/placeholder/decode/timeouts/progress and late cleanup are scoped there.41 new contracts and2 actual cases defined; all59 predecessor actual names/purposes remain.14.14 awaits exact-head Windows;14.15 unstarted;14.16 A10 image closure remains.",
+    "priorImplementationWindowsRun": 38197683019,
     "priorImplementationWindowsJobs": [
       {
         "id": 114622805817,
@@ -715,686 +719,300 @@
     "implementationWindowsRun": null,
     "implementationWindowsJobs": [],
     "currentStageAcceptance": {
-      "stage": "R14.12",
+      "stage": "R14.13",
       "date": "2026-10-12",
-      "commit": "0ea72e288f336c37ee42fa4fe19f8862ff73271c",
-      "run": 38190752844,
+      "commit": "f4e5d5ed64e27216a0152736ff8d0f21f87f488e",
+      "run": 38197683019,
       "status": "all-seven-Windows-jobs-and-all-steps-passed",
-      "record": "docs/R14-12-DETAILS.md",
-      "recursiveNodeTestsPassed": 1976,
+      "record": "docs/R14-13-DETAILS.md",
+      "recursiveNodeTestsPassed": 2009,
       "recursiveNodeDirectories": 16,
-      "recursiveNodeTestFiles": 338,
-      "frontendTestsPassed": 971,
+      "recursiveNodeTestFiles": 339,
+      "frontendTestsPassed": 1004,
+      "imageLayoutTestsPassed": 33,
       "pdfExporterTestsPassed": 33,
       "wordExporterTestsPassed": 29,
       "htmlExporterTestsPassed": 36,
       "markdownExporterTestsPassed": 30,
       "contractBrowserPassed": 11,
-      "builtAppBrowserPassed": 57,
+      "builtAppBrowserPassed": 59,
       "rustTestsPassed": 281,
       "importChainScenariosPassed": 8,
       "finalExactCommitAdmissionAccepted": true,
       "artifactDigestsChecked": true,
-      "actualIsolatedPdfLayouts": [
-        {
-          "mode": "edit",
-          "layout": "edit",
-          "prints": 1,
-          "printed": {
-            "format": "pdf",
-            "heading": "Export baseline",
-            "math": [
-              {
-                "width": 17.125,
-                "height": 21
-              },
-              {
-                "width": 790,
-                "height": 35.328125
-              }
-            ],
-            "mathml": 2,
-            "diagrams": 1,
-            "task": 1,
-            "code": 4,
-            "fonts": [
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded"
-            ],
-            "scripts": 0,
-            "privateGlobal": "undefined",
-            "color": "rgb(0, 0, 0)",
-            "paper": "rgb(255, 255, 255)",
-            "locked": true,
-            "parentUnscoped": true,
-            "focus": {
-              "tag": "BUTTON",
-              "id": "export-progress-cancel",
-              "themeToggle": false
-            }
-          },
-          "before": {
-            "previewScroll": 990,
-            "editorScroll": 0,
-            "start": 146,
-            "end": 146
-          },
-          "after": {
-            "previewScroll": 990,
-            "editorScroll": 0,
-            "start": 146,
-            "end": 146
-          },
-          "samePreview": true,
-          "sameHybrid": true,
-          "sameView": true,
-          "sameLayout": true,
-          "focusRestored": true,
-          "focusEvidence": {
-            "before": {
-              "tag": "BUTTON",
-              "id": null,
-              "themeToggle": true
-            },
-            "afterCommand": {
-              "tag": "BUTTON",
-              "id": "export-progress-cancel",
-              "themeToggle": false
-            },
-            "afterModalFrame": {
-              "tag": "BUTTON",
-              "id": null,
-              "themeToggle": true
-            }
-          },
-          "progressClosed": true,
-          "removed": true,
-          "released": true,
-          "scoped": true
-        },
-        {
-          "mode": "preview",
-          "layout": "preview",
-          "prints": 1,
-          "printed": {
-            "format": "pdf",
-            "heading": "Export baseline",
-            "math": [
-              {
-                "width": 17.125,
-                "height": 21
-              },
-              {
-                "width": 790,
-                "height": 35.328125
-              }
-            ],
-            "mathml": 2,
-            "diagrams": 1,
-            "task": 1,
-            "code": 4,
-            "fonts": [
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded"
-            ],
-            "scripts": 0,
-            "privateGlobal": "undefined",
-            "color": "rgb(0, 0, 0)",
-            "paper": "rgb(255, 255, 255)",
-            "locked": true,
-            "parentUnscoped": true,
-            "focus": {
-              "tag": "BUTTON",
-              "id": "export-progress-cancel",
-              "themeToggle": false
-            }
-          },
-          "before": {
-            "previewScroll": 0,
-            "editorScroll": 0,
-            "start": 146,
-            "end": 146
-          },
-          "after": {
-            "previewScroll": 0,
-            "editorScroll": 0,
-            "start": 146,
-            "end": 146
-          },
-          "samePreview": true,
-          "sameHybrid": true,
-          "sameView": true,
-          "sameLayout": true,
-          "focusRestored": true,
-          "focusEvidence": {
-            "before": {
-              "tag": "BUTTON",
-              "id": null,
-              "themeToggle": true
-            },
-            "afterCommand": {
-              "tag": "BUTTON",
-              "id": "export-progress-cancel",
-              "themeToggle": false
-            },
-            "afterModalFrame": {
-              "tag": "BUTTON",
-              "id": null,
-              "themeToggle": true
-            }
-          },
-          "progressClosed": true,
-          "removed": true,
-          "released": true,
-          "scoped": true
-        },
-        {
-          "mode": "hybrid",
-          "layout": "hybrid",
-          "prints": 1,
-          "printed": {
-            "format": "pdf",
-            "heading": "Export baseline",
-            "math": [
-              {
-                "width": 17.125,
-                "height": 21
-              },
-              {
-                "width": 790,
-                "height": 35.328125
-              }
-            ],
-            "mathml": 2,
-            "diagrams": 1,
-            "task": 1,
-            "code": 4,
-            "fonts": [
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded"
-            ],
-            "scripts": 0,
-            "privateGlobal": "undefined",
-            "color": "rgb(0, 0, 0)",
-            "paper": "rgb(255, 255, 255)",
-            "locked": true,
-            "parentUnscoped": true,
-            "focus": {
-              "tag": "BUTTON",
-              "id": "export-progress-cancel",
-              "themeToggle": false
-            }
-          },
-          "before": {
-            "previewScroll": 0,
-            "editorScroll": 0,
-            "start": 146,
-            "end": 146
-          },
-          "after": {
-            "previewScroll": 0,
-            "editorScroll": 0,
-            "start": 146,
-            "end": 146
-          },
-          "samePreview": true,
-          "sameHybrid": true,
-          "sameView": true,
-          "sameLayout": true,
-          "focusRestored": true,
-          "focusEvidence": {
-            "before": {
-              "tag": "BUTTON",
-              "id": null,
-              "themeToggle": true
-            },
-            "afterCommand": {
-              "tag": "BUTTON",
-              "id": "export-progress-cancel",
-              "themeToggle": false
-            },
-            "afterModalFrame": {
-              "tag": "BUTTON",
-              "id": null,
-              "themeToggle": true
-            }
-          },
-          "progressClosed": true,
-          "removed": true,
-          "released": true,
-          "scoped": true
-        },
-        {
-          "mode": "both",
-          "layout": "both",
-          "prints": 1,
-          "printed": {
-            "format": "pdf",
-            "heading": "Export baseline",
-            "math": [
-              {
-                "width": 17.125,
-                "height": 21
-              },
-              {
-                "width": 790,
-                "height": 35.328125
-              }
-            ],
-            "mathml": 2,
-            "diagrams": 1,
-            "task": 1,
-            "code": 4,
-            "fonts": [
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded",
-              "loaded"
-            ],
-            "scripts": 0,
-            "privateGlobal": "undefined",
-            "color": "rgb(0, 0, 0)",
-            "paper": "rgb(255, 255, 255)",
-            "locked": true,
-            "parentUnscoped": true,
-            "focus": {
-              "tag": "BUTTON",
-              "id": "export-progress-cancel",
-              "themeToggle": false
-            }
-          },
-          "before": {
-            "previewScroll": 0,
-            "editorScroll": 0,
-            "start": 146,
-            "end": 146
-          },
-          "after": {
-            "previewScroll": 0,
-            "editorScroll": 0,
-            "start": 146,
-            "end": 146
-          },
-          "samePreview": true,
-          "sameHybrid": true,
-          "sameView": true,
-          "sameLayout": true,
-          "focusRestored": true,
-          "focusEvidence": {
-            "before": {
-              "tag": "BUTTON",
-              "id": null,
-              "themeToggle": true
-            },
-            "afterCommand": {
-              "tag": "BUTTON",
-              "id": "export-progress-cancel",
-              "themeToggle": false
-            },
-            "afterModalFrame": {
-              "tag": "BUTTON",
-              "id": null,
-              "themeToggle": true
-            }
-          },
-          "progressClosed": true,
-          "removed": true,
-          "released": true,
-          "scoped": true
-        }
-      ],
-      "actualPrintRecovery": [
-        {
-          "mode": "timeout",
-          "prints": 1,
-          "errors": [],
-          "removed": true,
-          "released": true,
-          "progressClosed": true
-        },
-        {
-          "mode": "failure",
-          "prints": 1,
-          "errors": [
-            "PDF export failed: Error: R14-12 injected print boundary failure"
-          ],
-          "removed": true,
-          "released": true,
-          "progressClosed": true
-        },
-        {
-          "mode": "recovery",
-          "prints": 1,
-          "errors": [],
-          "removed": true,
-          "released": true,
-          "progressClosed": true
-        }
-      ],
-      "actualStalePrint": {
-        "rows": [
-          {
-            "action": "cancel",
-            "prints": 0,
-            "cancelled": true,
-            "released": true,
-            "removed": true
-          },
-          {
-            "action": "changed",
-            "prints": 0,
-            "cancelled": null,
-            "released": true,
-            "removed": true
-          },
-          {
-            "action": "recovery",
-            "prints": 1,
-            "cancelled": null,
-            "released": true,
-            "removed": true
-          }
-        ],
-        "body": "Current printCurrent PDF 原文 😀",
-        "current": true
-      },
-      "actualPagehideDisposal": {
-        "pdfRejected": true,
-        "printCount": 0,
-        "printRemoved": true,
-        "snapshot": {
-          "activeTask": null,
-          "lastTaskId": 67,
-          "destroyed": true
-        },
-        "lastSeen": {
-          "activeTask": null,
-          "lastTaskId": 67,
-          "destroyed": true
-        },
-        "cancelled": true,
-        "phase": "destroyed",
-        "waiting": {
-          "cancelled": true,
-          "reason": "destroyed"
-        },
-        "building": {
-          "cancelled": true,
-          "reason": "destroyed"
-        },
-        "enhancing": {
-          "cancelled": true,
-          "reason": "destroyed"
-        },
-        "interceptedFrames": 1,
-        "lateUpdate": false,
-        "lateLock": false,
-        "lateFinish": false,
-        "stylesRemoved": true,
-        "rejected": true,
-        "cancelledError": true,
-        "markdownRejected": true,
-        "htmlRejected": true,
-        "wordRejected": true,
-        "removed": true,
-        "progressVisible": false,
-        "progressRemoved": true
-      },
-      "nativePrintEvidenceBoundary": "Actual browser print DOM/resources/task/cleanup verified at injected platform boundary; native dialog interaction and user-saved PDF bytes not proved.",
-      "overallA10Closed": false,
-      "jobs": [
-        {
-          "id": 114622805817,
-          "name": "Safe file writes and cumulative Rust hard gates",
-          "conclusion": "success",
-          "failedSteps": []
-        },
-        {
-          "id": 114622805896,
-          "name": "HTML boundary baseline and frontend regression",
-          "conclusion": "success",
-          "failedSteps": []
-        },
-        {
-          "id": 114622805987,
-          "name": "R12-23 official RustSec and Windows dependency graph",
-          "conclusion": "success",
-          "failedSteps": []
-        },
-        {
-          "id": 114622806034,
-          "name": "Native opener compilation and linkage (windows-latest)",
-          "conclusion": "success",
-          "failedSteps": []
-        },
-        {
-          "id": 114622806035,
-          "name": "R13.13 real Windows WebView import chain and R12 security regression",
-          "conclusion": "success",
-          "failedSteps": []
-        },
-        {
-          "id": 114622806065,
-          "name": "All repository Node tests (Windows)",
-          "conclusion": "success",
-          "failedSteps": []
-        },
-        {
-          "id": 114624101886,
-          "name": "R12-24 exact-commit Windows evidence and handoff",
-          "conclusion": "success",
-          "failedSteps": []
-        }
-      ],
       "artifacts": [
         {
-          "id": 11721643163,
-          "name": "r12-24-closeout-0ea72e288f336c37ee42fa4fe19f8862ff73271c-1",
-          "digest": "sha256:840881f4987bd5c73d4b353628b45a56e3c991b9e3b7eba11157c1637b7a7452",
-          "downloadedAndDigestChecked": true
+          "id": 11724551139,
+          "name": "frontend",
+          "digest": "sha256:5fe7fb093f7faea6dbfbd9726119dba3f72fb02045aeff88ed3110eed88e540d"
         },
         {
-          "id": 11721598086,
-          "name": "r12-22-webview-verification-0ea72e288f336c37ee42fa4fe19f8862ff73271c-1",
-          "digest": "sha256:f5acded828fa70bf837b3bae2df215f85efe9c535a872994486ec13ea448d399",
-          "downloadedAndDigestChecked": true
+          "id": 11724136618,
+          "name": "recursive-Node",
+          "digest": "sha256:da8299fd6284c4a6de2a25db95f40e03564d036201a04647b24a2e514ee779bf"
         },
         {
-          "id": 11721373415,
-          "name": "r12-14-frontend-0ea72e288f336c37ee42fa4fe19f8862ff73271c-1",
-          "digest": "sha256:b443d30b40653c1d287a34c6c3ebc39ba8d7114c912c15d33a06e043fbee809b",
-          "downloadedAndDigestChecked": true
+          "id": 11724810842,
+          "name": "Rust",
+          "digest": "sha256:ea0ab4c3cab895dee280d6b9f7d3381a669246f13ce6c0a74312fb08ea0a102d"
         },
         {
-          "id": 11721063958,
-          "name": "repository-tests-windows-0ea72e288f336c37ee42fa4fe19f8862ff73271c-1",
-          "digest": "sha256:52a603db0aee9f47b902630fa4846c4d2be4d2931f7ef842e03466a24cfa5fba",
-          "downloadedAndDigestChecked": true
+          "id": 11724073409,
+          "name": "closeout",
+          "digest": "sha256:94fb10038ed0ec72575d494e6e6e3ed16e7d7b0326e1fd9dfff74d1b45cefee2"
         }
-      ]
+      ],
+      "actualRatioPixels": [
+        {
+          "ratio": "9:16",
+          "width": 1080,
+          "height": 1920,
+          "mode": "pad",
+          "cssWidth": "1080px",
+          "cssHeight": "1920px",
+          "boxSizing": "border-box",
+          "paddingBlock": "43px",
+          "paddingInline": "49px",
+          "fontSize": "30px",
+          "stageWidth": "1080px",
+          "stageHeight": "1920px",
+          "complete": true,
+          "locked": true,
+          "pixelWidth": 1080,
+          "pixelHeight": 1920,
+          "released": true,
+          "samePreview": true,
+          "scoped": true
+        },
+        {
+          "ratio": "4:5",
+          "width": 1080,
+          "height": 1350,
+          "mode": "pad",
+          "cssWidth": "1080px",
+          "cssHeight": "1350px",
+          "boxSizing": "border-box",
+          "paddingBlock": "43px",
+          "paddingInline": "49px",
+          "fontSize": "30px",
+          "stageWidth": "1080px",
+          "stageHeight": "1350px",
+          "complete": true,
+          "locked": true,
+          "pixelWidth": 1080,
+          "pixelHeight": 1350,
+          "released": true,
+          "samePreview": true,
+          "scoped": true
+        },
+        {
+          "ratio": "3:4",
+          "width": 1080,
+          "height": 1440,
+          "mode": "pad",
+          "cssWidth": "1080px",
+          "cssHeight": "1440px",
+          "boxSizing": "border-box",
+          "paddingBlock": "43px",
+          "paddingInline": "49px",
+          "fontSize": "30px",
+          "stageWidth": "1080px",
+          "stageHeight": "1440px",
+          "complete": true,
+          "locked": true,
+          "pixelWidth": 1080,
+          "pixelHeight": 1440,
+          "released": true,
+          "samePreview": true,
+          "scoped": true
+        },
+        {
+          "ratio": "1:1",
+          "width": 1080,
+          "height": 1080,
+          "mode": "pad",
+          "cssWidth": "1080px",
+          "cssHeight": "1080px",
+          "boxSizing": "border-box",
+          "paddingBlock": "43px",
+          "paddingInline": "49px",
+          "fontSize": "30px",
+          "stageWidth": "1080px",
+          "stageHeight": "1080px",
+          "complete": true,
+          "locked": true,
+          "pixelWidth": 1080,
+          "pixelHeight": 1080,
+          "released": true,
+          "samePreview": true,
+          "scoped": true
+        },
+        {
+          "ratio": "16:9",
+          "width": 1920,
+          "height": 1080,
+          "mode": "pad",
+          "cssWidth": "1920px",
+          "cssHeight": "1080px",
+          "boxSizing": "border-box",
+          "paddingBlock": "77px",
+          "paddingInline": "86px",
+          "fontSize": "53px",
+          "stageWidth": "1920px",
+          "stageHeight": "1080px",
+          "complete": true,
+          "locked": true,
+          "pixelWidth": 1920,
+          "pixelHeight": 1080,
+          "released": true,
+          "samePreview": true,
+          "scoped": true
+        },
+        {
+          "ratio": "1:1",
+          "width": 1080,
+          "height": 1080,
+          "mode": "pad",
+          "cssWidth": "1080px",
+          "cssHeight": "1080px",
+          "boxSizing": "border-box",
+          "paddingBlock": "43px",
+          "paddingInline": "49px",
+          "fontSize": "30px",
+          "stageWidth": "1080px",
+          "stageHeight": "1080px",
+          "complete": true,
+          "locked": true,
+          "pixelWidth": 1080,
+          "pixelHeight": 1080,
+          "released": true,
+          "samePreview": true,
+          "scoped": true,
+          "rapidReplaced": true,
+          "rapidEncodes": 1,
+          "activeRatio": "1:1"
+        }
+      ],
+      "actualLongCropPixels": {
+        "rows": [
+          {
+            "cropFit": false,
+            "width": 1080,
+            "height": 3538,
+            "mode": "long",
+            "overflow": "visible",
+            "bodyComplete": true,
+            "paragraphs": 50,
+            "tailBottom": 3433,
+            "pixelWidth": 1080,
+            "pixelHeight": 3538,
+            "released": true
+          },
+          {
+            "cropFit": true,
+            "width": 1080,
+            "height": 1920,
+            "mode": "crop",
+            "overflow": "hidden",
+            "bodyComplete": true,
+            "paragraphs": 50,
+            "tailBottom": 3433,
+            "pixelWidth": 1080,
+            "pixelHeight": 1920,
+            "released": true
+          }
+        ],
+        "differentPixels": 0
+      },
+      "scope": "Public image geometry and CSS lease acceptance only; A10 final image format acceptance remains at14.16.",
+      "windowsJobsPassed": 7,
+      "allWindowsStepsPassed": true
     },
     "currentStageImplementation": {
-      "stage": "R14.13",
-      "baselineCommit": "0ea72e288f336c37ee42fa4fe19f8862ff73271c",
+      "stage": "R14.14",
+      "baselineCommit": "f4e5d5ed64e27216a0152736ff8d0f21f87f488e",
       "branch": "agent/r14-stage",
       "status": "implemented-pending-exact-head-Windows-admission",
-      "record": "docs/R14-13-DETAILS.md",
+      "record": "docs/R14-14-DETAILS.md",
       "productionChanged": true,
       "dependenciesChanged": false,
-      "scope": "One canonical ratio table; pure numeric layout plus reversible CSS variable/mode leases, same-stage replacement and late-lease isolation, wired through existing image preparation/encoding; no duplicated inline geometry authority.",
+      "scope": "Independent image asset preloader, anonymous load and pixels, bounded inline decode/placeholder fallback, existing90-95 progress and every cancellation/stale/disposal path; old resource implementation removed. No new dependency, network privilege or encoder/file migration.",
       "changedSourceFingerprints": [
         {
           "path": "src/main.js",
-          "priorBlobSha": "5887ce34dabbfd0b39f48c4801278f1b4c981cdd",
-          "blobSha": "e8cc4a4be3c207d65b992783b2f0e574482fa0d8"
+          "priorBlobSha": "e8cc4a4be3c207d65b992783b2f0e574482fa0d8",
+          "blobSha": "a69bf09ce6356f9a2264574e836d8f373ac67ffe"
         },
         {
           "path": "public/app/export.js",
-          "priorBlobSha": "5987e1d4bfd3765f492650c5cb3d4363a14f4329",
-          "blobSha": "4fb4e937edfc4f4310c4048080927542bbecbed3"
+          "priorBlobSha": "4fb4e937edfc4f4310c4048080927542bbecbed3",
+          "blobSha": "1414316bd79e9d0025361e49906c9c1bae799b9a"
         },
         {
           "path": "src/features/export/index.js",
-          "priorBlobSha": "89ed9cb66c0a59d71b0365b1e16d1f1fb0530725",
-          "blobSha": "74f1c6ca4bc320daa8afada084fd37a8407b7417"
-        },
-        {
-          "path": "src/features/export/application/export-request.js",
-          "priorBlobSha": "31da9dde6e427f13d91eedd09a67250d11ae0d64",
-          "blobSha": "ad3adb0926b301b1c95bb5a96f8de18b1b7fab23"
-        },
-        {
-          "path": "src/styles/features/export.css",
-          "priorBlobSha": "cb452712595f5f565da0143bff64d6c4cae04629",
-          "blobSha": "5671c2dc7ecaa2b86af4655581c231d86ebab1ef"
+          "priorBlobSha": "74f1c6ca4bc320daa8afada084fd37a8407b7417",
+          "blobSha": "c1e4355857e5ceed6fbe8e40d7a3423e58ed8c5f"
         }
       ],
       "newReviewedSources": [
         {
-          "path": "src/features/export/formats/image/image-ratio-presets.js",
-          "blobSha": "f114e4279cb4761e85442806ea19ab328d68395b"
+          "path": "src/features/export/formats/image/image-asset-preloader.js",
+          "blobSha": "af7106ee9a84fcdb7b4d5d044bbe8a82ed811652"
         },
         {
-          "path": "src/features/export/formats/image/image-export-layout.js",
-          "blobSha": "60920874a67b46c59ce0f147cdf15efd98b07bd7"
-        },
-        {
-          "path": "src/features/export/compatibility/classic-image-layout-port.js",
-          "blobSha": "df2ddca16525d7610466c5a618a0f1fffc7ff4e9"
+          "path": "src/features/export/compatibility/classic-image-asset-port.js",
+          "blobSha": "fd8995d6931684c24ba22f7967dc1d151c8becf8"
         }
       ],
-      "newImageLayoutScenariosDefined": 33,
-      "builtAppScenariosRetained": 57,
+      "newImageAssetScenariosDefined": 41,
+      "builtAppScenariosRetained": 59,
       "newBuiltAppScenariosDefined": 2,
-      "builtAppScenariosDefined": 59,
-      "productionModuleCount": 542,
-      "riskReviewedSourceCount": 70,
+      "builtAppScenariosDefined": 61,
+      "productionModuleCount": 544,
+      "riskReviewedSourceCount": 72,
       "compatibilityMapping": [
         {
-          "prior": "Ratio table in request; classic image orchestration computed padding/font/height and mutated permanent inline geometry; stage height/width remained after capture.",
-          "current": "Same immutable ratio object exported through existing request boundary and used by public numeric layout; scoped CSS owns dimensions/clipping and lease restores all original variables/markers/priorities.",
-          "retained": "Original43 characterization/31 request/21 styles/33 PDF and57 actual cases retained; old stage-height assertion maps to dimensions at real PNG encoding plus released stage. MathML-removal reference remounts public style and layout instead of relying on leftover inline geometry; exact pixel and positive-control checks unchanged."
+          "prior": "Classic anonymous Image loading with cache-busting and original SVG fallback; task cancellation detached callbacks; no bounded loading/decode or inline pixels.",
+          "current": "One public preloader performs anonymous loading and inline conversion, keeps valid data URLs, substitutes the exact same SVG on asset failure/10s timeout, decodes before capture and owns cancellable waits/cleanup.",
+          "retained": "Original43 characterization/31 request/22 cancellation/33 geometry and59 built-app purposes remain; two direct classic preload tests now call the actual scoped asset capability. PNG encoding options/fallback remain, library3.10.0 already skips data URL retrieval."
         }
       ],
-      "actualPixelEvidenceDefined": [
-        "Five actual ratio button PNGs with exact decoded pixel dimensions, padding/font/CSS geometry, encoding lock, complete source and original Preview identity. During actual enhancing progress, a4:5 task is replaced by1:1; old preparation gives zero encodes, one current PNG and clean stage.",
-        "Natural long versus fixed crop actual PNGs preserve complete50-paragraph DOM, tail/clip geometry and identical visible prefix pixels.",
-        "Existing final pagehide also releases an active layout lease and removes/rejects its scoped port."
+      "actualEvidenceDefined": [
+        "Real loopback cross-origin anonymous success, inline PNG, no-CORS,404 and10s stalled image reach real PNG with exact asset/fallback pixels,complete source,scoped cleanup,original Preview identity and no extra CORS fetch in encoding.",
+        "Real public decode cancellation,replacement,document-source invalidation and recovery; original final pagehide includes pending decode and rejected late result."
       ],
       "staticReview": {
         "status": "passed",
-        "javascriptSyntaxFiles": 11,
-        "embeddedBrowserExpressionsCompiled": 35,
-        "sharedCssLiteralsParsed": 5,
-        "layoutCssVariablesValidated": 5,
-        "jsonYamlParsed": true,
-        "relativeLinksChecked": 158,
-        "riskFingerprintsChecked": 70,
-        "priorRiskPathsPreserved": 67,
-        "productionModuleCount": 542,
-        "priorProductionModuleRowsPreserved": 539,
-        "historicalRootAndStageHistoryPrefixesPreserved": true,
-        "prior12ImplementationPreservedWithAcceptance": true,
-        "retainedBuiltAppScenarios": 57,
-        "newBuiltAppScenarios": 2,
-        "builtAppScenariosDefined": 59,
-        "newImageLayoutScenariosDefined": 33,
-        "originalRatioTableAndPublicObjectAuthorityPreserved": true,
-        "classicDirectGeometryRemoved": true,
-        "originalPngAndMathPixelPurposesMapped": true,
-        "sevenWindowsJobsPreservedWithOneTargetedStep": true,
-        "diffWhitespaceCheck": "passed",
-        "productTestsRunLocally": false,
-        "layoutCssParsed": true,
-        "sharedCssLocalTokensVerified": 6,
-        "sameStageReplacementAndLateLeaseIsolationDefined": true,
-        "actualEnhancingPhaseRatioReplacementDefined": true,
-        "protectedTrackedFilesUnchanged": 1270,
         "architectureGate": "passed",
         "legacyRuntimeGate": "passed",
         "generatedFilesGate": "passed",
-        "readmeRecordGate": "passed"
+        "readmeRecordGate": "passed",
+        "javascriptSyntaxFiles": 9,
+        "embeddedBrowserExpressionsCompiled": 37,
+        "jsonYamlParsed": true,
+        "relativeLinksChecked": 165,
+        "placeholderExactBytesVerified": true,
+        "riskFingerprintsChecked": 72,
+        "priorRiskPathsPreserved": 70,
+        "productionModuleCount": 544,
+        "priorProductionModuleRowsPreserved": 542,
+        "historicalRootAndStageHistoryPrefixesPreserved": true,
+        "priorStageSnapshotsPreserved": true,
+        "retainedBuiltAppScenarios": 59,
+        "newBuiltAppScenarios": 2,
+        "builtAppScenariosDefined": 61,
+        "newImageAssetScenariosDefined": 41,
+        "classicPrivatePreloaderRemoved": true,
+        "sevenWindowsJobsPreservedWithOneTargetedStep": true,
+        "diffWhitespaceCheck": "passed",
+        "productTestsRunLocally": false,
+        "protectedTrackedFilesUnchanged": 1277,
+        "limitations": "New product Node tests, build, browser pixel scenarios and Rust validation await exact-head Windows CI."
       },
-      "tools": [
-        "GitHub exact accepted12 seven jobs/all steps, four SHA-256 artifacts and actual phase focus/print JSON",
-        "Context7 dom-to-image-more dimensions; matched locked3.10.0 source width/height clone override and default pixelRatio1; no dependency changes",
-        "Mermaid Chart Chinese implemented request/preset/layout/CSS/enhancement/PNG/disposal diagram"
-      ],
-      "remainingFindings": [
-        "Image asset preload14.14,Data Encoder14.15,final Image Exporter14.16 andUI/legacy removal14.17 retain their current handoffs",
-        "OverallA10 final image chain closure pending later exact-head Windows acceptance",
-        "Native PDF dialog and user-saved bytes remain outside injected print-boundary proof",
-        "Unrelated pre-existing Editor listener finding retains its original receiver"
+      "notClaimed": [
+        "Windows product tests/build/browser/Rust for the new head have not yet run.",
+        "Data encoder14.15,final Image Exporter14.16 and classic UI14.17 are not implemented by this task.",
+        "Overall A10 image acceptance remains pending14.16."
       ]
     },
     "priorStageAcceptance": {
@@ -4630,6 +4248,216 @@
             "downloadedAndDigestChecked": true
           }
         ]
+      },
+      {
+        "stage": "R14.13",
+        "date": "2026-10-12",
+        "commit": "f4e5d5ed64e27216a0152736ff8d0f21f87f488e",
+        "run": 38197683019,
+        "status": "all-seven-Windows-jobs-and-all-steps-passed",
+        "record": "docs/R14-13-DETAILS.md",
+        "recursiveNodeTestsPassed": 2009,
+        "recursiveNodeDirectories": 16,
+        "recursiveNodeTestFiles": 339,
+        "frontendTestsPassed": 1004,
+        "imageLayoutTestsPassed": 33,
+        "pdfExporterTestsPassed": 33,
+        "wordExporterTestsPassed": 29,
+        "htmlExporterTestsPassed": 36,
+        "markdownExporterTestsPassed": 30,
+        "contractBrowserPassed": 11,
+        "builtAppBrowserPassed": 59,
+        "rustTestsPassed": 281,
+        "importChainScenariosPassed": 8,
+        "finalExactCommitAdmissionAccepted": true,
+        "artifactDigestsChecked": true,
+        "artifacts": [
+          {
+            "id": 11724551139,
+            "name": "frontend",
+            "digest": "sha256:5fe7fb093f7faea6dbfbd9726119dba3f72fb02045aeff88ed3110eed88e540d"
+          },
+          {
+            "id": 11724136618,
+            "name": "recursive-Node",
+            "digest": "sha256:da8299fd6284c4a6de2a25db95f40e03564d036201a04647b24a2e514ee779bf"
+          },
+          {
+            "id": 11724810842,
+            "name": "Rust",
+            "digest": "sha256:ea0ab4c3cab895dee280d6b9f7d3381a669246f13ce6c0a74312fb08ea0a102d"
+          },
+          {
+            "id": 11724073409,
+            "name": "closeout",
+            "digest": "sha256:94fb10038ed0ec72575d494e6e6e3ed16e7d7b0326e1fd9dfff74d1b45cefee2"
+          }
+        ],
+        "actualRatioPixels": [
+          {
+            "ratio": "9:16",
+            "width": 1080,
+            "height": 1920,
+            "mode": "pad",
+            "cssWidth": "1080px",
+            "cssHeight": "1920px",
+            "boxSizing": "border-box",
+            "paddingBlock": "43px",
+            "paddingInline": "49px",
+            "fontSize": "30px",
+            "stageWidth": "1080px",
+            "stageHeight": "1920px",
+            "complete": true,
+            "locked": true,
+            "pixelWidth": 1080,
+            "pixelHeight": 1920,
+            "released": true,
+            "samePreview": true,
+            "scoped": true
+          },
+          {
+            "ratio": "4:5",
+            "width": 1080,
+            "height": 1350,
+            "mode": "pad",
+            "cssWidth": "1080px",
+            "cssHeight": "1350px",
+            "boxSizing": "border-box",
+            "paddingBlock": "43px",
+            "paddingInline": "49px",
+            "fontSize": "30px",
+            "stageWidth": "1080px",
+            "stageHeight": "1350px",
+            "complete": true,
+            "locked": true,
+            "pixelWidth": 1080,
+            "pixelHeight": 1350,
+            "released": true,
+            "samePreview": true,
+            "scoped": true
+          },
+          {
+            "ratio": "3:4",
+            "width": 1080,
+            "height": 1440,
+            "mode": "pad",
+            "cssWidth": "1080px",
+            "cssHeight": "1440px",
+            "boxSizing": "border-box",
+            "paddingBlock": "43px",
+            "paddingInline": "49px",
+            "fontSize": "30px",
+            "stageWidth": "1080px",
+            "stageHeight": "1440px",
+            "complete": true,
+            "locked": true,
+            "pixelWidth": 1080,
+            "pixelHeight": 1440,
+            "released": true,
+            "samePreview": true,
+            "scoped": true
+          },
+          {
+            "ratio": "1:1",
+            "width": 1080,
+            "height": 1080,
+            "mode": "pad",
+            "cssWidth": "1080px",
+            "cssHeight": "1080px",
+            "boxSizing": "border-box",
+            "paddingBlock": "43px",
+            "paddingInline": "49px",
+            "fontSize": "30px",
+            "stageWidth": "1080px",
+            "stageHeight": "1080px",
+            "complete": true,
+            "locked": true,
+            "pixelWidth": 1080,
+            "pixelHeight": 1080,
+            "released": true,
+            "samePreview": true,
+            "scoped": true
+          },
+          {
+            "ratio": "16:9",
+            "width": 1920,
+            "height": 1080,
+            "mode": "pad",
+            "cssWidth": "1920px",
+            "cssHeight": "1080px",
+            "boxSizing": "border-box",
+            "paddingBlock": "77px",
+            "paddingInline": "86px",
+            "fontSize": "53px",
+            "stageWidth": "1920px",
+            "stageHeight": "1080px",
+            "complete": true,
+            "locked": true,
+            "pixelWidth": 1920,
+            "pixelHeight": 1080,
+            "released": true,
+            "samePreview": true,
+            "scoped": true
+          },
+          {
+            "ratio": "1:1",
+            "width": 1080,
+            "height": 1080,
+            "mode": "pad",
+            "cssWidth": "1080px",
+            "cssHeight": "1080px",
+            "boxSizing": "border-box",
+            "paddingBlock": "43px",
+            "paddingInline": "49px",
+            "fontSize": "30px",
+            "stageWidth": "1080px",
+            "stageHeight": "1080px",
+            "complete": true,
+            "locked": true,
+            "pixelWidth": 1080,
+            "pixelHeight": 1080,
+            "released": true,
+            "samePreview": true,
+            "scoped": true,
+            "rapidReplaced": true,
+            "rapidEncodes": 1,
+            "activeRatio": "1:1"
+          }
+        ],
+        "actualLongCropPixels": {
+          "rows": [
+            {
+              "cropFit": false,
+              "width": 1080,
+              "height": 3538,
+              "mode": "long",
+              "overflow": "visible",
+              "bodyComplete": true,
+              "paragraphs": 50,
+              "tailBottom": 3433,
+              "pixelWidth": 1080,
+              "pixelHeight": 3538,
+              "released": true
+            },
+            {
+              "cropFit": true,
+              "width": 1080,
+              "height": 1920,
+              "mode": "crop",
+              "overflow": "hidden",
+              "bodyComplete": true,
+              "paragraphs": 50,
+              "tailBottom": 3433,
+              "pixelWidth": 1080,
+              "pixelHeight": 1920,
+              "released": true
+            }
+          ],
+          "differentPixels": 0
+        },
+        "scope": "Public image geometry and CSS lease acceptance only; A10 final image format acceptance remains at14.16.",
+        "windowsJobsPassed": 7,
+        "allWindowsStepsPassed": true
       }
     ],
     "stageImplementationHistory": [
@@ -9364,6 +9192,120 @@
             }
           ]
         }
+      },
+      {
+        "stage": "R14.13",
+        "baselineCommit": "0ea72e288f336c37ee42fa4fe19f8862ff73271c",
+        "branch": "agent/r14-stage",
+        "status": "implemented-pending-exact-head-Windows-admission",
+        "record": "docs/R14-13-DETAILS.md",
+        "productionChanged": true,
+        "dependenciesChanged": false,
+        "scope": "One canonical ratio table; pure numeric layout plus reversible CSS variable/mode leases, same-stage replacement and late-lease isolation, wired through existing image preparation/encoding; no duplicated inline geometry authority.",
+        "changedSourceFingerprints": [
+          {
+            "path": "src/main.js",
+            "priorBlobSha": "5887ce34dabbfd0b39f48c4801278f1b4c981cdd",
+            "blobSha": "e8cc4a4be3c207d65b992783b2f0e574482fa0d8"
+          },
+          {
+            "path": "public/app/export.js",
+            "priorBlobSha": "5987e1d4bfd3765f492650c5cb3d4363a14f4329",
+            "blobSha": "4fb4e937edfc4f4310c4048080927542bbecbed3"
+          },
+          {
+            "path": "src/features/export/index.js",
+            "priorBlobSha": "89ed9cb66c0a59d71b0365b1e16d1f1fb0530725",
+            "blobSha": "74f1c6ca4bc320daa8afada084fd37a8407b7417"
+          },
+          {
+            "path": "src/features/export/application/export-request.js",
+            "priorBlobSha": "31da9dde6e427f13d91eedd09a67250d11ae0d64",
+            "blobSha": "ad3adb0926b301b1c95bb5a96f8de18b1b7fab23"
+          },
+          {
+            "path": "src/styles/features/export.css",
+            "priorBlobSha": "cb452712595f5f565da0143bff64d6c4cae04629",
+            "blobSha": "5671c2dc7ecaa2b86af4655581c231d86ebab1ef"
+          }
+        ],
+        "newReviewedSources": [
+          {
+            "path": "src/features/export/formats/image/image-ratio-presets.js",
+            "blobSha": "f114e4279cb4761e85442806ea19ab328d68395b"
+          },
+          {
+            "path": "src/features/export/formats/image/image-export-layout.js",
+            "blobSha": "60920874a67b46c59ce0f147cdf15efd98b07bd7"
+          },
+          {
+            "path": "src/features/export/compatibility/classic-image-layout-port.js",
+            "blobSha": "df2ddca16525d7610466c5a618a0f1fffc7ff4e9"
+          }
+        ],
+        "newImageLayoutScenariosDefined": 33,
+        "builtAppScenariosRetained": 57,
+        "newBuiltAppScenariosDefined": 2,
+        "builtAppScenariosDefined": 59,
+        "productionModuleCount": 542,
+        "riskReviewedSourceCount": 70,
+        "compatibilityMapping": [
+          {
+            "prior": "Ratio table in request; classic image orchestration computed padding/font/height and mutated permanent inline geometry; stage height/width remained after capture.",
+            "current": "Same immutable ratio object exported through existing request boundary and used by public numeric layout; scoped CSS owns dimensions/clipping and lease restores all original variables/markers/priorities.",
+            "retained": "Original43 characterization/31 request/21 styles/33 PDF and57 actual cases retained; old stage-height assertion maps to dimensions at real PNG encoding plus released stage. MathML-removal reference remounts public style and layout instead of relying on leftover inline geometry; exact pixel and positive-control checks unchanged."
+          }
+        ],
+        "actualPixelEvidenceDefined": [
+          "Five actual ratio button PNGs with exact decoded pixel dimensions, padding/font/CSS geometry, encoding lock, complete source and original Preview identity. During actual enhancing progress, a4:5 task is replaced by1:1; old preparation gives zero encodes, one current PNG and clean stage.",
+          "Natural long versus fixed crop actual PNGs preserve complete50-paragraph DOM, tail/clip geometry and identical visible prefix pixels.",
+          "Existing final pagehide also releases an active layout lease and removes/rejects its scoped port."
+        ],
+        "staticReview": {
+          "status": "passed",
+          "javascriptSyntaxFiles": 11,
+          "embeddedBrowserExpressionsCompiled": 35,
+          "sharedCssLiteralsParsed": 5,
+          "layoutCssVariablesValidated": 5,
+          "jsonYamlParsed": true,
+          "relativeLinksChecked": 158,
+          "riskFingerprintsChecked": 70,
+          "priorRiskPathsPreserved": 67,
+          "productionModuleCount": 542,
+          "priorProductionModuleRowsPreserved": 539,
+          "historicalRootAndStageHistoryPrefixesPreserved": true,
+          "prior12ImplementationPreservedWithAcceptance": true,
+          "retainedBuiltAppScenarios": 57,
+          "newBuiltAppScenarios": 2,
+          "builtAppScenariosDefined": 59,
+          "newImageLayoutScenariosDefined": 33,
+          "originalRatioTableAndPublicObjectAuthorityPreserved": true,
+          "classicDirectGeometryRemoved": true,
+          "originalPngAndMathPixelPurposesMapped": true,
+          "sevenWindowsJobsPreservedWithOneTargetedStep": true,
+          "diffWhitespaceCheck": "passed",
+          "productTestsRunLocally": false,
+          "layoutCssParsed": true,
+          "sharedCssLocalTokensVerified": 6,
+          "sameStageReplacementAndLateLeaseIsolationDefined": true,
+          "actualEnhancingPhaseRatioReplacementDefined": true,
+          "protectedTrackedFilesUnchanged": 1270,
+          "architectureGate": "passed",
+          "legacyRuntimeGate": "passed",
+          "generatedFilesGate": "passed",
+          "readmeRecordGate": "passed"
+        },
+        "tools": [
+          "GitHub exact accepted12 seven jobs/all steps, four SHA-256 artifacts and actual phase focus/print JSON",
+          "Context7 dom-to-image-more dimensions; matched locked3.10.0 source width/height clone override and default pixelRatio1; no dependency changes",
+          "Mermaid Chart Chinese implemented request/preset/layout/CSS/enhancement/PNG/disposal diagram"
+        ],
+        "remainingFindings": [
+          "Image asset preload14.14,Data Encoder14.15,final Image Exporter14.16 andUI/legacy removal14.17 retain their current handoffs",
+          "OverallA10 final image chain closure pending later exact-head Windows acceptance",
+          "Native PDF dialog and user-saved bytes remain outside injected print-boundary proof",
+          "Unrelated pre-existing Editor listener finding retains its original receiver"
+        ]
       }
     ]
   }

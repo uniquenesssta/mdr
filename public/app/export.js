@@ -12,6 +12,7 @@
     const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
     const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
     const exportStylePort = exportCompatibilityHost?.markdownEditorExportStylePort;
+    const exportImageAssetPort = exportCompatibilityHost?.markdownEditorImageAssetPort;
     const exportImageLayoutPort = exportCompatibilityHost?.markdownEditorImageLayoutPort;
     const exportPdfPort = exportCompatibilityHost?.markdownEditorPdfExportPort;
     const exportWordPort = exportCompatibilityHost?.markdownEditorWordExportPort;
@@ -29,6 +30,7 @@
     if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
     if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
     if (!exportStylePort) throw new Error('Export style compatibility port is unavailable.');
+    if (!exportImageAssetPort) throw new Error('Image asset compatibility port is unavailable.');
     if (!exportImageLayoutPort) throw new Error('Image layout compatibility port is unavailable.');
     if (!exportPdfPort) throw new Error('PDF export compatibility port is unavailable.');
     if (!exportWordPort) throw new Error('Word export compatibility port is unavailable.');
@@ -48,11 +50,6 @@
         return null;
       }
     }
-    function waitForExportFrame(task = null) {
-      const frame = new Promise(resolve => requestAnimationFrame(() => resolve()));
-      return task ? task.token.waitFor(frame) : frame;
-    }
-
     function beginExportTask(title) {
       try {
         const task = exportTaskPort.begin(title);
@@ -171,13 +168,6 @@
     let currentImageRatio = '9:16';
     let currentImageDataUrl = '';
 
-    const IMAGE_PLACEHOLDER = 'data:image/svg+xml;base64,' + btoa(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">' +
-      '<rect width="120" height="80" fill="#e9ecef"/>' +
-      '<text x="60" y="44" text-anchor="middle" font-size="12" fill="#6c757d">Image unavailable</text>' +
-      '</svg>'
-    );
-
     function openExportImageModal() {
       if (exportPreviewCommandPort.getViewMode() !== 'preview') {
         exportPreviewCommandPort.setViewMode('preview');
@@ -206,40 +196,6 @@
       });
       renderExportImagePreview();
     }
-
-    async function prepareExportImages(root, task = null) {
-      const imgs = Array.from(root.querySelectorAll('img'));
-      for (let index = 0; index < imgs.length; index += 1) {
-        task?.token.throwIfCancelled();
-        const img = imgs[index];
-        if (img.src && !img.src.startsWith('data:')) {
-          let loader;
-          const loading = new Promise(resolve => {
-            loader = new Image();
-            loader.crossOrigin = 'anonymous';
-            loader.onload = () => {
-              if (!task?.token.cancelled) { img.crossOrigin = 'anonymous'; img.src = loader.src; }
-              resolve();
-            };
-            loader.onerror = () => {
-              if (!task?.token.cancelled) img.src = IMAGE_PLACEHOLDER;
-              resolve();
-            };
-            const sep = img.src.includes('?') ? '&' : '?';
-            loader.src = img.src + sep + '_cors=' + Date.now();
-          });
-          try {
-            await (task ? task.token.waitFor(loading) : loading);
-            task?.token.throwIfCancelled();
-          } finally {
-            if (loader) { loader.onload = null; loader.onerror = null; }
-          }
-        }
-        task?.update(90 + Math.round(((index + 1) / Math.max(1, imgs.length)) * 5), `正在准备图片 ${index + 1}/${imgs.length}`, 'images');
-        if ((index + 1) % 8 === 0) await waitForExportFrame(task);
-      }
-    }
-
 
     async function renderExportImagePreview() {
       const request = readExportRequest('image');
@@ -282,7 +238,9 @@
         imageLayoutLease = exportImageLayoutPort.mount({ root: clone, stage, options: request.imageOptions });
 
         await exportEnhancementPort.enhance({ root: fullBody, task, documentId: request.documentId });
-        await prepareExportImages(clone, task);
+        const source = exportDocumentPort.getSourceContext(fullBody);
+        await exportImageAssetPort.prepare({ root: clone, task, isCurrent: () =>
+          source.documentId === exportDocumentSessionPort.activeId && source.documentVersion === documentModel.getDocumentVersion() });
         task.token.throwIfCancelled();
 
         const layout = imageLayoutLease.measure();
@@ -294,7 +252,7 @@
           height: layout.captureHeight,
           bgcolor: getComputedStyle(clone).backgroundColor || '#ffffff',
           cacheBust: true,
-          imagePlaceholder: IMAGE_PLACEHOLDER
+          imagePlaceholder: exportImageAssetPort.placeholder
         }));
         task.token.throwIfCancelled();
         task.update(100, '图片预览已生成');

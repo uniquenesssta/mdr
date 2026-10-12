@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-13 image geometry and R14-12 acceptance · ${{ github.sha }}
+run-name: R14-14 bounded image assets and R14-13 acceptance · ${{ github.sha }}
 
 on:
   push:
@@ -204,6 +204,9 @@ jobs:
       - name: R14-13 image geometry and layout disposal contracts
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-image-layout.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/image-layout.log"
+      - name: R14-14 anonymous image assets, inline pixels and bounded failure contracts
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-image-assets.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-image-assets.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

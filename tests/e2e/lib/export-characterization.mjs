@@ -1,6 +1,7 @@
 // Exercise the actual built application and locked renderers. Capture file/print
 // boundaries only; R14-10 loads the unmodified standalone HTML with network blocked.
 import assert from 'node:assert/strict';
+import { createServer } from 'node:http';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -825,6 +826,82 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     const [long,crop]=result.rows;assert.equal(long.mode,'long');assert.equal(long.overflow,'visible');assert.ok(long.height>1920);assert.ok(long.tailBottom<=long.height);assert.equal(crop.mode,'crop');assert.equal(crop.overflow,'hidden');assert.equal(crop.height,1920);assert.ok(crop.tailBottom>crop.height);assert.equal(result.differentPixels,0,'Crop must keep the real long PNG visible prefix byte-for-byte.');
   });
 
+  await test('R14-14 actual anonymous resources inline pixels while CORS errors, missing and stalled assets still produce PNG', async () => {
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40"><view id="logo" viewBox="0 0 80 40"/><rect width="80" height="40" fill="#1183d3"/></svg>';
+    const inline='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAAAoCAYAAABpYH0BAAAAX0lEQVR4nO3QMQ0AIADAMCygGYkIAg88ZEmP/UvHXPvovfF7oB5AgADTAQQIMB1AgADTAQQIMB1AgADTAQQIMB1AgADTAQQIMB1AgADTAQQIMB1AgADTAQQIMB1AgH+7euX8tAdMvQMAAAAASUVORK5CYII=',requests=[];
+    const server=createServer((request,response)=>{
+      requests.push({url:request.url,origin:request.headers.origin||null,cookie:request.headers.cookie||null});
+      const path=new URL(request.url,'http://127.0.0.1').pathname;
+      if(path==='/stall.svg')return;
+      const headers={'Content-Type':'image/svg+xml','Cache-Control':'no-store'};
+      if(path!=='/no-cors.svg')headers['Access-Control-Allow-Origin']='*';
+      response.writeHead(path==='/missing.svg'?404:200,headers);response.end(path==='/missing.svg'?'missing':svg);
+    });
+    await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
+    const origin='http://127.0.0.1:'+server.address().port;
+    let result;
+    try {
+      await loadMarkdown('# Asset preparation\n\n![inline]('+inline+')\n\n![good]('+origin+'/good.svg?keep=1#logo)\n\n![no-cors]('+origin+'/no-cors.svg)\n\n![missing]('+origin+'/missing.svg)\n\n![stall]('+origin+'/stall.svg)\n\nKEEP TAIL 原文 😀');
+      result=await page.evaluate(`(async()=>{
+        const host=document.getElementById('compatibility-business-ports'),assets=host.markdownEditorImageAssetPort,tasks=host.markdownEditorExportTaskPort;
+        const renderer=await host.markdownEditorPresentationPort.loadDomToImage(),original=renderer.toPng,preview=document.getElementById('preview');
+        const previewNodes=Array.from(preview.childNodes),progress=[];let captured;
+        const oldRatio=currentImageRatio,oldCrop=document.getElementById('image-crop-fit').checked;currentImageRatio='9:16';document.getElementById('image-crop-fit').checked=false;
+        const unsubscribe=tasks.subscribe(snapshot=>{if(snapshot.activeTask?.phase==='images')progress.push(snapshot.activeTask.progress);});
+        renderer.toPng=async(root,input)=>{
+          const rect=root.getBoundingClientRect();captured={images:Array.from(root.querySelectorAll('img'),image=>{const r=image.getBoundingClientRect();return {alt:image.alt,src:image.src,ready:image.complete&&image.naturalWidth>0,srcset:image.getAttribute('srcset'),x:Math.round(r.left-rect.left+5),y:Math.round(r.top-rect.top+5)};}),
+            width:input.width,height:input.height,complete:root.textContent.includes('KEEP TAIL'),locked:tasks.getSnapshot().activeTask?.cancelable===false};
+          captured.png=await original.call(renderer,root,input);return captured.png;
+        };
+        try {
+          const start=performance.now();await renderExportImagePreview();
+          if(!captured?.png)throw new Error('Mixed assets did not reach actual PNG encoding');
+          const image=new Image();image.src=captured.png;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+          const context=canvas.getContext('2d');context.drawImage(image,0,0);for(const asset of captured.images)asset.pixel=Array.from(context.getImageData(asset.x,asset.y,1,1).data);
+          return {...captured,pixelWidth:image.naturalWidth,pixelHeight:image.naturalHeight,duration:performance.now()-start,inlineUnchanged:captured.images[0].src===${JSON.stringify(inline)},
+            placeholderCount:captured.images.filter(item=>item.src===assets.placeholder).length,progress,taskEnded:tasks.getSnapshot().activeTask===null,
+            previewPreserved:previewNodes.length===preview.childNodes.length&&previewNodes.every((node,index)=>preview.childNodes[index]===node),
+            layoutReleased:!document.getElementById('export-image-stage').hasAttribute('data-export-image-layout'),published:document.getElementById('export-image-preview').src===captured.png};
+        }finally{unsubscribe();renderer.toPng=original;currentImageRatio=oldRatio;document.getElementById('image-crop-fit').checked=oldCrop;}
+      })()`);
+    } finally {await new Promise((resolve,reject)=>{server.close(error=>error?reject(error):resolve());server.closeAllConnections();});}
+    await writeFile(join(artifactRoot,'r14-14-mixed-assets.json'),JSON.stringify({...result,png:undefined,images:result.images.map(({src,...item})=>({...item,sourceKind:src.startsWith('data:image/png')?'png':'svg'})),requests},null,2));
+    await writeFile(join(artifactRoot,'r14-14-mixed-assets.png'),Buffer.from(result.png.split(',')[1],'base64'));
+    assert.equal(result.images.length,5);assert.equal(result.placeholderCount,3);assert.equal(result.inlineUnchanged,true);
+    for(const field of ['complete','locked','taskEnded','previewPreserved','layoutReleased','published'])assert.equal(result[field],true,field);
+    assert.equal(result.pixelWidth,1080);assert.equal(result.pixelHeight,1920);
+    for(const item of result.images){assert.equal(item.ready,true);assert.equal(item.srcset,null);assert.deepEqual(item.pixel,item.alt==='inline'||item.alt==='good'?[17,131,211,255]:[233,236,239,255]);}
+    assert.deepEqual(result.progress,[91,92,93,94,95]);assert.ok(result.duration>=9000&&result.duration<25000);
+    const corsRequests=requests.filter(item=>new URL(item.url,origin).searchParams.has('_cors'));
+    assert.equal(corsRequests.length,4,'Already inlined assets must not cause another remote request in PNG encoding.');
+    assert.equal(corsRequests.every(item=>item.origin===applicationHost.origin&&item.cookie===null),true);
+    assert.equal(new URL(corsRequests.find(item=>item.url.startsWith('/good.svg')).url,origin).searchParams.get('keep'),'1');
+  });
+
+  await test('R14-14 actual public preloader rejects cancelled and stale decode without late projection and recovers', async () => {
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),assets=host.markdownEditorImageAssetPort,tasks=host.markdownEditorExportTaskPort;
+      const source=assets.placeholder,rows=[];
+      for(const action of ['cancel','replace','stale']){
+        const root=document.createElement('div'),image=document.createElement('img');image.src=source;root.append(image);document.body.append(root);
+        let late,entered=false,current=true;image.decode=()=>{entered=true;return new Promise(resolve=>{late=resolve;});};
+        const task=tasks.begin('asset '+action),work=assets.prepare({root,task,isCurrent:()=>current}).then(()=>({unexpected:true}),error=>({cancelled:tasks.isCancelled(error),reason:error.reason}));
+        const started=performance.now();while(!entered){if(performance.now()-started>5000)throw new Error('Asset decode not entered');await new Promise(resolve=>setTimeout(resolve,5));}
+        let replacementTask=null;if(action==='cancel')tasks.cancel();else if(action==='replace')replacementTask=tasks.begin('new assets');else current=false;
+        image.src='data:image/svg+xml;base64,'+btoa('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');const replacement=image.src;late();
+        const status=await work;rows.push({action,...status,preserved:image.src===replacement});root.remove();
+        if(tasks.getSnapshot().activeTask)tasks.finish(replacementTask||task);
+      }
+      const root=document.createElement('div'),image=document.createElement('img');image.src=source;root.append(image);document.body.append(root);
+      const recoveryTask=tasks.begin('asset recovery'),recovery=await assets.prepare({root,task:recoveryTask});tasks.finish(recoveryTask);root.remove();
+      return {rows,recovery,ended:tasks.getSnapshot().activeTask===null,retired:typeof prepareExportImages==='undefined'};
+    })()`);
+    await writeFile(join(artifactRoot,'r14-14-assets-recovery.json'),JSON.stringify(result,null,2));
+    assert.deepEqual(result.rows.map(row=>row.reason),['cancelled','replaced','document-changed']);
+    for(const row of result.rows){assert.equal(row.cancelled,true);assert.equal(row.preserved,true);}
+    assert.deepEqual(result.recovery,{total:1,inline:1,loaded:0,failed:0});assert.equal(result.ended,true);assert.equal(result.retired,true);
+  });
+
   // Final app probe: exercise the production pagehide owner after all other export probes.
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
     const result = await page.evaluate(`(async () => {
@@ -836,6 +913,11 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const styles=host.markdownEditorExportStylePort,styleRoot=document.createElement('div');document.body.append(styleRoot);styles.apply(styleRoot,'image');
       const layout=host.markdownEditorImageLayoutPort,layoutStage=document.getElementById('export-image-stage'),layoutRoot=document.createElement('div');layoutRoot.className='preview-content';layoutStage.append(layoutRoot);
       const layoutLease=layout.mount({root:layoutRoot,stage:layoutStage,options:host.markdownEditorExportRequestPort.createRequest({format:'image'}).imageOptions});layoutLease.measure();
+      const assets=host.markdownEditorImageAssetPort,assetRoot=document.createElement('div'),assetImage=document.createElement('img');
+      assetImage.src=assets.placeholder;assetRoot.append(assetImage);document.body.append(assetRoot);let assetLate,assetEntered=false;
+      assetImage.decode=()=>{assetEntered=true;return new Promise(resolve=>{assetLate=resolve;});};
+      const assetWait=assets.prepare({root:assetRoot}).then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
+      const assetStarted=performance.now();while(!assetEntered){if(performance.now()-assetStarted>5000)throw new Error('Pagehide asset decode not entered');await new Promise(resolve=>setTimeout(resolve,5));}
       const enhancementBody=await builder.build();
       enhancementBody.replaceChildren(...Array.from({length:25},()=>{const node=document.createElement('p');node.textContent='dispose enhancement';return node;}));
       const raf=window.requestAnimationFrame;let interceptedFrames=0;
@@ -855,6 +937,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const wait=task.token.waitFor(operation).then(()=>({unexpected:true}),error=>({cancelled:port.isCancelled(error),reason:error.reason}));
       window.dispatchEvent(new Event('pagehide'));
       window.setTimeout=nativeTimer;await pdfWork;await pendingPrint();
+      const assetResult=await assetWait;const assetBefore=assetImage.src;assetLate();await Promise.resolve();const assetPreserved=assetImage.src===assetBefore;assetRoot.remove();
       const building=await buildWait;const enhancing=await enhancementWait;const waiting=await wait;rejectLate(new Error('late encoder failure'));await Promise.resolve();
       let rejected=false;try {port.begin('late');}catch(error){rejected=/destroyed/.test(error.message);}
       let cancelledError=false;try {task.token.throwIfCancelled();}catch(error){cancelledError=port.isCancelled(error);}
@@ -863,12 +946,14 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       let wordRejected=false;try {await word.export({});}catch(error){wordRejected=/destroyed/.test(error.message);}
       let pdfRejected=false;try {await pdf.export({});}catch(error){pdfRejected=/destroyed/.test(error.message);}
       let layoutRejected=false;try {layout.mount({});}catch(error){layoutRejected=/destroyed/.test(error.message);}
-      return {layoutRejected,layoutReleased:!layoutRoot.hasAttribute('data-export-image-layout')&&!layoutStage.hasAttribute('data-export-image-layout')&&layoutRoot.style.getPropertyValue('--export-image-width')===''&&!Object.hasOwn(host,'markdownEditorImageLayoutPort'),pdfRejected,printCount,printRemoved:!pendingFrame.isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
+      let assetRejected=false;try{await assets.prepare({});}catch(error){assetRejected=/destroyed/.test(error.message);}
+      return {assetResult,assetPreserved,assetRejected,assetRemoved:!Object.hasOwn(host,'markdownEditorImageAssetPort'),layoutRejected,layoutReleased:!layoutRoot.hasAttribute('data-export-image-layout')&&!layoutStage.hasAttribute('data-export-image-layout')&&layoutRoot.style.getPropertyValue('--export-image-width')===''&&!Object.hasOwn(host,'markdownEditorImageLayoutPort'),pdfRejected,printCount,printRemoved:!pendingFrame.isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
         stylesRemoved:!document.querySelector('style[data-export-style-sheet="document"]')&&!styleRoot.classList.contains('export-document')&&!styleRoot.hasAttribute('data-export-format'),
         rejected,cancelledError,markdownRejected,htmlRejected,wordRejected,removed:!Object.hasOwn(host,'markdownEditorPdfExportPort')&&!Object.hasOwn(host,'markdownEditorWordExportPort')&&!Object.hasOwn(host,'markdownEditorHtmlExportPort')&&!Object.hasOwn(host,'markdownEditorMarkdownExportPort')&&!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
         progressVisible:progressRoot.classList.contains('show'),progressRemoved:!document.getElementById('export-progress-modal')};
     })()`);
+    assert.deepEqual(result.assetResult,{cancelled:true,reason:'destroyed'});assert.equal(result.assetPreserved,true);assert.equal(result.assetRejected,true);assert.equal(result.assetRemoved,true);
     assert.equal(result.printCount,0);
     assert.equal(result.progressRemoved, true);
     assert.equal(result.stylesRemoved, true);
