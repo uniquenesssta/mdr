@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { assessDependencyAudit } from '../scripts/ci/run-windows-dependency-audit.mjs';
+import { createHash } from 'node:crypto';
+import { assessDependencyAudit, downloadVerifiedScanner } from '../scripts/ci/run-windows-dependency-audit.mjs';
 
 const policy = JSON.parse(await readFile(new URL('../docs/audit/r12-23-dependency-advisories.json', import.meta.url), 'utf8'));
 function fixture() {
@@ -96,4 +97,60 @@ test('Windows CI keeps official checksum, exact database, TLS behavior and all c
   assert.match(client, /TLS 1\.3 handshake/);
   assert.match(client, /production must reject the untrusted CA/);
   assert.equal((client.match(/#\[test\]/g) || []).length, 2);
+});
+
+function downloadFixture(responses) {
+  const bytes = Buffer.from('pinned official scanner fixture');
+  const scanner = { windowsUrl: policy.scanner.windowsUrl, windowsSha256: createHash('sha256').update(bytes).digest('hex') };
+  const attempts = [], delays = [], requests = [];
+  return { bytes, scanner, attempts, delays, requests, options: {
+    fetchRelease: async (url, options) => {
+      requests.push({ url, signal: options.signal });
+      const response = responses.shift();
+      if (response instanceof Error) throw response;
+      return response ?? new Response(bytes);
+    },
+    pause: async delay => { delays.push(delay); }
+  } };
+}
+
+test('scanner transient HTTP failures retry the same official URL then require its exact digest', async () => {
+  for (const status of [408, 429, 500, 502, 503, 504]) {
+    const h = downloadFixture([new Response('', { status })]);
+    assert.deepEqual(await downloadVerifiedScanner(h.scanner, h.attempts, h.options), h.bytes);
+    assert.deepEqual(h.delays, [1000]);
+    assert.equal(h.attempts[0].httpStatus, status);
+    assert.equal(h.attempts[1].verified, true);
+    assert.ok(h.requests.every(item => item.url === policy.scanner.windowsUrl && item.signal instanceof AbortSignal));
+  }
+});
+
+test('scanner network timeout and interrupted body are retried without accepting partial bytes', async () => {
+  for (const failure of [new TypeError('fetch failed'), new DOMException('timed out', 'TimeoutError'),
+    { status: 200, ok: true, arrayBuffer: async () => { throw new TypeError('body terminated'); } }]) {
+    const h = downloadFixture([failure]);
+    assert.deepEqual(await downloadVerifiedScanner(h.scanner, h.attempts, h.options), h.bytes);
+    assert.equal(h.attempts.length, 2); assert.ok(h.attempts[0].error); assert.equal(h.attempts[0].verified, undefined);
+  }
+});
+
+test('scanner download exhaustion fails after four attempts with bounded backoff and raw errors', async () => {
+  const h = downloadFixture(Array.from({ length: 4 }, () => new Response('', { status: 504 })));
+  await assert.rejects(downloadVerifiedScanner(h.scanner, h.attempts, h.options), /Scanner download failed: 504/);
+  assert.deepEqual(h.delays, [1000, 2000, 4000]); assert.equal(h.requests.length, 4);
+  assert.ok(h.attempts.every(item => item.error && !item.verified));
+});
+
+test('scanner permanent HTTP and programming errors fail immediately without retry', async () => {
+  for (const failure of [new Response('', { status: 404 }), new Error('unexpected adapter failure')]) {
+    const h = downloadFixture([failure]);
+    await assert.rejects(downloadVerifiedScanner(h.scanner, h.attempts, h.options));
+    assert.equal(h.requests.length, 1); assert.deepEqual(h.delays, []);
+  }
+});
+
+test('scanner checksum mismatch stops before extraction and cannot become a retried green result', async () => {
+  const h = downloadFixture([new Response('corrupt or substituted archive')]);
+  await assert.rejects(downloadVerifiedScanner(h.scanner, h.attempts, h.options), /Scanner release digest mismatch/);
+  assert.equal(h.requests.length, 1); assert.deepEqual(h.delays, []); assert.equal(h.attempts[0].verified, undefined);
 });

@@ -9,6 +9,41 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
+// Retry transport failures only. A response is never usable without the pinned
+// release digest, and a digest mismatch or permanent HTTP error fails at once.
+export async function downloadVerifiedScanner(scanner, attempts, {
+  fetchRelease = fetch,
+  pause = milliseconds => new Promise(resolvePause => setTimeout(resolvePause, milliseconds))
+} = {}) {
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    const entry = { attempt };
+    attempts.push(entry);
+    let bytes;
+    try {
+      const response = await fetchRelease(scanner.windowsUrl, { signal: AbortSignal.timeout(120_000) });
+      entry.httpStatus = response.status;
+      if (!response.ok) {
+        await response.body?.cancel();
+        const error = new Error(`Scanner download failed: ${response.status}.`);
+        error.retryable = [408, 429, 500, 502, 503, 504].includes(response.status);
+        throw error;
+      }
+      bytes = Buffer.from(await response.arrayBuffer());
+    } catch (error) {
+      entry.error = error.message;
+      const transient = error.retryable === true || ['TypeError', 'TimeoutError', 'AbortError'].includes(error.name);
+      if (!transient || attempt === 4) throw error;
+      entry.retryDelayMs = 1000 * 2 ** (attempt - 1);
+      await pause(entry.retryDelayMs);
+      continue;
+    }
+    entry.sha256 = createHash('sha256').update(bytes).digest('hex');
+    assert.equal(entry.sha256, scanner.windowsSha256, 'Scanner release digest mismatch.');
+    entry.verified = true;
+    return bytes;
+  }
+}
+
 export function assessDependencyAudit({ audit, metadata, lockText, policy }) {
   assert.deepEqual(audit.settings?.ignore, [], 'Ignored advisories cannot prove acceptance.');
   assert.deepEqual(audit.settings?.target_os, [], 'Scan the complete lockfile before Windows classification.');
@@ -106,10 +141,8 @@ async function runWindowsAudit() {
   try {
     assert.equal(command('git', ['rev-parse', 'HEAD']).trim(), process.env.GITHUB_SHA);
     const archive = join(evidenceRoot, 'cargo-audit.zip');
-    const response = await fetch(policy.scanner.windowsUrl, { signal: AbortSignal.timeout(120_000) });
-    assert.ok(response.ok, `Scanner download failed: ${response.status}.`);
-    const bytes = Buffer.from(await response.arrayBuffer());
-    assert.equal(createHash('sha256').update(bytes).digest('hex'), policy.scanner.windowsSha256, 'Scanner release digest mismatch.');
+    evidence.scannerDownloadAttempts = [];
+    const bytes = await downloadVerifiedScanner(policy.scanner, evidence.scannerDownloadAttempts);
     await writeFile(archive, bytes);
     const extract = join(evidenceRoot, 'extract.ps1');
     await writeFile(extract, 'param([string]$Archive,[string]$Destination)\n$ErrorActionPreference="Stop"\nExpand-Archive -LiteralPath $Archive -DestinationPath $Destination -Force\n');

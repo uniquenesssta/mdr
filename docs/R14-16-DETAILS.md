@@ -1,6 +1,6 @@
 # R14-16 Image Exporter
 
-状态：**首轮未通过，修复后待新精确提交Windows累计验证**；16未勾选，17未开始。唯一分支`agent/r14-stage`，基线为15收尾`b1c236b3326357c1c0f8d991d1f282dcd5582f77`。15已在`463af96` / [CI38226523614](https://github.com/uniquenesssta/mdr/actions/runs/38226523614)七组及全部步骤验收，首轮失败和修复保留。[15正式验收](R14-15-DETAILS.md#正式验收2026-10-12)。
+状态：**两轮未通过，本轮修复待新精确提交Windows累计验证**；16未勾选，17未开始。唯一分支`agent/r14-stage`，基线为15收尾`b1c236b3326357c1c0f8d991d1f282dcd5582f77`。15已在`463af96` / [CI38226523614](https://github.com/uniquenesssta/mdr/actions/runs/38226523614)七组及全部步骤验收，首轮失败和修复保留。[15正式验收](R14-15-DETAILS.md#正式验收2026-10-12)。
 
 ## 职责与真实调用链
 
@@ -63,7 +63,7 @@ Mermaid Chart已展示实际关系。Context7返回官方README的通用toPng Pr
 
 新增实际页面：真实math/Mermaid/Unicode PNG在锁定转换期间修改正文，拒绝旧输出且下一次完整PNG使用当前版本；vendor编码故障及实际anchor点击故障释放真实DOM/任务/URL，原renderer恢复后PNG Blob逐字节一致。归档r14-16-stale-encoding.json、r14-16-output-recovery.json及discarded/recovered/downloaded实际PNG，验收需查看图片和核对内容，不仅确认可解码。
 
-原Windows WebView/import/security harness保留，并追加`image-export-chain.mjs`：实际Document导入→Image Exporter→原dom-to-image PNG→公共编码→实际Platform/Rust→Node真实文件读回；核对逐字节、PNG签名、1080×1920、目录目标失败及再次替换、来源变化前置拒绝。仅将原native save dialog结果自动指向harness临时根，实际交互式对话框/用户选路不作验收宣称；原renderer、IPC二进制、安全writer不替换。包装恢复原invoke属性，finally仍由原harness清理临时根。任何新链失败仍使原job失败，证据r14-16-native-image-export.json进入原归档。
+原Windows WebView/import/security harness保留，并追加`image-export-chain.mjs`：实际Document导入→Image Exporter→原dom-to-image PNG→公共编码→实际Platform/Rust→Node真实文件读回；核对逐字节、PNG签名、1080×1920、目录目标失败及再次替换、来源变化前置拒绝。仅将原native save dialog结果自动指向harness临时根，实际交互式对话框/用户选路不作验收宣称；原renderer、IPC二进制、安全writer不替换。仅包装并恢复原fetch属性；原invoke/ipc不改写，finally仍由原harness清理临时根。任何新链失败仍使原job失败，证据r14-16-native-image-export.json进入原归档。
 
 549行清单保持原546行，80风险指纹保持原76路径并加入3个新生产模块及完整原生harness；四个受影响来源指纹按当前内容更新。历史验收/实现前缀保留，15验收独立保留。[精确范围记录](audit/r12-24-closeout.json)的currentStageImplementation记录真实静态结果与未验收边界。
 
@@ -89,3 +89,21 @@ Mermaid Chart已展示实际关系。Context7返回官方README的通用toPng Pr
 新增2项构建配置审计：从实际文件导入验证chunk闭合及共享模块仍不入该包；调用原bundle gate，以入口/异步恰好达限、超出1字节、入口导入图片chunk三类检查确认原阈值仍生效。9项相关文档、配置和文档/平台公共边界静态检查通过；这些只读取源码/配置与冻结hash，不运行应用行为、构建、PNG或原生写入，不能替代Windows产品验收。其余修改的脚本语法、清单/指纹/历史及四门禁由repair.staticReview登记。
 
 549模块与80风险路径保持，只有Vite配置的已审阅来源指纹变化；原34项Image契约、58项字节、65实际页面和七组Windows门槛继续全部执行。无业务生产逻辑、依赖、Rust、冻结模型、图片cache或写入实现改动。16保持未勾选，17未开始；新精确head必须先实际构建再取得完整页面和原生PNG读回证据。推送Actions后结束，不轮询，约15～20分钟后查询。
+
+
+## 第二轮Windows失败与修复（2026-10-12）
+
+`b7bfe8610402360173c9d442b04bb4fbae7d91f4` / [CI38245940820](https://github.com/uniquenesssta/mdr/actions/runs/38245940820)未通过，七组中四组成功。上轮全部直接问题已消除：前端1139/1139、全仓2145/2145（16目录）、新Image34/34、Data58/58、原characterization43/43、浏览器11/11＋65/65、Rust281及Clippy通过；Windows构建成功，main约678.23kB与Image约26.09kB均在原预算内。不能将四组成功登记为16验收。
+
+| 本轮直接失败 | 修复与保留门槛 |
+|---|---|
+| Official scanner下载返回HTTP504，尚未开始RustSec扫描 | 同一官方URL最多4次，每次120秒超时，退避1/2/4秒。仅408/429/500/502/503/504及网络/读取超时重试；HTTP永久错误、编程错误立即失败。每次状态/错误/退避与最终SHA256记入证据，固定摘要不符立即失败；四次失败仍非零退出，不使用缓存替代、镜像或忽略公告。原数据库、版本、锁文件、扫描/分类和累计门槛不变。新增5项契约在Windows执行，原8项定义及顺序保留。 |
+| 完整原生PNG已render，但夹具试图Reflect.set不可写invoke，未到达完整图片save | 核对实际锁定JS API2.11.1、dialog2.7.1、Rust Tauri2.11.5；Context7返回通用官方实现，另读取[精确2.11.5 core](https://github.com/tauri-apps/tauri/blob/tauri-v2.11.5/crates/tauri/scripts/core.js)与[协议源码](https://github.com/tauri-apps/tauri/blob/tauri-v2.11.5/crates/tauri/scripts/ipc-protocol.js)：invoke/ipc/postMessage以默认描述符定义。夹具只匹配convertFileSrc生成的save命令URL及POST，按原JSON响应协议返回harness路径，原invoke和回调继续执行；所有其他fetch参数原样调用原fetch。三个write_local_binary_file请求计数且必须真实读回，finally恢复原fetch并验证invoke不变；不调用mockIPC、不替换整对象、不更改生产Tauri/Platform/权限。 |
+
+原生链保留实际Document导入、真实PNG生成、完整1080×1920字节、目录目标拒绝、后续同目标替换、编辑来源后的零新增dialog、缓存/任务/捕获释放。通过全部断言后把真实读回字节另存`r14-16-native-image-export.png`到原Windows证据归档，临时文件根仍由原harness finally删除。仅自动化保存对话框协议结果，不宣称交互式对话框/真实用户选路通过；如果原协议转入不支持的postMessage路线，本测试仍失败，不能以模拟原生写入替代。
+
+前端归档11746631052，SHA256 `5fc8f934d96fab89ed8d18c8559738171860ff2883eddf9869917ff450e03c12`；WebView归档11745387592，SHA256 `b790f949ba8b0063871c8b68e1ebf6a369a745b1ea550615d5bf03688d09aa03`，均实际下载校验。新增stale-encoding/recovery两份JSON已核对锁定、编辑拒绝、恢复及释放；真实recovered长图含当前标题、Unicode、表格、任务、完整代码、两段公式和Mermaid，downloaded恢复图含正确公式/尾文，无额外MathML文本。WebView原14.15四文件真实读回仍成功，完整14.16图片读回未成功，不能关闭A10。
+
+本地仅进行源码/配置/文档静态审计及语法编译，不运行应用产品测试、build、PNG或Rust。新下载行为和原生fetch响应包装必须在新精确head Windows复验，所有65页面/34图片/58字节场景、七组及预算保持。Mermaid Chart展示修复后的真实传输边界，完整所有者架构不变；16未勾选、17未开始，启动Actions后结束不轮询。
+
+本轮静态复核：8项配置/文档/源码门槛、四架构门禁通过，4脚本语法及1个修改后的WebView表达式只编译不执行，174链接和80指纹一致；549模块清单、原场景与前置验收历史不变。新下载5项和原生链未在本地执行；第一次外部解析器查找不可用，改用内建vm.Script完成表达式编译。

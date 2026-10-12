@@ -431,7 +431,7 @@
     },
     {
       "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
-      "blobSha": "e93fb5b40c915c59c3cda84c47c3aa18a9cc47e9"
+      "blobSha": "5976f7b1c851cfae43c2b71d603428e07de54ddd"
     },
     {
       "path": "src/features/export/formats/image/image-exporter.js",
@@ -447,7 +447,7 @@
     },
     {
       "path": "tests/e2e/windows/image-export-chain.mjs",
-      "blobSha": "5e354ff8b6ce691a763fbf289e7cc08a71f9bf2a"
+      "blobSha": "f9959d69ab7cd7e519e7edbb516292165a268546"
     }
   ],
   "priorFailures": {
@@ -1285,6 +1285,128 @@
           "limitations": "Only static source/document/config auditing locally; no application behavior tests, build, browser or Rust execution. Actual bundle sizes/65 pages/native PNG readback pending exact-head Windows CI."
         },
         "invalidInputsHaveExplicitValidationToast": true
+      },
+      "secondWindowsRun": {
+        "commit": "b7bfe8610402360173c9d442b04bb4fbae7d91f4",
+        "run": 38245940820,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38245940820",
+        "conclusion": "failure",
+        "accepted": false,
+        "windowsJobsPassed": 4,
+        "frontendNodePassed": 1139,
+        "recursiveNodePassed": 2145,
+        "directories": 16,
+        "imageExporterPassed": 34,
+        "imageDataPassed": 58,
+        "originalCharacterizationPassed": 43,
+        "contractBrowserPassed": 11,
+        "actualBuiltAppScenariosPassed": 65,
+        "rustTestsPassed": 281,
+        "buildPassed": true,
+        "directFailures": [
+          "official scanner download HTTP504 before RustSec scan",
+          "native full-image harness cannot replace read-only Tauri invoke after real PNG rendering"
+        ],
+        "prior15NativeByteReadbacksPassed": 4,
+        "actualNativeFullImageProbePassed": false,
+        "artifacts": [
+          {
+            "id": 11746631052,
+            "sha256": "5fc8f934d96fab89ed8d18c8559738171860ff2883eddf9869917ff450e03c12",
+            "downloadedAndVerified": true
+          },
+          {
+            "id": 11745387592,
+            "sha256": "b790f949ba8b0063871c8b68e1ebf6a369a745b1ea550615d5bf03688d09aa03",
+            "downloadedAndVerified": true
+          }
+        ],
+        "actualRecoveredAndDownloadedPngVisuallyChecked": true,
+        "actualNativePngReadbackPending": true
+      },
+      "secondRepair": {
+        "status": "implemented-pending-exact-head-Windows-admission",
+        "scope": "Bounded same-release transport retry with pinned checksum and all failures blocking; native full-image dialog-only fetch protocol response while invoke/callback/native writer stay real; archive actual readback PNG.",
+        "changedSourceFingerprints": [
+          {
+            "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
+            "priorBlobSha": "e93fb5b40c915c59c3cda84c47c3aa18a9cc47e9",
+            "blobSha": "5976f7b1c851cfae43c2b71d603428e07de54ddd"
+          },
+          {
+            "path": "tests/e2e/windows/image-export-chain.mjs",
+            "priorBlobSha": "5e354ff8b6ce691a763fbf289e7cc08a71f9bf2a",
+            "blobSha": "f9959d69ab7cd7e519e7edbb516292165a268546"
+          }
+        ],
+        "scannerSourceFingerprint": {
+          "path": "scripts/ci/run-windows-dependency-audit.mjs",
+          "blobSha": "e2b0ad86f0b57fb19680bb5e72a267f0918272a3"
+        },
+        "newScannerDownloadScenarios": 5,
+        "priorScannerScenariosRetained": 8,
+        "applicationRuntimeChanged": false,
+        "dependenciesChanged": false,
+        "rustChanged": false,
+        "modelsChanged": false,
+        "workflowChanged": false,
+        "productionModuleCount": 549,
+        "riskSourcePathsRetained": 80,
+        "imageExporterScenariosRetained": 34,
+        "imageDataScenariosRetained": 58,
+        "builtAppScenariosRetained": 65,
+        "onlyDialogProtocolResponseAutomated": true,
+        "nativeBinaryRequestsRequired": 3,
+        "originalFetchRestorationRequired": true,
+        "actualNativeReadbackPngArtifactDefined": "r14-16-native-image-export.png",
+        "lockedTauriVersions": {
+          "jsApi": "2.11.1",
+          "dialog": "2.7.1",
+          "rust": "2.11.5"
+        },
+        "scannerAttempts": 4,
+        "timeoutPerAttemptMs": 120000,
+        "retryDelaysMs": [
+          1000,
+          2000,
+          4000
+        ],
+        "staticReview": {
+          "status": "passed",
+          "productTestsRunLocally": false,
+          "staticAuditTestsPassed": 8,
+          "architectureGate": "passed",
+          "legacyRuntimeGate": "passed",
+          "generatedFilesGate": "passed",
+          "readmeRecordGate": "passed",
+          "javascriptSyntaxFiles": 4,
+          "modifiedEmbeddedBrowserExpressionsCompiled": 1,
+          "callbacksExecutedLocally": 0,
+          "relativeLinksChecked": 174,
+          "riskFingerprintsChecked": 80,
+          "riskPathsUnchanged": true,
+          "productionModuleRowsUnchanged": 549,
+          "prior15AcceptanceAndAllHistoriesPreserved": true,
+          "prior16FailuresAndRepairPreserved": true,
+          "oldScannerDeclarationsAndOrderRetained": 8,
+          "newScannerDeclarations": 5,
+          "imageExporterAndImageDataAndBuiltAppScenariosUnchanged": true,
+          "applicationRuntimeRustModelsDependenciesWorkflowAndBudgetsUnchanged": true,
+          "diffWhitespaceCheck": "passed",
+          "changedFiles": [
+            "AGENTS.md",
+            "README.md",
+            "docs/R14-16-DETAILS.md",
+            "docs/README.md",
+            "docs/audit/r12-24-closeout.json",
+            "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
+            "scripts/ci/run-windows-dependency-audit.mjs",
+            "tests/e2e/windows/image-export-chain.mjs",
+            "tests/e2e/windows/run-render-boundary-probe.mjs",
+            "tests/stage-12-dependency-advisories.test.mjs"
+          ],
+          "limitations": "Only source/config/document static checks locally; download retry behavior and full native image transport/readback await exact-head Windows. Initial parser lookup unavailable; embedded expression compiled with built-in vm.Script without executing it."
+        }
       }
     },
     "priorStageAcceptance": {

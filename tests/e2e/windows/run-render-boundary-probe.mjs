@@ -283,7 +283,7 @@ try {
       await persist();
       evidence.imageDataExport = await verifyImageDataExport({ browser, ownedRoot: canaryRoot, commit: process.env.GITHUB_SHA });
       await writeFile(join(evidenceRoot, 'r14-15-native-image-data.json'), JSON.stringify(evidence.imageDataExport, null, 2));
-      evidence.imageExportChain = await verifyImageExportChain({ browser, ownedRoot: canaryRoot, commit: process.env.GITHUB_SHA });
+      evidence.imageExportChain = await verifyImageExportChain({ browser, ownedRoot: canaryRoot, evidenceRoot, commit: process.env.GITHUB_SHA });
       await writeFile(join(evidenceRoot, 'r14-16-native-image-export.json'), JSON.stringify(evidence.imageExportChain, null, 2));
       await persist();
     }
