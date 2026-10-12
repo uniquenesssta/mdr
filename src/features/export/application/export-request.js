@@ -1,3 +1,6 @@
+import { EXPORT_IMAGE_RATIOS } from '../formats/image/image-ratio-presets.js';
+export { EXPORT_IMAGE_RATIOS } from '../formats/image/image-ratio-presets.js';
+
 /** Pure export input policy. No model, DOM, task, platform or file side effects. */
 const FORMATS = Object.freeze({
   markdown: Object.freeze({ extension: 'md', extensions: Object.freeze(['md', 'markdown']) }),
@@ -6,11 +9,6 @@ const FORMATS = Object.freeze({
   pdf: Object.freeze({ extension: 'pdf', extensions: Object.freeze(['pdf']) }),
   image: Object.freeze({ extension: 'png', extensions: Object.freeze(['png']) })
 });
-
-export const EXPORT_IMAGE_RATIOS = Object.freeze(Object.fromEntries([
-  ['9:16', 1080, 1920], ['4:5', 1080, 1350], ['3:4', 1080, 1440],
-  ['1:1', 1080, 1080], ['16:9', 1920, 1080]
-].map(([ratio, width, height]) => [ratio, Object.freeze({ width, height })])));
 
 export class ExportRequestValidationError extends TypeError {
   constructor(field, message) {

@@ -1,7 +1,7 @@
 import 'katex/dist/katex.css';
 import './styles/index.css';
 import katexStyleSheetText from 'katex/dist/katex.css?raw';
-import { createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
+import { createImageExportLayout, mountClassicImageLayoutPort, createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createBrowserPrint, createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
@@ -156,6 +156,8 @@ let exportPreviewEnhancer = null;
 let exportEnhancementPort = null;
 const exportStyles = createExportStyleSheet({ documentRef: document, mathCss: katexStyleSheetText });
 const exportStylePort = mountClassicExportStylePort(compatibilityPlatformHost, exportStyles);
+const imageExportLayout = createImageExportLayout();
+const imageLayoutPort = mountClassicImageLayoutPort(compatibilityPlatformHost, imageExportLayout);
 const htmlFontAssets = createHtmlFontAssets({ mathCss: katexStyleSheetText,
   loaders: import.meta.glob('../../node_modules/katex/dist/fonts/*.woff2', { query: '?inline', import: 'default' }) });
 const htmlDocumentSerializer = createHtmlDocumentSerializer({ styles: exportStyles });
@@ -306,7 +308,8 @@ window.addEventListener('pagehide', () => {
   for (const release of [() => pdfExporter?.destroy(), () => pdfExportPort?.destroy(), () => pdfPrintSurface?.destroy(), () => wordExporter?.destroy(), () => wordExportPort?.destroy(), () => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
     () => exportEnhancementPort?.destroy(), () => exportDocumentBuilder?.destroy(),
     () => exportDocumentPort?.destroy(), () => exportProgressView.destroy(),
-    () => exportProgressStore.destroy(), () => exportStyles.destroy(), () => exportStylePort.destroy(),
+    () => exportProgressStore.destroy(), () => imageExportLayout.destroy(), () => imageLayoutPort.destroy(),
+    () => exportStyles.destroy(), () => exportStylePort.destroy(),
     () => exportTaskPort.destroy(), () => exportRequestPort.destroy()]) {
     try { release(); } catch (error) { console.error('Export disposal failed:', error); }
   }

@@ -12,6 +12,7 @@
     const exportDocumentPort = exportCompatibilityHost?.markdownEditorExportDocumentPort;
     const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
     const exportStylePort = exportCompatibilityHost?.markdownEditorExportStylePort;
+    const exportImageLayoutPort = exportCompatibilityHost?.markdownEditorImageLayoutPort;
     const exportPdfPort = exportCompatibilityHost?.markdownEditorPdfExportPort;
     const exportWordPort = exportCompatibilityHost?.markdownEditorWordExportPort;
     const exportHtmlPort = exportCompatibilityHost?.markdownEditorHtmlExportPort;
@@ -28,6 +29,7 @@
     if (!exportDocumentPort) throw new Error('Export document compatibility port is unavailable.');
     if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
     if (!exportStylePort) throw new Error('Export style compatibility port is unavailable.');
+    if (!exportImageLayoutPort) throw new Error('Image layout compatibility port is unavailable.');
     if (!exportPdfPort) throw new Error('PDF export compatibility port is unavailable.');
     if (!exportWordPort) throw new Error('Word export compatibility port is unavailable.');
     if (!exportHtmlPort) throw new Error('HTML export compatibility port is unavailable.');
@@ -247,6 +249,7 @@
       let outcome = 'completed';
       let clone = null;
       let imageStyleLease = null;
+      let imageLayoutLease = null;
       try {
         let domToImageApi = null;
         if (!domToImageApi) {
@@ -265,7 +268,6 @@
           return;
         }
 
-        const preset = request.imageOptions;
         const stage = document.getElementById('export-image-stage');
         const container = document.getElementById('export-image-content');
 
@@ -275,45 +277,21 @@
         const fullBody = await exportDocumentPort.build({ task, documentId: request.documentId });
         task.token.throwIfCancelled();
         clone.replaceChildren(fullBody);
-        clone.style.width = preset.width + 'px';
-        clone.style.padding = Math.round(preset.width * 0.04) + 'px ' + Math.round(preset.width * 0.045) + 'px';
-        clone.style.fontSize = Math.round(preset.width / 36) + 'px';
         imageStyleLease = exportStylePort.apply(clone, 'image');
         container.appendChild(clone);
-
-        stage.style.width = preset.width + 'px';
-        stage.style.height = 'auto';
+        imageLayoutLease = exportImageLayoutPort.mount({ root: clone, stage, options: request.imageOptions });
 
         await exportEnhancementPort.enhance({ root: fullBody, task, documentId: request.documentId });
         await prepareExportImages(clone, task);
         task.token.throwIfCancelled();
 
-        const cropFit = request.imageOptions.cropFit;
-        const targetHeight = preset.height;
-        const naturalHeight = clone.scrollHeight;
-
-        let captureHeight;
-        if (naturalHeight < targetHeight) {
-          clone.style.minHeight = targetHeight + 'px';
-          clone.style.height = targetHeight + 'px';
-          captureHeight = targetHeight;
-        } else if (cropFit) {
-          clone.style.height = targetHeight + 'px';
-          clone.style.overflow = 'hidden';
-          captureHeight = targetHeight;
-        } else {
-          clone.style.height = 'auto';
-          clone.style.overflow = 'visible';
-          captureHeight = naturalHeight;
-        }
-
-        stage.style.height = captureHeight + 'px';
+        const layout = imageLayoutLease.measure();
         task.update(96, '正在生成 PNG，此阶段完成前不能立即取消…', 'encoding');
         task.lockCancellation('encoding');
         task.token.throwIfCancelled();
         const dataUrl = await task.token.waitFor(domToImageApi.toPng(clone, {
-          width: preset.width,
-          height: captureHeight,
+          width: layout.width,
+          height: layout.captureHeight,
           bgcolor: getComputedStyle(clone).backgroundColor || '#ffffff',
           cacheBust: true,
           imagePlaceholder: IMAGE_PLACEHOLDER
@@ -332,11 +310,14 @@
           showToast(t('toastImageGenFailed', error?.message || String(error)));
         }
       } finally {
-        imageStyleLease?.release();
-        if (clone) {
-          clone.style.height = '';
-          clone.style.minHeight = '';
-          clone.style.overflow = '';
+        let cleanupError;
+        for (const release of [() => imageLayoutLease?.release(), () => imageStyleLease?.release()]) {
+          try { release(); } catch (error) { cleanupError ??= error; }
+        }
+        if (cleanupError) {
+          outcome = 'failed';
+          console.error(cleanupError);
+          showToast(t('toastImageGenFailed', cleanupError?.message || String(cleanupError)));
         }
         finishExportTask(task, outcome);
       }

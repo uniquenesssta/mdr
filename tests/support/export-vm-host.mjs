@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 const mathCss = readFileSync(join(dirname(createRequire(import.meta.url).resolve('katex')), 'katex.css'), 'utf8');
-import { createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createImageExportLayout, mountClassicImageLayoutPort, createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
 import { createBrowserPrint, createBrowserFileDownload } from '../../src/platform/index.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
@@ -22,10 +22,14 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   const printDom = createExportPrintDom({ onPrint: () => calls.push(['print']) });
   const node = (tag = 'div') => {
     let html = '', children = [];
-    const classes = new Set();
+    const classes = new Set(), attributes = new Map(), priorities = new Map();
+    const style = { getPropertyValue(name) { return this[name] || ''; }, getPropertyPriority: name => priorities.get(name) || '',
+      setProperty(name, value, priority = '') { this[name] = String(value); priorities.set(name, priority); }, removeProperty(name) { const value = this[name] || ''; delete this[name]; priorities.delete(name); return value; } };
     return {
-      tagName: tag.toUpperCase(), style: {}, dataset: {}, value: '', disabled: false, checked: false, scrollHeight: imageHeight,
+      tagName: tag.toUpperCase(), style, dataset: {}, value: '', disabled: false, checked: false, scrollHeight: imageHeight,
       classList: { add: x => classes.add(x), remove: x => classes.delete(x), contains: x => classes.has(x), toggle(x, force) { const next = force ?? !classes.has(x); next ? classes.add(x) : classes.delete(x); return next; } },
+      getAttribute: name => attributes.get(name) ?? null, hasAttribute: name => attributes.has(name),
+      setAttribute(name, value) { attributes.set(name, String(value)); }, removeAttribute(name) { attributes.delete(name); },
       get children() { return children; },
       get textContent() { return html.replace(/<[^>]*>/g, '') + children.map(x => x.textContent || '').join(''); },
       set textContent(value) { html = escapeHtml(value); children = []; },
@@ -123,6 +127,8 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   context.coreMarkdownExportPort = markdownMount.port;
   const styles = createExportStyleSheet({ documentRef: context.document, mathCss });
   const styleMount = mountClassicExportStylePort(host, styles);
+  const imageLayout = createImageExportLayout();
+  const layoutMount = mountClassicImageLayoutPort(host, imageLayout);
   const documentBuilder = createExportDocumentBuilder({
     documentRef: context.document, documentModel: { ...context.documentModel, getTextLength: () => textLength },
     getActiveDocumentId: () => documentId, presentation,
@@ -158,11 +164,11 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   const pdfMount = mountClassicPdfExportPort(host, pdfExporter);
   vm.runInContext(markdownDownload + '\n' + source, context, { filename: 'public/app/export.js', timeout: 1000 });
   return {
-    context, calls, downloads, nodes, timers, events, printDom, pdfExporter, printSurface, taskController, documentBuilder, styles, markdownExporter, htmlExporter, wordExporter,
+    context, calls, downloads, nodes, timers, events, printDom, pdfExporter, printSurface, imageLayout, layoutMount, taskController, documentBuilder, styles, markdownExporter, htmlExporter, wordExporter,
     enhance: (root, task) => enhancementMount.port.enhance({ root, task, documentId }), createNode: node,
     build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,
     cancel: () => nodes.get('export-progress-cancel').click(),
-    destroy() { try { pdfExporter.destroy(); pdfMount.destroy(); printSurface.destroy(); wordExporter.destroy(); wordMount.destroy(); htmlExporter.destroy(); htmlMount.destroy(); markdownExporter.destroy(); markdownMount.destroy(); taskController.destroy(); } finally { enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    destroy() { try { pdfExporter.destroy(); pdfMount.destroy(); printSurface.destroy(); wordExporter.destroy(); wordMount.destroy(); htmlExporter.destroy(); htmlMount.destroy(); markdownExporter.destroy(); markdownMount.destroy(); taskController.destroy(); } finally { imageLayout.destroy(); layoutMount.destroy(); enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
     async runPdf() { const work = context.exportPDF(); await printDom.untilScheduled(); await printDom.fire(80); printDom.frames.at(-1).contentWindow.dispatchEvent({ type: 'afterprint' }); await work; },
     invoke: (name, ...args) => context[name](...args),
     evaluate: expression => vm.runInContext(expression, context),

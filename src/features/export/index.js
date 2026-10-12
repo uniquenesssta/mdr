@@ -24,3 +24,5 @@ export { mountClassicWordExportPort } from './compatibility/classic-word-export-
 export { createPdfExporter } from './formats/pdf-exporter.js';
 export { createPdfPrintSurface } from './document/pdf-print-surface.js';
 export { mountClassicPdfExportPort } from './compatibility/classic-pdf-export-port.js';
+export { calculateImageLayout, createImageExportLayout } from './formats/image/image-export-layout.js';
+export { mountClassicImageLayoutPort } from './compatibility/classic-image-layout-port.js';

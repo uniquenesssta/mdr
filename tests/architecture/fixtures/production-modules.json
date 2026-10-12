@@ -5406,6 +5406,36 @@
       "create-to-destroy",
       "remove-with-classic-callers",
       false
+    ],
+    [
+      "src/features/export/formats/image/image-ratio-presets.js",
+      "esm-module",
+      "export-format",
+      "One immutable ratio/pixel table shared by image request validation and layout without copied policies.",
+      "none",
+      "module-import",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/formats/image/image-export-layout.js",
+      "esm-module",
+      "export-format",
+      "Pure pixel geometry and reversible scoped CSS-variable leases for natural measurement, padding and cropping; independent fault rollback and destroy.",
+      "image-layout-leases",
+      "factory-to-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-image-layout-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Readonly scoped image layout mount; terminal independent unmount preserves replacement property and owner lifetime.",
+      "image-layout-port-mount",
+      "mount-to-destroy",
+      "remove-with-classic-callers",
+      false
     ]
   ]
 }

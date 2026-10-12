@@ -212,7 +212,8 @@ test('R14-01 PNG ratio/padding/crop/natural height, noncancelable encoding and g
     const png = h.calls.find(x => x[0] === 'png'); assert.ok(png);
     assert.equal(png[1].width, 1080); assert.equal(png[1].height, expected);
     assert.equal(png[1].cacheBust, true);
-    assert.equal(h.nodes.get('export-image-stage').style.height, expected + 'px');
+    assert.equal(h.nodes.get('export-image-stage').style.getPropertyValue('--export-image-height'), '');
+    assert.equal(h.nodes.get('export-image-stage').hasAttribute('data-export-image-layout'), false);
     assert.equal(h.nodes.get('export-progress-cancel').disabled, true);
     assert.equal(h.evaluate('currentImageDataUrl'), 'data:image/png;base64,iVBORw0KGgo=');
     await h.invoke('downloadExportImage');

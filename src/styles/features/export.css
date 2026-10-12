@@ -38,6 +38,39 @@
       z-index: var(--layer-below);
 }
 
+/* Capture geometry is temporary and scoped; numeric pixels come from Image Layout. */
+.export-image-stage[data-export-image-layout] {
+      --export-image-width: auto;
+      --export-image-height: auto;
+      width: var(--export-image-width);
+      height: var(--export-image-height);
+}
+
+.export-image-stage .preview-content[data-export-image-layout] {
+      --export-image-width: auto;
+      --export-image-height: auto;
+      --export-image-padding-block: 0px;
+      --export-image-padding-inline: 0px;
+      --export-image-font-size: inherit;
+      box-sizing: border-box;
+      width: var(--export-image-width);
+      padding: var(--export-image-padding-block) var(--export-image-padding-inline);
+      font-size: var(--export-image-font-size);
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+}
+
+.export-image-stage .preview-content[data-export-image-layout="pad"] {
+      min-height: var(--export-image-height);
+      height: var(--export-image-height);
+}
+
+.export-image-stage .preview-content[data-export-image-layout="crop"] {
+      height: var(--export-image-height);
+      overflow: hidden;
+}
+
 .ratio-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));

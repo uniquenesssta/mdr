@@ -432,6 +432,9 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
           const png=document.getElementById('export-image-preview').src,actual=await decode(png),root=document.getElementById('export-image-content').firstElementChild;
           const released=!root.classList.contains('export-document')&&!root.hasAttribute('data-export-format');
           const lease=styles.apply(root,'image'),previousHeight=root.style.height;
+          const geometry=host.markdownEditorImageLayoutPort.mount({root,stage:document.getElementById('export-image-stage'),
+            options:host.markdownEditorExportRequestPort.createRequest({format:'image',imageOptions:{ratio:'9:16',cropFit:false}}).imageOptions});
+          geometry.measure();
           root.style.height=actual.height+'px';
           const mathml=Array.from(root.querySelectorAll('.katex-mathml')),hidden=mathml.every(node=>getComputedStyle(node).display==='none');
           const retained=mathml.map(node=>({node,parent:node.parentNode,next:node.nextSibling}));
@@ -447,7 +450,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
             } else results.push({theme,width:actual.width,height:actual.height,hidden,mathml:mathml.length,released,diff,png,reference});
           } finally {
             control?.remove();for(const item of retained)item.parent.insertBefore(item.node,item.next);
-            root.style.height=previousHeight;lease.release();
+            root.style.height=previousHeight;geometry.release();lease.release();
           }
         }
         return results;
@@ -775,6 +778,53 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.deepEqual(result.rows.map(x=>x.prints),[0,0,1]);assert.equal(result.rows[0].cancelled,true);assert.equal(result.current,true);for(const row of result.rows){assert.equal(row.released,true);assert.equal(row.removed,true);}
   });
 
+  await test('R14-13 actual five ratio buttons produce exact PNG pixels with scoped geometry and unchanged Preview', async () => {
+    await loadMarkdown('# Layout pixels\n\nKEEP FULL BODY 原文 😀');
+    const rows=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),tasks=host.markdownEditorExportTaskPort,stage=document.getElementById('export-image-stage'),preview=document.getElementById('export-image-preview');
+      const appPreview=document.getElementById('preview'),originalNodes=Array.from(appPreview.childNodes),renderer=await host.markdownEditorPresentationPort.loadDomToImage(),originalPng=renderer.toPng;
+      const checkbox=document.getElementById('image-crop-fit'),oldCrop=checkbox.checked,oldRatio=document.querySelector('.ratio-btn.active')?.dataset.ratio||'9:16';const rows=[];let capture,encodes=0;
+      renderer.toPng=async(root,input)=>{encodes++;const css=getComputedStyle(root);capture={width:input.width,height:input.height,mode:root.getAttribute('data-export-image-layout'),cssWidth:css.width,cssHeight:css.height,boxSizing:css.boxSizing,paddingBlock:css.paddingTop,paddingInline:css.paddingLeft,fontSize:css.fontSize,stageWidth:getComputedStyle(stage).width,stageHeight:getComputedStyle(stage).height,
+        complete:root.textContent.includes('KEEP FULL BODY 原文 😀'),locked:tasks.getSnapshot().activeTask?.phase==='encoding'&&tasks.getSnapshot().activeTask?.cancelable===false};const png=await originalPng.call(renderer,root,input);capture.png=png;return png;};
+      const run=async ratio=>{capture=null;const prior=tasks.getSnapshot().lastTaskId;document.querySelector('.ratio-btn[data-ratio="'+ratio+'"]').click();if(tasks.getSnapshot().lastTaskId===prior)throw new Error('Ratio button did not start the real image task');
+        const started=performance.now();while(tasks.getSnapshot().activeTask){if(performance.now()-started>15000)throw new Error('Image ratio task did not finish');await new Promise(resolve=>requestAnimationFrame(resolve));}
+        if(!capture?.png||preview.src!==capture.png)throw new Error('Ratio command did not publish its actual encoded PNG');const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Ratio PNG decode failed'));image.src=capture.png;});
+        const root=document.getElementById('export-image-content').firstElementChild;return {ratio,...capture,pixelWidth:image.naturalWidth,pixelHeight:image.naturalHeight,released:!root.hasAttribute('data-export-image-layout')&&!stage.hasAttribute('data-export-image-layout')&&root.style.getPropertyValue('--export-image-width')===''&&stage.style.getPropertyValue('--export-image-height')==='',
+          samePreview:appPreview.childNodes.length===originalNodes.length&&originalNodes.every((node,index)=>appPreview.childNodes[index]===node),scoped:typeof window.markdownEditorImageLayoutPort==='undefined'&&Object.isFrozen(host.markdownEditorImageLayoutPort)};};
+      try {checkbox.checked=false;for(const ratio of ['9:16','4:5','3:4','1:1','16:9'])rows.push(await run(ratio));
+        let replaced=false;const beforeEncodes=encodes,unsubscribe=tasks.subscribe(snapshot=>{if(!replaced&&snapshot.activeTask?.phase==='enhancing'&&document.getElementById('export-image-content').firstElementChild?.hasAttribute('data-export-image-layout')){replaced=true;document.querySelector('.ratio-btn[data-ratio="1:1"]').click();}});
+        try{const rapid=await run('4:5');rows.push({...rapid,ratio:'1:1',rapidReplaced:replaced,rapidEncodes:encodes-beforeEncodes,activeRatio:document.querySelector('.ratio-btn.active')?.dataset.ratio});}finally{unsubscribe();}return rows;
+      }finally{checkbox.checked=oldCrop;renderer.toPng=originalPng;selectImageRatio(oldRatio);const started=performance.now();while(tasks.getSnapshot().activeTask){if(performance.now()-started>15000)throw new Error('Image ratio restore did not finish');await new Promise(resolve=>requestAnimationFrame(resolve));}}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-13-ratio-pixels.json'),JSON.stringify(rows.map(({png,...row})=>row),null,2));
+    const sizes={'9:16':[1080,1920],'4:5':[1080,1350],'3:4':[1080,1440],'1:1':[1080,1080],'16:9':[1920,1080]};
+    for(const row of rows){await writeFile(join(artifactRoot,'r14-13-ratio-'+(row.rapidReplaced?'rapid-':'')+row.ratio.replace(':','_')+'.png'),Buffer.from(row.png.split(',')[1],'base64'));
+      const [width,height]=sizes[row.ratio];assert.equal(row.width,width);assert.equal(row.pixelWidth,width);assert.equal(row.height,height);assert.equal(row.pixelHeight,height);assert.equal(row.mode,'pad');assert.equal(row.boxSizing,'border-box');
+      assert.equal(row.cssWidth,width+'px');assert.equal(row.cssHeight,height+'px');assert.equal(row.stageWidth,width+'px');assert.equal(row.stageHeight,height+'px');assert.equal(row.paddingBlock,Math.round(width*0.04)+'px');assert.equal(row.paddingInline,Math.round(width*0.045)+'px');assert.equal(row.fontSize,Math.round(width/36)+'px');
+      for(const field of ['complete','locked','released','samePreview','scoped'])assert.equal(row[field],true,field);}
+    const rapid=rows.at(-1);assert.equal(rapid.rapidReplaced,true);assert.equal(rapid.rapidEncodes,1);assert.equal(rapid.activeRatio,'1:1');
+  });
+
+  await test('R14-13 actual natural long PNG and cropped PNG retain full DOM and identical visible prefix', async () => {
+    await loadMarkdown('# Long geometry\n\n'+Array.from({length:50},(_,index)=>'Geometry paragraph '+index+(index===49?' KEEP LAST 原文 😀':' — readable content')).join('\n\n'));
+    const result=await page.evaluate(`(async()=>{
+      const host=document.getElementById('compatibility-business-ports'),tasks=host.markdownEditorExportTaskPort,renderer=await host.markdownEditorPresentationPort.loadDomToImage(),originalPng=renderer.toPng;
+      const checkbox=document.getElementById('image-crop-fit'),oldCrop=checkbox.checked,oldRatio=document.querySelector('.ratio-btn.active')?.dataset.ratio||'9:16';let captured;const rows=[];
+      renderer.toPng=async(root,input)=>{const css=getComputedStyle(root),tail=root.querySelector('.markdown-body')?.lastElementChild,rect=root.getBoundingClientRect();captured={width:input.width,height:input.height,mode:root.getAttribute('data-export-image-layout'),overflow:css.overflow,bodyComplete:root.textContent.includes('KEEP LAST 原文 😀'),paragraphs:root.querySelectorAll('p').length,tailBottom:tail?tail.getBoundingClientRect().bottom-rect.top:null};
+        const png=await originalPng.call(renderer,root,input);captured.png=png;return png;};
+      const decode=async png=>{const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Long/crop PNG decode failed'));image.src=png;});const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;const context=canvas.getContext('2d');context.drawImage(image,0,0);return {width:canvas.width,height:canvas.height,context};};
+      try {for(const cropFit of [false,true]){captured=null;checkbox.checked=cropFit;document.querySelector('.ratio-btn[data-ratio="9:16"]').click();const started=performance.now();while(tasks.getSnapshot().activeTask){if(performance.now()-started>15000)throw new Error('Long/crop task did not finish');await new Promise(resolve=>requestAnimationFrame(resolve));}
+          if(!captured?.png||document.getElementById('export-image-preview').src!==captured.png)throw new Error('Long/crop image did not publish the real PNG');const decoded=await decode(captured.png),root=document.getElementById('export-image-content').firstElementChild;
+          rows.push({cropFit,...captured,pixelWidth:decoded.width,pixelHeight:decoded.height,released:tasks.getSnapshot().activeTask===null&&!root.hasAttribute('data-export-image-layout')&&!document.getElementById('export-image-stage').hasAttribute('data-export-image-layout')});}
+        const long=await decode(rows[0].png),crop=await decode(rows[1].png),a=long.context.getImageData(0,0,crop.width,crop.height).data,b=crop.context.getImageData(0,0,crop.width,crop.height).data;let differentPixels=0;
+        for(let i=0;i<a.length;i+=4)if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]||a[i+3]!==b[i+3])differentPixels++;return {rows,differentPixels};
+      }finally{checkbox.checked=oldCrop;renderer.toPng=originalPng;selectImageRatio(oldRatio);const started=performance.now();while(tasks.getSnapshot().activeTask){if(performance.now()-started>15000)throw new Error('Long/crop restore did not finish');await new Promise(resolve=>requestAnimationFrame(resolve));}}
+    })()`);
+    await writeFile(join(artifactRoot,'r14-13-long-crop.json'),JSON.stringify({...result,rows:result.rows.map(({png,...row})=>row)},null,2));
+    for(const row of result.rows){await writeFile(join(artifactRoot,'r14-13-'+(row.cropFit?'crop':'long')+'.png'),Buffer.from(row.png.split(',')[1],'base64'));assert.equal(row.width,1080);assert.equal(row.pixelWidth,1080);assert.equal(row.height,row.pixelHeight);assert.equal(row.bodyComplete,true);assert.equal(row.paragraphs,50);assert.equal(row.released,true);}
+    const [long,crop]=result.rows;assert.equal(long.mode,'long');assert.equal(long.overflow,'visible');assert.ok(long.height>1920);assert.ok(long.tailBottom<=long.height);assert.equal(crop.mode,'crop');assert.equal(crop.overflow,'hidden');assert.equal(crop.height,1920);assert.ok(crop.tailBottom>crop.height);assert.equal(result.differentPixels,0,'Crop must keep the real long PNG visible prefix byte-for-byte.');
+  });
+
   // Final app probe: exercise the production pagehide owner after all other export probes.
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {
     const result = await page.evaluate(`(async () => {
@@ -784,6 +834,8 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const enhancer=host.markdownEditorExportEnhancementPort;
       const markdown=host.markdownEditorMarkdownExportPort,html=host.markdownEditorHtmlExportPort,word=host.markdownEditorWordExportPort,pdf=host.markdownEditorPdfExportPort;
       const styles=host.markdownEditorExportStylePort,styleRoot=document.createElement('div');document.body.append(styleRoot);styles.apply(styleRoot,'image');
+      const layout=host.markdownEditorImageLayoutPort,layoutStage=document.getElementById('export-image-stage'),layoutRoot=document.createElement('div');layoutRoot.className='preview-content';layoutStage.append(layoutRoot);
+      const layoutLease=layout.mount({root:layoutRoot,stage:layoutStage,options:host.markdownEditorExportRequestPort.createRequest({format:'image'}).imageOptions});layoutLease.measure();
       const enhancementBody=await builder.build();
       enhancementBody.replaceChildren(...Array.from({length:25},()=>{const node=document.createElement('p');node.textContent='dispose enhancement';return node;}));
       const raf=window.requestAnimationFrame;let interceptedFrames=0;
@@ -810,7 +862,8 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       let htmlRejected=false;try {await html.export({});}catch(error){htmlRejected=/destroyed/.test(error.message);}
       let wordRejected=false;try {await word.export({});}catch(error){wordRejected=/destroyed/.test(error.message);}
       let pdfRejected=false;try {await pdf.export({});}catch(error){pdfRejected=/destroyed/.test(error.message);}
-      return {pdfRejected,printCount,printRemoved:!pendingFrame.isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
+      let layoutRejected=false;try {layout.mount({});}catch(error){layoutRejected=/destroyed/.test(error.message);}
+      return {layoutRejected,layoutReleased:!layoutRoot.hasAttribute('data-export-image-layout')&&!layoutStage.hasAttribute('data-export-image-layout')&&layoutRoot.style.getPropertyValue('--export-image-width')===''&&!Object.hasOwn(host,'markdownEditorImageLayoutPort'),pdfRejected,printCount,printRemoved:!pendingFrame.isConnected&&!document.querySelector('iframe[data-export-print="pdf"]'),snapshot:port.getSnapshot(),lastSeen:seen.at(-1),cancelled:task.cancelled,phase:task.phase,waiting,building,enhancing,interceptedFrames,
         lateUpdate:task.update(100,'late'),lateLock:task.lockCancellation('encoding'),lateFinish:finishExportTask(task),
         stylesRemoved:!document.querySelector('style[data-export-style-sheet="document"]')&&!styleRoot.classList.contains('export-document')&&!styleRoot.hasAttribute('data-export-format'),
         rejected,cancelledError,markdownRejected,htmlRejected,wordRejected,removed:!Object.hasOwn(host,'markdownEditorPdfExportPort')&&!Object.hasOwn(host,'markdownEditorWordExportPort')&&!Object.hasOwn(host,'markdownEditorHtmlExportPort')&&!Object.hasOwn(host,'markdownEditorMarkdownExportPort')&&!Object.hasOwn(host,'markdownEditorExportTaskPort')&&!Object.hasOwn(host,'markdownEditorExportRequestPort')&&!Object.hasOwn(host,'markdownEditorExportDocumentPort')&&!Object.hasOwn(host,'markdownEditorExportEnhancementPort')&&!Object.hasOwn(host,'markdownEditorExportStylePort'),
@@ -825,7 +878,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
     assert.deepEqual(result.building, {cancelled:true,reason:'destroyed'});
     assert.deepEqual(result.enhancing, {cancelled:true,reason:'destroyed'});assert.equal(result.interceptedFrames,1);
     for (const field of ['lateUpdate','lateLock','lateFinish','progressVisible']) assert.equal(result[field], false, field);
-    for (const field of ['pdfRejected','printRemoved','rejected','cancelledError','markdownRejected','htmlRejected','wordRejected','removed']) assert.equal(result[field], true, field);
+    for (const field of ['layoutRejected','layoutReleased','pdfRejected','printRemoved','rejected','cancelledError','markdownRejected','htmlRejected','wordRejected','removed']) assert.equal(result[field], true, field);
     await writeFile(join(artifactRoot, 'r14-03-task-disposal.json'), JSON.stringify(result, null, 2));
   });
 }
