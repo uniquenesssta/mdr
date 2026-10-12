@@ -1,6 +1,6 @@
 # R14-14 Asset Preloader
 
-状态：**已实现，待本提交 Windows 累计验证**；14.14不勾选，14.15未开始。唯一分支`agent/r14-stage`，基线为13正式验收提交`f4e5d5ed64e27216a0152736ff8d0f21f87f488e` / [CI38197683019](https://github.com/uniquenesssta/mdr/actions/runs/38197683019)。[13正式验收](R14-13-DETAILS.md#正式验收2026-10-12)与原实施历史保留。
+状态：**已实现；首轮 Windows 累计验证未通过，修复架构误报后待复验**；14.14不勾选，14.15未开始。唯一分支`agent/r14-stage`，基线为13正式验收提交`f4e5d5ed64e27216a0152736ff8d0f21f87f488e` / [CI38197683019](https://github.com/uniquenesssta/mdr/actions/runs/38197683019)。[13正式验收](R14-13-DETAILS.md#正式验收2026-10-12)与原实施历史保留。
 
 ## 13收尾证据
 
@@ -64,3 +64,16 @@ Context7仅查询dom-to-image-more图片内联与imagePlaceholder；返回main�
 本地仅进行语法、架构和记录等静态复核，结果保存在现有[精确范围记录](audit/r12-24-closeout.json)的`currentSourceReview.currentStageImplementation.staticReview`。544条生产模块清单保留原542条，72条风险路径保留原70条，原R12验收与阶段历史不覆盖；静态通过不等于Windows功能已通过。
 
 14.14待新精确head七组Windows/累计全仓与61实际场景后才能验收；14.15 Data Encoder未开始，14.16最终Image Exporter和A10完整图片链、14.17 UI/经典删除保持接收。回退使用本任务基线f4e5d5e，不改变存储格式或数据库。启动Actions后结束会话，不轮询，约15～20分钟后查询。
+
+## 首轮失败与修复（2026-10-12）
+
+`8d925b3` / [CI38215675711](https://github.com/uniquenesssta/mdr/actions/runs/38215675711)已结束且失败。七组中六组成功，前端1045/1045、预载41/41、浏览器11/11＋61/61通过；全仓唯一直接失败为`tests/architecture/stage-09-editor-scroll-mapper.test.mjs:50`。最终汇总因repository-tests失败而正确拒绝，不能将实际图片场景通过等同本任务正式验收。
+
+失败断言拼接Selection Controller与整个`src/main.js`，禁止所有`createElement('canvas')`，因14.14组合根为导出资源提供Canvas创建能力而触发。该能力只注入图片预载，实际drawImage/像素内联属于预载所有者；Sync依然使用EditorScrollMapper与CodeMirror几何能力，没有恢复旧textarea/Canvas文本测量。此结论来自失败日志、唯一Canvas位置与当前调用链，产品代码无需搬动来规避测试。
+
+| 原断言目的 | 修复后的检查 | 保留与新增场景 |
+|---|---|---|
+| 防止Sync恢复Canvas全文测量与第二指标权威 | 五个Sync模块全部禁止Canvas创建；Sync与组合根一起禁止2D测量context、measureText、旧指标字段和重建函数 | 原mapper委托、core命令、经典脚本删除及销毁断言全部保留；新增正控拒绝单/双引号Canvas创建，以及Sync或组合根中的context、measureText、旧字段与重建函数 |
+| 组合根只注入几何能力，不恢复编辑器指标所有者 | 原EditorScrollMapper公共工厂、几何委托、销毁及无window权威断言保持；允许组合根向独立图片预载注入DOM工厂 | 实际导出Canvas注入仍受新增静态正控核对；41项预载与61个真实页面场景保留 |
+
+本轮只修改该架构检查及项目记录，未新增例外名单、跳过场景或修改产品、依赖、工作流。执行`node --test tests/architecture/stage-09-editor-scroll-mapper.test.mjs tests/architecture/stage-09-final-sync-legacy-removal.test.mjs`：17/17通过，这是源代码/清单静态审计，不能代替Windows产品复验。其余累计测试、真实图片和Rust由修复提交的七组Windows CI重验；14.14仍不勾选，14.15未开始。

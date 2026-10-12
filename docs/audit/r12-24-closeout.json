@@ -932,7 +932,7 @@
       "stage": "R14.14",
       "baselineCommit": "f4e5d5ed64e27216a0152736ff8d0f21f87f488e",
       "branch": "agent/r14-stage",
-      "status": "implemented-pending-exact-head-Windows-admission",
+      "status": "first-Windows-admission-failed-static-Sync-guard-corrected-pending-exact-head-revalidation",
       "record": "docs/R14-14-DETAILS.md",
       "productionChanged": true,
       "dependenciesChanged": false,
@@ -1010,10 +1010,47 @@
         "limitations": "New product Node tests, build, browser pixel scenarios and Rust validation await exact-head Windows CI."
       },
       "notClaimed": [
-        "Windows product tests/build/browser/Rust for the new head have not yet run.",
+        "The first Windows run completed but failed one obsolete architecture assertion; formal admission awaits the corrected exact-head cumulative Windows run.",
         "Data encoder14.15,final Image Exporter14.16 and classic UI14.17 are not implemented by this task.",
         "Overall A10 image acceptance remains pending14.16."
-      ]
+      ],
+      "firstWindowsFailureReview": {
+        "commit": "8d925b3603470bcb1f5527baeca319c8d1bbd3d0",
+        "runId": 38215675711,
+        "status": "failed",
+        "successfulIndependentJobs": 6,
+        "failedIndependentJob": "repository-tests",
+        "directFailure": "R9-04 final Sync code has no legacy Canvas textarea metric authority and delegates editor geometry only to EditorScrollMapper",
+        "failureLocation": "tests/architecture/stage-09-editor-scroll-mapper.test.mjs:50",
+        "cause": "The old guard scans the whole composition root for Canvas creation and incorrectly rejects the newly injected export-only Canvas factory. No Sync metric authority was restored.",
+        "frontendPassed": 1045,
+        "frontendTotal": 1045,
+        "assetContractsPassed": 41,
+        "assetContractsTotal": 41,
+        "browserContractsPassed": 11,
+        "builtAppPassed": 61,
+        "builtAppTotal": 61,
+        "finalCloseout": "correctly rejected repository-tests failure",
+        "repair": "Strict Canvas ban on all five Sync modules; retain no 2D text measurement and old metric identifiers/functions across Sync and main; add positive controls for reintroduced Canvas and metric authority.",
+        "localStaticChecks": {
+          "command": "node --test tests/architecture/stage-09-editor-scroll-mapper.test.mjs tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
+          "passed": 17,
+          "total": 17,
+          "scope": "Source/inventory static checks only; no local product acceptance.",
+          "gates": {
+            "architecture": "passed",
+            "legacy-runtime": "passed",
+            "generated-files": "passed",
+            "readme-record": "passed",
+            "javascript-syntax": "passed",
+            "diff-whitespace": "passed"
+          }
+        },
+        "productionChangedByRepair": false,
+        "dependenciesChangedByRepair": false,
+        "workflowChangedByRepair": false,
+        "nextStageStarted": false
+      }
     },
     "priorStageAcceptance": {
       "stage": "R14.11",

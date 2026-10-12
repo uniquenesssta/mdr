@@ -9,6 +9,15 @@ const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const file = path => resolve(ROOT, path);
 const read = path => readFile(file(path), 'utf8');
 
+function assertNoLegacyEditorMetrics(syncSource, main) {
+  const combined = syncSource + main;
+  assert.doesNotMatch(combined, /editorMeasureCanvas|editorMeasureContext|editorMetricText|editorMetricLines|editorLineRows|editorVisualOffsets/);
+  assert.doesNotMatch(combined, /getContext\(['"]2d['"]\)|measureText\s*\(|rebuildEditorLineMetrics|scheduleEditorMetricsRebuild/);
+  // The composition root injects Canvas creation into image export. Sync itself
+  // must never create a Canvas, and neither source may own text measurement.
+  assert.doesNotMatch(syncSource, /createElement\(['"]canvas['"]\)/);
+}
+
 test('R9-04 creates one canonical EditorScrollMapper and exports it only through the Sync public entry', async () => {
   const mapper = await read('src/features/sync/scroll/editor-scroll-mapper.js');
   const index = await read('src/features/sync/index.js');
@@ -50,18 +59,40 @@ test('R9-04 final composition injects editor/model capabilities through the publ
 test('R9-04 final Sync code has no legacy Canvas textarea metric authority and delegates editor geometry only to EditorScrollMapper', async () => {
   const controller = await read('src/features/sync/selection/selection-sync-controller.js');
   const main = await read('src/main.js');
-  const combined = controller + main;
+  const syncSource = (await Promise.all([
+    'src/features/sync/selection/selection-sync-controller.js',
+    'src/features/sync/scroll/editor-scroll-mapper.js',
+    'src/features/sync/scroll/preview-scroll-mapper.js',
+    'src/features/sync/scroll/scroll-sync-controller.js',
+    'src/features/sync/scroll/scroll-geometry-session.js'
+  ].map(read))).join('\n');
   assert.match(controller, /this\.editorMapper\.getLineNumberAtPosition/);
   assert.match(controller, /this\.editorMapper\.getContentYForPosition/);
   assert.match(main, /editorScrollMapper\.getLineAtContentY/);
   assert.match(main, /editorScrollMapper\.getContentYForLine/);
-  assert.doesNotMatch(combined, /editorMeasureCanvas|editorMeasureContext|editorMetricText|editorMetricLines|editorLineRows|editorVisualOffsets/);
-  assert.doesNotMatch(combined, /createElement\(['"]canvas['"]\)|getContext\(['"]2d['"]\)|measureText\s*\(|rebuildEditorLineMetrics|scheduleEditorMetricsRebuild/);
+  assertNoLegacyEditorMetrics(syncSource, main);
   const core = await read('public/app/core.js');
   assert.doesNotMatch(core, /scheduleEditorMetricsRebuild/);
   assert.match(core, /coreEditorUiCommandPort\.has\('preparePreviewEditorMetrics'\)/);
   assert.match(core, /coreEditorUiCommandPort\.invoke\('preparePreviewEditorMetrics'\)/);
   await assert.rejects(access(file('public/app/scroll-sync.js')));
+});
+
+test('R9-04 metric guard permits injected export Canvas but rejects restored Sync Canvas or measurement authority', async () => {
+  const main = await read('src/main.js');
+  assert.match(main, /createCanvas: \(\) => document\.createElement\('canvas'\)/);
+  assertNoLegacyEditorMetrics('', main);
+  for (const regression of [
+    "document.createElement('canvas')", 'document.createElement("canvas")'
+  ]) assert.throws(() => assertNoLegacyEditorMetrics(regression, main), assert.AssertionError);
+  for (const regression of [
+    "context.getContext('2d')", 'context.getContext("2d")',
+    'context.measureText(text)', 'let editorMeasureCanvas;',
+    'rebuildEditorLineMetrics()', 'scheduleEditorMetricsRebuild()'
+  ]) {
+    assert.throws(() => assertNoLegacyEditorMetrics(regression, main), assert.AssertionError);
+    assert.throws(() => assertNoLegacyEditorMetrics('', main + regression), assert.AssertionError);
+  }
 });
 
 test('R9-04 remains intact after final Selection migration without restoring old mapping or Controller authority', async () => {
