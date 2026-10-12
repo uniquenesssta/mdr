@@ -1062,7 +1062,125 @@
         "Captured download boundaries prove Blob bytes/lifecycle;only the actual native readback proves written disk bytes.",
         "Existing image modal orchestration/source identity owner migrates in14.16;write task cancellation lifecycle belongs to14.16/14.17.",
         "Overall A10 final image closure remains pending14.16."
-      ]
+      ],
+      "firstWindowsRun": {
+        "commit": "c3e6a6a7a4500e7d24ed9288522691268a1a0efd",
+        "run": 38223327955,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38223327955",
+        "conclusion": "failure",
+        "jobsPassed": 5,
+        "frontendNodePassed": 1103,
+        "imageDataPassed": 58,
+        "browserContractPassed": 11,
+        "builtApp": {
+          "total": 63,
+          "passed": 61,
+          "failed": 2,
+          "newImageDataScenariosPassed": 2
+        },
+        "failures": [
+          {
+            "stage": "R14-10",
+            "scenario": "complete HTML body",
+            "error": "Runtime.evaluate: CDP response timed out"
+          },
+          {
+            "stage": "R14-11",
+            "scenario": "complete Word body",
+            "error": "Runtime.evaluate: CDP response timed out"
+          }
+        ],
+        "nativeBinaryReadback": {
+          "status": "passed",
+          "cases": [
+            {
+              "name": "base64-all-octets",
+              "bytes": 65537,
+              "sha256": "2deb0bd2129a9d3aed91e3cff58b3993752be549642890a3e853ec1065f9b617"
+            },
+            {
+              "name": "percent-all-octets",
+              "bytes": 256,
+              "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880"
+            },
+            {
+              "name": "unicode",
+              "bytes": 20,
+              "sha256": "6e0c0af6574243794a2006fedec3ae23e279ff2ffb0722abc281b5bd2f52c92b"
+            },
+            {
+              "name": "actual-png",
+              "bytes": 93,
+              "sha256": "fa3b0769667a47ed741d5b37a073d042394ef259fe11b3315d50c28f6bf9a52e"
+            }
+          ],
+          "directoryRejected": true,
+          "nextWriteRecovered": true
+        },
+        "verifiedArtifacts": [
+          {
+            "id": 11735447667,
+            "sha256": "2d219892bb8d5455a34a27f1c65fc42862a2679a3257441b5e8edd7dd28842cb"
+          },
+          {
+            "id": 11735287618,
+            "sha256": "8df4eca497c5592fe2a2b33481bbf457e34a6553963c8c4c712bee141fe19d05"
+          }
+        ],
+        "accepted": false
+      },
+      "repair": {
+        "status": "implemented-pending-exact-head-Windows-admission",
+        "scope": "Split only complete HTML/Word fixture preparation into real import, initial reveal, visual editing, both layout, final reveal and strict idle CDP requests in the original order and with original per-step budgets; full Editor/model identity checks and persistent per-step/export timing evidence.",
+        "diagnosis": "Five existing idle budgets total25s plus real import/layout/frame work inside one30s CDP request. Screenshots show large loaded document; old logs cannot uniquely identify the timed-out phase. Repair request boundary and add phase evidence; do not claim proven product export performance.",
+        "productionChanged": false,
+        "workflowChanged": false,
+        "dependenciesChanged": false,
+        "rustChanged": false,
+        "cdpTimeoutMsUnchanged": 30000,
+        "originalIdleBudgetsMs": [
+          5000,
+          4000,
+          4000,
+          6000,
+          6000
+        ],
+        "sameLargeSourceUtf16Length": 450024,
+        "sameLargeSingleLineUtf16Length": 450000,
+        "sameScenarioNamesOrderAndExportAssertions": true,
+        "builtAppScenariosDefined": 63,
+        "newStrictReadinessChecks": true,
+        "retriesOrSkipsAdded": false,
+        "priorAcceptancePreserved": true,
+        "staticReview": {
+          "status": "passed",
+          "productTestsRunLocally": false,
+          "architectureGate": "passed",
+          "legacyRuntimeGate": "passed",
+          "generatedFilesGate": "passed",
+          "readmeRecordGate": "passed",
+          "javascriptSyntaxFiles": 1,
+          "embeddedPreparationTemplatesCompiled": 7,
+          "compiledInputVariants": 3,
+          "relativeLinksChecked": 169,
+          "riskFingerprintsChecked": 76,
+          "riskPathsAndFingerprintsUnchanged": true,
+          "historicalStageHistoryAndPriorAcceptanceUnchanged": true,
+          "originalFixtureSourceExportExpressionAssertionsAndScenarioNamesUnchanged": true,
+          "changedFiles": [
+            "AGENTS.md",
+            "README.md",
+            "docs/R14-15-DETAILS.md",
+            "docs/README.md",
+            "docs/audit/r12-24-closeout.json",
+            "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
+            "tests/e2e/lib/export-characterization.mjs"
+          ],
+          "productionWorkflowDependenciesAndTimeoutUnchanged": true,
+          "diffWhitespaceCheck": "passed",
+          "limitations": "Only static checks locally; repair awaits exact-head Windows7 jobs and63 actual-page scenarios."
+        }
+      }
     },
     "priorStageAcceptance": {
       "stage": "R14.14",

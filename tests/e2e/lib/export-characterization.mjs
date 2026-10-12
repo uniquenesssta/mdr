@@ -5,6 +5,58 @@ import { createServer } from 'node:http';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
+// Keep each real application preparation operation in its own CDP request.
+// loadMarkdown combines five idle budgets (25s) plus import/layout work in one
+// request; that can exhaust the unchanged 30s transport deadline before export.
+// These plain-text fixtures focus position 0, exactly as the E2E bridge does.
+async function loadCompleteBodyFixture(page, source, trace, tracePath) {
+  const steps = [
+    ['import', `(async()=>{
+      const commands=document.getElementById('compatibility-business-ports')?.markdownEditorDocumentUiCommandPort;
+      if(!commands?.has('importTextContent'))throw new Error('application document import flow is unavailable');
+      if(!await commands.invoke('importTextContent','e2e-fixture.md',${JSON.stringify(source)},''))throw new Error('application document import flow rejected the E2E fixture');
+      if(!document.getElementById('editor')?.virtualEditor)throw new Error('virtual editor is unavailable after document import');
+      return true;
+    })()`],
+    ['initial-position', `window.__markdownEditorE2E.revealPosition(0,{timeoutMs:5000})`],
+    ['visual-editing', `window.__markdownEditorE2E.setVisualEditing({code:true,table:true})`],
+    ['layout', `window.__markdownEditorE2E.setLayout('both')`],
+    ['final-position', `window.__markdownEditorE2E.revealPosition(0,{timeoutMs:6000})`],
+    ['idle', `window.__markdownEditorE2E.waitForIdle({timeoutMs:6000})`],
+    ['identity', `(()=>{
+      const snapshot=window.__markdownEditorE2E.snapshot(),expected=${JSON.stringify(source)};
+      return {ready:snapshot.ready,layout:snapshot.layout,documentLength:snapshot.documentLength,
+        selectionStart:snapshot.selectionStart,selectionEnd:snapshot.selectionEnd,
+        editorMatches:window.__markdownEditorE2E.getEditorValue()===expected,
+        modelMatches:window.markdownEditorDocumentModel.createSnapshot('r14-complete-body-setup')===expected};
+    })()`]
+  ];
+  for(const [step,expression] of steps) {
+    const row={sourceLength:source.length,step,status:'started'};
+    trace.push(row);
+    await writeFile(tracePath,JSON.stringify(trace,null,2));
+    const started=performance.now();
+    try {
+      const result=await page.evaluate(expression);
+      if(step==='idle')assert.equal(result,true,'Complete-body fixture must reach idle before export');
+      if(step==='identity') {
+        row.observation=result;
+        assert.equal(result.ready,true);assert.equal(result.layout,'both');
+        assert.equal(result.documentLength,source.length);
+        assert.equal(result.selectionStart,0);assert.equal(result.selectionEnd,0);
+        assert.equal(result.editorMatches,true);assert.equal(result.modelMatches,true);
+      }
+      row.status='passed';
+    } catch(error) {
+      row.status='failed';row.error=String(error?.stack||error);
+      throw new Error(`Complete-body fixture ${step} failed (${source.length} UTF-16 units)`,{cause:error});
+    } finally {
+      row.elapsedMs=Math.round(performance.now()-started);
+      await writeFile(tracePath,JSON.stringify(trace,null,2));
+    }
+  }
+}
+
 export async function runExportCharacterization({ page, test, loadMarkdown, artifactRoot, applicationHost }) {
   const fixture = JSON.parse(await readFile(new URL('../../fixtures/stage-14-export/contracts.json', import.meta.url), 'utf8'));
   const requests = JSON.parse(await readFile(new URL('../../fixtures/stage-14-export/requests.json', import.meta.url), 'utf8'));
@@ -651,9 +703,12 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
   });
 
   await test(`${stage} actual ${label} export preserves empty Unicode and complete large bodies without replacing Preview`, async () => {
-    const results=[];
+    const results=[],setupTrace=[],setupTracePath=join(artifactRoot,`${prefix}-complete-${format}-setup.json`);
     for(const source of ['', '# Unicode 中文 😀\n\n完整正文', '# Large HTML\n\n'+'原文 😀'.repeat(90000)+'\n\nEND-HTML']) {
-      await loadMarkdown(source);
+      await loadCompleteBodyFixture(page,source,setupTrace,setupTracePath);
+      const exportRow={sourceLength:source.length,step:'export-and-readback',status:'started'},exportStarted=performance.now();
+      setupTrace.push(exportRow);await writeFile(setupTracePath,JSON.stringify(setupTrace,null,2));
+      try {
       results.push(await page.evaluate(`(async()=>{
         const host=document.getElementById('compatibility-business-ports'),preview=document.getElementById('preview'),nodes=Array.from(preview.childNodes);
         const expected=window.markdownEditorDocumentModel.createSnapshot('r14-10-expected'),blobs=new Map(),captures=[],revoked=[];
@@ -673,6 +728,14 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
             released:host.markdownEditorExportTaskPort.getSnapshot().activeTask===null,scoped:typeof window['${portKey}']==='undefined'&&Object.isFrozen(host['${portKey}'])};
         } finally {URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;}
       })()`));
+      exportRow.status='passed';
+      } catch(error) {
+        exportRow.status='failed';exportRow.error=String(error?.stack||error);
+        throw error;
+      } finally {
+        exportRow.elapsedMs=Math.round(performance.now()-exportStarted);
+        await writeFile(setupTracePath,JSON.stringify(setupTrace,null,2));
+      }
     }
     await writeFile(join(artifactRoot,`${prefix}-complete-${format}-bodies.json`),JSON.stringify(results,null,2));
     assert.equal(results[0].empty,true);assert.ok(results[2].sourceLength>400000);

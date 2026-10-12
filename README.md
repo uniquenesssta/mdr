@@ -1,8 +1,10 @@
 # Markdown Editor
 
-Stage 14：`agent/r14-stage`；R14-01～14已验收（14：b3d38cc / CI38217129135），七组Windows及全部步骤通过，全仓2051/2051、预载41/41、浏览器11/11＋61/61。按用户指令在唯一agent/r14-stage实施14.15：独立Data URL→bytes编码及只读端口，保留UTF-8代理对与百分号二进制，保存弹窗前固定字节，原Platform二进制端口同时接管Windows写入与浏览器Blob下载；旧转换和直接Data URL下载删除。新增58项契约、2项真实页面（累计63）及真实Windows字节写入/读回、失败恢复；15待新提交Windows验收，14.16未开始，整体A10与最终Image Exporter/File Writer职责保持。 [14验收](docs/R14-14-DETAILS.md#正式验收2026-10-12) · [15范围](docs/R14-15-DETAILS.md)；历史见 [docs/README.md](docs/README.md)。
+Stage 14：`agent/r14-stage`；R14-01～14已验收（14：b3d38cc / CI38217129135），七组Windows及全部步骤通过，全仓2051/2051、预载41/41、浏览器11/11＋61/61。按用户指令在唯一agent/r14-stage实施14.15：独立Data URL→bytes编码及只读端口，保留UTF-8代理对与百分号二进制，保存弹窗前固定字节，原Platform二进制端口同时接管Windows写入与浏览器Blob下载；旧转换和直接Data URL下载删除。新增58项契约、2项真实页面（累计63）及真实Windows字节写入/读回、失败恢复；首轮c3e6a6a / CI38223327955未通过：编码58/58、前端1103/1103、新增实际PNG/Blob与Windows字节读回成功，旧HTML/Word大正文两场景CDP超时（实际页面61/63）；已拆分真实导入/布局/定位准备请求并增加逐步证据，数据及导出断言保持，CDP上限仍30秒，待修复head七组Windows重验。15待新提交Windows验收，14.16未开始，整体A10与最终Image Exporter/File Writer职责保持。 [14验收](docs/R14-14-DETAILS.md#正式验收2026-10-12) · [15范围](docs/R14-15-DETAILS.md)；历史见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-12：首轮c3e6a6a / CI38223327955未通过：编码58/58、前端1103/1103、新增实际PNG/Blob与Windows字节读回成功，旧HTML/Word大正文两场景CDP超时（实际页面61/63）；已拆分真实导入/布局/定位准备请求并增加逐步证据，数据及导出断言保持，CDP上限仍30秒，待修复head七组Windows重验。[失败与修复](docs/R14-15-DETAILS.md#首轮windows失败与修复2026-10-12)。
 
 - 2026-10-12：在R14-14已验收基线37920ad开始14.15：独立Data URL字节转换按URL/百分号八位字节/Base64次序处理，Unicode代理对和孤立代理项采用标准UTF-8标量语义；图片保存前固定字节，Windows与浏览器复用原Platform二进制写入/Blob清理。删除经典旧转换与直接URL下载，新增58项契约、2个真实页面及Windows实际文件读回/失败恢复；原61场景保留。15待本提交Windows累计验收，16未开始，最终图片/写入owner及A10门槛保持。[15范围](docs/R14-15-DETAILS.md)。
 
