@@ -363,7 +363,7 @@
     },
     {
       "path": "vite.config.js",
-      "blobSha": "3921a4fb81d46dd55396a88b4e2bbbd0613036af"
+      "blobSha": "4d580fe6e864d52e2a8619963e7f1ad544f8bd00"
     },
     {
       "path": "src/features/export/formats/rendered-document-exporter.js",
@@ -1151,7 +1151,141 @@
         "Only automated dialog result is covered in native harness; actual interactive save dialog/user-selected path is not claimed.",
         "Started PNG conversion or disk write has no abort guarantee;destroy suppresses late success but cannot undo an invoked side effect.",
         "Shared cross-format File Writer remains14.17;ratio/modal UI migration remains14.19;classic total removal later."
-      ]
+      ],
+      "firstWindowsRun": {
+        "commit": "43bc086a98ae1456ad5307fd94f63b1faa801d5a",
+        "run": 38238244716,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38238244716",
+        "conclusion": "failure",
+        "accepted": false,
+        "windowsJobsPassed": 3,
+        "imageExporterPassed": 34,
+        "imageDataPassed": 58,
+        "originalCharacterizationPassed": 43,
+        "contractBrowserPassed": 11,
+        "frontendNode": {
+          "total": 1137,
+          "passed": 1132,
+          "failed": 5
+        },
+        "recursiveNode": {
+          "total": 2143,
+          "passed": 2134,
+          "failed": 9,
+          "directories": 16
+        },
+        "actualBuiltAppScenariosExecuted": 0,
+        "actualNativeFullImageProbeExecuted": false,
+        "bundle": {
+          "mainBytes": 704049,
+          "asyncLimitBytes": 700000,
+          "overBudgetBytes": 4049
+        },
+        "browserBlockedEvidence": {
+          "error": "Timed out waiting for application ready",
+          "requests": [
+            {
+              "url": "/?e2e=1",
+              "status": 404
+            },
+            {
+              "url": "/favicon.ico",
+              "status": 404
+            }
+          ],
+          "console": [],
+          "exceptions": []
+        },
+        "directFailures": [
+          "invalid-input fixture invokes render before tested command",
+          "asset fallback/success fixture attaches image to first Builder div instead of capture root",
+          "README lost docs index and15 closeout entry",
+          "old DocumentSession/Controller assertions require direct classic ports",
+          "old Dialog/Cutover assertions require direct classic Platform calls",
+          "main async chunk exceeds unchanged budget"
+        ],
+        "artifact": {
+          "id": 11740719752,
+          "bytes": 2346951,
+          "digest": "sha256:b4ea8913e40b8cba54dc5b21a8060c8ff8d78d3ecdf48be3981a534102997d39",
+          "downloadedAndVerified": true
+        },
+        "rustTestsPassed": 281
+      },
+      "repair": {
+        "status": "implemented-pending-exact-head-Windows-admission",
+        "scope": "Correct invalid-input setup and actual capture-root asset injection,retain all old cases/assertions; migrate stale document/platform source checks to the complete public owner chain; restore exact15 README ChangeLog prefix and docs index; dependency-closed Image/Request/Task manual chunk with unchanged budgets/vendor policy.",
+        "changedSourceFingerprints": [
+          {
+            "path": "vite.config.js",
+            "priorBlobSha": "3921a4fb81d46dd55396a88b4e2bbbd0613036af",
+            "blobSha": "4d580fe6e864d52e2a8619963e7f1ad544f8bd00"
+          }
+        ],
+        "applicationRuntimeChanged": false,
+        "dependenciesChanged": false,
+        "rustChanged": false,
+        "modelsChanged": false,
+        "workflowChanged": false,
+        "productionModuleCount": 549,
+        "riskSourcePathsRetained": 80,
+        "imageExporterScenariosRetained": 34,
+        "newStaticBundleAuditScenarios": 2,
+        "imageDataScenariosRetained": 58,
+        "builtAppScenariosRetained": 65,
+        "budgetsUnchanged": {
+          "initialBytes": 500000,
+          "asyncBytes": 700000
+        },
+        "vendorMergePolicyUnchanged": true,
+        "manualFeatureImportsClosed": true,
+        "UIAndPreviewAndPlatformOutsideManualFeature": true,
+        "readmePrior15HistoryPrefixRestored": true,
+        "readmeDocsIndexRestored": true,
+        "staticAuditTestsPassed": 9,
+        "productTestsRunLocally": false,
+        "staticReview": {
+          "status": "passed",
+          "productTestsRunLocally": false,
+          "staticAuditTestsPassed": 9,
+          "architectureGate": "passed",
+          "legacyRuntimeGate": "passed",
+          "generatedFilesGate": "passed",
+          "readmeRecordGate": "passed",
+          "javascriptSyntaxFiles": 8,
+          "relativeLinksChecked": 172,
+          "riskFingerprintsChecked": 80,
+          "riskPathsUnchanged": true,
+          "productionModuleRowsUnchanged": 549,
+          "sevenWindowsJobsAndWorkflowUnchanged": true,
+          "allPriorTestDeclarationsAndScenarioNamesRetained": true,
+          "newConfigAuditScenarios": 2,
+          "imageExporterScenariosRetained": 34,
+          "builtAppScenariosRetained": 65,
+          "prior15AcceptanceAndHistoryPreserved": true,
+          "readme15ChangeLogExactPrefixRestored": true,
+          "applicationRuntimeRustModelsAndDependenciesUnchanged": true,
+          "diffWhitespaceCheck": "passed",
+          "changedFiles": [
+            "AGENTS.md",
+            "README.md",
+            "docs/R14-16-DETAILS.md",
+            "docs/README.md",
+            "docs/audit/r12-24-closeout.json",
+            "docs/markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md",
+            "tests/stage-14-export-request.test.mjs",
+            "tests/stage-14-image-assets.test.mjs",
+            "tests/unit/documents/document-session-controller.test.mjs",
+            "tests/unit/documents/document-session-store.test.mjs",
+            "tests/unit/platform/dialog-client.test.mjs",
+            "tests/unit/platform/platform-cutover.test.mjs",
+            "tests/vite-config.test.mjs",
+            "vite.config.js"
+          ],
+          "limitations": "Only static source/document/config auditing locally; no application behavior tests, build, browser or Rust execution. Actual bundle sizes/65 pages/native PNG readback pending exact-head Windows CI."
+        },
+        "invalidInputsHaveExplicitValidationToast": true
+      }
     },
     "priorStageAcceptance": {
       "stage": "R14.15",

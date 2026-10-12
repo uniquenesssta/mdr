@@ -1,6 +1,6 @@
 # R14-16 Image Exporter
 
-状态：**已实现，待新精确提交Windows累计验证**；16未勾选，17未开始。唯一分支`agent/r14-stage`，基线为15收尾`b1c236b3326357c1c0f8d991d1f282dcd5582f77`。15已在`463af96` / [CI38226523614](https://github.com/uniquenesssta/mdr/actions/runs/38226523614)七组及全部步骤验收，首轮失败和修复保留。[15正式验收](R14-15-DETAILS.md#正式验收2026-10-12)。
+状态：**首轮未通过，修复后待新精确提交Windows累计验证**；16未勾选，17未开始。唯一分支`agent/r14-stage`，基线为15收尾`b1c236b3326357c1c0f8d991d1f282dcd5582f77`。15已在`463af96` / [CI38226523614](https://github.com/uniquenesssta/mdr/actions/runs/38226523614)七组及全部步骤验收，首轮失败和修复保留。[15正式验收](R14-15-DETAILS.md#正式验收2026-10-12)。
 
 ## 职责与真实调用链
 
@@ -68,3 +68,24 @@ Mermaid Chart已展示实际关系。Context7返回官方README的通用toPng Pr
 549行清单保持原546行，80风险指纹保持原76路径并加入3个新生产模块及完整原生harness；四个受影响来源指纹按当前内容更新。历史验收/实现前缀保留，15验收独立保留。[精确范围记录](audit/r12-24-closeout.json)的currentStageImplementation记录真实静态结果与未验收边界。
 
 本地仅做静态语法/嵌入表达式、架构/清单/文档门禁、依赖/Rust/模型未改和差异复核；不在Linux运行产品Node、build、浏览器或Rust验收。新head必须取得七组Windows、65实际页面及完整原生图片文件证据后才可勾16、关闭对应完整PNG门槛，当前不宣称整体A10关闭。17 File Writer未开始。回退基线b1c236b，存储格式和依赖保持；推送Actions后结束，不轮询，约15～20分钟后查询。
+
+## 首轮Windows失败与修复2026-10-12
+
+`43bc086a98ae1456ad5307fd94f63b1faa801d5a` / [CI38238244716](https://github.com/uniquenesssta/mdr/actions/runs/38238244716)未通过：Rust、原生编译、依赖三组成功；全仓Node、frontend、WebView构建及最终汇总失败。图片所有者34/34、编码58/58、原characterization43/43、浏览器契约11/11通过；前端1132/1137、累计全仓2134/2143，原真实页面65项未到执行，原生完整PNG新链也未执行。不能以34项替身契约通过表示图片链验收。
+
+失败构建两次报告同一主业务包704049字节，超过既有700000异步预算4049字节；built-app诊断只有根页面和favicon两个404，无console/exception，随后app-ready等待超时，是未产出dist页面的后续失败，不增加等待期限。已下载frontend归档11740719752（2346951字节），实际ZIP SHA256为`b4ea8913e40b8cba54dc5b21a8060c8ff8d78d3ecdf48be3981a534102997d39`。其中image-exporter.log明确34/34，故障日志及诊断与上述分类一致；没有新PNG/实际文件证据可作验收。
+
+| 直接失败 | 根因与修复 | 原门槛保持 |
+|---|---|---|
+| bundle-budget / WebView build | 新独立Image模块进入已有主业务chunk，超过上限；把无外部依赖的图片模块、公共请求策略、Task模块及图片只读桥接组成export-image chunk | 入口500000/异步700000、已有vendor分配和加载时机保持，不提高预算或绕过插件 |
+| invalid-input前置场景 | 迁移私有缓存setter时多调用一次render准备，本场景的坏输入因此产生两次toast；删除这次无关准备，只调用原被测入口 | 六个原入口与坏名称/无文档场景保持，原单toast、零task/快照/vendor/打印/文件断言保留，并要求toast明确为参数无效，不能由“先生成预览”等提示冒充输入拒绝 |
+| Asset fallback/success两场景 | 旧夹具将图片挂到“第一个div”，现在第一个是Builder正文，真正捕获根在Surface后创建；按实际preview-content捕获根供给查询 | 原匿名loader、成功内联/占位图、PNG前锁定、回调/定时器释放及两种结果断言保持，新增确为PNG根且loader实际启动检查 |
+| Document Session/Controller旧源码检查 | 经典脚本已删除不再调用的直接文档端口；改核对只读Image端口→main注入公开DocumentController→新owner读取activeId/record/generation | 冻结模型hash、单一会话/生命周期所有者及禁止经典全局/直接状态写入断言保持，不恢复无用绑定来迎合字符串 |
+| Platform Dialog/Cutover旧源码检查 | 桌面dialog/write已由公共Image owner调用；改核对经典只读Image入口和owner的公开Platform调用 | 原Platform边界、禁止native全局/Tauri侵入和其他经典调用者断言保持 |
+| README/LoadController文档检查 | 上轮状态更新漏掉docs/README索引，并覆盖了15收尾历史条目；从已验收b1c236b恢复精确Change Log前缀，另保留16实施/失败记录 | 不改旧文档测试或LoadController职责；真实索引链接恢复、历史前缀一致 |
+
+实际锁定Vite7.3.6/Rollup4.62.2保持。Context7核对[官方manualChunks规则](https://rollupjs.org/configuration-options/#output-manualchunks)：函数形式默认吸收依赖，可能影响副作用时序。本轮只选择源码依赖闭合的请求/Task/Image集合；它们所有静态导入仍落在同一chunk，UI/Preview/Platform及vendor继续原图，不新增main→feature→main回路，也不全局改onlyExplicitManualChunks策略。不是改变业务职责或增加新生产模块；所有模块仍从原公共入口接线。Mermaid Chart展示该代码边界与运行时能力注入。
+
+新增2项构建配置审计：从实际文件导入验证chunk闭合及共享模块仍不入该包；调用原bundle gate，以入口/异步恰好达限、超出1字节、入口导入图片chunk三类检查确认原阈值仍生效。9项相关文档、配置和文档/平台公共边界静态检查通过；这些只读取源码/配置与冻结hash，不运行应用行为、构建、PNG或原生写入，不能替代Windows产品验收。其余修改的脚本语法、清单/指纹/历史及四门禁由repair.staticReview登记。
+
+549模块与80风险路径保持，只有Vite配置的已审阅来源指纹变化；原34项Image契约、58项字节、65实际页面和七组Windows门槛继续全部执行。无业务生产逻辑、依赖、Rust、冻结模型、图片cache或写入实现改动。16保持未勾选，17未开始；新精确head必须先实际构建再取得完整页面和原生PNG读回证据。推送Actions后结束，不轮询，约15～20分钟后查询。

@@ -26,7 +26,15 @@ test('classic callers use the scoped compatibility host instead of a replacement
   for (const path of ['public/app/core.js', 'public/app/events.js', 'public/app/export.js', 'public/app/web-clipper.js']) {
     const source = await readFile(new URL('../../../' + path, import.meta.url), 'utf8');
     assert.match(source, /compatibility-business-ports/);
-    assert.match(source, path === 'public/app/web-clipper.js' ? /markdownEditorEditorUiCommandPort/ : /markdownEditorPlatformPort/);
+    const boundary = path === 'public/app/web-clipper.js' ? /markdownEditorEditorUiCommandPort/
+      : path === 'public/app/export.js' ? /markdownEditorImageExportPort/ : /markdownEditorPlatformPort/;
+    assert.match(source, boundary);
+    if (path === 'public/app/export.js') {
+      assert.match(source, /exportImagePort\.(?:render|save)\(\{ request \}\)/);
+      const owner = await readFile(new URL('../../../src/features/export/formats/image/image-exporter.js', import.meta.url), 'utf8');
+      assert.match(owner, /platform\.dialogs\.saveFile/); assert.match(owner, /platform\.files\.writeBinary/);
+      assert.doesNotMatch(owner, /window\.markdownEditorPlatform|window\.markdownEditorNative|__TAURI/);
+    }
     assert.doesNotMatch(source, /window\.markdownEditorPlatform|window\.markdownEditorNative/);
   }
   const bridge = await readFile(new URL('../../../src/platform/compatibility/classic-platform-port.js', import.meta.url), 'utf8');

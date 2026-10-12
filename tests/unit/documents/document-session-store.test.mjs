@@ -150,7 +150,12 @@ test('Atomic 5.2 production integration removes classic session-state authority 
   assert.doesNotMatch(core, /\blet\s+documents\b/);
   assert.doesNotMatch(core, /\blet\s+currentDocumentId\b/);
   assert.match(core, /markdownEditorDocumentSessionPort/);
-  assert.match(exportModule, /markdownEditorDocumentSessionPort/);
+  assert.match(exportModule, /markdownEditorImageExportPort/);
+  const [main, imageOwner] = await Promise.all([
+    readText('src/main.js'), readText('src/features/export/formats/image/image-exporter.js')
+  ]);
+  assert.match(main, /createImageExporter\(\{ documentModel, documents: documentControllerPort/);
+  assert.match(imageOwner, /documents\.activeId/);
   assert.doesNotMatch(exportModule, /\bcurrentDocumentId\b|\bdocuments\b/);
   assert.match(previewEngine, /\bdocumentSession\b/);
   assert.match(previewEngine, /documentSession\?\.activeId/);

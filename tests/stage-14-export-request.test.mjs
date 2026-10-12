@@ -96,11 +96,11 @@ test('R14-02 every actual classic entry rejects invalid inputs before task, snap
   for (const operation of operations) {
     for (const options of [{ name: 'bad\0.md' }, { documentId: '' }]) {
       const h = createExportVmHost(options);
-      await h.renderImage();
       await h.invoke(operation);
       assert.equal(h.evaluate('exportTaskPort.getSnapshot().lastTaskId'), 0, operation);
       assert.equal(h.evaluate('exportTaskPort.getSnapshot().activeTask'), null);
       assert.deepEqual(h.calls.map(x => x[0]), ['toast'], operation);
+      assert.match(h.calls[0][1], /^导出参数无效：/, operation);
       assert.equal(h.downloads.length, 0); assert.equal(h.timers.length, 0);
     }
   }

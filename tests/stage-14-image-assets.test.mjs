@@ -228,9 +228,12 @@ for (const boundary of ['fallback', 'success']) {
     const h = createExportVmHost(), item = image('https://image.test/a'); const loaders = [];
     const create = h.context.document.createElement; let clone = null;
     h.context.document.createElement = tag => {
-      const node = create(tag); if (tag === 'div' && !clone) { clone = node;
+      const node = create(tag); if (tag === 'div') {
         const contains = node.contains.bind(node); node.contains = value => value === item || contains(value);
-        const query = node.querySelectorAll.bind(node); node.querySelectorAll = selector => selector === 'img' ? [item] : query(selector); }
+        const query = node.querySelectorAll.bind(node); node.querySelectorAll = selector => {
+          if (selector === 'img' && node.className === 'preview-content') { clone = node; return [item]; }
+          return query(selector);
+        }; }
       if (tag === 'canvas') { node.getContext = () => ({ drawImage() {} }); node.toDataURL = () => PNG; }
       return node;
     };
@@ -239,6 +242,7 @@ for (const boundary of ['fallback', 'success']) {
       get src() { return this.value; } };
     let captured;
     h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.loadDomToImage = async () => ({ async toPng(_root, options) {
+      assert.equal(_root, clone); assert.equal(_root.contains(item), true); assert.equal(loaders.length, 1);
       captured = item.src; assert.equal(h.taskPort.getSnapshot().activeTask.cancelable, false);
       assert.equal(options.imagePlaceholder, EXPORT_IMAGE_PLACEHOLDER); assert.equal(h.assetTimers.size, 0); return PNG;
     } });

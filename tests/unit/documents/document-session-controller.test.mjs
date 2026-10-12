@@ -436,7 +436,12 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
   assert.doesNotMatch(core, /function\s+loadDocumentContent\b/);
   assert.doesNotMatch(core, /function\s+saveDocumentsToStorage\b/);
   assert.match(core, /markdownEditorDocumentControllerPort/);
-  assert.match(exportModule, /markdownEditorDocumentControllerPort/);
+  assert.match(exportModule, /markdownEditorImageExportPort/);
+  assert.match(exportModule, /exportImagePort\.(?:render|save)\(\{ request \}\)/);
+  assert.match(main, /createImageExporter\(\{ documentModel, documents: documentControllerPort/);
+  const imageOwner = await readText('src/features/export/formats/image/image-exporter.js');
+  assert.match(imageOwner, /documents\.isCurrentGeneration/);
+  assert.match(imageOwner, /documents\.getRecord/);
   assert.match(events, /markdownEditorDocumentControllerPort/);
   assert.match(main, /createSessionDocumentRepository/);
   assert.match(main, /createDocumentSessionController/);
