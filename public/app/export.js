@@ -13,6 +13,7 @@
     const exportEnhancementPort = exportCompatibilityHost?.markdownEditorExportEnhancementPort;
     const exportStylePort = exportCompatibilityHost?.markdownEditorExportStylePort;
     const exportImageAssetPort = exportCompatibilityHost?.markdownEditorImageAssetPort;
+    const exportImageDataPort = exportCompatibilityHost?.markdownEditorImageDataPort;
     const exportImageLayoutPort = exportCompatibilityHost?.markdownEditorImageLayoutPort;
     const exportPdfPort = exportCompatibilityHost?.markdownEditorPdfExportPort;
     const exportWordPort = exportCompatibilityHost?.markdownEditorWordExportPort;
@@ -31,6 +32,7 @@
     if (!exportEnhancementPort) throw new Error('Export enhancement compatibility port is unavailable.');
     if (!exportStylePort) throw new Error('Export style compatibility port is unavailable.');
     if (!exportImageAssetPort) throw new Error('Image asset compatibility port is unavailable.');
+    if (!exportImageDataPort) throw new Error('Image data compatibility port is unavailable.');
     if (!exportImageLayoutPort) throw new Error('Image layout compatibility port is unavailable.');
     if (!exportPdfPort) throw new Error('PDF export compatibility port is unavailable.');
     if (!exportWordPort) throw new Error('Word export compatibility port is unavailable.');
@@ -74,19 +76,6 @@
         filterName,
         defaultDirectory: request.directory
       };
-    }
-
-    function dataUrlToBytes(dataUrl) {
-      const value = String(dataUrl || '');
-      const comma = value.indexOf(',');
-      if (comma < 0) throw new Error('图片数据无效');
-      const header = value.slice(0, comma);
-      const payload = value.slice(comma + 1);
-      if (!/;base64/i.test(header)) return new TextEncoder().encode(decodeURIComponent(payload));
-      const binary = atob(payload);
-      const bytes = new Uint8Array(binary.length);
-      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
-      return bytes;
     }
 
     // 导出文件
@@ -292,22 +281,25 @@
       const name = request.name;
 
       try {
-        if (exportPlatformPort?.supports('desktop.dialogs') && exportPlatformPort?.supports('desktop.fileSystem')) {
-          const path = await exportPlatformPort.call('dialogs', 'saveFile', name, getExportSaveOptions(
+        // Decode once before any await; a later preview cannot change these bytes.
+        const bytes = exportImageDataPort.encode(currentImageDataUrl);
+        const nativeDialogs = exportPlatformPort.supports('desktop.dialogs');
+        const nativeFiles = exportPlatformPort.supports('desktop.fileSystem');
+        let path = name;
+        if (nativeDialogs && nativeFiles) {
+          path = await exportPlatformPort.call('dialogs', 'saveFile', name, getExportSaveOptions(
             '导出图片',
             request,
             'PNG 图片'
           ));
-          if (!path) return;
-          await exportPlatformPort.call('files', 'writeBinary', path, dataUrlToBytes(currentImageDataUrl), { extension: 'png' });
-        } else {
-          const a = document.createElement('a');
-          a.href = currentImageDataUrl;
-          a.download = name;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+          if (path === null || path === '') return;
+          if (typeof path !== 'string') throw new TypeError('图片保存路径无效');
+        } else if (nativeDialogs || nativeFiles || !exportPlatformPort.supports('browser.fileDownload')) {
+          throw new Error('图片文件导出能力不可用');
         }
+        await exportPlatformPort.call('files', 'writeBinary', path, bytes, {
+          extension: request.extension, reason: 'export', ...(!nativeFiles ? { mimeType: 'image/png' } : {})
+        });
         showToast(t('toastImageDownloaded'));
       } catch (error) {
         showToast('图片导出失败：' + (error?.message || String(error)));

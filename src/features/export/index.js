@@ -28,3 +28,5 @@ export { calculateImageLayout, createImageExportLayout } from './formats/image/i
 export { mountClassicImageLayoutPort } from './compatibility/classic-image-layout-port.js';
 export { createImageAssetPreloader, EXPORT_IMAGE_PLACEHOLDER } from './formats/image/image-asset-preloader.js';
 export { mountClassicImageAssetPort } from './compatibility/classic-image-asset-port.js';
+export { imageDataUrlToBytes, ImageDataEncodingError } from './formats/image/image-data-encoder.js';
+export { mountClassicImageDataPort } from './compatibility/classic-image-data-port.js';

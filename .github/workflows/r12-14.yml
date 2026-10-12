@@ -1,5 +1,5 @@
 name: R14 Windows Export Revalidation
-run-name: R14-14 bounded image assets and R14-13 acceptance · ${{ github.sha }}
+run-name: R14-15 Data URL bytes and actual Windows binary writes · ${{ github.sha }}
 
 on:
   push:
@@ -207,6 +207,9 @@ jobs:
       - name: R14-14 anonymous image assets, inline pixels and bounded failure contracts
         if: ${{ !cancelled() }}
         run: node --test tests/stage-14-image-assets.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-image-assets.log"
+      - name: R14-15 exact Data URL bytes, Unicode and binary output contracts
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-14-image-data.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/export-image-data.log"
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"

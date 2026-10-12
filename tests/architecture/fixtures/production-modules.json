@@ -5456,6 +5456,26 @@
       "mount-to-destroy",
       "retain",
       false
+    ],
+    [
+      "src/features/export/formats/image/image-data-encoder.js",
+      "esm-module",
+      "export-image",
+      "Pure Data URL to exact bytes; URL scalar values, percent octets and base64 without text transcoding.",
+      "none",
+      "pure-function",
+      "retain",
+      false
+    ],
+    [
+      "src/features/export/compatibility/classic-image-data-port.js",
+      "esm-module",
+      "export-compatibility",
+      "Read-only pure byte conversion capability and terminal scoped unmount.",
+      "image-data-port-mount",
+      "mount-to-destroy",
+      "retain",
+      false
     ]
   ]
 }

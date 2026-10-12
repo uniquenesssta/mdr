@@ -12,7 +12,7 @@
 
 - 2026-09-29：全仓代码审计扩大到 882 个代码文件及 33 个配置/锁文件；仅 Windows 验证已落地，验收仍被保存可靠性、日志脱敏及累计门禁问题阻塞。[完整报告](FULL_CODE_AUDIT.md) · [Windows 策略](WINDOWS_VALIDATION_POLICY.md)。
 
-当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～14已验收（14：b3d38cc / CI38217129135），七组Windows及全部步骤通过；全仓2051/2051（340文件16目录）、前端1045/1045、图片预载41/41、浏览器11/11＋61/61、Rust281及最终accepted=true。四归档SHA-256一致，实际1080×1920 PNG的两张正常图片和三个失败占位图像素独立核对通过，取消/替换/源过时/pagehide及再次预载恢复通过。14.14正式收尾，首轮失败与修复保留；14.15未开始，整体A10最终图片链仍由14.16接收。 [14验收](R14-14-DETAILS.md#正式验收2026-10-12)。下方保留历史记录。
+当前进度以根目录 [README](../README.md) 与 [R14任务书](markdown-main-full-rewrite-taskbook-18-docs/15-阶段14-导出完整重写.md) 为准。R14-01～14已验收（14：b3d38cc / CI38217129135），七组Windows及全部步骤通过，全仓2051/2051、预载41/41、浏览器11/11＋61/61。按用户指令在唯一agent/r14-stage实施14.15：独立Data URL→bytes编码及只读端口，保留UTF-8代理对与百分号二进制，保存弹窗前固定字节，原Platform二进制端口同时接管Windows写入与浏览器Blob下载；旧转换和直接Data URL下载删除。新增58项契约、2项真实页面（累计63）及真实Windows字节写入/读回、失败恢复；15待新提交Windows验收，14.16未开始，整体A10与最终Image Exporter/File Writer职责保持。 [14验收](R14-14-DETAILS.md#正式验收2026-10-12) · [15范围](R14-15-DETAILS.md)。下方保留历史记录。
 
 Markdown Editor 是基于 **Tauri + Rust 后端 + 原生 HTML/CSS/JavaScript 前端** 重构的本地轻量 Markdown 编辑器。
 

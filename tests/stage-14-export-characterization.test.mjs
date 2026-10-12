@@ -224,7 +224,7 @@ test('R14-01 PNG ratio/padding/crop/natural height, noncancelable encoding and g
 
 test('R14-01 malformed image data errors before write; percent/base64 encodings preserve exact bytes', () => {
   const h = createExportVmHost();
-  assert.throws(() => h.invoke('dataUrlToBytes', 'not-data'), /图片数据无效/);
-  assert.deepEqual(Array.from(h.invoke('dataUrlToBytes', 'data:text/plain,hello%20world')), Array.from(new TextEncoder().encode('hello world')));
-  assert.deepEqual(Array.from(h.invoke('dataUrlToBytes', 'data:image/png;base64,iVBORw0KGgo=')), [137, 80, 78, 71, 13, 10, 26, 10]);
+  assert.throws(() => h.evaluate('exportImageDataPort').encode('not-data'), /图片数据无效/);
+  assert.deepEqual(Array.from(h.evaluate('exportImageDataPort').encode('data:text/plain,hello%20world')), Array.from(new TextEncoder().encode('hello world')));
+  assert.deepEqual(Array.from(h.evaluate('exportImageDataPort').encode('data:image/png;base64,iVBORw0KGgo=')), [137, 80, 78, 71, 13, 10, 26, 10]);
 });
