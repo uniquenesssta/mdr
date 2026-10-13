@@ -117,7 +117,10 @@ for(const boundary of ['write','dialog','capability','destroyed-port'])test('R14
   const port=h.context.document.getElementById('compatibility-business-ports').markdownEditorPlatformPort;
   if(boundary==='dialog')port.call=async()=>{throw new Error('dialog denied');};
   if(boundary==='capability')port.supports=()=>false;
-  if(boundary==='destroyed-port')h.imageMount.destroy();
-  await h.invoke('downloadExportImage');assert.equal(h.calls.some(x=>x[0]==='toast'&&x[1]==='toastImageDownloaded'),false);
-  assert.equal(h.downloads.length,0);h.destroy();
+  // R14-18 commands use the owner directly; unmount the actual command capability.
+  if(boundary==='destroyed-port'){h.commandMount.destroy();await assert.rejects(async()=>h.invoke('downloadExportImage'),/destroyed/);}
+  else await h.invoke('downloadExportImage');assert.equal(h.calls.some(x=>x[0]==='toast'&&x[1]==='toastImageDownloaded'),false);
+  assert.equal(h.downloads.length,0);
+  if(boundary==='destroyed-port')assert.equal(h.calls.some(x=>x[0]==='saveFile'||x[0]==='writeBinary'),false);
+  h.destroy();
 });

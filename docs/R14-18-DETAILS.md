@@ -39,8 +39,24 @@ Mermaid Chart已展示实际链路。本项使用已验收的项目ModalShell/Ic
 
 ## Windows验证与限制
 
-新增Controller26项、图片View5项、Menu1项，共32项Node回归；原Writer29、Image34、ImageData58与43项对照继续执行。原66个实际页面保留，再加1个真实Menu打开/比例与crop变化/下载PNG精确字节/关闭焦点/图标翻译场景，总67；既有pagehide加强命令端口解绑、图片modal/stage/preview移除，其他全部销毁用途保持。
+新增Controller26项、图片View7项、Menu1项，共34项Node回归（首轮32项，修复补2项）；原Writer29、Image34、ImageData58与43项对照继续执行。原66个实际页面保留，再加1个真实Menu打开/比例与crop变化/下载PNG精确字节/关闭焦点/图标翻译场景，总67；既有pagehide加强命令端口解绑、图片modal/stage/preview移除，其他全部销毁用途保持。
 
 原Windows WebView四格式实际文件Writer、16完整PNG、目标独占失败原件保留及恢复继续为硬门禁，没有替换原invoke或输出。七组Windows jobs、最终同提交汇总、Rust/安全/依赖/构建与体积门槛保持。新增PNG及JSON归档为`r14-18-image-ui.png/json`，待Actions实际产出后核对，不提前声明截图或原生结果。
 
 本环境完成源码/配置/文档静态审查、语法检查和浏览器表达式编译；筛选误匹配额外执行1项HTML VM回归并通过，仅作辅助检查，不计Windows验收。未运行构建、浏览器或Rust；所有累计功能仍待Windows CI。静态门禁和计数记录见[审计记录](audit/r12-24-closeout.json)。18须精确新head七组及全部步骤通过后验收，A10最终关闭待累计结果。保留原Office .doc容器与PDF打印能力边界；自动化协议响应不等于用户实际操作保存对话框。
+
+## 首轮失败与修复（2026-10-13）
+
+`26d4c5e` / [CI38274498659](https://github.com/uniquenesssta/mdr/actions/runs/38274498659)未通过，最终`accepted=false`。四份前端/全仓/WebView/汇总ZIP已下载并核对SHA-256。全仓2209/2211（16目录）、前端1202/1204、编码57/58；新增Controller/View31/31、Image34/34、浏览器契约11/11，实际页面66/67。四个独立Windows任务成功，包括Rust281、原生链接、依赖与真实WebView。Writer29专项因前序失败跳过，不能计为通过；实际四格式Writer独占失败/原件保留/恢复仍在原生证据中通过。
+
+| 失败 | 已确认原因 | 本次修复与保留门槛 |
+|---|---|---|
+| Stage1当前经典脚本总量5对6 | 已删除export.js，断言仍将其计入当前运行 | 当前5＋精确删除记录1＝旧6；历史67模块/9脚本/38全局不修改，全部inline逐条对照保持 |
+| destroyed-port仍出现成功消息 | 测试销毁旧Image兼容端口，Controller实际直接用格式owner，该端口不再是命令通路 | 销毁真实commandMount，明确拒绝已销毁调用；继续禁止成功、下载、picker、write。独立Image端口销毁不销毁共享owner的契约保持 |
+| englishTranslations=false | shell TranslationBindings在main前冻结绑定集合；没有动态Observer，新View没有订阅语言 | View显式注入公开translate/subscribeLocale，初始及语言更新处理全部14 text/alt绑定和关闭按钮ARIA；销毁解绑且晚到不更新，构造订阅失败也回滚。既有ratio/按钮/PNG状态不改 |
+
+main所用I18n端口在module-entry导入main前已挂载，沿用项目已验收的订阅API，没有新库或Observer。新增两项View契约覆盖十四绑定、英文更新、解绑、晚到回调及订阅失败清理；所有旧场景名、输入和顺序保持，总67个真实页面、58个编码场景与原31个Controller/View场景继续运行。实际语言检查仍严格逐项比较公开端口翻译；本次加入英文每项actual/expected，并在断言前保存PNG与JSON，便于失败审查，不减弱断言。
+
+生产只修复main注入与既有图片View，保留唯一所有者、原Writer/Platform/Rust、冻结模型、依赖及预算。Mermaid Chart已展示语言订阅与销毁关系；修复用项目现有公开接口，没有新增第三方API查询需要。风险84条指纹、生产552模块及17正式验收/所有历史失败记录保持。
+
+本次四项静态源码/文档检查及四项门禁通过，8个JavaScript语法、1个修改表达式编译、7个View测试仅注册不执行、193相对链接与84风险指纹均核对；原测试名/顺序与17验收/失败历史保持。未本地执行产品回归、构建、浏览器或Rust；新的功能契约和完整Windows累计结果待修复精确head。18不勾选，整体R14/A10未收官。

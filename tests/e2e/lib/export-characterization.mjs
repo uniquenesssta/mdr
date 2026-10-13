@@ -1144,8 +1144,8 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       await wait(()=>host.markdownEditorImageExportPort.getPreview()&&tasks.getSnapshot().activeTask===null);
       const locale=host.markdownEditorI18nPort,previousLocale=locale.locale;
       const translated=()=>Array.from(root.querySelectorAll('[data-i18n],[data-i18n-alt]')).every(node=>node.hasAttribute('data-i18n-alt')?node.getAttribute('alt')===locale.t(node.dataset.i18nAlt):node.textContent===locale.t(node.dataset.i18n));
-      const translationCount=root.querySelectorAll('[data-i18n],[data-i18n-alt]').length,initialTranslations=translated();let englishTranslations=false;
-      try {locale.setLocale('en');await new Promise(resolve=>requestAnimationFrame(resolve));englishTranslations=translated();}
+      const translationCount=root.querySelectorAll('[data-i18n],[data-i18n-alt]').length,initialTranslations=translated();let englishTranslations=false,englishBindingRows=[];
+      try {locale.setLocale('en');await new Promise(resolve=>requestAnimationFrame(resolve));englishTranslations=translated();englishBindingRows=Array.from(root.querySelectorAll('[data-i18n],[data-i18n-alt]')).map(node=>({key:node.dataset.i18n||node.dataset.i18nAlt,actual:node.hasAttribute('data-i18n-alt')?node.getAttribute('alt'):node.textContent,expected:locale.t(node.dataset.i18n||node.dataset.i18nAlt)}));}
       finally {locale.setLocale(previousLocale);await new Promise(resolve=>requestAnimationFrame(resolve));}
       const iconHrefs=Array.from(root.querySelectorAll('use')).map(node=>node.getAttribute('href'));
       const first=host.markdownEditorImageExportPort.getPreview(),button=root.querySelector('[data-ratio="1:1"]');button.click();
@@ -1160,13 +1160,15 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const bytes=new Uint8Array(await blob.arrayBuffer()),expected=host.markdownEditorImageDataPort.encode(cached.dataUrl);
       root.querySelector('[data-export-action="closeImage"]').click();await new Promise(resolve=>requestAnimationFrame(resolve));
       return {dataUrl:cached.dataUrl,firstRatio:first.imageOptions.ratio,ratio:cached.imageOptions.ratio,crop:cached.imageOptions.cropFit,modalCount:document.querySelectorAll('#export-image-modal').length,
-        translationCount,initialTranslations,englishTranslations,iconHrefs,commandAvailable:commands.has('openImage'),closed:!root.classList.contains('show'),focusRestored:document.activeElement===launcher,inlineHandlers:root.querySelectorAll('[onclick],[onchange]').length,
+        translationCount,initialTranslations,englishTranslations,englishBindingRows,iconHrefs,commandAvailable:commands.has('openImage'),closed:!root.classList.contains('show'),focusRestored:document.activeElement===launcher,inlineHandlers:root.querySelectorAll('[onclick],[onchange]').length,
         globalsAbsent:['exportFile','exportHTML','exportWord','exportPDF','openExportImageModal','selectImageRatio','downloadExportImage','renderExportImagePreview'].every(key=>typeof window[key]==='undefined'),
         oldScriptAbsent:!document.querySelector('script[src*="/app/export.js"]'),name,mime:blob.type,revoked,exactBytes:expected.length===bytes.length&&expected.every((value,index)=>value===bytes[index]),taskReleased:tasks.getSnapshot().activeTask===null};
     })()`);
-    const {dataUrl,...observations}=result;assert.equal(result.modalCount,1);assert.equal(result.inlineHandlers,0);assert.equal(result.translationCount,14);assert.deepEqual(result.iconHrefs,['/assets/icons.svg#icon-image','/assets/icons.svg#icon-close']);assert.equal(result.ratio,'1:1');assert.equal(result.crop,true);assert.equal(result.mime,'image/png');assert.equal(result.name,'菜单点击😀.png');
-    for(const key of ['initialTranslations','englishTranslations','commandAvailable','closed','focusRestored','globalsAbsent','oldScriptAbsent','revoked','exactBytes','taskReleased'])assert.equal(result[key],true,key);
+    const {dataUrl,...observations}=result;
+    // Preserve observations/PNG even when a semantic assertion rejects this scene.
     await writeFile(join(artifactRoot,'r14-18-image-ui.json'),JSON.stringify(observations,null,2));await writeFile(join(artifactRoot,'r14-18-image-ui.png'),Buffer.from(dataUrl.split(',')[1],'base64'));
+    assert.equal(result.modalCount,1);assert.equal(result.inlineHandlers,0);assert.equal(result.translationCount,14);assert.deepEqual(result.iconHrefs,['/assets/icons.svg#icon-image','/assets/icons.svg#icon-close']);assert.equal(result.ratio,'1:1');assert.equal(result.crop,true);assert.equal(result.mime,'image/png');assert.equal(result.name,'菜单点击😀.png');
+    for(const key of ['initialTranslations','englishTranslations','commandAvailable','closed','focusRestored','globalsAbsent','oldScriptAbsent','revoked','exactBytes','taskReleased'])assert.equal(result[key],true,key);
   });
 
   await test('R14-03 actual pagehide disposes a locked task, closes progress and removes scoped ports', async () => {

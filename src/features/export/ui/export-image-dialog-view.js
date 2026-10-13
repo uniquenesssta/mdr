@@ -4,12 +4,16 @@ import { createSafeElement, createEventScope, requireElementRef } from '../../..
 import { EXPORT_IMAGE_RATIOS } from '../formats/image/image-ratio-presets.js';
 
 /** Sole image modal/options/capture-stage DOM owner; no PNG or file workflow state. */
-export function createExportImageDialogView({overlayRoot,onCommand,createModalShell=(root,options)=>new ModalShell(root,options),createIcon=(documentRef,id,options)=>createIconView(documentRef,id,options)}={}) {
+export function createExportImageDialogView({overlayRoot,onCommand,translate,subscribeLocale,createModalShell=(root,options)=>new ModalShell(root,options),createIcon=(documentRef,id,options)=>createIconView(documentRef,id,options)}={}) {
   requireElementRef(overlayRoot,'Image export overlay root');
-  if(typeof onCommand!=='function')throw new TypeError('Image export command callback is required.');
+  if(![onCommand,translate,subscribeLocale].every(value=>typeof value==='function'))throw new TypeError('Image export command and locale capabilities are required.');
   const doc=overlayRoot.ownerDocument;
   if(doc.getElementById('export-image-modal')||doc.getElementById('export-image-stage'))throw new Error('Image export view already mounted.');
-  const node=(parent,tag,options={})=>{const element=createSafeElement(doc,tag,options);parent?.append(element);return element;};
+  const bindings=[];
+  const node=(parent,tag,options={})=>{const element=createSafeElement(doc,tag,options);
+    if(options.dataset?.i18n)bindings.push({element,key:options.dataset.i18n,kind:'text'});
+    if(options.dataset?.i18nAlt)bindings.push({element,key:options.dataset.i18nAlt,kind:'alt'});
+    parent?.append(element);return element;};
   const root=node(null,'div',{id:'export-image-modal',className:'modal-overlay'});
   const panel=node(root,'div',{className:'modal c-modal c-modal--preview'}),header=node(panel,'div',{className:'modal-header'});
   const title=node(header,'h3',{id:'export-image-title'});title.append(createIcon(doc,'icon-image',{className:'icon icon-lg'}));
@@ -30,15 +34,18 @@ export function createExportImageDialogView({overlayRoot,onCommand,createModalSh
   const footer=node(panel,'div',{className:'modal-footer'});
   for(const [action,key,label,primary]of [['closeImage','cancel','取消',false],['renderImage','refreshPreview','刷新预览',false],['saveImage','downloadPng','下载 PNG',true]])node(footer,'button',{text:label,className:primary?'primary':'',attributes:{type:'button'},dataset:{exportAction:action,i18n:key}});
   const stage=node(null,'div',{id:'export-image-stage',className:'export-image-stage',attributes:{'aria-hidden':'true'}}),container=node(stage,'div',{id:'export-image-content'});
-  const events=createEventScope();let modal,ratio='9:16',destroyed=false;
+  const events=createEventScope();let modal,unsubscribeLocale=null,ratio='9:16',destroyed=false;
   const alive=()=>{if(destroyed)throw new Error('Image export view is destroyed.');};
   const command=(action,payload)=>{if(destroyed)return;const result=onCommand(action,payload);result?.catch?.(()=>{});};
-  const cleanup=()=>{const errors=[];for(const release of [()=>events.destroy(),()=>modal?.destroy(),()=>root.remove(),()=>stage.remove()])try{release();}catch(error){errors.push(error);}return errors;};
+  const renderTranslations=()=>{if(destroyed)return;for(const {element,key,kind}of bindings){const value=translate(key);if(kind==='alt')element.setAttribute('alt',value);else element.textContent=value;}close.setAttribute('aria-label',translate('cancel'));};
+  const cleanup=()=>{const errors=[];for(const release of [()=>{if(typeof unsubscribeLocale==='function')unsubscribeLocale();},()=>events.destroy(),()=>modal?.destroy(),()=>root.remove(),()=>stage.remove()])try{release();}catch(error){errors.push(error);}return errors;};
   try {
     modal=createModalShell(root,{panel});overlayRoot.append(root,stage);
     for(const button of buttons)events.listen(button,'click',()=>command('selectRatio',{ratio:button.dataset.ratio}));
     for(const button of [close,...footer.children])events.listen(button,'click',()=>command(button.dataset.exportAction));
     events.listen(crop,'change',()=>command('renderImage'));
+    renderTranslations();unsubscribeLocale=subscribeLocale(renderTranslations);
+    if(typeof unsubscribeLocale!=='function')throw new TypeError('Image export locale subscription requires a disposer.');
   }catch(error){destroyed=true;const errors=[error,...cleanup()];if(errors.length===1)throw error;throw new AggregateError(errors,'Image export view construction failed.');}
   return Object.freeze({root,stage,container,previewImage,crop,buttons:Object.freeze(buttons),
     getOptions(){alive();return Object.freeze({ratio,cropFit:Boolean(crop.checked)});},

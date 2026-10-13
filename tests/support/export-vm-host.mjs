@@ -202,7 +202,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   context.finishExportTask=(...args)=>{try{return taskMount.port.finish(...args);}catch(error){context.showToast('导出清理失败：'+(error?.message||String(error)));return false;}};
   vm.runInContext(markdownDownload, context, {filename:'context-export-fixture',timeout:1000});
   return {
-    context, calls, downloads, nodes, timers, events, printDom, imageExporter, imageSurface, imageMount, captureRoots, imageAssets, assetMount, dataMount, assetTimers, pdfExporter, printSurface, imageLayout, layoutMount, taskController, documentBuilder, styles, markdownExporter, htmlExporter, wordExporter,
+    context, calls, downloads, nodes, timers, events, printDom, commandMount, imageExporter, imageSurface, imageMount, captureRoots, imageAssets, assetMount, dataMount, assetTimers, pdfExporter, printSurface, imageLayout, layoutMount, taskController, documentBuilder, styles, markdownExporter, htmlExporter, wordExporter,
     preload: (root, task) => assetMount.port.prepare({ root, task }),
     enhance: (root, task) => enhancementMount.port.enhance({ root, task, documentId }), createNode: node,
     build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,

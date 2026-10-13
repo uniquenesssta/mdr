@@ -384,7 +384,7 @@ test('compatibility modal bridge installs one authoritative registry for the rem
   assert.throws(() => bridge.open('export-image-modal'), /Unknown compatibility modal/);
   const imageDocument = new ExportProgressDocument(), imageOverlay = imageDocument.createElement('div');
   imageDocument.body.append(imageOverlay);
-  const imageView = createExportImageDialogView({overlayRoot:imageOverlay,onCommand:()=>{},createIcon:doc=>doc.createElement('span')});
+  const imageView = createExportImageDialogView({translate:key=>key,subscribeLocale:()=>()=>{},overlayRoot:imageOverlay,onCommand:()=>{},createIcon:doc=>doc.createElement('span')});
   imageView.open({closeOnEscape:false,closeOnBackdrop:false});imageDocument.flushFrames();
   imageView.root.dispatch('keydown',createEvent('Escape'));
   imageView.root.dispatch('mousedown',{target:imageView.root,preventDefault(){},stopPropagation(){}});
