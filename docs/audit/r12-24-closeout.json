@@ -1035,7 +1035,17 @@
         "productTestsRunLocally": false,
         "diffWhitespaceCheck": "passed",
         "limitations": "Functional22 callbacks and full new24 Windows contract run pending; no local build/browser/Rust. Source inventory guards are characterization, public Recorder replaces VM loader at15.2."
-      }
+      },
+      "failedWindowsAttempts": [
+        {
+          "sha": "b56c3e7e3d3fa89b827439b17c261aac2008e222",
+          "runId": 38352488733,
+          "accepted": false,
+          "cause": "15 stale exact R14-only workflow branch assertions",
+          "repair": "Require exact R14/R15 branch list, retain every cumulative gate and verify R15 telemetry routing",
+          "pending": "new-head full Windows validation"
+        }
+      ]
     },
     "priorStageAcceptance": {
       "stage": "R14.17",
