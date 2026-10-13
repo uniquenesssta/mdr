@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-04 bounded aggregation, acknowledgement and backoff regression · ${{ github.sha }}
+run-name: R15-05 explicit long-task observer lifecycle and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -238,6 +238,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-aggregation-buffer.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-buffer.log"
+
+      - name: R15-05 public LongTaskObserver lifecycle and actual Runtime collection
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-long-task-observer.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-long-task.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

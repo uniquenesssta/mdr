@@ -1,4 +1,4 @@
-> R15-03正式收尾：c77ffbb / CI38408451605七组Windows及全部步骤通过，脱敏33+实际payload3、Recorder22、目录24、全仓2293/2293、前端1286/1286、浏览器11+67及Rust281；三份下载产物摘要和最终同提交accepted=true核验。首轮ef7d520格式失败及修复记录保留。 当前在唯一agent/r15-stage实施15.4 AggregationBuffer：200聚合组/1000待送条目上限、窗口统计、250条批次、匹配批次与attempt的累计确认、未知失败隔离、250ms～30s退避、溢出样本计数及只读销毁交接；新增41项公共契约。04待精确提交Windows验收；15.5未开始，A04仅前端处置，原生确认/真实部分写入仍归15.7，不提前关闭。 [04详情](docs/R15-04-DETAILS.md)。
+> R15-04正式收尾：96fa3af / CI38421131243七组Windows及全部步骤通过，Buffer41、脱敏33+实际payload3、Recorder22、目录24、全仓2334/2334、前端1327/1327、浏览器11+67及Rust281；三份下载归档摘要与同提交最终accepted=true已核验。 当前在唯一agent/r15-stage实施15.5 Long Task Observer：公共工厂显式start/stop/destroy、能力降级、单一监听器/代次屏障、首次buffered与重启不重放、只送数值指标；DEV LogsPort启停和pagehide/pageshow接入，新增39项公共契约。05待精确提交Windows验收；15.6未开始，完整Runtime生命周期仍归15.8，A04原生确认仍归15.7，未关闭。 [05详情](docs/R15-05-DETAILS.md)。
 
 > 当前平台范围（2026-09-29，用户明确要求）：全部阶段只验收 Windows；取消 Linux/macOS 验证要求。以 [Windows 验证策略](docs/WINDOWS_VALIDATION_POLICY.md) 为准，历史多平台记录只保留作历史证据。
 

@@ -1,4 +1,4 @@
-import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer } from '../features/telemetry/index.js';
+import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver } from '../features/telemetry/index.js';
 
 const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const diagnosticStates = new Map();
@@ -29,6 +29,13 @@ const drainAggregates = () => buffer.drainAggregates();
 const flush = () => buffer.flush();
 export function getPerformanceBufferStats() { return buffer.getStats(); }
 
+const longTaskObserver = createLongTaskObserver({
+  getObserver: () => typeof PerformanceObserver === 'undefined' ? null : PerformanceObserver,
+  isEnabled: () => import.meta.env.DEV && platformLogsEnabled,
+  record,
+  onError: phase => console.warn('Performance long-task observer failed:', phase)
+});
+
 
 export function configurePerformanceRuntimeStats(provider) {
   if (typeof provider !== 'function') throw new TypeError('performance runtime stats provider must be a function');
@@ -42,6 +49,8 @@ export function configurePerformancePlatform({ logs, enabled = false } = {}) {
   platformLogs = logs;
   platformLogsEnabled = Boolean(enabled);
   buffer.setEnabled(platformLogsEnabled);
+  if (platformLogsEnabled) longTaskObserver.start();
+  else longTaskObserver.stop();
 }
 
 function timestampMs() {
@@ -216,20 +225,8 @@ function installInteractionTracking() {
 }
 
 function installPerformanceObservers() {
+  longTaskObserver.start();
   if (typeof PerformanceObserver === 'undefined') return;
-
-  try {
-    const longTaskObserver = new PerformanceObserver(list => {
-      for (const entry of list.getEntries()) {
-        record('runtime.long-task', {
-          category: 'runtime.performance',
-          durationMs: entry.duration,
-          details: { startTime: Number(entry.startTime.toFixed(3)) }
-        });
-      }
-    });
-    longTaskObserver.observe({ type: 'longtask', buffered: true });
-  } catch (_) {}
 
   try {
     // Event Timing 会同时上报 pointerover / mouseover / pointerenter 等同源事件。
@@ -512,7 +509,9 @@ if (import.meta.env.DEV) {
     }
   });
   window.addEventListener('pagehide', () => {
+    longTaskObserver.stop();
     drainAggregates();
     void flush();
   });
+  window.addEventListener('pageshow', () => longTaskObserver.start());
 }
