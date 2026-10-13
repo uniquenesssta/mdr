@@ -479,7 +479,7 @@
     },
     {
       "path": "src-tauri/tests/performance_log/redaction_pipeline.rs",
-      "blobSha": "9a692cc685d7173a72f1bb2fd42d9c4d1d3b90b5"
+      "blobSha": "416ec7844c887dd72b985b63b7fe3bc2385e2d14"
     },
     {
       "path": "tests/support/performance-log/frontend-payload.mjs",
@@ -866,7 +866,17 @@
         "originalSevenJobsAndAllStepsRetained": true,
         "modelsRustProductionDependenciesFormatsBudgetsAnd67ScenariosUnchanged": true,
         "priorAcceptancesAndFailuresPreserved": true
-      }
+      },
+      "failedWindowsAttempts": [
+        {
+          "commit": "ef7d5208457fe6c0ebd3ce0cb04f509a0dc4cc32",
+          "run": 38399111994,
+          "accepted": false,
+          "cause": "Rustfmt requires multiline new frontend_payload assert; all functional jobs and Rust regressions passed",
+          "repair": "Exact CI formatting diff, no logic or gate changes",
+          "pending": "repaired exact-head full Windows"
+        }
+      ]
     },
     "priorStageAcceptance": {
       "stage": "R15.1",

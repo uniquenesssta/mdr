@@ -32,7 +32,10 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     for secret in fixture["secrets"].as_array().unwrap() {
         let encoded = serde_json::to_string(secret).unwrap();
         let escaped = &encoded[1..encoded.len() - 1];
-        assert!(!frontend_payload.contains(secret.as_str().unwrap()), "raw secret reached command");
+        assert!(
+            !frontend_payload.contains(secret.as_str().unwrap()),
+            "raw secret reached command"
+        );
         assert!(!frontend_payload.contains(escaped), "escaped secret reached command");
         assert!(!persisted.contains(secret.as_str().unwrap()), "secret reached JSONL");
         assert!(!persisted.contains(escaped), "escaped secret reached JSONL");
