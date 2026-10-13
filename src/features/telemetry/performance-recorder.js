@@ -1,42 +1,13 @@
+import { redactTelemetryDetails as safeDetails, redactTelemetryLabel } from './telemetry-redaction.js';
+
 // The single frontend envelope/measurement owner. No DOM, timers or file transport.
 function cleanString(value, maxLength = 160) {
   return String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
 }
 
-function safeDetails(details) {
-  if (!details || typeof details !== 'object') return {};
-  const ancestors = new WeakSet();
-  let remaining = 512;
-  const visit = (value, depth) => {
-    if (--remaining < 0 || depth > 8) return '[truncated]';
-    if (value === null || typeof value === 'boolean') return value;
-    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-    if (typeof value === 'string') return cleanString(value, 300);
-    if (typeof value !== 'object') return undefined;
-    if (ancestors.has(value)) return '[circular]';
-    ancestors.add(value);
-    try {
-      if (Array.isArray(value)) return value.slice(0, 20).map(item => visit(item, depth + 1) ?? null);
-      const safe = Object.create(null);
-      for (const key of Object.keys(value).slice(0, 64)) {
-        if (remaining <= 0) break;
-        const nested = visit(value[key], depth + 1);
-        if (nested !== undefined) safe[key] = nested;
-      }
-      return safe;
-    } catch (_) {
-      return '[unserializable]';
-    } finally {
-      ancestors.delete(value);
-    }
-  };
-  return visit(details, 0);
-}
-
-
 /** Create an independently owned Recorder. Aggregation and persistence are injected ports. */
 export function createTelemetryRecorder({ sessionId, now, monotonicNow, emit, aggregate } = {}) {
-  if (typeof sessionId !== 'string' || !sessionId.trim()) throw new TypeError('Recorder requires a sessionId');
+  if (typeof sessionId !== 'string' || !sessionId.trim() || redactTelemetryLabel(sessionId) === '[redacted]') throw new TypeError('Recorder requires a sessionId');
   for (const [name, value] of Object.entries({ now, monotonicNow, emit })) {
     if (typeof value !== 'function') throw new TypeError(`Recorder requires ${name}`);
   }
@@ -47,7 +18,7 @@ export function createTelemetryRecorder({ sessionId, now, monotonicNow, emit, ag
     for (const name of ['category', 'status']) {
       if (options[name] && typeof options[name] !== 'string') throw new TypeError(`Recorder ${name} must be a string`);
     }
-    return { ...options, category: options.category || 'ui.operation', status: options.status || 'ok' };
+    return { ...options, category: redactTelemetryLabel(options.category || 'ui.operation'), status: redactTelemetryLabel(options.status || 'ok') };
   }
   function createEntry(operation, options = {}) {
     if (destroyed || typeof operation !== 'string' || !operation.trim()) return null;
@@ -62,7 +33,7 @@ export function createTelemetryRecorder({ sessionId, now, monotonicNow, emit, ag
       sessionId,
       source: 'frontend',
       category: normalized.category,
-      operation,
+      operation: redactTelemetryLabel(operation),
       durationMs: Number.isFinite(duration) ? Math.max(0, Number(duration.toFixed(3))) : null,
       status: normalized.status,
       details
@@ -74,7 +45,7 @@ export function createTelemetryRecorder({ sessionId, now, monotonicNow, emit, ag
     if (destroyed) return;
     if (normalized.aggregate && aggregate) {
       const details = safeDetails(normalized.details);
-      if (!destroyed) aggregate(operation, { ...normalized, details });
+      if (!destroyed) aggregate(redactTelemetryLabel(operation), { category: normalized.category, status: normalized.status, durationMs: Number(normalized.durationMs), aggregate: true, details });
     } else {
       const entry = createEntry(operation, normalized);
       if (!destroyed && entry) emit(entry);

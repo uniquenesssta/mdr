@@ -27,3 +27,17 @@ test('R12-14 runtime bounds diagnostic containers and safely handles cycles and 
   assert.ok(!Object.hasOwn(details, 'invalid'));
   assert.doesNotThrow(() => JSON.stringify(entries));
 });
+
+
+test('R15-03 actual frontend to desktop payload contains no raw secret before Rust writes', async () => {
+  const {entries, secrets} = await producePayload();
+  const payload = JSON.stringify(entries);
+  for (const secret of secrets) {assert.equal(payload.includes(secret), false); assert.equal(payload.includes(JSON.stringify(secret).slice(1, -1)), false);}
+  for (const field of ['nested', 'encoded', 'twice']) {
+    assert.equal(entries[0].details[field].count, 7);
+    assert.equal(Object.hasOwn(entries[0].details[field], 'path'), false);
+    assert.equal(Object.hasOwn(entries[0].details[field], 'body'), false);
+    assert.equal(Object.hasOwn(entries[0].details[field], 'token'), false);
+  }
+  assert.equal(entries[0].details.hasDocumentPath, true);
+});

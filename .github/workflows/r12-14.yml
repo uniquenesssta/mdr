@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-02 public Recorder and cumulative telemetry regression · ${{ github.sha }}
+run-name: R15-03 frontend minimization before buffering and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -228,6 +228,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-recorder.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-recorder.log"
+
+      - name: R15-03 recursive frontend redaction and actual native payload
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-redaction.test.mjs tests/stage-12-log-payload.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-redaction.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

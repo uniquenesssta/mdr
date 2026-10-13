@@ -5556,6 +5556,16 @@
       "explicit-instance",
       "retain",
       false
+    ],
+    [
+      "src/features/telemetry/telemetry-redaction.js",
+      "esm-module",
+      "telemetry",
+      "Pure frontend privacy minimization of nested details, envelope labels and retained diagnostic hint identities before buffering.",
+      "none",
+      "stateless",
+      "retain",
+      false
     ]
   ]
 }

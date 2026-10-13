@@ -1,4 +1,4 @@
-import { createTelemetryRecorder } from '../features/telemetry/index.js';
+import { createTelemetryRecorder, redactTelemetryIdentity } from '../features/telemetry/index.js';
 
 const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const queue = [];
@@ -87,8 +87,8 @@ function diagnostic(operation, options = {}) {
   if (typeof operation !== 'string' || !operation.trim()) return false;
   const now = timestampMs();
   const details = safeDetails(options.details);
-  const key = cleanString(options.dedupeKey || `${options.category || 'runtime.diagnostic'}:${operation}`, 240);
-  const fingerprint = cleanString(
+  const key = redactTelemetryIdentity(options.dedupeKey || `${options.category || 'runtime.diagnostic'}:${operation}`, 240);
+  const fingerprint = redactTelemetryIdentity(
     options.fingerprint || JSON.stringify(details),
     500
   );
@@ -155,10 +155,10 @@ async function flush() {
     lastFlushError = '';
   } catch (error) {
     queue.unshift(...batch);
-    const message = cleanString(error?.message || error, 240);
+    const message = redactTelemetryIdentity(error?.message || error, 240);
     if (message !== lastFlushError) {
       lastFlushError = message;
-      console.warn('Performance log flush failed:', error);
+      console.warn('Performance log flush failed:', '[redacted]');
     }
   } finally {
     flushInProgress = false;

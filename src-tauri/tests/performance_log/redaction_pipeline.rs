@@ -15,6 +15,7 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     let entries = fixture["entries"].as_array().unwrap().clone();
     assert_eq!(entries.len(), 3);
     assert!(entries[0]["details"]["nested"].is_object());
+    let frontend_payload = serde_json::to_string(&entries).unwrap();
     let session = entries[0]["sessionId"].clone();
     let path = write_performance_logs(entries).unwrap();
     let contents = {
@@ -31,13 +32,15 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     for secret in fixture["secrets"].as_array().unwrap() {
         let encoded = serde_json::to_string(secret).unwrap();
         let escaped = &encoded[1..encoded.len() - 1];
+        assert!(!frontend_payload.contains(secret.as_str().unwrap()), "raw secret reached command");
+        assert!(!frontend_payload.contains(escaped), "escaped secret reached command");
         assert!(!persisted.contains(secret.as_str().unwrap()), "secret reached JSONL");
         assert!(!persisted.contains(escaped), "escaped secret reached JSONL");
     }
     let details = &rows[0]["details"];
     for field in ["nested", "encoded", "twice"] {
         assert_eq!(details[field]["count"], 7);
-        assert_eq!(details[field]["path"], "note.md");
+        assert!(details[field].get("path").is_none());
         assert!(details[field].get("body").is_none());
         assert!(details[field].get("token").is_none());
     }
@@ -47,18 +50,18 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     assert_eq!(chain["count"], 2);
     assert_eq!(chain["cause"]["reason"], "[redacted]");
     assert!(chain["cause"].get("password").is_none());
-    assert_eq!(chain["cause"]["path"], "cause.md");
+    assert!(chain["cause"].get("path").is_none());
     assert_eq!(chain["cause"]["count"], 1);
     assert_eq!(chain["cause"]["causes"][0]["stack"], "[redacted]");
     assert!(chain["cause"]["causes"][0].get("token").is_none());
     assert_eq!(chain["cause"]["causes"][0]["count"], 4);
     let array = &details["array"];
     assert_eq!(array[0]["count"], 7);
-    assert_eq!(array[0]["path"], "note.md");
+    assert!(array[0].get("path").is_none());
     assert!(array[0].get("body").is_none());
     assert!(array[0].get("token").is_none());
     assert_eq!(array[1], "[redacted]");
-    assert_eq!(array[2]["path"], "other.md");
+    assert!(array[2].get("path").is_none());
     assert_eq!(array[2]["count"], 3);
     assert_eq!(details["exceptional"], "[redacted]");
     assert_eq!(details["cycle"]["self"], "[redacted]");

@@ -41,8 +41,8 @@ test('R12-14 preserves historical evidence and structured runtime details while 
   assert.equal(manifest.performanceLog.commandRedaction, 'none');
   assert.equal(await read('src-tauri/tests/fixtures/stage_12_security/manifest.json'),
     frozen('src-tauri/tests/fixtures/stage_12_security/manifest.json'));
-  const runtime = await read('src/features/telemetry/performance-recorder.js');
-  assert.doesNotMatch(runtime.slice(runtime.indexOf('function safeDetails'), runtime.indexOf('export function createTelemetryRecorder')), /JSON\.stringify/);
+  const runtime = await read('src/features/telemetry/telemetry-redaction.js');
+  assert.doesNotMatch(runtime, /JSON\.stringify/);
   assert.match(runtime, /new WeakSet/);
   assert.match(runtime, /remaining = 512/);
   await assertCurrentValidation();
