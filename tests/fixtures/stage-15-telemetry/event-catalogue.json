@@ -1,0 +1,5149 @@
+{
+  "schemaVersion": 1,
+  "stage": "R15.1",
+  "baselineCommit": "16d7b395ae7728731f1cbe4b39d5b11e4a5d377e",
+  "baselineRun": 38347726196,
+  "productBehaviorChanged": false,
+  "scope": "All current frontend event producers, injected hybrid/preview callbacks, platform details and backend producer boundaries; arbitrary public record input represented as open families.",
+  "envelopes": {
+    "frontend": [
+      "timestampMs",
+      "sessionId",
+      "source",
+      "category",
+      "operation",
+      "durationMs",
+      "status",
+      "details"
+    ],
+    "rust": [
+      "timestampMs",
+      "source",
+      "category",
+      "operation",
+      "durationMs",
+      "status",
+      "details"
+    ]
+  },
+  "defaults": {
+    "category": "ui.operation",
+    "status": "ok",
+    "diagnosticCategory": "runtime.diagnostic",
+    "source": "frontend",
+    "durationMs": "finite numeric coercion/clamp/3dp else null",
+    "details": "bounded structured object, not frontend redaction"
+  },
+  "inputOptions": [
+    "category",
+    "durationMs",
+    "status",
+    "details",
+    "aggregate",
+    "dedupeKey",
+    "fingerprint",
+    "minIntervalMs"
+  ],
+  "sourceSurfaces": [
+    {
+      "path": "public/app/core.js",
+      "blobSha": "9dee45e0997a634e46c5587c3ef52be9754ec695",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "public/app/editor-tools.js",
+      "blobSha": "29b0d096534777e845667d87bab32e80f2c0cc27",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src-tauri/src/local_file/commands.rs",
+      "blobSha": "8a4c8cc7415935712131fc9b04271b8f2907a59b",
+      "role": "backend-envelope/redaction/sink/producer"
+    },
+    {
+      "path": "src-tauri/src/main.rs",
+      "blobSha": "fd7ed57a116b73f20762ec7c01b402df1d01c455",
+      "role": "backend-envelope/redaction/sink/producer"
+    },
+    {
+      "path": "src-tauri/src/performance_log/command.rs",
+      "blobSha": "284f994bbba2d11f346c909e032b3a2e344eba99",
+      "role": "backend-envelope/redaction/sink/producer"
+    },
+    {
+      "path": "src-tauri/src/performance_log/lifecycle.rs",
+      "blobSha": "7b0f3e6a53c0bf7fc3c5d541021f6ed90f205857",
+      "role": "backend-envelope/redaction/sink/producer"
+    },
+    {
+      "path": "src-tauri/src/performance_log/mod.rs",
+      "blobSha": "bb9675e0a37698100d91f82caa1e7fe96dc6b855",
+      "role": "backend-envelope/redaction/sink/producer"
+    },
+    {
+      "path": "src-tauri/src/performance_log/redaction.rs",
+      "blobSha": "ea0790ff7243daa3d61b866d24e9364ff56ee699",
+      "role": "backend-envelope/redaction/sink/producer"
+    },
+    {
+      "path": "src-tauri/src/performance_log/writer.rs",
+      "blobSha": "bfda8cb0e5209437e75dbe5dabe5896af2124dad",
+      "role": "backend-envelope/redaction/sink/producer"
+    },
+    {
+      "path": "src-tauri/src/web_fetch/command.rs",
+      "blobSha": "e2f6f45ae71cd26c7fe443d599a227ee1e492b87",
+      "role": "backend-envelope/redaction/sink/producer"
+    },
+    {
+      "path": "src/document/document-model.js",
+      "blobSha": "d767d9025be05a6f6b87d7cd3527782db1c3303a",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/editor/hybrid-markdown.js",
+      "blobSha": "4b30211a3f05624058204e9c8d61f2975e8b68b2",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js",
+      "blobSha": "3912f573d3b45a9a3220ee1dd9c5cdb30157dcd8",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
+      "blobSha": "f29820dd71e6d5aa95706906a90e725b444e2bb9",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/application/hybrid-editor-controller.js",
+      "blobSha": "3a174fb5f4e73112e0935b0ad6601ada7eafb5c7",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js",
+      "blobSha": "cc4a021ab0c2136eba31004aa42c683ef888e558",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/code-block/code-block-widget.js",
+      "blobSha": "98e950974ff5b0ecb6205e877dc4bdf4ee457925",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/html/html-block-widget.js",
+      "blobSha": "5bc504290a18311e9fb9d700416b0437b6346be0",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/math/block-math-widget.js",
+      "blobSha": "221b37dbfe57a21e45c9752733dbcbfe1c3156a4",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/math/inline-math-widget.js",
+      "blobSha": "cc7779a66cbbe96cff23d203f707f2d5694aced5",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+      "blobSha": "dd69484c8ab2e5e17ddc432b9f1e12c32315c99f",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/table/table-cell-editor.js",
+      "blobSha": "e61dd3b7bef9f009ee4e92d274e156c8043d1f2e",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/table/table-widget.js",
+      "blobSha": "773b07015452c5c66eb7735f4cd3d9f76e961dd2",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/table/table-writeback.js",
+      "blobSha": "74e6e8149eefa43838f4f3d99705384b9323a632",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/import/application/import-document-controller.js",
+      "blobSha": "17c1afffb321a0a03970b3b153e4fcb02ec83e28",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/layout/shell/compact-shell-controller.js",
+      "blobSha": "d891c553b98849a2ca0919b40a2a67ec7f201a3d",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/layout/toolbar/toolbar-boundary-controller.js",
+      "blobSha": "d82d635a6b314b19681409d62446afac9e62cff2",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-layout-stability.js",
+      "blobSha": "41cf537aa473a800c22af50657d304dba9ec7312",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-render-engine.js",
+      "blobSha": "938ff541e630f3bcb01df3da06101a81942f563c",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/preview/render/mermaid-renderer.js",
+      "blobSha": "0ed4402d9fd067559767948ce86afb9ac7e46813",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/sidebar/folder-tree/folder-tree-controller.js",
+      "blobSha": "eec7c9259da0e01b63413e4530098e2f70a7c45f",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/sidebar/outline/outline-controller.js",
+      "blobSha": "0433a8206b2a87c8d382aadb72bb2a27d8f75231",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/sync/selection/selection-sync-controller.js",
+      "blobSha": "77ed7ecdebe362225e3fb84596d7de70ceb1bbc5",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/features/window/window-close-controller.js",
+      "blobSha": "b1e5da9e82bbf655e50398a3e6c99634af10f673",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/main.js",
+      "blobSha": "218a0d103b21e68d9bfbf90663f5a2d4ae3e798e",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/platform/desktop/dialog-client.js",
+      "blobSha": "20af9573b256735f892fad60c42a9c327c0d5ae1",
+      "role": "runtime/forwarder/native-details"
+    },
+    {
+      "path": "src/platform/desktop/document-store-client.js",
+      "blobSha": "ace6848ab4ae70c7d34f93adec8cba9d731e4edd",
+      "role": "runtime/forwarder/native-details"
+    },
+    {
+      "path": "src/platform/desktop/file-system-client.js",
+      "blobSha": "c14f5024b94cc90be1da5ec65c60db0c2a5cc925",
+      "role": "runtime/forwarder/native-details"
+    },
+    {
+      "path": "src/platform/desktop/invoke-client.js",
+      "blobSha": "5aa00f9362be029816291bf09b17d834fa69cc81",
+      "role": "runtime/forwarder/native-details"
+    },
+    {
+      "path": "src/platform/desktop/link-client.js",
+      "blobSha": "8c92974bb51a646963b0b26d3e4711085c7cbad5",
+      "role": "runtime/forwarder/native-details"
+    },
+    {
+      "path": "src/platform/desktop/web-fetch-client.js",
+      "blobSha": "161e8ea75104cb3972ae250776cd6acf84dfc322",
+      "role": "runtime/forwarder/native-details"
+    },
+    {
+      "path": "src/runtime/link-preview.js",
+      "blobSha": "1a50fe27cd7b4058e7e2a207520cbb97b19a9589",
+      "role": "emitter-or-injected-callback"
+    },
+    {
+      "path": "src/runtime/performance.js",
+      "blobSha": "70ea60286f423d9b65964253056b6a95511517f2",
+      "role": "emitter-or-injected-callback"
+    }
+  ],
+  "events": [
+    {
+      "operation": "app.ready",
+      "category": "app.lifecycle",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "documentReadyState"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/main.js",
+          "line": 1795,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "browser.event.change",
+      "category": "runtime.event-timing",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "interactionId",
+        "processingMs"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "browser.event.click",
+      "category": "runtime.event-timing",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "interactionId",
+        "processingMs"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "browser.event.contextmenu",
+      "category": "runtime.event-timing",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "interactionId",
+        "processingMs"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "browser.event.drop",
+      "category": "runtime.event-timing",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "interactionId",
+        "processingMs"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "browser.event.input",
+      "category": "runtime.event-timing",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "interactionId",
+        "processingMs"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "browser.event.keydown",
+      "category": "runtime.event-timing",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "interactionId",
+        "processingMs"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "document.file-save-error",
+      "category": "document.error",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/main.js",
+          "line": 1024,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "document.import-error",
+      "category": "document.error",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "fileName",
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/import/application/import-document-controller.js",
+          "line": 89,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "document.imported",
+      "category": "document.operation",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "documentId",
+        "editorCharacters",
+        "normalizedCrLf",
+        "sourceCharacters"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/import/application/import-document-controller.js",
+          "line": 80,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "document.lazy-created",
+      "category": "document.lifecycle",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "characters",
+        "documentId",
+        "generation"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "public/app/core.js",
+          "line": 493,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "document.save-as-error",
+      "category": "document.error",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/main.js",
+          "line": 1047,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "document.session-reset",
+      "category": "document.lifecycle",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "currentDocumentId",
+        "discardedDocuments",
+        "emptyWorkspace",
+        "generation",
+        "migratedRecentFiles"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "public/app/core.js",
+          "line": 455,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "document.snapshot",
+      "category": "document.model",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "chars",
+        "documentId",
+        "generation",
+        "reason",
+        "version"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/document/document-model.js",
+          "line": 225,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "downloadExportImage",
+      "category": "export.operation",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/export/application/export-controller.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "editor.pointer-position-corrected",
+      "category": "editor.input",
+      "statuses": [
+        "warning"
+      ],
+      "detailsFields": [
+        "fallbackLine",
+        "fallbackPosition",
+        "horizontalErrorPx",
+        "nativeLine",
+        "nativePosition",
+        "pointerX",
+        "pointerY",
+        "resolvedLine",
+        "resolvedPosition",
+        "targetLine",
+        "verticalErrorPx"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js",
+          "line": 33,
+          "call": "diagnostic"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "exportFile",
+      "category": "export.operation",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/export/application/export-controller.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "exportHTML",
+      "category": "export.operation",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/export/application/export-controller.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "exportPDF",
+      "category": "export.operation",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/export/application/export-controller.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "exportWord",
+      "category": "export.operation",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/export/application/export-controller.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "frontend.bootstrap",
+      "category": "app.lifecycle",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "deviceMemoryGb",
+        "hardwareConcurrency",
+        "userAgent",
+        "viewportHeight",
+        "viewportWidth"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 637,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.block-dispatch-failure",
+      "category": "editor.hybrid",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "documentChars",
+        "documentLines",
+        "hasFocus",
+        "message",
+        "selectionFrom",
+        "selectionTo",
+        "signatureLength",
+        "viewportRanges"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/application/hybrid-editor-controller.js",
+          "line": 94,
+          "call": "reportDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.code-direct-edit-close",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "codeFrom",
+        "reason"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/code-block/code-block-widget.js",
+          "line": 199,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.code-direct-edit-open",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "codeFrom",
+        "distancePx",
+        "intervalMs",
+        "line",
+        "trigger"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/code-block/code-block-widget.js",
+          "line": 145,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.code-edit-failure",
+      "category": "editor.hybrid",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/editor/hybrid-markdown.js",
+          "line": 115,
+          "call": "reportHybridDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.code-source-open",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "codeFrom",
+        "distancePx",
+        "intervalMs",
+        "trigger"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/code-block/code-block-widget.js",
+          "line": 91,
+          "call": "recordInteraction"
+        },
+        {
+          "path": "src/features/hybrid-editor/widgets/code-block/code-block-widget.js",
+          "line": 119,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.component-state-transition",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "componentFrom",
+        "componentType",
+        "key",
+        "mode",
+        "previousMode",
+        "reason",
+        "revision",
+        "version"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/editor/hybrid-markdown.js",
+          "line": 66,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.decoration-build-failure",
+      "category": "editor.hybrid",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "documentChars",
+        "documentLines",
+        "hasFocus",
+        "message",
+        "selectionFrom",
+        "selectionTo",
+        "viewportRanges"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
+          "line": 229,
+          "call": "reportDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.html-range-fallback",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "documentChars",
+        "documentLines",
+        "fallbackChars",
+        "fallbackCount",
+        "hasFocus",
+        "ranges",
+        "selectionFrom",
+        "selectionTo",
+        "viewportRanges"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
+          "line": 181,
+          "call": "reportDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.html-source-open",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "distancePx",
+        "htmlFrom",
+        "intervalMs",
+        "trigger"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/html/html-block-widget.js",
+          "line": 46,
+          "call": "recordInteraction"
+        },
+        {
+          "path": "src/features/hybrid-editor/widgets/html/html-block-widget.js",
+          "line": 58,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.invalid-block-range",
+      "category": "editor.hybrid",
+      "statuses": [
+        "warning"
+      ],
+      "detailsFields": [
+        "documentChars",
+        "documentLines",
+        "hasFocus",
+        "invalid",
+        "invalidCount",
+        "selectionFrom",
+        "selectionTo",
+        "viewportRanges"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
+          "line": 107,
+          "call": "reportDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.math-render-failure",
+      "category": "editor.hybrid",
+      "statuses": [
+        "warning"
+      ],
+      "detailsFields": [
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/editor/hybrid-markdown.js",
+          "line": 133,
+          "call": "reportHybridDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.math-source-open",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "displayMode",
+        "distancePx",
+        "intervalMs",
+        "mathFrom",
+        "trigger"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/math/block-math-widget.js",
+          "line": 62,
+          "call": "recordInteraction"
+        },
+        {
+          "path": "src/features/hybrid-editor/widgets/math/block-math-widget.js",
+          "line": 76,
+          "call": "recordInteraction"
+        },
+        {
+          "path": "src/features/hybrid-editor/widgets/math/inline-math-widget.js",
+          "line": 60,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.mermaid-direct-edit-close",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "reason",
+        "sourceFrom"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+          "line": 257,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.mermaid-direct-edit-open",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "distancePx",
+        "intervalMs",
+        "sourceFrom",
+        "trigger"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+          "line": 204,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.mermaid-render-failure",
+      "category": "editor.hybrid",
+      "statuses": [
+        "warning"
+      ],
+      "detailsFields": [
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/editor/hybrid-markdown.js",
+          "line": 141,
+          "call": "reportHybridDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.mermaid-render-result",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "sourceChars",
+        "sourceFrom",
+        "status",
+        "theme"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+          "line": 141,
+          "call": "recordInteraction"
+        },
+        {
+          "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+          "line": 169,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.mermaid-source-open",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "distancePx",
+        "intervalMs",
+        "sourceFrom",
+        "trigger"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+          "line": 99,
+          "call": "recordInteraction"
+        },
+        {
+          "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+          "line": 288,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.presentation-mode-mismatch",
+      "category": "editor.hybrid",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "actualMode",
+        "documentVersion",
+        "layoutMode",
+        "requestedMode"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "public/app/editor-tools.js",
+          "line": 108,
+          "call": "diagnostic"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.preview-index-failure",
+      "category": "editor.hybrid",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "message",
+        "sourceChars",
+        "requestedPreviewMode",
+        "useWorker",
+        "renderVersion"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/preview/pipeline/preview-render-engine.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.slow-decoration-build",
+      "category": "editor.hybrid",
+      "statuses": [
+        "warning"
+      ],
+      "detailsFields": [
+        "decoratedLines",
+        "documentChars",
+        "documentLines",
+        "durationMs",
+        "editableRanges",
+        "hasFocus",
+        "renderedBlocks",
+        "selectionFrom",
+        "selectionTo",
+        "viewportRanges"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
+          "line": 214,
+          "call": "reportDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.source-edit-close",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/editor/hybrid-markdown.js",
+          "line": 250,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.table-cell-edit-cancel",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "column",
+        "row",
+        "tableFrom"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/table/table-cell-editor.js",
+          "line": 123,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.table-cell-edit-close",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "column",
+        "reason",
+        "row",
+        "tableFrom"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/table/table-widget.js",
+          "line": 181,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.table-cell-edit-commit",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "changedChars",
+        "column",
+        "row",
+        "tableFrom"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/table/table-writeback.js",
+          "line": 42,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.table-cell-edit-failure",
+      "category": "editor.hybrid",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/editor/hybrid-markdown.js",
+          "line": 124,
+          "call": "reportHybridDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.table-cell-edit-open",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "column",
+        "distancePx",
+        "intervalMs",
+        "row",
+        "tableFrom",
+        "trigger"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/table/table-widget.js",
+          "line": 214,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.table-source-open",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "distancePx",
+        "intervalMs",
+        "tableFrom",
+        "trigger"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/widgets/table/table-widget.js",
+          "line": 84,
+          "call": "recordInteraction"
+        },
+        {
+          "path": "src/features/hybrid-editor/widgets/table/table-widget.js",
+          "line": 95,
+          "call": "recordInteraction"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "hybrid.widget-build-failure",
+      "category": "editor.hybrid",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "blockFrom",
+        "blockTo",
+        "blockType",
+        "documentChars",
+        "documentLines",
+        "hasFocus",
+        "message",
+        "selectionFrom",
+        "selectionTo",
+        "viewportRanges"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
+          "line": 153,
+          "call": "reportDiagnostic"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "hybrid.widget-geometry",
+      "category": "editor.hybrid",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "reason"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js",
+          "line": 29,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "instrumentation.ready",
+      "category": "app.lifecycle",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "wrappedFunctions"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 590,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "interaction.change",
+      "category": "ui.interaction",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "target"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "interaction.click",
+      "category": "ui.interaction",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "target",
+        "clickCount"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "interaction.contextmenu",
+      "category": "ui.interaction",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "target"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "interaction.drop",
+      "category": "ui.interaction",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "target"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "interaction.input.frame",
+      "category": "ui.interaction",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "target",
+        "valueLength"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 322,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "interaction.scroll.burst",
+      "category": "ui.interaction",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "events",
+        "origin",
+        "scrollTop",
+        "side",
+        "target"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 353,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "interaction.shortcut",
+      "category": "ui.interaction",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "key",
+        "target"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 307,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "layout.compact-shell-change",
+      "category": "ui.layout",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "active",
+        "reason",
+        "sidebarAutoCollapsed",
+        "viewportWidth"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/layout/shell/compact-shell-controller.js",
+          "line": 81,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "layout.mode-change",
+      "category": "ui.layout",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "animated",
+        "documentLength",
+        "nextMode",
+        "presentation",
+        "previousMode"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "public/app/editor-tools.js",
+          "line": 167,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "layout.system-fullscreen-error",
+      "category": "ui.layout",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/main.js",
+          "line": 1658,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "layout.toolbar-boundary-change",
+      "category": "ui.layout",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "availableWidth",
+        "requiredWidth",
+        "toolbarWidth",
+        "wrapped"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/layout/toolbar/toolbar-boundary-controller.js",
+          "line": 95,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "layout.window-resize-settled",
+      "category": "ui.layout",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "durationMs",
+        "events",
+        "viewportHeight",
+        "viewportWidth"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/layout/shell/compact-shell-controller.js",
+          "line": 111,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "link.preview-blocked",
+      "category": "link.preview",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "inputLength",
+        "reason",
+        "source"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/link-preview.js",
+          "line": 295,
+          "call": "report"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "link.preview-close",
+      "category": "link.preview",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "host",
+        "reason"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/link-preview.js",
+          "line": 233,
+          "call": "report"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "link.preview-external-open",
+      "category": "link.preview",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "inputLength",
+        "scheme"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/link-preview.js",
+          "line": 73,
+          "call": "report"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "link.preview-loaded",
+      "category": "link.preview",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "host",
+        "inputLength"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/link-preview.js",
+          "line": 153,
+          "call": "report"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "link.preview-open",
+      "category": "link.preview",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "host",
+        "inputLength",
+        "source"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/link-preview.js",
+          "line": 205,
+          "call": "report"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.abort_document_snapshot_upload",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "documentId",
+        "error",
+        "uploadId"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.append_document_snapshot_chunk",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "characters",
+        "chunkIndex",
+        "documentId",
+        "error",
+        "uploadId"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.begin_document_snapshot_upload",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "documentId",
+        "error",
+        "uploadId"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.cancel_fetch_url",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "error"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/web-fetch-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.commit_document_snapshot_upload",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "baseVersion",
+        "documentId",
+        "error",
+        "nextVersion",
+        "uploadId"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.delete_document_state",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "documentId",
+        "error"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.fetch_url",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "error",
+        "inputLength"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/web-fetch-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        },
+        {
+          "path": "src/platform/desktop/web-fetch-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.initial_file_path",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "error"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/file-system-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.list_text_file_tree",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "error",
+        "extension",
+        "hasDocumentPath"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/file-system-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.load_document_manifest",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "documentId",
+        "error"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.load_document_state",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "documentId",
+        "error"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.open-directory-dialog",
+      "category": "native.dialog",
+      "statuses": [
+        "ok",
+        "cancelled",
+        "error"
+      ],
+      "detailsFields": [
+        "error"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/dialog-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.open-file-dialog",
+      "category": "native.dialog",
+      "statuses": [
+        "ok",
+        "cancelled",
+        "error"
+      ],
+      "detailsFields": [
+        "error"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/dialog-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.open_external_url",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "error",
+        "inputLength",
+        "scheme"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/link-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.read_document_chunk",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "byteOffset",
+        "documentId",
+        "error",
+        "maxBytes"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.read_dropped_file",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "error",
+        "extension"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/file-system-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.read_local_image",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "error",
+        "hasDocumentPath",
+        "sourceLength"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/file-system-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.save-file-dialog",
+      "category": "native.dialog",
+      "statuses": [
+        "ok",
+        "cancelled",
+        "error"
+      ],
+      "detailsFields": [
+        "error",
+        "extension"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/dialog-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.save_document_state",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "baseVersion",
+        "documentId",
+        "error",
+        "fullSnapshot",
+        "nextVersion",
+        "transactions"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.search_document_state",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "documentId",
+        "error",
+        "from",
+        "queryLength"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/document-store-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.write_local_binary_file",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "bytes",
+        "error",
+        "extension",
+        "fileName",
+        "reason"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/file-system-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "native.write_local_text_file",
+      "category": "native.roundtrip",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "detailsFields": [
+        "characters",
+        "error",
+        "extension",
+        "fileName",
+        "reason"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/platform/desktop/file-system-client.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "preview.mermaid-render-failure",
+      "category": "render.pipeline",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "message",
+        "sourceChars",
+        "sourceLine"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/preview/render/mermaid-renderer.js",
+          "line": 118,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "preview.mermaid-render-result",
+      "category": "render.pipeline",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "renderer"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/preview/render/mermaid-renderer.js",
+          "line": 131,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": true
+    },
+    {
+      "operation": "preview.pipeline-failure",
+      "category": "render.pipeline",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "message",
+        "sourceChars",
+        "requestedPreviewMode",
+        "useWorker",
+        "renderVersion"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/preview/pipeline/preview-render-engine.js",
+          "line": null,
+          "call": "reviewed dispatch/helper mapping"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "render.preview-annotation",
+      "category": "render.pipeline",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "anchors",
+        "previewBlocks",
+        "sourceChars"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/preview/pipeline/preview-render-engine.js",
+          "line": 179,
+          "call": "emit"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "render.preview-enhancements",
+      "category": "render.pipeline",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "anchors",
+        "previewBlocks",
+        "sourceChars"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/preview/pipeline/preview-render-engine.js",
+          "line": 195,
+          "call": "emit"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "render.preview-index-only",
+      "category": "render.pipeline",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "blocks",
+        "mode",
+        "sourceChars",
+        "workerDurationMs"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/preview/pipeline/preview-render-engine.js",
+          "line": 401,
+          "call": "emit"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "render.preview-layout-refresh",
+      "category": "render.pipeline",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "attempts",
+        "forceRender",
+        "height",
+        "mountedBlocks",
+        "previewBlocks",
+        "reason",
+        "renderRequired",
+        "stableFrames",
+        "width"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/preview/pipeline/preview-layout-stability.js",
+          "line": 166,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "render.preview-patch",
+      "category": "render.pipeline",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "blocks",
+        "changed",
+        "enhancementJobs",
+        "mode",
+        "mountedBlocks",
+        "parsedChars",
+        "requestedPreviewMode",
+        "resolvedPreviewMode",
+        "reused",
+        "virtualized",
+        "workerDurationMs"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/preview/pipeline/preview-render-engine.js",
+          "line": 503,
+          "call": "emit"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "render.preview-prewarm",
+      "category": "render.pipeline",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "renderedBlocks",
+        "requestedBlocks",
+        "schedulerPending",
+        "workerDurationMs"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/preview/pipeline/preview-render-engine.js",
+          "line": 118,
+          "call": "emit"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "renderOutline",
+      "category": "render.pipeline",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "documentKey",
+        "headings",
+        "indexedVersion",
+        "reason"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/sidebar/outline/outline-controller.js",
+          "line": 82,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "runtime.error",
+      "category": "runtime.error",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "column",
+        "file",
+        "line",
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 427,
+          "call": "diagnostic"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "runtime.long-task",
+      "category": "runtime.performance",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "startTime"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 376,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "runtime.navigation",
+      "category": "runtime.performance",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "domContentLoadedMs",
+        "loadMs",
+        "transferBytes"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 410,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "runtime.snapshot",
+      "category": "runtime.performance",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "aggregateCount",
+        "domNodes",
+        "queueLength",
+        "scrollGeometryResyncs",
+        "scrollIgnoredTargetEvents",
+        "scrollSourceSide",
+        "scrollSourceSwitches",
+        "scrollTargetWrites",
+        "selectionIgnoredFeedbackEvents",
+        "selectionMappingFailures",
+        "selectionPendingRetries",
+        "selectionPreviewRefreshes",
+        "selectionPreviewRevision",
+        "totalHeapBytes",
+        "usedHeapBytes",
+        "viewportHeight",
+        "viewportWidth"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 602,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "runtime.unhandled-rejection",
+      "category": "runtime.error",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "reason"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/runtime/performance.js",
+          "line": 441,
+          "call": "diagnostic"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "selection.sync-anomaly",
+      "category": "sync.selection",
+      "statuses": [
+        "warning"
+      ],
+      "detailsFields": [
+        "direction",
+        "exactMapping",
+        "mappedCharacters",
+        "mappingCoverage",
+        "mappingMode",
+        "matchedAnchors",
+        "previewRevision",
+        "reason",
+        "result",
+        "selectionLength",
+        "sourceEnd",
+        "sourceStart",
+        "sourceViewportRatio",
+        "targetViewportRatio",
+        "virtualized"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/sync/selection/selection-sync-controller.js",
+          "line": 636,
+          "call": "diagnostic"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "selection.sync-result",
+      "category": "sync.selection",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "direction",
+        "exactMapping",
+        "mappedCharacters",
+        "mappingCoverage",
+        "mappingMode",
+        "matchedAnchors",
+        "previewRevision",
+        "reason",
+        "result",
+        "selectionLength",
+        "sourceEnd",
+        "sourceStart",
+        "sourceViewportRatio",
+        "targetViewportRatio",
+        "virtualized"
+      ],
+      "aggregation": "operation/category/status/time-window",
+      "sources": [
+        {
+          "path": "src/features/sync/selection/selection-sync-controller.js",
+          "line": 645,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "sidebar.file-tree-load-error",
+      "category": "sidebar.file-tree",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "error",
+        "rootPath"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/sidebar/folder-tree/folder-tree-controller.js",
+          "line": 120,
+          "call": "recordSafe"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "sidebar.file-tree-loaded",
+      "category": "sidebar.file-tree",
+      "statuses": [
+        "ok",
+        "partial"
+      ],
+      "detailsFields": [
+        "directories",
+        "files",
+        "rootPath",
+        "skipped",
+        "truncated"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/sidebar/folder-tree/folder-tree-controller.js",
+          "line": 102,
+          "call": "recordSafe"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "storage.document-recovered",
+      "category": "storage.recovery",
+      "statuses": [
+        "recovered"
+      ],
+      "detailsFields": [
+        "documentId",
+        "message",
+        "version"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "public/app/core.js",
+          "line": 431,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "window.close-error",
+      "category": "app.lifecycle",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/window/window-close-controller.js",
+          "line": 80,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    },
+    {
+      "operation": "window.close-handler-error",
+      "category": "app.lifecycle",
+      "statuses": [
+        "error"
+      ],
+      "detailsFields": [
+        "message"
+      ],
+      "aggregation": "direct",
+      "sources": [
+        {
+          "path": "src/features/window/window-close-controller.js",
+          "line": 166,
+          "call": "record"
+        }
+      ],
+      "injectedDetails": false
+    }
+  ],
+  "legacyWrappers": [
+    {
+      "operation": "updatePreview",
+      "category": "render.pipeline",
+      "aggregate": true,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "renderMermaidBlocks",
+      "category": "render.pipeline",
+      "aggregate": true,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "renderOutline",
+      "category": "render.pipeline",
+      "aggregate": true,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "setupDocuments",
+      "category": "document.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "openDocument",
+      "category": "document.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "newDocument",
+      "category": "document.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "duplicateDocument",
+      "category": "document.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "renameDocument",
+      "category": "document.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "closeDocument",
+      "category": "document.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "saveCurrentDocumentState",
+      "category": "document.operation",
+      "aggregate": true,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "saveToLocal",
+      "category": "document.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "saveAsMarkdown",
+      "category": "document.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "autoSave",
+      "category": "document.operation",
+      "aggregate": true,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "applySplit",
+      "category": "ui.layout",
+      "aggregate": true,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "setLayoutMode",
+      "category": "ui.layout",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "togglePane",
+      "category": "ui.layout",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "toggleSidebar",
+      "category": "ui.layout",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "applySettings",
+      "category": "ui.layout",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "setLanguage",
+      "category": "ui.layout",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "setAppTheme",
+      "category": "ui.layout",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "undo",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "redo",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "wrapSelection",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "prefixLines",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "insertHeading",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "insertTable",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "confirmImageInsert",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "confirmMermaidInsert",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "findNext",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "replaceOne",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    },
+    {
+      "operation": "replaceAll",
+      "category": "content.operation",
+      "aggregate": false,
+      "availability": "conditional on existing window function; configured does not imply installed"
+    }
+  ],
+  "nativeCommands": {
+    "save_document_state": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 19,
+        "detailsFields": [
+          "baseVersion",
+          "documentId",
+          "fullSnapshot",
+          "nextVersion",
+          "transactions"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "begin_document_snapshot_upload": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 29,
+        "detailsFields": [
+          "documentId",
+          "uploadId"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "append_document_snapshot_chunk": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 37,
+        "detailsFields": [
+          "characters",
+          "chunkIndex",
+          "documentId",
+          "uploadId"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "commit_document_snapshot_upload": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 50,
+        "detailsFields": [
+          "baseVersion",
+          "documentId",
+          "nextVersion",
+          "uploadId"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "abort_document_snapshot_upload": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 59,
+        "detailsFields": [
+          "documentId",
+          "uploadId"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "load_document_state": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 66,
+        "detailsFields": [
+          "documentId"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "load_document_manifest": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 70,
+        "detailsFields": [
+          "documentId"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "read_document_chunk": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 74,
+        "detailsFields": [
+          "byteOffset",
+          "documentId",
+          "maxBytes"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "search_document_state": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 82,
+        "detailsFields": [
+          "documentId",
+          "from",
+          "queryLength"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "delete_document_state": [
+      {
+        "path": "src/platform/desktop/document-store-client.js",
+        "line": 90,
+        "detailsFields": [
+          "documentId"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "read_dropped_file": [
+      {
+        "path": "src/platform/desktop/file-system-client.js",
+        "line": 37,
+        "detailsFields": [
+          "extension"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "list_text_file_tree": [
+      {
+        "path": "src/platform/desktop/file-system-client.js",
+        "line": 44,
+        "detailsFields": [
+          "extension",
+          "hasDocumentPath"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "read_local_image": [
+      {
+        "path": "src/platform/desktop/file-system-client.js",
+        "line": 53,
+        "detailsFields": [
+          "hasDocumentPath",
+          "sourceLength"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "initial_file_path": [
+      {
+        "path": "src/platform/desktop/file-system-client.js",
+        "line": 63,
+        "detailsFields": [],
+        "injectedDetails": false
+      }
+    ],
+    "write_local_text_file": [
+      {
+        "path": "src/platform/desktop/file-system-client.js",
+        "line": 69,
+        "detailsFields": [
+          "characters",
+          "extension",
+          "fileName",
+          "reason"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "write_local_binary_file": [
+      {
+        "path": "src/platform/desktop/file-system-client.js",
+        "line": 83,
+        "detailsFields": [
+          "bytes",
+          "extension",
+          "fileName",
+          "reason"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "open_external_url": [
+      {
+        "path": "src/platform/desktop/link-client.js",
+        "line": 20,
+        "detailsFields": [
+          "inputLength",
+          "scheme"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "write_performance_logs": [
+      {
+        "path": "src/platform/desktop/performance-log-client.js",
+        "line": 19,
+        "detailsFields": [],
+        "injectedDetails": false
+      }
+    ],
+    "fetch_url": [
+      {
+        "path": "src/platform/desktop/web-fetch-client.js",
+        "line": 22,
+        "detailsFields": [
+          "inputLength"
+        ],
+        "injectedDetails": false
+      },
+      {
+        "path": "src/platform/desktop/web-fetch-client.js",
+        "line": 35,
+        "detailsFields": [
+          "inputLength"
+        ],
+        "injectedDetails": false
+      }
+    ],
+    "cancel_fetch_url": [
+      {
+        "path": "src/platform/desktop/web-fetch-client.js",
+        "line": 28,
+        "detailsFields": [],
+        "injectedDetails": false
+      }
+    ]
+  },
+  "backendEvents": [
+    {
+      "category": "native.command",
+      "operation": "list_text_file_tree",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "path": "src-tauri/src/local_file/commands.rs",
+      "detailsFields": [
+        "extension"
+      ]
+    },
+    {
+      "category": "native.command",
+      "operation": "read_dropped_file",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "path": "src-tauri/src/local_file/commands.rs",
+      "detailsFields": [
+        "extension"
+      ]
+    },
+    {
+      "category": "native.command",
+      "operation": "read_local_image",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "path": "src-tauri/src/local_file/commands.rs",
+      "detailsFields": [
+        "sourceLength",
+        "hasDocumentPath"
+      ]
+    },
+    {
+      "category": "native.command",
+      "operation": "write_local_text_file",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "path": "src-tauri/src/local_file/commands.rs",
+      "detailsFields": [
+        "extension",
+        "bytes"
+      ]
+    },
+    {
+      "category": "native.command",
+      "operation": "write_local_binary_file",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "path": "src-tauri/src/local_file/commands.rs",
+      "detailsFields": [
+        "extension",
+        "bytes"
+      ]
+    },
+    {
+      "category": "native.command",
+      "operation": "fetch_url",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "path": "src-tauri/src/web_fetch/command.rs",
+      "detailsFields": [
+        "inputLength"
+      ]
+    },
+    {
+      "category": "app.lifecycle",
+      "operation": "app.start",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "debugBuild",
+        "pid"
+      ],
+      "path": "src-tauri/src/performance_log/lifecycle.rs"
+    },
+    {
+      "category": "app.lifecycle",
+      "operation": "app.exit",
+      "statuses": [
+        "ok"
+      ],
+      "detailsFields": [
+        "debugBuild",
+        "pid"
+      ],
+      "path": "src-tauri/src/performance_log/lifecycle.rs"
+    }
+  ],
+  "detailHelperEvidence": [
+    {
+      "path": "src/runtime/performance.js",
+      "scope": "functionDetails optional wrapper snapshots",
+      "fields": [
+        "backgroundTasks",
+        "documentDirty",
+        "documentGeneration",
+        "documentId",
+        "documentJournalChars",
+        "documentJournalEntries",
+        "documentVersion",
+        "editorChars",
+        "editorCodeBlocks",
+        "editorDecoratedLines",
+        "editorHeadingLines",
+        "editorHiddenMarkers",
+        "editorHtmlBlocks",
+        "editorHtmlFallbackBlocks",
+        "editorImageBlocks",
+        "editorLines",
+        "editorMathBlocks",
+        "editorMermaidBlocks",
+        "editorPresentationMode",
+        "editorRenderedBlocks",
+        "editorRenderedLines",
+        "editorScrollTop",
+        "editorSourceActiveLines",
+        "editorTableBlocks",
+        "editorViewportFrom",
+        "editorViewportTo",
+        "indexedBlocks",
+        "indexedHeadings",
+        "previewAnchors",
+        "previewBlocks",
+        "previewCachedHeights",
+        "previewMeasuredHeights",
+        "previewMountedBlocks",
+        "previewScrollTop",
+        "previewVirtualized",
+        "scrollGeometryResyncs",
+        "scrollIgnoredTargetEvents",
+        "scrollLastTargetDelta",
+        "scrollSourceReason",
+        "scrollSourceSide",
+        "scrollTargetWrites",
+        "selectionApplyingSide",
+        "selectionLength",
+        "selectionMappingFailures",
+        "selectionPendingRetries",
+        "selectionPreviewRefreshes",
+        "selectionPreviewRevision"
+      ]
+    },
+    {
+      "path": "src/features/sync/selection/selection-sync-controller.js",
+      "scope": "recordResult details",
+      "fields": [
+        "direction",
+        "reason",
+        "result",
+        "selectionLength",
+        "matchedAnchors",
+        "virtualized",
+        "previewRevision",
+        "sourceViewportRatio",
+        "targetViewportRatio",
+        "mappingMode",
+        "mappingCoverage",
+        "mappedCharacters",
+        "exactMapping",
+        "sourceStart",
+        "sourceEnd"
+      ]
+    },
+    {
+      "path": "src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js",
+      "scope": "recordCorrection details",
+      "fields": [
+        "fallbackLine",
+        "fallbackPosition",
+        "horizontalErrorPx",
+        "nativeLine",
+        "nativePosition",
+        "pointerX",
+        "pointerY",
+        "resolvedLine",
+        "resolvedPosition",
+        "targetLine",
+        "verticalErrorPx"
+      ]
+    }
+  ],
+  "detailFieldClassification": [
+    {
+      "field": "active",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "actualMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "aggregateCount",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "anchors",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "animated",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "attempts",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "availableWidth",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "averageMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "backgroundTasks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "baseVersion",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "blockFrom",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "blockTo",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "blockType",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "blocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "byteOffset",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "bytes",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "changed",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "changedChars",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "characters",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "chars",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "chunkIndex",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "clickCount",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "codeFrom",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "column",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "componentFrom",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "componentType",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "currentDocumentId",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "debugBuild",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Backend-only debug flag/process integer; review retention, not a runtime whitelist."
+    },
+    {
+      "field": "decoratedLines",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "deviceMemoryGb",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "direction",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "directories",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "discardedDocuments",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "displayMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "distancePx",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentChars",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentDirty",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentGeneration",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentId",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentJournalChars",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentJournalEntries",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentKey",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentLength",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentLines",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentReadyState",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "documentVersion",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "domContentLoadedMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "domNodes",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "durationMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editableRanges",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorCharacters",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorChars",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorCodeBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorDecoratedLines",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorHeadingLines",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorHiddenMarkers",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorHtmlBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorHtmlFallbackBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorImageBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorLines",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorMathBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorMermaidBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorPresentationMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorRenderedBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorRenderedLines",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorScrollTop",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorSourceActiveLines",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorTableBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorViewportFrom",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "editorViewportTo",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "emptyWorkspace",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "enhancementJobs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "error",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "events",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "exactMapping",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "extension",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "fallbackChars",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "fallbackCount",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "fallbackLine",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "fallbackPosition",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "file",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "fileName",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "files",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "forceRender",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "from",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "fullSnapshot",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "generation",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "hardwareConcurrency",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "hasDocumentPath",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "hasFocus",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "headings",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "height",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "horizontalErrorPx",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "host",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "htmlFrom",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "indexedBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "indexedHeadings",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "indexedVersion",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "inputLength",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "interactionId",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "intervalMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "invalid",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "invalidCount",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "key",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "layoutMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "line",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "loadMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "mappedCharacters",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "mappingCoverage",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "mappingMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "matchedAnchors",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "mathFrom",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "maxBytes",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "maxMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "message",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "migratedRecentFiles",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "minMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "mode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "mountedBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "nativeLine",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "nativePosition",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "nextMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "nextVersion",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "normalizedCrLf",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "origin",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "parsedChars",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "periodMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "pid",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Backend-only debug flag/process integer; review retention, not a runtime whitelist."
+    },
+    {
+      "field": "pointerX",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "pointerY",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "presentation",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "previewAnchors",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "previewBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "previewCachedHeights",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "previewMeasuredHeights",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "previewMountedBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "previewRevision",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "previewScrollTop",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "previewVirtualized",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "previousMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "processingMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "queryLength",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "queueLength",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "ranges",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "reason",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "renderRequired",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "renderVersion",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "renderedBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "renderer",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "requestedBlocks",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "requestedMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "requestedPreviewMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "requiredWidth",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "resolvedLine",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "resolvedPosition",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "resolvedPreviewMode",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "result",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "reused",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "revision",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "rootPath",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "row",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "samples",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "schedulerPending",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "scheme",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "scrollGeometryResyncs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "scrollIgnoredTargetEvents",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "scrollLastTargetDelta",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "scrollSourceReason",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "scrollSourceSide",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "scrollSourceSwitches",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "scrollTargetWrites",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "scrollTop",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "selectionApplyingSide",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "selectionFrom",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "selectionIgnoredFeedbackEvents",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "selectionLength",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "selectionMappingFailures",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "selectionPendingRetries",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "selectionPreviewRefreshes",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "selectionPreviewRevision",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "selectionTo",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "side",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "sidebarAutoCollapsed",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "signatureLength",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "skipped",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "source",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "sourceCharacters",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "sourceChars",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "sourceEnd",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "sourceFrom",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "sourceLength",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "sourceLine",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "sourceStart",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "sourceViewportRatio",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "stableFrames",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "startTime",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "status",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "suppressedDuplicates",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "tableFrom",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "target",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "targetLine",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "targetViewportRatio",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "theme",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "toolbarWidth",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "totalHeapBytes",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "transactions",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "transferBytes",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "trigger",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "truncated",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "uploadId",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "useWorker",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "usedHeapBytes",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "userAgent",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "valueLength",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "version",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "verticalErrorPx",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "viewportHeight",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "viewportRanges",
+      "classification": "sensitive-or-high-cardinality-review",
+      "receiver": "15.3",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "viewportWidth",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "virtualized",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "width",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "workerDurationMs",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "wrapped",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    },
+    {
+      "field": "wrappedFunctions",
+      "classification": "stable-scalar-candidate",
+      "receiver": "15.2/15.6",
+      "note": "Observation/candidate only; validate enum/type/cardinality before retention. Not a production allowlist."
+    }
+  ],
+  "dynamicFamilies": [
+    {
+      "operation": "document.${operation}-error",
+      "category": "document.error",
+      "source": "public/app/core.js",
+      "statuses": [
+        "error"
+      ],
+      "details": [
+        "message",
+        "currentDocumentId",
+        "runtimeDocumentId",
+        "...callerDetails"
+      ]
+    },
+    {
+      "operation": "native.${command}",
+      "category": "native.roundtrip",
+      "source": "src/platform/desktop/invoke-client.js",
+      "statuses": [
+        "ok",
+        "error"
+      ],
+      "details": [
+        "...callerDetails",
+        "error"
+      ],
+      "excluded": "write_performance_logs sets record:false"
+    },
+    {
+      "operation": "public record/diagnostic/measure arbitrary operation/category/status",
+      "source": "src/runtime/performance.js",
+      "classification": "current open contract; validation belongs15.2, cannot claim a closed allowlist"
+    }
+  ],
+  "aggregationFields": [
+    "samples",
+    "averageMs",
+    "minMs",
+    "maxMs",
+    "periodMs"
+  ],
+  "diagnosticFields": [
+    "suppressedDuplicates"
+  ],
+  "bounds": {
+    "queue": 1000,
+    "flushBatch": 250,
+    "flushIntervalMs": 2000,
+    "aggregateIntervalMs": 1500,
+    "diagnosticKeys": 200,
+    "diagnosticIntervalMs": 5000,
+    "diagnosticMinMs": 250,
+    "detailDepth": 8,
+    "detailNodes": 512,
+    "objectKeys": 64,
+    "arrayItems": 20,
+    "stringChars": 300
+  },
+  "noiseCandidates": [
+    {
+      "fields": [
+        "userAgent",
+        "target",
+        "fileName",
+        "rootPath",
+        "message",
+        "error",
+        "reason",
+        "documentId",
+        "key"
+      ],
+      "decision": "Review/remove free text and high-cardinality identifiers at15.2/15.3; current Rust redaction remains sole safety boundary."
+    },
+    {
+      "operations": [
+        "updatePreview",
+        "renderMermaidBlocks",
+        "renderOutline",
+        "setupDocuments",
+        "openDocument",
+        "newDocument",
+        "duplicateDocument",
+        "renameDocument",
+        "closeDocument",
+        "saveCurrentDocumentState",
+        "saveToLocal",
+        "saveAsMarkdown",
+        "autoSave",
+        "applySplit",
+        "setLayoutMode",
+        "togglePane",
+        "toggleSidebar",
+        "applySettings",
+        "setLanguage",
+        "setAppTheme",
+        "undo",
+        "redo",
+        "wrapSelection",
+        "prefixLines",
+        "insertHeading",
+        "insertTable",
+        "confirmImageInsert",
+        "confirmMermaidInsert",
+        "findNext",
+        "replaceOne",
+        "replaceAll"
+      ],
+      "decision": "Conditional legacy wrapper names; verify reachability before removal during15.8/15.11, never treat configured wrapper count as emitted count."
+    }
+  ],
+  "knownGaps": [
+    {
+      "id": "A04",
+      "receiver": [
+        "15.4",
+        "15.7"
+      ],
+      "fixed": false,
+      "baseline": "Failed batches unshift in full, partial Rust append acknowledgement absent, queue may exceed1000 on reinsertion, 50ms retry chain not bounded."
+    },
+    {
+      "id": "lifecycle",
+      "receiver": [
+        "15.5",
+        "15.6",
+        "15.8"
+      ],
+      "fixed": false,
+      "baseline": "No unified destroy of old runtime global/listeners/intervals/observers."
+    },
+    {
+      "id": "A01-frontend-minimization",
+      "receiver": [
+        "15.3"
+      ],
+      "fixed": false,
+      "baseline": "safeDetails limits structure but leaves sensitive synthetic strings until already-tested Rust redaction; baseline catalogue does not establish safe frontend buffering."
+    },
+    {
+      "id": "production-e2e",
+      "receiver": [
+        "15.9",
+        "15.10",
+        "15.11",
+        "15.12"
+      ],
+      "fixed": false,
+      "baseline": "Current explicit opt-in bridge and stale-dist tests retained; no migration in15.1."
+    }
+  ],
+  "statusClarifications": [
+    "hybrid.mermaid-render-result envelope status remains ok while details.status records rendered/cached/failed.",
+    "layout.system-fullscreen-error currently omits explicit status so envelope defaults ok; preserve baseline, review15.2.",
+    "Arbitrary public record status/category is currently open, finite emitter list is not enforced validation."
+  ],
+  "trackedLogEvidence": [
+    {
+      "path": "logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl",
+      "sha256": "b9afdfd7d95e65115b4405e309207aed0cebbeaf8c1de22b510a3e440e39ba4c",
+      "records": 94,
+      "detailsKeys": [
+        "aggregateCount",
+        "animated",
+        "averageMs",
+        "backgroundTasks",
+        "baseVersion",
+        "blocks",
+        "characters",
+        "chars",
+        "chunkIndex",
+        "clickCount",
+        "currentDocumentId",
+        "debugBuild",
+        "decoratedLines",
+        "deviceMemoryGb",
+        "directories",
+        "discardedDocuments",
+        "documentDirty",
+        "documentGeneration",
+        "documentId",
+        "documentJournalChars",
+        "documentJournalEntries",
+        "documentLength",
+        "documentReadyState",
+        "documentVersion",
+        "domContentLoadedMs",
+        "domNodes",
+        "editorCharacters",
+        "editorChars",
+        "editorCodeBlocks",
+        "editorDecoratedLines",
+        "editorHeadingLines",
+        "editorHiddenMarkers",
+        "editorHtmlBlocks",
+        "editorHtmlFallbackBlocks",
+        "editorImageBlocks",
+        "editorLines",
+        "editorMathBlocks",
+        "editorMermaidBlocks",
+        "editorPresentationMode",
+        "editorRenderedBlocks",
+        "editorRenderedLines",
+        "editorSourceActiveLines",
+        "editorTableBlocks",
+        "editorViewportFrom",
+        "editorViewportTo",
+        "emptyWorkspace",
+        "extension",
+        "files",
+        "generation",
+        "hardwareConcurrency",
+        "hasDocumentPath",
+        "headingLines",
+        "hiddenMarkers",
+        "indexedBlocks",
+        "indexedHeadings",
+        "interactionId",
+        "loadMs",
+        "maxMs",
+        "migratedRecentFiles",
+        "minMs",
+        "mode",
+        "nextMode",
+        "nextVersion",
+        "normalizedCrLf",
+        "periodMs",
+        "pid",
+        "presentation",
+        "previewAnchors",
+        "previewBlocks",
+        "previewCachedHeights",
+        "previewMeasuredHeights",
+        "previewMountedBlocks",
+        "previewVirtualized",
+        "previousMode",
+        "processingMs",
+        "queueLength",
+        "ratio",
+        "reason",
+        "renderedBlocks",
+        "requestedBlocks",
+        "resizing",
+        "rootPath",
+        "samples",
+        "schedulerPending",
+        "scrollGeometryResyncs",
+        "scrollIgnoredTargetEvents",
+        "scrollSourceSide",
+        "scrollSourceSwitches",
+        "scrollTargetWrites",
+        "selectionIgnoredFeedbackEvents",
+        "selectionMappingFailures",
+        "selectionPendingRetries",
+        "selectionPreviewRefreshes",
+        "selectionPreviewRevision",
+        "skipped",
+        "sourceActiveLines",
+        "sourceCharacters",
+        "sourceChars",
+        "startTime",
+        "target",
+        "totalHeapBytes",
+        "transferBytes",
+        "truncated",
+        "uploadId",
+        "usedHeapBytes",
+        "userAgent",
+        "version",
+        "viewportHeight",
+        "viewportWidth",
+        "visibleLines",
+        "workerDurationMs",
+        "wrappedFunctions"
+      ],
+      "scope": "historical observation, not current event reachability; no payload values copied",
+      "receiver": "15.13"
+    },
+    {
+      "path": "logs/performance-2026-07-25_17-29-13-389_pid-20484.jsonl",
+      "sha256": "d7e6dcfad2c1dcd0450e18fb154fc03f772aa19b42b7c48495601a1504336b28",
+      "records": 222,
+      "detailsKeys": [
+        "aggregateCount",
+        "anchors",
+        "animated",
+        "attempts",
+        "averageMs",
+        "backgroundTasks",
+        "blocks",
+        "bytes",
+        "cancelled",
+        "changed",
+        "characters",
+        "chars",
+        "clickCount",
+        "currentDocumentId",
+        "debugBuild",
+        "decoratedLines",
+        "deviceMemoryGb",
+        "discardedDocuments",
+        "documentChars",
+        "documentDirty",
+        "documentGeneration",
+        "documentId",
+        "documentJournalChars",
+        "documentJournalEntries",
+        "documentLength",
+        "documentLines",
+        "documentReadyState",
+        "documentVersion",
+        "domContentLoadedMs",
+        "domNodes",
+        "durationMs",
+        "editorCharacters",
+        "editorChars",
+        "editorCodeBlocks",
+        "editorDecoratedLines",
+        "editorHeadingLines",
+        "editorHiddenMarkers",
+        "editorHtmlBlocks",
+        "editorHtmlFallbackBlocks",
+        "editorImageBlocks",
+        "editorLines",
+        "editorMathBlocks",
+        "editorMermaidBlocks",
+        "editorPresentationMode",
+        "editorRenderedBlocks",
+        "editorRenderedLines",
+        "editorScrollTop",
+        "editorSourceActiveLines",
+        "editorTableBlocks",
+        "editorViewportFrom",
+        "editorViewportTo",
+        "emptyWorkspace",
+        "enhancementJobs",
+        "events",
+        "extension",
+        "failed",
+        "fallbackChars",
+        "fallbackCount",
+        "fallbackLine",
+        "fallbackPosition",
+        "fileName",
+        "forceRender",
+        "generation",
+        "hardwareConcurrency",
+        "hasFocus",
+        "headingLines",
+        "height",
+        "hiddenMarkers",
+        "horizontalErrorPx",
+        "indexedBlocks",
+        "indexedHeadings",
+        "interactionId",
+        "loadMs",
+        "maxMs",
+        "migratedRecentFiles",
+        "minMs",
+        "mode",
+        "mountedBlocks",
+        "nativeLine",
+        "nativePosition",
+        "nextMode",
+        "normalizedCrLf",
+        "origin",
+        "parsedChars",
+        "periodMs",
+        "pid",
+        "pointerX",
+        "pointerY",
+        "presentation",
+        "previewAnchors",
+        "previewBlocks",
+        "previewCachedHeights",
+        "previewMeasuredHeights",
+        "previewMountedBlocks",
+        "previewScrollTop",
+        "previewVirtualized",
+        "previousMode",
+        "priorityChapterEnd",
+        "priorityChapterStart",
+        "processingMs",
+        "queueLength",
+        "ranges",
+        "ratio",
+        "reason",
+        "renderRequired",
+        "rendered",
+        "renderer",
+        "requested",
+        "requestedPreviewMode",
+        "resizing",
+        "resolvedLine",
+        "resolvedPosition",
+        "resolvedPreviewMode",
+        "reused",
+        "samples",
+        "scrollGeometryResyncs",
+        "scrollIgnoredTargetEvents",
+        "scrollLastTargetDelta",
+        "scrollSourceReason",
+        "scrollSourceSide",
+        "scrollSourceSwitches",
+        "scrollTargetWrites",
+        "scrollTop",
+        "selectionFrom",
+        "selectionIgnoredFeedbackEvents",
+        "selectionMappingFailures",
+        "selectionPendingRetries",
+        "selectionPreviewRefreshes",
+        "selectionPreviewRevision",
+        "selectionTo",
+        "side",
+        "sourceActiveLines",
+        "sourceCharacters",
+        "sourceChars",
+        "stableFrames",
+        "startTime",
+        "suppressedDuplicates",
+        "target",
+        "targetLine",
+        "totalHeapBytes",
+        "transferBytes",
+        "usedHeapBytes",
+        "userAgent",
+        "version",
+        "verticalErrorPx",
+        "viewportHeight",
+        "viewportRanges",
+        "viewportWidth",
+        "virtualized",
+        "visibleLines",
+        "width",
+        "workerDurationMs",
+        "wrappedFunctions"
+      ],
+      "scope": "historical observation, not current event reachability; no payload values copied",
+      "receiver": "15.13"
+    }
+  ]
+}
