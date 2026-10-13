@@ -1,27 +1,34 @@
-import { createTelemetryRecorder, redactTelemetryIdentity } from '../features/telemetry/index.js';
+import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer } from '../features/telemetry/index.js';
 
 const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-const queue = [];
-const aggregates = new Map();
 const diagnosticStates = new Map();
 const wrappedFunctions = new Set();
-const MAX_QUEUE = 1000;
 const MAX_DIAGNOSTIC_KEYS = 200;
 const FLUSH_INTERVAL_MS = 2000;
 const AGGREGATE_INTERVAL_MS = 1500;
 const DEFAULT_DIAGNOSTIC_INTERVAL_MS = 5000;
-let flushInProgress = false;
-let lastFlushError = '';
-let logPath = '';
 let platformLogs = null;
 let platformLogsEnabled = false;
 let runtimeStatsProvider = () => ({});
 
+let buffer;
 const recorder = createTelemetryRecorder({
   sessionId, now: timestampMs, monotonicNow: () => performance.now(),
-  emit: enqueue, aggregate: recordAggregate
+  emit: entry => buffer.enqueue(entry), aggregate: (operation, options) => buffer.aggregate(operation, options)
 });
 const { record, measure, createEntry: makeEntry, normalizeDetails: safeDetails } = recorder;
+buffer = createAggregationBuffer({ now: timestampMs, createEntry: makeEntry, batchPrefix: sessionId,
+  schedule: (callback, delay) => setTimeout(callback, delay), cancel: timer => clearTimeout(timer),
+  onError: marker => console.warn('Performance log flush failed:', marker),
+  async writeBatch(entries, meta) {
+    const path = await platformLogs.writePerformance(entries);
+    return { batchId: meta.batchId, attempt: meta.attempt, acceptedCount: meta.offset + entries.length, logPath: path };
+  }
+});
+const drainAggregates = () => buffer.drainAggregates();
+const flush = () => buffer.flush();
+export function getPerformanceBufferStats() { return buffer.getStats(); }
+
 
 export function configurePerformanceRuntimeStats(provider) {
   if (typeof provider !== 'function') throw new TypeError('performance runtime stats provider must be a function');
@@ -34,6 +41,7 @@ export function configurePerformancePlatform({ logs, enabled = false } = {}) {
   }
   platformLogs = logs;
   platformLogsEnabled = Boolean(enabled);
+  buffer.setEnabled(platformLogsEnabled);
 }
 
 function timestampMs() {
@@ -45,42 +53,6 @@ function cleanString(value, maxLength = 160) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, maxLength);
-}
-
-function enqueue(entry) {
-  if (queue.length >= MAX_QUEUE) queue.splice(0, Math.max(1, queue.length - MAX_QUEUE + 1));
-  queue.push(entry);
-  if (queue.length >= 50) void flush();
-}
-
-function recordAggregate(operation, options = {}) {
-  if (!operation) return;
-  if (options.aggregate) {
-    const key = `${options.category || 'ui.operation'}:${operation}:${options.status || 'ok'}`;
-    const duration = Number(options.durationMs);
-    const metric = aggregates.get(key) || {
-      operation,
-      category: options.category || 'ui.operation',
-      status: options.status || 'ok',
-      count: 0,
-      total: 0,
-      min: Number.POSITIVE_INFINITY,
-      max: 0,
-      firstTimestampMs: timestampMs(),
-      lastTimestampMs: timestampMs(),
-      details: {}
-    };
-    metric.count += 1;
-    metric.lastTimestampMs = timestampMs();
-    if (Number.isFinite(duration)) {
-      metric.total += duration;
-      metric.min = Math.min(metric.min, duration);
-      metric.max = Math.max(metric.max, duration);
-    }
-    metric.details = safeDetails(options.details);
-    aggregates.set(key, metric);
-    return;
-  }
 }
 
 function diagnostic(operation, options = {}) {
@@ -115,7 +87,7 @@ function diagnostic(operation, options = {}) {
     if (oldestKey) diagnosticStates.delete(oldestKey);
   }
 
-  enqueue(makeEntry(operation, {
+  buffer.enqueue(makeEntry(operation, {
     ...options,
     category: options.category || 'runtime.diagnostic',
     details: {
@@ -124,46 +96,6 @@ function diagnostic(operation, options = {}) {
     }
   }));
   return true;
-}
-
-function drainAggregates() {
-  for (const metric of aggregates.values()) {
-    const hasDuration = Number.isFinite(metric.min);
-    enqueue(makeEntry(metric.operation, {
-      category: metric.category,
-      status: metric.status,
-      durationMs: hasDuration ? metric.total / metric.count : null,
-      details: {
-        ...metric.details,
-        samples: metric.count,
-        averageMs: hasDuration ? Number((metric.total / metric.count).toFixed(3)) : null,
-        minMs: hasDuration ? Number(metric.min.toFixed(3)) : null,
-        maxMs: hasDuration ? Number(metric.max.toFixed(3)) : null,
-        periodMs: metric.lastTimestampMs - metric.firstTimestampMs
-      }
-    }));
-  }
-  aggregates.clear();
-}
-
-async function flush() {
-  if (flushInProgress || !queue.length || !platformLogsEnabled || !platformLogs) return;
-  flushInProgress = true;
-  const batch = queue.splice(0, Math.min(queue.length, 250));
-  try {
-    logPath = await platformLogs.writePerformance(batch);
-    lastFlushError = '';
-  } catch (error) {
-    queue.unshift(...batch);
-    const message = redactTelemetryIdentity(error?.message || error, 240);
-    if (message !== lastFlushError) {
-      lastFlushError = message;
-      console.warn('Performance log flush failed:', '[redacted]');
-    }
-  } finally {
-    flushInProgress = false;
-    if (queue.length >= 50) setTimeout(() => void flush(), 50);
-  }
 }
 
 function describeElement(element) {
@@ -521,8 +453,12 @@ function recordRuntimeSnapshot() {
       domNodes: document.querySelectorAll('*').length,
       usedHeapBytes: memory?.usedJSHeapSize || null,
       totalHeapBytes: memory?.totalJSHeapSize || null,
-      queueLength: queue.length,
-      aggregateCount: aggregates.size,
+      queueLength: getPerformanceBufferStats().queueLength,
+      aggregateCount: getPerformanceBufferStats().aggregateCount,
+      queueOverflowEntries: getPerformanceBufferStats().overflowEntries,
+      queueOverflowSamples: getPerformanceBufferStats().overflowSamples,
+      unconfirmedLogEntries: getPerformanceBufferStats().unconfirmedEntries,
+      acknowledgedLogEntries: getPerformanceBufferStats().acknowledgedEntries,
       viewportWidth: window.innerWidth,
       viewportHeight: window.innerHeight,
       scrollSourceSide: scrollState?.sourceSide || '',
@@ -547,7 +483,7 @@ if (import.meta.env.DEV) {
     measure,
     flush,
     installLegacyInstrumentation,
-    getLogPath: () => logPath
+    getLogPath: () => buffer.getLogPath()
   };
 
   record('frontend.bootstrap', {

@@ -57,8 +57,8 @@ test('R15-01 enqueue baseline evicts oldest entries at1000 while a disabled sink
 test('R15-01 native flush uses the original 250-entry batch and preserves the remaining tail',async t=>{
   const h=host(t,{enabled:false});for(let i=0;i<251;i++)h.api.record('runtime.snapshot',{details:{count:i}});h.configure(true);await h.api.flush();await h.api.flush();assert.deepEqual(h.batches.map(x=>x.length),[250,1]);assert.equal(h.entries().at(-1).details.count,250);
 });
-test('R15-01 failed sink requeues the whole batch and schedules one known50ms retry without claiming A04 fixed',async t=>{
-  const h=host(t,{enabled:false,fail:true});for(let i=0;i<50;i++)h.api.record('runtime.snapshot',{details:{count:i}});h.configure(true);await h.api.flush();assert.equal(h.batches.length,1);assert.equal(h.warnings.length,1);assert.equal([...h.timers.values()].filter(x=>x.delay===50).length,1);assert.equal(catalogue.knownGaps.find(x=>x.id==='A04').fixed,false);
+test('R15-01 failed legacy sink quarantines its unconfirmed batch without blind50ms replay and A04 remains pending native acknowledgement',async t=>{
+  const h=host(t,{enabled:false,fail:true});for(let i=0;i<50;i++)h.api.record('runtime.snapshot',{details:{count:i}});h.configure(true);await h.api.flush();assert.equal(h.batches.length,1);assert.equal(h.warnings.length,1);assert.equal(h.api.getPerformanceBufferStats().unconfirmedEntries,50);assert.equal([...h.timers.values()].filter(x=>x.delay===50).length,0);assert.equal(catalogue.knownGaps.find(x=>x.id==='A04').fixed,false);
 });
 test('R15-01 bounded details preserve nested metrics and remove sensitive bodies before transport',async t=>{
   const h=host(t),cycle={};cycle.self=cycle;h.api.record('runtime.snapshot',{details:{nested:{body:'SYNTHETIC_SECRET'},array:Array(30).fill(1),cycle,big:1n,bad:Infinity}});await h.api.flush();const d=h.entries()[0].details;assert.equal(Object.hasOwn(d.nested,'body'),false);assert.equal(d.array.length,20);assert.equal(d.cycle.self,'[circular]');assert.equal(Object.hasOwn(d,'big'),false);assert.equal(d.bad,null);

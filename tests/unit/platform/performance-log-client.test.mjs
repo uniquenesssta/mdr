@@ -28,15 +28,18 @@ test('Atomic Task 3.9 writes the supplied performance batch with recursive telem
   assert.ok(Object.isFrozen(client));
 });
 
-test('performance-log client leaves queueing aggregation retry and diagnostics in the performance runtime', async () => {
+test('performance-log client leaves queueing aggregation retry in AggregationBuffer and diagnostics in Runtime', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/performance-log-client.js', import.meta.url), 'utf8');
   const runtimeSource = await readFile(new URL('../../../src/runtime/performance.js', import.meta.url), 'utf8');
 
   assert.doesNotMatch(clientSource, /MAX_QUEUE|aggregates|diagnosticStates|flushInProgress|setTimeout|queue\.unshift/);
-  assert.match(runtimeSource, /const queue = \[\]/);
-  assert.match(runtimeSource, /const aggregates = new Map\(\)/);
+  const bufferSource = await readFile(new URL('../../../src/features/telemetry/aggregation-buffer.js', import.meta.url), 'utf8');
+  assert.match(bufferSource, /const queue = \[\], aggregates = new Map\(\)/);
+  assert.match(runtimeSource, /buffer = createAggregationBuffer/);
   assert.match(runtimeSource, /const diagnosticStates = new Map\(\)/);
-  assert.match(runtimeSource, /queue\.unshift\(\.\.\.batch\)/);
+  assert.doesNotMatch(runtimeSource + bufferSource, /queue\.unshift/);
+  assert.match(bufferSource, /batch.state = 'unconfirmed'/);
+  assert.match(bufferSource, /function backoff\(/);
 });
 
 test('performance-log client preserves native result and error identity', async () => {
@@ -59,7 +62,7 @@ test('desktop platform maps LogsPort through the dedicated client and performanc
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
   const performance = await readFile(new URL('../../../src/runtime/performance.js', import.meta.url), 'utf8');
   assert.match(desktop, /logs: performanceLogClient/);
-  assert.match(performance, /platformLogs\.writePerformance\(batch\)/);
+  assert.match(performance, /platformLogs\.writePerformance\(entries\)/);
   assert.doesNotMatch(performance, /markdownEditorNative/);
 });
 

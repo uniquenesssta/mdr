@@ -1,4 +1,4 @@
-import { createTelemetryRecorder, redactTelemetryIdentity } from '../../../src/features/telemetry/index.js';
+import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer } from '../../../src/features/telemetry/index.js';
 // Exercise the actual runtime and desktop adapter without installing DOM observers.
 // Rust executes this producer too; no hand-written replacement payload is used.
 import { readFile } from 'node:fs/promises';
@@ -10,10 +10,10 @@ import { createPerformanceLogClient } from '../../../src/platform/desktop/perfor
 export const secrets = ['AUDIT_BODY_SECRET', 'AUDIT_TOKEN_SECRET', 'AUDIT_ERROR_SECRET', 'C:\\PrivateRoot', '/private/root', 'AUDIT_STACK_SECRET', 'AUDIT_CAUSE_SECRET', 'AUDIT_PASSWORD_SECRET', 'AUDIT_GETTER_SECRET'];
 export async function producePayload() {
   const path = new URL('../../../src/runtime/performance.js', import.meta.url);
-  const source = (await readFile(path, 'utf8')).replace("import { createTelemetryRecorder, redactTelemetryIdentity } from '../features/telemetry/index.js';", '')
+  const source = (await readFile(path, 'utf8')).replace("import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer } from '../features/telemetry/index.js';", '')
     .replaceAll('export function ', 'function ')
     .replaceAll('import.meta.env.DEV', 'false');
-  const context = vm.createContext({ createTelemetryRecorder, redactTelemetryIdentity, crypto: { randomUUID }, console, performance, setTimeout, clearTimeout });
+  const context = vm.createContext({ createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, crypto: { randomUUID }, console, performance, setTimeout, clearTimeout });
   vm.runInContext(source + '\n;globalThis.runtime = {configurePerformancePlatform, record, diagnostic, measure, flush};', context, {filename: fileURLToPath(path)});
   const batches = [];
   const logs = createPerformanceLogClient({ invoke: async (command, args, details, options) => {
