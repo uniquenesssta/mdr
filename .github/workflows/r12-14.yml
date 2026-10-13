@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-01 telemetry event catalogue and unchanged-runtime baseline · ${{ github.sha }}
+run-name: R15-02 public Recorder and cumulative telemetry regression · ${{ github.sha }}
 
 on:
   push:
@@ -223,6 +223,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-event-catalogue.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-catalogue.log"
+
+      - name: R15-02 public Recorder inputs, measurement and disposal
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-recorder.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-recorder.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

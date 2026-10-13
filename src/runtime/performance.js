@@ -1,3 +1,5 @@
+import { createTelemetryRecorder } from '../features/telemetry/index.js';
+
 const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const queue = [];
 const aggregates = new Map();
@@ -14,6 +16,12 @@ let logPath = '';
 let platformLogs = null;
 let platformLogsEnabled = false;
 let runtimeStatsProvider = () => ({});
+
+const recorder = createTelemetryRecorder({
+  sessionId, now: timestampMs, monotonicNow: () => performance.now(),
+  emit: enqueue, aggregate: recordAggregate
+});
+const { record, measure, createEntry: makeEntry, normalizeDetails: safeDetails } = recorder;
 
 export function configurePerformanceRuntimeStats(provider) {
   if (typeof provider !== 'function') throw new TypeError('performance runtime stats provider must be a function');
@@ -39,59 +47,13 @@ function cleanString(value, maxLength = 160) {
     .slice(0, maxLength);
 }
 
-// Keep data structured until the single Rust redaction boundary. Bound hostile/cyclic
-// diagnostic objects without JSON-stringifying their nested payloads into opaque strings.
-function safeDetails(details) {
-  if (!details || typeof details !== 'object') return {};
-  const ancestors = new WeakSet();
-  let remaining = 512;
-  const visit = (value, depth) => {
-    if (--remaining < 0 || depth > 8) return '[truncated]';
-    if (value === null || typeof value === 'boolean') return value;
-    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-    if (typeof value === 'string') return cleanString(value, 300);
-    if (typeof value !== 'object') return undefined;
-    if (ancestors.has(value)) return '[circular]';
-    ancestors.add(value);
-    try {
-      if (Array.isArray(value)) return value.slice(0, 20).map(item => visit(item, depth + 1) ?? null);
-      const safe = Object.create(null);
-      for (const key of Object.keys(value).slice(0, 64)) {
-        if (remaining <= 0) break;
-        const nested = visit(value[key], depth + 1);
-        if (nested !== undefined) safe[key] = nested;
-      }
-      return safe;
-    } catch (_) {
-      return '[unserializable]';
-    } finally {
-      ancestors.delete(value);
-    }
-  };
-  return visit(details, 0);
-}
-
-function makeEntry(operation, options = {}) {
-  const duration = Number(options.durationMs);
-  return {
-    timestampMs: timestampMs(),
-    sessionId,
-    source: 'frontend',
-    category: options.category || 'ui.operation',
-    operation,
-    durationMs: Number.isFinite(duration) ? Math.max(0, Number(duration.toFixed(3))) : null,
-    status: options.status || 'ok',
-    details: safeDetails(options.details)
-  };
-}
-
 function enqueue(entry) {
   if (queue.length >= MAX_QUEUE) queue.splice(0, Math.max(1, queue.length - MAX_QUEUE + 1));
   queue.push(entry);
   if (queue.length >= 50) void flush();
 }
 
-function record(operation, options = {}) {
+function recordAggregate(operation, options = {}) {
   if (!operation) return;
   if (options.aggregate) {
     const key = `${options.category || 'ui.operation'}:${operation}:${options.status || 'ok'}`;
@@ -119,11 +81,10 @@ function record(operation, options = {}) {
     aggregates.set(key, metric);
     return;
   }
-  enqueue(makeEntry(operation, options));
 }
 
 function diagnostic(operation, options = {}) {
-  if (!operation) return false;
+  if (typeof operation !== 'string' || !operation.trim()) return false;
   const now = timestampMs();
   const details = safeDetails(options.details);
   const key = cleanString(options.dedupeKey || `${options.category || 'runtime.diagnostic'}:${operation}`, 240);
@@ -202,51 +163,6 @@ async function flush() {
   } finally {
     flushInProgress = false;
     if (queue.length >= 50) setTimeout(() => void flush(), 50);
-  }
-}
-
-function resolveMeasuredDetails(details) {
-  if (typeof details !== 'function') return details;
-  try {
-    return details();
-  } catch (_) {
-    return {};
-  }
-}
-
-function measure(operation, callback, options = {}) {
-  const started = performance.now();
-  const finish = (status, error = null) => {
-    const details = resolveMeasuredDetails(options.details);
-    record(operation, {
-      ...options,
-      durationMs: performance.now() - started,
-      status,
-      details: error
-        ? { ...(details && typeof details === 'object' ? details : {}), error: cleanString(error?.message || error) }
-        : details
-    });
-  };
-
-  try {
-    const result = callback();
-    if (result && typeof result.then === 'function') {
-      return result.then(
-        value => {
-          finish('ok');
-          return value;
-        },
-        error => {
-          finish('error', error);
-          throw error;
-        }
-      );
-    }
-    finish('ok');
-    return result;
-  } catch (error) {
-    finish('error', error);
-    throw error;
   }
 }
 

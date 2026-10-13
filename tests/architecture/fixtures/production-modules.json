@@ -5536,6 +5536,26 @@
       "factory-to-destroy",
       "retain",
       false
+    ],
+    [
+      "src/features/telemetry/index.js",
+      "esm-module",
+      "telemetry",
+      "Public Telemetry Recorder factory capability.",
+      "none",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/telemetry/performance-recorder.js",
+      "esm-module",
+      "telemetry",
+      "Unified event envelope validation, bounded structured details, session/time and callback measurements; no persistence.",
+      "telemetry-recorder",
+      "explicit-instance",
+      "retain",
+      false
     ]
   ]
 }

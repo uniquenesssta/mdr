@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
 import {createTelemetryRuntimeHost} from './support/telemetry-runtime-host.mjs';
 const catalogue=JSON.parse(readFileSync(new URL('./fixtures/stage-15-telemetry/event-catalogue.json',import.meta.url),'utf8'));
 const plain=value=>JSON.parse(JSON.stringify(value));
@@ -15,9 +16,9 @@ test('R15-01 catalogue explicitly distinguishes events, dynamic input, condition
   for(const event of catalogue.backendEvents){assert.ok(event.detailsFields.length);for(const field of event.detailsFields)assert.ok(catalogue.detailFieldClassification.some(x=>x.field===field));}
   for(const event of catalogue.events){assert.ok(event.category);assert.ok(event.statuses.length);assert.ok(event.sources.length);for(const field of event.detailsFields)assert.ok(catalogue.detailFieldClassification.some(x=>x.field===field));}
 });
-test('R15-01 baseline evidence covers every current direct producer, native boundary and injected hybrid callback without changing source',()=>{
+test('R15-01 baseline evidence covers every current direct producer, native boundary and injected hybrid callback with the R15-02 Recorder migration retaining its frozen baseline',()=>{
   const manifest=JSON.parse(readFileSync(new URL('./architecture/fixtures/production-modules.json',import.meta.url),'utf8'));const covered=new Set(catalogue.sourceSurfaces.map(x=>x.path));
-  for(const row of catalogue.sourceSurfaces){const content=readFileSync(new URL('../'+row.path,import.meta.url));const hash=createHash('sha1').update('blob '+content.length+'\0').update(content).digest('hex');assert.equal(hash,row.blobSha,row.path);}
+  for(const row of catalogue.sourceSurfaces){const content=row.path==='src/runtime/performance.js' ? execFileSync('git',['show',catalogue.baselineCommit+':'+row.path]) : readFileSync(new URL('../'+row.path,import.meta.url));const hash=createHash('sha1').update('blob '+content.length+'\0').update(content).digest('hex');assert.equal(hash,row.blobSha,row.path);}
   for(const [path]of manifest.modules){if(!path.endsWith('.js'))continue;const source=readFileSync(new URL('../'+path,import.meta.url),'utf8');if(source.includes('markdownEditorPerf')||/\b(?:recordInteraction|reportDiagnostic)\??\.?\(\s*['"]hybrid\./.test(source))assert.ok(covered.has(path),path);}
   const snapshot=catalogue.detailFieldClassification.find(x=>x.field==='documentId');assert.equal(snapshot.classification,'sensitive-or-high-cardinality-review');
 });

@@ -103,7 +103,7 @@ test('R12-01 preserves the historical performance-log limits fields modes and pr
   const contract = await fixture();
   const [rust, frontend] = await Promise.all([
     Promise.all(['src-tauri/src/performance_log/mod.rs', 'src-tauri/src/performance_log/writer.rs'].map(source)).then(parts => parts.join('\n')),
-    source('src/runtime/performance.js')
+    source('src/features/telemetry/performance-recorder.js')
   ]);
   assert.deepEqual(contract.performanceLog.backendEntryFields, [
     'timestampMs', 'source', 'category', 'operation', 'durationMs', 'status', 'details'
