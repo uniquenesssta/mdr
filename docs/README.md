@@ -1,6 +1,6 @@
 # Markdown Editor
 
-R15-04正式收尾：96fa3af / CI38421131243七组Windows及全部步骤通过，Buffer41、脱敏33+实际payload3、Recorder22、目录24、全仓2334/2334、前端1327/1327、浏览器11+67及Rust281；三份下载归档摘要与同提交最终accepted=true已核验。 当前在唯一agent/r15-stage实施15.5 Long Task Observer：公共工厂显式start/stop/destroy、能力降级、单一监听器/代次屏障、首次buffered与重启不重放、只送数值指标；DEV LogsPort启停和pagehide/pageshow接入，新增39项公共契约。05待精确提交Windows验收；15.6未开始，完整Runtime生命周期仍归15.8，A04原生确认仍归15.7，未关闭。 [05详情](R15-05-DETAILS.md)。
+R15-05正式收尾：a9be96d / CI38425603742七组Windows及全部步骤通过，长任务39、Buffer41、脱敏33+实际payload3、Recorder22、目录24、全仓2373/2373、前端1366/1366、浏览器11+67及Rust281；三份下载归档摘要与同提交最终accepted=true已核验。 当前在唯一agent/r15-stage实施15.6 Runtime Snapshot：公共工厂固定22字段、最多10000元素迭代、内存/队列/视口/同步指标一次读取、显式sample/start/stop/destroy及单一30秒计时器；DEV启停和pagehide/pageshow接入，新增51项公共契约。06待精确提交Windows验收；15.7未开始，完整Runtime生命周期仍归15.8，A04原生确认归15.7，未关闭。 [06详情](R15-06-DETAILS.md)。
 
 R14-01～18及本阶段整体已验收收尾。18：16d7b39 / CI38347726196七组Windows及全部步骤通过，全仓2213/2213、前端1206/1206、Controller/View33/33、Writer29/29、图片34/34、编码58/58、浏览器11/11＋67/67、Rust281；真实Menu语言/PNG/焦点/销毁及四格式原生安全输出通过，五归档摘要与实际PNG核对。首轮失败/修复保留，R14接收的A10完整格式链关闭，历史公告快照不重写。按用户指令准备R15-01，唯一新阶段分支agent/r15-stage；A04未修复，仍归15.4/15.7。 [18验收](R14-18-DETAILS.md#正式验收2026-10-13)。
 

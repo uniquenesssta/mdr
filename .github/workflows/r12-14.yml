@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-05 explicit long-task observer lifecycle and cumulative regression · ${{ github.sha }}
+run-name: R15-06 bounded runtime snapshot sampling and timer disposal regression · ${{ github.sha }}
 
 on:
   push:
@@ -243,6 +243,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-long-task-observer.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-long-task.log"
+
+      - name: R15-06 public Runtime Snapshot limits, failures and timer disposal
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-runtime-snapshot.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-snapshot.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

@@ -1,4 +1,4 @@
-import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver } from '../features/telemetry/index.js';
+import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder } from '../features/telemetry/index.js';
 
 const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const diagnosticStates = new Map();
@@ -35,6 +35,17 @@ const longTaskObserver = createLongTaskObserver({
   record,
   onError: phase => console.warn('Performance long-task observer failed:', phase)
 });
+const runtimeSnapshotRecorder = createRuntimeSnapshotRecorder({
+  getDocument: () => typeof document === 'undefined' ? null : document,
+  getMemory: () => performance.memory,
+  getViewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
+  getBufferStats: getPerformanceBufferStats,
+  getRuntimeStats: () => runtimeStatsProvider(), record,
+  schedule: (callback, delay) => setTimeout(callback, delay), cancel: timer => clearTimeout(timer),
+  isEnabled: () => import.meta.env.DEV && platformLogsEnabled,
+  onError: phase => console.warn('Performance runtime snapshot failed:', phase)
+});
+const recordRuntimeSnapshot = () => runtimeSnapshotRecorder.sample();
 
 
 export function configurePerformanceRuntimeStats(provider) {
@@ -49,8 +60,8 @@ export function configurePerformancePlatform({ logs, enabled = false } = {}) {
   platformLogs = logs;
   platformLogsEnabled = Boolean(enabled);
   buffer.setEnabled(platformLogsEnabled);
-  if (platformLogsEnabled) longTaskObserver.start();
-  else longTaskObserver.stop();
+  if (platformLogsEnabled) { longTaskObserver.start(); runtimeSnapshotRecorder.start(); }
+  else { longTaskObserver.stop(); runtimeSnapshotRecorder.stop(); }
 }
 
 function timestampMs() {
@@ -439,39 +450,6 @@ function installLegacyInstrumentation() {
   setTimeout(() => void flush(), 0);
 }
 
-function recordRuntimeSnapshot() {
-  const memory = performance.memory;
-  const runtimeStats = runtimeStatsProvider() || {};
-  const scrollState = runtimeStats.scrollSync || null;
-  const selectionState = runtimeStats.selectionSync || null;
-  record('runtime.snapshot', {
-    category: 'runtime.performance',
-    details: {
-      domNodes: document.querySelectorAll('*').length,
-      usedHeapBytes: memory?.usedJSHeapSize || null,
-      totalHeapBytes: memory?.totalJSHeapSize || null,
-      queueLength: getPerformanceBufferStats().queueLength,
-      aggregateCount: getPerformanceBufferStats().aggregateCount,
-      queueOverflowEntries: getPerformanceBufferStats().overflowEntries,
-      queueOverflowSamples: getPerformanceBufferStats().overflowSamples,
-      unconfirmedLogEntries: getPerformanceBufferStats().unconfirmedEntries,
-      acknowledgedLogEntries: getPerformanceBufferStats().acknowledgedEntries,
-      viewportWidth: window.innerWidth,
-      viewportHeight: window.innerHeight,
-      scrollSourceSide: scrollState?.sourceSide || '',
-      scrollSourceSwitches: scrollState?.sourceSwitches || 0,
-      scrollTargetWrites: scrollState?.targetWrites || 0,
-      scrollIgnoredTargetEvents: scrollState?.ignoredTargetEvents || 0,
-      scrollGeometryResyncs: scrollState?.geometryResyncs || 0,
-      selectionPreviewRevision: selectionState?.previewRevision || 0,
-      selectionPreviewRefreshes: selectionState?.previewRefreshes || 0,
-      selectionPendingRetries: selectionState?.pendingRetries || 0,
-      selectionMappingFailures: selectionState?.mappingFailures || 0,
-      selectionIgnoredFeedbackEvents: selectionState?.ignoredFeedbackEvents || 0
-    }
-  });
-}
-
 if (import.meta.env.DEV) {
   window.markdownEditorPerf = {
     sessionId,
@@ -500,7 +478,7 @@ if (import.meta.env.DEV) {
 
   setInterval(drainAggregates, AGGREGATE_INTERVAL_MS);
   setInterval(() => void flush(), FLUSH_INTERVAL_MS);
-  setInterval(recordRuntimeSnapshot, 30_000);
+  runtimeSnapshotRecorder.start();
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
@@ -510,8 +488,9 @@ if (import.meta.env.DEV) {
   });
   window.addEventListener('pagehide', () => {
     longTaskObserver.stop();
+    runtimeSnapshotRecorder.stop();
     drainAggregates();
     void flush();
   });
-  window.addEventListener('pageshow', () => longTaskObserver.start());
+  window.addEventListener('pageshow', () => { longTaskObserver.start(); runtimeSnapshotRecorder.start(); });
 }

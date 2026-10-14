@@ -1,6 +1,16 @@
 # R15-05 Long Task Observer
 
-唯一分支 `agent/r15-stage`；基线96fa3af / CI38421131243。R15-04七组Windows及全部步骤通过，Buffer41、脱敏33+真实payload3、Recorder22、目录24、递归Node2334、前端1327、浏览器11+67、Rust281；三份下载归档摘要与同提交最终accepted=true核验，正式收尾。05已实施，等待本次精确提交Windows验收，15.6未开始。
+唯一分支 `agent/r15-stage`；基线96fa3af / CI38421131243。R15-04七组Windows及全部步骤通过，Buffer41、脱敏33+真实payload3、Recorder22、目录24、递归Node2334、前端1327、浏览器11+67、Rust281；三份下载归档摘要与同提交最终accepted=true核验，正式收尾。05已正式验收；用户要求开始15.6，仍使用同一分支。
+
+## 正式验收（2026-10-14）
+
+a9be96d / [CI38425603742](https://github.com/uniquenesssta/mdr/actions/runs/38425603742)七组Windows及全部步骤通过。长任务39/39、Buffer41、脱敏33+实际payload3、Recorder22、目录24、递归全仓2373/2373（350文件/16目录）、前端1366/1366、浏览器11+67、Rust281；closeout-verification.json匹配该提交且accepted=true，A04依旧deferred-not-fixed。
+
+| 归档 | ID | 已下载核验的SHA-256 |
+| --- | --- | --- |
+| closeout | 11829670211 | `sha256:2558134d6d92454ff2d162a909210ebb76681acf04539ade17ff69a45f3a1172` |
+| frontend | 11828568903 | `sha256:1553f787423391dc60cd90821aa2024d99e72ae950e4d338027a4ff620005f4f` |
+| repository-tests | 11828099077 | `sha256:da473242827d0fc908f445a53b6feaab58332f2dd6a41cc04db5890bfa035df5` |
 
 ## 单一监听所有者
 
@@ -24,7 +34,7 @@ Runtime注入浏览器内建PerformanceObserver、公共Recorder.record和DEV+Lo
 
 Runtime夹具注入真实公共Recorder、Redaction、Buffer及LongTaskObserver，通过原Runtime装配函数与浏览器端口验证接入；未使用替代遥测payload。Rust实际frontend→desktop→JSONL生产者只更新公共工厂注入，原三条payload场景和原生命令/数据格式保持。夹具源加载仅服务未迁移的Runtime DOM装配，仍在15.11统一移除；本项不将源字符串静态边界检查冒充可观察生命周期证明。
 
-R15-01目录24、Recorder22、Redaction33+payload3、Buffer41及全部累计场景保留，七组Windows全部旧步骤保留，只新增telemetry-long-task.log步骤。生产清单557模块、风险来源91，历史根验收与失败记录不改写。模型、Rust生产/测试、依赖、所有体积门槛、原生接口、E2E runner与67实际页面场景保持。本地仅静态/语法/来源/文档/测试注册；功能、构建、浏览器和Rust仅由Windows CI验证，05尚未验收。
+R15-01目录24、Recorder22、Redaction33+payload3、Buffer41及全部累计场景保留，七组Windows全部旧步骤保留，只新增telemetry-long-task.log步骤。生产清单557模块、风险来源91，历史根验收与失败记录不改写。模型、Rust生产/测试、依赖、所有体积门槛、原生接口、E2E runner与67实际页面场景保持。本地仅静态/语法/来源/文档/测试注册；功能、构建、浏览器和Rust已在顶部同提交Windows CI验证通过。
 
 ## 插件与接口依据
 
@@ -46,4 +56,4 @@ flowchart TD
  R -->|destroy 并 disconnect| D
 ```
 
-最后静态复核通过：四项架构/生成/文档门禁、6个JS/MJS语法、162个相对文档链接、91个风险来源blob SHA；历史审计根记录及历史前缀、557模块旧行、七组CI及全部旧步骤、受保护文件保持。注册39+41+33+22+24=159项，未执行功能回调；四项公共职责边界及两项原目录来源/元数据静态契约通过。05功能与累计产品验收等待本次精确提交Windows CI。
+最后静态复核通过：四项架构/生成/文档门禁、6个JS/MJS语法、162个相对文档链接、91个风险来源blob SHA；历史审计根记录及历史前缀、557模块旧行、七组CI及全部旧步骤、受保护文件保持。注册39+41+33+22+24=159项，未执行功能回调；四项公共职责边界及两项原目录来源/元数据静态契约通过。以上为提交前静态记录；05功能与累计产品验收已在顶部同提交Windows CI通过。
