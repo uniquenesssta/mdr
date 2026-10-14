@@ -25,8 +25,12 @@ test('R15-06 public Snapshot owns bounded schema and recurring timer without glo
   const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8'),source=read('src/features/telemetry/runtime-snapshot-recorder.js');
   assert.match(read('src/features/telemetry/index.js'),/export \{ createRuntimeSnapshotRecorder \}/);
   assert.doesNotMatch(source,/\b(?:window|globalThis)\.|querySelectorAll|setTimeout\(|setInterval\(|node:fs|@tauri|writePerformance/);
-  const runtime=read('src/runtime/performance.js');assert.match(runtime,/const runtimeSnapshotRecorder = createRuntimeSnapshotRecorder/);
+  const runtime=read('src/runtime/performance.js');assert.match(runtime,/function getRuntimeSnapshotRecorder\(/);
+  assert.match(runtime,/if \(!runtimeSnapshotRecorder\) runtimeSnapshotRecorder = createRuntimeSnapshotRecorder/);
+  assert.match(runtime,/if \(import.meta.env.DEV\) getRuntimeSnapshotRecorder\(\).start\(\)/);
+  assert.doesNotMatch(runtime,/const runtimeSnapshotRecorder = createRuntimeSnapshotRecorder/);
   assert.doesNotMatch(runtime,/function recordRuntimeSnapshot\(|setInterval\(recordRuntimeSnapshot|querySelectorAll\('\*'\)/);
+  assert.match(read('src-tauri/src/performance_log/redaction.rs'),/"side" \| "sourceSide" \| "targetSide" \| "scrollSourceSide" => \{\s*matches!\(value, "editor" \| "preview" \| ""\)/);
 });
 for(const name of ['getDocument','getMemory','getViewport','getBufferStats','getRuntimeStats','record','schedule','cancel','isEnabled','onError'])test('R15-06 rejects invalid dependency '+name,t=>{
   assert.throws(()=>fixture(t,{[name]:null}),TypeError);
@@ -138,5 +142,14 @@ test('R15-06 actual DEV Runtime pagehide disable and destroy cancel snapshot tim
   h.dispatch('window','pageshow');assert.equal(snapshots().length,1);h.configure(false);assert.equal(snapshots().length,0);h.configure(true);assert.equal(snapshots().length,1);h.api.destroySnapshots();assert.equal(snapshots().length,0);h.dispatch('window','pageshow');assert.equal(snapshots().length,0);
 });
 test('R15-06 actual production Runtime schedules no snapshot timer and explicit manual sampling remains compatible',async t=>{
-  const h=createTelemetryRuntimeHost({dev:false});t.after(()=>h.dispose());h.configure(true);assert.equal(h.timers.size,0);assert.equal(h.domReads.walks,0);h.api.recordRuntimeSnapshot();await h.api.flush();assert.equal(h.entries()[0].details.domNodes,7);assert.equal(h.timers.size,0);
+  const h=createTelemetryRuntimeHost({dev:false});t.after(()=>h.dispose());h.configure(true);assert.equal(h.api.getSnapshotState(),null);assert.equal(h.timers.size,0);assert.equal(h.domReads.walks,0);h.api.recordRuntimeSnapshot();await h.api.flush();assert.equal(h.entries()[0].details.domNodes,7);assert.equal(h.timers.size,0);
+});
+
+test('R15-06 actual Recorder retains only the exact scrollSourceSide enums and masks private or forged values',()=>{
+  const entries=[],recorder=createTelemetryRecorder({sessionId:'snapshot-enum-fixture',now:()=>1000,monotonicNow:()=>1,emit:e=>entries.push(e)});
+  try {
+    for(const value of ['editor','preview',''])recorder.record('fixture',{details:{scrollSourceSide:value}});
+    for(const value of ['EDITOR','/private/path','PRIVATE prose'])recorder.record('fixture',{details:{scrollSourceSide:value}});
+    assert.deepEqual(entries.map(e=>e.details.scrollSourceSide),['editor','preview','', '[redacted]','[redacted]','[redacted]']);
+  } finally { recorder.destroy(); }
 });

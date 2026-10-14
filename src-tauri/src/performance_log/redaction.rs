@@ -269,7 +269,9 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
     }
     match key {
         "contentType" => matches!(value, "text/html" | "text/plain" | "text/markdown" | "application/json"),
-        "side" | "sourceSide" | "targetSide" => matches!(value, "editor" | "preview" | ""),
+        "side" | "sourceSide" | "targetSide" | "scrollSourceSide" => {
+            matches!(value, "editor" | "preview" | "")
+        }
         "mode" | "presentationMode" => matches!(value, "source" | "hybrid" | "preview"),
         _ => false,
     }
@@ -455,6 +457,14 @@ mod tests {
             "hasDocumentPath": true
         });
         assert_eq!(redact_value(&value), value);
+        for side in ["editor", "preview", ""] {
+            let result = redact_value(&json!({ "scrollSourceSide": side }));
+            assert_eq!(result["scrollSourceSide"], side);
+        }
+        for side in ["EDITOR", "/private/path", "PRIVATE prose"] {
+            let result = redact_value(&json!({ "scrollSourceSide": side }));
+            assert_eq!(result["scrollSourceSide"], "[redacted]");
+        }
     }
 
     #[test]

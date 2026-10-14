@@ -35,17 +35,21 @@ const longTaskObserver = createLongTaskObserver({
   record,
   onError: phase => console.warn('Performance long-task observer failed:', phase)
 });
-const runtimeSnapshotRecorder = createRuntimeSnapshotRecorder({
-  getDocument: () => typeof document === 'undefined' ? null : document,
-  getMemory: () => performance.memory,
-  getViewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
-  getBufferStats: getPerformanceBufferStats,
-  getRuntimeStats: () => runtimeStatsProvider(), record,
-  schedule: (callback, delay) => setTimeout(callback, delay), cancel: timer => clearTimeout(timer),
-  isEnabled: () => import.meta.env.DEV && platformLogsEnabled,
-  onError: phase => console.warn('Performance runtime snapshot failed:', phase)
-});
-const recordRuntimeSnapshot = () => runtimeSnapshotRecorder.sample();
+let runtimeSnapshotRecorder = null;
+function getRuntimeSnapshotRecorder() {
+  if (!runtimeSnapshotRecorder) runtimeSnapshotRecorder = createRuntimeSnapshotRecorder({
+    getDocument: () => typeof document === 'undefined' ? null : document,
+    getMemory: () => performance.memory,
+    getViewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
+    getBufferStats: getPerformanceBufferStats,
+    getRuntimeStats: () => runtimeStatsProvider(), record,
+    schedule: (callback, delay) => setTimeout(callback, delay), cancel: timer => clearTimeout(timer),
+    isEnabled: () => import.meta.env.DEV && platformLogsEnabled,
+    onError: phase => console.warn('Performance runtime snapshot failed:', phase)
+  });
+  return runtimeSnapshotRecorder;
+}
+const recordRuntimeSnapshot = () => getRuntimeSnapshotRecorder().sample();
 
 
 export function configurePerformanceRuntimeStats(provider) {
@@ -60,8 +64,10 @@ export function configurePerformancePlatform({ logs, enabled = false } = {}) {
   platformLogs = logs;
   platformLogsEnabled = Boolean(enabled);
   buffer.setEnabled(platformLogsEnabled);
-  if (platformLogsEnabled) { longTaskObserver.start(); runtimeSnapshotRecorder.start(); }
-  else { longTaskObserver.stop(); runtimeSnapshotRecorder.stop(); }
+  if (platformLogsEnabled) {
+    longTaskObserver.start();
+    if (import.meta.env.DEV) getRuntimeSnapshotRecorder().start();
+  } else { longTaskObserver.stop(); runtimeSnapshotRecorder?.stop(); }
 }
 
 function timestampMs() {
@@ -478,7 +484,7 @@ if (import.meta.env.DEV) {
 
   setInterval(drainAggregates, AGGREGATE_INTERVAL_MS);
   setInterval(() => void flush(), FLUSH_INTERVAL_MS);
-  runtimeSnapshotRecorder.start();
+  getRuntimeSnapshotRecorder().start();
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
@@ -488,9 +494,9 @@ if (import.meta.env.DEV) {
   });
   window.addEventListener('pagehide', () => {
     longTaskObserver.stop();
-    runtimeSnapshotRecorder.stop();
+    runtimeSnapshotRecorder?.stop();
     drainAggregates();
     void flush();
   });
-  window.addEventListener('pageshow', () => { longTaskObserver.start(); runtimeSnapshotRecorder.start(); });
+  window.addEventListener('pageshow', () => { longTaskObserver.start(); getRuntimeSnapshotRecorder().start(); });
 }

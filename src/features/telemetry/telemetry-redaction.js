@@ -3,6 +3,7 @@ const MARKERS = new Set(['[redacted]', '[circular]', '[truncated]', '[unserializ
 const ENUMS = {
   contentType: new Set(['text/html', 'text/plain', 'text/markdown', 'application/json']),
   side: new Set(['editor', 'preview', '']), sourceSide: new Set(['editor', 'preview', '']),
+  scrollSourceSide: new Set(['editor', 'preview', '']),
   targetSide: new Set(['editor', 'preview', '']),
   mode: new Set(['source', 'hybrid', 'preview']), presentationMode: new Set(['source', 'hybrid', 'preview']),
   status: new Set(['ok', 'error', 'warning', 'cancelled', 'skipped', 'rendered', 'cached', 'failed']),

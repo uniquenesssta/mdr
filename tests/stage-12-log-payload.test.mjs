@@ -40,4 +40,6 @@ test('R15-03 actual frontend to desktop payload contains no raw secret before Ru
     assert.equal(Object.hasOwn(entries[0].details[field], 'token'), false);
   }
   assert.equal(entries[0].details.hasDocumentPath, true);
+  assert.equal(entries[0].details.scrollSourceSide, 'editor');
+  assert.deepEqual(entries[0].details.sideCases.map(item=>item.scrollSourceSide), ['preview', '', '[redacted]']);
 });

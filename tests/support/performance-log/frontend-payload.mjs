@@ -37,7 +37,8 @@ export async function producePayload() {
     exceptional,
     array: [nested, secrets[0], { path: secrets[4] + '/other.md', count: 3 }],
     cycle, invalid: 1n, notFinite: Infinity, items: Array(50).fill({count:1}),
-    contentType:'text/html', contentLength:2048, hasDocumentPath:true
+    contentType:'text/html', contentLength:2048, hasDocumentPath:true,
+    scrollSourceSide:'editor', sideCases:[{scrollSourceSide:'preview'},{scrollSourceSide:''},{scrollSourceSide:secrets[4]}]
   }});
   runtime.diagnostic('runtime.error', {category:'runtime.error', status:'warning', details:{message:secrets[2], nested}});
   try { runtime.measure('runtime.error', () => { throw new Error(secrets[2]); }, {category:'runtime.error'}); } catch {}

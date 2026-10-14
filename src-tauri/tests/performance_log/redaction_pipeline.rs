@@ -72,6 +72,10 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     assert!(details["notFinite"].is_null());
     assert_eq!(details["items"].as_array().unwrap().len(), 20);
     assert_eq!(details["contentType"], "text/html");
+    assert_eq!(details["scrollSourceSide"], "editor");
+    assert_eq!(details["sideCases"][0]["scrollSourceSide"], "preview");
+    assert_eq!(details["sideCases"][1]["scrollSourceSide"], "");
+    assert_eq!(details["sideCases"][2]["scrollSourceSide"], "[redacted]");
     assert_eq!(rows[0]["operation"], "runtime.snapshot");
     assert_eq!(rows[0]["durationMs"], 12.5);
     assert_eq!(rows[1]["status"], "warning");
