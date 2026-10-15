@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-07 native acknowledged batches and bounded recovery regression · ${{ github.sha }}
+run-name: R15-08 unified telemetry lifecycle and resource disposal regression · ${{ github.sha }}
 
 on:
   push:
@@ -253,6 +253,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-native-log-sink.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-native-sink.log"
+
+      - name: R15-08 unified telemetry lifecycle and owned resource disposal
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-telemetry-lifecycle.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-lifecycle.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

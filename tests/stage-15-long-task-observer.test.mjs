@@ -137,7 +137,7 @@ test('R15-05 actual DEV Runtime starts one longtask observer and pagehide/pagesh
 });
 test('R15-05 actual Runtime disable disconnects longtask collection and destroy permanently stops the owner',t=>{
   const browser=observerPort(),host=createTelemetryRuntimeHost({dev:true,Observer:browser.Observer});t.after(()=>host.dispose());const task=browser.instances.find(x=>x.observations.some(o=>o.type==='longtask'));
-  host.configure(false);assert.equal(task.disconnections,1);task.deliver([entry()]);host.api.destroyLongTasks();host.configure(true);assert.equal(host.api.getLongTaskState().state,'destroyed');assert.equal(browser.instances.length,3);
+  host.configure(false);assert.equal(task.disconnections,1);task.deliver([entry()]);host.api.destroyLongTasks();host.configure(true);assert.equal(host.api.getLongTaskState().state,'destroyed');assert.equal(browser.instances.filter(item=>item.observations.some(o=>o.type==='longtask')).length,1);assert.equal(browser.instances.length,5);
 });
 test('R15-05 actual production Runtime creates no observer even when LogsPort is explicitly enabled',t=>{
   const browser=observerPort(),host=createTelemetryRuntimeHost({dev:false,Observer:browser.Observer});t.after(()=>host.dispose());host.configure(true);assert.equal(browser.instances.length,0);assert.equal(host.api.getLongTaskState().observerAttached,false);assert.equal(host.window.markdownEditorPerf,undefined);

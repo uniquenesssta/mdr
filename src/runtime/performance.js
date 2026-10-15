@@ -1,8 +1,12 @@
-import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink } from '../features/telemetry/index.js';
+import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink, createTelemetryLifecycle } from '../features/telemetry/index.js';
 
 const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const diagnosticStates = new Map();
-const wrappedFunctions = new Set();
+const wrappedFunctions = new Map();
+let legacyInstrumentationRequested = false, activeScope = null, telemetryLifecycle = null;
+let telemetryDestroyed = false, destructionReport = null, pendingHandoff = null;
+let publishedPerf = null, previousPerfDescriptor;
+let eventTimingSeen = false, navigationSeen = false;
 const MAX_DIAGNOSTIC_KEYS = 200;
 const FLUSH_INTERVAL_MS = 2000;
 const AGGREGATE_INTERVAL_MS = 1500;
@@ -13,7 +17,7 @@ let runtimeStatsProvider = () => ({});
 
 let buffer, recorder, nativeLogSink, longTaskObserver;
 function initializeTelemetry() {
-  if (recorder) return;
+  if (recorder || telemetryDestroyed) return;
   recorder = createTelemetryRecorder({
     sessionId, now: timestampMs, monotonicNow: () => performance.now(),
     emit: entry => buffer.enqueue(entry), aggregate: (operation, options) => buffer.aggregate(operation, options)
@@ -33,13 +37,13 @@ function initializeTelemetry() {
   });
   buffer.setEnabled(platformLogsEnabled);
 }
-const record = (...args) => { initializeTelemetry(); return recorder.record(...args); };
-const measure = (...args) => { initializeTelemetry(); return recorder.measure(...args); };
+const record = (...args) => { if (telemetryDestroyed) return; initializeTelemetry(); return recorder.record(...args); };
+const measure = (operation, callback, options) => { if (telemetryDestroyed) return callback(); initializeTelemetry(); return recorder.measure(operation, callback, options); };
 const makeEntry = (...args) => { initializeTelemetry(); return recorder.createEntry(...args); };
 const safeDetails = (...args) => { initializeTelemetry(); return recorder.normalizeDetails(...args); };
-const drainAggregates = () => { initializeTelemetry(); return buffer.drainAggregates(); };
-const flush = () => { initializeTelemetry(); return buffer.flush(); };
-export function getPerformanceBufferStats() { initializeTelemetry(); return buffer.getStats(); }
+const drainAggregates = () => { if (telemetryDestroyed) return; initializeTelemetry(); return buffer.drainAggregates(); };
+const flush = () => { if (telemetryDestroyed) return Promise.resolve(buffer?.getStats()); initializeTelemetry(); return buffer.flush(); };
+export function getPerformanceBufferStats() { initializeTelemetry(); return buffer?.getStats() || Object.freeze({ destroyed: telemetryDestroyed, queueLength: 0, aggregateCount: 0 }); }
 
 let runtimeSnapshotRecorder = null;
 function getRuntimeSnapshotRecorder() {
@@ -55,28 +59,80 @@ function getRuntimeSnapshotRecorder() {
   });
   return runtimeSnapshotRecorder;
 }
-const recordRuntimeSnapshot = () => getRuntimeSnapshotRecorder().sample();
+const recordRuntimeSnapshot = () => { if (!telemetryDestroyed) return getRuntimeSnapshotRecorder().sample(); };
 
 
 export function configurePerformanceRuntimeStats(provider) {
   if (typeof provider !== 'function') throw new TypeError('performance runtime stats provider must be a function');
-  runtimeStatsProvider = provider;
+  if (!telemetryDestroyed) runtimeStatsProvider = provider;
 }
 
 export function configurePerformancePlatform({ logs, enabled = false } = {}) {
   if (!logs || typeof logs.writePerformance !== 'function') {
     throw new TypeError('performance runtime requires a logs port');
   }
+  if (telemetryDestroyed) return;
   platformLogs = logs;
   platformLogsEnabled = Boolean(enabled);
-  buffer?.setEnabled(platformLogsEnabled);
-  if (!import.meta.env.DEV) return;
-  initializeTelemetry();
-  buffer.setEnabled(platformLogsEnabled);
-  if (platformLogsEnabled) {
-    longTaskObserver.start();
-    if (import.meta.env.DEV) getRuntimeSnapshotRecorder().start();
-  } else { longTaskObserver.stop(); runtimeSnapshotRecorder?.stop(); }
+  if (!import.meta.env.DEV) { buffer?.setEnabled(platformLogsEnabled); return; }
+  if (platformLogsEnabled) getTelemetryLifecycle().start();
+  else telemetryLifecycle?.stop();
+}
+
+function cleanupOwners(destroy = false) {
+  let failed = false;
+  const actions = destroy ? [() => nativeLogSink?.destroy(), () => runtimeSnapshotRecorder?.destroy(),
+    () => longTaskObserver?.destroy(), () => { try { pendingHandoff = buffer?.destroy() ?? null; } catch (error) { pendingHandoff = buffer?.snapshot() ?? null; throw error; } }, () => recorder?.destroy()]
+    : [() => buffer?.setEnabled(false), () => longTaskObserver?.stop(), () => runtimeSnapshotRecorder?.stop()];
+  for (const action of actions) try { action(); } catch (_) { failed = true; }
+  if (longTaskObserver?.getState().cleanupFailed || runtimeSnapshotRecorder?.getState().cleanupFailed || nativeLogSink?.getState().cleanupFailed) failed = true;
+  if (failed) throw new Error('Telemetry owner cleanup failed');
+  return pendingHandoff;
+}
+function getTelemetryLifecycle() {
+  if (!telemetryLifecycle && !telemetryDestroyed) {
+    initializeTelemetry();
+    telemetryLifecycle = createTelemetryLifecycle({ getWindow: () => window, getDocument: () => document,
+      isEnabled: () => import.meta.env.DEV && platformLogsEnabled,
+      schedule: (callback, delay) => setTimeout(callback, delay), cancel: timer => clearTimeout(timer),
+      requestFrame: callback => requestAnimationFrame(callback), cancelFrame: frame => cancelAnimationFrame(frame),
+      install(scope) {
+        activeScope = scope;
+        scope.own(() => { if (activeScope === scope) activeScope = null; });
+        installInteractionTracking(scope); installPerformanceObservers(scope); installErrorTracking(scope);
+        if (legacyInstrumentationRequested) installLegacyInstrumentation(scope);
+      },
+      startOwners() {
+        buffer.setEnabled(platformLogsEnabled); longTaskObserver.start();
+        if (import.meta.env.DEV) getRuntimeSnapshotRecorder().start();
+      },
+      stopOwners: () => cleanupOwners(), destroyOwners: () => cleanupOwners(true),
+      drain: drainAggregates, flush, aggregateMs: AGGREGATE_INTERVAL_MS, flushMs: FLUSH_INTERVAL_MS,
+      onError: phase => console.warn('Performance lifecycle failed:', phase)
+    });
+  }
+  return telemetryLifecycle;
+}
+export function destroyPerformanceTelemetry() {
+  if (telemetryDestroyed) return destructionReport;
+  telemetryDestroyed = true;
+  let lifecycleReport;
+  try {
+    if (telemetryLifecycle) lifecycleReport = telemetryLifecycle.destroy();
+    else cleanupOwners(true);
+  } catch (_) { lifecycleReport = { cleanupFailed: true }; }
+  let cleanupFailed = Boolean(lifecycleReport?.cleanupFailed);
+  for (const { restore } of [...wrappedFunctions.values()].reverse()) try { restore(); } catch (_) { cleanupFailed = true; }
+  wrappedFunctions.clear(); diagnosticStates.clear(); activeScope = null; platformLogsEnabled = false; platformLogs = null;
+  runtimeStatsProvider = () => ({});
+  if (import.meta.env.DEV) try {
+    if (window.markdownEditorPerf === publishedPerf) {
+      if (previousPerfDescriptor) Object.defineProperty(window, 'markdownEditorPerf', previousPerfDescriptor);
+      else delete window.markdownEditorPerf;
+    }
+  } catch (_) { cleanupFailed = true; }
+  destructionReport = Object.freeze({ state: 'destroyed', cleanupFailed, handoff: pendingHandoff });
+  return destructionReport;
 }
 
 function timestampMs() {
@@ -91,7 +147,7 @@ function cleanString(value, maxLength = 160) {
 }
 
 function diagnostic(operation, options = {}) {
-  if (typeof operation !== 'string' || !operation.trim()) return false;
+  if (telemetryDestroyed || typeof operation !== 'string' || !operation.trim()) return false;
   const now = timestampMs();
   const details = safeDetails(options.details);
   const key = redactTelemetryIdentity(options.dedupeKey || `${options.category || 'runtime.diagnostic'}:${operation}`, 240);
@@ -161,17 +217,17 @@ function describeElement(element) {
   return cleanString(`${element.tagName.toLowerCase()}${id}${role ? `[${role}]` : ''} ${action || label}`, 140);
 }
 
-function installInteractionTracking() {
+function installInteractionTracking(scope) {
   const paintTrackedEvents = ['click', 'change', 'contextmenu', 'drop'];
   for (const eventName of paintTrackedEvents) {
-    document.addEventListener(eventName, event => {
+    scope.listen(document, eventName, event => {
       const started = performance.now();
       const target = event.target instanceof Element ? event.target.closest('button, a, input, select, textarea, [onclick], [role="menuitem"], .doc-item') || event.target : null;
       const clickCount = eventName === 'click' && event instanceof MouseEvent
         ? Number(event.detail) || 0
         : null;
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
+      scope.frame(() => {
+        scope.frame(() => {
           record(`interaction.${eventName}`, {
             category: 'ui.interaction',
             durationMs: performance.now() - started,
@@ -185,7 +241,7 @@ function installInteractionTracking() {
     }, true);
   }
 
-  document.addEventListener('keydown', event => {
+  scope.listen(document, 'keydown', event => {
     if (!(event.ctrlKey || event.metaKey || event.altKey || /^F\d+$/.test(event.key))) return;
     record('interaction.shortcut', {
       category: 'ui.interaction',
@@ -198,9 +254,9 @@ function installInteractionTracking() {
     });
   }, true);
 
-  document.addEventListener('input', event => {
+  scope.listen(document, 'input', event => {
     const started = performance.now();
-    requestAnimationFrame(() => {
+    scope.frame(() => {
       const target = event.target;
       record('interaction.input.frame', {
         category: 'ui.interaction',
@@ -215,7 +271,7 @@ function installInteractionTracking() {
   }, true);
 
   const scrollStates = new WeakMap();
-  document.addEventListener('scroll', event => {
+  scope.listen(document, 'scroll', event => {
     const target = event.target;
     if (!(target instanceof Element)) return;
     // CodeMirror 的原生滚动会转发为编辑器宿主事件，忽略内部 scroller，
@@ -231,8 +287,8 @@ function installInteractionTracking() {
       timer: null
     };
     current.count += 1;
-    clearTimeout(current.timer);
-    current.timer = setTimeout(() => {
+    current.timer?.();
+    current.timer = scope.timeout(() => {
       record('interaction.scroll.burst', {
         category: 'ui.interaction',
         durationMs: performance.now() - current.started,
@@ -250,52 +306,29 @@ function installInteractionTracking() {
   }, true);
 }
 
-function installPerformanceObservers() {
-  initializeTelemetry();
-  longTaskObserver.start();
+function installPerformanceObservers(scope) {
   if (typeof PerformanceObserver === 'undefined') return;
-
-  try {
-    // Event Timing 会同时上报 pointerover / mouseover / pointerenter 等同源事件。
-    // 只保留能代表用户实际操作的事件，避免一轮鼠标动作产生多份重复日志。
-    const meaningfulEvents = new Set(['click', 'keydown', 'input', 'change', 'contextmenu', 'drop']);
-    const eventObserver = new PerformanceObserver(list => {
-      for (const entry of list.getEntries()) {
-        if (!meaningfulEvents.has(entry.name)) continue;
-        record(`browser.event.${entry.name}`, {
-          category: 'runtime.event-timing',
-          durationMs: entry.duration,
-          aggregate: true,
-          details: {
-            interactionId: entry.interactionId || 0,
-            processingMs: Number(Math.max(0, entry.processingEnd - entry.processingStart).toFixed(3))
-          }
-        });
-      }
-    });
-    eventObserver.observe({ type: 'event', buffered: true, durationThreshold: 16 });
-  } catch (_) {}
-
-  try {
-    const navigationObserver = new PerformanceObserver(list => {
-      for (const entry of list.getEntries()) {
-        record('runtime.navigation', {
-          category: 'runtime.performance',
-          durationMs: entry.duration,
-          details: {
-            domContentLoadedMs: Number(entry.domContentLoadedEventEnd.toFixed(3)),
-            loadMs: Number(entry.loadEventEnd.toFixed(3)),
-            transferBytes: entry.transferSize || 0
-          }
-        });
-      }
-    });
-    navigationObserver.observe({ type: 'navigation', buffered: true });
-  } catch (_) {}
+  const meaningfulEvents = new Set(['click', 'keydown', 'input', 'change', 'contextmenu', 'drop']);
+  if (scope.observe(PerformanceObserver, list => {
+    for (const entry of list.getEntries()) {
+      if (!scope.active() || !meaningfulEvents.has(entry.name)) continue;
+      record(`browser.event.${entry.name}`, { category: 'runtime.event-timing', durationMs: entry.duration, aggregate: true,
+        details: { interactionId: entry.interactionId || 0,
+          processingMs: Number(Math.max(0, entry.processingEnd - entry.processingStart).toFixed(3)) } });
+    }
+  }, { type: 'event', buffered: !eventTimingSeen, durationThreshold: 16 })) eventTimingSeen = true;
+  if (scope.observe(PerformanceObserver, list => {
+    for (const entry of list.getEntries()) {
+      if (!scope.active()) break;
+      record('runtime.navigation', { category: 'runtime.performance', durationMs: entry.duration,
+        details: { domContentLoadedMs: Number(entry.domContentLoadedEventEnd.toFixed(3)),
+          loadMs: Number(entry.loadEventEnd.toFixed(3)), transferBytes: entry.transferSize || 0 } });
+    }
+  }, { type: 'navigation', buffered: !navigationSeen })) navigationSeen = true;
 }
 
-function installErrorTracking() {
-  window.addEventListener('error', event => {
+function installErrorTracking(scope) {
+  scope.listen(window, 'error', event => {
     diagnostic('runtime.error', {
       category: 'runtime.error',
       status: 'error',
@@ -308,7 +341,7 @@ function installErrorTracking() {
       }
     });
   });
-  window.addEventListener('unhandledrejection', event => {
+  scope.listen(window, 'unhandledrejection', event => {
     const reason = event.reason?.message || event.reason;
     diagnostic('runtime.unhandled-rejection', {
       category: 'runtime.error',
@@ -391,9 +424,9 @@ function functionDetails(name) {
   };
 }
 
-function instrumentFunction(name, category, aggregate = false) {
+function instrumentFunction(name, category, aggregate = false, scope) {
   const original = window[name];
-  if (typeof original !== 'function' || wrappedFunctions.has(name)) return false;
+  if (typeof original !== 'function' || wrappedFunctions.get(name)?.wrapped === original) return false;
   const wrapped = function (...args) {
     return measure(name, () => original.apply(this, args), {
       category,
@@ -405,11 +438,19 @@ function instrumentFunction(name, category, aggregate = false) {
     Object.defineProperty(wrapped, 'name', { value: original.name, configurable: true });
   } catch (_) {}
   window[name] = wrapped;
-  wrappedFunctions.add(name);
+  const restore = () => {
+    if (window[name] === wrapped) window[name] = original;
+    if (wrappedFunctions.get(name)?.wrapped === wrapped) wrappedFunctions.delete(name);
+  };
+  wrappedFunctions.set(name, { wrapped, restore });
+  scope?.own(restore);
   return true;
 }
 
-function installLegacyInstrumentation() {
+function installLegacyInstrumentation(scope = activeScope) {
+  if (telemetryDestroyed) return 0;
+  legacyInstrumentationRequested = true;
+  if (import.meta.env.DEV && !scope?.active()) return 0;
   const groups = {
     'render.pipeline': [
       ['updatePreview', true],
@@ -455,7 +496,7 @@ function installLegacyInstrumentation() {
   let installed = 0;
   for (const [category, functions] of Object.entries(groups)) {
     for (const [name, aggregate] of functions) {
-      if (instrumentFunction(name, category, aggregate)) installed += 1;
+      if (instrumentFunction(name, category, aggregate, scope)) installed += 1;
     }
   }
 
@@ -463,50 +504,24 @@ function installLegacyInstrumentation() {
     category: 'app.lifecycle',
     details: { wrappedFunctions: installed }
   });
-  setTimeout(() => void flush(), 0);
+  scope?.timeout(() => void flush(), 0);
+  return installed;
 }
 
 if (import.meta.env.DEV) {
-  window.markdownEditorPerf = {
-    sessionId,
-    record,
-    diagnostic,
-    measure,
-    flush,
-    installLegacyInstrumentation,
-    getLogPath: () => buffer.getLogPath()
+  previousPerfDescriptor = Object.getOwnPropertyDescriptor(window, 'markdownEditorPerf');
+  publishedPerf = {
+    sessionId, record, diagnostic, measure, flush, installLegacyInstrumentation,
+    getLogPath: () => buffer?.getLogPath() || '',
+    start: () => !telemetryDestroyed && getTelemetryLifecycle().start(),
+    stop: () => telemetryLifecycle?.stop(), destroy: destroyPerformanceTelemetry,
+    getState: () => telemetryLifecycle?.getState() || { state: telemetryDestroyed ? 'destroyed' : 'idle' }
   };
-
-  record('frontend.bootstrap', {
-    category: 'app.lifecycle',
-    durationMs: performance.now(),
-    details: {
-      userAgent: navigator.userAgent,
-      hardwareConcurrency: navigator.hardwareConcurrency || null,
-      deviceMemoryGb: navigator.deviceMemory || null,
-      viewportWidth: window.innerWidth,
-      viewportHeight: window.innerHeight
-    }
-  });
-  installInteractionTracking();
-  installPerformanceObservers();
-  installErrorTracking();
-
-  setInterval(drainAggregates, AGGREGATE_INTERVAL_MS);
-  setInterval(() => void flush(), FLUSH_INTERVAL_MS);
-  getRuntimeSnapshotRecorder().start();
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      drainAggregates();
-      void flush();
-    }
-  });
-  window.addEventListener('pagehide', () => {
-    longTaskObserver.stop();
-    runtimeSnapshotRecorder?.stop();
-    drainAggregates();
-    void flush();
-  });
-  window.addEventListener('pageshow', () => { longTaskObserver.start(); getRuntimeSnapshotRecorder().start(); });
+  window.markdownEditorPerf = publishedPerf;
+  record('frontend.bootstrap', { category: 'app.lifecycle', durationMs: performance.now(), details: {
+    userAgent: navigator.userAgent, hardwareConcurrency: navigator.hardwareConcurrency || null,
+    deviceMemoryGb: navigator.deviceMemory || null, viewportWidth: window.innerWidth, viewportHeight: window.innerHeight
+  } });
+  getTelemetryLifecycle().mount();
+  getTelemetryLifecycle().start();
 }

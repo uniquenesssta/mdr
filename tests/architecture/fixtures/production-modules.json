@@ -5616,6 +5616,16 @@
       "process-session",
       "retain",
       false
+    ],
+    [
+      "src/features/telemetry/telemetry-lifecycle.js",
+      "esm-module",
+      "telemetry",
+      "Single automatic telemetry lifecycle, bounded owned listeners/timers/frames/observers, idempotent start and full teardown.",
+      "telemetry-lifecycle",
+      "explicit-instance",
+      "retain",
+      false
     ]
   ]
 }

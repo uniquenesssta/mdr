@@ -6,7 +6,7 @@ import { createImageImportController, createDropImportController, createDropOver
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createBrowserPrint, createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
-import { configurePerformancePlatform, configurePerformanceRuntimeStats } from './runtime/performance.js';
+import { configurePerformancePlatform, configurePerformanceRuntimeStats, destroyPerformanceTelemetry } from './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
 import {
   createEditorCommandService,
@@ -832,7 +832,10 @@ async function loadAppModules() {
     documentModel.destroy();
     virtualEditor.destroy();
   };
-  window.addEventListener('pagehide', destroyDocumentFeatures, { once: true });
+  window.addEventListener('pagehide', event => {
+    try { destroyDocumentFeatures(); }
+    finally { if (import.meta.env.DEV && !event.persisted) destroyPerformanceTelemetry(); }
+  }, { once: true });
 
   const folderTreeState = createFolderTreeState();
   const folderTreeView = createFolderTreeView({
@@ -1798,6 +1801,7 @@ loadAppModules().then(() => {
     details: { documentReadyState: document.readyState }
   });
 }).catch((error) => {
+  if (import.meta.env.DEV) destroyPerformanceTelemetry();
   destroyImportFeature();
   void dropImportController.destroy();
   dropOverlayView.destroy();
