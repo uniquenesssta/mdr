@@ -361,7 +361,8 @@ fn batch_child() {
 #[test]
 fn batch_serialized_byte_budget_is_checked_before_the_first_file_write() {
     let small = sized(60000);
-    assert!(writer::prepare(&vec![small.clone(); 17], 250).is_ok());
+    let prepared = writer::prepare(&vec![small.clone(); 17], 250).unwrap();
+    assert_eq!(prepared.iter().map(Vec::len).sum::<usize>(), 17 * 60001);
     assert!(writer::prepare(&vec![small; 18], 250).is_err());
     assert!(writer::prepare(&[sized(65537)], 250).is_err());
 }
@@ -370,6 +371,9 @@ fn batch_uncompleted_receipts_cannot_exceed_the_ledger_memory_budget() {
     let mut ledger = Ledger::default();
     let mut disk = Disk::new();
     let payload = writer::prepare(&vec![sized(60000); 17], 250).unwrap();
+    let batch_bytes = payload.iter().map(Vec::len).sum::<usize>();
+    assert_eq!(batch_bytes, 17 * 60001);
+    assert!(4 * batch_bytes <= 4 * 1024 * 1024 && 5 * batch_bytes > 4 * 1024 * 1024);
     for sequence in 1..=4 {
         disk.fail_at = disk.calls + 1;
         let id = format!("bounded-batch-{sequence}");
@@ -384,6 +388,12 @@ fn batch_uncompleted_receipts_cannot_exceed_the_ledger_memory_budget() {
         "ledger-limit"
     );
     assert_eq!(disk.calls, calls);
+    for sequence in 1..=4 {
+        let id = format!("bounded-batch-{sequence}");
+        let retained = ledger.query(&request(&id, 0, 1, 17));
+        assert_eq!(retained["state"], "partial");
+        assert_eq!(retained["acceptedCount"], 0);
+    }
     assert!(disk.rows().is_empty());
 }
 #[test]
@@ -406,6 +416,34 @@ fn batch_200_uncompleted_receipts_are_retained_without_unbounded_growth() {
     assert!(disk.rows().is_empty());
 }
 
+// Keep all fields within the production redactor's key/container/path budgets.
+// Raw bytes alone cannot establish a serialized post-redaction boundary.
 fn sized(bytes: usize) -> Value {
-    Value::Object(std::iter::once(("x".repeat(bytes - 6), json!(0))).collect())
+    let mut groups = serde_json::Map::new();
+    for group in 0..5 {
+        let mut fields = serde_json::Map::new();
+        for index in 0..60 {
+            fields.insert(format!("{}_{index:02}_path", "k".repeat(48)), json!("x"));
+        }
+        groups.insert(format!("group{group}"), Value::Object(fields));
+    }
+    let mut value = Value::Object(groups);
+    let mut remaining = bytes - serde_json::to_vec(&value).unwrap().len();
+    for group in value.as_object_mut().unwrap().values_mut() {
+        for field in group.as_object_mut().unwrap().values_mut() {
+            let extra = remaining.min(159);
+            *field = json!("x".repeat(extra + 1));
+            remaining -= extra;
+        }
+    }
+    assert_eq!(remaining, 0, "fixture must reach requested byte size");
+    assert_eq!(serde_json::to_vec(&value).unwrap().len(), bytes);
+    assert_eq!(
+        serde_json::to_vec(&super::redaction::redact_value(&value))
+            .unwrap()
+            .len(),
+        bytes,
+        "production redaction must retain the exact boundary fixture"
+    );
+    value
 }
