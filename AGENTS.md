@@ -1,4 +1,4 @@
-> R15-07正式收尾：8c7e232 / CI38688232262七组Windows及全部步骤通过，Sink31、原生批次17、全仓2456/2456、前端1449/1449、浏览器11+67、Rust298；四份下载归档摘要与同提交accepted=true已核验。首轮两项夹具失败及修复保留；A04进程内批次确认/有界重试风险在本范围关闭，历史R12交接不回写。 当前在唯一agent/r15-stage实施15.8 Telemetry Lifecycle：统一启动/暂停/周期drain与flush、DOM监听/帧/滚动Timer/观察器/旧包装器清理；重复启动单份资源、隐藏与pagehide暂停、pageshow恢复，最终退出与显式destroy关闭等待并保留有界交接。新增49项公共契约，08待精确提交Windows验收，15.9未开始。 [08详情](docs/R15-08-DETAILS.md)。
+> R15-08正式收尾：d8520d2 / CI38726360552七组Windows及全部步骤通过，Lifecycle49、全仓2505/2505、前端1498/1498、浏览器11+67、Rust298；三份下载归档摘要与同提交accepted=true已核验。 当前在唯一agent/r15-stage实施15.9 E2E Query API：公共入口统一load/layout、组件状态和预览指标，固定字段深只读DTO、文档身份/代次/版本屏障、单动作及有界可取消等待，应用退出清理适配器。新增59项契约与1项真实页面场景，09待精确提交Windows验收，15.10未开始。 [09详情](docs/R15-09-DETAILS.md)。
 
 > 当前平台范围（2026-09-29，用户明确要求）：全部阶段只验收 Windows；取消 Linux/macOS 验证要求。以 [Windows 验证策略](docs/WINDOWS_VALIDATION_POLICY.md) 为准，历史多平台记录只保留作历史证据。
 

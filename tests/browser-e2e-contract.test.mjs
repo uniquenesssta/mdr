@@ -7,6 +7,7 @@ const root = new URL('../', import.meta.url);
 test('browser E2E runner stays dependency-free and covers required interactions', async () => {
   const runner = await readFile(new URL('./e2e/run-browser-tests.mjs', import.meta.url), 'utf8');
   const bridge = await readFile(new URL('../src/runtime/e2e-bridge.js', import.meta.url), 'utf8');
+  const query = await readFile(new URL('../src/features/e2e/e2e-query-api.js', import.meta.url), 'utf8');
   const browserLauncher = await readFile(new URL('./e2e/lib/cdp-browser.mjs', import.meta.url), 'utf8');
   for (const phrase of [
     'single click keeps a component presented',
@@ -36,7 +37,9 @@ test('browser E2E runner stays dependency-free and covers required interactions'
   assert.match(browserLauncher, /--headless=new/);
   assert.match(browserLauncher, /accessSync/);
   assert.doesNotMatch(browserLauncher, /spawnSync|--version/);
-  assert.match(bridge, /loadMarkdown/);
+  assert.match(bridge, /createE2EQueryAPI/);
+  assert.match(bridge, /from '..\/features\/e2e\/index.js'/);
+  assert.match(query, /loadMarkdown:/);
   assert.match(bridge, /getHybridComponentStates/);
 });
 

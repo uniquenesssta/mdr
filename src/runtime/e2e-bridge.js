@@ -1,3 +1,5 @@
+import { createE2EQueryAPI } from '../features/e2e/index.js';
+
 function isE2EEnabled() {
   try {
     return globalThis.__MARKDOWN_EDITOR_E2E__ === true
@@ -7,17 +9,18 @@ function isE2EEnabled() {
   }
 }
 
-function waitForAnimationFrames(count = 2) {
-  return new Promise(resolve => {
-    const step = remaining => {
-      if (remaining <= 0) {
-        resolve();
-        return;
-      }
-      requestAnimationFrame(() => step(remaining - 1));
-    };
-    step(Math.max(0, Number(count) || 0));
-  });
+// Composition-only providers; no model, controller or platform object is published.
+let providers = null;
+let installed = null;
+let previousDescriptor = null;
+
+export function configureMarkdownEditorE2EPorts(value) {
+  if (!isE2EEnabled()) return;
+  if (installed) throw new Error('E2E already installed');
+  if (typeof value?.readContext !== 'function' || typeof value?.readPreviewStats !== 'function') {
+    throw new TypeError('E2E providers unavailable');
+  }
+  providers = Object.freeze({ readContext: value.readContext, readPreviewStats: value.readPreviewStats });
 }
 
 function getEditor() {
@@ -59,139 +62,10 @@ function getComponentDomSnapshot() {
   }));
 }
 
-async function waitForIdle(options = {}) {
-  const timeoutMs = Math.max(250, Number(options.timeoutMs) || 4000);
-  const quietMs = Math.max(20, Number(options.quietMs) || 80);
-  const started = performance.now();
-  let stableSince = 0;
-  let previous = '';
-
-  while (performance.now() - started < timeoutMs) {
-    await waitForAnimationFrames(1);
-    const pendingMermaid = document.querySelectorAll('[data-mermaid-rendering="true"], .cm-hybrid-mermaid-status:not(.is-error)').length;
-    const snapshot = JSON.stringify({
-      pendingMermaid,
-      blocks: getComponentDomSnapshot(),
-      sourceActiveLines: getEditor()?.virtualEditor?.getPresentationStats?.().sourceActiveLines || 0,
-      active: describeActiveElement()
-    });
-    if (pendingMermaid === 0 && snapshot === previous) {
-      if (!stableSince) stableSince = performance.now();
-      if (performance.now() - stableSince >= quietMs) return true;
-    } else {
-      stableSince = 0;
-      previous = snapshot;
-    }
-    await new Promise(resolve => setTimeout(resolve, 16));
-  }
-  return false;
-}
-
-async function setLayout(mode) {
-  const normalized = ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
-  if (typeof globalThis.setLayoutMode !== 'function') {
-    throw new Error('setLayoutMode is unavailable');
-  }
-  globalThis.setLayoutMode(normalized, false);
-  await waitForIdle();
-  return normalized;
-}
-
-async function setVisualEditing(options = {}) {
-  const editor = getEditor();
-  if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable');
-  if (Object.hasOwn(options, 'code')) {
-    editor.virtualEditor.setHybridCodeVisualEditing?.(Boolean(options.code));
-    localStorage.setItem('md_editor_code_visual_editing', options.code ? 'true' : 'false');
-  }
-  if (Object.hasOwn(options, 'table')) {
-    editor.virtualEditor.setHybridTableVisualEditing?.(Boolean(options.table));
-    localStorage.setItem('md_editor_table_visual_editing', options.table ? 'true' : 'false');
-  }
-  await waitForIdle();
-}
-
-function findFixtureFocusPosition(content, options = {}) {
-  const requestedSelection = Number(options.selection);
-  if (Number.isFinite(requestedSelection)) {
-    return Math.max(0, Math.min(content.length, requestedSelection));
-  }
-  const requestedText = String(options.focusText || '');
-  if (requestedText) {
-    const requestedIndex = content.indexOf(requestedText);
-    if (requestedIndex >= 0) return requestedIndex;
-  }
-  const fencedCode = content.match(/```(?!mermaid\b)[^\n]*\n/);
-  if (fencedCode?.index !== undefined) {
-    return fencedCode.index + fencedCode[0].length;
-  }
-  return 0;
-}
-
-async function revealPosition(position, options = {}) {
-  const editor = getEditor();
-  if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable');
-  const safePosition = Math.max(0, Math.min(editor.textLength, Number(position) || 0));
-  if (options.preserveSelection !== true) {
-    editor.focus({ preventScroll: true });
-    await waitForAnimationFrames(1);
-    editor.setSelectionRange(safePosition, safePosition);
-  }
-  editor.virtualEditor.scrollPositionIntoView?.(
-    safePosition,
-    options.behavior === 'smooth' ? 'smooth' : 'auto',
-    Number.isFinite(Number(options.viewportRatio)) ? Number(options.viewportRatio) : 0.5
-  );
-  await waitForAnimationFrames(3);
-  await waitForIdle({ timeoutMs: options.timeoutMs || 5000 });
-  return safePosition;
-}
-
-async function revealText(text, options = {}) {
-  const editor = getEditor();
-  if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable');
-  const query = String(text || '');
-  if (!query) throw new Error('revealText requires non-empty text');
-  const match = editor.virtualEditor.findText?.(query, Number(options.from) || 0, { wrap: options.wrap !== false });
-  if (!match) throw new Error(`Unable to find E2E fixture text: ${query}`);
-  return revealPosition(options.edge === 'end' ? match.to : match.from, options);
-}
-
-async function loadApplicationDocument(source, options = {}) {
-  const commands = document.getElementById('compatibility-business-ports')?.markdownEditorDocumentUiCommandPort;
-  if (!commands?.has('importTextContent')) {
-    throw new Error('application document import flow is unavailable');
-  }
-  const content = String(source || '');
-  const loaded = await commands.invoke('importTextContent',
-    String(options.name || 'e2e-fixture.md'),
-    content,
-    ''
-  );
-  if (!loaded) throw new Error('application document import flow rejected the E2E fixture');
-
-  const editor = getEditor();
-  if (!editor?.virtualEditor) throw new Error('virtual editor is unavailable after document import');
-  const focusPosition = findFixtureFocusPosition(content, options);
-  await revealPosition(focusPosition, { timeoutMs: options.timeoutMs || 5000 });
-  return editor;
-}
-
-async function loadMarkdown(source, options = {}) {
-  await loadApplicationDocument(source, options);
-  await setVisualEditing({
-    code: options.codeVisualEditing !== false,
-    table: options.tableVisualEditing !== false
-  });
-  await setLayout(options.layout || 'hybrid');
-  await revealPosition(getEditor()?.selectionStart || 0, { timeoutMs: options.timeoutMs || 6000 });
-  await waitForIdle({ timeoutMs: options.timeoutMs || 6000 });
-  return snapshot();
-}
-
-function snapshot() {
+function readSnapshot() {
   const editor = getEditor();
   return {
+    pendingMermaid: document.querySelectorAll('[data-mermaid-rendering="true"], .cm-hybrid-mermaid-status:not(.is-error)').length,
     ready: document.documentElement.classList.contains('app-ready'),
     layout: getLayoutMode(),
     presentationMode: editor?.virtualEditor?.getPresentationMode?.() || null,
@@ -206,27 +80,75 @@ function snapshot() {
   };
 }
 
+function createBrowserPorts(current) {
+  return {
+    readContext: () => current.readContext(),
+    readPreviewStats: () => current.readPreviewStats(),
+    readSnapshot,
+    readText: () => getEditor()?.value || '',
+    async importDocument(content, name, isCurrent) {
+      const commands = document.getElementById('compatibility-business-ports')?.markdownEditorDocumentUiCommandPort;
+      if (!commands?.has('importTextContent')) throw new Error('E2E import unavailable');
+      const loaded = await commands.invoke('importTextContent', name, content, '');
+      if (!isCurrent()) return { loaded: false };
+      return { loaded: loaded === true, context: current.readContext() };
+    },
+    setLayout: mode => {
+      if (typeof globalThis.setLayoutMode !== 'function') throw new Error('E2E layout unavailable');
+      globalThis.setLayoutMode(mode, false);
+    },
+    setVisualEditing: options => {
+      const editor = getEditor();
+      if (!editor?.virtualEditor) throw new Error('E2E editor unavailable');
+      if (options.code !== undefined) {
+        editor.virtualEditor.setHybridCodeVisualEditing?.(options.code);
+        localStorage.setItem('md_editor_code_visual_editing', options.code ? 'true' : 'false');
+      }
+      if (options.table !== undefined) {
+        editor.virtualEditor.setHybridTableVisualEditing?.(options.table);
+        localStorage.setItem('md_editor_table_visual_editing', options.table ? 'true' : 'false');
+      }
+    },
+    focus: () => getEditor().focus({ preventScroll: true }),
+    select: position => getEditor().setSelectionRange(position, position),
+    scroll: (position, behavior, ratio) => getEditor().virtualEditor.scrollPositionIntoView?.(position, behavior, ratio),
+    findText: (query, from, options) => getEditor().virtualEditor.findText?.(query, from, options),
+    clearStorage: () => localStorage.clear(),
+    now: () => performance.now(),
+    schedule: (callback, ms) => setTimeout(callback, ms),
+    cancel: id => clearTimeout(id),
+    requestFrame: callback => requestAnimationFrame(callback),
+    cancelFrame: id => cancelAnimationFrame(id)
+  };
+}
+
 export function installMarkdownEditorE2EBridge() {
   if (!isE2EEnabled() || globalThis.__markdownEditorE2E) return null;
-  const bridge = Object.freeze({
-    loadMarkdown,
-    setLayout,
-    setVisualEditing,
-    revealPosition,
-    revealText,
-    waitForIdle,
-    snapshot,
-    clearStorage() {
-      localStorage.clear();
-      return true;
-    },
-    getEditorValue() {
-      return getEditor()?.value || '';
-    }
-  });
-  Object.defineProperty(globalThis, '__markdownEditorE2E', {
-    configurable: true,
-    value: bridge
-  });
+  if (!providers) throw new Error('E2E providers unavailable');
+  // Existing method names delegate to the sole semantic owner.
+  const bridge = createE2EQueryAPI(createBrowserPorts(providers));
+  previousDescriptor = Object.getOwnPropertyDescriptor(globalThis, '__markdownEditorE2E');
+  try {
+    Object.defineProperty(globalThis, '__markdownEditorE2E', { configurable: true, value: bridge });
+    installed = bridge;
+  } catch (_) { bridge.destroy(); previousDescriptor = null; throw new Error('E2E installation unavailable'); }
   return bridge;
+}
+
+export function destroyMarkdownEditorE2EBridge() {
+  const bridge = installed;
+  installed = null;
+  providers = null;
+  if (!bridge) return;
+  bridge.destroy();
+  let restored = true;
+  try {
+    if (Object.getOwnPropertyDescriptor(globalThis, '__markdownEditorE2E')?.value === bridge) {
+      if (previousDescriptor) Object.defineProperty(globalThis, '__markdownEditorE2E', previousDescriptor);
+      else delete globalThis.__markdownEditorE2E;
+    }
+  } catch (_) { restored = false; }
+  finally { previousDescriptor = null; }
+  // A locked host slot must not block application feature teardown; its owner is already terminal.
+  return restored;
 }

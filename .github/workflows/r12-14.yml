@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-08 unified telemetry lifecycle and resource disposal regression · ${{ github.sha }}
+run-name: R15-09 public semantic E2E queries and bounded actions regression · ${{ github.sha }}
 
 on:
   push:
@@ -258,6 +258,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-telemetry-lifecycle.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-lifecycle.log"
+
+      - name: R15-09 public E2E query DTOs, stale actions and wait disposal
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-e2e-query-api.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/e2e-query-api.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

@@ -60,7 +60,7 @@ import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
 import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler, createSelectionSyncController } from './features/sync/index.js';
-import { installMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
+import { configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
 import {
   createFolderTreeController,
   createFolderTreeState,
@@ -722,6 +722,7 @@ async function loadAppModules() {
 
   let documentFeaturesDestroyed = false;
   const destroyDocumentFeatures = () => {
+    destroyMarkdownEditorE2EBridge();
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
     destroyImportFeature();
@@ -1553,6 +1554,13 @@ async function loadAppModules() {
       virtualPreview: previewController?.getVirtualStats?.() || null,
       backgroundTasks: backgroundTaskScheduler.getStats().pending
     }));
+    configureMarkdownEditorE2EPorts({
+      readContext: () => {
+        const state = documentModel.getState();
+        return { documentId: state.documentId, generation: state.generation, version: state.version };
+      },
+      readPreviewStats: () => previewController?.getVirtualStats?.() || null
+    });
     closeSavePort = createCloseSavePort();
     closeSaveController = createCloseSaveController({
       saveController,
@@ -1801,6 +1809,7 @@ loadAppModules().then(() => {
     details: { documentReadyState: document.readyState }
   });
 }).catch((error) => {
+  destroyMarkdownEditorE2EBridge();
   if (import.meta.env.DEV) destroyPerformanceTelemetry();
   destroyImportFeature();
   void dropImportController.destroy();

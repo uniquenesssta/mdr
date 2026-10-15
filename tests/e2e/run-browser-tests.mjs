@@ -1813,6 +1813,39 @@ async function runAppSuite() {
       await setAppLayout(browser.page, 'hybrid');
     });
 
+    await test('application public E2E queries return readonly semantic data without feature objects', async () => {
+      await loadAppFixture(browser.page);
+      const result = await browser.page.evaluate(`(async () => {
+        const api=window.__markdownEditorE2E;
+        const before=api.snapshot();
+        const deeplyReadonly=value=>value===null||typeof value!=='object'
+          ? typeof value!=='function'
+          : Object.isFrozen(value)&&(Array.isArray(value)||Object.getPrototypeOf(value)===Object.prototype)
+            &&Object.values(value).every(deeplyReadonly);
+        const states=api.getComponentStates(),preview=api.getPreviewStats();
+        const readonly=deeplyReadonly(before)&&deeplyReadonly(states)&&deeplyReadonly(preview);
+        const noDetails=states.every(value=>!('details' in value)&&!('model' in value)&&!('dom' in value));
+        const blocked=states.length===0||Reflect.set(states[0],'mode','external-mutation')===false;
+        const querySnapshot=api.snapshot();
+        const layout=await api.setLayout('preview');
+        const reveal=await api.revealText('selection alpha',{preserveSelection:true});
+        const idle=await api.waitForIdle();
+        const after=api.snapshot();
+        await api.setLayout('hybrid');
+        return {readonly,noDetails,blocked,layout,reveal,idle,preview,
+          unchangedByQuery:before.documentId===querySnapshot.documentId&&before.documentGeneration===querySnapshot.documentGeneration
+            &&before.documentVersion===querySnapshot.documentVersion&&before.selectionStart===querySnapshot.selectionStart&&before.selectionEnd===querySnapshot.selectionEnd,
+          identityStable:before.documentId===after.documentId&&before.documentGeneration===after.documentGeneration&&before.documentVersion===after.documentVersion,
+          documentLength:after.documentLength,textLength:api.getEditorValue().length,state:api.getState()};
+      })()`);
+      assert.equal(result.readonly,true);assert.equal(result.noDetails,true);assert.equal(result.blocked,true);
+      assert.equal(result.unchangedByQuery,true);assert.equal(result.identityStable,true);assert.equal(result.layout,'preview');
+      assert.ok(result.reveal>=0);assert.equal(result.idle,true);assert.equal(result.documentLength,APP_FIXTURE.length);assert.equal(result.textLength,APP_FIXTURE.length);
+      assert.equal(typeof result.preview.active,'boolean');assert.ok(Number.isFinite(result.preview.blocks));
+      assert.equal(result.state.activeOperations,0);assert.equal(result.state.pendingWaits,0);assert.equal(result.state.busy,false);
+      await writeFile(join(artifactRoot,'r15-09-query-api.json'),JSON.stringify(result,null,2));
+    });
+
     await runExportCharacterization({ page: browser.page, test, artifactRoot, applicationHost,
       loadMarkdown: source => browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)}, {layout:'both',codeVisualEditing:true,tableVisualEditing:true})`)
     });

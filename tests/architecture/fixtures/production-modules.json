@@ -3531,7 +3531,7 @@
       "src/runtime/e2e-bridge.js",
       "esm-module",
       "test-support",
-      "Conditional E2E application control and snapshot bridge.",
+      "Opt-in browser adapter for public E2E semantics, explicit application providers and identity-safe teardown.",
       "e2e-bridge",
       "conditional-runtime",
       "retain-until-final-switch",
@@ -5623,6 +5623,26 @@
       "telemetry",
       "Single automatic telemetry lifecycle, bounded owned listeners/timers/frames/observers, idempotent start and full teardown.",
       "telemetry-lifecycle",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/e2e/index.js",
+      "esm-module",
+      "test-support",
+      "Public semantic E2E capability entry.",
+      "e2e-query-api",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/e2e/e2e-query-api.js",
+      "esm-module",
+      "test-support",
+      "Detached frozen query DTOs, document identity barriers, bounded actions and owned wait disposal.",
+      "e2e-query-api",
       "explicit-instance",
       "retain",
       false
