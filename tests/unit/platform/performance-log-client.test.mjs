@@ -62,7 +62,7 @@ test('desktop platform maps LogsPort through the dedicated client and performanc
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
   const performance = await readFile(new URL('../../../src/runtime/performance.js', import.meta.url), 'utf8');
   assert.match(desktop, /logs: performanceLogClient/);
-  assert.match(performance, /platformLogs\.writePerformance\(entries\)/);
+  assert.match(performance, /platformLogs\.writePerformance\(entries, meta\)/);
   assert.doesNotMatch(performance, /markdownEditorNative/);
 });
 

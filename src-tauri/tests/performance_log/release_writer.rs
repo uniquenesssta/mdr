@@ -1,5 +1,7 @@
 //! Compiled by the Windows CI rustc harness with debug assertions disabled.
 //! Uses the production Paths/Writer/Redaction files, not a mock or Tauri GUI substitute.
+#[path = "../../src/performance_log/batch.rs"]
+mod batch;
 #[path = "../../src/performance_log/paths.rs"]
 mod paths;
 #[path = "../../src/performance_log/redaction.rs"]
@@ -25,6 +27,9 @@ fn release_writer_never_resolves_paths_or_writes_even_for_oversized_input() {
         writer::append_values(&vec![serde_json::Value::Null; 501]).unwrap(),
         std::path::PathBuf::new()
     );
+    let receipt = batch::submit(vec![serde_json::Value::Null; 501], "release-batch-1", 0, 1, 501, false).unwrap();
+    assert_eq!(receipt["state"], "disabled");
+    assert_eq!(receipt["acceptedCount"], 0);
     assert!(
         !directory.exists(),
         "release logging must not create a directory or file"

@@ -1,4 +1,4 @@
-> R15-06首轮7617f5c / CI38507035518未通过：Snapshot50/51、全仓2423/2424、前端1416/1417；合法scrollSourceSide被误脱敏，main703542字节超过700000原门槛，构建失败继而阻断浏览器/WebView。修复仅补前端/原生一致的精确侧别枚举与DEV快照按需装配，原断言/门槛保持，新增1项安全/非法枚举回归，共52项快照契约待同分支agent/r15-stage精确提交Windows复验。R15-05验收保留；15.7未开始，A04未关闭。 [06修复记录](docs/R15-06-DETAILS.md)。
+> R15-06正式收尾：c871637 / CI38588143325七组Windows及全部步骤通过，Snapshot52、全仓2425/2425、前端1418/1418、长任务39、Buffer41、脱敏33+实际payload3、Recorder22、目录24、浏览器11+67及Rust281；三份下载归档摘要与同提交最终accepted=true已核验，首轮失败/修复保留。 当前在唯一agent/r15-stage实施15.7 Native Sink：单请求与有界超时查询、累计前缀确认、整批预校验、部分帧回滚、未知结果隔离、最多八次后缀重试及16MiB进程日志预算；release在路径与文件访问前禁用。07待精确提交Windows验收，A04未提前关闭；完整Runtime生命周期仍归15.8。 [07详情](docs/R15-07-DETAILS.md)。
 
 > 当前平台范围（2026-09-29，用户明确要求）：全部阶段只验收 Windows；取消 Linux/macOS 验证要求。以 [Windows 验证策略](docs/WINDOWS_VALIDATION_POLICY.md) 为准，历史多平台记录只保留作历史证据。
 

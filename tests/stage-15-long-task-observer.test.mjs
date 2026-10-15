@@ -28,7 +28,7 @@ test('R15-05 public observer owns one generation without globals timers DOM or f
   assert.match(read('src/features/telemetry/index.js'),/export \{ createLongTaskObserver \}/);
   const source=read('src/features/telemetry/long-task-observer.js');
   assert.doesNotMatch(source,/\b(?:window|document|globalThis)\.|setTimeout|setInterval|node:fs|@tauri|writePerformance/);
-  const runtime=read('src/runtime/performance.js');assert.match(runtime,/const longTaskObserver = createLongTaskObserver/);
+  const runtime=read('src/runtime/performance.js');assert.match(runtime,/longTaskObserver = createLongTaskObserver/);
   assert.doesNotMatch(runtime,/longTaskObserver = new PerformanceObserver|observe\(\{ type: 'longtask'/);
 });
 for(const name of ['getObserver','record','isEnabled','onError'])test('R15-05 rejects invalid '+name+' dependency',()=>{

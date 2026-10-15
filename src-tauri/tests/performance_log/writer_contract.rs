@@ -144,8 +144,10 @@ fn writer_contract_child() {
         "partial" => {
             assert!(write_performance_logs(vec![json!({"count": 1}), sized_entry(64 * 1024 + 1)]).is_err());
             let path = write_performance_logs(vec![]).unwrap();
+            assert!(!Path::new(&path).exists());
+            write_performance_logs(vec![json!({"count": 1})]).unwrap();
             assert_eq!(read_rows(&path), vec![json!({"count": 1})]);
-            // A04 remains explicitly deferred: this task preserves partial-batch semantics.
+            // R15-07 prevalidates the entire legacy batch; acknowledged I/O faults use the new protocol.
         }
         "directory" => {
             fs::create_dir_all(directory.parent().unwrap()).unwrap();

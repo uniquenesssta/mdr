@@ -15,7 +15,10 @@ export function createPerformanceLogClient(options = {}) {
   const invoke = options.invoke;
   assertFunction(invoke, 'performance-log client requires an invoke function');
 
-  async function writePerformance(entries) {
+  async function writePerformance(entries, batch) {
+    if (batch) return invoke('write_performance_log_batch', {
+      entries, batchId: batch.batchId, offset: batch.offset, attempt: batch.attempt, total: batch.total, query: batch.query === true
+    }, {}, { record: false });
     return invoke('write_performance_logs', { entries }, {}, { record: false });
   }
 

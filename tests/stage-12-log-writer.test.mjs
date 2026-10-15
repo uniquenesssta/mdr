@@ -24,15 +24,23 @@ test('R12-15 has one path cache and one write lock and redacts before serializin
   assert.doesNotMatch(paths, /OpenOptions|redact_value|Mutex/);
   assert.doesNotMatch(writer, /env::|SystemTime|static LOG_FILE_PATH/);
   const append = writer.slice(writer.indexOf('pub(super) fn append_values'));
-  const order = ['if !cfg!(debug_assertions)', 'if values.is_empty()', 'values.len() > MAX_BATCH_ENTRIES',
-    'let file_path = log_file_path()?', 'write_lock()', 'OpenOptions::new()', 'let redacted = redact_value(value)',
-    'serde_json::to_string(&redacted)', 'line.len() > MAX_ENTRY_BYTES', 'file.write_all', 'file.flush()'];
+  // R15-07 prevalidates the entire batch before opening the file; the original
+  // redact -> serialize -> size -> write -> flush obligations now span helpers.
+  const order = ['if !cfg!(debug_assertions)', 'if values.is_empty()', 'prepare(values, MAX_BATCH_ENTRIES)?',
+    'let file_path = log_file_path()?', 'write_lock()', 'OpenOptions::new()', 'append_prepared(&mut file, &frames)'];
   let previous = -1;
   for (const marker of order) {
     const next = append.indexOf(marker);
     assert.ok(next > previous, `missing or reordered boundary: ${marker}`);
     previous = next;
   }
+  const prepare = writer.slice(writer.indexOf('pub(super) fn prepare'), writer.indexOf('pub(super) fn append_prepared'));
+  previous = -1;
+  for (const marker of ['values.len() > limit', 'redact_value(value)', 'serde_json::to_string(&redacted)', 'line.len() > MAX_ENTRY_BYTES', 'bytes > MAX_BATCH_BYTES', 'frames.push(frame)']) {
+    const next = prepare.indexOf(marker); assert.ok(next > previous, marker); previous = next;
+  }
+  assert.match(writer, /self.write_all\(bytes\)/); assert.match(writer, /self.flush\(\)/);
+  assert.match(writer, /file.frame\(frame\)/); assert.match(writer, /file.truncate\(start\)/); assert.match(writer, /file.finish\(\)/);
   assert.match(writer, /const MAX_BATCH_ENTRIES: usize = 500;/);
   assert.match(writer, /const MAX_ENTRY_BYTES: usize = 64 \* 1024;/);
 });

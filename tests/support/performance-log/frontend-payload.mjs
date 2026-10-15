@@ -1,4 +1,4 @@
-import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder } from '../../../src/features/telemetry/index.js';
+import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink } from '../../../src/features/telemetry/index.js';
 // Exercise the actual runtime and desktop adapter without installing DOM observers.
 // Rust executes this producer too; no hand-written replacement payload is used.
 import { readFile } from 'node:fs/promises';
@@ -10,16 +10,17 @@ import { createPerformanceLogClient } from '../../../src/platform/desktop/perfor
 export const secrets = ['AUDIT_BODY_SECRET', 'AUDIT_TOKEN_SECRET', 'AUDIT_ERROR_SECRET', 'C:\\PrivateRoot', '/private/root', 'AUDIT_STACK_SECRET', 'AUDIT_CAUSE_SECRET', 'AUDIT_PASSWORD_SECRET', 'AUDIT_GETTER_SECRET'];
 export async function producePayload() {
   const path = new URL('../../../src/runtime/performance.js', import.meta.url);
-  const source = (await readFile(path, 'utf8')).replace("import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder } from '../features/telemetry/index.js';", '')
+  const source = (await readFile(path, 'utf8')).replace("import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink } from '../features/telemetry/index.js';", '')
     .replaceAll('export function ', 'function ')
     .replaceAll('import.meta.env.DEV', 'false');
-  const context = vm.createContext({ createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, crypto: { randomUUID }, console, performance, setTimeout, clearTimeout });
+  const context = vm.createContext({ createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink, crypto: { randomUUID }, console, performance, setTimeout, clearTimeout });
   vm.runInContext(source + '\n;globalThis.runtime = {configurePerformancePlatform, record, diagnostic, measure, flush};', context, {filename: fileURLToPath(path)});
-  const batches = [];
+  const batches = [], requests = [];
   const logs = createPerformanceLogClient({ invoke: async (command, args, details, options) => {
-    if (command !== 'write_performance_logs' || options.record !== false) throw new Error('Wrong log command boundary');
+    if (command !== 'write_performance_log_batch' || options.record !== false) throw new Error('Wrong log command boundary');
+    requests.push(JSON.parse(JSON.stringify(args)));
     batches.push(JSON.parse(JSON.stringify(args.entries)));
-    return 'test-log-path';
+    return {batchId:args.batchId,attempt:args.attempt,acceptedCount:args.total,state:'complete'};
   }});
   const runtime = context.runtime;
   runtime.configurePerformancePlatform({logs, enabled: true});
@@ -43,7 +44,7 @@ export async function producePayload() {
   runtime.diagnostic('runtime.error', {category:'runtime.error', status:'warning', details:{message:secrets[2], nested}});
   try { runtime.measure('runtime.error', () => { throw new Error(secrets[2]); }, {category:'runtime.error'}); } catch {}
   await runtime.flush();
-  return { entries: batches.flat(), secrets };
+  return { entries: batches.flat(), secrets, requests };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   console.log(JSON.stringify(await producePayload()));

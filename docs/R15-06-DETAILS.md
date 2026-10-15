@@ -65,3 +65,18 @@ flowchart TD
 修复接口依据：锁文件Vite7.3.6未改，Context7查询Vite7官方[env-and-mode](https://v7.vite.dev/guide/env-and-mode)确认DEV静态替换及开发分支裁剪；未将文档语义当成实际包体通过证据。Mermaid Chart已更新真实DEV/测试手动入口与单一所有者装配图。当前本地功能/构建/浏览器/Rust不执行，全部等待Windows。
 
 修复最终静态复核：四项门禁通过；7个变更JS/MJS语法、165相对链接、93风险来源SHA通过。原51快照及所有前序场景名称/顺序保持，注册总211；工作流、阈值、依赖锁、558模块清单与43目录指纹原文件逐字节保持。所有本地功能回调、构建、实际浏览器及Rust均未执行，修复仍待Windows验收。
+
+
+## 正式验收（2026-10-15）
+
+R15-06正式收尾：c871637 / CI38588143325七组Windows及全部步骤通过，Snapshot52、全仓2425/2425、前端1418/1418、长任务39、Buffer41、脱敏33+实际payload3、Recorder22、目录24、浏览器11+67及Rust281；三份下载归档摘要与同提交最终accepted=true已核验，首轮失败/修复保留。
+
+精确提交：c871637dbc96bbd43aa12f324e90adeedf18b506；[Windows CI38588143325](https://github.com/uniquenesssta/mdr/actions/runs/38588143325)。逐项核对七组作业及全部执行步骤成功。main699.39kB通过原700000字节门槛；目录351个Node文件、16目录。
+
+|归档|ID|下载SHA256|
+|---|---|---|
+|全仓|11906785868|67484ba214a78bf57c05f983bfc1ca3e2d8c8d2236cec1a52ea86e8c592f3c63|
+|最终汇总|11906616954|55e5160231841e10d6ae4c20ddf2f293b27311f92b51b50416ee19313056ec08|
+|前端|11906431808|4113d55fbf582014b85d2c49717c046cc6f42c2b13063cac2c34dcd99eec34c2|
+
+closeout-verification.json确认同一提交与accepted=true；首轮7617f5c/run38507035518拒绝记录保持。06收尾不表示A04原生协议已经修复；15.7接收后仍需自己的Windows证据。

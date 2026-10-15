@@ -19,7 +19,7 @@ test('R15-02 owns one pure Recorder implementation and runtime consumes its publ
   assert.match(read('src/features/telemetry/index.js'), /export \{ createTelemetryRecorder \}/);
   const runtime = read('src/runtime/performance.js');
   assert.match(runtime, /from '..\/features\/telemetry\/index.js'/);
-  assert.match(runtime, /const \{ record, measure, createEntry: makeEntry, normalizeDetails: safeDetails \} = recorder/);
+  for (const method of ['record','measure','createEntry','normalizeDetails']) assert.ok(runtime.includes('recorder.'+method));
   assert.doesNotMatch(runtime, /function (?:record|measure|makeEntry|safeDetails)\(/);
 });
 

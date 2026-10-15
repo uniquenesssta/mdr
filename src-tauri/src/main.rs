@@ -34,6 +34,7 @@ pub fn run() {
             local_file::commands::write_local_binary_file,
             local_file::commands::initial_file_path,
             performance_log::command::write_performance_logs,
+            performance_log::command::write_performance_log_batch,
             web_fetch::command::cancel_fetch_url
         ])
         .run(tauri::generate_context!());

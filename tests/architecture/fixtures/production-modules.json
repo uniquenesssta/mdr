@@ -4441,7 +4441,7 @@
       "src-tauri/src/performance_log/writer.rs",
       "rust-module",
       "telemetry",
-      "Debug-only serialized JSONL append with batch/byte limits, redaction and write error propagation.",
+      "Single serialized JSONL append and rollback boundary, full prevalidation, process file cap and uncertain-write isolation.",
       "performance-log-write-lock",
       "per-batch-append",
       "retain",
@@ -5594,6 +5594,26 @@
       "Fixed scalar schema, bounded DOM traversal, single-read memory/queue/viewport/sync statistics and owned recurring snapshot timer with explicit sampling/disposal; injected browser ports, no globals or file I/O.",
       "telemetry-runtime-snapshot",
       "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/telemetry/native-log-sink.js",
+      "esm-module",
+      "telemetry",
+      "Single acknowledged native request, bounded timeout and one read-only recovery query; Buffer owns retries.",
+      "telemetry-native-sink",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/performance_log/batch.rs",
+      "rust-module",
+      "telemetry",
+      "Bounded process-local receipt ledger, cumulative prefix validation, replay protection and native batch submission.",
+      "performance-log-batch-ledger",
+      "process-session",
       "retain",
       false
     ]

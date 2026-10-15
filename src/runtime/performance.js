@@ -1,4 +1,4 @@
-import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder } from '../features/telemetry/index.js';
+import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink } from '../features/telemetry/index.js';
 
 const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const diagnosticStates = new Map();
@@ -11,30 +11,36 @@ let platformLogs = null;
 let platformLogsEnabled = false;
 let runtimeStatsProvider = () => ({});
 
-let buffer;
-const recorder = createTelemetryRecorder({
-  sessionId, now: timestampMs, monotonicNow: () => performance.now(),
-  emit: entry => buffer.enqueue(entry), aggregate: (operation, options) => buffer.aggregate(operation, options)
-});
-const { record, measure, createEntry: makeEntry, normalizeDetails: safeDetails } = recorder;
-buffer = createAggregationBuffer({ now: timestampMs, createEntry: makeEntry, batchPrefix: sessionId,
-  schedule: (callback, delay) => setTimeout(callback, delay), cancel: timer => clearTimeout(timer),
-  onError: marker => console.warn('Performance log flush failed:', marker),
-  async writeBatch(entries, meta) {
-    const path = await platformLogs.writePerformance(entries);
-    return { batchId: meta.batchId, attempt: meta.attempt, acceptedCount: meta.offset + entries.length, logPath: path };
-  }
-});
-const drainAggregates = () => buffer.drainAggregates();
-const flush = () => buffer.flush();
-export function getPerformanceBufferStats() { return buffer.getStats(); }
+let buffer, recorder, nativeLogSink, longTaskObserver;
+function initializeTelemetry() {
+  if (recorder) return;
+  recorder = createTelemetryRecorder({
+    sessionId, now: timestampMs, monotonicNow: () => performance.now(),
+    emit: entry => buffer.enqueue(entry), aggregate: (operation, options) => buffer.aggregate(operation, options)
+  });
+  nativeLogSink = createNativeLogSink({ write: (entries, meta) => platformLogs.writePerformance(entries, meta),
+    schedule: (callback, delay) => setTimeout(callback, delay), cancel: timer => clearTimeout(timer),
+    isEnabled: () => platformLogsEnabled });
+  buffer = createAggregationBuffer({ now: timestampMs, createEntry: recorder.createEntry, batchPrefix: sessionId,
+    schedule: (callback, delay) => setTimeout(callback, delay), cancel: timer => clearTimeout(timer),
+    onError: marker => console.warn('Performance log flush failed:', marker),
+    writeBatch: (entries, meta) => nativeLogSink.writeBatch(entries, meta)
+  });
+  longTaskObserver = createLongTaskObserver({
+    getObserver: () => typeof PerformanceObserver === 'undefined' ? null : PerformanceObserver,
+    isEnabled: () => import.meta.env.DEV && platformLogsEnabled, record,
+    onError: phase => console.warn('Performance long-task observer failed:', phase)
+  });
+  buffer.setEnabled(platformLogsEnabled);
+}
+const record = (...args) => { initializeTelemetry(); return recorder.record(...args); };
+const measure = (...args) => { initializeTelemetry(); return recorder.measure(...args); };
+const makeEntry = (...args) => { initializeTelemetry(); return recorder.createEntry(...args); };
+const safeDetails = (...args) => { initializeTelemetry(); return recorder.normalizeDetails(...args); };
+const drainAggregates = () => { initializeTelemetry(); return buffer.drainAggregates(); };
+const flush = () => { initializeTelemetry(); return buffer.flush(); };
+export function getPerformanceBufferStats() { initializeTelemetry(); return buffer.getStats(); }
 
-const longTaskObserver = createLongTaskObserver({
-  getObserver: () => typeof PerformanceObserver === 'undefined' ? null : PerformanceObserver,
-  isEnabled: () => import.meta.env.DEV && platformLogsEnabled,
-  record,
-  onError: phase => console.warn('Performance long-task observer failed:', phase)
-});
 let runtimeSnapshotRecorder = null;
 function getRuntimeSnapshotRecorder() {
   if (!runtimeSnapshotRecorder) runtimeSnapshotRecorder = createRuntimeSnapshotRecorder({
@@ -63,6 +69,9 @@ export function configurePerformancePlatform({ logs, enabled = false } = {}) {
   }
   platformLogs = logs;
   platformLogsEnabled = Boolean(enabled);
+  buffer?.setEnabled(platformLogsEnabled);
+  if (!import.meta.env.DEV) return;
+  initializeTelemetry();
   buffer.setEnabled(platformLogsEnabled);
   if (platformLogsEnabled) {
     longTaskObserver.start();
@@ -242,6 +251,7 @@ function installInteractionTracking() {
 }
 
 function installPerformanceObservers() {
+  initializeTelemetry();
   longTaskObserver.start();
   if (typeof PerformanceObserver === 'undefined') return;
 

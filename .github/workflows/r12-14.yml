@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-06 bounded runtime snapshot sampling and timer disposal regression · ${{ github.sha }}
+run-name: R15-07 native acknowledged batches and bounded recovery regression · ${{ github.sha }}
 
 on:
   push:
@@ -249,6 +249,11 @@ jobs:
         shell: bash
         run: node --test tests/stage-15-runtime-snapshot.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-snapshot.log"
 
+      - name: R15-07 Native Sink receipts, timeout recovery and retry limits
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-native-log-sink.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/telemetry-native-sink.log"
+
       - name: Full Node regression
         if: ${{ !cancelled() }}
         run: npm test 2>&1 | tee "$RUNNER_TEMP/r12-14/node.log"
@@ -404,6 +409,12 @@ jobs:
           grep -Fq 'test result: ok. 9 passed; 0 failed' "$RUNNER_TEMP/r12-14/writer-after.log"
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::paths::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/log-paths.log"
           grep -Fq 'test result: ok. 1 passed; 0 failed' "$RUNNER_TEMP/r12-14/log-paths.log"
+      - name: R15-07 real JSONL partial append, receipt loss and Windows denial
+        if: ${{ !cancelled() }}
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::batch_contract_tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/r12-14/batch-confirmation.log"
+          grep -Fq 'test result: ok. 17 passed; 0 failed' "$RUNNER_TEMP/r12-14/batch-confirmation.log"
+
       - name: R12-15 release writer creates no log files
         if: ${{ !cancelled() }}
         run: node scripts/ci/verify-release-log-writer.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/release-writer.log"

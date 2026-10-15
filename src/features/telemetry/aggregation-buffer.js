@@ -119,7 +119,7 @@ export function createAggregationBuffer({ now, createEntry, writeBatch, schedule
       batches.delete(batch.id); completed.set(batch.id, {attempt:batch.attempt,acceptedCount:batch.offset});
       if (completed.size > 200) completed.delete(completed.keys().next().value);
       failures = 0; nextAttemptAt = 0; lastError = '';
-    } else { batch.state = 'ready'; backoff(); }
+    } else { batch.state = batch.attempt >= 8 ? 'unconfirmed' : 'ready'; backoff(); }
     return true;
   }
   function resolveBatch(ack) {

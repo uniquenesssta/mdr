@@ -2,6 +2,7 @@ pub(crate) mod command;
 mod lifecycle;
 pub use lifecycle::record_lifecycle;
 
+mod batch;
 mod paths;
 mod redaction;
 mod writer;
@@ -74,3 +75,7 @@ mod writer_contract_tests;
 #[cfg(all(test, debug_assertions))]
 #[path = "../../tests/performance_log/lifecycle_contract.rs"]
 mod lifecycle_contract_tests;
+
+#[cfg(all(test, debug_assertions))]
+#[path = "../../tests/performance_log/batch_contract.rs"]
+mod batch_contract_tests;

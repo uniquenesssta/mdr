@@ -2,11 +2,11 @@ import { definePlatformPort } from './port-contract.js';
 
 /**
  * @typedef {Object} LogsPortImplementation
- * @property {(entries: object[]) => Promise<string>} writePerformance
+ * @property {(entries: object[], batch?: object) => Promise<string|object>} writePerformance
  * @property {(() => void | Promise<void>)=} destroy
  */
 
-/** Durable performance-log transport contract. */
+/** Debug transport: legacy path result, or explicit process-local batch receipt (not crash durability). */
 export const LOGS_PORT_METHODS = Object.freeze(['writePerformance']);
 
 /** @param {LogsPortImplementation} implementation */

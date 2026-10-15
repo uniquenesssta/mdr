@@ -16,8 +16,9 @@ test('R12-17 preserves all nineteen original commands plus the R13-S01 cancellat
   const before = registry(frozen('src-tauri/src/main.rs'));
   const all = registry(await read('src-tauri/src/main.rs'));
   assert.equal(all.at(-1), 'web_fetch::command::cancel_fetch_url');
-  assert.equal(new Set(all).size, 20);
-  const after = all.slice(0, -1);
+  assert.equal(new Set(all).size, 21);
+  assert.equal(all.at(-2), 'performance_log::command::write_performance_log_batch');
+  const after = all.slice(0, -2);
   assert.equal(before.length, 19);
   assert.deepEqual(after.map(p => p.split('::').at(-1)), before.map(p => p.split('::').at(-1)));
   assert.equal(new Set(after).size, 19);
@@ -35,7 +36,7 @@ test('R12-17 preserves command signatures payloads and asynchronous error propag
       assert.equal((after.match(/#\[tauri::command\]/g) || []).length, 2);
     } else {
       assert.equal(rustSignature(rustFunction(after, name)), rustSignature(rustFunction(before, name)), name);
-      assert.equal((after.match(/#\[tauri::command\]/g) || []).length, 1);
+      assert.equal((after.match(/#\[tauri::command\]/g) || []).length, module === 'performance_log' ? 2 : 1);
     }
   }
   await assertCurrentValidation();

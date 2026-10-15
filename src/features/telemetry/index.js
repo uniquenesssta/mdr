@@ -3,3 +3,4 @@ export { redactTelemetryDetails, redactTelemetryLabel, redactTelemetryIdentity }
 export { createAggregationBuffer } from './aggregation-buffer.js';
 export { createLongTaskObserver } from './long-task-observer.js';
 export { createRuntimeSnapshotRecorder } from './runtime-snapshot-recorder.js';
+export { createNativeLogSink } from './native-log-sink.js';
