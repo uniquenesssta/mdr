@@ -89,6 +89,15 @@ test('R15-09 paused RAF is bounded independently by the owned deadline',async t=
 test('R15-09 layout and visual actions retain legacy return values and normalize input',async t=>{
   const f=fixture(t);assert.equal(await f.complete(f.api.setLayout('invalid')), 'both');assert.equal(await f.complete(f.api.setVisualEditing({code:false,table:true})),undefined);assert.deepEqual(f.calls,[['layout','both'],['visual',{code:false,table:true}]]);f.empty();
 });
+test('R15-09 current layout is idempotent and still waits for real idle',async t=>{
+  const f=fixture(t),waiting=f.api.setLayout('hybrid');assert.equal(f.api.getState().busy,true);
+  assert.equal(await f.complete(waiting),'hybrid');assert.equal(f.calls.length,0);f.empty();
+});
+test('R15-09 current layout with pending work still fails at the original deadline',async t=>{
+  const f=fixture(t);f.preview.pendingEnhancements=1;
+  const waiting=f.api.setLayout('hybrid',{timeoutMs:250}),rejected=assert.rejects(waiting,/operation timed out/);
+  await f.complete(rejected);assert.equal(f.calls.length,0);f.empty();
+});
 test('R15-09 reveal clamps position and sequences focus selection scroll with copied options',async t=>{
   const f=fixture(t),options={viewportRatio:2,behavior:'smooth'};const waiting=f.api.revealPosition(999,options);options.viewportRatio=0;assert.equal(await f.complete(waiting),10);assert.deepEqual(f.calls,[['focus'],['select',10],['scroll',10,'smooth',1]]);f.empty();
 });
@@ -116,6 +125,21 @@ test('R15-09 successful import intentionally adopts its returned identity then u
 });
 test('R15-09 load chooses first non-Mermaid fence when no selection is supplied',async t=>{
   const f=fixture(t),source='```mermaid\nA-->B\n```\n```js\nconst x=1\n```';const result=await f.complete(f.api.loadMarkdown(source));assert.equal(result.selectionStart,source.indexOf('const x'));f.empty();
+});
+for(const [name,source,target] of [
+  ['longer Mermaid fence containing shorter fences','````mermaid\n```js\ninside\n```\n````\n```js\noutside\n```','outside'],
+  ['tilde Mermaid fence and indented code','~~~mermaid\nA-->B\n~~~\n  ~~~js\noutside\n  ~~~','outside'],
+  ['inline backticks before a real fence','text ```js\ninline\n```js\noutside\n```','outside'],
+  ['unclosed Mermaid fence','```mermaid\nA-->B\n```js\ninside',null],
+  ['Mermaid-only document','```mermaid\nA-->B\n```',null]
+])test('R15-09 default focus handles '+name,async t=>{
+  const f=fixture(t),result=await f.complete(f.api.loadMarkdown(source));
+  assert.equal(result.selectionStart,target===null?0:source.indexOf(target));f.empty();
+});
+test('R15-09 load preserves an already selected layout without replaying its command',async t=>{
+  const f=fixture(t),result=await f.complete(f.api.loadMarkdown('body',{layout:'hybrid'}));
+  assert.equal(result.layout,'hybrid');assert.equal(result.documentLength,4);
+  assert.equal(f.calls.some(row=>row[0]==='layout'),false);f.empty();
 });
 test('R15-09 load accepts formal editor newline normalization and locates normalized focus',async t=>{
   const f=fixture(t);const result=await f.complete(f.api.loadMarkdown('title\r\nbody\rrest',{focusText:'rest'}));assert.equal(f.api.getEditorValue(),'title\nbody\nrest');assert.equal(result.documentLength,15);assert.equal(result.selectionStart,11);f.empty();

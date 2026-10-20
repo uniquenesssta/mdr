@@ -1827,12 +1827,17 @@ async function runAppSuite() {
         const noDetails=states.every(value=>!('details' in value)&&!('model' in value)&&!('dom' in value));
         const blocked=states.length===0||Reflect.set(states[0],'mode','external-mutation')===false;
         const querySnapshot=api.snapshot();
+        const originalLayout=window.setLayoutMode,sameLayoutCommands=[];
+        window.setLayoutMode=function(...args){sameLayoutCommands.push(args[0]);return originalLayout.apply(this,args);};
+        let repeatedLayout;
+        try{repeatedLayout=await api.setLayout(before.layout);}
+        finally{window.setLayoutMode=originalLayout;}
         const layout=await api.setLayout('preview');
         const reveal=await api.revealText('selection alpha',{preserveSelection:true});
         const idle=await api.waitForIdle();
         const after=api.snapshot();
         await api.setLayout('hybrid');
-        return {readonly,noDetails,blocked,layout,reveal,idle,preview,
+        return {readonly,noDetails,blocked,layout,reveal,idle,preview,repeatedLayout,sameLayoutCommands,
           unchangedByQuery:before.documentId===querySnapshot.documentId&&before.documentGeneration===querySnapshot.documentGeneration
             &&before.documentVersion===querySnapshot.documentVersion&&before.selectionStart===querySnapshot.selectionStart&&before.selectionEnd===querySnapshot.selectionEnd,
           identityStable:before.documentId===after.documentId&&before.documentGeneration===after.documentGeneration&&before.documentVersion===after.documentVersion,
@@ -1840,6 +1845,7 @@ async function runAppSuite() {
       })()`);
       assert.equal(result.readonly,true);assert.equal(result.noDetails,true);assert.equal(result.blocked,true);
       assert.equal(result.unchangedByQuery,true);assert.equal(result.identityStable,true);assert.equal(result.layout,'preview');
+      assert.equal(result.repeatedLayout,'hybrid');assert.deepEqual(result.sameLayoutCommands,[]);
       assert.ok(result.reveal>=0);assert.equal(result.idle,true);assert.equal(result.documentLength,APP_FIXTURE.length);assert.equal(result.textLength,APP_FIXTURE.length);
       assert.equal(typeof result.preview.active,'boolean');assert.ok(Number.isFinite(result.preview.blocks));
       assert.equal(result.state.activeOperations,0);assert.equal(result.state.pendingWaits,0);assert.equal(result.state.busy,false);

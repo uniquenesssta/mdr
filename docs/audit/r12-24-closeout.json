@@ -547,7 +547,7 @@
     },
     {
       "path": "src/features/e2e/e2e-query-api.js",
-      "blobSha": "03dd6be8b87024bfdcb943f44eb501a3e9114b8b"
+      "blobSha": "bece12364a4bcd65a005cc376a55868d7f9626a3"
     },
     {
       "path": "src/runtime/e2e-bridge.js",
@@ -555,7 +555,7 @@
     },
     {
       "path": "tests/stage-15-e2e-query-api.test.mjs",
-      "blobSha": "ed1c5d1457d28d72509951013b30e3dcfbbe18e9"
+      "blobSha": "df7cd7139cd10da533269bedcb1d7f4d335822f3"
     }
   ],
   "priorFailures": {
@@ -772,8 +772,8 @@
   },
   "currentSourceReview": {
     "stage": "R15.9",
-    "date": "2026-10-15",
-    "reviewedCommit": "62ad8f37df472e0a9cc970358e99bc4203296f70",
+    "date": "2026-10-20",
+    "reviewedCommit": "5731941ff576bf8dc07b3d080c0179c7219d204f",
     "record": "docs/R15-09-DETAILS.md",
     "status": "R15.8 accepted; R15.9 implemented pending exact-head Windows",
     "priorWindowsRun": 38217129135,
@@ -918,7 +918,7 @@
       "branch": "agent/r15-stage",
       "record": "docs/R15-09-DETAILS.md",
       "status": "implemented-pending-windows",
-      "newScenariosDefined": 59,
+      "newScenariosDefined": 67,
       "newBuiltAppScenariosDefined": 1,
       "productionModuleCount": 563,
       "retainedTelemetryScenarios": 291,
@@ -948,7 +948,26 @@
       },
       "failurePolicy": "Fixed safe errors; context checks at asynchronous boundaries; explicit import identity handoff; owned deadline/timer/RAF cancellation and late result rejection; no cancellation claim for an already dispatched formal import.",
       "localValidation": "Static gates, syntax, source contracts and registration only; Windows functional/build/browser/Rust pending.",
-      "riskReviewedSourceCount": 105
+      "riskReviewedSourceCount": 105,
+      "firstWindowsFailure": {
+        "commit": "5731941ff576bf8dc07b3d080c0179c7219d204f",
+        "run": 38730937138,
+        "queryPassed": 58,
+        "queryTotal": 59,
+        "frontendPassed": 1556,
+        "frontendTotal": 1557,
+        "browserPassed": 66,
+        "browserTotal": 68,
+        "failureRecord": "docs/R15-09-DETAILS.md#首轮失败与修复2026-10-20",
+        "repairStatus": "implemented-pending-exact-commit-windows",
+        "additionalRegressionScenarios": 8,
+        "timeoutsAndBudgetsChanged": false,
+        "frontendArtifact": {
+          "id": 11970925747,
+          "digest": "sha256:d67a0d30abbde55c690caab1e0919beda862f4e497e3fa9a0c45c8855df22d07",
+          "downloadDigestVerified": true
+        }
+      }
     },
     "priorStageAcceptance": {
       "stage": "R15.7",
@@ -11898,6 +11917,18 @@
         "blobSha": "838c4d0f408232920e95e452d7b77701ae2d173f",
         "stage": "R15.9",
         "receiver": "docs/R15-09-DETAILS.md"
+      },
+      {
+        "path": "src/features/e2e/e2e-query-api.js",
+        "blobSha": "03dd6be8b87024bfdcb943f44eb501a3e9114b8b",
+        "stage": "R15.9-repair",
+        "receiver": "docs/R15-09-DETAILS.md#首轮失败与修复2026-10-20"
+      },
+      {
+        "path": "tests/stage-15-e2e-query-api.test.mjs",
+        "blobSha": "ed1c5d1457d28d72509951013b30e3dcfbbe18e9",
+        "stage": "R15.9-repair",
+        "receiver": "docs/R15-09-DETAILS.md#首轮失败与修复2026-10-20"
       }
     ]
   }

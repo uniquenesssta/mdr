@@ -126,11 +126,32 @@ export function createE2EQueryAPI(options = {}) {
     call('scroll',pos,settings.behavior,settings.viewportRatio);check(op);
     for(let i=0;i<3;i++){await frame(op);check(op);}await idle(op,settings);return pos;
   }
+  async function layout(op,mode,settings) {
+    check(op);
+    // Reapplying the current layout rebuilds the source presentation, including
+    // a large document that the formal import has already laid out.
+    if(snapshot().layout!==mode){call('setLayout',mode);check(op);}
+    await idle(op,settings);
+  }
+  function firstCodePosition(content) {
+    let skipped=null;
+    for(const match of content.matchAll(/^ {0,3}(`{3,}|~{3,})([^\n]*)(?:\n|$)/gm)) {
+      const fence=match[1],info=match[2].trim();
+      if(skipped){
+        if(fence[0]===skipped[0]&&fence.length>=skipped.length&&!info)skipped=null;
+        continue;
+      }
+      if(fence[0]==='`'&&info.includes('`'))continue;
+      if(info.split(/\s/)[0].toLowerCase()==='mermaid'){skipped=fence;continue;}
+      return match.index+match[0].length;
+    }
+    return 0;
+  }
   const api = {
     snapshot,getComponentStates:()=>snapshot().componentStates,getPreviewStats,
     getEditorValue(){const origin=context(),value=call('readText');if(key(context())!==key(origin))throw error('document changed');return typeof value==='string'?value:'';},
     waitForIdle:input=>execute(false,input,(op,settings)=>idle(op,settings)).catch(()=>false),
-    setLayout:(mode,input)=>execute(true,input,async(op,settings)=>{const normalized=['both','hybrid','edit','preview'].includes(mode)?mode:'both';call('setLayout',normalized);check(op);await idle(op,settings);return normalized;}),
+    setLayout:(mode,input)=>execute(true,input,async(op,settings)=>{const normalized=['both','hybrid','edit','preview'].includes(mode)?mode:'both';await layout(op,normalized,settings);return normalized;}),
     setVisualEditing:input=>execute(true,input,async(op,settings)=>{call('setVisualEditing',freeze({code:settings.code,table:settings.table}));check(op);await idle(op,settings);}),
     revealPosition:(position,input)=>execute(true,input,(op,settings)=>reveal(op,position,settings)),
     revealText:(value,input)=>execute(true,input,async(op,settings)=>{const query=typeof value==='string'?value:'';if(!query)throw error('text query required');const match=call('findText',query,settings.from,{wrap:settings.wrap});check(op);if(!match||!Number.isFinite(match.from)||!Number.isFinite(match.to))throw error('text not found');return reveal(op,settings.edge==='end'?match.to:match.from,settings);}),
@@ -143,10 +164,10 @@ export function createE2EQueryAPI(options = {}) {
       const editorContent=content.replace(/\r\n?/g,'\n');
       if(call('readText')!==editorContent)throw error('document import mismatch');check(op);
       let position=settings.selection;
-      if(position===null){const found=settings.focusText?editorContent.indexOf(settings.focusText):-1;const code=editorContent.match(/```(?!mermaid\b)[^\n]*\n/);position=found>=0?found:code?.index!==undefined?code.index+code[0].length:0;}
+      if(position===null){const found=settings.focusText?editorContent.indexOf(settings.focusText):-1;position=found>=0?found:firstCodePosition(editorContent);}
       await reveal(op,position,settings);check(op);
       call('setVisualEditing',freeze({code:settings.codeVisualEditing,table:settings.tableVisualEditing}));check(op);await idle(op,settings);
-      call('setLayout',settings.layout);check(op);await idle(op,settings);await reveal(op,snapshot().selectionStart,settings);return snapshot();
+      await layout(op,settings.layout,settings);await reveal(op,snapshot().selectionStart,settings);return snapshot();
     }),
     clearStorage(){alive();if(operations.size)throw error('operation busy');call('clearStorage');return true;},
     destroy(){if(destroyed)return;destroyed=true;for(const op of [...operations])stop(op,error('query destroyed'));ports=null;},
