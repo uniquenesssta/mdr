@@ -815,7 +815,7 @@
     "date": "2026-10-23",
     "reviewedCommit": "f9cd03ef012e7f7bb31b05e168f2334116c98cca",
     "record": "docs/R15-11-DETAILS.md",
-    "status": "R15.10 accepted; R15.11 implemented pending exact-commit Windows",
+    "status": "R15.11 accepted; R15.12 authorized",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "Test-only public semantic runner actions, no legacy fixture/layout/snapshot fallback, trusted native CDP input, preserved feature fault/identity contracts and unchanged product surfaces.",
@@ -902,30 +902,29 @@
         "failedSteps": []
       }
     ],
-    "implementationWindowsRun": null,
-    "implementationWindowsJobs": [],
+    "implementationWindowsRun": 39940004887,
+    "implementationWindowsJobs": 7,
     "currentStageAcceptance": {
-      "stage": "R15.10",
+      "stage": "R15.11",
       "date": "2026-10-23",
-      "commit": "7233094ddb4e18c49d7fd897f00db0689622233e",
-      "run": 39929368170,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39929368170",
+      "commit": "89dd76c67f40187e92485deba5fbd2b3739f3b91",
+      "run": 39940004887,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39940004887",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "frontendNodePassed": 1606,
-      "recursiveNodePassed": 2613,
+      "frontendNodePassed": 1628,
+      "recursiveNodePassed": 2635,
       "contractBrowserPassed": 11,
-      "builtAppPassed": 74,
-      "e2eInstallationPassed": 41,
-      "localBuiltAppPassed": 74,
-      "localBrowserRuntime": "Node 24.19.0",
-      "record": "docs/R15-10-DETAILS.md#正式验收2026-10-23",
+      "builtAppPassed": 75,
+      "runnerPassed": 22,
+      "rustPassed": 298,
+      "record": "docs/R15-11-DETAILS.md#正式验收2026-10-23",
       "artifacts": [
         {
-          "id": 12491451740,
+          "id": 12496595005,
           "kind": "closeout",
-          "digest": "sha256:580dee94638ca568c81f581e8a316440d9102177334eeb6ee554be83d590da03",
+          "digest": "sha256:4c62c593558bf5e125f07ac752f952563fc907c4231fe7ba2d526eb3a031e83c",
           "downloadDigestVerified": true
         }
       ],
@@ -936,7 +935,7 @@
       "baselineCommit": "f9cd03ef012e7f7bb31b05e168f2334116c98cca",
       "branch": "agent/r15-stage",
       "record": "docs/R15-11-DETAILS.md",
-      "status": "implemented-pending-windows",
+      "status": "accepted",
       "newScenariosDefined": 22,
       "newBuiltAppScenariosDefined": 1,
       "builtAppScenariosRetained": 74,
@@ -948,7 +947,7 @@
       "modelKernelChanged": false,
       "dependenciesChanged": false,
       "riskReviewedSourceCount": 115,
-      "localValidation": "Node24.19 Windows: runner 22/22; all tracked Node 2635/2635 with no skips; built-app 75/75; browser contract 11/11; four architecture gates, syntax and diff checks passed. Product build/native evidence retained from unchanged R15.10 implementation; exact R15.11 Windows CI pending.",
+      "localValidation": "Node24.19 Windows: runner 22/22; all tracked Node 2635/2635 with no skips; built-app 75/75; browser contract 11/11; four architecture gates, syntax and diff checks passed. Product build/native evidence retained from unchanged R15.10 implementation; exact R15.11 Windows CI pending. Exact implementation Windows CI39940004887 passed all seven jobs and steps; accepted.",
       "independentUiFinding": "Real pointer Image Menu close does not restore File launcher focus; product UI unchanged; original R14 component probe retained with every original assertion.",
       "localRecursiveNodePassed": 2635,
       "localNewScenariosPassed": 22
@@ -4256,6 +4255,33 @@
         "telemetryLifecyclePassed": 49,
         "e2eQueryPassed": 67,
         "record": "docs/R15-09-DETAILS.md"
+      },
+      {
+        "stage": "R15.10",
+        "date": "2026-10-23",
+        "commit": "7233094ddb4e18c49d7fd897f00db0689622233e",
+        "run": 39929368170,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/39929368170",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "frontendNodePassed": 1606,
+        "recursiveNodePassed": 2613,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 74,
+        "e2eInstallationPassed": 41,
+        "localBuiltAppPassed": 74,
+        "localBrowserRuntime": "Node 24.19.0",
+        "record": "docs/R15-10-DETAILS.md#正式验收2026-10-23",
+        "artifacts": [
+          {
+            "id": 12491451740,
+            "kind": "closeout",
+            "digest": "sha256:580dee94638ca568c81f581e8a316440d9102177334eeb6ee554be83d590da03",
+            "downloadDigestVerified": true
+          }
+        ],
+        "priorArtifactDigestsVerifiedByFinalCIJob": true
       }
     ],
     "stageImplementationHistory": [
