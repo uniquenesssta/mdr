@@ -1,6 +1,6 @@
 # R15-10 显式 E2E 安装门禁
 
-2026-10-23，用户要求“收尾09开始10”。09已核验 `4fa93d2` / [CI39361525737](https://github.com/uniquenesssta/mdr/actions/runs/39361525737)七组Windows及全部步骤成功，Query67、全仓2572、前端1565、浏览器11+68、Rust298及三份归档摘要、accepted=true，详见[09正式验收](R15-09-DETAILS.md#正式验收2026-10-23)。本项继续唯一 `agent/r15-stage`，起始检出干净；10已实施、待自己的精确提交Windows验收，15.11 Runner整体迁移与15.12 stale-dist重写未开始。
+**实施起点（历史）**：2026-10-23，用户要求“收尾09开始10”。09已核验 `4fa93d2` / [CI39361525737](https://github.com/uniquenesssta/mdr/actions/runs/39361525737)七组Windows及全部步骤成功，Query67、全仓2572、前端1565、浏览器11+68、Rust298及三份归档摘要、accepted=true，详见[09正式验收](R15-09-DETAILS.md#正式验收2026-10-23)。本项继续唯一 `agent/r15-stage`，起始检出干净；10已实施、待自己的精确提交Windows验收，15.11 Runner整体迁移与15.12 stale-dist重写未开始。
 
 ## 职责与真实接线
 
@@ -88,3 +88,9 @@ flowchart TD
 本机已核实的24.19.0位于`C:/Users/uniqu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe`。仅为当前验证进程将该目录前置到PATH，再执行`npm run test:browser`；不修改系统安装、全局PATH、生产源码、依赖、测试或其门槛。完整74项本地实际页面回归74/74通过，零失败；包含原失败的导出完整内容读回、大文档HTML/Word、PNG和销毁场景，未缩减测试或改动构建产物。结果日志为本机临时目录`mdr-ci-node2419-browser.log`，对应实际产物目录`mdr-ci-node2419-browser-artifacts`；当前实现仍对应已通过CI的7233094，8ad37e2及本次仅更新文档。
 
 后续本地浏览器验证继续选择已验证的24.19.0，运行前确认`node --version`；直接沿用系统默认24.16.0仍可能重现旧故障，本次未升级系统Node。完整Node2613/2613、构建、架构和11项交互契约沿用同一实现的既有通过证据，无产品变更不重复执行。原生WebView/Rust沿用同实现CI39929368170，不将本机浏览器通过冒充本机原生验收。通用操作原则见[Windows验证策略](WINDOWS_VALIDATION_POLICY.md#本地浏览器回归运行时2026-10-23)。本项待诊断的本机断连已通过运行时选择解决；15.11仍未开始，提交后停止轮询。
+
+## 正式验收（2026-10-23）
+
+R15-10已正式收尾。验收实现为`7233094ddb4e18c49d7fd897f00db0689622233e`，对应[CI39929368170](https://github.com/uniquenesssta/mdr/actions/runs/39929368170)七组及全部步骤成功：安装41项、全仓2613/2613、前端1606/1606、交互契约11/11、实际页面74/74，以及原生WebView/Rust/安全与最终同提交汇总。已实际下载汇总归档12491451740，SHA256为`580dee94638ca568c81f581e8a316440d9102177334eeb6ee554be83d590da03`，与GitHub登记摘要一致；其中commit精确匹配7233094、accepted=true。最终汇总作业还核验六份前置归档摘要，日志已核对；本次不声称另行下载验证了全部前置归档。
+
+本机Node24.19下74/74通过，本机旧Node24.16大消息通道故障已通过明确运行时选择解决；系统默认Node未改，不影响已通过CI的产品实现。首轮失败、修复和本机诊断历史保留。8ad37e2、3a5d454及本次仅为文档，不改变验收实现。用户随后明确要求“收尾完之后进入11”，因此下一项为15.11 Runner更新，沿用唯一agent/r15-stage；不实施15.12。
