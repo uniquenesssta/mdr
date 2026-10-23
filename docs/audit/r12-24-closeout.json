@@ -1140,13 +1140,13 @@
   },
   "currentSourceReview": {
     "stage": "R16.3",
-    "date": "2026-10-23",
-    "reviewedCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
-    "record": "docs/R16-03-DETAILS.md",
-    "status": "ci-repair-targeted-verified; local-case-sensitive-setup-unavailable; exact-windows-ci-pending",
+    "date": "2026-10-24",
+    "reviewedCommit": "52aa8f21851850e2a29a0acd7fdcf081c104c2da",
+    "record": "docs/R16-03-DETAILS.md#正式验收2026-10-24",
+    "status": "accepted-exact-commit-windows-ci",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
-    "scope": "R16-02 classic script deletion, explicit ESM startup and complete caller/test lifecycle migration; R16-03 not started.",
+    "scope": "R16-03 explicit module APIs, owned widget capabilities and bounded cache admission test coordination; R16-04 authorized next.",
     "acceptedPriorStage": {
       "stage": "R15.9",
       "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
@@ -1258,37 +1258,37 @@
         "failedSteps": []
       }
     ],
-    "implementationWindowsRun": null,
-    "implementationWindowsJobs": 0,
+    "implementationWindowsRun": 39988412402,
+    "implementationWindowsJobs": 7,
     "currentStageAcceptance": {
-      "stage": "R16.2",
-      "date": "2026-10-23",
-      "commit": "0963dfe4ee1dd9b29053b8982489e04a6645f93f",
-      "run": 39971556914,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39971556914",
+      "stage": "R16.3",
+      "date": "2026-10-24",
+      "commit": "52aa8f21851850e2a29a0acd7fdcf081c104c2da",
+      "run": 39988412402,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39988412402",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "recursiveNodePassed": 2720,
+      "recursiveNodePassed": 2737,
       "contractBrowserPassed": 11,
       "builtAppPassed": 75,
-      "rustPassed": 299,
-      "esmPassed": 12,
-      "cdpPassed": 12,
-      "deletionInventoryPassed": 13,
+      "rustPassed": 301,
+      "globalApiPassed": 16,
+      "realFocusPassed": 1,
+      "cacheAdmissionPassed": 9,
       "nativeLargeImportScenariosPassed": 4,
-      "record": "docs/R16-02-DETAILS.md#正式验收2026-10-23",
+      "record": "docs/R16-03-DETAILS.md#正式验收2026-10-24",
       "artifacts": [
         {
-          "id": 12509921802,
+          "id": 12517067046,
           "kind": "closeout",
-          "digest": "sha256:ad78bc7a66fdb672aece5470a84ba537173c74c6ee6e44c2d66c3daf4167932a",
+          "digest": "sha256:4b6ee848277c641bb16e5ac8d52e40fcbeaac710aa8ff8b67cdce66c94bb2386",
           "downloadDigestVerified": true
         },
         {
-          "id": 12510001649,
+          "id": 12517311255,
           "kind": "webview",
-          "digest": "sha256:d73196b534dec58d2efe73bd3bf74645389fa94441c271e736d0780130ff0d35",
+          "digest": "sha256:c1e080342335d076a33ffa226e1f62754499a50e66f6049c43be62b006afd877",
           "downloadDigestVerified": true
         }
       ]
@@ -1298,7 +1298,7 @@
       "baselineCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
       "branch": "codex/r16-stage",
       "record": "docs/R16-03-DETAILS.md",
-      "status": "ci-repair-targeted-verified; local-case-sensitive-setup-unavailable; exact-windows-ci-pending",
+      "status": "accepted-exact-commit-windows-ci",
       "newScenariosDefined": 19,
       "modelKernelChanged": false,
       "nativeProductionChanged": true,
@@ -1307,7 +1307,7 @@
       "businessGlobalWrites": 0,
       "implicitWidgetHandlers": 0,
       "frozenOptionalGlobalReads": 1,
-      "exactCommitWindowsPending": true,
+      "exactCommitWindowsPending": false,
       "localNewScenariosPassed": 19,
       "localContractBrowserPassed": 11,
       "localFirstCumulative": {
@@ -1360,7 +1360,7 @@
         "failedRun": 39979330283,
         "url": "https://github.com/uniquenesssta/mdr/actions/runs/39979330283",
         "record": "docs/R16-03-DETAILS.md#ci未通过与并发夹具修复2026-10-24",
-        "status": "targeted-verified; exact-commit-ci-pending",
+        "status": "accepted-exact-commit-windows-ci",
         "failedUnitPassed": 285,
         "failedUnitFailed": 2,
         "otherJobsPassed": 5,
@@ -1391,7 +1391,12 @@
         "localTargetedNodePassed": 78,
         "fourArchitectureGatesPassed": true,
         "protectedSourcesUnchanged": 10,
-        "frontendSourceSha256": "14a6ed038657c11ada42372661e36fb63bcec8b25611cf1fd2fcf551c7524fdc"
+        "frontendSourceSha256": "14a6ed038657c11ada42372661e36fb63bcec8b25611cf1fd2fcf551c7524fdc",
+        "acceptance": {
+          "commit": "52aa8f21851850e2a29a0acd7fdcf081c104c2da",
+          "run": 39988412402,
+          "record": "docs/R16-03-DETAILS.md#正式验收2026-10-24"
+        }
       },
       "nativeProductionBehaviorChanged": false
     },
@@ -4831,6 +4836,39 @@
             "id": 12504398448,
             "kind": "webview",
             "digest": "sha256:b26cb414305fb055cc72b10920913f691ef869c64648f8da463e5df2e9cd67b4",
+            "downloadDigestVerified": true
+          }
+        ]
+      },
+      {
+        "stage": "R16.2",
+        "date": "2026-10-23",
+        "commit": "0963dfe4ee1dd9b29053b8982489e04a6645f93f",
+        "run": 39971556914,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/39971556914",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "recursiveNodePassed": 2720,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 75,
+        "rustPassed": 299,
+        "esmPassed": 12,
+        "cdpPassed": 12,
+        "deletionInventoryPassed": 13,
+        "nativeLargeImportScenariosPassed": 4,
+        "record": "docs/R16-02-DETAILS.md#正式验收2026-10-23",
+        "artifacts": [
+          {
+            "id": 12509921802,
+            "kind": "closeout",
+            "digest": "sha256:ad78bc7a66fdb672aece5470a84ba537173c74c6ee6e44c2d66c3daf4167932a",
+            "downloadDigestVerified": true
+          },
+          {
+            "id": 12510001649,
+            "kind": "webview",
+            "digest": "sha256:d73196b534dec58d2efe73bd3bf74645389fa94441c271e736d0780130ff0d35",
             "downloadDigestVerified": true
           }
         ]
