@@ -32,7 +32,12 @@ test('R12-22 baseline and repair verification require real native IPC, own canar
   assert.match(runner, /await persist\(\)/);
   assert.match(runner, /saveScreenshot/);
   assert.match(runner, /await rm\(canaryRoot, \{ recursive: true, force: true \}\)/);
-  assert.doesNotMatch(runner, /createCDP|__markdownEditorE2E|setDocumentContent|__TAURI_INTERNALS__\s*=/);
+  // Observing the default absence is required by R15-10; the security probe
+  // must still use real native IPC rather than obtaining or invoking an E2E API.
+  assert.match(runner, /e2eGlobalPublished: Object\.hasOwn\(window, '__markdownEditorE2E'\)/);
+  assert.match(runner, /assert\.equal\(evidence\.environment\.e2eGlobalPublished, false,/);
+  assert.match(runner, /assert\.equal\(evidence\.environment\.e2eOptIn, false,/);
+  assert.doesNotMatch(runner, /createCDP|setDocumentContent|__TAURI_INTERNALS__\s*=|(?:window|globalThis)(?:\.__markdownEditorE2E|\[['"]__markdownEditorE2E['"]\])/);
 });
 
 test('R12-22 automatic Windows baseline preserves cumulative gates and production locked dependencies', async () => {

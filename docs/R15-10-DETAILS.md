@@ -62,3 +62,13 @@ flowchart TD
 ## 提交前接入远端规则更新
 
 最终核对时，原分支新增20bc961（更新AGENTS）、0bc3975（删除本地ALL_AI_CODE）及81f60d3（删除本地AI_PROJECT_RULES）。已将本项接到 `81f60d3e49e0be221f0d39a697be209eb2f908f8`，保留三项远端修改；本项不再写AGENTS进度段，也不恢复已删除规则。按新AGENTS明确引用，远端skil/Code/0.0.1/AGENTS.md及其两份关联规则已完整读取。规则整理未改产品源码，09历史验收仍对应4fa93d2，10仍待新提交Windows验收。
+
+## 首轮失败与修复（2026-10-23）
+
+`fa0220f` / [CI39923924843](https://github.com/uniquenesssta/mdr/actions/runs/39923924843)未通过。Rust累计、RustSec和原生链接三组成功；前端依赖审计发现DOMPurify 3.4.16的critical公告及Vite 7.3.6的high公告。全仓Node、前端Node及WebView前置检查共同失败于同一旧断言：禁止源码出现任何`__markdownEditorE2E`，误伤10新增的`Object.hasOwn`默认缺席探测。最终汇总正确拒绝；WebView真实功能步骤未运行，不能将前置失败算作功能通过。
+
+修复只更新既有DOMPurify至3.4.17、Vite最低补丁至7.3.7及对应锁定条目，不新增依赖或变更传递依赖。修复版本分别见[DOMPurify公告](https://github.com/advisories/GHSA-cg2g-xh64-v4q7)与[Vite公告](https://github.com/advisories/GHSA-rq7h-c2jc-7f22)。许可证保持MPL-2.0/Apache-2.0和MIT；npm登记解包体积分别为1,615,512和2,244,268字节，不代表生产包体增量，实际包体仍由既有500000/700000字节门禁验证。升级风险为净化和开发/构建行为变化，使用原安全、构建及真实页面回归覆盖；不采用跳过审计或修改安全策略的替代方式。
+
+旧断言保留真实IPC、canary、CSP、源文件读取和原有安全链验证；允许`Object.hasOwn`观测属性存在性，并新增两项约束要求真实默认窗口的`e2eOptIn=false`与`e2eGlobalPublished=false`断言存在。继续禁止CDP、旧setDocumentContent、读取window/globalThis上的E2E API及替换原生invoke。生产probe和产品安装实现均未修改，74项页面及41项安装契约保持。
+
+本地Windows已执行：`npm audit --audit-level=high`零漏洞；安全边界与安装门禁48/48通过；正式入口`npm exec --offline --call "node scripts/ci/run-repository-tests.mjs"`累计2613/2613，无跳过；四项架构门禁及浏览器交互契约11/11通过；`npm run build`通过，main约695.00kB，既有预算未修改。首次直接Node启动缺npm_execpath且沙箱拒绝浏览器清理，改用正式npm入口在本机复验后全部通过。74项实际页面首轮36通过、38失败，首次错误为CDP连接关闭；同机累计浏览器测试结束后单独复验，结果待补齐，不声称实际页面通过。Rust产品与锁文件未改，未在本地重复原生构建；新提交仍需完整七组Windows CI及原生WebView证据，15.10暂不标记验收，15.11未开始。
