@@ -953,9 +953,9 @@
   "currentSourceReview": {
     "stage": "R16.1",
     "date": "2026-10-23",
-    "reviewedCommit": "05a7ac50aae81e352d76198e2b1b10fa48bf0156",
+    "reviewedCommit": "733c2ae00dd949280dc33bf2ad0094ec518d8e06",
     "record": "docs/R16-01-DETAILS.md",
-    "status": "implemented-ci-repair-pending-windows",
+    "status": "accepted",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "R16-01 deletion evidence freeze plus user-authorized large document import repair before closure; no deletion or next Atomic.",
@@ -1045,37 +1045,42 @@
     "implementationWindowsRun": null,
     "implementationWindowsJobs": 0,
     "currentStageAcceptance": {
-      "stage": "R15.13",
+      "stage": "R16.1",
       "date": "2026-10-23",
-      "commit": "5c50f9c5a2c2c27348eb8ebd3088409e22df488a",
-      "run": 39946123945,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39946123945",
+      "commit": "733c2ae00dd949280dc33bf2ad0094ec518d8e06",
+      "run": 39960541384,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39960541384",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "frontendNodePassed": 1678,
-      "recursiveNodePassed": 2685,
+      "recursiveNodePassed": 2705,
       "contractBrowserPassed": 11,
       "builtAppPassed": 75,
-      "logCleanupPassed": 17,
-      "rustPassed": 298,
-      "record": "docs/R15-13-DETAILS.md#正式验收与阶段15交接2026-10-23",
+      "rustPassed": 299,
+      "deletionInventoryPassed": 13,
+      "nativeLargeImportScenariosPassed": 4,
+      "record": "docs/R16-01-DETAILS.md#正式验收2026-10-23",
       "artifacts": [
         {
-          "id": 12497489814,
+          "id": 12504528934,
           "kind": "closeout",
-          "digest": "sha256:86e164eac999d86666e4a4b528890669865ca165863d5cd2e32a53894b0e6c41",
+          "digest": "sha256:1cf36093f731166614b3deed26360cd4d2431c950149fc9cfa94c1e6c873559a",
+          "downloadDigestVerified": true
+        },
+        {
+          "id": 12504398448,
+          "kind": "webview",
+          "digest": "sha256:b26cb414305fb055cc72b10920913f691ef869c64648f8da463e5df2e9cd67b4",
           "downloadDigestVerified": true
         }
-      ],
-      "priorArtifactDigestsVerifiedByFinalCIJob": true
+      ]
     },
     "currentStageImplementation": {
       "stage": "R16.1",
       "baselineCommit": "05a7ac50aae81e352d76198e2b1b10fa48bf0156",
       "branch": "codex/r16-stage",
       "record": "docs/R16-01-DETAILS.md",
-      "status": "implemented-ci-repair-pending-windows",
+      "status": "accepted",
       "newScenariosDefined": 13,
       "localNewScenariosPassed": 13,
       "localRoutingScenariosPassed": 95,
@@ -1171,7 +1176,7 @@
         "localNativeScenariosPassed": 8,
         "diagnosticPrivacyTestsPassed": 57,
         "rustLogTestsPassed": 49,
-        "exactCommitWindowsPending": true,
+        "exactCommitWindowsPending": false,
         "localRust": {
           "unitPassed": 286,
           "unitFailed": 1,
@@ -1204,7 +1209,7 @@
         "baselineCommit": "467555817283323efd941494a84535245f5bb9c2",
         "failedRun": 39957123588,
         "failedRunUrl": "https://github.com/uniquenesssta/mdr/actions/runs/39957123588",
-        "status": "locally-verified-pending-exact-commit-ci",
+        "status": "accepted",
         "reviewedSources": [
           {
             "path": ".github/workflows/r12-14.yml",
@@ -4650,6 +4655,32 @@
             "id": 12497980172,
             "kind": "closeout",
             "digest": "sha256:002ffbb3fb5a742036234f36adaf5c2b1e987124030221ed3da3f10237807571",
+            "downloadDigestVerified": true
+          }
+        ],
+        "priorArtifactDigestsVerifiedByFinalCIJob": true
+      },
+      {
+        "stage": "R15.13",
+        "date": "2026-10-23",
+        "commit": "5c50f9c5a2c2c27348eb8ebd3088409e22df488a",
+        "run": 39946123945,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/39946123945",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "frontendNodePassed": 1678,
+        "recursiveNodePassed": 2685,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 75,
+        "logCleanupPassed": 17,
+        "rustPassed": 298,
+        "record": "docs/R15-13-DETAILS.md#正式验收与阶段15交接2026-10-23",
+        "artifacts": [
+          {
+            "id": 12497489814,
+            "kind": "closeout",
+            "digest": "sha256:86e164eac999d86666e4a4b528890669865ca165863d5cd2e32a53894b0e6c41",
             "downloadDigestVerified": true
           }
         ],
