@@ -96,6 +96,9 @@ try {
         origin: location.origin, href: location.href, userAgent: navigator.userAgent,
         nativeCanaryControlPassed: result.content === text,
         globalTauriPublished: typeof window.__TAURI__ !== 'undefined',
+        e2eGlobalPublished: Object.hasOwn(window, '__markdownEditorE2E'),
+        e2eOptIn: new URL(location.href).searchParams.get('e2e') === '1'
+          || Object.getOwnPropertyDescriptor(window, '__MARKDOWN_EDITOR_E2E__')?.value === true,
         internalInvokePresent: true,
         mainResponseCsp: mainResponse.headers.get('content-security-policy'),
         metaCsp: Array.from(document.querySelectorAll('meta[http-equiv]'))
@@ -108,6 +111,8 @@ try {
     if (verifyBoundary) {
       assert.ok(evidence.environment.mainResponseCsp || evidence.environment.metaCsp.length, 'Production CSP must actually reach the WebView.');
       assert.equal(evidence.environment.globalTauriPublished, false);
+      assert.equal(evidence.environment.e2eOptIn, false, 'Default Windows WebView must not request the E2E bridge.');
+      assert.equal(evidence.environment.e2eGlobalPublished, false, 'Default production Windows WebView must not publish E2E globals.');
       // Independently challenge CSP, bypassing the sanitizer with a test-owned node.
       evidence.cspControl = await browser.execute(async () => {
         window.__r12CspExecuted = false;

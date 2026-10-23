@@ -3531,8 +3531,8 @@
       "src/runtime/e2e-bridge.js",
       "esm-module",
       "test-support",
-      "Opt-in browser adapter for public E2E semantics, explicit application providers and identity-safe teardown.",
-      "e2e-bridge",
+      "Browser environment and descriptor capability adapter; public E2E Bridge solely owns opt-in and installation lifecycle.",
+      "e2e-browser-adapter",
       "conditional-runtime",
       "retain-until-final-switch",
       false
@@ -5631,8 +5631,8 @@
       "src/features/e2e/index.js",
       "esm-module",
       "test-support",
-      "Public semantic E2E capability entry.",
-      "e2e-query-api",
+      "Public E2E semantic query and explicit installation entry.",
+      "none",
       "explicit-instance",
       "retain",
       false
@@ -5643,6 +5643,16 @@
       "test-support",
       "Detached frozen query DTOs, document identity barriers, bounded actions and owned wait disposal.",
       "e2e-query-api",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/e2e/e2e-bridge.js",
+      "esm-module",
+      "test-support",
+      "Explicit opt-in gate, lazy query factory, exact global descriptor ownership, rollback and terminal disposal.",
+      "e2e-installation",
       "explicit-instance",
       "retain",
       false

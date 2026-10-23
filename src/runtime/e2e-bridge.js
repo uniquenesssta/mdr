@@ -1,26 +1,30 @@
-import { createE2EQueryAPI } from '../features/e2e/index.js';
+import { createE2EBridge, createE2EQueryAPI } from '../features/e2e/index.js';
 
-function isE2EEnabled() {
-  try {
-    return globalThis.__MARKDOWN_EDITOR_E2E__ === true
-      || new URL(globalThis.location?.href || 'http://localhost/').searchParams.get('e2e') === '1';
-  } catch (_) {
-    return false;
+let installation = null;
+function getInstallation() {
+  if (!installation) {
+    installation = createE2EBridge({
+      readEnvironment: () => ({
+        testFlag: Object.getOwnPropertyDescriptor(globalThis, '__MARKDOWN_EDITOR_E2E__')?.value,
+        url: globalThis.location?.href || 'http://localhost/'
+      }),
+      readSlotDescriptor: () => Object.getOwnPropertyDescriptor(globalThis, '__markdownEditorE2E')
+        || ('__markdownEditorE2E' in globalThis ? { configurable: false } : undefined),
+      defineSlot: descriptor => Object.defineProperty(globalThis, '__markdownEditorE2E', descriptor),
+      deleteSlot: () => Reflect.deleteProperty(globalThis, '__markdownEditorE2E')
+    });
   }
+  return installation;
 }
 
-// Composition-only providers; no model, controller or platform object is published.
-let providers = null;
-let installed = null;
-let previousDescriptor = null;
-
 export function configureMarkdownEditorE2EPorts(value) {
-  if (!isE2EEnabled()) return;
-  if (installed) throw new Error('E2E already installed');
+  const owner = getInstallation();
+  if (!owner.isEnabled()) { owner.configure(null); return; }
   if (typeof value?.readContext !== 'function' || typeof value?.readPreviewStats !== 'function') {
     throw new TypeError('E2E providers unavailable');
   }
-  providers = Object.freeze({ readContext: value.readContext, readPreviewStats: value.readPreviewStats });
+  const current = Object.freeze({ readContext: value.readContext, readPreviewStats: value.readPreviewStats });
+  owner.configure(() => createE2EQueryAPI(createBrowserPorts(current)));
 }
 
 function getEditor() {
@@ -123,32 +127,11 @@ function createBrowserPorts(current) {
 }
 
 export function installMarkdownEditorE2EBridge() {
-  if (!isE2EEnabled() || globalThis.__markdownEditorE2E) return null;
-  if (!providers) throw new Error('E2E providers unavailable');
-  // Existing method names delegate to the sole semantic owner.
-  const bridge = createE2EQueryAPI(createBrowserPorts(providers));
-  previousDescriptor = Object.getOwnPropertyDescriptor(globalThis, '__markdownEditorE2E');
-  try {
-    Object.defineProperty(globalThis, '__markdownEditorE2E', { configurable: true, value: bridge });
-    installed = bridge;
-  } catch (_) { bridge.destroy(); previousDescriptor = null; throw new Error('E2E installation unavailable'); }
-  return bridge;
+  return getInstallation().install();
 }
 
 export function destroyMarkdownEditorE2EBridge() {
-  const bridge = installed;
-  installed = null;
-  providers = null;
-  if (!bridge) return;
-  bridge.destroy();
-  let restored = true;
-  try {
-    if (Object.getOwnPropertyDescriptor(globalThis, '__markdownEditorE2E')?.value === bridge) {
-      if (previousDescriptor) Object.defineProperty(globalThis, '__markdownEditorE2E', previousDescriptor);
-      else delete globalThis.__markdownEditorE2E;
-    }
-  } catch (_) { restored = false; }
-  finally { previousDescriptor = null; }
-  // A locked host slot must not block application feature teardown; its owner is already terminal.
-  return restored;
+  const owner = installation;
+  installation = null;
+  return owner?.destroy() ?? true;
 }

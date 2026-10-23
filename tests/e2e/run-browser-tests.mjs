@@ -7,6 +7,7 @@ import { launchChromium } from './lib/cdp-browser.mjs';
 import { installVirtualFileHost } from './lib/virtual-file-host.mjs';
 import { startBuiltApplicationHost } from './lib/built-application-host.mjs';
 import { runExportCharacterization } from './lib/export-characterization.mjs';
+import { runE2EInstallationChecks } from './lib/e2e-installation.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '../..');
@@ -547,6 +548,7 @@ async function runAppSuite() {
   try {
     applicationHost = externalUrl ? null : await startBuiltApplicationHost(resolve(projectRoot, 'dist'));
     const baseUrl = externalUrl || applicationHost.origin;
+    await runE2EInstallationChecks({ test, baseUrl, artifactRoot });
     if (!externalUrl) await browser.page.addInitScript(`
       localStorage.setItem('md_editor_help_shown','true');
       localStorage.setItem('md_editor_sidebar_visible','false');

@@ -46,9 +46,12 @@ test('browser E2E runner stays dependency-free and covers required interactions'
 test('application installs the E2E bridge only through explicit opt-in', async () => {
   const main = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
   const bridge = await readFile(new URL('../src/runtime/e2e-bridge.js', import.meta.url), 'utf8');
+  const installation = await readFile(new URL('../src/features/e2e/e2e-bridge.js', import.meta.url), 'utf8');
   assert.match(main, /installMarkdownEditorE2EBridge\(\)/);
   assert.match(bridge, /__MARKDOWN_EDITOR_E2E__/);
-  assert.match(bridge, /searchParams\.get\('e2e'\) === '1'/);
+  assert.match(bridge, /createE2EBridge/);
+  assert.match(installation, /environment\?\.testFlag === true/);
+  assert.match(installation, /searchParams\.get\('e2e'\) === '1'/);
 });
 
 test('E2E fixture loading follows the application document lifecycle', async () => {

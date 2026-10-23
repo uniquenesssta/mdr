@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-09 public semantic E2E queries and bounded actions regression · ${{ github.sha }}
+run-name: R15-10 explicit E2E installation and production-default absence regression · ${{ github.sha }}
 
 on:
   push:
@@ -263,6 +263,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-e2e-query-api.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/e2e-query-api.log"
+
+      - name: R15-10 explicit E2E installation, descriptor ownership and rollback
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-e2e-installation.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/e2e-installation.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

@@ -435,7 +435,7 @@
     },
     {
       "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
-      "blobSha": "025d6df0392c26aa17400a4ce907a5d6189f1172"
+      "blobSha": "cb32826d9c4757044c7ad1782b32d26dc6e987d7"
     },
     {
       "path": "src/features/export/formats/image/image-exporter.js",
@@ -543,7 +543,7 @@
     },
     {
       "path": "src/features/e2e/index.js",
-      "blobSha": "f6028153471ebb35938d1c41654dfa25751998ec"
+      "blobSha": "87ffcc7e02db1f7e603945cb742719e3afa87a43"
     },
     {
       "path": "src/features/e2e/e2e-query-api.js",
@@ -551,11 +551,31 @@
     },
     {
       "path": "src/runtime/e2e-bridge.js",
-      "blobSha": "98ad8507fe648894429007447065db7745db58cf"
+      "blobSha": "ce607941a3398fed900398d5e7af5fac8151c56f"
     },
     {
       "path": "tests/stage-15-e2e-query-api.test.mjs",
       "blobSha": "df7cd7139cd10da533269bedcb1d7f4d335822f3"
+    },
+    {
+      "path": "src/features/e2e/e2e-bridge.js",
+      "blobSha": "74d3a86949420d46009e4d6490434e020349e9b9"
+    },
+    {
+      "path": "tests/stage-15-e2e-installation.test.mjs",
+      "blobSha": "1c77ac28df0047f5945c363bf003968c49884838"
+    },
+    {
+      "path": "tests/e2e/lib/e2e-installation.mjs",
+      "blobSha": "65c647340366ac837966cfaa326047ae92220c54"
+    },
+    {
+      "path": "tests/browser-e2e-contract.test.mjs",
+      "blobSha": "edd8e49f0967c115940cbeca87a6cfb7309cb712"
+    },
+    {
+      "path": "tests/e2e/run-browser-tests.mjs",
+      "blobSha": "367cd5a185154d005990ecd99fab31ae1db3bb7e"
     }
   ],
   "priorFailures": {
@@ -771,20 +791,20 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R15.9",
-    "date": "2026-10-20",
-    "reviewedCommit": "5731941ff576bf8dc07b3d080c0179c7219d204f",
-    "record": "docs/R15-09-DETAILS.md",
-    "status": "R15.8 accepted; R15.9 implemented pending exact-head Windows",
+    "stage": "R15.10",
+    "date": "2026-10-23",
+    "reviewedCommit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
+    "record": "docs/R15-10-DETAILS.md",
+    "status": "R15.9 accepted; R15.10 implemented pending exact-commit Windows",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "Public E2E semantic query/action owner, detached readonly DTOs, explicit application context/preview providers and bounded request cleanup; existing installation gate retained.",
     "acceptedPriorStage": {
-      "stage": "R15.8",
-      "commit": "d8520d20de61d628aed4d9d5a0077655d0478475",
-      "run": 38726360552,
+      "stage": "R15.9",
+      "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
+      "run": 39361525737,
       "accepted": true,
-      "record": "docs/R15-08-DETAILS.md"
+      "record": "docs/R15-09-DETAILS.md"
     },
     "removedReviewedSources": [
       {
@@ -865,16 +885,16 @@
     "implementationWindowsRun": null,
     "implementationWindowsJobs": [],
     "currentStageAcceptance": {
-      "stage": "R15.8",
-      "date": "2026-10-15",
-      "commit": "d8520d20de61d628aed4d9d5a0077655d0478475",
-      "run": 38726360552,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/38726360552",
+      "stage": "R15.9",
+      "date": "2026-10-23",
+      "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
+      "run": 39361525737,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39361525737",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "frontendNodePassed": 1498,
-      "recursiveNodePassed": 2505,
+      "frontendNodePassed": 1565,
+      "recursiveNodePassed": 2572,
       "directories": 16,
       "longTaskObserverPassed": 39,
       "aggregationBufferPassed": 41,
@@ -883,26 +903,26 @@
       "recorderPassed": 22,
       "telemetryBaselinePassed": 24,
       "contractBrowserPassed": 11,
-      "builtAppPassed": 67,
+      "builtAppPassed": 68,
       "rustTestsPassed": 298,
       "a04Fixed": true,
       "artifacts": [
         {
-          "id": 11967979468,
+          "id": 12238280251,
           "kind": "closeout",
-          "digest": "sha256:af0adc5e771ae1112648c817f033a1066744622ca67a15541cec27a3caae4fe5",
+          "digest": "sha256:69319cdd49487bc40b1bb5a8539024c6937c5704c9ac9dd96aef6d37c526fbd2",
           "downloadDigestVerified": true
         },
         {
-          "id": 11967803237,
+          "id": 12236998766,
           "kind": "repository-tests",
-          "digest": "sha256:bdf21b547407ed410b885cadbaf8e847e2e60bf285f3a3d220db20f9b5bf71a6",
+          "digest": "sha256:6acb91aed658285e7ce9db15710d80b159c9079cf0bb827a0a2e59502c90e4e4",
           "downloadDigestVerified": true
         },
         {
-          "id": 11967279529,
+          "id": 12237073215,
           "kind": "frontend",
-          "digest": "sha256:2f28b4df3c3af0f04ce4d07271db4706d90ae503a62245d55ce02f894f49f25e",
+          "digest": "sha256:bf0b9ab5c826e5c7fa41d8582b70888394dd6872b6cd38b9a8ece3450b74aabb",
           "downloadDigestVerified": true
         }
       ],
@@ -910,9 +930,89 @@
       "nativeSinkPassed": 31,
       "nativeBatchPassed": 17,
       "a04Scope": "Current process-local acknowledged batches, bounded retry/queue/backoff and log-file growth; not crash-durable exactly-once or arbitrary native OS I/O latency.",
-      "telemetryLifecyclePassed": 49
+      "telemetryLifecyclePassed": 49,
+      "e2eQueryPassed": 67,
+      "record": "docs/R15-09-DETAILS.md"
     },
     "currentStageImplementation": {
+      "stage": "R15.10",
+      "baselineCommit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
+      "branch": "agent/r15-stage",
+      "record": "docs/R15-10-DETAILS.md",
+      "status": "implemented-pending-windows",
+      "newScenariosDefined": 41,
+      "newBuiltAppScenariosDefined": 6,
+      "productionModuleCount": 564,
+      "retainedE2EQueryScenarios": 67,
+      "retainedTelemetryScenarios": 291,
+      "builtAppScenariosRetained": 68,
+      "builtAppScenariosDefined": 74,
+      "nativeDefaultE2EAbsenceAssertionAdded": true,
+      "a04Fixed": true,
+      "nativeProductionChanged": false,
+      "modelKernelChanged": false,
+      "dependenciesChanged": false,
+      "singleOwner": "src/features/e2e/e2e-bridge.js",
+      "localValidation": "Static gates, syntax, source contracts and registration only; Windows functional/build/browser/Rust pending.",
+      "riskReviewedSourceCount": 110,
+      "integrationBaseCommit": "81f60d3e49e0be221f0d39a697be209eb2f908f8",
+      "preservedUpstreamChanges": [
+        "20bc9611c7b4bcf4cbe6a8193b034b48f8a159f2",
+        "0bc3975cc94f12a8042c47cab0c8dcd96be01088",
+        "81f60d3e49e0be221f0d39a697be209eb2f908f8"
+      ]
+    },
+    "priorStageAcceptance": {
+      "stage": "R15.9",
+      "date": "2026-10-23",
+      "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
+      "run": 39361525737,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39361525737",
+      "accepted": true,
+      "windowsJobsPassed": 7,
+      "allStepsPassed": true,
+      "frontendNodePassed": 1565,
+      "recursiveNodePassed": 2572,
+      "directories": 16,
+      "longTaskObserverPassed": 39,
+      "aggregationBufferPassed": 41,
+      "redactionPassed": 33,
+      "actualFrontendPayloadPassed": 3,
+      "recorderPassed": 22,
+      "telemetryBaselinePassed": 24,
+      "contractBrowserPassed": 11,
+      "builtAppPassed": 68,
+      "rustTestsPassed": 298,
+      "a04Fixed": true,
+      "artifacts": [
+        {
+          "id": 12238280251,
+          "kind": "closeout",
+          "digest": "sha256:69319cdd49487bc40b1bb5a8539024c6937c5704c9ac9dd96aef6d37c526fbd2",
+          "downloadDigestVerified": true
+        },
+        {
+          "id": 12236998766,
+          "kind": "repository-tests",
+          "digest": "sha256:6acb91aed658285e7ce9db15710d80b159c9079cf0bb827a0a2e59502c90e4e4",
+          "downloadDigestVerified": true
+        },
+        {
+          "id": 12237073215,
+          "kind": "frontend",
+          "digest": "sha256:bf0b9ab5c826e5c7fa41d8582b70888394dd6872b6cd38b9a8ece3450b74aabb",
+          "downloadDigestVerified": true
+        }
+      ],
+      "runtimeSnapshotPassed": 52,
+      "nativeSinkPassed": 31,
+      "nativeBatchPassed": 17,
+      "a04Scope": "Current process-local acknowledged batches, bounded retry/queue/backoff and log-file growth; not crash-durable exactly-once or arbitrary native OS I/O latency.",
+      "telemetryLifecyclePassed": 49,
+      "e2eQueryPassed": 67,
+      "record": "docs/R15-09-DETAILS.md"
+    },
+    "priorStageImplementation": {
       "stage": "R15.9",
       "baselineCommit": "d8520d20de61d628aed4d9d5a0077655d0478475",
       "branch": "agent/r15-stage",
@@ -968,90 +1068,6 @@
           "downloadDigestVerified": true
         }
       }
-    },
-    "priorStageAcceptance": {
-      "stage": "R15.7",
-      "date": "2026-10-15",
-      "commit": "8c7e23272fb0753a8ae79963e0c38f1a872019b1",
-      "run": 38688232262,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/38688232262",
-      "accepted": true,
-      "windowsJobsPassed": 7,
-      "allStepsPassed": true,
-      "frontendNodePassed": 1449,
-      "recursiveNodePassed": 2456,
-      "directories": 16,
-      "longTaskObserverPassed": 39,
-      "aggregationBufferPassed": 41,
-      "redactionPassed": 33,
-      "actualFrontendPayloadPassed": 3,
-      "recorderPassed": 22,
-      "telemetryBaselinePassed": 24,
-      "contractBrowserPassed": 11,
-      "builtAppPassed": 67,
-      "rustTestsPassed": 298,
-      "a04Fixed": true,
-      "artifacts": [
-        {
-          "id": 11952050161,
-          "kind": "closeout",
-          "digest": "sha256:674bfbfa41a1f8dd4ed16e2f4c3a80766298bc6a813ce032984e984f7d40a55d",
-          "downloadDigestVerified": true
-        },
-        {
-          "id": 11951032065,
-          "kind": "frontend",
-          "digest": "sha256:626191a53bbc3a26195edab558de49c2e12cc477bdd5b15f0a365a954939e78a",
-          "downloadDigestVerified": true
-        },
-        {
-          "id": 11950684737,
-          "kind": "repository-tests",
-          "digest": "sha256:82255644a8930b15e499b3d78f2f3f85419e01dc6da2bc29fd91a870c218552a",
-          "downloadDigestVerified": true
-        },
-        {
-          "id": 11951370386,
-          "kind": "rust",
-          "digest": "sha256:186c2e8fc2c7d8a695cc767f6b1a156696d3580134114ff3916f2a06ea596989",
-          "downloadDigestVerified": true
-        }
-      ],
-      "runtimeSnapshotPassed": 52,
-      "nativeSinkPassed": 31,
-      "nativeBatchPassed": 17,
-      "a04Scope": "Current process-local acknowledged batches, bounded retry/queue/backoff and log-file growth; not crash-durable exactly-once or arbitrary native OS I/O latency."
-    },
-    "priorStageImplementation": {
-      "stage": "R15.8",
-      "baselineCommit": "8c7e23272fb0753a8ae79963e0c38f1a872019b1",
-      "branch": "agent/r15-stage",
-      "record": "docs/R15-08-DETAILS.md",
-      "status": "implemented-pending-windows",
-      "newScenariosDefined": 49,
-      "productionModuleCount": 561,
-      "retainedNativeSinkScenarios": 31,
-      "retainedNativeBatchScenarios": 17,
-      "retainedTelemetryScenarios": 242,
-      "builtAppScenariosRetained": 67,
-      "a04Fixed": true,
-      "nativeProductionChanged": false,
-      "dependenciesChanged": false,
-      "singleOwner": "src/features/telemetry/telemetry-lifecycle.js",
-      "limits": {
-        "resources": 256,
-        "timers": 1000,
-        "frames": 64,
-        "periodMs": [
-          1000,
-          300000
-        ],
-        "aggregateMs": 1500,
-        "flushMs": 2000
-      },
-      "failurePolicy": "Generation invalidation, reverse independent cleanup, bounded asynchronous periodic successors, physical cleanup failures prevent restart; native in-flight receipt waits remain bounded on pause and are cancelled on destroy.",
-      "localValidation": "Static gates, syntax, source contracts and registration only; Windows functional/build/browser/Rust pending.",
-      "riskReviewedSourceCount": 101
     },
     "stageAcceptanceHistory": [
       {
@@ -4180,6 +4196,54 @@
         "nativeSinkPassed": 31,
         "nativeBatchPassed": 17,
         "a04Scope": "Current process-local acknowledged batches, bounded retry/queue/backoff and log-file growth; not crash-durable exactly-once or arbitrary native OS I/O latency."
+      },
+      {
+        "stage": "R15.8",
+        "date": "2026-10-15",
+        "commit": "d8520d20de61d628aed4d9d5a0077655d0478475",
+        "run": 38726360552,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/38726360552",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "frontendNodePassed": 1498,
+        "recursiveNodePassed": 2505,
+        "directories": 16,
+        "longTaskObserverPassed": 39,
+        "aggregationBufferPassed": 41,
+        "redactionPassed": 33,
+        "actualFrontendPayloadPassed": 3,
+        "recorderPassed": 22,
+        "telemetryBaselinePassed": 24,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 67,
+        "rustTestsPassed": 298,
+        "a04Fixed": true,
+        "artifacts": [
+          {
+            "id": 11967979468,
+            "kind": "closeout",
+            "digest": "sha256:af0adc5e771ae1112648c817f033a1066744622ca67a15541cec27a3caae4fe5",
+            "downloadDigestVerified": true
+          },
+          {
+            "id": 11967803237,
+            "kind": "repository-tests",
+            "digest": "sha256:bdf21b547407ed410b885cadbaf8e847e2e60bf285f3a3d220db20f9b5bf71a6",
+            "downloadDigestVerified": true
+          },
+          {
+            "id": 11967279529,
+            "kind": "frontend",
+            "digest": "sha256:2f28b4df3c3af0f04ce4d07271db4706d90ae503a62245d55ce02f894f49f25e",
+            "downloadDigestVerified": true
+          }
+        ],
+        "runtimeSnapshotPassed": 52,
+        "nativeSinkPassed": 31,
+        "nativeBatchPassed": 17,
+        "a04Scope": "Current process-local acknowledged batches, bounded retry/queue/backoff and log-file growth; not crash-durable exactly-once or arbitrary native OS I/O latency.",
+        "telemetryLifecyclePassed": 49
       }
     ],
     "stageImplementationHistory": [
@@ -11729,6 +11793,63 @@
         "failurePolicy": "Generation invalidation, reverse independent cleanup, bounded asynchronous periodic successors, physical cleanup failures prevent restart; native in-flight receipt waits remain bounded on pause and are cancelled on destroy.",
         "localValidation": "Static gates, syntax, source contracts and registration only; Windows functional/build/browser/Rust pending.",
         "riskReviewedSourceCount": 101
+      },
+      {
+        "stage": "R15.9",
+        "baselineCommit": "d8520d20de61d628aed4d9d5a0077655d0478475",
+        "branch": "agent/r15-stage",
+        "record": "docs/R15-09-DETAILS.md",
+        "status": "implemented-pending-windows",
+        "newScenariosDefined": 67,
+        "newBuiltAppScenariosDefined": 1,
+        "productionModuleCount": 563,
+        "retainedTelemetryScenarios": 291,
+        "retainedNativeSinkScenarios": 31,
+        "retainedNativeBatchScenarios": 17,
+        "builtAppScenariosRetained": 67,
+        "builtAppScenariosDefined": 68,
+        "a04Fixed": true,
+        "nativeProductionChanged": false,
+        "modelKernelChanged": false,
+        "dependenciesChanged": false,
+        "singleOwner": "src/features/e2e/e2e-query-api.js",
+        "limits": {
+          "operations": 8,
+          "mutatingOperations": 1,
+          "componentDtoRows": 1000,
+          "timeoutMs": [
+            250,
+            30000
+          ],
+          "defaultTimeoutMs": 6000,
+          "quietMs": [
+            20,
+            1000
+          ],
+          "idleSamples": 2000
+        },
+        "failurePolicy": "Fixed safe errors; context checks at asynchronous boundaries; explicit import identity handoff; owned deadline/timer/RAF cancellation and late result rejection; no cancellation claim for an already dispatched formal import.",
+        "localValidation": "Static gates, syntax, source contracts and registration only; Windows functional/build/browser/Rust pending.",
+        "riskReviewedSourceCount": 105,
+        "firstWindowsFailure": {
+          "commit": "5731941ff576bf8dc07b3d080c0179c7219d204f",
+          "run": 38730937138,
+          "queryPassed": 58,
+          "queryTotal": 59,
+          "frontendPassed": 1556,
+          "frontendTotal": 1557,
+          "browserPassed": 66,
+          "browserTotal": 68,
+          "failureRecord": "docs/R15-09-DETAILS.md#首轮失败与修复2026-10-20",
+          "repairStatus": "implemented-pending-exact-commit-windows",
+          "additionalRegressionScenarios": 8,
+          "timeoutsAndBudgetsChanged": false,
+          "frontendArtifact": {
+            "id": 11970925747,
+            "digest": "sha256:d67a0d30abbde55c690caab1e0919beda862f4e497e3fa9a0c45c8855df22d07",
+            "downloadDigestVerified": true
+          }
+        }
       }
     ],
     "migratedReviewedSources": [
@@ -11929,6 +12050,24 @@
         "blobSha": "ed1c5d1457d28d72509951013b30e3dcfbbe18e9",
         "stage": "R15.9-repair",
         "receiver": "docs/R15-09-DETAILS.md#首轮失败与修复2026-10-20"
+      },
+      {
+        "path": "src/features/e2e/index.js",
+        "blobSha": "f6028153471ebb35938d1c41654dfa25751998ec",
+        "stage": "R15.10",
+        "receiver": "docs/R15-10-DETAILS.md"
+      },
+      {
+        "path": "src/runtime/e2e-bridge.js",
+        "blobSha": "98ad8507fe648894429007447065db7745db58cf",
+        "stage": "R15.10",
+        "receiver": "docs/R15-10-DETAILS.md"
+      },
+      {
+        "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
+        "blobSha": "025d6df0392c26aa17400a4ce907a5d6189f1172",
+        "stage": "R15.10",
+        "receiver": "docs/R15-10-DETAILS.md"
       }
     ]
   }
