@@ -831,7 +831,7 @@
     "date": "2026-10-23",
     "reviewedCommit": "5548c9059202970edc53387f622a2a90b1c2a4ab",
     "record": "docs/R15-12-DETAILS.md",
-    "status": "R15.11 accepted; R15.12 implemented pending exact-commit Windows",
+    "status": "R15.12 accepted; R15.13 authorized",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "Build-time source and emitted/public byte fingerprints; local browser admission before process/socket allocation; actionable stale-dist failures without feature or UI changes.",
@@ -918,29 +918,29 @@
         "failedSteps": []
       }
     ],
-    "implementationWindowsRun": null,
-    "implementationWindowsJobs": 0,
+    "implementationWindowsRun": 39943187508,
+    "implementationWindowsJobs": 7,
     "currentStageAcceptance": {
-      "stage": "R15.11",
+      "stage": "R15.12",
       "date": "2026-10-23",
-      "commit": "89dd76c67f40187e92485deba5fbd2b3739f3b91",
-      "run": 39940004887,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39940004887",
+      "commit": "44da71a623a19dcdf9a97a3db4dc851142df26fc",
+      "run": 39943187508,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39943187508",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "frontendNodePassed": 1628,
-      "recursiveNodePassed": 2635,
+      "frontendNodePassed": 1661,
+      "recursiveNodePassed": 2668,
       "contractBrowserPassed": 11,
       "builtAppPassed": 75,
-      "runnerPassed": 22,
+      "staleDistPassed": 33,
       "rustPassed": 298,
-      "record": "docs/R15-11-DETAILS.md#正式验收2026-10-23",
+      "record": "docs/R15-12-DETAILS.md#正式验收2026-10-23",
       "artifacts": [
         {
-          "id": 12496595005,
+          "id": 12497980172,
           "kind": "closeout",
-          "digest": "sha256:4c62c593558bf5e125f07ac752f952563fc907c4231fe7ba2d526eb3a031e83c",
+          "digest": "sha256:002ffbb3fb5a742036234f36adaf5c2b1e987124030221ed3da3f10237807571",
           "downloadDigestVerified": true
         }
       ],
@@ -951,7 +951,7 @@
       "baselineCommit": "5548c9059202970edc53387f622a2a90b1c2a4ab",
       "branch": "agent/r15-stage",
       "record": "docs/R15-12-DETAILS.md",
-      "status": "implemented-pending-windows",
+      "status": "accepted",
       "newScenariosDefined": 33,
       "builtAppScenariosRetained": 75,
       "builtAppScenariosDefined": 75,
@@ -4296,6 +4296,32 @@
             "id": 12491451740,
             "kind": "closeout",
             "digest": "sha256:580dee94638ca568c81f581e8a316440d9102177334eeb6ee554be83d590da03",
+            "downloadDigestVerified": true
+          }
+        ],
+        "priorArtifactDigestsVerifiedByFinalCIJob": true
+      },
+      {
+        "stage": "R15.11",
+        "date": "2026-10-23",
+        "commit": "89dd76c67f40187e92485deba5fbd2b3739f3b91",
+        "run": 39940004887,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/39940004887",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "frontendNodePassed": 1628,
+        "recursiveNodePassed": 2635,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 75,
+        "runnerPassed": 22,
+        "rustPassed": 298,
+        "record": "docs/R15-11-DETAILS.md#正式验收2026-10-23",
+        "artifacts": [
+          {
+            "id": 12496595005,
+            "kind": "closeout",
+            "digest": "sha256:4c62c593558bf5e125f07ac752f952563fc907c4231fe7ba2d526eb3a031e83c",
             "downloadDigestVerified": true
           }
         ],
