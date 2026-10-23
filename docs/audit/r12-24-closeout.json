@@ -859,7 +859,7 @@
     "date": "2026-10-23",
     "reviewedCommit": "bb0c585eabfc014f2689cbebd30561051e912baf",
     "record": "docs/R15-13-DETAILS.md",
-    "status": "R15.12 accepted; R15.13 implemented pending exact-commit Windows",
+    "status": "R15 accepted within phase scope; R16.1 authorized",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "Remove two development JSONL files from Git tracking while preserving local bytes and history; shared root logs ignore and non-exemptible generated-file checks. Product code, build inputs, native and UI unchanged.",
@@ -946,29 +946,29 @@
         "failedSteps": []
       }
     ],
-    "implementationWindowsRun": null,
-    "implementationWindowsJobs": 0,
+    "implementationWindowsRun": 39946123945,
+    "implementationWindowsJobs": 7,
     "currentStageAcceptance": {
-      "stage": "R15.12",
+      "stage": "R15.13",
       "date": "2026-10-23",
-      "commit": "44da71a623a19dcdf9a97a3db4dc851142df26fc",
-      "run": 39943187508,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39943187508",
+      "commit": "5c50f9c5a2c2c27348eb8ebd3088409e22df488a",
+      "run": 39946123945,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39946123945",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "frontendNodePassed": 1661,
-      "recursiveNodePassed": 2668,
+      "frontendNodePassed": 1678,
+      "recursiveNodePassed": 2685,
       "contractBrowserPassed": 11,
       "builtAppPassed": 75,
-      "staleDistPassed": 33,
+      "logCleanupPassed": 17,
       "rustPassed": 298,
-      "record": "docs/R15-12-DETAILS.md#正式验收2026-10-23",
+      "record": "docs/R15-13-DETAILS.md#正式验收与阶段15交接2026-10-23",
       "artifacts": [
         {
-          "id": 12497980172,
+          "id": 12497489814,
           "kind": "closeout",
-          "digest": "sha256:002ffbb3fb5a742036234f36adaf5c2b1e987124030221ed3da3f10237807571",
+          "digest": "sha256:86e164eac999d86666e4a4b528890669865ca165863d5cd2e32a53894b0e6c41",
           "downloadDigestVerified": true
         }
       ],
@@ -979,7 +979,7 @@
       "baselineCommit": "bb0c585eabfc014f2689cbebd30561051e912baf",
       "branch": "agent/r15-stage",
       "record": "docs/R15-13-DETAILS.md",
-      "status": "implemented-pending-windows",
+      "status": "accepted",
       "newScenariosDefined": 17,
       "localNewScenariosPassed": 17,
       "localRelatedScenariosPassed": 23,
@@ -4347,6 +4347,32 @@
             "id": 12496595005,
             "kind": "closeout",
             "digest": "sha256:4c62c593558bf5e125f07ac752f952563fc907c4231fe7ba2d526eb3a031e83c",
+            "downloadDigestVerified": true
+          }
+        ],
+        "priorArtifactDigestsVerifiedByFinalCIJob": true
+      },
+      {
+        "stage": "R15.12",
+        "date": "2026-10-23",
+        "commit": "44da71a623a19dcdf9a97a3db4dc851142df26fc",
+        "run": 39943187508,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/39943187508",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "frontendNodePassed": 1661,
+        "recursiveNodePassed": 2668,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 75,
+        "staleDistPassed": 33,
+        "rustPassed": 298,
+        "record": "docs/R15-12-DETAILS.md#正式验收2026-10-23",
+        "artifacts": [
+          {
+            "id": 12497980172,
+            "kind": "closeout",
+            "digest": "sha256:002ffbb3fb5a742036234f36adaf5c2b1e987124030221ed3da3f10237807571",
             "downloadDigestVerified": true
           }
         ],
@@ -12280,6 +12306,19 @@
         "stage": "R15.12",
         "receiver": "docs/R15-12-DETAILS.md"
       }
-    ]
+    ],
+    "currentPhaseAcceptance": {
+      "stage": "R15",
+      "accepted": true,
+      "atomicTasksAccepted": 13,
+      "commit": "5c50f9c5a2c2c27348eb8ebd3088409e22df488a",
+      "run": 39946123945,
+      "record": "docs/R15-13-DETAILS.md#正式验收与阶段15交接2026-10-23",
+      "scope": "Telemetry and opt-in E2E contracts, trusted runner, stale build admission and tracked runtime log retirement.",
+      "handoffs": [
+        "Current classic/compatibility references and .vite exceptions require R16 proof before deletion.",
+        "Independent Image Menu real-pointer focus finding remains open and requires UI/Figma scope for repair."
+      ]
+    }
   }
 }

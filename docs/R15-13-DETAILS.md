@@ -27,3 +27,13 @@
 ## 恢复
 
 回退本项实现提交可恢复索引条目、原豁免与旧检查；两份日志本机原文件已保留，历史Git对象也保留，无产品数据迁移。恢复跟踪属于明确回退操作，不代表日常允许重新提交开发日志。临时测试夹具不执行递归删除。R15-11独立图片菜单UI焦点发现仍开放，本项未修改或声称修复。
+
+## 正式验收与阶段15交接（2026-10-23）
+
+实现提交`5c50f9c5a2c2c27348eb8ebd3088409e22df488a`的[Windows CI39946123945](https://github.com/uniquenesssta/mdr/actions/runs/39946123945)七组及全部步骤通过：日志专项17/17、前端1678/1678、全仓2685/2685、浏览器11/11与75/75、Rust298项；原生链接、实际WebView、依赖与最后聚合门禁通过。小型收尾归档12497489814已下载，SHA256 `86e164eac999d86666e4a4b528890669865ca165863d5cd2e32a53894b0e6c41`与GitHub摘要一致；内部commit/运行号匹配、accepted=true、358测试文件/16目录、Rust298项。其余归档由最终CI任务校验，不声称本机下载全部归档。13正式验收收尾。
+
+阶段15的13项Atomic均已有各自精确提交Windows验收，本次累计再次覆盖Recorder、递归脱敏、Aggregation Buffer、Long Task、Snapshot、Sink、Lifecycle、Query、显式安装、Runner和stale-dist。A04按15.4/15.7约定在进程内确认、有界队列/退避/重试和销毁范围关闭，不承诺跨进程exactly-once；A01真实前端至Rust/JSONL脱敏与release无日志继续通过。默认不创建E2E全局，显式启用具备动作/查询及退出清理；当前无已跟踪开发日志。冻结模型、数据格式和依赖未改变，所有步骤维持原质量门槛。阶段15范围验收完成，可以接收用户已授权的R16-01。
+
+交接公共入口为features/telemetry、features/e2e及测试application-driver；状态/生命周期仍分别由各已验收Recorder/Buffer/Observer/Snapshot/Sink/Lifecycle和Query/Bridge拥有。剩余classic Runtime及兼容端口、两份历史.vite精确豁免按R16任务书审计，不因其路径含旧名就认定可删。工作区本机忽略日志按用户约束保留；阶段15门禁已证明它们不再入库，不为清理而批量删除。独立图片菜单真实鼠标关闭后的焦点问题保持开放，属于产品UI，后续修复需Figma要求与相应授权，不声称本次CI消除了此发现。
+
+用户要求“收尾13开始 R16-01”：下一阶段仅冻结候选清单，逐项核对import graph、HTML、测试、构建与Rust mod graph；仍有引用或不能证明安全的候选必须禁止删除。阶段分支codex/r16-stage从本正式收尾提交创建。R16-02及后续未获本次实施授权，不执行文件删除或产品行为修改。
