@@ -1,12 +1,12 @@
 # Markdown Editor
 
-R16-01正式收尾：733c2ae / CI39960541384七组Windows及全部步骤通过，Node2705、Rust299、浏览器11＋75、删除清单13及原生大文档四条链路通过；汇总与WebView归档摘要已核验。继续唯一codex/r16-stage，按用户授权推进16.2经典脚本清除，16.3未开始。 [01详情](docs/R16-01-DETAILS.md)。
-
-R16-02经典脚本清除已实现：删除public/app/五文件及动态加载器，改为显式ESM和可销毁生命周期；全仓2720/2720、ESM专项12/12、CDP专项12/12、浏览器11＋75、原文及同量级文档8条Windows原生链路、四项架构门禁和构建均通过。等待精确实现提交的Windows累计CI验收，推送后停止轮询，16.3未开始。[02详情](docs/R16-02-DETAILS.md)。
+R16-02正式收尾：0963dfe / CI39971556914七组Windows及全部步骤成功，同提交汇总accepted=true；Node2720、ESM12、CDP12、浏览器11＋75、Rust299和原生大文档4条链路通过，closeout/WebView归档SHA256已核验。继续codex/r16-stage，用户授权开始R16-03全局API清除；16.4未开始。 [02验收](docs/R16-02-DETAILS.md#正式验收2026-10-23)。
 
 历史与文档索引见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-23：R16-02正式收尾：0963dfe / CI39971556914七组Windows及全部步骤成功，同提交汇总accepted=true；Node2720、ESM12、CDP12、浏览器11＋75、Rust299和原生大文档4条链路通过，closeout/WebView归档SHA256已核验。继续codex/r16-stage，用户授权开始R16-03全局API清除；16.4未开始。 [证据](docs/R16-02-DETAILS.md#正式验收2026-10-23)。
 
 - 2026-10-23：R16-02经典脚本清除已实现：删除public/app/五文件及动态加载器，改为显式ESM和可销毁生命周期；全仓2720/2720、ESM专项12/12、CDP专项12/12、浏览器11＋75、原文及同量级文档8条Windows原生链路、四项架构门禁和构建均通过。等待精确实现提交的Windows累计CI验收，推送后停止轮询，16.3未开始。[实现与验证](docs/R16-02-DETAILS.md)。
 

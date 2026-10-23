@@ -48,3 +48,12 @@
 本次已实现，等待实现提交的精确Windows累计CI，R16-02未提前勾选验收，R16-03未开始。全仓2720/2720（360文件/16目录），ESM专项12/12、CDP专项12/12（新增3项），原浏览器契约11/11＋当前生产包75/75；四项架构门禁、159项源码指纹、冻结清单CLI、来源指纹和diff空白检查通过。源码/输出均不存在public/app目录。原生8链在现有调试Tauri二进制＋最终Vite源码、独立WebView配置下复验；真正嵌入生产bundle的同提交Windows验收仍由CI完成。原文件只读，验证服务仅按已核验PID关闭。
 
 最终移除空目录后，两项旧的CodeMirror/Theme扫描仍枚举public/app而失败；现分别扫描所有public源码与当前完整生产JS集合，原职责禁止条件保留并扩大覆盖。相关63/63通过，随后最终全仓2720/2720通过，不保留空目录来掩盖旧断言。此前失败记录和所有历史验收保留。回退使用本次实现提交的git revert，阶段前收尾基线b88a94e；不重置用户AGENTS.md修改，不递归清理用户文件。
+
+
+## 正式验收（2026-10-23）
+
+实现提交0963dfe4ee1dd9b29053b8982489e04a6645f93f的[CI39971556914](https://github.com/uniquenesssta/mdr/actions/runs/39971556914)七组Windows及全部步骤成功。closeout-verification.json的accepted=true、commit及run均精确匹配；WebView原生大文档四路正文长度/SHA、nativeBacked、metadata无正文副本和有界会话通过。Node2720、ESM12、CDP12、浏览器11＋75、Rust299和删除清单13通过，R16-02正式收尾。历史失败及本地调试二进制验证边界保留。
+
+归档12509921802（closeout，8081字节）SHA256=ad78bc7a66fdb672aece5470a84ba537173c74c6ee6e44c2d66c3daf4167932a；12510001649（WebView，1344255字节）SHA256=d73196b534dec58d2efe73bd3bf74645389fa94441c271e736d0780130ff0d35，均下载核验一致。首次gh下载连接被远端关闭，连接器转存下载成功，没有用未取得产物替代验收。
+
+按用户“收尾02开始03”，继续唯一codex/r16-stage实施16.3；16.4及后续未授权。推送后停止CI轮询。

@@ -989,9 +989,9 @@
   "currentSourceReview": {
     "stage": "R16.2",
     "date": "2026-10-23",
-    "reviewedCommit": "733c2ae00dd949280dc33bf2ad0094ec518d8e06",
+    "reviewedCommit": "0963dfe4ee1dd9b29053b8982489e04a6645f93f",
     "record": "docs/R16-02-DETAILS.md",
-    "status": "locally-verified-pending-exact-commit-windows-ci",
+    "status": "accepted",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "R16-02 classic script deletion, explicit ESM startup and complete caller/test lifecycle migration; R16-03 not started.",
@@ -1109,32 +1109,34 @@
     "implementationWindowsRun": null,
     "implementationWindowsJobs": 0,
     "currentStageAcceptance": {
-      "stage": "R16.1",
+      "stage": "R16.2",
       "date": "2026-10-23",
-      "commit": "733c2ae00dd949280dc33bf2ad0094ec518d8e06",
-      "run": 39960541384,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39960541384",
+      "commit": "0963dfe4ee1dd9b29053b8982489e04a6645f93f",
+      "run": 39971556914,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39971556914",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "recursiveNodePassed": 2705,
+      "recursiveNodePassed": 2720,
       "contractBrowserPassed": 11,
       "builtAppPassed": 75,
       "rustPassed": 299,
+      "esmPassed": 12,
+      "cdpPassed": 12,
       "deletionInventoryPassed": 13,
       "nativeLargeImportScenariosPassed": 4,
-      "record": "docs/R16-01-DETAILS.md#正式验收2026-10-23",
+      "record": "docs/R16-02-DETAILS.md#正式验收2026-10-23",
       "artifacts": [
         {
-          "id": 12504528934,
+          "id": 12509921802,
           "kind": "closeout",
-          "digest": "sha256:1cf36093f731166614b3deed26360cd4d2431c950149fc9cfa94c1e6c873559a",
+          "digest": "sha256:ad78bc7a66fdb672aece5470a84ba537173c74c6ee6e44c2d66c3daf4167932a",
           "downloadDigestVerified": true
         },
         {
-          "id": 12504398448,
+          "id": 12510001649,
           "kind": "webview",
-          "digest": "sha256:b26cb414305fb055cc72b10920913f691ef869c64648f8da463e5df2e9cd67b4",
+          "digest": "sha256:d73196b534dec58d2efe73bd3bf74645389fa94441c271e736d0780130ff0d35",
           "downloadDigestVerified": true
         }
       ]
@@ -1144,7 +1146,7 @@
       "baselineCommit": "b88a94efd5dd84c5815f3593c1a4cea019cf0156",
       "branch": "codex/r16-stage",
       "record": "docs/R16-02-DETAILS.md",
-      "status": "locally-verified-pending-exact-commit-windows-ci",
+      "status": "accepted",
       "newScenariosDefined": 15,
       "modelKernelChanged": false,
       "nativeProductionChanged": false,
@@ -1159,7 +1161,7 @@
       "productionModuleCount": 567,
       "nativeOriginalCharacters": 5453875,
       "localNativeLargeImportScenariosPassed": 8,
-      "exactCommitWindowsPending": true,
+      "exactCommitWindowsPending": false,
       "localNativeEvidence": "mdr-r1602-native-90pNdP/verification.json",
       "cdpPortRepair": {
         "cause": "Actual CDP startup selected Fetch-blocked port6679; Chromium exposed DevTools but Node Fetch rejected before any scenario.",
@@ -1180,7 +1182,7 @@
       },
       "totalNewNodeScenariosDefined": 15,
       "localCdpPassed": 12,
-      "localNativeEnvironment": "Existing debug Tauri binary with final Vite sources and isolated WebView profile; embedded production same-commit Windows CI remains pending.",
+      "localNativeEnvironment": "Existing debug Tauri binary with final Vite sources and isolated WebView profile; embedded production same-commit Windows CI remains pending. Exact production embedded bundle accepted at CI39971556914.",
       "actualDirectoryGuardPassed": 63,
       "esmScenariosDefined": 12,
       "cdpNewScenariosDefined": 3
@@ -4593,6 +4595,37 @@
           }
         ],
         "priorArtifactDigestsVerifiedByFinalCIJob": true
+      },
+      {
+        "stage": "R16.1",
+        "date": "2026-10-23",
+        "commit": "733c2ae00dd949280dc33bf2ad0094ec518d8e06",
+        "run": 39960541384,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/39960541384",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "recursiveNodePassed": 2705,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 75,
+        "rustPassed": 299,
+        "deletionInventoryPassed": 13,
+        "nativeLargeImportScenariosPassed": 4,
+        "record": "docs/R16-01-DETAILS.md#正式验收2026-10-23",
+        "artifacts": [
+          {
+            "id": 12504528934,
+            "kind": "closeout",
+            "digest": "sha256:1cf36093f731166614b3deed26360cd4d2431c950149fc9cfa94c1e6c873559a",
+            "downloadDigestVerified": true
+          },
+          {
+            "id": 12504398448,
+            "kind": "webview",
+            "digest": "sha256:b26cb414305fb055cc72b10920913f691ef869c64648f8da463e5df2e9cd67b4",
+            "downloadDigestVerified": true
+          }
+        ]
       }
     ],
     "stageImplementationHistory": [
