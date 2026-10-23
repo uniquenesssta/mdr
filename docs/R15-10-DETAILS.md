@@ -72,3 +72,11 @@ flowchart TD
 旧断言保留真实IPC、canary、CSP、源文件读取和原有安全链验证；允许`Object.hasOwn`观测属性存在性，并新增两项约束要求真实默认窗口的`e2eOptIn=false`与`e2eGlobalPublished=false`断言存在。继续禁止CDP、旧setDocumentContent、读取window/globalThis上的E2E API及替换原生invoke。生产probe和产品安装实现均未修改，74项页面及41项安装契约保持。
 
 本地Windows已执行：`npm audit --audit-level=high`零漏洞；安全边界与安装门禁48/48通过；正式入口`npm exec --offline --call "node scripts/ci/run-repository-tests.mjs"`累计2613/2613，无跳过；四项架构门禁及浏览器交互契约11/11通过；`npm run build`通过，main约695.00kB，既有预算未修改。首次直接Node启动缺npm_execpath且沙箱拒绝浏览器清理，改用正式npm入口在本机复验后全部通过。74项实际页面首轮36通过、38失败，首次错误为CDP连接关闭；同机累计浏览器测试结束后单独复验，结果待补齐，不声称实际页面通过。Rust产品与锁文件未改，未在本地重复原生构建；新提交仍需完整七组Windows CI及原生WebView证据，15.10暂不标记验收，15.11未开始。
+
+## CI复验结果（2026-10-23）
+
+用户报告CI通过后，一次性核对修复提交`7233094ddb4e18c49d7fd897f00db0689622233e` / [CI39929368170](https://github.com/uniquenesssta/mdr/actions/runs/39929368170)：七组Windows作业及全部步骤均成功，无跳过。前端1606/1606、浏览器交互契约11/11、实际构建页面74/74通过；依赖审计、累计Node、Rust硬门禁、原生WebView安全/导入/输出链、原生链接及最终同提交证据汇总均通过。此次CI失败修复已获云端验证，不开始15.11。
+
+本机实际页面单独复验仍为36/74，首个导出场景CDP关闭后其余场景无法继续；隔离首次失败场景也复现，WebSocket关闭码1006，根因尚未确定。并发资源争用的猜测未获证实；不得以CI的74/74覆盖或标记本机页面通过。保留此项待诊断，未将本次CI核对扩展为新的阶段正式验收或后续任务实施。
+
+本次仅文档更新，不变更已验证实现或触发重复CI；遵循用户要求，推送后停止轮询，等待用户报告或明确要求查看结果。
