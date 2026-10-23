@@ -1,6 +1,7 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+import { buildFingerprintPlugin } from './scripts/build/fingerprint-plugin.mjs';
 
 const PROJECT_ROOT = dirname(fileURLToPath(import.meta.url));
 const PARENT_NODE_MODULES = resolve(PROJECT_ROOT, '..', 'node_modules');
@@ -71,7 +72,7 @@ function bundleBudgetPlugin() {
 export default defineConfig({
   clearScreen: false,
   cacheDir: '../node_modules/.vite/markdown-editor',
-  plugins: [bundleBudgetPlugin()],
+  plugins: [bundleBudgetPlugin(), buildFingerprintPlugin()],
   server: {
     host: '127.0.0.1',
     port: 16663,

@@ -92,6 +92,11 @@ test('hybrid widgets keep geometry explicit while document pointer listeners are
 
 test('local full-application E2E refuses stale build output', async () => {
   const runner = await readFile(new URL('./e2e/run-browser-tests.mjs', import.meta.url), 'utf8');
-  assert.match(runner, /Built dist is stale or was not produced from the current source/);
-  assert.match(runner, /Run npm run build before npm run test:browser/);
+  const app = runner.slice(runner.indexOf('async function runAppSuite()'));
+  const admission = app.indexOf('await verifyBuiltApplication({ projectRoot })');
+  const launch = app.indexOf('await launchChromium(');
+  assert.ok(admission >= 0 && launch >= 0 && admission < launch);
+  assert.match(app, /r15-12-build-fingerprint\.json/);
+  // Byte-level rejection and recovery are exercised in stage-15-stale-dist.test.mjs.
+  assert.doesNotMatch(app, /!externalUrl && !bridgeAvailable/);
 });

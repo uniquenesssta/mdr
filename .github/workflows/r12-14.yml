@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-11 public semantic runner and trusted input regression · ${{ github.sha }}
+run-name: R15-12 source and built-output fingerprint regression · ${{ github.sha }}
 
 on:
   push:
@@ -273,6 +273,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-e2e-runner.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/e2e-runner.log"
+
+      - name: R15-12 source and built-output fingerprint rejection and recovery
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-stale-dist.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/stale-dist.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { launchChromium } from './lib/cdp-browser.mjs';
 import { installVirtualFileHost } from './lib/virtual-file-host.mjs';
 import { startBuiltApplicationHost } from './lib/built-application-host.mjs';
+import { verifyBuiltApplication } from './lib/built-application-check.mjs';
 import { runExportCharacterization } from './lib/export-characterization.mjs';
 import { runE2EInstallationChecks } from './lib/e2e-installation.mjs';
 import { createApplicationDriver } from './lib/application-driver.mjs';
@@ -524,6 +525,16 @@ async function inspectResponsiveShell(page, viewport) {
 }
 
 async function runAppSuite() {
+  // Admit local bytes before allocating any Chromium process or listening socket.
+  if (!externalUrl) {
+    const evidencePath = join(artifactRoot, 'r15-12-build-fingerprint.json');
+    try {
+      await writeFile(evidencePath, JSON.stringify(await verifyBuiltApplication({ projectRoot }), null, 2));
+    } catch (error) {
+      await writeFile(evidencePath, JSON.stringify({ accepted: false, code: error.code, reason: error.reason, message: error.message }, null, 2));
+      throw error;
+    }
+  } else console.log('External URL mode: local dist fingerprint admission does not attest the external server.');
   const browser = await launchChromium({ width: 1440, height: 1000 });
   const app = createApplicationDriver(browser.page);
   const openSettings = async () => {
@@ -552,9 +563,7 @@ async function runAppSuite() {
     await browser.page.navigate(`${baseUrl.replace(/\/$/, '')}/?e2e=1`);
     await browser.page.waitFor(() => document.documentElement.classList.contains('app-ready'), { timeoutMs: 20000, description: 'application ready' });
     const bridgeAvailable = await browser.page.evaluate('Boolean(window.__markdownEditorE2E)');
-    if (!externalUrl && !bridgeAvailable) {
-      throw new Error('Built dist is stale or was not produced from the current source. Run npm run build before npm run test:browser.');
-    }
+    if (!bridgeAvailable) throw new Error('Public E2E capability is unavailable at ?e2e=1 after application startup.');
     await test('application mounts one App Shell with strict named slots', async () => {
       const snapshot = await browser.page.evaluate(`(()=>{
         const root=document.getElementById('app-root');
