@@ -25,6 +25,7 @@ import {
 } from './source-analysis.mjs';
 
 const DEFAULT_BASELINE_PATH = 'tests/architecture/fixtures/architecture-baseline.json';
+const RUNTIME_LOG_PATH = /^logs(?:\/|$)/i;
 const GENERATED_RUNTIME_PATTERNS = [
   /^(?:dist|\.vite|logs)(?:\/|$)/,
   /^src-tauri\/target(?:\/|$)/,
@@ -236,7 +237,7 @@ export async function checkGeneratedFiles({
   assertBaselineShape(baseline);
   const files = await listRepositoryFiles(root);
   const actualGenerated = files
-    .filter(path => GENERATED_RUNTIME_PATTERNS.some(pattern => pattern.test(path)))
+    .filter(path => RUNTIME_LOG_PATH.test(path) || GENERATED_RUNTIME_PATTERNS.some(pattern => pattern.test(path)))
     .sort();
   const expectedGenerated = [...baseline.trackedGeneratedFiles].sort();
   const issues = [];
@@ -244,7 +245,12 @@ export async function checkGeneratedFiles({
   const expected = new Set(expectedGenerated);
   const actual = new Set(actualGenerated);
   for (const path of actualGenerated) {
-    if (!expected.has(path)) {
+    if (RUNTIME_LOG_PATH.test(path)) {
+      issues.push(architectureIssue(
+        'tracked-runtime-log', path,
+        'Runtime logs must not be tracked by Git, including force-added or previously exempted files.'
+      ));
+    } else if (!expected.has(path)) {
       issues.push(architectureIssue(
         'tracked-generated-file-regression',
         path,
@@ -253,13 +259,36 @@ export async function checkGeneratedFiles({
     }
   }
   for (const path of expectedGenerated) {
-    if (!actual.has(path)) {
+    if (RUNTIME_LOG_PATH.test(path)) {
+      issues.push(architectureIssue(
+        'runtime-log-baseline-exemption', path,
+        'Runtime logs cannot be exempted by the generated-file baseline; remove this active exemption.'
+      ));
+    } else if (!actual.has(path)) {
       issues.push(architectureIssue(
         'generated-file-baseline-stale',
         path,
         'Tracked generated-file baseline changed without updating the exact baseline.'
       ));
     }
+  }
+
+  // Ask Git to evaluate the directory itself, including negation semantics.
+  // Local/global excludes are not a portable repository policy.
+  const ignored = spawnSync('git', ['check-ignore', '--no-index', '--verbose', '--non-matching', '--stdin', '-z'], {
+    cwd: root, input: 'logs/\0', encoding: 'utf8'
+  });
+  const [ignoreSource, , ignorePattern, ignoredPath] = (ignored.stdout || '').split('\0');
+  if (ignored.error || ![0, 1].includes(ignored.status)) {
+    issues.push(architectureIssue(
+      'runtime-logs-ignore-check-failed', '.gitignore',
+      'Unable to evaluate the shared logs/ ignore rule with git check-ignore.'
+    ));
+  } else if (ignoreSource !== '.gitignore' || !ignorePattern || ignorePattern.startsWith('!') || ignoredPath !== 'logs/') {
+    issues.push(architectureIssue(
+      'runtime-logs-ignore-missing', '.gitignore',
+      'The repository .gitignore must ignore the entire logs/ directory, for example with /logs/.'
+    ));
   }
 
   for (const path of files.filter(shouldScanLegacySuffix)) {

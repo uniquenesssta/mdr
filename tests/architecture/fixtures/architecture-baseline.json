@@ -249,9 +249,7 @@
   ],
   "trackedGeneratedFiles": [
     ".vite/deps/_metadata.json",
-    ".vite/deps/package.json",
-    "logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl",
-    "logs/performance-2026-07-25_17-29-13-389_pid-20484.jsonl"
+    ".vite/deps/package.json"
   ],
   "auditCorrections": {
     "atomic": "R12-18",
@@ -426,6 +424,25 @@
           "lines": [
             28
           ]
+        }
+      ]
+    },
+    "r15RuntimeLogRetirement": {
+      "atomic": "R15-13",
+      "baselineCommit": "bb0c585eabfc014f2689cbebd30561051e912baf",
+      "reason": "Remove runtime logs from Git tracking and active exemptions; preserve local bytes and historical evidence. Runtime logs cannot be re-exempted.",
+      "removedTrackedGeneratedFiles": [
+        {
+          "path": "logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl",
+          "bytes": 37698,
+          "sha256": "b9afdfd7d95e65115b4405e309207aed0cebbeaf8c1de22b510a3e440e39ba4c",
+          "blobSha": "00b9f2341c928628180787934c433fb3ef87709e"
+        },
+        {
+          "path": "logs/performance-2026-07-25_17-29-13-389_pid-20484.jsonl",
+          "bytes": 118805,
+          "sha256": "d7e6dcfad2c1dcd0450e18fb154fc03f772aa19b42b7c48495601a1504336b28",
+          "blobSha": "20da25e479ae57f9879b0f2d4cb25ae3f252a0b7"
         }
       ]
     }

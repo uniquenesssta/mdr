@@ -22,12 +22,12 @@ test('rejects new tracked generated output and forbidden migration suffixes', as
   const generated = join(root, 'logs/new.jsonl');
   await mkdir(dirname(generated), { recursive: true });
   await writeFile(generated, '{}\n', 'utf8');
-  spawnSync('git', ['add', 'logs/new.jsonl'], { cwd: root });
+  assert.equal(spawnSync('git', ['add', '-f', '--', 'logs/new.jsonl'], { cwd: root }).status, 0);
   await writeFile(join(root, 'src/service-final.js'), 'export {};\n', 'utf8');
   spawnSync('git', ['add', 'src/service-final.js'], { cwd: root });
 
   const issues = await checkGeneratedFiles({ root });
-  assert.ok(issues.some(issue => issue.rule === 'tracked-generated-file-regression'));
+  assert.ok(issues.some(issue => issue.rule === 'tracked-runtime-log' && issue.path === 'logs/new.jsonl'));
   assert.ok(issues.some(issue => (
     issue.rule === 'legacy-file-suffix' && issue.path === 'src/service-final.js'
   )));

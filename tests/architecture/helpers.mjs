@@ -11,6 +11,7 @@ export async function createArchitectureFixture(files, moduleRecords) {
     field === 'frozen' ? false : ''
   )));
   const allFiles = {
+    '.gitignore': '/logs/\n',
     'tests/architecture/fixtures/production-modules.json': `${JSON.stringify({ schemaVersion: 1, fields, modules }, null, 2)}\n`,
     'README.md': '# Fixture\n\n## Change Log\n',
     ...files

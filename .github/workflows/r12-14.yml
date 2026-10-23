@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-12 source and built-output fingerprint regression · ${{ github.sha }}
+run-name: R15-13 runtime log retirement and generated-file regression · ${{ github.sha }}
 
 on:
   push:
@@ -278,6 +278,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-stale-dist.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/stale-dist.log"
+
+      - name: R15-13 runtime log retirement and non-exemptible generated-file guard
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-log-cleanup.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/log-cleanup.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

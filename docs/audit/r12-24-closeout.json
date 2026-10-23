@@ -612,6 +612,34 @@
     {
       "path": "tests/stage-15-stale-dist.test.mjs",
       "blobSha": "e81fb71004e3374cba97e908516375c6101ba7e2"
+    },
+    {
+      "path": ".gitignore",
+      "blobSha": "7fce4443ddb80c85586c87a9ac528fa48df12e66"
+    },
+    {
+      "path": "scripts/architecture/checks.mjs",
+      "blobSha": "e2940de95ddec5d13d600b6e04c69558bd681ad3"
+    },
+    {
+      "path": "tests/architecture/fixtures/architecture-baseline.json",
+      "blobSha": "e78a01a683d5e53640c499f8dfe003e2e9130838"
+    },
+    {
+      "path": "tests/architecture/architecture-tooling.test.mjs",
+      "blobSha": "a79652dc962348db77b76babcc2be22fc2ddb805"
+    },
+    {
+      "path": "tests/architecture/helpers.mjs",
+      "blobSha": "baa1d176bb86c945e832219a6c228ada76dd0a23"
+    },
+    {
+      "path": "tests/stage-01-handoff.test.mjs",
+      "blobSha": "9f634a74caeb52952f4a25eb39fb3ed93a937dd1"
+    },
+    {
+      "path": "tests/stage-15-log-cleanup.test.mjs",
+      "blobSha": "0c32e298cd1b3ef96d0a00b85b0c37a8b33d4a56"
     }
   ],
   "priorFailures": {
@@ -827,14 +855,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R15.12",
+    "stage": "R15.13",
     "date": "2026-10-23",
-    "reviewedCommit": "5548c9059202970edc53387f622a2a90b1c2a4ab",
-    "record": "docs/R15-12-DETAILS.md",
-    "status": "R15.12 accepted; R15.13 authorized",
+    "reviewedCommit": "bb0c585eabfc014f2689cbebd30561051e912baf",
+    "record": "docs/R15-13-DETAILS.md",
+    "status": "R15.12 accepted; R15.13 implemented pending exact-commit Windows",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
-    "scope": "Build-time source and emitted/public byte fingerprints; local browser admission before process/socket allocation; actionable stale-dist failures without feature or UI changes.",
+    "scope": "Remove two development JSONL files from Git tracking while preserving local bytes and history; shared root logs ignore and non-exemptible generated-file checks. Product code, build inputs, native and UI unchanged.",
     "acceptedPriorStage": {
       "stage": "R15.9",
       "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
@@ -918,8 +946,8 @@
         "failedSteps": []
       }
     ],
-    "implementationWindowsRun": 39943187508,
-    "implementationWindowsJobs": 7,
+    "implementationWindowsRun": null,
+    "implementationWindowsJobs": 0,
     "currentStageAcceptance": {
       "stage": "R15.12",
       "date": "2026-10-23",
@@ -947,28 +975,25 @@
       "priorArtifactDigestsVerifiedByFinalCIJob": true
     },
     "currentStageImplementation": {
-      "stage": "R15.12",
-      "baselineCommit": "5548c9059202970edc53387f622a2a90b1c2a4ab",
+      "stage": "R15.13",
+      "baselineCommit": "bb0c585eabfc014f2689cbebd30561051e912baf",
       "branch": "agent/r15-stage",
-      "record": "docs/R15-12-DETAILS.md",
-      "status": "accepted",
-      "newScenariosDefined": 33,
-      "builtAppScenariosRetained": 75,
-      "builtAppScenariosDefined": 75,
+      "record": "docs/R15-13-DETAILS.md",
+      "status": "implemented-pending-windows",
+      "newScenariosDefined": 17,
+      "localNewScenariosPassed": 17,
+      "localRelatedScenariosPassed": 23,
+      "trackedRuntimeLogs": 0,
+      "localLogFilesPreserved": true,
       "productionModuleCount": 564,
       "nativeProductionChanged": false,
       "modelKernelChanged": false,
       "dependenciesChanged": false,
-      "localNewScenariosPassed": 33,
-      "localRelatedScenariosPassed": 45,
-      "sourceInputFiles": 505,
-      "outputFiles": 140,
-      "oldDistRejected": true,
-      "localProductionBuildPassed": true,
-      "localRecursiveNodePassed": 2668,
-      "localBuiltAppPassed": 75,
-      "localContractBrowserPassed": 11,
-      "localValidation": "Node24.19 Windows: stale-dist 33/33, related 45/45, full tracked Node 2668/2668 across 357 files and 16 directories without failures/skips, built-app 75/75, browser contract 11/11, production build, four architecture gates, 119 source hashes, historical acceptance preservation and diff checks passed. Old dist rejected before Chromium allocation; current 505-input/140-output manifest accepted. Exact implementation Windows CI remains pending."
+      "productBuildInputsChanged": false,
+      "priorBuiltAppPassed": 75,
+      "priorProductRun": 39943187508,
+      "localRecursiveNodePassed": 2685,
+      "localValidation": "Node24.19 Windows: log cleanup 17/17; related tooling/handoff 23/23; all tracked Node 2685/2685 across 358 files and 16 directories, no failures/skips/cancellations; four architecture gates, 126 current review hashes, syntax and diff checks passed. Two local logs retained with exact bytes, tracked log inventory empty and shared ignore verified. Archived R12 and R15.12 acceptance unchanged. Product build/worker/browser/native source unchanged; retained 505-input/140-output fingerprint accepted. Exact implementation Windows CI pending."
     },
     "priorStageAcceptance": {
       "stage": "R15.9",
@@ -11982,6 +12007,30 @@
         "independentUiFinding": "Real pointer Image Menu close does not restore File launcher focus; product UI unchanged; original R14 component probe retained with every original assertion.",
         "localRecursiveNodePassed": 2635,
         "localNewScenariosPassed": 22
+      },
+      {
+        "stage": "R15.12",
+        "baselineCommit": "5548c9059202970edc53387f622a2a90b1c2a4ab",
+        "branch": "agent/r15-stage",
+        "record": "docs/R15-12-DETAILS.md",
+        "status": "accepted",
+        "newScenariosDefined": 33,
+        "builtAppScenariosRetained": 75,
+        "builtAppScenariosDefined": 75,
+        "productionModuleCount": 564,
+        "nativeProductionChanged": false,
+        "modelKernelChanged": false,
+        "dependenciesChanged": false,
+        "localNewScenariosPassed": 33,
+        "localRelatedScenariosPassed": 45,
+        "sourceInputFiles": 505,
+        "outputFiles": 140,
+        "oldDistRejected": true,
+        "localProductionBuildPassed": true,
+        "localRecursiveNodePassed": 2668,
+        "localBuiltAppPassed": 75,
+        "localContractBrowserPassed": 11,
+        "localValidation": "Node24.19 Windows: stale-dist 33/33, related 45/45, full tracked Node 2668/2668 across 357 files and 16 directories without failures/skips, built-app 75/75, browser contract 11/11, production build, four architecture gates, 119 source hashes, historical acceptance preservation and diff checks passed. Old dist rejected before Chromium allocation; current 505-input/140-output manifest accepted. Exact implementation Windows CI remains pending."
       }
     ],
     "migratedReviewedSources": [
