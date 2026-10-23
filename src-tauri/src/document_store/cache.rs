@@ -112,6 +112,14 @@ impl DocumentCache {
     pub(super) fn mutex_available(&self) -> bool {
         self.state.try_lock().is_ok()
     }
+
+    #[cfg(test)]
+    pub(super) fn reservation_active_for_test(&self, key: &str) -> bool {
+        match self.state.try_lock() {
+            Ok(state) => state.active.contains(&key.to_ascii_lowercase()),
+            Err(_) => false,
+        }
+    }
 }
 
 impl Drop for DocumentLease<'_> {

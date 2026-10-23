@@ -8,10 +8,83 @@ use std::{
     fs,
     sync::{mpsc, Barrier},
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 const DEADLINE: Duration = Duration::from_secs(5);
+
+// Bound cache admission, not real filesystem latency. A fast operation may have
+// already completed; otherwise its active lease proves it reached IO without
+// waiting for another document. The caller still joins and checks the real save.
+fn wait_for_admission<T>(
+    receive: &mpsc::Receiver<T>,
+    admitted: impl Fn() -> bool,
+    deadline: Duration,
+) -> Result<Option<T>, mpsc::RecvTimeoutError> {
+    let end = Instant::now() + deadline;
+    loop {
+        match receive.try_recv() {
+            Ok(result) => return Ok(Some(result)),
+            Err(mpsc::TryRecvError::Disconnected) => {
+                return Err(mpsc::RecvTimeoutError::Disconnected);
+            }
+            Err(mpsc::TryRecvError::Empty) => {}
+        }
+        if admitted() {
+            return Ok(None);
+        }
+        let remaining = end.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            return Err(mpsc::RecvTimeoutError::Timeout);
+        }
+        match receive.recv_timeout(remaining.min(Duration::from_millis(1))) {
+            Ok(result) => return Ok(Some(result)),
+            Err(mpsc::RecvTimeoutError::Disconnected) => {
+                return Err(mpsc::RecvTimeoutError::Disconnected);
+            }
+            Err(mpsc::RecvTimeoutError::Timeout) => {}
+        }
+    }
+}
+
+#[test]
+fn admission_wait_observes_a_real_lease_before_the_io_result_exists() {
+    let store = DocumentStore::default();
+    let lease = store.inner.checkout(Ok(DOCUMENT_ID.into())).unwrap();
+    let (send, receive) = mpsc::channel::<u32>();
+    assert!(matches!(receive.try_recv(), Err(mpsc::TryRecvError::Empty)));
+    let result = wait_for_admission(
+        &receive,
+        || {
+            store
+                .inner
+                .reservation_active_for_test(&DOCUMENT_ID.to_ascii_uppercase())
+        },
+        Duration::from_millis(10),
+    );
+    assert!(matches!(result, Ok(None)));
+    assert!(store.inner.mutex_available());
+    drop(lease);
+    assert!(!store.inner.reservation_active_for_test(DOCUMENT_ID));
+    send.send(7).unwrap();
+    assert_eq!(receive.recv_timeout(DEADLINE).unwrap(), 7);
+}
+
+#[test]
+fn admission_wait_preserves_completion_timeout_and_disconnect_results() {
+    let (send, receive) = mpsc::channel();
+    send.send(7).unwrap();
+    assert_eq!(wait_for_admission(&receive, || false, DEADLINE), Ok(Some(7)));
+    assert_eq!(
+        wait_for_admission(&receive, || false, Duration::from_millis(10)),
+        Err(mpsc::RecvTimeoutError::Timeout)
+    );
+    drop(send);
+    assert_eq!(
+        wait_for_admission(&receive, || false, DEADLINE),
+        Err(mpsc::RecvTimeoutError::Disconnected)
+    );
+}
 
 #[test]
 fn reservation_releases_mutex_and_keeps_other_documents_available() {
@@ -27,7 +100,11 @@ fn reservation_releases_mutex_and_keeps_other_documents_available() {
         request.document_id = "independent".into();
         send.send(worker.save(&path, request)).unwrap();
     });
-    let result = receive.recv_timeout(DEADLINE);
+    let result = wait_for_admission(
+        &receive,
+        || store.inner.reservation_active_for_test("independent"),
+        DEADLINE,
+    );
     let alias_store = store.clone();
     let (alias_send, alias_receive) = mpsc::channel();
     let (started_send, started_receive) = mpsc::channel();
@@ -48,11 +125,14 @@ fn reservation_releases_mutex_and_keeps_other_documents_available() {
     task.join().unwrap();
     alias_receive.recv_timeout(DEADLINE).unwrap();
     alias.join().unwrap();
-    assert!(
-        alias_blocked,
-        "case aliases must retain same-directory serialization"
-    );
-    assert_eq!(result.unwrap().unwrap().version, 1);
+    assert!(alias_blocked, "case aliases must retain same-directory serialization");
+    let saved = result.unwrap().unwrap_or_else(|| receive.recv().unwrap());
+    assert_eq!(saved.unwrap().version, 1);
+    let disk = DocumentStore::default()
+        .load(&root.0, "independent".into())
+        .unwrap()
+        .unwrap();
+    assert_eq!((disk.content.as_str(), disk.version), ("另一份文档😀", 1));
 }
 
 #[test]
@@ -68,10 +148,11 @@ fn competing_deltas_have_one_winner_and_preserve_disk_cache_agreement() {
             let barrier = barrier.clone();
             thread::spawn(move || {
                 let request = serde_json::from_value(json!({
-                "documentId": DOCUMENT_ID, "title": "并发.md", "baseVersion": 1,
-                "nextVersion": 2, "updatedAt": 43,
-                "transactions": [{"changes": [{"from": 1, "to": 1, "insert": index.to_string()}]}]
-            })).unwrap();
+                    "documentId": DOCUMENT_ID, "title": "并发.md", "baseVersion": 1,
+                    "nextVersion": 2, "updatedAt": 43,
+                    "transactions": [{"changes": [{"from": 1, "to": 1, "insert": index.to_string()}]}]
+                }))
+                .unwrap();
                 barrier.wait();
                 (index, store.save(&path, request))
             })
@@ -95,10 +176,7 @@ fn competing_deltas_have_one_winner_and_preserve_disk_cache_agreement() {
         .unwrap()
         .unwrap();
     assert_eq!(cached.content, format!("甲{}", winners[0]));
-    assert_eq!(
-        (disk.content, disk.version),
-        (cached.content, cached.version)
-    );
+    assert_eq!((disk.content, disk.version), (cached.content, cached.version));
 }
 
 #[test]
@@ -125,10 +203,7 @@ fn concurrent_full_saves_share_normalized_identity_and_rotate_valid_slots() {
     let mut results: Vec<_> = tasks.into_iter().map(|task| task.join().unwrap()).collect();
     results.sort_by_key(|(_, version)| *version);
     assert_eq!(
-        results
-            .iter()
-            .map(|(_, version)| *version)
-            .collect::<Vec<_>>(),
+        results.iter().map(|(_, version)| *version).collect::<Vec<_>>(),
         (1..=8).collect::<Vec<_>>()
     );
     let disk = DocumentStore::default()
@@ -162,10 +237,7 @@ fn concurrent_recovery_readers_consume_the_notice_exactly_once() {
         })
         .collect();
     let notices: Vec<_> = tasks.into_iter().map(|task| task.join().unwrap()).collect();
-    assert_eq!(
-        notices.iter().filter(|(recovered, _)| *recovered).count(),
-        1
-    );
+    assert_eq!(notices.iter().filter(|(recovered, _)| *recovered).count(), 1);
     for (recovered, message) in notices {
         assert_eq!(recovered, message.is_some());
     }
@@ -182,17 +254,23 @@ fn io_failure_discards_uncommitted_document_and_allows_a_retry() {
         .unwrap_err()
         .starts_with("无法创建临时文件："));
     assert!(store.inner.mutex_available());
+    assert!(!store.inner.reservation_active_for_test(DOCUMENT_ID));
+    assert_eq!(store.inner.cached_len(), 0);
     fs::remove_dir(obstacle).unwrap();
     let worker = store.clone();
     let path = root.0.clone();
     let (send, receive) = mpsc::channel();
-    let task = thread::spawn(move || {
-        send.send(worker.save(&path, full_request("重试😀")))
-            .unwrap()
-    });
-    // Failed initial snapshot never committed a version; retry starts from disk version zero.
-    assert_eq!(receive.recv_timeout(DEADLINE).unwrap().unwrap().version, 1);
+    let task = thread::spawn(move || send.send(worker.save(&path, full_request("重试😀"))).unwrap());
+    let result = wait_for_admission(
+        &receive,
+        || store.inner.reservation_active_for_test(DOCUMENT_ID),
+        DEADLINE,
+    )
+    .expect("failed saves must release admission before a retry");
     task.join().unwrap();
+    // Failed initial snapshot never committed a version; retry starts from disk version zero.
+    let saved = result.unwrap_or_else(|| receive.recv().unwrap());
+    assert_eq!(saved.unwrap().version, 1);
     let disk = DocumentStore::default()
         .load(&root.0, DOCUMENT_ID.into())
         .unwrap()
@@ -223,10 +301,7 @@ fn unwind_releases_reservation_and_wakes_same_document_waiters_with_poison_error
         panic!("unwind while owning a document without holding a mutex");
     }));
     assert!(unwound.is_err());
-    assert_eq!(
-        receive.recv_timeout(DEADLINE).unwrap().unwrap_err(),
-        "文档存储锁已损坏"
-    );
+    assert_eq!(receive.recv_timeout(DEADLINE).unwrap().unwrap_err(), "文档存储锁已损坏");
     task.join().unwrap();
     assert!(store.inner.mutex_available());
     assert_eq!(
@@ -273,11 +348,7 @@ fn blocked_real_journal_read_does_not_block_another_documents_disk_save() {
         .unwrap();
     let journal = journal_path(&slow_root.0);
     fs::remove_file(&journal).unwrap();
-    assert!(Command::new("mkfifo")
-        .arg(&journal)
-        .status()
-        .unwrap()
-        .success());
+    assert!(Command::new("mkfifo").arg(&journal).status().unwrap().success());
 
     let store = DocumentStore::default();
     let slow_store = store.clone();

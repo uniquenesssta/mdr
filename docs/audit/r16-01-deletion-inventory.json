@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
+  "baselineCommit": "f3570af01938ff463a53a14a9f9f7acb0159ba72",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "44a0e95dc801f8e00a5c59d6bfac3632bc4b74b9705c329d78d444c3d11e529b"
+      "sha256": "1feddc61c7ffebad55a11df0eba0af4fc76bb66915d10d48469a6cb8de066b26"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -451,7 +451,7 @@
     },
     {
       "path": "src-tauri/src/document_store/cache.rs",
-      "sha256": "8fb492ecc620f1c66c9fe7f6d181605efbe99cdfd6e112fb8b0b87ea06474198"
+      "sha256": "9ea1a02f1b26657c2b1f1deeac77a65f2655fe62eeaaf7e51802e2be867cbf34"
     },
     {
       "path": "src-tauri/src/document_store/chunks/mod.rs",
@@ -827,7 +827,7 @@
     },
     {
       "path": "src-tauri/tests/support/document_store_concurrency.rs",
-      "sha256": "83ee49834925ca42c0b478817405db05c4ad0fcfdee61299606915596c2f3282"
+      "sha256": "9b86783f52c074aed235fe9974e29eda28d4a8924da7a50e80c6d23450278988"
     },
     {
       "path": "src-tauri/tests/support/document_store_faults.rs",
@@ -4550,7 +4550,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "0b1c3fa75fd07999ee3a339472c1a2ab5d550a68a3992d02908afbad3b962679",
+  "inputSha256": "5edbdcae059a0206c4262761248ab47a7bc29f25c6ac8ea27a0b220db22fef25",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",

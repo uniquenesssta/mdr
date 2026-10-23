@@ -635,7 +635,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "blobSha": "6da0e72f640f7a70c89ccc1216dd9d76c404ca7d"
+      "blobSha": "ad8a40dad11526bbfc41147bf87a9ceb9e65fcba"
     },
     {
       "path": "scripts/stage-16/deletion-inventory.mjs",
@@ -707,7 +707,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "1cc712c8dfc6cc14f4783135cf57a44d6d81767c"
+      "blobSha": "5fb5afccb7bddb39119ff89a0295ff28780e09af"
     },
     {
       "path": "src/features/documents/application/document-open-coordinator.js",
@@ -916,6 +916,14 @@
     {
       "path": "tests/e2e/link-preview.test.mjs",
       "blobSha": "32fa07042d1aebfed8d1a9dc60df09cf8b99c377"
+    },
+    {
+      "path": "src-tauri/src/document_store/cache.rs",
+      "blobSha": "679b480913d89fbe95998661c68bd94422e42905"
+    },
+    {
+      "path": "src-tauri/tests/support/document_store_concurrency.rs",
+      "blobSha": "88bd6a74a7bc3025164cad88f7fabf61d7baa207"
     }
   ],
   "priorFailures": {
@@ -1135,7 +1143,7 @@
     "date": "2026-10-23",
     "reviewedCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
     "record": "docs/R16-03-DETAILS.md",
-    "status": "locally-verified-pending-exact-commit-windows-ci",
+    "status": "ci-repair-targeted-verified; local-case-sensitive-setup-unavailable; exact-windows-ci-pending",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "R16-02 classic script deletion, explicit ESM startup and complete caller/test lifecycle migration; R16-03 not started.",
@@ -1290,17 +1298,17 @@
       "baselineCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
       "branch": "codex/r16-stage",
       "record": "docs/R16-03-DETAILS.md",
-      "status": "locally-verified-pending-exact-commit-windows-ci",
-      "newScenariosDefined": 17,
+      "status": "ci-repair-targeted-verified; local-case-sensitive-setup-unavailable; exact-windows-ci-pending",
+      "newScenariosDefined": 19,
       "modelKernelChanged": false,
-      "nativeProductionChanged": false,
+      "nativeProductionChanged": true,
       "dependenciesChanged": false,
       "productionModuleCount": 570,
       "businessGlobalWrites": 0,
       "implicitWidgetHandlers": 0,
       "frozenOptionalGlobalReads": 1,
       "exactCommitWindowsPending": true,
-      "localNewScenariosPassed": 17,
+      "localNewScenariosPassed": 19,
       "localContractBrowserPassed": 11,
       "localFirstCumulative": {
         "passed": 2734,
@@ -1315,7 +1323,7 @@
         "failed": 2,
         "reason": "Two remaining test probes read the removed model global; replaced by existing detached E2E queries with identity/body/version assertions retained."
       },
-      "sourceReviewCount": 195,
+      "sourceReviewCount": 197,
       "localSecondCumulative": {
         "passed": 2734,
         "failed": 2,
@@ -1344,7 +1352,48 @@
       "focusRetentionNegativeControlRejected": true,
       "localGlobalApiPassed": 16,
       "snapshotInputs": 1132,
-      "finalDeliveryContractsPassed": 38
+      "finalDeliveryContractsPassed": 38,
+      "localNewRustScenariosDefined": 2,
+      "ciRepair": {
+        "date": "2026-10-24",
+        "baselineCommit": "f3570af01938ff463a53a14a9f9f7acb0159ba72",
+        "failedRun": 39979330283,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/39979330283",
+        "record": "docs/R16-03-DETAILS.md#ci未通过与并发夹具修复2026-10-24",
+        "status": "targeted-verified; exact-commit-ci-pending",
+        "failedUnitPassed": 285,
+        "failedUnitFailed": 2,
+        "otherJobsPassed": 5,
+        "failures": [
+          "reservation_releases_mutex_and_keeps_other_documents_available: old line55 Timeout",
+          "io_failure_discards_uncommitted_document_and_allows_a_retry: old line194 Timeout"
+        ],
+        "repair": "Bound actual cache admission rather than real filesystem completion; retain original five-second admission budget, alias exclusion, join and version/body readback. Only cfg(test) read-only cache observation added.",
+        "newRustScenarios": 2,
+        "localConcurrencyPassed": 9,
+        "negativeControlRejected": true,
+        "rustfmtInputsPassed": 45,
+        "clippyWarningsDeniedPassed": true,
+        "cargoCheckPassed": true,
+        "productionRustBehaviorChanged": false,
+        "modelKernelChanged": false,
+        "frontendBuildInputsChanged": false,
+        "dependenciesChanged": false,
+        "localRust": {
+          "unitPassed": 288,
+          "unitFailed": 1,
+          "compatibilityPassed": 12,
+          "totalDefined": 301,
+          "environmentLimitation": "Unchanged case-sensitive-directory test: fsutil setup returned request not supported; same test passed in CI39979330283. Test remains mandatory."
+        },
+        "sourceReviewCount": 197,
+        "nativeSourceChangeScope": "Only a cfg(test) readonly observer added to cache.rs; production checkout/save/drop behavior unchanged.",
+        "localTargetedNodePassed": 78,
+        "fourArchitectureGatesPassed": true,
+        "protectedSourcesUnchanged": 10,
+        "frontendSourceSha256": "14a6ed038657c11ada42372661e36fb63bcec8b25611cf1fd2fcf551c7524fdc"
+      },
+      "nativeProductionBehaviorChanged": false
     },
     "priorStageAcceptance": {
       "stage": "R15.9",
@@ -13078,6 +13127,18 @@
         "blobSha": "ef3252e4f051d9af9165ab83cb894c470b5ddbe5",
         "stage": "R16.3",
         "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": ".github/workflows/r12-14.yml",
+        "blobSha": "6da0e72f640f7a70c89ccc1216dd9d76c404ca7d",
+        "stage": "R16.3-CI-repair",
+        "receiver": "docs/R16-03-DETAILS.md#ci未通过与并发夹具修复2026-10-24"
+      },
+      {
+        "path": "docs/audit/r16-01-deletion-inventory.json",
+        "blobSha": "1cc712c8dfc6cc14f4783135cf57a44d6d81767c",
+        "stage": "R16.3-CI-repair",
+        "receiver": "docs/R16-03-DETAILS.md#ci未通过与并发夹具修复2026-10-24"
       }
     ],
     "currentPhaseAcceptance": {

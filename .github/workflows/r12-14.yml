@@ -447,6 +447,7 @@ jobs:
             src-tauri/tests/local_file/stage_12.rs \
             src-tauri/tests/local_file/commands.rs \
             src-tauri/tests/stage_12_security_compatibility.rs \
+            src-tauri/tests/support/document_store_concurrency.rs \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rustfmt.log"
       - name: R12-21 shared safe writer Windows failures 18 of 18
         if: ${{ !cancelled() }}
@@ -590,6 +591,12 @@ jobs:
           cargo test --manifest-path src-tauri/Cargo.toml --locked --test stage_12_security_compatibility \
             2>&1 | tee "$RUNNER_TEMP/r12-14/rust-fixture.log"
           grep -Fq 'test result: ok. 6 passed; 0 failed' "$RUNNER_TEMP/r12-14/rust-fixture.log"
+      - name: R16-03 bounded cache admission and real disk concurrency
+        if: ${{ !cancelled() }}
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor document_store::store::concurrency_tests \
+            -- --nocapture 2>&1 | tee "$RUNNER_TEMP/r12-14/document-admission.log"
+          grep -Fq 'test result: ok. 9 passed; 0 failed; 0 ignored' "$RUNNER_TEMP/r12-14/document-admission.log"
       - name: Full Rust tests
         if: ${{ !cancelled() }}
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked 2>&1 | tee "$RUNNER_TEMP/r12-14/rust-tests.log"
