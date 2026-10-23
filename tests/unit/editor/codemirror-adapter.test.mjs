@@ -309,8 +309,8 @@ test('production integration keeps raw CodeMirror confined to editor and the exp
   const nonEditorSource = walkJavaScript(path.join(repositoryRoot, 'src'))
     .filter(file => file !== hybridPort && !file.includes(`${path.sep}src${path.sep}editor${path.sep}`)
       && !file.includes(`${path.sep}src${path.sep}features${path.sep}editor${path.sep}`));
-  const classicSource = walkJavaScript(path.join(repositoryRoot, 'public', 'app'));
-  for (const file of [...nonEditorSource, ...classicSource]) {
+  const publicSource = walkJavaScript(path.join(repositoryRoot, 'public'));
+  for (const file of [...nonEditorSource, ...publicSource]) {
     const source = fs.readFileSync(file, 'utf8');
     assert.doesNotMatch(source, /@codemirror\//, `${path.relative(repositoryRoot, file)} must not import CodeMirror`);
   }

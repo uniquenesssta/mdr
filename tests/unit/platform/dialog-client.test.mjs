@@ -1,5 +1,6 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+
 import test from 'node:test';
 import { createDialogClient } from '../../../src/platform/index.js';
 

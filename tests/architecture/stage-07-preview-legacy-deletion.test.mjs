@@ -1,5 +1,6 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -62,7 +63,7 @@ test('Atomic 7.14 remaining classic callers use the single scoped Preview comman
     'public/app/web-clipper.js'
   ];
   const combined = (await Promise.all(paths.map(source))).join('\n');
-  assert.match(combined, /markdownEditorPreviewCommandPort/);
+  assert.match(combined, /corePreviewCommandPort/);
   for (const forbidden of [
     'function updatePreview(',
     'function createPreviewWorkerClient(',

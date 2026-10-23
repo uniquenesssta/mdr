@@ -1,7 +1,8 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -208,7 +209,7 @@ test('Atomic 6.12 production integration keeps persistence in Documents and remo
     readText('src/features/menu/recent-files-menu-controller.js'),
     readText('src/features/import/application/import-document-controller.js')
   ]);
-  assert.match(core, /markdownEditorRecentFilesPort/);
+  assert.match(core, /coreRecentFilesPort/);
   assert.ok(core.includes('coreRecentFilesPort.add('));
   assert.doesNotMatch(core, /coreRecentFilesPort\.(load|clear|entries)/);
   assert.doesNotMatch(core, /function (loadRecentFiles|renderRecentFilesMenu|openRecentFile|clearRecentFiles)\s*\(/);

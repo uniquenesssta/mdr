@@ -1,6 +1,7 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile } from 'node:fs/promises';
+
 const read = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
 
 test('Atomic 6.5 exposes one Toolbar Boundary controller through the Layout public entrypoint', async () => {
@@ -29,7 +30,7 @@ test('Atomic 6.5 removes classic Toolbar Boundary authority but preserves user-c
   ]) {
     assert.doesNotMatch(core, new RegExp(`\\b${legacy}\\b`), `core must not retain ${legacy}`);
   }
-  assert.match(core, /let toolbarHiddenItems = new Set\(\)/);
+  assert.match(core, /new Set\(coreSettingsStorePort\.get\('toolbarHiddenItems'\)\)/);
   assert.match(core, /function updateToolbarItemVisibility\(\)/);
   assert.match(core, /toolbar-item-hidden/);
   assert.match(core, /refreshToolbarBoundary/);

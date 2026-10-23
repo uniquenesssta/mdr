@@ -154,10 +154,11 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   assert.match(stage1Section, /38 个业务全局写入/);
 
   // R14-18 retires export.js; retain its exact historical deletion mapping.
-  assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 5);
+  assert.equal(baseline.legacyClassicScripts.reduce((sum, item) => sum + item.count, 0), 0);
   assert.deepEqual(baseline.auditCorrections.r14ExportRetirement.removedClassicScripts,
     [{loader:'src/main.js',script:'public/app/export.js',count:1}]);
   assert.equal(baseline.legacyClassicScripts.reduce((sum,item)=>sum+item.count,0)
+    + baseline.auditCorrections.r16ClassicRetirement.removedClassicScripts.reduce((sum,item)=>sum+item.count,0)
     + baseline.auditCorrections.r14ExportRetirement.removedClassicScripts.reduce((sum,item)=>sum+item.count,0),6);
   for(const path of ['src/features/export/application/export-controller.js','src/features/export/ui/export-image-dialog-view.js','src/features/export/compatibility/classic-export-command-port.js'])assert.ok(moduleFixture.modules.some(record=>record[0]===path));
   assert.equal(moduleFixture.modules.some(record=>record[0]==='public/app/export.js'),false);

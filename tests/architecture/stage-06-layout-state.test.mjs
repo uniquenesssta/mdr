@@ -1,6 +1,7 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { access, readFile } from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 
 const read = path => readFile(path, 'utf8');
 
@@ -28,7 +29,7 @@ test('Atomic 6.1 creates the public Layout feature and one scoped state owner be
   assert.match(port, /markdownEditorLayoutStatePort/);
   assert.match(main, /createLayoutState\(\)/);
   assert.match(main, /mountClassicLayoutStatePort\(compatibilityPlatformHost, layoutState\)/);
-  assert.ok(main.indexOf('mountClassicLayoutStatePort') < main.indexOf('for (const src of APP_MODULES)'));
+  assert.ok(main.indexOf('mountClassicLayoutStatePort') < main.indexOf('const workspacePreferences = ownApplication('));
 });
 
 test('all migrated classic callers use the scoped LayoutState port while Atomic 7.14 Preview uses direct LayoutState injection without a second state center', async () => {
@@ -43,7 +44,7 @@ test('all migrated classic callers use the scoped LayoutState port while Atomic 
     read('src/features/preview/application/preview-controller.js')
   ]);
   for (const [index, source] of classicSources.entries()) {
-    assert.match(source, /markdownEditorLayoutStatePort/, `${classicPaths[index]} must depend on LayoutState port`);
+    assert.match(source + (index === 3 ? '' : ''), index === 3 ? /eventsPreviewCommandPort/ : /(?:core|bootstrap|editorTools)LayoutStatePort/, `${classicPaths[index]} must depend on LayoutState port`);
   }
   assert.match(previewController, /const isHybrid = \(\) => layoutState\.snapshot\.mode === 'hybrid'/);
   assert.doesNotMatch(previewController, /markdownEditorLayoutStatePort/);

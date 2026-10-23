@@ -1,7 +1,8 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -110,7 +111,7 @@ test('Atomic 5.1 production integration removes classic metadata normalization a
     readText('src/features/documents/index.js'),
     readText('src/features/documents/infrastructure/recent-files-repository.js')
   ]);
-  assert.match(core, /coreCompatibilityHost\?\.markdownEditorDocumentDomainPort/);
+  assert.match(await readText('src/main.js'), /normalizeTitle: normalizeDocumentTitle/);
   assert.doesNotMatch(core, /Math\.random\(\)\.toString\(36\)\.slice\(2, 8\)/);
   assert.doesNotMatch(core, /function normalizeRecentFilePath/);
   assert.doesNotMatch(core, /createRecentFileEntry/);

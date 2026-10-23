@@ -1,5 +1,6 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 import test from 'node:test';
 
 const plannedModules = Object.freeze([

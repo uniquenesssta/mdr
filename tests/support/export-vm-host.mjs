@@ -1,8 +1,9 @@
+import { readFileSync } from './application-surface-source.mjs';
 // Characterization host: invoke actual public Export Controller and format owners.
 // Old scenario names map to explicit test-only command aliases; no retired product script/global is supplied.
 // DOM/vendor/platform doubles prove orchestration only; actual Builder/Enhancer own the complete body.
 // Retired Worker/enhancement globals are never supplied. Actual renderer output is checked in built-app tests.
-import { readFileSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import vm from 'node:vm';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
@@ -87,6 +88,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   const requestMount = mountClassicExportRequestPort(host, { getActiveDocumentId: () => documentId, hasDocument: id => documentIds.includes(id) });
   const escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   const context = vm.createContext({
+    coreSettingsStorePort: { get: key => key === 'exportDirectory' ? 'C:\\custom' : undefined },
     document: { body, head, getElementById: id => id === 'compatibility-business-ports' ? host : getNode(id), createElement: tag => tag === 'iframe' ? printDom.document.createElement(tag) : node(tag), createDocumentFragment() { const result = node(); result.fragment = true; return result; }, querySelectorAll: () => [], querySelector: () => null },
     documentModel: { getDocumentVersion: () => 7, createSnapshot(reason) { calls.push(['snapshot', reason]); return sourceText; } },
     coreExportRequestPort: requestMount.port, coreExportTaskPort: taskMount.port,

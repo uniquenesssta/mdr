@@ -1,6 +1,7 @@
+import { readFile } from './support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile } from 'node:fs/promises';
+
 import { assessBrowserImage, isAllowedImageMime, classifyBrowserFile, IMPORT_KINDS } from '../src/features/import/index.js';
 
 const MiB = 1024 * 1024;

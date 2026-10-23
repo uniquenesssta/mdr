@@ -1,3 +1,11 @@
+import { createApplicationLifetime } from './bootstrap/application-lifetime.js';
+import { createShellMenus } from './features/menu/shell-menus.js';
+import { createWorkspaceStatus } from './features/persistence/ui/workspace-status.js';
+import { createWorkspacePreferences } from './features/layout/workspace-preferences.js';
+import { createDocumentWorkspace } from './features/documents/ui/document-workspace.js';
+import { createApplicationEvents } from './bootstrap/application-events.js';
+import { createWorkspaceStartup } from './bootstrap/workspace-startup.js';
+import { createFindPreviewCommands } from './features/editor/application/find-preview-commands.js';
 import 'katex/dist/katex.css';
 import './styles/index.css';
 import katexStyleSheetText from 'katex/dist/katex.css?raw';
@@ -365,25 +373,6 @@ if (typeof document.startViewTransition === 'function') {
   document.documentElement.classList.add('view-transitions-supported');
 }
 
-const APP_MODULES = [
-  '/app/core.js',
-  '/app/bootstrap.js',
-  '/app/editor-tools.js',
-  '/app/web-clipper.js',
-  '/app/events.js'
-];
-
-function loadClassicScript(src) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = src;
-    script.async = false;
-    script.onload = resolve;
-    script.onerror = () => reject(new Error(`Failed to load ${src}`));
-    document.body.appendChild(script);
-  });
-}
-
 function requireElement(selector, label) {
   const element = document.querySelector(selector);
   if (!element) throw new Error(`${label} is missing.`);
@@ -720,11 +709,13 @@ async function loadAppModules() {
     if (errors.length) console.error('Document/Editor View cleanup failed:', new AggregateError(errors));
   };
 
+  const applicationLifetime = createApplicationLifetime();
   let documentFeaturesDestroyed = false;
   const destroyDocumentFeatures = () => {
     destroyMarkdownEditorE2EBridge();
     if (documentFeaturesDestroyed) return;
     documentFeaturesDestroyed = true;
+    try { applicationLifetime.destroy(); } catch (error) { console.error(error); }
     destroyImportFeature();
     destroySelectionSync();
     if (windowController) {
@@ -1555,6 +1546,7 @@ async function loadAppModules() {
       backgroundTasks: backgroundTaskScheduler.getStats().pending
     }));
     configureMarkdownEditorE2EPorts({
+      setLayout: mode => editorUiCommandPort.invoke('setLayoutMode', mode, false),
       readContext: () => {
         const state = documentModel.getState();
         return { documentId: state.documentId, generation: state.generation, version: state.version };
@@ -1742,9 +1734,119 @@ async function loadAppModules() {
       onGeometryChanged() { scrollController.notifyGeometryChanged(); }
     });
     sidebarResizeController.start();
-    for (const src of APP_MODULES) {
-      await loadClassicScript(src);
-    }
+    const ownApplication = owner => { applicationLifetime.own(() => owner.destroy()); return owner; };
+    const shellMenus = ownApplication(createShellMenus({
+      document, window,
+      toast: requireElement('#toast', 'Toast'),
+      coreSubmenuPositionerPort: compatibilityPlatformHost.markdownEditorSubmenuPositionerPort,
+      coreEditorUiCommandPort: editorUiCommandPort
+    }));
+    const workspaceStatus = ownApplication(createWorkspaceStatus({
+      document,
+      editor: editorHost,
+      coreI18nPort: compatibilityPlatformHost.markdownEditorI18nPort,
+      corePreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
+      coreSettingsStorePort: autosaveSettingsStorePort,
+      coreSaveStatusStorePort: compatibilityPlatformHost.markdownEditorSaveStatusStorePort,
+      coreDocumentSessionPort: documentSessionPort,
+      coreLayoutStatePort: compatibilityPlatformHost.markdownEditorLayoutStatePort,
+      coreEditorUiCommandPort: editorUiCommandPort
+    }));
+    const workspacePreferences = ownApplication(createWorkspacePreferences({
+      document, window,
+      editor: editorHost,
+      preview: previewHost, documentModel,
+      coreSettingsStorePort: autosaveSettingsStorePort,
+      coreEditorUiCommandPort: editorUiCommandPort,
+      coreLayoutStatePort: compatibilityPlatformHost.markdownEditorLayoutStatePort,
+      corePreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
+      splitController: compatibilityPlatformHost.markdownEditorSplitControllerPort, t,
+      showToast: shellMenus.showToast,
+      updateStatusBar: workspaceStatus.updateStatusBar,
+      updateInlineColorToolAvailability: () => inlineColorView?.updateAvailability?.()
+    }));
+    const documentWorkspace = ownApplication(createDocumentWorkspace({
+      document, window,
+      editor: editorHost, documentModel,
+      filenameInput: requireElement('#filename', 'Filename'),
+      localStorage: window.localStorage,
+      navigator: window.navigator,
+      prompt: (...args) => window.prompt(...args),
+      confirm: (...args) => window.confirm(...args),
+      nativeStore: window.markdownEditorDocumentStore,
+      publishStatistics: statistics => { window.markdownEditorDocumentStatistics = statistics; }, t,
+      showToast: shellMenus.showToast,
+      corePlatformPort: compatibilityPlatformHost.markdownEditorPlatformPort,
+      coreExportRequestPort: compatibilityPlatformHost.markdownEditorExportRequestPort,
+      coreMarkdownExportPort: compatibilityPlatformHost.markdownEditorMarkdownExportPort,
+      coreExportTaskPort: compatibilityPlatformHost.markdownEditorExportTaskPort,
+      coreSettingsStorePort: autosaveSettingsStorePort,
+      coreDocumentSessionPort: documentSessionPort,
+      coreDocumentControllerPort: documentControllerPort,
+      coreRecentFilesPort: compatibilityPlatformHost.markdownEditorRecentFilesPort,
+      coreDocumentUiCommandPort: documentUiCommandPort,
+      coreEditorUiCommandPort: editorUiCommandPort,
+      coreSidebarControllerPort: compatibilityPlatformHost.markdownEditorSidebarControllerPort,
+      coreOutlineControllerPort: compatibilityPlatformHost.markdownEditorOutlineControllerPort,
+      coreFolderTreeControllerPort: compatibilityPlatformHost.markdownEditorFolderTreeControllerPort,
+      corePreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
+      coreTaskSchedulerPort: backgroundTaskScheduler,
+      coreSaveStatusStorePort: compatibilityPlatformHost.markdownEditorSaveStatusStorePort
+    }));
+    const runtimeContext = { getCurrentDocumentContext() { const record = documentWorkspace.getCurrentDocument(); return { documentId: String(record?.id || ''),
+      filePath: String(record?.filePath || ''),
+      title: String(record?.title || readCurrentDocumentTitle() || '') }; } };
+    window.markdownEditorRuntimeContext = runtimeContext;
+    applicationLifetime.own(() => { if (window.markdownEditorRuntimeContext === runtimeContext) delete window.markdownEditorRuntimeContext; });
+    applicationLifetime.own(editorUiCommandPort.register({
+      updatePreviewStrategyBadge: workspaceStatus.updatePreviewStrategyBadge
+    }));
+    ownApplication(createFindPreviewCommands({
+      nativeStore: window.markdownEditorDocumentStore, documentModel,
+      getCurrentDocument: documentWorkspace.getCurrentDocument,
+      saveDocument: () => documentController.saveActive({
+        title: readCurrentDocumentTitle(),
+        fallbackTitle: t('filenameDefault'),
+        snapshotReason: 'find-native-search'
+      }),
+      webClipperEditorUiCommandPort: editorUiCommandPort,
+      webClipperPreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
+      requestAnimationFrame: callback => window.requestAnimationFrame(callback),
+      cancelAnimationFrame: id => window.cancelAnimationFrame(id)
+    }));
+    ownApplication(createApplicationEvents({
+      document, window,
+      editor: editorHost,
+      eventsEditorControllerPort: editorControllerPort,
+      eventsEditorUiCommandPort: editorUiCommandPort,
+      eventsPreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
+      eventsDocumentUiCommandPort: documentUiCommandPort,
+      ensureCurrentDocumentForEditing: documentWorkspace.ensureCurrentDocumentForEditing,
+      updateLargeDocumentMode: workspaceStatus.updateLargeDocumentMode,
+      closeAppMenus: shellMenus.closeAppMenus,
+      closeContextMenus: shellMenus.closeContextMenus,
+      showToast: shellMenus.showToast,
+      newDocument: documentWorkspace.newDocument,
+      toggleSidebar: workspacePreferences.toggleSidebar,
+      renameCurrentDocument: documentWorkspace.renameCurrentDocument
+    }));
+    const workspaceStartup = ownApplication(createWorkspaceStartup({
+      editor: editorHost,
+      preview: previewHost,
+      filenameInput: requireElement('#filename', 'Filename'), t,
+      localStorage: window.localStorage,
+      platform: compatibilityPlatformHost.markdownEditorPlatformPort,
+      documentCommands: documentUiCommandPort,
+      bootstrapSettingsStorePort: autosaveSettingsStorePort,
+      bootstrapEditorControllerPort: editorControllerPort,
+      bootstrapLayoutStatePort: compatibilityPlatformHost.markdownEditorLayoutStatePort,
+      bootstrapPreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
+      bootstrapHelpPort: compatibilityPlatformHost.markdownEditorHelpPort, ...workspacePreferences,
+      setupDocuments: documentWorkspace.setupDocuments,
+      updateStatusBar: workspaceStatus.updateStatusBar,
+      updateLargeDocumentMode: workspaceStatus.updateLargeDocumentMode,
+      refreshClassicLocalizedState: workspaceStatus.refreshClassicLocalizedState
+    }));
     if (!closeSavePort.registered) throw new Error('CloseSavePort application policy is unavailable.');
     const windowSupported = platform.capabilities.desktop.window;
     const windowState = createWindowState();
@@ -1792,7 +1894,7 @@ async function loadAppModules() {
     recentFilesMenuController.start();
     sidebarTabController.start();
     mountDocumentEditorViews();
-    if (window.__markdownEditorInitPromise) await window.__markdownEditorInitPromise;
+    if (!await workspaceStartup.start()) throw new Error('Application startup cancelled.');
   } catch (error) {
     destroyDocumentFeatures();
     throw error;

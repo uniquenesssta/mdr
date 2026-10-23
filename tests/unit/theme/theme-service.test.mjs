@@ -1,6 +1,7 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { discoverProductionFiles } from '../../../scripts/stage-01/module-inventory-core.mjs';
 
 import { SETTINGS_CHANGED_EVENT, SETTING_DEFAULTS } from '../../../src/features/settings/index.js';
 import { createThemeService, createThemeToggleController } from '../../../src/theme/index.js';
@@ -195,10 +196,9 @@ test('Atomic 4.11 production integration removes classic theme authority and kee
   assert.doesNotMatch(toggleController, /setAttribute\(['"]data-theme|\blocalStorage\b|updatePreview\s*\(|virtualEditor/);
   assert.match(coordinator, /commit\(changes\)/);
 
-  const publicAppFiles = (await readdir('public/app', { recursive: true }))
-    .filter(path => path.endsWith('.js'));
-  const publicAppSources = await Promise.all(publicAppFiles.map(path => readFile('public/app/' + path, 'utf8')));
-  assert.doesNotMatch(publicAppSources.join('\n'), /setAppTheme\s*\(/);
+  const productionFiles = (await discoverProductionFiles()).filter(path => path.endsWith('.js'));
+  const productionSources = await Promise.all(productionFiles.map(path => readFile(path, 'utf8')));
+  assert.doesNotMatch(productionSources.join('\n'), /setAppTheme\s*\(/);
 
   assert.doesNotMatch(service, /(?:styles\/themes|\.css)/, 'Theme Service must not own theme CSS.');
 });

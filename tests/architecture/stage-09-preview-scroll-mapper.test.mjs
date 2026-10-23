@@ -1,8 +1,9 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));

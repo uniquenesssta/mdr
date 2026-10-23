@@ -2,6 +2,8 @@
 
 R16-01正式收尾：733c2ae / CI39960541384七组Windows及全部步骤通过，Node2705、Rust299、浏览器11＋75、删除清单13及原生大文档四条链路通过；汇总与WebView归档摘要已核验。继续唯一codex/r16-stage，按用户授权推进16.2经典脚本清除，16.3未开始。 [01详情](R16-01-DETAILS.md)。
 
+R16-02经典脚本清除已实现：删除public/app/五文件及动态加载器，改为显式ESM和可销毁生命周期；全仓2720/2720、ESM专项12/12、CDP专项12/12、浏览器11＋75、原文及同量级文档8条Windows原生链路、四项架构门禁和构建均通过。等待精确实现提交的Windows累计CI验收，推送后停止轮询，16.3未开始。 [02详情](R16-02-DETAILS.md)。
+
 以下为此前阶段记录：
 
 R15-09首轮5731941 / CI38730937138未通过：代码块默认定位误认Mermaid结束围栏，45万字符HTML/Word准备重复应用当前布局而超时。已修正围栏配对，并让相同布局只等待稳定、不同布局仍走正式命令；原超时/包体/文件读回门槛保持。新增8项回归（09共67项契约），68个页面场景保留，待同分支agent/r15-stage修复提交Windows复验；08验收保留，15.10未开始。 [修复详情](R15-09-DETAILS.md#首轮失败与修复2026-10-20)。
@@ -86,15 +88,8 @@ src/                        # 前端源码
     components/             # 菜单、模态框、进度、提示等通用组件
     features/               # 编辑器、预览、导出、混合编辑等功能样式
 public/
-  app/                      # 尚未迁出的经典前端功能模块（按职责拆分）
-    core.js                 # 状态、文档、侧栏、设置与布局
-    scroll-sync.js          # 双向滚动与划词定位
-    bootstrap.js            # 初始化与状态恢复
-    preview.js              # Markdown 预览渲染
-    export.js               # 保存、导入与导出
-    editor-tools.js         # 过渡：布局/全屏、可视编辑开关与 Mermaid 预览增强（后续阶段拆除）
-    web-clipper.js          # 网页抓取与 HTML 转 Markdown
-    events.js               # 全局事件、拖放与快捷键
+  assets/                   # 静态图标等资源
+  compatibility/            # 后续任务继续清理的业务挂载模板
 src-tauri/                  # Tauri / Rust 桌面后端
   src/main.rs
   src/document_store/       # 原生文档存储目录入口、命令与分层实现

@@ -1,49 +1,14 @@
 {
   "schemaVersion": 1,
   "kind": "stage-01-exact-migration-regression-baseline",
-  "sourceCommit": "5efe460b6025b5af0de25ee917fa6dccd542c50d",
+  "sourceCommit": "b88a94efd5dd84c5815f3593c1a4cea019cf0156",
   "policy": {
     "exactEntriesOnly": true,
     "wildcardExemptions": false,
     "additionsRequireMigrationRemovalOrBaselineReview": true
   },
-  "legacyClassicScripts": [
-    {
-      "loader": "src/main.js",
-      "script": "public/app/bootstrap.js",
-      "count": 1
-    },
-    {
-      "loader": "src/main.js",
-      "script": "public/app/core.js",
-      "count": 1
-    },
-    {
-      "loader": "src/main.js",
-      "script": "public/app/editor-tools.js",
-      "count": 1
-    },
-    {
-      "loader": "src/main.js",
-      "script": "public/app/events.js",
-      "count": 1
-    },
-    {
-      "loader": "src/main.js",
-      "script": "public/app/web-clipper.js",
-      "count": 1
-    }
-  ],
+  "legacyClassicScripts": [],
   "inlineEvents": [
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "closeAppMenus();",
-      "count": 1,
-      "lines": [
-        96
-      ]
-    },
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
@@ -92,51 +57,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "toggleAppMenu('app-view-menu')",
-      "count": 1,
-      "lines": [
-        48
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleAppMenu('edit-menu')",
-      "count": 1,
-      "lines": [
-        34
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleAppMenu('file-menu')",
-      "count": 1,
-      "lines": [
-        8
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleAppMenu('help-menu')",
-      "count": 1,
-      "lines": [
-        94
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleAppMenu('insert-menu')",
-      "count": 1,
-      "lines": [
-        61
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "toggleCodeVisualEditing(event)",
       "count": 1,
       "lines": [
@@ -164,15 +84,6 @@
     {
       "path": "public/compatibility/business-content.html",
       "attribute": "onclick",
-      "handler": "toggleSidebar()",
-      "count": 1,
-      "lines": [
-        224
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
       "handler": "toggleSidebar(); closeAppMenus();",
       "count": 1,
       "lines": [
@@ -191,35 +102,19 @@
   ],
   "businessGlobalWrites": [
     {
-      "path": "public/app/core.js",
-      "global": "window.markdownEditorDocumentStatistics",
-      "count": 1,
-      "lines": [
-        324
-      ]
-    },
-    {
-      "path": "public/app/core.js",
-      "global": "window.markdownEditorRuntimeContext",
-      "count": 1,
-      "lines": [
-        466
-      ]
-    },
-    {
-      "path": "public/app/events.js",
-      "global": "window.__markdownEditorInitPromise",
-      "count": 1,
-      "lines": [
-        151
-      ]
-    },
-    {
       "path": "src/main.js",
       "global": "window.markdownEditorDocumentModel",
       "count": 1,
       "lines": [
-        430
+        477
+      ]
+    },
+    {
+      "path": "src/main.js",
+      "global": "window.markdownEditorDocumentStatistics",
+      "count": 1,
+      "lines": [
+        1777
       ]
     },
     {
@@ -227,7 +122,15 @@
       "global": "window.markdownEditorDocumentStore",
       "count": 1,
       "lines": [
-        431
+        478
+      ]
+    },
+    {
+      "path": "src/main.js",
+      "global": "window.markdownEditorRuntimeContext",
+      "count": 1,
+      "lines": [
+        1799
       ]
     },
     {
@@ -243,7 +146,7 @@
       "global": "window.markdownEditorPerf",
       "count": 1,
       "lines": [
-        634
+        520
       ]
     }
   ],
@@ -443,6 +346,123 @@
           "bytes": 118805,
           "sha256": "d7e6dcfad2c1dcd0450e18fb154fc03f772aa19b42b7c48495601a1504336b28",
           "blobSha": "20da25e479ae57f9879b0f2d4cb25ae3f252a0b7"
+        }
+      ]
+    },
+    "r16ClassicRetirement": {
+      "atomic": "R16-02",
+      "baselineCommit": "b88a94e",
+      "record": "docs/R16-02-DETAILS.md",
+      "removedClassicScripts": [
+        {
+          "loader": "src/main.js",
+          "script": "public/app/bootstrap.js",
+          "count": 1
+        },
+        {
+          "loader": "src/main.js",
+          "script": "public/app/core.js",
+          "count": 1
+        },
+        {
+          "loader": "src/main.js",
+          "script": "public/app/editor-tools.js",
+          "count": 1
+        },
+        {
+          "loader": "src/main.js",
+          "script": "public/app/events.js",
+          "count": 1
+        },
+        {
+          "loader": "src/main.js",
+          "script": "public/app/web-clipper.js",
+          "count": 1
+        }
+      ],
+      "removedInlineEvents": [
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "closeAppMenus();",
+          "count": 1,
+          "lines": [
+            96
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleAppMenu('app-view-menu')",
+          "count": 1,
+          "lines": [
+            48
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleAppMenu('edit-menu')",
+          "count": 1,
+          "lines": [
+            34
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleAppMenu('file-menu')",
+          "count": 1,
+          "lines": [
+            8
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleAppMenu('help-menu')",
+          "count": 1,
+          "lines": [
+            94
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleAppMenu('insert-menu')",
+          "count": 1,
+          "lines": [
+            61
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleSidebar()",
+          "count": 1,
+          "lines": [
+            224
+          ]
+        }
+      ],
+      "movedBusinessGlobals": [
+        {
+          "path": "public/app/core.js",
+          "global": "window.markdownEditorDocumentStatistics",
+          "count": 1,
+          "lines": [
+            324
+          ],
+          "replacement": "src/main.js"
+        },
+        {
+          "path": "public/app/core.js",
+          "global": "window.markdownEditorRuntimeContext",
+          "count": 1,
+          "lines": [
+            466
+          ],
+          "replacement": "src/main.js"
         }
       ]
     }

@@ -2,13 +2,14 @@ import { assertProductionInventory } from './support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { readFileSync } from './support/application-surface-source.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createCloseSaveController } from '../src/features/persistence/application/close-save-controller.js';
 import { createCloseSavePort } from '../src/features/window/close-save-port.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = relative => fs.readFileSync(path.join(ROOT, relative), 'utf8');
+const read = relative => readFileSync(path.join(ROOT, relative), 'utf8');
 
 function deferred() {
   let resolve;

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CdpConnection, waitForJson, recoverChromiumStartup } from './e2e/lib/cdp-browser.mjs';
+import { createServer } from 'node:http';
+import { CdpConnection, waitForJson, recoverChromiumStartup, getFreePort } from './e2e/lib/cdp-browser.mjs';
 
 test('an unanswered CDP cleanup command rejects and releases its pending entry', async () => {
   const connection = new CdpConnection('unused', { commandTimeoutMs: 20 });
@@ -114,4 +115,30 @@ test('ordinary startup errors, cleanup failures and test assertions are not retr
   }, () => assert.fail('unexpected recovery'));
   assert.throws(() => browser.page.evaluate(), /test body failed/);
   assert.equal(attempts, 1);
+});
+
+test('R16-02 CDP discards blocked OS ports and closes every reservation before selecting a usable one', async () => {
+  const ports = [6679, 10080, 6680], closed = [];
+  const port = await getFreePort({ createServerImpl() {
+    const selected = ports.shift();
+    return { once() {}, listen(_port, _host, ready) { ready(); }, address: () => ({ port: selected }), close(done) { closed.push(selected); done(); } };
+  } });
+  assert.equal(port, 6680); assert.deepEqual(closed, [6679, 10080, 6680]);
+});
+
+test('R16-02 repeated unusable port allocation fails within its bound without launching a browser', async () => {
+  let closed = 0;
+  await assert.rejects(getFreePort({ createServerImpl: () => ({ once() {}, listen(_port, _host, ready) { ready(); },
+    address: () => ({ port: 6679 }), close(done) { closed++; done(); } }) }), /after 32 attempts/);
+  assert.equal(closed, 32);
+});
+
+test('R16-02 an actual allocated CDP port accepts HTTP Fetch and JSON readiness', async () => {
+  const port = await getFreePort(), server = createServer((_request, response) => {
+    response.setHeader('Content-Type', 'application/json'); response.end('{"ready":true}');
+  });
+  assert.ok(Number.isInteger(port) && port > 0 && port <= 65535);
+  await new Promise((resolve, reject) => { server.once('error', reject); server.listen(port, '127.0.0.1', resolve); });
+  try { assert.deepEqual(await waitForJson(`http://127.0.0.1:${port}/json/list`), { ready: true }); }
+  finally { await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }); }
 });

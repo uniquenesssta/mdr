@@ -573,6 +573,7 @@ async function runAppSuite() {
         const ids=Array.from(document.querySelectorAll('[id]')).map(element=>element.id);
         return {
           shellCount:document.querySelectorAll('[data-ui-shell="app"]').length,
+          scripts:Array.from(document.scripts).map(script=>({type:script.type,path:new URL(script.src,location.href).pathname})),
           appCount:document.querySelectorAll('.l-app-shell').length,
           legacyAppHookCount:document.querySelectorAll('.app').length,
           counts,
@@ -587,6 +588,8 @@ async function runAppSuite() {
         };
       })()`);
       assert.equal(snapshot.shellCount, 1);
+      assert.ok(snapshot.scripts.length > 0);
+      assert.ok(snapshot.scripts.every(script => script.type === 'module' && !script.path.startsWith('/app/')));
       assert.equal(snapshot.appCount, 1);
       assert.equal(snapshot.legacyAppHookCount, 1);
       assert.deepEqual(snapshot.counts, {menu:1,toolbar:1,sidebar:1,editor:1,preview:1,status:1,overlay:1});
@@ -1029,7 +1032,8 @@ async function runAppSuite() {
         const host=document.getElementById('compatibility-business-ports');
         const port=host?.markdownEditorDocumentControllerPort;
         if(!port)throw new Error('Document controller port unavailable');
-        if(typeof applyDocumentLifecycleUi!=='function')throw new Error('Document lifecycle UI adapter unavailable');
+        const applyDocumentLifecycleUi=result=>host.markdownEditorDocumentUiCommandPort.invoke('applyDocumentLifecycleUi',result);
+        if(!host.markdownEditorDocumentUiCommandPort.has('applyDocumentLifecycleUi'))throw new Error('Document lifecycle UI adapter unavailable');
         const metadataOnly=records=>records.every(record=>!['content','contentChunks','body','text','source','markdown'].some(key=>Object.prototype.hasOwnProperty.call(record,key)));
         const snapshot=()=>({
           activeId:port.activeId,
@@ -1050,13 +1054,13 @@ async function runAppSuite() {
         await applyDocumentLifecycleUi(beta);
         const betaState=snapshot();
 
-        await openDocument(alpha.record.id);
+        await document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('openDocument',alpha.record.id);
         const reopenedAlpha=snapshot();
 
         const originalPrompt=window.prompt;
         try{
           window.prompt=()=> 'Atomic Alpha Renamed';
-          renameDocument(alpha.record.id);
+          document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('renameDocument',alpha.record.id);
         }finally{
           window.prompt=originalPrompt;
         }
@@ -1066,9 +1070,9 @@ async function runAppSuite() {
         const savedAlpha=await persistencePort.invoke('saveCurrentFile');
         if(!savedAlpha)throw new Error('Atomic 5.3 lifecycle fixture failed to save renamed document');
 
-        await closeDocument(alpha.record.id);
+        await document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('closeDocument',alpha.record.id);
         const afterAlphaClose=snapshot();
-        await closeDocument(beta.record.id);
+        await document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('closeDocument',beta.record.id);
         const emptyState=snapshot();
 
         return {
@@ -1370,7 +1374,7 @@ async function runAppSuite() {
         await setAppLayout(browser.page, 'both');
         await browser.page.evaluate(`(()=>{
           const sidebar=document.querySelector('.l-sidebar');
-          if(sidebar?.classList.contains('is-hidden')) toggleSidebar();
+          if(sidebar?.classList.contains('is-hidden')) document.getElementById('compatibility-business-ports').markdownEditorEditorUiCommandPort.invoke('toggleSidebar');
         })()`);
         for (const viewport of RESPONSIVE_SHELL_VIEWPORTS) {
           await applyResponsiveViewport(browser.page, viewport);
@@ -1705,11 +1709,10 @@ async function runAppSuite() {
         const noDetails=states.every(value=>!('details' in value)&&!('model' in value)&&!('dom' in value));
         const blocked=states.length===0||Reflect.set(states[0],'mode','external-mutation')===false;
         const querySnapshot=api.snapshot();
-        const originalLayout=window.setLayoutMode,sameLayoutCommands=[];
-        window.setLayoutMode=function(...args){sameLayoutCommands.push(args[0]);return originalLayout.apply(this,args);};
-        let repeatedLayout;
-        try{repeatedLayout=await api.setLayout(before.layout);}
-        finally{window.setLayoutMode=originalLayout;}
+        const presentationRoot=document.getElementById('editor').virtualEditor;
+        const sameLayoutCommands=[];
+        const repeatedLayout=await api.setLayout(before.layout);
+        if(document.getElementById('editor').virtualEditor!==presentationRoot)sameLayoutCommands.push('editor-replaced');
         const layout=await api.setLayout('preview');
         const reveal=await api.revealText('selection alpha',{preserveSelection:true});
         const idle=await api.waitForIdle();

@@ -1,7 +1,9 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
-import { Script } from 'node:vm';
+import { access } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { applicationSurfaceOwners } from '../support/application-surface-source.mjs';
 
 const read = path => readFile(path, 'utf8');
 const mustBeMissing = async path => {
@@ -60,9 +62,7 @@ test('Atomic 5.13 preserves unresolved later-stage editor-tools responsibilities
     'applyTableVisualEditingSetting',
     'applyCodeVisualEditingSetting',
     'getLayoutMode',
-    'setLayoutMode',
-    'togglePageFullscreen',
-    'toggleFullscreen'
+    'setLayoutMode'
   ]) {
     assert.match(source, new RegExp(`function\\s+${responsibility}\\s*\\(`), `later-stage responsibility disappeared: ${responsibility}`);
   }
@@ -111,6 +111,8 @@ test('Atomic 5.13 modified classic scripts remain parseable before browser execu
     'public/app/events.js',
     'public/app/web-clipper.js'
   ]) {
-    assert.doesNotThrow(() => new Script(awaitableSource[path] || '', { filename: path }));
+    for (const owner of applicationSurfaceOwners[path]) {
+      assert.doesNotThrow(() => execFileSync(process.execPath, ['--check', owner]));
+    }
   }
 });

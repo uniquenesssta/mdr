@@ -6,6 +6,12 @@ export function evaluateExport(page,expression) {
   return page.evaluate(`(() => {
     const exportHost=document.getElementById('compatibility-business-ports');
     const commands=exportHost.markdownEditorExportCommandPort;
+    const filenameInput=document.getElementById('filename'),editor=document.getElementById('editor'),preview=document.getElementById('preview');
+    const documentModel=window.markdownEditorDocumentModel;
+    let exportDirectory=exportHost.markdownEditorSettingsStorePort.get('exportDirectory');
+    const showToast=message=>exportHost.markdownEditorEditorUiCommandPort.invoke('notify',message);
+    const exportContextDocument=id=>exportHost.markdownEditorDocumentUiCommandPort.invoke('exportDocument',id);
+    const applyDocumentLifecycleUi=result=>exportHost.markdownEditorDocumentUiCommandPort.invoke('applyDocumentLifecycleUi',result);
     const exportTaskPort=exportHost.markdownEditorExportTaskPort,exportRequestPort=exportHost.markdownEditorExportRequestPort;
     const exportImagePort=exportHost.markdownEditorImageExportPort,exportPdfPort=exportHost.markdownEditorPdfExportPort;
     const exportWordPort=exportHost.markdownEditorWordExportPort,exportHtmlPort=exportHost.markdownEditorHtmlExportPort,exportMarkdownPort=exportHost.markdownEditorMarkdownExportPort;

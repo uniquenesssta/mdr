@@ -1,8 +1,9 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import { createFileImportController, createImportDocumentController, createImageImportController } from '../../../src/features/import/index.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -435,14 +436,14 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
   assert.doesNotMatch(core, /function\s+activateDocumentRuntime\b/);
   assert.doesNotMatch(core, /function\s+loadDocumentContent\b/);
   assert.doesNotMatch(core, /function\s+saveDocumentsToStorage\b/);
-  assert.match(core, /markdownEditorDocumentControllerPort/);
+  assert.match(core, /coreDocumentControllerPort/);
   assert.match(exportModule, /owners\[format\]\[method\]/);
   assert.match(main, /owners: \{ markdown: markdownExporter, html: htmlExporter, word: wordExporter, pdf: pdfExporter, image: imageExporter \}/);
   assert.match(main, /createImageExporter\(\{ documentModel, documents: documentControllerPort/);
   const imageOwner = await readText('src/features/export/formats/image/image-exporter.js');
   assert.match(imageOwner, /documents\.isCurrentGeneration/);
   assert.match(imageOwner, /documents\.getRecord/);
-  assert.match(events, /markdownEditorDocumentControllerPort/);
+  assert.match(events, /ensureCurrentDocumentForEditing/);
   assert.match(main, /createSessionDocumentRepository/);
   assert.match(main, /createDocumentSessionController/);
   assert.match(main, /createLoadController/);

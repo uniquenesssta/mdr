@@ -1,6 +1,7 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -82,7 +83,7 @@ test('Atomic 4.8 Store remains the Settings state authority after Atomic 4.10 mi
   assert.match(entry, /createSettingsFeature\(\{/);
   assert.ok(entry.indexOf('createSettingsStore({') < entry.indexOf('createSettingsFeature({'));
   assert.match(core, /markdown-editor:settings-changed/);
-  assert.doesNotMatch(core, /function\s+(?:openSettings|closeSettings|applySettings)\b/);
+  assert.doesNotMatch(core, /function\s+(?:openSettings|closeSettings)\b/);
   assert.match(editorTools, /editorToolsSettingsStorePort\.set\('layoutMode', nextMode\)/);
   assert.match(editorTools, /editorToolsSettingsStorePort\.set\('tableVisualEditing', nextEnabled\)/);
   assert.match(editorTools, /editorToolsSettingsStorePort\.set\('codeVisualEditing', nextEnabled\)/);

@@ -23,7 +23,7 @@ export function configureMarkdownEditorE2EPorts(value) {
   if (typeof value?.readContext !== 'function' || typeof value?.readPreviewStats !== 'function') {
     throw new TypeError('E2E providers unavailable');
   }
-  const current = Object.freeze({ readContext: value.readContext, readPreviewStats: value.readPreviewStats });
+  const current = Object.freeze({ readContext: value.readContext, readPreviewStats: value.readPreviewStats, setLayout: value.setLayout });
   owner.configure(() => createE2EQueryAPI(createBrowserPorts(current)));
 }
 
@@ -98,8 +98,8 @@ function createBrowserPorts(current) {
       return { loaded: loaded === true, context: current.readContext() };
     },
     setLayout: mode => {
-      if (typeof globalThis.setLayoutMode !== 'function') throw new Error('E2E layout unavailable');
-      globalThis.setLayoutMode(mode, false);
+      if (typeof current.setLayout !== 'function') throw new Error('E2E layout unavailable');
+      current.setLayout(mode);
     },
     setVisualEditing: options => {
       const editor = getEditor();

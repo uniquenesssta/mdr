@@ -1,6 +1,7 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile } from 'node:fs/promises';
+
 const read = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
 
 test('Atomic 6.6 exposes separate page and system fullscreen controllers through the Layout entrypoint', async () => {
@@ -32,9 +33,10 @@ test('Atomic 6.6 removes classic fullscreen authority and direct browser fullscr
   assert.doesNotMatch(bootstrap, /md_editor_page_fullscreen|pageFullscreen\s*=|page-fullscreen-active|is-page-fullscreen/);
   assert.doesNotMatch(events, /addEventListener\(['"](?:webkit)?fullscreenchange/);
   assert.doesNotMatch(editorTools, /fullscreenEnabled|fullscreenElement|requestFullscreen|exitFullscreen|webkitFullscreen|localStorage\.setItem\(PAGE_FULLSCREEN_KEY/);
+  const main = await read('src/main.js');
+  assert.match(main, /togglePageFullscreen\(\)[^]*?pageFullscreenController/);
+  assert.match(main, /toggleSystemFullscreen\(\)[^]*?systemFullscreenController/);
   assert.doesNotMatch(editorTools, /editorToolsLayoutStatePort\.(?:pageFullscreen|systemFullscreen)\s*=/);
-  assert.match(editorTools, /function togglePageFullscreen\(\) \{\s*return editorToolsEditorUiCommandPort\.invoke\('togglePageFullscreen'\);\s*\}/s);
-  assert.match(editorTools, /function toggleFullscreen\(\) \{\s*return editorToolsEditorUiCommandPort\.invoke\('toggleSystemFullscreen'\);\s*\}/s);
 });
 
 test('Atomic 6.6 main composition owns both fullscreen lifecycles and uses Platform ports', async () => {

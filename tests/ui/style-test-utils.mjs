@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile } from '../support/application-surface-source.mjs';
 import { resolve } from 'node:path';
 
 export const root = process.cwd();

@@ -1,5 +1,6 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+
 import test from 'node:test';
 
 import { createI18nService } from '../../../src/i18n/i18n-service.js';
@@ -137,7 +138,7 @@ test('Atomic 4.3 production integration keeps service DOM/storage-free and remov
   assert.match(moduleEntry, /i18nService\?\.destroy\(\)/);
   assert.ok(moduleEntry.indexOf('i18nPort?.destroy()') < moduleEntry.indexOf('i18nService?.destroy()'));
 
-  assert.match(core, /markdownEditorI18nPort/);
+  assert.match(core, /coreI18nPort/);
   assert.match(core, /return coreI18nPort\.t\(key, \.\.\.args\)/);
   assert.match(core, /function refreshClassicLocalizedState\(\)/);
   assert.match(core, /coreI18nPort\.subscribe\(\(\) => refreshClassicLocalizedState\(\)\)/);

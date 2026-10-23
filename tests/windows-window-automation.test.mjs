@@ -117,11 +117,11 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(sessionOwner, /await prepareWindowTestSurface\(browser\)/);
   assert.doesNotMatch(sessionOwner, /dragFromViewportPoint|driver\.actions\(\)|tauri:options|--native-driver|node:net/);
 
-  assert.match(testSurface, /__markdownEditorInitPromise/);
+  assert.match(testSurface, /document\.documentElement\.classList\.contains\('app-ready'\)/);
   assert.match(testSurface, /waitForApplicationInitialization/);
   assert.match(testSurface, /await waitForApplicationInitialization\(browser\)/);
-  assert.match(testSurface, /Application initialization promise did not become available before Windows automation/);
-  assert.match(testSurface, /await pending/);
+  assert.match(testSurface, /Application did not become ready before Windows automation/);
+  assert.doesNotMatch(testSurface, /__markdownEditorInitPromise/);
   assert.match(testSurface, /#help-modal/);
   assert.match(testSurface, /#help-modal \.modal-header button/);
   assert.match(testSurface, /classList\.contains\('show'\)/);

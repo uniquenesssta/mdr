@@ -1,7 +1,8 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -149,7 +150,7 @@ test('Atomic 5.2 production integration removes classic session-state authority 
   ]);
   assert.doesNotMatch(core, /\blet\s+documents\b/);
   assert.doesNotMatch(core, /\blet\s+currentDocumentId\b/);
-  assert.match(core, /markdownEditorDocumentSessionPort/);
+  assert.match(core, /coreDocumentSessionPort/);
   assert.match(exportModule, /owners\[format\]\[method\]/);
   const [main, imageOwner] = await Promise.all([
     readText('src/main.js'), readText('src/features/export/formats/image/image-exporter.js')

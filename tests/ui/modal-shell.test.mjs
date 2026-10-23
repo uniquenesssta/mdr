@@ -1,8 +1,9 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import { createExportImageDialogView } from '../../src/features/export/index.js';
 import { ExportProgressDocument } from '../support/export-progress-dom.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile } from 'node:fs/promises';
+
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import {
   COMPATIBILITY_MODAL_CLOSE_EVENT,

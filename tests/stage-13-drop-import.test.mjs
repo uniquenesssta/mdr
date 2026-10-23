@@ -1,6 +1,7 @@
+import { readFile } from './support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile, access } from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 import { createDropImportController } from '../src/features/import/index.js';
 
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };

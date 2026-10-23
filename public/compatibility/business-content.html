@@ -5,7 +5,7 @@
       </div>
       <span class="menu-bar-divider" aria-hidden="true"></span>
       <div class="menu-dropdown" id="file-menu-dropdown">
-        <button class="menu-trigger" onclick="toggleAppMenu('file-menu')" title="文件" aria-label="文件菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-file"></use></svg><span class="menu-button-label">文件</span></button>
+        <button class="menu-trigger" data-menu-toggle="file-menu" title="文件" aria-label="文件菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-file"></use></svg><span class="menu-button-label">文件</span></button>
         <div class="menu-dropdown-list" id="file-menu">
           <div class="menu-item" onclick="newDocument(); closeAppMenus();"><span>新建文档</span><kbd>Ctrl+N</kbd></div>
           <div class="menu-item"><span>打开文件...</span><kbd>Ctrl+O</kbd></div>
@@ -31,7 +31,7 @@
         </div>
       </div>
       <div class="menu-dropdown" id="edit-menu-dropdown">
-        <button class="menu-trigger" onclick="toggleAppMenu('edit-menu')" title="编辑" aria-label="编辑菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-edit"></use></svg><span class="menu-button-label">编辑</span></button>
+        <button class="menu-trigger" data-menu-toggle="edit-menu" title="编辑" aria-label="编辑菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-edit"></use></svg><span class="menu-button-label">编辑</span></button>
         <div class="menu-dropdown-list" id="edit-menu">
           <div class="menu-item" data-editor-action="undo"><span>撤销</span><kbd>Ctrl+Z</kbd></div>
           <div class="menu-item" data-editor-action="redo"><span>重做</span><kbd>Ctrl+Y</kbd></div>
@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="menu-dropdown" id="view-menu-dropdown">
-        <button class="menu-trigger" onclick="toggleAppMenu('app-view-menu')" title="视图" aria-label="视图菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-view"></use></svg><span class="menu-button-label">视图</span></button>
+        <button class="menu-trigger" data-menu-toggle="app-view-menu" title="视图" aria-label="视图菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-view"></use></svg><span class="menu-button-label">视图</span></button>
         <div class="menu-dropdown-list" id="app-view-menu">
           <div class="menu-item" onclick="toggleSidebar(); closeAppMenus();"><span>显示 / 隐藏侧边栏</span><kbd>Ctrl+Shift+B</kbd></div>
           <div class="menu-separator"></div>
@@ -58,7 +58,7 @@
         </div>
       </div>
       <div class="menu-dropdown" id="insert-menu-dropdown">
-        <button class="menu-trigger" onclick="toggleAppMenu('insert-menu')" title="插入" aria-label="插入菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-insert"></use></svg><span class="menu-button-label">插入</span></button>
+        <button class="menu-trigger" data-menu-toggle="insert-menu" title="插入" aria-label="插入菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-menu-insert"></use></svg><span class="menu-button-label">插入</span></button>
         <div class="menu-dropdown-list" id="insert-menu">
           <div class="menu-item menu-submenu"><span>标题</span><span class="menu-arrow">›</span>
             <div class="menu-dropdown-list menu-submenu-list">
@@ -91,9 +91,9 @@
         </div>
       </div>
       <div class="menu-dropdown" id="help-menu-dropdown">
-        <button class="menu-trigger" onclick="toggleAppMenu('help-menu')" title="帮助" aria-label="帮助菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-help"></use></svg><span class="menu-button-label">帮助</span></button>
+        <button class="menu-trigger" data-menu-toggle="help-menu" title="帮助" aria-label="帮助菜单"><svg class="icon menu-button-icon" aria-hidden="true"><use href="/assets/icons.svg#icon-help"></use></svg><span class="menu-button-label">帮助</span></button>
         <div class="menu-dropdown-list" id="help-menu">
-          <div class="menu-item" data-help-open onclick="closeAppMenus();"><span>使用帮助</span></div>
+          <div class="menu-item" data-help-open><span>使用帮助</span></div>
         </div>
       </div>
       <div class="menu-bar-spacer window-drag-region"></div>
@@ -221,7 +221,7 @@
             <span class="sidebar-kicker">WORKSPACE</span>
             <strong>内容导航</strong>
           </div>
-          <button onclick="toggleSidebar()" title="隐藏侧边栏"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg></button>
+          <button data-sidebar-hide title="隐藏侧边栏"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-chevron-left"></use></svg></button>
         </div>
         <div class="sidebar-tabs">
           <button class="active" id="sidebar-docs-tab"><svg class="icon icon-sm"><use href="/assets/icons.svg#icon-book"></use></svg><span>文档</span></button>

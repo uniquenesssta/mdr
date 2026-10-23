@@ -1,6 +1,7 @@
+import { readFile } from './support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+
 import {
   getNativeParentPath,
   isNativePathWithinDirectory,
@@ -62,7 +63,7 @@ test('folder file tree is wired through the Sidebar controller, runtime bridge, 
   assert.match(main, /registerLifecycle\('files', folderTreeController\)/);
   assert.match(sidebarState, /\['docs', 'files', 'outline'\]/);
   assert.match(core, /openFolderTreeFile/);
-  assert.match(core, /markdownEditorFolderTreeControllerPort/);
+  assert.match(core, /coreFolderTreeControllerPort/);
   assert.match(desktopPlatform, /listTextTree/);
   assert.match(desktopPlatform, /fileSystemClient\.listTextFileTree/);
   assert.match(rustMain, /local_file::commands::list_text_file_tree/);

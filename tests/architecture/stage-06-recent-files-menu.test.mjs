@@ -1,6 +1,7 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+
 
 const ROOT = new URL('../../', import.meta.url);
 const read = path => readFile(new URL(path, ROOT), 'utf8');

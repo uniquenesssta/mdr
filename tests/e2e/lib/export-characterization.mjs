@@ -610,7 +610,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
           taskReleased:host.markdownEditorExportTaskPort.getSnapshot().activeTask===null};
       } finally {
         URL.createObjectURL=create;URL.revokeObjectURL=revoke;HTMLAnchorElement.prototype.click=click;
-        if(initial){await openDocument(initial);if(selected)await closeDocument(selected.record.id);if(active)await closeDocument(active.record.id);}
+        if(initial){await document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('openDocument',initial);if(selected)await document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('closeDocument',selected.record.id);if(active)await document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('closeDocument',active.record.id);}
       }
     })()`);
     await writeFile(join(artifactRoot,'r14-09-inactive-document-export.json'),JSON.stringify(result,null,2));
@@ -1135,7 +1135,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       const host=document.getElementById('compatibility-business-ports'),commands=host.markdownEditorExportCommandPort,tasks=host.markdownEditorExportTaskPort;
       const root=document.getElementById('export-image-modal'),launcher=document.querySelector('#file-menu-dropdown > .menu-trigger');
       if(!launcher)throw new Error('Real File menu launcher unavailable');launcher.focus();launcher.click();
-      filenameInput.value='菜单点击😀.md';
+      document.getElementById('filename').value='菜单点击😀.md';
       const menu=document.querySelector('[data-menu-command="export.image"]');if(!menu)throw new Error('Real Image menu command unavailable');menu.click();
       const wait=async check=>{const deadline=Date.now()+12000;while(!check()){if(Date.now()>deadline)throw new Error('Real image UI did not settle');await new Promise(resolve=>requestAnimationFrame(resolve));}};
       await wait(()=>host.markdownEditorImageExportPort.getPreview()&&tasks.getSnapshot().activeTask===null);

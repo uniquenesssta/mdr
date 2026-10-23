@@ -1,7 +1,8 @@
+import { readFile } from './support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { execFileSync } from 'node:child_process';
-import { readFile, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { buildDeletionInventory, verifyDeletionInventory } from '../scripts/stage-16/deletion-inventory.mjs';
 import { createArchitectureFixture, moduleRecord } from './architecture/helpers.mjs';

@@ -1,6 +1,7 @@
+import { readFile } from './support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile } from 'node:fs/promises';
+
 import {
   IMPORT_KINDS as K, classifyBrowserFile, classifyImportPath, classifyImportResult
 } from '../src/features/import/index.js';
@@ -80,7 +81,7 @@ test('production routing consumes one public classifier with startup and teardow
   assert.doesNotMatch(entry + main, /mountClassicImportClassifierPort|classic-import-classifier-port/);
   assert.match(main, /dropImportController\.start\(\{/);
   assert.match(main, /openNativeText: \(path, request\) => importDocumentController\.openNativeText\(path, request\)/);
-  assert.ok(main.indexOf('dropImportController.start({') < main.indexOf('for (const src of APP_MODULES)'));
+  assert.ok(main.indexOf('dropImportController.start({') < main.indexOf('const workspacePreferences = ownApplication('));
   assert.equal(main.match(/dropImportController\.destroy\(\)/g).length, 3);
   assert.doesNotMatch(entry + main, /mountClassicDropImportPort|classic-drop-import-port/);
   assert.match(image, /from '\.\.\/\.\.\/import\/index\.js'/);

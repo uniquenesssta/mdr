@@ -1,42 +1,37 @@
-    const eventsCompatibilityHost = document.getElementById('compatibility-business-ports');
-    const eventsPlatformPort = eventsCompatibilityHost?.markdownEditorPlatformPort;
-    const eventsDocumentUiCommandPort = eventsCompatibilityHost?.markdownEditorDocumentUiCommandPort;
-    if (!eventsDocumentUiCommandPort) throw new Error('Document UI command port is unavailable.');
-    const eventsDocumentControllerPort = eventsCompatibilityHost?.markdownEditorDocumentControllerPort;
-    const eventsEditorControllerPort = eventsCompatibilityHost?.markdownEditorEditorControllerPort;
-    const eventsEditorUiCommandPort = eventsCompatibilityHost?.markdownEditorEditorUiCommandPort;
-    const eventsLayoutStatePort = eventsCompatibilityHost?.markdownEditorLayoutStatePort;
-    const eventsPreviewCommandPort = eventsCompatibilityHost?.markdownEditorPreviewCommandPort;
-    if (!eventsDocumentControllerPort) throw new Error('Document controller compatibility port is unavailable.');
-    if (!eventsEditorControllerPort) throw new Error('Editor Controller compatibility port is unavailable.');
-    if (!eventsEditorUiCommandPort) throw new Error('Editor UI command compatibility port is unavailable.');
-    if (!eventsLayoutStatePort) throw new Error('Layout State compatibility port is unavailable.');
-    if (!eventsPreviewCommandPort) throw new Error('Preview Command compatibility port is unavailable.');
-
-    eventsEditorControllerPort.subscribeTransactions(transaction => {
+/**
+ * Responsibility: Bind document editing and application shortcuts to explicit feature commands.
+ * Imports: Explicit startup capabilities and lifetime scope.
+ * Exports: createApplicationEvents.
+ * State/side effects: Owns startup/event lifetime only; document and settings authorities remain in their features.
+ * Lifecycle: Explicit start and idempotent destroy with cancellation of late results.
+ */
+import { createApplicationLifetime } from './application-lifetime.js';
+export function createApplicationEvents({ document, window, editor, eventsEditorControllerPort, eventsEditorUiCommandPort, eventsPreviewCommandPort, eventsDocumentUiCommandPort, ensureCurrentDocumentForEditing, updateLargeDocumentMode, closeAppMenus, closeContextMenus, showToast, newDocument, toggleSidebar, renameCurrentDocument }) {
+  const lifetime = createApplicationLifetime();
+  try {
+    lifetime.own(eventsEditorControllerPort.subscribeTransactions(transaction => {
       if (!transaction.interactive) return;
       ensureCurrentDocumentForEditing();
-      editorLineIndexText = null;
-      editorMetricText = null;
       updateLargeDocumentMode();
-      scheduleEditorMetricsRebuild(120);
+      eventsEditorUiCommandPort.invoke('preparePreviewEditorMetrics');
       eventsPreviewCommandPort.scheduleUpdate();
       eventsPreviewCommandPort.scheduleCountUpdate();
       eventsEditorUiCommandPort.invoke('requestDocumentPersistence', 'editor-transaction');
-    });
-    eventsEditorUiCommandPort.register({
+    }));
+    lifetime.own(eventsEditorUiCommandPort.register({
       selectionChanged: () => eventsPreviewCommandPort.scheduleFocusUpdate()
-    });
+    }));
 
 
 
 
 
     // Settings menu trigger preserves the legacy menu-close side effect without inline handlers.
-    document.querySelector('[data-settings-open]')?.addEventListener('click', closeAppMenus);
+    const settingsTrigger = document.querySelector('[data-settings-open]');
+    if (settingsTrigger) lifetime.listen(settingsTrigger, 'click', closeAppMenus);
 
     // 点击外部关闭下拉菜单
-    document.addEventListener('click', (e) => {
+    lifetime.listen(document, 'click', (e) => {
       if (!e.target.closest('.context-menu')) {
         closeContextMenus();
       }
@@ -53,7 +48,7 @@
     }
 
     function isTextControlOutsideEditor(target) {
-      if (!(target instanceof Element) || isEditorShortcutTarget(target)) return false;
+      if (!(target instanceof window.Element) || isEditorShortcutTarget(target)) return false;
       return Boolean(target.closest('input, textarea, select, [contenteditable="true"]'));
     }
 
@@ -69,10 +64,10 @@
     }
 
     function handleAppKeydown(e) {
-      const tableCellInput = e.target instanceof Element
+      const tableCellInput = e.target instanceof window.Element
         ? e.target.closest('[data-hybrid-table-cell-input]')
         : null;
-      const codeBlockEditor = e.target instanceof Element
+      const codeBlockEditor = e.target instanceof window.Element
         ? e.target.closest('[data-hybrid-code-editor]')
         : null;
       const key = String(e.key || '').toLowerCase();
@@ -138,16 +133,9 @@
         editor.setRangeText('    ', start, end, 'end');
       }
     }
-    document.addEventListener('keydown', handleAppKeydown, true);
+    lifetime.listen(document, 'keydown', handleAppKeydown, true);
 
-    // 启动
-    window.__markdownEditorInitPromise = init().then(async () => {
-      const initialPath = eventsPlatformPort?.supports('desktop.fileSystem')
-        ? await eventsPlatformPort.call('files', 'getInitialPath')
-        : null;
-      if (initialPath) await eventsDocumentUiCommandPort.invoke('openImportPath', initialPath);
-    }).catch(error => {
-      console.error('Application initialization failed:', error);
-      showToast(error?.message || String(error));
-      throw error;
-    });
+
+    return Object.freeze({ destroy: lifetime.destroy });
+  } catch (error) { lifetime.destroy(); throw error; }
+}

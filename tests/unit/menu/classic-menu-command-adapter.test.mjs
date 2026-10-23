@@ -23,9 +23,9 @@ test('Atomic 6.10 classic adapter keeps legacy calls outside Menu Model and pres
   bindings.execute(C.DOCUMENT_SAVE);
   bindings.execute(C.EDITOR_BOLD);
   const visual = bindings.execute(C.EDITOR_TABLE_VISUAL_TOGGLE, { event: 'evt' });
-  assert.deepEqual(calls[0].slice(0, 2), ['global', 'saveCurrentFile']);
+  assert.deepEqual(calls[0].slice(0, 2), ['port', 'saveCurrentFile']);
   assert.deepEqual(calls[1], ['port', 'executeEditorAction', 'bold']);
-  assert.deepEqual(calls[2], ['global', 'toggleTableVisualEditing', 'evt']);
+  assert.deepEqual(calls[2], ['port', 'toggleTableVisualEditing', 'evt']);
   assert.equal(visual.closeMenu, false);
   assert.equal(bindings.has(C.SETTINGS_OPEN), false);
   assert.equal(bindings.has(C.HELP_OPEN), false);

@@ -1,6 +1,7 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,7 +28,7 @@ test('Atomic 6.7 keeps classic tab state, persistence and inline click authority
   }
   assert.doesNotMatch(core, /function\s+setSidebarTab\s*\(/);
   assert.doesNotMatch(html, /onclick="setSidebarTab\(/);
-  assert.match(core, /markdownEditorSidebarControllerPort/);
+  assert.match(core, /coreSidebarControllerPort/);
   assert.doesNotMatch(previewController, /markdownEditorSidebarControllerPort/);
 });
 

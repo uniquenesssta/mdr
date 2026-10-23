@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { readFileSync } from './support/application-surface-source.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createSaveController, createSaveStatusStore } from '../src/features/persistence/index.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = relative => fs.readFileSync(path.join(ROOT, relative), 'utf8');
+const read = relative => readFileSync(path.join(ROOT, relative), 'utf8');
 const exists = relative => fs.existsSync(path.join(ROOT, relative));
 
 function createManualHarness({

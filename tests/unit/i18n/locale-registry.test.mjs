@@ -1,6 +1,7 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { access, readFile } from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -123,7 +124,7 @@ test('Atomic 4.2 locale data remains isolated from the Atomic 4.5 Help feature',
   assert.match(index, /locale-registry\.js/);
   assert.match(index, /classic-i18n-port\.js/);
   assert.match(helpIndex, /help-content-registry\.js/);
-  assert.match(core, /markdownEditorI18nPort/);
+  assert.match(core, /coreI18nPort/);
   assert.doesNotMatch(core, /markdownEditorHelpContent|markdownEditorLocalePort|coreLocalePort/);
   assert.doesNotMatch(core, /\bi18n\s*\[/);
   assert.doesNotMatch(core, /window\.markdownEditor(?:Locale|I18n|Help)/);

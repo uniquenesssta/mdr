@@ -11,6 +11,10 @@ const ASYNC_CHUNK_LIMIT_BYTES = 700_000;
 
 function vendorChunkName(id) {
   const path = id.replaceAll('\\', '/');
+  if (!path.includes('/node_modules/') && /\/src\/(?:runtime\/e2e-bridge\.js|features\/e2e\/)/.test(path)) return 'e2e-query';
+  // Application shell owners depend only on their shared lifetime module;
+  // feature capabilities arrive as arguments, so this chunk has no main cycle.
+  if (!path.includes('/node_modules/') && /\/src\/(?:bootstrap\/(?:application-(?:lifetime|events)|workspace-startup)|features\/(?:menu\/shell-menus|persistence\/ui\/workspace-status|layout\/workspace-preferences|documents\/ui\/document-workspace|editor\/application\/find-preview-commands))\.js(?:\?|$)/.test(path)) return 'workspace-shell';
   // This dependency-closed set imports only the request/task/image modules in
   // this same chunk. Shared UI, Preview and Platform stay in their own graph;
   // no main -> feature -> main chunk cycle or changed vendor merge policy.

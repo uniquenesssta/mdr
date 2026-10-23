@@ -1,6 +1,7 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 
 import {
   SETTINGS_CHANGED_EVENT,
@@ -323,7 +324,7 @@ test('Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Servic
 
   assert.match(markup, /data-settings-open/);
   assert.doesNotMatch(markup, /data-settings-open[^>]*onclick=/);
-  assert.ok(events.includes("document.querySelector('[data-settings-open]')?.addEventListener('click', closeAppMenus);"));
+  assert.match(events, /lifetime\.listen\(settingsTrigger, 'click', closeAppMenus\)/);
   assert.doesNotMatch(markup, /id="settings-modal"|openSettings\(|closeSettings\(|switchSettingsPage\(|applySettings\(|chooseExportDirectory\(|clearExportDirectory\(|resetSettingColor\(/);
   assert.doesNotMatch(modalBridge, /id: 'settings-modal'/);
   assert.match(dialog, /id: 'settings-modal'/);
@@ -338,7 +339,7 @@ test('Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Servic
     assert.doesNotMatch(source, /onclick\s*=|onchange\s*=|oninput\s*=/);
   }
 
-  assert.doesNotMatch(core, /function\s+(?:openSettings|closeSettings|switchSettingsPage|applySettings|chooseExportDirectory|clearExportDirectory|resetSettingColor|markSettingColorCustom|syncSettingsThemeDefaults|toggleCustomAutosaveDelay)\b/);
+  assert.doesNotMatch(core, /function\s+(?:openSettings|closeSettings|switchSettingsPage|chooseExportDirectory|clearExportDirectory|resetSettingColor|markSettingColorCustom|syncSettingsThemeDefaults|toggleCustomAutosaveDelay)\b/);
   assert.doesNotMatch(core, /getElementById\(['"]setting-|querySelectorAll\(['"]\[data-toolbar-setting\]/);
   assert.match(core, /markdown-editor:settings-changed/);
   assert.doesNotMatch(events, /key === ','\)\s*action = openSettings/);

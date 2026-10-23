@@ -1,6 +1,7 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile } from 'node:fs/promises';
+
 const read = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
 
 test('Atomic 6.3 exposes three split responsibilities only through Layout public entrypoint', async () => {
@@ -36,7 +37,7 @@ test('Atomic 6.3 removes classic split authority and direct split listeners', as
   assert.doesNotMatch(core, /addEventListener\(['"](?:mouse|touch)(?:down|move|up|end)/);
   assert.doesNotMatch(events, /bindCompactPaneActivation|activateCompactSplitPane/);
   assert.doesNotMatch(bootstrap, /RATIO_KEY|EDITOR_COLLAPSED_KEY|PREVIEW_COLLAPSED_KEY|initializeCompactSplitObserver/);
-  assert.match(editorTools, /markdownEditorSplitControllerPort/);
+  assert.match(editorTools, /editorToolsSplitControllerPort/);
   assert.match(editorTools, /editorToolsSplitControllerPort\.applyMode/);
   assert.doesNotMatch(editorTools, /editorToolsLayoutStatePort\.editorCollapsed\s*=/);
   assert.doesNotMatch(editorTools, /editorToolsLayoutStatePort\.previewCollapsed\s*=/);

@@ -28,56 +28,6 @@
       false
     ],
     [
-      "public/app/bootstrap.js",
-      "legacy-classic-script",
-      "legacy-app",
-      "Legacy startup sequencing, restored settings and initial document activation with initial editor body reset delegated through the scoped Editor Controller.",
-      "legacy-bootstrap-state",
-      "classic-script",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "public/app/core.js",
-      "legacy-classic-script",
-      "legacy-app",
-      "Legacy layout/sidebar/document UI coordination with Stage 10 save implementation removed; persistence intents are dispatched through explicit document/editor command boundaries. Committed Settings effects apply layout, sidebar and editor preferences only for their changed fields, preserving Preview nodes on theme-only commits. Markdown context export delegates raw snapshot/read/write lifecycle to the public Markdown Exporter.",
-      "legacy-ui-state",
-      "classic-script",
-      "split-and-remove",
-      false
-    ],
-    [
-      "public/app/editor-tools.js",
-      "legacy-classic-script",
-      "legacy-app",
-      "Legacy post-Stage-5 shell workflows only: Stage 6 layout/fullscreen and Stage 8 hybrid visual-editing toggles; Stage 7 Mermaid rendering and preview layout stability are delegated.",
-      "legacy-editor-tools-state",
-      "classic-script",
-      "split-and-remove",
-      false
-    ],
-    [
-      "public/app/events.js",
-      "legacy-classic-script",
-      "legacy-app",
-      "Legacy keyboard and interaction wiring; picker/startup import intents invoke public commands. Drag/drop and source reads belong to Import.",
-      "legacy-event-bindings",
-      "classic-script",
-      "split-and-remove",
-      false
-    ],
-    [
-      "public/app/web-clipper.js",
-      "legacy-classic-script",
-      "legacy-app",
-      "Legacy Find/Preview callbacks and toast helper; all import commands, state and views belong to ESM Import.",
-      "legacy-find-preview-callbacks",
-      "classic-script",
-      "split-and-remove",
-      false
-    ],
-    [
       "public/compatibility/business-content.html",
       "html-shell",
       "ui-compatibility",
@@ -5654,6 +5604,86 @@
       "Explicit opt-in gate, lazy query factory, exact global descriptor ownership, rollback and terminal disposal.",
       "e2e-installation",
       "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/bootstrap/application-events.js",
+      "esm-module",
+      "bootstrap",
+      "Route interactive transactions and keyboard/menu events into explicit Document, Editor and Preview commands.",
+      "scoped event and command registrations",
+      "explicit construction/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/bootstrap/application-lifetime.js",
+      "esm-module",
+      "bootstrap",
+      "Release all owned subscriptions, listeners and timers, including partial construction failure.",
+      "owned release callbacks and pending timers",
+      "explicit construction/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/bootstrap/workspace-startup.js",
+      "esm-module",
+      "bootstrap",
+      "Restore preferences, create the empty session and initialize layout/help before opening the launch path.",
+      "startup cancellation lifetime",
+      "explicit construction/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/documents/ui/document-workspace.js",
+      "esm-module",
+      "feature",
+      "Project document lifecycle results and own index caches over the Document Controller.",
+      "index cache tasks and cached statistics; session/model remain external authorities",
+      "explicit construction/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/editor/application/find-preview-commands.js",
+      "esm-module",
+      "feature",
+      "Save before native Find and synchronize Preview selection with document/version and lifetime guards.",
+      "Find command registrations and pending selection frames",
+      "explicit construction/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/layout/workspace-preferences.js",
+      "esm-module",
+      "feature",
+      "Apply Settings Store values and route layout/visual-edit commands through existing controllers.",
+      "view transition and scoped settings/command listeners",
+      "explicit construction/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/shell-menus.js",
+      "esm-module",
+      "feature",
+      "Present existing dropdown/context menus and transient toast messages with owned dismissal.",
+      "menu geometry and toast timer",
+      "explicit construction/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/persistence/ui/workspace-status.js",
+      "esm-module",
+      "feature",
+      "Project persistence, locale and Preview strategy into the existing status elements.",
+      "save-hint timer and status subscriptions",
+      "explicit construction/destroy",
       "retain",
       false
     ]

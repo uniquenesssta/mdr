@@ -1,5 +1,6 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 import test from 'node:test';
 import { classifyBrowserFile, classifyImportPath, IMPORT_KINDS } from '../../../src/features/import/index.js';
 
@@ -25,9 +26,9 @@ test('Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-
 test('classic callers use the scoped compatibility host instead of a replacement global facade', async () => {
   for (const path of ['public/app/core.js', 'public/app/events.js', 'public/app/web-clipper.js']) {
     const source = await readFile(new URL('../../../' + path, import.meta.url), 'utf8');
-    assert.match(source, /compatibility-business-ports/);
-    const boundary = path === 'public/app/web-clipper.js' ? /markdownEditorEditorUiCommandPort/
-      : /markdownEditorPlatformPort/;
+    assert.doesNotMatch(source, /getElementById\(['"]compatibility-business-ports/);
+    const boundary = path === 'public/app/web-clipper.js' ? /webClipperEditorUiCommandPort/
+      : path === 'public/app/events.js' ? /eventsDocumentUiCommandPort/ : /corePlatformPort/;
     assert.match(source, boundary);
 
     assert.doesNotMatch(source, /window\.markdownEditorPlatform|window\.markdownEditorNative/);

@@ -1,5 +1,6 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -33,7 +34,7 @@ test('Atomic 7.1 callers still read one canonical threshold object after Atomic 
   assert.match(main, /previewThresholdsPort\.destroy\(\)/);
   assert.match(handler, /PREVIEW_BEHAVIOR_THRESHOLDS/);
   assert.match(handler, /thresholds:\s*PREVIEW_BEHAVIOR_THRESHOLDS/);
-  assert.match(core, /markdownEditorPreviewCommandPort/);
+  assert.match(core, /corePreviewCommandPort/);
   assert.match(core, /const corePreviewBehaviorThresholds = corePreviewCommandPort\.thresholds/);
   assert.match(engine, /PREVIEW_BEHAVIOR_THRESHOLDS/);
   for (const value of [main, core, handler, engine]) assert.doesNotMatch(value, /window\.markdownEditorPreviewThresholds/);

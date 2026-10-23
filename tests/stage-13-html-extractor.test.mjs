@@ -1,6 +1,7 @@
+import { readFile } from './support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFile } from 'node:fs/promises';
+
 import { createWebClipperController, createWebFetchCoordinator } from '../src/features/import/index.js';
 
 test('public clipper preserves extraction result identity and parse errors before insertion', () => {

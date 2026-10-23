@@ -1,5 +1,6 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -54,7 +55,7 @@ test('Atomic 7.2 state mutations remain in PreviewState while Atomic 7.14 orches
   assert.match(handler, /get snapshot\(\)[\s\S]*controller\.getStateSnapshot\(\)/);
   assert.match(webClipper, /webClipperPreviewCommandPort\.snapshot\.mode/);
   assert.match(editorTools, /editorToolsPreviewCommandPort\.snapshot\.lastStableResult/);
-  assert.match(core, /let previewPerformanceMode = 'auto'/);
+  assert.match(core, /coreSettingsStorePort\.get\('previewPerformanceMode'\)/);
   assert.doesNotMatch(core, /previewLineFocusVersion|previewLineFocusTarget|previewLineFocusPromise/);
 });
 

@@ -165,7 +165,7 @@ test('refresh continues through binding failures and reports them after remainin
 });
 
 test('production integration preserves 113 bindings across shell, Help and the owned clipper view', async () => {
-  const { readFile } = await import('node:fs/promises');
+  const { readFile } = await import('../../support/application-surface-source.mjs');
   const [moduleEntry, core, bootstrap, index, markup, helpDialog, clipperView, main, exportImageView] = await Promise.all([
     readFile('src/bootstrap/module-entry.js', 'utf8'),
     readFile('public/app/core.js', 'utf8'),

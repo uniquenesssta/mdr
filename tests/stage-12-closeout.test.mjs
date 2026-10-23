@@ -16,7 +16,11 @@ test('current source review matches the checkout while archived R12 fingerprints
     assert.equal(git(['hash-object', source.path]), source.blobSha, source.path + ': risk review became stale.');
   }
   for (const source of policy.acceptance.artifact.evidence.reviewedSources) {
-    assert.ok(policy.reviewedSources.some(current => current.path === source.path), source.path + ': review coverage removed.');
+    if (policy.reviewedSources.some(current => current.path === source.path)) continue;
+    const migration = policy.currentSourceReview.removedReviewedSources.find(row => row.path === source.path && row.stage === 'R16.2');
+    assert.ok(migration?.historicalBlobShas.includes(source.blobSha), source.path + ': frozen review provenance removed.');
+    assert.ok(migration.replacements.length > 0);
+    for (const path of migration.replacements) assert.ok(policy.reviewedSources.some(row => row.path === path), path + ': replacement is unreviewed.');
     assert.equal(git(['rev-parse', policy.acceptance.commit + ':' + source.path]), source.blobSha,
       source.path + ': historical R12 review was rewritten.');
   }

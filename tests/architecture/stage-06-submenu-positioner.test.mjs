@@ -1,6 +1,7 @@
+import { readFile } from '../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 
 test('Atomic 6.11 owns submenu geometry outside MenuView and removes the classic implementation path', async () => {
   const [positioner, port, menuView, menuIndex, moduleEntry, core, events] = await Promise.all([
@@ -31,7 +32,7 @@ test('Atomic 6.11 owns submenu geometry outside MenuView and removes the classic
   assert.match(moduleEntry, /createSubmenuPositioner/);
   assert.match(moduleEntry, /mountClassicSubmenuPositionerPort/);
   assert.match(moduleEntry, /submenuPositioner\.start\(\)/);
-  assert.match(core, /markdownEditorSubmenuPositionerPort/);
+  assert.match(core, /coreSubmenuPositionerPort/);
   assert.match(core, /coreSubmenuPositionerPort\.closeAll\(\)/);
   assert.doesNotMatch(core, /function positionAppSubmenu|function resetAppSubmenuPosition|function initializeAppSubmenus|__markdownEditorCancelSubmenuClose/);
   assert.doesNotMatch(events, /initializeAppSubmenus/);

@@ -1,6 +1,7 @@
+import { readFile } from '../../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { access, readFile, readdir } from 'node:fs/promises';
+import { access, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 import {
@@ -242,7 +243,7 @@ test('Atomic 4.5 production integration removes the classic Help authority and w
 
   assert.doesNotMatch(core, /markdownEditorHelpContent|HELP_SHOWN_KEY|help-body|data-help-page-panel/);
   assert.doesNotMatch(editorTools, /function\s+(?:openHelp|closeHelp|switchHelpPage)\b|activeHelpPage/);
-  assert.match(bootstrap, /markdownEditorHelpPort/);
+  assert.match(bootstrap, /bootstrapHelpPort/);
   assert.match(bootstrap, /bootstrapHelpPort\.openFirstRun\(\)/);
   assert.doesNotMatch(bootstrap, /HELP_SHOWN_KEY|openHelp\(/);
 

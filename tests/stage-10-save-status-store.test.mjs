@@ -1,5 +1,6 @@
+import { readFile } from './support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+
 import test from 'node:test';
 import {
   SAVE_STATUS_STATES,
@@ -143,7 +144,7 @@ test('Atomic 10.1 composition gives status authority to Persistence and UI only 
   assert.match(main, /saveStatusStorePort\.destroy\(\)/);
   assert.match(main, /saveStatusStore\.destroy\(\)/);
 
-  assert.match(core, /markdownEditorSaveStatusStorePort/);
+  assert.match(core, /coreSaveStatusStorePort/);
   assert.match(core, /coreSaveStatusStorePort\.subscribe\(/);
   assert.doesNotMatch(core, /let\s+saveStatusState\b|function\s+setSaveStatus\b/);
   assert.doesNotMatch(core, /event\.state === 'queued'|event\.state === 'saving'|event\.state === 'saved'|event\.state === 'error'|event\.state === 'loading-index'|event\.state === 'loading'/);
