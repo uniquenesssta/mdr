@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "05a7ac50aae81e352d76198e2b1b10fa48bf0156",
+  "baselineCommit": "0c9133c5852a3c7a7c3981aacbee948865784057",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -691,7 +691,7 @@
     },
     {
       "path": "src-tauri/src/performance_log/redaction.rs",
-      "sha256": "4f20f6f62aa1a1c281873df65dae5a366463cc6e1729f361e36eac1bbc62c757"
+      "sha256": "267fa386b09c909115f549401877708463a7d2e42bf93843b985108eba229b8c"
     },
     {
       "path": "src-tauri/src/performance_log/writer.rs",
@@ -827,7 +827,7 @@
     },
     {
       "path": "src-tauri/tests/performance_log/redaction_pipeline.rs",
-      "sha256": "39d9ed87ef8a69754f8a5ce3523eecfbd5cc2eb36f702ca04957842af4bc04c5"
+      "sha256": "b793bf124cc29ca60e89bd4914a65fea01953dac4794a294340d583888a6a37e"
     },
     {
       "path": "src-tauri/tests/performance_log/release_writer.rs",
@@ -951,11 +951,11 @@
     },
     {
       "path": "src/features/documents/application/document-open-coordinator.js",
-      "sha256": "e06c96f6859b392d93c7d9e4bbe9022ab73ba2c0d9d29d7e3fe16e167eacd30c"
+      "sha256": "189eca84bfdd2f3c8b0921713caa4e343428b3ce528d464634e42976d1d882bf"
     },
     {
       "path": "src/features/documents/application/document-session-controller.js",
-      "sha256": "88dcd1adf2df6ff391c8dfca8433048924acd0df6f1f49d7aba80352240ad19c"
+      "sha256": "8f7867360b26cf8dea0de532f75161c0cefcd5e65d0082649fa2c21e20f48104"
     },
     {
       "path": "src/features/documents/application/document-title-controller.js",
@@ -1619,7 +1619,7 @@
     },
     {
       "path": "src/features/import/application/import-document-controller.js",
-      "sha256": "53998eac7695452e47e9ec69f6248560d373a7aa36716528f6869d2f4a8b2ce3"
+      "sha256": "19bf8458379f8077b70a4bfedf5065859e1ef39cba87a43c27fcef2b468685ac"
     },
     {
       "path": "src/features/import/files/drop-import-controller.js",
@@ -2247,7 +2247,7 @@
     },
     {
       "path": "src/features/telemetry/telemetry-redaction.js",
-      "sha256": "f80f0c9d5bdaeff1703f268ac010d0d2b1b1aee6acee8ce50f12832bce1cf045"
+      "sha256": "0dcd50dcd93dfdd81a9d276a39095f548978044dee4f8ab62ac5f8497a79cc73"
     },
     {
       "path": "src/features/window/close-save-port.js",
@@ -3306,6 +3306,10 @@
       "sha256": "ff7165e29ffad72a1fd4d623795938fb32f7daa05af96b567948a39c93814dab"
     },
     {
+      "path": "tests/e2e/windows/large-document-import.mjs",
+      "sha256": "4c01b8135b10c8dc29640c9dbbd95f9ba1ca9a246a879fd4ca28ccf7dcb7f9d6"
+    },
+    {
       "path": "tests/e2e/windows/native-window-interop.mjs",
       "sha256": "89fe39755499da20e1fc551908ac0a43a0247f1a5b5cc1aedcb962bd9b0bea50"
     },
@@ -3319,7 +3323,7 @@
     },
     {
       "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
-      "sha256": "b439ccb11462f1df56b8967f42f7658476efb2f1a2e84ba677146c0f5e77992e"
+      "sha256": "c79d436de6daca1001e3422d5f2535240339137bfdeb6b73fdd2fae9a7b45473"
     },
     {
       "path": "tests/e2e/windows/run-window-automation.mjs",
@@ -3855,7 +3859,7 @@
     },
     {
       "path": "tests/stage-15-event-catalogue.test.mjs",
-      "sha256": "a1eb8a46fab89ea9ebabcb5f7830cf284f7b845ab5b539ae9bd550abf6f4dd84"
+      "sha256": "afced9adbf8785d27900d81bce878b4e063a0dac7103eefa362a4b2d554dff2a"
     },
     {
       "path": "tests/stage-15-log-cleanup.test.mjs",
@@ -3875,7 +3879,7 @@
     },
     {
       "path": "tests/stage-15-redaction.test.mjs",
-      "sha256": "6d92240ca97454edd3ff654b93415c1793183ffd1ed2686fef1f4d28677a7ded"
+      "sha256": "8ddab98f81d7bb1b0c38700678fd9d7e661abfe7ebd27e64e3d282229dc0cae7"
     },
     {
       "path": "tests/stage-15-runtime-snapshot.test.mjs",
@@ -3911,7 +3915,7 @@
     },
     {
       "path": "tests/support/performance-log/frontend-payload.mjs",
-      "sha256": "5b89dea4cb83320a831c00d9b4bcc9d5d038bb013443dca7594ef6d1a7f22872"
+      "sha256": "f2accc057f14e0370611c896a6e5f23621b01aad0d426550b4926d1a77eb72bf"
     },
     {
       "path": "tests/support/performance-log/storage-contract.mjs",
@@ -3991,7 +3995,7 @@
     },
     {
       "path": "tests/unit/documents/document-session-controller.test.mjs",
-      "sha256": "41becb2a806c80b03727111b7ba803a1a6a3e29cbea26ed350400184aa4f30e7"
+      "sha256": "6f44d778f7e25905a7175bbfe3c261395f683aee9b38a101ae2f6d865973f908"
     },
     {
       "path": "tests/unit/documents/document-session-store.test.mjs",
@@ -4506,7 +4510,7 @@
       "sha256": "401810c90a64f43ef0bf46e1428e728d02c011c4d65f08963ecb486f4efef32f"
     }
   ],
-  "inputSha256": "9a94b026fcb0e504e48cc9af4bd671f3be1363f23d5135051e278fbc16d504f5",
+  "inputSha256": "9b79a4f84d0658d34d7537d2d5fdc929e9c3abe4231b79b4709f6247825ba604",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -16366,7 +16370,7 @@
           "target": "src/runtime/performance.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 20
+          "line": 32
         },
         {
           "from": "tests/stage-15-runtime-snapshot.test.mjs",

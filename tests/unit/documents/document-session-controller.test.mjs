@@ -510,6 +510,122 @@ function createImportHarness(h, { read = async () => '正文\r\ntext', imageRead
     destroy() { application.destroy(); application.destroy(); files.destroy(); images.destroy(); h.controller.destroy(); } };
 }
 
+function createQuotaImportHarness({ save = null } = {}) {
+  const storage = createMemoryStorage();
+  const write = storage.setItem;
+  storage.setItem = (key, value) => {
+    const values = storage.snapshot(); values.set(key, String(value));
+    if ([...values].reduce((sum, [name, body]) => sum + name.length + body.length, 0) > 5 * 1024 * 1024) {
+      throw Object.assign(new Error('storage quota exceeded'), { name: 'QuotaExceededError' });
+    }
+    write(key, value);
+  };
+  const bodies = new Map(), removed = [];
+  const native = new NativeDocumentStore({ available: true, documentStore: {
+    async save(request) {
+      if (save) await save(request);
+      bodies.set(request.documentId, request.fullContent);
+      return { version: request.nextVersion };
+    },
+    async load(id) { return { content: bodies.get(id), version: 1 }; },
+    async remove(id) { removed.push(id); bodies.delete(id); }
+  } });
+  const browser = createBrowserDocumentRepository({ storage });
+  const repository = createSessionDocumentRepository({ browserRepository: browser, nativeStore: native });
+  return { ...createHarness({ repository }), storage, browser, bodies, removed };
+}
+
+test('large native and browser-file imports commit native bodies before quota-limited session storage', async () => {
+  const content = '中'.repeat(5_453_875);
+  const h = createQuotaImportHarness();
+  const chain = createImportHarness(h, { read: async () => content });
+  try {
+    for (const open of [() => chain.application.openNativeText('C:\\large.md'),
+      () => chain.application.openBrowserFile({ name: 'large.md', size: Buffer.byteLength(content) })]) {
+      assert.equal(await open(), true);
+      const active = h.controller.getActiveRecord();
+      assert.equal(active.nativeBacked, true);
+      assert.equal(h.bodies.get(active.id), content);
+      assert.equal(h.model.createSnapshot(), content);
+      assert.equal(h.browser.hasContent(active.id), false);
+      assert.equal(h.storage.getItem('md_editor_content'), null);
+      const records = JSON.parse(h.storage.getItem('md_editor_documents'));
+      assert.ok(records.every(record => record.nativeBacked && !Object.hasOwn(record, 'content')));
+    }
+    assert.equal(h.session.records.length, 2);
+    const first = h.session.records[1];
+    await h.controller.openDocument(first.id);
+    assert.equal(h.model.createSnapshot(), content);
+  } finally { chain.destroy(); }
+});
+
+test('failed native import keeps the previous document and cleans up the uncommitted body', async () => {
+  const failure = new Error('native disk write failed');
+  const h = createQuotaImportHarness({ save: async () => { throw failure; } });
+  const original = await h.controller.newDocument({ title: 'Original', content: 'stable' });
+  await assert.rejects(h.controller.openExternalDocument({ title: 'large.md',
+    expectedTextLength: value => value.length, loadContent: async () => '中'.repeat(5_453_875) }), error => error === failure);
+  assert.equal(h.session.activeId, original.record.id);
+  assert.equal(h.session.records.length, 1);
+  assert.equal(h.model.createSnapshot(), 'stable');
+  assert.equal(h.browser.cachedBodyCount, 1);
+  assert.equal(h.removed.length, 1);
+  h.controller.destroy();
+});
+
+test('superseded native import cannot commit after a newer document activates', async () => {
+  const saving = deferred();
+  const started = deferred();
+  const h = createQuotaImportHarness({ save: async () => { started.resolve(); await saving.promise; } });
+  const original = await h.controller.newDocument({ title: 'Original', content: 'stable' });
+  const pending = h.controller.openExternalDocument({ title: 'large.md',
+    expectedTextLength: value => value.length, loadContent: async () => '中'.repeat(5_453_875) });
+  const rejected = assert.rejects(pending, error => error.code === 'DOCUMENT_OPERATION_STALE');
+  await started.promise;
+  let newer;
+  try { newer = await h.controller.newDocument({ title: 'Newer', content: 'newer' }); }
+  finally { saving.resolve(); await rejected; }
+  assert.equal(h.session.activeId, newer.record.id);
+  assert.equal(h.session.records.length, 2);
+  assert.equal(h.model.createSnapshot(), 'newer');
+  assert.equal(h.bodies.size, 0);
+  assert.equal(h.browser.hasContent(newer.record.id), true);
+  assert.equal(h.browser.readContent(original.record.id), 'stable');
+  h.controller.destroy();
+});
+
+test('cancelling during native import persistence rolls back without publishing success', async () => {
+  const saving = deferred(), started = deferred();
+  const h = createQuotaImportHarness({ save: async () => { started.resolve(); await saving.promise; } });
+  const original = await h.controller.newDocument({ title: 'Original', content: 'stable' });
+  const chain = createImportHarness(h, { read: async () => '中'.repeat(5_453_875) });
+  const pending = chain.application.openNativeText('C:\\large.md');
+  await started.promise; chain.application.cancel(); saving.resolve();
+  assert.equal(await pending, false);
+  assert.equal(h.session.activeId, original.record.id);
+  assert.equal(h.model.createSnapshot(), 'stable');
+  assert.equal(h.bodies.size, 0);
+  assert.deepEqual(chain.recents, []); assert.deepEqual(chain.messages, []);
+  chain.destroy();
+});
+
+test('metadata persistence failure after a native import commit is explicit and cleans the unpublished document', async () => {
+  const h = createQuotaImportHarness();
+  const original = await h.controller.newDocument({ title: 'Original', content: 'stable' });
+  const failure = new Error('session metadata unavailable'), write = h.storage.setItem;
+  h.storage.setItem = (key, value) => {
+    if (key === 'md_editor_documents') throw failure;
+    write(key, value);
+  };
+  await assert.rejects(h.controller.openExternalDocument({ title: 'large.md',
+    expectedTextLength: value => value.length, loadContent: async () => '中'.repeat(5_453_875) }), error => error === failure);
+  assert.equal(h.session.activeId, original.record.id);
+  assert.equal(h.model.createSnapshot(), 'stable');
+  assert.equal(h.bodies.size, 0);
+  assert.equal(h.browser.cachedBodyCount, 1);
+  h.controller.destroy();
+});
+
 test('R13.13 real Documents chain saves before read, normalizes CRLF, commits once and registers successful native paths', async () => {
   const order = [];
   const repository = createRepository({ saveImpl: async () => { order.push('save'); return { native: false }; } });
@@ -517,7 +633,7 @@ test('R13.13 real Documents chain saves before read, normalizes CRLF, commits on
   const original = await h.controller.newDocument({ title: 'Original', content: 'unsaved body' });
   const chain = createImportHarness(h, { read: async () => { order.push('read'); return '正文\r\ntext'; } });
   assert.equal(await chain.application.openNativeText('C:\\notes\\import.md'), true);
-  assert.deepEqual(order, ['save', 'read']);
+  assert.deepEqual(order, ['save', 'read', 'save']);
   assert.equal(repository.content.get(original.record.id), 'unsaved body');
   assert.equal(h.session.records.length, 2); assert.equal(h.model.createSnapshot(), '正文\ntext');
   assert.equal(chain.recents.length, 1); assert.equal(chain.recents[0][0], 'C:\\notes\\import.md');

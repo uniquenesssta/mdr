@@ -136,6 +136,12 @@ export function createDocumentSessionController({
       if (runtimeRecord) {
         session.setActive(runtimeRecord.id, { reason: 'runtime-reconciled' });
         record = runtimeRecord;
+      } else {
+        // A superseded import may have activated its body while native storage
+        // was pending. Restore the committed document before saving it.
+        await restoreRuntimeForSession(operation);
+        assertCurrent(operation);
+        record = session.getActiveRecord();
       }
     }
     if (!record) return frozenResult(operation, { saved: false, native: false, record: null });
@@ -273,11 +279,11 @@ export function createDocumentSessionController({
         : expectedTextLength;
       const expectedLength = Number(expectedLengthValue);
       const record = createRecord({ title: title || fallbackTitle, filePath, fallbackTitle });
-      const opened = openCoordinator.activateNew(record, { content, chunks: null, loaded: null }, operation, {
+      const opened = await openCoordinator.activateImported(record, { content, chunks: null, loaded: null }, operation, {
         index: 0,
         reason: 'import',
-        persistLegacySnapshot: true,
         validate: () => {
+          assertNotCancelled();
           if (Number.isFinite(expectedLength) && model.getTextLength() !== expectedLength) {
             throw new Error(`导入文档长度校验失败：期望 ${expectedLength}，实际 ${model.getTextLength()}`);
           }

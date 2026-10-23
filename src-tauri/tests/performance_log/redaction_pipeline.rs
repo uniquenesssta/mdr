@@ -10,7 +10,11 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
         .current_dir(root)
         .output()
         .expect("Node is required for the actual JS to Rust log pipeline test");
-    assert!(result.status.success(), "{}", String::from_utf8_lossy(&result.stderr));
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
     let fixture: Value = serde_json::from_slice(&result.stdout).unwrap();
     let entries = fixture["entries"].as_array().unwrap().clone();
     assert_eq!(entries.len(), 3);
@@ -36,8 +40,14 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
             !frontend_payload.contains(secret.as_str().unwrap()),
             "raw secret reached command"
         );
-        assert!(!frontend_payload.contains(escaped), "escaped secret reached command");
-        assert!(!persisted.contains(secret.as_str().unwrap()), "secret reached JSONL");
+        assert!(
+            !frontend_payload.contains(escaped),
+            "escaped secret reached command"
+        );
+        assert!(
+            !persisted.contains(secret.as_str().unwrap()),
+            "secret reached JSONL"
+        );
         assert!(!persisted.contains(escaped), "escaped secret reached JSONL");
     }
     let details = &rows[0]["details"];
@@ -76,9 +86,37 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
     assert_eq!(details["sideCases"][0]["scrollSourceSide"], "preview");
     assert_eq!(details["sideCases"][1]["scrollSourceSide"], "");
     assert_eq!(details["sideCases"][2]["scrollSourceSide"], "[redacted]");
+    for (key, value) in [
+        ("direction", "editor-to-preview"),
+        ("result", "mapping-failed"),
+        ("reason", "editor-select"),
+        ("mappingMode", "source-dom"),
+        ("failureStage", "activate"),
+        ("errorCode", "STORAGE_QUOTA_EXCEEDED"),
+    ] {
+        assert_eq!(details["diagnostics"][key], value);
+        assert_eq!(details["hostileDiagnostics"][key], "[redacted]");
+    }
     assert_eq!(rows[0]["operation"], "runtime.snapshot");
     assert_eq!(rows[0]["durationMs"], 12.5);
     assert_eq!(rows[1]["status"], "warning");
     assert_eq!(rows[2]["status"], "error");
     assert_eq!(rows[2]["details"]["error"], "[redacted]");
+}
+
+#[test]
+fn imported_document_labels_survive_without_exposing_unknown_labels_or_error_prose() {
+    for operation in ["document.imported", "document.import-error"] {
+        let entry = serde_json::json!({"operation":operation,"category":"document.error",
+            "details":{"errorCode":"STORAGE_QUOTA_EXCEEDED","message":"PRIVATE error text"}});
+        let redacted = super::redaction::redact_value(&entry);
+        assert_eq!(redacted["operation"], operation);
+        assert_eq!(redacted["details"]["errorCode"], "STORAGE_QUOTA_EXCEEDED");
+        assert_eq!(redacted["details"]["message"], "[redacted]");
+    }
+    assert_eq!(
+        super::redaction::redact_value(&serde_json::json!({"operation":"PRIVATE-label"}))
+            ["operation"],
+        "[redacted]"
+    );
 }

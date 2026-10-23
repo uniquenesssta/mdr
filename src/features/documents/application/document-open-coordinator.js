@@ -1,7 +1,8 @@
 /**
- * Responsibility: Atomically activate newly created/imported document bodies before committing Documents Session state.
+ * Responsibility: Activate new document bodies and durably prepare imports before committing Documents Session state.
  * State/side effects: No independent state; mutates only the injected model, session store and persistence port after generation validation. Persisted existing-document loads belong to Persistence LoadController.
  */
+import { updateDocumentRecord } from '../domain/document-record.js';
 
 function activationOptions(restored = {}) {
   const options = { loaded: restored.loaded || null };
@@ -29,25 +30,26 @@ export function createDocumentOpenCoordinator({ session, model, repository, asse
     if (destroyed) throw new Error('Document open coordinator has been destroyed.');
   };
 
-  const activateNew = (record, restored, operation, {
-    index = 0,
-    reason = 'new',
-    validate = null,
-    persistLegacySnapshot = false
-  } = {}) => {
+  const activateRuntime = (record, restored, operation, validate) => {
     assertActive();
     assertCurrent(operation);
     model.activate(record, activationOptions(restored));
     repository.activate(model, record, restored?.loaded || null);
     if (typeof validate === 'function') validate(record, restored);
     assertCurrent(operation);
-    const snapshot = model.createSnapshot?.('document-session-create') ?? restored?.content ?? '';
-    repository.rememberContent(record.id, snapshot);
+  };
+
+  const commitNew = (record, restored, { index = 0, reason = 'new', persistLegacySnapshot = false } = {}) => {
+    let snapshot = '';
+    if (!record.nativeBacked) {
+      snapshot = model.createSnapshot?.('document-session-create') ?? restored?.content ?? '';
+      repository.rememberContent(record.id, snapshot);
+    }
     if (persistLegacySnapshot) {
       repository.persistLegacyActiveSnapshot({
         title: record.title || '',
         content: snapshot,
-        nativeBacked: false
+        nativeBacked: Boolean(record.nativeBacked)
       });
     } else {
       repository.persistLegacyActiveTitle(record.title || '');
@@ -59,8 +61,44 @@ export function createDocumentOpenCoordinator({ session, model, repository, asse
     return Object.freeze({ record: session.getRecord(record.id), loaded: restored?.loaded || null });
   };
 
+  const activateNew = (record, restored, operation, options = {}) => {
+    activateRuntime(record, restored, operation, options.validate);
+    return commitNew(record, restored, options);
+  };
+
+  const activateImported = async (record, restored, operation, options = {}) => {
+    try {
+      activateRuntime(record, restored, operation, options.validate);
+      const targetVersion = model.getDocumentVersion();
+      const saved = await repository.save(model, record, { forceSnapshot: true, snapshotReason: 'document-import' });
+      assertActive();
+      assertCurrent(operation);
+      if (typeof options.validate === 'function') options.validate(record, restored);
+      const committedVersion = Number(saved?.editorVersion ?? targetVersion);
+      if (model.getDocumentVersion() !== committedVersion || model.title !== (saved?.editorTitle ?? record.title)) {
+        throw Object.assign(new Error('DOCUMENT_CHANGED_DURING_SAVE'), { code: 'DOCUMENT_CHANGED_DURING_SAVE' });
+      }
+      const committedRecord = saved?.native ? updateDocumentRecord(record, {
+        nativeBacked: true, nativeVersion: Number(saved.nativeVersion ?? saved.version) || 0
+      }) : record;
+      const opened = commitNew(committedRecord, restored, { ...options, persistLegacySnapshot: true });
+      model.markPersisted(committedVersion, committedRecord.nativeVersion || 0);
+      if (saved?.native) repository.forgetContent(record.id);
+      return opened;
+    } catch (error) {
+      if (!session.getRecord(record.id)) {
+        try { await repository.remove(record.id); }
+        catch (cleanupError) {
+          throw new AggregateError([error, cleanupError], 'Imported document cleanup failed.');
+        }
+      }
+      throw error;
+    }
+  };
+
   return Object.freeze({
     activateNew,
+    activateImported,
     destroy() {
       if (destroyed) return;
       destroyed = true;

@@ -79,7 +79,9 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
     if envelope {
         match key {
             "source" => return matches!(value, "frontend" | "rust"),
-            "status" => return matches!(value, "ok" | "error" | "warning" | "cancelled" | "skipped"),
+            "status" => {
+                return matches!(value, "ok" | "error" | "warning" | "cancelled" | "skipped")
+            }
             "category" => {
                 return matches!(
                     value,
@@ -138,6 +140,8 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                         | "convertAndInsert"
                         | "delete_document_state"
                         | "document.file-save-error"
+                        | "document.import-error"
+                        | "document.imported"
                         | "document.save-as-error"
                         | "document.snapshot"
                         | "downloadExportImage"
@@ -268,11 +272,43 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
         }
     }
     match key {
-        "contentType" => matches!(value, "text/html" | "text/plain" | "text/markdown" | "application/json"),
+        "contentType" => matches!(
+            value,
+            "text/html" | "text/plain" | "text/markdown" | "application/json"
+        ),
         "side" | "sourceSide" | "targetSide" | "scrollSourceSide" => {
             matches!(value, "editor" | "preview" | "")
         }
         "mode" | "presentationMode" => matches!(value, "source" | "hybrid" | "preview"),
+        "direction" => matches!(value, "editor-to-preview" | "preview-to-editor"),
+        "result" => matches!(
+            value,
+            "exact" | "mapped" | "pending" | "mapping-failed" | "no-selection"
+        ),
+        "mappingMode" => matches!(value, "source-dom" | "dom-source"),
+        "reason" => matches!(
+            value,
+            "editor-select"
+                | "editor-keyup"
+                | "editor-pointerup"
+                | "editor-selection"
+                | "editor-select-retry"
+                | "editor-keyup-retry"
+                | "editor-pointerup-retry"
+                | "editor-selection-retry"
+                | "preview-selection"
+                | "preview-keyup"
+                | "preview-pointerup"
+                | "document-selectionchange"
+                | "preview-mounted"
+                | "preview-replaced"
+                | "editor-geometry"
+        ),
+        "failureStage" => matches!(value, "save-before-read" | "read" | "activate" | "apply-ui"),
+        "errorCode" => matches!(
+            value,
+            "STORAGE_QUOTA_EXCEEDED" | "DOCUMENT_CHANGED_DURING_SAVE" | "DOCUMENT_IMPORT_FAILED"
+        ),
         _ => false,
     }
 }
@@ -287,7 +323,11 @@ fn redact_path_value(value: &Value, depth: usize, remaining: &mut usize) -> Valu
         // do not mistake its final slash-delimited fragment for a safe file name.
         Value::String(path) => {
             let name = terminal_path_component(path);
-            if name.len() > 160 || name.chars().any(|c| c.is_control() || "?&#=\"{}[]<>:".contains(c)) {
+            if name.len() > 160
+                || name
+                    .chars()
+                    .any(|c| c.is_control() || "?&#=\"{}[]<>:".contains(c))
+            {
                 Value::String(REDACTED.into())
             } else {
                 Value::String(name)
@@ -305,7 +345,13 @@ fn redact_path_value(value: &Value, depth: usize, remaining: &mut usize) -> Valu
     }
 }
 
-fn redact_nested(value: &Value, key: &str, depth: usize, remaining: &mut usize, envelope: bool) -> Value {
+fn redact_nested(
+    value: &Value,
+    key: &str,
+    depth: usize,
+    remaining: &mut usize,
+    envelope: bool,
+) -> Value {
     if depth > MAX_DEPTH || *remaining == 0 {
         return Value::String(REDACTED.into());
     }
@@ -321,7 +367,11 @@ fn redact_nested(value: &Value, key: &str, depth: usize, remaining: &mut usize, 
                     continue;
                 }
                 // Diagnostic field names are identifiers, never caller-supplied prose/paths.
-                if key.len() > 64 || !key.bytes().all(|b| b.is_ascii_alphanumeric() || b"_-".contains(&b)) {
+                if key.len() > 64
+                    || !key
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"_-".contains(&b))
+                {
                     continue;
                 }
                 let value = if is_path_field(key) {
@@ -382,7 +432,10 @@ mod tests {
             },
             "safe": "kept"
         });
-        assert_eq!(redact_value(&value), json!({ "nested": {}, "safe": "[redacted]" }));
+        assert_eq!(
+            redact_value(&value),
+            json!({ "nested": {}, "safe": "[redacted]" })
+        );
     }
 
     #[test]
@@ -491,7 +544,10 @@ mod tests {
         let value = json!({
             "nested": r#"{"body":"SECRET","token":"TOKEN","path":"C:\\Private\\note.md","count":7}"#
         });
-        assert_eq!(redact_value(&value), json!({ "nested": {"path":"note.md","count":7} }));
+        assert_eq!(
+            redact_value(&value),
+            json!({ "nested": {"path":"note.md","count":7} })
+        );
     }
 
     #[test]

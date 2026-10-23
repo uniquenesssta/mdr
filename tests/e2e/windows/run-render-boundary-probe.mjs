@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { withEmbeddedSession } from './embedded-webdriver-session.mjs';
 import { verifyImportDocumentChain } from './import-document-chain.mjs';
+import { verifyLargeDocumentImport } from './large-document-import.mjs';
 import { verifyImageDataExport } from './image-data-export.mjs';
 import { verifyFileWriterChain } from './file-writer-chain.mjs';
 import { verifyImageExportChain } from './image-export-chain.mjs';
@@ -56,6 +57,9 @@ importArticleHtml = '<!doctype html><html><head><title>R13 imported article</tit
   + '<p>$$x^2$$</p><pre><code class="language-mermaid">flowchart TD\n A[Safe] --&gt; B[Import]\n</code></pre>'
   + createRenderBoundaryProbe('r12-import-web', markerOrigin).html + '</article></body></html>';
 const importFilePath = join(canaryRoot, 'import-chain.md');
+const largeImportPath = join(canaryRoot, 'large-import.md');
+const largeLine = '大文档导入回归验证，原生存储保留完整正文。'.repeat(2) + '\r\n\r\n';
+await writeFile(largeImportPath, ('# Large document import\r\n\r\n' + largeLine.repeat(125_000)).slice(0, 5_453_875));
 await writeFile(importFilePath, '# R13 imported file\n\n**R13 harmless import text**\n\n'
   + '![owned import image](data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7)\n\n'
   + '$$\nx^2\n$$\n\n```mermaid\nflowchart TD\n A[Safe] --> B[Import]\n```\n\n'
@@ -286,6 +290,10 @@ try {
       evidence.importDocumentChain = await verifyImportDocumentChain({ browser, fixtureOrigin,
         filePath: importFilePath, missingPath: join(canaryRoot, 'missing.md'), requests, evidenceRoot,
         diagnostics: evidence.importDocumentChainDiagnostics });
+      await persist();
+      evidence.largeDocumentImportDiagnostics = {};
+      evidence.largeDocumentImport = await verifyLargeDocumentImport({ browser, filePath: largeImportPath,
+        diagnostics: evidence.largeDocumentImportDiagnostics });
       await persist();
       evidence.imageDataExport = await verifyImageDataExport({ browser, ownedRoot: canaryRoot, commit: process.env.GITHUB_SHA });
       await writeFile(join(evidenceRoot, 'r14-15-native-image-data.json'), JSON.stringify(evidence.imageDataExport, null, 2));

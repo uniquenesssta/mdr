@@ -58,6 +58,7 @@ export function createImportDocumentController({ files, images, documents, edito
 
   async function openText(name, filePath, read, details, request) {
     const operation = begin(request);
+    let failureStage = 'save-before-read';
     try {
       operation.assertCurrent();
       prepareTransition('document-import');
@@ -66,13 +67,16 @@ export function createImportDocumentController({ files, images, documents, edito
         expectedTextLength: getImportedTextLength,
         async loadContent() {
           operation.assertCurrent();
+          failureStage = 'read';
           const value = await read(operation.signal);
           operation.assertCurrent();
+          failureStage = 'activate';
           return value.content;
         }
       });
       operation.assertCurrent();
       if (!documents.isCurrentGeneration(result.generation)) return false;
+      failureStage = 'apply-ui';
       if (!await afterDocumentOpen(result)) return false;
       operation.assertCurrent();
       if (!documents.isCurrentGeneration(result.generation)) return false;
@@ -87,7 +91,9 @@ export function createImportDocumentController({ files, images, documents, edito
     } catch (error) {
       if (ignored(error, operation)) return false;
       record('document.import-error', { category: 'document.error', status: 'error', details: {
-        fileName: String(name || ''), message: String(error?.message || error), ...details
+        fileName: String(name || ''), message: String(error?.message || error), ...details,
+        failureStage, errorCode: error?.name === 'QuotaExceededError' ? 'STORAGE_QUOTA_EXCEEDED'
+          : error?.code === 'DOCUMENT_CHANGED_DURING_SAVE' ? 'DOCUMENT_CHANGED_DURING_SAVE' : 'DOCUMENT_IMPORT_FAILED'
       } });
       notify(String(error?.message || error));
       return false;

@@ -8,6 +8,15 @@ const ENUMS = {
   mode: new Set(['source', 'hybrid', 'preview']), presentationMode: new Set(['source', 'hybrid', 'preview']),
   status: new Set(['ok', 'error', 'warning', 'cancelled', 'skipped', 'rendered', 'cached', 'failed']),
   origin: new Set(['user', 'programmatic', 'layout', 'compensation']),
+  direction: new Set(['editor-to-preview', 'preview-to-editor']),
+  result: new Set(['exact', 'mapped', 'pending', 'mapping-failed', 'no-selection']),
+  mappingMode: new Set(['source-dom', 'dom-source']),
+  reason: new Set(['editor-select', 'editor-keyup', 'editor-pointerup', 'editor-selection',
+    'editor-select-retry', 'editor-keyup-retry', 'editor-pointerup-retry', 'editor-selection-retry',
+    'preview-selection', 'preview-keyup', 'preview-pointerup', 'document-selectionchange',
+    'preview-mounted', 'preview-replaced', 'editor-geometry']),
+  failureStage: new Set(['save-before-read', 'read', 'activate', 'apply-ui']),
+  errorCode: new Set(['STORAGE_QUOTA_EXCEEDED', 'DOCUMENT_CHANGED_DURING_SAVE', 'DOCUMENT_IMPORT_FAILED']),
   extension: new Set(['', 'md', 'markdown', 'txt', 'html', 'htm', 'doc', 'docx', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'avif'])
 };
 const normalizeKey = key => key.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();

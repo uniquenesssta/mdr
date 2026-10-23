@@ -39,7 +39,11 @@ export async function producePayload() {
     array: [nested, secrets[0], { path: secrets[4] + '/other.md', count: 3 }],
     cycle, invalid: 1n, notFinite: Infinity, items: Array(50).fill({count:1}),
     contentType:'text/html', contentLength:2048, hasDocumentPath:true,
-    scrollSourceSide:'editor', sideCases:[{scrollSourceSide:'preview'},{scrollSourceSide:''},{scrollSourceSide:secrets[4]}]
+    scrollSourceSide:'editor', sideCases:[{scrollSourceSide:'preview'},{scrollSourceSide:''},{scrollSourceSide:secrets[4]}],
+    diagnostics: { direction:'editor-to-preview', result:'mapping-failed', reason:'editor-select',
+      mappingMode:'source-dom', failureStage:'activate', errorCode:'STORAGE_QUOTA_EXCEEDED' },
+    hostileDiagnostics: { direction:secrets[0], result:secrets[0], reason:secrets[0],
+      mappingMode:secrets[0], failureStage:secrets[0], errorCode:secrets[0] }
   }});
   runtime.diagnostic('runtime.error', {category:'runtime.error', status:'warning', details:{message:secrets[2], nested}});
   try { runtime.measure('runtime.error', () => { throw new Error(secrets[2]); }, {category:'runtime.error'}); } catch {}

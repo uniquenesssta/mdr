@@ -4,6 +4,18 @@ import { readFileSync } from 'node:fs';
 import { createTelemetryRecorder, redactTelemetryDetails, redactTelemetryLabel, redactTelemetryIdentity } from '../src/features/telemetry/index.js';
 import { createTelemetryRuntimeHost } from './support/telemetry-runtime-host.mjs';
 const plain = value => JSON.parse(JSON.stringify(value));
+
+test('document and selection diagnostics retain only explicit failure and mapping enums', () => {
+  const safe = { direction: 'editor-to-preview', result: 'mapping-failed', reason: 'editor-select',
+    mappingMode: 'source-dom', failureStage: 'activate', errorCode: 'STORAGE_QUOTA_EXCEEDED' };
+  assert.deepEqual(plain(redactTelemetryDetails(safe)), safe);
+  for (const key of Object.keys(safe)) {
+    for (const value of ['C:\\PrivateRoot\\note.md', 'PRIVATE prose', 'future-private-code']) {
+      assert.equal(redactTelemetryDetails({ [key]: value })[key], '[redacted]');
+    }
+  }
+  assert.equal(redactTelemetryDetails({ message: 'QuotaExceededError PRIVATE' }).message, '[redacted]');
+});
 function recorder(extra = {}) {
   const entries = [], groups = [];
   const api = createTelemetryRecorder({ sessionId: 'privacy-fixture', now: () => 1000, monotonicNow: () => 5,
