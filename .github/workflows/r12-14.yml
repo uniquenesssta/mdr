@@ -1,9 +1,9 @@
 name: Windows Rewrite Revalidation
-run-name: R15-13 runtime log retirement and generated-file regression · ${{ github.sha }}
+run-name: R16-01 frozen deletion evidence and cumulative regression · ${{ github.sha }}
 
 on:
   push:
-    branches: [agent/r14-stage, agent/r15-stage]
+    branches: [agent/r14-stage, agent/r15-stage, codex/r16-stage]
     paths:
       - 'src/**'
       - 'public/app/core.js'
@@ -33,6 +33,8 @@ on:
       - 'docs/R12-24-DETAILS.md'
       - 'docs/R13-01-DETAILS.md'
       - 'docs/R15-*-DETAILS.md'
+      - 'docs/R16-*-DETAILS.md'
+      - 'docs/audit/r16-01-deletion-inventory.json'
       - 'docs/R14-01-DETAILS.md'
       - 'docs/R14-02-DETAILS.md'
       - 'docs/R14-03-DETAILS.md'
@@ -42,6 +44,7 @@ on:
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/14-*'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/15-*'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/16-*'
+      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/17-*'
       - 'docs/audit/r12-23-dependency-advisories.json'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/01-*'
       - 'src-tauri/src/external_link.rs'
@@ -283,6 +286,13 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-log-cleanup.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/log-cleanup.log"
+
+      - name: R16-01 conservative deletion evidence and drift rejection
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          node --test tests/stage-16-deletion-inventory.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/deletion-inventory-tests.log"
+          node scripts/stage-16/deletion-inventory.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/deletion-inventory.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

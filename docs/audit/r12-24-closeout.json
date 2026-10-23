@@ -640,6 +640,82 @@
     {
       "path": "tests/stage-15-log-cleanup.test.mjs",
       "blobSha": "0c32e298cd1b3ef96d0a00b85b0c37a8b33d4a56"
+    },
+    {
+      "path": ".github/workflows/r12-14.yml",
+      "blobSha": "a25aadcf0b00f332c303531279e0bddf1e07e6ff"
+    },
+    {
+      "path": "scripts/stage-16/deletion-inventory.mjs",
+      "blobSha": "368619734c3ce5b2ca3e9713af366cf61acc85dd"
+    },
+    {
+      "path": "tests/historical-workflow-routing.test.mjs",
+      "blobSha": "d9ce35d907116f40b745ad3e6d09d71b6d3aaab9"
+    },
+    {
+      "path": "tests/stage-12-directory-tree.test.mjs",
+      "blobSha": "51f256de299b93e0a4ce32884f1008722c6c6160"
+    },
+    {
+      "path": "tests/stage-12-external-link-validation.test.mjs",
+      "blobSha": "1ac03e09d1ad212a490bb2dcd6962e05e8f74641"
+    },
+    {
+      "path": "tests/stage-12-file-kind.test.mjs",
+      "blobSha": "82ed60c9c6081c97960530a48370214529fea894"
+    },
+    {
+      "path": "tests/stage-12-local-commands.test.mjs",
+      "blobSha": "16986ff912baba3bfb3f8e1d3bf6b06207532bc5"
+    },
+    {
+      "path": "tests/stage-12-log-redaction.test.mjs",
+      "blobSha": "13c4cc874089e505978ff8865306ac82e50d6d54"
+    },
+    {
+      "path": "tests/stage-12-opener.test.mjs",
+      "blobSha": "d361e1490389d1be6002f623d34f61d4b41ff182"
+    },
+    {
+      "path": "tests/stage-12-path-policy.test.mjs",
+      "blobSha": "32dff0ea5d1a8bec091a0ab9de7b66a3f9679a1a"
+    },
+    {
+      "path": "tests/stage-12-readers.test.mjs",
+      "blobSha": "6d01ecb9f5cdfbc19598e72a712b585d4d1e4b26"
+    },
+    {
+      "path": "tests/stage-12-security-contract.test.mjs",
+      "blobSha": "8738f5f3ad20f60dc9524b1d5deaee9d199c37e0"
+    },
+    {
+      "path": "tests/stage-12-tree-limits.test.mjs",
+      "blobSha": "fd742f115bbf142c11a15266b9b3a9c1faf596e9"
+    },
+    {
+      "path": "tests/stage-12-web-client.test.mjs",
+      "blobSha": "c9c00484fae2b04429a8955ad11ba5b5c4546197"
+    },
+    {
+      "path": "tests/stage-12-web-response.test.mjs",
+      "blobSha": "ffb6f3775307b0d5d85421cd92b7ba7be243b637"
+    },
+    {
+      "path": "tests/stage-12-web-validation.test.mjs",
+      "blobSha": "2a0be9e977b01787e49d070a5f6cc0a606168c8f"
+    },
+    {
+      "path": "tests/stage-12-writers.test.mjs",
+      "blobSha": "5dc43f2f2aa63a1a022f410b5062c0185076fba0"
+    },
+    {
+      "path": "tests/stage-16-deletion-inventory.test.mjs",
+      "blobSha": "92cd30dad54698549993042c59170c7a901ca488"
+    },
+    {
+      "path": "docs/audit/r16-01-deletion-inventory.json",
+      "blobSha": "e682e62ba8aec1a05428553c7adc1def96058163"
     }
   ],
   "priorFailures": {
@@ -855,14 +931,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R15.13",
+    "stage": "R16.1",
     "date": "2026-10-23",
-    "reviewedCommit": "bb0c585eabfc014f2689cbebd30561051e912baf",
-    "record": "docs/R15-13-DETAILS.md",
-    "status": "R15 accepted within phase scope; R16.1 authorized",
+    "reviewedCommit": "05a7ac50aae81e352d76198e2b1b10fa48bf0156",
+    "record": "docs/R16-01-DETAILS.md",
+    "status": "R15 accepted within phase scope; R16.1 implemented pending exact-commit Windows",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
-    "scope": "Remove two development JSONL files from Git tracking while preserving local bytes and history; shared root logs ignore and non-exemptible generated-file checks. Product code, build inputs, native and UI unchanged.",
+    "scope": "Conservative read-only deletion candidate inventory with import/HTML/test/build/Rust evidence and drift rejection. No candidate deletions, product or UI changes.",
     "acceptedPriorStage": {
       "stage": "R15.9",
       "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
@@ -946,8 +1022,8 @@
         "failedSteps": []
       }
     ],
-    "implementationWindowsRun": 39946123945,
-    "implementationWindowsJobs": 7,
+    "implementationWindowsRun": null,
+    "implementationWindowsJobs": 0,
     "currentStageAcceptance": {
       "stage": "R15.13",
       "date": "2026-10-23",
@@ -975,25 +1051,32 @@
       "priorArtifactDigestsVerifiedByFinalCIJob": true
     },
     "currentStageImplementation": {
-      "stage": "R15.13",
-      "baselineCommit": "bb0c585eabfc014f2689cbebd30561051e912baf",
-      "branch": "agent/r15-stage",
-      "record": "docs/R15-13-DETAILS.md",
-      "status": "accepted",
-      "newScenariosDefined": 17,
-      "localNewScenariosPassed": 17,
-      "localRelatedScenariosPassed": 23,
-      "trackedRuntimeLogs": 0,
-      "localLogFilesPreserved": true,
+      "stage": "R16.1",
+      "baselineCommit": "05a7ac50aae81e352d76198e2b1b10fa48bf0156",
+      "branch": "codex/r16-stage",
+      "record": "docs/R16-01-DETAILS.md",
+      "status": "implemented-pending-windows",
+      "newScenariosDefined": 13,
+      "localNewScenariosPassed": 13,
+      "localRoutingScenariosPassed": 95,
+      "candidates": 104,
+      "referenced": 64,
+      "absent": 32,
+      "protectedCandidates": 6,
+      "unproven": 2,
+      "deletionAuthorized": false,
+      "snapshotInputs": 1121,
+      "rustModDeclarations": 83,
+      "staticUncertainties": 34,
       "productionModuleCount": 564,
+      "productBuildInputsChanged": false,
       "nativeProductionChanged": false,
       "modelKernelChanged": false,
       "dependenciesChanged": false,
-      "productBuildInputsChanged": false,
+      "priorProductRun": 39946123945,
       "priorBuiltAppPassed": 75,
-      "priorProductRun": 39943187508,
-      "localRecursiveNodePassed": 2685,
-      "localValidation": "Node24.19 Windows: log cleanup 17/17; related tooling/handoff 23/23; all tracked Node 2685/2685 across 358 files and 16 directories, no failures/skips/cancellations; four architecture gates, 126 current review hashes, syntax and diff checks passed. Two local logs retained with exact bytes, tracked log inventory empty and shared ignore verified. Archived R12 and R15.12 acceptance unchanged. Product build/worker/browser/native source unchanged; retained 505-input/140-output fingerprint accepted. Exact implementation Windows CI pending."
+      "localRecursiveNodePassed": 2698,
+      "localValidation": "Node24.19 Windows: inventory 13/13, routing 95/95, all tracked Node 2698/2698 across 359 files and 16 directories without failures/skips/cancellations; four architecture gates, 145 review hashes, frozen evidence CLI, syntax and diff checks passed. 104 candidates have no deletion permit. No product/native/build/browser source changes or file deletions. Historical R12 and R15.13 acceptance preserved; unchanged 505-input/140-output product build accepted. Exact implementation Windows CI pending."
     },
     "priorStageAcceptance": {
       "stage": "R15.9",
@@ -12057,6 +12140,27 @@
         "localBuiltAppPassed": 75,
         "localContractBrowserPassed": 11,
         "localValidation": "Node24.19 Windows: stale-dist 33/33, related 45/45, full tracked Node 2668/2668 across 357 files and 16 directories without failures/skips, built-app 75/75, browser contract 11/11, production build, four architecture gates, 119 source hashes, historical acceptance preservation and diff checks passed. Old dist rejected before Chromium allocation; current 505-input/140-output manifest accepted. Exact implementation Windows CI remains pending."
+      },
+      {
+        "stage": "R15.13",
+        "baselineCommit": "bb0c585eabfc014f2689cbebd30561051e912baf",
+        "branch": "agent/r15-stage",
+        "record": "docs/R15-13-DETAILS.md",
+        "status": "accepted",
+        "newScenariosDefined": 17,
+        "localNewScenariosPassed": 17,
+        "localRelatedScenariosPassed": 23,
+        "trackedRuntimeLogs": 0,
+        "localLogFilesPreserved": true,
+        "productionModuleCount": 564,
+        "nativeProductionChanged": false,
+        "modelKernelChanged": false,
+        "dependenciesChanged": false,
+        "productBuildInputsChanged": false,
+        "priorBuiltAppPassed": 75,
+        "priorProductRun": 39943187508,
+        "localRecursiveNodePassed": 2685,
+        "localValidation": "Node24.19 Windows: log cleanup 17/17; related tooling/handoff 23/23; all tracked Node 2685/2685 across 358 files and 16 directories, no failures/skips/cancellations; four architecture gates, 126 current review hashes, syntax and diff checks passed. Two local logs retained with exact bytes, tracked log inventory empty and shared ignore verified. Archived R12 and R15.12 acceptance unchanged. Product build/worker/browser/native source unchanged; retained 505-input/140-output fingerprint accepted. Exact implementation Windows CI pending."
       }
     ],
     "migratedReviewedSources": [
