@@ -487,7 +487,7 @@
     },
     {
       "path": "src-tauri/tests/performance_log/redaction_pipeline.rs",
-      "blobSha": "8492dd4413099a26deadb3a9a44daf20c2c06f62"
+      "blobSha": "5e20f90c1359c0ccd64a52f681b53f00efdddfbc"
     },
     {
       "path": "tests/support/performance-log/frontend-payload.mjs",
@@ -507,7 +507,7 @@
     },
     {
       "path": "src-tauri/src/performance_log/redaction.rs",
-      "blobSha": "8a36093d01229fb123f31a69bf1bc22c8b896bca"
+      "blobSha": "23b94a82f0a4131c97afe526921c6d414a4dcdc9"
     },
     {
       "path": "src/features/telemetry/native-log-sink.js",
@@ -643,7 +643,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "blobSha": "a25aadcf0b00f332c303531279e0bddf1e07e6ff"
+      "blobSha": "5b94c3e4df242162eb3d6648ea79e7ae80b4a9a2"
     },
     {
       "path": "scripts/stage-16/deletion-inventory.mjs",
@@ -671,7 +671,7 @@
     },
     {
       "path": "tests/stage-12-log-redaction.test.mjs",
-      "blobSha": "13c4cc874089e505978ff8865306ac82e50d6d54"
+      "blobSha": "da998ee832079d22deae3c75203c661f0e585ee5"
     },
     {
       "path": "tests/stage-12-opener.test.mjs",
@@ -715,7 +715,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "a273a6fdfbf6d2ed9b59d013a3f7e383f574af91"
+      "blobSha": "ffaa951d65769cbbc9749a4b037d0698815b2aef"
     },
     {
       "path": "src/features/documents/application/document-open-coordinator.js",
@@ -955,7 +955,7 @@
     "date": "2026-10-23",
     "reviewedCommit": "05a7ac50aae81e352d76198e2b1b10fa48bf0156",
     "record": "docs/R16-01-DETAILS.md",
-    "status": "implemented-large-import-fix-pending-windows",
+    "status": "implemented-ci-repair-pending-windows",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "R16-01 deletion evidence freeze plus user-authorized large document import repair before closure; no deletion or next Atomic.",
@@ -1075,7 +1075,7 @@
       "baselineCommit": "05a7ac50aae81e352d76198e2b1b10fa48bf0156",
       "branch": "codex/r16-stage",
       "record": "docs/R16-01-DETAILS.md",
-      "status": "implemented-large-import-fix-pending-windows",
+      "status": "implemented-ci-repair-pending-windows",
       "newScenariosDefined": 13,
       "localNewScenariosPassed": 13,
       "localRoutingScenariosPassed": 95,
@@ -1095,8 +1095,8 @@
       "dependenciesChanged": false,
       "priorProductRun": 39946123945,
       "priorBuiltAppPassed": 75,
-      "localRecursiveNodePassed": 2704,
-      "localValidation": "Final Windows Node24.19 validation: all tracked Node 2704/2704 across 359 files and 16 directories, no failures/skips/cancellations; final production build and 75/75 actual-page scenarios; original file and same-scale CRLF fixture through 8 native IPC/file scenarios with full SHA256 and displayed editor text; four architecture gates, 150 source review hashes, frozen evidence CLI and changed-file syntax/format/diff checks passed. Rust logs 49/49 and integration 12/12 passed; full Rust unit 286/287 passed, existing case-sensitive-directory setup failed because this machine rejects fsutil enable. Global cargo fmt reports existing unrelated formatting differences; both changed Rust files pass rustfmt. Exact repair Windows CI pending. No deletion, UI, dependency or frozen model changes.",
+      "localRecursiveNodePassed": 2705,
+      "localValidation": "R16-01 large import implementation 4675558: CI39957123588 passed native large-import/WebView chain, Node2704, Rust299, Clippy, build and actual pages75, but overall rejected on formatting, obsolete JSONL count and Chrome pre-test startup. Current CI-only repair: exact Rust1.88 max_width=120 formatting passed all44 paths; both actual JS-to-Rust JSONL tests and corrected exact summary passed;21 related contracts, original browser contract11, final tracked Node2705/2705 across359 files/16 directories without skips/cancellations, four architecture gates,150 source hashes and refreshed frozen inventory passed. Product frontend bytes unchanged; existing production build fingerprint remains accepted, same-code75 actual pages retained. Chrome startup failure not reproduced locally; no timeout/assertion/recovery changes. New exact-commit CI required before R16-01 closure.",
       "largeImportFix": {
         "baselineCommit": "0c9133c5852a3c7a7c3981aacbee948865784057",
         "record": "docs/R16-01-DETAILS.md",
@@ -1199,7 +1199,78 @@
         "fourArchitectureGatesPassed": true,
         "sourceReviewCount": 150
       },
-      "localBuiltAppPassed": 75
+      "localBuiltAppPassed": 75,
+      "ciRepair": {
+        "baselineCommit": "467555817283323efd941494a84535245f5bb9c2",
+        "failedRun": 39957123588,
+        "failedRunUrl": "https://github.com/uniquenesssta/mdr/actions/runs/39957123588",
+        "status": "locally-verified-pending-exact-commit-ci",
+        "reviewedSources": [
+          {
+            "path": ".github/workflows/r12-14.yml",
+            "previousBlobSha": "a25aadcf0b00f332c303531279e0bddf1e07e6ff",
+            "blobSha": "5b94c3e4df242162eb3d6648ea79e7ae80b4a9a2"
+          },
+          {
+            "path": "src-tauri/src/performance_log/redaction.rs",
+            "previousBlobSha": "8a36093d01229fb123f31a69bf1bc22c8b896bca",
+            "blobSha": "23b94a82f0a4131c97afe526921c6d414a4dcdc9"
+          },
+          {
+            "path": "src-tauri/tests/performance_log/redaction_pipeline.rs",
+            "previousBlobSha": "8492dd4413099a26deadb3a9a44daf20c2c06f62",
+            "blobSha": "5e20f90c1359c0ccd64a52f681b53f00efdddfbc"
+          },
+          {
+            "path": "tests/stage-12-log-redaction.test.mjs",
+            "previousBlobSha": "13c4cc874089e505978ff8865306ac82e50d6d54",
+            "blobSha": "da998ee832079d22deae3c75203c661f0e585ee5"
+          },
+          {
+            "path": "docs/audit/r16-01-deletion-inventory.json",
+            "previousBlobSha": "a273a6fdfbf6d2ed9b59d013a3f7e383f574af91",
+            "blobSha": "ffaa951d65769cbbc9749a4b037d0698815b2aef"
+          }
+        ],
+        "failures": [
+          {
+            "job": "rust",
+            "step": "Rust formatting",
+            "cause": "Previous local rustfmt used default 100 columns; CI pins Rust1.88 and max_width=120.",
+            "repair": "Only two already-modified Rust files formatted with exact CI options; all 44 CI formatting inputs pass."
+          },
+          {
+            "job": "rust",
+            "step": "R12-14 actual frontend payload to Rust JSONL",
+            "cause": "Both native scenarios passed; old summary grep still required one.",
+            "repair": "Require two passed and zero failed; a new contract derives expected count from current test functions and retains both named regressions and JS producer."
+          },
+          {
+            "job": "frontend",
+            "step": "Browser preview contract",
+            "cause": "Both fresh Chrome processes failed CDP readiness with ECONNREFUSED before any scenario. Existing cleanup completed; subsequent same-run built-app Chrome75 passed.",
+            "repair": "No browser assertion, timeout or recovery budget changed. Local original contract11 passes; next CI host startup must still pass."
+          }
+        ],
+        "priorCiEvidence": {
+          "rustPassed": 299,
+          "nodePassed": 2704,
+          "builtAppPassed": 75,
+          "nativeLargeImportJob": "success",
+          "nativeBoundary": "success",
+          "dependencyAudit": "success",
+          "accepted": false
+        },
+        "localTargetedPassed": 21,
+        "localRustPipelinePassed": 2,
+        "localExactFormattingPaths": 44,
+        "localBrowserContractPassed": 11,
+        "localRecursiveNodePassed": 2705,
+        "localRepositoryFiles": 359,
+        "localRepositoryDirectories": 16,
+        "fourArchitectureGatesPassed": true,
+        "currentSourceReviewCount": 150
+      }
     },
     "priorStageAcceptance": {
       "stage": "R15.9",

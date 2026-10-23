@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "0c9133c5852a3c7a7c3981aacbee948865784057",
+  "baselineCommit": "467555817283323efd941494a84535245f5bb9c2",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "201dd666c139a74068f7b7131e53b9d254c23e922c4d8a71f6f6c2cc022a5c41"
+      "sha256": "025980d0255c36bda61c7cd75a7a3990a7286f5a00a0b1aaabd9c93afec979a3"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -691,7 +691,7 @@
     },
     {
       "path": "src-tauri/src/performance_log/redaction.rs",
-      "sha256": "267fa386b09c909115f549401877708463a7d2e42bf93843b985108eba229b8c"
+      "sha256": "b7086bc9f03c2f48c45e70d5db6b145c9109d5807285c45a5822f2d4b576a36a"
     },
     {
       "path": "src-tauri/src/performance_log/writer.rs",
@@ -827,7 +827,7 @@
     },
     {
       "path": "src-tauri/tests/performance_log/redaction_pipeline.rs",
-      "sha256": "b793bf124cc29ca60e89bd4914a65fea01953dac4794a294340d583888a6a37e"
+      "sha256": "cea9e2f7f2541480ca44e6c1dac01a941a60330c05dd554e8df63440cd8809ef"
     },
     {
       "path": "src-tauri/tests/performance_log/release_writer.rs",
@@ -3647,7 +3647,7 @@
     },
     {
       "path": "tests/stage-12-log-redaction.test.mjs",
-      "sha256": "8d087170c867114de8d0170bc4eb3a7c568d87d182ca5db99f5f6ff553a97974"
+      "sha256": "7bd391c6f135a52318f4e1f273f684d21068ecd5f5dca94a8e0f1a1fdc0b9785"
     },
     {
       "path": "tests/stage-12-log-writer.test.mjs",
@@ -4510,7 +4510,7 @@
       "sha256": "401810c90a64f43ef0bf46e1428e728d02c011c4d65f08963ecb486f4efef32f"
     }
   ],
-  "inputSha256": "9b79a4f84d0658d34d7537d2d5fdc929e9c3abe4231b79b4709f6247825ba604",
+  "inputSha256": "430591b69b4fb75b88f2632866f61b9113e26942585ee2daad3456141523f574",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",

@@ -79,9 +79,7 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
     if envelope {
         match key {
             "source" => return matches!(value, "frontend" | "rust"),
-            "status" => {
-                return matches!(value, "ok" | "error" | "warning" | "cancelled" | "skipped")
-            }
+            "status" => return matches!(value, "ok" | "error" | "warning" | "cancelled" | "skipped"),
             "category" => {
                 return matches!(
                     value,
@@ -272,10 +270,7 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
         }
     }
     match key {
-        "contentType" => matches!(
-            value,
-            "text/html" | "text/plain" | "text/markdown" | "application/json"
-        ),
+        "contentType" => matches!(value, "text/html" | "text/plain" | "text/markdown" | "application/json"),
         "side" | "sourceSide" | "targetSide" | "scrollSourceSide" => {
             matches!(value, "editor" | "preview" | "")
         }
@@ -323,11 +318,7 @@ fn redact_path_value(value: &Value, depth: usize, remaining: &mut usize) -> Valu
         // do not mistake its final slash-delimited fragment for a safe file name.
         Value::String(path) => {
             let name = terminal_path_component(path);
-            if name.len() > 160
-                || name
-                    .chars()
-                    .any(|c| c.is_control() || "?&#=\"{}[]<>:".contains(c))
-            {
+            if name.len() > 160 || name.chars().any(|c| c.is_control() || "?&#=\"{}[]<>:".contains(c)) {
                 Value::String(REDACTED.into())
             } else {
                 Value::String(name)
@@ -345,13 +336,7 @@ fn redact_path_value(value: &Value, depth: usize, remaining: &mut usize) -> Valu
     }
 }
 
-fn redact_nested(
-    value: &Value,
-    key: &str,
-    depth: usize,
-    remaining: &mut usize,
-    envelope: bool,
-) -> Value {
+fn redact_nested(value: &Value, key: &str, depth: usize, remaining: &mut usize, envelope: bool) -> Value {
     if depth > MAX_DEPTH || *remaining == 0 {
         return Value::String(REDACTED.into());
     }
@@ -367,11 +352,7 @@ fn redact_nested(
                     continue;
                 }
                 // Diagnostic field names are identifiers, never caller-supplied prose/paths.
-                if key.len() > 64
-                    || !key
-                        .bytes()
-                        .all(|b| b.is_ascii_alphanumeric() || b"_-".contains(&b))
-                {
+                if key.len() > 64 || !key.bytes().all(|b| b.is_ascii_alphanumeric() || b"_-".contains(&b)) {
                     continue;
                 }
                 let value = if is_path_field(key) {
@@ -432,10 +413,7 @@ mod tests {
             },
             "safe": "kept"
         });
-        assert_eq!(
-            redact_value(&value),
-            json!({ "nested": {}, "safe": "[redacted]" })
-        );
+        assert_eq!(redact_value(&value), json!({ "nested": {}, "safe": "[redacted]" }));
     }
 
     #[test]
@@ -544,10 +522,7 @@ mod tests {
         let value = json!({
             "nested": r#"{"body":"SECRET","token":"TOKEN","path":"C:\\Private\\note.md","count":7}"#
         });
-        assert_eq!(
-            redact_value(&value),
-            json!({ "nested": {"path":"note.md","count":7} })
-        );
+        assert_eq!(redact_value(&value), json!({ "nested": {"path":"note.md","count":7} }));
     }
 
     #[test]

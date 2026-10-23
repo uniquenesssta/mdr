@@ -88,6 +88,23 @@ test('R12-14 shell command starts Cargo with only the intended arguments and kee
   ]);
 });
 
+test('log pipeline CI gate requires every current Rust JSONL scenario while retaining the actual frontend producer', async () => {
+  const [workflow, pipeline] = await Promise.all([
+    read('.github/workflows/r12-14.yml'), read('src-tauri/tests/performance_log/redaction_pipeline.rs')
+  ]);
+  const names = [...pipeline.matchAll(/#\[test\]\s*fn\s+(\w+)\s*\(/g)].map(match => match[1]);
+  for (const required of ['actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write',
+    'imported_document_labels_survive_without_exposing_unknown_labels_or_error_prose']) {
+    assert.ok(names.includes(required), `Missing required pipeline scenario: ${required}`);
+  }
+  const step = workflow.match(/^      - name: R12-14 actual frontend payload to Rust JSONL\n(?:        if: [^\n]+\n)?        run: \|\n([\s\S]*?)(?=^      - name:)/m);
+  assert.ok(step, 'Missing actual frontend to Rust pipeline step');
+  assert.ok(step[1].includes('node --test tests/stage-12-log-payload.test.mjs'));
+  assert.ok(step[1].includes('cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction_pipeline_tests'));
+  assert.ok(step[1].includes(`grep -Fq 'test result: ok. ${names.length} passed; 0 failed' "$RUNNER_TEMP/r12-14/redaction-pipeline.log"`),
+    'CI must require all current pipeline scenarios, with no failures.');
+});
+
 test('R12-14 production log changes trigger validation and its scope gate runs the redaction contracts', async () => {
   const workflow = await read('.github/workflows/r12-14.yml');
   const triggers = workflow.split('  workflow_dispatch:')[0];

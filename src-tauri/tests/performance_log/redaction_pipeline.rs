@@ -10,11 +10,7 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
         .current_dir(root)
         .output()
         .expect("Node is required for the actual JS to Rust log pipeline test");
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
+    assert!(result.status.success(), "{}", String::from_utf8_lossy(&result.stderr));
     let fixture: Value = serde_json::from_slice(&result.stdout).unwrap();
     let entries = fixture["entries"].as_array().unwrap().clone();
     assert_eq!(entries.len(), 3);
@@ -40,14 +36,8 @@ fn actual_frontend_payload_is_redacted_by_the_real_command_before_jsonl_write() 
             !frontend_payload.contains(secret.as_str().unwrap()),
             "raw secret reached command"
         );
-        assert!(
-            !frontend_payload.contains(escaped),
-            "escaped secret reached command"
-        );
-        assert!(
-            !persisted.contains(secret.as_str().unwrap()),
-            "secret reached JSONL"
-        );
+        assert!(!frontend_payload.contains(escaped), "escaped secret reached command");
+        assert!(!persisted.contains(secret.as_str().unwrap()), "secret reached JSONL");
         assert!(!persisted.contains(escaped), "escaped secret reached JSONL");
     }
     let details = &rows[0]["details"];
@@ -115,8 +105,7 @@ fn imported_document_labels_survive_without_exposing_unknown_labels_or_error_pro
         assert_eq!(redacted["details"]["message"], "[redacted]");
     }
     assert_eq!(
-        super::redaction::redact_value(&serde_json::json!({"operation":"PRIVATE-label"}))
-            ["operation"],
+        super::redaction::redact_value(&serde_json::json!({"operation":"PRIVATE-label"}))["operation"],
         "[redacted]"
     );
 }
