@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "stage-01-exact-migration-regression-baseline",
-  "sourceCommit": "b88a94efd5dd84c5815f3593c1a4cea019cf0156",
+  "sourceCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
   "policy": {
     "exactEntriesOnly": true,
     "wildcardExemptions": false,
@@ -100,56 +100,7 @@
       ]
     }
   ],
-  "businessGlobalWrites": [
-    {
-      "path": "src/main.js",
-      "global": "window.markdownEditorDocumentModel",
-      "count": 1,
-      "lines": [
-        477
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.markdownEditorDocumentStatistics",
-      "count": 1,
-      "lines": [
-        1777
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.markdownEditorDocumentStore",
-      "count": 1,
-      "lines": [
-        478
-      ]
-    },
-    {
-      "path": "src/main.js",
-      "global": "window.markdownEditorRuntimeContext",
-      "count": 1,
-      "lines": [
-        1799
-      ]
-    },
-    {
-      "path": "src/runtime/link-preview.js",
-      "global": "window.markdownEditorLinkPreview",
-      "count": 1,
-      "lines": [
-        325
-      ]
-    },
-    {
-      "path": "src/runtime/performance.js",
-      "global": "window.markdownEditorPerf",
-      "count": 1,
-      "lines": [
-        520
-      ]
-    }
-  ],
+  "businessGlobalWrites": [],
   "trackedGeneratedFiles": [
     ".vite/deps/_metadata.json",
     ".vite/deps/package.json"
@@ -465,6 +416,60 @@
           "replacement": "src/main.js"
         }
       ]
+    },
+    "r16GlobalRetirement": {
+      "stage": "R16.3",
+      "removedBusinessGlobalWrites": [
+        {
+          "path": "src/main.js",
+          "global": "window.markdownEditorDocumentModel",
+          "count": 1,
+          "lines": [
+            477
+          ]
+        },
+        {
+          "path": "src/main.js",
+          "global": "window.markdownEditorDocumentStatistics",
+          "count": 1,
+          "lines": [
+            1777
+          ]
+        },
+        {
+          "path": "src/main.js",
+          "global": "window.markdownEditorDocumentStore",
+          "count": 1,
+          "lines": [
+            478
+          ]
+        },
+        {
+          "path": "src/main.js",
+          "global": "window.markdownEditorRuntimeContext",
+          "count": 1,
+          "lines": [
+            1799
+          ]
+        },
+        {
+          "path": "src/runtime/link-preview.js",
+          "global": "window.markdownEditorLinkPreview",
+          "count": 1,
+          "lines": [
+            325
+          ]
+        },
+        {
+          "path": "src/runtime/performance.js",
+          "global": "window.markdownEditorPerf",
+          "count": 1,
+          "lines": [
+            520
+          ]
+        }
+      ],
+      "publicationPolicy": "Only explicitly enabled E2E slots; frozen DocumentModel optional read retained byte-identical and unreachable, snapshot telemetry composed externally."
     }
   }
 }

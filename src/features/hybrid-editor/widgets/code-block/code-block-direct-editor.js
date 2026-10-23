@@ -1,3 +1,4 @@
+import { registerHybridDirectEditor } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.8 Code Block direct-editor and fence-safe writeback owner.
  * Allowed imports: Hybrid outside-pointer Activation only. Forbidden imports: CodeMirror packages, widget presentation and application globals.
@@ -51,6 +52,7 @@ export function createCodeBlockDirectEditor(view, descriptor, options = {}) {
   let cancelled = false;
   let committed = false;
   let closed = false;
+  let releaseEditor = () => {};
   let removeOutsidePointerListener = () => {};
 
   const releaseOutsidePointer = () => {
@@ -61,6 +63,7 @@ export function createCodeBlockDirectEditor(view, descriptor, options = {}) {
   const close = result => {
     if (closed) return;
     closed = true;
+    releaseEditor();
     releaseOutsidePointer();
     options.onClose?.(result);
   };
@@ -114,11 +117,11 @@ export function createCodeBlockDirectEditor(view, descriptor, options = {}) {
     if (closed) return;
     cancelled = true;
     closed = true;
+    releaseEditor();
     releaseOutsidePointer();
   };
 
-  textarea.__markdownEditorCommitCodeBlock = commit;
-  textarea.__markdownEditorDestroyCodeBlock = destroy;
+  releaseEditor = registerHybridDirectEditor(textarea, { commit, destroy });
   textarea.addEventListener('mousedown', event => event.stopPropagation());
   textarea.addEventListener('click', event => event.stopPropagation());
   textarea.addEventListener('input', event => {

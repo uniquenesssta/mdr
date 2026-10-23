@@ -1,3 +1,5 @@
+import { observeDocumentSnapshots } from './features/documents/application/document-snapshot-telemetry.js';
+import { telemetry } from './features/telemetry/index.js';
 import { createApplicationLifetime } from './bootstrap/application-lifetime.js';
 import { createShellMenus } from './features/menu/shell-menus.js';
 import { createWorkspaceStatus } from './features/persistence/ui/workspace-status.js';
@@ -13,7 +15,7 @@ import { createExportController, createExportImageDialogView, mountClassicExport
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createBrowserPrint, createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
-import { configureLinkPreviewPlatform } from './runtime/link-preview.js';
+import { createLinkPreview } from './runtime/link-preview.js';
 import { configurePerformancePlatform, configurePerformanceRuntimeStats, destroyPerformanceTelemetry } from './runtime/performance.js';
 import { createVirtualEditor } from './editor/virtual-editor.js';
 import {
@@ -82,7 +84,7 @@ import {
   mountClassicOutlineControllerPort,
   mountClassicSidebarControllerPort
 } from './features/sidebar/index.js';
-import { configureHybridImageSourcePlatform, configureHybridSyncCapabilities } from './features/hybrid-editor/index.js';
+import { configureHybridImageSourcePlatform, configureHybridSyncCapabilities, configureHybridLinkPreview } from './features/hybrid-editor/index.js';
 import {
   DocumentOperationStaleError,
   createDocumentContextMenuView,
@@ -142,7 +144,7 @@ import {
 const platform = createPlatform({
   runtime: window,
   now: () => performance.now(),
-  record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
+  record: (operation, entry) => telemetry.record?.(operation, entry)
 });
 const exportFileWriter = createExportFileWriter({ platform });
 const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
@@ -275,7 +277,7 @@ const previewLayoutStability = createPreviewLayoutStability({
     ? callback => new previewLayoutFrameHost.ResizeObserver(callback)
     : null,
   now: () => previewLayoutFrameHost?.performance?.now?.() ?? performance.now(),
-  record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+  record(operation, entry) { telemetry.record?.(operation, entry); },
   reportError(message, error) { console.warn(message, error); }
 });
 const previewLayoutStabilityPort = mountClassicPreviewLayoutStabilityPort(compatibilityPlatformHost, previewLayoutStability);
@@ -319,7 +321,10 @@ const destroyLayoutStateFeature = () => {
   layoutState.destroy();
 };
 const compatibilityPlatformPort = mountClassicPlatformPort(compatibilityPlatformHost, platform);
-configureLinkPreviewPlatform({ links: platform.links });
+let readLinkDocumentContext = () => ({}), notifyLinkPreview = message => console.warn(message);
+const linkPreview = createLinkPreview({ document, window, links: platform.links, record: telemetry.record,
+  notify: message => notifyLinkPreview(message) });
+configureHybridLinkPreview(linkPreview);
 configurePerformancePlatform({
   logs: platform.logs,
   enabled: platform.capabilities.desktop.performanceLogs
@@ -327,10 +332,11 @@ configurePerformancePlatform({
 configureHybridImageSourcePlatform({
   files: platform.files,
   enabled: platform.capabilities.desktop.fileSystem,
-  getDocumentContext: () => window.markdownEditorRuntimeContext?.getCurrentDocumentContext?.() || {}
+  getDocumentContext: () => readLinkDocumentContext()
 });
 window.addEventListener('pagehide', () => {
-  for (const release of [() => exportController?.destroy(), () => exportCommandPort?.destroy(), () => imageExporter?.destroy(), () => imageExportPort?.destroy(), () => imageExportSurface?.destroy(), () => exportImageView.destroy(), () => pdfExporter?.destroy(), () => pdfExportPort?.destroy(), () => pdfPrintSurface?.destroy(), () => wordExporter?.destroy(), () => wordExportPort?.destroy(), () => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportFileWriter.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
+  configureHybridLinkPreview(null);
+  for (const release of [() => linkPreview.destroy(), () => exportController?.destroy(), () => exportCommandPort?.destroy(), () => imageExporter?.destroy(), () => imageExportPort?.destroy(), () => imageExportSurface?.destroy(), () => exportImageView.destroy(), () => pdfExporter?.destroy(), () => pdfExportPort?.destroy(), () => pdfPrintSurface?.destroy(), () => wordExporter?.destroy(), () => wordExportPort?.destroy(), () => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportFileWriter.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
     () => exportEnhancementPort?.destroy(), () => exportDocumentBuilder?.destroy(),
     () => exportDocumentPort?.destroy(), () => exportProgressView.destroy(),
     () => exportProgressStore.destroy(), () => imageAssetPreloader.destroy(), () => imageAssetPort.destroy(), () => imageDataPort.destroy(), () => imageExportLayout.destroy(), () => imageLayoutPort.destroy(),
@@ -430,10 +436,13 @@ async function loadAppModules() {
   };
   window.addEventListener('pagehide', destroySelectionSync, { once: true });
   const documentModel = createDocumentModel(editorHost);
+  const releaseSnapshotTelemetry = import.meta.env.DEV
+    ? observeDocumentSnapshots(documentModel, { record: telemetry.record, now: () => performance.now() }) : () => {};
   let editorScrollMapper = null;
   try {
     editorScrollMapper = createEditorScrollMapper({ editorApi: virtualEditor, model: documentModel });
   } catch (error) {
+    releaseSnapshotTelemetry();
     documentModel.destroy();
     virtualEditor.destroy();
     throw error;
@@ -470,12 +479,12 @@ async function loadAppModules() {
     editorHistoryAdapter?.destroy?.();
     editorController?.destroy?.();
     destroyEditorScrollMapper();
+    releaseSnapshotTelemetry();
     documentModel.destroy();
     virtualEditor.destroy();
     throw error;
   }
-  window.markdownEditorDocumentModel = documentModel;
-  window.markdownEditorDocumentStore = createNativeDocumentStore({
+  const nativeDocumentStore = createNativeDocumentStore({
     documentStore: platform.documentStore,
     available: platform.capabilities.desktop.documentStore
   });
@@ -492,7 +501,7 @@ async function loadAppModules() {
   });
   const documentRepository = createSessionDocumentRepository({
     browserRepository: browserDocumentRepository,
-    nativeStore: window.markdownEditorDocumentStore,
+    nativeStore: nativeDocumentStore,
     scheduleCleanup(task) {
       if (backgroundTaskScheduler?.schedule) return backgroundTaskScheduler.schedule('document-session-cleanup-' + Date.now(), task, {
         priority: 'background',
@@ -520,7 +529,7 @@ async function loadAppModules() {
   });
   documentController = createDocumentSessionController({
     session: documentSessionPort,
-    model: window.markdownEditorDocumentModel,
+    model: documentModel,
     repository: documentRepository,
     loadController
   });
@@ -597,6 +606,7 @@ async function loadAppModules() {
     editorHistoryAdapter.destroy();
     editorController.destroy();
     destroyEditorScrollMapper();
+    releaseSnapshotTelemetry();
     documentModel.destroy();
     virtualEditor.destroy();
     throw error;
@@ -649,7 +659,7 @@ async function loadAppModules() {
     clearTimer: timerId => window.clearTimeout(timerId),
     reportError(message, error) { console.error(message, error); }
   });
-  const unsubscribeNativeSaveStatus = window.markdownEditorDocumentStore.subscribe(event => {
+  const unsubscribeNativeSaveStatus = nativeDocumentStore.subscribe(event => {
     saveStatusStore.consumePersistenceEvent(event);
   });
   let unregisterPersistenceEditorCommands = null;
@@ -821,6 +831,7 @@ async function loadAppModules() {
     previewRenderer?.destroy();
     previewRenderer = null;
     destroyEditorScrollMapper();
+    releaseSnapshotTelemetry();
     documentModel.destroy();
     virtualEditor.destroy();
   };
@@ -849,7 +860,7 @@ async function loadAppModules() {
       ? documentUiCommandPort.invoke('openFolderTreeFile', path)
       : false,
     now: () => performance.now(),
-    record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+    record(operation, entry) { telemetry.record?.(operation, entry); },
     reportError(message, error) { console.warn(message, error); }
   });
   folderTreeController.start();
@@ -921,7 +932,7 @@ async function loadAppModules() {
       return true;
     },
     now: () => performance.now(),
-    record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+    record(operation, entry) { telemetry.record?.(operation, entry); },
     reportError(message, error) { console.warn(message, error); }
   });
   outlineController.start();
@@ -961,7 +972,7 @@ async function loadAppModules() {
     },
     addRecentFile: (path, name) => recentFilesRepository.add(path, { name }),
     notify, translate: t,
-    record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry)
+    record: (operation, entry) => telemetry.record?.(operation, entry)
   });
   let fileImportView = null, webClipperView = null, webClipperController = null, unregisterImportCommands = null;
   let importFeatureDestroyed = false;
@@ -1016,7 +1027,7 @@ async function loadAppModules() {
     } catch (error) {
       if (error?.code === 'DOCUMENT_OPERATION_STALE') return false;
       notify('保存失败：' + String(error?.message || error));
-      window.markdownEditorPerf?.record?.('document.file-save-error', {
+      telemetry.record?.('document.file-save-error', {
         category: 'document.error',
         status: 'error',
         details: { message: String(error?.message || error) }
@@ -1039,7 +1050,7 @@ async function loadAppModules() {
     } catch (error) {
       if (error?.code === 'DOCUMENT_OPERATION_STALE') return false;
       notify('另存为失败：' + String(error?.message || error));
-      window.markdownEditorPerf?.record?.('document.save-as-error', {
+      telemetry.record?.('document.save-as-error', {
         category: 'document.error',
         status: 'error',
         details: { message: String(error?.message || error) }
@@ -1330,8 +1341,8 @@ async function loadAppModules() {
     now: () => performance.now(),
     isHybridLayout: () => layoutState.snapshot.mode === 'hybrid',
     updateActiveLine: line => outlineController?.updateActiveLine?.(line),
-    record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry),
-    diagnostic: (operation, entry) => window.markdownEditorPerf?.diagnostic?.(operation, entry)
+    record: (operation, entry) => telemetry.record?.(operation, entry),
+    diagnostic: (operation, entry) => telemetry.diagnostic?.(operation, entry)
   });
 
   try {
@@ -1341,7 +1352,7 @@ async function loadAppModules() {
       documentModel,
       presentation: markdownPresentation,
       notify,
-      record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+      record(operation, entry) { telemetry.record?.(operation, entry); },
       reportError(message, error) { console.error(message, error); }
     });
     previewRenderer.start();
@@ -1423,8 +1434,8 @@ async function loadAppModules() {
       selectionController,
       scrollController,
       notify,
-      record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
-      diagnostic(operation, entry) { window.markdownEditorPerf?.diagnostic?.(operation, entry); }
+      record(operation, entry) { telemetry.record?.(operation, entry); },
+      diagnostic(operation, entry) { telemetry.diagnostic?.(operation, entry); }
     });
     previewController = createPreviewController({
       root: previewHost,
@@ -1493,7 +1504,7 @@ async function loadAppModules() {
       readInput: () => ({ name: document.getElementById('filename').value,
         directory: compatibilityPlatformHost.markdownEditorSettingsStorePort.get('exportDirectory') }),
       notify, translate: t, reportError: error => console.error(error),
-      now: () => performance.now(), record: (operation, entry) => window.markdownEditorPerf?.record?.(operation, entry) });
+      now: () => performance.now(), record: (operation, entry) => telemetry.record?.(operation, entry) });
     exportCommandPort = mountClassicExportCommandPort(compatibilityPlatformHost, exportController);
     const scrollPreviewToLine = (line, behavior = 'auto', viewportRatio = 0.38) => {
       const ratio = Math.max(0.05, Math.min(0.95, Number(viewportRatio) || 0.38));
@@ -1600,7 +1611,7 @@ async function loadAppModules() {
         if (editorUiCommandPort.has('closeAppMenus')) editorUiCommandPort.invoke('closeAppMenus');
       },
       onGeometryChanged() { scrollController.notifyGeometryChanged(); },
-      record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); }
+      record(operation, entry) { telemetry.record?.(operation, entry); }
     });
     sidebarLayoutController.start();
     compactShellController.start();
@@ -1637,7 +1648,7 @@ async function loadAppModules() {
       requestFrame: requestLayoutFrame,
       cancelFrame: cancelLayoutFrame,
       fontsReady: document.fonts?.ready ?? null,
-      record(operation, entry) { layoutFrameHost.markdownEditorPerf?.record?.(operation, entry); }
+      record(operation, entry) { telemetry.record?.(operation, entry); }
     });
     toolbarBoundaryController.start();
     unregisterLayoutUiCommands = editorUiCommandPort.register({
@@ -1658,7 +1669,7 @@ async function loadAppModules() {
         if (!result.supported) notify(t('toastNoFullscreenApi'));
         else if (!result.ok) {
           console.warn('System fullscreen transition failed:', result.error);
-          layoutFrameHost.markdownEditorPerf?.record?.('layout.system-fullscreen-error', {
+          telemetry.record?.('layout.system-fullscreen-error', {
             category: 'ui.layout',
             durationMs: 0,
             details: { message: String(result.error?.message || result.error || 'unknown') }
@@ -1773,8 +1784,8 @@ async function loadAppModules() {
       navigator: window.navigator,
       prompt: (...args) => window.prompt(...args),
       confirm: (...args) => window.confirm(...args),
-      nativeStore: window.markdownEditorDocumentStore,
-      publishStatistics: statistics => { window.markdownEditorDocumentStatistics = statistics; }, t,
+      nativeStore: nativeDocumentStore,
+      t,
       showToast: shellMenus.showToast,
       corePlatformPort: compatibilityPlatformHost.markdownEditorPlatformPort,
       coreExportRequestPort: compatibilityPlatformHost.markdownEditorExportRequestPort,
@@ -1793,16 +1804,17 @@ async function loadAppModules() {
       coreTaskSchedulerPort: backgroundTaskScheduler,
       coreSaveStatusStorePort: compatibilityPlatformHost.markdownEditorSaveStatusStorePort
     }));
-    const runtimeContext = { getCurrentDocumentContext() { const record = documentWorkspace.getCurrentDocument(); return { documentId: String(record?.id || ''),
-      filePath: String(record?.filePath || ''),
-      title: String(record?.title || readCurrentDocumentTitle() || '') }; } };
-    window.markdownEditorRuntimeContext = runtimeContext;
-    applicationLifetime.own(() => { if (window.markdownEditorRuntimeContext === runtimeContext) delete window.markdownEditorRuntimeContext; });
+    notifyLinkPreview = shellMenus.showToast;
+    readLinkDocumentContext = () => {
+      const record = documentWorkspace.getCurrentDocument();
+      return { documentId: String(record?.id || ''), filePath: String(record?.filePath || ''), title: String(record?.title || readCurrentDocumentTitle() || '') };
+    };
+    applicationLifetime.own(() => { notifyLinkPreview = () => {}; readLinkDocumentContext = () => ({}); });
     applicationLifetime.own(editorUiCommandPort.register({
       updatePreviewStrategyBadge: workspaceStatus.updatePreviewStrategyBadge
     }));
     ownApplication(createFindPreviewCommands({
-      nativeStore: window.markdownEditorDocumentStore, documentModel,
+      nativeStore: nativeDocumentStore, documentModel,
       getCurrentDocument: documentWorkspace.getCurrentDocument,
       saveDocument: () => documentController.saveActive({
         title: readCurrentDocumentTitle(),
@@ -1876,7 +1888,7 @@ async function loadAppModules() {
       closeSave: closeSavePort,
       supported: windowSupported,
       notify,
-      record(operation, entry) { window.markdownEditorPerf?.record?.(operation, entry); },
+      record(operation, entry) { telemetry.record?.(operation, entry); },
       reportError(message, error) { console.error(message, error); }
     });
     nextWindowController = createWindowController({
@@ -1904,8 +1916,7 @@ async function loadAppModules() {
 loadAppModules().then(() => {
   document.documentElement.classList.add('app-ready');
   installMarkdownEditorE2EBridge();
-  window.markdownEditorPerf?.installLegacyInstrumentation();
-  window.markdownEditorPerf?.record('app.ready', {
+  telemetry.record('app.ready', {
     category: 'app.lifecycle',
     durationMs: performance.now(),
     details: { documentReadyState: document.readyState }

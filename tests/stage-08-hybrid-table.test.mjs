@@ -1,3 +1,4 @@
+import { commitHybridDirectEditor, destroyHybridDirectEditor } from '../src/features/hybrid-editor/lifecycle/widget-lifecycle.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -190,7 +191,7 @@ test('Atomic 8.9 cell-editor destroy removes its Session-owned document listener
   const { input, dispatches, closed, documentRef } = createEditorHarness();
   assert.equal(documentRef.listenerCount('pointerdown'), 1);
   input.value = 'changed after destroy';
-  input.__markdownEditorDestroyTableCell();
+  destroyHybridDirectEditor(input);
   assert.equal(documentRef.listenerCount('pointerdown'), 0);
   input.blur();
   assert.equal(dispatches.length, 0);

@@ -43,14 +43,14 @@ test('Atomic 8.13 HTML View delegates document security and retains presentation
 
 test('Atomic 8.13 HTML Widget owns SOURCE delegation and explicit idempotent cleanup without duplicating shared policy', async () => {
   const widget = await text(htmlPaths[0]);
-  for (const symbol of ['bindWidgetSourceAction', 'openWidgetSource', 'attachHybridWidgetLifecycle', 'destroyHybridWidgetLifecycle']) {
+  for (const symbol of ['bindWidgetSourceAction', 'openWidgetSource', 'attachHybridWidgetLifecycle', 'disposeHybridWidget']) {
     assert.match(widget, new RegExp(symbol), symbol);
   }
   assert.match(widget, /sourceKeys: \[\]/);
   assert.match(widget, /componentType: 'html'/);
   assert.match(widget, /editFrom: this\.from/);
   assert.match(widget, /editTo: this\.to/);
-  assert.match(widget, /__markdownEditorHtmlBlockCleanup/);
+  assert.match(widget, /registerHybridWidgetCleanup/);
   assert.match(widget, /if \(cleaned\) return;\s*cleaned = true;/);
   assert.match(widget, /disposeSourceAction\(\)/);
   assert.doesNotMatch(widget, /bindStrictDoubleActivation|bindSourceActivation|getClassicHybridSourceEditControllerPort/);

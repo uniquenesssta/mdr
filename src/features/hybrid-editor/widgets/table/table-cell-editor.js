@@ -1,3 +1,4 @@
+import { registerHybridDirectEditor } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.9 Table cell direct-editor lifecycle owner.
  * Allowed imports: Table navigation/writeback plus Hybrid outside-pointer Activation.
@@ -33,6 +34,7 @@ export function createTableCellEditor(view, descriptor, options = {}) {
   let cancelled = false;
   let committed = false;
   let closed = false;
+  let releaseEditor = () => {};
   let requestedFocusKey = '';
   let removeOutsidePointerListener = () => {};
 
@@ -57,6 +59,7 @@ export function createTableCellEditor(view, descriptor, options = {}) {
   const close = result => {
     if (closed) return;
     closed = true;
+    releaseEditor();
     releaseOutsidePointer();
     options.onClose?.(result);
   };
@@ -81,11 +84,11 @@ export function createTableCellEditor(view, descriptor, options = {}) {
     if (closed) return;
     cancelled = true;
     closed = true;
+    releaseEditor();
     releaseOutsidePointer();
   };
 
-  input.__markdownEditorCommitTableCell = (focusKey = '') => commit(focusKey);
-  input.__markdownEditorDestroyTableCell = destroy;
+  releaseEditor = registerHybridDirectEditor(input, { commit, destroy });
   input.addEventListener('focus', () => input.select());
   input.addEventListener('mousedown', event => event.stopPropagation());
   input.addEventListener('click', event => event.stopPropagation());

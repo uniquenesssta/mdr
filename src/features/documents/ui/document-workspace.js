@@ -1,3 +1,4 @@
+import { telemetry } from '../../telemetry/index.js';
 /**
  * Responsibility: Present document lifecycle and cached indexes over the existing Document Controller.
  * Imports: Explicit caller capabilities and application lifetime management.
@@ -7,7 +8,7 @@
  */
 import { createApplicationLifetime } from '../../../bootstrap/application-lifetime.js';
 
-export function createDocumentWorkspace({ document, window, editor, documentModel, filenameInput, localStorage, navigator, prompt, confirm, nativeStore, publishStatistics, t, showToast, corePlatformPort, coreExportRequestPort, coreMarkdownExportPort, coreExportTaskPort, coreSettingsStorePort, coreDocumentSessionPort, coreDocumentControllerPort, coreRecentFilesPort, coreDocumentUiCommandPort, coreEditorUiCommandPort, coreSidebarControllerPort, coreOutlineControllerPort, coreFolderTreeControllerPort, corePreviewCommandPort, coreTaskSchedulerPort, coreSaveStatusStorePort }) {
+export function createDocumentWorkspace({ document, window, editor, documentModel, filenameInput, localStorage, navigator, prompt, confirm, nativeStore, t, showToast, corePlatformPort, coreExportRequestPort, coreMarkdownExportPort, coreExportTaskPort, coreSettingsStorePort, coreDocumentSessionPort, coreDocumentControllerPort, coreRecentFilesPort, coreDocumentUiCommandPort, coreEditorUiCommandPort, coreSidebarControllerPort, coreOutlineControllerPort, coreFolderTreeControllerPort, corePreviewCommandPort, coreTaskSchedulerPort, coreSaveStatusStorePort }) {
   const lifetime = createApplicationLifetime();
   const setTimeout = lifetime.setTimeout, clearTimeout = lifetime.clearTimeout;
   try {
@@ -27,7 +28,6 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
 
     function updateDocumentStatistics(statistics) {
       cachedDocumentStatistics = statistics && typeof statistics === 'object' ? { ...statistics } : null;
-      publishStatistics(cachedDocumentStatistics);
     }
 
     function getDocumentIndexSignature() {
@@ -131,7 +131,7 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
       if (loaded?.recovered && coreDocumentControllerPort.isCurrentGeneration(result.generation)) {
         const message = loaded.recoveryMessage || '检测到未完整写入的数据，已从可用快照恢复';
         showToast(message);
-        window.markdownEditorPerf?.record('storage.document-recovered', {
+        telemetry.record('storage.document-recovered', {
           category: 'storage.recovery',
           status: 'recovered',
           details: { documentId: doc?.id || '', version: doc?.nativeVersion || 0, message }
@@ -155,7 +155,7 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
       filenameInput.value = t('filenameDefault');
       syncCurrentDocumentFileTree();
 
-      window.markdownEditorPerf?.record?.('document.session-reset', {
+      telemetry.record?.('document.session-reset', {
         category: 'document.lifecycle',
         durationMs: 0,
         details: {
@@ -181,7 +181,7 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
       });
       filenameInput.value = result.record.title;
       syncCurrentDocumentFileTree();
-      window.markdownEditorPerf?.record?.('document.lazy-created', {
+      telemetry.record?.('document.lazy-created', {
         category: 'document.lifecycle',
         durationMs: 0,
         details: { documentId: result.record.id, characters: editor.textLength, generation: result.generation }
@@ -197,7 +197,7 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
     function recordDocumentOperationError(operation, error, details = {}) {
       const message = error?.message || String(error);
       console.error(operation + ' failed:', error);
-      window.markdownEditorPerf?.record?.('document.' + operation + '-error', {
+      telemetry.record?.('document.' + operation + '-error', {
         category: 'document.error',
         status: 'error',
         details: {

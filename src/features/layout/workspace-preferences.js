@@ -1,3 +1,4 @@
+import { telemetry } from '../telemetry/index.js';
 /**
  * Responsibility: Project Settings and Layout into the editor and toolbar without owning persisted settings.
  * Imports: Explicit caller capabilities and application lifetime management.
@@ -208,7 +209,7 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
       editor.virtualEditor?.setPresentationMode?.(hybrid ? 'hybrid' : 'source');
       const actualMode = editor.virtualEditor?.getPresentationMode?.() || 'source';
       if (actualMode !== (hybrid ? 'hybrid' : 'source')) {
-        window.markdownEditorPerf?.diagnostic?.('hybrid.presentation-mode-mismatch', {
+        telemetry.diagnostic?.('hybrid.presentation-mode-mismatch', {
           category: 'editor.hybrid',
           status: 'error',
           dedupeKey: 'hybrid.presentation-mode-mismatch',
@@ -267,7 +268,7 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
           reason: `layout:${previousMode}->${nextMode}`
         });
       }
-      window.markdownEditorPerf?.record('layout.mode-change', {
+      telemetry.record('layout.mode-change', {
         category: 'ui.layout',
         durationMs: 0,
         details: {

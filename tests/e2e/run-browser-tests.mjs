@@ -574,6 +574,8 @@ async function runAppSuite() {
         return {
           shellCount:document.querySelectorAll('[data-ui-shell="app"]').length,
           scripts:Array.from(document.scripts).map(script=>({type:script.type,path:new URL(script.src,location.href).pathname})),
+          businessGlobals:Object.getOwnPropertyNames(window).filter(name=>/^markdownEditor/.test(name)),
+          implicitHandlers:Array.from(document.querySelectorAll('*')).filter(node=>Array.from(node.attributes).some(attribute=>/^on(?:click|change|input)$/.test(attribute.name))).length,
           appCount:document.querySelectorAll('.l-app-shell').length,
           legacyAppHookCount:document.querySelectorAll('.app').length,
           counts,
@@ -590,6 +592,8 @@ async function runAppSuite() {
       assert.equal(snapshot.shellCount, 1);
       assert.ok(snapshot.scripts.length > 0);
       assert.ok(snapshot.scripts.every(script => script.type === 'module' && !script.path.startsWith('/app/')));
+      assert.deepEqual(snapshot.businessGlobals, []);
+      assert.equal(snapshot.implicitHandlers, 0);
       assert.equal(snapshot.appCount, 1);
       assert.equal(snapshot.legacyAppHookCount, 1);
       assert.deepEqual(snapshot.counts, {menu:1,toolbar:1,sidebar:1,editor:1,preview:1,status:1,overlay:1});
@@ -952,7 +956,8 @@ async function runAppSuite() {
         source.textContent='focus source';
         document.body.append(source);
         source.focus();
-        window.markdownEditorLinkPreview.open('https://example.com/first',{sourceElement:source,source:'dom-primitive-test'});
+        const anchor=document.createElement('a');anchor.href='https://example.com/first';anchor.textContent='preview link';document.getElementById('preview').append(anchor);
+        anchor.id='dom-primitive-link-source';anchor.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,button:0}));
       })()`);
       await browser.page.waitFor(() => document.activeElement?.classList.contains('link-preview-close'), { description: 'link preview initial focus' });
       await browser.page.pressKey('Tab');
@@ -960,12 +965,13 @@ async function runAppSuite() {
 
       await browser.page.evaluate(`(()=>{
         const source=document.getElementById('dom-primitive-focus-source');
-        window.markdownEditorLinkPreview.close('stale-close-test');
-        window.markdownEditorLinkPreview.open('https://example.com/second',{sourceElement:source,source:'dom-primitive-test'});
+        document.querySelector('.link-preview-close').click();
+        source.focus();const anchor=document.createElement('a');anchor.href='https://example.com/second';anchor.textContent='preview link';document.getElementById('preview').append(anchor);
+        anchor.id='dom-primitive-link-source-2';anchor.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,button:0}));
       })()`);
       await new Promise(resolve => setTimeout(resolve, 240));
       const reopened = await browser.page.evaluate(`(()=>({
-        open:window.markdownEditorLinkPreview.isOpen(),
+        open:Boolean(document.querySelector('#link-preview-overlay.show')),
         src:document.querySelector('.link-preview-frame')?.getAttribute('src')||'',
         focusClass:document.activeElement?.className||''
       }))()`);
@@ -973,13 +979,15 @@ async function runAppSuite() {
       assert.match(reopened.src, /example\.com\/second/);
       assert.match(reopened.focusClass, /link-preview-close/);
 
-      await browser.page.evaluate("window.markdownEditorLinkPreview.close('dom-primitive-test')");
-      await browser.page.waitFor(() => document.activeElement?.id === 'dom-primitive-focus-source', { description: 'link preview focus restoration' });
-      assert.equal(await browser.page.evaluate('window.markdownEditorLinkPreview.isOpen()'), false);
+      await browser.page.evaluate("document.querySelector('.link-preview-close').click()");
+      await browser.page.waitFor(() => document.activeElement?.id === 'dom-primitive-link-source-2', { description: 'link preview focus restoration' });
+      assert.equal(await browser.page.evaluate("Boolean(document.querySelector('#link-preview-overlay.show'))"), false);
       await browser.page.evaluate(`(()=>{
-        const source=document.getElementById('dom-primitive-focus-source');
+        const source=document.getElementById('dom-primitive-link-source-2');
         if(document.activeElement===source)source.blur();
         source?.remove();
+        document.getElementById('dom-primitive-link-source')?.remove();
+        document.getElementById('dom-primitive-focus-source')?.remove();
         scrollTo(0,0);
       })()`);
     });
@@ -1037,9 +1045,9 @@ async function runAppSuite() {
         const metadataOnly=records=>records.every(record=>!['content','contentChunks','body','text','source','markdown'].some(key=>Object.prototype.hasOwnProperty.call(record,key)));
         const snapshot=()=>({
           activeId:port.activeId,
-          modelId:String(window.markdownEditorDocumentModel?.documentId||''),
+          modelId:window.__markdownEditorE2E.snapshot().documentId,
           title:document.getElementById('filename')?.value||'',
-          body:window.markdownEditorDocumentModel?.createSnapshot?.('atomic-5.3-e2e')||'',
+          body:window.__markdownEditorE2E.getEditorValue(),
           recordCount:port.records.length,
           metadataOnly:metadataOnly(port.records)
         });
@@ -1109,7 +1117,7 @@ async function runAppSuite() {
       let result;
       try {
         await browser.page.insertText('x');
-        result = await browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorEditorControllerPort,model=window.markdownEditorDocumentModel,transactions=window.__runnerTransactions;const interactive={...transactions.at(-1)},interactiveVersion=model.getDocumentVersion();port.setText('controller body');return {count:transactions.length,interactive,interactiveVersion,programmatic:{...transactions.at(-1)},finalVersion:model.getDocumentVersion(),body:model.createSnapshot('atomic-5.8-e2e'),scopedOnly:typeof window.markdownEditorEditorControllerPort==='undefined'};})()");
+        result = await browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorEditorControllerPort,model=window.__markdownEditorE2E,transactions=window.__runnerTransactions;const interactive={...transactions.at(-1)},interactiveVersion=model.snapshot().documentVersion;port.setText('controller body');return {count:transactions.length,interactive,interactiveVersion,programmatic:{...transactions.at(-1)},finalVersion:model.snapshot().documentVersion,body:model.getEditorValue(),scopedOnly:typeof window.markdownEditorEditorControllerPort==='undefined'};})()");
       } finally {
         await browser.page.evaluate("window.__runnerUnsubscribe?.();delete window.__runnerUnsubscribe;delete window.__runnerTransactions");
       }
@@ -1473,16 +1481,6 @@ async function runAppSuite() {
             window.__hybridDispatchRaceErrors.push(message);
           }
         });
-        const perf=window.markdownEditorPerf;
-        if(perf&&typeof perf.diagnostic==='function'){
-          const original=perf.diagnostic.bind(perf);
-          perf.diagnostic=(operation,options={})=>{
-            if(operation==='hybrid.block-dispatch-failure'){
-              window.__hybridDispatchRaceErrors.push(String(options?.details?.message||operation));
-            }
-            return original(operation,options);
-          };
-        }
       })()`);
       const beforeLength = await browser.page.evaluate('document.getElementById("editor")?.textLength || 0');
       for (let index = 0; index < 4; index += 1) {

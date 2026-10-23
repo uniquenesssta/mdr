@@ -1,11 +1,11 @@
+import { registerHybridWidgetCleanup, disposeHybridWidget } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.10 Image WidgetType composition.
  * Owns image DOM, retry orchestration and generation-checked async lifecycle only.
  * Source resolution/cache, failure DOM and shared source/lifecycle mechanics remain delegated.
  */
 import {
-  attachHybridWidgetLifecycle,
-  destroyHybridWidgetLifecycle
+  attachHybridWidgetLifecycle
 } from '../../lifecycle/widget-lifecycle.js';
 import { scheduleHybridWidgetGeometry } from '../../lifecycle/widget-geometry-scheduler.js';
 import { createWidgetButton } from '../shared/widget-button.js';
@@ -201,7 +201,7 @@ export function createImageBlockWidgetType(WidgetType, options = {}) {
 
       const lifecycleCleanup = attachHybridWidgetLifecycle(figure, view, 'image');
       let cleaned = false;
-      figure.__markdownEditorImageBlockCleanup = () => {
+      registerHybridWidgetCleanup(figure, () => {
         if (cleaned) return;
         cleaned = true;
         loadVersion.destroy();
@@ -209,15 +209,13 @@ export function createImageBlockWidgetType(WidgetType, options = {}) {
         clearBadge();
         disposeSourceAction();
         lifecycleCleanup();
-      };
+      });
       void loadImage();
       return figure;
     }
 
     destroy(dom) {
-      dom?.__markdownEditorImageBlockCleanup?.();
-      if (dom) delete dom.__markdownEditorImageBlockCleanup;
-      destroyHybridWidgetLifecycle(dom);
+      disposeHybridWidget(dom);
     }
 
     ignoreEvent() {

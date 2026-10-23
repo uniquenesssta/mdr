@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R16-02 ESM application cutover and cumulative regression · ${{ github.sha }}
+run-name: R16-03 explicit module APIs and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -287,6 +287,20 @@ jobs:
         shell: bash
         run: node --test tests/stage-15-log-cleanup.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/log-cleanup.log"
 
+      - name: R16-03 no business globals and owned widget capabilities
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/stage-16-global-api.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/global-api-tests.log"
+          grep -Eq 'tests 16' "$RUNNER_TEMP/r12-14/global-api-tests.log"
+          grep -Eq 'fail 0' "$RUNNER_TEMP/r12-14/global-api-tests.log"
+      - name: R16-03 actual link preview focus owner retirement
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/e2e/link-preview.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/link-preview-focus-tests.log"
+          grep -Eq 'tests 1' "$RUNNER_TEMP/r12-14/link-preview-focus-tests.log"
+          grep -Eq 'fail 0' "$RUNNER_TEMP/r12-14/link-preview-focus-tests.log"
       - name: R16-02 explicit ESM startup and feature lifetime
         shell: bash
         run: |

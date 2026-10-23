@@ -1,3 +1,4 @@
+import { activateHybridTableCell } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.9 Table keyboard-navigation owner.
  * Allowed imports: none. Forbidden imports: CodeMirror, model-kernel, Session and application globals.
@@ -51,8 +52,7 @@ export function scheduleTableCellEdit(tableFrom, cellKey, options = {}) {
   const selector = `.cm-hybrid-table-widget[data-hybrid-table-from="${tableFrom}"] [data-hybrid-table-cell-key="${cellKey}"]`;
   const activate = remaining => {
     const cell = documentRef.querySelector(selector);
-    if (cell && typeof cell.__markdownEditorActivateTableCell === 'function') {
-      cell.__markdownEditorActivateTableCell({ focus: true, select: true, trigger: 'navigation' });
+    if (cell && activateHybridTableCell(cell, { focus: true, select: true, trigger: 'navigation' })) {
       return;
     }
     if (remaining > 0) scheduleFrame(() => activate(remaining - 1));

@@ -44,7 +44,7 @@ test('Atomic 8.9 separates Table view, cell editor, keyboard navigation and writ
   assert.match(editor, /createTableCellEditor/);
   assert.match(editor, /getTableCellNavigationTarget/);
   assert.match(editor, /writeTableCellValue/);
-  assert.match(editor, /__markdownEditorDestroyTableCell/);
+  assert.match(editor, /registerHybridDirectEditor/);
   assert.doesNotMatch(editor, /createWidgetToolbar|transitionHybridComponent|view\.dispatch/);
   assert.match(navigation, /event\?\.key === 'Tab'/);
   assert.match(navigation, /event\?\.key === 'Enter'/);
@@ -80,7 +80,7 @@ test('Atomic 8.9 preserves Session/source/lifecycle ownership and leaves the fro
   assert.match(widget, /bindWidgetSourceAction/);
   assert.match(widget, /openWidgetSource/);
   assert.match(widget, /attachHybridWidgetLifecycle/);
-  assert.match(widget, /section\.__markdownEditorTableBlockCleanup/);
+  assert.match(widget, /registerHybridWidgetCleanup/);
   assert.match(editor, /bindOutsidePointerClosure/);
   assert.match(model, /export function parseTableRow/);
   assert.match(model, /export function encodeTableCell/);

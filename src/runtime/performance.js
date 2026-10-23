@@ -1,11 +1,10 @@
-import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink, createTelemetryLifecycle } from '../features/telemetry/index.js';
+import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink, createTelemetryLifecycle, connectTelemetryRecorder } from '../features/telemetry/index.js';
 
 const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const diagnosticStates = new Map();
-const wrappedFunctions = new Map();
-let legacyInstrumentationRequested = false, activeScope = null, telemetryLifecycle = null;
+let telemetryLifecycle = null;
 let telemetryDestroyed = false, destructionReport = null, pendingHandoff = null;
-let publishedPerf = null, previousPerfDescriptor;
+let disconnectRecorder = null;
 let eventTimingSeen = false, navigationSeen = false;
 const MAX_DIAGNOSTIC_KEYS = 200;
 const FLUSH_INTERVAL_MS = 2000;
@@ -97,10 +96,7 @@ function getTelemetryLifecycle() {
       schedule: (callback, delay) => setTimeout(callback, delay), cancel: timer => clearTimeout(timer),
       requestFrame: callback => requestAnimationFrame(callback), cancelFrame: frame => cancelAnimationFrame(frame),
       install(scope) {
-        activeScope = scope;
-        scope.own(() => { if (activeScope === scope) activeScope = null; });
         installInteractionTracking(scope); installPerformanceObservers(scope); installErrorTracking(scope);
-        if (legacyInstrumentationRequested) installLegacyInstrumentation(scope);
       },
       startOwners() {
         buffer.setEnabled(platformLogsEnabled); longTaskObserver.start();
@@ -122,15 +118,9 @@ export function destroyPerformanceTelemetry() {
     else cleanupOwners(true);
   } catch (_) { lifecycleReport = { cleanupFailed: true }; }
   let cleanupFailed = Boolean(lifecycleReport?.cleanupFailed);
-  for (const { restore } of [...wrappedFunctions.values()].reverse()) try { restore(); } catch (_) { cleanupFailed = true; }
-  wrappedFunctions.clear(); diagnosticStates.clear(); activeScope = null; platformLogsEnabled = false; platformLogs = null;
+  disconnectRecorder?.(); disconnectRecorder = null;
+  diagnosticStates.clear(); platformLogsEnabled = false; platformLogs = null;
   runtimeStatsProvider = () => ({});
-  if (import.meta.env.DEV) try {
-    if (window.markdownEditorPerf === publishedPerf) {
-      if (previousPerfDescriptor) Object.defineProperty(window, 'markdownEditorPerf', previousPerfDescriptor);
-      else delete window.markdownEditorPerf;
-    }
-  } catch (_) { cleanupFailed = true; }
   destructionReport = Object.freeze({ state: 'destroyed', cleanupFailed, handoff: pendingHandoff });
   return destructionReport;
 }
@@ -352,172 +342,12 @@ function installErrorTracking(scope) {
   });
 }
 
-function functionDetails(name) {
-  const editor = document.getElementById('editor');
-  const preview = document.getElementById('preview');
-  const runtimeStats = runtimeStatsProvider() || {};
-  if (name.includes('Scroll')) {
-    const syncState = runtimeStats.scrollSync || null;
-    return {
-      editorScrollTop: Math.round(editor?.scrollTop || 0),
-      previewScrollTop: Math.round(preview?.scrollTop || 0),
-      scrollSourceSide: syncState?.sourceSide || '',
-      scrollSourceReason: syncState?.sourceReason || '',
-      scrollTargetWrites: syncState?.targetWrites || 0,
-      scrollIgnoredTargetEvents: syncState?.ignoredTargetEvents || 0,
-      scrollGeometryResyncs: syncState?.geometryResyncs || 0,
-      scrollLastTargetDelta: syncState?.lastTargetDelta || 0
-    };
-  }
-  if (name.includes('Selection')) {
-    const selectionState = runtimeStats.selectionSync || null;
-    return {
-      selectionLength: Math.max(0, (editor?.selectionEnd || 0) - (editor?.selectionStart || 0)),
-      selectionApplyingSide: selectionState?.applyingSide || '',
-      selectionPreviewRevision: selectionState?.previewRevision || 0,
-      selectionPendingRetries: selectionState?.pendingRetries || 0,
-      selectionMappingFailures: selectionState?.mappingFailures || 0,
-      selectionPreviewRefreshes: selectionState?.previewRefreshes || 0
-    };
-  }
-  const previewBody = preview?.querySelector?.('.markdown-body');
-  const virtualEditor = editor?.virtualEditor;
-  const viewport = virtualEditor?.getVisibleRange?.();
-  const virtualPreview = runtimeStats.virtualPreview || null;
-  const documentStatistics = window.markdownEditorDocumentStatistics || null;
-  const documentModel = window.markdownEditorDocumentModel?.getState?.() || null;
-  const presentationStats = virtualEditor?.getPresentationStats?.() || null;
-  return {
-    editorChars: documentModel?.length ?? editor?.textLength ?? editor?.value?.length ?? 0,
-    documentId: documentModel?.documentId || '',
-    documentGeneration: documentModel?.generation || 0,
-    documentVersion: documentModel?.version || 0,
-    documentDirty: Boolean(documentModel?.dirty),
-    documentJournalEntries: documentModel?.journalEntries || 0,
-    documentJournalChars: documentModel?.journalChars || 0,
-    editorLines: virtualEditor?.getLineCount?.() || 0,
-    editorRenderedLines: editor?.querySelectorAll?.('.cm-line')?.length || 0,
-    editorPresentationMode: virtualEditor?.getPresentationMode?.() || 'source',
-    editorDecoratedLines: presentationStats?.decoratedLines || 0,
-    editorHeadingLines: presentationStats?.headingLines || 0,
-    editorSourceActiveLines: presentationStats?.sourceActiveLines || 0,
-    editorHiddenMarkers: presentationStats?.hiddenMarkers || 0,
-    editorRenderedBlocks: presentationStats?.renderedBlocks || 0,
-    editorCodeBlocks: presentationStats?.codeBlocks || 0,
-    editorMermaidBlocks: presentationStats?.mermaidBlocks || 0,
-    editorTableBlocks: presentationStats?.tableBlocks || 0,
-    editorImageBlocks: presentationStats?.imageBlocks || 0,
-    editorMathBlocks: presentationStats?.mathBlocks || 0,
-    editorHtmlBlocks: presentationStats?.htmlBlocks || 0,
-    editorHtmlFallbackBlocks: presentationStats?.htmlFallbackBlocks || 0,
-    editorViewportFrom: viewport?.from || 0,
-    editorViewportTo: viewport?.to || 0,
-    previewBlocks: virtualPreview?.blocks ?? previewBody?.children?.length ?? 0,
-    indexedBlocks: documentStatistics?.blocks || 0,
-    indexedHeadings: documentStatistics?.headings || 0,
-    previewMountedBlocks: virtualPreview?.mountedBlocks ?? previewBody?.children?.length ?? 0,
-    previewVirtualized: Boolean(virtualPreview?.active),
-    previewMeasuredHeights: virtualPreview?.measuredHeights || 0,
-    previewCachedHeights: virtualPreview?.cachedHeights || 0,
-    backgroundTasks: Number(runtimeStats.backgroundTasks) || 0,
-    previewAnchors: preview?.querySelectorAll?.('[data-source-line]')?.length || 0
-  };
-}
-
-function instrumentFunction(name, category, aggregate = false, scope) {
-  const original = window[name];
-  if (typeof original !== 'function' || wrappedFunctions.get(name)?.wrapped === original) return false;
-  const wrapped = function (...args) {
-    return measure(name, () => original.apply(this, args), {
-      category,
-      aggregate,
-      details: () => functionDetails(name)
-    });
-  };
-  try {
-    Object.defineProperty(wrapped, 'name', { value: original.name, configurable: true });
-  } catch (_) {}
-  window[name] = wrapped;
-  const restore = () => {
-    if (window[name] === wrapped) window[name] = original;
-    if (wrappedFunctions.get(name)?.wrapped === wrapped) wrappedFunctions.delete(name);
-  };
-  wrappedFunctions.set(name, { wrapped, restore });
-  scope?.own(restore);
-  return true;
-}
-
-function installLegacyInstrumentation(scope = activeScope) {
-  if (telemetryDestroyed) return 0;
-  legacyInstrumentationRequested = true;
-  if (import.meta.env.DEV && !scope?.active()) return 0;
-  const groups = {
-    'render.pipeline': [
-      ['updatePreview', true],
-      ['renderMermaidBlocks', true],
-      ['renderOutline', true],
-    ],
-    'document.operation': [
-      ['setupDocuments', false],
-      ['openDocument', false],
-      ['newDocument', false],
-      ['duplicateDocument', false],
-      ['renameDocument', false],
-      ['closeDocument', false],
-      ['saveCurrentDocumentState', true],
-      ['saveToLocal', false],
-      ['saveAsMarkdown', false],
-      ['autoSave', true]
-    ],
-    'ui.layout': [
-      ['applySplit', true],
-      ['setLayoutMode', false],
-      ['togglePane', false],
-      ['toggleSidebar', false],
-      ['applySettings', false],
-      ['setLanguage', false],
-      ['setAppTheme', false]
-    ],
-    'content.operation': [
-      ['undo', false],
-      ['redo', false],
-      ['wrapSelection', false],
-      ['prefixLines', false],
-      ['insertHeading', false],
-      ['insertTable', false],
-      ['confirmImageInsert', false],
-      ['confirmMermaidInsert', false],
-      ['findNext', false],
-      ['replaceOne', false],
-      ['replaceAll', false]
-    ]
-  };
-
-  let installed = 0;
-  for (const [category, functions] of Object.entries(groups)) {
-    for (const [name, aggregate] of functions) {
-      if (instrumentFunction(name, category, aggregate, scope)) installed += 1;
-    }
-  }
-
-  record('instrumentation.ready', {
-    category: 'app.lifecycle',
-    details: { wrappedFunctions: installed }
-  });
-  scope?.timeout(() => void flush(), 0);
-  return installed;
-}
+export function startPerformanceTelemetry() { return !telemetryDestroyed && getTelemetryLifecycle().start(); }
+export function stopPerformanceTelemetry() { return telemetryLifecycle?.stop(); }
+export function getPerformanceTelemetryState() { return telemetryLifecycle?.getState() || { state: telemetryDestroyed ? 'destroyed' : 'idle' }; }
 
 if (import.meta.env.DEV) {
-  previousPerfDescriptor = Object.getOwnPropertyDescriptor(window, 'markdownEditorPerf');
-  publishedPerf = {
-    sessionId, record, diagnostic, measure, flush, installLegacyInstrumentation,
-    getLogPath: () => buffer?.getLogPath() || '',
-    start: () => !telemetryDestroyed && getTelemetryLifecycle().start(),
-    stop: () => telemetryLifecycle?.stop(), destroy: destroyPerformanceTelemetry,
-    getState: () => telemetryLifecycle?.getState() || { state: telemetryDestroyed ? 'destroyed' : 'idle' }
-  };
-  window.markdownEditorPerf = publishedPerf;
+  disconnectRecorder = connectTelemetryRecorder({ record, diagnostic });
   record('frontend.bootstrap', { category: 'app.lifecycle', durationMs: performance.now(), details: {
     userAgent: navigator.userAgent, hardwareConcurrency: navigator.hardwareConcurrency || null,
     deviceMemoryGb: navigator.deviceMemory || null, viewportWidth: window.innerWidth, viewportHeight: window.innerHeight

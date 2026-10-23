@@ -1,9 +1,10 @@
+import { registerHybridWidgetCleanup, disposeHybridWidget } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.13 HTML WidgetType composition.
  * Owns HTML SOURCE activation, telemetry delegation and explicit widget lifecycle teardown.
  * WidgetType and application telemetry are injected at the editor composition boundary.
  */
-import { attachHybridWidgetLifecycle, destroyHybridWidgetLifecycle } from '../../lifecycle/widget-lifecycle.js';
+import { attachHybridWidgetLifecycle } from '../../lifecycle/widget-lifecycle.js';
 import { bindWidgetSourceAction, openWidgetSource } from '../shared/widget-source-action.js';
 import { createHtmlBlockView } from './html-block-view.js';
 
@@ -64,19 +65,17 @@ export function createHtmlBlockWidgetType(WidgetType, options = {}) {
       });
       const disposeLifecycle = attachHybridWidgetLifecycle(section, view, 'html');
       let cleaned = false;
-      section.__markdownEditorHtmlBlockCleanup = () => {
+      registerHybridWidgetCleanup(section, () => {
         if (cleaned) return;
         cleaned = true;
         disposeSourceAction();
         disposeLifecycle();
-      };
+      });
       return section;
     }
 
     destroy(dom) {
-      dom?.__markdownEditorHtmlBlockCleanup?.();
-      if (dom) delete dom.__markdownEditorHtmlBlockCleanup;
-      destroyHybridWidgetLifecycle(dom);
+      disposeHybridWidget(dom);
     }
 
     ignoreEvent() {

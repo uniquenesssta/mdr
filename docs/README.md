@@ -1,6 +1,6 @@
 # Markdown Editor
 
-R16-02正式收尾：0963dfe / CI39971556914七组Windows及全部步骤成功，同提交汇总accepted=true；Node2720、ESM12、CDP12、浏览器11＋75、Rust299和原生大文档4条链路通过，closeout/WebView归档SHA256已核验。继续codex/r16-stage，用户授权开始R16-03全局API清除；16.4未开始。 [02验收](R16-02-DETAILS.md#正式验收2026-10-23)。
+R16-02已正式验收（0963dfe / CI39971556914）。R16-03全局API清理已实现：业务全局发布为0，控件回调由Lifecycle管理；全仓2737/2737、专项16＋真实焦点1、浏览器11＋75、原文及同量级文档8条Windows原生链路、构建与四门禁通过。待精确提交Windows累计CI；继续codex/r16-stage，推送后停止轮询，16.4未开始。 [03详情](R16-03-DETAILS.md)。
 
 以下为此前阶段记录：
 

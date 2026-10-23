@@ -1,3 +1,4 @@
+import { commitHybridDirectEditor, destroyHybridDirectEditor } from '../src/features/hybrid-editor/lifecycle/widget-lifecycle.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { WidgetType } from '@codemirror/view';
@@ -132,14 +133,14 @@ test('Atomic 8.8 direct edit commits one transaction with isolated history and r
   const closed = [];
   const { editor, dispatches } = createHarness({ onClose: result => closed.push(result) });
   editor.value = 'let answer = 42;';
-  const descriptor = editor.__markdownEditorCommitCodeBlock();
+  const descriptor = commitHybridDirectEditor(editor);
   assert.equal(dispatches.length, 1);
   assert.equal(dispatches[0].annotations, 'isolated-history');
   assert.equal(dispatches[0].changes.from, 10);
   assert.equal(dispatches[0].changes.to, 30);
   assert.equal(dispatches[0].changes.insert, '```js\nlet answer = 42;\n```');
   assert.deepEqual(descriptor, { from: 10, to: 36, editFrom: 16, editTo: 32, preferredPosition: 16 });
-  assert.equal(editor.__markdownEditorCommitCodeBlock(), false);
+  assert.equal(commitHybridDirectEditor(editor), false);
   assert.equal(dispatches.length, 1);
   assert.equal(closed.length, 0);
 });
@@ -152,7 +153,7 @@ test('Atomic 8.8 direct edit rejects stale ranges without dispatching and report
     onFailure: (error, details) => failures.push({ error, details })
   });
   editor.value = 'changed';
-  assert.equal(editor.__markdownEditorCommitCodeBlock(), false);
+  assert.equal(commitHybridDirectEditor(editor), false);
   assert.equal(dispatches.length, 0);
   assert.equal(failures.length, 1);
   assert.equal(failures[0].error.message, '代码块范围已经失效');
@@ -191,7 +192,7 @@ test('Atomic 8.8 direct-editor destroy removes its Session-owned document listen
   const { editor, documentRef, dispatches } = createHarness({ onClose: result => closed.push(result) });
   assert.equal(documentRef.listenerCount('pointerdown'), 1);
   editor.value = 'changed after destroy';
-  editor.__markdownEditorDestroyCodeBlock();
+  destroyHybridDirectEditor(editor);
   assert.equal(documentRef.listenerCount('pointerdown'), 0);
   editor.blur();
   assert.equal(dispatches.length, 0);

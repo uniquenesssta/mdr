@@ -83,12 +83,12 @@ test('Atomic 8.12 removes legacy Mermaid authority and composes Preview presenta
 
 test('Atomic 8.12 Mermaid ownership remains intact after Atomic 8.13 HTML migration', async () => {
   const widget = await text(mermaidPaths[0]);
-  assert.match(widget, /__markdownEditorMermaidBlockCleanup/);
+  assert.match(widget, /registerHybridWidgetCleanup/);
   assert.match(widget, /if \(cleaned\) return;\s*cleaned = true;/);
   assert.match(widget, /renderState\.destroy\(\)/);
   assert.match(widget, /themeObserver\?\.disconnect\(\)/);
-  assert.match(widget, /__markdownEditorDestroyCodeBlock/);
-  assert.match(widget, /destroy\(dom\) \{[\s\S]*__markdownEditorMermaidBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
+  assert.match(widget, /destroyHybridDirectEditor/);
+  assert.match(widget, /destroy\(dom\) \{[\s\S]*disposeHybridWidget\(dom\)/);
   const inventory = JSON.parse(await text('tests/architecture/fixtures/production-modules.json'));
   await assertProductionInventory(inventory);
   const paths = new Set(inventory.modules.map(row => row[0]));

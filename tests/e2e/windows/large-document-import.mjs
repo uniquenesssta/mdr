@@ -14,11 +14,11 @@ export async function verifyLargeDocumentImport({ browser, filePath, diagnostics
   const inspect = async scenario => {
     const state = await browser.execute(async () => {
       const documents = document.getElementById('compatibility-business-ports').markdownEditorDocumentControllerPort;
-      const model = window.markdownEditorDocumentModel;
-      const bytes = new TextEncoder().encode(model.createSnapshot('large-import-regression'));
+      const editor = document.getElementById('editor');
+      const bytes = new TextEncoder().encode(editor.value);
       const hash = await crypto.subtle.digest('SHA-256', bytes);
       const records = JSON.parse(localStorage.getItem('md_editor_documents') || '[]');
-      return { id: documents.activeId, characters: model.getTextLength(), nativeBacked: documents.getActiveRecord()?.nativeBacked,
+      return { id: documents.activeId, characters: editor.textLength, nativeBacked: documents.getActiveRecord()?.nativeBacked,
         sha256: [...new Uint8Array(hash)].map(value => value.toString(16).padStart(2, '0')).join(''),
         legacyBody: localStorage.getItem('md_editor_content') !== null,
         bodyInMetadata: records.some(record => record.nativeBacked && Object.hasOwn(record, 'content')),
@@ -49,7 +49,7 @@ export async function verifyLargeDocumentImport({ browser, filePath, diagnostics
           });
         } else {
           const data = new DataTransfer();
-          data.items.add(new File([window.markdownEditorDocumentModel.createSnapshot('large-import-regression')],
+          data.items.add(new File([document.getElementById('editor').value],
             'large-import-input.md', { type: 'text/markdown' }));
           const input = document.getElementById('importFile');
           input.files = data.files; input.dispatchEvent(new Event('change', { bubbles: true }));

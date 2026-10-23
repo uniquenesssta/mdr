@@ -1,3 +1,4 @@
+import { connectTelemetryRecorder } from '../src/features/telemetry/index.js';
 import test, { afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { configureHybridSyncCapabilities } from '../src/features/hybrid-editor/index.js';
@@ -10,7 +11,8 @@ import {
   destroyHybridWidgetLifecycle
 } from '../src/features/hybrid-editor/lifecycle/widget-lifecycle.js';
 
-afterEach(() => configureHybridSyncCapabilities(null));
+let releaseTelemetry = () => {};
+afterEach(() => { configureHybridSyncCapabilities(null); releaseTelemetry(); });
 
 function createClock() {
   let nextId = 0;
@@ -69,17 +71,19 @@ function createHarness({ withObserver = true } = {}) {
     trigger(width = 100, height = 50) { this.callback([{ contentRect: { width, height } }]); }
   }
   if (withObserver) clock.ResizeObserver = FakeResizeObserver;
-  clock.scheduleEditorMetricsRebuild = delay => metricsRebuilds.push(delay);
+
   configureHybridSyncCapabilities({
     markProgrammaticScroll() {},
     notifyScrollGeometry(surface) { scrollSignals.push(surface); },
     notifySelectionGeometry(reason) { selectionSignals.push(reason); }
   });
-  clock.markdownEditorPerf = {
+  releaseTelemetry();
+  releaseTelemetry = connectTelemetryRecorder({
+    diagnostic() {},
     record(operation, payload) {
       if (operation === 'hybrid.widget-geometry') geometryReasons.push(payload.details.reason);
     }
-  };
+  });
 
   const element = new clock.Element();
   element.ownerDocument = { defaultView: clock };
@@ -140,7 +144,7 @@ test('Atomic 8.5 geometry scheduler coalesces to the latest reason and preserves
   h.clock.flushTimer();
   assert.deepEqual(h.geometryReasons, ['latest', 'latest:settled']);
   assert.equal(h.view.measures, 2);
-  assert.deepEqual(h.metricsRebuilds, [40, 40]);
+  assert.deepEqual(h.metricsRebuilds, []);
   assert.deepEqual(h.scrollSignals, ['editor', 'editor']);
   assert.deepEqual(h.selectionSignals, ['hybrid-widget:latest', 'hybrid-widget:latest:settled']);
   destroyHybridWidgetGeometryScheduler(h.view);

@@ -52,7 +52,7 @@ test('Atomic 8.10 separates path resolution, cache state, failure/retry presenta
   assert.doesNotMatch(errorView, /resolveHybridImageSource|invalidateHybridImageSource|attachHybridWidgetLifecycle/);
   assert.match(widget, /createImageErrorView/);
   assert.match(widget, /attachHybridWidgetLifecycle/);
-  assert.match(widget, /__markdownEditorImageBlockCleanup/);
+  assert.match(widget, /registerHybridWidgetCleanup/);
   assert.match(widget, /createImageLoadVersionGuard/);
 });
 
@@ -74,7 +74,7 @@ test('Atomic 8.10 removes legacy Image authority and composes platform plus Widg
   assert.doesNotMatch(widgets, /class ImageBlockWidget|resolveHybridImageSource|invalidateHybridImageSource|cm-hybrid-image-error/);
   assert.match(main, /configureHybridImageSourcePlatform[\s\S]*from '\.\/features\/hybrid-editor\/index\.js'/);
   assert.doesNotMatch(main, /editor\/hybrid\/image-source\.js/);
-  assert.match(main, /getDocumentContext:\s*\(\) => window\.markdownEditorRuntimeContext/);
+  assert.match(main, /getDocumentContext:\s*\(\) => readLinkDocumentContext\(\)/);
   assert.match(controller, /createImageBlockWidgetType/);
   assert.match(controller, /const ImageBlockWidget = createImageBlockWidgetType\(WidgetType\)/);
   assert.doesNotMatch(controller, /ImageBlockWidget,[\s\S]*from '\.\/widgets\.js'/);

@@ -1601,7 +1601,7 @@
       "src/features/hybrid-editor/lifecycle/widget-lifecycle.js",
       "esm-module",
       "hybrid-editor-lifecycle",
-      "Per-widget element lifecycle owner for single attach/destroy, ResizeObserver-driven geometry invalidation, mount-frame cleanup and idempotent teardown.",
+      "Per-widget observation, mount frames and private WeakMap ownership of direct editors, widget cleanup, cell navigation and activation disposal; terminal capabilities never attach to DOM.",
       "hybrid-widget-element-lifecycle",
       "element-lifecycle",
       "retain",
@@ -3491,7 +3491,7 @@
       "src/runtime/link-preview.js",
       "esm-module",
       "runtime-ui",
-      "In-application external link preview overlay and system-open actions.",
+      "Explicitly constructed link overlay and system navigation; owns document/overlay listeners, focus scopes, animation frames and terminal cleanup with injected platform, notifications and telemetry.",
       "link-preview-overlay",
       "explicit-instance",
       "rewrite",
@@ -3501,7 +3501,7 @@
       "src/runtime/performance.js",
       "esm-module",
       "telemetry",
-      "Legacy DEV DOM/event/navigation instrumentation and diagnostic composition; public Recorder, privacy, Buffer, LongTaskObserver and RuntimeSnapshotRecorder own migrated telemetry responsibilities.",
+      "DEV DOM/event/navigation diagnostics and lifecycle composition over public telemetry owners; connects one explicit recording channel and publishes no global API or function wrapper.",
       "performance-runtime",
       "module-singleton",
       "decompose",
@@ -5684,6 +5684,36 @@
       "Project persistence, locale and Preview strategy into the existing status elements.",
       "save-hint timer and status subscriptions",
       "explicit construction/destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/telemetry/telemetry-channel.js",
+      "esm-module",
+      "telemetry",
+      "Explicit shared recording capability with single recorder ownership and terminal disconnection; no automatic effects.",
+      "recorder-connection",
+      "explicit-connect-release",
+      "retain",
+      false
+    ],
+    [
+      "src/features/hybrid-editor/runtime/hybrid-link-capabilities.js",
+      "esm-module",
+      "hybrid-editor",
+      "Composition-owned immutable link navigation capability for Hybrid CodeMirror integration.",
+      "composition-reference",
+      "configure-reset",
+      "retain",
+      false
+    ],
+    [
+      "src/features/documents/application/document-snapshot-telemetry.js",
+      "esm-module",
+      "documents",
+      "Observe snapshot latency through the existing frozen model instance without changing model bytes or authority.",
+      "model-method-instrumentation",
+      "explicit-attach-release",
       "retain",
       false
     ]

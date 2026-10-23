@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "b88a94efd5dd84c5815f3593c1a4cea019cf0156",
+  "baselineCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "f6e073590e2685a152f5e819e5e68715b7935c6d406ea9419e75ce979cef9f28"
+      "sha256": "44a0e95dc801f8e00a5c59d6bfac3632bc4b74b9705c329d78d444c3d11e529b"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -895,7 +895,7 @@
     },
     {
       "path": "src/bootstrap/application-events.js",
-      "sha256": "b040ecb68b160fa9a8f8291e6a8c93fc05e29641463725e735e44d2a99eb1021"
+      "sha256": "38a6bf8dffc4d8634a2c51bdbc7269aa8ee3167c18f177237b7dafa8033da67a"
     },
     {
       "path": "src/bootstrap/application-lifetime.js",
@@ -915,7 +915,7 @@
     },
     {
       "path": "src/editor/hybrid-markdown.js",
-      "sha256": "4785da739d57396fadcba064e852ce9127063589807a0408b43b98c7cdb1fdb4"
+      "sha256": "f9b62de1216dc1895bee482cedba4dcffb9a70a0beeff9c332b13dd4748ee6b0"
     },
     {
       "path": "src/editor/hybrid/block-registry.js",
@@ -948,6 +948,10 @@
     {
       "path": "src/features/documents/application/document-session-controller.js",
       "sha256": "8f7867360b26cf8dea0de532f75161c0cefcd5e65d0082649fa2c21e20f48104"
+    },
+    {
+      "path": "src/features/documents/application/document-snapshot-telemetry.js",
+      "sha256": "34bb659a9cacc7a543d4f33cff3759ad7b78bac8c09b7006cace1f083b1dcf3a"
     },
     {
       "path": "src/features/documents/application/document-title-controller.js",
@@ -1035,7 +1039,7 @@
     },
     {
       "path": "src/features/documents/ui/document-workspace.js",
-      "sha256": "4aee3070a8bbfd0a053a8566d38cb90ce921af3652c51cbebcc9a7c0820cd663"
+      "sha256": "81d0b3ce20b29c8a25a20e1b8b56cc35f2acbc2646856170ce1a57798485010e"
     },
     {
       "path": "src/features/e2e/e2e-bridge.js",
@@ -1143,7 +1147,7 @@
     },
     {
       "path": "src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js",
-      "sha256": "31c16fbc68d6eb99b57b051053b9591af04712429a17417d1b89d6545697a4c0"
+      "sha256": "b140da314211ca69d24a9db7cfdc4009afe085e8fd8addb9526051a4229b7419"
     },
     {
       "path": "src/features/editor/ui/editor-pane-view.js",
@@ -1471,15 +1475,15 @@
     },
     {
       "path": "src/features/hybrid-editor/index.js",
-      "sha256": "727b7e4b354748bc1a1263283499f3a12a589387e533c0943e6cdc83d4b4cddb"
+      "sha256": "2fd2e62063e1312f33a3f9439eec3cac001202cf83c6f984f5983bd1db1953a7"
     },
     {
       "path": "src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js",
-      "sha256": "4e38ff098eb03c479dcc230bda0407adbd431ad860c104c95b055df03af78ee9"
+      "sha256": "c93c172a4dfc317473058d1d4e386b7c44e0cccf9dfa3c4bc41929aec4072766"
     },
     {
       "path": "src/features/hybrid-editor/lifecycle/widget-lifecycle.js",
-      "sha256": "35833c45867298a2a64387ee109e92b783103de92eefa3fdad9bf2f663823488"
+      "sha256": "9da02d99f33e12e4f7dd384dae1904d92828a19d3472fdaf0338a8947fa3bcb0"
     },
     {
       "path": "src/features/hybrid-editor/presentation/heading-presentation.js",
@@ -1510,6 +1514,10 @@
       "sha256": "2fe4385585f5013f5fbaa209cc7911e58b2081b9a3e2a99d88266faab244cd8f"
     },
     {
+      "path": "src/features/hybrid-editor/runtime/hybrid-link-capabilities.js",
+      "sha256": "2209765e17a14d2531f9f2428293d6e1f2b8599fc75fb110949f57ab092ad4ac"
+    },
+    {
       "path": "src/features/hybrid-editor/runtime/hybrid-sync-capabilities.js",
       "sha256": "e48ecb416843724da4f5dbca1d3f2e33df576d31334944e8b1ee6c8d91eb9c90"
     },
@@ -1523,7 +1531,7 @@
     },
     {
       "path": "src/features/hybrid-editor/widgets/code-block/code-block-direct-editor.js",
-      "sha256": "86293c6a997016644d5b2ac914f9c1dba6111a3373c1b2473d614d06c01e7421"
+      "sha256": "ee0db4473cc41c179a86dd2d2ebefa59cad6d57dbe746c4c7473e8e5d2060bf9"
     },
     {
       "path": "src/features/hybrid-editor/widgets/code-block/code-block-view.js",
@@ -1531,7 +1539,7 @@
     },
     {
       "path": "src/features/hybrid-editor/widgets/code-block/code-block-widget.js",
-      "sha256": "51d30f268d6f9ce1d7bedc658d6c56c5edb07bbb045f4d7171e48d08b60eb673"
+      "sha256": "933ab346ee8426d4fb7ff33638b77552e4c77dbffed0a784259f096eb5dc9ad6"
     },
     {
       "path": "src/features/hybrid-editor/widgets/horizontal-rule/horizontal-rule-widget.js",
@@ -1543,7 +1551,7 @@
     },
     {
       "path": "src/features/hybrid-editor/widgets/html/html-block-widget.js",
-      "sha256": "ba58fcdbd189bf02cfa0a195a77ff2409965e875c4f2d11768f9436d2f8077a6"
+      "sha256": "4039c16506c2bb4a59c70acced6f2832b1bca643404f1395cad8200aec083720"
     },
     {
       "path": "src/features/hybrid-editor/widgets/image/image-error-view.js",
@@ -1551,15 +1559,15 @@
     },
     {
       "path": "src/features/hybrid-editor/widgets/image/image-widget.js",
-      "sha256": "9ad22acd2ce7baefe9a86fbd075071f725163f02723db85598fb0c753f8dc5ea"
+      "sha256": "27615f807bede8ab907963e687c1abf535748b750936c98b945d559bea40212e"
     },
     {
       "path": "src/features/hybrid-editor/widgets/math/block-math-widget.js",
-      "sha256": "a9f31c1b9fade9fdf1c1ad3c29b9e59445d9a96712b8d76241fc2801a8d06a1c"
+      "sha256": "7b7489b887de0c2e27a143edd975e76d9aa3516aa3431bf2d06813557358cd4a"
     },
     {
       "path": "src/features/hybrid-editor/widgets/math/inline-math-widget.js",
-      "sha256": "29531eef66e7367ab1b00cf4a9cb15655128d9ed2cad1cf32853b36e772727c1"
+      "sha256": "848efcfc12dadeb5d0dcfcd7bd33f1fa22cba2475e731f55305a847c96f35e81"
     },
     {
       "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-actions.js",
@@ -1571,7 +1579,7 @@
     },
     {
       "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
-      "sha256": "795d883a540c5d3c48f5dc1fedeaecdf8f29d1ba5b1f2bb6d7c896f913a2dc2f"
+      "sha256": "8285b6315433bc5ff7b537e1853f1690a25b4cb6521639c0836813082c5dc5fa"
     },
     {
       "path": "src/features/hybrid-editor/widgets/prefix/prefix-widget.js",
@@ -1599,11 +1607,11 @@
     },
     {
       "path": "src/features/hybrid-editor/widgets/table/table-cell-editor.js",
-      "sha256": "6a865fd241758164d154efe2ac5c10341a87826bd272b92835ecbf99ddeacf57"
+      "sha256": "a78b3dffadb5f4ffdad65983042545e410326c09b4a1f81f894f87ebcc8714cf"
     },
     {
       "path": "src/features/hybrid-editor/widgets/table/table-keyboard-navigation.js",
-      "sha256": "79046bb167d7a8be2820220e514d558ee40a77bac3012288d18f14900a0e531f"
+      "sha256": "4f39749190160f716c2a10ce1b28c2347e18a8e2f82d49d80e00b2c8285c8a98"
     },
     {
       "path": "src/features/hybrid-editor/widgets/table/table-view.js",
@@ -1611,7 +1619,7 @@
     },
     {
       "path": "src/features/hybrid-editor/widgets/table/table-widget.js",
-      "sha256": "ea9200141f65fbe235dd7ab82cbb1532c48cd4242636c17578acc5db2ab337d2"
+      "sha256": "e5f044b3d052b17aacc99a54840b811088348f7ae23a43df2921fef73d5a5c73"
     },
     {
       "path": "src/features/hybrid-editor/widgets/table/table-writeback.js",
@@ -1735,7 +1743,7 @@
     },
     {
       "path": "src/features/layout/workspace-preferences.js",
-      "sha256": "6be90dabe1d86db0c92b9caf108c2b183a262c001da0566f86fb90b6af472c0a"
+      "sha256": "4b99f3cde11f399e267be0f462d0be2effccfb140d3640758ed7ac6db3c87bfb"
     },
     {
       "path": "src/features/menu/compatibility/classic-menu-command-adapter.js",
@@ -2235,7 +2243,7 @@
     },
     {
       "path": "src/features/telemetry/index.js",
-      "sha256": "b6374545b76ebecd6cec01445abb206c539d9d9544862af885dfad122ff59917"
+      "sha256": "e04194307e7c62f9a7437c847d76e136b7aef8b20aa601678ab5319ad1274b57"
     },
     {
       "path": "src/features/telemetry/long-task-observer.js",
@@ -2252,6 +2260,10 @@
     {
       "path": "src/features/telemetry/runtime-snapshot-recorder.js",
       "sha256": "b9bca6c9a035e313ba641ac9bc7bf1c9ffc8b7a3f4e5652e182d4e86e663c3f3"
+    },
+    {
+      "path": "src/features/telemetry/telemetry-channel.js",
+      "sha256": "90f8ce42460fbb85c5af2d83a72f5e8fd1f32308d97a354c1d3a90a2206a66a4"
     },
     {
       "path": "src/features/telemetry/telemetry-lifecycle.js",
@@ -2359,7 +2371,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "9ab8e31125ee855e359a1c226e646d02539f4a858b506f6c291eb347a488207d"
+      "sha256": "aeef56c015774c603bac65c2c3a243561b91218b2f199347bbfaada6ed6b40f7"
     },
     {
       "path": "src/model-kernel/index.js",
@@ -2523,11 +2535,11 @@
     },
     {
       "path": "src/runtime/link-preview.js",
-      "sha256": "a4abbd7c5930a48173a387b8f97f7d94695d6f1c2fe2ceb003488332726ced9e"
+      "sha256": "e51d5d121a07069dffbcd103a68797108a9ad779818f84df9684fdf414e36185"
     },
     {
       "path": "src/runtime/performance.js",
-      "sha256": "915f52032d2923c1b2f87567141970e1f9301eec2f06001d099adea04dc93c55"
+      "sha256": "ae8dc8144065436d0b2e5f4ecf1bf4a2c0e47a7c1c647a83dc224598d300a543"
     },
     {
       "path": "src/shared/scheduling/classic-task-scheduler-port.js",
@@ -2879,11 +2891,11 @@
     },
     {
       "path": "tests/architecture/fixtures/architecture-baseline.json",
-      "sha256": "9127a93063987445c7bdd07bc1334327f0bb10ea64f79fbed36a45271645d56c"
+      "sha256": "8fb049e7d543426a480e09044cfd87bb51fc8f8263dbab6392b49b53019562de"
     },
     {
       "path": "tests/architecture/fixtures/production-modules.json",
-      "sha256": "23f7be07f05f6b83cecf2ea5efe9ab231edb4bdecb0b7e5fb4e919d3b7f123eb"
+      "sha256": "0ad50a2e7f1d841007516fe03436377749c2ff998dd48330a391b891531c20d7"
     },
     {
       "path": "tests/architecture/global-write-scanner.test.mjs",
@@ -2899,7 +2911,7 @@
     },
     {
       "path": "tests/architecture/module-inventory.test.mjs",
-      "sha256": "f5a460706603a346867d7a74cbc2830d4b5da7c544defa993a6fb91a256437cc"
+      "sha256": "1d4ccdbf63385c213aebc9c703bb7430e5eab734055518227d4f222774e297d2"
     },
     {
       "path": "tests/architecture/module-side-effects.test.mjs",
@@ -3063,7 +3075,7 @@
     },
     {
       "path": "tests/architecture/stage-08-hybrid-code-block.test.mjs",
-      "sha256": "5f84d49bd3fca8faf2a97ae34328c799f007e14112bbb7e80332f2ff8504a02a"
+      "sha256": "564522e7b2a3c07fbe1fc0d749cb1b35e5296215304679826fa0cf6b1af787fa"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-component-session.test.mjs",
@@ -3075,11 +3087,11 @@
     },
     {
       "path": "tests/architecture/stage-08-hybrid-html.test.mjs",
-      "sha256": "484a48c07a844bcfa460ffa1990adf2bbaa7b2661760b5dff9de4ac5c6688243"
+      "sha256": "0cf3632dd7f8314b4728dfa1c9a0ab110bdfc47ddc54737cdfe3596748939296"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-image.test.mjs",
-      "sha256": "90b9425a1df73a7209a1dc49fcccd56ed0fe8943a5278baeac02d3a8435559c1"
+      "sha256": "cc448d37035ecfc780a4a360e8fc84971a363a0f51dd3e6ae522a9b6d851644b"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-inline-presentation.test.mjs",
@@ -3087,11 +3099,11 @@
     },
     {
       "path": "tests/architecture/stage-08-hybrid-math.test.mjs",
-      "sha256": "13d5fe7d4fc57557df8eff813804b28027e4980129efa1a82c4200ca968a1d1d"
+      "sha256": "265baa1d3397d3bb1241f869898c59003f455637908572f498d3507263d0a056"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-mermaid.test.mjs",
-      "sha256": "cc8fc4833062f7553162432d0201f8c7436e837259c189492645bd57b49750cc"
+      "sha256": "f62fde94b5e76ade3ff1ff24ccf91695aec4b651041640a1088e57bfe6f0cffb"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-prefix-hr.test.mjs",
@@ -3107,11 +3119,11 @@
     },
     {
       "path": "tests/architecture/stage-08-hybrid-table.test.mjs",
-      "sha256": "2193505afa213058ebfb0202c7901f31554a11b03d9a04cd08c5944a8282699b"
+      "sha256": "cb9d47f1f2c7a2b1501cfe68d915da197f8a8c34d91ea8ca3feaee3f89bbef3f"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-widget-lifecycle.test.mjs",
-      "sha256": "5a4380b0ec7b50f9e71d37c3957152addc66e601381f14e29ee73ce7fd3e7b0f"
+      "sha256": "df01cc60bcdeff14e1af7d5448c0bcc10ae2d6e8f64131b227f11c1fee280001"
     },
     {
       "path": "tests/architecture/stage-09-editor-scroll-mapper.test.mjs",
@@ -3235,15 +3247,19 @@
     },
     {
       "path": "tests/e2e/lib/export-characterization.mjs",
-      "sha256": "b20314d1c5f75f5b3c521dc7a3e88f2a03eb67a6054dbc64583ecc2bbd081b0b"
+      "sha256": "34e1c993ad6367c867e4b1e6526fd5d650fce32d0d9ba37aa52abb4185d485eb"
     },
     {
       "path": "tests/e2e/lib/export-test-commands.mjs",
-      "sha256": "360367551ed396e3c54e1775d2215f821e1c13484d1556bf755122c65d8db2e6"
+      "sha256": "acfe7a49842781b79742ddd4a7fc597deae81b37811ec945fb8daa8a649276b0"
     },
     {
       "path": "tests/e2e/lib/virtual-file-host.mjs",
       "sha256": "8bba513b9e9e106272cd162caa22172fc546a92c8d49bfafba5da298e43324d8"
+    },
+    {
+      "path": "tests/e2e/link-preview.test.mjs",
+      "sha256": "f1a6dc7dce59317ac59b19597275e024ac81f99e82fe2447cf2de3fa6e25b5e2"
     },
     {
       "path": "tests/e2e/preview-enhancement-coordinator.test.mjs",
@@ -3271,7 +3287,7 @@
     },
     {
       "path": "tests/e2e/run-browser-tests.mjs",
-      "sha256": "348ee5b882433e474db7810ce09ca51461eb58cdaf0f44e45af928561729bb40"
+      "sha256": "32b473fd2c5b08fb529a90036fba2c6634aff60c7f89eb449589ce4b6687ae91"
     },
     {
       "path": "tests/e2e/submenu-positioner.test.mjs",
@@ -3315,11 +3331,11 @@
     },
     {
       "path": "tests/e2e/windows/import-document-chain.mjs",
-      "sha256": "ff7165e29ffad72a1fd4d623795938fb32f7daa05af96b567948a39c93814dab"
+      "sha256": "9ffd5920f8d76ca314551f84c5a30ca0ac4aac1ce73026a5d1296c9631df204e"
     },
     {
       "path": "tests/e2e/windows/large-document-import.mjs",
-      "sha256": "4c01b8135b10c8dc29640c9dbbd95f9ba1ca9a246a879fd4ca28ccf7dcb7f9d6"
+      "sha256": "4c978c9e208cdeae45738e4f4101bf6bb921e5a824b9f10623183ca22db1f743"
     },
     {
       "path": "tests/e2e/windows/native-window-interop.mjs",
@@ -3463,7 +3479,7 @@
     },
     {
       "path": "tests/stage-08-hybrid-code-block.test.mjs",
-      "sha256": "7124f3d6139d96b58ee7594e5b7998c262333cb494ec715fbb135b71a897746a"
+      "sha256": "461ab48afc2e3dfd55d8859de27332320024decccf8a750808379bfa0d5dda9a"
     },
     {
       "path": "tests/stage-08-hybrid-component-session.test.mjs",
@@ -3511,11 +3527,11 @@
     },
     {
       "path": "tests/stage-08-hybrid-table.test.mjs",
-      "sha256": "cff48dc87043e301791c1af8a98583c20f4611723a241262b9009984796f1a59"
+      "sha256": "64bd44d76eedd81eea6d0a2fbe0e627247662fc9bd123bb6fb47a65be33b4966"
     },
     {
       "path": "tests/stage-08-hybrid-widget-lifecycle.test.mjs",
-      "sha256": "74866e46b5f5650e8db3b69b55491482948b36b3a229172b37cca23ca874bc5a"
+      "sha256": "5c04c8f66d61abf881b2390797d11a20257efd0a74a38fdc4c923f84802ed1b1"
     },
     {
       "path": "tests/stage-09-editor-scroll-mapper.test.mjs",
@@ -3871,7 +3887,7 @@
     },
     {
       "path": "tests/stage-15-event-catalogue.test.mjs",
-      "sha256": "e1f121891a4d9018c26e8a46022bc41365279ae6a86a8b8efda480ff5bf89342"
+      "sha256": "a8cd644928d511da5e70dbb2e7a865a2612b465b324b011b10d4882b4b45d51d"
     },
     {
       "path": "tests/stage-15-log-cleanup.test.mjs",
@@ -3903,7 +3919,7 @@
     },
     {
       "path": "tests/stage-15-telemetry-lifecycle.test.mjs",
-      "sha256": "695944530e8217674b730f451db97cee6c6a48786c923ae4890699561b3dbf97"
+      "sha256": "2d2d32f64bd4ed03b90501920cb2b7c311358ecf8cabf7f3498d6394aa69309c"
     },
     {
       "path": "tests/stage-16-deletion-inventory.test.mjs",
@@ -3912,6 +3928,10 @@
     {
       "path": "tests/stage-16-esm-application.test.mjs",
       "sha256": "f711bc10c3a5006df6bf62ef8af642a0321e1555bbc755a27b5be558649858f4"
+    },
+    {
+      "path": "tests/stage-16-global-api.test.mjs",
+      "sha256": "fcdb829b748243e39ede9bf47bfc7ea548d96ba708059caeffa04065f2eed574"
     },
     {
       "path": "tests/support/application-surface-source.mjs",
@@ -3935,7 +3955,7 @@
     },
     {
       "path": "tests/support/performance-log/frontend-payload.mjs",
-      "sha256": "f2accc057f14e0370611c896a6e5f23621b01aad0d426550b4926d1a77eb72bf"
+      "sha256": "0af044c23c76de9c2294e050d24323c1b0be550870641cdb001f6b9d9e4829a7"
     },
     {
       "path": "tests/support/performance-log/storage-contract.mjs",
@@ -3947,7 +3967,7 @@
     },
     {
       "path": "tests/support/telemetry-runtime-host.mjs",
-      "sha256": "d7f9b387e35eb9128babf57b9fde81eddd99632b5a0b4fb8958f52d0e00a2b1f"
+      "sha256": "f26f646eb05aae6f6dedb73cd6e8e123e39be472a7099b8003a5a978eaac257c"
     },
     {
       "path": "tests/svg-sprite.test.mjs",
@@ -4035,7 +4055,7 @@
     },
     {
       "path": "tests/unit/editor/codemirror-adapter.test.mjs",
-      "sha256": "4806e2274e45295eb787b02d732337389a4026638ab43e38cd6f00f58ae5e4b8"
+      "sha256": "e21ae01a25bbd68cefcf33a323ad450139f347076665b1454b5d6287410fb2e0"
     },
     {
       "path": "tests/unit/editor/codemirror-extension-registry.test.mjs",
@@ -4530,7 +4550,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "70e49ae784abfd3bae24586f0fdff31fe79b3ca12aa0c3c5e492d49c50eb9fd6",
+  "inputSha256": "0b1c3fa75fd07999ee3a339472c1a2ab5d550a68a3992d02908afbad3b962679",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -5290,7 +5310,7 @@
           "target": "logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 339
+          "line": 290
         },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
@@ -5324,7 +5344,7 @@
           "target": "logs/performance-2026-07-25_17-29-13-389_pid-20484.jsonl",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 345
+          "line": 296
         },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
@@ -5358,7 +5378,7 @@
           "target": "public/app/bootstrap.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 359
+          "line": 310
         },
         {
           "from": "tests/architecture/stage-04-taskbook-conformance.test.mjs",
@@ -5609,21 +5629,21 @@
           "target": "public/app/core.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 364
+          "line": 315
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/app/core.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 450
+          "line": 401
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/app/core.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 459
+          "line": 410
         },
         {
           "from": "tests/architecture/no-inline-events.test.mjs",
@@ -7449,7 +7469,7 @@
           "target": "public/app/editor-tools.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 369
+          "line": 320
         },
         {
           "from": "tests/architecture/stage-05-basic-command-boundary.test.mjs",
@@ -8253,7 +8273,7 @@
           "target": "public/app/events.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 374
+          "line": 325
         },
         {
           "from": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
@@ -8728,7 +8748,7 @@
           "target": "public/app/export.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 199
+          "line": 150
         },
         {
           "from": "tests/e2e/lib/export-characterization.mjs",
@@ -9432,7 +9452,7 @@
           "target": "public/app/web-clipper.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 379
+          "line": 330
         },
         {
           "from": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
@@ -9939,6 +9959,13 @@
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
+          "line": 134
+        },
+        {
+          "from": "tests/architecture/fixtures/architecture-baseline.json",
+          "target": "public/compatibility/business-content.html",
+          "surface": "governance",
+          "kind": "path-literal",
           "line": 13
         },
         {
@@ -9946,28 +9973,63 @@
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 183
+          "line": 156
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 205
+          "line": 165
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 214
+          "line": 175
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 224
+          "line": 184
+        },
+        {
+          "from": "tests/architecture/fixtures/architecture-baseline.json",
+          "target": "public/compatibility/business-content.html",
+          "surface": "governance",
+          "kind": "path-literal",
+          "line": 193
+        },
+        {
+          "from": "tests/architecture/fixtures/architecture-baseline.json",
+          "target": "public/compatibility/business-content.html",
+          "surface": "governance",
+          "kind": "path-literal",
+          "line": 202
+        },
+        {
+          "from": "tests/architecture/fixtures/architecture-baseline.json",
+          "target": "public/compatibility/business-content.html",
+          "surface": "governance",
+          "kind": "path-literal",
+          "line": 211
+        },
+        {
+          "from": "tests/architecture/fixtures/architecture-baseline.json",
+          "target": "public/compatibility/business-content.html",
+          "surface": "governance",
+          "kind": "path-literal",
+          "line": 220
+        },
+        {
+          "from": "tests/architecture/fixtures/architecture-baseline.json",
+          "target": "public/compatibility/business-content.html",
+          "surface": "governance",
+          "kind": "path-literal",
+          "line": 229
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
@@ -9981,70 +10043,35 @@
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 233
+          "line": 238
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 242
+          "line": 247
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 251
+          "line": 256
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 260
+          "line": 265
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 269
-        },
-        {
-          "from": "tests/architecture/fixtures/architecture-baseline.json",
-          "target": "public/compatibility/business-content.html",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 278
-        },
-        {
-          "from": "tests/architecture/fixtures/architecture-baseline.json",
-          "target": "public/compatibility/business-content.html",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 287
-        },
-        {
-          "from": "tests/architecture/fixtures/architecture-baseline.json",
-          "target": "public/compatibility/business-content.html",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 296
-        },
-        {
-          "from": "tests/architecture/fixtures/architecture-baseline.json",
-          "target": "public/compatibility/business-content.html",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 305
-        },
-        {
-          "from": "tests/architecture/fixtures/architecture-baseline.json",
-          "target": "public/compatibility/business-content.html",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 314
+          "line": 274
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
@@ -10058,28 +10085,49 @@
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 323
+          "line": 336
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 385
+          "line": 345
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 394
+          "line": 354
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 403
+          "line": 363
+        },
+        {
+          "from": "tests/architecture/fixtures/architecture-baseline.json",
+          "target": "public/compatibility/business-content.html",
+          "surface": "governance",
+          "kind": "path-literal",
+          "line": 372
+        },
+        {
+          "from": "tests/architecture/fixtures/architecture-baseline.json",
+          "target": "public/compatibility/business-content.html",
+          "surface": "governance",
+          "kind": "path-literal",
+          "line": 381
+        },
+        {
+          "from": "tests/architecture/fixtures/architecture-baseline.json",
+          "target": "public/compatibility/business-content.html",
+          "surface": "governance",
+          "kind": "path-literal",
+          "line": 390
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
@@ -10087,34 +10135,6 @@
           "surface": "governance",
           "kind": "path-literal",
           "line": 40
-        },
-        {
-          "from": "tests/architecture/fixtures/architecture-baseline.json",
-          "target": "public/compatibility/business-content.html",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 412
-        },
-        {
-          "from": "tests/architecture/fixtures/architecture-baseline.json",
-          "target": "public/compatibility/business-content.html",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 421
-        },
-        {
-          "from": "tests/architecture/fixtures/architecture-baseline.json",
-          "target": "public/compatibility/business-content.html",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 430
-        },
-        {
-          "from": "tests/architecture/fixtures/architecture-baseline.json",
-          "target": "public/compatibility/business-content.html",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 439
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
@@ -10676,7 +10696,7 @@
     {
       "path": "src/editor/hybrid-markdown.js",
       "tracked": true,
-      "sha256": "4785da739d57396fadcba064e852ce9127063589807a0408b43b98c7cdb1fdb4",
+      "sha256": "f9b62de1216dc1895bee482cedba4dcffb9a70a0beeff9c332b13dd4748ee6b0",
       "status": "referenced",
       "deletionAllowed": false,
       "followup": "R16-06",
@@ -10691,6 +10711,7 @@
           "../features/hybrid-editor/index.js",
           "../features/preview/render/presentation/math-presentation.js",
           "../features/preview/render/presentation/mermaid-presentation.js",
+          "../features/telemetry/index.js",
           "../model-kernel/index.js",
           "@codemirror/commands",
           "@codemirror/language",
@@ -10876,7 +10897,7 @@
           "target": "src/editor/hybrid-markdown.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 39
+          "line": 40
         },
         {
           "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
@@ -10961,6 +10982,13 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 22
+        },
+        {
+          "from": "tests/stage-15-event-catalogue.test.mjs",
+          "target": "src/editor/hybrid-markdown.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 21
         },
         {
           "from": "tests/unit/editor/codemirror-extension-registry.test.mjs",
@@ -11273,7 +11301,7 @@
           "target": "src/editor/hybrid/controller.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 49
+          "line": 52
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -11729,7 +11757,7 @@
           "target": "src/editor/hybrid/widget-lifecycle.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 79
+          "line": 82
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -11784,7 +11812,7 @@
           "target": "src/editor/hybrid/widgets.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 70
+          "line": 73
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -12438,7 +12466,7 @@
           "target": "src/editor/virtual-editor.js",
           "surface": "production",
           "kind": "module",
-          "line": 18
+          "line": 20
         },
         {
           "from": "tests/architecture/fixtures/production-modules.json",
@@ -13697,14 +13725,14 @@
           "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
           "surface": "production",
           "kind": "module",
-          "line": 46
+          "line": 48
         },
         {
           "from": "src/editor/hybrid-markdown.js",
           "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
           "surface": "production",
           "kind": "path-literal",
-          "line": 49
+          "line": 51
         },
         {
           "from": "tests/architecture/fixtures/production-modules.json",
@@ -13739,7 +13767,7 @@
           "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 305
+          "line": 306
         }
       ],
       "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
@@ -15544,14 +15572,14 @@
           "target": "src/runtime/e2e-bridge.js",
           "surface": "production",
           "kind": "module",
-          "line": 71
+          "line": 73
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "src/runtime/e2e-bridge.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 162
+          "line": 113
         },
         {
           "from": "tests/architecture/fixtures/production-modules.json",
@@ -15629,12 +15657,12 @@
     {
       "path": "src/runtime/link-preview.js",
       "tracked": true,
-      "sha256": "a4abbd7c5930a48173a387b8f97f7d94695d6f1c2fe2ceb003488332726ced9e",
+      "sha256": "e51d5d121a07069dffbcd103a68797108a9ad779818f84df9684fdf414e36185",
       "status": "referenced",
       "deletionAllowed": false,
       "followup": "R16-07",
       "ownership": {
-        "responsibility": "In-application external link preview overlay and system-open actions.",
+        "responsibility": "Explicitly constructed link overlay and system navigation; owns document/overlay listeners, focus scopes, animation frames and terminal cleanup with injected platform, notifications and telemetry.",
         "stateOwner": "link-preview-overlay",
         "lifecycle": "explicit-instance"
       },
@@ -15644,13 +15672,10 @@
           "../ui/dom/index.js"
         ],
         "exports": [
-          "configureLinkPreviewPlatform"
+          "createLinkPreview"
         ],
         "listeners": [],
-        "globalWrites": [
-          "markdownEditorLinkPreview",
-          "showToast"
-        ],
+        "globalWrites": [],
         "sideEffects": {
           "domAccess": true,
           "storageAccess": false,
@@ -15676,21 +15701,21 @@
           "target": "src/runtime/link-preview.js",
           "surface": "production",
           "kind": "module",
-          "line": 16
+          "line": 18
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "src/runtime/link-preview.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 137
+          "line": 121
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "src/runtime/link-preview.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 170
+          "line": 456
         },
         {
           "from": "tests/architecture/fixtures/production-modules.json",
@@ -15740,6 +15765,20 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 254
+        },
+        {
+          "from": "tests/stage-15-event-catalogue.test.mjs",
+          "target": "src/runtime/link-preview.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 21
+        },
+        {
+          "from": "tests/stage-16-global-api.test.mjs",
+          "target": "src/runtime/link-preview.js",
+          "surface": "tests",
+          "kind": "module",
+          "line": 9
         },
         {
           "from": "tests/svg-sprite.test.mjs",
@@ -15950,12 +15989,12 @@
     {
       "path": "src/runtime/performance.js",
       "tracked": true,
-      "sha256": "915f52032d2923c1b2f87567141970e1f9301eec2f06001d099adea04dc93c55",
+      "sha256": "ae8dc8144065436d0b2e5f4ecf1bf4a2c0e47a7c1c647a83dc224598d300a543",
       "status": "referenced",
       "deletionAllowed": false,
       "followup": "R16-07",
       "ownership": {
-        "responsibility": "Legacy DEV DOM/event/navigation instrumentation and diagnostic composition; public Recorder, privacy, Buffer, LongTaskObserver and RuntimeSnapshotRecorder own migrated telemetry responsibilities.",
+        "responsibility": "DEV DOM/event/navigation diagnostics and lifecycle composition over public telemetry owners; connects one explicit recording channel and publishes no global API or function wrapper.",
         "stateOwner": "performance-runtime",
         "lifecycle": "module-singleton"
       },
@@ -15967,12 +16006,13 @@
           "configurePerformancePlatform",
           "configurePerformanceRuntimeStats",
           "destroyPerformanceTelemetry",
-          "getPerformanceBufferStats"
+          "getPerformanceBufferStats",
+          "getPerformanceTelemetryState",
+          "startPerformanceTelemetry",
+          "stopPerformanceTelemetry"
         ],
         "listeners": [],
-        "globalWrites": [
-          "markdownEditorPerf"
-        ],
+        "globalWrites": [],
         "sideEffects": {
           "domAccess": true,
           "storageAccess": false,
@@ -15999,14 +16039,14 @@
           "target": "src/runtime/performance.js",
           "surface": "production",
           "kind": "module",
-          "line": 17
+          "line": 19
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "src/runtime/performance.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 145
+          "line": 464
         },
         {
           "from": "tests/architecture/fixtures/production-modules.json",
@@ -16491,7 +16531,7 @@
           "target": "src/shared/scheduling/classic-task-scheduler-port.js",
           "surface": "production",
           "kind": "module",
-          "line": 67
+          "line": 69
         },
         {
           "from": "tests/architecture/fixtures/production-modules.json",
@@ -16718,7 +16758,7 @@
           "target": "src/storage/native-document-store.js",
           "surface": "production",
           "kind": "module",
-          "line": 55
+          "line": 57
         },
         {
           "from": "tests/architecture/fixtures/production-modules.json",

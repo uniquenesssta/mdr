@@ -1,3 +1,4 @@
+import { registerHybridWidgetCleanup, disposeHybridWidget } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.11 inline Math presentation and source-activation lifecycle.
  * Preview formula rendering is supplied explicitly by the editor integration boundary.
@@ -71,17 +72,16 @@ export function createInlineMathWidgetType(WidgetType, options = {}) {
         : '双击编辑公式源码';
 
       let cleaned = false;
-      span.__markdownEditorInlineMathCleanup = () => {
+      registerHybridWidgetCleanup(span, () => {
         if (cleaned) return;
         cleaned = true;
         disposeSourceAction();
-      };
+      });
       return span;
     }
 
     destroy(dom) {
-      dom?.__markdownEditorInlineMathCleanup?.();
-      if (dom) delete dom.__markdownEditorInlineMathCleanup;
+      disposeHybridWidget(dom);
     }
 
     ignoreEvent() {

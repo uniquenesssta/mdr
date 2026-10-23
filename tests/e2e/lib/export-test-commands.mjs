@@ -7,7 +7,6 @@ export function evaluateExport(page,expression) {
     const exportHost=document.getElementById('compatibility-business-ports');
     const commands=exportHost.markdownEditorExportCommandPort;
     const filenameInput=document.getElementById('filename'),editor=document.getElementById('editor'),preview=document.getElementById('preview');
-    const documentModel=window.markdownEditorDocumentModel;
     let exportDirectory=exportHost.markdownEditorSettingsStorePort.get('exportDirectory');
     const showToast=message=>exportHost.markdownEditorEditorUiCommandPort.invoke('notify',message);
     const exportContextDocument=id=>exportHost.markdownEditorDocumentUiCommandPort.invoke('exportDocument',id);

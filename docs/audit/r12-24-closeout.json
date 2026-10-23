@@ -139,7 +139,7 @@
   "reviewedSources": [
     {
       "path": "src/runtime/performance.js",
-      "blobSha": "62cf39df3062aab1235502da99521196875f5023"
+      "blobSha": "a8ff75b93a5185341733f5c95736f22690408db1"
     },
     {
       "path": "src-tauri/src/performance_log/mod.rs",
@@ -239,7 +239,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "308eb07ba1fcf641716b25554fb6d726b29829a6"
+      "blobSha": "7cf171d7b391486475a4d0094c5b64f9e703c672"
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
@@ -247,7 +247,7 @@
     },
     {
       "path": "tests/e2e/windows/import-document-chain.mjs",
-      "blobSha": "a7c1d361d4ad1e1fc40b3a8933157a0d17cf782b"
+      "blobSha": "5f869a5873f34a0c8434542fbcd54dea05a01a9e"
     },
     {
       "path": "scripts/ci/verify-r13-import-chain.mjs",
@@ -467,7 +467,7 @@
     },
     {
       "path": "src/features/telemetry/index.js",
-      "blobSha": "c0073d2ecca5e5bcd28ffb1bced2a9a7b9822a9a"
+      "blobSha": "c35ff05022d53efa1068691d292abb787b82e074"
     },
     {
       "path": "src/features/telemetry/performance-recorder.js",
@@ -483,7 +483,7 @@
     },
     {
       "path": "tests/support/performance-log/frontend-payload.mjs",
-      "blobSha": "ecbb7bd2f633668a30b0d10a24de7583aa9e44b9"
+      "blobSha": "5ca5110b6d17b32acad5a28e83d407737827ba9a"
     },
     {
       "path": "src/features/telemetry/aggregation-buffer.js",
@@ -531,7 +531,7 @@
     },
     {
       "path": "tests/stage-15-telemetry-lifecycle.test.mjs",
-      "blobSha": "42c1480ede91e31f7e6d367a5239a5bc1cdbcc7e"
+      "blobSha": "e7aad39c0e44bb3759ca9f0ce616b30e760c9e07"
     },
     {
       "path": "src/features/e2e/index.js",
@@ -567,7 +567,7 @@
     },
     {
       "path": "tests/e2e/run-browser-tests.mjs",
-      "blobSha": "9be692050004b1b9685f454bf9cbf0feb3a2e6e8"
+      "blobSha": "81e018041a245063c3498dd98e9bf9526eece7e5"
     },
     {
       "path": "tests/e2e/lib/application-driver.mjs",
@@ -583,7 +583,7 @@
     },
     {
       "path": "tests/e2e/lib/export-characterization.mjs",
-      "blobSha": "5274a6072107d90e3caff82b8713abe957762f74"
+      "blobSha": "097c190b0706e0326f2cd37e8129523afa7de344"
     },
     {
       "path": "tests/ui/responsive-shell.test.mjs",
@@ -615,7 +615,7 @@
     },
     {
       "path": "tests/architecture/fixtures/architecture-baseline.json",
-      "blobSha": "bc201ecb6f5b86f0c14a27a7a998f3481c1b65a4"
+      "blobSha": "ffa42d511f4106bd8a1406fab2170b9456e381dc"
     },
     {
       "path": "tests/architecture/architecture-tooling.test.mjs",
@@ -635,7 +635,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "blobSha": "a2db35fad8dd367e5c179ed6374ec651c63585c2"
+      "blobSha": "6da0e72f640f7a70c89ccc1216dd9d76c404ca7d"
     },
     {
       "path": "scripts/stage-16/deletion-inventory.mjs",
@@ -707,7 +707,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "a3c188bb1dfd738193f8fefdc6c428b303399b16"
+      "blobSha": "1cc712c8dfc6cc14f4783135cf57a44d6d81767c"
     },
     {
       "path": "src/features/documents/application/document-open-coordinator.js",
@@ -715,7 +715,7 @@
     },
     {
       "path": "tests/e2e/windows/large-document-import.mjs",
-      "blobSha": "01ec2775f845f56f9b4d9d53edd5156b7092ae92"
+      "blobSha": "71e463d9d102520b0411fbd70dbe692b51d2fa9d"
     },
     {
       "path": "tests/stage-15-redaction.test.mjs",
@@ -727,11 +727,11 @@
     },
     {
       "path": "tests/stage-15-event-catalogue.test.mjs",
-      "blobSha": "23dc4c3c031cc91bb2140a65884601fe66c024a7"
+      "blobSha": "84a3ae63b0042e06d02afc3dc55fbfe00595c864"
     },
     {
       "path": "src/features/documents/ui/document-workspace.js",
-      "blobSha": "ec7b45835d607b97535be866ac568d8240f31db9"
+      "blobSha": "38d457ba9358ae3d5b125454a9a5d31600013995"
     },
     {
       "path": "src/features/menu/shell-menus.js",
@@ -743,7 +743,7 @@
     },
     {
       "path": "src/features/layout/workspace-preferences.js",
-      "blobSha": "0286a1181705026d2f8c1ef52c452053838c442b"
+      "blobSha": "dafe6af09fd6bf20fffe204d7379149107e4778b"
     },
     {
       "path": "src/bootstrap/workspace-startup.js",
@@ -751,7 +751,7 @@
     },
     {
       "path": "src/bootstrap/application-events.js",
-      "blobSha": "ef3252e4f051d9af9165ab83cb894c470b5ddbe5"
+      "blobSha": "d4b48dab1dcd295271be5b3488ed7170843ce485"
     },
     {
       "path": "src/features/editor/application/find-preview-commands.js",
@@ -772,6 +772,150 @@
     {
       "path": "tests/cdp-browser-lifecycle.test.mjs",
       "blobSha": "37b0a61c25082b0ed87555f4924f542af144cf43"
+    },
+    {
+      "path": "src/editor/hybrid-markdown.js",
+      "blobSha": "aa1ede9d57f77439700d049406381b76f70d0a35"
+    },
+    {
+      "path": "src/features/documents/application/document-snapshot-telemetry.js",
+      "blobSha": "8b90b7a6bb0e57236698bcb081957a9fd225f650"
+    },
+    {
+      "path": "src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js",
+      "blobSha": "1f06d36570c633c289623a669ecd4910c6a9e91e"
+    },
+    {
+      "path": "src/features/hybrid-editor/index.js",
+      "blobSha": "6bf0f1ba4a3b3e78a1a369673caa3065e662435d"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js",
+      "blobSha": "9a4e8ab4a98eaa3297ca800921af37318ffa9c34"
+    },
+    {
+      "path": "src/features/hybrid-editor/lifecycle/widget-lifecycle.js",
+      "blobSha": "b40d08988675690839a022865002e6783852458f"
+    },
+    {
+      "path": "src/features/hybrid-editor/runtime/hybrid-link-capabilities.js",
+      "blobSha": "998e5aef03f8be8e553b1a4c8a75ecc61e59f37e"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/code-block/code-block-direct-editor.js",
+      "blobSha": "bf573b6c486fc9e244667060c9eaee4ed758c159"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/code-block/code-block-widget.js",
+      "blobSha": "71b5d0c3ab2fbd58eb7425c62292e9f300a8fac1"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/html/html-block-widget.js",
+      "blobSha": "a43f1c2246cb4799049b3be9a20a1231ce8a1177"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/image/image-widget.js",
+      "blobSha": "8f0b8d1ca884519ea671ab80e85a58f69baba796"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/math/block-math-widget.js",
+      "blobSha": "0774b639d39534ffb10fd9be250f71aa1596a0ac"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/math/inline-math-widget.js",
+      "blobSha": "3c1c83d8a8fb415fbf9b28e6a82bb523a73998cc"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js",
+      "blobSha": "9f3e470a9f0fe9e7129774ed5b14cb3214e0ccf4"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/table/table-cell-editor.js",
+      "blobSha": "959928a2b8b28c3e3693ba35c8ab3c8c3e8b19a5"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/table/table-keyboard-navigation.js",
+      "blobSha": "ef08ba6ac818f2d793b8acb205453f726078def3"
+    },
+    {
+      "path": "src/features/hybrid-editor/widgets/table/table-widget.js",
+      "blobSha": "7d799f8ce64983e30ae0f858a10b8ce7c5a224d5"
+    },
+    {
+      "path": "src/features/telemetry/telemetry-channel.js",
+      "blobSha": "9b18537c367a6abfa7b23312eafa45383947f5ab"
+    },
+    {
+      "path": "src/runtime/link-preview.js",
+      "blobSha": "248bbba93b73ac49cf2db50ff99e917bcd110c39"
+    },
+    {
+      "path": "tests/architecture/fixtures/production-modules.json",
+      "blobSha": "7cd067a5eaef0abdc02a5d8ee5e742573517b90f"
+    },
+    {
+      "path": "tests/architecture/module-inventory.test.mjs",
+      "blobSha": "558addc057f2d22289dcadc2a3a35304b850609a"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-code-block.test.mjs",
+      "blobSha": "6c81b2ff1296a4b4a6b41c2ae871b13a055490e5"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-html.test.mjs",
+      "blobSha": "9b9d0e1a94026ba93854bb58680d969c7b00475f"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-image.test.mjs",
+      "blobSha": "b65501bde417210476d7fa5a1d40f7b146b2f2a0"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-math.test.mjs",
+      "blobSha": "54d4c10043e65d3c020ae139252ef551fefebf63"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-mermaid.test.mjs",
+      "blobSha": "7138c9c4fb543e955de7e3fc15d61b6db576ef27"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-table.test.mjs",
+      "blobSha": "9b47d92a8bc445117437ff4a2b6ef153c2588e4a"
+    },
+    {
+      "path": "tests/architecture/stage-08-hybrid-widget-lifecycle.test.mjs",
+      "blobSha": "640f0bb3dfffec7b4924b7d362851f68ee2087a7"
+    },
+    {
+      "path": "tests/e2e/lib/export-test-commands.mjs",
+      "blobSha": "92e4b0031c17ba229ead1728e6141c7647d9f067"
+    },
+    {
+      "path": "tests/stage-08-hybrid-code-block.test.mjs",
+      "blobSha": "9023834ab20e05412d43802c1b02d42bbec9606f"
+    },
+    {
+      "path": "tests/stage-08-hybrid-table.test.mjs",
+      "blobSha": "902cf9f8987b4a6ff1c1797ed3b8333c68a944a7"
+    },
+    {
+      "path": "tests/stage-08-hybrid-widget-lifecycle.test.mjs",
+      "blobSha": "4ea46a3e359ade07f3b266f34ac5e9249e0616f0"
+    },
+    {
+      "path": "tests/stage-16-global-api.test.mjs",
+      "blobSha": "1af67c078088ae54de4a14956d52baf47a78f203"
+    },
+    {
+      "path": "tests/support/telemetry-runtime-host.mjs",
+      "blobSha": "37c5eca05fa453aa0b4f69685a6424db8d745283"
+    },
+    {
+      "path": "tests/unit/editor/codemirror-adapter.test.mjs",
+      "blobSha": "2abd3372645f9374743a82261d6ff1107652ee7e"
+    },
+    {
+      "path": "tests/e2e/link-preview.test.mjs",
+      "blobSha": "32fa07042d1aebfed8d1a9dc60df09cf8b99c377"
     }
   ],
   "priorFailures": {
@@ -987,11 +1131,11 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R16.2",
+    "stage": "R16.3",
     "date": "2026-10-23",
-    "reviewedCommit": "0963dfe4ee1dd9b29053b8982489e04a6645f93f",
-    "record": "docs/R16-02-DETAILS.md",
-    "status": "accepted",
+    "reviewedCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
+    "record": "docs/R16-03-DETAILS.md",
+    "status": "locally-verified-pending-exact-commit-windows-ci",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "R16-02 classic script deletion, explicit ESM startup and complete caller/test lifecycle migration; R16-03 not started.",
@@ -1142,50 +1286,65 @@
       ]
     },
     "currentStageImplementation": {
-      "stage": "R16.2",
-      "baselineCommit": "b88a94efd5dd84c5815f3593c1a4cea019cf0156",
+      "stage": "R16.3",
+      "baselineCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
       "branch": "codex/r16-stage",
-      "record": "docs/R16-02-DETAILS.md",
-      "status": "accepted",
-      "newScenariosDefined": 15,
+      "record": "docs/R16-03-DETAILS.md",
+      "status": "locally-verified-pending-exact-commit-windows-ci",
+      "newScenariosDefined": 17,
       "modelKernelChanged": false,
       "nativeProductionChanged": false,
       "dependenciesChanged": false,
-      "localRecursiveNodePassed": 2720,
-      "localRepositoryFiles": 360,
-      "localRepositoryDirectories": 16,
-      "localEsmPassed": 12,
+      "productionModuleCount": 570,
+      "businessGlobalWrites": 0,
+      "implicitWidgetHandlers": 0,
+      "frozenOptionalGlobalReads": 1,
+      "exactCommitWindowsPending": true,
+      "localNewScenariosPassed": 17,
       "localContractBrowserPassed": 11,
-      "fourArchitectureGatesPassed": true,
-      "sourceReviewCount": 159,
-      "productionModuleCount": 567,
-      "nativeOriginalCharacters": 5453875,
-      "localNativeLargeImportScenariosPassed": 8,
-      "exactCommitWindowsPending": false,
-      "localNativeEvidence": "mdr-r1602-native-90pNdP/verification.json",
-      "cdpPortRepair": {
-        "cause": "Actual CDP startup selected Fetch-blocked port6679; Chromium exposed DevTools but Node Fetch rejected before any scenario.",
-        "policy": "Filter exact Node bundled Undici blocked ports while retaining ordinary low ephemeral ports; release each reservation, fail after32 attempts; no timeout, browser retry or assertion weakening.",
-        "newScenarios": 3,
-        "targetedPassed": 12,
-        "priorRunBuiltAppPassed": 74,
-        "priorRunBuiltAppFailed": 1,
-        "builtAppPassed": 75,
-        "finalRecursiveNodePassed": 2720
+      "localFirstCumulative": {
+        "passed": 2734,
+        "failed": 2,
+        "reasons": [
+          "Windows package gate invoked outside npm lacked npm_execpath",
+          "Current source-review fingerprints not yet refreshed"
+        ]
       },
+      "localFirstBuiltApp": {
+        "passed": 73,
+        "failed": 2,
+        "reason": "Two remaining test probes read the removed model global; replaced by existing detached E2E queries with identity/body/version assertions retained."
+      },
+      "sourceReviewCount": 195,
+      "localSecondCumulative": {
+        "passed": 2734,
+        "failed": 2,
+        "reasons": [
+          "Two HTML lifecycle source assertions still required a removed unused direct-destroy import; current Widget Lifecycle registry guarantees final observation teardown."
+        ]
+      },
+      "scope": "Remove business global publications and implicit widget callbacks through explicit module capabilities, retain frozen model bytes and opt-in E2E boundary; HTML/runtime/compatibility retirement remains assigned to 16.4/16.7/16.8.",
+      "localRecursiveNodePassed": 2737,
+      "localRepositoryFiles": 362,
+      "localRepositoryDirectories": 16,
       "localBuiltAppPassed": 75,
+      "localNativeLargeImportScenariosPassed": 8,
+      "nativeOriginalCharacters": 5453875,
+      "localNativeEvidence": "mdr-r1603-native-3ThisJ/verification.json",
+      "localNativeEnvironment": "Existing debug Tauri binary with final Vite sources and isolated WebView profile; exact embedded production CI pending.",
+      "fourArchitectureGatesPassed": true,
       "finalBuild": {
         "accepted": true,
-        "sourceSha256": "2cb8966573368ba5dfa9ba10f9b6c17dfc7bd3b10c5f0af4f5936e3eaf52a97c",
-        "sourceFiles": 508,
+        "sourceSha256": "14a6ed038657c11ada42372661e36fb63bcec8b25611cf1fd2fcf551c7524fdc",
+        "sourceFiles": 511,
         "outputFiles": 137
       },
-      "totalNewNodeScenariosDefined": 15,
-      "localCdpPassed": 12,
-      "localNativeEnvironment": "Existing debug Tauri binary with final Vite sources and isolated WebView profile; embedded production same-commit Windows CI remains pending. Exact production embedded bundle accepted at CI39971556914.",
-      "actualDirectoryGuardPassed": 63,
-      "esmScenariosDefined": 12,
-      "cdpNewScenariosDefined": 3
+      "finalTargetedOwnershipPassed": 28,
+      "localFocusBrowserPassed": 1,
+      "focusRetentionNegativeControlRejected": true,
+      "localGlobalApiPassed": 16,
+      "snapshotInputs": 1132,
+      "finalDeliveryContractsPassed": 38
     },
     "priorStageAcceptance": {
       "stage": "R15.9",
@@ -12529,6 +12688,52 @@
           "fourArchitectureGatesPassed": true,
           "currentSourceReviewCount": 150
         }
+      },
+      {
+        "stage": "R16.2",
+        "baselineCommit": "b88a94efd5dd84c5815f3593c1a4cea019cf0156",
+        "branch": "codex/r16-stage",
+        "record": "docs/R16-02-DETAILS.md",
+        "status": "accepted",
+        "newScenariosDefined": 15,
+        "modelKernelChanged": false,
+        "nativeProductionChanged": false,
+        "dependenciesChanged": false,
+        "localRecursiveNodePassed": 2720,
+        "localRepositoryFiles": 360,
+        "localRepositoryDirectories": 16,
+        "localEsmPassed": 12,
+        "localContractBrowserPassed": 11,
+        "fourArchitectureGatesPassed": true,
+        "sourceReviewCount": 159,
+        "productionModuleCount": 567,
+        "nativeOriginalCharacters": 5453875,
+        "localNativeLargeImportScenariosPassed": 8,
+        "exactCommitWindowsPending": false,
+        "localNativeEvidence": "mdr-r1602-native-90pNdP/verification.json",
+        "cdpPortRepair": {
+          "cause": "Actual CDP startup selected Fetch-blocked port6679; Chromium exposed DevTools but Node Fetch rejected before any scenario.",
+          "policy": "Filter exact Node bundled Undici blocked ports while retaining ordinary low ephemeral ports; release each reservation, fail after32 attempts; no timeout, browser retry or assertion weakening.",
+          "newScenarios": 3,
+          "targetedPassed": 12,
+          "priorRunBuiltAppPassed": 74,
+          "priorRunBuiltAppFailed": 1,
+          "builtAppPassed": 75,
+          "finalRecursiveNodePassed": 2720
+        },
+        "localBuiltAppPassed": 75,
+        "finalBuild": {
+          "accepted": true,
+          "sourceSha256": "2cb8966573368ba5dfa9ba10f9b6c17dfc7bd3b10c5f0af4f5936e3eaf52a97c",
+          "sourceFiles": 508,
+          "outputFiles": 137
+        },
+        "totalNewNodeScenariosDefined": 15,
+        "localCdpPassed": 12,
+        "localNativeEnvironment": "Existing debug Tauri binary with final Vite sources and isolated WebView profile; embedded production same-commit Windows CI remains pending. Exact production embedded bundle accepted at CI39971556914.",
+        "actualDirectoryGuardPassed": 63,
+        "esmScenariosDefined": 12,
+        "cdpNewScenariosDefined": 3
       }
     ],
     "migratedReviewedSources": [
@@ -12777,6 +12982,102 @@
         "blobSha": "a288c4d94506f84390660e91baece69ed25994c6",
         "stage": "R15.12",
         "receiver": "docs/R15-12-DETAILS.md"
+      },
+      {
+        "path": "src/runtime/performance.js",
+        "blobSha": "62cf39df3062aab1235502da99521196875f5023",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "src/main.js",
+        "blobSha": "308eb07ba1fcf641716b25554fb6d726b29829a6",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "tests/e2e/windows/import-document-chain.mjs",
+        "blobSha": "a7c1d361d4ad1e1fc40b3a8933157a0d17cf782b",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "src/features/telemetry/index.js",
+        "blobSha": "c0073d2ecca5e5bcd28ffb1bced2a9a7b9822a9a",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "tests/support/performance-log/frontend-payload.mjs",
+        "blobSha": "ecbb7bd2f633668a30b0d10a24de7583aa9e44b9",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "tests/stage-15-telemetry-lifecycle.test.mjs",
+        "blobSha": "42c1480ede91e31f7e6d367a5239a5bc1cdbcc7e",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "tests/e2e/run-browser-tests.mjs",
+        "blobSha": "9be692050004b1b9685f454bf9cbf0feb3a2e6e8",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "tests/e2e/lib/export-characterization.mjs",
+        "blobSha": "5274a6072107d90e3caff82b8713abe957762f74",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "tests/architecture/fixtures/architecture-baseline.json",
+        "blobSha": "bc201ecb6f5b86f0c14a27a7a998f3481c1b65a4",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": ".github/workflows/r12-14.yml",
+        "blobSha": "a2db35fad8dd367e5c179ed6374ec651c63585c2",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "docs/audit/r16-01-deletion-inventory.json",
+        "blobSha": "a3c188bb1dfd738193f8fefdc6c428b303399b16",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "tests/e2e/windows/large-document-import.mjs",
+        "blobSha": "01ec2775f845f56f9b4d9d53edd5156b7092ae92",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "tests/stage-15-event-catalogue.test.mjs",
+        "blobSha": "23dc4c3c031cc91bb2140a65884601fe66c024a7",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "src/features/documents/ui/document-workspace.js",
+        "blobSha": "ec7b45835d607b97535be866ac568d8240f31db9",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "src/features/layout/workspace-preferences.js",
+        "blobSha": "0286a1181705026d2f8c1ef52c452053838c442b",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
+      },
+      {
+        "path": "src/bootstrap/application-events.js",
+        "blobSha": "ef3252e4f051d9af9165ab83cb894c470b5ddbe5",
+        "stage": "R16.3",
+        "receiver": "docs/R16-03-DETAILS.md"
       }
     ],
     "currentPhaseAcceptance": {

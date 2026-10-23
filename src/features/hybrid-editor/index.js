@@ -147,3 +147,7 @@ export {
 } from './presentation/inline-presentation-coordinator.js';
 
 export { configureHybridSyncCapabilities, getHybridSyncCapabilities } from './runtime/hybrid-sync-capabilities.js';
+
+export { configureHybridLinkPreview, getHybridLinkPreview } from './runtime/hybrid-link-capabilities.js';
+
+export { commitHybridDirectEditor } from './lifecycle/widget-lifecycle.js';

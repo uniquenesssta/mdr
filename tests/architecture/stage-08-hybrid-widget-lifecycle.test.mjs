@@ -25,7 +25,8 @@ test('Atomic 8.5 separates element observation from the geometry side-effect que
   assert.match(lifecycle, /scheduleHybridWidgetGeometry/);
   assert.doesNotMatch(lifecycle, /scheduleEditorMetricsRebuild|notifyScrollGeometry|notifySelectionGeometry|hybrid\.widget-geometry/);
   assert.match(scheduler, /getHybridSyncCapabilities/);
-  assert.match(scheduler, /scheduleEditorMetricsRebuild\?\.\(40\)/);
+  assert.match(scheduler, /view\.requestMeasure\(\)/);
+  assert.doesNotMatch(scheduler, /scheduleEditorMetricsRebuild/);
   assert.match(scheduler, /notifyScrollGeometry\('editor'\)/);
   assert.match(scheduler, /notifySelectionGeometry\(`hybrid-widget:/);
   assert.match(scheduler, /hybrid\.widget-geometry/);
@@ -41,7 +42,9 @@ test('Atomic 8.5 lifecycle ownership remains behind the Hybrid boundary after th
   assert.doesNotMatch(widgets, /from ['"]\.\/widget-lifecycle\.js['"]/);
   assert.match(widgets, /lifecycle\/widget-lifecycle\.js/);
   assert.match(widgets, /attachHybridWidgetLifecycle/);
-  assert.match(widgets, /destroyHybridWidgetLifecycle/);
+  assert.match(widgets, /disposeHybridWidget/);
+  const lifecycle = await text('src/features/hybrid-editor/lifecycle/widget-lifecycle.js');
+  assert.match(lifecycle, /finally \{ destroyHybridWidgetLifecycle\(element\); \}/);
   assert.match(facade, /destroyHybridWidgetGeometryScheduler\(view\)/);
   assert.match(application, /this\.destroyGeometry\(\)/);
   assert.doesNotMatch(facade, /lifecycle\/widget-(?:lifecycle|geometry-scheduler)\.js/);
@@ -57,16 +60,16 @@ test('Atomic 8.5 keeps migrated HTML and component widgets on shared idempotent 
   const inlineMath = await text('src/features/hybrid-editor/widgets/math/inline-math-widget.js');
   const blockMath = await text('src/features/hybrid-editor/widgets/math/block-math-widget.js');
   const mermaidBlock = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
-  assert.match(htmlBlock, /__markdownEditorHtmlBlockCleanup/);
+  assert.match(htmlBlock, /registerHybridWidgetCleanup/);
   assert.match(htmlBlock, /if \(cleaned\) return;\s*cleaned = true;/);
   assert.match(htmlBlock, /disposeSourceAction\(\)/);
-  assert.match(htmlBlock, /destroy\(dom\) \{[\s\S]*__markdownEditorHtmlBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
-  assert.match(codeBlock, /__markdownEditorCodeBlockCleanup/);
-  assert.match(tableBlock, /__markdownEditorTableBlockCleanup/);
-  assert.match(imageBlock, /__markdownEditorImageBlockCleanup/);
-  assert.match(inlineMath, /__markdownEditorInlineMathCleanup/);
-  assert.match(blockMath, /__markdownEditorMathBlockCleanup/);
-  assert.match(mermaidBlock, /__markdownEditorMermaidBlockCleanup/);
+  assert.match(htmlBlock, /destroy\(dom\) \{[\s\S]*disposeHybridWidget\(dom\)/);
+  assert.match(codeBlock, /registerHybridWidgetCleanup/);
+  assert.match(tableBlock, /registerHybridWidgetCleanup/);
+  assert.match(imageBlock, /registerHybridWidgetCleanup/);
+  assert.match(inlineMath, /registerHybridWidgetCleanup/);
+  assert.match(blockMath, /registerHybridWidgetCleanup/);
+  assert.match(mermaidBlock, /registerHybridWidgetCleanup/);
   await assert.rejects(access(file('src/editor/hybrid/widgets.js')));
 });
 

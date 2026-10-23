@@ -5,3 +5,4 @@ export { createLongTaskObserver } from './long-task-observer.js';
 export { createRuntimeSnapshotRecorder } from './runtime-snapshot-recorder.js';
 export { createNativeLogSink } from './native-log-sink.js';
 export { createTelemetryLifecycle } from './telemetry-lifecycle.js';
+export { telemetry, connectTelemetryRecorder } from './telemetry-channel.js';

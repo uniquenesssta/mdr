@@ -1,3 +1,4 @@
+import { registerHybridWidgetCleanup, disposeHybridWidget } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.11 block Math presentation, source action and Widget lifecycle.
  * Allowed imports: Hybrid lifecycle and shared widget primitives only.
@@ -5,8 +6,7 @@
  * API: createMathBlockWidgetType(). State: widget descriptor snapshot plus idempotent DOM cleanup only.
  */
 import {
-  attachHybridWidgetLifecycle,
-  destroyHybridWidgetLifecycle
+  attachHybridWidgetLifecycle
 } from '../../lifecycle/widget-lifecycle.js';
 import { createWidgetButton } from '../shared/widget-button.js';
 import { createWidgetToolbar } from '../shared/widget-toolbar.js';
@@ -95,19 +95,17 @@ export function createMathBlockWidgetType(WidgetType, options = {}) {
 
       const lifecycleCleanup = attachHybridWidgetLifecycle(section, view, 'math');
       let cleaned = false;
-      section.__markdownEditorMathBlockCleanup = () => {
+      registerHybridWidgetCleanup(section, () => {
         if (cleaned) return;
         cleaned = true;
         disposeSourceAction();
         lifecycleCleanup();
-      };
+      });
       return section;
     }
 
     destroy(dom) {
-      dom?.__markdownEditorMathBlockCleanup?.();
-      if (dom) delete dom.__markdownEditorMathBlockCleanup;
-      destroyHybridWidgetLifecycle(dom);
+      disposeHybridWidget(dom);
     }
 
     ignoreEvent() {

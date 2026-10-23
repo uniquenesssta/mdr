@@ -10,7 +10,7 @@ import { createPerformanceLogClient } from '../../../src/platform/desktop/perfor
 export const secrets = ['AUDIT_BODY_SECRET', 'AUDIT_TOKEN_SECRET', 'AUDIT_ERROR_SECRET', 'C:\\PrivateRoot', '/private/root', 'AUDIT_STACK_SECRET', 'AUDIT_CAUSE_SECRET', 'AUDIT_PASSWORD_SECRET', 'AUDIT_GETTER_SECRET'];
 export async function producePayload() {
   const path = new URL('../../../src/runtime/performance.js', import.meta.url);
-  const source = (await readFile(path, 'utf8')).replace("import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink, createTelemetryLifecycle } from '../features/telemetry/index.js';", '')
+  const source = (await readFile(path, 'utf8')).replace("import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink, createTelemetryLifecycle, connectTelemetryRecorder } from '../features/telemetry/index.js';", '')
     .replaceAll('export function ', 'function ')
     .replaceAll('import.meta.env.DEV', 'false');
   const context = vm.createContext({ createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink, createTelemetryLifecycle, crypto: { randomUUID }, console, performance, setTimeout, clearTimeout });

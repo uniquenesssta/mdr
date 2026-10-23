@@ -1,3 +1,4 @@
+import { registerHybridWidgetCleanup, disposeHybridWidget, commitHybridDirectEditor, destroyHybridDirectEditor, registerHybridCellActivation, unregisterHybridCellActivation } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.9 Table WidgetType composition and interactive lifecycle.
  * Allowed imports: Table view/cell editor plus Hybrid Session/Activation/Lifecycle/Shared source primitives.
@@ -13,8 +14,7 @@ import {
   transitionHybridComponent
 } from '../../state/hybrid-component-session.js';
 import {
-  attachHybridWidgetLifecycle,
-  destroyHybridWidgetLifecycle
+  attachHybridWidgetLifecycle
 } from '../../lifecycle/widget-lifecycle.js';
 import { scheduleHybridWidgetGeometry } from '../../lifecycle/widget-geometry-scheduler.js';
 import { createWidgetButton } from '../shared/widget-button.js';
@@ -91,7 +91,7 @@ export function createTableBlockWidgetType(WidgetType, options = {}) {
 
       const openTableSource = (activeInput = null, trigger = 'button') => {
         const anchorRect = section.getBoundingClientRect();
-        activeInput?.__markdownEditorCommitTableCell?.();
+        commitHybridDirectEditor(activeInput);
         recordInteraction('hybrid.table-source-open', {
           tableFrom: this.from,
           trigger
@@ -227,7 +227,7 @@ export function createTableBlockWidgetType(WidgetType, options = {}) {
             });
           };
 
-          cellElement.__markdownEditorActivateTableCell = activateCellEditor;
+          registerHybridCellActivation(cellElement, activateCellEditor);
           activationCleanups.push(bindStrictDoubleActivation(cellElement, (event, gesture) => {
             activateCellEditor({ trigger: 'doubleclick', select: true, gesture });
           }, {
@@ -241,7 +241,7 @@ export function createTableBlockWidgetType(WidgetType, options = {}) {
       section.appendChild(scroller);
       const lifecycleCleanup = attachHybridWidgetLifecycle(section, view, 'table');
       let cleaned = false;
-      section.__markdownEditorTableBlockCleanup = () => {
+      registerHybridWidgetCleanup(section, () => {
         if (cleaned) return;
         cleaned = true;
         disposeSourceAction();
@@ -249,20 +249,18 @@ export function createTableBlockWidgetType(WidgetType, options = {}) {
         for (const dispose of [...closerDisposers]) dispose();
         closerDisposers.clear();
         for (const input of section.querySelectorAll('[data-hybrid-table-cell-input]')) {
-          input.__markdownEditorDestroyTableCell?.();
+          destroyHybridDirectEditor(input);
         }
         for (const { cellElement } of cells) {
-          delete cellElement.__markdownEditorActivateTableCell;
+          unregisterHybridCellActivation(cellElement);
         }
         lifecycleCleanup();
-      };
+      });
       return section;
     }
 
     destroy(dom) {
-      dom?.__markdownEditorTableBlockCleanup?.();
-      if (dom) delete dom.__markdownEditorTableBlockCleanup;
-      destroyHybridWidgetLifecycle(dom);
+      disposeHybridWidget(dom);
     }
 
     ignoreEvent() {

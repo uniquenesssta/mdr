@@ -69,14 +69,14 @@ test('Atomic 8.11 Math ownership remains intact through the Atomic 8.14 presenta
 test('Atomic 8.11 gives both Math variants explicit source-action cleanup and block Math shared lifecycle teardown', async () => {
   const [inline, block] = await Promise.all(mathPaths.map(path => text(path)));
   assert.match(inline, /bindWidgetSourceAction/);
-  assert.match(inline, /__markdownEditorInlineMathCleanup/);
+  assert.match(inline, /registerHybridWidgetCleanup/);
   assert.match(inline, /if \(cleaned\) return;\s*cleaned = true;/);
-  assert.match(inline, /destroy\(dom\) \{[\s\S]*__markdownEditorInlineMathCleanup/);
+  assert.match(inline, /destroy\(dom\) \{[\s\S]*disposeHybridWidget/);
   assert.match(block, /bindWidgetSourceAction/);
   assert.match(block, /attachHybridWidgetLifecycle/);
-  assert.match(block, /__markdownEditorMathBlockCleanup/);
+  assert.match(block, /registerHybridWidgetCleanup/);
   assert.match(block, /if \(cleaned\) return;\s*cleaned = true;/);
-  assert.match(block, /destroy\(dom\) \{[\s\S]*__markdownEditorMathBlockCleanup[\s\S]*destroyHybridWidgetLifecycle\(dom\)/);
+  assert.match(block, /destroy\(dom\) \{[\s\S]*disposeHybridWidget\(dom\)/);
 });
 
 test('Atomic 8.11 Math ownership remains intact after Atomic 8.14 Inline Presentation migration', async () => {

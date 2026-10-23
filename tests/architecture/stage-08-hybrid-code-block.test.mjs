@@ -48,7 +48,7 @@ test('Atomic 8.8 separates view, direct-edit fence/writeback, actions and widget
   assert.match(editor, /buildCodeBlockWriteback/);
   assert.equal((editor.match(/view\.dispatch\(/g) || []).length, 1);
   assert.match(editor, /event\.key === 'Escape'/);
-  assert.match(editor, /__markdownEditorDestroyCodeBlock/);
+  assert.match(editor, /registerHybridDirectEditor/);
   assert.doesNotMatch(editor, /createWidgetToolbar|renderHighlightedCodeRows|openWidgetSource/);
   assert.match(actions, /copyCodeBlockText/);
   assert.match(actions, /createCodeBlockToolbar/);

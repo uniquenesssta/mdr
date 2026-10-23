@@ -1,3 +1,4 @@
+import { telemetry } from '../../../telemetry/index.js';
 /**
  * Responsibility: Orchestrate precise CodeMirror pointer-selection sessions from sibling geometry readers and pure selection policies.
  * Imports: May import CodeMirror selection/view primitives plus sibling pointer-selection modules; must not import document/session/persistence or UI feature state.
@@ -30,7 +31,7 @@ function recordCorrection(view, details) {
   const previous = lastCorrectionLogAt.get(view) || 0;
   if (now - previous < 750) return;
   lastCorrectionLogAt.set(view, now);
-  globalThis.window?.markdownEditorPerf?.diagnostic?.('editor.pointer-position-corrected', {
+  telemetry.diagnostic?.('editor.pointer-position-corrected', {
     category: 'editor.input',
     status: 'warning',
     dedupeKey: `pointer-position:${details.targetLine}:${details.fallbackLine}:${details.nativeLine}`,

@@ -1,3 +1,4 @@
+import { registerHybridWidgetCleanup, disposeHybridWidget, commitHybridDirectEditor, destroyHybridDirectEditor, registerHybridDirectActivation, disposeHybridDirectActivation } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.12 Mermaid WidgetType composition, presentation orchestration and interactive lifecycle.
  * Allowed imports: Mermaid actions/render-state, canonical Code Block direct editor, Hybrid Session/Activation/Lifecycle/Shared SOURCE primitives.
@@ -13,8 +14,7 @@ import {
   transitionHybridComponent
 } from '../../state/hybrid-component-session.js';
 import {
-  attachHybridWidgetLifecycle,
-  destroyHybridWidgetLifecycle
+  attachHybridWidgetLifecycle
 } from '../../lifecycle/widget-lifecycle.js';
 import { scheduleHybridWidgetGeometry } from '../../lifecycle/widget-geometry-scheduler.js';
 import { bindWidgetSourceAction, openWidgetSource } from '../shared/widget-source-action.js';
@@ -106,7 +106,7 @@ export function createMermaidBlockWidgetType(WidgetType, options = {}) {
 
       const openMermaidSource = (activeEditor = null) => {
         const anchorRect = section.getBoundingClientRect();
-        const committedDescriptor = activeEditor?.__markdownEditorCommitCodeBlock?.();
+        const committedDescriptor = commitHybridDirectEditor(activeEditor);
         scheduleFrame(() => {
           openWidgetSource(view, { ...(committedDescriptor || editDescriptor), componentType: 'mermaid' }, {
             getBoundingClientRect: () => anchorRect
@@ -181,8 +181,7 @@ export function createMermaidBlockWidgetType(WidgetType, options = {}) {
       let unregisterDirectCloser = () => {};
 
       const cleanupDirectActivation = body => {
-        body?.__markdownEditorMermaidDirectActivationCleanup?.();
-        if (body) delete body.__markdownEditorMermaidDirectActivationCleanup;
+        disposeHybridDirectActivation(body);
       };
 
       const createPresentation = (codeValue = this.code) => {
@@ -200,7 +199,7 @@ export function createMermaidBlockWidgetType(WidgetType, options = {}) {
           void renderPresentation(body, codeValue);
         });
         if (this.visualEditing) {
-          body.__markdownEditorMermaidDirectActivationCleanup = bindStrictDoubleActivation(body, (event, gesture) => {
+          registerHybridDirectActivation(body, bindStrictDoubleActivation(body, (event, gesture) => {
             recordInteraction('hybrid.mermaid-direct-edit-open', {
               sourceFrom: this.from,
               trigger: 'doubleclick',
@@ -212,7 +211,7 @@ export function createMermaidBlockWidgetType(WidgetType, options = {}) {
             exclude: event => event.target instanceof Element
               && Boolean(event.target.closest('button, a, input, textarea, select')),
             getTargetKey: () => 'mermaid-body'
-          });
+          }));
         }
         return body;
       };
@@ -306,26 +305,24 @@ export function createMermaidBlockWidgetType(WidgetType, options = {}) {
 
       const lifecycleCleanup = attachHybridWidgetLifecycle(section, view, 'mermaid');
       let cleaned = false;
-      section.__markdownEditorMermaidBlockCleanup = () => {
+      registerHybridWidgetCleanup(section, () => {
         if (cleaned) return;
         cleaned = true;
         disposeSourceAction();
         unregisterDirectCloser();
         unregisterDirectCloser = () => {};
         const editor = section.querySelector('[data-hybrid-code-editor]');
-        editor?.__markdownEditorDestroyCodeBlock?.();
+        destroyHybridDirectEditor(editor);
         cleanupDirectActivation(section.querySelector('.cm-hybrid-mermaid-body'));
         renderState.destroy();
         themeObserver?.disconnect();
         lifecycleCleanup();
-      };
+      });
       return section;
     }
 
     destroy(dom) {
-      dom?.__markdownEditorMermaidBlockCleanup?.();
-      if (dom) delete dom.__markdownEditorMermaidBlockCleanup;
-      destroyHybridWidgetLifecycle(dom);
+      disposeHybridWidget(dom);
     }
 
     ignoreEvent() {

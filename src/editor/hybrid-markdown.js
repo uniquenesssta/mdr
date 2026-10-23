@@ -1,3 +1,4 @@
+import { telemetry } from '../features/telemetry/index.js';
 
 /**
  * Responsibility: Final CodeMirror integration facade for the Stage 8 Hybrid Editor feature; compose editor/vendor/model/Preview capabilities into the public Hybrid feature without owning feature policy.
@@ -33,6 +34,7 @@ import {
   createImageBlockWidgetType,
   createInlinePresentationCoordinator,
   getHybridSyncCapabilities,
+  getHybridLinkPreview,
   createMathBlockWidgetType,
   createMermaidBlockWidgetType,
   createTableBlockWidgetType,
@@ -63,7 +65,7 @@ const hybridCodeVisualEditingFacet = Facet.define({
 });
 
 function recordHybridComponentTransition({ previous, current }) {
-  globalThis.window?.markdownEditorPerf?.record?.('hybrid.component-state-transition', {
+  telemetry.record?.('hybrid.component-state-transition', {
     category: 'editor.hybrid',
     details: {
       key: current.key,
@@ -80,7 +82,7 @@ function recordHybridComponentTransition({ previous, current }) {
 }
 
 function reportHybridDiagnostic(operation, options = {}) {
-  globalThis.window?.markdownEditorPerf?.diagnostic?.(operation, {
+  telemetry.diagnostic?.(operation, {
     category: 'editor.hybrid',
     minIntervalMs: 5000,
     ...options
@@ -100,7 +102,7 @@ function getViewDiagnosticDetails(view) {
 }
 
 function recordInteraction(operation, details = {}) {
-  globalThis.window?.markdownEditorPerf?.record?.(operation, {
+  telemetry.record?.(operation, {
     category: 'editor.hybrid',
     details
   });
@@ -247,7 +249,7 @@ export function buildHybridMarkdownDecorations(view) {
 }
 
 function recordSourceEditingClose(details = {}) {
-  globalThis.window?.markdownEditorPerf?.record?.('hybrid.source-edit-close', {
+  telemetry.record?.('hybrid.source-edit-close', {
     category: 'editor.hybrid',
     details
   });
@@ -339,7 +341,7 @@ const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
       event.preventDefault();
       event.stopPropagation();
       const url = element.getAttribute('data-hybrid-link-url');
-      const linkPreview = globalThis.window?.markdownEditorLinkPreview;
+      const linkPreview = getHybridLinkPreview();
       if (!linkPreview) {
         showOpenError(new Error('链接预览尚未初始化'));
         return true;

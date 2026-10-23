@@ -1,3 +1,4 @@
+import { registerHybridWidgetCleanup, disposeHybridWidget, commitHybridDirectEditor, destroyHybridDirectEditor, registerHybridDirectActivation, disposeHybridDirectActivation } from '../../lifecycle/widget-lifecycle.js';
 /**
  * Atomic 8.8 Code Block widget composition and interactive lifecycle.
  * Allowed imports: Code Block view/direct-editor/actions plus Hybrid Session/Activation/Lifecycle/Shared source primitives.
@@ -13,8 +14,7 @@ import {
   transitionHybridComponent
 } from '../../state/hybrid-component-session.js';
 import {
-  attachHybridWidgetLifecycle,
-  destroyHybridWidgetLifecycle
+  attachHybridWidgetLifecycle
 } from '../../lifecycle/widget-lifecycle.js';
 import { scheduleHybridWidgetGeometry } from '../../lifecycle/widget-geometry-scheduler.js';
 import { bindWidgetSourceAction, openWidgetSource } from '../shared/widget-source-action.js';
@@ -98,7 +98,7 @@ export function createCodeBlockWidgetType(WidgetType, options = {}) {
 
       const openCodeSource = (activeEditor = null) => {
         const anchorRect = section.getBoundingClientRect();
-        const committedDescriptor = activeEditor?.__markdownEditorCommitCodeBlock?.();
+        const committedDescriptor = commitHybridDirectEditor(activeEditor);
         scheduleFrame(() => {
           openWidgetSource(view, { ...(committedDescriptor || editDescriptor), componentType: 'code' }, {
             getBoundingClientRect: () => anchorRect
@@ -129,8 +129,7 @@ export function createCodeBlockWidgetType(WidgetType, options = {}) {
       let unregisterDirectCloser = () => {};
 
       const cleanupDirectActivation = body => {
-        body?.__markdownEditorCodeDirectActivationCleanup?.();
-        if (body) delete body.__markdownEditorCodeDirectActivationCleanup;
+        disposeHybridDirectActivation(body);
       };
 
       const createPresentation = (codeValue = this.code) => {
@@ -141,7 +140,7 @@ export function createCodeBlockWidgetType(WidgetType, options = {}) {
         body.tabIndex = 0;
         body.title = '双击直接编辑代码；点击“编辑源码”编辑 Markdown 源码';
         body.setAttribute('aria-label', `${this.language || '无语言'}代码块，双击直接编辑`);
-        body.__markdownEditorCodeDirectActivationCleanup = bindStrictDoubleActivation(body, (event, gesture) => {
+        registerHybridDirectActivation(body, bindStrictDoubleActivation(body, (event, gesture) => {
           recordInteraction('hybrid.code-direct-edit-open', {
             codeFrom: this.from,
             trigger: 'doubleclick',
@@ -156,7 +155,7 @@ export function createCodeBlockWidgetType(WidgetType, options = {}) {
           getTargetKey: event => event.target?.closest?.('[data-line-number]')?.getAttribute?.('data-line-number')
             ? `code-line:${event.target.closest('[data-line-number]').getAttribute('data-line-number')}`
             : 'code-body'
-        });
+        }));
         return body;
       };
 
@@ -221,24 +220,22 @@ export function createCodeBlockWidgetType(WidgetType, options = {}) {
       section.appendChild(createPresentation());
       const lifecycleCleanup = attachHybridWidgetLifecycle(section, view, 'code');
       let cleaned = false;
-      section.__markdownEditorCodeBlockCleanup = () => {
+      registerHybridWidgetCleanup(section, () => {
         if (cleaned) return;
         cleaned = true;
         disposeSourceAction();
         unregisterDirectCloser();
         unregisterDirectCloser = () => {};
         const editor = section.querySelector('[data-hybrid-code-editor]');
-        editor?.__markdownEditorDestroyCodeBlock?.();
+        destroyHybridDirectEditor(editor);
         cleanupDirectActivation(section.querySelector('.cm-hybrid-code-body'));
         lifecycleCleanup();
-      };
+      });
       return section;
     }
 
     destroy(dom) {
-      dom?.__markdownEditorCodeBlockCleanup?.();
-      if (dom) delete dom.__markdownEditorCodeBlockCleanup;
-      destroyHybridWidgetLifecycle(dom);
+      disposeHybridWidget(dom);
     }
 
     ignoreEvent() {

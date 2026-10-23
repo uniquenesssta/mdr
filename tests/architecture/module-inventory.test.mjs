@@ -87,7 +87,7 @@ test('module inventory collector records imports, exports, listeners, state and 
   }
   const main = inventory.modules.find(record => record.path === 'src/main.js');
   assert.ok(main.detected.imports.includes('./platform/index.js'));
-  assert.ok(main.detected.globalWrites.length > 0, 'current bootstrap globals must remain visible in the baseline inventory');
+  assert.deepEqual(main.detected.globalWrites, [], 'R16-03 bootstrap must publish no business globals');
   const legacyScripts = inventory.modules.filter(record => record.surface === 'legacy-classic-script');
   const mainSource = await readFile(resolve(root, 'src/main.js'), 'utf8');
   const loadedScripts = [...mainSource.matchAll(/['"](\/app\/[^'"]+\.js)['"]/g)].map(match => `public${match[1]}`);

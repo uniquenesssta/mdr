@@ -12,7 +12,7 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
     const host = document.getElementById('compatibility-business-ports');
     const documents = host.markdownEditorDocumentControllerPort;
     return { documentId: documents.activeId, records: documents.records.length,
-      text: window.markdownEditorDocumentModel.createSnapshot('r13-chain-observation') };
+      text: document.getElementById('editor').value };
   });
   const startFetch = url => browser.execute(value => {
     if (typeof window.openUrlModal !== 'undefined') throw new Error('Classic import global remains.');
@@ -95,7 +95,7 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
                 error: code.parentElement.dataset.mermaidError === 'true'
               })),
               preview: { status: preview.status, version: preview.version, lastStableResult: preview.lastStableResult, error: preview.error },
-              documentVersion: window.markdownEditorDocumentModel.getDocumentVersion(),
+              documentVersion: document.getElementById('editor').virtualEditor.getDocumentVersion(),
               text: root?.textContent.slice(0, 600) || ''
             };
           }, selector, requireImage);

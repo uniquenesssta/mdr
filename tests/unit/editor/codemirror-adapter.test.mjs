@@ -297,7 +297,8 @@ test('production integration keeps raw CodeMirror confined to editor and the exp
   assert.doesNotMatch(virtualEditor, /EditorState\.create\s*\(/);
   assert.doesNotMatch(scrollSync, /virtualEditor\??\.view/);
   assert.doesNotMatch(performanceRuntime, /virtualEditor\??\.view/);
-  assert.match(performanceRuntime, /virtualEditor\?\.getLineCount\?\.\(\)/);
+  assert.match(performanceRuntime, /runtimeStatsProvider\(\)/);
+  assert.doesNotMatch(performanceRuntime, /functionDetails|window\[name\]/);
   assert.match(main, /const\s+virtualEditor\s*=\s*createVirtualEditor\(editorHost(?:, [^;]+)?\)/);
   assert.match(main, /virtualEditor\.destroy\(\)/);
 

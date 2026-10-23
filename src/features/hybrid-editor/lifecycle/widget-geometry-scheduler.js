@@ -1,3 +1,4 @@
+import { telemetry } from '../../telemetry/index.js';
 import { getHybridSyncCapabilities } from '../runtime/hybrid-sync-capabilities.js';
 
 /**
@@ -20,13 +21,11 @@ function canRefreshGeometry(view) {
 
 function runGeometryRefresh(view, reason) {
   if (!canRefreshGeometry(view)) return false;
-  const runtimeWindow = resolveRuntimeWindow(view);
   view.requestMeasure();
-  runtimeWindow?.scheduleEditorMetricsRebuild?.(40);
   const sync = getHybridSyncCapabilities();
   sync?.notifyScrollGeometry('editor');
   sync?.notifySelectionGeometry(`hybrid-widget:${reason}`);
-  runtimeWindow?.markdownEditorPerf?.record?.('hybrid.widget-geometry', {
+  telemetry.record?.('hybrid.widget-geometry', {
     category: 'editor.hybrid',
     aggregate: true,
     details: { reason }

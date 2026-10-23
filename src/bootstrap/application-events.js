@@ -1,3 +1,4 @@
+import { commitHybridDirectEditor } from '../features/hybrid-editor/index.js';
 /**
  * Responsibility: Bind document editing and application shortcuts to explicit feature commands.
  * Imports: Explicit startup capabilities and lifetime scope.
@@ -78,7 +79,7 @@ export function createApplicationEvents({ document, window, editor, eventsEditor
         if (modifier && key === 's') {
           e.preventDefault();
           e.stopPropagation();
-          tableCellInput.__markdownEditorCommitTableCell?.();
+          commitHybridDirectEditor(tableCellInput);
           invokeShortcut(() => eventsEditorUiCommandPort.invoke(e.shiftKey ? 'saveAsMarkdown' : 'saveCurrentFile'));
         }
         return;
@@ -88,7 +89,7 @@ export function createApplicationEvents({ document, window, editor, eventsEditor
         if (modifier && key === 's') {
           e.preventDefault();
           e.stopPropagation();
-          codeBlockEditor.__markdownEditorCommitCodeBlock?.();
+          commitHybridDirectEditor(codeBlockEditor);
           invokeShortcut(() => eventsEditorUiCommandPort.invoke(e.shiftKey ? 'saveAsMarkdown' : 'saveCurrentFile'));
         }
         return;
