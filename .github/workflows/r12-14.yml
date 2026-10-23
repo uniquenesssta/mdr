@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R15-10 explicit E2E installation and production-default absence regression · ${{ github.sha }}
+run-name: R15-11 public semantic runner and trusted input regression · ${{ github.sha }}
 
 on:
   push:
@@ -268,6 +268,11 @@ jobs:
         if: ${{ !cancelled() }}
         shell: bash
         run: node --test tests/stage-15-e2e-installation.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/e2e-installation.log"
+
+      - name: R15-11 public runner actions and trusted CDP input contracts
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: node --test tests/stage-15-e2e-runner.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/e2e-runner.log"
 
       - name: Full Node regression
         if: ${{ !cancelled() }}

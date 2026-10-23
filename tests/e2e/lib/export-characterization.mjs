@@ -1,4 +1,5 @@
 import { evaluateExport } from './export-test-commands.mjs';
+import { createApplicationDriver } from './application-driver.mjs';
 // Exercise the actual built application and locked renderers. Capture file/print
 // boundaries only; R14-10 loads the unmodified standalone HTML with network blocked.
 import assert from 'node:assert/strict';
@@ -6,39 +7,35 @@ import { createServer } from 'node:http';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-// Keep each real application preparation operation in its own CDP request.
-// loadMarkdown combines five idle budgets (25s) plus import/layout work in one
-// request; that can exhaust the unchanged 30s transport deadline before export.
-// These plain-text fixtures focus position 0, exactly as the E2E bridge does.
+// Keep preparation steps separately observable, using only public actions.
+// The identity probe intentionally still compares the frozen model body: that
+// independent export-source assertion is not a fixture-loading fallback.
 async function loadCompleteBodyFixture(page, source, trace, tracePath) {
+  const app = createApplicationDriver(page);
   const steps = [
-    ['import', `(async()=>{
-      const commands=document.getElementById('compatibility-business-ports')?.markdownEditorDocumentUiCommandPort;
-      if(!commands?.has('importTextContent'))throw new Error('application document import flow is unavailable');
-      if(!await commands.invoke('importTextContent','e2e-fixture.md',${JSON.stringify(source)},''))throw new Error('application document import flow rejected the E2E fixture');
-      if(!document.getElementById('editor')?.virtualEditor)throw new Error('virtual editor is unavailable after document import');
-      return true;
-    })()`],
-    ['initial-position', `window.__markdownEditorE2E.revealPosition(0,{timeoutMs:5000})`],
-    ['visual-editing', `window.__markdownEditorE2E.setVisualEditing({code:true,table:true})`],
-    ['layout', `window.__markdownEditorE2E.setLayout('both')`],
-    ['final-position', `window.__markdownEditorE2E.revealPosition(0,{timeoutMs:6000})`],
-    ['idle', `window.__markdownEditorE2E.waitForIdle({timeoutMs:6000})`],
-    ['identity', `(()=>{
+    // The original import step had the CDP transport's 30s bound. Keep that
+    // same total bound when it goes through the public bounded action.
+    ['import', () => app.loadMarkdown(source, { layout: 'both', selection: 0, timeoutMs: 30000 })],
+    ['initial-position', () => app.revealPosition(0, { timeoutMs: 5000 })],
+    ['visual-editing', () => app.setVisualEditing({ code: true, table: true })],
+    ['layout', () => app.setLayout('both')],
+    ['final-position', () => app.revealPosition(0, { timeoutMs: 6000 })],
+    ['idle', () => app.waitForIdle({ timeoutMs: 6000 })],
+    ['identity', () => page.evaluate(`(()=>{
       const snapshot=window.__markdownEditorE2E.snapshot(),expected=${JSON.stringify(source)};
       return {ready:snapshot.ready,layout:snapshot.layout,documentLength:snapshot.documentLength,
         selectionStart:snapshot.selectionStart,selectionEnd:snapshot.selectionEnd,
         editorMatches:window.__markdownEditorE2E.getEditorValue()===expected,
         modelMatches:window.markdownEditorDocumentModel.createSnapshot('r14-complete-body-setup')===expected};
-    })()`]
+    })()`)]
   ];
-  for(const [step,expression] of steps) {
+  for(const [step,run] of steps) {
     const row={sourceLength:source.length,step,status:'started'};
     trace.push(row);
     await writeFile(tracePath,JSON.stringify(trace,null,2));
     const started=performance.now();
     try {
-      const result=await evaluateExport(page, expression);
+      const result=await run();
       if(step==='idle')assert.equal(result,true,'Complete-body fixture must reach idle before export');
       if(step==='identity') {
         row.observation=result;

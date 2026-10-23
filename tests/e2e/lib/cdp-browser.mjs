@@ -316,11 +316,6 @@ export class CdpPage {
     return rect;
   }
 
-  async elementCenter(selector) {
-    const rect = await this.elementRect(selector);
-    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-  }
-
   async waitForElementStable(selector, options = {}) {
     const timeoutMs = Math.max(100, Number(options.timeoutMs) || 2500);
     const intervalMs = Math.max(10, Number(options.intervalMs) || 40);
@@ -361,7 +356,8 @@ export class CdpPage {
   }
 
   async click(selector, options = {}) {
-    const point = await this.elementCenter(selector);
+    const rect = await this.waitForElementStable(selector, { stableSamples: 2, intervalMs: 20 });
+    const point = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
     await this.clickAt(point.x, point.y, options);
   }
 
@@ -405,8 +401,37 @@ export class CdpPage {
 
   async pressKey(key, options = {}) {
     const modifiers = Number(options.modifiers) || 0;
-    await this.connection.send('Input.dispatchKeyEvent', { type: 'keyDown', key, code: options.code || key, modifiers });
-    await this.connection.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code: options.code || key, modifiers });
+    const keys = { Backspace: 8, Tab: 9, Enter: 13, Escape: 27, Home: 36, End: 35, ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40, Delete: 46, F2: 113, ',': 188 };
+    const virtualKey = keys[key] || (key.length === 1 ? key.toUpperCase().charCodeAt(0) : 0);
+    const event = { key, code: options.code || (key.length === 1 ? 'Key' + key.toUpperCase() : key), modifiers,
+      windowsVirtualKeyCode: virtualKey, nativeVirtualKeyCode: virtualKey };
+    await this.connection.send('Input.dispatchKeyEvent', { ...event, type: 'keyDown' });
+    await this.connection.send('Input.dispatchKeyEvent', { ...event, type: 'keyUp' });
+  }
+
+  async insertText(text) {
+    await this.connection.send('Input.insertText', { text: String(text) });
+  }
+
+  async fill(selector, value) {
+    await this.click(selector);
+    await this.pressKey('a', { modifiers: 2 });
+    await this.pressKey('Backspace');
+    if (String(value)) await this.insertText(value);
+  }
+
+  async selectOption(selector, value) {
+    const encoded = JSON.stringify(selector), selected = String(value);
+    const values = await this.evaluate(`Array.from(document.querySelector(${encoded})?.options || [])
+      .filter(option => !option.disabled && !option.hidden).map(option => option.value)`);
+    const index = values.indexOf(selected);
+    if (index < 0) throw new Error('Selectable option not found: ' + selector);
+    await this.click(selector);
+    await this.pressKey('Home');
+    for (let step = 0; step < index; step++) await this.pressKey('ArrowDown');
+    await this.pressKey('Enter');
+    const actual = await this.evaluate(`document.querySelector(${encoded})?.value`);
+    if (actual !== selected) throw new Error('Keyboard option selection did not commit: ' + selector);
   }
 
   async screenshot(path) {

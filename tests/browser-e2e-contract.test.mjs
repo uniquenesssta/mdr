@@ -1,13 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-
-const root = new URL('../', import.meta.url);
+import { runInNewContext } from 'node:vm';
+import { createE2EBridge } from '../src/features/e2e/index.js';
+import { createApplicationDriver } from './e2e/lib/application-driver.mjs';
 
 test('browser E2E runner stays dependency-free and covers required interactions', async () => {
   const runner = await readFile(new URL('./e2e/run-browser-tests.mjs', import.meta.url), 'utf8');
-  const bridge = await readFile(new URL('../src/runtime/e2e-bridge.js', import.meta.url), 'utf8');
-  const query = await readFile(new URL('../src/features/e2e/e2e-query-api.js', import.meta.url), 'utf8');
   const browserLauncher = await readFile(new URL('./e2e/lib/cdp-browser.mjs', import.meta.url), 'utf8');
   for (const phrase of [
     'single click keeps a component presented',
@@ -37,29 +36,33 @@ test('browser E2E runner stays dependency-free and covers required interactions'
   assert.match(browserLauncher, /--headless=new/);
   assert.match(browserLauncher, /accessSync/);
   assert.doesNotMatch(browserLauncher, /spawnSync|--version/);
-  assert.match(bridge, /createE2EQueryAPI/);
-  assert.match(bridge, /from '..\/features\/e2e\/index.js'/);
-  assert.match(query, /loadMarkdown:/);
-  assert.match(bridge, /getHybridComponentStates/);
+  assert.match(runner, /createApplicationDriver/);
+  assert.doesNotMatch(runner, /virtualEditor\.loadDocument|setLayoutMode\('hybrid',false\)/);
 });
 
-test('application installs the E2E bridge only through explicit opt-in', async () => {
-  const main = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
-  const bridge = await readFile(new URL('../src/runtime/e2e-bridge.js', import.meta.url), 'utf8');
-  const installation = await readFile(new URL('../src/features/e2e/e2e-bridge.js', import.meta.url), 'utf8');
-  assert.match(main, /installMarkdownEditorE2EBridge\(\)/);
-  assert.match(bridge, /__MARKDOWN_EDITOR_E2E__/);
-  assert.match(bridge, /createE2EBridge/);
-  assert.match(installation, /environment\?\.testFlag === true/);
-  assert.match(installation, /searchParams\.get\('e2e'\) === '1'/);
+test('application installs the E2E bridge only through explicit opt-in', () => {
+  for (const environment of [{ url: 'http://localhost/', testFlag: false }, { url: 'http://localhost/?e2e=true', testFlag: 'true' },
+    { url: 'http://localhost/?e2e=1', testFlag: false }, { url: 'http://localhost/', testFlag: true }]) {
+    const host = {}, api = { destroy() {} }; let created = 0;
+    const bridge = createE2EBridge({ readEnvironment: () => environment,
+      readSlotDescriptor: () => Object.getOwnPropertyDescriptor(host, 'api'),
+      defineSlot: descriptor => Object.defineProperty(host, 'api', descriptor), deleteSlot: () => Reflect.deleteProperty(host, 'api') });
+    const enabled = environment.testFlag === true || environment.url.endsWith('?e2e=1');
+    assert.equal(bridge.configure(() => { created++; return api; }), enabled);
+    assert.equal(bridge.install(), enabled ? api : null);
+    assert.equal(created, enabled ? 1 : 0);
+    bridge.destroy(); assert.equal(Object.hasOwn(host, 'api'), false);
+  }
 });
 
 test('E2E fixture loading follows the application document lifecycle', async () => {
-  const bridge = await readFile(new URL('../src/runtime/e2e-bridge.js', import.meta.url), 'utf8');
-  assert.match(bridge, /commands\.invoke\('importTextContent'/);
-  assert.doesNotMatch(bridge, /loadTextContentAsDocument/);
-  assert.doesNotMatch(bridge, /virtualEditor\.loadDocument/);
-  assert.doesNotMatch(bridge, /dispatchEditorInput/);
+  const calls = [], result = { ready: true, documentId: 'imported', documentGeneration: 2, documentVersion: 0 };
+  const api = { loadMarkdown(...args) { calls.push(JSON.parse(JSON.stringify(args))); return result; } };
+  const driver = createApplicationDriver({ evaluate: source => runInNewContext(source, {
+    __markdownEditorE2E: api, get document() { assert.fail('Runner bypassed public import'); }
+  }) });
+  assert.equal(await driver.loadMarkdown('# document', { layout: 'hybrid' }), result);
+  assert.deepEqual(calls, [['# document', { layout: 'hybrid' }]]);
 });
 
 test('hybrid widgets keep geometry explicit while document pointer listeners are Session-owned', async () => {

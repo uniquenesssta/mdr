@@ -8,6 +8,7 @@ import { installVirtualFileHost } from './lib/virtual-file-host.mjs';
 import { startBuiltApplicationHost } from './lib/built-application-host.mjs';
 import { runExportCharacterization } from './lib/export-characterization.mjs';
 import { runE2EInstallationChecks } from './lib/e2e-installation.mjs';
+import { createApplicationDriver } from './lib/application-driver.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '../..');
@@ -94,8 +95,9 @@ async function centerByText(page, rootSelector, text) {
   const payload = JSON.stringify({ rootSelector, text });
   const point = await page.evaluate(`(() => {
     const {rootSelector,text}=${payload};
-    const root=document.querySelector(rootSelector); if(!root)return null;
-    const element=Array.from(root.querySelectorAll('button,[role="button"]')).find(item=>item.textContent.trim()===text);
+    const roots=Array.from(document.querySelectorAll(rootSelector));
+    const element=roots.flatMap(root=>[root,...root.querySelectorAll('button,[role="button"]')])
+      .find(item=>item.textContent.trim()===text&&item.getBoundingClientRect().width>0&&item.getBoundingClientRect().height>0);
     if(!element)return null; const rect=element.getBoundingClientRect(); return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
   })()`);
   if (!point) throw new Error(`Button not found: ${rootSelector} / ${text}`);
@@ -283,13 +285,15 @@ async function runContractSuite() {
       assert.equal(snapshot.expanded, 'true');
       assert.ok(snapshot.iconHrefs.length >= 4);
       assert.ok(snapshot.iconHrefs.every(href => /^\/assets\/icons\.svg#icon-[a-z0-9-]+$/.test(href)));
-      await browser.page.evaluate(`document.querySelector('.folder-tree-directory-row').click()`);
+      await browser.page.click('.folder-tree-directory-row');
       assert.equal(await browser.page.evaluate(`document.querySelector('.folder-tree-directory-row').getAttribute('aria-expanded')`), 'false');
-      await browser.page.evaluate(`Array.from(document.querySelectorAll('.folder-tree-file-row')).find(row=>row.textContent.includes('next.txt')).click()`);
+      const nextPoint = await centerByText(browser.page, '.folder-tree-file-row', 'next.txt');
+      await browser.page.clickAt(nextPoint.x, nextPoint.y);
       await browser.page.waitFor(() => window.__folderTreeOpened?.length === 1, { description: 'folder tree open callback' });
       assert.equal(await browser.page.evaluate('window.__folderTreeOpened[0]'), 'F:/Notes/next.txt');
       const readsBeforeDestroy = await browser.page.evaluate('window.__folderTreeReads');
-      await browser.page.evaluate(`window.__folderTreeController.destroy();document.getElementById('folder-file-tree-refresh').click()`);
+      await browser.page.evaluate(`window.__folderTreeController.destroy()`);
+      await browser.page.click('#folder-file-tree-refresh');
       await new Promise(resolve => setTimeout(resolve, 20));
       assert.equal(await browser.page.evaluate('window.__folderTreeReads'), readsBeforeDestroy);
     });
@@ -377,37 +381,15 @@ async function runContractSuite() {
 const APP_FIXTURE = await readFile(resolve(projectRoot, 'tests/fixtures/hybrid-regression.md'), 'utf8');
 
 async function loadAppFixture(page) {
-  const fixture = JSON.stringify(APP_FIXTURE);
-  return page.evaluate(`(async()=>{
-    const source=${fixture};
-    if(window.__markdownEditorE2E){
-      await window.__markdownEditorE2E.loadMarkdown(source,{layout:'hybrid',codeVisualEditing:true,tableVisualEditing:true});
-      return window.__markdownEditorE2E.snapshot();
-    }
-    const editor=document.getElementById('editor');
-    editor.virtualEditor.loadDocument(source,{selection:0});
-    editor.virtualEditor.setHybridCodeVisualEditing(true);
-    editor.virtualEditor.setHybridTableVisualEditing(true);
-    editor.dispatchEvent(new Event('input',{bubbles:true}));
-    setLayoutMode('hybrid',false);
-    await new Promise(resolve=>setTimeout(resolve,700));
-    return {layout:document.body.classList.contains('hybrid-view-mode')?'hybrid':'unknown'};
-  })()`);
+  return createApplicationDriver(page).loadMarkdown(APP_FIXTURE, { layout: 'hybrid', codeVisualEditing: true, tableVisualEditing: true });
 }
 
 async function setAppLayout(page, mode) {
-  const encoded = JSON.stringify(mode);
-  await page.evaluate(`(async()=>{
-    if(window.__markdownEditorE2E) return window.__markdownEditorE2E.setLayout(${encoded});
-    setLayoutMode(${encoded},false); await new Promise(resolve=>setTimeout(resolve,250)); return ${encoded};
-  })()`);
+  return createApplicationDriver(page).setLayout(mode);
 }
 
 async function appSnapshot(page) {
-  return page.evaluate(`window.__markdownEditorE2E?.snapshot?.() || (()=>{
-    const editor=document.getElementById('editor');
-    return {layout:document.body.classList.contains('hybrid-view-mode')?'hybrid':'other',selectionStart:editor.selectionStart,selectionEnd:editor.selectionEnd,selectedText:editor.value.slice(editor.selectionStart,editor.selectionEnd),presentationStats:editor.virtualEditor.getPresentationStats(),components:Array.from(document.querySelectorAll('[data-hybrid-block-type]')).map(item=>({type:item.dataset.hybridBlockType,directEditing:Boolean(item.querySelector('[data-hybrid-code-editor],[data-hybrid-table-cell-input]'))}))};
-  })()`);
+  return createApplicationDriver(page).snapshot();
 }
 
 async function applyResponsiveViewport(page, viewport) {
@@ -543,6 +525,20 @@ async function inspectResponsiveShell(page, viewport) {
 
 async function runAppSuite() {
   const browser = await launchChromium({ width: 1440, height: 1000 });
+  const app = createApplicationDriver(browser.page);
+  const openSettings = async () => {
+    await browser.page.click('#file-menu-dropdown > .menu-trigger');
+    await browser.page.click('[data-settings-open]');
+    await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings dialog open' });
+  };
+  const settingsClosed = () => browser.page.waitFor(() => !document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings dialog closed' });
+  const showSidebar = async () => {
+    if (await browser.page.evaluate("document.querySelector('.l-sidebar')?.classList.contains('is-hidden')")) {
+      await browser.page.click('#view-menu-dropdown > .menu-trigger');
+      await browser.page.click('[data-menu-command="layout.toggle-sidebar"]');
+    }
+    await browser.page.waitFor(() => !document.querySelector('.l-sidebar')?.classList.contains('is-hidden'), { description: 'sidebar visible for real pointer input' });
+  };
   let applicationHost = null;
   activePage = browser.page;
   try {
@@ -637,151 +633,72 @@ async function runAppSuite() {
     });
 
     await test('application Settings Store cancels draft without persisting changes', async () => {
-      const result = await browser.page.evaluate(`(()=>{
-        const host=document.getElementById('compatibility-business-ports');
-        const port=host?.markdownEditorSettingsStorePort;
-        if(!port)throw new Error('Settings Store port unavailable');
-        const before={stored:localStorage.getItem('md_editor_theme'),committed:port.get('theme'),body:document.body.getAttribute('data-theme')};
-        const open=()=>document.querySelector('[data-settings-open]')?.click();
-
-        open();
-        document.getElementById('setting-theme').value='dark';
-        document.getElementById('setting-theme').dispatchEvent(new Event('change',{bubbles:true}));
-        document.querySelector('#settings-modal .modal-footer button:not(.primary)')?.click();
-        const afterButton={stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};
-
-        open();
-        document.getElementById('setting-theme').value='dark';
-        document.getElementById('setting-theme').dispatchEvent(new Event('change',{bubbles:true}));
-        document.getElementById('settings-modal').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));
-        const afterEscape={stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};
-
-        open();
-        document.getElementById('setting-theme').value='dark';
-        document.getElementById('setting-theme').dispatchEvent(new Event('change',{bubbles:true}));
-        document.getElementById('settings-modal').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true}));
-        const afterBackdrop={stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};
-
-        open();
-        const reopened=document.getElementById('setting-theme').value;
-        document.querySelector('#settings-modal .modal-footer button:not(.primary)')?.click();
-        return {before,afterButton,afterEscape,afterBackdrop,reopened,globals:{
-          openSettings:typeof window.openSettings,
-          closeSettings:typeof window.closeSettings,
-          applySettings:typeof window.applySettings,
-          switchSettingsPage:typeof window.switchSettingsPage
-        }};
-      })()`);
-      assert.deepEqual(result.before, {stored:null,committed:'light',body:'light'});
-      for (const state of [result.afterButton, result.afterEscape, result.afterBackdrop]) {
-        assert.deepEqual(state, {stored:null,hasDraft:false,body:'light'});
+      const before = await browser.page.evaluate("(()=>{const port=document.getElementById('compatibility-business-ports').markdownEditorSettingsStorePort;return {stored:localStorage.getItem('md_editor_theme'),committed:port.get('theme'),body:document.body.getAttribute('data-theme')};})()");
+      const read = () => browser.page.evaluate("(()=>{const port=document.getElementById('compatibility-business-ports').markdownEditorSettingsStorePort;return {stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};})()");
+      const states = [];
+      for (const action of ['button', 'escape', 'backdrop']) {
+        await openSettings();
+        await browser.page.click('#settings-modal [data-settings-page="general"]');
+        await browser.page.selectOption('#setting-theme', 'dark');
+        if (action === 'button') await browser.page.click('#settings-modal .modal-footer button:not(.primary)');
+        else if (action === 'escape') await browser.page.pressKey('Escape');
+        else await browser.page.clickAt(3, 3);
+        await settingsClosed();
+        states.push(await read());
       }
-      assert.equal(result.reopened, 'light');
-      assert.deepEqual(result.globals, {
-        openSettings:'undefined',closeSettings:'undefined',applySettings:'undefined',switchSettingsPage:'undefined'
-      });
+      await openSettings();
+      await browser.page.click('#settings-modal [data-settings-page="general"]');
+      const reopened = await browser.page.evaluate("document.getElementById('setting-theme').value");
+      await browser.page.click('#settings-modal .modal-footer button:not(.primary)');
+      await settingsClosed();
+      assert.deepEqual(before, {stored:null,committed:'light',body:'light'});
+      for (const state of states) assert.deepEqual(state, {stored:null,hasDraft:false,body:'light'});
+      assert.equal(reopened, 'light');
+      const globals = await browser.page.evaluate("({openSettings:typeof window.openSettings,closeSettings:typeof window.closeSettings,applySettings:typeof window.applySettings,switchSettingsPage:typeof window.switchSettingsPage})");
+      assert.deepEqual(globals, {openSettings:'undefined',closeSettings:'undefined',applySettings:'undefined',switchSettingsPage:'undefined'});
     });
 
     await test('application Settings UI validates and applies one draft without global dialog functions', async () => {
-      await browser.page.evaluate(`document.querySelector('[data-settings-open]')?.click()`);
-      await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings dialog open' });
+      await openSettings();
       await browser.page.click('#settings-modal [data-settings-page="save"]');
       await browser.page.waitFor(() => !document.querySelector('#settings-modal [data-settings-page-panel="save"]')?.hidden, { description: 'Settings save page' });
-      const selected = await browser.page.evaluate(`document.querySelector('#settings-modal [data-settings-page="save"]')?.getAttribute('aria-selected')`);
+      const selected = await browser.page.evaluate("document.querySelector('#settings-modal [data-settings-page=\"save\"]')?.getAttribute('aria-selected')");
       assert.equal(selected, 'true');
-
-      await browser.page.evaluate(`(()=>{
-        const select=document.getElementById('setting-autosave-delay');
-        select.value='custom';
-        select.dispatchEvent(new Event('change',{bubbles:true}));
-        const custom=document.getElementById('setting-autosave-custom-seconds');
-        custom.value='0.1';
-        custom.dispatchEvent(new Event('input',{bubbles:true}));
-        document.querySelector('#settings-modal .modal-footer .primary')?.click();
-      })()`);
-      const invalid = await browser.page.evaluate(`(()=>({
-        open:document.getElementById('settings-modal')?.classList.contains('show'),
-        invalid:document.getElementById('setting-autosave-custom-seconds')?.getAttribute('aria-invalid'),
-        feedback:document.getElementById('settings-feedback')?.textContent||''
-      }))()`);
-      assert.equal(invalid.open, true);
-      assert.equal(invalid.invalid, 'true');
-      assert.match(invalid.feedback, /0\.5–3600/);
-
-      await browser.page.evaluate(`(()=>{
-        const custom=document.getElementById('setting-autosave-custom-seconds');
-        custom.value='1.5';
-        custom.dispatchEvent(new Event('input',{bubbles:true}));
-        const theme=document.getElementById('setting-theme');
-        theme.value='dark';
-        theme.dispatchEvent(new Event('change',{bubbles:true}));
-        document.querySelector('#settings-modal .modal-footer .primary')?.click();
-      })()`);
-      await browser.page.waitFor(() => !document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings apply close' });
-      const applied = await browser.page.evaluate(`(()=>{
-        const port=document.getElementById('compatibility-business-ports')?.markdownEditorSettingsStorePort;
-        return {
-          theme:port?.get('theme'),
-          delay:port?.get('autoSaveDelay'),
-          storedTheme:localStorage.getItem('md_editor_theme'),
-          storedDelay:localStorage.getItem('md_editor_autosave_delay'),
-          body:document.body.getAttribute('data-theme')
-        };
-      })()`);
+      await browser.page.selectOption('#setting-autosave-delay', 'custom');
+      await browser.page.fill('#setting-autosave-custom-seconds', '0.1');
+      await browser.page.click('#settings-modal .modal-footer .primary');
+      const invalid = await browser.page.evaluate("({open:document.getElementById('settings-modal')?.classList.contains('show'),invalid:document.getElementById('setting-autosave-custom-seconds')?.getAttribute('aria-invalid'),feedback:document.getElementById('settings-feedback')?.textContent||''})");
+      assert.equal(invalid.open, true); assert.equal(invalid.invalid, 'true'); assert.match(invalid.feedback, /0\.5–3600/);
+      await browser.page.fill('#setting-autosave-custom-seconds', '1.5');
+      await browser.page.click('#settings-modal [data-settings-page="general"]');
+      await browser.page.selectOption('#setting-theme', 'dark');
+      await browser.page.click('#settings-modal .modal-footer .primary');
+      await settingsClosed();
+      const applied = await browser.page.evaluate("(()=>{const port=document.getElementById('compatibility-business-ports').markdownEditorSettingsStorePort;return {theme:port.get('theme'),delay:port.get('autoSaveDelay'),storedTheme:localStorage.getItem('md_editor_theme'),storedDelay:localStorage.getItem('md_editor_autosave_delay'),body:document.body.getAttribute('data-theme')};})()");
       assert.deepEqual(applied, {theme:'dark',delay:1500,storedTheme:'dark',storedDelay:'1500',body:'dark'});
-
-      await browser.page.evaluate(`(()=>{
-        document.querySelector('[data-settings-open]')?.click();
-        const theme=document.getElementById('setting-theme');
-        theme.value='light';
-        theme.dispatchEvent(new Event('change',{bubbles:true}));
-        const delay=document.getElementById('setting-autosave-delay');
-        delay.value='500';
-        delay.dispatchEvent(new Event('change',{bubbles:true}));
-        document.querySelector('#settings-modal .modal-footer .primary')?.click();
-      })()`);
-      await browser.page.waitFor(() => document.body.getAttribute('data-theme') === 'light' && !document.getElementById('settings-modal')?.classList.contains('show'));
+      await openSettings();
+      await browser.page.click('#settings-modal [data-settings-page="general"]');
+      await browser.page.selectOption('#setting-theme', 'light');
+      await browser.page.click('#settings-modal [data-settings-page="save"]');
+      await browser.page.selectOption('#setting-autosave-delay', '500');
+      await browser.page.click('#settings-modal .modal-footer .primary');
+      await settingsClosed();
+      await browser.page.waitFor(() => document.body.getAttribute('data-theme') === 'light');
     });
 
     await test('application language Settings commit updates I18n without legacy globals', async () => {
-      await browser.page.evaluate(`document.querySelector('[data-settings-open]')?.click()`);
-      await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings dialog open for language' });
-      await browser.page.evaluate(`(()=>{
-        const language=document.getElementById('setting-language');
-        if(!language)throw new Error('Language setting unavailable');
-        language.value='en';
-        language.dispatchEvent(new Event('change',{bubbles:true}));
-        document.querySelector('#settings-modal .modal-footer .primary')?.click();
-      })()`);
-      await browser.page.waitFor(() => document.documentElement.lang === 'en' && !document.getElementById('settings-modal')?.classList.contains('show'), { description: 'committed English locale' });
-      const applied = await browser.page.evaluate(`(()=>{
-        const host=document.getElementById('compatibility-business-ports');
-        const port=host?.markdownEditorI18nPort;
-        const store=host?.markdownEditorSettingsStorePort;
-        const editorButton=document.getElementById('editor-collapse-btn');
-        const editorCollapsed=document.querySelector('.editor-pane')?.classList.contains('collapsed');
-        const expectedTitle=port?.t(editorCollapsed?'expandEditor':'collapseEditor');
-        return {
-          locale:port?.locale,
-          committed:store?.get('language'),
-          stored:localStorage.getItem('md_editor_language'),
-          htmlLang:document.documentElement.lang,
-          dynamicMatches:Boolean(editorButton && expectedTitle && editorButton.title===expectedTitle),
-          globals:{i18n:typeof window.i18n,currentLang:typeof window.currentLang,setLanguage:typeof window.setLanguage}
-        };
-      })()`);
-      assert.deepEqual(applied, {
-        locale:'en',committed:'en',stored:'en',htmlLang:'en',dynamicMatches:true,
-        globals:{i18n:'undefined',currentLang:'undefined',setLanguage:'undefined'}
-      });
-
-      await browser.page.evaluate(`(()=>{
-        document.querySelector('[data-settings-open]')?.click();
-        const language=document.getElementById('setting-language');
-        language.value='zh-CN';
-        language.dispatchEvent(new Event('change',{bubbles:true}));
-        document.querySelector('#settings-modal .modal-footer .primary')?.click();
-      })()`);
+      const setLanguage = async value => {
+        await openSettings();
+        await browser.page.click('#settings-modal [data-settings-page="general"]');
+        await browser.page.selectOption('#setting-language', value);
+        await browser.page.click('#settings-modal .modal-footer .primary');
+        await settingsClosed();
+      };
+      await setLanguage('en');
+      await browser.page.waitFor(() => document.documentElement.lang === 'en', { description: 'committed English locale' });
+      const applied = await browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorI18nPort,store=host.markdownEditorSettingsStorePort,button=document.getElementById('editor-collapse-btn'),collapsed=document.querySelector('.editor-pane')?.classList.contains('collapsed');return {locale:port.locale,committed:store.get('language'),stored:localStorage.getItem('md_editor_language'),htmlLang:document.documentElement.lang,dynamicMatches:Boolean(button&&button.title===port.t(collapsed?'expandEditor':'collapseEditor')),globals:{i18n:typeof window.i18n,currentLang:typeof window.currentLang,setLanguage:typeof window.setLanguage}};})()");
+      assert.deepEqual(applied, {locale:'en',committed:'en',stored:'en',htmlLang:'en',dynamicMatches:true,globals:{i18n:'undefined',currentLang:'undefined',setLanguage:'undefined'}});
+      await setLanguage('zh-CN');
       await browser.page.waitFor(() => document.documentElement.lang === 'zh-CN', { description: 'restore zh-CN locale' });
     });
 
@@ -850,7 +767,7 @@ async function runAppSuite() {
         assert.deepEqual(before, {theme:'light',trigger:true,previewFirst:true});
 
         const toggle = async expected => {
-          await browser.page.evaluate(`document.querySelector('[data-theme-toggle]').click()`);
+          await browser.page.click('[data-theme-toggle]');
           await browser.page.waitFor(`document.body.getAttribute('data-theme') === ${JSON.stringify(expected)}`, { description: 'Theme Toggle Controller apply ' + expected });
           return browser.page.evaluate(`(()=>{
             const probe=window.__themeToggleIdentity;
@@ -876,11 +793,8 @@ async function runAppSuite() {
       } finally {
         try { await writeFile(join(artifactRoot, 'themeToggle-identity.json'), JSON.stringify(report, null, 2)); }
         finally {
-          await browser.page.evaluate(`(()=>{
-            const settings=document.getElementById('compatibility-business-ports')?.markdownEditorSettingsStorePort;
-            if(settings?.get('theme')==='dark')document.querySelector('[data-theme-toggle]').click();
-            delete window.__themeToggleIdentity;
-          })()`);
+          if (await browser.page.evaluate("document.body.getAttribute('data-theme')==='dark'")) await browser.page.click('[data-theme-toggle]');
+          await browser.page.evaluate('delete window.__themeToggleIdentity');
           await browser.page.waitFor(() => document.body.getAttribute('data-theme') === 'light', { description: 'restore light theme after Theme Toggle Controller' });
         }
       }
@@ -911,13 +825,10 @@ async function runAppSuite() {
         assert.deepEqual(before, {theme:'light',editor:true,virtualEditor:true,documentReady:true,previewFirst:true,legacyThemeGlobal:'undefined'});
 
         const applyTheme = async theme => {
-          await browser.page.evaluate(`(()=>{
-            document.querySelector('[data-settings-open]')?.click();
-            const field=document.getElementById('setting-theme');
-            field.value=${JSON.stringify(theme)};
-            field.dispatchEvent(new Event('change',{bubbles:true}));
-            document.querySelector('#settings-modal .modal-footer .primary')?.click();
-          })()`);
+          await openSettings();
+          await browser.page.click('#settings-modal [data-settings-page="general"]');
+          await browser.page.selectOption('#setting-theme', theme);
+          await browser.page.click('#settings-modal .modal-footer .primary');
           const encodedTheme = JSON.stringify(theme);
           await browser.page.waitFor(`(()=>document.body.getAttribute('data-theme')===${encodedTheme}&&!document.getElementById('settings-modal')?.classList.contains('show'))()`, { description: 'Theme Service apply ' + theme });
           return browser.page.evaluate(`(()=>{
@@ -950,27 +861,22 @@ async function runAppSuite() {
       } finally {
         try { await writeFile(join(artifactRoot, 'themeService-identity.json'), JSON.stringify(report, null, 2)); }
         finally {
-          await browser.page.evaluate(`(()=>{
-            const settings=document.getElementById('compatibility-business-ports')?.markdownEditorSettingsStorePort;
-            if(settings?.get('theme')==='dark')document.querySelector('[data-theme-toggle]').click();
-            delete window.__themeServiceIdentity;
-          })()`);
+          if (await browser.page.evaluate("document.body.getAttribute('data-theme')==='dark'")) await browser.page.click('[data-theme-toggle]');
+          await browser.page.evaluate('delete window.__themeServiceIdentity');
           await browser.page.waitFor(() => document.body.getAttribute('data-theme') === 'light', { description: 'restore light theme after Theme Service' });
         }
       }
     });
 
     await test('application Modal Shell owns accessibility, focus, Escape, backdrop and protected progress policy', async () => {
-      await browser.page.evaluate(`(()=>{
-        document.getElementById('modal-shell-focus-source')?.remove();
-        const source=document.createElement('button');
-        source.id='modal-shell-focus-source';
-        source.type='button';
-        source.textContent='modal focus source';
-        document.body.append(source);
-        source.focus();
-        document.querySelector('[data-settings-open]')?.click();
-      })()`);
+      await app.loadMarkdown('modal focus', { layout: 'edit', selection: 0 });
+      const openFromKeyboard = async () => {
+        await app.revealPosition(0);
+        await browser.page.evaluate('void(window.__runnerModalOpener=document.activeElement)');
+        await browser.page.pressKey(',', { modifiers: 2, code: 'Comma' });
+        await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'));
+      };
+      await openFromKeyboard();
       await browser.page.waitFor(() => {
         const root=document.getElementById('settings-modal');
         const panel=root?.firstElementChild;
@@ -998,27 +904,21 @@ async function runAppSuite() {
       await browser.page.pressKey('Escape');
       await browser.page.waitFor(() => (
         document.getElementById('settings-modal')?.style.display === 'none'
-          && document.activeElement?.id === 'modal-shell-focus-source'
+          && document.activeElement === window.__runnerModalOpener
       ), { description: 'settings Escape close and focus restoration' });
 
-      await browser.page.evaluate("document.querySelector('[data-settings-open]')?.click()");
+      await openFromKeyboard();
       await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'));
-      await browser.page.evaluate(`(()=>{
-        const root=document.getElementById('settings-modal');
-        root.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));
-      })()`);
+      await browser.page.clickAt(3, 3);
       await browser.page.waitFor(() => (
         document.getElementById('settings-modal')?.style.display === 'none'
-          && document.activeElement?.id === 'modal-shell-focus-source'
+          && document.activeElement === window.__runnerModalOpener
       ), { description: 'settings backdrop close and focus restoration' });
 
       await browser.page.evaluate(`window.__progressProbeTask=document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort.begin('进度弹窗');`);
       await browser.page.waitFor(() => document.getElementById('export-progress-modal')?.classList.contains('show'));
       await browser.page.pressKey('Escape');
-      await browser.page.evaluate(`(()=>{
-        const root=document.getElementById('export-progress-modal');
-        root.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));
-      })()`);
+      await browser.page.clickAt(3, 3);
       assert.equal(
         await browser.page.evaluate("document.getElementById('export-progress-modal')?.classList.contains('show')"),
         true
@@ -1026,9 +926,7 @@ async function runAppSuite() {
       await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort.finish(window.__progressProbeTask);delete window.__progressProbeTask;`);
       await browser.page.waitFor(() => document.getElementById('export-progress-modal')?.style.display === 'none');
       await browser.page.evaluate(`(()=>{
-        const source=document.getElementById('modal-shell-focus-source');
-        if(document.activeElement===source)source.blur();
-        source?.remove();
+        delete window.__runnerModalOpener;
         scrollTo(0,0);
       })()`);
     });
@@ -1193,31 +1091,15 @@ async function runAppSuite() {
     });
 
     await test('application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes', async () => {
-      const result = await browser.page.evaluate(`(()=>{
-        const host=document.getElementById('compatibility-business-ports');
-        const port=host?.markdownEditorEditorControllerPort;
-        const model=window.markdownEditorDocumentModel;
-        const editor=document.getElementById('editor');
-        if(!port||!model||!editor?.virtualEditor)throw new Error('Editor Controller fixture unavailable');
-        const transactions=[];
-        const unsubscribe=port.subscribeTransactions(transaction=>transactions.push(transaction));
-        try{
-          editor.virtualEditor.replaceRange('x',0,0,'end');
-          const interactive={...transactions.at(-1)};
-          const interactiveVersion=model.getDocumentVersion();
-          port.setText('controller body');
-          const programmatic={...transactions.at(-1)};
-          return {
-            count:transactions.length,
-            interactive,
-            interactiveVersion,
-            programmatic,
-            finalVersion:model.getDocumentVersion(),
-            body:model.createSnapshot('atomic-5.8-e2e'),
-            scopedOnly:typeof window.markdownEditorEditorControllerPort==='undefined'
-          };
-        }finally{unsubscribe();}
-      })()`);
+      await app.loadMarkdown('controller seed', { layout: 'edit', selection: 0 });
+      await browser.page.evaluate("(()=>{const port=document.getElementById('compatibility-business-ports').markdownEditorEditorControllerPort;window.__runnerTransactions=[];window.__runnerUnsubscribe=port.subscribeTransactions(value=>window.__runnerTransactions.push(value));})()");
+      let result;
+      try {
+        await browser.page.insertText('x');
+        result = await browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorEditorControllerPort,model=window.markdownEditorDocumentModel,transactions=window.__runnerTransactions;const interactive={...transactions.at(-1)},interactiveVersion=model.getDocumentVersion();port.setText('controller body');return {count:transactions.length,interactive,interactiveVersion,programmatic:{...transactions.at(-1)},finalVersion:model.getDocumentVersion(),body:model.createSnapshot('atomic-5.8-e2e'),scopedOnly:typeof window.markdownEditorEditorControllerPort==='undefined'};})()");
+      } finally {
+        await browser.page.evaluate("window.__runnerUnsubscribe?.();delete window.__runnerUnsubscribe;delete window.__runnerTransactions");
+      }
       assert.equal(result.count, 2);
       assert.equal(result.interactive.interactive, true);
       assert.equal(result.interactive.version, result.interactiveVersion);
@@ -1366,29 +1248,14 @@ async function runAppSuite() {
 
     await test('application sidebar tabs switch one mount region and coordinate child lifecycles', async () => {
       await loadAppFixture(browser.page);
-      const result = await browser.page.evaluate(`(async()=>{
-        const host=document.getElementById('compatibility-business-ports');
-        const port=host?.markdownEditorSidebarControllerPort;
-        const tree=host?.markdownEditorFolderTreeControllerPort;
-        if(!port||!tree)throw new Error('Sidebar/Folder Tree runtime unavailable');
-        const states=[];
-        const panelState=()=>['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-panel')?.classList.contains('active'));
-        const tabState=()=>['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-tab')?.classList.contains('active'));
-        const docsBefore=document.getElementById('document-list')?.childElementCount??-1;
-        document.getElementById('sidebar-files-tab').click();
-        await Promise.resolve();
-        states.push(tree.snapshot.active);
-        const files={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab'),treeActive:tree.snapshot.active};
-        document.getElementById('sidebar-outline-tab').click();
-        await Promise.resolve();
-        states.push(tree.snapshot.active);
-        const outline={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab'),items:document.getElementById('outline-list')?.children.length??0,treeActive:tree.snapshot.active};
-        document.getElementById('sidebar-docs-tab').click();
-        await Promise.resolve();
-        const docs={active:port.activeTab,panels:panelState(),tabs:tabState(),stored:localStorage.getItem('md_editor_sidebar_tab'),count:document.getElementById('document-list')?.childElementCount??-1};
-        states.push(tree.snapshot.active);
-        return {files,outline,docs,docsBefore,states,legacyGlobal:typeof window.setSidebarTab,legacyTreeGlobal:typeof window.markdownEditorFileTree};
-      })()`);
+      await showSidebar();
+      const docsBefore = await browser.page.evaluate("document.getElementById('document-list')?.childElementCount??-1");
+      const readSidebar = () => browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorSidebarControllerPort,tree=host.markdownEditorFolderTreeControllerPort;return {active:port.activeTab,panels:['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-panel')?.classList.contains('active')),tabs:['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-tab')?.classList.contains('active')),stored:localStorage.getItem('md_editor_sidebar_tab'),treeActive:tree.snapshot.active,items:document.getElementById('outline-list')?.children.length??0,count:document.getElementById('document-list')?.childElementCount??-1};})()");
+      await browser.page.click('#sidebar-files-tab'); const files = await readSidebar();
+      await browser.page.click('#sidebar-outline-tab'); const outline = await readSidebar();
+      await browser.page.click('#sidebar-docs-tab'); const docs = await readSidebar();
+      const globals = await browser.page.evaluate("({legacyGlobal:typeof window.setSidebarTab,legacyTreeGlobal:typeof window.markdownEditorFileTree})");
+      const result={docsBefore,files:{active:files.active,panels:files.panels,tabs:files.tabs,stored:files.stored,treeActive:files.treeActive},outline,docs:{active:docs.active,panels:docs.panels,tabs:docs.tabs,stored:docs.stored,count:docs.count},states:[files.treeActive,outline.treeActive,docs.treeActive],...globals};
       assert.deepEqual(result.files, {active:'files',panels:['files'],tabs:['files'],stored:'files',treeActive:true});
       assert.equal(result.outline.active, 'outline');
       assert.deepEqual(result.outline.panels, ['outline']);
@@ -1404,9 +1271,10 @@ async function runAppSuite() {
 
     await test('application Outline uses indexed headings, persists collapse, tracks active heading, and navigates source', async () => {
       await loadAppFixture(browser.page);
+      await showSidebar();
       const source = '# Root\nroot body\n## Child\nchild body\n### Grand\ngrand body\n# Next\nnext body\n';
-      await browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)},{layout:'both',focusText:'child body'})`);
-      await browser.page.evaluate(`document.getElementById('sidebar-outline-tab').click()`);
+      await app.loadMarkdown(source, { layout: 'both', focusText: 'child body' });
+      await browser.page.click('#sidebar-outline-tab');
       await browser.page.waitFor(() => {
         const host=document.getElementById('compatibility-business-ports');
         return host?.markdownEditorOutlineControllerPort?.snapshot?.headings?.length===4
@@ -1451,13 +1319,7 @@ async function runAppSuite() {
       assert.deepEqual(initial.legacy, {renderOutline:'undefined',getMarkdownHeadings:'undefined',jumpToLine:'undefined'});
 
       const rootId = initial.headings[0].id;
-      await browser.page.evaluate(`(()=>{
-        const id=${JSON.stringify(rootId)};
-        const node=Array.from(document.querySelectorAll('#outline-list .outline-node')).find(item=>item.dataset.outlineId===id);
-        const toggle=node?.querySelector(':scope > .outline-row .outline-toggle');
-        if(!toggle)throw new Error('Atomic 6.8 Root Outline toggle unavailable');
-        toggle.click();
-      })()`);
+      await browser.page.click('#outline-list .outline-node[data-outline-id='+JSON.stringify(rootId)+'] > .outline-row .outline-toggle');
       await browser.page.waitFor(() => {
         const persisted=JSON.parse(localStorage.getItem('md_editor_outline_collapsed')||'{}');
         const node=document.querySelector('#outline-list > .outline-tree > .outline-node');
@@ -1466,17 +1328,14 @@ async function runAppSuite() {
           && node.querySelector(':scope > .outline-children')?.classList.contains('collapsed');
       }, { description: 'Atomic 6.8 Outline collapse persisted' });
 
-      await browser.page.evaluate(`document.getElementById('sidebar-docs-tab').click()`);
-      await browser.page.evaluate(`document.getElementById('sidebar-outline-tab').click()`);
+      await browser.page.click('#sidebar-docs-tab');
+      await browser.page.click('#sidebar-outline-tab');
       await browser.page.waitFor(() => document.querySelector('#outline-list > .outline-tree > .outline-node')?.classList.contains('is-collapsed')===true, {
         description: 'Atomic 6.8 Outline collapse restored after lifecycle resume'
       });
 
-      await browser.page.evaluate(`(()=>{
-        const link=Array.from(document.querySelectorAll('#outline-list .outline-link')).find(item=>item.textContent?.trim()==='Next');
-        if(!link)throw new Error('Atomic 6.8 Next Outline link unavailable');
-        link.click();
-      })()`);
+      const nextHeading = await centerByText(browser.page, '#outline-list .outline-link', 'Next');
+      await browser.page.clickAt(nextHeading.x, nextHeading.y);
       await browser.page.waitFor(() => {
         const editor=document.getElementById('editor');
         return editor?.virtualEditor?.getLineNumberAtPosition?.(editor.selectionStart)===7
@@ -1543,35 +1402,23 @@ async function runAppSuite() {
 
     await test('application code block placeholder never receives a phantom source highlight', async () => {
       const source = '```\n\n\n```\n\n';
-      await browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)},{layout:'hybrid',selection:${source.length},codeVisualEditing:true,tableVisualEditing:true})`);
+      await app.loadMarkdown(source, { layout: 'hybrid', selection: source.length, codeVisualEditing: true, tableVisualEditing: true });
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'closed code widget' });
-      const trailingPoint = await browser.page.evaluate(`(()=>{
-        const editor=document.getElementById('editor');
-        const virtualEditor=editor?.virtualEditor;
-        const position=editor?.textLength;
-        if(!virtualEditor||!Number.isInteger(position))return null;
-        virtualEditor.scrollPositionIntoView(position,'auto',0.5);
-        const rect=virtualEditor.getPositionCoordinates?.(position,1)||virtualEditor.getPositionCoordinates?.(position,-1);
-        if(!rect)return null;
-        return {
-          x:Math.max(2,rect.left+2),
-          y:rect.top+Math.max(1,rect.bottom-rect.top)/2,
-          position
-        };
-      })()`);
-      if (!trailingPoint) throw new Error('Unable to resolve final document caret point');
+      await app.revealPosition(source.length);
+      const trailingRect = await browser.page.elementRect('.cm-content > .cm-line:last-child');
+      const trailingPoint = { x: trailingRect.x + 2, y: trailingRect.y + trailingRect.height / 2 };
       await browser.page.clickAt(trailingPoint.x, trailingPoint.y);
       await browser.page.waitFor(() => {
         const editor=document.getElementById('editor');
         return editor?.selectionStart===editor?.textLength
           && editor?.selectionEnd===editor?.textLength
-          && editor?.virtualEditor?.getPresentationStats?.().sourceActiveLines===1;
+          && window.__markdownEditorE2E.snapshot().presentationStats?.sourceActiveLines===1;
       }, { description: 'trailing source active line' });
       const snapshot = await browser.page.evaluate(`(()=>{
         const widget=document.querySelector('[data-hybrid-block-type="code"]');
         const widgetRect=widget?.getBoundingClientRect();
         const active=Array.from(document.querySelectorAll('.cm-hybrid-source-active')).map(element=>{const rect=element.getBoundingClientRect();return {top:rect.top,bottom:rect.bottom,text:element.textContent||''};});
-        return {widgetTop:widgetRect?.top||0,widgetBottom:widgetRect?.bottom||0,active,presentation:document.getElementById('editor')?.virtualEditor?.getPresentationStats?.()||{}};
+        return {widgetTop:widgetRect?.top||0,widgetBottom:widgetRect?.bottom||0,active,presentation:window.__markdownEditorE2E.snapshot().presentationStats||{}};
       })()`);
       assert.equal(snapshot.presentation.codeBlocks, 1);
       assert.equal(snapshot.active.length, 1);
@@ -1629,13 +1476,8 @@ async function runAppSuite() {
         await browser.page.click('[data-hybrid-block-type="table"] td');
         const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
         await browser.page.clickAt(outside.x + 2, outside.y);
-        await browser.page.evaluate(`(()=>{
-          const editor=document.getElementById('editor');
-          const virtualEditor=editor?.virtualEditor;
-          const selection=virtualEditor?.getSelection?.();
-          if(!virtualEditor||!selection)throw new Error('Virtual editor selection is unavailable');
-          virtualEditor.replaceRange('x',selection.head,selection.head,'end');
-        })()`);
+        await app.revealText('selection alpha', { edge: 'end' });
+        await browser.page.insertText('x');
         await browser.page.evaluate('new Promise(resolve=>queueMicrotask(resolve))');
       }
       await browser.page.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(resolve,160))))');
@@ -1650,7 +1492,7 @@ async function runAppSuite() {
     await test('application Mermaid presentation stays normalized across hybrid and preview layouts', async () => {
       await loadAppFixture(browser.page);
       await setAppLayout(browser.page, 'hybrid');
-      await browser.page.evaluate(`window.__markdownEditorE2E.revealText('flowchart LR',{preserveSelection:true})`);
+      await app.revealText('flowchart LR', { preserveSelection: true });
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type=\"mermaid\"] svg')), { timeoutMs: 10000, description: 'hybrid Mermaid SVG' });
       const inspectMermaid = `selector=>{const svg=document.querySelector(selector);const style=svg?getComputedStyle(svg):null;return {role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),className:svg?.getAttribute('class')||'',heightAttribute:svg?.getAttribute('height'),inlineStyle:svg?.getAttribute('style'),maxWidth:style?.maxWidth||'',backgroundColor:style?.backgroundColor||''}}`;
       const hybrid = await browser.page.evaluate(`(${inspectMermaid})('[data-hybrid-block-type=\"mermaid\"] svg')`);
@@ -1673,7 +1515,7 @@ async function runAppSuite() {
       await browser.page.waitFor(() => !document.querySelector('[data-hybrid-block-type="code"]') && document.getElementById('editor')?.selectionEnd > document.getElementById('editor')?.selectionStart, { description: 'source range open' });
       const selectedSource = await browser.page.evaluate(`(()=>{const editor=document.getElementById('editor');return editor.value.slice(editor.selectionStart,editor.selectionEnd)})()`);
       assert.match(selectedSource, /plain code/);
-      await browser.page.evaluate(`window.__markdownEditorE2E.revealText('selection alpha',{preserveSelection:true})`);
+      await app.revealText('selection alpha', { preserveSelection: true });
       const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
       await browser.page.clickAt(outside.x + 2, outside.y);
       await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'source range close' });
@@ -1682,7 +1524,7 @@ async function runAppSuite() {
     await test('application split controllers drag, collapse and preserve compact hysteresis in the built app', async () => {
       await browser.page.setViewport({ width: 1440, height: 1000 });
       await browser.page.waitFor(() => window.innerWidth === 1440, { description: 'wide split viewport' });
-      await browser.page.evaluate(`(()=>{ setLayoutMode('both', false, false); })()`);
+      await app.setLayout('both');
       await browser.page.waitFor(() => {
         const handle=document.getElementById('resizer');
         return Boolean(handle && !handle.classList.contains('is-hidden') && handle.getBoundingClientRect().width > 0);
@@ -1741,10 +1583,7 @@ async function runAppSuite() {
       await browser.page.waitFor(() => window.innerWidth === 1440 && window.innerHeight === 1000, {
         description: 'wide viewport for sidebar resize'
       });
-      await browser.page.evaluate(`(()=>{
-        const sidebar=document.querySelector('.l-sidebar');
-        if(sidebar?.classList.contains('is-hidden')) toggleSidebar();
-      })()`);
+      await showSidebar();
       await browser.page.waitFor(() => {
         const handle=document.getElementById('sidebar-resizer');
         return Boolean(handle && !handle.classList.contains('is-hidden') && handle.getBoundingClientRect().height > 0);
@@ -1804,8 +1643,7 @@ async function runAppSuite() {
     await test('application pointer drag maps to exact editor characters', async () => {
       await loadAppFixture(browser.page);
       await setAppLayout(browser.page, 'edit');
-      await browser.page.evaluate(`(()=>{const editor=document.getElementById('editor'); const position=editor.value.indexOf('selection alpha'); editor.setSelectionRange(position,position); editor.virtualEditor.scrollPositionIntoView(position);})()`);
-      await new Promise(resolve => setTimeout(resolve, 250));
+      await app.revealText('selection alpha');
       const lineSelector = '.cm-line';
       const start = await getTextBoundary(browser.page, lineSelector, 'alpha', 'start', 'selection alpha');
       const end = await getTextBoundary(browser.page, lineSelector, 'beta', 'end', 'selection alpha');
@@ -1813,6 +1651,35 @@ async function runAppSuite() {
       const snapshot = await appSnapshot(browser.page);
       assert.equal(snapshot.selectedText.trim(), 'alpha beta');
       await setAppLayout(browser.page, 'hybrid');
+    });
+
+    await test('R15-11 application runner uses public queries and trusted pointer and keyboard input', async () => {
+      const original = 'runner alpha', addition = ' 中文🧪';
+      await app.loadMarkdown(original, { layout: 'edit', selection: original.length });
+      await browser.page.evaluate(`(() => {
+        const events = [], capture = event => { if (event.target.closest?.('.cm-content')) events.push({ type: event.type, trusted: event.isTrusted }); };
+        const types = ['pointerdown', 'keydown', 'beforeinput', 'input'];
+        for (const type of types) document.addEventListener(type, capture, true);
+        window.__runnerInputProbe = { events, destroy() { for (const type of types) document.removeEventListener(type, capture, true); } };
+      })()`);
+      try {
+        await browser.page.click('.cm-content');
+        await app.revealPosition(original.length);
+        await browser.page.pressKey('ArrowLeft');
+        await browser.page.pressKey('ArrowRight');
+        await browser.page.insertText(addition);
+        await app.waitForIdle();
+        assert.equal(await app.getEditorValue(), original + addition);
+        const snapshot = await app.snapshot(), state = await app.getState();
+        assert.equal(snapshot.documentLength, (original + addition).length);
+        assert.equal(state.activeOperations, 0); assert.equal(state.pendingWaits, 0);
+        const events = await browser.page.evaluate('window.__runnerInputProbe.events');
+        for (const type of ['pointerdown', 'keydown', 'beforeinput', 'input']) assert.ok(events.some(event => event.type === type && event.trusted), type);
+        assert.ok(events.every(event => event.trusted));
+        await writeFile(join(artifactRoot, 'r15-11-runner.json'), JSON.stringify({ snapshot, state, events }, null, 2));
+      } finally {
+        await browser.page.evaluate('window.__runnerInputProbe.destroy();delete window.__runnerInputProbe');
+      }
     });
 
     await test('application public E2E queries return readonly semantic data without feature objects', async () => {
@@ -1855,7 +1722,7 @@ async function runAppSuite() {
     });
 
     await runExportCharacterization({ page: browser.page, test, artifactRoot, applicationHost,
-      loadMarkdown: source => browser.page.evaluate(`window.__markdownEditorE2E.loadMarkdown(${JSON.stringify(source)}, {layout:'both',codeVisualEditing:true,tableVisualEditing:true})`)
+      loadMarkdown: (source, options = {}) => app.loadMarkdown(source, { layout: 'both', codeVisualEditing: true, tableVisualEditing: true, ...options })
     });
 
     if (browser.page.exceptions.length) {

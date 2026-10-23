@@ -34,8 +34,13 @@ test('responsive application verification covers every required width and short 
   assert.match(source, /focusIssues/);
   assert.match(source, /focus\(\{preventScroll:true\}\)/);
   assert.match(source, /reason:'page-scroll'/);
-  assert.equal((source.match(/if\(document\.activeElement===source\)source\.blur\(\);/g) ?? []).length, 2);
-  assert.equal((source.match(/source\?\.remove\(\);/g) ?? []).length, 2);
+  // R15-11 uses the real editor/keyboard opener for Modal Shell. Only the
+  // independent Link Preview fixture still creates and removes a focus button.
+  assert.equal((source.match(/if\(document\.activeElement===source\)source\.blur\(\);/g) ?? []).length, 1);
+  assert.equal((source.match(/source\?\.remove\(\);/g) ?? []).length, 1);
+  assert.match(source, /pressKey\(',', \{ modifiers: 2, code: 'Comma' \}\)/);
+  assert.match(source, /document\.activeElement === window\.__runnerModalOpener/);
+  assert.match(source, /delete window\.__runnerModalOpener/);
 });
 
 test('responsive shell CSS contains bounded flex and status-bar geometry', async () => {
