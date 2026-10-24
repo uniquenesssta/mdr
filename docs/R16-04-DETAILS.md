@@ -33,3 +33,11 @@ index.html在阶段2已实现最小入口，本项再次核对其标准head、�
 全仓跟踪Node测试2740/2740（362文件/16目录），失败/跳过/取消均0，目录级退出码全部0；9项HTML专项及200项风险源SHA核对通过，四项架构/旧运行时/生成文件/README门禁通过。浏览器契约11/11与最终生产包实际页面75/75通过，没有改动产品JS、CSS、模型、Rust、依赖或数据格式。全仓证据为Temp/mdr-r1604-repository-tests.log及mdr-r1604-repository/repository-audit。
 
 本项未重复Rust编译和本地原生大文档链：相关Rust/IPC/正文保存源码无变化，03的301项Rust与原生链仅作已验收基线，不冒充04同提交证据；新实现提交仍必须通过完整Windows累计CI。04保持未验收，05未开始。提交并推送现有分支后停止CI查询，等用户通知。
+
+## 正式验收（2026-10-24）
+
+实现提交804950fdc58fb973561f6a4e53c273473258a104的[CI40060322282](https://github.com/uniquenesssta/mdr/actions/runs/40060322282)七组Windows及全部步骤成功。closeout-verification.json accepted=true、commit及run精确匹配；Rust301、全仓Node2740（362文件/16目录）、HTML9、浏览器11＋75及四项门禁通过，真实WebView安全边界、导入8场景、大文档4路、原生图片与四格式写入链通过。R16-04正式收尾；系统Node24.16断连与bundled24.19通过的本地历史保持，不据后续CI反推底层原因。
+
+归档12546628442（closeout，9621字节）SHA256=22e9fc7a48c03daf4261621dab8d1a2d537eb32c9fa0a7b183261b91415906ab；12547421954（WebView，1343523字节）SHA256=476bd74cb958d57e4c4d45b17c81b87f80ea6d163e0ae95c14be62af5f077ca1，均已下载核对一致。
+
+按用户“收尾04开始05”，继续唯一codex/r16-stage执行16.5 CSS清理，保持现有主题和布局，不推进16.6。兼容挂载退出仍归16.8，独立Image Menu指针焦点发现保留原UI/Figma交接；推送后停止CI查询。

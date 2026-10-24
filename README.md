@@ -1,10 +1,12 @@
 # Markdown Editor
 
-R16-03已正式验收（52aa8f2 / CI39988412402）。R16-04已清除HTML中10个残留内联事件，保持最小入口及现有菜单交互；专项9/9、全仓2740/2740、浏览器11＋75、构建及四门禁通过。待精确提交Windows CI；16.5未开始，推送后不轮询。 [04详情](docs/R16-04-DETAILS.md)。
+R16-04已正式验收（804950f / CI40060322282）：七组Windows及全部步骤成功，同提交accepted=true、Rust301、全仓Node2740、HTML9、浏览器11＋75及原生大文档4路通过。继续codex/r16-stage开始R16-05 CSS清理；16.6未开始，推送后不轮询。 [04验收](docs/R16-04-DETAILS.md#正式验收2026-10-24)。
 
 历史与文档索引见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-24：R16-04已正式验收（804950f / CI40060322282）：七组Windows及全部步骤成功，同提交accepted=true、Rust301、全仓Node2740、HTML9、浏览器11＋75及原生大文档4路通过。继续codex/r16-stage开始R16-05 CSS清理；16.6未开始，推送后不轮询。 [04验收](docs/R16-04-DETAILS.md#正式验收2026-10-24)。
 
 - 2026-10-24：R16-04清除10项HTML内联事件，保留现有显式命令路由与界面；零事件门禁覆盖原始HTTP资产和负向注入，兼容挂载删除仍归16.8，待精确Windows CI。 [详情](docs/R16-04-DETAILS.md)。
 

@@ -1153,9 +1153,9 @@
   "currentSourceReview": {
     "stage": "R16.4",
     "date": "2026-10-24",
-    "reviewedCommit": "40cea4fb83e17c5c0b1df79c3d2b38c3f20e8f1c",
-    "record": "docs/R16-04-DETAILS.md",
-    "status": "locally-verified-pending-exact-commit-windows-ci",
+    "reviewedCommit": "804950fdc58fb973561f6a4e53c273473258a104",
+    "record": "docs/R16-04-DETAILS.md#正式验收2026-10-24",
+    "status": "accepted-exact-commit-windows-ci",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "Remove ten inert HTML inline handlers; preserve minimal index, current visible UI, external icons and ModalShell; compatibility retirement stays R16-08.",
@@ -1270,37 +1270,35 @@
         "failedSteps": []
       }
     ],
-    "implementationWindowsRun": 39988412402,
+    "implementationWindowsRun": 40060322282,
     "implementationWindowsJobs": 7,
     "currentStageAcceptance": {
-      "stage": "R16.3",
+      "stage": "R16.4",
       "date": "2026-10-24",
-      "commit": "52aa8f21851850e2a29a0acd7fdcf081c104c2da",
-      "run": 39988412402,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/39988412402",
+      "commit": "804950fdc58fb973561f6a4e53c273473258a104",
+      "run": 40060322282,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40060322282",
+      "record": "docs/R16-04-DETAILS.md#正式验收2026-10-24",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "recursiveNodePassed": 2737,
+      "recursiveNodePassed": 2740,
       "contractBrowserPassed": 11,
       "builtAppPassed": 75,
       "rustPassed": 301,
-      "globalApiPassed": 16,
-      "realFocusPassed": 1,
-      "cacheAdmissionPassed": 9,
+      "htmlCleanupPassed": 9,
       "nativeLargeImportScenariosPassed": 4,
-      "record": "docs/R16-03-DETAILS.md#正式验收2026-10-24",
       "artifacts": [
         {
-          "id": 12517067046,
+          "id": 12546628442,
           "kind": "closeout",
-          "digest": "sha256:4b6ee848277c641bb16e5ac8d52e40fcbeaac710aa8ff8b67cdce66c94bb2386",
+          "digest": "sha256:22e9fc7a48c03daf4261621dab8d1a2d537eb32c9fa0a7b183261b91415906ab",
           "downloadDigestVerified": true
         },
         {
-          "id": 12517311255,
+          "id": 12547421954,
           "kind": "webview",
-          "digest": "sha256:c1e080342335d076a33ffa226e1f62754499a50e66f6049c43be62b006afd877",
+          "digest": "sha256:476bd74cb958d57e4c4d45b17c81b87f80ea6d163e0ae95c14be62af5f077ca1",
           "downloadDigestVerified": true
         }
       ]
@@ -1310,7 +1308,7 @@
       "baselineCommit": "40cea4fb83e17c5c0b1df79c3d2b38c3f20e8f1c",
       "branch": "codex/r16-stage",
       "record": "docs/R16-04-DETAILS.md",
-      "status": "locally-verified-pending-exact-commit-windows-ci",
+      "status": "accepted-exact-commit-windows-ci",
       "scope": "Remove ten inert HTML inline handlers; preserve minimal index, current visible UI, external icons and ModalShell; compatibility retirement stays R16-08.",
       "newScenariosDefined": 3,
       "localNewScenariosPassed": 3,
@@ -1322,7 +1320,7 @@
       "businessGlobalWrites": 0,
       "productionInlineEvents": 0,
       "removedHtmlHandlers": 10,
-      "exactCommitWindowsPending": true,
+      "exactCommitWindowsPending": false,
       "localContractBrowserPassed": 11,
       "frontendSourceSha256": "f8ed6b0de4d8680f67f2d40f7166f999152d42a06a6cae1fa5769bcc96d369f5",
       "ciPublicHtmlTriggers": true,
@@ -4836,6 +4834,39 @@
             "id": 12510001649,
             "kind": "webview",
             "digest": "sha256:d73196b534dec58d2efe73bd3bf74645389fa94441c271e736d0780130ff0d35",
+            "downloadDigestVerified": true
+          }
+        ]
+      },
+      {
+        "stage": "R16.3",
+        "date": "2026-10-24",
+        "commit": "52aa8f21851850e2a29a0acd7fdcf081c104c2da",
+        "run": 39988412402,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/39988412402",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "recursiveNodePassed": 2737,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 75,
+        "rustPassed": 301,
+        "globalApiPassed": 16,
+        "realFocusPassed": 1,
+        "cacheAdmissionPassed": 9,
+        "nativeLargeImportScenariosPassed": 4,
+        "record": "docs/R16-03-DETAILS.md#正式验收2026-10-24",
+        "artifacts": [
+          {
+            "id": 12517067046,
+            "kind": "closeout",
+            "digest": "sha256:4b6ee848277c641bb16e5ac8d52e40fcbeaac710aa8ff8b67cdce66c94bb2386",
+            "downloadDigestVerified": true
+          },
+          {
+            "id": 12517311255,
+            "kind": "webview",
+            "digest": "sha256:c1e080342335d076a33ffa226e1f62754499a50e66f6049c43be62b006afd877",
             "downloadDigestVerified": true
           }
         ]
