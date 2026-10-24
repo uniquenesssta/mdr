@@ -1,8 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { basename, dirname, extname, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { discoverProductionFiles } from '../stage-01/module-inventory-core.mjs';
+import { auditModuleNaming } from './module-naming.mjs';
 import {
   getGitHead,
   getLineAndColumn,
@@ -37,7 +38,6 @@ const REQUIRED_GENERATED_IGNORES = [
   'artifacts/', '.cargo-target/', '.windows-driver-host/', '.windows-driver-host.zip',
   '.markdown-editor-windows-driver-host/', '.markdown-editor-windows-driver-host.zip', 'runtime.log'
 ];
-const LEGACY_SUFFIX_PATTERN = /(?:^|[-_.])(old|new|v\d+|final|copy)$/i;
 const STRICT_IMPORT_ZONES = [
   'src/app/',
   'src/model-kernel/',
@@ -228,13 +228,6 @@ export async function checkLegacyRuntime({
   return issues;
 }
 
-function shouldScanLegacySuffix(path) {
-  if (path.startsWith('docs/')) return false;
-  if (path.startsWith('.git/')) return false;
-  if (path === 'package-lock.json') return false;
-  return /^(?:src|public|tests|scripts|src-tauri|\.github)(?:\/|$)|^(?:index\.html|vite\.config\.js|package\.json)$/.test(path);
-}
-
 export async function checkGeneratedFiles({
   root = process.cwd(),
   baselinePath = DEFAULT_BASELINE_PATH
@@ -309,17 +302,8 @@ export async function checkGeneratedFiles({
     }
   }
 
-  for (const path of files.filter(shouldScanLegacySuffix)) {
-    const extension = extname(path);
-    const stem = basename(path, extension);
-    const match = stem.match(LEGACY_SUFFIX_PATTERN);
-    if (match) {
-      issues.push(architectureIssue(
-        'legacy-file-suffix',
-        path,
-        `File name uses forbidden migration suffix "${match[1]}".`
-      ));
-    }
+  for (const issue of (await auditModuleNaming({ root })).issues) {
+    issues.push(architectureIssue(issue.rule, issue.path, issue.message, { detail: issue.detail }));
   }
   return issues;
 }

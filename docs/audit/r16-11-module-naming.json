@@ -1,0 +1,431 @@
+{
+  "baselineCommit": "aac985b3181df63507c88bbc4e591a4b91f4d4d2",
+  "schemaVersion": 1,
+  "stage": "R16.11",
+  "scope": "Tracked file/directory names, actual production discoveries, production modules, build scripts and reusable test hosts. No file mutation or semantic equivalence claim.",
+  "trackedPaths": 1359,
+  "productionFiles": 532,
+  "moduleCandidates": 591,
+  "inputSha256": "490ff4f08bbf8cd720f54049d945b25929b99fa70b0c58f2f853ff222e7bb46a",
+  "nameFindings": [
+    {
+      "path": "docs/audit/windows-validation-final.json",
+      "component": "windows-validation-final.json",
+      "decision": "legitimate",
+      "reason": "Historical Windows acceptance evidence; final identifies that recorded decision, not an alternative implementation."
+    },
+    {
+      "path": "docs/rewrite-progress/stage-02/02-11-old-shell-cutover.md",
+      "component": "02-11-old-shell-cutover.md",
+      "decision": "legitimate",
+      "reason": "Historical Stage 2 cutover record describing the retired shell."
+    },
+    {
+      "path": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
+      "component": "stage-09-final-sync-legacy-removal.test.mjs",
+      "decision": "legitimate",
+      "reason": "R9-12 architecture cutover assertions; final identifies the completed migration task."
+    },
+    {
+      "path": "tests/stage-09-final-sync-legacy-removal.test.mjs",
+      "component": "stage-09-final-sync-legacy-removal.test.mjs",
+      "decision": "legitimate",
+      "reason": "R9-12 runtime sync behavior and disposal scenarios; independent of the architecture assertions."
+    }
+  ],
+  "identicalModules": [],
+  "sameBasenames": [
+    {
+      "name": "command-registry.js",
+      "paths": [
+        "src/app/commands/command-registry.js",
+        "src/shared/commands/command-registry.js"
+      ],
+      "decision": "legitimate",
+      "reason": "App registry owns typed command IDs and single-handler resolution; shared registry owns injected callback batches, atomic registration and terminal disposal. Separate contracts and instances.",
+      "owners": [
+        {
+          "path": "src/app/commands/command-registry.js",
+          "responsibility": "Unique command-handler ownership, duplicate prevention, exact lookup and idempotent unregister.",
+          "stateOwner": "command-registry"
+        },
+        {
+          "path": "src/shared/commands/command-registry.js",
+          "responsibility": "Own atomic explicit callback registrations with ownership-safe disposal and no domain state.",
+          "stateOwner": "Registered command callbacks"
+        }
+      ]
+    },
+    {
+      "name": "command.rs",
+      "paths": [
+        "src-tauri/src/external_link/command.rs",
+        "src-tauri/src/performance_log/command.rs",
+        "src-tauri/src/web_fetch/command.rs"
+      ],
+      "decision": "legitimate",
+      "reason": "Rust module scopes distinguish link opening, telemetry receipt and HTTP fetch command adapters.",
+      "owners": [
+        {
+          "path": "src-tauri/src/external_link/command.rs",
+          "responsibility": "External-link command validation and platform-open dispatch.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/performance_log/command.rs",
+          "responsibility": "Frontend log batch command and writer result projection.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/web_fetch/command.rs",
+          "responsibility": "HTTP command orchestration and telemetry through validation, client and response owners.",
+          "stateOwner": "none"
+        }
+      ]
+    },
+    {
+      "name": "index.js",
+      "paths": [
+        "src/features/documents/index.js",
+        "src/features/e2e/index.js",
+        "src/features/editor/index.js",
+        "src/features/export/index.js",
+        "src/features/help/index.js",
+        "src/features/hybrid-editor/index.js",
+        "src/features/import/index.js",
+        "src/features/layout/index.js",
+        "src/features/link-preview/index.js",
+        "src/features/menu/index.js",
+        "src/features/persistence/index.js",
+        "src/features/preview/index.js",
+        "src/features/settings/index.js",
+        "src/features/sidebar/index.js",
+        "src/features/sync/index.js",
+        "src/features/telemetry/index.js",
+        "src/features/window/index.js",
+        "src/i18n/index.js",
+        "src/model-kernel/index.js",
+        "src/platform/index.js",
+        "src/platform/ports/index.js",
+        "src/theme/index.js",
+        "src/ui/dom/index.js"
+      ],
+      "decision": "legitimate",
+      "reason": "Conventional directory public entry/module declaration; relative imports and enclosing module scope distinguish ownership.",
+      "owners": [
+        {
+          "path": "src/features/documents/index.js",
+          "responsibility": "Public Stage 5 Documents contract exporting domain, session/application/infrastructure contracts, scoped compatibility ports and Atomic 5.12 document Views.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/e2e/index.js",
+          "responsibility": "Public E2E semantic query and explicit installation entry.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/editor/index.js",
+          "responsibility": "Public Stage 5 Editor contract exporting neutral infrastructure, application services, commands, Views and only the scoped controller/UI bridges still required by later-stage classic callers.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/export/index.js",
+          "responsibility": "Public Export request, task, cancellation, progress, complete document, enhancement and shared document-style boundary.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/help/index.js",
+          "responsibility": "Public Help feature entry exporting composition, controller, state, content registry and scoped compatibility mount contracts.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/hybrid-editor/index.js",
+          "responsibility": "Public Stage 8 Hybrid Editor contract exporting Session, Activation, Source Edit, lifecycle/shared UI, migrated widgets/presentation plus final decoration/editor application coordinators and scoped CodeMirror compatibility capability.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/import/index.js",
+          "responsibility": "Public file/image/drop/web import boundaries and scoped classic migration ports.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/layout/index.js",
+          "responsibility": "Public Stage 6 Layout contract for runtime layout state, responsive thresholds and the scoped classic migration bridge.",
+          "stateOwner": "Import-only facade; no DOM, storage or runtime state ownership."
+        },
+        {
+          "path": "src/features/link-preview/index.js",
+          "responsibility": "Public link preview capability with explicit instance lifecycle and no import-time overlay or subscriptions.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/menu/index.js",
+          "responsibility": "Stable public entry for the Menu feature.",
+          "stateOwner": "None."
+        },
+        {
+          "path": "src/features/persistence/index.js",
+          "responsibility": "Public Stage 10 Persistence contract through R10-12 exposing save status, manual/autosave/load/close-save application boundaries plus browser/native persistence specialists; Save/Autosave classic bridges are retired.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/preview/index.js",
+          "responsibility": "Public preview feature entry.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/settings/index.js",
+          "responsibility": "Public Settings contract exporting domain, sections, Repository, Store, Settings UI/application composition and the scoped classic Store bridge.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/sidebar/index.js",
+          "responsibility": "Public Stage 6 Sidebar entry exposing Atomic 6.7 state, tab controller and scoped compatibility bridge only.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/sync/index.js",
+          "responsibility": "Public Stage 9 Sync contract exposing final scroll and selection owners through R9-12; frozen selection mapping remains composition-injected from model-kernel.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/telemetry/index.js",
+          "responsibility": "Public Telemetry Recorder, privacy minimization, AggregationBuffer, LongTaskObserver and RuntimeSnapshotRecorder capabilities.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/features/window/index.js",
+          "responsibility": "Public window feature entry.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/i18n/index.js",
+          "responsibility": "Public entry for locale registry, I18n Service, Settings Locale Controller, Translation Bindings and scoped classic I18n compatibility mount.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/model-kernel/index.js",
+          "responsibility": "Stable explicit public facade for frozen JavaScript model contracts.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/platform/index.js",
+          "responsibility": "Stable public entry for business-neutral platform contracts, immutable runtime detection, adapters and capability-driven platform composition.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/platform/ports/index.js",
+          "responsibility": "Single internal public entry for platform port factories and immutable method catalogs.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/theme/index.js",
+          "responsibility": "Public Theme feature entry exporting Theme Service and Theme Toggle Controller contracts.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src/ui/dom/index.js",
+          "responsibility": "Stable explicit public entry for bounded DOM primitives without implementation accumulation.",
+          "stateOwner": "none"
+        }
+      ]
+    },
+    {
+      "name": "mod.rs",
+      "paths": [
+        "src-tauri/src/document_store/chunks/mod.rs",
+        "src-tauri/src/document_store/commands/mod.rs",
+        "src-tauri/src/document_store/index/mod.rs",
+        "src-tauri/src/document_store/journal/mod.rs",
+        "src-tauri/src/document_store/mod.rs",
+        "src-tauri/src/document_store/snapshot/mod.rs",
+        "src-tauri/src/external_link/mod.rs",
+        "src-tauri/src/local_file/mod.rs",
+        "src-tauri/src/performance_log/mod.rs",
+        "src-tauri/src/web_fetch/mod.rs"
+      ],
+      "decision": "legitimate",
+      "reason": "Conventional directory public entry/module declaration; relative imports and enclosing module scope distinguish ownership.",
+      "owners": [
+        {
+          "path": "src-tauri/src/document_store/chunks/mod.rs",
+          "responsibility": "Public boundary for chunk reads and snapshot upload sessions.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/document_store/commands/mod.rs",
+          "responsibility": "Public command-module boundary.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/document_store/index/mod.rs",
+          "responsibility": "Public boundary for index construction and search.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/document_store/journal/mod.rs",
+          "responsibility": "Public boundary for journal append, replay and recovery.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/document_store/mod.rs",
+          "responsibility": "Public directory boundary for the native document-store subsystem.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/document_store/snapshot/mod.rs",
+          "responsibility": "Public boundary for dual-slot snapshots.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/external_link/mod.rs",
+          "responsibility": "Feature module composition and test wiring.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/local_file/mod.rs",
+          "responsibility": "Public local-file directory boundary exposing commands and stable DTOs without runtime implementation.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/performance_log/mod.rs",
+          "responsibility": "Backend performance measurement envelopes and log module composition.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/web_fetch/mod.rs",
+          "responsibility": "Feature module composition and test wiring.",
+          "stateOwner": "none"
+        }
+      ]
+    },
+    {
+      "name": "paths.rs",
+      "paths": [
+        "src-tauri/src/document_store/paths.rs",
+        "src-tauri/src/performance_log/paths.rs"
+      ],
+      "decision": "legitimate",
+      "reason": "Document-store slot paths and per-process telemetry log paths belong to separate storage domains.",
+      "owners": [
+        {
+          "path": "src-tauri/src/document_store/paths.rs",
+          "responsibility": "Stable native document-store path layout.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/performance_log/paths.rs",
+          "responsibility": "Development log directory policy, UTC session filename and per-process cached file identity.",
+          "stateOwner": "performance-log-session-path"
+        }
+      ]
+    },
+    {
+      "name": "search.rs",
+      "paths": [
+        "src-tauri/src/document_store/commands/search.rs",
+        "src-tauri/src/document_store/index/search.rs"
+      ],
+      "decision": "legitimate",
+      "reason": "Tauri search adapter dispatches store work; index search implements UTF-16 query matching.",
+      "owners": [
+        {
+          "path": "src-tauri/src/document_store/commands/search.rs",
+          "responsibility": "Tauri adapter for native document search.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/document_store/index/search.rs",
+          "responsibility": "UTF-16-aware indexed text search.",
+          "stateOwner": "none"
+        }
+      ]
+    },
+    {
+      "name": "types.rs",
+      "paths": [
+        "src-tauri/src/document_store/types.rs",
+        "src-tauri/src/local_file/types.rs"
+      ],
+      "decision": "legitimate",
+      "reason": "Document-store and local-file transport DTOs belong to separate native APIs.",
+      "owners": [
+        {
+          "path": "src-tauri/src/document_store/types.rs",
+          "responsibility": "Stable document-store DTO and Serde wire schemas.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/local_file/types.rs",
+          "responsibility": "Stable camelCase local-file read/write wire DTO definitions without behavior.",
+          "stateOwner": "none"
+        }
+      ]
+    },
+    {
+      "name": "validation.rs",
+      "paths": [
+        "src-tauri/src/document_store/validation.rs",
+        "src-tauri/src/external_link/validation.rs",
+        "src-tauri/src/web_fetch/validation.rs"
+      ],
+      "decision": "legitimate",
+      "reason": "Document IDs, external-link schemes and HTTP/public-address admission validate separate request contracts.",
+      "owners": [
+        {
+          "path": "src-tauri/src/document_store/validation.rs",
+          "responsibility": "Document identifier and request validation.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/external_link/validation.rs",
+          "responsibility": "Pure external-link trimming, URL parsing, four-scheme admission and stable validation errors.",
+          "stateOwner": "none"
+        },
+        {
+          "path": "src-tauri/src/web_fetch/validation.rs",
+          "responsibility": "Pure HTTP(S) input, redirect scheme and public address policy.",
+          "stateOwner": "none"
+        }
+      ]
+    },
+    {
+      "name": "writer.rs",
+      "paths": [
+        "src-tauri/src/document_store/snapshot/writer.rs",
+        "src-tauri/src/performance_log/writer.rs"
+      ],
+      "decision": "legitimate",
+      "reason": "Atomic snapshot publication and serialized JSONL append have different formats, locks and recovery contracts.",
+      "owners": [
+        {
+          "path": "src-tauri/src/document_store/snapshot/writer.rs",
+          "responsibility": "Ordered atomic snapshot writer.",
+          "stateOwner": "snapshot-files"
+        },
+        {
+          "path": "src-tauri/src/performance_log/writer.rs",
+          "responsibility": "Single serialized JSONL append and rollback boundary, full prevalidation, process file cap and uncertain-write isolation.",
+          "stateOwner": "performance-log-write-lock"
+        }
+      ]
+    }
+  ],
+  "schemaMetadata": {
+    "paths": [
+      "src-tauri/gen/schemas/desktop-schema.json",
+      "src-tauri/gen/schemas/windows-schema.json"
+    ],
+    "sha256": [
+      "b5c6e214b83d5446a912790522469085fa1a51e4c72136de8d4782227669efdd",
+      "b5c6e214b83d5446a912790522469085fa1a51e4c72136de8d4782227669efdd"
+    ],
+    "reason": "Tauri-generated desktop and Windows schema metadata; not executable modules or a copied product implementation."
+  },
+  "limitations": [
+    "Exact content and scoped basenames identify copy candidates, not arbitrary semantic equivalence.",
+    "Historical records, fixed data fixtures and ignored local outputs are not executable implementations.",
+    "Empty modules have no implementation body; equality alone does not establish duplicate business ownership."
+  ],
+  "issues": []
+}

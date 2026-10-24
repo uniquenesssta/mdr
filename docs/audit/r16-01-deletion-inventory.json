@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "24bd196a751394c382076d54078a2218d039cd99",
+  "baselineCommit": "aac985b3181df63507c88bbc4e591a4b91f4d4d2",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "5b96adc0c4592f09ffd0338d99b896536c71659676079e469120548ee294430c"
+      "sha256": "007490474f212718f240ae1f3af09769664cb66fdf794b9630b55b7f4686571c"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -227,11 +227,15 @@
     },
     {
       "path": "scripts/architecture/checks.mjs",
-      "sha256": "e272bc37591a6f327373e874d6f484a83cb0eed177f99748041a98be5a9e9219"
+      "sha256": "cab4ee0f34f41e19c4016d9d7ad7444399fdf08df2e4a006afd397119590c034"
     },
     {
       "path": "scripts/architecture/cli.mjs",
       "sha256": "495fda8311336d0c609789e4e7181cf55cda0c50fb3389067945f4bdb8ca919a"
+    },
+    {
+      "path": "scripts/architecture/module-naming.mjs",
+      "sha256": "6a403ad747f0648a9c6ee31e5152620efbc94edea00a352c082a7ed0b7597efc"
     },
     {
       "path": "scripts/architecture/repository.mjs",
@@ -3806,6 +3810,10 @@
       "sha256": "c8fe8c528cb190b9fd4373b1772ba987293105e43a5b2262e6987cc1983f7e32"
     },
     {
+      "path": "tests/stage-16-module-naming.test.mjs",
+      "sha256": "e52825d3b4301b2e66fed79e0389fd5c212c4db30602b74b340e739902e6660e"
+    },
+    {
       "path": "tests/stage-16-runtime-cleanup.test.mjs",
       "sha256": "5dba9d846489ad99dc9dc1e32e8faecf4d3d7ae883b50f83db959ea99c5d563a"
     },
@@ -4434,7 +4442,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "a118c09a134f980aca046cf8541db4039593ad9bd5d46045fc0506b5ee168cd0",
+  "inputSha256": "70cb079a316388c893de0c9209683ba629461844cdc2f7e719377b11c127d5b3",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -4980,7 +4988,7 @@
   "uncertainties": [
     {
       "from": "scripts/architecture/checks.mjs",
-      "line": 443,
+      "line": 427,
       "kind": "computed-import"
     },
     {
