@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
 import { readFile } from '../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,7 +13,7 @@ test('Atomic 6.7 exposes Sidebar state/tab/compatibility through the public Side
   const index = await read('src/features/sidebar/index.js');
   assert.match(index, /createSidebarState/);
   assert.match(index, /createSidebarTabController/);
-  assert.match(index, /mountClassicSidebarControllerPort/);
+  assert.doesNotMatch(index, /mountClassicSidebarControllerPort/);
 });
 
 test('Atomic 6.7 keeps classic tab state, persistence and inline click authority removed after Atomic 7.14 Preview deletion', async () => {
@@ -20,7 +21,7 @@ test('Atomic 6.7 keeps classic tab state, persistence and inline click authority
     read('public/app/core.js'),
     read('public/app/bootstrap.js'),
     read('src/features/preview/application/preview-controller.js'),
-    read('public/compatibility/business-content.html')
+    readCurrentViewMarkup()
   ]);
   for (const source of [core, bootstrap, previewController]) {
     assert.doesNotMatch(source, /\bactiveSidebarTab\b/);
@@ -38,7 +39,7 @@ test('Atomic 6.7 composition still owns tab mount switching while Documents keep
   ]);
   assert.match(main, /createSidebarState/);
   assert.match(main, /createSidebarTabController/);
-  assert.match(main, /mountClassicSidebarControllerPort/);
+  assert.doesNotMatch(main, /mountClassicSidebarControllerPort/);
   assert.match(main, /registerLifecycle\('files', folderTreeController\)/);
   assert.match(main, /registerLifecycle\('outline', outlineController\)/);
   assert.match(main, /sidebarTabController\.start\(\)/);
@@ -62,7 +63,7 @@ test('Atomic 6.7 Sidebar tab modules avoid direct browser-global authority', asy
   for (const path of [
     'src/features/sidebar/state/sidebar-state.js',
     'src/features/sidebar/tabs/sidebar-tab-controller.js',
-    'src/features/sidebar/compatibility/classic-sidebar-controller-port.js'
+    'src/features/sidebar/index.js'
   ]) {
     const source = await read(path);
     assert.doesNotMatch(source, /\bwindow\s*[.[]/);

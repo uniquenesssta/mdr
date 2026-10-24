@@ -289,6 +289,14 @@ jobs:
         shell: bash
         run: node --test tests/stage-15-log-cleanup.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/log-cleanup.log"
 
+      - name: R16-08 retired compatibility, model binding and actual UI ownership
+        if: ${{ !cancelled() }}
+        run: |
+          node --test tests/stage-16-compatibility-retirement.test.mjs tests/e2e/compatibility-retirement.test.mjs \
+            2>&1 | tee "$RUNNER_TEMP/r12-14/compatibility-retirement-tests.log"
+          grep -Eq 'tests 6' "$RUNNER_TEMP/r12-14/compatibility-retirement-tests.log"
+          grep -Eq 'pass 6' "$RUNNER_TEMP/r12-14/compatibility-retirement-tests.log"
+          grep -Eq 'fail 0' "$RUNNER_TEMP/r12-14/compatibility-retirement-tests.log"
       - name: R16-07 feature-owned browser telemetry, E2E and link lifetimes
         if: ${{ !cancelled() }}
         run: node --test tests/stage-16-runtime-cleanup.test.mjs tests/stage-15-telemetry-lifecycle.test.mjs tests/stage-15-e2e-installation.test.mjs tests/stage-16-global-api.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/runtime-cleanup-tests.log"

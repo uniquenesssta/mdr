@@ -1,10 +1,11 @@
+import { evaluateApplication } from './application-inspector.mjs';
 // Explicit scenario migration adapter. Aliases are lexical to each test
 // expression; they call the actual scoped commands with test metadata and never
 // reinstall retired production globals or replace a renderer/format owner.
 export function evaluateExport(page,expression) {
   if(typeof expression!=='string')return page.evaluate(expression);
-  return page.evaluate(`(() => {
-    const exportHost=document.getElementById('compatibility-business-ports');
+  return evaluateApplication(page, `(() => {
+    const exportHost=applicationCapabilities;
     const commands=exportHost.markdownEditorExportCommandPort;
     const filenameInput=document.getElementById('filename'),editor=document.getElementById('editor'),preview=document.getElementById('preview');
     let exportDirectory=exportHost.markdownEditorSettingsStorePort.get('exportDirectory');

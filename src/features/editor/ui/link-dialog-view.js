@@ -6,13 +6,7 @@
  * Lifecycle: Explicit View with idempotent destroy(); closes modal, clears pending state and removes listeners.
  */
 import { createEventScope } from '../../../ui/dom/index.js';
-const OPEN_EVENT = 'markdown-editor:modal-shell-open';
-const CLOSE_EVENT = 'markdown-editor:modal-shell-close';
-function modal(root, type, detail) {
-  const EventCtor = root.ownerDocument?.defaultView?.CustomEvent || globalThis.CustomEvent;
-  root.dispatchEvent(new EventCtor(type, { detail }));
-  if (detail.error) throw detail.error;
-}
+import { ModalShell } from '../../../ui/components/modal-shell.js';
 export function createLinkDialogView({
   root,
   selection,
@@ -27,15 +21,17 @@ export function createLinkDialogView({
   if (!selection || typeof selection.snapshot !== 'function' || typeof selection.selectedText !== 'function') throw new TypeError('Link Dialog View requires Selection Service.');
   if (typeof insertLink !== 'function') throw new TypeError('Link Dialog View requires insertLink command.');
   const events = createEventScope();
+  const shell = new ModalShell(root, { panel: root.firstElementChild });
+  try {
   const input = root.querySelector('#link-url-input');
   let pending = null;
   let destroyed = false;
-  const close = () => modal(root, CLOSE_EVENT, { reason: 'feature-close' });
+  const close = () => shell.close('feature-close');
   const open = () => {
     const snapshot = selection.snapshot();
     pending = Object.freeze({ selection: snapshot, label: selection.selectedText(snapshot) || fallbackLabel });
     if (input) input.value = defaultUrl;
-    modal(root, OPEN_EVENT, { options: { initialFocus: input, onClose: () => { pending = null; focus?.focus?.({ preventScroll: true }); } } });
+    shell.open(null, { labelledBy: 'link-modal-title',  initialFocus: input, onClose: () => { pending = null; focus?.focus?.({ preventScroll: true }); } });
     input?.select?.();
   };
   const confirm = () => {
@@ -54,5 +50,12 @@ export function createLinkDialogView({
     if (action === 'confirm') confirm();
   });
   events.listen(input, 'keydown', event => { if (event.key === 'Enter') { event.preventDefault?.(); confirm(); } });
-  return Object.freeze({ open, close, confirm, destroy() { if (destroyed) return; destroyed = true; pending = null; try { close(); } catch (_) {} events.destroy(); } });
+  return Object.freeze({ open, close, confirm, destroy() { if (destroyed) return; destroyed = true; pending = null; const errors = []; for (const action of [() => close(), () => events.destroy(), () => shell.destroy()]) try { action(); } catch (error) { errors.push(error); } if (errors.length) throw new AggregateError(errors, 'Editor dialog cleanup failed.'); } });
+  } catch (error) {
+    const errors = [error];
+    try { events.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    try { shell.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    if (errors.length > 1) throw new AggregateError(errors, 'Editor dialog construction failed.');
+    throw error;
+  }
 }

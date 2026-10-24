@@ -5,16 +5,15 @@
  */
 
 function getDocumentLength(source) {
-  return Math.max(0, Number(source?.getTextLength?.() ?? source?.textLength) || 0);
+  return Math.max(0, Number(source.getTextLength()) || 0);
 }
 
 function getDocumentVersion(source) {
-  return Math.max(0, Number(source?.getDocumentVersion?.() ?? source?.virtualEditor?.getDocumentVersion?.()) || 0);
+  return Math.max(0, Number(source.getDocumentVersion()) || 0);
 }
 
 function createSnapshot(source, reason) {
-  if (typeof source?.createSnapshot === 'function') return source.createSnapshot(reason);
-  return String(source?.value ?? '');
+  return source.createSnapshot(reason);
 }
 
 function materializeLoadedContent(restored) {

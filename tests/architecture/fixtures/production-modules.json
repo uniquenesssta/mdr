@@ -28,16 +28,6 @@
       false
     ],
     [
-      "public/compatibility/business-content.html",
-      "html-shell",
-      "ui-compatibility",
-      "Existing business DOM slots excluding independently owned image export modal/stage; Menu structure retained without export inline handlers.",
-      "none",
-      "fetched-template",
-      "remove-after-migration",
-      false
-    ],
-    [
       "src-tauri/build.rs",
       "rust-build-script",
       "build",
@@ -768,56 +758,6 @@
       false
     ],
     [
-      "src/features/documents/compatibility/classic-document-controller-port.js",
-      "esm-module",
-      "documents-compatibility",
-      "Scoped temporary DocumentSessionController bridge for remaining classic UI callers without copying lifecycle/session/model state.",
-      "classic-document-controller-port-mount",
-      "explicit-instance",
-      "remove-with-classic-document-callers",
-      false
-    ],
-    [
-      "src/features/documents/compatibility/classic-document-domain-port.js",
-      "esm-module",
-      "documents-compatibility",
-      "Scoped temporary pure document-domain bridge for remaining classic document callers without creating window/global document state.",
-      "classic-document-domain-port-mount",
-      "explicit-instance",
-      "remove-with-classic-document-callers",
-      false
-    ],
-    [
-      "src/features/documents/compatibility/classic-document-session-port.js",
-      "esm-module",
-      "documents-compatibility",
-      "Scoped temporary DocumentSessionStore bridge for remaining classic document callers without exposing document body or creating window/global session state.",
-      "classic-document-session-port-mount",
-      "explicit-instance",
-      "remove-with-classic-document-callers",
-      false
-    ],
-    [
-      "src/features/documents/compatibility/classic-document-ui-command-port.js",
-      "esm-module",
-      "documents-compatibility",
-      "Scoped transitional command registry for document UI actions whose application workflows remain classic after Atomic 5.12; owns callbacks only.",
-      "classic-document-ui-command-port-mount",
-      "explicit-instance",
-      "remove-with-classic-document-callers",
-      false
-    ],
-    [
-      "src/features/documents/compatibility/classic-recent-files-port.js",
-      "esm-module",
-      "documents-compatibility",
-      "Scoped temporary RecentFilesRepository bridge for remaining classic startup/menu callers without owning recent-file state or DOM.",
-      "classic-recent-files-port-mount",
-      "explicit-instance",
-      "remove-with-classic-recent-files-callers",
-      false
-    ],
-    [
       "src/features/documents/domain/document-identity.js",
       "esm-module",
       "documents-domain",
@@ -1108,26 +1048,6 @@
       false
     ],
     [
-      "src/features/editor/compatibility/classic-editor-controller-port.js",
-      "esm-module",
-      "editor-compatibility",
-      "Scoped temporary Editor Controller bridge for remaining classic UI callers without owning editor text, model state or raw CodeMirror objects.",
-      "classic-editor-controller-port-mount",
-      "explicit-instance",
-      "remove-with-classic-editor-callers",
-      false
-    ],
-    [
-      "src/features/editor/compatibility/classic-editor-ui-command-port.js",
-      "esm-module",
-      "editor-compatibility",
-      "Scoped transitional command registry for editor shell actions still owned by classic workflows after Atomic 5.12; owns callbacks only.",
-      "classic-editor-ui-command-port-mount",
-      "explicit-instance",
-      "remove-with-classic-editor-callers",
-      false
-    ],
-    [
       "src/features/editor/index.js",
       "esm-facade",
       "editor-contract",
@@ -1275,16 +1195,6 @@
       "table-dialog-view-state",
       "explicit-instance",
       "retain",
-      false
-    ],
-    [
-      "src/features/help/compatibility/classic-help-port.js",
-      "esm-module",
-      "help-compatibility",
-      "Scoped temporary Help Controller bridge for remaining classic startup callers without creating window/global Help functions.",
-      "classic-help-port-mount",
-      "explicit-instance",
-      "remove-after-migration",
       false
     ],
     [
@@ -1535,16 +1445,6 @@
       "none",
       "pure-view-build",
       "retain",
-      false
-    ],
-    [
-      "src/features/hybrid-editor/compatibility/classic-hybrid-source-edit-controller-port.js",
-      "esm-module",
-      "hybrid-editor-compatibility",
-      "Scoped per-view bridge exposing the Source Edit Controller to remaining legacy hybrid widgets without copying source range or Session state.",
-      "classic-hybrid-source-edit-controller-port-mount",
-      "explicit-instance",
-      "remove-with-legacy-hybrid-callers",
       false
     ],
     [
@@ -1998,16 +1898,6 @@
       false
     ],
     [
-      "src/features/persistence/compatibility/classic-save-status-store-port.js",
-      "esm-module",
-      "persistence-compatibility",
-      "Scoped temporary SaveStatusStore bridge for remaining classic save/status callers without copying canonical persistence status state.",
-      "classic-save-status-store-port-mount",
-      "explicit-instance",
-      "remove-after-migration",
-      false
-    ],
-    [
       "src/features/persistence/index.js",
       "esm-facade",
       "persistence-contract",
@@ -2078,16 +1968,6 @@
       false
     ],
     [
-      "src/features/preview/application/preview-command-handler.js",
-      "esm-module",
-      "preview-application",
-      "Scoped compatibility command and policy facade over the single PreviewController without copying Preview state or virtual-window state.",
-      "none",
-      "explicit-instance",
-      "retain-until-classic-preview-callers-removed",
-      false
-    ],
-    [
       "src/features/preview/application/preview-controller.js",
       "esm-module",
       "preview-application",
@@ -2095,66 +1975,6 @@
       "preview-controller-view-mode-and-count-timer",
       "explicit-instance",
       "retain",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-enhancement-coordinator-port.js",
-      "esm-module",
-      "preview-compatibility",
-      "Scoped temporary Preview Enhancement Coordinator bridge for classic preview callers without copying queue, generation or scheduler state.",
-      "classic-preview-enhancement-coordinator-port-mount",
-      "explicit-instance",
-      "remove-with-classic-preview-callers",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-focus-controller-port.js",
-      "esm-module",
-      "preview-compatibility",
-      "Scoped temporary Preview Focus Controller bridge for classic outline/cursor callers without copying focus state.",
-      "classic-preview-focus-controller-port-mount",
-      "explicit-instance",
-      "remove-with-classic-preview-callers",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-layout-stability-port.js",
-      "esm-module",
-      "preview-compatibility",
-      "Scoped temporary Preview Layout Stability bridge for classic Stage 7 callers without owning observer, geometry or scheduler state.",
-      "classic-preview-layout-stability-port-mount",
-      "explicit-instance",
-      "remove-with-classic-preview-callers",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-presentation-port.js",
-      "esm-module",
-      "preview-compatibility",
-      "Scoped read-only presentation capability bridge for remaining classic export and synchronization callers without duplicating rendering state.",
-      "classic-preview-presentation-port-mount",
-      "explicit-instance",
-      "remove-with-classic-callers",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-recovery-view-port.js",
-      "esm-module",
-      "preview-compatibility",
-      "Scoped temporary Preview Recovery View bridge for classic preview callers without copying recovery DOM or Preview state.",
-      "classic-preview-recovery-view-port-mount",
-      "explicit-instance",
-      "remove-with-classic-preview-callers",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-renderer-port.js",
-      "esm-module",
-      "preview-compatibility",
-      "Scoped temporary PreviewRendererPort bridge for remaining classic preview orchestration without owning renderer state.",
-      "classic-preview-renderer-port-mount",
-      "explicit-instance",
-      "remove-with-classic-preview-callers",
       false
     ],
     [
@@ -2408,16 +2228,6 @@
       false
     ],
     [
-      "src/features/settings/compatibility/classic-settings-store-port.js",
-      "esm-module",
-      "settings-compatibility",
-      "Scoped temporary Settings Store bridge for remaining classic callers without exposing Repository or raw storage.",
-      "classic-settings-store-port-mount",
-      "explicit-instance",
-      "remove-with-classic-settings-callers",
-      false
-    ],
-    [
       "src/features/settings/create-settings-feature.js",
       "esm-module",
       "settings-composition",
@@ -2625,36 +2435,6 @@
       "settings-navigation-view",
       "explicit-instance",
       "retain",
-      false
-    ],
-    [
-      "src/features/sidebar/compatibility/classic-folder-tree-controller-port.js",
-      "esm-module",
-      "sidebar-compatibility",
-      "Scoped Stage 6 bridge from remaining classic document callers to canonical FolderTreeController without copying file/tree/expansion/DOM/platform state.",
-      "classic-folder-tree-controller-port-mount",
-      "explicit-instance",
-      "remove-with-classic-folder-tree-callers",
-      false
-    ],
-    [
-      "src/features/sidebar/compatibility/classic-outline-controller-port.js",
-      "esm-module",
-      "sidebar-compatibility",
-      "Scoped Stage 6 bridge from remaining classic Outline callers to the canonical Outline Controller without copying heading, collapse, active-line, DOM or persistence state.",
-      "classic-outline-controller-port-mount",
-      "explicit-instance",
-      "remove-with-classic-outline-callers",
-      false
-    ],
-    [
-      "src/features/sidebar/compatibility/classic-sidebar-controller-port.js",
-      "esm-module",
-      "sidebar-compatibility",
-      "Scoped temporary SidebarTabController bridge for remaining classic callers without copying active-tab state.",
-      "classic-sidebar-controller-port-mount",
-      "explicit-instance",
-      "remove-with-classic-sidebar-callers",
       false
     ],
     [
@@ -2918,16 +2698,6 @@
       false
     ],
     [
-      "src/i18n/compatibility/classic-i18n-port.js",
-      "esm-module",
-      "internationalization-compatibility",
-      "Scoped I18n Service bridge for classic callers without exposing raw locale dictionaries or a window global facade.",
-      "classic-i18n-port-mount",
-      "explicit-instance",
-      "remove-with-classic-i18n-callers",
-      false
-    ],
-    [
       "src/i18n/i18n-service.js",
       "esm-module",
       "internationalization",
@@ -3155,16 +2925,6 @@
       "none",
       "pure-with-injected-runtime",
       "retain",
-      false
-    ],
-    [
-      "src/platform/compatibility/classic-platform-port.js",
-      "esm-module",
-      "platform-compatibility",
-      "Scoped call/supports bridge on the dedicated compatibility ports host for classic-script consumers without exposing Platform or native runtime objects on window.",
-      "classic-platform-port-mount",
-      "explicit-instance",
-      "remove-with-classic-business-compatibility",
       false
     ],
     [
@@ -3505,16 +3265,6 @@
       "performance-runtime",
       "explicit-mount-start-stop-destroy",
       "retain",
-      false
-    ],
-    [
-      "src/shared/scheduling/classic-task-scheduler-port.js",
-      "esm-module",
-      "shared-compatibility",
-      "Scoped compatibility facade over the explicit shared TaskScheduler for classic callers without global scheduler state.",
-      "classic-task-scheduler-port-mount",
-      "explicit-instance",
-      "remove-with-classic-callers",
       false
     ],
     [
@@ -4108,36 +3858,6 @@
       false
     ],
     [
-      "src/ui/compatibility/business-content-port.js",
-      "esm-module",
-      "ui-compatibility",
-      "Temporary independently destroyable port that mounts compatibility business-content templates into injected App Shell slots without creating or destroying the shell.",
-      "compatibility-business-content-mount",
-      "explicit-instance",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "src/ui/compatibility/index.js",
-      "esm-facade",
-      "ui-compatibility",
-      "Single public entry for temporary compatibility business-content and modal mount ports.",
-      "none",
-      "pure-api",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "src/ui/compatibility/mount-modal-shells.js",
-      "esm-module",
-      "ui-compatibility",
-      "Own four remaining classic ModalShell instances for link/find/image-insert/Mermaid; image export owns its independent View.",
-      "compatibility-modal-registry",
-      "explicit-instance",
-      "remove-after-migration",
-      false
-    ],
-    [
       "src/ui/components/icon-view.js",
       "esm-module",
       "ui-components",
@@ -4448,26 +4168,6 @@
       false
     ],
     [
-      "src/features/layout/compatibility/classic-layout-state-port.js",
-      "esm-module",
-      "feature-layout",
-      "Scoped Stage 6 migration bridge exposing the one LayoutState owner to remaining classic layout callers.",
-      "Owns one non-enumerable compatibility-host property; owns no layout values and removes the property on destroy.",
-      "mount one scoped property; destroy removes the property",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "src/features/layout/compatibility/classic-split-controller-port.js",
-      "esm-module",
-      "feature-layout",
-      "Scoped migration bridge from remaining classic layout-mode callers to the authoritative Stage 6 Split controllers.",
-      "Owns one non-enumerable compatibility-host property and no layout state/DOM behavior.",
-      "Explicit destroy removes the scoped host property.",
-      "remove-after-migration",
-      false
-    ],
-    [
       "src/features/layout/fullscreen/page-fullscreen-controller.js",
       "esm-module",
       "feature-layout",
@@ -4568,36 +4268,6 @@
       false
     ],
     [
-      "src/features/menu/compatibility/classic-menu-command-adapter.js",
-      "esm-module",
-      "feature-menu",
-      "Bind existing Menu command IDs to explicit public feature ports; all five exports use the sole scoped Export Controller command port.",
-      "Owns only registrations in MenuCommandBindings; it never owns document/editor/layout state.",
-      "Explicit start/destroy; classic global lookup is lazy and therefore never copied into Menu Model state.",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "src/features/menu/compatibility/classic-menu-command-port.js",
-      "esm-module",
-      "feature-menu",
-      "Expose MenuCommandBindings execution to staged runtime modules through one scoped compatibility host property.",
-      "Owns only one host property lifecycle and command error/close orchestration.",
-      "Explicit idempotent destroy; never destroys the injected bindings.",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "src/features/menu/compatibility/classic-submenu-positioner-port.js",
-      "esm-module",
-      "feature-menu",
-      "Expose the canonical SubmenuPositioner close operation to the remaining classic top-level menu close path.",
-      "Owns only one scoped compatibility-host property.",
-      "Explicit destroy removes only the exact port instance it mounted.",
-      "remove-after-migration",
-      false
-    ],
-    [
       "src/features/menu/index.js",
       "esm-facade",
       "feature-menu",
@@ -4675,56 +4345,6 @@
       "Immutable in-memory snapshots and synchronous subscriptions only; no DOM, storage, timers, Worker, platform or rendering access.",
       "Explicit destroy; destroy clears subscribers and makes all reads and writes terminal.",
       "retain",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-mode-resolver-port.js",
-      "esm-module",
-      "feature-preview",
-      "Scoped Stage 7 migration bridge exposing the pure Preview Mode Resolver to remaining classic preview callers.",
-      "Owns one non-enumerable compatibility-host property; owns no preview mode state and removes the property on destroy.",
-      "mountClassicPreviewModeResolverPort()/destroy() are idempotent per mount; API calls are terminal after destroy.",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-render-coordinator-port.js",
-      "esm-module",
-      "feature-preview",
-      "Scoped bridge from remaining classic preview code to the Stage 7 Render Coordinator.",
-      "Owns one non-enumerable compatibility-host property and removes it on destroy.",
-      "API calls are terminal after destroy(); coordinator lifecycle stays with the composition root.",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-scheduler-port.js",
-      "esm-module",
-      "feature-preview",
-      "Scoped migration bridge exposing Preview Scheduler channels to remaining classic preview callers.",
-      "Owns one non-enumerable compatibility-host property; owns no scheduling state and removes the property on destroy.",
-      "mountClassicPreviewSchedulerPort()/destroy() are idempotent per mount; API calls are terminal after destroy.",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-state-port.js",
-      "esm-module",
-      "feature-preview",
-      "Scoped Stage 7 migration bridge exposing the canonical PreviewState to remaining classic preview callers without copying state.",
-      "Owns one non-enumerable compatibility-host property; owns no Preview state and removes the property on destroy.",
-      "mountClassicPreviewStatePort()/destroy() are idempotent per mount; API calls are terminal after destroy.",
-      "remove-after-migration",
-      false
-    ],
-    [
-      "src/features/preview/compatibility/classic-preview-thresholds-port.js",
-      "esm-module",
-      "feature-preview",
-      "Scoped Stage 7 migration bridge exposing the immutable preview threshold owner to remaining classic preview callers.",
-      "Owns one non-enumerable compatibility-host property; owns no threshold values and removes the property on destroy.",
-      "mountClassicPreviewThresholdsPort()/destroy() are idempotent per mount.",
-      "remove-after-migration",
       false
     ],
     [
@@ -4815,16 +4435,6 @@
       "Owns exactly one registered close-save handler; owns no document or window state.",
       "Registration disposer and destroy are idempotent; destroy is terminal.",
       "retain",
-      false
-    ],
-    [
-      "src/features/window/compatibility/classic-close-save-port.js",
-      "esm-module",
-      "feature-window",
-      "Expose only CloseSavePort handler registration to remaining classic application code.",
-      "Owns one host property and the registration disposer it creates.",
-      "Explicit terminal destroy removes only its own host property and registration.",
-      "remove-after-migration",
       false
     ],
     [
@@ -5078,16 +4688,6 @@
       false
     ],
     [
-      "src/features/export/compatibility/classic-export-request-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped request policy and document existence bridge for classic export callers; no document, task or renderer state is copied.",
-      "classic-export-request-port-mount",
-      "explicit-instance",
-      "remove-with-classic-callers",
-      false
-    ],
-    [
       "src/features/export/index.js",
       "esm-facade",
       "feature",
@@ -5105,16 +4705,6 @@
       "active-export-task",
       "begin/update/cancel/finish/destroy",
       "retain",
-      false
-    ],
-    [
-      "src/features/export/compatibility/classic-export-task-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped task commands and subscription disposal for classic callers; controller retains all task authority.",
-      "classic-export-task-port-mount-and-subscriptions",
-      "explicit-instance",
-      "remove-with-classic-callers",
       false
     ],
     [
@@ -5158,16 +4748,6 @@
       false
     ],
     [
-      "src/features/export/compatibility/classic-export-document-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped immutable build and source-context delegation to the public Document Builder.",
-      "none",
-      "explicit-idempotent-destroy",
-      "retain",
-      false
-    ],
-    [
       "src/features/export/document/export-preview-enhancer.js",
       "esm-module",
       "export-application",
@@ -5178,26 +4758,6 @@
       false
     ],
     [
-      "src/features/export/compatibility/classic-export-enhancement-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped immutable enhancement delegation; mounting and removal do not own renderer or task state.",
-      "none",
-      "explicit-idempotent-destroy",
-      "retain",
-      false
-    ],
-    [
-      "src/features/export/compatibility/classic-export-style-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped immutable stylesheet and root-lease capabilities for classic format callers; unmount does not destroy the style owner.",
-      "export-style-port-mount",
-      "mount-to-destroy",
-      "remove-with-classic-callers",
-      false
-    ],
-    [
       "src/features/export/document/export-style-sheet.js",
       "esm-module",
       "export-document",
@@ -5205,16 +4765,6 @@
       "export-style-sheet",
       "factory-to-destroy",
       "retain",
-      false
-    ],
-    [
-      "src/features/export/compatibility/classic-markdown-export-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped frozen raw Markdown command bridge; unmount rejects late calls and preserves exporter/platform ownership.",
-      "markdown-export-port-mount",
-      "mount-to-destroy",
-      "remove-with-classic-callers",
       false
     ],
     [
@@ -5258,16 +4808,6 @@
       false
     ],
     [
-      "src/features/export/compatibility/classic-html-export-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped frozen HTML command bridge; terminal unmount without owning shared document/format resources.",
-      "html-export-port-mount",
-      "mount-to-destroy",
-      "remove-with-classic-callers",
-      false
-    ],
-    [
       "src/features/export/formats/rendered-document-exporter.js",
       "esm-module",
       "export-format",
@@ -5308,16 +4848,6 @@
       false
     ],
     [
-      "src/features/export/compatibility/classic-word-export-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped readonly Word command bridge; terminal independent unmount preserving replacement property and shared owner.",
-      "word-export-port-mount",
-      "mount-to-destroy",
-      "remove-with-classic-callers",
-      false
-    ],
-    [
       "src/features/export/formats/pdf-exporter.js",
       "esm-module",
       "export-format",
@@ -5335,16 +4865,6 @@
       "pdf-print-surfaces",
       "create-to-destroy",
       "retain",
-      false
-    ],
-    [
-      "src/features/export/compatibility/classic-pdf-export-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped readonly PDF command bridge; independent terminal unmount preserving replacement property.",
-      "pdf-export-port-mount",
-      "create-to-destroy",
-      "remove-with-classic-callers",
       false
     ],
     [
@@ -5368,16 +4888,6 @@
       false
     ],
     [
-      "src/features/export/compatibility/classic-image-layout-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Readonly scoped image layout mount; terminal independent unmount preserves replacement property and owner lifetime.",
-      "image-layout-port-mount",
-      "mount-to-destroy",
-      "remove-with-classic-callers",
-      false
-    ],
-    [
       "src/features/export/formats/image/image-asset-preloader.js",
       "esm-module",
       "export-format",
@@ -5388,32 +4898,12 @@
       false
     ],
     [
-      "src/features/export/compatibility/classic-image-asset-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Read-only scoped asset preparation capability with independent terminal unmount.",
-      "image-asset-port-mount",
-      "mount-to-destroy",
-      "retain",
-      false
-    ],
-    [
       "src/features/export/formats/image/image-data-encoder.js",
       "esm-module",
       "export-image",
       "Pure Data URL to exact bytes; URL scalar values, percent octets and base64 without text transcoding.",
       "none",
       "pure-function",
-      "retain",
-      false
-    ],
-    [
-      "src/features/export/compatibility/classic-image-data-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Read-only pure byte conversion capability and terminal scoped unmount.",
-      "image-data-port-mount",
-      "mount-to-destroy",
       "retain",
       false
     ],
@@ -5434,16 +4924,6 @@
       "Owned capture DOM, scoped layout/style leases and preview projection with complete release and independent disposal.",
       "image-capture-leases",
       "factory-to-destroy",
-      "retain",
-      false
-    ],
-    [
-      "src/features/export/compatibility/classic-image-export-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped immutable render/save/read-preview capabilities; terminal unmount without owning image workflow state.",
-      "image-export-port-mount",
-      "mount-to-destroy",
       "retain",
       false
     ],
@@ -5473,16 +4953,6 @@
       "export-ui",
       "Single image modal/options/capture-stage DOM and event/focus lifetime over ModalShell and injected commands.",
       "image-options-and-modal-dom",
-      "factory-to-destroy",
-      "retain",
-      false
-    ],
-    [
-      "src/features/export/compatibility/classic-export-command-port.js",
-      "esm-module",
-      "export-compatibility",
-      "Scoped public command capability for Menu and remaining classic callers without window aliases or cloned state.",
-      "scoped-command-mount",
       "factory-to-destroy",
       "retain",
       false
@@ -5724,6 +5194,146 @@
       "Public link preview capability with explicit instance lifecycle and no import-time overlay or subscriptions.",
       "none",
       "import-only",
+      "retain",
+      false
+    ],
+    [
+      "src/bootstrap/workspace-content.js",
+      "esm-module",
+      "bootstrap",
+      "Compose feature-owned static Views into shell slots and roll back their exact ownership.",
+      "View release stack",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/documents/ui/document-content-view.js",
+      "esm-module",
+      "documents",
+      "Construct document context actions and filename input with unchanged markup.",
+      "Document View DOM nodes",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/editor/infrastructure/document-model-binding.js",
+      "esm-module",
+      "editor",
+      "Bind the frozen model input to Editor API without DOM properties, body cache or history.",
+      "none",
+      "pure",
+      "retain",
+      false
+    ],
+    [
+      "src/features/editor/ui/editor-content-view.js",
+      "esm-module",
+      "editor",
+      "Construct the editor pane and four editing dialogs with unchanged markup.",
+      "Editor View DOM nodes",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/hybrid-editor/application/source-editor-registry.js",
+      "esm-module",
+      "hybrid-editor",
+      "Associate an actual source editor controller with its CodeMirror View and revoke only that binding.",
+      "WeakMap binding ownership",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/import/ui/import-content-view.js",
+      "esm-module",
+      "import",
+      "Construct drop overlay and browser import file input with unchanged markup.",
+      "Import View DOM nodes",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/menu-actions.js",
+      "esm-module",
+      "menu",
+      "Bind canonical Menu command IDs to explicit feature command capabilities.",
+      "Menu command registration disposers",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/ui/menu-content-view.js",
+      "esm-module",
+      "menu",
+      "Construct Menu content and window controls with unchanged markup.",
+      "Menu View DOM nodes",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/persistence/ui/status-content-view.js",
+      "esm-module",
+      "persistence",
+      "Construct save/status presentation and toast container with unchanged markup.",
+      "Status View DOM nodes",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/application/preview-commands.js",
+      "esm-module",
+      "preview",
+      "Expose typed Preview commands and virtual geometry while retaining controller state authority.",
+      "Command capability lifetime only",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/ui/preview-content-view.js",
+      "esm-module",
+      "preview",
+      "Construct Preview pane content with unchanged markup.",
+      "Preview View DOM nodes",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/sidebar/ui/sidebar-content-view.js",
+      "esm-module",
+      "sidebar",
+      "Construct Sidebar tabs, panels and menus with unchanged markup.",
+      "Sidebar View DOM nodes",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/shared/commands/command-registry.js",
+      "esm-module",
+      "shared",
+      "Own atomic explicit callback registrations with ownership-safe disposal and no domain state.",
+      "Registered command callbacks",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/ui/dom/static-content.js",
+      "esm-module",
+      "ui-dom",
+      "Render declarative feature View nodes through safe elements and canonical sprite icons.",
+      "Exact appended node ownership",
+      "explicit-destroy",
       "retain",
       false
     ]

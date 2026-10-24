@@ -47,7 +47,7 @@ function eventHarness() {
   const document = { querySelector: () => null,
     addEventListener(type, fn) { listeners.set(type, fn); }, removeEventListener(type) { listeners.delete(type); } };
   const ui = { has: () => true, invoke: (...args) => calls.push(args), register(values) { registrations.add(values); return () => registrations.delete(values); } };
-  const owner = createApplicationEvents({ document, window: { Element }, editor,
+  const owner = createApplicationEvents({ document, window: { Element }, editor, editorApi: { getSelection: () => ({ start: 1, end: 2 }), replaceRange: (...args) => calls.push(['range', ...args]) },
     eventsEditorControllerPort: { subscribeTransactions(fn) { transaction = fn; return () => { transaction = null; }; } },
     eventsEditorUiCommandPort: ui, eventsDocumentUiCommandPort: ui,
     eventsPreviewCommandPort: { scheduleUpdate: () => calls.push(['preview']), scheduleCountUpdate: () => calls.push(['count']), scheduleFocusUpdate() {} },
@@ -96,10 +96,10 @@ for (const reason of ['document-change', 'destroy']) test('R16-02 native Find re
 function startupHarness({ launch = false, setup } = {}) {
   const calls = []; let resolvePath;
   const mode = () => calls.push('layout');
-  const owner = createWorkspaceStartup({ editor: { textLength: 0 }, preview: {}, filenameInput: {}, t: key => key,
-    localStorage: { setItem: () => calls.push('preview-mode') }, platform: { supports: () => launch, call: () => new Promise(resolve => { resolvePath = resolve; }) },
+  const owner = createWorkspaceStartup({ editor: { getTextLength: () => 0 }, preview: {}, filenameInput: {}, t: key => key,
+    localStorage: { setItem: () => calls.push('preview-mode') }, platform: { capabilities: { desktop: { fileSystem: launch } }, files: { getInitialPath: () => new Promise(resolve => { resolvePath = resolve; }) } },
     documentCommands: { invoke: () => calls.push('launch-import') }, bootstrapSettingsStorePort: { snapshot: { sidebarVisible: true, layoutMode: 'both' } },
-    bootstrapEditorControllerPort: { setText: text => calls.push(['text', text]) }, bootstrapLayoutStatePort: { previewCollapsed: true },
+    bootstrapEditorControllerPort: { setText: text => calls.push(['text', text]) }, bootstrapLayoutStatePort: { snapshot: { split: { previewCollapsed: true } }, setSidebar() {} },
     bootstrapPreviewCommandPort: { thresholds: { scheduling: { postprocess: { deferChars: 100000 } } }, updateCount: () => calls.push('count'), setViewMode: () => calls.push('view') },
     bootstrapHelpPort: { openFirstRun: () => calls.push('help') }, applyEditorPreferences: () => calls.push('preferences'),
     applyTableVisualEditingSetting: () => calls.push('table'), applyCodeVisualEditingSetting: () => calls.push('code'),

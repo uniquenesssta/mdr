@@ -5,7 +5,7 @@
  * State/side effects: Owns toolbar listeners plus heading/view menu visibility; no editor/document state.
  * Lifecycle: Explicit View with idempotent destroy(); closes owned menus and removes listeners.
  */
-import { createEventScope } from '../../../ui/dom/index.js';
+import { createEventScope, mountStaticContent } from '../../../ui/dom/index.js';
 
 export function createEditorToolbarView({
   root,
@@ -104,4 +104,299 @@ export function createEditorToolbarView({
       events.destroy();
     }
   });
+}
+
+/** Construct the toolbar controlled by this View without changing its frozen markup. */
+export function createEditorToolbarContentView(slots) {
+  return mountStaticContent([
+    [slots.toolbar,[
+      "\n      ",
+      ["div",{"class":"format-group"},[
+        "\n        ",
+        ["button",{"data-editor-action":"undo","data-i18n-title":"undoTitle","title":"撤销 Ctrl+Z"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-undo"},[]]]]
+        ]],
+        "\n        ",
+        ["button",{"data-editor-action":"redo","data-i18n-title":"redoTitle","title":"重做 Ctrl+Y / Ctrl+Shift+Z"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-redo"},[]]]]
+        ]],
+        "\n        ",
+        ["span",{"class":"divider"},[]],
+        "\n        ",
+        ["button",{"data-editor-action":"bold","data-toolbar-item":"bold","data-i18n-title":"boldTitle","title":"加粗 Ctrl+B"},[["b",{},["B"]]]],
+        "\n        ",
+        ["button",{"data-editor-action":"italic","data-toolbar-item":"italic","data-i18n-title":"italicTitle","title":"斜体 Ctrl+I"},[["i",{},["I"]]]],
+        "\n        ",
+        ["button",{"data-editor-action":"underline","data-toolbar-item":"underline","data-i18n-title":"underlineTitle","title":"下划线 Ctrl+U"},[["u",{},["U"]]]],
+        "\n        ",
+        ["button",{"data-editor-action":"strikethrough","data-toolbar-item":"strikethrough","data-i18n-title":"strikethroughTitle","title":"删除线"},[["s",{},["S"]]]],
+        "\n        ",
+        ["button",{"data-editor-action":"subscript","data-toolbar-item":"script","data-i18n-title":"subscriptTitle","title":"下标"},["x₂"]],
+        "\n        ",
+        ["button",{"data-editor-action":"superscript","data-toolbar-item":"script","data-i18n-title":"superscriptTitle","title":"上标"},["x²"]],
+        "\n        ",
+        ["div",{"class":"dropdown color-dropdown","id":"text-color-dropdown","data-toolbar-item":"textColor"},[
+          "\n          ",
+          ["button",{"type":"button","id":"text-color-button","class":"color-tool-button","data-color-menu-kind":"text","title":"文字颜色（请先选择文字）","aria-haspopup":"true","aria-expanded":"false","disabled":true},[
+            "\n            ",
+            ["span",{"class":"color-tool-glyph"},["A"]],
+            ["span",{"class":"color-tool-indicator","id":"text-color-indicator"},[]],
+            ["svg",{"class":"icon icon-sm"},[["use",{"href":"/assets/icons.svg#icon-chevron-down"},[]]]],
+            "\n          "
+          ]],
+          "\n          ",
+          ["div",{"class":"dropdown-menu color-menu","id":"text-color-menu"},[
+            "\n            ",
+            ["strong",{},["文字颜色"]],
+            "\n            ",
+            ["div",{"class":"color-swatches","aria-label":"文字颜色预设"},[
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-ink","title":"黑色","data-inline-color-kind":"text","data-inline-color":"#1a1d23"},[]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-gray","title":"灰色","data-inline-color-kind":"text","data-inline-color":"#6b7280"},[]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-red","title":"红色","data-inline-color-kind":"text","data-inline-color":"#dc2626"},[]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-orange","title":"橙色","data-inline-color-kind":"text","data-inline-color":"#ea580c"},[]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-yellow","title":"黄色","data-inline-color-kind":"text","data-inline-color":"#ca8a04"},[]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-green","title":"绿色","data-inline-color-kind":"text","data-inline-color":"#16a34a"},[]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-cyan","title":"青色","data-inline-color-kind":"text","data-inline-color":"#0891b2"},[]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-blue","title":"蓝色","data-inline-color-kind":"text","data-inline-color":"#2563eb"},[]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-purple","title":"紫色","data-inline-color-kind":"text","data-inline-color":"#7c3aed"},[]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--text-pink","title":"粉色","data-inline-color-kind":"text","data-inline-color":"#db2777"},[]],
+              "\n            "
+            ]],
+            "\n            ",
+            ["div",{"class":"color-menu-actions"},[
+              "\n              ",
+              ["label",{"class":"custom-color-action"},["自定义",["input",{"type":"color","id":"custom-text-color","value":"#2563eb","data-inline-color-custom":"text"},[]]]],
+              "\n              ",
+              ["button",{"type":"button","data-inline-color-clear":"text"},["清除颜色"]],
+              "\n            "
+            ]],
+            "\n          "
+          ]],
+          "\n        "
+        ]],
+        "\n        ",
+        ["div",{"class":"dropdown color-dropdown","id":"highlight-color-dropdown","data-toolbar-item":"highlight"},[
+          "\n          ",
+          ["button",{"type":"button","id":"highlight-color-button","class":"color-tool-button","data-color-menu-kind":"highlight","title":"文字高亮（请先选择文字）","aria-haspopup":"true","aria-expanded":"false","disabled":true},[
+            "\n            ",
+            ["span",{"class":"color-tool-glyph color-tool-highlight"},["A"]],
+            ["span",{"class":"color-tool-indicator","id":"highlight-color-indicator"},[]],
+            ["svg",{"class":"icon icon-sm"},[["use",{"href":"/assets/icons.svg#icon-chevron-down"},[]]]],
+            "\n          "
+          ]],
+          "\n          ",
+          ["div",{"class":"dropdown-menu color-menu","id":"highlight-color-menu"},[
+            "\n            ",
+            ["strong",{},["文字高亮"]],
+            "\n            ",
+            ["div",{"class":"color-swatches","aria-label":"文字高亮预设"},[
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--highlight-yellow","title":"黄色","data-inline-color-kind":"highlight","data-inline-color":"#fff3a3"},[
+
+              ]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--highlight-orange","title":"橙色","data-inline-color-kind":"highlight","data-inline-color":"#fed7aa"},[
+
+              ]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--highlight-red","title":"红色","data-inline-color-kind":"highlight","data-inline-color":"#fecaca"},[
+
+              ]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--highlight-green","title":"绿色","data-inline-color-kind":"highlight","data-inline-color":"#bbf7d0"},[
+
+              ]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--highlight-blue","title":"蓝色","data-inline-color-kind":"highlight","data-inline-color":"#bae6fd"},[
+
+              ]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--highlight-purple","title":"紫色","data-inline-color-kind":"highlight","data-inline-color":"#ddd6fe"},[
+
+              ]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--highlight-pink","title":"粉色","data-inline-color-kind":"highlight","data-inline-color":"#fbcfe8"},[
+
+              ]],
+              "\n              ",
+              ["button",{"type":"button","class":"color-swatch c-color-swatch--highlight-gray","title":"灰色","data-inline-color-kind":"highlight","data-inline-color":"#e5e7eb"},[
+
+              ]],
+              "\n            "
+            ]],
+            "\n            ",
+            ["div",{"class":"color-menu-actions"},[
+              "\n              ",
+              ["label",{"class":"custom-color-action"},[
+                "自定义",
+                ["input",{"type":"color","id":"custom-highlight-color","value":"#fff3a3","data-inline-color-custom":"highlight"},[]]
+              ]],
+              "\n              ",
+              ["button",{"type":"button","data-inline-color-clear":"highlight"},["清除高亮"]],
+              "\n            "
+            ]],
+            "\n          "
+          ]],
+          "\n        "
+        ]],
+        "\n        ",
+        ["span",{"class":"divider"},[]],
+        "\n        ",
+        ["div",{"class":"dropdown","id":"heading-dropdown","data-toolbar-item":"heading"},[
+          "\n          ",
+          ["button",{"data-editor-action":"toggle-heading-menu","data-i18n-title":"heading","title":"标题"},[
+            "H ",
+            ["svg",{"class":"icon icon-sm"},[["use",{"href":"/assets/icons.svg#icon-chevron-down"},[]]]]
+          ]],
+          "\n          ",
+          ["div",{"class":"dropdown-menu","id":"heading-menu"},[
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"heading","data-level":"1","data-i18n":"headingH1"},["H1 一级标题"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"heading","data-level":"2","data-i18n":"headingH2"},["H2 二级标题"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"heading","data-level":"3","data-i18n":"headingH3"},["H3 三级标题"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"heading","data-level":"4","data-i18n":"headingH4"},["H4 四级标题"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"heading","data-level":"5","data-i18n":"headingH5"},["H5 五级标题"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"heading","data-level":"6","data-i18n":"headingH6"},["H6 六级标题"]],
+            "\n          "
+          ]],
+          "\n        "
+        ]],
+        "\n        ",
+        ["span",{"class":"divider"},[]],
+        "\n        ",
+        ["button",{"data-editor-action":"quote","data-toolbar-item":"quote","data-i18n-title":"quote","title":"引用"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-quote"},[]]]],
+          " ",
+          ["span",{"data-i18n":"quote"},["引用"]]
+        ]],
+        "\n        ",
+        ["button",{"data-editor-action":"unordered","data-toolbar-item":"lists","data-i18n-title":"unordered","title":"无序列表"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-list"},[]]]],
+          " ",
+          ["span",{"data-i18n":"unordered"},["无序"]]
+        ]],
+        "\n        ",
+        ["button",{"data-editor-action":"ordered","data-toolbar-item":"lists","data-i18n-title":"ordered","title":"有序列表"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-list-numbered"},[]]]],
+          " ",
+          ["span",{"data-i18n":"ordered"},["有序"]]
+        ]],
+        "\n        ",
+        ["button",{"data-editor-action":"task","data-toolbar-item":"lists","data-i18n-title":"task","title":"任务列表"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-task"},[]]]],
+          " ",
+          ["span",{"data-i18n":"task"},["任务"]]
+        ]],
+        "\n        ",
+        ["span",{"class":"divider"},[]],
+        "\n        ",
+        ["button",{"data-editor-action":"inline-code","data-toolbar-item":"code","data-i18n-title":"inlineCode","title":"行内代码"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-code"},[]]]],
+          " ",
+          ["span",{"data-i18n":"inlineCode"},["行内代码"]]
+        ]],
+        "\n        ",
+        ["button",{"data-editor-action":"code","data-toolbar-item":"code","data-i18n-title":"codeBlock","title":"代码块"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-braces"},[]]]]
+        ]],
+        "\n        ",
+        ["button",{"data-editor-action":"open-link","data-toolbar-item":"link","data-i18n-title":"link","title":"插入链接 Ctrl+K"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-link"},[]]]],
+          " ",
+          ["span",{"data-i18n":"link"},["链接"]]
+        ]],
+        "\n        ",
+        ["button",{"data-editor-action":"open-image","data-toolbar-item":"image","data-i18n-title":"image","title":"插入图片 Ctrl+Shift+K"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-image"},[]]]],
+          " ",
+          ["span",{"data-i18n":"image"},["图片"]]
+        ]],
+        "\n        ",
+        ["div",{"class":"dropdown","id":"table-dropdown","data-toolbar-item":"table"},[
+          "\n          ",
+          ["button",{"data-editor-action":"toggle-table","data-i18n-title":"table","title":"插入表格"},[
+            ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-table"},[]]]],
+            " ",
+            ["span",{"data-i18n":"table"},["表格"]]
+          ]],
+          "\n          ",
+          ["div",{"class":"dropdown-menu table-selector-menu","id":"table-menu"},[
+            "\n            ",
+            ["div",{"class":"table-grid","id":"table-grid"},[]],
+            "\n            ",
+            ["div",{"class":"table-size-label","id":"table-size-label"},["0 行 × 0 列"]],
+            "\n          "
+          ]],
+          "\n        "
+        ]],
+        "\n        ",
+        ["button",{"data-editor-action":"open-find","data-toolbar-item":"find","data-i18n-title":"find","title":"查找替换 Ctrl+F"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-search"},[]]]],
+          " ",
+          ["span",{"data-i18n":"find"},["查找"]]
+        ]],
+        "\n        ",
+        ["button",{"data-editor-action":"open-mermaid","data-toolbar-item":"mermaid","data-i18n-title":"mermaid","title":"插入 Mermaid 图表"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-mermaid"},[]]]],
+          " ",
+          ["span",{"data-i18n":"mermaid"},["Mermaid"]]
+        ]],
+        "\n      "
+      ]],
+      "\n      ",
+      ["div",{"class":"editor-actions"},[
+        "\n        ",
+        ["div",{"class":"dropdown","id":"view-dropdown"},[
+          "\n          ",
+          ["button",{"data-editor-action":"toggle-view-menu","data-i18n-title":"view","title":"视图布局"},[
+            ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-layout"},[]]]],
+            " ",
+            ["span",{"data-i18n":"view"},["视图"]],
+            " ",
+            ["svg",{"class":"icon icon-sm"},[["use",{"href":"/assets/icons.svg#icon-chevron-down"},[]]]]
+          ]],
+          "\n          ",
+          ["div",{"class":"dropdown-menu","id":"view-menu"},[
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"layout","data-mode":"both","data-i18n":"viewBoth"},["编辑 + 预览"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"layout","data-mode":"hybrid","data-i18n":"viewHybrid"},["单视图混合编辑"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"layout","data-mode":"edit","data-i18n":"viewEdit"},["仅编辑"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"layout","data-mode":"preview","data-i18n":"viewPreview"},["仅预览"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"page-fullscreen","data-i18n":"pageFullscreen"},["页面全屏"]],
+            "\n            ",
+            ["div",{"class":"dropdown-item","data-editor-action":"system-fullscreen","data-i18n":"systemFullscreen"},["系统全屏"]],
+            "\n          "
+          ]],
+          "\n        "
+        ]],
+        "\n        ",
+        ["button",{"data-theme-toggle":true,"data-i18n-title":"theme","title":"切换主题"},[
+          ["svg",{"class":"icon"},[["use",{"href":"/assets/icons.svg#icon-sun"},[]]]],
+          " ",
+          ["span",{"data-i18n":"theme"},["主题"]]
+        ]],
+        "\n      "
+      ]],
+      "\n"
+    ]],
+  ]);
 }

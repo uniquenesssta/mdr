@@ -36,11 +36,11 @@ function harness(t) {
   document.getElementById = () => null;
   document.querySelector = () => null;
   document.querySelectorAll = () => [];
-  const preferences = createWorkspacePreferences({ document, window: { matchMedia: () => ({ matches: true }) }, editor: {}, preview: { querySelector: () => first }, documentModel: { getTextLength: () => 7 },
+  const preferences = createWorkspacePreferences({ document, window: { matchMedia: () => ({ matches: true }) }, editor: { setPresentationMode() {}, getPresentationMode: () => 'source' }, preview: { querySelector: () => first }, documentModel: { getTextLength: () => 7 },
     coreSettingsStorePort: store, coreEditorUiCommandPort: { has: () => false, register: () => () => {} },
-    coreLayoutStatePort: { layoutMode: 'both', previewCollapsed: false, set sidebarVisible(value) { effects.sidebar++; effects.sidebarValue = value; } },
+    coreLayoutStatePort: { snapshot: { mode: 'both', split: { previewCollapsed: false } }, setMode(mode) { this.snapshot.mode = mode; }, setSidebar({visible}) { effects.sidebar++; effects.sidebarValue = visible; } },
     corePreviewCommandPort: { snapshot: { lastStableResult: {} }, thresholds: { scheduling: { postprocess: { deferChars: 100000 } } }, requestLayoutRefresh() {} },
-    splitController: { applyMode(mode) { effects.layout.push([mode, false, false]); preview.firstElementChild = {}; } }, t: key => key, showToast() {}, updateStatusBar() {}, updateInlineColorToolAvailability() { effects.preferences++; }
+    compactSplitController: { reconcile() {} }, splitController: { applyMode(mode) { effects.layout.push([mode, false, false]); preview.firstElementChild = {}; } }, t: key => key, showToast() {}, updateStatusBar() {}, updateInlineColorToolAvailability() { effects.preferences++; }
   });
   const coordinator = createSettingsApplyCoordinator({ store, publish: event => document.emit(event) });
   let click;

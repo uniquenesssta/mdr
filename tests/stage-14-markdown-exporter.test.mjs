@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { createExportFileWriter, createExportRequest, createExportTaskController, createMarkdownExporter, mountClassicMarkdownExportPort, isExportCancelledError } from '../src/features/export/index.js';
+import { createExportFileWriter, createExportRequest, createExportTaskController, createMarkdownExporter, isExportCancelledError } from '../src/features/export/index.js';
 import { createBrowserFileDownload } from '../src/platform/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
@@ -196,14 +196,13 @@ test('R14-09 browser click failures use the existing adapter to remove the ancho
   assert.deepEqual(calls, ['remove', 'blob:raw']); assert.equal(h.tasks.getSnapshot().activeTask, null);
 });
 
-test('R14-09 bridge owns only its scoped mount and rejects late calls without destroying the exporter', async () => {
-  const h = setup(), host = {}, mount = mountClassicMarkdownExportPort(host, h.owner);
-  assert.equal(Object.isFrozen(mount.port), true); assert.deepEqual(Object.keys(host), []);
-  assert.throws(() => mountClassicMarkdownExportPort(host, h.owner), /already/);
-  const replacement = {}; Object.defineProperty(host, 'markdownEditorMarkdownExportPort', { value: replacement, configurable: true });
-  mount.destroy(); mount.destroy(); assert.equal(host.markdownEditorMarkdownExportPort, replacement);
-  assert.throws(() => mount.port.export({ request: h.request() }), /destroyed/);
+test('R16-08 explicit Markdown capability writes through its owner and rejects late work after disposal', async () => {
+  const h = setup(), host = {};
+  assert.equal(Object.isFrozen(h.owner), true); assert.deepEqual(Object.keys(host), []);
   assert.equal((await h.owner.export({ request: h.request() })).status, 'written');
+  h.owner.destroy(); h.owner.destroy();
+  await assert.rejects(async () => h.owner.export({ request: h.request() }), cancelled('destroyed'));
+  assert.equal(h.tasks.getSnapshot().activeTask, null); h.tasks.destroy();
 });
 
 test('R14-09 actual classic active/context calls use one raw owner without parser, builder or editor fallback', async () => {

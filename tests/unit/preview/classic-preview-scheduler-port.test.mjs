@@ -1,50 +1,30 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
-import { mountClassicPreviewSchedulerPort } from '../../../src/features/preview/compatibility/classic-preview-scheduler-port.js';
-
-function createScheduler() {
-  const calls = [];
-  return {
-    calls,
-    schedule(...args) { calls.push(['schedule', ...args]); return { token: 'task' }; },
-    hasPending(channel) { calls.push(['hasPending', channel]); return channel === 'input'; },
-    cancel(channel) { calls.push(['cancel', channel]); return true; },
-    cancelAll() { calls.push(['cancelAll']); }
-  };
+import { createPreviewScheduler, createPreviewCancellation } from '../../../src/features/preview/index.js';
+function fixture() {
+  let next = 0; const timers = new Map(), cancellation = createPreviewCancellation();
+  const scheduler = createPreviewScheduler({ cancellation, setTimer(fn) { const id = ++next; timers.set(id, () => { timers.delete(id); fn(); }); return id; }, clearTimer(id) { timers.delete(id); } });
+  return { scheduler, cancellation, timers };
 }
-
-test('Atomic 7.4 classic scheduler port delegates without owning scheduling state', () => {
-  const host = {};
-  const scheduler = createScheduler();
-  const mount = mountClassicPreviewSchedulerPort(host, scheduler);
-  const callback = () => {};
-  const options = { kind: 'timeout', delay: 12 };
-
-  assert.equal(Object.keys(host).includes('markdownEditorPreviewSchedulerPort'), false);
-  assert.equal(host.markdownEditorPreviewSchedulerPort, mount.api);
-  assert.deepEqual(mount.api.schedule('input', callback, options), { token: 'task' });
-  assert.equal(mount.api.hasPending('input'), true);
-  assert.equal(mount.api.cancel('focus'), true);
-  mount.api.cancelAll();
-
-  assert.deepEqual(scheduler.calls, [
-    ['schedule', 'input', callback, options],
-    ['hasPending', 'input'],
-    ['cancel', 'focus'],
-    ['cancelAll']
-  ]);
+test('R16-08 explicit Preview scheduling coalesces work and cancelled callbacks cannot commit', async () => {
+  const h = fixture(), calls = [];
+  const old = h.scheduler.schedule('input', () => calls.push('old'), { delay: 12 });
+  const late = [...h.timers.values()][0];
+  const next = h.scheduler.schedule('input', () => calls.push('current'));
+  assert.equal(old.signal.aborted, true);
+  assert.equal(h.scheduler.hasPending('input'), true);
+  late(); [...h.timers.values()][0](); await next.done; await old.done;
+  assert.deepEqual(calls, ['current']);
+  h.scheduler.cancelAll(); assert.equal(h.timers.size, 0);
+  h.scheduler.destroy(); h.cancellation.destroy();
 });
-
-test('Atomic 7.4 classic scheduler port unmount is idempotent and terminal', () => {
-  const host = {};
-  const scheduler = createScheduler();
-  const mount = mountClassicPreviewSchedulerPort(host, scheduler);
-
-  mount.destroy();
-  mount.destroy();
-
-  assert.equal(Object.hasOwn(host, 'markdownEditorPreviewSchedulerPort'), false);
-  assert.throws(() => mount.api.cancel('input'), /destroyed/i);
-  assert.doesNotThrow(() => scheduler.cancel('input'));
+test('R16-08 scheduler rejects malformed work and terminal disposal clears every channel', () => {
+  const h = fixture();
+  assert.throws(() => h.scheduler.schedule('unknown', () => {}), /Unsupported/);
+  for (const channel of ['input','focus','layout','enhancement']) h.scheduler.schedule(channel, () => {});
+  assert.equal(h.timers.size, 4);
+  h.scheduler.destroy(); h.scheduler.destroy();
+  assert.equal(h.timers.size, 0);
+  assert.throws(() => h.scheduler.cancel('input'), /destroyed/);
+  h.cancellation.destroy();
 });

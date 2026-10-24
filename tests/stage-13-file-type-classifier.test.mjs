@@ -83,6 +83,7 @@ test('production routing consumes one public classifier with startup and teardow
   assert.match(main, /openNativeText: \(path, request\) => importDocumentController\.openNativeText\(path, request\)/);
   assert.ok(main.indexOf('dropImportController.start({') < main.indexOf('const workspacePreferences = ownApplication('));
   assert.equal(main.match(/dropImportController\.destroy\(\)/g).length, 3);
+
   assert.doesNotMatch(entry + main, /mountClassicDropImportPort|classic-drop-import-port/);
   assert.match(image, /from '\.\.\/\.\.\/import\/index\.js'/);
   assert.match(image, /imageController\.readFile\(file, \{ source: 'dialog', confirmLargeFile \}\)/);

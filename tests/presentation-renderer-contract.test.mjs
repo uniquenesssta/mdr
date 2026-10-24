@@ -10,12 +10,12 @@ async function source(path) {
 test('application composes one canonical presentation API into Preview without publishing presentation globals', async () => {
   const main = await source('../src/main.js');
   const api = await source('../src/features/preview/render/presentation/presentation-api.js');
-  const port = await source('../src/features/preview/compatibility/classic-preview-presentation-port.js');
+  const port = await source('../src/features/preview/index.js');
   assert.match(main, /const markdownPresentation\s*=\s*createMarkdownPresentationApi\(\)/);
   assert.match(main, /createPreviewRendererPort\(\{[\s\S]*presentation:\s*markdownPresentation/);
-  assert.match(main, /mountClassicPreviewPresentationPort\(compatibilityPlatformHost, markdownPresentation/);
+  assert.doesNotMatch(main, /mountClassicPreviewPresentationPort\(compatibilityPlatformHost, markdownPresentation/);
   assert.doesNotMatch(main, /window\.markdownEditorPresentation\s*=|window\.markdownEditorMath\s*=|window\.markdownEditorCodeHighlighter\s*=/);
-  assert.match(port, /markdownEditorPresentationPort/);
+  assert.doesNotMatch(port, /markdownEditorPresentationPort|mountClassicPreviewPresentationPort/);
   for (const renderer of ['code', 'math', 'mermaid']) {
     assert.match(api, new RegExp(`\\b${renderer}\\b`));
   }

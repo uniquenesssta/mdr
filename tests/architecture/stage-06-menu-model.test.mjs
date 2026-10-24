@@ -40,9 +40,9 @@ test('Atomic 6.10 MenuView boundary remains intact after 6.11 and 6.12', async (
 });
 
 test('Atomic 6.10 classic compatibility is isolated from canonical Menu Model files', async () => {
-  const adapter = await read('src/features/menu/compatibility/classic-menu-command-adapter.js');
+  const adapter = await read('src/features/menu/menu-actions.js');
   assert.match(adapter, /saveCurrentFile/);
-  assert.match(adapter, /markdownEditorEditorUiCommandPort/);
-  assert.match(adapter, /markdownEditorDocumentUiCommandPort/);
+  assert.match(adapter, /editorCommands/);
+  assert.match(adapter, /documentCommands/);
   assert.doesNotMatch(adapter, /MENU_DECLARATION|menu-state|menu-view/);
 });

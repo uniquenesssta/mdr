@@ -11,6 +11,6 @@ export { createMenuController } from './menu-controller.js';
 export { createMenuView } from './menu-view.js';
 export { createSubmenuPositioner } from './submenu-positioner.js';
 export { createRecentFilesMenuController } from './recent-files-menu-controller.js';
-export { createClassicMenuCommandAdapter } from './compatibility/classic-menu-command-adapter.js';
-export { mountClassicMenuCommandPort } from './compatibility/classic-menu-command-port.js';
-export { mountClassicSubmenuPositionerPort } from './compatibility/classic-submenu-positioner-port.js';
+export { createMenuActions } from './menu-actions.js';
+
+export { createMenuContentView } from './ui/menu-content-view.js';

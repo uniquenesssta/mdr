@@ -21,13 +21,13 @@ test('Atomic 7.7 keeps one DOM-free Render Coordinator pipeline owner', async ()
 test('Atomic 7.7 composition root still owns and destroys one scoped classic coordinator port', async () => {
   const [main, entry, port] = await Promise.all([
     source('src/main.js'), source('src/features/preview/index.js'),
-    source('src/features/preview/compatibility/classic-preview-render-coordinator-port.js')
+    source('src/features/preview/pipeline/preview-render-coordinator.js')
   ]);
-  assert.match(entry, /mountClassicPreviewRenderCoordinatorPort/);
-  assert.match(port, /markdownEditorPreviewRenderCoordinatorPort/);
+  assert.doesNotMatch(entry, /mountClassicPreviewRenderCoordinatorPort/);
+  assert.doesNotMatch(port, /markdownEditorPreviewRenderCoordinatorPort/);
   assert.match(main, /const previewRenderCoordinator = createPreviewRenderCoordinator\(\)/);
-  assert.match(main, /mountClassicPreviewRenderCoordinatorPort\(compatibilityPlatformHost, previewRenderCoordinator\)/);
-  assert.match(main, /previewRenderCoordinatorPort\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewRenderCoordinatorPort\(compatibilityPlatformHost, previewRenderCoordinator\)/);
+  assert.doesNotMatch(main, /previewRenderCoordinatorPort\.destroy\(\)/);
   assert.match(main, /previewRenderCoordinator\.destroy\(\)/);
 });
 

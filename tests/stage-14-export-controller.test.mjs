@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync, existsSync } from 'node:fs';
-import { createExportController, createExportRequest, mountClassicExportCommandPort, ExportCancelledError } from '../src/features/export/index.js';
+import { createExportController, createExportRequest, ExportCancelledError } from '../src/features/export/index.js';
 
 const actions={exportMarkdown:['markdown','export'],exportHtml:['html','export'],exportWord:['word','export'],exportPdf:['pdf','export'],renderImage:['image','render'],saveImage:['image','save']};
 function fixture(){
@@ -32,14 +32,22 @@ for(const late of ['resolve','reject'])test('R14-18 controller destroy suppresse
   const h=fixture();let resolve,reject;h.owners.markdown.export=()=>new Promise((a,b)=>{resolve=a;reject=b;});const work=h.controller.invoke('exportMarkdown');h.controller.destroy();h.controller.destroy();late==='resolve'?resolve({status:'written'}):reject(new Error('late output'));
   assert.deepEqual(await work,{status:'cancelled',reason:'destroyed'});assert.equal(h.messages.length,0);assert.equal(h.errors.length,0);assert.throws(()=>h.controller.invoke('exportMarkdown'),/EXPORT_CANCELLED/);assert.equal(h.controller.has('exportMarkdown'),false);
 });
-test('R14-18 scoped command port unmount is independent and preserves a replacement capability',()=>{
-  const h=fixture(),host={},mount=mountClassicExportCommandPort(host,h.controller);assert.equal(Object.isFrozen(mount.port),true);assert.deepEqual(Object.keys(host),[]);assert.throws(()=>mountClassicExportCommandPort(host,h.controller),/already/);const replacement={};Object.defineProperty(host,'markdownEditorExportCommandPort',{value:replacement,configurable:true});mount.destroy();mount.destroy();assert.equal(host.markdownEditorExportCommandPort,replacement);assert.throws(()=>mount.port.invoke('exportMarkdown'),/destroyed/);assert.equal(h.controller.has('exportMarkdown'),true);
+test('R16-08 explicit Export commands retain immutable capabilities and terminal owner cleanup', () => {
+  const h = fixture(), host = {};
+  assert.equal(Object.isFrozen(h.controller), true);
+  assert.equal(h.controller.has('exportMarkdown'), true);
+  assert.equal(h.controller.has('unknown'), false);
+  h.controller.destroy(); h.controller.destroy();
+  assert.deepEqual(Object.keys(host), []);
+  assert.equal(h.controller.has('exportMarkdown'), false);
+  assert.throws(() => h.controller.invoke('exportMarkdown'), /EXPORT_CANCELLED/);
 });
 test('R14-18 removed script, inline image template and Menu globals cannot form a second production export chain',()=>{
   assert.equal(existsSync(new URL('../public/app/export.js',import.meta.url)),false);
   const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
   assert.doesNotMatch(read('src/main.js'),/['"]\/app\/export\.js['"]/);
-  assert.doesNotMatch(read('public/compatibility/business-content.html'),/id="export-image-(?:modal|stage|content|preview)"|selectImageRatio\(|downloadExportImage\(|(?:exportFile|exportWord|exportPDF|exportHTML|openExportImageModal)\(/);
-  assert.doesNotMatch(read('src/features/menu/compatibility/classic-menu-command-adapter.js'),/invokeGlobal\('(?:exportFile|exportWord|exportHTML|exportPDF|openExportImageModal)'/);
-  assert.match(read('src/features/menu/compatibility/classic-menu-command-adapter.js'),/markdownEditorExportCommandPort/);
+  assert.doesNotMatch(read('src/features/menu/ui/menu-content-view.js'),/id="export-image-(?:modal|stage|content|preview)"|selectImageRatio\(|downloadExportImage\(|(?:exportFile|exportWord|exportPDF|exportHTML|openExportImageModal)\(/);
+  assert.doesNotMatch(read('src/features/menu/menu-actions.js'),/invokeGlobal\('(?:exportFile|exportWord|exportHTML|exportPDF|openExportImageModal)'/);
+  assert.match(read('src/features/menu/menu-actions.js'),/exportCommands/);
+  assert.equal(existsSync(new URL('../public/compatibility/business-content.html', import.meta.url)), false);
 });

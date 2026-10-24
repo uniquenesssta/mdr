@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
 import { readFile } from '../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -19,7 +20,7 @@ const awaitableSource = Object.fromEntries(await Promise.all(classicSyntaxPaths.
 
 test('Atomic 5.13 removes hidden textarea compatibility from production callers and presentation', async () => {
   const [html, core, events, previewEngine, clipper, performance, previewCss, exportCss] = await Promise.all([
-    read('public/compatibility/business-content.html'),
+    readCurrentViewMarkup(),
     read('public/app/core.js'),
     read('public/app/events.js'),
     read('src/features/preview/pipeline/preview-render-engine.js'),
@@ -73,7 +74,7 @@ test('Atomic 5.13 preserves unresolved later-stage editor-tools responsibilities
 
 test('Atomic 5.13 routes migrated menu actions through declarative Editor View commands', async () => {
   const [html, main] = await Promise.all([
-    read('public/compatibility/business-content.html'),
+    readCurrentViewMarkup(),
     read('src/main.js')
   ]);
   assert.match(html, /data-editor-action="open-find"/);

@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from './support/current-view-markup.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -114,8 +115,8 @@ test('Atomic 10.12 events.js routes edit autosave and Ctrl-S variants through ex
   assert.doesNotMatch(source, /\bfunction\s+saveCurrentFile|\bfunction\s+saveAsMarkdown|\bfunction\s+autoSave/);
 });
 
-test('Atomic 10.12 file-menu Save actions are declarative and no longer call classic save globals inline', () => {
-  const source = read('public/compatibility/business-content.html');
+test('Atomic 10.12 file-menu Save actions are declarative and no longer call classic save globals inline', async () => {
+  const source = await readCurrentViewMarkup();
   assert.match(source, /data-editor-action="save-current-file"/);
   assert.match(source, /data-editor-action="save-as-markdown"/);
   assert.doesNotMatch(source, /onclick="saveCurrentFile\(|onclick="saveAsMarkdown\(/);

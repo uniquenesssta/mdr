@@ -10,13 +10,13 @@ const text = path => readFile(file(path), 'utf8');
 test('Atomic 8.4 keeps one Source Edit Controller while CodeMirror transaction compatibility stays at the final editor integration boundary', async () => {
   const application = 'src/features/hybrid-editor/application/hybrid-source-edit-controller.js';
   const editorPort = 'src/features/editor/infrastructure/codemirror-source-editor-port.js';
-  const bridge = 'src/features/hybrid-editor/compatibility/classic-hybrid-source-edit-controller-port.js';
+  const bridge = 'src/features/hybrid-editor/application/source-editor-registry.js';
   await access(file(application));
   await access(file(editorPort));
   await access(file(bridge));
   const index = await text('src/features/hybrid-editor/index.js');
   assert.match(index, /application\/hybrid-source-edit-controller\.js/);
-  assert.match(index, /compatibility\/classic-hybrid-source-edit-controller-port\.js/);
+  assert.match(index, /application\/source-editor-registry\.js/);
   assert.doesNotMatch(index, /compatibility\/codemirror-source-editor-port\.js|createCodeMirrorSourceEditorPort|revealHybridSourceRangeEffect/);
   const facade = await text('src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   assert.match(facade, /createCodeMirrorSourceEditorPort/);
@@ -42,8 +42,8 @@ test('Atomic 8.4 source-range authority remains removed from widgets and the fin
   const outside = await text('src/features/hybrid-editor/activation/outside-pointer-closure.js');
   assert.doesNotMatch(widgets, /activeHybridSourceRanges|setActiveHybridSourceRange|getActiveHybridSourceRange|clearActiveHybridSourceRange|revealHybridSourceRangeEffect/);
   assert.doesNotMatch(widgets, /scrollIntoView\(|view\.state\.doc\.length[\s\S]{0,1200}source-opened/);
-  assert.doesNotMatch(widgets, /getClassicHybridSourceEditControllerPort\(view\)/);
-  assert.match(sourceAction, /getClassicHybridSourceEditControllerPort\(view\)/);
+  assert.doesNotMatch(widgets, /getHybridSourceEditor\(view\)/);
+  assert.match(sourceAction, /getHybridSourceEditor\(view\)/);
   assert.doesNotMatch(facade + application, /mapActiveSourceRange|selectionIntersectsRange|closeActiveSourceFromPointer|clearActiveHybridSourceRange|setActiveHybridSourceRange/);
   assert.match(facade, /createHybridSourceEditController/);
   assert.match(facade, /createCodeMirrorSourceEditorPort/);
@@ -66,6 +66,6 @@ test('Atomic 8.4 production inventory records the new responsibility boundaries'
   for (const path of [
     'src/features/hybrid-editor/application/hybrid-source-edit-controller.js',
     'src/features/editor/infrastructure/codemirror-source-editor-port.js',
-    'src/features/hybrid-editor/compatibility/classic-hybrid-source-edit-controller-port.js'
+    'src/features/hybrid-editor/application/source-editor-registry.js'
   ]) assert.ok(paths.includes(path), path);
 });

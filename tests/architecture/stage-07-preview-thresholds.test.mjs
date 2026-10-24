@@ -1,6 +1,6 @@
 import { readFile } from '../support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
+import { access, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -11,27 +11,27 @@ test('Atomic 7.1 keeps the preview threshold owner and scoped classic read port 
   const pipelineEntries = (await readdir(new URL('src/features/preview/pipeline/', root))).sort();
   assert.ok(entries.includes('index.js'));
   assert.ok(entries.includes('pipeline'));
-  assert.ok(entries.includes('compatibility'));
+  await assert.rejects(access(new URL('src/features/preview/compatibility/classic-preview-thresholds-port.js',root)));
   assert.ok(pipelineEntries.includes('preview-thresholds.js'));
   assert.ok(pipelineEntries.includes('preview-mode-resolver.js'));
-  assert.ok((await readdir(new URL('src/features/preview/compatibility/', root))).includes('classic-preview-thresholds-port.js'));
+  assert.doesNotMatch(await source('src/features/preview/index.js'), /classic-preview-thresholds-port/);
   const thresholds = await source('src/features/preview/pipeline/preview-thresholds.js');
   assert.doesNotMatch(thresholds, /^import\s/m);
   assert.doesNotMatch(thresholds, /\bwindow\b|\bdocument\b|localStorage|sessionStorage/);
   assert.match(thresholds, /PREVIEW_BEHAVIOR_THRESHOLDS/);
   const publicEntry = await source('src/features/preview/index.js');
   assert.match(publicEntry, /PREVIEW_BEHAVIOR_THRESHOLDS/);
-  assert.match(publicEntry, /mountClassicPreviewThresholdsPort/);
+  assert.doesNotMatch(publicEntry, /mountClassicPreviewThresholdsPort/);
 });
 
 test('Atomic 7.1 callers still read one canonical threshold object after Atomic 7.14 removes classic preview ownership', async () => {
   const [main, core, handler, engine] = await Promise.all([
     source('src/main.js'), source('public/app/core.js'),
-    source('src/features/preview/application/preview-command-handler.js'),
+    source('src/features/preview/application/preview-commands.js'),
     source('src/features/preview/pipeline/preview-render-engine.js')
   ]);
-  assert.match(main, /mountClassicPreviewThresholdsPort/);
-  assert.match(main, /previewThresholdsPort\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewThresholdsPort/);
+  assert.doesNotMatch(main, /previewThresholdsPort\.destroy\(\)/);
   assert.match(handler, /PREVIEW_BEHAVIOR_THRESHOLDS/);
   assert.match(handler, /thresholds:\s*PREVIEW_BEHAVIOR_THRESHOLDS/);
   assert.match(core, /corePreviewCommandPort/);
@@ -66,7 +66,7 @@ test('Atomic 7.1 threshold ownership remains isolated after the Atomic 7.14 appl
     source('src/features/preview/pipeline/preview-thresholds.js'),
     source('src/features/preview/application/preview-controller.js'),
     source('src/features/preview/pipeline/preview-render-engine.js'),
-    source('src/features/preview/application/preview-command-handler.js')
+    source('src/features/preview/application/preview-commands.js')
   ]);
   assert.doesNotMatch(thresholds, /preview-controller|preview-render-engine|preview-command-handler/);
   assert.match(controller, /PREVIEW_BEHAVIOR_THRESHOLDS/);

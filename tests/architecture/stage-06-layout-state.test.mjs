@@ -18,18 +18,18 @@ test('Atomic 6.1 creates the public Layout feature and one scoped state owner be
   const [index, state, port, main] = await Promise.all([
     read('src/features/layout/index.js'),
     read('src/features/layout/state/layout-state.js'),
-    read('src/features/layout/compatibility/classic-layout-state-port.js'),
+    read('src/features/layout/workspace-preferences.js'),
     read('src/main.js')
   ]);
   assert.match(index, /createLayoutState/);
   assert.match(index, /responsive-breakpoints\.js/);
-  assert.match(index, /mountClassicLayoutStatePort/);
+  assert.doesNotMatch(index, /mountClassicLayoutStatePort/);
   assert.match(state, /runtime layout state/);
   assert.doesNotMatch(state, /\b(document|window|localStorage|sessionStorage)\b/);
-  assert.match(port, /markdownEditorLayoutStatePort/);
+  assert.match(port, /coreLayoutStatePort\.snapshot/);
   assert.match(main, /createLayoutState\(\)/);
-  assert.match(main, /mountClassicLayoutStatePort\(compatibilityPlatformHost, layoutState\)/);
-  assert.ok(main.indexOf('mountClassicLayoutStatePort') < main.indexOf('const workspacePreferences = ownApplication('));
+  assert.doesNotMatch(main, /mountClassicLayoutStatePort|compatibilityPlatformHost/);
+  assert.ok(main.indexOf('const layoutState = createLayoutState()') < main.indexOf('const workspacePreferences = ownApplication('));
 });
 
 test('all migrated classic callers use the scoped LayoutState port while Atomic 7.14 Preview uses direct LayoutState injection without a second state center', async () => {

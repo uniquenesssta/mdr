@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { createImageExporter, mountClassicImageExportPort, isExportCancelledError } from '../src/features/export/index.js';
+import { createImageExporter, isExportCancelledError } from '../src/features/export/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
 const PNG = 'data:image/png;base64,iVBORw0KGgo=';
@@ -9,14 +9,13 @@ const signature = [137,80,78,71,13,10,26,10];
 const deferred = () => { let resolve, reject; const promise = new Promise((yes,no) => { resolve=yes;reject=no; }); return { promise, resolve, reject }; };
 const cancelled = reason => error => isExportCancelledError(error) && error.reason === reason;
 const fixture = (t, options) => { const h=createExportVmHost(options);t.after(()=>h.destroy());return h; };
-const host = h => h.context.document.getElementById('compatibility-business-ports');
-const request = (h, options={}) => host(h).markdownEditorExportRequestPort.createRequest({ format:'image',name:h.context.filenameInput.value,
+const request = (h, options={}) => h.context.exportRequestPort.createRequest({ format:'image',name:h.context.filenameInput.value,
   directory:h.context.exportDirectory,documentId:h.context.getActiveDocumentId(),imageOptions:{ratio:'9:16',cropFit:false},...options });
 const idle = h => { assert.equal(h.taskController.getSnapshot().activeTask,null);assert.equal(h.nodes.get('export-image-content')?.children.length||0,0); };
 async function until(condition) { for(let i=0;i<100;i++){if(condition())return;await Promise.resolve();}throw new Error('Expected image workflow boundary was not reached'); }
 function holdPng(h) {
   const entered=deferred(),done=deferred();
-  host(h).markdownEditorPresentationPort.loadDomToImage=async()=>({ toPng(root,options) { entered.resolve({root,options});return done.promise; } });
+  h.presentation.loadDomToImage=async()=>({ toPng(root,options) { entered.resolve({root,options});return done.promise; } });
   return {entered,done};
 }
 
@@ -86,7 +85,7 @@ for(const phase of ['loading','building','enhancing','images','encoding'])test('
 });
 
 for(const action of ['cancel','replace','destroy'])test('R14-16 pending library '+action+' detaches preparation and consumes its late rejection',async t=>{
-  const h=fixture(t),entered=deferred(),done=deferred();host(h).markdownEditorPresentationPort.loadDomToImage=()=>{entered.resolve();return done.promise;};
+  const h=fixture(t),entered=deferred(),done=deferred();h.presentation.loadDomToImage=()=>{entered.resolve();return done.promise;};
   const work=h.imageExporter.render({request:request(h)});await entered.promise;
   const rejected=assert.rejects(work,cancelled(action==='cancel'?'cancelled':action==='replace'?'replaced':'destroyed'));
   if(action==='cancel')h.taskController.cancel();else if(action==='replace')h.taskController.begin('replacement');else h.imageExporter.destroy();
@@ -114,7 +113,7 @@ test('R14-16 reentrant begin replacement keeps the newer render revision and can
 });
 
 for(const fault of ['library','encoder','decode','cleanup'])test('R14-16 '+fault+' failure releases capture/task/cache and next rendering succeeds',async t=>{
-  const h=fixture(t),presentation=host(h).markdownEditorPresentationPort;let root;
+  const h=fixture(t),presentation=h.presentation;let root;
   if(fault==='library')presentation.loadDomToImage=async()=>{throw new Error('load failed');};
   else presentation.loadDomToImage=async()=>({async toPng(value){root=value;
     if(fault==='encoder')throw new Error('PNG failed');
@@ -127,8 +126,8 @@ for(const fault of ['library','encoder','decode','cleanup'])test('R14-16 '+fault
 });
 
 for(const action of ['cancel','edit','replace','destroy'])test('R14-16 pending native dialog '+action+' cannot write after it returns',async t=>{
-  const h=fixture(t,{desktop:true});await h.renderImage(PNG);const entered=deferred(),done=deferred(),port=host(h).markdownEditorPlatformPort,original=port.call;
-  port.call=(area,method,...args)=>{if(method==='saveFile'){entered.resolve();return done.promise;}return original(area,method,...args);};
+  const h=fixture(t,{desktop:true});await h.renderImage(PNG);const entered=deferred(),done=deferred(),port=h.platform;
+  port.dialogs.saveFile=()=>{entered.resolve();return done.promise;};
   const work=h.imageExporter.save({request:request(h)});await entered.promise;
   const reason=({cancel:'cancelled',edit:'document-changed',replace:'replaced',destroy:'destroyed'})[action],rejected=assert.rejects(work,cancelled(reason));
   if(action==='cancel')h.taskController.cancel();if(action==='edit')h.context.documentModel.getDocumentVersion=()=>8;
@@ -138,22 +137,22 @@ for(const action of ['cancel','edit','replace','destroy'])test('R14-16 pending n
 });
 
 test('R14-16 already started binary write stays locked and rejects a late error after destruction',async t=>{
-  const h=fixture(t,{desktop:true});await h.renderImage(PNG);const entered=deferred(),done=deferred(),port=host(h).markdownEditorPlatformPort,original=port.call;
-  port.call=(area,method,...args)=>{if(method==='writeBinary'){entered.resolve(args);return done.promise;}return original(area,method,...args);};
+  const h=fixture(t,{desktop:true});await h.renderImage(PNG);const entered=deferred(),done=deferred(),port=h.platform;
+  port.files.writeBinary=(...args)=>{entered.resolve(args);return done.promise;};
   const work=h.imageExporter.save({request:request(h)}),args=await entered.promise;assert.deepEqual(Array.from(args[1]),signature);
   assert.equal(h.taskController.getSnapshot().activeTask.phase,'writing');assert.equal(h.taskController.cancel(),false);
   assert.equal((await h.imageExporter.render({request:request(h)})).status,'busy');
   const rejected=assert.rejects(work,cancelled('destroyed'));h.imageExporter.destroy();done.reject(new Error('late file error'));await rejected;idle(h);
 });
 
-test('R14-16 scoped command/cache port is immutable, preserves replacements and becomes terminal independently',async t=>{
-  const h=fixture(t),target={},mount=mountClassicImageExportPort(target,h.imageExporter);assert.equal(Object.isFrozen(mount.port),true);
-  assert.equal(Object.getOwnPropertyDescriptor(target,'markdownEditorImageExportPort').writable,false);
-  assert.throws(()=>mountClassicImageExportPort(target,h.imageExporter),/already mounted/);
-  Object.defineProperty(target,'markdownEditorImageExportPort',{value:'replacement',configurable:true});mount.destroy();mount.destroy();
-  assert.equal(target.markdownEditorImageExportPort,'replacement');assert.throws(()=>mount.port.getPreview(),/destroyed/);
-  assert.throws(()=>mount.port.render({}),/destroyed/);assert.throws(()=>mount.port.save({}),/destroyed/);
-  await h.renderImage(PNG);assert.equal(h.imageData(),PNG);
+test('R16-08 direct image owner retains immutable cache DTOs and rejects every late command after disposal', async t => {
+  const h = fixture(t); assert.equal(Object.isFrozen(h.imageExporter), true);
+  await h.renderImage(PNG); const snapshot = h.imageExporter.getPreview();
+  assert.equal(Object.isFrozen(snapshot), true); assert.equal(h.imageData(), PNG);
+  h.imageExporter.destroy(); h.imageExporter.destroy();
+  assert.throws(() => h.imageExporter.getPreview(), cancelled('destroyed'));
+  await assert.rejects(async () => h.imageExporter.render({ request: request(h) }), cancelled('destroyed'));
+  await assert.rejects(async () => h.imageExporter.save({ request: request(h) }), cancelled('destroyed'));
 });
 
 test('R14-16 classic commands retain only immutable requests and no PNG, layout, encoding or binary writer owner',()=>{

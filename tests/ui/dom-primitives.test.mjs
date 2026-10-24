@@ -105,6 +105,7 @@ test('DOM primitive public entry is exact and callers do not bypass it', async (
     'createSafeElement',
     'createTransitionVisibility',
     'isElementRef',
+    'mountStaticContent',
     'requireElementRef'
   ]);
 
@@ -113,7 +114,7 @@ test('DOM primitive public entry is exact and callers do not bypass it', async (
 
   const migratedCallers = [
     'src/ui/create-ui.js',
-    'src/ui/compatibility/business-content-port.js',
+    'src/features/editor/ui/editor-content-view.js',
     'src/ui/shell/app-shell-view.js',
     'src/ui/shell/menu-bar-shell.js',
     'src/ui/shell/overlay-root.js',

@@ -92,8 +92,8 @@ function dialogHarness(confirmLargeFile = () => true) {
   class CustomEvent extends Event { constructor(type, options) { super(type); this.detail = options.detail; } }
   const root = new Element(); root.ownerDocument = { defaultView: { CustomEvent }, createElement: () => new Element() };
   let onClose;
-  root.addEventListener('markdown-editor:modal-shell-open', event => { onClose = event.detail.options.onClose; });
-  const view = createImageDialogView({ root, confirmLargeFile, imageController: createImageImportController(h),
+  const createModalShell = () => ({ open(_content, options) { onClose = options.onClose; }, close() { onClose?.(); }, destroy() {} });
+  const view = createImageDialogView({ root, createModalShell, confirmLargeFile, imageController: createImageImportController(h),
     selection: { snapshot: () => ({ start: 2, end: 2 }) }, insertImage: (...args) => inserted.push(args), notify: x => messages.push(x) });
   view.open();
   return { ...h, root, view, inserted, messages, shellClose: () => onClose(),

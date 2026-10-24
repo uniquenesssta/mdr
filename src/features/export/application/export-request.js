@@ -60,3 +60,16 @@ export function createExportRequest(input) {
   }
   return Object.freeze({ format, documentId, name, directory, extension: spec.extension, extensions: spec.extensions, imageOptions });
 }
+/** Bind current document identity to the canonical pure request policy without a host or copied state. */
+export function createExportRequestPolicy({ getActiveDocumentId, hasDocument } = {}) {
+  if (typeof getActiveDocumentId !== 'function' || typeof hasDocument !== 'function') throw new TypeError('Export request document readers are required.');
+  return Object.freeze({
+    imageRatios: EXPORT_IMAGE_RATIOS,
+    createRequest(input) {
+      if (input === null || typeof input !== 'object' || Array.isArray(input)) return createExportRequest(input);
+      const request = createExportRequest({ ...input, documentId: input.documentId === undefined ? getActiveDocumentId() : input.documentId });
+      if (!hasDocument(request.documentId)) throw new ExportRequestValidationError('documentId', '要导出的文档已不存在');
+      return request;
+    }
+  });
+}

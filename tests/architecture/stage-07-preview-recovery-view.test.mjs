@@ -9,13 +9,13 @@ async function exists(path) { try { await access(new URL(path, root)); return tr
 test('Atomic 7.13 keeps the taskbook Preview Recovery View and scoped classic bridge', async () => {
   const [entry, view, port] = await Promise.all([
     source('src/features/preview/index.js'), source('src/features/preview/ui/preview-recovery-view.js'),
-    source('src/features/preview/compatibility/classic-preview-recovery-view-port.js')
+    source('src/features/preview/ui/preview-recovery-view.js')
   ]);
   assert.match(entry, /createPreviewRecoveryView/);
-  assert.match(entry, /mountClassicPreviewRecoveryViewPort/);
+  assert.doesNotMatch(entry, /mountClassicPreviewRecoveryViewPort/);
   assert.match(view, /DEFAULT_RECOVERY_MESSAGE/);
   assert.match(view, /preserveStable/);
-  assert.match(port, /markdownEditorPreviewRecoveryViewPort/);
+  assert.doesNotMatch(port, /markdownEditorPreviewRecoveryViewPort/);
 });
 
 test('Atomic 7.13 Recovery View owns recovery DOM only and never edits document or Preview state', async () => {
@@ -28,8 +28,8 @@ test('Atomic 7.13 Recovery View owns recovery DOM only and never edits document 
 test('Atomic 7.13 composition owns Recovery View while Atomic 7.14 RenderEngine delegates recovery presentation', async () => {
   const [main, engine] = await Promise.all([source('src/main.js'), source('src/features/preview/pipeline/preview-render-engine.js')]);
   assert.match(main, /createPreviewRecoveryView\(\{/);
-  assert.match(main, /mountClassicPreviewRecoveryViewPort\(\s*compatibilityPlatformHost,\s*previewRecoveryView\s*\)/);
-  assert.match(main, /previewRecoveryViewPort\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewRecoveryViewPort\(\s*compatibilityPlatformHost,\s*previewRecoveryView\s*\)/);
+  assert.doesNotMatch(main, /previewRecoveryViewPort\.destroy\(\)/);
   assert.match(main, /previewRecoveryView\.destroy\(\)/);
   assert.match(engine, /recoveryView\.recover\(/);
   assert.match(engine, /recoveryView\.inspect\(/);

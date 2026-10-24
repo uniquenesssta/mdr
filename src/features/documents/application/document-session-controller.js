@@ -394,6 +394,7 @@ export function createDocumentSessionController({
     get records() { assertActive(); return session.records; },
     get activeId() { assertActive(); return session.activeId; },
     getActiveRecord() { assertActive(); return session.getActiveRecord(); },
+    isStaleError(error) { assertActive(); return error instanceof DocumentOperationStaleError || error?.code === 'DOCUMENT_OPERATION_STALE'; },
     getRecord(documentId) { assertActive(); return session.getRecord(documentId); },
     getLegacySessionRecords() { assertActive(); return repository.readLegacySession(); },
     captureOperation,

@@ -30,7 +30,6 @@ function collectPendingMermaidRoots(body) {
 export function createPreviewRenderEngine(options = {}) {
   const {
     root,
-    editor,
     documentModel,
     documentSession,
     outline,
@@ -53,7 +52,7 @@ export function createPreviewRenderEngine(options = {}) {
     diagnostic,
     now
   } = options;
-  if (!root || !editor || !documentModel || !state || !scheduler || !renderCoordinator || !renderer || !enhancementCoordinator || !recoveryView || !markdownRenderer) {
+  if (!root || !documentModel || !state || !scheduler || !renderCoordinator || !renderer || !enhancementCoordinator || !recoveryView || !markdownRenderer) {
     throw new TypeError('Preview Render Engine requires canonical Preview dependencies.');
   }
   if (typeof createWorkerClient !== 'function' || typeof createVirtualController !== 'function') {
@@ -217,14 +216,10 @@ export function createPreviewRenderEngine(options = {}) {
     let resolvedMode = state.snapshot.mode;
     let resolvedScopeKey = state.snapshot.lastStableResult?.scopeKey || resolvedMode;
     let previewFailure = null;
-    const sourceLength = Math.max(
-      Number(documentModel.getTextLength?.()) || 0,
-      Number(editor.virtualEditor?.getTextLength?.()) || 0,
-      Number(editor.textLength) || 0
-    );
+    const sourceLength = Math.max(0, Number(documentModel.getTextLength()) || 0);
     let sourceText = null;
     const getSourceText = () => {
-      if (sourceText === null) sourceText = documentModel.createSnapshot?.('preview-full-source') ?? editor.value;
+      if (sourceText === null) sourceText = documentModel.createSnapshot('preview-full-source');
       return sourceText;
     };
 
@@ -249,7 +244,7 @@ export function createPreviewRenderEngine(options = {}) {
 
     try {
       if (useWorker) {
-        modelResult = await getWorkerClient().update(documentModel || editor, getSourceText, forceFullRebuild, { indexOnly: hybrid });
+        modelResult = await getWorkerClient().update(documentModel, getSourceText, forceFullRebuild, { indexOnly: hybrid });
         if (modelResult?.cancelled || !state.isCurrentVersion(renderVersion)) return;
         workerDocumentId = renderingDocumentId;
         workerDurationMs = modelResult.workerDurationMs || 0;
@@ -266,7 +261,7 @@ export function createPreviewRenderEngine(options = {}) {
         state.setFocusSection(renderVersion, focusSection);
         enhancementCoordinator.setPriorityRange(focusSection);
         shell.updateDocumentStatistics?.(modelResult.statistics);
-        const headingVersion = modelResult.documentVersion ?? documentModel.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.();
+        const headingVersion = modelResult.documentVersion ?? documentModel.getDocumentVersion();
         const outlineDocumentKey = documentSession?.activeId || '';
         if (Array.isArray(modelResult.headings)) {
           const outlineUpdate = outline?.replaceIndex?.(modelResult.headings, {
@@ -485,7 +480,7 @@ export function createPreviewRenderEngine(options = {}) {
       sourceLength,
       blockCount: stableBlockCount,
       mountedBlocks: stableMountedBlocks,
-      documentVersion: documentModel.getDocumentVersion?.() ?? editor.virtualEditor?.getDocumentVersion?.() ?? 0
+      documentVersion: documentModel.getDocumentVersion() ?? 0
     };
     if (workerFailed) {
       state.commitDegraded(renderVersion, { mode: resolvedMode, error: previewFailure });

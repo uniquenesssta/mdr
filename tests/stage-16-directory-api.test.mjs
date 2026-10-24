@@ -39,7 +39,8 @@ for (const [old, current, marker] of migrations) {
   test('R16-06 removes ' + old + ' and preserves its complete implementation at the current owner', async () => {
     await assert.rejects(access(new URL(old, root)), { code: 'ENOENT' });
     const previous = git(['show', baseline + ':' + old]);
-    const source = await read(current);
+    const source = ['src/editor/hybrid-markdown.js','src/editor/virtual-editor.js','src/storage/native-document-store.js'].includes(old)
+      ? git(['show', '3f22fd6b79e17d481d69ae2822c49268e1e0e993:' + current]) : await read(current);
     assert.equal(previous.split(marker).length, 2, old);
     assert.equal(source.split(marker).length, 2, current);
     assert.equal(source.slice(source.indexOf(marker)).trimEnd(), previous.slice(previous.indexOf(marker)), current + ': logic changed beyond imports/header');

@@ -61,6 +61,7 @@ test('production composes the public view before owned Import callbacks and dest
   assert.ok(main.indexOf('const dropOverlayView = ') < main.indexOf('dropImportController.start({'));
   assert.match(main, /openBrowserText: \(file, request\) => importDocumentController\.openBrowserFile\(file, request\)/);
   assert.equal(main.match(/dropOverlayView\.destroy\(\)/g).length, 2);
+
   assert.doesNotMatch(events, /dropOverlay|drop-overlay|setOverlayVisible/);
   assert.doesNotMatch(view, /addEventListener|FileReader|readText|readImage|dragCounter|createDropImportController/);
 });

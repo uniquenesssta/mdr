@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createDocumentTitleView } from '../../../src/features/documents/ui/document-title-view.js';
-import { mountClassicDocumentUiCommandPort } from '../../../src/features/documents/compatibility/classic-document-ui-command-port.js';
+import { createCommandRegistry } from '../../../src/shared/commands/command-registry.js';
 
 function createInput() {
   const listeners = new Map();
@@ -52,10 +52,10 @@ test('Atomic 5.12 Document Title View is session-read-only, sends title drafts a
   assert.equal(session.listenerCount(), 0);
 });
 
-test('Atomic 5.12 scoped Document UI compatibility port owns callbacks only and removes them deterministically', () => {
+test('R16-08 explicit Document commands own callbacks only and remove them deterministically', () => {
   const host = {};
   const calls = [];
-  const port = mountClassicDocumentUiCommandPort(host);
+  const port = createCommandRegistry('Document commands');
   const unregister = port.register({ open: id => calls.push(['open', id]), close: id => calls.push(['close', id]) });
   port.invoke('open', 'a');
   port.invoke('close', 'b');

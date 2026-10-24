@@ -4,4 +4,3 @@ export { createWindowControlsView } from './window-controls-view.js';
 export { createWindowDragRegion } from './window-drag-region.js';
 export { createWindowCloseController } from './window-close-controller.js';
 export { createWindowController } from './window-controller.js';
-export { mountClassicCloseSavePort } from './compatibility/classic-close-save-port.js';

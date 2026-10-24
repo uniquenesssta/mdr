@@ -39,9 +39,9 @@ import {
   createTableBlockWidgetType,
   destroyHybridComponentSession,
   destroyHybridWidgetGeometryScheduler,
-  getClassicHybridSourceEditControllerPort,
+  getHybridSourceEditor,
   getHybridComponentSession,
-  mountClassicHybridSourceEditControllerPort,
+  bindHybridSourceEditor,
   scheduleHybridWidgetGeometry
 } from '../../hybrid-editor/index.js';
 import {
@@ -230,7 +230,7 @@ function createBlockDecoration(view, descriptor, presentationRange) {
 const decorationCoordinator = createHybridDecorationCoordinator({
   getSyntaxTree: view => syntaxTree(view.state),
   getEditableRanges,
-  getActiveSourceRange: view => getClassicHybridSourceEditControllerPort(view)?.getActiveRange() || null,
+  getActiveSourceRange: view => getHybridSourceEditor(view)?.getActiveRange() || null,
   collectHybridBlocks,
   buildInlinePresentation,
   createBlockDecoration,
@@ -281,7 +281,7 @@ const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
       scheduleGeometry: reason => scheduleHybridWidgetGeometry(view, reason),
       recordClose: recordSourceEditingClose
     });
-    const sourceEditPortMount = mountClassicHybridSourceEditControllerPort(view, sourceEditController);
+    const sourceEditPortMount = bindHybridSourceEditor(view, sourceEditController);
     this.controller = createHybridEditorController({
       view,
       decorationCoordinator,

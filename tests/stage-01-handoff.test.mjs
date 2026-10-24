@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from './support/current-view-markup.mjs';
 import { checkLegacyRuntime } from '../scripts/architecture/checks.mjs';
 import { collectInlineEvents } from '../scripts/architecture/source-analysis.mjs';
 import { assertProductionInventory } from './support/production-inventory.mjs';
@@ -160,14 +161,14 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   assert.equal(baseline.legacyClassicScripts.reduce((sum,item)=>sum+item.count,0)
     + baseline.auditCorrections.r16ClassicRetirement.removedClassicScripts.reduce((sum,item)=>sum+item.count,0)
     + baseline.auditCorrections.r14ExportRetirement.removedClassicScripts.reduce((sum,item)=>sum+item.count,0),6);
-  for(const path of ['src/features/export/application/export-controller.js','src/features/export/ui/export-image-dialog-view.js','src/features/export/compatibility/classic-export-command-port.js'])assert.ok(moduleFixture.modules.some(record=>record[0]===path));
+  for(const path of ['src/features/export/application/export-controller.js','src/features/export/ui/export-image-dialog-view.js'])assert.ok(moduleFixture.modules.some(record=>record[0]===path));
   assert.equal(moduleFixture.modules.some(record=>record[0]==='public/app/export.js'),false);
   // R13.13 removes the file input change and file-menu import handlers; the historical handoff above stays frozen.
   // R13.14 also removes the webpage import menu handler; MenuView owns that command.
   // R14.5 retires the progress cancel handler. Compare exact remaining handlers/counts,
   // rather than treating a past migration total as a permanent product contract.
   const compatibilityPath = 'public/compatibility/business-content.html';
-  const currentHtml = await readText(compatibilityPath);
+  const currentHtml = await readCurrentViewMarkup();
   const inlineContract = records => records.map(({ path, attribute, handler, count }) =>
     JSON.stringify([path, attribute, handler, count])).sort();
   assert.deepEqual(inlineContract(collectInlineEvents(compatibilityPath, currentHtml)),

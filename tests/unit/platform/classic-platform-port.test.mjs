@@ -1,42 +1,23 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mountClassicPlatformPort } from '../../../src/platform/compatibility/classic-platform-port.js';
-
-function createHost() { return { removeAttribute() {} }; }
-function createPlatform() {
-  const calls = [];
-  return {
-    calls,
-    capabilities: Object.freeze({ isDesktop: true, desktop: Object.freeze({ window: true, fileSystem: true }) }),
-    files: Object.freeze({ readText(path) { calls.push(['files.readText', path]); return 'text'; } }),
-    dialogs: Object.freeze({ confirm(message) { calls.push(['dialogs.confirm', message]); return true; } })
-  };
-}
-
-test('Atomic Task 3.12 classic bridge exposes call/supports only on the dedicated host', () => {
-  const host = createHost();
-  const platform = createPlatform();
-  const mount = mountClassicPlatformPort(host, platform);
-  const port = host.markdownEditorPlatformPort;
-  assert.ok(Object.isFrozen(port));
-  assert.deepEqual(Object.keys(port), ['supports', 'call']);
-  assert.equal(port.supports('desktop.window'), true);
-  assert.equal(port.supports('desktop.dialogs'), false);
-  assert.equal(port.call('files', 'readText', 'a.md'), 'text');
-  assert.equal(port.call('dialogs', 'confirm', 'ok?'), true);
-  assert.deepEqual(platform.calls, [['files.readText', 'a.md'], ['dialogs.confirm', 'ok?']]);
-  assert.equal(globalThis.markdownEditorPlatformPort, undefined);
-  assert.equal(globalThis.markdownEditorNative, undefined);
-  mount.destroy();
-  mount.destroy();
-  assert.equal(host.markdownEditorPlatformPort, undefined);
+import { createPlatform, PlatformCapabilityUnavailableError } from '../../../src/platform/index.js';
+test('R16-08 explicit Platform uses typed capabilities and methods without the old call/supports facade', async () => {
+  const calls = [], runtime = { confirm(message) { calls.push(message); return true; } };
+  const platform = createPlatform({ runtime });
+  assert.equal(platform.capabilities.desktop.window, false);
+  assert.equal(platform.capabilities.desktop.dialogs, false);
+  assert.equal(platform.dialogs.confirm('ok?'), true);
+  assert.deepEqual(calls, ['ok?']);
+  assert.equal(Object.hasOwn(platform, 'call'), false); assert.equal(Object.hasOwn(platform, 'supports'), false);
+  assert.equal(Object.isFrozen(platform), true);
+  assert.equal(globalThis.markdownEditorPlatformPort, undefined); assert.equal(globalThis.markdownEditorNative, undefined);
+  await platform.destroy(); await platform.destroy();
 });
-
-test('classic bridge fails explicitly for unknown calls and invalid/terminal mounts', () => {
-  const host = createHost();
-  const mount = mountClassicPlatformPort(host, createPlatform());
-  assert.throws(() => host.markdownEditorPlatformPort.call('files', 'missing'), /Unknown Platform method/);
-  mount.destroy();
-  assert.throws(() => mountClassicPlatformPort(null, createPlatform()), /requires a DOM host/);
-  assert.throws(() => mountClassicPlatformPort(createHost(), null), /requires a Platform object/);
+test('R16-08 unsupported and destroyed typed Platform calls fail explicitly', async () => {
+  const platform = createPlatform({ runtime: {} });
+  assert.throws(() => platform.files.readText('a.md'), PlatformCapabilityUnavailableError);
+  assert.throws(() => platform.dialogs.openDirectory({}), PlatformCapabilityUnavailableError);
+  assert.equal(platform.files.missing, undefined);
+  await platform.destroy();
+  assert.throws(() => platform.files.readText('a.md'), /destroyed/);
 });

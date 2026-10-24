@@ -100,4 +100,5 @@ test('text callers use Import while Documents retains lazy load and document com
   assert.doesNotMatch(legacy + events, /markdownEditorFileImportPort|function loadFile|loadDocumentFromContentLoader/);
   assert.match(main, /createImportDocumentController/);
   assert.equal(main.match(/fileImportController\.destroy\(\)/g).length, 2);
+
 });

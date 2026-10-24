@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createExportTaskController, createExportRequest, isExportCancelledError } from '../src/features/export/index.js';
+import { createPdfExporter, createPdfPrintSurface, createExportTaskController, createExportRequest, isExportCancelledError } from '../src/features/export/index.js';
 import { createBrowserPrint } from '../src/platform/index.js';
 import { createExportPrintDom } from './support/export-print-dom.mjs';
 import { createExportVmHost } from './support/export-vm-host.mjs';
@@ -144,16 +144,19 @@ test('R14-12 surface and owner destruction are independent, idempotent and rejec
   await assert.rejects(h.owner.export({request:h.request()}),cancelled('destroyed'));assert.throws(()=>h.surface.mount({body:h.body,name:'late.pdf',fontCss}),cancelled('destroyed'));
 });
 
-test('R14-12 readonly scoped PDF bridge unmounts only its property and never destroys the owner',async()=>{
-  const h=setup(),host={},mount=mountClassicPdfExportPort(host,h.owner);assert.equal(Object.keys(host).length,0);assert.ok(Object.isFrozen(mount.port));
-  assert.throws(()=>mountClassicPdfExportPort(host,h.owner),/already/);const replacement={};Object.defineProperty(host,'markdownEditorPdfExportPort',{configurable:true,value:replacement});
-  mount.destroy();mount.destroy();assert.equal(host.markdownEditorPdfExportPort,replacement);assert.throws(()=>mount.port.export({request:h.request()}),/destroyed/);
-  const work=h.owner.export({request:h.request()});await h.dom.untilScheduled();await h.dom.fire(80);await h.dom.fire(1200);await work;
+test('R16-08 explicit PDF capability prints through the isolated surface and disposes terminally', async () => {
+  const h = setup(), host = {};
+  assert.equal(Object.keys(host).length, 0); assert.equal(Object.isFrozen(h.owner), true);
+  const work = h.owner.export({ request: h.request() });
+  await h.dom.untilScheduled(); await h.dom.fire(80); await h.dom.fire(1200); await work;
+  assert.equal(h.calls.filter(row => row[0] === 'print').length, 1);
+  h.owner.destroy(); h.owner.destroy(); h.surface.destroy();
+  await assert.rejects(async () => h.owner.export({ request: h.request() }), cancelled('destroyed'));
 });
 
 test('R14-12 actual classic command shares resources and preserves Preview/Hybrid view without private print orchestration',async()=>{
   for(const view of ['source','preview','hybrid']){
-    const h=createExportVmHost({sourceText:'中文 😀 $x^2$',name:'source.md'}),port=h.context.document.getElementById('compatibility-business-ports').markdownEditorPreviewCommandPort;
+    const h=createExportVmHost({sourceText:'中文 😀 $x^2$',name:'source.md'}),port=h.preview;
     port.setViewMode(view);const before=h.calls.length,preview=h.context.preview;
     try {const work=h.invoke('exportPDF');await h.printDom.untilScheduled();const frame=h.printDom.frames[0];
       assert.ok(frame.contentDocument.body.children[0].innerHTML.includes('中文'));assert.equal(frame.contentDocument.head.children.find(x=>x.dataset.exportFonts==='katex').textContent.match(/@font-face/g).length,20);

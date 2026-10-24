@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createExportTaskController, ExportCancelledError, isExportCancelledError, mountClassicExportTaskPort } from '../src/features/export/index.js';
+import { createExportTaskController, ExportCancelledError, isExportCancelledError } from '../src/features/export/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
@@ -102,17 +102,19 @@ test('R14-03 subscription disposal and reentrant replacement never publish an ob
   unsubscribe(); unsubscribe(); c.cancel(); assert.deepEqual(seen, ['none', 'new']); c.destroy();
 });
 
-test('R14-03 scoped port owns its subscriptions only and refuses duplicate mounts and new calls after removal', () => {
-  const c = createExportTaskController(), host = {}, mount = mountClassicExportTaskPort(host, c);
-  assert.equal(host.markdownEditorExportTaskPort, mount.port); assert.ok(Object.isFrozen(mount.port));
-  assert.throws(() => mountClassicExportTaskPort(host, c), /already mounted/);
-  let seen = 0; mount.port.subscribe(() => seen++); const task = mount.port.begin('port');
-  mount.destroy(); mount.destroy(); const count = seen;
-  assert.equal(Object.hasOwn(host, 'markdownEditorExportTaskPort'), false);
+test('R16-08 direct Export Task subscriptions have independent disposal and terminal owner cleanup', () => {
+  const c = createExportTaskController(), host = {};
+  assert.equal(Object.isFrozen(c), true);
+  let seen = 0; const unsubscribe = c.subscribe(() => seen++), task = c.begin('direct');
+  unsubscribe(); unsubscribe(); const count = seen;
   task.update(30, 'still owned'); assert.equal(seen, count);
-  assert.throws(() => mount.port.begin('removed'), /destroyed/); assert.throws(() => mount.port.subscribe(() => {}), /destroyed/);
-  assert.equal(mount.port.finish(task), false); assert.equal(c.getSnapshot().activeTask.id, task.id);
-  c.destroy();
+  assert.equal(c.getSnapshot().activeTask.id, task.id);
+  assert.equal(c.isCancelled(new ExportCancelledError('test')), true);
+  c.destroy(); c.destroy();
+  assert.equal(Object.hasOwn(host, 'markdownEditorExportTaskPort'), false);
+  assert.throws(() => c.begin('removed'), /destroyed/);
+  assert.throws(() => c.subscribe(() => {}), /destroyed/);
+  assert.equal(c.finish(task), false); assert.equal(c.getSnapshot().activeTask, null);
 });
 
 test('R14-03 classic modal opening errors abort before work and cleanup failures do not retain the task', async () => {
@@ -139,7 +141,7 @@ test('R14-03 stale lock/progress/finish cannot change the current classic dialog
 
 test('R14-03 image library arriving after replacement cannot clear DOM or capture an image', async () => {
   const h = createExportVmHost(), pending = deferred(), entered = deferred();
-  h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.loadDomToImage = () => { entered.resolve(); return pending.promise; };
+  h.presentation.loadDomToImage = () => { entered.resolve(); return pending.promise; };
   const work = h.invoke('renderExportImagePreview'); await entered.promise;
   const current = h.invoke('beginExportTask', 'new');
   h.context.document.getElementById('export-image-content').innerHTML = 'new content';
@@ -150,7 +152,7 @@ test('R14-03 image library arriving after replacement cannot clear DOM or captur
 
 test('R14-03 locked PNG encoding rejects replacement/cancel and a late result after destroy cannot publish', async () => {
   const h = createExportVmHost(), pending = deferred(), entered = deferred();
-  h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.loadDomToImage = async () => ({ toPng: () => { entered.resolve(); return pending.promise; } });
+  h.presentation.loadDomToImage = async () => ({ toPng: () => { entered.resolve(); return pending.promise; } });
   const work = h.invoke('renderExportImagePreview'); await entered.promise;
   assert.equal(h.taskPort.getSnapshot().activeTask.phase, 'encoding');
   assert.equal(h.invoke('beginExportTask', 'blocked'), null); h.cancel();
@@ -163,8 +165,9 @@ test('R14-03 locked PNG encoding rejects replacement/cancel and a late result af
 
 for (const operation of ['exportHTML', 'exportWord']) test(`R14-03 ${operation} late save dialog cannot write or finish a replacement task`, async () => {
   const h = createExportVmHost({ desktop: true }), pending = deferred(), entered = deferred();
-  const platform = h.context.document.getElementById('compatibility-business-ports').markdownEditorPlatformPort;
-  platform.call = (capability, op) => { if (op === 'saveFile') { entered.resolve(); return pending.promise; } throw new Error('Stale write must not occur'); };
+  const platform = h.platform;
+  platform.dialogs.saveFile = () => { entered.resolve(); return pending.promise; };
+  platform.files.writeText = () => { throw new Error('Stale write must not occur'); };
   const work = h.invoke(operation); await entered.promise; const current = h.invoke('beginExportTask', 'new');
   pending.resolve('C:\\late.doc'); await work;
   assert.equal(h.downloads.length, 0); assert.equal(h.taskPort.getSnapshot().activeTask.id, current.id);
@@ -173,7 +176,7 @@ for (const operation of ['exportHTML', 'exportWord']) test(`R14-03 ${operation} 
 
 test('R14-03 PDF isolated-document initialization and print failures release the task without preview recovery', async () => {
   for (const failure of ['init', 'print']) {
-    const h = createExportVmHost(), preview = h.context.document.getElementById('compatibility-business-ports').markdownEditorPreviewCommandPort;
+    const h = createExportVmHost(), preview = h.preview;
     preview.reset = () => { throw new Error('Preview must not be reset'); };
     preview.setViewMode = () => { throw new Error('Preview must not change'); };
     if (failure === 'init') h.context.document.createElement = () => { throw new Error('print document failed'); };

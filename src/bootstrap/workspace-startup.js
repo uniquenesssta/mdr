@@ -17,7 +17,7 @@ export function createWorkspaceStartup({ editor, preview, filenameInput, t, loca
       // 不再先恢复旧正文或文档元数据，避免侧栏历史和后台快照重新进入当前会话。
       bootstrapEditorControllerPort.setText('');
       filenameInput.value = t('filenameDefault');
-      bootstrapLayoutStatePort.sidebarVisible = restoredSettings.sidebarVisible;
+      bootstrapLayoutStatePort.setSidebar({ visible: restoredSettings.sidebarVisible });
       applyEditorPreferences();
       applyTableVisualEditingSetting({ persist: false, notify: false });
       applyCodeVisualEditingSetting({ persist: false, notify: false });
@@ -27,7 +27,7 @@ export function createWorkspaceStartup({ editor, preview, filenameInput, t, loca
       localStorage.setItem('md_editor_preview_mode', 'preview');
 
       updateLargeDocumentMode();
-      if (editor.textLength >= LARGE_DOCUMENT_CHARS) {
+      if (editor.getTextLength() >= LARGE_DOCUMENT_CHARS) {
         preview.innerHTML = '<div class="markdown-body preview-loading">正在生成实时预览…</div>';
       }
       bootstrapPreviewCommandPort.updateCount();
@@ -41,14 +41,14 @@ export function createWorkspaceStartup({ editor, preview, filenameInput, t, loca
       } else {
         setLayoutMode('both', false);
       }
-      if (!bootstrapLayoutStatePort.previewCollapsed && !isHybridLayoutMode()) {
+      if (!bootstrapLayoutStatePort.snapshot.split.previewCollapsed && !isHybridLayoutMode()) {
         bootstrapPreviewCommandPort.requestLayoutRefresh({ forceRender: true, reason: 'startup-layout' });
       }
 
 
       bootstrapHelpPort.openFirstRun();
       refreshClassicLocalizedState();
-      const initialPath = platform.supports('desktop.fileSystem') ? await platform.call('files', 'getInitialPath') : null;
+      const initialPath = platform.capabilities.desktop.fileSystem ? await platform.files.getInitialPath() : null;
       if (!lifetime.alive) return false;
       if (initialPath) await documentCommands.invoke('openImportPath', initialPath);
       return lifetime.alive;

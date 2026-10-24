@@ -7,14 +7,14 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
   const observations = [];
   diagnostics.observations = observations;
   diagnostics.renders = [];
-  const baseHref = await browser.execute(() => location.href);
-  const fingerprint = () => browser.execute(() => {
-    const host = document.getElementById('compatibility-business-ports');
+  const baseHref = await browser.inspect(() => location.href);
+  const fingerprint = () => browser.inspect(() => {
+    const host = applicationCapabilities;
     const documents = host.markdownEditorDocumentControllerPort;
     return { documentId: documents.activeId, records: documents.records.length,
-      text: document.getElementById('editor').value };
+      text: editorApi.getText() };
   });
-  const startFetch = url => browser.execute(value => {
+  const startFetch = url => browser.inspect(value => {
     if (typeof window.openUrlModal !== 'undefined') throw new Error('Classic import global remains.');
     document.querySelector('#file-menu-dropdown .menu-trigger').click();
     const command = document.querySelector('[data-menu-command="import.web"]');
@@ -24,20 +24,20 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
     input.value = value; input.dispatchEvent(new Event('input', { bubbles: true }));
     document.querySelector('[data-clipper-fetch]').click();
   }, url);
-  const waitStatus = success => browser.waitUntil(() => browser.execute(expected =>
+  const waitStatus = success => browser.waitUntil(() => browser.inspect(expected =>
     document.getElementById('url-status').classList.contains(expected ? 'is-success' : 'is-error'), success),
   { timeout: 35_000, timeoutMsg: 'Native clipper did not publish its explicit fetch outcome.' });
-  const close = () => browser.execute(() => document.querySelector('[data-clipper-close]').click());
+  const close = () => browser.inspect(() => document.querySelector('[data-clipper-close]').click());
 
-  await browser.execute(() => {
-    const host = document.getElementById('compatibility-business-ports');
+  await browser.inspect(() => {
+    const host = applicationCapabilities;
     host.markdownEditorDocumentControllerPort.initializeEmptySession({ legacyRecords: [] });
     window.__r12Probe = { events: [], ipcAttempted: false, ipc: null, cspViolations: [] };
   });
   const empty = await fingerprint();
   assert.equal(empty.records, 0); assert.equal(empty.text, '');
   await startFetch(fixtureOrigin + '/r13/non-html'); await waitStatus(false);
-  await browser.execute(() => document.querySelector('[data-clipper-insert]').click());
+  await browser.inspect(() => document.querySelector('[data-clipper-insert]').click());
   assert.deepEqual(await fingerprint(), empty, 'Rejected response created a blank document.');
   await close(); observations.push({ scenario: 'fetch-failure-no-document', passed: true });
 
@@ -45,13 +45,13 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
   await browser.waitUntil(() => requests.some(item => item.marker === '/r13/slow'), { timeout: 10_000 });
   await close();
   // Wait past the owned delayed body, then challenge the old insert button.
-  await browser.execute(async () => { await new Promise(done => setTimeout(done, 1_400));
+  await browser.inspect(async () => { await new Promise(done => setTimeout(done, 1_400));
     document.querySelector('[data-clipper-insert]').click(); });
   assert.deepEqual(await fingerprint(), empty, 'Cancelled fetch published its late body.');
   observations.push({ scenario: 'fetch-cancel-late-result', passed: true });
 
   await startFetch(fixtureOrigin + '/r13/article'); await waitStatus(true);
-  await browser.execute(() => {
+  await browser.inspect(() => {
     document.querySelector('[data-clipper-insert]').click();
     document.querySelector('[data-clipper-insert]').click();
   });
@@ -64,9 +64,9 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
 
   async function inspectModes(source, requireImage) {
     for (const mode of ['both', 'hybrid']) {
-      await browser.execute(async layout => {
-        const host = document.getElementById('compatibility-business-ports');
-        document.getElementById('editor').virtualEditor.setSelection(0, 0);
+      await browser.inspect(async layout => {
+        const host = applicationCapabilities;
+        editorApi.setSelection(0, 0);
         host.markdownEditorEditorUiCommandPort.invoke('setLayoutMode', layout);
         if (layout === 'both') await host.markdownEditorPreviewCommandPort.update();
       }, mode);
@@ -75,10 +75,10 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
       diagnostics.renders.push(renderObservation);
       try {
         await browser.waitUntil(async () => {
-          renderObservation.snapshot = await browser.execute((rootSelector, needsImage) => {
+          renderObservation.snapshot = await browser.inspect((rootSelector, needsImage) => {
             const root = document.querySelector(rootSelector);
             const image = root?.querySelector('img[alt="owned import image"]');
-            const host = document.getElementById('compatibility-business-ports');
+            const host = applicationCapabilities;
             const preview = host.markdownEditorPreviewCommandPort.snapshot;
             return {
               checks: {
@@ -95,7 +95,7 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
                 error: code.parentElement.dataset.mermaidError === 'true'
               })),
               preview: { status: preview.status, version: preview.version, lastStableResult: preview.lastStableResult, error: preview.error },
-              documentVersion: document.getElementById('editor').virtualEditor.getDocumentVersion(),
+              documentVersion: editorApi.getDocumentVersion(),
               text: root?.textContent.slice(0, 600) || ''
             };
           }, selector, requireImage);
@@ -110,7 +110,7 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
         const missing = Object.entries(renderObservation.snapshot?.checks || {}).filter(([, value]) => value !== true).map(([key]) => key);
         throw new Error(`${source}/${mode}: imported legal content did not render; missing=${missing.join(',') || 'snapshot unavailable'}.`, { cause: error });
       }
-      const snapshot = await browser.execute(rootSelector => {
+      const snapshot = await browser.inspect(rootSelector => {
         const root = document.querySelector(rootSelector);
         const body = rootSelector === '#preview' ? root.querySelector('.markdown-body') : root;
         const importedHtml = rootSelector === '#preview' ? [body] : Array.from(root.querySelectorAll('.cm-hybrid-html-body'));
@@ -138,11 +138,11 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
   }
   await inspectModes('web', false);
   const beforeFailure = await fingerprint();
-  const failed = await browser.execute(path => document.getElementById('compatibility-business-ports')
+  const failed = await browser.inspect(path => applicationCapabilities
     .markdownEditorDocumentUiCommandPort.invoke('openImportPath', path), missingPath);
   assert.equal(failed, false); assert.deepEqual(await fingerprint(), beforeFailure);
   observations.push({ scenario: 'native-read-failure-preserves-document', passed: true });
-  const loaded = await browser.execute(path => document.getElementById('compatibility-business-ports')
+  const loaded = await browser.inspect(path => applicationCapabilities
     .markdownEditorDocumentUiCommandPort.invoke('openImportPath', path), filePath);
   assert.equal(loaded, true);
   const fileDocument = await fingerprint();
@@ -150,7 +150,7 @@ export async function verifyImportDocumentChain({ browser, fixtureOrigin, filePa
   assert.match(fileDocument.text, /R13 harmless import text/);
   await inspectModes('file', true);
   assert.equal(requests.some(item => /^\/marker\/r12-import-(?:web|file)\/css$/.test(item.marker)), false, 'Imported CSS started a resource request.');
-  const recents = await browser.execute(path => JSON.parse(localStorage.getItem('md_editor_recent_files') || '[]').some(item => item.path === path), filePath);
+  const recents = await browser.inspect(path => JSON.parse(localStorage.getItem('md_editor_recent_files') || '[]').some(item => item.path === path), filePath);
   assert.equal(recents, true);
   observations.push({ scenario: 'recent-file-after-success', passed: true });
   return { commit: process.env.GITHUB_SHA, status: 'passed', driverProvider: 'embedded-isolated-host',

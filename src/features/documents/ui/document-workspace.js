@@ -31,10 +31,10 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
     }
 
     function getDocumentIndexSignature() {
-      const length = documentModel?.getTextLength?.() ?? editor.textLength;
-      const slice = documentModel?.sliceText?.bind(documentModel) || editor.virtualEditor?.sliceText?.bind(editor.virtualEditor);
-      const head = slice ? slice(0, Math.min(length, 256)) : editor.value.slice(0, 256);
-      const tail = slice ? slice(Math.max(0, length - 256), length) : editor.value.slice(-256);
+      const length = documentModel?.getTextLength?.() ?? editor.getTextLength();
+      const slice = documentModel?.sliceText?.bind(documentModel) || editor.sliceText?.bind(editor);
+      const head = slice ? slice(0, Math.min(length, 256)) : editor.getText().slice(0, 256);
+      const tail = slice ? slice(Math.max(0, length - 256), length) : editor.getText().slice(-256);
       return simpleHash(length + ':' + head + ':' + tail);
     }
 
@@ -48,11 +48,11 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
       try {
         const parsed = JSON.parse(localStorage.getItem(getDocumentIndexStorageKey(doc.id)) || 'null');
         if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.headings)) return false;
-        const currentLength = editor.textLength;
+        const currentLength = editor.getTextLength();
         if (Number(parsed.textLength) !== currentLength) return false;
         if (String(parsed.signature || '') !== getDocumentIndexSignature()) return false;
         coreOutlineControllerPort.replaceIndex(parsed.headings, {
-          version: editor.virtualEditor?.getDocumentVersion?.(),
+          version: editor.getDocumentVersion?.(),
           documentKey: doc.id,
           reason: 'persisted-document-index'
         });
@@ -69,7 +69,7 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
       const payload = {
         version: 1,
         updatedAt: Number(doc.updatedAt) || 0,
-        textLength: editor.textLength,
+        textLength: editor.getTextLength(),
         signature: getDocumentIndexSignature(),
         headings: headings.map(item => ({
           id: String(item.id || ''),
@@ -118,8 +118,8 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
           reason: 'document-load-index'
         });
         updateDocumentStatistics({
-          characters: Number(loaded.textLength) || editor.textLength,
-          lines: Number(loaded.lineCount) || editor.lineCount,
+          characters: Number(loaded.textLength) || editor.getTextLength(),
+          lines: Number(loaded.lineCount) || editor.getLineCount(),
           blocks: Number(cachedDocumentStatistics?.blocks) || 0,
           headings: loaded.headings.length,
           nonWhitespaceCount: Number(loaded.nonWhitespaceCount) || 0,
@@ -184,13 +184,13 @@ const getSessionDocuments = () => coreDocumentSessionPort.records;
       telemetry.record?.('document.lazy-created', {
         category: 'document.lifecycle',
         durationMs: 0,
-        details: { documentId: result.record.id, characters: editor.textLength, generation: result.generation }
+        details: { documentId: result.record.id, characters: editor.getTextLength(), generation: result.generation }
       });
       return result.record;
     }
 
     async function confirmUserAction(message, options = {}) {
-      if (corePlatformPort) return corePlatformPort.call('dialogs', 'confirm', message, options);
+      if (corePlatformPort) return corePlatformPort.dialogs.confirm( message, options);
       return confirm(String(message || ''));
     }
 

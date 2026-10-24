@@ -8,4 +8,3 @@ export { createHelpFeature } from './create-help-feature.js';
 export { createHelpController, HELP_SHOWN_STORAGE_KEY } from './help-controller.js';
 export { createHelpContentRegistry, helpContentRegistry } from './help-content-registry.js';
 export { createHelpState, HELP_PAGE_IDS, normalizeHelpPage } from './help-state.js';
-export { mountClassicHelpPort } from './compatibility/classic-help-port.js';

@@ -1,19 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MENU_COMMAND_IDS as C, createMenuCommandBindings, mountClassicMenuCommandPort } from '../../../src/features/menu/index.js';
+import { MENU_COMMAND_IDS as C, createMenuCommandBindings, createMenuController } from '../../../src/features/menu/index.js';
 
-test('Atomic 6.12 classic Menu command port delegates dynamic commands and close policy without owning bindings', async () => {
+test('R16-08 direct Menu controller preserves dynamic commands, close policy and binding ownership', async () => {
   const host = {};
   const bindings = createMenuCommandBindings();
   const calls = [];
   bindings.register(C.RECENT_FILE_OPEN, payload => { calls.push(payload); return Promise.resolve('opened'); });
   let closes = 0;
   const errors = [];
-  const port = mountClassicMenuCommandPort(host, bindings, {
+  const port = createMenuController({ bindings, state: { declaration: [], isEnabled: () => true, isVisible: () => true, subscribe: () => () => {} }, view: { bindDeclaration() {}, setCommandState() {}, start() {}, destroy() {} },
     closeMenus() { closes += 1; },
     reportError(message, error) { errors.push({ message, error }); }
   });
-  assert.equal(host.markdownEditorMenuCommandPort, port);
+  assert.equal(Object.hasOwn(host, 'markdownEditorMenuCommandPort'), false);
   assert.equal(port.has(C.RECENT_FILE_OPEN), true);
   const result = port.execute(C.RECENT_FILE_OPEN, { path: 'C:/Notes/A.md' });
   assert.equal(await result, 'opened');
@@ -28,14 +28,14 @@ test('Atomic 6.12 classic Menu command port delegates dynamic commands and close
   bindings.destroy();
 });
 
-test('Atomic 6.12 classic Menu command port contains command errors and rejects duplicate mounts', () => {
+test('R16-08 direct Menu controller contains command errors and rejects operations after disposal', () => {
   const host = {};
   const bindings = createMenuCommandBindings();
   const errors = [];
-  const port = mountClassicMenuCommandPort(host, bindings, {
+  const port = createMenuController({ bindings, state: { declaration: [], isEnabled: () => true, isVisible: () => true, subscribe: () => () => {} }, view: { bindDeclaration() {}, setCommandState() {}, start() {}, destroy() {} },
     reportError(message, error) { errors.push([message, error.message]); }
   });
-  assert.throws(() => mountClassicMenuCommandPort(host, bindings), /already mounted/);
+  assert.equal(port.has(C.RECENT_FILE_OPEN), false);
   assert.equal(port.execute(C.RECENT_FILE_OPEN, {}), false);
   assert.equal(errors.length, 1);
   assert.match(errors[0][0], /document\.open-recent/);

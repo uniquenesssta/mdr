@@ -10,8 +10,6 @@ export { createEditorHistoryAdapter } from './application/editor-history-adapter
 export { createEditorCommandService } from './application/editor-command-service.js';
 export { createEditorSelectionService } from './application/editor-selection-service.js';
 export { createEditorFocusService } from './application/editor-focus-service.js';
-export { mountClassicEditorControllerPort } from './compatibility/classic-editor-controller-port.js';
-export { mountClassicEditorUiCommandPort } from './compatibility/classic-editor-ui-command-port.js';
 export { createEditorPaneView } from './ui/editor-pane-view.js';
 export { createEditorToolbarView } from './ui/editor-toolbar-view.js';
 export { createInlineColorMenuView } from './ui/inline-color-menu-view.js';
@@ -33,3 +31,9 @@ export {
   CODEMIRROR_EXTENSION_SLOT_NAMES,
   createCodeMirrorExtensionRegistry
 } from './infrastructure/codemirror-extension-registry.js';
+
+export { createEditorContentView } from './ui/editor-content-view.js';
+
+export { createEditorToolbarContentView } from './ui/editor-toolbar-view.js';
+
+export { createDocumentModelBinding } from './infrastructure/document-model-binding.js';

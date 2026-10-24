@@ -6,16 +6,8 @@
  * Lifecycle: Explicit View with idempotent destroy(); closes the modal and removes listeners.
  */
 import { createEventScope } from '../../../ui/dom/index.js';
+import { ModalShell } from '../../../ui/components/modal-shell.js';
 
-const OPEN_EVENT = 'markdown-editor:modal-shell-open';
-const CLOSE_EVENT = 'markdown-editor:modal-shell-close';
-function dispatchModal(root, type, detail) {
-  const EventCtor = root.ownerDocument?.defaultView?.CustomEvent || globalThis.CustomEvent;
-  if (typeof EventCtor !== 'function') throw new Error('CustomEvent is unavailable for Find/Replace dialog.');
-  root.dispatchEvent(new EventCtor(type, { detail }));
-  if (detail.error) throw detail.error;
-  return detail.result;
-}
 
 export function createFindReplaceDialogView({ root, commands, selection, focus, getSearchOptions = () => ({}), onMatch = () => {}, labels = {} } = {}) {
   if (!root?.ownerDocument) throw new TypeError('Find/Replace Dialog View requires a modal root.');
@@ -23,6 +15,8 @@ export function createFindReplaceDialogView({ root, commands, selection, focus, 
     throw new TypeError('Find/Replace Dialog View requires Find/Replace commands.');
   }
   const events = createEventScope();
+  const shell = new ModalShell(root, { panel: root.firstElementChild });
+  try {
   const findInput = root.querySelector('#find-input');
   const replaceInput = root.querySelector('#replace-input');
   const replaceSection = root.querySelector('#replace-section');
@@ -62,7 +56,7 @@ export function createFindReplaceDialogView({ root, commands, selection, focus, 
     setStatus(count ? (labels.replacedAll?.(count) || `已替换 ${count} 处`) : (labels.noMatch || '未找到匹配项'));
     return count;
   };
-  const close = () => dispatchModal(root, CLOSE_EVENT, { reason: 'feature-close' });
+  const close = () => shell.close('feature-close');
   const open = (replace = false) => {
     setStatus('');
     const snapshot = selection?.snapshot?.();
@@ -70,7 +64,7 @@ export function createFindReplaceDialogView({ root, commands, selection, focus, 
     if (selected && findInput) findInput.value = selected;
     if (replaceSection) replaceSection.style.display = replace ? '' : 'none';
     const request = { options: { initialFocus: findInput, onClose: () => { setStatus(''); focus?.focus?.({ preventScroll: true }); } } };
-    dispatchModal(root, OPEN_EVENT, request);
+    shell.open(null, { ariaLabel: '查找与替换', ...request.options });
     findInput?.select?.();
     return true;
   };
@@ -99,8 +93,14 @@ export function createFindReplaceDialogView({ root, commands, selection, focus, 
     destroy() {
       if (destroyed) return;
       destroyed = true;
-      try { close(); } catch (_) {}
-      events.destroy();
+      const errors = []; for (const action of [() => close(), () => events.destroy(), () => shell.destroy()]) try { action(); } catch (error) { errors.push(error); } if (errors.length) throw new AggregateError(errors, 'Editor dialog cleanup failed.');
     }
   });
+  } catch (error) {
+    const errors = [error];
+    try { events.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    try { shell.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    if (errors.length > 1) throw new AggregateError(errors, 'Editor dialog construction failed.');
+    throw error;
+  }
 }

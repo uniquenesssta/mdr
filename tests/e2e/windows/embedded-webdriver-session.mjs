@@ -6,6 +6,8 @@ import { Builder, By, Capabilities } from 'selenium-webdriver';
 import { prepareWindowTestSurface } from './window-test-surface.mjs';
 import { getWindowSnapshot, waitForWindowSnapshot } from './native-window-system.mjs';
 import { runEmbeddedSession } from './embedded-session-lifecycle.mjs';
+import { CdpConnection } from '../lib/cdp-browser.mjs';
+import { createApplicationInspector } from '../lib/application-inspector.mjs';
 
 function pause(milliseconds) {
   return new Promise(resolvePromise => setTimeout(resolvePromise, milliseconds));
@@ -45,6 +47,8 @@ async function waitForEmbeddedServer({ port, process, logPath, timeout = 30_000 
 }
 
 async function startApplication({ binaryPath, repositoryRoot, artifactDirectory, label, port }) {
+  const debuggingPort = Number(port) + 10000;
+  if (!Number.isInteger(debuggingPort) || debuggingPort > 65535) throw new RangeError('Invalid embedded test debugging port.');
   const logPath = resolve(artifactDirectory, `${label}-application.log`);
   await mkdir(dirname(logPath), { recursive: true });
   const log = createWriteStream(logPath, { flags: 'w' });
@@ -52,7 +56,9 @@ async function startApplication({ binaryPath, repositoryRoot, artifactDirectory,
     cwd: repositoryRoot,
     env: {
       ...process.env,
-      TAURI_WEBDRIVER_PORT: String(port)
+      TAURI_WEBDRIVER_PORT: String(port),
+      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: [process.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS || '',
+        `--remote-debugging-port=${debuggingPort}`].filter(Boolean).join(' ')
     },
     stdio: ['ignore', 'pipe', 'pipe'],
     windowsHide: false
@@ -68,6 +74,7 @@ async function startApplication({ binaryPath, repositoryRoot, artifactDirectory,
   const application = {
     child,
     logPath,
+    debuggingPort,
     isRunning: () => child.exitCode === null && child.signalCode === null,
     async stop() {
       try {
@@ -91,7 +98,9 @@ async function startApplication({ binaryPath, repositoryRoot, artifactDirectory,
   return application;
 }
 
-function createBrowserAdapter(driver) {
+function createBrowserAdapter(driver, connection) {
+  const inspector = createApplicationInspector(connection);
+  let inspectReady;
   return Object.freeze({
     async $(selector) {
       const element = await driver.findElement(By.css(selector));
@@ -114,6 +123,13 @@ function createBrowserAdapter(driver) {
         throw new Error(result?.error || 'Browser script execution failed without an error message.');
       }
       return result.value;
+    },
+    // Deep integration checks use inspector-held actual owners. The default product
+    // keeps its E2E slot disabled and publishes no DOM/global service object.
+    async inspect(script, ...args) {
+      inspectReady ||= driver.wait(() => driver.executeScript("return document.documentElement.classList.contains('app-ready');"), 30000);
+      await inspectReady;
+      return inspector.evaluate('(' + script.toString() + ')(...' + JSON.stringify(args) + ')');
     },
     async waitUntil(predicate, options = {}) {
       const timeout = options.timeout ?? 10_000;
@@ -147,8 +163,31 @@ function createBrowserAdapter(driver) {
       const screenshot = await driver.takeScreenshot();
       await import('node:fs/promises').then(({ writeFile }) => writeFile(path, screenshot, 'base64'));
     },
-    deleteSession: () => driver.quit()
+    async deleteSession() {
+      const errors = [];
+      try { await inspector.destroy(); } catch (error) { errors.push(error); }
+      connection.close();
+      try { await driver.quit(); } catch (error) { errors.push(error); }
+      if (errors.length) throw new AggregateError(errors, 'Embedded test transport cleanup failed.');
+    }
   });
+}
+
+async function connectInspector({ debuggingPort, process, logPath, timeout = 20000 }) {
+  const deadline = Date.now() + timeout;
+  let lastError;
+  while (Date.now() < deadline) {
+    assertApplicationRunning(process, logPath, 'integration inspector attachment');
+    try {
+      const response = await fetch(`http://127.0.0.1:${debuggingPort}/json/list`, { signal: AbortSignal.timeout(1000) });
+      const targets = await response.json();
+      const pages = targets.filter(target => target.type === 'page' && target.webSocketDebuggerUrl && !target.url.startsWith('devtools:'));
+      if (pages.length === 1) return await new CdpConnection(pages[0].webSocketDebuggerUrl).open();
+      lastError = new Error('Expected one application WebView; found ' + pages.length);
+    } catch (error) { lastError = error; }
+    await pause(150);
+  }
+  throw new Error('Embedded integration inspector did not attach: ' + String(lastError?.message || lastError));
 }
 
 async function waitForWindowHandle({ driver, process, logPath, timeout = 20_000 }) {
@@ -216,12 +255,15 @@ async function buildDriver({ port, process, logPath, timeout = 20_000 }) {
   throw error;
 }
 
-async function createSession({ port, process, logPath }) {
+async function createSession({ port, process, logPath, debuggingPort }) {
   const driver = await buildDriver({ port, process, logPath });
+  let connection;
   try {
     await waitForWindowHandle({ driver, process, logPath });
     await driver.manage().setTimeouts({implicit:0,pageLoad:30_000,script:30_000});
-    const adapter = createBrowserAdapter(driver);
+    connection = await connectInspector({ debuggingPort, process, logPath });
+    await connection.send('Runtime.enable');
+    const adapter = createBrowserAdapter(driver, connection);
     return Object.freeze({...adapter,async deleteSession(){
       try {await adapter.deleteSession();}
       catch(error){
@@ -230,6 +272,7 @@ async function createSession({ port, process, logPath }) {
       }
     }});
   } catch(error) {
+    connection?.close();
     try {await driver.quit();}
     catch(cleanupError){throw new AggregateError([error,cleanupError],'Partial WebDriver session cleanup failed.');}
     throw error;
@@ -251,7 +294,7 @@ export async function withEmbeddedSession(options, run) {
         if(!/Timed out waiting for native window state/.test(error.message))throw error;
         error.code='EMBEDDED_WINDOW_STARTUP_TIMEOUT';throw error;
       }
-      return createSession({port:options.port,process:application.child,logPath:application.logPath});
+      return createSession({port:options.port,process:application.child,logPath:application.logPath,debuggingPort:application.debuggingPort});
     },
     prepare:async browser=>await prepareWindowTestSurface(browser),
     isRecoverable:error=>error.code==='EMBEDDED_WINDOW_STARTUP_TIMEOUT',

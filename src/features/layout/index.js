@@ -21,5 +21,3 @@ export {
   getCompactSplitMaxWidth,
   matchesNarrowInteractiveLayout
 } from './shell/responsive-breakpoints.js';
-export { mountClassicLayoutStatePort } from './compatibility/classic-layout-state-port.js';
-export { mountClassicSplitControllerPort } from './compatibility/classic-split-controller-port.js';

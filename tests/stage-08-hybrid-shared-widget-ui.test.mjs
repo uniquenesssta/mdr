@@ -6,7 +6,7 @@ import {
   createWidgetActionGroup,
   createWidgetButton,
   createWidgetToolbar,
-  mountClassicHybridSourceEditControllerPort,
+  bindHybridSourceEditor,
   openWidgetSource
 } from '../src/features/hybrid-editor/index.js';
 
@@ -147,7 +147,7 @@ test('Atomic 8.6 focus policy keeps single-click focus, excludes interactive des
 test('Atomic 8.6 source open delegates descriptor and anchor geometry through the existing controller port', () => withDocument(({ FakeElement }) => {
   const view = {};
   const openCalls = [];
-  const binding = mountClassicHybridSourceEditControllerPort(view, createSourceController(openCalls));
+  const binding = bindHybridSourceEditor(view, createSourceController(openCalls));
   const anchor = new FakeElement('section');
   anchor.dataset.hybridBlockType = 'custom-kind';
   anchor.rect = { top: 25.5, height: 48 };
@@ -162,7 +162,7 @@ test('Atomic 8.6 source action composes focus, strict double activation, keyboar
   const view = {};
   const openCalls = [];
   const openReasons = [];
-  const binding = mountClassicHybridSourceEditControllerPort(view, createSourceController(openCalls));
+  const binding = bindHybridSourceEditor(view, createSourceController(openCalls));
   const root = new FakeElement('section');
   root.dataset.hybridBlockType = 'custom-kind';
   const dispose = bindWidgetSourceAction(root, view, { from: 10, to: 20 }, {

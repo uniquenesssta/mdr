@@ -66,8 +66,8 @@ export function createPreviewController(options = {}) {
   focusController.connect({
     isSuspended: isHybrid,
     isCursorTrackingEligible: () => Boolean(
-      editor.virtualEditor
-      && (editor.textLength >= thresholds.mode.workerChars || shell.getPreviewPerformanceMode?.() === 'chapter')
+      editor
+      && (editor.getTextLength() >= thresholds.mode.workerChars || shell.getPreviewPerformanceMode?.() === 'chapter')
     ),
     getFocusSection: () => state.snapshot.focusSection,
     getMode: () => state.snapshot.mode,
@@ -129,7 +129,7 @@ export function createPreviewController(options = {}) {
 
   function scheduleUpdate() {
     assertActive();
-    const length = editor.textLength;
+    const length = editor.getTextLength();
     const input = thresholds.scheduling.input;
     const delay = length >= thresholds.mode.virtualChars
       ? input.virtualMs
@@ -143,8 +143,8 @@ export function createPreviewController(options = {}) {
 
   function scheduleFocusUpdate() {
     assertActive();
-    if (!editor.virtualEditor) return false;
-    const line = editor.virtualEditor.getLineNumberAtPosition?.(editor.selectionStart || 0) || 1;
+    if (!editor) return false;
+    const line = editor.getLineNumberAtPosition?.(editor.getSelection().start || 0) || 1;
     return focusController.scheduleCursorFocus(line);
   }
 
@@ -168,8 +168,8 @@ export function createPreviewController(options = {}) {
     if (countTimer) runtime.clearTimeout(countTimer);
     countTimer = 0;
     const count = documentModel.getNonWhitespaceCount?.()
-      ?? editor.virtualEditor?.getNonWhitespaceCount?.()
-      ?? String(editor.value || '').replace(/\s/g, '').length;
+      ?? editor.getNonWhitespaceCount?.()
+      ?? String(editor.getText() || '').replace(/\s/g, '').length;
     const wordCount = root.ownerDocument?.getElementById('word-count');
     if (wordCount) wordCount.textContent = shell.translate?.('wordCount', count) || `字数: ${count}`;
     return count;
@@ -178,7 +178,7 @@ export function createPreviewController(options = {}) {
   function scheduleCountUpdate() {
     assertActive();
     if (countTimer) runtime.clearTimeout(countTimer);
-    countTimer = runtime.setTimeout(updateCount, editor.textLength >= 50000 ? 140 : 40);
+    countTimer = runtime.setTimeout(updateCount, editor.getTextLength() >= 50000 ? 140 : 40);
     return countTimer;
   }
 

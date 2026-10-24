@@ -32,7 +32,7 @@ export async function runE2EInstallationChecks({ test, baseUrl, artifactRoot }) 
         result.observation = await browser.page.evaluate(`(async () => {
           const descriptor=Object.getOwnPropertyDescriptor(window,'__markdownEditorE2E');
           if(!descriptor)return {installed:false,ready:document.documentElement.classList.contains('app-ready'),
-            editorAvailable:typeof document.getElementById('editor')?.value==='string'};
+            editorAvailable:Boolean(document.querySelector('#editor .cm-content[contenteditable]')) && !Object.hasOwn(document.getElementById('editor'),'value')};
           const api=descriptor.value;
           const source=${JSON.stringify(fixtureSource)};
           const loaded=await api.loadMarkdown(source,{layout:'edit',selection:0});

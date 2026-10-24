@@ -6,8 +6,7 @@ import {
   createWindowController,
   createWindowControlsView,
   createWindowDragRegion,
-  createWindowState,
-  mountClassicCloseSavePort
+  createWindowState
 } from '../src/features/window/index.js';
 
 function classList() {
@@ -27,8 +26,7 @@ function button() {
 test('Atomic 6.13 public Window entry composes one unavailable lifecycle without browser or desktop globals', async () => {
   const host = {};
   const closeSave = createCloseSavePort();
-  const classic = mountClassicCloseSavePort(host, closeSave);
-  host.markdownEditorCloseSavePort.register(() => true);
+  const unregisterCloseSave = closeSave.register(() => true);
   const state = createWindowState();
   const root = { classList: classList() };
   const controls = { hidden: false };
@@ -70,7 +68,7 @@ test('Atomic 6.13 public Window entry composes one unavailable lifecycle without
   assert.equal((await controller.minimize()).reason, 'unsupported');
   assert.equal((await controller.requestClose()).reason, 'unsupported');
   await controller.destroy();
-  classic.destroy();
+  unregisterCloseSave();
   closeSave.destroy();
   assert.equal(host.markdownEditorCloseSavePort, undefined);
 });

@@ -1,50 +1,31 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
-import { mountClassicPreviewLayoutStabilityPort } from '../../../src/features/preview/compatibility/classic-preview-layout-stability-port.js';
-
-function createStability(calls) {
-  return {
-    connect(value) { calls.push(['connect', value]); return 'connected'; },
-    start() { calls.push(['start']); return true; },
-    requestRefresh(value) { calls.push(['requestRefresh', value]); return 'scheduled'; },
-    cancel() { calls.push(['cancel']); return true; }
-  };
+import { createPreviewLayoutStability, PREVIEW_BEHAVIOR_THRESHOLDS } from '../../../src/features/preview/index.js';
+function fixture() {
+  const calls = [], root = { clientWidth: 400, clientHeight: 250 }, pane = { classList: { contains: () => false } };
+  const capabilities = { isSuspended: () => false, hasStablePreview: () => true, inspectRenderTarget: () => ({ present: true }),
+    render() {}, refreshViewport() {}, invalidateGeometry() {}, notifyGeometryChanged() {} };
+  const owner = createPreviewLayoutStability({ root, pane, thresholds: PREVIEW_BEHAVIOR_THRESHOLDS.scheduling.layout,
+    scheduler: { schedule(channel) { calls.push(['schedule', channel]); return 'scheduled'; }, cancel(channel) { calls.push(['cancel', channel]); return true; } },
+    createResizeObserver: () => ({ observe(node) { calls.push(['observe', node]); }, disconnect() { calls.push(['disconnect']); } }) });
+  return { owner, capabilities, calls, root, pane };
 }
-
-test('Atomic 7.9 classic port delegates only the Preview Layout Stability contract', () => {
-  const calls = [];
-  const host = {};
-  const mounted = mountClassicPreviewLayoutStabilityPort(host, createStability(calls));
-  const port = host.markdownEditorPreviewLayoutStabilityPort;
-  const capabilities = { render() {} };
-
-  assert.equal(port.connect(capabilities), 'connected');
-  assert.equal(port.start(), true);
-  assert.equal(port.requestRefresh({ forceRender: true }), 'scheduled');
-  assert.equal(port.cancel(), true);
-  assert.deepEqual(calls, [
-    ['connect', capabilities],
-    ['start'],
-    ['requestRefresh', { forceRender: true }],
-    ['cancel']
-  ]);
-  mounted.destroy();
+test('R16-08 direct Layout Stability owns observation and the layout scheduling channel', () => {
+  const h = fixture(); assert.equal(h.owner.connect(h.capabilities), true);
+  assert.equal(h.owner.start(), true); assert.equal(h.owner.start(), false);
+  assert.equal(h.owner.requestRefresh({ forceRender: true }), 'scheduled');
+  assert.equal(h.owner.cancel(), true);
+  assert.deepEqual(h.calls, [['observe', h.pane], ['observe', h.root], ['schedule','layout'], ['cancel','layout']]);
+  h.owner.destroy();
 });
-
-test('Atomic 7.9 classic port rejects duplicate ownership and destroy removes only its own host property', () => {
-  const host = {};
-  const mounted = mountClassicPreviewLayoutStabilityPort(host, createStability([]));
-  assert.throws(() => mountClassicPreviewLayoutStabilityPort(host, createStability([])), /already mounted/i);
-  const port = host.markdownEditorPreviewLayoutStabilityPort;
-  mounted.destroy();
-  assert.equal(host.markdownEditorPreviewLayoutStabilityPort, undefined);
-  assert.throws(() => port.start(), /destroyed/i);
-  assert.doesNotThrow(() => mounted.destroy());
+test('R16-08 Layout Stability rejects duplicate connections and disposes its observer exactly once', () => {
+  const h = fixture(); h.owner.connect(h.capabilities); h.owner.start();
+  assert.throws(() => h.owner.connect(h.capabilities), /already connected/);
+  h.owner.destroy(); h.owner.destroy();
+  assert.equal(h.calls.filter(row => row[0] === 'disconnect').length, 1);
+  assert.throws(() => h.owner.start(), /destroyed/);
 });
-
-test('Atomic 7.9 classic port validates every required controller operation before mounting', () => {
-  const host = {};
-  assert.throws(() => mountClassicPreviewLayoutStabilityPort(host, {}), /connect/i);
-  assert.equal(host.markdownEditorPreviewLayoutStabilityPort, undefined);
+test('R16-08 Layout Stability validates each connected capability before activation', () => {
+  const h = fixture(); assert.throws(() => h.owner.connect({}), /isSuspended/);
+  assert.throws(() => h.owner.start(), /not connected/); h.owner.destroy();
 });

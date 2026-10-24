@@ -32,15 +32,15 @@ export async function verifyFileWriterChain({browser,ownedRoot,evidenceRoot,comm
   const root=join(ownedRoot,'file-writer');await mkdir(root);
   const script=join(root,'hold-export-file.ps1');
   await writeFile(script,'param([string]$Path)\n$ErrorActionPreference="Stop"\n$handle=[System.IO.File]::Open($Path,[System.IO.FileMode]::Open,[System.IO.FileAccess]::ReadWrite,[System.IO.FileShare]::None)\ntry {[Console]::WriteLine("MDR_EXPORT_LOCKED");[Console]::Out.Flush();[Console]::ReadLine() | Out-Null} finally {$handle.Dispose()}\n');
-  await browser.execute(async()=>{
-    const host=document.getElementById('compatibility-business-ports');
+  await browser.inspect(async()=>{
+    const host=applicationCapabilities;
     if(!await host.markdownEditorDocumentUiCommandPort.invoke('importTextContent','shared-writer.md','\uFEFF# Shared Writer 原文😀\r\n\r\n公式 $x^2$\n\nKEEP WRITER TAIL',''))throw new Error('Native shared writer import failed.');
     const request=host.markdownEditorExportRequestPort.createRequest({format:'image',name:'原文.png',imageOptions:{ratio:'9:16',cropFit:false}});
     if((await host.markdownEditorImageExportPort.render({request})).status!=='ready')throw new Error('Native shared writer PNG failed.');
   });
   async function output(format,destination) {
-    return browser.execute(async(format,destination)=>{
-      const host=document.getElementById('compatibility-business-ports'),internals=window.__TAURI_INTERNALS__;
+    return browser.inspect(async(format,destination)=>{
+      const host=applicationCapabilities,internals=window.__TAURI_INTERNALS__;
       const owners={markdown:host.markdownEditorMarkdownExportPort,html:host.markdownEditorHtmlExportPort,word:host.markdownEditorWordExportPort,image:host.markdownEditorImageExportPort};
       const request=host.markdownEditorExportRequestPort.createRequest({format,name:'统一输出😀.txt',imageOptions:format==='image'?{ratio:'9:16',cropFit:false}:undefined});
       const original=window.fetch,descriptor=Object.getOwnPropertyDescriptor(window,'fetch'),invoke=internals.invoke;

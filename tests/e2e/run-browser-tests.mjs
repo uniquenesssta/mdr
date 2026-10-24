@@ -9,6 +9,7 @@ import { startBuiltApplicationHost } from './lib/built-application-host.mjs';
 import { verifyBuiltApplication } from './lib/built-application-check.mjs';
 import { runExportCharacterization } from './lib/export-characterization.mjs';
 import { runE2EInstallationChecks } from './lib/e2e-installation.mjs';
+import { evaluateApplication, waitForApplication, releaseApplicationInspector } from './lib/application-inspector.mjs';
 import { createApplicationDriver } from './lib/application-driver.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -300,77 +301,41 @@ async function runContractSuite() {
     });
 
 
-    await test('temporary compatibility business port mounts and destroys without owning the App Shell', async () => {
+    await test('feature content releases owned nodes, rolls back invalid construction and leaves App Shell ownership intact', async () => {
       await setContractDocument(`<!doctype html><html><head><base href="${virtualHost.origin}/"></head><body>
         <div id="app-root" hidden><span id="pre-shell-node">before</span></div>
       </body></html>`);
       const result = await browser.page.evaluate(`(async()=>{
-        const [{createUI},{createCompatibilityBusinessContentPort}]=await Promise.all([
-          import('${virtualHost.origin}/src/ui/create-ui.js'),
-          import('${virtualHost.origin}/src/ui/compatibility/index.js')
+        const [{createUI},{mountStaticContent},{createMenuContentView},{createDocumentContentView}]=await Promise.all([
+          import('${virtualHost.origin}/src/ui/create-ui.js'), import('${virtualHost.origin}/src/ui/dom/index.js'),
+          import('${virtualHost.origin}/src/features/menu/ui/menu-content-view.js'),
+          import('${virtualHost.origin}/src/features/documents/ui/document-content-view.js')
         ]);
-        const markup=await fetch('${virtualHost.origin}/public/compatibility/business-content.html').then(response=>response.text());
-        const root=document.getElementById('app-root');
-        const ui=createUI(root);
-        let foreignSlotError='';
-        try{createCompatibilityBusinessContentPort(root,{...ui,menu:document.createElement('nav')});}
-        catch(error){foreignSlotError=error.message;}
-        const port=createCompatibilityBusinessContentPort(root,ui);
+        const root=document.getElementById('app-root'),ui=createUI(root);
         let invalidMarkupError='';
-        try{port.mount('<template data-compat-slot=\"menu\"></template>');}
-        catch(error){invalidMarkupError=error.message;}
-        const cleanAfterInvalid={
-          shellCount:root.querySelectorAll('[data-ui-shell=\"app\"]').length,
+        try{mountStaticContent([[ui.menu,[['span',{},['uncommitted']]]],[null,[]]]);}catch(error){invalidMarkupError=error.message;}
+        const cleanAfterInvalid={shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,menuChildren:ui.menu.childNodes.length};
+        const menu=createMenuContentView(ui),documents=createDocumentContentView(ui);
+        const foreign=document.createElement('span'); foreign.id='foreign-content';ui.overlay.append(foreign);
+        const mounted={rootChildren:Array.from(root.children).map(node=>node.id||node.getAttribute('data-ui-shell')||''),
+          shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,menuChildren:ui.menu.childNodes.length,
           portHostPresent:Boolean(document.getElementById('compatibility-business-ports')),
-          menuChildren:ui.menu.childNodes.length
-        };
-        const firstMount=port.mount(markup);
-        const secondMount=port.mount(markup);
-        const mounted={
-          firstMount,secondMount,
-          rootChildren:Array.from(root.children).map(node=>node.id||node.getAttribute('data-ui-shell')||''),
-          shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,
-          portHostParent:document.getElementById('compatibility-business-ports')?.parentElement?.id||'',
-          filePortParent:document.getElementById('filename')?.parentElement?.id||'',
-          settingsParent:document.getElementById('settings-modal')?.parentElement?.id||'',
-          previousPresent:Boolean(document.getElementById('pre-shell-node'))
-        };
-        port.destroy();
-        port.destroy();
-        let remountError='';
-        try{port.mount(markup);}catch(error){remountError=error.message;}
-        const afterPort={
-          shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,
-          settingsPresent:Boolean(document.getElementById('settings-modal')),
-          filePortPresent:Boolean(document.getElementById('filename')),
-          portHostPresent:Boolean(document.getElementById('compatibility-business-ports')),
-          remountError
-        };
+          filePortParent:document.getElementById('filename')?.parentElement?.id||'',previousPresent:Boolean(document.getElementById('pre-shell-node'))};
+        documents.destroy();documents.destroy();menu.destroy();menu.destroy();
+        const afterContent={shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,menuChildren:ui.menu.childNodes.length,
+          filePortPresent:Boolean(document.getElementById('filename')),foreignPresent:foreign.isConnected};
         ui.destroy();
-        const afterUI={
-          hidden:root.hidden,
-          children:Array.from(root.children).map(node=>node.id),
-          shellCount:root.querySelectorAll('[data-ui-shell="app"]').length
-        };
-        return {foreignSlotError,invalidMarkupError,cleanAfterInvalid,mounted,afterPort,afterUI};
+        return {invalidMarkupError,cleanAfterInvalid,mounted,afterContent,
+          afterUI:{hidden:root.hidden,children:Array.from(root.children).map(node=>node.id),shellCount:root.querySelectorAll('[data-ui-shell="app"]').length}};
       })()`);
-      assert.match(result.foreignSlotError, /outside the current application root/);
-      assert.match(result.invalidMarkupError, /Missing compatibility templates/);
-      assert.deepEqual(result.cleanAfterInvalid, { shellCount: 1, portHostPresent: false, menuChildren: 0 });
-      assert.deepEqual(result.mounted.rootChildren, ['app', 'overlay-root']);
-      assert.equal(result.mounted.firstMount, true);
-      assert.equal(result.mounted.secondMount, false);
-      assert.equal(result.mounted.shellCount, 1);
-      assert.equal(result.mounted.portHostParent, 'overlay-root');
-      assert.equal(result.mounted.filePortParent, 'compatibility-business-ports');
-      assert.equal(result.mounted.settingsParent, '');
-      assert.equal(result.mounted.previousPresent, false);
-      assert.equal(result.afterPort.shellCount, 1);
-      assert.equal(result.afterPort.settingsPresent, false);
-      assert.equal(result.afterPort.filePortPresent, false);
-      assert.equal(result.afterPort.portHostPresent, false);
-      assert.match(result.afterPort.remountError, /destroyed/);
-      assert.deepEqual(result.afterUI, { hidden: true, children: ['pre-shell-node'], shellCount: 0 });
+      assert.match(result.invalidMarkupError,/live root/);
+      assert.deepEqual(result.cleanAfterInvalid,{shellCount:1,menuChildren:0});
+      assert.deepEqual(result.mounted.rootChildren,['app','overlay-root']);
+      assert.equal(result.mounted.shellCount,1);assert.ok(result.mounted.menuChildren>0);
+      assert.equal(result.mounted.portHostPresent,false);assert.equal(result.mounted.filePortParent,'overlay-root');
+      assert.equal(result.mounted.previousPresent,false);
+      assert.deepEqual(result.afterContent,{shellCount:1,menuChildren:0,filePortPresent:false,foreignPresent:true});
+      assert.deepEqual(result.afterUI,{hidden:true,children:['pre-shell-node'],shellCount:0});
     });
   } finally {
     activePage = null;
@@ -567,8 +532,8 @@ async function runAppSuite() {
     await test('application mounts one App Shell with strict named slots', async () => {
       // Check the delivered asset before MenuView can remove legacy attributes.
       const markupResponse = await fetch(`${baseUrl.replace(/\/$/, '')}/compatibility/business-content.html`);
-      assert.equal(markupResponse.status, 200);
-      assert.doesNotMatch(await markupResponse.text(), /\son[a-z][a-z0-9:_-]*\s*=/i);
+      assert.equal(markupResponse.status, 404);
+
       const snapshot = await browser.page.evaluate(`(()=>{
         const root=document.getElementById('app-root');
         const shell=root?.querySelector('[data-ui-shell="app"]');
@@ -609,15 +574,15 @@ async function runAppSuite() {
       assert.deepEqual(snapshot.mainChildren, ['l-pane f-editor-pane','resizer','l-pane f-preview-pane']);
       assert.equal(snapshot.overlayParent, 'app-root');
       assert.equal(snapshot.settingsParent, 'overlay-root');
-      assert.equal(snapshot.compatibilityPortHostParent, 'overlay-root');
-      assert.deepEqual(snapshot.filePortParents, ['compatibility-business-ports','compatibility-business-ports']);
+      assert.equal(snapshot.compatibilityPortHostParent, '');
+      assert.deepEqual(snapshot.filePortParents, ['overlay-root','overlay-root']);
       assert.deepEqual(snapshot.duplicateIds, []);
     });
 
     await test('application Help feature owns first-run visibility, navigation and scoped lifecycle', async () => {
-      const initial = await browser.page.evaluate(`(()=>{
+      const initial = await evaluateApplication(browser.page, `(()=>{
         localStorage.removeItem('md_editor_help_shown');
-        const host=document.getElementById('compatibility-business-ports');
+        const host=applicationCapabilities;
         const port=host?.markdownEditorHelpPort;
         if(!port)return null;
         return {
@@ -638,26 +603,26 @@ async function runAppSuite() {
       assert.equal(initial.activePage, 'start');
       assert.deepEqual(initial.globals, {openHelp:'undefined',closeHelp:'undefined',switchHelpPage:'undefined'});
       assert.equal(initial.shown, null);
-      await browser.page.waitFor(() => document.getElementById('help-modal')?.classList.contains('show'), { description: 'Help first-run modal open' });
+      await waitForApplication(browser.page, () => document.getElementById('help-modal')?.classList.contains('show'), { description: 'Help first-run modal open' });
       await browser.page.click('#help-modal [data-help-page="files"]');
-      await browser.page.waitFor(() => document.querySelector('#help-modal [data-help-page-panel="files"]'), { description: 'Help files page' });
-      const navigated = await browser.page.evaluate(`(()=>{
-        const port=document.getElementById('compatibility-business-ports')?.markdownEditorHelpPort;
+      await waitForApplication(browser.page, () => document.querySelector('#help-modal [data-help-page-panel="files"]'), { description: 'Help files page' });
+      const navigated = await evaluateApplication(browser.page, `(()=>{
+        const port=applicationCapabilities?.markdownEditorHelpPort;
         return {activePage:port?.activePage,selected:document.querySelector('#help-modal [data-help-page="files"]')?.getAttribute('aria-selected')};
       })()`);
       assert.deepEqual(navigated, {activePage:'files',selected:'true'});
       await browser.page.click('#help-modal .modal-footer button');
-      await browser.page.waitFor(() => !document.getElementById('help-modal')?.classList.contains('show'), { description: 'Help modal close' });
-      const closed = await browser.page.evaluate(`(()=>{
-        const port=document.getElementById('compatibility-business-ports')?.markdownEditorHelpPort;
+      await waitForApplication(browser.page, () => !document.getElementById('help-modal')?.classList.contains('show'), { description: 'Help modal close' });
+      const closed = await evaluateApplication(browser.page, `(()=>{
+        const port=applicationCapabilities?.markdownEditorHelpPort;
         return {shown:localStorage.getItem('md_editor_help_shown'),firstRunAgain:port?.openFirstRun(),isOpen:port?.isOpen()};
       })()`);
       assert.deepEqual(closed, {shown:'true',firstRunAgain:false,isOpen:false});
     });
 
     await test('application Settings Store cancels draft without persisting changes', async () => {
-      const before = await browser.page.evaluate("(()=>{const port=document.getElementById('compatibility-business-ports').markdownEditorSettingsStorePort;return {stored:localStorage.getItem('md_editor_theme'),committed:port.get('theme'),body:document.body.getAttribute('data-theme')};})()");
-      const read = () => browser.page.evaluate("(()=>{const port=document.getElementById('compatibility-business-ports').markdownEditorSettingsStorePort;return {stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};})()");
+      const before = await evaluateApplication(browser.page, "(()=>{const port=applicationCapabilities.markdownEditorSettingsStorePort;return {stored:localStorage.getItem('md_editor_theme'),committed:port.get('theme'),body:document.body.getAttribute('data-theme')};})()");
+      const read = () => evaluateApplication(browser.page, "(()=>{const port=applicationCapabilities.markdownEditorSettingsStorePort;return {stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};})()");
       const states = [];
       for (const action of ['button', 'escape', 'backdrop']) {
         await openSettings();
@@ -671,33 +636,33 @@ async function runAppSuite() {
       }
       await openSettings();
       await browser.page.click('#settings-modal [data-settings-page="general"]');
-      const reopened = await browser.page.evaluate("document.getElementById('setting-theme').value");
+      const reopened = await evaluateApplication(browser.page, "document.getElementById('setting-theme').value");
       await browser.page.click('#settings-modal .modal-footer button:not(.primary)');
       await settingsClosed();
       assert.deepEqual(before, {stored:null,committed:'light',body:'light'});
       for (const state of states) assert.deepEqual(state, {stored:null,hasDraft:false,body:'light'});
       assert.equal(reopened, 'light');
-      const globals = await browser.page.evaluate("({openSettings:typeof window.openSettings,closeSettings:typeof window.closeSettings,applySettings:typeof window.applySettings,switchSettingsPage:typeof window.switchSettingsPage})");
+      const globals = await evaluateApplication(browser.page, "({openSettings:typeof window.openSettings,closeSettings:typeof window.closeSettings,applySettings:typeof window.applySettings,switchSettingsPage:typeof window.switchSettingsPage})");
       assert.deepEqual(globals, {openSettings:'undefined',closeSettings:'undefined',applySettings:'undefined',switchSettingsPage:'undefined'});
     });
 
     await test('application Settings UI validates and applies one draft without global dialog functions', async () => {
       await openSettings();
       await browser.page.click('#settings-modal [data-settings-page="save"]');
-      await browser.page.waitFor(() => !document.querySelector('#settings-modal [data-settings-page-panel="save"]')?.hidden, { description: 'Settings save page' });
-      const selected = await browser.page.evaluate("document.querySelector('#settings-modal [data-settings-page=\"save\"]')?.getAttribute('aria-selected')");
+      await waitForApplication(browser.page, () => !document.querySelector('#settings-modal [data-settings-page-panel="save"]')?.hidden, { description: 'Settings save page' });
+      const selected = await evaluateApplication(browser.page, "document.querySelector('#settings-modal [data-settings-page=\"save\"]')?.getAttribute('aria-selected')");
       assert.equal(selected, 'true');
       await browser.page.selectOption('#setting-autosave-delay', 'custom');
       await browser.page.fill('#setting-autosave-custom-seconds', '0.1');
       await browser.page.click('#settings-modal .modal-footer .primary');
-      const invalid = await browser.page.evaluate("({open:document.getElementById('settings-modal')?.classList.contains('show'),invalid:document.getElementById('setting-autosave-custom-seconds')?.getAttribute('aria-invalid'),feedback:document.getElementById('settings-feedback')?.textContent||''})");
+      const invalid = await evaluateApplication(browser.page, "({open:document.getElementById('settings-modal')?.classList.contains('show'),invalid:document.getElementById('setting-autosave-custom-seconds')?.getAttribute('aria-invalid'),feedback:document.getElementById('settings-feedback')?.textContent||''})");
       assert.equal(invalid.open, true); assert.equal(invalid.invalid, 'true'); assert.match(invalid.feedback, /0\.5–3600/);
       await browser.page.fill('#setting-autosave-custom-seconds', '1.5');
       await browser.page.click('#settings-modal [data-settings-page="general"]');
       await browser.page.selectOption('#setting-theme', 'dark');
       await browser.page.click('#settings-modal .modal-footer .primary');
       await settingsClosed();
-      const applied = await browser.page.evaluate("(()=>{const port=document.getElementById('compatibility-business-ports').markdownEditorSettingsStorePort;return {theme:port.get('theme'),delay:port.get('autoSaveDelay'),storedTheme:localStorage.getItem('md_editor_theme'),storedDelay:localStorage.getItem('md_editor_autosave_delay'),body:document.body.getAttribute('data-theme')};})()");
+      const applied = await evaluateApplication(browser.page, "(()=>{const port=applicationCapabilities.markdownEditorSettingsStorePort;return {theme:port.get('theme'),delay:port.get('autoSaveDelay'),storedTheme:localStorage.getItem('md_editor_theme'),storedDelay:localStorage.getItem('md_editor_autosave_delay'),body:document.body.getAttribute('data-theme')};})()");
       assert.deepEqual(applied, {theme:'dark',delay:1500,storedTheme:'dark',storedDelay:'1500',body:'dark'});
       await openSettings();
       await browser.page.click('#settings-modal [data-settings-page="general"]');
@@ -706,7 +671,7 @@ async function runAppSuite() {
       await browser.page.selectOption('#setting-autosave-delay', '500');
       await browser.page.click('#settings-modal .modal-footer .primary');
       await settingsClosed();
-      await browser.page.waitFor(() => document.body.getAttribute('data-theme') === 'light');
+      await waitForApplication(browser.page, () => document.body.getAttribute('data-theme') === 'light');
     });
 
     await test('application language Settings commit updates I18n without legacy globals', async () => {
@@ -718,15 +683,15 @@ async function runAppSuite() {
         await settingsClosed();
       };
       await setLanguage('en');
-      await browser.page.waitFor(() => document.documentElement.lang === 'en', { description: 'committed English locale' });
-      const applied = await browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorI18nPort,store=host.markdownEditorSettingsStorePort,button=document.getElementById('editor-collapse-btn'),collapsed=document.querySelector('.f-editor-pane')?.classList.contains('is-collapsed');return {locale:port.locale,committed:store.get('language'),stored:localStorage.getItem('md_editor_language'),htmlLang:document.documentElement.lang,dynamicMatches:Boolean(button&&button.title===port.t(collapsed?'expandEditor':'collapseEditor')),globals:{i18n:typeof window.i18n,currentLang:typeof window.currentLang,setLanguage:typeof window.setLanguage}};})()");
+      await waitForApplication(browser.page, () => document.documentElement.lang === 'en', { description: 'committed English locale' });
+      const applied = await evaluateApplication(browser.page, "(()=>{const host=applicationCapabilities,port=host.markdownEditorI18nPort,store=host.markdownEditorSettingsStorePort,button=document.getElementById('editor-collapse-btn'),collapsed=document.querySelector('.f-editor-pane')?.classList.contains('is-collapsed');return {locale:port.locale,committed:store.get('language'),stored:localStorage.getItem('md_editor_language'),htmlLang:document.documentElement.lang,dynamicMatches:Boolean(button&&button.title===port.t(collapsed?'expandEditor':'collapseEditor')),globals:{i18n:typeof window.i18n,currentLang:typeof window.currentLang,setLanguage:typeof window.setLanguage}};})()");
       assert.deepEqual(applied, {locale:'en',committed:'en',stored:'en',htmlLang:'en',dynamicMatches:true,globals:{i18n:'undefined',currentLang:'undefined',setLanguage:'undefined'}});
       await setLanguage('zh-CN');
-      await browser.page.waitFor(() => document.documentElement.lang === 'zh-CN', { description: 'restore zh-CN locale' });
+      await waitForApplication(browser.page, () => document.documentElement.lang === 'zh-CN', { description: 'restore zh-CN locale' });
     });
 
     await test('application theme switch changes visual tokens without changing shell geometry', async () => {
-      const result = await browser.page.evaluate(`(async()=>{
+      const result = await evaluateApplication(browser.page, `(async()=>{
         const selectors={
           shell:'[data-ui-shell="app"]',
           menu:'.l-menu-bar',
@@ -775,10 +740,10 @@ async function runAppSuite() {
       const report={};
       try {
         await loadAppFixture(browser.page);
-        await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorPreviewCommandPort.update()`);
-        const before = await browser.page.evaluate(`(()=>{
+        await evaluateApplication(browser.page, `applicationCapabilities.markdownEditorPreviewCommandPort.update()`);
+        const before = await evaluateApplication(browser.page, `(()=>{
           const editor=document.getElementById('editor');
-          const virtualEditor=editor?.virtualEditor||null;
+          const virtualEditor=editorApi;
           const documentText=virtualEditor?.getText?.()??null;
           const documentVersion=virtualEditor?.getDocumentVersion?.()??null;
           const preview=document.getElementById('preview');
@@ -791,16 +756,16 @@ async function runAppSuite() {
 
         const toggle = async expected => {
           await browser.page.click('[data-theme-toggle]');
-          await browser.page.waitFor(`document.body.getAttribute('data-theme') === ${JSON.stringify(expected)}`, { description: 'Theme Toggle Controller apply ' + expected });
-          return browser.page.evaluate(`(()=>{
+          await waitForApplication(browser.page, `document.body.getAttribute('data-theme') === ${JSON.stringify(expected)}`, { description: 'Theme Toggle Controller apply ' + expected });
+          return evaluateApplication(browser.page, `(()=>{
             const probe=window.__themeToggleIdentity;
             return {
               theme:document.body.getAttribute('data-theme'),
               stored:localStorage.getItem('md_editor_theme'),
               sameEditor:probe.editor===document.getElementById('editor'),
-              sameVirtualEditor:probe.virtualEditor===document.getElementById('editor')?.virtualEditor,
-              sameDocumentText:probe.documentText===document.getElementById('editor')?.virtualEditor?.getText?.(),
-              sameDocumentVersion:probe.documentVersion===document.getElementById('editor')?.virtualEditor?.getDocumentVersion?.(),
+              sameVirtualEditor:probe.virtualEditor===editorApi,
+              sameDocumentText:probe.documentText===editorApi?.getText?.(),
+              sameDocumentVersion:probe.documentVersion===editorApi?.getDocumentVersion?.(),
               samePreview:probe.preview===document.getElementById('preview'),
               samePreviewFirst:probe.previewFirst===document.getElementById('preview')?.firstElementChild
             };
@@ -816,9 +781,9 @@ async function runAppSuite() {
       } finally {
         try { await writeFile(join(artifactRoot, 'themeToggle-identity.json'), JSON.stringify(report, null, 2)); }
         finally {
-          if (await browser.page.evaluate("document.body.getAttribute('data-theme')==='dark'")) await browser.page.click('[data-theme-toggle]');
-          await browser.page.evaluate('delete window.__themeToggleIdentity');
-          await browser.page.waitFor(() => document.body.getAttribute('data-theme') === 'light', { description: 'restore light theme after Theme Toggle Controller' });
+          if (await evaluateApplication(browser.page, "document.body.getAttribute('data-theme')==='dark'")) await browser.page.click('[data-theme-toggle]');
+          await evaluateApplication(browser.page, 'delete window.__themeToggleIdentity');
+          await waitForApplication(browser.page, () => document.body.getAttribute('data-theme') === 'light', { description: 'restore light theme after Theme Toggle Controller' });
         }
       }
     });
@@ -828,11 +793,11 @@ async function runAppSuite() {
       try {
         await loadAppFixture(browser.page);
         await setAppLayout(browser.page, 'preview');
-        await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorPreviewCommandPort.update()`);
-        await browser.page.waitFor(() => Boolean(document.getElementById('preview')?.firstElementChild), { timeoutMs: 10000, description: 'Theme Service preview fixture ready' });
-        const before = await browser.page.evaluate(`(()=>{
+        await evaluateApplication(browser.page, `applicationCapabilities.markdownEditorPreviewCommandPort.update()`);
+        await waitForApplication(browser.page, () => Boolean(document.getElementById('preview')?.firstElementChild), { timeoutMs: 10000, description: 'Theme Service preview fixture ready' });
+        const before = await evaluateApplication(browser.page, `(()=>{
           const editor=document.getElementById('editor');
-          const virtualEditor=editor?.virtualEditor||null;
+          const virtualEditor=editorApi;
           const documentText=virtualEditor?.getText?.()??null;
           const documentVersion=virtualEditor?.getDocumentVersion?.()??null;
           const preview=document.getElementById('preview');
@@ -853,15 +818,15 @@ async function runAppSuite() {
           await browser.page.selectOption('#setting-theme', theme);
           await browser.page.click('#settings-modal .modal-footer .primary');
           const encodedTheme = JSON.stringify(theme);
-          await browser.page.waitFor(`(()=>document.body.getAttribute('data-theme')===${encodedTheme}&&!document.getElementById('settings-modal')?.classList.contains('show'))()`, { description: 'Theme Service apply ' + theme });
-          return browser.page.evaluate(`(()=>{
+          await waitForApplication(browser.page, `(()=>document.body.getAttribute('data-theme')===${encodedTheme}&&!document.getElementById('settings-modal')?.classList.contains('show'))()`, { description: 'Theme Service apply ' + theme });
+          return evaluateApplication(browser.page, `(()=>{
             const probe=window.__themeServiceIdentity;
             return {
               theme:document.body.getAttribute('data-theme'),
               sameEditor:probe.editor===document.getElementById('editor'),
-              sameVirtualEditor:probe.virtualEditor===document.getElementById('editor')?.virtualEditor,
-              sameDocumentText:probe.documentText===document.getElementById('editor')?.virtualEditor?.getText?.(),
-              sameDocumentVersion:probe.documentVersion===document.getElementById('editor')?.virtualEditor?.getDocumentVersion?.(),
+              sameVirtualEditor:probe.virtualEditor===editorApi,
+              sameDocumentText:probe.documentText===editorApi?.getText?.(),
+              sameDocumentVersion:probe.documentVersion===editorApi?.getDocumentVersion?.(),
               samePreview:probe.preview===document.getElementById('preview'),
               samePreviewFirst:probe.previewFirst===document.getElementById('preview')?.firstElementChild,
               canvas:getComputedStyle(document.body).getPropertyValue('--color-canvas').trim()
@@ -884,9 +849,9 @@ async function runAppSuite() {
       } finally {
         try { await writeFile(join(artifactRoot, 'themeService-identity.json'), JSON.stringify(report, null, 2)); }
         finally {
-          if (await browser.page.evaluate("document.body.getAttribute('data-theme')==='dark'")) await browser.page.click('[data-theme-toggle]');
-          await browser.page.evaluate('delete window.__themeServiceIdentity');
-          await browser.page.waitFor(() => document.body.getAttribute('data-theme') === 'light', { description: 'restore light theme after Theme Service' });
+          if (await evaluateApplication(browser.page, "document.body.getAttribute('data-theme')==='dark'")) await browser.page.click('[data-theme-toggle]');
+          await evaluateApplication(browser.page, 'delete window.__themeServiceIdentity');
+          await waitForApplication(browser.page, () => document.body.getAttribute('data-theme') === 'light', { description: 'restore light theme after Theme Service' });
         }
       }
     });
@@ -895,19 +860,19 @@ async function runAppSuite() {
       await app.loadMarkdown('modal focus', { layout: 'edit', selection: 0 });
       const openFromKeyboard = async () => {
         await app.revealPosition(0);
-        await browser.page.evaluate('void(window.__runnerModalOpener=document.activeElement)');
+        await evaluateApplication(browser.page, 'void(window.__runnerModalOpener=document.activeElement)');
         await browser.page.pressKey(',', { modifiers: 2, code: 'Comma' });
-        await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'));
+        await waitForApplication(browser.page, () => document.getElementById('settings-modal')?.classList.contains('show'));
       };
       await openFromKeyboard();
-      await browser.page.waitFor(() => {
+      await waitForApplication(browser.page, () => {
         const root=document.getElementById('settings-modal');
         const panel=root?.firstElementChild;
         return root?.classList.contains('show')
           && root?.getAttribute('aria-hidden')==='false'
           && panel?.contains(document.activeElement);
       }, { description: 'settings modal initial focus' });
-      const opened = await browser.page.evaluate(`(()=>{
+      const opened = await evaluateApplication(browser.page, `(()=>{
         const root=document.getElementById('settings-modal');
         const panel=root?.firstElementChild;
         return {
@@ -925,37 +890,37 @@ async function runAppSuite() {
       });
 
       await browser.page.pressKey('Escape');
-      await browser.page.waitFor(() => (
+      await waitForApplication(browser.page, () => (
         document.getElementById('settings-modal')?.style.display === 'none'
           && document.activeElement === window.__runnerModalOpener
       ), { description: 'settings Escape close and focus restoration' });
 
       await openFromKeyboard();
-      await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'));
+      await waitForApplication(browser.page, () => document.getElementById('settings-modal')?.classList.contains('show'));
       await browser.page.clickAt(3, 3);
-      await browser.page.waitFor(() => (
+      await waitForApplication(browser.page, () => (
         document.getElementById('settings-modal')?.style.display === 'none'
           && document.activeElement === window.__runnerModalOpener
       ), { description: 'settings backdrop close and focus restoration' });
 
-      await browser.page.evaluate(`window.__progressProbeTask=document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort.begin('进度弹窗');`);
-      await browser.page.waitFor(() => document.getElementById('export-progress-modal')?.classList.contains('show'));
+      await evaluateApplication(browser.page, `window.__progressProbeTask=applicationCapabilities.markdownEditorExportTaskPort.begin('进度弹窗');`);
+      await waitForApplication(browser.page, () => document.getElementById('export-progress-modal')?.classList.contains('show'));
       await browser.page.pressKey('Escape');
       await browser.page.clickAt(3, 3);
       assert.equal(
-        await browser.page.evaluate("document.getElementById('export-progress-modal')?.classList.contains('show')"),
+        await evaluateApplication(browser.page, "document.getElementById('export-progress-modal')?.classList.contains('show')"),
         true
       );
-      await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorExportTaskPort.finish(window.__progressProbeTask);delete window.__progressProbeTask;`);
-      await browser.page.waitFor(() => document.getElementById('export-progress-modal')?.style.display === 'none');
-      await browser.page.evaluate(`(()=>{
+      await evaluateApplication(browser.page, `applicationCapabilities.markdownEditorExportTaskPort.finish(window.__progressProbeTask);delete window.__progressProbeTask;`);
+      await waitForApplication(browser.page, () => document.getElementById('export-progress-modal')?.style.display === 'none');
+      await evaluateApplication(browser.page, `(()=>{
         delete window.__runnerModalOpener;
         scrollTo(0,0);
       })()`);
     });
 
     await test('application link preview uses scoped focus and cancels stale close completion', async () => {
-      await browser.page.evaluate(`(()=>{
+      await evaluateApplication(browser.page, `(()=>{
         document.getElementById('dom-primitive-focus-source')?.remove();
         const source=document.createElement('button');
         source.id='dom-primitive-focus-source';
@@ -966,18 +931,18 @@ async function runAppSuite() {
         const anchor=document.createElement('a');anchor.href='https://example.com/first';anchor.textContent='preview link';document.getElementById('preview').append(anchor);
         anchor.id='dom-primitive-link-source';anchor.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,button:0}));
       })()`);
-      await browser.page.waitFor(() => document.activeElement?.classList.contains('link-preview-close'), { description: 'link preview initial focus' });
+      await waitForApplication(browser.page, () => document.activeElement?.classList.contains('link-preview-close'), { description: 'link preview initial focus' });
       await browser.page.pressKey('Tab');
-      assert.equal(await browser.page.evaluate("document.activeElement?.classList.contains('link-preview-external')"), true);
+      assert.equal(await evaluateApplication(browser.page, "document.activeElement?.classList.contains('link-preview-external')"), true);
 
-      await browser.page.evaluate(`(()=>{
+      await evaluateApplication(browser.page, `(()=>{
         const source=document.getElementById('dom-primitive-focus-source');
         document.querySelector('.link-preview-close').click();
         source.focus();const anchor=document.createElement('a');anchor.href='https://example.com/second';anchor.textContent='preview link';document.getElementById('preview').append(anchor);
         anchor.id='dom-primitive-link-source-2';anchor.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,button:0}));
       })()`);
       await new Promise(resolve => setTimeout(resolve, 240));
-      const reopened = await browser.page.evaluate(`(()=>({
+      const reopened = await evaluateApplication(browser.page, `(()=>({
         open:Boolean(document.querySelector('#link-preview-overlay.show')),
         src:document.querySelector('.link-preview-frame')?.getAttribute('src')||'',
         focusClass:document.activeElement?.className||''
@@ -986,10 +951,10 @@ async function runAppSuite() {
       assert.match(reopened.src, /example\.com\/second/);
       assert.match(reopened.focusClass, /link-preview-close/);
 
-      await browser.page.evaluate("document.querySelector('.link-preview-close').click()");
-      await browser.page.waitFor(() => document.activeElement?.id === 'dom-primitive-link-source-2', { description: 'link preview focus restoration' });
-      assert.equal(await browser.page.evaluate("Boolean(document.querySelector('#link-preview-overlay.show'))"), false);
-      await browser.page.evaluate(`(()=>{
+      await evaluateApplication(browser.page, "document.querySelector('.link-preview-close').click()");
+      await waitForApplication(browser.page, () => document.activeElement?.id === 'dom-primitive-link-source-2', { description: 'link preview focus restoration' });
+      assert.equal(await evaluateApplication(browser.page, "Boolean(document.querySelector('#link-preview-overlay.show'))"), false);
+      await evaluateApplication(browser.page, `(()=>{
         const source=document.getElementById('dom-primitive-link-source-2');
         if(document.activeElement===source)source.blur();
         source?.remove();
@@ -1000,11 +965,11 @@ async function runAppSuite() {
     });
 
     await test('application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear', async () => {
-      const result = await browser.page.evaluate(`(()=>{
-        const host=document.getElementById('compatibility-business-ports');
+      const result = await evaluateApplication(browser.page, `(()=>{
+        const host=applicationCapabilities;
         const port=host?.markdownEditorRecentFilesPort;
         if(!port)throw new Error('Recent files write port unavailable');
-        if(typeof port.load==='function'||'entries' in port)throw new Error('Recent files classic port leaked read authority');
+        if(document.getElementById('compatibility-business-ports'))throw new Error('Retired service host remains.');
         port.clear();
         for(let index=0;index<23;index+=1){
           const suffix=String(index).padStart(2,'0');
@@ -1029,7 +994,7 @@ async function runAppSuite() {
         snapshot.clearedMenuItems=document.querySelectorAll('#recent-files-menu .recent-file-item').length;
         return snapshot;
       })()`);
-      assert.deepEqual(result.writePortKeys, ['add', 'clear', 'destroy']);
+      assert.deepEqual(result.writePortKeys, ['add', 'clear', 'destroy', 'entries', 'load', 'maxEntries', 'snapshot', 'subscribe']);
       assert.equal(result.count, 20);
       assert.deepEqual(result.first, { path: 'c:/notes/FILE-05.md', name: 'Reopened.md', openedAt: 999 });
       assert.equal(result.duplicateCount, 1);
@@ -1043,8 +1008,8 @@ async function runAppSuite() {
     });
 
     await test('application Document Session Controller keeps lifecycle model, session and UI coherent', async () => {
-      const result = await browser.page.evaluate(`(async()=>{
-        const host=document.getElementById('compatibility-business-ports');
+      const result = await evaluateApplication(browser.page, `(async()=>{
+        const host=applicationCapabilities;
         const port=host?.markdownEditorDocumentControllerPort;
         if(!port)throw new Error('Document controller port unavailable');
         const applyDocumentLifecycleUi=result=>host.markdownEditorDocumentUiCommandPort.invoke('applyDocumentLifecycleUi',result);
@@ -1069,13 +1034,13 @@ async function runAppSuite() {
         await applyDocumentLifecycleUi(beta);
         const betaState=snapshot();
 
-        await document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('openDocument',alpha.record.id);
+        await applicationCapabilities.markdownEditorDocumentUiCommandPort.invoke('openDocument',alpha.record.id);
         const reopenedAlpha=snapshot();
 
         const originalPrompt=window.prompt;
         try{
           window.prompt=()=> 'Atomic Alpha Renamed';
-          document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('renameDocument',alpha.record.id);
+          applicationCapabilities.markdownEditorDocumentUiCommandPort.invoke('renameDocument',alpha.record.id);
         }finally{
           window.prompt=originalPrompt;
         }
@@ -1085,9 +1050,9 @@ async function runAppSuite() {
         const savedAlpha=await persistencePort.invoke('saveCurrentFile');
         if(!savedAlpha)throw new Error('Atomic 5.3 lifecycle fixture failed to save renamed document');
 
-        await document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('closeDocument',alpha.record.id);
+        await applicationCapabilities.markdownEditorDocumentUiCommandPort.invoke('closeDocument',alpha.record.id);
         const afterAlphaClose=snapshot();
-        await document.getElementById('compatibility-business-ports').markdownEditorDocumentUiCommandPort.invoke('closeDocument',beta.record.id);
+        await applicationCapabilities.markdownEditorDocumentUiCommandPort.invoke('closeDocument',beta.record.id);
         const emptyState=snapshot();
 
         return {
@@ -1120,13 +1085,13 @@ async function runAppSuite() {
 
     await test('application Editor Controller publishes model-authoritative transactions and suppresses programmatic body writes', async () => {
       await app.loadMarkdown('controller seed', { layout: 'edit', selection: 0 });
-      await browser.page.evaluate("(()=>{const port=document.getElementById('compatibility-business-ports').markdownEditorEditorControllerPort;window.__runnerTransactions=[];window.__runnerUnsubscribe=port.subscribeTransactions(value=>window.__runnerTransactions.push(value));})()");
+      await evaluateApplication(browser.page, "(()=>{const port=applicationCapabilities.markdownEditorEditorControllerPort;window.__runnerTransactions=[];window.__runnerUnsubscribe=port.subscribeTransactions(value=>window.__runnerTransactions.push(value));})()");
       let result;
       try {
         await browser.page.insertText('x');
-        result = await browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorEditorControllerPort,model=window.__markdownEditorE2E,transactions=window.__runnerTransactions;const interactive={...transactions.at(-1)},interactiveVersion=model.snapshot().documentVersion;port.setText('controller body');return {count:transactions.length,interactive,interactiveVersion,programmatic:{...transactions.at(-1)},finalVersion:model.snapshot().documentVersion,body:model.getEditorValue(),scopedOnly:typeof window.markdownEditorEditorControllerPort==='undefined'};})()");
+        result = await evaluateApplication(browser.page, "(()=>{const host=applicationCapabilities,port=host.markdownEditorEditorControllerPort,model=window.__markdownEditorE2E,transactions=window.__runnerTransactions;const interactive={...transactions.at(-1)},interactiveVersion=model.snapshot().documentVersion;port.setText('controller body');return {count:transactions.length,interactive,interactiveVersion,programmatic:{...transactions.at(-1)},finalVersion:model.snapshot().documentVersion,body:model.getEditorValue(),scopedOnly:typeof window.markdownEditorEditorControllerPort==='undefined'};})()");
       } finally {
-        await browser.page.evaluate("window.__runnerUnsubscribe?.();delete window.__runnerUnsubscribe;delete window.__runnerTransactions");
+        await evaluateApplication(browser.page, "window.__runnerUnsubscribe?.();delete window.__runnerUnsubscribe;delete window.__runnerTransactions");
       }
       assert.equal(result.count, 2);
       assert.equal(result.interactive.interactive, true);
@@ -1138,7 +1103,7 @@ async function runAppSuite() {
     });
 
     await loadAppFixture(browser.page);
-    await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]') && document.querySelector('[data-hybrid-block-type="table"]')), { timeoutMs: 10000, description: 'hybrid widgets' });
+    await waitForApplication(browser.page, () => Boolean(document.querySelector('[data-hybrid-block-type="code"]') && document.querySelector('[data-hybrid-block-type="table"]')), { timeoutMs: 10000, description: 'hybrid widgets' });
 
     await test('application switches deterministically across every layout mode', async () => {
       for (const mode of ['both', 'hybrid', 'edit', 'preview', 'both']) {
@@ -1155,26 +1120,26 @@ async function runAppSuite() {
 
     await test('compact shell keeps 860/900 hysteresis and clears resize burst state', async () => {
       await browser.page.setViewport({ width: 840, height: 700 });
-      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactShellActive === true, { description: 'compact shell enter' });
-      let snapshot = await browser.page.evaluate(`(()=>{const p=document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort;return {active:p.compactShellActive,auto:p.sidebarAutoCollapsed,burst:p.windowResizeActiveUntil,cls:document.documentElement.classList.contains('is-compact-shell')}})()`);
+      await waitForApplication(browser.page, () => applicationCapabilities?.markdownEditorLayoutStatePort?.snapshot.compact.shellActive === true, { description: 'compact shell enter' });
+      let snapshot = await evaluateApplication(browser.page, `(()=>{const p=applicationCapabilities.markdownEditorLayoutStatePort;return {active:p.snapshot.compact.shellActive,auto:p.snapshot.sidebar.autoCollapsed,burst:p.snapshot.resize.windowActiveUntil,cls:document.documentElement.classList.contains('is-compact-shell')}})()`);
       assert.deepEqual({ active: snapshot.active, auto: snapshot.auto, cls: snapshot.cls }, { active: true, auto: true, cls: true });
       await browser.page.setViewport({ width: 880, height: 700 });
-      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.windowResizeActiveUntil > performance.now(), { description: 'window resize burst gate' });
+      await waitForApplication(browser.page, () => applicationCapabilities?.markdownEditorLayoutStatePort?.snapshot.resize.windowActiveUntil > performance.now(), { description: 'window resize burst gate' });
       await new Promise(resolve => setTimeout(resolve, 80));
-      assert.equal(await browser.page.evaluate("document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.compactShellActive"), true);
-      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.windowResizeActiveUntil === 0, { description: 'window resize burst settled' });
-      snapshot = await browser.page.evaluate(`(()=>{const p=document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort;return {started:p.windowResizeBurstStartedAt,events:p.windowResizeBurstEvents}})()`);
+      assert.equal(await evaluateApplication(browser.page, "applicationCapabilities.markdownEditorLayoutStatePort.snapshot.compact.shellActive"), true);
+      await waitForApplication(browser.page, () => applicationCapabilities?.markdownEditorLayoutStatePort?.snapshot.resize.windowActiveUntil === 0, { description: 'window resize burst settled' });
+      snapshot = await evaluateApplication(browser.page, `(()=>{const p=applicationCapabilities.markdownEditorLayoutStatePort;return {started:p.snapshot.resize.windowBurstStartedAt,events:p.snapshot.resize.windowBurstEvents}})()`);
       assert.deepEqual(snapshot, { started: 0, events: 0 });
       await browser.page.setViewport({ width: 920, height: 700 });
-      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactShellActive === false, { description: 'compact shell hysteresis exit' });
-      snapshot = await browser.page.evaluate(`(()=>{const p=document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort;return {active:p.compactShellActive,auto:p.sidebarAutoCollapsed,cls:document.documentElement.classList.contains('is-compact-shell')}})()`);
+      await waitForApplication(browser.page, () => applicationCapabilities?.markdownEditorLayoutStatePort?.snapshot.compact.shellActive === false, { description: 'compact shell hysteresis exit' });
+      snapshot = await evaluateApplication(browser.page, `(()=>{const p=applicationCapabilities.markdownEditorLayoutStatePort;return {active:p.snapshot.compact.shellActive,auto:p.snapshot.sidebar.autoCollapsed,cls:document.documentElement.classList.contains('is-compact-shell')}})()`);
       assert.deepEqual(snapshot, { active: false, auto: false, cls: false });
     });
 
     await test('application toolbar boundary wraps from measured content width without hiding tools', async () => {
       await browser.page.setViewport({ width: 1800, height: 900 });
-      await browser.page.waitFor(() => window.innerWidth === 1800 && !document.documentElement.classList.contains('is-compact-shell'), { description: 'wide toolbar viewport' });
-      const before = await browser.page.evaluate(`(()=>{
+      await waitForApplication(browser.page, () => window.innerWidth === 1800 && !document.documentElement.classList.contains('is-compact-shell'), { description: 'wide toolbar viewport' });
+      const before = await evaluateApplication(browser.page, `(()=>{
         const toolbar=document.querySelector('.l-toolbar-shell');
         const format=toolbar?.querySelector('.format-group');
         const actions=toolbar?.querySelector('.editor-actions');
@@ -1190,7 +1155,7 @@ async function runAppSuite() {
       const targetWidth = Math.max(260, Math.min(620, Math.floor(before.required + before.padding - 24)));
       assert.ok(targetWidth < before.required + before.padding, JSON.stringify({before,targetWidth}));
       try {
-        await browser.page.evaluate(`(()=>{
+        await evaluateApplication(browser.page, `(()=>{
           const target=${JSON.stringify(targetWidth)};
           const toolbar=document.querySelector('.l-toolbar-shell');
           toolbar.style.width=target+'px';
@@ -1198,8 +1163,8 @@ async function runAppSuite() {
           toolbar.style.boxSizing='border-box';
           toolbar.style.alignSelf='flex-start';
         })()`);
-        await browser.page.waitFor(() => document.querySelector('.l-toolbar-shell')?.classList.contains('toolbar-boundary-wrap') === true, { description: 'content-width toolbar wrapping' });
-        const wrapped = await browser.page.evaluate(`(()=>{
+        await waitForApplication(browser.page, () => document.querySelector('.l-toolbar-shell')?.classList.contains('toolbar-boundary-wrap') === true, { description: 'content-width toolbar wrapping' });
+        const wrapped = await evaluateApplication(browser.page, `(()=>{
           const toolbar=document.querySelector('.l-toolbar-shell');
           const format=toolbar.querySelector('.format-group');
           const actions=toolbar.querySelector('.editor-actions');
@@ -1217,7 +1182,7 @@ async function runAppSuite() {
         assert.equal(wrapped.twoRows, true, JSON.stringify(wrapped));
         assert.deepEqual(wrapped.hidden, before.hidden, 'responsive boundary must not hide toolbar tools');
       } finally {
-        await browser.page.evaluate(`(()=>{
+        await evaluateApplication(browser.page, `(()=>{
           const toolbar=document.querySelector('.l-toolbar-shell');
           if(!toolbar)return;
           toolbar.style.removeProperty('width');
@@ -1226,36 +1191,36 @@ async function runAppSuite() {
           toolbar.style.removeProperty('align-self');
         })()`);
       }
-      await browser.page.waitFor(() => document.querySelector('.l-toolbar-shell')?.classList.contains('toolbar-boundary-wrap') === false, { description: 'wide toolbar unwrap restoration' });
-      const restored = await browser.page.evaluate(`(()=>({
+      await waitForApplication(browser.page, () => document.querySelector('.l-toolbar-shell')?.classList.contains('toolbar-boundary-wrap') === false, { description: 'wide toolbar unwrap restoration' });
+      const restored = await evaluateApplication(browser.page, `(()=>({
         hidden:Array.from(document.querySelectorAll('.l-toolbar-shell [data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')])
       }))()`);
       assert.deepEqual(restored.hidden, before.hidden);
       await browser.page.setViewport({ width: 1440, height: 1000 });
-      await browser.page.waitFor(() => window.innerWidth === 1440 && window.innerHeight === 1000, { description: 'restore toolbar test viewport' });
+      await waitForApplication(browser.page, () => window.innerWidth === 1440 && window.innerHeight === 1000, { description: 'restore toolbar test viewport' });
     });
 
     await test('application page fullscreen uses the Stage 6.6 controller without changing command IDs', async () => {
       await browser.page.setViewport({ width: 1440, height: 1000 });
-      const before = await browser.page.evaluate(`(()=>{
-        const host=document.getElementById('compatibility-business-ports');
+      const before = await evaluateApplication(browser.page, `(()=>{
+        const host=applicationCapabilities;
         const port=host?.markdownEditorEditorUiCommandPort;
         const layout=host?.markdownEditorLayoutStatePort;
         if(!port||!layout)throw new Error('Atomic 6.6 fullscreen ports unavailable');
         localStorage.setItem('md_editor_page_fullscreen','false');
         return {
-          active:layout.pageFullscreen,
+          active:layout.snapshot.fullscreen.page,
           app:document.querySelector('.l-app-shell')?.classList.contains('is-page-fullscreen')||false,
           body:document.body.classList.contains('is-page-fullscreen-active')
         };
       })()`);
       if (before.active) {
-        await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
+        await evaluateApplication(browser.page, `applicationCapabilities.markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
       }
-      await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
-      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.pageFullscreen === true, { description: 'page fullscreen enter' });
-      let snapshot = await browser.page.evaluate(`(()=>({
-        state:document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.pageFullscreen,
+      await evaluateApplication(browser.page, `applicationCapabilities.markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
+      await waitForApplication(browser.page, () => applicationCapabilities?.markdownEditorLayoutStatePort?.snapshot.fullscreen.page === true, { description: 'page fullscreen enter' });
+      let snapshot = await evaluateApplication(browser.page, `(()=>({
+        state:applicationCapabilities.markdownEditorLayoutStatePort.snapshot.fullscreen.page,
         appLegacy:document.querySelector('.l-app-shell').classList.contains('page-fullscreen'),
         appCurrent:document.querySelector('.l-app-shell').classList.contains('is-page-fullscreen'),
         bodyLegacy:document.body.classList.contains('page-fullscreen-active'),
@@ -1263,10 +1228,10 @@ async function runAppSuite() {
         persisted:localStorage.getItem('md_editor_page_fullscreen')
       }))()`);
       assert.deepEqual(snapshot, { state:true, appLegacy:false, appCurrent:true, bodyLegacy:false, bodyCurrent:true, persisted:'true' });
-      await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
-      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.pageFullscreen === false, { description: 'page fullscreen exit' });
-      snapshot = await browser.page.evaluate(`(()=>({
-        state:document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.pageFullscreen,
+      await evaluateApplication(browser.page, `applicationCapabilities.markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
+      await waitForApplication(browser.page, () => applicationCapabilities?.markdownEditorLayoutStatePort?.snapshot.fullscreen.page === false, { description: 'page fullscreen exit' });
+      snapshot = await evaluateApplication(browser.page, `(()=>({
+        state:applicationCapabilities.markdownEditorLayoutStatePort.snapshot.fullscreen.page,
         app:document.querySelector('.l-app-shell').classList.contains('is-page-fullscreen'),
         body:document.body.classList.contains('is-page-fullscreen-active'),
         persisted:localStorage.getItem('md_editor_page_fullscreen')
@@ -1277,12 +1242,12 @@ async function runAppSuite() {
     await test('application sidebar tabs switch one mount region and coordinate child lifecycles', async () => {
       await loadAppFixture(browser.page);
       await showSidebar();
-      const docsBefore = await browser.page.evaluate("document.getElementById('document-list')?.childElementCount??-1");
-      const readSidebar = () => browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorSidebarControllerPort,tree=host.markdownEditorFolderTreeControllerPort;return {active:port.activeTab,panels:['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-panel')?.classList.contains('active')),tabs:['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-tab')?.classList.contains('active')),stored:localStorage.getItem('md_editor_sidebar_tab'),treeActive:tree.snapshot.active,items:document.getElementById('outline-list')?.children.length??0,count:document.getElementById('document-list')?.childElementCount??-1};})()");
+      const docsBefore = await evaluateApplication(browser.page, "document.getElementById('document-list')?.childElementCount??-1");
+      const readSidebar = () => evaluateApplication(browser.page, "(()=>{const host=applicationCapabilities,port=host.markdownEditorSidebarControllerPort,tree=host.markdownEditorFolderTreeControllerPort;return {active:port.activeTab,panels:['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-panel')?.classList.contains('active')),tabs:['docs','files','outline'].filter(name=>document.getElementById('sidebar-'+name+'-tab')?.classList.contains('active')),stored:localStorage.getItem('md_editor_sidebar_tab'),treeActive:tree.snapshot.active,items:document.getElementById('outline-list')?.children.length??0,count:document.getElementById('document-list')?.childElementCount??-1};})()");
       await browser.page.click('#sidebar-files-tab'); const files = await readSidebar();
       await browser.page.click('#sidebar-outline-tab'); const outline = await readSidebar();
       await browser.page.click('#sidebar-docs-tab'); const docs = await readSidebar();
-      const globals = await browser.page.evaluate("({legacyGlobal:typeof window.setSidebarTab,legacyTreeGlobal:typeof window.markdownEditorFileTree})");
+      const globals = await evaluateApplication(browser.page, "({legacyGlobal:typeof window.setSidebarTab,legacyTreeGlobal:typeof window.markdownEditorFileTree})");
       const result={docsBefore,files:{active:files.active,panels:files.panels,tabs:files.tabs,stored:files.stored,treeActive:files.treeActive},outline,docs:{active:docs.active,panels:docs.panels,tabs:docs.tabs,stored:docs.stored,count:docs.count},states:[files.treeActive,outline.treeActive,docs.treeActive],...globals};
       assert.deepEqual(result.files, {active:'files',panels:['files'],tabs:['files'],stored:'files',treeActive:true});
       assert.equal(result.outline.active, 'outline');
@@ -1303,14 +1268,14 @@ async function runAppSuite() {
       const source = '# Root\nroot body\n## Child\nchild body\n### Grand\ngrand body\n# Next\nnext body\n';
       await app.loadMarkdown(source, { layout: 'both', focusText: 'child body' });
       await browser.page.click('#sidebar-outline-tab');
-      await browser.page.waitFor(() => {
-        const host=document.getElementById('compatibility-business-ports');
+      await waitForApplication(browser.page, () => {
+        const host=applicationCapabilities;
         return host?.markdownEditorOutlineControllerPort?.snapshot?.headings?.length===4
           && document.querySelectorAll('#outline-list .outline-node').length===4;
       }, { description: 'Atomic 6.8 indexed Outline tree' });
 
-      const initial = await browser.page.evaluate(`(()=>{
-        const host=document.getElementById('compatibility-business-ports');
+      const initial = await evaluateApplication(browser.page, `(()=>{
+        const host=applicationCapabilities;
         const port=host?.markdownEditorOutlineControllerPort;
         const serialize=node=>({
           id:node.dataset.outlineId||'',
@@ -1323,7 +1288,7 @@ async function runAppSuite() {
         return {
           tree:Array.from(root?.children||[]).map(serialize),
           activeText:document.querySelector('#outline-list .outline-row.active .outline-link')?.textContent?.trim()||'',
-          activeLine:editor?.virtualEditor?.getLineNumberAtPosition?.(editor.selectionStart)||0,
+          activeLine:editorApi?.getLineNumberAtPosition?.(editorApi.getSelection().start)||0,
           headings:port?.snapshot?.headings?.map(item=>({id:item.id,level:item.level,text:item.text,line:item.line}))||[],
           legacy:{
             renderOutline:typeof window.renderOutline,
@@ -1348,7 +1313,7 @@ async function runAppSuite() {
 
       const rootId = initial.headings[0].id;
       await browser.page.click('#outline-list .outline-node[data-outline-id='+JSON.stringify(rootId)+'] > .outline-row .outline-toggle');
-      await browser.page.waitFor(() => {
+      await waitForApplication(browser.page, () => {
         const persisted=JSON.parse(localStorage.getItem('md_editor_outline_collapsed')||'{}');
         const node=document.querySelector('#outline-list > .outline-tree > .outline-node');
         return Object.values(persisted).some(value=>value===true)
@@ -1358,19 +1323,19 @@ async function runAppSuite() {
 
       await browser.page.click('#sidebar-docs-tab');
       await browser.page.click('#sidebar-outline-tab');
-      await browser.page.waitFor(() => document.querySelector('#outline-list > .outline-tree > .outline-node')?.classList.contains('is-collapsed')===true, {
+      await waitForApplication(browser.page, () => document.querySelector('#outline-list > .outline-tree > .outline-node')?.classList.contains('is-collapsed')===true, {
         description: 'Atomic 6.8 Outline collapse restored after lifecycle resume'
       });
 
       const nextHeading = await centerByText(browser.page, '#outline-list .outline-link', 'Next');
       await browser.page.clickAt(nextHeading.x, nextHeading.y);
-      await browser.page.waitFor(() => {
+      await waitForApplication(browser.page, () => {
         const editor=document.getElementById('editor');
-        return editor?.virtualEditor?.getLineNumberAtPosition?.(editor.selectionStart)===7
+        return editorApi?.getLineNumberAtPosition?.(editorApi.getSelection().start)===7
           && document.querySelector('#outline-list .outline-row.active .outline-link')?.textContent?.trim()==='Next';
       }, { description: 'Atomic 6.8 Outline heading navigation' });
-      const final = await browser.page.evaluate(`(()=>({
-        line:document.getElementById('editor')?.virtualEditor?.getLineNumberAtPosition?.(document.getElementById('editor')?.selectionStart)||0,
+      const final = await evaluateApplication(browser.page, `(()=>({
+        line:editorApi?.getLineNumberAtPosition?.(editorApi.getSelection().start)||0,
         active:document.querySelector('#outline-list .outline-row.active .outline-link')?.textContent?.trim()||'',
         persisted:JSON.parse(localStorage.getItem('md_editor_outline_collapsed')||'{}')
       }))()`);
@@ -1383,13 +1348,13 @@ async function runAppSuite() {
       const report = [];
       try {
         await browser.page.setViewport({ width: 1200, height: 720 });
-        await browser.page.waitFor(() => !document.documentElement.classList.contains('is-compact-shell'), {
+        await waitForApplication(browser.page, () => !document.documentElement.classList.contains('is-compact-shell'), {
           description: 'wide shell before responsive verification'
         });
         await setAppLayout(browser.page, 'both');
-        await browser.page.evaluate(`(()=>{
+        await evaluateApplication(browser.page, `(()=>{
           const sidebar=document.querySelector('.l-sidebar');
-          if(sidebar?.classList.contains('is-hidden')) document.getElementById('compatibility-business-ports').markdownEditorEditorUiCommandPort.invoke('toggleSidebar');
+          if(sidebar?.classList.contains('is-hidden')) applicationCapabilities.markdownEditorEditorUiCommandPort.invoke('toggleSidebar');
         })()`);
         for (const viewport of RESPONSIVE_SHELL_VIEWPORTS) {
           await applyResponsiveViewport(browser.page, viewport);
@@ -1421,7 +1386,7 @@ async function runAppSuite() {
         }
       } finally {
         await browser.page.setViewport({ width: 1440, height: 1000 });
-        await browser.page.waitFor(() => window.innerWidth === 1440 && window.innerHeight === 1000, {
+        await waitForApplication(browser.page, () => window.innerWidth === 1440 && window.innerHeight === 1000, {
           description: 'restore default application viewport'
         });
         await setAppLayout(browser.page, 'hybrid');
@@ -1431,18 +1396,18 @@ async function runAppSuite() {
     await test('application code block placeholder never receives a phantom source highlight', async () => {
       const source = '```\n\n\n```\n\n';
       await app.loadMarkdown(source, { layout: 'hybrid', selection: source.length, codeVisualEditing: true, tableVisualEditing: true });
-      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'closed code widget' });
+      await waitForApplication(browser.page, () => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'closed code widget' });
       await app.revealPosition(source.length);
       const trailingRect = await browser.page.elementRect('.cm-content > .cm-line:last-child');
       const trailingPoint = { x: trailingRect.x + 2, y: trailingRect.y + trailingRect.height / 2 };
       await browser.page.clickAt(trailingPoint.x, trailingPoint.y);
-      await browser.page.waitFor(() => {
+      await waitForApplication(browser.page, () => {
         const editor=document.getElementById('editor');
-        return editor?.selectionStart===editor?.textLength
-          && editor?.selectionEnd===editor?.textLength
+        return editorApi.getSelection().start===editorApi.getTextLength()
+          && editorApi.getSelection().end===editorApi.getTextLength()
           && window.__markdownEditorE2E.snapshot().presentationStats?.sourceActiveLines===1;
       }, { description: 'trailing source active line' });
-      const snapshot = await browser.page.evaluate(`(()=>{
+      const snapshot = await evaluateApplication(browser.page, `(()=>{
         const widget=document.querySelector('[data-hybrid-block-type="code"]');
         const widgetRect=widget?.getBoundingClientRect();
         const active=Array.from(document.querySelectorAll('.cm-hybrid-source-active')).map(element=>{const rect=element.getBoundingClientRect();return {top:rect.top,bottom:rect.bottom,text:element.textContent||''};});
@@ -1455,32 +1420,32 @@ async function runAppSuite() {
     await test('application code block ignores single click and opens on strict double click', async () => {
       await loadAppFixture(browser.page);
       await browser.page.click('[data-hybrid-block-type="code"] .cm-hybrid-code-body');
-      assert.equal(await browser.page.evaluate('Boolean(document.querySelector("[data-hybrid-code-editor]"))'), false);
+      assert.equal(await evaluateApplication(browser.page, 'Boolean(document.querySelector("[data-hybrid-code-editor]"))'), false);
       await browser.page.click('[data-hybrid-block-type="code"] .cm-hybrid-code-body', { count: 2, intervalMs: 90 });
-      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-code-editor]')), { description: 'code editor open' });
+      await waitForApplication(browser.page, () => Boolean(document.querySelector('[data-hybrid-code-editor]')), { description: 'code editor open' });
       const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
       await browser.page.clickAt(outside.x + 2, outside.y);
-      await browser.page.waitFor(() => !document.querySelector('[data-hybrid-code-editor]'), { description: 'code editor close' });
+      await waitForApplication(browser.page, () => !document.querySelector('[data-hybrid-code-editor]'), { description: 'code editor close' });
     });
 
     await test('application keeps only one direct editor active', async () => {
       await loadAppFixture(browser.page);
       await browser.page.click('[data-hybrid-block-type="code"] .cm-hybrid-code-body', { count: 2 });
-      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-code-editor]')));
+      await waitForApplication(browser.page, () => Boolean(document.querySelector('[data-hybrid-code-editor]')));
       const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
       await browser.page.clickAt(outside.x + 2, outside.y);
-      await browser.page.waitFor(() => !document.querySelector('[data-hybrid-code-editor]'));
+      await waitForApplication(browser.page, () => !document.querySelector('[data-hybrid-code-editor]'));
       await browser.page.click('[data-hybrid-block-type="table"] td', { count: 2 });
-      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-table-cell-input]')));
-      assert.equal(await browser.page.evaluate('Boolean(document.querySelector("[data-hybrid-code-editor]"))'), false);
+      await waitForApplication(browser.page, () => Boolean(document.querySelector('[data-hybrid-table-cell-input]')));
+      assert.equal(await evaluateApplication(browser.page, 'Boolean(document.querySelector("[data-hybrid-code-editor]"))'), false);
       await browser.page.clickAt(outside.x + 2, outside.y);
-      await browser.page.waitFor(() => !document.querySelector('[data-hybrid-table-cell-input]'));
+      await waitForApplication(browser.page, () => !document.querySelector('[data-hybrid-table-cell-input]'));
     });
 
     await test('application Hybrid table pointer input avoids block decoration dispatch races', async () => {
       await loadAppFixture(browser.page);
       await setAppLayout(browser.page, 'hybrid');
-      await browser.page.evaluate(`(()=>{
+      await evaluateApplication(browser.page, `(()=>{
         window.__hybridDispatchRaceErrors=[];
         window.addEventListener('error',event=>{
           const message=String(event?.message||event?.error?.message||'');
@@ -1489,19 +1454,19 @@ async function runAppSuite() {
           }
         });
       })()`);
-      const beforeLength = await browser.page.evaluate('document.getElementById("editor")?.textLength || 0');
+      const beforeLength = await evaluateApplication(browser.page, 'editorApi.getTextLength()');
       for (let index = 0; index < 4; index += 1) {
         await browser.page.click('[data-hybrid-block-type="table"] td');
         const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
         await browser.page.clickAt(outside.x + 2, outside.y);
         await app.revealText('selection alpha', { edge: 'end' });
         await browser.page.insertText('x');
-        await browser.page.evaluate('new Promise(resolve=>queueMicrotask(resolve))');
+        await evaluateApplication(browser.page, 'new Promise(resolve=>queueMicrotask(resolve))');
       }
-      await browser.page.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(resolve,160))))');
-      const result = await browser.page.evaluate(`(()=>({
+      await evaluateApplication(browser.page, 'new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(resolve,160))))');
+      const result = await evaluateApplication(browser.page, `(()=>({
         errors:window.__hybridDispatchRaceErrors||[],
-        textLength:document.getElementById('editor')?.textLength||0
+        textLength:editorApi.getTextLength()
       }))()`);
       assert.deepEqual(result.errors, []);
       assert.equal(result.textLength, beforeLength + 4);
@@ -1511,12 +1476,12 @@ async function runAppSuite() {
       await loadAppFixture(browser.page);
       await setAppLayout(browser.page, 'hybrid');
       await app.revealText('flowchart LR', { preserveSelection: true });
-      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type=\"mermaid\"] svg')), { timeoutMs: 10000, description: 'hybrid Mermaid SVG' });
+      await waitForApplication(browser.page, () => Boolean(document.querySelector('[data-hybrid-block-type=\"mermaid\"] svg')), { timeoutMs: 10000, description: 'hybrid Mermaid SVG' });
       const inspectMermaid = `selector=>{const svg=document.querySelector(selector);const style=svg?getComputedStyle(svg):null;return {role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),className:svg?.getAttribute('class')||'',heightAttribute:svg?.getAttribute('height'),inlineStyle:svg?.getAttribute('style'),maxWidth:style?.maxWidth||'',backgroundColor:style?.backgroundColor||''}}`;
-      const hybrid = await browser.page.evaluate(`(${inspectMermaid})('[data-hybrid-block-type=\"mermaid\"] svg')`);
+      const hybrid = await evaluateApplication(browser.page, `(${inspectMermaid})('[data-hybrid-block-type=\"mermaid\"] svg')`);
       await setAppLayout(browser.page, 'preview');
-      await browser.page.waitFor(() => Boolean(document.querySelector('.f-preview-pane .mermaid svg')), { timeoutMs: 10000, description: 'preview Mermaid SVG' });
-      const previewResult = await browser.page.evaluate(`(${inspectMermaid})('.f-preview-pane .mermaid svg')`);
+      await waitForApplication(browser.page, () => Boolean(document.querySelector('.f-preview-pane .mermaid svg')), { timeoutMs: 10000, description: 'preview Mermaid SVG' });
+      const previewResult = await evaluateApplication(browser.page, `(${inspectMermaid})('.f-preview-pane .mermaid svg')`);
       assert.deepEqual(previewResult, hybrid);
       assert.match(hybrid.className, /(?:^|\s)f-mermaid-svg(?:\s|$)/);
       assert.equal(hybrid.heightAttribute, null);
@@ -1530,36 +1495,36 @@ async function runAppSuite() {
       await loadAppFixture(browser.page);
       const point = await centerByText(browser.page, '[data-hybrid-block-type="code"]', '编辑源码');
       await browser.page.clickAt(point.x, point.y);
-      await browser.page.waitFor(() => !document.querySelector('[data-hybrid-block-type="code"]') && document.getElementById('editor')?.selectionEnd > document.getElementById('editor')?.selectionStart, { description: 'source range open' });
-      const selectedSource = await browser.page.evaluate(`(()=>{const editor=document.getElementById('editor');return editor.value.slice(editor.selectionStart,editor.selectionEnd)})()`);
+      await waitForApplication(browser.page, () => !document.querySelector('[data-hybrid-block-type="code"]') && editorApi.getSelection().end > editorApi.getSelection().start, { description: 'source range open' });
+      const selectedSource = await evaluateApplication(browser.page, `(()=>{const editor=document.getElementById('editor');return editorApi.sliceText(editorApi.getSelection().start,editorApi.getSelection().end)})()`);
       assert.match(selectedSource, /plain code/);
       await app.revealText('selection alpha', { preserveSelection: true });
       const outside = await getTextBoundary(browser.page, '.cm-line', 'alpha', 'start', 'selection alpha');
       await browser.page.clickAt(outside.x + 2, outside.y);
-      await browser.page.waitFor(() => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'source range close' });
+      await waitForApplication(browser.page, () => Boolean(document.querySelector('[data-hybrid-block-type="code"]')), { description: 'source range close' });
     });
 
     await test('application split controllers drag, collapse and preserve compact hysteresis in the built app', async () => {
       await browser.page.setViewport({ width: 1440, height: 1000 });
-      await browser.page.waitFor(() => window.innerWidth === 1440, { description: 'wide split viewport' });
+      await waitForApplication(browser.page, () => window.innerWidth === 1440, { description: 'wide split viewport' });
       await app.setLayout('both');
-      await browser.page.waitFor(() => {
+      await waitForApplication(browser.page, () => {
         const handle=document.getElementById('resizer');
         return Boolean(handle && !handle.classList.contains('is-hidden') && handle.getBoundingClientRect().width > 0);
       }, { description: 'visible split handle' });
-      const before=await browser.page.evaluate(`(()=>{
+      const before=await evaluateApplication(browser.page, `(()=>{
         const handle=document.getElementById('resizer'); const rect=handle.getBoundingClientRect();
-        const host=document.getElementById('compatibility-business-ports');
-        return {x:rect.left+rect.width/2,y:rect.top+rect.height/2,ratio:host.markdownEditorLayoutStatePort.editorRatio};
+        const host=applicationCapabilities;
+        return {x:rect.left+rect.width/2,y:rect.top+rect.height/2,ratio:host.markdownEditorLayoutStatePort.snapshot.split.ratio};
       })()`);
       await browser.page.drag({ x: before.x, y: before.y }, { x: before.x + 120, y: before.y }, { steps: 12 });
-      const dragged=await browser.page.evaluate(`(()=>{
-        const host=document.getElementById('compatibility-business-ports');
+      const dragged=await evaluateApplication(browser.page, `(()=>{
+        const host=applicationCapabilities;
         return {
-          ratio:host.markdownEditorLayoutStatePort.editorRatio,
+          ratio:host.markdownEditorLayoutStatePort.snapshot.split.ratio,
           stored:Number(localStorage.getItem('md_editor_ratio')),
           aria:document.getElementById('resizer')?.getAttribute('aria-valuenow')||'',
-          active:host.markdownEditorLayoutStatePort.isResizing
+          active:host.markdownEditorLayoutStatePort.snapshot.resize.splitActive
         };
       })()`);
       assert.ok(dragged.ratio > before.ratio);
@@ -1568,8 +1533,8 @@ async function runAppSuite() {
       assert.ok(Number(dragged.aria) >= 15 && Number(dragged.aria) <= 85);
 
       await browser.page.click('#preview-collapse-btn');
-      await browser.page.waitFor(() => document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed'), { description: 'preview collapsed' });
-      let collapsed=await browser.page.evaluate(`(()=>({
+      await waitForApplication(browser.page, () => document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed'), { description: 'preview collapsed' });
+      let collapsed=await evaluateApplication(browser.page, `(()=>({
         editor:document.querySelector('.f-editor-pane')?.classList.contains('is-collapsed'),
         preview:document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed'),
         resizer:document.getElementById('resizer')?.classList.contains('is-hidden')
@@ -1577,36 +1542,36 @@ async function runAppSuite() {
       assert.deepEqual(collapsed,{editor:false,preview:true,resizer:true});
       await browser.page.waitForElementStable('#preview-collapse-btn', { description: 'preview collapse button after collapse' });
       await browser.page.click('#preview-collapse-btn');
-      await browser.page.waitFor(() => !document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed'), { description: 'preview expanded' });
+      await waitForApplication(browser.page, () => !document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed'), { description: 'preview expanded' });
 
-      await browser.page.evaluate(`(()=>{
+      await evaluateApplication(browser.page, `(()=>{
         const main=document.querySelector('.l-split-pane'); main.style.flex='0 0 710px'; main.style.width='710px';
       })()`);
-      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactSplitActive === true, { description: 'compact split enter' });
-      await browser.page.evaluate(`(()=>{const main=document.querySelector('.l-split-pane');main.style.flex='0 0 740px';main.style.width='740px';})()`);
+      await waitForApplication(browser.page, () => applicationCapabilities?.markdownEditorLayoutStatePort?.snapshot.split.compactActive === true, { description: 'compact split enter' });
+      await evaluateApplication(browser.page, `(()=>{const main=document.querySelector('.l-split-pane');main.style.flex='0 0 740px';main.style.width='740px';})()`);
       await new Promise(resolve => setTimeout(resolve, 80));
-      assert.equal(await browser.page.evaluate("document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.compactSplitActive"), true);
-      await browser.page.evaluate(`(()=>{const main=document.querySelector('.l-split-pane');main.style.flex='0 0 780px';main.style.width='780px';})()`);
-      await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactSplitActive === false, { description: 'compact split hysteresis exit' });
-      collapsed=await browser.page.evaluate(`(()=>({
+      assert.equal(await evaluateApplication(browser.page, "applicationCapabilities.markdownEditorLayoutStatePort.snapshot.split.compactActive"), true);
+      await evaluateApplication(browser.page, `(()=>{const main=document.querySelector('.l-split-pane');main.style.flex='0 0 780px';main.style.width='780px';})()`);
+      await waitForApplication(browser.page, () => applicationCapabilities?.markdownEditorLayoutStatePort?.snapshot.split.compactActive === false, { description: 'compact split hysteresis exit' });
+      collapsed=await evaluateApplication(browser.page, `(()=>({
         editor:document.querySelector('.f-editor-pane')?.classList.contains('is-collapsed'),
         preview:document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed')
       }))()`);
       assert.deepEqual(collapsed,{editor:false,preview:false});
-      await browser.page.evaluate(`(()=>{const main=document.querySelector('.l-split-pane');main.style.removeProperty('flex');main.style.removeProperty('width');})()`);
+      await evaluateApplication(browser.page, `(()=>{const main=document.querySelector('.l-split-pane');main.style.removeProperty('flex');main.style.removeProperty('width');})()`);
     });
 
     await test('application sidebar resize captures pointer, projects width and persists the final width', async () => {
       await browser.page.setViewport({ width: 1440, height: 1000 });
-      await browser.page.waitFor(() => window.innerWidth === 1440 && window.innerHeight === 1000, {
+      await waitForApplication(browser.page, () => window.innerWidth === 1440 && window.innerHeight === 1000, {
         description: 'wide viewport for sidebar resize'
       });
       await showSidebar();
-      await browser.page.waitFor(() => {
+      await waitForApplication(browser.page, () => {
         const handle=document.getElementById('sidebar-resizer');
         return Boolean(handle && !handle.classList.contains('is-hidden') && handle.getBoundingClientRect().height > 0);
       }, { description: 'visible sidebar resize handle' });
-      const before = await browser.page.evaluate(`(()=>{
+      const before = await evaluateApplication(browser.page, `(()=>{
         const handle=document.getElementById('sidebar-resizer');
         const rect=handle.getBoundingClientRect();
         const width=Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width'));
@@ -1624,8 +1589,8 @@ async function runAppSuite() {
         { x: before.x + delta, y: before.y },
         { steps: 12 }
       );
-      await browser.page.evaluate('window.__atomic62SidebarBaselineWidth=' + JSON.stringify(before.width));
-      await browser.page.waitFor(() => {
+      await evaluateApplication(browser.page, 'window.__atomic62SidebarBaselineWidth=' + JSON.stringify(before.width));
+      await waitForApplication(browser.page, () => {
         const handle=document.getElementById('sidebar-resizer');
         const css=Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width'));
         const stored=Number.parseFloat(localStorage.getItem('md_editor_sidebar_width'));
@@ -1635,7 +1600,7 @@ async function runAppSuite() {
           && !document.body.classList.contains('sidebar-resizing')
           && !document.body.classList.contains('is-sidebar-resizing');
       }, { description: 'persisted sidebar width after pointer drag' });
-      const after = await browser.page.evaluate(`(()=>{
+      const after = await evaluateApplication(browser.page, `(()=>{
         const handle=document.getElementById('sidebar-resizer');
         return {
           width:Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width')),
@@ -1650,8 +1615,8 @@ async function runAppSuite() {
       assert.equal(after.dragging, false);
       assert.equal(after.bodyResizing, false);
       assert.ok(after.width >= 180 && after.width <= 520, JSON.stringify(after));
-      await browser.page.evaluate('delete window.__atomic62SidebarBaselineWidth');
-      await browser.page.evaluate(`(()=>{
+      await evaluateApplication(browser.page, 'delete window.__atomic62SidebarBaselineWidth');
+      await evaluateApplication(browser.page, `(()=>{
         const value=${JSON.stringify(before.stored)};
         if(value===null) localStorage.removeItem('md_editor_sidebar_width');
         else localStorage.setItem('md_editor_sidebar_width', value);
@@ -1674,7 +1639,7 @@ async function runAppSuite() {
     await test('R15-11 application runner uses public queries and trusted pointer and keyboard input', async () => {
       const original = 'runner alpha', addition = ' 中文🧪';
       await app.loadMarkdown(original, { layout: 'edit', selection: original.length });
-      await browser.page.evaluate(`(() => {
+      await evaluateApplication(browser.page, `(() => {
         const events = [], capture = event => { if (event.target.closest?.('.cm-content')) events.push({ type: event.type, trusted: event.isTrusted }); };
         const types = ['pointerdown', 'keydown', 'beforeinput', 'input'];
         for (const type of types) document.addEventListener(type, capture, true);
@@ -1691,18 +1656,18 @@ async function runAppSuite() {
         const snapshot = await app.snapshot(), state = await app.getState();
         assert.equal(snapshot.documentLength, (original + addition).length);
         assert.equal(state.activeOperations, 0); assert.equal(state.pendingWaits, 0);
-        const events = await browser.page.evaluate('window.__runnerInputProbe.events');
+        const events = await evaluateApplication(browser.page, 'window.__runnerInputProbe.events');
         for (const type of ['pointerdown', 'keydown', 'beforeinput', 'input']) assert.ok(events.some(event => event.type === type && event.trusted), type);
         assert.ok(events.every(event => event.trusted));
         await writeFile(join(artifactRoot, 'r15-11-runner.json'), JSON.stringify({ snapshot, state, events }, null, 2));
       } finally {
-        await browser.page.evaluate('window.__runnerInputProbe.destroy();delete window.__runnerInputProbe');
+        await evaluateApplication(browser.page, 'window.__runnerInputProbe.destroy();delete window.__runnerInputProbe');
       }
     });
 
     await test('application public E2E queries return readonly semantic data without feature objects', async () => {
       await loadAppFixture(browser.page);
-      const result = await browser.page.evaluate(`(async () => {
+      const result = await evaluateApplication(browser.page, `(async () => {
         const api=window.__markdownEditorE2E;
         const before=api.snapshot();
         const deeplyReadonly=value=>value===null||typeof value!=='object'
@@ -1714,10 +1679,10 @@ async function runAppSuite() {
         const noDetails=states.every(value=>!('details' in value)&&!('model' in value)&&!('dom' in value));
         const blocked=states.length===0||Reflect.set(states[0],'mode','external-mutation')===false;
         const querySnapshot=api.snapshot();
-        const presentationRoot=document.getElementById('editor').virtualEditor;
+        const presentationRoot=editorApi;
         const sameLayoutCommands=[];
         const repeatedLayout=await api.setLayout(before.layout);
-        if(document.getElementById('editor').virtualEditor!==presentationRoot)sameLayoutCommands.push('editor-replaced');
+        if(editorApi!==presentationRoot)sameLayoutCommands.push('editor-replaced');
         const layout=await api.setLayout('preview');
         const reveal=await api.revealText('selection alpha',{preserveSelection:true});
         const idle=await api.waitForIdle();
@@ -1753,7 +1718,8 @@ async function runAppSuite() {
         requests: applicationHost?.requests || [], origin: applicationHost?.origin || externalUrl
       }, null, 2));
     } finally {
-      try { await browser.close(); } finally { await applicationHost?.close(); }
+      try { await releaseApplicationInspector(browser.page);
+    await browser.close(); } finally { await applicationHost?.close(); }
     }
   }
 }

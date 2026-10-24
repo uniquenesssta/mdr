@@ -19,15 +19,15 @@ test('Atomic 7.9 keeps one Preview Layout Stability owner for visibility, stable
 test('Atomic 7.9 composition root owns and destroys one scoped layout stability port with frozen Stage 7 thresholds', async () => {
   const [main, entry, port] = await Promise.all([
     source('src/main.js'), source('src/features/preview/index.js'),
-    source('src/features/preview/compatibility/classic-preview-layout-stability-port.js')
+    source('src/features/preview/pipeline/preview-layout-stability.js')
   ]);
-  assert.match(entry, /mountClassicPreviewLayoutStabilityPort/);
+  assert.doesNotMatch(entry, /mountClassicPreviewLayoutStabilityPort/);
   assert.match(main, /createPreviewLayoutStability\(\{/);
   assert.match(main, /thresholds:\s*PREVIEW_BEHAVIOR_THRESHOLDS\.scheduling\.layout/);
-  assert.match(main, /mountClassicPreviewLayoutStabilityPort\(compatibilityPlatformHost, previewLayoutStability\)/);
-  assert.match(main, /previewLayoutStabilityPort\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewLayoutStabilityPort\(compatibilityPlatformHost, previewLayoutStability\)/);
+  assert.doesNotMatch(main, /previewLayoutStabilityPort\.destroy\(\)/);
   assert.match(main, /previewLayoutStability\.destroy\(\)/);
-  assert.match(port, /markdownEditorPreviewLayoutStabilityPort/);
+  assert.doesNotMatch(port, /markdownEditorPreviewLayoutStabilityPort/);
 });
 
 test('Atomic 7.9 layout-stability authority moves into PreviewController while classic callers use the command facade', async () => {

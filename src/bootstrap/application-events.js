@@ -7,7 +7,7 @@ import { commitHybridDirectEditor } from '../features/hybrid-editor/index.js';
  * Lifecycle: Explicit start and idempotent destroy with cancellation of late results.
  */
 import { createApplicationLifetime } from './application-lifetime.js';
-export function createApplicationEvents({ document, window, editor, eventsEditorControllerPort, eventsEditorUiCommandPort, eventsPreviewCommandPort, eventsDocumentUiCommandPort, ensureCurrentDocumentForEditing, updateLargeDocumentMode, closeAppMenus, closeContextMenus, showToast, newDocument, toggleSidebar, renameCurrentDocument }) {
+export function createApplicationEvents({ document, window, editor, editorApi, eventsEditorControllerPort, eventsEditorUiCommandPort, eventsPreviewCommandPort, eventsDocumentUiCommandPort, ensureCurrentDocumentForEditing, updateLargeDocumentMode, closeAppMenus, closeContextMenus, showToast, newDocument, toggleSidebar, renameCurrentDocument }) {
   const lifetime = createApplicationLifetime();
   try {
     lifetime.own(eventsEditorControllerPort.subscribeTransactions(transaction => {
@@ -129,9 +129,9 @@ export function createApplicationEvents({ document, window, editor, eventsEditor
       if (key === 'tab' && isEditorShortcutTarget(e.target)) {
         e.preventDefault();
         e.stopPropagation();
-        const start = editor.selectionStart;
-        const end = editor.selectionEnd;
-        editor.setRangeText('    ', start, end, 'end');
+        const start = editorApi.getSelection().start;
+        const end = editorApi.getSelection().end;
+        editorApi.replaceRange('    ', start, end, 'end');
       }
     }
     lifetime.listen(document, 'keydown', handleAppKeydown, true);

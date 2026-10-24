@@ -6,7 +6,6 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   createSettingsStore,
-  mountClassicSettingsStorePort,
   SETTING_DEFAULTS
 } from '../../../src/features/settings/index.js';
 
@@ -23,50 +22,36 @@ async function readText(path) {
   return (await readFile(resolve(ROOT, path), 'utf8')).replace(/\r\n?/g, '\n');
 }
 
-test('Atomic 4.8 classic bridge exposes only Settings Store committed/draft operations', () => {
-  const host = {};
-  const store = createStore();
-  const mount = mountClassicSettingsStorePort(host, store);
-  assert.deepEqual(Object.keys(mount.api), [
-    'snapshot', 'draft', 'hasDraft', 'get', 'openDraft', 'updateDraft', 'applyDraft',
-    'cancelDraft', 'commit', 'set'
-  ]);
-  assert.equal(mount.api.snapshot.theme, 'light');
-  mount.api.openDraft();
-  mount.api.updateDraft({ theme: 'dark' });
-  assert.equal(mount.api.draft.theme, 'dark');
-  assert.equal(mount.api.hasDraft, true);
-  assert.equal('repository' in mount.api, false);
-  assert.equal('storage' in mount.api, false);
-  assert.equal(Object.prototype.propertyIsEnumerable.call(host, 'markdownEditorSettingsStorePort'), false);
+test('R16-08 direct Settings Store preserves committed and draft operations without a host facade', () => {
+  const api = createStore();
+  for (const name of ['get','openDraft','updateDraft','applyDraft','cancelDraft','commit','set']) assert.equal(typeof api[name], 'function');
+  assert.equal(api.snapshot.theme, 'light');
+  api.openDraft(); api.updateDraft({ theme: 'dark' });
+  assert.equal(api.draft.theme, 'dark'); assert.equal(api.hasDraft, true);
+  assert.equal(api.snapshot.theme, 'light');
+  api.applyDraft(); assert.equal(api.snapshot.theme, 'dark');
+  assert.equal('repository' in api, false); assert.equal('storage' in api, false); api.destroy();
 });
-
-test('Atomic 4.8 classic bridge rejects duplicate ownership and destroy is idempotent and terminal', () => {
-  const host = {};
-  const store = createStore();
-  const mount = mountClassicSettingsStorePort(host, store);
-  assert.throws(() => mountClassicSettingsStorePort(host, store), /already mounted/);
-  const api = mount.api;
-  mount.destroy();
-  mount.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorSettingsStorePort'), false);
+test('R16-08 Settings draft has one owner and Store disposal is terminal and idempotent', () => {
+  const api = createStore(), second = createStore(), draft = api.openDraft();
+  assert.equal(api.openDraft(), draft);
+  api.updateDraft({ theme: 'dark' }); assert.equal(second.hasDraft, false);
+  api.destroy(); api.destroy();
   assert.throws(() => api.snapshot, /destroyed/);
   assert.throws(() => api.openDraft(), /destroyed/);
-  assert.throws(() => api.commit({ theme: 'dark' }), /destroyed/);
+  assert.throws(() => api.commit({ theme: 'dark' }), /destroyed/); second.destroy();
 });
 
-test('Atomic 4.8 production bootstrap keeps Repository internal and mounts Store before classic application import', async () => {
+test('R16-08 bootstrap retains the internal Repository and injects the committed Store before starting the application', async () => {
   const source = await readText('src/bootstrap/module-entry.js');
-  assert.match(source, /createSettingsRepository, createSettingsStore, mountClassicSettingsStorePort/);
   assert.match(source, /const settingsRepository = createSettingsRepository\(\{ storage \}\);/);
-  assert.match(source, /settingsStore = createSettingsStore\(\{/);
+  assert.match(source, /const settingsStore = own\(createSettingsStore\(\{/);
   assert.match(source, /initialSnapshot: settingsRepository\.load\(\)/);
   assert.match(source, /persist: changes => settingsRepository\.save\(changes\)/);
-  assert.match(source, /settingsPort = mountClassicSettingsStorePort\(portsHost, settingsStore\)/);
-  assert.ok(source.indexOf('mountClassicSettingsStorePort') < source.indexOf('await importApplication();'));
-  assert.match(source, /settingsPort\?\.destroy\(\)/);
-  assert.match(source, /settingsStore\?\.destroy\(\)/);
-  assert.doesNotMatch(source, /mountClassicSettingsRepositoryPort/);
+  assert.ok(source.indexOf('own(createSettingsStore(') < source.indexOf('await importApplication()'));
+  assert.match(source, /await startApplication\(\{ platform, documentSessionStore, settingsStore,/);
+  assert.match(source, /lifetime\.destroy\(\)/);
+  assert.doesNotMatch(source, /mountClassicSettings|compatibility-business-ports/);
 });
 
 test('Atomic 4.8 Store remains the Settings state authority after Atomic 4.10 migrates dialog ownership', async () => {
@@ -91,11 +76,8 @@ test('Atomic 4.8 Store remains the Settings state authority after Atomic 4.10 mi
 
 test('Atomic 4.8 retires the Repository compatibility bridge while Atomic 4.10 adds UI/application beside the unchanged Store boundary', async () => {
   const rootEntries = (await readdir(resolve(ROOT, 'src/features/settings'))).sort();
-  assert.deepEqual(rootEntries, ['application', 'compatibility', 'create-settings-feature.js', 'domain', 'index.js', 'infrastructure', 'sections', 'state', 'ui']);
-  assert.deepEqual(
-    (await readdir(resolve(ROOT, 'src/features/settings/compatibility'))).sort(),
-    ['classic-settings-store-port.js']
-  );
+  assert.deepEqual(rootEntries.filter(name => name !== 'compatibility'), ['application', 'create-settings-feature.js', 'domain', 'index.js', 'infrastructure', 'sections', 'state', 'ui']);
+  await assert.rejects(import('../../../src/features/settings/compatibility/classic-settings-store-port.js'), { code: 'ERR_MODULE_NOT_FOUND' });
   assert.deepEqual(
     (await readdir(resolve(ROOT, 'src/features/settings/state'))).sort(),
     ['settings-store.js']

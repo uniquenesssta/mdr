@@ -118,7 +118,7 @@ test('Atomic 4.12 production integration removes legacy locale ownership from pu
   assert.match(moduleEntry, /createI18nService\(localeRegistry, \{ initialLocale: settingsStore\.get\('language'\) \}\)/);
   assert.match(moduleEntry, /createSettingsLocaleController\(\{[\s\S]*i18n: i18nService,[\s\S]*eventTarget: documentRef,[\s\S]*eventType: SETTINGS_CHANGED_EVENT[\s\S]*\}\)/);
   assert.ok(moduleEntry.indexOf('createSettingsStore({') < moduleEntry.indexOf('createI18nService(localeRegistry'));
-  assert.ok(moduleEntry.indexOf('settingsLocaleController?.destroy()') < moduleEntry.indexOf('i18nService?.destroy()'));
+  assert.ok(moduleEntry.indexOf('own(createI18nService(') < moduleEntry.indexOf('own(createSettingsLocaleController('));
 
   assert.match(core, /return coreI18nPort\.t\(key, \.\.\.args\)/);
   assert.match(core, /coreI18nPort\.subscribe\(\(\) => refreshClassicLocalizedState\(\)\)/);

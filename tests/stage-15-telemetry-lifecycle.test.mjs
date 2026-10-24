@@ -22,7 +22,7 @@ function fixture(t,extra={}) {
 }
 test('R15-08 public Lifecycle owns resources without global DOM or native storage',()=>{
  const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8'),source=read('src/features/telemetry/telemetry-lifecycle.js');assert.doesNotMatch(source,/\b(?:window|document|globalThis)\.|setInterval\(|setTimeout\(|node:fs|@tauri|writePerformance/);assert.match(read('src/features/telemetry/index.js'),/export \{ createTelemetryLifecycle \}/);
- const runtime=read('src/features/telemetry/browser-telemetry.js');assert.match(runtime,/telemetryLifecycle = createTelemetryLifecycle/);assert.doesNotMatch(runtime,/setInterval\(|document.addEventListener\(|window.addEventListener\(|new PerformanceObserver\(/);assert.match(read('src/main.js'),/finally \{ if \(import.meta.env.DEV && !event.persisted\) destroyPerformanceTelemetry\(\); \}/);
+ const runtime=read('src/features/telemetry/browser-telemetry.js');assert.match(runtime,/telemetryLifecycle = createTelemetryLifecycle/);assert.doesNotMatch(runtime,/setInterval\(|document.addEventListener\(|window.addEventListener\(|new PerformanceObserver\(/);assert.match(read('src/main.js'),/if \(import.meta.env.DEV\) destroyPerformanceTelemetry\(\)/);
 });
 for(const name of ['getWindow','getDocument','isEnabled','install','startOwners','stopOwners','destroyOwners','drain','flush','schedule','cancel','requestFrame','cancelFrame','onError'])test('R15-08 rejects invalid dependency '+name,t=>{assert.throws(()=>fixture(t,{[name]:null}),TypeError);});
 for(const [name,value]of [['aggregateMs',999],['aggregateMs',300001],['aggregateMs',1.5],['flushMs',0],['flushMs',300001]])test('R15-08 rejects unbounded period '+name+' '+value,t=>{assert.throws(()=>fixture(t,{[name]:value}),TypeError);});

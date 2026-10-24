@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from './support/current-view-markup.mjs';
 import { readFile } from './support/application-surface-source.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -146,7 +147,7 @@ test('web routing has one feature owner and the production inventory includes it
   assert.doesNotMatch(source, /await fetch\(|allorigins|codetabs|fetchWithNativeBackend|status\.innerHTML/);
   assert.doesNotMatch(source, /openUrlModal|markdownEditorWeb(?:Clipper|Fetch)Port|webClipperDocumentUiCommandPort/);
   const main = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
-  const menu = await readFile(new URL('../src/features/menu/compatibility/classic-menu-command-adapter.js', import.meta.url), 'utf8');
+  const menu = await readFile(new URL('../src/features/menu/menu-actions.js', import.meta.url), 'utf8');
   assert.match(main, /openWebClipper: \(\) => webClipperView\.open\(\)/);
   assert.match(menu, /\[C\.IMPORT_WEB\]: \(\) => invokeDocument\('openWebClipper'\)/);
   const controller = await readFile(new URL('../src/features/import/web-clipper/web-clipper-controller.js', import.meta.url), 'utf8');
@@ -160,10 +161,9 @@ test('retired import ports, global opener and inline clipper markup cannot re-en
   }
   const entry = await readFile(new URL('../src/features/import/index.js', import.meta.url), 'utf8');
   assert.doesNotMatch(entry, /mountClassic|compatibility\//);
-  const html = await readFile(new URL('../public/compatibility/business-content.html', import.meta.url), 'utf8');
+  const html = await readCurrentViewMarkup();
   assert.doesNotMatch(html, /id="(?:url-modal|url-input|manual-html)"|openUrlModal/);
-  const registry = await readFile(new URL('../src/ui/compatibility/mount-modal-shells.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(registry, /url-modal/);
+  await assert.rejects(access(new URL('../src/ui/compatibility/mount-modal-shells.js', import.meta.url)), { code: 'ENOENT' });
   for (const name of ['web-clipper', 'events', 'editor-tools']) {
     const source = await readFile(new URL('../public/app/' + name + '.js', import.meta.url), 'utf8');
     assert.doesNotMatch(source, /function\s+(?:openUrlModal|triggerImportFile|importFile|fetchUrl|insertUrlMarkdown)\s*\(|mountClassic(?:Web|Html)/);

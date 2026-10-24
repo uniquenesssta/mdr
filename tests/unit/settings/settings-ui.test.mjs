@@ -91,7 +91,7 @@ function createControllerFixture({ persist = () => {}, platform = null } = {}) {
     store,
     view,
     applyCoordinator,
-    platform: platform || { supports: () => false, call: async () => null },
+    platform: platform || { capabilities: { desktop: { dialogs: false } }, dialogs: { openDirectory: async () => null } },
     openTrigger,
     shortcutTarget
   });
@@ -231,8 +231,8 @@ test('Atomic 4.10 persistence failure keeps the committed snapshot unchanged and
 test('Atomic 4.10 directory selection updates draft only, ignores cancellation/stale completion and reports unsupported platforms', async () => {
   let resolveDirectory;
   const platform = {
-    supports: () => true,
-    call: () => new Promise(resolve => { resolveDirectory = resolve; })
+    capabilities: { desktop: { dialogs: true } },
+    dialogs: { openDirectory: () => new Promise(resolve => { resolveDirectory = resolve; }) }
   };
   const { controller, store, calls } = createControllerFixture({ platform });
 
@@ -289,7 +289,7 @@ test('Atomic 4.10 controller construction rolls back an already-installed open t
   };
   assert.throws(() => createSettingsController({
     store, view, applyCoordinator: coordinator,
-    platform: { supports: () => false, call: async () => null },
+    platform: { capabilities: { desktop: { dialogs: false } }, dialogs: { openDirectory: async () => null } },
     openTrigger, shortcutTarget
   }), /shortcut listener failed/);
   assert.equal(openTrigger.listenerCount(), 0);
@@ -304,8 +304,8 @@ test('Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Servic
     readFile('src/features/settings/index.js', 'utf8'),
     readFile('public/app/core.js', 'utf8'),
     readFile('public/app/events.js', 'utf8'),
-    readFile('public/compatibility/business-content.html', 'utf8'),
-    readFile('src/ui/compatibility/mount-modal-shells.js', 'utf8'),
+    readFile('src/features/menu/ui/menu-content-view.js', 'utf8'),
+    readFile('src/bootstrap/workspace-content.js', 'utf8'),
     readFile('src/features/settings/ui/settings-dialog-view.js', 'utf8'),
     readFile('src/features/settings/ui/settings-field-view.js', 'utf8'),
     readFile('src/features/settings/ui/settings-navigation-view.js', 'utf8'),
@@ -315,9 +315,9 @@ test('Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Servic
   ]);
 
   assert.match(entry, /createSettingsFeature/);
-  assert.ok(entry.indexOf('await importApplication();') < entry.indexOf('createSettingsFeature({'));
-  assert.match(entry, /markdownEditorPlatformPort/);
-  assert.match(entry, /settingsController\?\.destroy\(\)/);
+  assert.ok(entry.indexOf('own(createSettingsFeature({') < entry.indexOf('await importApplication()'));
+  assert.match(entry, /documentRef, store: settingsStore, platform/);
+  assert.match(entry, /const settingsController = own\(createSettingsFeature/);
   assert.match(settingsIndex, /create-settings-feature\.js/);
   assert.match(settingsIndex, /settings-controller\.js/);
   assert.match(settingsIndex, /settings-apply-coordinator\.js/);

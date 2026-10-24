@@ -4,7 +4,6 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createI18nService } from '../../../src/i18n/i18n-service.js';
-import { mountClassicI18nPort } from '../../../src/i18n/compatibility/classic-i18n-port.js';
 import { localeRegistry } from '../../../src/i18n/locale-registry.js';
 
 function createLooseRegistry() {
@@ -98,11 +97,10 @@ test('Atomic 4.3 destroy is idempotent and makes stateful service operations ter
   assert.throws(() => service.subscribe(() => {}), /I18n service is destroyed/);
 });
 
-test('Atomic 4.3 classic I18n port exposes service semantics without raw locale dictionaries', () => {
+test('R16-08 direct I18n capability preserves service semantics without raw locale dictionaries', () => {
   const service = createI18nService(localeRegistry);
   const target = { removeAttribute() {} };
-  const mount = mountClassicI18nPort(target, service);
-  const port = target.markdownEditorI18nPort;
+  const port = service;
   const events = [];
 
   assert.equal(port.locale, 'zh-CN');
@@ -113,30 +111,30 @@ test('Atomic 4.3 classic I18n port exposes service semantics without raw locale 
   assert.equal(port.setLocale('en'), 'en');
   assert.deepEqual(events, ['en']);
 
-  mount.destroy();
-  mount.destroy();
+  service.destroy();
+  service.destroy();
   dispose();
   assert.equal(Object.hasOwn(target, 'markdownEditorI18nPort'), false);
-  assert.throws(() => port.t('saved'), /Classic I18n port is destroyed/);
+  assert.throws(() => port.t('saved'), /I18n service is destroyed/);
   service.destroy();
 });
 
 test('Atomic 4.3 production integration keeps service DOM/storage-free and removes classic translation ownership', async () => {
-  const [serviceSource, portSource, moduleEntry, core, bootstrap] = await Promise.all([
+  const [serviceSource, publicSource, moduleEntry, core, bootstrap] = await Promise.all([
     readFile('src/i18n/i18n-service.js', 'utf8'),
-    readFile('src/i18n/compatibility/classic-i18n-port.js', 'utf8'),
+    readFile('src/i18n/index.js', 'utf8'),
     readFile('src/bootstrap/module-entry.js', 'utf8'),
     readFile('public/app/core.js', 'utf8'),
     readFile('public/app/bootstrap.js', 'utf8')
   ]);
 
   assert.doesNotMatch(serviceSource, /\bdocument\b|\bwindow\b|localStorage|querySelector|querySelectorAll/);
-  assert.doesNotMatch(portSource, /getLocale|hasLocale|markdownEditorLocalePort/);
+  assert.doesNotMatch(publicSource, /getLocale|hasLocale|markdownEditorLocalePort/);
   assert.match(moduleEntry, /createI18nService\(localeRegistry, \{ initialLocale: settingsStore\.get\('language'\) \}\)/);
-  assert.match(moduleEntry, /mountClassicI18nPort\(portsHost, i18nService\)/);
-  assert.match(moduleEntry, /i18nPort\?\.destroy\(\)/);
-  assert.match(moduleEntry, /i18nService\?\.destroy\(\)/);
-  assert.ok(moduleEntry.indexOf('i18nPort?.destroy()') < moduleEntry.indexOf('i18nService?.destroy()'));
+  assert.match(moduleEntry, /const i18nService = own\(createI18nService/);
+  assert.match(moduleEntry, /i18nService, helpController, menuController/);
+  assert.match(moduleEntry, /lifetime\.destroy\(\)/);
+  assert.doesNotMatch(moduleEntry, /mountClassicI18nPort|compatibility-business-ports/);
 
   assert.match(core, /coreI18nPort/);
   assert.match(core, /return coreI18nPort\.t\(key, \.\.\.args\)/);

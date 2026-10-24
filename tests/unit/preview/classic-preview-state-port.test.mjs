@@ -1,44 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createPreviewState } from '../../../src/features/preview/index.js';
 
-import { createPreviewState, mountClassicPreviewStatePort } from '../../../src/features/preview/index.js';
-
-function createHost() {
-  return {
-    removeAttribute() {}
-  };
-}
-
-test('Atomic 7.2 classic PreviewState port exposes the canonical state without copying it', () => {
-  const host = createHost();
-  const state = createPreviewState();
-  const mount = mountClassicPreviewStatePort(host, state);
-  const api = host.markdownEditorPreviewStatePort;
-
+test('R16-08 explicit PreviewState remains the sole snapshot and version owner', () => {
+  const state = createPreviewState(), api = state;
   assert.equal(api.snapshot, state.snapshot);
   const version = api.beginRender();
   assert.equal(version, 1);
-  assert.equal(api.snapshot, state.snapshot);
   assert.equal(api.setFocusSection(version, { headingId: 'a', startLine: 1, endLine: 10 }), true);
   assert.equal(state.snapshot.focusSection.headingId, 'a');
-  assert.equal(api.commitStable(version, {
-    mode: 'full',
-    result: { scopeKey: 'full', renderMode: 'whole-document', sourceLength: 50, blockCount: 3, mountedBlocks: 3, documentVersion: 1 }
-  }), true);
+  assert.equal(api.commitStable(version, { mode: 'full', result: { scopeKey: 'full', renderMode: 'whole-document', sourceLength: 50, blockCount: 3, mountedBlocks: 3, documentVersion: 1 } }), true);
   assert.equal(api.snapshot.lastStableResult, state.snapshot.lastStableResult);
-
-  mount.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorPreviewStatePort'), false);
-  assert.throws(() => api.snapshot, /Classic Preview State port is destroyed/);
+  const staleVersion = api.beginRender();
+  assert.equal(api.commitStable(version, { mode: 'full', result: {} }), false);
+  assert.equal(api.snapshot.version, staleVersion);
   state.destroy();
+  assert.throws(() => api.snapshot, /destroyed/);
 });
 
-test('Atomic 7.2 classic PreviewState port duplicate mount is rejected and destroy is idempotent', () => {
-  const host = createHost();
-  const state = createPreviewState();
-  const mount = mountClassicPreviewStatePort(host, state);
-  assert.throws(() => mountClassicPreviewStatePort(host, state), /already mounted/);
-  mount.destroy();
-  mount.destroy();
-  state.destroy();
+test('R16-08 independent PreviewState owners remain isolated and destruction is terminal and idempotent', () => {
+  const first = createPreviewState(), second = createPreviewState();
+  first.beginRender();
+  assert.equal(second.snapshot.version, 0);
+  first.destroy(); first.destroy();
+  assert.throws(() => first.subscribe(() => {}), /destroyed/);
+  assert.equal(second.beginRender(), 1);
+  second.destroy();
 });

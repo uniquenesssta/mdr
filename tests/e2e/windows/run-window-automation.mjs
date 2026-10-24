@@ -23,8 +23,8 @@ function pause(milliseconds) {
 
 async function waitForApplication(browser) {
   await browser.waitUntil(
-    async () => browser.execute(() => Boolean(
-      document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort?.supports('desktop.window')
+    async () => browser.inspect(() => Boolean(
+      applicationCapabilities?.markdownEditorPlatformPort?.capabilities.desktop.window
       && document.getElementById('window-controls')
       && document.querySelector('.l-menu-bar')
     )),
@@ -62,7 +62,7 @@ function movedEnough(before, after, threshold = 20) {
 }
 
 async function resolveTitleBarDragTarget(browser) {
-  const target = await browser.execute(excludedSelector => {
+  const target = await browser.inspect(excludedSelector => {
     const bar = document.querySelector('.l-menu-bar');
     if (!bar) throw new Error('Menu bar was not found.');
 
@@ -138,7 +138,7 @@ async function resolveTitleBarDragTarget(browser) {
     );
   }, TITLE_BAR_EXCLUDED_SELECTOR);
 
-  const validation = await browser.execute((point, excludedSelector) => {
+  const validation = await browser.inspect((point, excludedSelector) => {
     const bar = document.querySelector('.l-menu-bar');
     const candidate = document.elementFromPoint(point.x, point.y);
     return {
@@ -186,11 +186,11 @@ try {
       const maximizeButton = await browser.$('#window-maximize-btn');
       await maximizeButton.click();
       await browser.waitUntil(
-        () => browser.execute(() => document.getElementById('compatibility-business-ports').markdownEditorPlatformPort.call('window', 'isMaximized')),
+        () => browser.inspect(() => applicationCapabilities.markdownEditorPlatformPort.window.isMaximized()),
         { timeout: 10_000, interval: 100, timeoutMsg: 'Window did not maximize.' }
       );
       const maximized = await waitForWindowSnapshot(snapshot => snapshot.showCmd === 3);
-      const maximizedChrome = await browser.execute(() => ({
+      const maximizedChrome = await browser.inspect(() => ({
         dataset: document.getElementById('window-maximize-btn')?.dataset.maximized,
         classApplied: document.documentElement.classList.contains('window-maximized')
       }));
@@ -198,20 +198,20 @@ try {
 
       await maximizeButton.click();
       await browser.waitUntil(
-        async () => !(await browser.execute(() => document.getElementById('compatibility-business-ports').markdownEditorPlatformPort.call('window', 'isMaximized'))),
+        async () => !(await browser.inspect(() => applicationCapabilities.markdownEditorPlatformPort.window.isMaximized())),
         { timeout: 10_000, interval: 100, timeoutMsg: 'Window did not restore.' }
       );
       const restored = await waitForWindowSnapshot(snapshot => snapshot.showCmd === 1);
 
-      await browser.execute(async () => {
+      await browser.inspect(async () => {
         const state = window.__windowsNativeAutomation = {
           resizeEvents: 0,
           disposedResizeEvents: null,
           resizeDisposer: null,
           menuBarMouseDownEvents: 0
         };
-        const port = document.getElementById('compatibility-business-ports').markdownEditorPlatformPort;
-        state.resizeDisposer = await port.call('window', 'subscribeResize', () => {
+        const port = applicationCapabilities.markdownEditorPlatformPort;
+        state.resizeDisposer = await port.window.subscribeResize( () => {
           state.resizeEvents += 1;
         });
       });
@@ -223,14 +223,14 @@ try {
       };
       await browser.setWindowSize(firstSize.width, firstSize.height);
       await browser.waitUntil(
-        async () => (await browser.execute(() => window.__windowsNativeAutomation.resizeEvents)) > 0,
+        async () => (await browser.inspect(() => window.__windowsNativeAutomation.resizeEvents)) > 0,
         { timeout: 10_000, interval: 100, timeoutMsg: 'Native resize subscription did not fire.' }
       );
 
-      const subscribedResizeEvents = await browser.execute(
+      const subscribedResizeEvents = await browser.inspect(
         () => window.__windowsNativeAutomation.resizeEvents
       );
-      await browser.execute(async () => {
+      await browser.inspect(async () => {
         const state = window.__windowsNativeAutomation;
         await state.resizeDisposer();
         await state.resizeDisposer();
@@ -239,7 +239,7 @@ try {
 
       await browser.setWindowSize(firstSize.width + 60, firstSize.height + 40);
       await pause(800);
-      const resizeAfterDispose = await browser.execute(() => ({
+      const resizeAfterDispose = await browser.inspect(() => ({
         count: window.__windowsNativeAutomation.resizeEvents,
         disposedAt: window.__windowsNativeAutomation.disposedResizeEvents
       }));
@@ -251,13 +251,13 @@ try {
       restoreWindow();
       const afterMinimizeRestore = await waitForWindowSnapshot(snapshot => snapshot.showCmd === 1);
       assert.equal(
-        await browser.execute(() => Boolean(document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort?.supports('desktop.window'))),
+        await browser.inspect(() => Boolean(applicationCapabilities?.markdownEditorPlatformPort?.capabilities.desktop.window)),
         true
       );
 
       const dragTarget = await resolveTitleBarDragTarget(browser);
 
-      await browser.execute(() => {
+      await browser.inspect(() => {
         const state = window.__windowsNativeAutomation;
         const bar = document.querySelector('.l-menu-bar');
         if (!bar) throw new Error('Menu bar was not found while installing drag instrumentation.');
@@ -276,14 +276,14 @@ try {
         viewportHeight: dragTarget.viewportHeight
       });
       await browser.waitUntil(
-        async () => (await browser.execute(() => window.__windowsNativeAutomation.menuBarMouseDownEvents)) > 0,
+        async () => (await browser.inspect(() => window.__windowsNativeAutomation.menuBarMouseDownEvents)) > 0,
         {
           timeout: 5_000,
           interval: 100,
           timeoutMsg: 'Native title-bar input did not dispatch mousedown inside .menu-bar.'
         }
       );
-      const dragInput = await browser.execute(() => ({
+      const dragInput = await browser.inspect(() => ({
         menuBarMouseDownEvents: window.__windowsNativeAutomation.menuBarMouseDownEvents
       }));
       assert.equal(dragInput.menuBarMouseDownEvents, 1);
@@ -327,8 +327,8 @@ try {
     withSession('force-close', 4446, async browser => {
       const beforeClose = getWindowSnapshot();
       try {
-        await browser.execute(async () => {
-          await document.getElementById('compatibility-business-ports').markdownEditorPlatformPort.call('window', 'forceClose');
+        await browser.inspect(async () => {
+          await applicationCapabilities.markdownEditorPlatformPort.window.forceClose();
         });
       } catch (_) {
         // destroy() intentionally removes the WebView before the command can respond.

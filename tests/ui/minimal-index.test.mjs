@@ -42,47 +42,25 @@ test('Atomic Task 2.2 reduces index.html to the exact minimal document shell', a
   assert.doesNotMatch(source, /\/i18n\.js|\/src\/main\.js|\son[a-z]+=|<svg|modal|menu-bar|data-theme/i);
 });
 
-test('compatibility asset owns only the remaining unmigrated business content while App Shell owns structure', async () => {
-  const [markup, frozenInventory] = await Promise.all([
-    readText('public/compatibility/business-content.html'),
-    readJson('tests/ui/fixtures/dom-asset-inventory.json')
-  ]);
-  const currentInlineEventCount = collectInlineEvents('public/compatibility/business-content.html', markup)
-    .reduce((sum, record) => sum + record.count, 0);
-
-  assert.equal(frozenInventory.summary.inlineEventCount, 184);
-  assert.equal(currentInlineEventCount, 0, 'R16-04 forbids inline events before startup controllers run');
-  assert.equal(buildHtmlInventory(markup).summary.inlineEventCount, 0);
-  assert.doesNotMatch(markup, /<script\b/i);
-  assert.doesNotMatch(markup, /<html\b|<head\b|<body\b/i);
-  assert.deepEqual([...markup.matchAll(/<template\s+data-compat-slot=\"([^\"]+)\">/g)].map(match => match[1]), ['menu', 'toolbar', 'sidebar', 'editor', 'preview', 'status', 'overlay', 'ports']);
-  assert.doesNotMatch(markup, /<div class=\"app\">|<nav class=\"menu-bar\"|<div class=\"editor-toolbar\"|<div class=\"workspace\"|<aside class=\"sidebar\"|<div class=\"statusbar\"/);
-  for (const required of ['id="editor"', 'id="preview"']) {
-    assert.match(markup, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+test('R16-08 business content belongs to safe feature Views while the frozen shell stays minimal', async () => {
+  const paths = ['menu/ui/menu-content-view.js','editor/ui/editor-toolbar-view.js','editor/ui/editor-content-view.js',
+    'sidebar/ui/sidebar-content-view.js','preview/ui/preview-content-view.js','persistence/ui/status-content-view.js',
+    'documents/ui/document-content-view.js','import/ui/import-content-view.js'];
+  const sources = await Promise.all(paths.map(path => readText('src/features/' + path)));
+  for (const source of sources) {
+    assert.match(source, /mountStaticContent/);
+    assert.doesNotMatch(source, /innerHTML|insertAdjacentHTML|new Function|eval\(|<script\b/);
+    assert.doesNotMatch(source, /["']on(?:click|change|input)["']\s*:/);
   }
-  assert.match(markup, /\bdata-settings-open\b/);
-  assert.doesNotMatch(markup, /id="settings-modal"/);
-  assert.doesNotMatch(markup, /<symbol\b|class="icon-sprite"|href="#icon-/i);
-  assert.match(markup, /href="\/assets\/icons\.svg#icon-/i);
+  assert.match(sources.join('\n'), /\/assets\/icons\.svg#icon-/);
+  const frozen = await readJson('tests/ui/fixtures/dom-asset-inventory.json');
+  assert.equal(frozen.summary.inlineEventCount, 184);
 });
 
-test('module entry creates the App Shell before mounting temporary compatibility content', async () => {
-  const [entrySource, compatibilityModule] = await Promise.all([
-    readText('src/bootstrap/module-entry.js'),
-    import(pathToFileURL(resolve(root, 'src/ui/compatibility/index.js')).href)
-  ]);
-  assert.equal(typeof compatibilityModule.createCompatibilityBusinessContentPort, 'function');
-  const uiModule = await import(pathToFileURL(resolve(root, 'src/ui/create-ui.js')).href);
-  assert.equal(typeof uiModule.createUI, 'function');
-  assert.throws(() => compatibilityModule.createCompatibilityBusinessContentPort(null, {}), /#app-root/);
-  assert.match(entrySource, /\/compatibility\/business-content\.html/);
-  assert.doesNotMatch(entrySource, /['"]\/i18n\.js['"]/);
-  assert.match(entrySource, /import\('\.\.\/main\.js'\)/);
-  assert.match(entrySource, /ui = createUI\(root\)/);
-  assert.match(entrySource, /contentPort = createCompatibilityBusinessContentPort\(root, ui\)/);
-  assert.match(entrySource, /contentPort\.mount\(markup\)/);
-  assert.match(entrySource, /contentPort\?\.destroy\(\)/);
-  assert.match(entrySource, /ui\?\.destroy\(\)/);
-  assert.doesNotMatch(await readText('src/ui/compatibility/business-content-port.js'), /createUI|app-shell-view|shell\//);
-  assert.doesNotMatch(entrySource, /current-shell|mountCurrentShell|\bwindow\./);
+test('R16-08 module entry composes the shell before explicit application construction and owns rollback', async () => {
+  const source = await readText('src/bootstrap/module-entry.js');
+  assert.match(source, /const ui = own\(createUI\(root\)\);[\s\S]*own\(createWorkspaceContent\(ui\)\);[\s\S]*await importApplication\(\)/);
+  assert.match(source, /own\(await startApplication\(/);
+  assert.match(source, /lifetime\.destroy\(\)/);
+  assert.doesNotMatch(source, /compatibility-business-ports|business-content|mountCurrentShell|current-shell/);
 });

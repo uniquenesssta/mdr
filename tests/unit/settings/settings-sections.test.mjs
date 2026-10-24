@@ -139,7 +139,7 @@ test('Section descriptors remain the field authority consumed by Atomic 4.10 Set
     readText('src/features/settings/ui/autosave-field-view.js'),
     readText('src/features/settings/ui/color-field-view.js'),
     readText('src/features/settings/ui/directory-field-view.js'),
-    readText('public/compatibility/business-content.html')
+    readText('src/features/menu/ui/menu-content-view.js')
   ]);
   assert.match(dialog, /listSettingsSectionDefinitions/);
   assert.ok(dialog.includes('for (const descriptor of section.fields) {'));
@@ -155,8 +155,8 @@ test('Section descriptors remain the field authority consumed by Atomic 4.10 Set
     assert.ok(uiSources.includes(marker), settingId);
   }
   assert.doesNotMatch(compatibility, /id="settings-modal"|id="setting-theme"/);
-  assert.match(compatibility, /id="table-visual-editing-toggle"/);
-  assert.match(compatibility, /id="code-visual-editing-toggle"/);
+  assert.match(compatibility, /"id":"table-visual-editing-toggle"/);
+  assert.match(compatibility, /"id":"code-visual-editing-toggle"/);
 });
 
 test('Atomic 4.9 section modules remain pure descriptions after Atomic 4.10 consumes them through the public Settings feature', async () => {

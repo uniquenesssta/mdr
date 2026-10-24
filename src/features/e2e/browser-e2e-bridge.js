@@ -28,15 +28,11 @@ function getInstallation() {
 export function configureMarkdownEditorE2EPorts(value) {
   const owner = getInstallation();
   if (!owner.isEnabled()) { owner.configure(null); return; }
-  if (typeof value?.readContext !== 'function' || typeof value?.readPreviewStats !== 'function') {
+  if (typeof value?.readContext !== 'function' || typeof value?.readPreviewStats !== 'function' || typeof value?.editorApi?.getText !== 'function' || typeof value?.importDocument !== 'function') {
     throw new TypeError('E2E providers unavailable');
   }
-  const current = Object.freeze({ readContext: value.readContext, readPreviewStats: value.readPreviewStats, setLayout: value.setLayout });
+  const current = Object.freeze({ readContext: value.readContext, readPreviewStats: value.readPreviewStats, setLayout: value.setLayout, editorApi: value.editorApi, importDocument: value.importDocument });
   owner.configure(() => createE2EQueryAPI(createBrowserPorts(current)));
-}
-
-function getEditor() {
-  return document.getElementById('editor');
 }
 
 function getLayoutMode() {
@@ -74,19 +70,18 @@ function getComponentDomSnapshot() {
   }));
 }
 
-function readSnapshot() {
-  const editor = getEditor();
+function readSnapshot(editor) {
   return {
     pendingMermaid: document.querySelectorAll('[data-mermaid-rendering="true"], .cm-hybrid-mermaid-status:not(.is-error)').length,
     ready: document.documentElement.classList.contains('app-ready'),
     layout: getLayoutMode(),
-    presentationMode: editor?.virtualEditor?.getPresentationMode?.() || null,
-    documentLength: editor?.textLength || 0,
-    selectionStart: editor?.selectionStart || 0,
-    selectionEnd: editor?.selectionEnd || 0,
-    selectedText: editor?.value?.slice?.(editor.selectionStart || 0, editor.selectionEnd || 0) || '',
-    presentationStats: editor?.virtualEditor?.getPresentationStats?.() || null,
-    componentStates: editor?.virtualEditor?.getHybridComponentStates?.() || [],
+    presentationMode: editor?.getPresentationMode?.() || null,
+    documentLength: editor.getTextLength(),
+    selectionStart: editor.getSelection().start,
+    selectionEnd: editor.getSelection().end,
+    selectedText: editor.sliceText(editor.getSelection().start, editor.getSelection().end),
+    presentationStats: editor?.getPresentationStats?.() || null,
+    componentStates: editor?.getHybridComponentStates?.() || [],
     components: getComponentDomSnapshot(),
     activeElement: describeActiveElement()
   };
@@ -96,12 +91,10 @@ function createBrowserPorts(current) {
   return {
     readContext: () => current.readContext(),
     readPreviewStats: () => current.readPreviewStats(),
-    readSnapshot,
-    readText: () => getEditor()?.value || '',
+    readSnapshot: () => readSnapshot(current.editorApi),
+    readText: () => current.editorApi.getText(),
     async importDocument(content, name, isCurrent) {
-      const commands = document.getElementById('compatibility-business-ports')?.markdownEditorDocumentUiCommandPort;
-      if (!commands?.has('importTextContent')) throw new Error('E2E import unavailable');
-      const loaded = await commands.invoke('importTextContent', name, content, '');
+      const loaded = await current.importDocument(content, name);
       if (!isCurrent()) return { loaded: false };
       return { loaded: loaded === true, context: current.readContext() };
     },
@@ -110,21 +103,21 @@ function createBrowserPorts(current) {
       current.setLayout(mode);
     },
     setVisualEditing: options => {
-      const editor = getEditor();
-      if (!editor?.virtualEditor) throw new Error('E2E editor unavailable');
+      const editor = current.editorApi;
+      if (!editor) throw new Error('E2E editor unavailable');
       if (options.code !== undefined) {
-        editor.virtualEditor.setHybridCodeVisualEditing?.(options.code);
+        editor.setHybridCodeVisualEditing?.(options.code);
         localStorage.setItem('md_editor_code_visual_editing', options.code ? 'true' : 'false');
       }
       if (options.table !== undefined) {
-        editor.virtualEditor.setHybridTableVisualEditing?.(options.table);
+        editor.setHybridTableVisualEditing?.(options.table);
         localStorage.setItem('md_editor_table_visual_editing', options.table ? 'true' : 'false');
       }
     },
-    focus: () => getEditor().focus({ preventScroll: true }),
-    select: position => getEditor().setSelectionRange(position, position),
-    scroll: (position, behavior, ratio) => getEditor().virtualEditor.scrollPositionIntoView?.(position, behavior, ratio),
-    findText: (query, from, options) => getEditor().virtualEditor.findText?.(query, from, options),
+    focus: () => current.editorApi.focus({ preventScroll: true }),
+    select: position => current.editorApi.setSelection(position, position),
+    scroll: (position, behavior, ratio) => current.editorApi.scrollPositionIntoView?.(position, behavior, ratio),
+    findText: (query, from, options) => current.editorApi.findText?.(query, from, options),
     clearStorage: () => localStorage.clear(),
     now: () => performance.now(),
     schedule: (callback, ms) => setTimeout(callback, ms),

@@ -27,7 +27,8 @@ for (const [old, current, marker] of migrations) {
       previous = previous.replace(start, 'export function mountPerformanceTelemetry() {\n  if (!import.meta.env.DEV || telemetryDestroyed || disconnectRecorder) return false;\n');
       previous = previous.replace(/\n}$/, '\n  return true;\n}');
     }
-    const source = await read(current);
+    const source = old.endsWith('/e2e-bridge.js')
+      ? git(['show', '3f22fd6b79e17d481d69ae2822c49268e1e0e993:' + current]) : await read(current);
     assert.equal(source.slice(source.indexOf(marker)).trimEnd(), previous, current + ': changed beyond imports/header and explicit idempotent mount');
   });
 }

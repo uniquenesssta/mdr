@@ -202,7 +202,7 @@ test('the Tauri sentinel has one production owner and main consumes createPlatfo
   assert.doesNotMatch(capabilitySource, /__TAURI_INTERNALS__|@tauri|\binvoke\s*\(/);
   assert.doesNotMatch(capabilitySource, /\bwindow\.|\bdocument\.|\bnavigator\./);
   assert.match(platformIndexSource, /environment\/platform-detection\.js/);
-  assert.match(mainSource, /createPlatform\(\{/);
+  assert.match(await readFile(new URL('../../../src/bootstrap/module-entry.js',import.meta.url),'utf8'), /createPlatform\(\{/);
   assert.match(mainSource, /platform\.capabilities/);
   assert.doesNotMatch(mainSource, /markdownEditorNative|__TAURI_INTERNALS__/);
 });

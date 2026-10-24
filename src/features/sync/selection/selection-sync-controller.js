@@ -107,7 +107,7 @@ export class SelectionSyncController {
       diagnostic = () => {}
     } = options;
 
-    assertMethods(editorApi, ['getSelection', 'setSelection', 'focus'], 'editorApi');
+    assertMethods(editorApi, ['getSelection', 'setSelection', 'focus', 'subscribe', 'getScrollMetrics'], 'editorApi');
     assertMethods(documentModel, ['getTextLength', 'sliceText', 'getDocumentVersion'], 'DocumentModel');
     assertMethods(editorMapper, REQUIRED_EDITOR_MAPPER_METHODS, 'EditorScrollMapper');
     if (typeof getPreviewMapper !== 'function') throw new TypeError('SelectionSyncController requires getPreviewMapper capability');
@@ -223,7 +223,7 @@ export class SelectionSyncController {
     }
     this.previewSelectionDisposer = disposePreviewSelection;
     this.started = true;
-    this.editor.addEventListener('select', this.onEditorSelect);
+    this.unsubscribeEditorSelection = this.editorApi.subscribe(update => { if (update.selectionSet) this.onEditorSelect(update); });
     this.editor.addEventListener('keyup', this.onEditorKeyUp);
     this.editor.addEventListener('pointerdown', this.onEditorPointerDown, true);
     this.preview.addEventListener('keyup', this.onPreviewKeyUp);
@@ -241,7 +241,8 @@ export class SelectionSyncController {
     if (!this.started) return;
     this.started = false;
     this.editorPointerActive = false;
-    this.editor.removeEventListener('select', this.onEditorSelect);
+    this.unsubscribeEditorSelection?.();
+    this.unsubscribeEditorSelection = null;
     this.editor.removeEventListener('keyup', this.onEditorKeyUp);
     this.editor.removeEventListener('pointerdown', this.onEditorPointerDown, true);
     this.preview.removeEventListener('keyup', this.onPreviewKeyUp);
@@ -474,7 +475,7 @@ export class SelectionSyncController {
     this.highlightSession.show(plan, { restore: createPlan });
     const editorY = this.editorMapper.getContentYForPosition(from + Math.floor((to - from) / 2));
     const sourceViewportRatio = clamp(
-      (editorY - this.editor.scrollTop) / Math.max(1, this.editor.clientHeight),
+      (editorY - this.editorApi.getScrollMetrics().top) / Math.max(1, this.editorApi.getScrollMetrics().clientHeight),
       0.05,
       0.95
     );
@@ -548,7 +549,7 @@ export class SelectionSyncController {
     const targetIndex = start + Math.floor((end - start) / 2);
     const editorY = this.editorMapper.getContentYForPosition(targetIndex);
     const behavior = /pointerup|keyup|selectionchange/.test(reason) ? 'smooth' : 'auto';
-    this.scrollController.scrollTo('editor', editorY - this.editor.clientHeight * sourceViewportRatio, {
+    this.scrollController.scrollTo('editor', editorY - this.editorApi.getScrollMetrics().clientHeight * sourceViewportRatio, {
       behavior,
       reason: 'selection-preview-to-editor',
       suspendMs: behavior === 'smooth' ? 520 : 180,

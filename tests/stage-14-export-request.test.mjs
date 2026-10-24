@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
-import { createExportRequest, EXPORT_IMAGE_RATIOS, ExportRequestValidationError, mountClassicExportRequestPort } from '../src/features/export/index.js';
+import { createExportRequest, EXPORT_IMAGE_RATIOS, ExportRequestValidationError, createExportRequestPolicy } from '../src/features/export/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/stage-14-export/requests.json', import.meta.url), 'utf8'));
@@ -71,24 +71,23 @@ for (const [label, input, field] of [
   ['string crop option', { ...base, format: 'image', imageOptions: { cropFit: 'false' } }, 'imageOptions.cropFit']
 ]) test(`R14-02 rejects ${label} with an explicit field error`, () => assert.throws(() => createExportRequest(input), requestError(field)));
 
-test('R14-02 scoped port verifies document existence, preserves identity and has a terminal mount lifecycle', () => {
+test('R16-08 explicit export request policy verifies current documents and preserves request identity', () => {
   const host = {}, existing = new Set([' legacy/id ', 'other']);
   const options = { getActiveDocumentId: () => ' legacy/id ', hasDocument: id => existing.has(id) };
-  const mount = mountClassicExportRequestPort(host, options);
-  const port = mount.port;
+  const port = createExportRequestPolicy(options);
   assert.equal(port.createRequest({ format: 'markdown' }).documentId, ' legacy/id ');
   assert.equal(port.createRequest({ format: 'markdown', documentId: 'other' }).documentId, 'other');
   assert.throws(() => port.createRequest({ format: 'markdown', documentId: 'missing' }), requestError('documentId'));
   existing.delete('other');
   assert.throws(() => port.createRequest({ format: 'markdown', documentId: 'other' }), requestError('documentId'));
   assert.throws(() => port.createRequest(null), requestError('request'));
-  assert.throws(() => mountClassicExportRequestPort(host, options), /already mounted/);
+  assert.throws(() => createExportRequestPolicy({ getActiveDocumentId: options.getActiveDocumentId }), TypeError);
   assert.equal(Object.keys(host).length, 0); assert.ok(Object.isFrozen(port));
-  mount.destroy(); mount.destroy();
   assert.equal(Object.hasOwn(host, 'markdownEditorExportRequestPort'), false);
-  assert.throws(() => port.createRequest({ format: 'markdown' }), /destroyed/);
-  const next = mountClassicExportRequestPort(host, options);
-  assert.notEqual(next.port, port); next.destroy();
+  const next = createExportRequestPolicy(options);
+  assert.notEqual(next, port);
+  assert.equal(next.imageRatios, EXPORT_IMAGE_RATIOS);
+  assert.equal(next.createRequest({ format: 'markdown' }).documentId, ' legacy/id ');
 });
 
 test('R14-02 every actual classic entry rejects invalid inputs before task, snapshot, vendor, print or file effects', async () => {

@@ -15,21 +15,19 @@ import { createNativeSearchAdapter } from './native-search-adapter.js';
 const NATIVE_DOCUMENT_THRESHOLD = 100000;
 
 function currentDocumentVersion(source) {
-  return Math.max(0, Number(source?.getDocumentVersion?.() ?? source?.virtualEditor?.getDocumentVersion?.()) || 0);
+  return Math.max(0, Number(source.getDocumentVersion()) || 0);
 }
 
 function getDocumentLength(source) {
-  return Math.max(0, Number(source?.getTextLength?.() ?? source?.textLength) || 0);
+  return Math.max(0, Number(source.getTextLength()) || 0);
 }
 
 function getDocumentChanges(source, version) {
-  if (typeof source?.getChangesSince === 'function') return source.getChangesSince(version, 'storage');
-  return source?.virtualEditor?.getDocumentChangesSince?.(version);
+  return source.getChangesSince(version, 'storage');
 }
 
 function createDocumentSnapshot(source) {
-  if (typeof source?.createSnapshot === 'function') return source.createSnapshot('native-storage-reset');
-  return String(source?.value ?? '');
+  return source.createSnapshot('native-storage-reset');
 }
 
 function createSaveRequestContext(document) {

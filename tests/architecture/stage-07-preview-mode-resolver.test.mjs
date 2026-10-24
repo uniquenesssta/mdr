@@ -30,16 +30,16 @@ test('Atomic 7.3 preserves manual override before automatic character or block t
 test('Atomic 7.3 remains the only mode policy after Atomic 7.14 removes classic preview resolver logic', async () => {
   const [main, core, entry, port, handler, engine] = await Promise.all([
     source('src/main.js'), source('public/app/core.js'), source('src/features/preview/index.js'),
-    source('src/features/preview/compatibility/classic-preview-mode-resolver-port.js'),
-    source('src/features/preview/application/preview-command-handler.js'),
+    source('src/features/preview/pipeline/preview-mode-resolver.js'),
+    source('src/features/preview/application/preview-commands.js'),
     source('src/features/preview/pipeline/preview-render-engine.js')
   ]);
   assert.match(entry, /normalizePreviewModeSetting/);
   assert.match(entry, /resolvePreviewMode/);
-  assert.match(port, /markdownEditorPreviewModeResolverPort/);
+  assert.doesNotMatch(port, /markdownEditorPreviewModeResolverPort/);
   assert.doesNotMatch(port, /window\.markdownEditorPreviewModeResolver/);
-  assert.match(main, /mountClassicPreviewModeResolverPort/);
-  assert.match(main, /previewModeResolverPort\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewModeResolverPort/);
+  assert.doesNotMatch(main, /previewModeResolverPort\.destroy\(\)/);
   assert.match(core, /corePreviewCommandPort\.normalizePerformanceMode/);
   assert.match(handler, /normalizePreviewModeSetting/);
   assert.match(handler, /resolvePreviewMode/);
@@ -51,7 +51,7 @@ test('Atomic 7.3 remains the only mode policy after Atomic 7.14 removes classic 
 test('Atomic 7.3 policy remains pure while Atomic 7.14 Controller and RenderEngine consume it', async () => {
   const [resolver, handler, engine] = await Promise.all([
     source('src/features/preview/pipeline/preview-mode-resolver.js'),
-    source('src/features/preview/application/preview-command-handler.js'),
+    source('src/features/preview/application/preview-commands.js'),
     source('src/features/preview/pipeline/preview-render-engine.js')
   ]);
   assert.doesNotMatch(resolver, /preview-controller|preview-render-engine|preview-command-handler/);

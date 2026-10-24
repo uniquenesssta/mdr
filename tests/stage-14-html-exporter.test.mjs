@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { createExportFileWriter, createExportRequest, createExportTaskController, createHtmlFontStyle, createHtmlFontAssets,
-  createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, isExportCancelledError } from '../src/features/export/index.js';
+  createHtmlDocumentSerializer, createHtmlExporter, isExportCancelledError } from '../src/features/export/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 import config from '../vite.config.js';
 
@@ -184,14 +184,13 @@ test('R14-10 destroy during an issued write rejects late completion without retr
   assert.equal(h.calls.filter(x => x[0] === 'write').length, 1); assert.equal(h.tasks.getSnapshot().activeTask, null);
 });
 
-test('R14-10 scoped HTML port unloads independently and preserves a replacement property', async () => {
-  const h = setup(), host = {}, mount = mountClassicHtmlExportPort(host, h.owner);
-  assert.equal(Object.keys(host).length, 0); assert.equal(Object.isFrozen(mount.port), true);
-  assert.throws(() => mountClassicHtmlExportPort(host, h.owner), /already/);
-  const next = {}; Object.defineProperty(host, 'markdownEditorHtmlExportPort', { configurable: true, value: next });
-  mount.destroy(); mount.destroy(); assert.equal(host.markdownEditorHtmlExportPort, next);
-  assert.throws(() => mount.port.export({ request: h.request() }), /destroyed/);
+test('R16-08 direct HTML capability writes through its owner and rejects work after disposal', async () => {
+  const h = setup(), host = {};
+  assert.equal(Object.keys(host).length, 0); assert.equal(Object.isFrozen(h.owner), true);
   assert.equal((await h.owner.export({ request: h.request() })).status, 'written');
+  h.owner.destroy(); h.owner.destroy();
+  await assert.rejects(async () => h.owner.export({ request: h.request() }), cancelled('destroyed'));
+  assert.equal(h.tasks.getSnapshot().activeTask, null); h.tasks.destroy();
 });
 
 test('R14-10 actual classic HTML entry delegates without template CDN, direct blob or document authority', async () => {

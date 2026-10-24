@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createEditorController, mountClassicEditorControllerPort } from '../../../src/features/editor/index.js';
+import { createEditorController } from '../../../src/features/editor/index.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const readText = path => readFile(resolve(ROOT, path), 'utf8');
@@ -117,12 +117,11 @@ test('Atomic 5.8 destroy is idempotent, unsubscribes the adapter and makes state
   assert.throws(() => harness.controller.state, /destroyed/);
 });
 
-test('Atomic 5.8 classic port is scoped, rejects duplicate ownership and becomes terminal on destroy', () => {
+test('R16-08 explicit Editor controller retains writes, readonly snapshots and terminal lifecycle', () => {
   const harness = createHarness();
   const host = {};
-  const port = mountClassicEditorControllerPort(host, harness.controller);
-  assert.equal(host.markdownEditorEditorControllerPort, port);
-  assert.throws(() => mountClassicEditorControllerPort(host, harness.controller), /already mounted/);
+  const port = harness.controller;
+  assert.equal(Object.isFrozen(port.state), true);
   port.setText('classic');
   assert.equal(harness.replaceCalls.at(-1).replacement, 'classic');
   port.destroy();
@@ -139,8 +138,9 @@ test('Atomic 5.8 production integration gives input one Controller transaction p
   ]);
   assert.equal(main.includes("from './features/editor/index.js'"), true);
   assert.equal(main.includes("from './editor/index.js'"), false);
-  assert.ok(main.indexOf('createDocumentModel(editorHost)') < main.indexOf('createEditorController({'));
-  assert.equal(main.includes('mountClassicEditorControllerPort(compatibilityPlatformHost, editorController)'), true);
+  assert.ok(main.indexOf('createDocumentModel(createDocumentModelBinding(virtualEditor))') < main.indexOf('createEditorController({'));
+  assert.equal(main.includes('eventsEditorControllerPort: editorController'), true);
+  assert.doesNotMatch(main, /mountClassicEditorControllerPort|compatibilityPlatformHost/);
   assert.equal(events.includes('subscribeTransactions(transaction =>'), true);
   assert.equal(events.includes("editor.addEventListener('input'"), false);
   assert.equal(events.includes('editor.addEventListener("input"'), false);

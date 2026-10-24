@@ -94,10 +94,8 @@ test('Stage 6 composition still destroys every Layout, Sidebar, Menu and Window 
     'recentFilesMenuController?.destroy()',
     'windowController.destroy()'
   ]) assert.match(main, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  for (const token of [
-    'menuController?.destroy()',
-    'submenuPositioner?.destroy()',
-    'menuCommandBindings?.destroy()',
-    'menuState?.destroy()'
-  ]) assert.match(moduleEntry, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(moduleEntry, /const own = owner => \{ lifetime\.own\(\(\) => owner\.destroy\(\)\)/);
+  for (const factory of ['createMenuController','createSubmenuPositioner','createMenuCommandBindings','createMenuState']) {
+    assert.match(moduleEntry,new RegExp('own\\(' + factory + '\\('));
+  }
 });

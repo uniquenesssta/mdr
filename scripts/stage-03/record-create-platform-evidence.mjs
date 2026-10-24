@@ -8,7 +8,8 @@ import {
 const OUTPUT_DIRECTORY = 'artifacts/stage-03';
 const MODULE_FIXTURE_PATH = 'tests/architecture/fixtures/production-modules.json';
 const HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT = 174;
-const STAGE_3_PLATFORM_MODULE_COUNT = 36;
+const STAGE_3_PLATFORM_MODULE_COUNT = 36; // Historical accepted surface.
+const CURRENT_PLATFORM_MODULE_COUNT = STAGE_3_PLATFORM_MODULE_COUNT - 1; // R16-08 retires only its bridge.
 
 class EvidenceFileReader {
   constructor() {
@@ -162,7 +163,7 @@ const platformModules = moduleFixture.modules
 const createPlatformSource = await readFile('src/platform/create-platform.js', 'utf8');
 const desktopPlatformSource = await readFile('src/platform/desktop/desktop-platform.js', 'utf8');
 const mainSource = await readFile('src/main.js', 'utf8');
-const classicBridgeSource = await readFile('src/platform/compatibility/classic-platform-port.js', 'utf8');
+const applicationEntrySource = await readFile('src/bootstrap/module-entry.js', 'utf8');
 
 const browserSurface = createBrowserRuntime();
 const browserPlatform = createPlatform({ runtime: browserSurface.runtime });
@@ -197,7 +198,7 @@ const desktopText = await desktopPlatform.files.readText('native.md');
 const desktopWeb = await desktopPlatform.web.fetchText('https://desktop.example');
 await desktopPlatform.clipboard.writeText('browser-webview-clipboard');
 
-if (platformModules.length !== STAGE_3_PLATFORM_MODULE_COUNT) process.exit(1);
+if (platformModules.length !== CURRENT_PLATFORM_MODULE_COUNT) process.exit(1);
 if (!platformModules.includes('src/platform/create-platform.js')) process.exit(1);
 if (!platformModules.includes('src/platform/desktop/desktop-platform.js')) process.exit(1);
 if (JSON.stringify(Object.keys(browserPlatform)) !== JSON.stringify(['capabilities', ...PLATFORM_PORT_NAMES, 'destroy'])) process.exit(1);
@@ -219,11 +220,10 @@ if (/public\/app|features\/|markdownEditorNative|showToast|localStorage|document
 if (!createPlatformSource.includes('PlatformCapabilityUnavailableError')) process.exit(1);
 if (!createPlatformSource.includes('createPlatformPortSet')) process.exit(1);
 if (!createPlatformSource.includes('createDesktopPlatform')) process.exit(1);
-if (!mainSource.includes('createPlatform({')) process.exit(1);
-if (!mainSource.includes('mountClassicPlatformPort')) process.exit(1);
+if (!applicationEntrySource.includes('createPlatform({')) process.exit(1);
+if (mainSource.includes('mountClassicPlatformPort') || applicationEntrySource.includes('compatibility-business-ports')) process.exit(1);
 if (/markdownEditorNative|window\.markdownEditorPlatform/.test(mainSource)) process.exit(1);
-if (!classicBridgeSource.includes('call(portName, methodName')) process.exit(1);
-if (!classicBridgeSource.includes('supports(capability)')) process.exit(1);
+if (!applicationEntrySource.includes('startApplication({ platform,')) process.exit(1);
 
 await mkdir(OUTPUT_DIRECTORY, { recursive: true });
 await writeFile(`${OUTPUT_DIRECTORY}/03-11-create-platform-evidence.json`, `${JSON.stringify({

@@ -1,0 +1,524 @@
+{
+  "schemaVersion": 1,
+  "stage": "R16.8",
+  "sourceCommit": "3f22fd6b79e17d481d69ae2822c49268e1e0e993",
+  "retiredModules": [
+    {
+      "path": "public/compatibility/business-content.html",
+      "sourceBlob": "242726fa6d5bac9997de028b869b316fbd2f0eb3",
+      "retiredExports": [],
+      "currentBoundary": "src/bootstrap/workspace-content.js"
+    },
+    {
+      "path": "src/features/documents/compatibility/classic-document-controller-port.js",
+      "sourceBlob": "eb6d999b1bf721f8c4adeac18dad727e1d5825cd",
+      "retiredExports": [
+        "mountClassicDocumentControllerPort"
+      ],
+      "currentBoundary": "src/features/documents/index.js"
+    },
+    {
+      "path": "src/features/documents/compatibility/classic-document-domain-port.js",
+      "sourceBlob": "dce25c72630744439b4645712cad2c437f232762",
+      "retiredExports": [
+        "mountClassicDocumentDomainPort"
+      ],
+      "currentBoundary": "src/features/documents/index.js"
+    },
+    {
+      "path": "src/features/documents/compatibility/classic-document-session-port.js",
+      "sourceBlob": "3c6e2169146d66df73c7071babb2ebdb85e9a580",
+      "retiredExports": [
+        "mountClassicDocumentSessionPort"
+      ],
+      "currentBoundary": "src/features/documents/index.js"
+    },
+    {
+      "path": "src/features/documents/compatibility/classic-document-ui-command-port.js",
+      "sourceBlob": "b3d21e3ed3834fe3a35ab7503256207672f0f5ac",
+      "retiredExports": [
+        "mountClassicDocumentUiCommandPort"
+      ],
+      "currentBoundary": "src/features/documents/index.js"
+    },
+    {
+      "path": "src/features/documents/compatibility/classic-recent-files-port.js",
+      "sourceBlob": "2370e5c5fa30b31a559a3a1cb04c4aaaab5f1fd1",
+      "retiredExports": [
+        "mountClassicRecentFilesPort"
+      ],
+      "currentBoundary": "src/features/documents/index.js"
+    },
+    {
+      "path": "src/features/editor/compatibility/classic-editor-controller-port.js",
+      "sourceBlob": "ecac186c213f96b66e71e04280631d351927be72",
+      "retiredExports": [
+        "mountClassicEditorControllerPort"
+      ],
+      "currentBoundary": "src/features/editor/index.js"
+    },
+    {
+      "path": "src/features/editor/compatibility/classic-editor-ui-command-port.js",
+      "sourceBlob": "09d59940f025aaa3ffaf1d008714167d2589918b",
+      "retiredExports": [
+        "mountClassicEditorUiCommandPort"
+      ],
+      "currentBoundary": "src/features/editor/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-export-command-port.js",
+      "sourceBlob": "7e419360cc4e8ebeae31c3ef69181888003257e7",
+      "retiredExports": [
+        "mountClassicExportCommandPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-export-document-port.js",
+      "sourceBlob": "69295036335591ebe9332bb2954e517d240d6a0d",
+      "retiredExports": [
+        "mountClassicExportDocumentPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-export-enhancement-port.js",
+      "sourceBlob": "e4fa2b47bc302cc0924642eb321a47f63f51bb42",
+      "retiredExports": [
+        "mountClassicExportEnhancementPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-export-request-port.js",
+      "sourceBlob": "9d26b278b0bf3c1bc6165f9dc91010259ba92d6c",
+      "retiredExports": [
+        "mountClassicExportRequestPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-export-style-port.js",
+      "sourceBlob": "825af5fa68795c490fcfb45cbc6e2b32d9ceae89",
+      "retiredExports": [
+        "mountClassicExportStylePort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-export-task-port.js",
+      "sourceBlob": "9619ef58b32fbdecc82450152ae223ac6e1f2e0f",
+      "retiredExports": [
+        "mountClassicExportTaskPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-html-export-port.js",
+      "sourceBlob": "532e0ac47435756baa123f79518407a3c5be2b62",
+      "retiredExports": [
+        "mountClassicHtmlExportPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-image-asset-port.js",
+      "sourceBlob": "fd8995d6931684c24ba22f7967dc1d151c8becf8",
+      "retiredExports": [
+        "mountClassicImageAssetPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-image-data-port.js",
+      "sourceBlob": "6dfe5a6953151cbb5829c3cc4144219f90980217",
+      "retiredExports": [
+        "mountClassicImageDataPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-image-export-port.js",
+      "sourceBlob": "6bb0aff064add9dc247b428350a71f97adfad17a",
+      "retiredExports": [
+        "mountClassicImageExportPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-image-layout-port.js",
+      "sourceBlob": "df2ddca16525d7610466c5a618a0f1fffc7ff4e9",
+      "retiredExports": [
+        "mountClassicImageLayoutPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-markdown-export-port.js",
+      "sourceBlob": "55f824fe0a91dba065ea8ad9db7a6aded0e3fb85",
+      "retiredExports": [
+        "mountClassicMarkdownExportPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-pdf-export-port.js",
+      "sourceBlob": "e567552a8c25fb75566bb8dc610b0bc78e2d579a",
+      "retiredExports": [
+        "mountClassicPdfExportPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/export/compatibility/classic-word-export-port.js",
+      "sourceBlob": "b955ca96089b0bc83d8271e59c02e5f57bd249af",
+      "retiredExports": [
+        "mountClassicWordExportPort"
+      ],
+      "currentBoundary": "src/features/export/index.js"
+    },
+    {
+      "path": "src/features/help/compatibility/classic-help-port.js",
+      "sourceBlob": "6332a817c4131cd81cb1b4d031299767ffbe9535",
+      "retiredExports": [
+        "mountClassicHelpPort"
+      ],
+      "currentBoundary": "src/features/help/index.js"
+    },
+    {
+      "path": "src/features/hybrid-editor/compatibility/classic-hybrid-source-edit-controller-port.js",
+      "sourceBlob": "8f375aa8e217248845be6745fdcf411e816d573c",
+      "retiredExports": [
+        "mountClassicHybridSourceEditControllerPort",
+        "getClassicHybridSourceEditControllerPort"
+      ],
+      "currentBoundary": "src/features/hybrid-editor/index.js"
+    },
+    {
+      "path": "src/features/layout/compatibility/classic-layout-state-port.js",
+      "sourceBlob": "c3e6b93e6621d636ae44fa590d14f1c47ada3501",
+      "retiredExports": [
+        "mountClassicLayoutStatePort"
+      ],
+      "currentBoundary": "src/features/layout/index.js"
+    },
+    {
+      "path": "src/features/layout/compatibility/classic-split-controller-port.js",
+      "sourceBlob": "1102f83086db9b0d1700e65d9d7f4d4dccb9afb0",
+      "retiredExports": [
+        "mountClassicSplitControllerPort"
+      ],
+      "currentBoundary": "src/features/layout/index.js"
+    },
+    {
+      "path": "src/features/menu/compatibility/classic-menu-command-adapter.js",
+      "sourceBlob": "f70a1cbd697b4b04a13e2fdc8a6024887ccd30fc",
+      "retiredExports": [
+        "createClassicMenuCommandAdapter"
+      ],
+      "currentBoundary": "src/features/menu/index.js"
+    },
+    {
+      "path": "src/features/menu/compatibility/classic-menu-command-port.js",
+      "sourceBlob": "b6c13b154cd5be964cf60833b373a462b81d6ab3",
+      "retiredExports": [
+        "mountClassicMenuCommandPort"
+      ],
+      "currentBoundary": "src/features/menu/index.js"
+    },
+    {
+      "path": "src/features/menu/compatibility/classic-submenu-positioner-port.js",
+      "sourceBlob": "8e80abd5579bd3f024db9fbf6ff5d531691d56df",
+      "retiredExports": [
+        "mountClassicSubmenuPositionerPort"
+      ],
+      "currentBoundary": "src/features/menu/index.js"
+    },
+    {
+      "path": "src/features/persistence/compatibility/classic-save-status-store-port.js",
+      "sourceBlob": "e36474d01b423e0e5ee87e837ca611119b3fb870",
+      "retiredExports": [
+        "mountClassicSaveStatusStorePort"
+      ],
+      "currentBoundary": "src/features/persistence/index.js"
+    },
+    {
+      "path": "src/features/preview/application/preview-command-handler.js",
+      "sourceBlob": "e1d4fcf6229c1a450f94fd0c6b672272905a849f",
+      "retiredExports": [
+        "mountPreviewCommandHandler"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-enhancement-coordinator-port.js",
+      "sourceBlob": "1b07da83ecc7ce67cfa92d7cab51d8b458108230",
+      "retiredExports": [
+        "mountClassicPreviewEnhancementCoordinatorPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-focus-controller-port.js",
+      "sourceBlob": "1adc7651d4521493380eb52ed0439096e296b20f",
+      "retiredExports": [
+        "mountClassicPreviewFocusControllerPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-layout-stability-port.js",
+      "sourceBlob": "51aa421a613099a870ed04a1e6f7ca1e22f776b5",
+      "retiredExports": [
+        "mountClassicPreviewLayoutStabilityPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-mode-resolver-port.js",
+      "sourceBlob": "2e4b04d43b278a3dca38c507e32d1bab8f8ce4c9",
+      "retiredExports": [
+        "mountClassicPreviewModeResolverPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-presentation-port.js",
+      "sourceBlob": "40828bb3c9ec733b72098bfbb629fcefb909164c",
+      "retiredExports": [
+        "mountClassicPreviewPresentationPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-recovery-view-port.js",
+      "sourceBlob": "8ab09cd81bab48a3cb4e8dc052f4e4a2ec556121",
+      "retiredExports": [
+        "mountClassicPreviewRecoveryViewPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-render-coordinator-port.js",
+      "sourceBlob": "b60f6e2b0ae50f5a595f62f446af69b5ca379297",
+      "retiredExports": [
+        "mountClassicPreviewRenderCoordinatorPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-renderer-port.js",
+      "sourceBlob": "fdada9eb924894406f51d54fb69fbf114d6c6d6f",
+      "retiredExports": [
+        "mountClassicPreviewRendererPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-scheduler-port.js",
+      "sourceBlob": "fb77f0a170ef1eb54004a6d93d7a6cb158ef154c",
+      "retiredExports": [
+        "mountClassicPreviewSchedulerPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-state-port.js",
+      "sourceBlob": "c2145572aff3ec647f8c098a9cfeb840496e06ba",
+      "retiredExports": [
+        "mountClassicPreviewStatePort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/preview/compatibility/classic-preview-thresholds-port.js",
+      "sourceBlob": "f6ce3053c189055e26bf123d41ebfaad3601e028",
+      "retiredExports": [
+        "mountClassicPreviewThresholdsPort"
+      ],
+      "currentBoundary": "src/features/preview/index.js"
+    },
+    {
+      "path": "src/features/settings/compatibility/classic-settings-store-port.js",
+      "sourceBlob": "eec1b5529d144698a262c145b4b5955b4df2d492",
+      "retiredExports": [
+        "mountClassicSettingsStorePort"
+      ],
+      "currentBoundary": "src/features/settings/index.js"
+    },
+    {
+      "path": "src/features/sidebar/compatibility/classic-folder-tree-controller-port.js",
+      "sourceBlob": "342e30e104d6322d08b4456641a4f7c70cedab06",
+      "retiredExports": [
+        "mountClassicFolderTreeControllerPort"
+      ],
+      "currentBoundary": "src/features/sidebar/index.js"
+    },
+    {
+      "path": "src/features/sidebar/compatibility/classic-outline-controller-port.js",
+      "sourceBlob": "68f9b8892b6ae59cfa5badd17308d26b84dbd54d",
+      "retiredExports": [
+        "mountClassicOutlineControllerPort"
+      ],
+      "currentBoundary": "src/features/sidebar/index.js"
+    },
+    {
+      "path": "src/features/sidebar/compatibility/classic-sidebar-controller-port.js",
+      "sourceBlob": "832c61dc0799f1dd7d5ba0b8f713e6ec768d2a8a",
+      "retiredExports": [
+        "mountClassicSidebarControllerPort"
+      ],
+      "currentBoundary": "src/features/sidebar/index.js"
+    },
+    {
+      "path": "src/features/window/compatibility/classic-close-save-port.js",
+      "sourceBlob": "31d95930dcc06d52874fea3dcf7ed42c7ce6bae6",
+      "retiredExports": [
+        "mountClassicCloseSavePort"
+      ],
+      "currentBoundary": "src/features/window/index.js"
+    },
+    {
+      "path": "src/i18n/compatibility/classic-i18n-port.js",
+      "sourceBlob": "d2538fb0c9fa17203e2d79358d21be1ff4b20275",
+      "retiredExports": [
+        "mountClassicI18nPort"
+      ],
+      "currentBoundary": "src/i18n/index.js"
+    },
+    {
+      "path": "src/platform/compatibility/classic-platform-port.js",
+      "sourceBlob": "6928969b587e8dcf6cb37351ea948f37ca9974da",
+      "retiredExports": [
+        "mountClassicPlatformPort"
+      ],
+      "currentBoundary": "src/platform/index.js"
+    },
+    {
+      "path": "src/shared/scheduling/classic-task-scheduler-port.js",
+      "sourceBlob": "cea8f841001c094853450c06b4b46f059adaa956",
+      "retiredExports": [
+        "mountClassicTaskSchedulerPort"
+      ],
+      "currentBoundary": "src/shared/scheduling/task-scheduler.js"
+    },
+    {
+      "path": "src/ui/compatibility/business-content-port.js",
+      "sourceBlob": "574bd742cf07e9e4e873e2a9033660dab35b2aeb",
+      "retiredExports": [
+        "createCompatibilityBusinessContentPort"
+      ],
+      "currentBoundary": "src/bootstrap/workspace-content.js"
+    },
+    {
+      "path": "src/ui/compatibility/index.js",
+      "sourceBlob": "e3819c25cca1b297dcbc66a58cc7e2080caef74f",
+      "retiredExports": [],
+      "currentBoundary": "src/bootstrap/workspace-content.js"
+    },
+    {
+      "path": "src/ui/compatibility/mount-modal-shells.js",
+      "sourceBlob": "3f6321e52149059c8a8c8594e0997ca863d2f3b7",
+      "retiredExports": [
+        "mountCompatibilityModalShells"
+      ],
+      "currentBoundary": "src/bootstrap/workspace-content.js"
+    }
+  ],
+  "telemetryMigrations": [
+    {
+      "path": "src/features/preview/pipeline/preview-render-engine.js",
+      "baselineBlob": "938ff541e630f3bcb01df3da06101a81942f563c",
+      "currentPath": "src/features/preview/pipeline/preview-render-engine.js"
+    },
+    {
+      "path": "src/features/sync/selection/selection-sync-controller.js",
+      "baselineBlob": "77ed7ecdebe362225e3fb84596d7de70ceb1bbc5",
+      "currentPath": "src/features/sync/selection/selection-sync-controller.js"
+    },
+    {
+      "path": "src/main.js",
+      "baselineBlob": "218a0d103b21e68d9bfbf90663f5a2d4ae3e798e",
+      "currentPath": "src/main.js"
+    },
+    {
+      "path": "src/main.js",
+      "baselineBlob": "218a0d103b21e68d9bfbf90663f5a2d4ae3e798e",
+      "currentPath": "src/bootstrap/module-entry.js"
+    }
+  ],
+  "historicalUiModules": [
+    "public/compatibility/business-content.html",
+    "src/styles/components/badge.css",
+    "src/styles/components/color-picker.css",
+    "src/styles/components/drop-overlay.css",
+    "src/styles/components/form.css",
+    "src/styles/components/icon.css",
+    "src/styles/components/link-preview.css",
+    "src/styles/components/menu.css",
+    "src/styles/components/modal.css",
+    "src/styles/components/progress.css",
+    "src/styles/components/table-picker.css",
+    "src/styles/components/tabs.css",
+    "src/styles/components/toast.css",
+    "src/styles/features/code-presentation.css",
+    "src/styles/features/content-rendering.css",
+    "src/styles/features/editor.css",
+    "src/styles/features/export.css",
+    "src/styles/features/file-tree.css",
+    "src/styles/features/help.css",
+    "src/styles/features/hybrid-code.css",
+    "src/styles/features/hybrid-html.css",
+    "src/styles/features/hybrid-math.css",
+    "src/styles/features/hybrid-media.css",
+    "src/styles/features/hybrid-mermaid.css",
+    "src/styles/features/hybrid-table.css",
+    "src/styles/features/hybrid.css",
+    "src/styles/features/media.css",
+    "src/styles/features/preferences.css",
+    "src/styles/features/preview.css",
+    "src/styles/features/settings.css",
+    "src/styles/features/sidebar-documents.css",
+    "src/styles/features/sidebar-navigation.css",
+    "src/styles/features/sidebar-outline.css",
+    "src/styles/foundation/accessibility.css",
+    "src/styles/foundation/motion.css",
+    "src/styles/foundation/reset.css",
+    "src/styles/foundation/tokens.css",
+    "src/styles/foundation/typography.css",
+    "src/styles/index.css",
+    "src/styles/layout/compact-shell.css",
+    "src/styles/layout/compact-split.css",
+    "src/styles/layout/fullscreen.css",
+    "src/styles/layout/resize-state.css",
+    "src/styles/layout/sidebar-layout.css",
+    "src/styles/layout/split-pane.css",
+    "src/styles/shell/app-shell.css",
+    "src/styles/shell/menu-bar.css",
+    "src/styles/shell/status-bar.css",
+    "src/styles/shell/toolbar-shell.css",
+    "src/styles/shell/window-controls.css",
+    "src/styles/shell/workspace-shell.css",
+    "src/styles/themes/dark.css",
+    "src/styles/themes/light.css",
+    "src/ui/compatibility/business-content-port.js",
+    "src/ui/compatibility/index.js",
+    "src/ui/compatibility/mount-modal-shells.js",
+    "src/ui/components/icon-view.js",
+    "src/ui/components/modal-shell.js",
+    "src/ui/create-ui.js",
+    "src/ui/dom/event-scope.js",
+    "src/ui/dom/focus-scope.js",
+    "src/ui/dom/index.js",
+    "src/ui/dom/required-refs.js",
+    "src/ui/dom/safe-element.js",
+    "src/ui/dom/transition-visibility.js",
+    "src/ui/shell/app-shell-view.js",
+    "src/ui/shell/menu-bar-shell.js",
+    "src/ui/shell/overlay-root.js",
+    "src/ui/shell/sidebar-shell.js",
+    "src/ui/shell/status-bar-shell.js",
+    "src/ui/shell/toolbar-shell.js",
+    "src/ui/shell/workspace-shell.js"
+  ]
+}

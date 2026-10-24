@@ -12,8 +12,7 @@ import {
   createDocumentSessionController,
   createDocumentSessionStore,
   updateDocumentRecord,
-  createSessionDocumentRepository,
-  mountClassicDocumentControllerPort
+  createSessionDocumentRepository
 } from '../../../src/features/documents/index.js';
 import { createBrowserDocumentRepository, createLoadController } from '../../../src/features/persistence/index.js';
 import { NativeDocumentStore } from '../../../src/features/persistence/index.js';
@@ -73,6 +72,7 @@ function createModel(initial = '') {
     getDocumentVersion() { return this.version; },
     markPersisted() { this.dirty = false; },
     registerConsumer() {},
+    getChangesSince() { return null; },
     acknowledge() {},
     getState() { return { documentId: this.documentId, title: this.title, generation: this.generation, version: this.version, dirty: this.dirty }; },
     setContent(next) { content = String(next ?? ''); this.version += 1; this.dirty = true; }
@@ -404,14 +404,15 @@ test('Atomic 5.3 NativeDocumentStore isolated reads neither cancel nor are cance
   assert.equal((await winningLoad).content, 'winner');
 });
 
-test('Atomic 5.3 classic controller port exposes only controller commands and has a terminal host lifecycle', async () => {
+test('R16-08 explicit Document controller preserves active identity, operation generations and terminal lifecycle', async () => {
   const { controller } = createHarness();
   const host = {};
-  const port = mountClassicDocumentControllerPort(host, controller);
-  assert.equal(host.markdownEditorDocumentControllerPort, port);
+  const port = controller;
+  const previous = port.captureOperation('before-create');
   const created = await port.newDocument({ title: 'Port', content: 'body' });
   assert.equal(port.activeId, created.record.id);
-  assert.throws(() => mountClassicDocumentControllerPort(host, controller), /already mounted/);
+  assert.equal(port.isCurrentGeneration(previous), false);
+  assert.equal(port.isStaleError(new DocumentOperationStaleError(previous, null)), true);
   port.destroy();
   port.destroy();
   assert.equal('markdownEditorDocumentControllerPort' in host, false);
@@ -439,7 +440,7 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
   assert.match(core, /coreDocumentControllerPort/);
   assert.match(exportModule, /owners\[format\]\[method\]/);
   assert.match(main, /owners: \{ markdown: markdownExporter, html: htmlExporter, word: wordExporter, pdf: pdfExporter, image: imageExporter \}/);
-  assert.match(main, /createImageExporter\(\{ documentModel, documents: documentControllerPort/);
+  assert.match(main, /createImageExporter\(\{ documentModel, documents: documentController/);
   const imageOwner = await readText('src/features/export/formats/image/image-exporter.js');
   assert.match(imageOwner, /documents\.isCurrentGeneration/);
   assert.match(imageOwner, /documents\.getRecord/);
@@ -447,7 +448,7 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
   assert.match(main, /createSessionDocumentRepository/);
   assert.match(main, /createDocumentSessionController/);
   assert.match(main, /createLoadController/);
-  assert.match(main, /mountClassicDocumentControllerPort/);
+  assert.match(main, /coreDocumentControllerPort: documentController/);
   assert.match(loadControllerSource, /repository\.load/);
   assert.match(persistenceEntry, /createLoadController/);
   assert.doesNotMatch(sessionControllerSource, /repository\.load|materializeLoadedContent/);
@@ -455,7 +456,7 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
   assert.match(segmentedLoader, /cancelPrevious/);
   assert.match(entry, /document-session-controller\.js/);
   assert.match(entry, /session-document-repository\.js/);
-  assert.match(entry, /classic-document-controller-port\.js/);
+  assert.doesNotMatch(entry, /classic-document-controller-port\.js/);
   const classic = core + '\n' + exportModule + '\n' + events;
   assert.doesNotMatch(classic, /coreDocumentSessionPort\.(?:insertRecord|updateRecord|setActive|removeRecord|reset)\s*\(/);
   assert.doesNotMatch(exportModule, /exportDocumentSessionPort\.(?:insertRecord|updateRecord|setActive|removeRecord|reset)\s*\(/);

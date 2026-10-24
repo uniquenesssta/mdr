@@ -36,10 +36,10 @@ test('Atomic 6.4 removes classic Compact Shell and sidebar projection authority 
     assert.doesNotMatch(bootstrap, new RegExp(`\\b${legacy}\\b`), `bootstrap must not retain ${legacy}`);
   }
   assert.match(core, /function isWindowResizeBurstActive\(\)/);
-  assert.match(core, /performance\.now\(\) < coreLayoutStatePort\.windowResizeActiveUntil/);
+  assert.match(core, /performance\.now\(\) < coreLayoutStatePort\.snapshot\.resize\.windowActiveUntil/);
   assert.match(core, /&& !isWindowResizeBurstActive\(\)/);
   assert.doesNotMatch(core, /(^|\n)\s*sidebarVisible\s*=\s*applied\.sidebarVisible/m);
-  assert.match(core, /coreLayoutStatePort\.sidebarVisible = applied\.sidebarVisible/);
+  assert.match(core, /coreLayoutStatePort\.setSidebar\(\{ visible: applied\.sidebarVisible \}\)/);
 });
 
 test('Atomic 6.4 main composition remains intact after the 6.5 Toolbar Boundary migration', async () => {

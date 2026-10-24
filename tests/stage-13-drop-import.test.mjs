@@ -112,6 +112,7 @@ test('production routing has one owner and deletes the obsolete classifier bridg
   assert.match(main, /openImportPath: path => dropImportController\.openPath\(path\)/);
   assert.doesNotMatch(drop, /FileReader|readAs|\.readText\(|\.readImage\(|showToast|classList/);
   assert.equal(main.match(/dropImportController\.destroy\(\)/g).length, 3);
+
   assert.doesNotMatch(main + fixture, /classic-drop-import-port|mountClassicDropImportPort/);
   await assert.rejects(access(new URL('../src/features/import/compatibility/classic-drop-import-port.js', import.meta.url)), { code: 'ENOENT' });
   assert.doesNotMatch(fixture, /classic-import-classifier-port/);

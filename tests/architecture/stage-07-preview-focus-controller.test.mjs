@@ -11,7 +11,7 @@ test('Atomic 7.11 keeps one taskbook Preview Focus Controller pipeline owner', a
   assert.ok(entries.includes('preview-focus-controller.js'));
   const [entry, focus] = await Promise.all([source('src/features/preview/index.js'), source('src/features/preview/pipeline/preview-focus-controller.js')]);
   assert.match(entry, /createPreviewFocusController/);
-  assert.match(entry, /mountClassicPreviewFocusControllerPort/);
+  assert.doesNotMatch(entry, /mountClassicPreviewFocusControllerPort/);
   for (const token of ['requestGeneration','scheduleCursorFocus','focusLine','ensureLineVisible','scrollToLine']) assert.match(focus, new RegExp(token));
 });
 
@@ -27,14 +27,14 @@ test('Atomic 7.11 Focus Controller stays DOM-free and owns request-token invalid
 test('Atomic 7.11 composition owns one scoped Focus port while PreviewController delegates focus behavior to the canonical owner', async () => {
   const [main, controller, core, port] = await Promise.all([
     source('src/main.js'), source('src/features/preview/application/preview-controller.js'), source('public/app/core.js'),
-    source('src/features/preview/compatibility/classic-preview-focus-controller-port.js')
+    source('src/features/preview/pipeline/preview-focus-controller.js')
   ]);
   assert.match(main, /createPreviewFocusController\(\{/);
   assert.match(main, /focusDelay:\s*PREVIEW_BEHAVIOR_THRESHOLDS\.scheduling\.focusMs/);
-  assert.match(main, /mountClassicPreviewFocusControllerPort\(compatibilityPlatformHost, previewFocusController\)/);
-  assert.match(main, /previewFocusControllerPort\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewFocusControllerPort\(compatibilityPlatformHost, previewFocusController\)/);
+  assert.doesNotMatch(main, /previewFocusControllerPort\.destroy\(\)/);
   assert.match(main, /previewFocusController\.destroy\(\)/);
-  assert.match(port, /markdownEditorPreviewFocusControllerPort/);
+  assert.doesNotMatch(port, /markdownEditorPreviewFocusControllerPort/);
   assert.match(controller, /focusController\.connect\(\{/);
   assert.match(controller, /focusController\.scheduleCursorFocus\(/);
   assert.match(controller, /focusController\.focusLine\(/);

@@ -1,17 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mountClassicSubmenuPositionerPort } from '../../../src/features/menu/compatibility/classic-submenu-positioner-port.js';
-
-test('Atomic 6.11 classic submenu port delegates close without owning geometry state and unmounts exactly itself', () => {
-  const calls = [];
-  const host = {};
-  const positioner = { closeAll() { calls.push('close'); return true; } };
-  const mounted = mountClassicSubmenuPositionerPort(host, positioner);
-  assert.equal(host.markdownEditorSubmenuPositionerPort.closeAll(), true);
-  assert.deepEqual(calls, ['close']);
-  assert.throws(() => mountClassicSubmenuPositionerPort(host, positioner), /already mounted/);
-  mounted.destroy();
-  assert.equal(host.markdownEditorSubmenuPositionerPort, undefined);
-  assert.throws(() => mounted.api.closeAll(), /destroyed/);
-  mounted.destroy();
+import { createSubmenuPositioner } from '../../../src/features/menu/index.js';
+test('R16-08 explicit Submenu Positioner owns its lifecycle and no host publication', () => {
+  const root = { querySelectorAll: () => [] }, runtime = { setTimeout: () => 1, clearTimeout() {} };
+  const positioner = createSubmenuPositioner({ root, runtime });
+  assert.equal(positioner.start(), true); assert.equal(positioner.start(), false);
+  assert.equal(positioner.closeAll(), true);
+  positioner.destroy(); positioner.destroy();
+  assert.throws(() => positioner.closeAll(), /destroyed/);
+  assert.throws(() => positioner.start(), /destroyed/);
+  assert.equal(Object.hasOwn(root, 'markdownEditorSubmenuPositionerPort'), false);
 });

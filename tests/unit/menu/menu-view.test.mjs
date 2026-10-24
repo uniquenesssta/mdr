@@ -1,12 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildHtmlInventory } from '../../../scripts/stage-02/dom-inventory/html-inventory.mjs';
 import { MENU_DECLARATION } from '../../../src/features/menu/menu-state.js';
 import { createMenuView } from '../../../src/features/menu/menu-view.js';
 import { createMenuController } from '../../../src/features/menu/menu-controller.js';
 import { createMenuCommandBindings } from '../../../src/features/menu/menu-command-bindings.js';
-import { createClassicMenuCommandAdapter } from '../../../src/features/menu/compatibility/classic-menu-command-adapter.js';
+import { createMenuActions } from '../../../src/features/menu/menu-actions.js';
 
 function classList(...initial) {
   const set = new Set(initial);
@@ -104,16 +103,20 @@ test('Atomic 6.10 MenuView binds command metadata, blocks legacy bubbling and de
 });
 
 function productionMenu() {
-  const markup = readFileSync('public/compatibility/business-content.html', 'utf8');
-  const inventory = buildHtmlInventory(markup);
-  assert.equal(inventory.summary.inlineEventCount, 0, 'menu commands must work without inline fallback');
+  // The real-browser R16-08 test compares current feature Views with this exact markup.
+  // This unit fixture supplies only element behavior to the actual Menu View/controller.
+  const specification = JSON.parse(readFileSync('tests/fixtures/stage-16/ui-markup-baseline.json', 'utf8')).slots.menu;
   const root = el(), nodes = new Map();
-  for (const record of inventory.nodes) {
-    const node = el({ id: record.id || '', classes: record.classes });
-    for (const [name, value] of Object.entries(record.attributes)) node.setAttribute(name, value);
-    nodes.set(record.path, node);
-    (nodes.get(record.parentPath) || root).append(node);
-  }
+  let sequence = 0;
+  const append = (parent, specs) => {
+    for (const spec of specs.filter(Array.isArray)) {
+      const [, attributes, children] = spec;
+      const node = el({ id: attributes.id || '', classes: String(attributes.class || '').split(/\s+/).filter(Boolean) });
+      for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value);
+      nodes.set(++sequence, node); parent.append(node); append(node, children);
+    }
+  };
+  append(root, specification);
   const calls = [], errors = [];
   let failure = null;
   const port = {
@@ -125,9 +128,7 @@ function productionMenu() {
     }
   };
   const bindings = createMenuCommandBindings();
-  const adapter = createClassicMenuCommandAdapter({ bindings, host: {
-    markdownEditorDocumentUiCommandPort: port, markdownEditorEditorUiCommandPort: port
-  } });
+  const adapter = createMenuActions({ bindings, documentCommands: port, editorCommands: port, exportCommands: port, recentFiles: { clear() {} }, normalizeRecentPath: value => value.trim() });
   adapter.start();
   const controller = createMenuController({
     state: { declaration: MENU_DECLARATION, isVisible: () => true, isEnabled: () => true, subscribe: () => () => {} },

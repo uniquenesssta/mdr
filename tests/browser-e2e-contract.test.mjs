@@ -26,7 +26,7 @@ test('browser E2E runner stays dependency-free and covers required interactions'
     'application Settings Store cancels draft without persisting changes',
     'application Settings UI validates and applies one draft without global dialog functions',
     'application language Settings commit updates I18n without legacy globals',
-    'temporary compatibility business port mounts and destroys without owning the App Shell',
+    'feature content releases owned nodes, rolls back invalid construction and leaves App Shell ownership intact',
     'application shell has no structural overflow or clipped focus across required viewports',
     'application Document Session Controller keeps lifecycle model, session and UI coherent',
     'application Recent Files Repository and read-only Menu projection enforce limit, case-insensitive dedupe and clear'

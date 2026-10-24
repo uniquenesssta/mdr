@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
 import assert from 'node:assert/strict';
 import { access } from 'node:fs/promises';
 import test from 'node:test';
@@ -120,7 +121,7 @@ test('layered selectors do not cross independent feature namespaces', async () =
 
 test('stable compatibility presentation has no inline style authority', async () => {
   const [markup, shellSources, clipperSource, exportSource] = await Promise.all([
-    readText('public/compatibility/business-content.html'),
+    readCurrentViewMarkup(),
     Promise.all([
       'src/ui/shell/app-shell-view.js',
       'src/ui/shell/menu-bar-shell.js',

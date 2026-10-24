@@ -182,7 +182,7 @@ test('R14-05 actual classic caller consumes the new progress view without a lega
 
 test('R14-05 production composition owns disposal and compatibility markup/registry no longer own progress', async () => {
   const read = path => readFile(path, 'utf8');
-  const [main, classic, markup, bridge] = await Promise.all(['src/main.js','src/features/export/application/export-controller.js','public/compatibility/business-content.html','src/ui/compatibility/mount-modal-shells.js'].map(read));
+  const [main, classic, markup, bridge] = await Promise.all(['src/main.js','src/features/export/application/export-controller.js','src/features/editor/ui/editor-content-view.js','src/bootstrap/workspace-content.js'].map(read));
   assert.match(main, /createExportProgressStore\(exportTaskController\)/);
   assert.match(main, /createExportProgressDialogView/); assert.match(main, /exportProgressView\.destroy\(\)/); assert.match(main, /exportProgressStore\.destroy\(\)/);
   assert.doesNotMatch(classic, /export-progress-|exportProgressModalOpened|cancelActiveExport|exportTaskPort\.subscribe/);

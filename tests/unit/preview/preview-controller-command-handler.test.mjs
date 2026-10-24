@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createPreviewController } from '../../../src/features/preview/application/preview-controller.js';
-import { mountPreviewCommandHandler } from '../../../src/features/preview/application/preview-command-handler.js';
+import { createPreviewCommands } from '../../../src/features/preview/application/preview-commands.js';
 
 function createHarness() {
   const calls = [];
@@ -23,7 +23,7 @@ function createHarness() {
     replaceChildren() { calls.push('replaceChildren'); },
     querySelector() { return null; }
   };
-  const editor = { textLength: 0, value: '', selectionStart: 0, virtualEditor: null };
+  const editor = { getTextLength: () => 0, getText: () => '', getSelection: () => ({start:0,end:0}) };
   const documentModel = { getNonWhitespaceCount() { return 0; } };
   const layoutState = { snapshot: { mode: 'preview' } };
   const state = {
@@ -100,23 +100,23 @@ function createHarness() {
 test('Atomic 7.14 command handler accepts the canonical PreviewController and exposes one virtual facade', () => {
   const { controller } = createHarness();
   const host = {};
-  const mounted = mountPreviewCommandHandler(host, controller);
+  const mounted = createPreviewCommands(controller);
 
-  assert.equal(host.markdownEditorPreviewCommandPort, mounted.port);
-  assert.equal(mounted.port.virtual.active, true);
-  assert.deepEqual(mounted.port.virtual.getStats(), { blocks: 9, mountedBlocks: 3 });
-  assert.deepEqual(mounted.port.virtual.getMountedAnchors(), ['anchor']);
-  assert.deepEqual(mounted.port.virtual.getMetrics(), [{ startLine: 10, endLine: 12 }]);
-  assert.equal(mounted.port.virtual.getContentYForLine(11), 110);
-  assert.equal(mounted.port.virtual.getLineForContentY(110), 11);
-  assert.equal(mounted.port.virtual.containsLineRange(10, 12), true);
-  assert.equal(mounted.port.virtual.hasLineRangeMounted(10, 12), true);
-  assert.deepEqual(mounted.port.virtual.ensureLineRangeVisible(10, 12), { from: 10, to: 12 });
-  assert.deepEqual(mounted.port.virtual.ensureLineVisible(11), { line: 11 });
+  assert.deepEqual(Object.keys(host), []);
+  assert.equal(mounted.virtual.active, true);
+  assert.deepEqual(mounted.virtual.getStats(), { blocks: 9, mountedBlocks: 3 });
+  assert.deepEqual(mounted.virtual.getMountedAnchors(), ['anchor']);
+  assert.deepEqual(mounted.virtual.getMetrics(), [{ startLine: 10, endLine: 12 }]);
+  assert.equal(mounted.virtual.getContentYForLine(11), 110);
+  assert.equal(mounted.virtual.getLineForContentY(110), 11);
+  assert.equal(mounted.virtual.containsLineRange(10, 12), true);
+  assert.equal(mounted.virtual.hasLineRangeMounted(10, 12), true);
+  assert.deepEqual(mounted.virtual.ensureLineRangeVisible(10, 12), { from: 10, to: 12 });
+  assert.deepEqual(mounted.virtual.ensureLineVisible(11), { line: 11 });
 
   mounted.destroy();
   assert.equal(Object.hasOwn(host, 'markdownEditorPreviewCommandPort'), false);
-  assert.throws(() => mounted.port.virtual.getMetrics(), /destroyed/);
+  assert.throws(() => mounted.virtual.getMetrics(), /destroyed/);
   controller.destroy();
 });
 

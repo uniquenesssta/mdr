@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportTaskController,
+import { createExportPreviewEnhancer, createExportTaskController,
   ExportCancelledError, ExportDocumentStaleError } from '../src/features/export/index.js';
 
 class Element {
@@ -151,14 +151,13 @@ test('R14-07 cancellation from enhancement progress stops before another frame o
   await assert.rejects(h.enhancer.enhance({ root: h.root, task: h.task }), cancellation('cancelled'));
   assert.equal(h.calls.length, 18); assert.equal(h.frames.size, 0);
 });
-test('R14-07 enhancement bridge owns only its immutable scoped capability', async t => {
-  const h = harness(t, { count: 0 }), host = {}, mount = mountClassicExportEnhancementPort(host, h.enhancer);
-  assert.ok(Object.isFrozen(mount.port)); assert.deepEqual(Object.keys(host), []);
-  assert.throws(() => mountClassicExportEnhancementPort(host, h.enhancer), /already mounted/);
-  assert.equal(await mount.port.enhance({ root: h.root }), h.root); mount.destroy(); mount.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorExportEnhancementPort'), false); assert.throws(() => mount.port.enhance({ root: h.root }), /destroyed/);
+test('R16-08 direct enhancement capability retains root identity and terminal disposal', async t => {
+  const h = harness(t, { count: 0 }), host = {};
+  assert.equal(Object.isFrozen(h.enhancer), true); assert.deepEqual(Object.keys(host), []);
   assert.equal(await h.enhancer.enhance({ root: h.root }), h.root);
-  assert.throws(() => mountClassicExportEnhancementPort(null, h.enhancer), TypeError);
+  h.enhancer.destroy(); h.enhancer.destroy();
+  assert.equal(Object.hasOwn(host, 'markdownEditorExportEnhancementPort'), false);
+  await assert.rejects(h.enhancer.enhance({ root: h.root }), cancellation('destroyed'));
 });
 test('R14-07 required presentation/model/Builder/frame capabilities fail at construction', t => {
   const h = harness(t); for (const key of ['documentRef', 'documentModel', 'getActiveDocumentId', 'builder', 'presentation', 'requestFrame', 'cancelFrame']) {

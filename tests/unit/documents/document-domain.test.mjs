@@ -9,7 +9,7 @@ import {
   createDocumentId,
   createDocumentRecord,
   createRecentFileEntry,
-  mountClassicDocumentDomainPort,
+  pickDocumentRecordMetadata,
   normalizeDocumentId,
   normalizeDocumentNativeMetadata,
   normalizeDocumentPath,
@@ -91,16 +91,16 @@ test('Atomic 5.1 native metadata and recent-file entries preserve legacy numeric
   assert.throws(() => createRecentFileEntry({ path: '   ' }), /must not be empty/);
 });
 
-test('Atomic 5.1 classic compatibility port owns only one explicit host property lifecycle', () => {
-  const host = {};
-  const port = mountClassicDocumentDomainPort(host);
-  assert.equal(host.markdownEditorDocumentDomainPort, port);
-  assert.throws(() => mountClassicDocumentDomainPort(host), /already mounted/);
-  assert.equal(port.normalizeTitle('x', 'Untitled'), 'x.md');
-  port.destroy();
-  port.destroy();
-  assert.equal('markdownEditorDocumentDomainPort' in host, false);
-  assert.throws(() => port.normalizeTitle('x'), /destroyed/);
+test('R16-08 pure Documents metadata capabilities preserve normalization without creating a host object', () => {
+  const before = Object.getOwnPropertyNames(globalThis);
+  const legacy = { id: 'legacy', title: 'x', content: 'private body' };
+  const metadata = pickDocumentRecordMetadata(legacy);
+  assert.deepEqual(metadata, { id: 'legacy', title: 'x' });
+  assert.equal(createDocumentRecord(metadata).title, 'x.md');
+  assert.equal(normalizeDocumentTitle('x', 'Untitled'), 'x.md');
+  assert.equal(normalizeRecentFilePath(' C:/x.md '), 'C:/x.md');
+  assert.equal(legacy.content, 'private body');
+  assert.deepEqual(Object.getOwnPropertyNames(globalThis), before);
 });
 
 test('Atomic 5.1 production integration removes classic metadata normalization authority without changing the frozen DocumentModel', async () => {
@@ -116,7 +116,8 @@ test('Atomic 5.1 production integration removes classic metadata normalization a
   assert.doesNotMatch(core, /function normalizeRecentFilePath/);
   assert.doesNotMatch(core, /createRecentFileEntry/);
   assert.match(recentFilesRepository, /createRecentFileEntry/);
-  assert.match(bootstrap, /mountClassicDocumentDomainPort\(portsHost\)/);
+  assert.match(bootstrap, /normalizeRecentPath: normalizeRecentFilePath/);
+  assert.doesNotMatch(bootstrap, /mountClassicDocumentDomainPort/);
   assert.match(nativeStore, /\.\.\/\.\.\/documents\/index\.js/);
   assert.equal((nativeStore.match(/normalizeDocumentNativeMetadata/g) || []).length, 3);
   assert.match(entry, /document-record\.js/);

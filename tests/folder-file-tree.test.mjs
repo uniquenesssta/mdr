@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from './support/current-view-markup.mjs';
 import { readFile } from './support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -48,7 +49,7 @@ test('folder file tree keeps supported files, sorts directories first, and norma
 
 test('folder file tree is wired through the Sidebar controller, runtime bridge, core state, and Rust command', async () => {
   const [index, main, core, sidebarState, desktopPlatform, rustMain, rustLocal, treeLimits] = await Promise.all([
-    readFile(new URL('../public/compatibility/business-content.html', import.meta.url), 'utf8'),
+    readCurrentViewMarkup(),
     readFile(new URL('../src/main.js', import.meta.url), 'utf8'),
     readFile(new URL('../public/app/core.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/features/sidebar/state/sidebar-state.js', import.meta.url), 'utf8'),

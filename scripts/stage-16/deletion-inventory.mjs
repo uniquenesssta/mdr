@@ -27,6 +27,7 @@ const fixedPaths = [
 ];
 function followup(path) {
   if (path.startsWith('public/app/') || path === 'public/i18n.js') return 'R16-02';
+  if (path === 'src/features/preview/application/preview-command-handler.js') return 'R16-08';
   if (path === 'src/styles/main.css') return 'R16-05';
   if (path === 'src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js') return 'R16-06';
   if (path.startsWith('src/runtime/')) return 'R16-07';
@@ -62,6 +63,10 @@ export async function buildDeletionInventory({ root = process.cwd(), baselineCom
     if (/^(?:public\/app\/|src\/runtime\/|src\/editor\/|src\/preview\/|src\/rendering\/|src\/storage\/|\.vite\/|logs\/)/.test(path)
       || (/^(?:src|public)\//.test(path) && (path.includes('/compatibility/') || posix.basename(path).startsWith('classic-')))) candidates.add(path);
   }
+  // Retain every R16-08 retired candidate after it leaves the tracked tree.
+  const retirementPath = resolve(root, 'docs/audit/r16-08-compatibility-retirements.json');
+  const retirement = await readFile(retirementPath, 'utf8').then(JSON.parse, error => { if (error.code === 'ENOENT') return null; throw error; });
+  for (const entry of retirement?.retiredModules || []) candidates.add(entry.path);
   // The original log paths stay visible as already-retired candidates, not local inputs.
   const architecture = JSON.parse(await readFile(resolve(root, 'tests/architecture/fixtures/architecture-baseline.json'), 'utf8'));
   for (const log of architecture.auditCorrections?.r15RuntimeLogRetirement?.removedTrackedGeneratedFiles || []) candidates.add(log.path);

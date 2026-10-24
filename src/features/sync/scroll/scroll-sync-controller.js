@@ -52,6 +52,8 @@ export class ScrollSyncController {
     assertSourceOwnership(sourceOwnership);
 
     this.elements = { editor, preview };
+    this.editorApi = null;
+    this.unsubscribeEditorScroll = null;
     this.sourceOwnership = sourceOwnership;
     this.ownsSourceOwnership = !options.sourceOwnership;
     this.frameRuntime = {
@@ -77,11 +79,28 @@ export class ScrollSyncController {
     this.destroyed = false;
     this.geometrySession = createScrollGeometrySession({
       sourceOwnership: this.sourceOwnership,
-      readScrollTop: side => this.elements[side].scrollTop,
+      readScrollTop: side => this.readMetrics(side).top,
       applyScrollTop: (side, top, geometryOptions) => this.applyScrollTop(side, top, geometryOptions),
       scheduleSourceSync: side => this.scheduleSourceSync(side)
     });
     this.installListeners();
+  }
+
+  connectEditor(editorApi) {
+    if (this.destroyed) throw new Error('ScrollSyncController is destroyed.');
+    for (const method of ['getScrollMetrics', 'setScrollTop', 'scrollTo', 'subscribeScroll']) {
+      if (typeof editorApi?.[method] !== 'function') throw new TypeError(`ScrollSyncController Editor requires ${method}().`);
+    }
+    if (this.editorApi) throw new Error('ScrollSyncController Editor is already connected.');
+    const unsubscribe = editorApi.subscribeScroll(() => this.handleScroll('editor'));
+    this.editorApi = editorApi;
+    this.unsubscribeEditorScroll = unsubscribe;
+  }
+
+  readMetrics(side) {
+    if (side === 'editor' && this.editorApi) return this.editorApi.getScrollMetrics();
+    const element = this.elements[side];
+    return { top: element.scrollTop, height: element.scrollHeight, clientHeight: element.clientHeight };
   }
 
   installListeners() {
@@ -93,7 +112,7 @@ export class ScrollSyncController {
       const onKeyDown = event => {
         if (SCROLL_KEYS.has(event.key)) this.beginUserGesture(side, 'keyboard');
       };
-      const onScroll = () => this.handleScroll(side);
+      const onScroll = () => { if (side !== 'editor' || !this.editorApi) this.handleScroll(side); };
 
       element.addEventListener('wheel', onWheel, { passive: true });
       element.addEventListener('pointerdown', onPointerDown, true);
@@ -184,7 +203,8 @@ export class ScrollSyncController {
   scheduleTarget(side, top, options = {}) {
     if (this.destroyed || !SIDE_NAMES.has(side)) return false;
     const element = this.elements[side];
-    const maxScroll = Math.max(0, element.scrollHeight - element.clientHeight);
+    const metrics = this.readMetrics(side);
+    const maxScroll = Math.max(0, metrics.height - metrics.clientHeight);
     this.pendingTarget = {
       side,
       top: clamp(top, 0, maxScroll),
@@ -210,9 +230,10 @@ export class ScrollSyncController {
   applyScrollTop(side, top, options = {}) {
     if (this.destroyed || !SIDE_NAMES.has(side)) return false;
     const element = this.elements[side];
-    const maxScroll = Math.max(0, element.scrollHeight - element.clientHeight);
+    const metrics = this.readMetrics(side);
+    const maxScroll = Math.max(0, metrics.height - metrics.clientHeight);
     const targetTop = clamp(top, 0, maxScroll);
-    const delta = targetTop - element.scrollTop;
+    const delta = targetTop - metrics.top;
     if (Math.abs(delta) < 0.75) return false;
 
     this.markProgrammaticScroll(side, options.settleMs || (options.behavior === 'smooth' ? 900 : 700));
@@ -221,7 +242,10 @@ export class ScrollSyncController {
     this.stats.lastTargetTop = Math.round(targetTop);
     this.stats.lastTargetDelta = Math.round(delta);
 
-    if (options.behavior === 'smooth') {
+    if (side === 'editor' && this.editorApi) {
+      if (options.behavior === 'smooth') this.editorApi.scrollTo({ top: targetTop, behavior: 'smooth' });
+      else this.editorApi.setScrollTop(targetTop);
+    } else if (options.behavior === 'smooth') {
       element.scrollTo({ top: targetTop, behavior: 'smooth' });
     } else {
       element.scrollTop = targetTop;
@@ -308,6 +332,9 @@ export class ScrollSyncController {
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true;
+    this.unsubscribeEditorScroll?.();
+    this.unsubscribeEditorScroll = null;
+    this.editorApi = null;
     this.cancelQueuedFrame('source');
     this.cancelQueuedFrame('target');
     this.pendingSourceSide = '';

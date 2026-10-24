@@ -9,7 +9,7 @@ import {
   DOCUMENT_SESSION_CHANGED_EVENT,
   createDocumentRecord,
   createDocumentSessionStore,
-  mountClassicDocumentSessionPort
+  pickDocumentRecordMetadata
 } from '../../../src/features/documents/index.js';
 import { createNativeDocumentStore } from '../../../src/features/persistence/index.js';
 
@@ -78,20 +78,21 @@ test('Atomic 5.2 listener failures are reported without rolling back committed s
   assert.equal(errors[0].event.snapshot.activeId, 'alpha');
 });
 
-test('Atomic 5.2 classic port projects legacy body-bearing inputs into metadata-only Store records and owns only host lifecycle', () => {
+test('R16-08 explicit metadata projection excludes legacy bodies before the sole Store boundary', () => {
   const store = createDocumentSessionStore();
   const host = {};
-  const port = mountClassicDocumentSessionPort(host, store);
-  port.insertRecord({ id: 'legacy', title: 'Legacy.md', updatedAt: 3, content: 'must stay outside store' }, { activate: true });
-  assert.equal(host.markdownEditorDocumentSessionPort, port);
+  const port = store;
+  const legacy = { id: 'legacy', title: 'Legacy.md', updatedAt: 3, content: 'must stay outside store' };
+  assert.throws(() => port.insertRecord(legacy), /body field/);
+  port.insertRecord(pickDocumentRecordMetadata(legacy), { activate: true });
   assert.deepEqual(port.records, [{ id: 'legacy', title: 'Legacy.md', updatedAt: 3 }]);
   assert.equal('content' in port.records[0], false);
-  assert.throws(() => mountClassicDocumentSessionPort(host, store), /already mounted/);
+  assert.equal(store.activeId, 'legacy');
   port.destroy();
   port.destroy();
   assert.equal('markdownEditorDocumentSessionPort' in host, false);
   assert.throws(() => port.getActiveRecord(), /destroyed/);
-  assert.equal(store.activeId, 'legacy');
+  assert.throws(() => store.activeId, /destroyed/);
 });
 
 test('Atomic 5.2 destroy is idempotent, removes listeners and makes Store operations terminal', () => {
@@ -155,18 +156,18 @@ test('Atomic 5.2 production integration removes classic session-state authority 
   const [main, imageOwner] = await Promise.all([
     readText('src/main.js'), readText('src/features/export/formats/image/image-exporter.js')
   ]);
-  assert.match(main, /createImageExporter\(\{ documentModel, documents: documentControllerPort/);
+  assert.match(main, /createImageExporter\(\{ documentModel, documents: documentController/);
   assert.match(imageOwner, /documents\.activeId/);
   assert.doesNotMatch(exportModule, /\bcurrentDocumentId\b|\bdocuments\b/);
   assert.match(previewEngine, /\bdocumentSession\b/);
   assert.match(previewEngine, /documentSession\?\.activeId/);
   assert.doesNotMatch(previewEngine, /markdownEditorDocumentSessionPort|\bcurrentDocumentId\b/);
   assert.match(bootstrap, /createDocumentSessionStore\(\)/);
-  assert.match(bootstrap, /mountClassicDocumentSessionPort\(portsHost, documentSessionStore\)/);
+  assert.match(bootstrap, /await startApplication\(\{ platform, documentSessionStore/);
   assert.doesNotMatch(nativeStore, /Object\.assign\((?:session\.)?document/);
   assert.match(nativeStore, /nativeVersion: session\.backendVersion/);
   assert.match(entry, /document-session-store\.js/);
-  assert.match(entry, /classic-document-session-port\.js/);
+  assert.doesNotMatch(entry, /classic-document-session-port\.js/);
   const globals = core + '\n' + exportModule + '\n' + previewEngine + '\n' + bootstrap;
   assert.doesNotMatch(globals, /window\.markdownEditorDocumentSession/);
   const frozenHash = execFileSync('git', ['hash-object', 'src/document/document-model.js'], { cwd: ROOT, encoding: 'utf8' }).trim();

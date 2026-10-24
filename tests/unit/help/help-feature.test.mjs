@@ -10,8 +10,7 @@ import {
   createHelpContentRegistry,
   createHelpController,
   createHelpState,
-  helpContentRegistry,
-  mountClassicHelpPort
+  helpContentRegistry
 } from '../../../src/features/help/index.js';
 import enContent from '../../../src/features/help/content/help.en.js';
 
@@ -195,27 +194,18 @@ test('Help controller construction rolls back locale subscriptions when menu lis
   state.destroy();
 });
 
-test('Classic Help port delegates only the controller contract and is removed cleanly on destroy', () => {
-  const calls = [];
-  const host = { removeAttribute() {} };
-  const controller = {
-    activePage: 'start',
-    open(page) { calls.push(['open', page]); return true; },
-    close(reason) { calls.push(['close', reason]); return true; },
-    navigate(page) { calls.push(['navigate', page]); return page; },
-    openFirstRun() { calls.push(['first']); return false; },
-    isOpen() { return false; }
-  };
-  const mount = mountClassicHelpPort(host, controller);
-  assert.equal(Object.keys(host).includes('markdownEditorHelpPort'), false);
-  assert.equal(host.markdownEditorHelpPort.open('files'), true);
-  assert.equal(host.markdownEditorHelpPort.navigate('views'), 'views');
-  assert.equal(host.markdownEditorHelpPort.openFirstRun(), false);
-  assert.deepEqual(calls, [['open', 'files'], ['navigate', 'views'], ['first']]);
-  mount.destroy();
-  mount.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorHelpPort'), false);
-  assert.throws(() => mount.api.open(), /destroyed/);
+test('R16-08 explicit Help capability keeps navigation, first-run policy and terminal cleanup', () => {
+  const h = createControllerFixture({ storageEntries: [[HELP_SHOWN_STORAGE_KEY, '1']] });
+  assert.equal(h.controller.open('files'), true);
+  assert.equal(h.controller.activePage, 'files');
+  h.controller.navigate('views');
+  assert.equal(h.controller.activePage, 'views');
+  assert.equal(h.controller.openFirstRun(), false);
+  assert.equal(h.controller.isOpen(), true);
+  h.controller.close('test'); assert.equal(h.controller.isOpen(), false);
+  h.controller.destroy(); h.controller.destroy();
+  assert.equal(h.i18n.listenerCount, 0);
+  assert.throws(() => h.controller.open(), /destroyed/);
 });
 
 test('Atomic 4.5 production integration removes the classic Help authority and wires one ESM Help feature before Translation Bindings', async () => {
@@ -224,8 +214,8 @@ test('Atomic 4.5 production integration removes the classic Help authority and w
     readFile('public/app/core.js', 'utf8'),
     readFile('public/app/bootstrap.js', 'utf8'),
     readFile('public/app/editor-tools.js', 'utf8'),
-    readFile('public/compatibility/business-content.html', 'utf8'),
-    readFile('src/ui/compatibility/mount-modal-shells.js', 'utf8'),
+    readFile('src/features/menu/ui/menu-content-view.js', 'utf8'),
+    readFile('src/bootstrap/workspace-content.js', 'utf8'),
     readFile('src/features/help/ui/help-dialog-view.js', 'utf8'),
     readFile('scripts/architecture/source-analysis.mjs', 'utf8')
   ]);
@@ -236,10 +226,11 @@ test('Atomic 4.5 production integration removes the classic Help authority and w
   const bindingsIndex = entry.indexOf('createTranslationBindings(i18nService, ui,');
   const appIndex = entry.indexOf('await importApplication()');
   assert.ok(serviceIndex >= 0 && helpIndex > serviceIndex && bindingsIndex > helpIndex && appIndex > bindingsIndex);
-  assert.match(entry, /mountClassicHelpPort\(portsHost, helpController\)/);
+  assert.match(entry, /const helpController = own\(createHelpFeature/);
   assert.doesNotMatch(entry, /loadClassicScript|\/help-content\.js/);
-  assert.ok(entry.indexOf('translationBindings?.destroy()') < entry.indexOf('helpController?.destroy()'));
-  assert.ok(entry.indexOf('helpController?.destroy()') < entry.indexOf('i18nService?.destroy()'));
+  assert.ok(entry.indexOf('const i18nService = own(') < entry.indexOf('const helpController = own('));
+  assert.match(entry, /own\(createTranslationBindings/);
+  assert.match(entry, /lifetime\.destroy\(\)/);
 
   assert.doesNotMatch(core, /markdownEditorHelpContent|HELP_SHOWN_KEY|help-body|data-help-page-panel/);
   assert.doesNotMatch(editorTools, /function\s+(?:openHelp|closeHelp|switchHelpPage)\b|activeHelpPage/);

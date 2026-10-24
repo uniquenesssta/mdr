@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from '../../support/current-view-markup.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createTranslationBindings } from '../../../src/i18n/translation-bindings.js';
@@ -171,7 +172,7 @@ test('production integration preserves 113 bindings across shell, Help and the o
     readFile('public/app/core.js', 'utf8'),
     readFile('public/app/bootstrap.js', 'utf8'),
     readFile('src/i18n/index.js', 'utf8'),
-    readFile('public/compatibility/business-content.html', 'utf8'),
+    readCurrentViewMarkup(),
     readFile('src/features/help/ui/help-dialog-view.js', 'utf8'),
     readFile('src/features/import/web-clipper/web-clipper-view.js', 'utf8'),
     readFile('src/main.js', 'utf8'),
@@ -180,9 +181,9 @@ test('production integration preserves 113 bindings across shell, Help and the o
 
   assert.match(index, /translation-bindings\.js/);
   assert.match(moduleEntry, /createTranslationBindings\(i18nService, ui,/);
-  assert.match(moduleEntry, /translationBindings\?\.destroy\(\)/);
-  assert.ok(moduleEntry.indexOf('i18nPort?.destroy()') < moduleEntry.indexOf('translationBindings?.destroy()'));
-  assert.ok(moduleEntry.indexOf('translationBindings?.destroy()') < moduleEntry.indexOf('i18nService?.destroy()'));
+  assert.match(moduleEntry,/own\(createTranslationBindings\(/);
+  assert.match(moduleEntry,/own\(createI18nService\(/);
+  assert.ok(moduleEntry.indexOf('own(createI18nService(')<moduleEntry.indexOf('own(createTranslationBindings('));
 
   assert.doesNotMatch(core, /function applyLanguage\s*\(/);
   assert.doesNotMatch(core, /querySelectorAll\(['"]\[data-i18n/);
@@ -210,7 +211,7 @@ test('production integration preserves 113 bindings across shell, Help and the o
     ['data-i18n', 'cancel'], ['data-i18n', 'convertInsert']
   ]);
   assert.equal(markupBindings.length + helpBindings.length + clipperBindings.length + imageBindings.length, 113);
-  assert.match(main, /subscribeLocale: listener => compatibilityPlatformHost\.markdownEditorI18nPort\.subscribe\(listener\)/);
+  assert.match(main, /subscribeLocale: listener => i18nService\.subscribe\(listener\)/);
   assert.match(clipperView, /subscribeLocale\(renderTranslations\)/);
   assert.doesNotMatch(markup, /id="url-modal"/);
 });

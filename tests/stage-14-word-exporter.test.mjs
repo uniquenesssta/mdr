@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { createExportFileWriter, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort,
-  createHtmlExporter, createHtmlDocumentSerializer, createExportRequest, createExportTaskController,
+import { createExportFileWriter, createWordExporter, createWordDocumentSerializer, createHtmlExporter, createHtmlDocumentSerializer, createExportRequest, createExportTaskController,
   isExportCancelledError } from '../src/features/export/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
@@ -138,12 +137,13 @@ test('R14-11 HTML and Word share one task authority while keeping owner lifetime
   assert.equal(h.calls.filter(x=>x[0]==='write').length,2);assert.equal(h.tasks.getSnapshot().activeTask,null);
 });
 
-test('R14-11 scoped Word command is readonly and independent of owner/replacement property',async()=>{
-  const h=setup(),host={},mount=mountClassicWordExportPort(host,h.owner);
-  assert.equal(Object.keys(host).length,0);assert.equal(Object.isFrozen(mount.port),true);assert.throws(()=>mountClassicWordExportPort(host,h.owner),/already/);
-  const next={};Object.defineProperty(host,'markdownEditorWordExportPort',{configurable:true,value:next});mount.destroy();mount.destroy();
-  assert.equal(host.markdownEditorWordExportPort,next);assert.throws(()=>mount.port.export({request:h.request()}),/destroyed/);
-  assert.equal((await h.owner.export({request:h.request()})).status,'written');
+test('R16-08 explicit Word capability preserves readonly metadata and terminal owner cleanup', async () => {
+  const h = setup(), host = {};
+  assert.equal(Object.keys(host).length, 0); assert.equal(Object.isFrozen(h.owner), true);
+  assert.equal((await h.owner.export({ request: h.request() })).status, 'written');
+  h.owner.destroy(); h.owner.destroy();
+  await assert.rejects(async () => h.owner.export({ request: h.request() }), cancelled('destroyed'));
+  assert.equal(h.tasks.getSnapshot().activeTask, null); h.tasks.destroy();
 });
 
 test('R14-11 actual classic Word command uses complete public pipeline with no private template or downloader',async()=>{

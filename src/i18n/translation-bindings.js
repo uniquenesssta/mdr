@@ -68,7 +68,8 @@ function applyBinding(binding, value) {
       binding.element.title = value;
       break;
     case 'placeholder':
-      binding.element.placeholder = value;
+      if ('placeholder' in binding.element) binding.element.placeholder = value;
+      else binding.element.setAttribute('data-placeholder', value);
       break;
     case 'alt':
       binding.element.alt = value;

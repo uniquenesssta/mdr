@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   createRecentFilesRepository,
-  mountClassicRecentFilesPort
+  createRecentFilesReadSource
 } from '../../../src/features/documents/index.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
@@ -175,17 +175,15 @@ test('Atomic 6.12 repository publishes immutable read-only snapshots only on sem
   repository.destroy();
 });
 
-test('Atomic 6.12 classic port exposes write commands only and owns one scoped host lifecycle', () => {
+test('R16-08 explicit Recent Files writes preserve one Repository and the Menu read source stays readonly', () => {
   const storage = createMemoryStorage();
   const repository = createRecentFilesRepository({ storage, now: () => 3 });
   repository.load();
   const host = {};
-  const port = mountClassicRecentFilesPort(host, repository);
-  assert.equal(host.markdownEditorRecentFilesPort, port);
-  assert.throws(() => mountClassicRecentFilesPort(host, repository), /already mounted/);
-  assert.deepEqual(Object.keys(port).sort(), ['add', 'clear', 'destroy']);
-  assert.equal('entries' in port, false);
-  assert.equal('load' in port, false);
+  const port = repository, source = createRecentFilesReadSource(repository);
+  assert.deepEqual(Object.keys(source).sort(), ['snapshot', 'subscribe']);
+  assert.equal('add' in source, false); assert.equal('clear' in source, false);
+  assert.equal(source.snapshot, repository.snapshot);
   port.add('C:/Notes/A.md', { name: 'A.md' });
   assert.deepEqual(repository.entries[0], { path: 'C:/Notes/A.md', name: 'A.md', openedAt: 3 });
   port.clear();
@@ -205,7 +203,7 @@ test('Atomic 6.12 production integration keeps persistence in Documents and remo
     readText('src/main.js'),
     readText('src/features/documents/index.js'),
     readText('src/features/documents/infrastructure/recent-files-repository.js'),
-    readText('src/features/documents/compatibility/classic-recent-files-port.js'),
+    readText('src/features/documents/application/recent-files-read-source.js'),
     readText('src/features/menu/recent-files-menu-controller.js'),
     readText('src/features/import/application/import-document-controller.js')
   ]);
@@ -223,7 +221,7 @@ test('Atomic 6.12 production integration keeps persistence in Documents and remo
   assert.match(main, /createRecentFilesMenuController/);
   assert.match(index, /recent-files-read-source\.js/);
   assert.match(index, /recent-files-repository\.js/);
-  assert.match(index, /classic-recent-files-port\.js/);
+  assert.doesNotMatch(index, /classic-recent-files-port\.js/);
   assert.doesNotMatch(repositorySource, /document\.|window\.|querySelector|createElement/);
   assert.doesNotMatch(portSource, /entries|\.load\(|window\.|querySelector|createElement/);
   assert.doesNotMatch(menuController, /localStorage|sessionStorage|recent-files-repository|platform\.files|handleNativeDroppedPath/);

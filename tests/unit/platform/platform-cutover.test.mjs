@@ -18,8 +18,8 @@ test('Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-
     assert.doesNotMatch(source, /markdownEditorNative|runtime\/tauri\.js/);
   }
   const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
-  assert.match(main, /createPlatform\(/);
-  assert.match(main, /mountClassicPlatformPort\(/);
+  assert.match(await readFile('src/bootstrap/module-entry.js','utf8'), /createPlatform\(/);
+  assert.doesNotMatch(main, /mountClassicPlatformPort|compatibilityPlatformHost/);
   assert.doesNotMatch(main, /window\.markdownEditorPlatform|window\.platform\s*=/);
 });
 
@@ -38,10 +38,10 @@ test('classic callers use the scoped compatibility host instead of a replacement
   assert.match(exportCommands, /owners\[format\]\[method\]/);
   assert.match(writer, /platform\.dialogs\.saveFile/);assert.match(writer, /platform\.files\.writeBinary/);
   assert.doesNotMatch(exportCommands + writer, /window\.markdownEditorNative|__TAURI/);
-  const bridge = await readFile(new URL('../../../src/platform/compatibility/classic-platform-port.js', import.meta.url), 'utf8');
-  assert.match(bridge, /call\(portName, methodName/);
-  assert.match(bridge, /supports\(capability\)/);
-  assert.doesNotMatch(bridge, /\bwindow\.|\bglobalThis\./);
+  await assert.rejects(access(new URL('../../../src/platform/compatibility/classic-platform-port.js', import.meta.url)));
+  const entry=await readFile('src/bootstrap/module-entry.js','utf8');
+  assert.match(entry, /startApplication\(\{ platform,/);
+  assert.doesNotMatch(entry, /mountClassicPlatformPort|portsHost/);
 });
 
 test('ESM consumers receive responsibility-focused ports rather than native DTO facade methods', async () => {
@@ -98,7 +98,7 @@ test('Stage 3 evidence keeps 174 as historical context while enforcing the exact
     const source = await readFile(new URL('../../../' + path, import.meta.url), 'utf8');
     assert.match(source, /HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT\s*=\s*174/);
     assert.match(source, /STAGE_3_PLATFORM_MODULE_COUNT\s*=\s*36/);
-    assert.match(source, /platformModules\.length\s*!==\s*STAGE_3_PLATFORM_MODULE_COUNT/);
+    assert.match(source, /platformModules\.length\s*!==\s*CURRENT_PLATFORM_MODULE_COUNT/);
     assert.doesNotMatch(source, /moduleFixture\.modules\.length\s*!==\s*174|fixture\.modules\.length\s*!==\s*174/);
   }
 });

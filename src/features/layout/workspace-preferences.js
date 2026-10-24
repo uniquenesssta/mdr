@@ -8,7 +8,7 @@ import { telemetry } from '../telemetry/index.js';
  */
 import { createApplicationLifetime } from '../../bootstrap/application-lifetime.js';
 
-export function createWorkspacePreferences({ document, window, editor, preview, documentModel, coreSettingsStorePort, coreEditorUiCommandPort, coreLayoutStatePort, corePreviewCommandPort, splitController, t, showToast, updateStatusBar, updateInlineColorToolAvailability }) {
+export function createWorkspacePreferences({ document, window, editor, preview, documentModel, coreSettingsStorePort, coreEditorUiCommandPort, coreLayoutStatePort, corePreviewCommandPort, splitController, compactSplitController, t, showToast, updateStatusBar, updateInlineColorToolAvailability }) {
   const lifetime = createApplicationLifetime();
   const setTimeout = lifetime.setTimeout, clearTimeout = lifetime.clearTimeout;
   try {
@@ -16,7 +16,7 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
     const editorToolsSettingsStorePort = coreSettingsStorePort, editorToolsEditorUiCommandPort = coreEditorUiCommandPort, editorToolsLayoutStatePort = coreLayoutStatePort, editorToolsSplitControllerPort = splitController, editorToolsPreviewCommandPort = corePreviewCommandPort;
     let activeLayoutTransition = null;
     function isWindowResizeBurstActive() {
-      return performance.now() < coreLayoutStatePort.windowResizeActiveUntil;
+      return performance.now() < coreLayoutStatePort.snapshot.resize.windowActiveUntil;
     }
 
     function consumeViewTransitionPromise(promise) {
@@ -35,8 +35,8 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
       const canUseViewTransition = typeof document.startViewTransition === 'function'
         && document.documentElement.classList.contains('app-ready')
         && !reduceMotion
-        && !coreLayoutStatePort.isResizing
-        && !coreLayoutStatePort.isSidebarResizing
+        && !coreLayoutStatePort.snapshot.resize.splitActive
+        && !coreLayoutStatePort.snapshot.resize.sidebarActive
         && !isWindowResizeBurstActive();
       if (!canUseViewTransition) {
         commit();
@@ -67,14 +67,14 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
     }
 
     function toggleSidebar() {
-      if (coreLayoutStatePort.sidebarAutoCollapsed) {
+      if (coreLayoutStatePort.snapshot.sidebar.autoCollapsed) {
         showToast('当前窗口较窄，侧边栏已自动折叠');
         return;
       }
-      const nextVisible = !coreLayoutStatePort.sidebarVisible;
+      const nextVisible = !coreLayoutStatePort.snapshot.sidebar.visible;
       coreSettingsStorePort.set('sidebarVisible', nextVisible);
-      runLayoutTransition(() => { coreLayoutStatePort.sidebarVisible = nextVisible; }, 'sidebar');
-      showToast(coreLayoutStatePort.sidebarVisible ? '已显示侧边栏' : '已隐藏侧边栏');
+      runLayoutTransition(() => { coreLayoutStatePort.setSidebar({ visible: nextVisible }); }, 'sidebar');
+      showToast(coreLayoutStatePort.snapshot.sidebar.visible ? '已显示侧边栏' : '已隐藏侧边栏');
     }
 
     function updateToolbarItemVisibility() {
@@ -131,7 +131,7 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
 
     function applyTableVisualEditingSetting(options = {}) {
       const enabled = Boolean(coreSettingsStorePort.get('tableVisualEditing'));
-      editor.virtualEditor?.setHybridTableVisualEditing?.(enabled);
+      editor.setHybridTableVisualEditing?.(enabled);
       updateTableVisualEditingToggle();
       if (options.persist !== false) {
         editorToolsSettingsStorePort.set('tableVisualEditing', enabled);
@@ -168,7 +168,7 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
 
     function applyCodeVisualEditingSetting(options = {}) {
       const enabled = Boolean(coreSettingsStorePort.get('codeVisualEditing'));
-      editor.virtualEditor?.setHybridCodeVisualEditing?.(enabled);
+      editor.setHybridCodeVisualEditing?.(enabled);
       updateCodeVisualEditingToggle();
       if (options.persist !== false) {
         editorToolsSettingsStorePort.set('codeVisualEditing', enabled);
@@ -195,7 +195,7 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
     }
 
     function getLayoutMode() {
-      return editorToolsLayoutStatePort.layoutMode;
+      return editorToolsLayoutStatePort.snapshot.mode;
     }
 
     function isHybridLayoutMode() {
@@ -203,10 +203,10 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
     }
 
     function applyEditorPresentationMode(mode) {
-      const hybrid = mode === 'hybrid' && Boolean(editor.virtualEditor?.setPresentationMode);
+      const hybrid = mode === 'hybrid' && Boolean(editor.setPresentationMode);
       document.body.classList.toggle('hybrid-view-mode', hybrid);
-      editor.virtualEditor?.setPresentationMode?.(hybrid ? 'hybrid' : 'source');
-      const actualMode = editor.virtualEditor?.getPresentationMode?.() || 'source';
+      editor.setPresentationMode?.(hybrid ? 'hybrid' : 'source');
+      const actualMode = editor.getPresentationMode?.() || 'source';
       if (actualMode !== (hybrid ? 'hybrid' : 'source')) {
         telemetry.diagnostic?.('hybrid.presentation-mode-mismatch', {
           category: 'editor.hybrid',
@@ -232,31 +232,32 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
 
     function setLayoutMode(mode, animate = document.documentElement.classList.contains('app-ready'), persist = true) {
       const previousMode = getLayoutMode();
-      const previewWasHidden = editorToolsLayoutStatePort.previewCollapsed || previousMode === 'hybrid';
+      const previewWasHidden = editorToolsLayoutStatePort.snapshot.split.previewCollapsed || previousMode === 'hybrid';
       let nextMode = ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
-      if (nextMode === 'hybrid' && !editor.virtualEditor?.setPresentationMode) nextMode = 'edit';
+      if (nextMode === 'hybrid' && !editor.setPresentationMode) nextMode = 'edit';
       if (persist) editorToolsSettingsStorePort.set('layoutMode', nextMode);
-      editorToolsLayoutStatePort.layoutMode = nextMode;
+      editorToolsLayoutStatePort.setMode(nextMode);
 
       if (editorToolsEditorUiCommandPort.has('refreshToolbarLayoutLabel')) {
         editorToolsEditorUiCommandPort.invoke('refreshToolbarLayoutLabel', nextMode);
       }
 
       const involvesHybridMode = previousMode === 'hybrid' || nextMode === 'hybrid';
-      const documentLength = documentModel?.getTextLength?.() ?? editor.textLength;
+      const documentLength = documentModel?.getTextLength?.() ?? editor.getTextLength();
       const shouldAnimate = animate && !involvesHybridMode && documentLength < LARGE_DOCUMENT_CHARS;
       const commit = () => {
         applyEditorPresentationMode(nextMode);
         editorToolsSplitControllerPort.applyMode(nextMode, {
           resetCompactPane: previousMode !== 'both' && nextMode === 'both'
         });
+        compactSplitController.reconcile(nextMode, { resetPane: previousMode !== 'both' && nextMode === 'both' });
       };
       if (shouldAnimate) runLayoutTransition(commit, 'panes');
       else commit();
 
       if (nextMode === 'hybrid') {
         editorToolsPreviewCommandPort.scheduleUpdate();
-      } else if (!editorToolsLayoutStatePort.previewCollapsed) {
+      } else if (!editorToolsLayoutStatePort.snapshot.split.previewCollapsed) {
         const previewBody = preview.querySelector('.markdown-body');
         editorToolsPreviewCommandPort.requestLayoutRefresh({
           forceRender: previewWasHidden
@@ -283,7 +284,7 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
       const applied = event?.detail?.snapshot;
       if (!applied || !Array.isArray(event?.detail?.changedIds)) return;
       const changedIds = event.detail.changedIds;
-      if (changedIds.includes('sidebarVisible')) coreLayoutStatePort.sidebarVisible = applied.sidebarVisible;
+      if (changedIds.includes('sidebarVisible')) coreLayoutStatePort.setSidebar({ visible: applied.sidebarVisible });
       if (changedIds.includes('layoutMode') || changedIds.includes('previewPerformanceMode')) setLayoutMode(applied.layoutMode, false, false);
       if (['editorFontSize', 'editorTextColor', 'activeLineColor', 'toolbarVisible', 'toolbarHiddenItems'].some(id => changedIds.includes(id))) applyEditorPreferences();
       updateStatusBar(); showToast('设置已保存');

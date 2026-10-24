@@ -59,6 +59,7 @@ export function createMenuController({ state, bindings, view, closeMenus = () =>
 
   return Object.freeze({
     execute,
+    has(commandId) { assertActive(); return bindings.has(commandId); },
     start() {
       assertActive();
       if (started) return false;

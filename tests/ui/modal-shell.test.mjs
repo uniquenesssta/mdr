@@ -5,11 +5,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
-import {
-  COMPATIBILITY_MODAL_CLOSE_EVENT,
-  COMPATIBILITY_MODAL_OPEN_EVENT,
-  mountCompatibilityModalShells
-} from '../../src/ui/compatibility/mount-modal-shells.js';
+
 
 class FakeClassList {
   constructor(owner) {
@@ -334,55 +330,7 @@ test('ModalShell accepts feature content, validates accessibility options and re
   assert.throws(() => shell.open(null, { ariaLabel: 'x' }), /destroyed/);
 });
 
-const COMPATIBILITY_MODAL_IDS = [
-  'link-modal',
-  'find-modal',
-  'image-modal',
-  'mermaid-modal'
-];
-
-function addCompatibilityModal(overlayRoot, id) {
-  const documentRef = overlayRoot.ownerDocument;
-  const { root, panel } = createModal(documentRef, id);
-  const controls = {
-    'link-modal': ['input', 'link-url-input'],
-    'find-modal': ['input', 'find-input'],
-    'export-image-modal': ['button', 'export-image-ratio'],
-    'image-modal': ['input', 'image-url-input'],
-    'mermaid-modal': ['textarea', 'mermaid-code']
-  };
-  const [tag, controlId] = controls[id];
-  const control = documentRef.createElement(tag);
-  control.id = controlId;
-  if (id === 'export-image-modal') {
-    control.classList.add('ratio-btn', 'active');
-  }
-  panel.append(control);
-  if (id === 'link-modal') panel.querySelector(`#${id}-title`).id = 'link-modal-title';
-  overlayRoot.append(root);
-  return { root, panel, control };
-}
-
-test('compatibility modal bridge installs one authoritative registry for the remaining five compatibility feature modals', () => {
-  const documentRef = new FakeDocument();
-  const overlayRoot = documentRef.createElement('div');
-  overlayRoot.id = 'overlay-root';
-  const records = new Map(COMPATIBILITY_MODAL_IDS.map(id => [id, addCompatibilityModal(overlayRoot, id)]));
-  const bridge = mountCompatibilityModalShells(overlayRoot);
-
-  assert.throws(() => bridge.open('missing-modal'), /Unknown compatibility modal/);
-  assert.throws(() => bridge.open('settings-modal'), /Unknown compatibility modal/);
-  assert.throws(() => bridge.open('url-modal'), /Unknown compatibility modal/);
-
-  bridge.open('link-modal');
-  documentRef.flushFrames();
-  assert.equal(bridge.isOpen('link-modal'), true);
-  records.get('link-modal').root.dispatch('keydown', createEvent('Escape'));
-  documentRef.flushFrames();
-  assert.equal(bridge.isOpen('link-modal'), false);
-
-  assert.throws(() => bridge.open('export-progress-modal'), /Unknown compatibility modal/);
-  assert.throws(() => bridge.open('export-image-modal'), /Unknown compatibility modal/);
+test('independent image export dialog retains its non-dismissible policy and terminal ownership', () => {
   const imageDocument = new ExportProgressDocument(), imageOverlay = imageDocument.createElement('div');
   imageDocument.body.append(imageOverlay);
   const imageView = createExportImageDialogView({translate:key=>key,subscribeLocale:()=>()=>{},overlayRoot:imageOverlay,onCommand:()=>{},createIcon:doc=>doc.createElement('span')});
@@ -392,15 +340,9 @@ test('compatibility modal bridge installs one authoritative registry for the rem
   assert.equal(imageView.isOpen(),true);assert.equal(imageView.close('finished'),true);
   imageView.destroy();imageView.destroy();assert.equal(imageDocument.getElementById('export-image-modal'),null);
 
-  bridge.destroy();
-  bridge.destroy();
-  assert.throws(() => bridge.isOpen('link-modal'), /destroyed/);
 });
 
-
-test('compatibility feature callers use the explicit modal event port without new globals or duplicate lifecycle ownership', async () => {
-  const bridgeSource = await readFile('src/ui/compatibility/mount-modal-shells.js', 'utf8');
-  const mountSource = await readFile('src/ui/compatibility/business-content-port.js', 'utf8');
+test('R16-08 editor dialogs own ModalShell directly without modal events or a second registry', async () => {
   const featureSources = await Promise.all([
     'src/features/editor/ui/link-dialog-view.js',
     'src/features/editor/ui/find-replace-dialog-view.js',
@@ -414,25 +356,22 @@ test('compatibility feature callers use the explicit modal event port without ne
   assert.match(clipperSource, /new ModalShell\(root, \{ panel \}\)/);
   assert.doesNotMatch(clipperSource, /markdown-editor:modal-shell-/);
 
-  assert.match(mountSource, /mountCompatibilityModalShells\(slots\.overlay\)/);
-  assert.doesNotMatch(bridgeSource, /windowRef|markdownEditorModalShells|window\.|globalThis\./);
   for (const source of featureSources) {
-    assert.match(source, /markdown-editor:modal-shell-open|markdown-editor:modal-shell-close|markdown-editor:modal-shell-' \+ name/);
-    assert.doesNotMatch(source, /markdownEditorModalShells/);
+    assert.match(source, /new ModalShell\((?:root|element),|createModalShell\(root,/);
+    assert.match(source, /shell\.open\(null,/);
+    assert.match(source, /shell\.destroy\(\)/);
+    assert.doesNotMatch(source, /markdown-editor:modal-shell-|markdownEditorModalShells/);
   }
   assert.doesNotMatch(eventSource, /linkModal\?\.addEventListener|event\.key === 'Escape'/);
 
   const imageViewSource = await readFile('src/features/export/ui/export-image-dialog-view.js', 'utf8');
   assert.match(imageViewSource,/createModalShell\(root,\{panel\}\)/);
   assert.doesNotMatch(imageViewSource,/markdown-editor:modal-shell-/);
-  assert.doesNotMatch(bridgeSource,/id: 'export-image-modal'/);
   const joined = featureSources.join('\n') + imageViewSource;
-  for (const id of COMPATIBILITY_MODAL_IDS) assert.match(bridgeSource, new RegExp(`id: '${id}'`));
-  assert.doesNotMatch(bridgeSource, /id: '(?:help|settings|url|export-progress)-modal'/);
   assert.match(helpDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'help-modal'/);
-  assert.match(helpDialogSource, /new ModalShell\(root,/);
+  assert.match(helpDialogSource, /new ModalShell\((?:root|element),|createModalShell\(root,/);
   assert.match(settingsDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'settings-modal'/);
-  assert.match(settingsDialogSource, /new ModalShell\(root,/);
+  assert.match(settingsDialogSource, /new ModalShell\((?:root|element),|createModalShell\(root,/);
   assert.doesNotMatch(
     joined,
     /(?:settings|help|link|url|find|export-progress|export-image|image|mermaid)-modal[^\n]*(?:classList\.(?:add|remove)|style\.display)/

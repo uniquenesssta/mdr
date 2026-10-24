@@ -191,7 +191,8 @@ function browserHost(t) {
   set('__MARKDOWN_EDITOR_E2E__',true);set('Element',Element);set('document',{getElementById:id=>id==='editor'?editor:null,querySelector:()=>null,querySelectorAll:()=>[],activeElement:null,body:{classList:{contains:()=>false}},documentElement:{classList:{contains:()=>true}}});
   set('localStorage',{getItem:()=>null,clear:()=>{}});set('__markdownEditorE2E',undefined);
   t.after(()=>{destroyMarkdownEditorE2EBridge();for(const[name,descriptor]of saved){if(descriptor)Object.defineProperty(globalThis,name,descriptor);else delete globalThis[name];}});
-  return {context,editor,set,configure:()=>configureMarkdownEditorE2EPorts({setLayout: mode=>globalThis.setLayoutMode(mode,false),readContext:()=>context,readPreviewStats:()=>({active:true,blocks:1})})};
+  const editorApi={getText:()=>editor.value,getTextLength:()=>editor.textLength,getSelection:()=>({start:editor.selectionStart,end:editor.selectionEnd}),sliceText:(from,to)=>editor.value.slice(from,to),...editor.virtualEditor};
+  return {context,editor,set,configure:()=>configureMarkdownEditorE2EPorts({editorApi,importDocument:async()=>true,setLayout: mode=>globalThis.setLayoutMode(mode,false),readContext:()=>context,readPreviewStats:()=>({active:true,blocks:1})})};
 }
 test('R15-09 actual Runtime installs the sole public owner and returns detached DOM-free snapshots',t=>{
   const h=browserHost(t);h.configure();const api=installMarkdownEditorE2EBridge();assert.equal(globalThis.__markdownEditorE2E,api);assert.equal(installMarkdownEditorE2EBridge(),null);assert.equal(api.snapshot().documentVersion,4);assert.equal(api.getPreviewStats().blocks,1);assert.equal(api.getEditorValue(),'host text');assert.equal(api.getComponentStates()[0].details,undefined);assertFrozen(api.snapshot());destroyMarkdownEditorE2EBridge();assert.equal(api.getState().destroyed,true);assert.equal(globalThis.__markdownEditorE2E,undefined);

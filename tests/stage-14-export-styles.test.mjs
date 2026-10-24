@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { createExportStyleSheet, mountClassicExportStylePort } from '../src/features/export/index.js';
+import { createExportStyleSheet } from '../src/features/export/index.js';
 import { ExportProgressDocument } from './support/export-progress-dom.mjs';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
@@ -108,23 +108,21 @@ test('R14-08 mounting failure leaves the root intact and the owner can retry', (
   h.doc.head.appendChild = append; h.owner.apply(h.root, 'image'); assert.equal(h.doc.head.children.length, 1); h.owner.destroy();
 });
 
-test('R14-08 scoped port validates required capabilities and rejects duplicate mounts', () => {
-  const h = harness(), host = {};
-  for (const owner of [null, {}, { getCss() {} }]) assert.throws(() => mountClassicExportStylePort(host, owner), TypeError);
-  const mount = mountClassicExportStylePort(host, h.owner);
-  assert.equal(Object.isFrozen(mount.port), true); assert.equal(Object.keys(host).length, 0);
-  assert.throws(() => mountClassicExportStylePort(host, h.owner), /already mounted/);
-  assert.equal(mount.port.getCss('html'), h.owner.getCss('html'));
-  const lease = mount.port.apply(h.root, 'image'); assert.equal(Object.isFrozen(lease), true); lease.release();
-  mount.destroy(); mount.destroy(); assert.equal(Object.hasOwn(host, 'markdownEditorExportStylePort'), false);
-  assert.throws(() => mount.port.getCss('html'), /destroyed/); assert.throws(() => mount.port.apply(h.root, 'pdf'), /destroyed/);
-  assert.ok(h.owner.getCss('word')); h.owner.destroy();
+test('R16-08 direct stylesheet capability validates formats and releases its exact root lease', () => {
+  const h = harness(), api = h.owner;
+  assert.equal(Object.isFrozen(api), true);
+  assert.throws(() => api.getCss('unknown'), TypeError);
+  assert.equal(api.getCss('html'), h.owner.getCss('html'));
+  const lease = api.apply(h.root, 'image'); assert.equal(Object.isFrozen(lease), true);
+  lease.release(); assert.equal(h.root.dataset.exportFormat, undefined);
+  api.destroy(); api.destroy();
+  assert.throws(() => api.getCss('html'), /destroyed/); assert.throws(() => api.apply(h.root, 'pdf'), /destroyed/);
 });
-
-test('R14-08 port unmount preserves a replacement host property', () => {
-  const h = harness(), host = {}, mount = mountClassicExportStylePort(host, h.owner), replacement = {};
-  Object.defineProperty(host, 'markdownEditorExportStylePort', { value: replacement, configurable: true });
-  mount.destroy(); assert.equal(host.markdownEditorExportStylePort, replacement); h.owner.destroy();
+test('R16-08 stylesheet disposal preserves a separately owned DOM node', () => {
+  const h = harness(), foreign = h.doc.createElement('style');
+  h.owner.apply(h.root, 'image'); h.doc.head.appendChild(foreign);
+  h.owner.destroy(); h.owner.destroy();
+  assert.deepEqual(h.doc.head.children, [foreign]);
 });
 
 for (const [format, operation] of [['html', 'exportHTML'], ['word', 'exportWord']]) {
@@ -158,7 +156,7 @@ test('R14-08 actual PDF caller isolates document styles and releases on afterpri
 test('R14-08 actual image caller applies styles through encoding and releases on success, failure and cancellation', async () => {
   for (const boundary of ['success', 'failure', 'cancelled']) {
     const h = createExportVmHost({ sourceText: '$x^2$' }); let encoded = false;
-    const presentation = h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort;
+    const presentation = h.presentation;
     presentation.loadDomToImage = async () => ({ async toPng(root) {
       encoded = true; assert.equal(root.dataset.exportFormat, 'image'); assert.equal(root.classList.contains('export-document'), true);
       if (boundary === 'failure') throw new Error('encoding failed');

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { calculateImageLayout, createImageExportLayout, mountClassicImageLayoutPort, createExportRequest, EXPORT_IMAGE_RATIOS } from '../src/features/export/index.js';
+import { calculateImageLayout, createImageExportLayout, createExportRequest, EXPORT_IMAGE_RATIOS } from '../src/features/export/index.js';
 import { EXPORT_IMAGE_RATIOS as layoutRatios } from '../src/features/export/formats/image/image-ratio-presets.js';
 import { EXPORT_IMAGE_RATIOS as requestRatios } from '../src/features/export/application/export-request.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
@@ -105,16 +105,21 @@ test('R14-13 independent idempotent destroy during a measurement prevents late p
   assert.throws(()=>lease.measure(),e=>e.reason==='destroyed');empty(root);empty(stage);lease.release();owner.destroy();
 });
 
-test('R14-13 readonly scoped bridge has independent terminal unmount and preserves replacement ownership',()=>{
-  const owner=createImageExportLayout(),host={},mount=mountClassicImageLayoutPort(host,owner),root=element(),stage=element();
-  assert.equal(Object.isFrozen(mount.port),true);assert.equal(Object.keys(host).length,0);assert.throws(()=>mountClassicImageLayoutPort(host,owner),/already mounted/);
-  const lease=mount.port.mount({root,stage,options:options()}),replacement={};Object.defineProperty(host,'markdownEditorImageLayoutPort',{value:replacement,configurable:true});mount.destroy();mount.destroy();assert.equal(host.markdownEditorImageLayoutPort,replacement);
-  assert.throws(()=>mount.port.mount({}),/destroyed/);assert.equal(lease.measure().mode,'pad');lease.release();owner.mount({root,stage,options:options()}).release();owner.destroy();
+test('R16-08 direct Image Layout capability releases leases and terminal owner geometry', () => {
+  const owner = createImageExportLayout(), host = {}, root = element(), stage = element();
+  assert.equal(Object.isFrozen(owner), true); assert.equal(Object.keys(host).length, 0);
+  const lease = owner.mount({ root, stage, options: options() });
+  assert.equal(lease.measure().mode, 'pad');
+  lease.release(); lease.release(); empty(root); empty(stage);
+  const next = owner.mount({ root, stage, options: options() });
+  owner.destroy(); owner.destroy(); empty(root); empty(stage);
+  assert.throws(() => next.measure(), error => error.reason === 'destroyed');
+  assert.throws(() => owner.mount({ root, stage, options: options() }), error => error.reason === 'destroyed');
 });
 
 test('R14-13 actual classic image encoding uses canonical layout for every ratio and releases all geometry',async()=>{
   for(const [ratio,width,height] of sizes) {
-    const h=createExportVmHost({imageHeight:height+100}),presentation=h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort;
+    const h=createExportVmHost({imageHeight:height+100}),presentation=h.presentation;
     h.evaluate('currentImageRatio='+JSON.stringify(ratio));h.context.document.getElementById('image-crop-fit').checked=true;
     presentation.loadDomToImage=async()=>({async toPng(root,input){assert.equal(input.width,width);assert.equal(input.height,height);assert.equal(root.getAttribute(marker),'crop');assert.equal(root.style.getPropertyValue('--export-image-font-size'),Math.round(width/36)+'px');
       assert.equal(h.taskPort.getSnapshot().activeTask.cancelable,false);assert.equal(h.context.document.getElementById('export-image-stage').style.getPropertyValue('--export-image-height'),height+'px');return 'data:image/png;base64,iVBORw0KGgo=';}});
@@ -124,7 +129,7 @@ test('R14-13 actual classic image encoding uses canonical layout for every ratio
 
 test('R14-13 classic measurement, cancellation, encoder and cleanup failures finish tasks and recover',async()=>{
   for(const boundary of ['read','cancel','encoding','release']) {
-    const h=createExportVmHost({sourceText:'$x^2$'}),presentation=h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort;let first=true,encodes=0;
+    const h=createExportVmHost({sourceText:'$x^2$'}),presentation=h.presentation;let first=true,encodes=0;
     const create=h.context.document.createElement;
     if(boundary==='read')h.context.document.createElement=tag=>{const root=create(tag),height=root.scrollHeight;if(tag==='div')Object.defineProperty(root,'scrollHeight',{get(){if(first&&root.className==='preview-content'){first=false;throw new Error('measure failure');}return height;}});return root;};
     if(boundary==='cancel')presentation.math.renderTree=()=>{if(first){first=false;h.cancel();}};

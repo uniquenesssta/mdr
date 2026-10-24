@@ -164,7 +164,8 @@ test('the frozen legacy capability inventory maps every historical native method
   const fixture = JSON.parse(await readFile(new URL('../../../tests/architecture/fixtures/production-modules.json', import.meta.url), 'utf8'));
   const paths = fixture.modules.map(record => record[0]);
   assert.ok(!paths.includes('src/runtime/tauri.js'));
-  assert.ok(paths.includes('src/platform/compatibility/classic-platform-port.js'));
+  assert.equal(paths.includes('src/platform/compatibility/classic-platform-port.js'),false);
+  assert.ok(paths.includes('src/platform/create-platform.js'));
 });
 
 test('individual port definitions validate, bind and freeze one exact responsibility', () => {

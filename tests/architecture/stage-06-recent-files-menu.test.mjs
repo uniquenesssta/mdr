@@ -16,7 +16,7 @@ test('Atomic 6.12 Recent Files Menu has one dedicated controller behind public M
     read('src/bootstrap/module-entry.js')
   ]);
   assert.match(menuEntry, /createRecentFilesMenuController/);
-  assert.match(menuEntry, /mountClassicMenuCommandPort/);
+  assert.doesNotMatch(menuEntry, /mountClassicMenuCommandPort/);
   assert.match(documentsEntry, /createRecentFilesReadSource/);
   assert.match(main, /from '\.\/features\/documents\/index\.js'/);
   assert.match(main, /from '\.\/features\/menu\/index\.js'/);
@@ -29,7 +29,7 @@ test('Atomic 6.12 Recent Files Menu has one dedicated controller behind public M
 test('Atomic 6.12 keeps Documents as the sole Recent Files persistence authority and classic as write-only compatibility', async () => {
   const [repository, classicPort, core, classicBootstrap, events, main, importer] = await Promise.all([
     read('src/features/documents/infrastructure/recent-files-repository.js'),
-    read('src/features/documents/compatibility/classic-recent-files-port.js'),
+    read('src/features/documents/application/recent-files-read-source.js'),
     read('public/app/core.js'),
     read('public/app/bootstrap.js'),
     read('public/app/events.js'),
@@ -41,8 +41,8 @@ test('Atomic 6.12 keeps Documents as the sole Recent Files persistence authority
   assert.match(repository, /storage\.setItem/);
   assert.match(repository, /subscribe\(listener\)/);
   assert.doesNotMatch(classicPort, /get entries|\bload\s*:|call\('load'\)|repository\.load/);
-  assert.match(classicPort, /add: call\('add'\)/);
-  assert.match(classicPort, /clear: call\('clear'\)/);
+  assert.doesNotMatch(classicPort, /\.add\(|\.clear\(/);
+  assert.match(classicPort, /get snapshot\(\)/);
   assert.doesNotMatch(core, /function (loadRecentFiles|renderRecentFilesMenu|openRecentFile|clearRecentFiles)\s*\(/);
   assert.doesNotMatch(core, /coreRecentFilesPort\.(load|clear|entries)/);
   assert.match(core, /coreRecentFilesPort\.add/);
@@ -62,8 +62,8 @@ test('Atomic 6.12 emits stable Menu commands and does not leak Recent Files into
     read('src/features/menu/recent-files-menu-controller.js'),
     read('src/features/menu/menu-view.js'),
     read('src/features/menu/submenu-positioner.js'),
-    read('src/features/menu/compatibility/classic-menu-command-adapter.js'),
-    read('src/features/menu/compatibility/classic-menu-command-port.js')
+    read('src/features/menu/menu-actions.js'),
+    read('src/features/menu/menu-controller.js')
   ]);
   assert.match(bindings, /RECENT_FILE_OPEN: 'document\.open-recent'/);
   assert.match(bindings, /RECENT_FILES_CLEAR: 'document\.clear-recent'/);

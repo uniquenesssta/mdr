@@ -1,26 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mountClassicOutlineControllerPort } from '../../../src/features/sidebar/compatibility/classic-outline-controller-port.js';
-
-test('Atomic 6.8 classic Outline port is stateless and forwards only to the canonical controller', () => {
+import { createOutlineController, createOutlineCollapseStore } from '../../../src/features/sidebar/index.js';
+test('R16-08 direct Outline capability retains index versioning, rendering and terminal ownership', () => {
   const calls = [];
-  const controller = {
-    replaceIndex(...args) { calls.push(['index', ...args]); return { accepted: true }; },
-    replacePreviewBlocks(...args) { calls.push(['blocks', ...args]); return { accepted: true }; },
-    updateActiveLine(...args) { calls.push(['line', ...args]); return null; },
-    refresh(...args) { calls.push(['refresh', ...args]); return { rendered: true }; },
-    get snapshot() { return { active: true }; }
-  };
-  const host = {};
-  const port = mountClassicOutlineControllerPort(host, controller);
-  assert.equal(host.markdownEditorOutlineControllerPort, port);
-  assert.deepEqual(port.replaceIndex([{ id: 'a' }], { version: 1 }), { accepted: true });
-  port.replacePreviewBlocks([], { version: 2 });
-  port.updateActiveLine(4);
-  port.refresh('test');
-  assert.deepEqual(port.snapshot, { active: true });
-  assert.deepEqual(calls.map(item => item[0]), ['index', 'blocks', 'line', 'refresh']);
-  port.destroy();
-  assert.equal('markdownEditorOutlineControllerPort' in host, false);
-  assert.throws(() => port.updateActiveLine(1), /destroyed/);
+  const collapseStore = createOutlineCollapseStore({ storage: { get: () => null, set: async () => {} } });
+  const view = { start() {}, render(tree) { calls.push(tree); return { headings: tree.length, rows: tree.length }; }, setActiveHeading() {}, destroy() { calls.push('destroy'); } };
+  const controller = createOutlineController({ view, collapseStore, getActiveLine: () => 4, navigateToLine: () => true });
+  controller.start();
+  controller.replaceIndex([{ id: 'a', level: 1, text: 'A', line: 1 }], { documentKey: 'doc', version: 2 });
+  assert.equal(controller.snapshot.headings.length, 1);
+  controller.replaceIndex([], { documentKey: 'doc', version: 1 });
+  assert.equal(controller.snapshot.headings.length, 1);
+  controller.activate(); controller.updateActiveLine(4); controller.refresh('test');
+  assert.equal(controller.snapshot.active, true);
+  assert.equal(calls.length, 2);
+  controller.replacePreviewBlocks([], { documentKey: 'doc', version: 3 });
+  assert.equal(controller.snapshot.headings.length, 0);
+  controller.destroy(); controller.destroy();
+  assert.equal(calls.filter(value => value === 'destroy').length, 1);
+  assert.throws(() => controller.updateActiveLine(1), /destroyed/);
 });

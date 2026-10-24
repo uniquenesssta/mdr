@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { imageDataUrlToBytes } from '../src/features/export/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/stage-14-export/contracts.json', import.meta.url), 'utf8'));
@@ -224,7 +225,7 @@ test('R14-01 PNG ratio/padding/crop/natural height, noncancelable encoding and g
 
 test('R14-01 malformed image data errors before write; percent/base64 encodings preserve exact bytes', () => {
   const h = createExportVmHost();
-  assert.throws(() => h.context.document.getElementById('compatibility-business-ports').markdownEditorImageDataPort.encode('not-data'), /图片数据无效/);
-  assert.deepEqual(Array.from(h.context.document.getElementById('compatibility-business-ports').markdownEditorImageDataPort.encode('data:text/plain,hello%20world')), Array.from(new TextEncoder().encode('hello world')));
-  assert.deepEqual(Array.from(h.context.document.getElementById('compatibility-business-ports').markdownEditorImageDataPort.encode('data:image/png;base64,iVBORw0KGgo=')), [137, 80, 78, 71, 13, 10, 26, 10]);
+  assert.throws(() => imageDataUrlToBytes('not-data'), /图片数据无效/);
+  assert.deepEqual(Array.from(imageDataUrlToBytes('data:text/plain,hello%20world')), Array.from(new TextEncoder().encode('hello world')));
+  assert.deepEqual(Array.from(imageDataUrlToBytes('data:image/png;base64,iVBORw0KGgo=')), [137, 80, 78, 71, 13, 10, 26, 10]);
 });

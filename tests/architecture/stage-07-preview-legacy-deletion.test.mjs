@@ -23,7 +23,7 @@ const removedLegacyPaths = [
 
 const canonicalPaths = [
   'src/features/preview/application/preview-controller.js',
-  'src/features/preview/application/preview-command-handler.js',
+  'src/features/preview/application/preview-commands.js',
   'src/features/preview/pipeline/preview-render-engine.js',
   'src/features/preview/render/preview-markdown-renderer.js',
   'src/features/preview/render/presentation/presentation-api.js',
@@ -46,7 +46,7 @@ test('Atomic 7.14 application composition owns one PreviewController/RenderEngin
   const main = await source('src/main.js');
   assert.match(main, /createPreviewController/);
   assert.match(main, /createPreviewRenderEngine/);
-  assert.match(main, /mountPreviewCommandHandler/);
+  assert.match(main, /createPreviewCommands/);
   assert.match(main, /previewCommandHandler\?\.destroy\(\)/);
   assert.match(main, /previewController\?\.destroy\(\)/);
   assert.doesNotMatch(main, /['"]\/app\/preview\.js['"]/);
@@ -81,7 +81,7 @@ test('Atomic 7.14 remaining classic callers use the single scoped Preview comman
 test('Atomic 7.14 keeps application, render, Worker, virtual, scheduler and presentation responsibilities in separate modules', async () => {
   const [controller, handler, engine, worker, virtual, scheduler, presentation] = await Promise.all([
     source('src/features/preview/application/preview-controller.js'),
-    source('src/features/preview/application/preview-command-handler.js'),
+    source('src/features/preview/application/preview-commands.js'),
     source('src/features/preview/pipeline/preview-render-engine.js'),
     source('src/features/preview/worker/preview-worker.js'),
     source('src/features/preview/virtual/virtual-preview-controller.js'),
@@ -91,7 +91,7 @@ test('Atomic 7.14 keeps application, render, Worker, virtual, scheduler and pres
 
   assert.match(controller, /Responsibility: Own Preview application lifecycle/);
   assert.match(engine, /Responsibility: Execute one canonical Preview render cycle/);
-  assert.match(handler, /single PreviewController command\/policy surface/);
+  assert.match(handler, /Preview command\/policy capability/);
   assert.match(worker, /startPreviewWorker/);
   assert.match(virtual, /extends VirtualWindowController/);
   assert.match(scheduler, /createTaskScheduler/);

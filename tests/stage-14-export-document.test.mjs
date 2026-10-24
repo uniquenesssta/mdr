@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createExportDocumentBuilder, mountClassicExportDocumentPort, createExportTaskController,
+import { createExportDocumentBuilder, createExportTaskController,
   ExportDocumentStaleError, ExportCancelledError } from '../src/features/export/index.js';
 
 const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
@@ -139,15 +139,14 @@ test('R14-06 materialization errors propagate, release frames and do not replace
   assert.equal(h.frames.size,0);builder.destroy();h.dispose();
 });
 
-test('R14-06 public bridge is immutable, scoped, duplicate-safe and releases only its own capability', async () => {
-  const h=harness({count:1}),host={},mount=mountClassicExportDocumentPort(host,h.builder);
-  assert.ok(Object.isFrozen(mount.port));assert.equal(Object.keys(host).length,0);
-  assert.throws(()=>mountClassicExportDocumentPort(host,h.builder),/already mounted/);
-  assert.equal((await mount.port.build()).children.length,1);
-  mount.destroy();mount.destroy();assert.equal(Object.hasOwn(host,'markdownEditorExportDocumentPort'),false);
-  assert.throws(()=>mount.port.build(),/destroyed/);
-  assert.equal((await h.builder.build()).children.length,1,'Bridge does not destroy its owner.');
-  const next=mountClassicExportDocumentPort(host,h.builder);next.destroy();h.dispose();
+test('R16-08 explicit Export Builder is immutable, constructs independent complete bodies and disposes terminally', async () => {
+  const h = harness({ count: 1 });
+  assert.equal(Object.isFrozen(h.builder), true);
+  const first = await h.builder.build(), second = await h.builder.build();
+  assert.equal(first.children.length, 1); assert.equal(second.children.length, 1);
+  assert.notEqual(first, second);
+  h.builder.destroy(); h.builder.destroy();
+  await assert.rejects(h.builder.build(), /^Error: Export Document Builder is destroyed\.$/); h.dispose();
 });
 
 test('R14-06 missing public dependencies and invalid bridge fail at construction', () => {
@@ -155,8 +154,7 @@ test('R14-06 missing public dependencies and invalid bridge fail at construction
   for(const key of ['documentRef','documentModel','getActiveDocumentId','preview','createHtmlNodes','requestFrame','cancelFrame']) {
     assert.throws(()=>createExportDocumentBuilder({...h.options,[key]:null}),TypeError);
   }
-  assert.throws(()=>mountClassicExportDocumentPort(null,h.builder),TypeError);
-  assert.throws(()=>mountClassicExportDocumentPort({},{}),TypeError);h.dispose();
+  assert.throws(() => createExportDocumentBuilder({ ...h.options, preview: {} }), TypeError); h.dispose();
 });
 
 test('R14-07 Builder source context binds the original complete body to its document/version without DOM metadata', async () => {
@@ -165,7 +163,6 @@ test('R14-07 Builder source context binds the original complete body to its docu
   assert.deepEqual(source, { documentId: 'a', documentVersion: 7 }); assert.ok(Object.isFrozen(source));
   h.setVersion(8); assert.equal(h.builder.getSourceContext(body), source);
   assert.throws(() => h.builder.getSourceContext({}), TypeError);
-  const host = {}, mount = mountClassicExportDocumentPort(host, h.builder);
-  assert.equal(mount.port.getSourceContext(body), source); mount.destroy();
+  assert.equal(h.builder.getSourceContext(body), source);
   h.builder.destroy(); assert.throws(() => h.builder.getSourceContext(body), cancelled('destroyed')); h.dispose();
 });

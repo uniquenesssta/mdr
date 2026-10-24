@@ -4,7 +4,7 @@
  */
 import { bindSourceActivation } from '../../activation/source-activation.js';
 import { bindStrictDoubleActivation } from '../../activation/strict-double-activation.js';
-import { getClassicHybridSourceEditControllerPort } from '../../compatibility/classic-hybrid-source-edit-controller-port.js';
+import { getHybridSourceEditor } from '../../application/source-editor-registry.js';
 import { bindWidgetFocusPolicy, isWidgetInteractiveTarget } from './widget-focus-policy.js';
 
 function resolveComponentType(descriptor, anchorElement) {
@@ -21,7 +21,7 @@ function resolveAnchorRect(anchorElement) {
 }
 
 export function openWidgetSource(view, descriptor, anchorElement = null) {
-  const sourceEditPort = getClassicHybridSourceEditControllerPort(view);
+  const sourceEditPort = getHybridSourceEditor(view);
   if (!sourceEditPort) throw new Error('Hybrid Source Edit Controller unavailable');
   const componentType = resolveComponentType(descriptor, anchorElement);
   return sourceEditPort.open(

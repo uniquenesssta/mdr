@@ -1,38 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mountClassicSidebarControllerPort } from '../../../src/features/sidebar/compatibility/classic-sidebar-controller-port.js';
-
-test('Atomic 6.7 classic Sidebar port forwards controller state and commands without copying state', async () => {
-  const host = {};
-  const calls = [];
-  const controller = {
-    activeTab: 'files',
-    isActive(tab) { calls.push(['isActive', tab]); return tab === this.activeTab; },
-    select(tab, options) { calls.push(['select', tab, options]); this.activeTab = tab; return Promise.resolve({ ok: true, activeTab: tab }); },
-    registerLifecycle(tab, lifecycle) { calls.push(['register', tab, lifecycle]); return () => calls.push(['unregister', tab]); }
-  };
-  const port = mountClassicSidebarControllerPort(host, controller);
-  assert.equal(host.markdownEditorSidebarControllerPort, port);
-  assert.equal(port.activeTab, 'files');
-  assert.equal(port.isActive('files'), true);
-  const result = await port.select('outline', { reason: 'test' });
-  assert.deepEqual(result, { ok: true, activeTab: 'outline' });
-  assert.equal(port.activeTab, 'outline');
-  const lifecycle = { activate() {}, deactivate() {} };
-  const unregister = port.registerLifecycle('outline', lifecycle);
-  unregister();
-  assert.deepEqual(calls.map(item => item[0]), ['isActive', 'select', 'register', 'unregister']);
-  port.destroy();
-  assert.equal(host.markdownEditorSidebarControllerPort, undefined);
+import { createSidebarTabController, createSidebarState } from '../../../src/features/sidebar/index.js';
+function fixture() {
+  const state = createSidebarState(), listeners = new Map(), calls = [];
+  const tabs = {}, panels = {};
+  for (const tab of ['docs','files','outline']) {
+    tabs[tab] = { classList: { toggle() {} }, addEventListener(_type, callback) { listeners.set(tab, callback); }, removeEventListener() { listeners.delete(tab); } };
+    panels[tab] = { classList: { toggle() {} } };
+  }
+  const controller = createSidebarTabController({ state, tabs, panels, storage: { get: () => 'files', set: async () => {} } });
+  return { controller, state, listeners, calls };
+}
+test('R16-08 direct Sidebar controller projects its canonical state and owns registered child lifecycles', async () => {
+  const h = fixture();
+  const unregister = h.controller.registerLifecycle('outline', { activate: () => h.calls.push('activate'), deactivate: () => h.calls.push('deactivate') });
+  h.controller.start(); assert.equal(h.controller.activeTab, 'files'); assert.equal(h.controller.isActive('files'), true);
+  await h.controller.select('outline', { reason: 'test' });
+  assert.equal(h.controller.activeTab, h.state.snapshot.activeTab); assert.equal(h.controller.activeTab, 'outline');
+  assert.deepEqual(h.calls, ['activate']);
+  unregister(); assert.deepEqual(h.calls, ['activate','deactivate']);
+  h.controller.destroy(); assert.equal(h.listeners.size, 0); h.state.destroy();
 });
-
-test('Atomic 6.7 classic Sidebar port rejects duplicate mount and becomes terminal after destroy', () => {
-  const host = {};
-  const controller = { activeTab: 'docs', isActive: () => false, select: () => Promise.resolve(), registerLifecycle: () => () => {} };
-  const port = mountClassicSidebarControllerPort(host, controller);
-  assert.throws(() => mountClassicSidebarControllerPort(host, controller), /already mounted/);
-  port.destroy();
-  port.destroy();
-  assert.throws(() => port.isActive('docs'), /destroyed/);
-  assert.throws(() => port.select('files'), /destroyed/);
+test('R16-08 Sidebar lifecycle registration is unique and controller disposal is terminal', () => {
+  const h = fixture(); h.controller.registerLifecycle('outline', { activate() {}, deactivate() {} });
+  assert.throws(() => h.controller.registerLifecycle('outline', { activate() {}, deactivate() {} }), /already/);
+  h.controller.start(); h.controller.destroy(); h.controller.destroy();
+  assert.equal(h.listeners.size, 0);
+  assert.throws(() => h.controller.isActive('docs'), /destroyed/);
+  assert.throws(() => h.controller.select('files'), /destroyed/); h.state.destroy();
 });

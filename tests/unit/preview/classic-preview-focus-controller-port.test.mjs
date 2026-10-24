@@ -1,55 +1,40 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mountClassicPreviewFocusControllerPort } from '../../../src/features/preview/compatibility/classic-preview-focus-controller-port.js';
-
-function createController(log = []) {
-  return {
-    connect(value) { log.push(['connect', value]); return 'connected'; },
-    scheduleCursorFocus(line) { log.push(['schedule', line]); return true; },
-    focusLine(line, options) { log.push(['focus', line, options]); return Promise.resolve(true); },
-    cancel() { log.push(['cancel']); return true; }
-  };
+import { createPreviewFocusController } from '../../../src/features/preview/index.js';
+function fixture(overrides = {}) {
+  const calls = [], pending = new Map();
+  const scheduler = { schedule(channel, run) { pending.set(channel, run); return true; }, cancel(channel) { return pending.delete(channel); }, hasPending(channel) { return pending.has(channel); } };
+  const controller = createPreviewFocusController({ scheduler });
+  const capabilities = { isSuspended: () => false, isCursorTrackingEligible: () => true,
+    getFocusSection: () => null, getMode: () => 'full', isVirtualWindowActive: () => true,
+    virtualWindowContainsLine: () => true, refreshPreview: () => calls.push('refresh'),
+    ensureLineVisible(line) { calls.push(['ensure', line]); return { line }; },
+    invalidateAnchors: () => calls.push('invalidate'), scrollToLine: (...args) => calls.push(['scroll', ...args]), ...overrides };
+  controller.connect(capabilities);
+  return { controller, capabilities, calls, pending };
 }
-
-test('Atomic 7.11 classic focus port forwards the exact scoped controller contract', async () => {
-  const host = {};
-  const log = [];
-  const owner = mountClassicPreviewFocusControllerPort(host, createController(log));
-  const port = host.markdownEditorPreviewFocusControllerPort;
-  const capabilities = { value: 1 };
-  assert.equal(port.connect(capabilities), 'connected');
-  assert.equal(port.scheduleCursorFocus(7), true);
-  assert.equal(await port.focusLine(9, { scroll: false }), true);
-  assert.equal(port.cancel(), true);
-  assert.deepEqual(log, [
-    ['connect', capabilities],
-    ['schedule', 7],
-    ['focus', 9, { scroll: false }],
-    ['cancel']
-  ]);
-  owner.destroy();
+test('R16-08 direct focus capability schedules and positions through the canonical controller', async () => {
+  const h = fixture();
+  assert.equal(h.controller.scheduleCursorFocus(7), true);
+  h.pending.get('focus')();
+  assert.equal(await h.controller.focusLine(9, { scroll: false }), true);
+  assert.deepEqual(h.calls, ['refresh', ['ensure', 9], 'invalidate']);
+  assert.equal(h.controller.cancel(), true);
+  assert.equal(h.pending.size, 0); h.controller.destroy();
 });
-
-test('Atomic 7.11 classic focus port rejects duplicate ownership and removes only itself', () => {
-  const host = {};
-  const owner = mountClassicPreviewFocusControllerPort(host, createController());
-  assert.throws(() => mountClassicPreviewFocusControllerPort(host, createController()), /already mounted/);
-  const replacement = {};
-  host.markdownEditorPreviewFocusControllerPort = replacement;
-  owner.destroy();
-  assert.equal(host.markdownEditorPreviewFocusControllerPort, replacement);
-  owner.destroy();
+test('R16-08 Focus validates dependencies and rejects a second capability owner', () => {
+  assert.throws(() => createPreviewFocusController({ scheduler: {} }), /Scheduler/);
+  const h = fixture();
+  assert.throws(() => h.controller.connect(h.capabilities), /already connected/);
+  h.controller.destroy(); h.controller.destroy();
+  assert.throws(() => h.controller.cancel(), /destroyed/);
 });
-
-test('Atomic 7.11 classic focus port validates every required operation and becomes terminal after destroy', async () => {
-  const host = {};
-  assert.throws(
-    () => mountClassicPreviewFocusControllerPort(host, { connect() {}, scheduleCursorFocus() {}, focusLine() {} }),
-    /cancel/
-  );
-  const owner = mountClassicPreviewFocusControllerPort(host, createController());
-  const port = host.markdownEditorPreviewFocusControllerPort;
-  owner.destroy();
-  assert.throws(() => port.cancel(), /destroyed/);
-  await assert.rejects(Promise.resolve().then(() => port.focusLine(1)), /destroyed/);
+test('R16-08 cancelled chapter focus cannot position a late refreshed scope', async () => {
+  let resolve; const wait = new Promise(done => { resolve = done; });
+  const h = fixture({ getMode: () => 'chapter', virtualWindowContainsLine: () => false, refreshPreview: () => wait });
+  const pending = h.controller.focusLine(40);
+  h.controller.cancel(); resolve();
+  assert.equal(await pending, false);
+  assert.deepEqual(h.calls, []); h.controller.destroy();
+  await assert.rejects(h.controller.focusLine(1), /destroyed/);
 });

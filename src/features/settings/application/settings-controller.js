@@ -33,7 +33,7 @@ export function createSettingsController({
     'setFeedback', 'setDirectoryBusy', 'setDirectoryValue', 'open', 'close', 'isOpen', 'destroy'
   ], 'a Settings dialog view.');
   assertPort(applyCoordinator, ['applyDraft', 'destroy'], 'a Settings Apply Coordinator.');
-  if (!platform || typeof platform.supports !== 'function' || typeof platform.call !== 'function') {
+  if (!platform || !platform.capabilities?.desktop || typeof platform.dialogs?.openDirectory !== 'function') {
     throw new TypeError('Settings Controller requires a platform port.');
   }
   requireElementRef(openTrigger, 'Settings open trigger');
@@ -123,7 +123,7 @@ export function createSettingsController({
   async function chooseDirectory() {
     assertActive();
     if (!store.hasDraft) return false;
-    if (!platform.supports('desktop.dialogs')) {
+    if (!platform.capabilities.desktop.dialogs) {
       view.setFeedback('自定义导出路径仅支持桌面版', 'info');
       return false;
     }
@@ -131,7 +131,7 @@ export function createSettingsController({
     view.setDirectoryBusy(true);
     view.setFeedback('');
     try {
-      const selected = await platform.call('dialogs', 'openDirectory', {
+      const selected = await platform.dialogs.openDirectory({
         title: '选择默认导出目录',
         defaultPath: String(store.draft?.exportDirectory || '')
       });

@@ -15,12 +15,12 @@ export async function verifyImageDataExport({ browser, ownedRoot, commit }) {
   const observations = [];
   for (const row of rows) {
     const path = join(ownedRoot, row.name);
-    const result = await browser.execute(async (source, destination, loneSurrogate) => {
-      const host = document.getElementById('compatibility-business-ports');
+    const result = await browser.inspect(async (source, destination, loneSurrogate) => {
+      const host = applicationCapabilities;
       const platform = host.markdownEditorPlatformPort;
-      if (!platform.supports('desktop.fileSystem')) throw new Error('Real native binary writer is unavailable.');
+      if (!platform.capabilities.desktop.fileSystem) throw new Error('Real native binary writer is unavailable.');
       const bytes = host.markdownEditorImageDataPort.encode(source + (loneSurrogate ? String.fromCharCode(0xD800) : ''));
-      await platform.call('files', 'writeBinary', destination, bytes, { extension: 'png', reason: 'export' });
+      await platform.files.writeBinary( destination, bytes, { extension: 'png', reason: 'export' });
       return { byteLength: bytes.byteLength, typed: bytes instanceof Uint8Array };
     }, row.url, path, Boolean(row.loneSurrogate));
     const actual = await readFile(path);
@@ -29,28 +29,28 @@ export async function verifyImageDataExport({ browser, ownedRoot, commit }) {
   }
   // Generate actual PNG pixels in WebView, then save the public encoder's bytes through Rust.
   const pngPath = join(ownedRoot, 'actual-pixels.png');
-  const png = await browser.execute(async destination => {
+  const png = await browser.inspect(async destination => {
     const canvas = document.createElement('canvas'); canvas.width = 2; canvas.height = 2;
     canvas.getContext('2d').fillStyle = '#1183d3'; canvas.getContext('2d').fillRect(0, 0, 2, 2);
     const source = canvas.toDataURL('image/png'); canvas.width = 0; canvas.height = 0;
-    const host = document.getElementById('compatibility-business-ports');
-    await host.markdownEditorPlatformPort.call('files', 'writeBinary', destination, host.markdownEditorImageDataPort.encode(source), { extension: 'png', reason: 'export' });
+    const host = applicationCapabilities;
+    await host.markdownEditorPlatformPort.files.writeBinary( destination, host.markdownEditorImageDataPort.encode(source), { extension: 'png', reason: 'export' });
     return source;
   }, pngPath);
   const actualPng = await readFile(pngPath); assert.deepEqual(actualPng, Buffer.from(png.split(',')[1], 'base64'));
   observations.push({ name: 'actual-pixels.png', byteLength: actualPng.length, sha256: createHash('sha256').update(actualPng).digest('hex'), exactBytes: true, realPng: true });
   const blocked = join(ownedRoot, 'directory.png'); await mkdir(blocked);
-  const failure = await browser.execute(async destination => {
-    const host = document.getElementById('compatibility-business-ports');
-    try { await host.markdownEditorPlatformPort.call('files', 'writeBinary', destination, host.markdownEditorImageDataPort.encode('data:;base64,AA=='), { extension: 'png', reason: 'export' }); }
+  const failure = await browser.inspect(async destination => {
+    const host = applicationCapabilities;
+    try { await host.markdownEditorPlatformPort.files.writeBinary( destination, host.markdownEditorImageDataPort.encode('data:;base64,AA=='), { extension: 'png', reason: 'export' }); }
     catch { return { rejected: true }; }
     throw new Error('Native binary writer accepted a directory target.');
   }, blocked);
   assert.equal(failure.rejected, true);
   const replacement = rows[0];
-  await browser.execute(async (destination, source) => {
-    const host = document.getElementById('compatibility-business-ports');
-    await host.markdownEditorPlatformPort.call('files', 'writeBinary', destination, host.markdownEditorImageDataPort.encode(source), { extension: 'png', reason: 'export' });
+  await browser.inspect(async (destination, source) => {
+    const host = applicationCapabilities;
+    await host.markdownEditorPlatformPort.files.writeBinary( destination, host.markdownEditorImageDataPort.encode(source), { extension: 'png', reason: 'export' });
   }, pngPath, replacement.url);
   assert.deepEqual(await readFile(pngPath), replacement.bytes);
   return { commit, status: 'passed', transport: 'public encoder -> actual Platform binary adapter -> Rust safe writer -> actual Windows file readback', observations, directoryRejected: true, nextWriteRecovered: true };

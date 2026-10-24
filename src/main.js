@@ -11,192 +11,109 @@ import { createFindPreviewCommands } from './features/editor/application/find-pr
 import 'katex/dist/katex.css';
 import './styles/index.css';
 import katexStyleSheetText from 'katex/dist/katex.css?raw';
-import { createExportController, createExportImageDialogView, mountClassicExportCommandPort, createExportFileWriter, createImageExporter, createImageExportSurface, mountClassicImageExportPort, imageDataUrlToBytes, mountClassicImageDataPort, createImageAssetPreloader, mountClassicImageAssetPort, createImageExportLayout, mountClassicImageLayoutPort, createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from './features/export/index.js';
+import { createExportController, createExportRequestPolicy, createExportImageDialogView, createExportFileWriter, createImageExporter, createImageExportSurface, imageDataUrlToBytes, createImageAssetPreloader, createImageExportLayout, createPdfExporter, createPdfPrintSurface, createWordExporter, createWordDocumentSerializer, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, createMarkdownExporter, createExportStyleSheet, createExportPreviewEnhancer, createExportDocumentBuilder, createExportProgressStore, createExportProgressDialogView, createExportTaskController } from './features/export/index.js';
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
-import { createBrowserPrint, createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
+import { createBrowserPrint, createBrowserFileReader } from './platform/index.js';
 import { createLinkPreview } from './features/link-preview/index.js';
 import { mountPerformanceTelemetry, configurePerformancePlatform, configurePerformanceRuntimeStats, destroyPerformanceTelemetry } from './features/telemetry/index.js';
-import { createVirtualEditor } from './features/editor/index.js';
-import {
-  createEditorCommandService,
-  createEditorController,
-  createEditorFocusService,
-  createEditorHistoryAdapter,
-  createEditorSelectionService,
-  createEditorPaneView,
-  createEditorToolbarView,
-  createFindReplaceDialogView,
-  createImageDialogView,
-  createInlineColorMenuView,
-  createLinkDialogView,
-  createMathDialogView,
-  createMermaidDialogView,
-  createTableDialogView,
-  mountClassicEditorControllerPort,
-  mountClassicEditorUiCommandPort
-} from './features/editor/index.js';
-import {
-  createCompactShellController,
-  createCompactSplitController,
-  createLayoutState,
-  createPageFullscreenController,
-  createSidebarLayoutController,
-  createSidebarResizeController,
-  createSplitPaneController,
-  createSplitResizeController,
-  createSystemFullscreenController,
-  createToolbarBoundaryController,
-  mountClassicLayoutStatePort,
-  mountClassicSplitControllerPort
-} from './features/layout/index.js';
+import { createVirtualEditor, createDocumentModelBinding } from './features/editor/index.js';
+import { createEditorCommandService, createEditorController, createEditorFocusService, createEditorHistoryAdapter, createEditorSelectionService, createEditorPaneView, createEditorToolbarView, createFindReplaceDialogView, createImageDialogView, createInlineColorMenuView, createLinkDialogView, createMathDialogView, createMermaidDialogView, createTableDialogView } from './features/editor/index.js';
+import { createCompactShellController, createCompactSplitController, createLayoutState, createPageFullscreenController, createSidebarLayoutController, createSidebarResizeController, createSplitPaneController, createSplitResizeController, createSystemFullscreenController, createToolbarBoundaryController } from './features/layout/index.js';
 import {
   createDocumentModel,
   selectionMappingApi
 } from './model-kernel/index.js';
 import { createNativeDocumentStore } from './features/persistence/index.js';
 import { SETTINGS_CHANGED_EVENT } from './features/settings/index.js';
-import {
-  createAutosaveController,
-  createBrowserDocumentRepository,
-  createCloseSaveController,
-  createLoadController,
-  createSaveController,
-  createSaveStatusStore,
-  mountClassicSaveStatusStorePort
-} from './features/persistence/index.js';
+import { createAutosaveController, createBrowserDocumentRepository, createCloseSaveController, createLoadController, createSaveController, createSaveStatusStore } from './features/persistence/index.js';
 import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
-import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-scheduler-port.js';
+
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
 import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler, createSelectionSyncController } from './features/sync/index.js';
 import { configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge } from './features/e2e/index.js';
-import {
-  createFolderTreeController,
-  createFolderTreeState,
-  createFolderTreeView,
-  createOutlineCollapseStore,
-  createOutlineController,
-  createOutlineView,
-  createSidebarState,
-  createSidebarTabController,
-  mountClassicFolderTreeControllerPort,
-  mountClassicOutlineControllerPort,
-  mountClassicSidebarControllerPort
-} from './features/sidebar/index.js';
+import { createFolderTreeController, createFolderTreeState, createFolderTreeView, createOutlineCollapseStore, createOutlineController, createOutlineView, createSidebarState, createSidebarTabController } from './features/sidebar/index.js';
 import { configureHybridImageSourcePlatform, configureHybridSyncCapabilities, configureHybridLinkPreview } from './features/hybrid-editor/index.js';
-import {
-  DocumentOperationStaleError,
-  createDocumentContextMenuView,
-  createDocumentListView,
-  createDocumentSessionController,
-  createDocumentTitleView,
-  createRecentFilesReadSource,
-  createRecentFilesRepository,
-  createSessionDocumentRepository,
-  normalizeDocumentTitle,
-  updateDocumentRecord,
-  mountClassicDocumentControllerPort,
-  mountClassicDocumentUiCommandPort,
-  mountClassicRecentFilesPort
-} from './features/documents/index.js';
+import { DocumentOperationStaleError, createDocumentContextMenuView, createDocumentListView, createDocumentSessionController, createDocumentTitleView, createRecentFilesReadSource, createRecentFilesRepository, createSessionDocumentRepository, normalizeDocumentTitle, updateDocumentRecord } from './features/documents/index.js';
 import { createRecentFilesMenuController } from './features/menu/index.js';
-import {
-  createCloseSavePort,
-  createWindowCloseController,
-  createWindowController,
-  createWindowControlsView,
-  createWindowDragRegion,
-  createWindowState,
-  mountClassicCloseSavePort
-} from './features/window/index.js';
-import {
-  createPreviewCancellation,
-  createMarkdownPresentationApi,
-  createPreviewController,
-  createPreviewEnhancementCoordinator,
-  createPreviewFocusController,
-  createPreviewLayoutStability,
-  createPreviewRenderCoordinator,
-  createPreviewRenderEngine,
-  createPreviewRendererPort,
-  createPreviewMarkdownRenderer,
-  createPreviewRecoveryView,
-  createPreviewScheduler,
-  createPreviewState,
-  createPreviewWorkerClient,
-  createVirtualPreviewController,
-  PREVIEW_BEHAVIOR_THRESHOLDS,
-  mountPreviewCommandHandler,
-  mountClassicPreviewPresentationPort,
-  mountClassicPreviewEnhancementCoordinatorPort,
-  mountClassicPreviewFocusControllerPort,
-  mountClassicPreviewLayoutStabilityPort,
-  mountClassicPreviewModeResolverPort,
-  mountClassicPreviewRenderCoordinatorPort,
-  mountClassicPreviewRendererPort,
-  mountClassicPreviewRecoveryViewPort,
-  mountClassicPreviewSchedulerPort,
-  mountClassicPreviewStatePort,
-  mountClassicPreviewThresholdsPort
-} from './features/preview/index.js';
+import { createCloseSavePort, createWindowCloseController, createWindowController, createWindowControlsView, createWindowDragRegion, createWindowState } from './features/window/index.js';
+import { createPreviewCancellation, createMarkdownPresentationApi, createPreviewController, createPreviewEnhancementCoordinator, createPreviewFocusController, createPreviewLayoutStability, createPreviewRenderCoordinator, createPreviewRenderEngine, createPreviewRendererPort, createPreviewMarkdownRenderer, createPreviewRecoveryView, createPreviewScheduler, createPreviewState, createPreviewWorkerClient, createVirtualPreviewController, PREVIEW_BEHAVIOR_THRESHOLDS, createPreviewCommands } from './features/preview/index.js';
 
+/** Construct the application from explicit feature owners. Importing has no startup side effects. */
+export async function startApplication({ platform, documentSessionStore, settingsStore, i18nService, helpController, menuController, submenuPositioner, editorCommands, documentCommands }) {
+const startupLifetime = createApplicationLifetime();
+function ownApplicationExit(release) {
+  let active = true;
+  const dispose = () => {
+    if (!active) return;
+    active = false;
+    const result = release();
+    if (result && typeof result.catch === 'function') void result.catch(error => console.error('Asynchronous application cleanup failed:', error));
+  };
+  startupLifetime.own(dispose);
+}
+startupLifetime.listen(window, 'pagehide', () => startupLifetime.destroy(), { once: true });
+startupLifetime.own(() => { document.documentElement.classList.remove('app-ready'); destroyMarkdownEditorE2EBridge(); if (import.meta.env.DEV) destroyPerformanceTelemetry(); });
+try {
 if (import.meta.env.DEV) mountPerformanceTelemetry();
 
-const platform = createPlatform({
-  runtime: window,
-  now: () => performance.now(),
-  record: (operation, entry) => telemetry.record?.(operation, entry)
-});
 const exportFileWriter = createExportFileWriter({ platform });
-const compatibilityPlatformHost = document.getElementById('compatibility-business-ports');
-const exportRequestPort = mountClassicExportRequestPort(compatibilityPlatformHost, {
-  getActiveDocumentId: () => compatibilityPlatformHost.markdownEditorDocumentSessionPort?.activeId,
-  hasDocument: id => Boolean(compatibilityPlatformHost.markdownEditorDocumentSessionPort?.getRecord(id))
+ownApplicationExit(() => exportFileWriter.destroy());
+
+const exportRequestPort = createExportRequestPolicy( {
+  getActiveDocumentId: () => documentSessionStore?.activeId,
+  hasDocument: id => Boolean(documentSessionStore?.getRecord(id))
 });
 let exportController = null;
-let exportCommandPort = null;
+
 const exportImageView = createExportImageDialogView({ overlayRoot: document.getElementById('overlay-root'),
   onCommand: (action, payload) => exportController?.invoke(action, payload),
-  translate: (...args) => compatibilityPlatformHost.markdownEditorI18nPort.t(...args),
-  subscribeLocale: listener => compatibilityPlatformHost.markdownEditorI18nPort.subscribe(listener) });
+  translate: (...args) => i18nService.t(...args),
+  subscribeLocale: listener => i18nService.subscribe(listener) });
+ownApplicationExit(() => exportImageView.destroy());
 let imageExporter = null;
 let imageExportSurface = null;
-let imageExportPort = null;
+
 let pdfExporter = null;
-let pdfExportPort = null;
+
 let pdfPrintSurface = null;
 let wordExporter = null;
-let wordExportPort = null;
+
 let htmlExporter = null;
-let htmlExportPort = null;
+
 let markdownExporter = null;
-let markdownExportPort = null;
+
 let exportDocumentBuilder = null;
-let exportDocumentPort = null;
+
 let exportPreviewEnhancer = null;
-let exportEnhancementPort = null;
+
 const exportStyles = createExportStyleSheet({ documentRef: document, mathCss: katexStyleSheetText });
-const exportStylePort = mountClassicExportStylePort(compatibilityPlatformHost, exportStyles);
+ownApplicationExit(() => exportStyles.destroy());
+
 const imageAssetPreloader = createImageAssetPreloader({
   createImage: () => new window.Image(), createCanvas: () => document.createElement('canvas'),
   setTimer: (...args) => window.setTimeout(...args), clearTimer: handle => window.clearTimeout(handle),
   requestFrame: callback => window.requestAnimationFrame(callback), cancelFrame: handle => window.cancelAnimationFrame(handle)
 });
-const imageAssetPort = mountClassicImageAssetPort(compatibilityPlatformHost, imageAssetPreloader);
-const imageDataPort = mountClassicImageDataPort(compatibilityPlatformHost, imageDataUrlToBytes);
+ownApplicationExit(() => imageAssetPreloader.destroy());
+
 const imageExportLayout = createImageExportLayout();
-const imageLayoutPort = mountClassicImageLayoutPort(compatibilityPlatformHost, imageExportLayout);
+ownApplicationExit(() => imageExportLayout.destroy());
+
 const htmlFontAssets = createHtmlFontAssets({ mathCss: katexStyleSheetText,
   loaders: import.meta.glob('../../node_modules/katex/dist/fonts/*.woff2', { query: '?inline', import: 'default' }) });
 const htmlDocumentSerializer = createHtmlDocumentSerializer({ styles: exportStyles });
 const wordDocumentSerializer = createWordDocumentSerializer({ styles: exportStyles });
 const exportTaskController = createExportTaskController();
+ownApplicationExit(() => exportTaskController.destroy());
 const exportProgressStore = createExportProgressStore(exportTaskController);
+ownApplicationExit(() => exportProgressStore.destroy());
 const exportProgressView = createExportProgressDialogView({
   overlayRoot: document.getElementById('overlay-root'), store: exportProgressStore, onCancel: () => exportTaskController.cancel()
 });
-const exportTaskPort = mountClassicExportTaskPort(compatibilityPlatformHost, exportTaskController);
+ownApplicationExit(() => exportProgressView.destroy());
+
 const dropImportController = createDropImportController({
   target: document,
   nativeDrop: platform.capabilities.desktop.dragDrop,
@@ -204,11 +121,14 @@ const dropImportController = createDropImportController({
   subscribeNative: handler => platform.dragDrop.subscribe(handler),
   onSubscriptionError: error => console.warn('Native drag-drop subscription failed', error)
 });
+ownApplicationExit(() => dropImportController.destroy());
 const dropImageController = createImageImportController({
   readBrowserImage: (file, options) => browserImageReader.readDataUrl(file, options),
   readNativeImage: path => platform.files.readImage(path, '')
 });
+ownApplicationExit(() => dropImageController.destroy());
 const dropOverlayView = createDropOverlayView({ element: document.getElementById('drop-overlay') });
+ownApplicationExit(() => dropOverlayView.destroy());
 const browserImportReader = createBrowserFileReader({
   FileReaderClass: window.FileReader,
   readErrorMessage: '无法读取所选文档',
@@ -223,40 +143,44 @@ const fileImportController = createFileImportController({
   readBrowserText: (file, options) => browserImportReader.readText(file, options),
   readNativeText: path => platform.files.readText(path)
 });
+ownApplicationExit(() => fileImportController.destroy());
 const webFetchCoordinator = createWebFetchCoordinator({
   nativeFetch: platform.capabilities.desktop.webFetch ? (url, options) => platform.web.fetchText(url, options) : undefined,
   browserFetch: (url, options) => window.fetch(url, options)
 });
+ownApplicationExit(() => webFetchCoordinator.destroy());
 let destroyImportFeature = () => {};
 const backgroundTaskScheduler = createTaskScheduler({ runtime: window });
-const backgroundTaskSchedulerPort = mountClassicTaskSchedulerPort(compatibilityPlatformHost, backgroundTaskScheduler);
+ownApplicationExit(() => backgroundTaskScheduler.destroy());
+
 const markdownPresentation = createMarkdownPresentationApi();
-const previewPresentationPort = mountClassicPreviewPresentationPort(compatibilityPlatformHost, markdownPresentation, { loadDomToImage });
+
 const previewState = createPreviewState();
-const previewStatePort = mountClassicPreviewStatePort(compatibilityPlatformHost, previewState);
-const previewModeResolverPort = mountClassicPreviewModeResolverPort(compatibilityPlatformHost);
-const previewThresholdsPort = mountClassicPreviewThresholdsPort(compatibilityPlatformHost);
+ownApplicationExit(() => previewState.destroy());
+
 const previewCancellation = createPreviewCancellation();
+ownApplicationExit(() => previewCancellation.destroy());
 const previewScheduler = createPreviewScheduler({
   cancellation: previewCancellation,
   getBackgroundScheduler: () => backgroundTaskScheduler
 });
-const previewSchedulerPort = mountClassicPreviewSchedulerPort(compatibilityPlatformHost, previewScheduler);
+ownApplicationExit(() => previewScheduler.destroy());
+
 const previewEnhancementCoordinator = createPreviewEnhancementCoordinator({
   scheduler: previewScheduler,
   thresholds: PREVIEW_BEHAVIOR_THRESHOLDS.scheduling.enhancement
 });
-const previewEnhancementCoordinatorPort = mountClassicPreviewEnhancementCoordinatorPort(
-  compatibilityPlatformHost,
-  previewEnhancementCoordinator
-);
+ownApplicationExit(() => previewEnhancementCoordinator.destroy());
+
 const previewFocusController = createPreviewFocusController({
   scheduler: previewScheduler,
   focusDelay: PREVIEW_BEHAVIOR_THRESHOLDS.scheduling.focusMs
 });
-const previewFocusControllerPort = mountClassicPreviewFocusControllerPort(compatibilityPlatformHost, previewFocusController);
+ownApplicationExit(() => previewFocusController.destroy());
+
 const previewRenderCoordinator = createPreviewRenderCoordinator();
-const previewRenderCoordinatorPort = mountClassicPreviewRenderCoordinatorPort(compatibilityPlatformHost, previewRenderCoordinator);
+ownApplicationExit(() => previewRenderCoordinator.destroy());
+
 const previewLayoutRoot = document.getElementById('preview');
 const previewLayoutPane = document.querySelector('.f-preview-pane');
 const previewLayoutFrameHost = document.defaultView;
@@ -266,10 +190,8 @@ const previewRecoveryView = createPreviewRecoveryView({
   root: previewLayoutRoot,
   documentRef: document
 });
-const previewRecoveryViewPort = mountClassicPreviewRecoveryViewPort(
-  compatibilityPlatformHost,
-  previewRecoveryView
-);
+ownApplicationExit(() => previewRecoveryView.destroy());
+
 const previewLayoutStability = createPreviewLayoutStability({
   root: previewLayoutRoot,
   pane: previewLayoutPane,
@@ -282,9 +204,11 @@ const previewLayoutStability = createPreviewLayoutStability({
   record(operation, entry) { telemetry.record?.(operation, entry); },
   reportError(message, error) { console.warn(message, error); }
 });
-const previewLayoutStabilityPort = mountClassicPreviewLayoutStabilityPort(compatibilityPlatformHost, previewLayoutStability);
+ownApplicationExit(() => previewLayoutStability.destroy());
+
 const layoutState = createLayoutState();
-const layoutStatePort = mountClassicLayoutStatePort(compatibilityPlatformHost, layoutState);
+ownApplicationExit(() => layoutState.destroy());
+
 let compactShellController = null;
 let sidebarLayoutController = null;
 let sidebarResizeController = null;
@@ -294,7 +218,7 @@ let compactSplitController = null;
 let toolbarBoundaryController = null;
 let pageFullscreenController = null;
 let systemFullscreenController = null;
-let splitControllerPort = null;
+
 const destroyLayoutInteractionControllers = () => {
   systemFullscreenController?.destroy();
   systemFullscreenController = null;
@@ -316,16 +240,16 @@ const destroyLayoutInteractionControllers = () => {
   sidebarResizeController = null;
 };
 const destroyLayoutStateFeature = () => {
-  splitControllerPort?.destroy();
-  splitControllerPort = null;
+
   destroyLayoutInteractionControllers();
-  layoutStatePort.destroy();
+
   layoutState.destroy();
 };
-const compatibilityPlatformPort = mountClassicPlatformPort(compatibilityPlatformHost, platform);
+
 let readLinkDocumentContext = () => ({}), notifyLinkPreview = message => console.warn(message);
 const linkPreview = createLinkPreview({ document, window, links: platform.links, record: telemetry.record,
   notify: message => notifyLinkPreview(message) });
+ownApplicationExit(() => linkPreview.destroy());
 configureHybridLinkPreview(linkPreview);
 configurePerformancePlatform({
   logs: platform.logs,
@@ -336,36 +260,34 @@ configureHybridImageSourcePlatform({
   enabled: platform.capabilities.desktop.fileSystem,
   getDocumentContext: () => readLinkDocumentContext()
 });
-window.addEventListener('pagehide', () => {
+ownApplicationExit(() => {
   configureHybridLinkPreview(null);
-  for (const release of [() => linkPreview.destroy(), () => exportController?.destroy(), () => exportCommandPort?.destroy(), () => imageExporter?.destroy(), () => imageExportPort?.destroy(), () => imageExportSurface?.destroy(), () => exportImageView.destroy(), () => pdfExporter?.destroy(), () => pdfExportPort?.destroy(), () => pdfPrintSurface?.destroy(), () => wordExporter?.destroy(), () => wordExportPort?.destroy(), () => htmlExporter?.destroy(), () => htmlExportPort?.destroy(), () => markdownExporter?.destroy(), () => markdownExportPort?.destroy(), () => exportFileWriter.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
-    () => exportEnhancementPort?.destroy(), () => exportDocumentBuilder?.destroy(),
-    () => exportDocumentPort?.destroy(), () => exportProgressView.destroy(),
-    () => exportProgressStore.destroy(), () => imageAssetPreloader.destroy(), () => imageAssetPort.destroy(), () => imageDataPort.destroy(), () => imageExportLayout.destroy(), () => imageLayoutPort.destroy(),
-    () => exportStyles.destroy(), () => exportStylePort.destroy(),
-    () => exportTaskPort.destroy(), () => exportRequestPort.destroy()]) {
-    try { release(); } catch (error) { console.error('Export disposal failed:', error); }
+  const cleanupErrors = [];
+  for (const release of [() => linkPreview.destroy(), () => exportController?.destroy(),  () => imageExporter?.destroy(),  () => imageExportSurface?.destroy(), () => exportImageView.destroy(), () => pdfExporter?.destroy(),  () => pdfPrintSurface?.destroy(), () => wordExporter?.destroy(),  () => htmlExporter?.destroy(),  () => markdownExporter?.destroy(),  () => exportFileWriter.destroy(), () => exportTaskController.destroy(), () => exportPreviewEnhancer?.destroy(),
+     () => exportDocumentBuilder?.destroy(),
+     () => exportProgressView.destroy(),
+    () => exportProgressStore.destroy(), () => imageAssetPreloader.destroy(),   () => imageExportLayout.destroy(),
+    () => exportStyles.destroy(),
+     ]) {
+    try { release(); } catch (error) { cleanupErrors.push(error); }
   }
   destroyLayoutStateFeature();
-  previewLayoutStabilityPort.destroy();
+
   previewLayoutStability.destroy();
-  previewRecoveryViewPort.destroy();
+
   previewRecoveryView.destroy();
-  previewFocusControllerPort.destroy();
+
   previewFocusController.destroy();
-  previewEnhancementCoordinatorPort.destroy();
+
   previewEnhancementCoordinator.destroy();
-  previewRenderCoordinatorPort.destroy();
+
   previewRenderCoordinator.destroy();
-  previewSchedulerPort.destroy();
+
   previewScheduler.destroy();
   previewCancellation.destroy();
-  previewStatePort.destroy();
+
   previewState.destroy();
-  previewModeResolverPort.destroy();
-  previewThresholdsPort.destroy();
-  previewPresentationPort.destroy();
-  backgroundTaskSchedulerPort.destroy();
+
   backgroundTaskScheduler.destroy();
   destroyImportFeature();
   void dropImportController.destroy();
@@ -373,9 +295,10 @@ window.addEventListener('pagehide', () => {
   dropImageController.destroy();
   fileImportController.destroy();
   webFetchCoordinator.destroy();
-  compatibilityPlatformPort.destroy();
-  void platform.destroy().catch(error => console.warn('Platform cleanup failed:', error));
-}, { once: true });
+
+  if (cleanupErrors.length) throw new AggregateError(cleanupErrors, 'Export cleanup failed.');
+
+});
 
 if (typeof document.startViewTransition === 'function') {
   document.documentElement.classList.add('view-transitions-supported');
@@ -396,7 +319,9 @@ async function loadAppModules() {
     requestFrame: callback => window.requestAnimationFrame(callback),
     cancelFrame: frameId => window.cancelAnimationFrame(frameId)
   });
+  ownApplicationExit(() => scrollController.destroy());
   const virtualEditor = createVirtualEditor(editorHost, { scrollSync: scrollController.getPublicApi() });
+  scrollController.connectEditor(virtualEditor);
   const editorSelectionReader = createEditorSelectionReader({ editorApi: virtualEditor });
   const previewSelectionDocument = previewHost.ownerDocument;
   const previewSelectionView = previewSelectionDocument?.defaultView;
@@ -436,8 +361,8 @@ async function loadAppModules() {
     previewSelectionReader.destroy();
     editorSelectionReader.destroy();
   };
-  window.addEventListener('pagehide', destroySelectionSync, { once: true });
-  const documentModel = createDocumentModel(editorHost);
+  ownApplicationExit(destroySelectionSync);
+  const documentModel = createDocumentModel(createDocumentModelBinding(virtualEditor));
   const releaseSnapshotTelemetry = import.meta.env.DEV
     ? observeDocumentSnapshots(documentModel, { record: telemetry.record, now: () => performance.now() }) : () => {};
   let editorScrollMapper = null;
@@ -458,8 +383,7 @@ async function loadAppModules() {
   let editorCommandService;
   let editorSelectionService;
   let editorFocusService;
-  let editorControllerPort;
-  let editorUiCommandPort;
+
   try {
     editorController = createEditorController({
       model: documentModel,
@@ -470,11 +394,9 @@ async function loadAppModules() {
     editorCommandService = createEditorCommandService({ adapter: virtualEditor });
     editorSelectionService = createEditorSelectionService({ adapter: virtualEditor });
     editorFocusService = createEditorFocusService({ adapter: virtualEditor });
-    editorControllerPort = mountClassicEditorControllerPort(compatibilityPlatformHost, editorController);
-    editorUiCommandPort = mountClassicEditorUiCommandPort(compatibilityPlatformHost);
+
   } catch (error) {
-    editorUiCommandPort?.destroy?.();
-    editorControllerPort?.destroy?.();
+
     editorFocusService?.destroy?.();
     editorSelectionService?.destroy?.();
     editorCommandService?.destroy?.();
@@ -490,11 +412,6 @@ async function loadAppModules() {
     documentStore: platform.documentStore,
     available: platform.capabilities.desktop.documentStore
   });
-
-  const documentSessionPort = compatibilityPlatformHost?.markdownEditorDocumentSessionPort;
-  if (!documentSessionPort) throw new Error('Document session compatibility port is unavailable.');
-  const menuCommandPort = compatibilityPlatformHost?.markdownEditorMenuCommandPort;
-  if (!menuCommandPort) throw new Error('Menu command compatibility port is unavailable.');
   const browserDocumentRepository = createBrowserDocumentRepository({
     storage: window.localStorage,
     reportError(message, error) {
@@ -517,7 +434,7 @@ async function loadAppModules() {
   });
   let documentController = null;
   const loadController = createLoadController({
-    documents: documentSessionPort,
+    documents: documentSessionStore,
     model: documentModel,
     editor: virtualEditor,
     repository: documentRepository,
@@ -530,14 +447,14 @@ async function loadAppModules() {
     }
   });
   documentController = createDocumentSessionController({
-    session: documentSessionPort,
+    session: documentSessionStore,
     model: documentModel,
     repository: documentRepository,
     loadController
   });
-  const documentControllerPort = mountClassicDocumentControllerPort(compatibilityPlatformHost, documentController);
-  markdownExporter = createMarkdownExporter({ documentModel, documents: documentControllerPort, taskController: exportTaskController, fileWriter: exportFileWriter });
-  markdownExportPort = mountClassicMarkdownExportPort(compatibilityPlatformHost, markdownExporter);
+
+  markdownExporter = createMarkdownExporter({ documentModel, documents: documentController, taskController: exportTaskController, fileWriter: exportFileWriter });
+
   const recentFilesRepository = createRecentFilesRepository({
     storage: window.localStorage,
     reportError(message, error) {
@@ -546,62 +463,59 @@ async function loadAppModules() {
   });
   recentFilesRepository.load();
   const recentFilesSource = createRecentFilesReadSource(recentFilesRepository);
-  let recentFilesPort;
+
   let recentFilesMenuController;
-  let documentUiCommandPort;
+
   try {
-    recentFilesPort = mountClassicRecentFilesPort(compatibilityPlatformHost, recentFilesRepository);
-    documentUiCommandPort = mountClassicDocumentUiCommandPort(compatibilityPlatformHost);
+
     recentFilesMenuController = createRecentFilesMenuController({
       owner: requireElement('#recent-files-menu-item', 'Recent Files submenu owner'),
       list: requireElement('#recent-files-menu', 'Recent Files submenu list'),
       source: recentFilesSource,
-      commands: menuCommandPort,
+      commands: menuController,
       available: platform.capabilities.desktop.fileSystem,
       reportError(message, error) { console.error(message, error); }
     });
   } catch (error) {
     recentFilesMenuController?.destroy?.();
-    documentUiCommandPort?.destroy?.();
-    recentFilesPort?.destroy?.();
+
     recentFilesRepository.destroy();
     exportController?.destroy();
-    exportCommandPort?.destroy();
+
     exportController = null;
-    exportCommandPort = null;
+
     imageExporter?.destroy();
-    imageExportPort?.destroy();
+
     imageExportSurface?.destroy();
     exportImageView.destroy();
     imageExporter = null;
-    imageExportPort = null;
+
     imageExportSurface = null;
     pdfExporter?.destroy();
-    pdfExportPort?.destroy();
+
     pdfPrintSurface?.destroy();
     pdfExporter = null;
-    pdfExportPort = null;
+
     pdfPrintSurface = null;
     wordExporter?.destroy();
-    wordExportPort?.destroy();
+
     wordExporter = null;
-    wordExportPort = null;
+
     htmlExporter?.destroy();
-    htmlExportPort?.destroy();
+
     htmlExporter = null;
-    htmlExportPort = null;
+
     markdownExporter?.destroy();
-    markdownExportPort?.destroy();
+
     markdownExporter = null;
-    markdownExportPort = null;
+
     exportFileWriter.destroy();
-    documentControllerPort.destroy();
+
     documentController.destroy();
     loadController.destroy();
     documentRepository.destroy();
     browserDocumentRepository.destroy();
-    editorUiCommandPort.destroy();
-    editorControllerPort.destroy();
+
     editorFocusService.destroy();
     editorSelectionService.destroy();
     editorCommandService.destroy();
@@ -613,14 +527,11 @@ async function loadAppModules() {
     virtualEditor.destroy();
     throw error;
   }
-
-  const autosaveSettingsStorePort = compatibilityPlatformHost?.markdownEditorSettingsStorePort;
-  if (!autosaveSettingsStorePort) throw new Error('Settings Store compatibility port is unavailable for Autosave.');
   const autosaveSettingsSource = Object.freeze({
     read() {
       return Object.freeze({
-        enabled: Boolean(autosaveSettingsStorePort.get('autoSaveEnabled')),
-        delay: Number(autosaveSettingsStorePort.get('autoSaveDelay'))
+        enabled: Boolean(settingsStore.get('autoSaveEnabled')),
+        delay: Number(settingsStore.get('autoSaveDelay'))
       });
     },
     subscribe(listener) {
@@ -639,7 +550,7 @@ async function loadAppModules() {
     }
   });
   const saveStatusStore = createSaveStatusStore();
-  const saveStatusStorePort = mountClassicSaveStatusStorePort(compatibilityPlatformHost, saveStatusStore);
+
   const saveController = createSaveController({
     documentController,
     model: documentModel,
@@ -677,7 +588,7 @@ async function loadAppModules() {
     autosaveController.destroy();
     unsubscribeNativeSaveStatus();
     saveController.destroy();
-    saveStatusStorePort.destroy();
+
     saveStatusStore.destroy();
   };
 
@@ -686,17 +597,17 @@ async function loadAppModules() {
   let unregisterLayoutUiCommands = null;
   let sidebarState = null;
   let sidebarTabController = null;
-  let sidebarControllerPort = null;
+
   let outlineController = null;
-  let outlineControllerPort = null;
+
   let folderTreeController = null;
-  let folderTreeControllerPort = null;
+
   let closeSavePort = null;
   let closeSaveController = null;
-  let classicCloseSavePort = null;
+
   let windowController = null;
   let previewRenderer = null;
-  let previewRendererPort = null;
+
   let previewMarkdownRenderer = null;
   let previewRenderEngine = null;
   let previewController = null;
@@ -739,19 +650,13 @@ async function loadAppModules() {
     }
     closeSaveController?.destroy();
     closeSaveController = null;
-    classicCloseSavePort?.destroy();
-    classicCloseSavePort = null;
+
     closeSavePort?.destroy();
     closeSavePort = null;
     destroyPersistenceSaveFeature();
     unregisterLayoutUiCommands?.();
     unregisterLayoutUiCommands = null;
-    sidebarControllerPort?.destroy();
-    sidebarControllerPort = null;
-    folderTreeControllerPort?.destroy();
-    folderTreeControllerPort = null;
-    outlineControllerPort?.destroy();
-    outlineControllerPort = null;
+
     sidebarTabController?.destroy();
     sidebarTabController = null;
     outlineController?.destroy();
@@ -760,52 +665,49 @@ async function loadAppModules() {
     folderTreeController = null;
     sidebarState?.destroy();
     sidebarState = null;
-    splitControllerPort?.destroy();
-    splitControllerPort = null;
+
     destroyLayoutInteractionControllers();
     destroyDocumentEditorViews();
     recentFilesMenuController?.destroy();
     recentFilesMenuController = null;
-    documentUiCommandPort.destroy();
-    recentFilesPort.destroy();
+
     recentFilesRepository.destroy();
     exportController?.destroy();
-    exportCommandPort?.destroy();
+
     exportController = null;
-    exportCommandPort = null;
+
     imageExporter?.destroy();
-    imageExportPort?.destroy();
+
     imageExportSurface?.destroy();
     exportImageView.destroy();
     imageExporter = null;
-    imageExportPort = null;
+
     imageExportSurface = null;
     pdfExporter?.destroy();
-    pdfExportPort?.destroy();
+
     pdfPrintSurface?.destroy();
     pdfExporter = null;
-    pdfExportPort = null;
+
     pdfPrintSurface = null;
     wordExporter?.destroy();
-    wordExportPort?.destroy();
+
     wordExporter = null;
-    wordExportPort = null;
+
     htmlExporter?.destroy();
-    htmlExportPort?.destroy();
+
     htmlExporter = null;
-    htmlExportPort = null;
+
     markdownExporter?.destroy();
-    markdownExportPort?.destroy();
+
     markdownExporter = null;
-    markdownExportPort = null;
+
     exportFileWriter.destroy();
-    documentControllerPort.destroy();
+
     documentController.destroy();
     loadController.destroy();
     documentRepository.destroy();
     browserDocumentRepository.destroy();
-    editorUiCommandPort.destroy();
-    editorControllerPort.destroy();
+
     editorFocusService.destroy();
     editorSelectionService.destroy();
     editorCommandService.destroy();
@@ -816,20 +718,17 @@ async function loadAppModules() {
     unregisterPreviewEditorCommands = null;
     exportPreviewEnhancer?.destroy();
     exportPreviewEnhancer = null;
-    exportEnhancementPort?.destroy();
-    exportEnhancementPort = null;
+
     exportDocumentBuilder?.destroy();
     exportDocumentBuilder = null;
-    exportDocumentPort?.destroy();
-    exportDocumentPort = null;
+
     previewCommandHandler?.destroy();
     previewCommandHandler = null;
     previewController?.destroy();
     previewController = null;
     previewRenderEngine = null;
     previewMarkdownRenderer = null;
-    previewRendererPort?.destroy();
-    previewRendererPort = null;
+
     previewRenderer?.destroy();
     previewRenderer = null;
     destroyEditorScrollMapper();
@@ -837,10 +736,7 @@ async function loadAppModules() {
     documentModel.destroy();
     virtualEditor.destroy();
   };
-  window.addEventListener('pagehide', event => {
-    try { destroyDocumentFeatures(); }
-    finally { if (import.meta.env.DEV && !event.persisted) destroyPerformanceTelemetry(); }
-  }, { once: true });
+  ownApplicationExit(destroyDocumentFeatures);
 
   const folderTreeState = createFolderTreeState();
   const folderTreeView = createFolderTreeView({
@@ -857,16 +753,16 @@ async function loadAppModules() {
     view: folderTreeView,
     files: platform.files,
     available: platform.capabilities.desktop.fileSystem,
-    getCurrentContext: () => ({ filePath: documentSessionPort.getActiveRecord()?.filePath || '' }),
-    openFile: path => documentUiCommandPort.has('openFolderTreeFile')
-      ? documentUiCommandPort.invoke('openFolderTreeFile', path)
+    getCurrentContext: () => ({ filePath: documentSessionStore.getActiveRecord()?.filePath || '' }),
+    openFile: path => documentCommands.has('openFolderTreeFile')
+      ? documentCommands.invoke('openFolderTreeFile', path)
       : false,
     now: () => performance.now(),
     record(operation, entry) { telemetry.record?.(operation, entry); },
     reportError(message, error) { console.warn(message, error); }
   });
   folderTreeController.start();
-  folderTreeControllerPort = mountClassicFolderTreeControllerPort(compatibilityPlatformHost, folderTreeController);
+
   sidebarState = createSidebarState();
   sidebarTabController = createSidebarTabController({
     state: sidebarState,
@@ -905,11 +801,11 @@ async function loadAppModules() {
     onCollapseAll: () => { void outlineController?.collapseAll(); },
     onCollapseNode: id => { void outlineController?.collapseNode(id); },
     openContextMenu(event) {
-      if (editorUiCommandPort.has('showContextMenu')) editorUiCommandPort.invoke('showContextMenu', outlineContextMenu, event);
+      if (editorCommands.has('showContextMenu')) editorCommands.invoke('showContextMenu', outlineContextMenu, event);
       else event?.preventDefault?.();
     },
     closeContextMenus() {
-      if (editorUiCommandPort.has('closeContextMenus')) editorUiCommandPort.invoke('closeContextMenus');
+      if (editorCommands.has('closeContextMenus')) editorCommands.invoke('closeContextMenus');
     }
   });
   outlineController = createOutlineController({
@@ -925,8 +821,8 @@ async function loadAppModules() {
       virtualEditor.focus({ preventScroll: true });
       virtualEditor.setSelection(position, position);
       virtualEditor.scrollPositionIntoView(position, 'auto', 0.5);
-      if (editorUiCommandPort.has('focusPreviewLineForOutline')) {
-        void editorUiCommandPort.invoke('focusPreviewLineForOutline', targetLine, { behavior: 'auto', scroll: true });
+      if (editorCommands.has('focusPreviewLineForOutline')) {
+        void editorCommands.invoke('focusPreviewLineForOutline', targetLine, { behavior: 'auto', scroll: true });
       } else {
         scrollController.beginUserGesture('editor', 'outline-navigation');
         scrollController.syncNow('editor');
@@ -939,22 +835,20 @@ async function loadAppModules() {
   });
   outlineController.start();
   sidebarTabController.registerLifecycle('outline', outlineController);
-  outlineControllerPort = mountClassicOutlineControllerPort(compatibilityPlatformHost, outlineController);
-  sidebarControllerPort = mountClassicSidebarControllerPort(compatibilityPlatformHost, sidebarTabController);
 
   const t = (...args) => {
-    const i18n = compatibilityPlatformHost?.markdownEditorI18nPort;
+    const i18n = i18nService;
     if (i18n?.t) return i18n.t(...args);
     return String(args[0] || '');
   };
 
   let inlineColorView = null;
   const notify = message => {
-    if (editorUiCommandPort.has('notify')) return editorUiCommandPort.invoke('notify', message);
+    if (editorCommands.has('notify')) return editorCommands.invoke('notify', message);
     console.warn(message);
   };
-  const currentLayoutMode = () => editorUiCommandPort.has('getLayoutMode')
-    ? editorUiCommandPort.invoke('getLayoutMode')
+  const currentLayoutMode = () => editorCommands.has('getLayoutMode')
+    ? editorCommands.invoke('getLayoutMode')
     : 'both';
   const readCurrentDocumentTitle = () => requireElement('#filename', 'Document title input').value;
   const importDocumentController = createImportDocumentController({
@@ -967,7 +861,7 @@ async function loadAppModules() {
     getDocumentOptions: () => ({ currentTitle: readCurrentDocumentTitle(),
       title: t('filenameDefault'), fallbackTitle: t('filenameDefault') }),
     async afterDocumentOpen(result) {
-      if (!await documentUiCommandPort.invoke('applyDocumentLifecycleUi', result)) return false;
+      if (!await documentCommands.invoke('applyDocumentLifecycleUi', result)) return false;
       if (!documentController.isCurrentGeneration(result.generation)) return false;
       void sidebarTabController.select('docs');
       return true;
@@ -999,8 +893,8 @@ async function loadAppModules() {
       native: platform.capabilities.desktop.webFetch });
     webClipperView = createWebClipperView({ overlayRoot: requireElement('#overlay-root', 'Web Clipper overlay'),
       controller: webClipperController, translate: t, notify,
-      subscribeLocale: listener => compatibilityPlatformHost.markdownEditorI18nPort.subscribe(listener) });
-    unregisterImportCommands = documentUiCommandPort.register({
+      subscribeLocale: listener => i18nService.subscribe(listener) });
+    unregisterImportCommands = documentCommands.register({
       importFile: () => fileImportView.open(),
       openImportPath: path => dropImportController.openPath(path),
       importTextContent: (name, content, path = '') => importDocumentController.openTextContent(name, content, path),
@@ -1060,12 +954,12 @@ async function loadAppModules() {
       return false;
     }
   };
-  unregisterPersistenceEditorCommands = editorUiCommandPort.register({
+  unregisterPersistenceEditorCommands = editorCommands.register({
     requestDocumentPersistence: reason => autosaveController.schedule({ reason: String(reason || 'editor-ui-command') }),
     saveCurrentFile: () => saveCurrentFileFromUi(),
     saveAsMarkdown: () => saveAsMarkdownFromUi()
   });
-  unregisterPersistenceDocumentCommands = documentUiCommandPort.register({
+  unregisterPersistenceDocumentCommands = documentCommands.register({
     prepareDocumentTransition: reason => autosaveController.cancelPending(String(reason || 'document-transition')),
     saveAsDocument: documentId => saveAsMarkdownFromUi(documentId)
   });
@@ -1078,7 +972,7 @@ async function loadAppModules() {
   };
   const executeEditorAction = (action, payload) => {
     if (action === 'close-app-menus') {
-      if (editorUiCommandPort.has('closeAppMenus')) return editorUiCommandPort.invoke('closeAppMenus');
+      if (editorCommands.has('closeAppMenus')) return editorCommands.invoke('closeAppMenus');
       return;
     }
     if (action === 'clear') {
@@ -1086,11 +980,11 @@ async function loadAppModules() {
       editorController.setText('');
       return true;
     }
-    if (action === 'layout') return editorUiCommandPort.invoke('setLayoutMode', payload);
+    if (action === 'layout') return editorCommands.invoke('setLayoutMode', payload);
     if (action === 'save-current-file') return saveCurrentFileFromUi();
     if (action === 'save-as-markdown') return saveAsMarkdownFromUi();
-    if (action === 'page-fullscreen') return editorUiCommandPort.invoke('togglePageFullscreen');
-    if (action === 'system-fullscreen') return editorUiCommandPort.invoke('toggleSystemFullscreen');
+    if (action === 'page-fullscreen') return editorCommands.invoke('togglePageFullscreen');
+    if (action === 'system-fullscreen') return editorCommands.invoke('toggleSystemFullscreen');
     if (action === 'undo') {
       const changed = editorHistoryAdapter.undo();
       if (changed) {
@@ -1138,9 +1032,9 @@ async function loadAppModules() {
   const mountDocumentEditorViews = () => {
     const titleView = createDocumentTitleView({
       input: requireElement('#filename', 'Document title input'),
-      session: documentSessionPort,
+      session: documentSessionStore,
       fallbackTitle: t('filenameDefault') || '未命名文档.md',
-      updateTitleDraft(value) { return documentUiCommandPort.invoke('updateTitleDraft', value); }
+      updateTitleDraft(value) { return documentCommands.invoke('updateTitleDraft', value); }
     });
     featureViews.push(titleView);
 
@@ -1148,19 +1042,19 @@ async function loadAppModules() {
       documentMenu: requireElement('#document-context-menu', 'Document context menu'),
       sidebarMenu: requireElement('#sidebar-context-menu', 'Sidebar context menu'),
       docsPanel: requireElement('#sidebar-docs-panel', 'Documents panel'),
-      commands: { invoke: (action, ...args) => documentUiCommandPort.invoke(action, ...args) }
+      commands: { invoke: (action, ...args) => documentCommands.invoke(action, ...args) }
     });
     featureViews.push(contextMenuView);
 
     const documentListView = createDocumentListView({
       root: requireElement('#document-list', 'Document list'),
-      session: documentSessionPort,
+      session: documentSessionStore,
       defaultTitle: t('filenameDefault') || '未命名文档',
       emptyText: '暂无文档',
       contextMenu: contextMenuView,
       commands: {
-        open: id => documentUiCommandPort.invoke('openDocument', id),
-        close: id => documentUiCommandPort.invoke('closeDocument', id)
+        open: id => documentCommands.invoke('openDocument', id),
+        close: id => documentCommands.invoke('closeDocument', id)
       }
     });
     featureViews.push(documentListView);
@@ -1238,11 +1132,11 @@ async function loadAppModules() {
         replacedAll: count => t('statusReplacedCount', count)
       },
       getSearchOptions({ setStatus }) {
-        if (!editorUiCommandPort.has('getFindSearchOptions')) return {};
-        return editorUiCommandPort.invoke('getFindSearchOptions', setStatus);
+        if (!editorCommands.has('getFindSearchOptions')) return {};
+        return editorCommands.invoke('getFindSearchOptions', setStatus);
       },
       onMatch(match) {
-        if (editorUiCommandPort.has('afterFindMatch')) editorUiCommandPort.invoke('afterFindMatch', match);
+        if (editorCommands.has('afterFindMatch')) editorCommands.invoke('afterFindMatch', match);
       },
       commands: {
         findNext: (...args) => editorCommandService.findNext(...args),
@@ -1278,16 +1172,16 @@ async function loadAppModules() {
 
     const editorPaneView = createEditorPaneView({
       root: requireElement('.f-editor-pane', 'Editor pane'),
-      editorElement: editorHost,
+      editorElement: editorHost, editorApi: virtualEditor, i18n: i18nService,
       collapse: pane => splitPaneController.togglePane(pane),
       onSelectionChange() {
         inlineColorView.updateAvailability();
-        if (editorUiCommandPort.has('selectionChanged')) editorUiCommandPort.invoke('selectionChanged');
+        if (editorCommands.has('selectionChanged')) editorCommands.invoke('selectionChanged');
       }
     });
     featureViews.push(editorPaneView);
 
-    unregisterEditorViewCommands = editorUiCommandPort.register({
+    unregisterEditorViewCommands = editorCommands.register({
       executeEditorAction,
       openLink: () => linkView.open(),
       openImage: () => imageView.open(),
@@ -1301,15 +1195,15 @@ async function loadAppModules() {
   };
 
   const previewVirtualGeometry = Object.freeze({
-    get active() { return Boolean(previewCommandHandler?.port?.virtual?.active); },
-    getMountedAnchors: () => previewCommandHandler?.port?.virtual?.getMountedAnchors?.() || [],
-    getMetrics: () => previewCommandHandler?.port?.virtual?.getMetrics?.() || [],
-    getContentYForLine: line => previewCommandHandler?.port?.virtual?.getContentYForLine?.(line) ?? null,
-    getLineForContentY: y => previewCommandHandler?.port?.virtual?.getLineForContentY?.(y) ?? null,
-    containsLineRange: (from, to) => previewCommandHandler?.port?.virtual?.containsLineRange?.(from, to) ?? true,
-    hasLineRangeMounted: (from, to) => previewCommandHandler?.port?.virtual?.hasLineRangeMounted?.(from, to) ?? true,
-    ensureLineRangeVisible: (from, to) => previewCommandHandler?.port?.virtual?.ensureLineRangeVisible?.(from, to) ?? null,
-    ensureLineVisible: line => previewCommandHandler?.port?.virtual?.ensureLineVisible?.(line) ?? null
+    get active() { return Boolean(previewCommandHandler?.virtual?.active); },
+    getMountedAnchors: () => previewCommandHandler?.virtual?.getMountedAnchors?.() || [],
+    getMetrics: () => previewCommandHandler?.virtual?.getMetrics?.() || [],
+    getContentYForLine: line => previewCommandHandler?.virtual?.getContentYForLine?.(line) ?? null,
+    getLineForContentY: y => previewCommandHandler?.virtual?.getLineForContentY?.(y) ?? null,
+    containsLineRange: (from, to) => previewCommandHandler?.virtual?.containsLineRange?.(from, to) ?? true,
+    hasLineRangeMounted: (from, to) => previewCommandHandler?.virtual?.hasLineRangeMounted?.(from, to) ?? true,
+    ensureLineRangeVisible: (from, to) => previewCommandHandler?.virtual?.ensureLineRangeVisible?.(from, to) ?? null,
+    ensureLineVisible: line => previewCommandHandler?.virtual?.ensureLineVisible?.(line) ?? null
   });
   const previewView = previewHost.ownerDocument?.defaultView;
   const PreviewResizeObserver = previewView?.ResizeObserver;
@@ -1358,54 +1252,54 @@ async function loadAppModules() {
       reportError(message, error) { console.error(message, error); }
     });
     previewRenderer.start();
-    previewRendererPort = mountClassicPreviewRendererPort(compatibilityPlatformHost, previewRenderer);
+
     const previewShell = Object.freeze({
       getPreviewPerformanceMode() {
-        if (!editorUiCommandPort.has('getPreviewRuntimeSettings')) return 'auto';
-        return editorUiCommandPort.invoke('getPreviewRuntimeSettings')?.previewPerformanceMode || 'auto';
+        if (!editorCommands.has('getPreviewRuntimeSettings')) return 'auto';
+        return editorCommands.invoke('getPreviewRuntimeSettings')?.previewPerformanceMode || 'auto';
       },
       getEditorFontSize() {
-        if (!editorUiCommandPort.has('getPreviewRuntimeSettings')) return 16;
-        return editorUiCommandPort.invoke('getPreviewRuntimeSettings')?.editorFontSize || 16;
+        if (!editorCommands.has('getPreviewRuntimeSettings')) return 16;
+        return editorCommands.invoke('getPreviewRuntimeSettings')?.editorFontSize || 16;
       },
       updatePreviewStrategyBadge(mode, stats) {
-        if (editorUiCommandPort.has('updatePreviewStrategyBadge')) editorUiCommandPort.invoke('updatePreviewStrategyBadge', mode, stats);
+        if (editorCommands.has('updatePreviewStrategyBadge')) editorCommands.invoke('updatePreviewStrategyBadge', mode, stats);
       },
       updateDocumentStatistics(statistics) {
-        if (editorUiCommandPort.has('updateDocumentStatistics')) editorUiCommandPort.invoke('updateDocumentStatistics', statistics);
+        if (editorCommands.has('updateDocumentStatistics')) editorCommands.invoke('updateDocumentStatistics', statistics);
       },
       persistCurrentDocumentIndex(headings, statistics) {
-        if (editorUiCommandPort.has('persistCurrentDocumentIndex')) editorUiCommandPort.invoke('persistCurrentDocumentIndex', headings, statistics);
+        if (editorCommands.has('persistCurrentDocumentIndex')) editorCommands.invoke('persistCurrentDocumentIndex', headings, statistics);
       },
       preparePreviewEditorMetrics() {
-        if (editorUiCommandPort.has('preparePreviewEditorMetrics')) editorUiCommandPort.invoke('preparePreviewEditorMetrics');
+        if (editorCommands.has('preparePreviewEditorMetrics')) editorCommands.invoke('preparePreviewEditorMetrics');
       },
       invalidatePreviewAnchorMetrics() {
-        if (editorUiCommandPort.has('invalidatePreviewAnchorMetrics')) editorUiCommandPort.invoke('invalidatePreviewAnchorMetrics');
+        if (editorCommands.has('invalidatePreviewAnchorMetrics')) editorCommands.invoke('invalidatePreviewAnchorMetrics');
       },
       invalidatePreviewAnchorStructure() {
-        if (editorUiCommandPort.has('invalidatePreviewAnchorStructure')) editorUiCommandPort.invoke('invalidatePreviewAnchorStructure');
+        if (editorCommands.has('invalidatePreviewAnchorStructure')) editorCommands.invoke('invalidatePreviewAnchorStructure');
       },
       annotatePreviewSourceLines(source, tokens, blocks) {
-        if (editorUiCommandPort.has('annotatePreviewSourceLines')) return editorUiCommandPort.invoke('annotatePreviewSourceLines', source, tokens, blocks);
+        if (editorCommands.has('annotatePreviewSourceLines')) return editorCommands.invoke('annotatePreviewSourceLines', source, tokens, blocks);
         return null;
       },
       refreshPreviewAnchorStructure() {
-        if (editorUiCommandPort.has('refreshPreviewAnchorStructure')) return editorUiCommandPort.invoke('refreshPreviewAnchorStructure');
+        if (editorCommands.has('refreshPreviewAnchorStructure')) return editorCommands.invoke('refreshPreviewAnchorStructure');
         return null;
       },
       getPreviewAnchorMetrics() {
-        return editorUiCommandPort.has('getPreviewAnchorMetrics') ? editorUiCommandPort.invoke('getPreviewAnchorMetrics') : [];
+        return editorCommands.has('getPreviewAnchorMetrics') ? editorCommands.invoke('getPreviewAnchorMetrics') : [];
       },
       getPreviewAnchorCount() {
-        return editorUiCommandPort.has('getPreviewAnchorCount') ? editorUiCommandPort.invoke('getPreviewAnchorCount') : 0;
+        return editorCommands.has('getPreviewAnchorCount') ? editorCommands.invoke('getPreviewAnchorCount') : 0;
       },
       scrollPreviewToLine(line, behavior, ratio) {
-        if (editorUiCommandPort.has('scrollPreviewToLine')) return editorUiCommandPort.invoke('scrollPreviewToLine', line, behavior, ratio);
+        if (editorCommands.has('scrollPreviewToLine')) return editorCommands.invoke('scrollPreviewToLine', line, behavior, ratio);
         return false;
       },
       requestAutoSave() {
-        if (editorUiCommandPort.has('requestDocumentPersistence')) return editorUiCommandPort.invoke('requestDocumentPersistence', 'preview-shell');
+        if (editorCommands.has('requestDocumentPersistence')) return editorCommands.invoke('requestDocumentPersistence', 'preview-shell');
         return false;
       },
       translate(key, ...args) { return t(key, ...args); }
@@ -1417,10 +1311,9 @@ async function loadAppModules() {
     });
     previewRenderEngine = createPreviewRenderEngine({
       root: previewHost,
-      editor: editorHost,
       documentModel,
-      documentSession: documentSessionPort,
-      outline: outlineControllerPort,
+      documentSession: documentSessionStore,
+      outline: outlineController,
       state: previewState,
       scheduler: previewScheduler,
       renderCoordinator: previewRenderCoordinator,
@@ -1441,7 +1334,7 @@ async function loadAppModules() {
     });
     previewController = createPreviewController({
       root: previewHost,
-      editor: editorHost,
+      editor: virtualEditor,
       documentModel,
       layoutState,
       state: previewState,
@@ -1458,56 +1351,56 @@ async function loadAppModules() {
       storage: window.localStorage
     });
     previewController.start();
-    previewCommandHandler = mountPreviewCommandHandler(compatibilityPlatformHost, previewController);
+    previewCommandHandler = createPreviewCommands(previewController);
     exportDocumentBuilder = createExportDocumentBuilder({
       documentRef: document, documentModel,
-      getActiveDocumentId: () => documentSessionPort.activeId,
+      getActiveDocumentId: () => documentSessionStore.activeId,
       preview: { capture: () => previewRenderEngine.captureExportSource() },
       presentation: markdownPresentation,
       createHtmlNodes: html => previewRenderer.createBlockNodes({ id: 'export-full', html }),
       requestFrame: callback => window.requestAnimationFrame(callback),
       cancelFrame: handle => window.cancelAnimationFrame(handle)
     });
-    exportDocumentPort = mountClassicExportDocumentPort(compatibilityPlatformHost, exportDocumentBuilder);
+
     exportPreviewEnhancer = createExportPreviewEnhancer({
       documentRef: document, documentModel,
-      getActiveDocumentId: () => documentSessionPort.activeId,
+      getActiveDocumentId: () => documentSessionStore.activeId,
       builder: exportDocumentBuilder, presentation: markdownPresentation,
       requestFrame: callback => window.requestAnimationFrame(callback),
       cancelFrame: handle => window.cancelAnimationFrame(handle)
     });
-    exportEnhancementPort = mountClassicExportEnhancementPort(compatibilityPlatformHost, exportPreviewEnhancer);
-    htmlExporter = createHtmlExporter({ documentModel, documents: documentControllerPort,
+
+    htmlExporter = createHtmlExporter({ documentModel, documents: documentController,
       builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: htmlFontAssets,
       serializer: htmlDocumentSerializer, taskController: exportTaskController, fileWriter: exportFileWriter });
-    htmlExportPort = mountClassicHtmlExportPort(compatibilityPlatformHost, htmlExporter);
-    wordExporter = createWordExporter({ documentModel, documents: documentControllerPort,
+
+    wordExporter = createWordExporter({ documentModel, documents: documentController,
       builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: htmlFontAssets,
       serializer: wordDocumentSerializer, taskController: exportTaskController, fileWriter: exportFileWriter });
-    wordExportPort = mountClassicWordExportPort(compatibilityPlatformHost, wordExporter);
+
     pdfPrintSurface = createPdfPrintSurface({ documentRef: document, styles: exportStyles,
       printWindow: frameWindow => createBrowserPrint({ windowObject: frameWindow }).print(),
       setTimer: (callback, delay) => window.setTimeout(callback, delay), clearTimer: handle => window.clearTimeout(handle) });
-    pdfExporter = createPdfExporter({ documentModel, documents: documentControllerPort,
+    pdfExporter = createPdfExporter({ documentModel, documents: documentController,
       builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: htmlFontAssets,
       surface: pdfPrintSurface, taskController: exportTaskController });
-    pdfExportPort = mountClassicPdfExportPort(compatibilityPlatformHost, pdfExporter);
+
     imageExportSurface = createImageExportSurface({ documentRef: document,
       container: exportImageView.container, stage: exportImageView.stage, previewImage: exportImageView.previewImage,
       layout: imageExportLayout, styles: exportStyles, readStyle: root => window.getComputedStyle(root) });
-    imageExporter = createImageExporter({ documentModel, documents: documentControllerPort,
+    imageExporter = createImageExporter({ documentModel, documents: documentController,
       builder: exportDocumentBuilder, enhancer: exportPreviewEnhancer, assets: imageAssetPreloader,
       surface: imageExportSurface, encodeDataUrl: imageDataUrlToBytes, loadDomToImage,
       taskController: exportTaskController, fileWriter: exportFileWriter });
-    imageExportPort = mountClassicImageExportPort(compatibilityPlatformHost, imageExporter);
-    exportController = createExportController({ requests: exportRequestPort.port, tasks: exportTaskPort.port,
+
+    exportController = createExportController({ requests: exportRequestPort, tasks: exportTaskController,
       owners: { markdown: markdownExporter, html: htmlExporter, word: wordExporter, pdf: pdfExporter, image: imageExporter },
-      imageView: exportImageView, preview: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
+      imageView: exportImageView, preview: previewCommandHandler,
       readInput: () => ({ name: document.getElementById('filename').value,
-        directory: compatibilityPlatformHost.markdownEditorSettingsStorePort.get('exportDirectory') }),
+        directory: settingsStore.get('exportDirectory') }),
       notify, translate: t, reportError: error => console.error(error),
       now: () => performance.now(), record: (operation, entry) => telemetry.record?.(operation, entry) });
-    exportCommandPort = mountClassicExportCommandPort(compatibilityPlatformHost, exportController);
+
     const scrollPreviewToLine = (line, behavior = 'auto', viewportRatio = 0.38) => {
       const ratio = Math.max(0.05, Math.min(0.95, Number(viewportRatio) || 0.38));
       const contentY = previewScrollMapper.getContentYForLine(line);
@@ -1518,7 +1411,7 @@ async function loadAppModules() {
         settleMs: behavior === 'smooth' ? 900 : 700
       });
     };
-    unregisterPreviewEditorCommands = editorUiCommandPort.register({
+    unregisterPreviewEditorCommands = editorCommands.register({
       focusPreviewLineForOutline: (line, options) => previewController.focusLine(line, options),
       preparePreviewEditorMetrics: () => scrollController.notifyGeometryChanged('editor'),
       invalidatePreviewAnchorMetrics: () => previewScrollMapper.invalidateMetrics(),
@@ -1532,7 +1425,7 @@ async function loadAppModules() {
     });
     scrollController.configure({
       syncFromEditor: () => {
-        const contentY = editorHost.scrollTop + editorHost.clientHeight * 0.38;
+        const contentY = virtualEditor.getScrollMetrics().top + virtualEditor.getScrollMetrics().clientHeight * 0.38;
         const sourceLine = editorScrollMapper.getLineAtContentY(contentY);
         const targetY = previewScrollMapper.getContentYForLine(sourceLine);
         scrollController.scheduleTarget('preview', targetY - previewHost.clientHeight * 0.38, { reason: 'linked-scroll' });
@@ -1541,7 +1434,7 @@ async function loadAppModules() {
       syncFromPreview: () => {
         const sourceLine = previewScrollMapper.getLineForContentY(previewHost.scrollTop + previewHost.clientHeight * 0.38);
         const targetY = editorScrollMapper.getContentYForLine(sourceLine);
-        scrollController.scheduleTarget('editor', targetY - editorHost.clientHeight * 0.38, { reason: 'linked-scroll' });
+        scrollController.scheduleTarget('editor', targetY - virtualEditor.getScrollMetrics().clientHeight * 0.38, { reason: 'linked-scroll' });
         outlineController?.updateActiveLine?.(Math.max(1, Math.floor(sourceLine)));
       }
     });
@@ -1559,7 +1452,9 @@ async function loadAppModules() {
       backgroundTasks: backgroundTaskScheduler.getStats().pending
     }));
     configureMarkdownEditorE2EPorts({
-      setLayout: mode => editorUiCommandPort.invoke('setLayoutMode', mode, false),
+      editorApi: virtualEditor,
+      importDocument: (content, name) => documentCommands.invoke('importTextContent', name, content, ''),
+      setLayout: mode => editorCommands.invoke('setLayoutMode', mode, false),
       readContext: () => {
         const state = documentModel.getState();
         return { documentId: state.documentId, generation: state.generation, version: state.version };
@@ -1590,7 +1485,7 @@ async function loadAppModules() {
       }
     });
     closeSaveController.start();
-    classicCloseSavePort = mountClassicCloseSavePort(compatibilityPlatformHost, closeSavePort);
+
     const layoutFrameHost = document.defaultView;
     const requestLayoutFrame = callback => layoutFrameHost.requestAnimationFrame(callback);
     const cancelLayoutFrame = id => layoutFrameHost.cancelAnimationFrame(id);
@@ -1610,7 +1505,7 @@ async function loadAppModules() {
       clearTimer: layoutFrameHost.clearTimeout.bind(layoutFrameHost),
       now: () => layoutFrameHost.performance.now(),
       closeMenus() {
-        if (editorUiCommandPort.has('closeAppMenus')) editorUiCommandPort.invoke('closeAppMenus');
+        if (editorCommands.has('closeAppMenus')) editorCommands.invoke('closeAppMenus');
       },
       onGeometryChanged() { scrollController.notifyGeometryChanged(); },
       record(operation, entry) { telemetry.record?.(operation, entry); }
@@ -1653,7 +1548,7 @@ async function loadAppModules() {
       record(operation, entry) { telemetry.record?.(operation, entry); }
     });
     toolbarBoundaryController.start();
-    unregisterLayoutUiCommands = editorUiCommandPort.register({
+    unregisterLayoutUiCommands = editorCommands.register({
       refreshToolbarBoundary: () => toolbarBoundaryController?.refresh(),
       async togglePageFullscreen() {
         const result = await pageFullscreenController.toggle();
@@ -1704,8 +1599,8 @@ async function loadAppModules() {
       previewCollapseButton: requireElement('#preview-collapse-btn', 'Preview collapse button'),
       storage: layoutFrameHost.localStorage,
       requestLayoutMode(mode) {
-        if (!editorUiCommandPort.has('setLayoutMode')) throw new Error('Layout mode command is unavailable.');
-        editorUiCommandPort.invoke('setLayoutMode', mode);
+        if (!editorCommands.has('setLayoutMode')) throw new Error('Layout mode command is unavailable.');
+        editorCommands.invoke('setLayoutMode', mode);
       },
       activateCompactPane: (pane, reason) => compactSplitController?.activatePane(pane, reason) || false,
       getCollapseLabel(pane, collapsed) {
@@ -1726,10 +1621,7 @@ async function loadAppModules() {
       requestFrame: requestLayoutFrame,
       cancelFrame: cancelLayoutFrame
     });
-    splitControllerPort = mountClassicSplitControllerPort(compatibilityPlatformHost, {
-      paneController: splitPaneController,
-      compactController: compactSplitController
-    });
+
     splitResizeController.start();
     splitPaneController.start();
     compactSplitController.start();
@@ -1751,36 +1643,36 @@ async function loadAppModules() {
     const shellMenus = ownApplication(createShellMenus({
       document, window,
       toast: requireElement('#toast', 'Toast'),
-      coreSubmenuPositionerPort: compatibilityPlatformHost.markdownEditorSubmenuPositionerPort,
-      coreEditorUiCommandPort: editorUiCommandPort
+      coreSubmenuPositionerPort: submenuPositioner,
+      coreEditorUiCommandPort: editorCommands
     }));
     const workspaceStatus = ownApplication(createWorkspaceStatus({
       document,
-      editor: editorHost,
-      coreI18nPort: compatibilityPlatformHost.markdownEditorI18nPort,
-      corePreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
-      coreSettingsStorePort: autosaveSettingsStorePort,
-      coreSaveStatusStorePort: compatibilityPlatformHost.markdownEditorSaveStatusStorePort,
-      coreDocumentSessionPort: documentSessionPort,
-      coreLayoutStatePort: compatibilityPlatformHost.markdownEditorLayoutStatePort,
-      coreEditorUiCommandPort: editorUiCommandPort
+      editor: virtualEditor,
+      coreI18nPort: i18nService,
+      corePreviewCommandPort: previewCommandHandler,
+      coreSettingsStorePort: settingsStore,
+      coreSaveStatusStorePort: saveStatusStore,
+      coreDocumentSessionPort: documentSessionStore,
+      coreLayoutStatePort: layoutState,
+      coreEditorUiCommandPort: editorCommands
     }));
     const workspacePreferences = ownApplication(createWorkspacePreferences({
       document, window,
-      editor: editorHost,
+      editor: virtualEditor,
       preview: previewHost, documentModel,
-      coreSettingsStorePort: autosaveSettingsStorePort,
-      coreEditorUiCommandPort: editorUiCommandPort,
-      coreLayoutStatePort: compatibilityPlatformHost.markdownEditorLayoutStatePort,
-      corePreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
-      splitController: compatibilityPlatformHost.markdownEditorSplitControllerPort, t,
+      coreSettingsStorePort: settingsStore,
+      coreEditorUiCommandPort: editorCommands,
+      coreLayoutStatePort: layoutState,
+      corePreviewCommandPort: previewCommandHandler,
+      splitController: splitPaneController, compactSplitController, t,
       showToast: shellMenus.showToast,
       updateStatusBar: workspaceStatus.updateStatusBar,
       updateInlineColorToolAvailability: () => inlineColorView?.updateAvailability?.()
     }));
     const documentWorkspace = ownApplication(createDocumentWorkspace({
       document, window,
-      editor: editorHost, documentModel,
+      editor: virtualEditor, documentModel,
       filenameInput: requireElement('#filename', 'Filename'),
       localStorage: window.localStorage,
       navigator: window.navigator,
@@ -1789,22 +1681,22 @@ async function loadAppModules() {
       nativeStore: nativeDocumentStore,
       t,
       showToast: shellMenus.showToast,
-      corePlatformPort: compatibilityPlatformHost.markdownEditorPlatformPort,
-      coreExportRequestPort: compatibilityPlatformHost.markdownEditorExportRequestPort,
-      coreMarkdownExportPort: compatibilityPlatformHost.markdownEditorMarkdownExportPort,
-      coreExportTaskPort: compatibilityPlatformHost.markdownEditorExportTaskPort,
-      coreSettingsStorePort: autosaveSettingsStorePort,
-      coreDocumentSessionPort: documentSessionPort,
-      coreDocumentControllerPort: documentControllerPort,
-      coreRecentFilesPort: compatibilityPlatformHost.markdownEditorRecentFilesPort,
-      coreDocumentUiCommandPort: documentUiCommandPort,
-      coreEditorUiCommandPort: editorUiCommandPort,
-      coreSidebarControllerPort: compatibilityPlatformHost.markdownEditorSidebarControllerPort,
-      coreOutlineControllerPort: compatibilityPlatformHost.markdownEditorOutlineControllerPort,
-      coreFolderTreeControllerPort: compatibilityPlatformHost.markdownEditorFolderTreeControllerPort,
-      corePreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
+      corePlatformPort: platform,
+      coreExportRequestPort: exportRequestPort,
+      coreMarkdownExportPort: markdownExporter,
+      coreExportTaskPort: exportTaskController,
+      coreSettingsStorePort: settingsStore,
+      coreDocumentSessionPort: documentSessionStore,
+      coreDocumentControllerPort: documentController,
+      coreRecentFilesPort: recentFilesRepository,
+      coreDocumentUiCommandPort: documentCommands,
+      coreEditorUiCommandPort: editorCommands,
+      coreSidebarControllerPort: sidebarTabController,
+      coreOutlineControllerPort: outlineController,
+      coreFolderTreeControllerPort: folderTreeController,
+      corePreviewCommandPort: previewCommandHandler,
       coreTaskSchedulerPort: backgroundTaskScheduler,
-      coreSaveStatusStorePort: compatibilityPlatformHost.markdownEditorSaveStatusStorePort
+      coreSaveStatusStorePort: saveStatusStore
     }));
     notifyLinkPreview = shellMenus.showToast;
     readLinkDocumentContext = () => {
@@ -1812,7 +1704,7 @@ async function loadAppModules() {
       return { documentId: String(record?.id || ''), filePath: String(record?.filePath || ''), title: String(record?.title || readCurrentDocumentTitle() || '') };
     };
     applicationLifetime.own(() => { notifyLinkPreview = () => {}; readLinkDocumentContext = () => ({}); });
-    applicationLifetime.own(editorUiCommandPort.register({
+    applicationLifetime.own(editorCommands.register({
       updatePreviewStrategyBadge: workspaceStatus.updatePreviewStrategyBadge
     }));
     ownApplication(createFindPreviewCommands({
@@ -1823,18 +1715,18 @@ async function loadAppModules() {
         fallbackTitle: t('filenameDefault'),
         snapshotReason: 'find-native-search'
       }),
-      webClipperEditorUiCommandPort: editorUiCommandPort,
-      webClipperPreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
+      webClipperEditorUiCommandPort: editorCommands,
+      webClipperPreviewCommandPort: previewCommandHandler,
       requestAnimationFrame: callback => window.requestAnimationFrame(callback),
       cancelAnimationFrame: id => window.cancelAnimationFrame(id)
     }));
     ownApplication(createApplicationEvents({
       document, window,
-      editor: editorHost,
-      eventsEditorControllerPort: editorControllerPort,
-      eventsEditorUiCommandPort: editorUiCommandPort,
-      eventsPreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
-      eventsDocumentUiCommandPort: documentUiCommandPort,
+      editor: editorHost, editorApi: virtualEditor,
+      eventsEditorControllerPort: editorController,
+      eventsEditorUiCommandPort: editorCommands,
+      eventsPreviewCommandPort: previewCommandHandler,
+      eventsDocumentUiCommandPort: documentCommands,
       ensureCurrentDocumentForEditing: documentWorkspace.ensureCurrentDocumentForEditing,
       updateLargeDocumentMode: workspaceStatus.updateLargeDocumentMode,
       closeAppMenus: shellMenus.closeAppMenus,
@@ -1845,17 +1737,17 @@ async function loadAppModules() {
       renameCurrentDocument: documentWorkspace.renameCurrentDocument
     }));
     const workspaceStartup = ownApplication(createWorkspaceStartup({
-      editor: editorHost,
+      editor: virtualEditor,
       preview: previewHost,
       filenameInput: requireElement('#filename', 'Filename'), t,
       localStorage: window.localStorage,
-      platform: compatibilityPlatformHost.markdownEditorPlatformPort,
-      documentCommands: documentUiCommandPort,
-      bootstrapSettingsStorePort: autosaveSettingsStorePort,
-      bootstrapEditorControllerPort: editorControllerPort,
-      bootstrapLayoutStatePort: compatibilityPlatformHost.markdownEditorLayoutStatePort,
-      bootstrapPreviewCommandPort: compatibilityPlatformHost.markdownEditorPreviewCommandPort,
-      bootstrapHelpPort: compatibilityPlatformHost.markdownEditorHelpPort, ...workspacePreferences,
+      platform: platform,
+      documentCommands: documentCommands,
+      bootstrapSettingsStorePort: settingsStore,
+      bootstrapEditorControllerPort: editorController,
+      bootstrapLayoutStatePort: layoutState,
+      bootstrapPreviewCommandPort: previewCommandHandler,
+      bootstrapHelpPort: helpController, ...workspacePreferences,
       setupDocuments: documentWorkspace.setupDocuments,
       updateStatusBar: workspaceStatus.updateStatusBar,
       updateLargeDocumentMode: workspaceStatus.updateLargeDocumentMode,
@@ -1909,31 +1801,25 @@ async function loadAppModules() {
     sidebarTabController.start();
     mountDocumentEditorViews();
     if (!await workspaceStartup.start()) throw new Error('Application startup cancelled.');
+    return Object.freeze({ exportCommands: exportController, recentFiles: recentFilesRepository });
   } catch (error) {
     destroyDocumentFeatures();
     throw error;
   }
 }
 
-loadAppModules().then(() => {
-  document.documentElement.classList.add('app-ready');
-  installMarkdownEditorE2EBridge();
-  telemetry.record('app.ready', {
-    category: 'app.lifecycle',
-    durationMs: performance.now(),
-    details: { documentReadyState: document.readyState }
-  });
-}).catch((error) => {
-  destroyMarkdownEditorE2EBridge();
-  if (import.meta.env.DEV) destroyPerformanceTelemetry();
-  destroyImportFeature();
-  void dropImportController.destroy();
-  dropOverlayView.destroy();
-  dropImageController.destroy();
-  fileImportController.destroy();
-  webFetchCoordinator.destroy();
-  destroyLayoutStateFeature();
-  console.error(error);
-  const status = document.getElementById('status');
-  if (status) status.textContent = error.message;
+const actions = await loadAppModules();
+return Object.freeze({ ...actions,
+  activate() {
+    if (!startupLifetime.alive) throw new Error('Application is destroyed.');
+    document.documentElement.classList.add('app-ready');
+    installMarkdownEditorE2EBridge();
+    telemetry.record('app.ready', { category: 'app.lifecycle', durationMs: performance.now(), details: { documentReadyState: document.readyState } });
+  },
+  destroy: startupLifetime.destroy
 });
+} catch (error) {
+  try { startupLifetime.destroy(); } catch (cleanupError) { throw new AggregateError([error, cleanupError], 'Application startup and cleanup failed.'); }
+  throw error;
+}
+}

@@ -47,4 +47,3 @@ export {
   getSettingsSectionDefinition,
   listSettingsSectionDefinitions
 } from './sections/section-registry.js';
-export { mountClassicSettingsStorePort } from './compatibility/classic-settings-store-port.js';

@@ -44,9 +44,9 @@ export {
 } from './application/hybrid-editor-controller.js';
 
 export {
-  getClassicHybridSourceEditControllerPort,
-  mountClassicHybridSourceEditControllerPort
-} from './compatibility/classic-hybrid-source-edit-controller-port.js';
+  getHybridSourceEditor,
+  bindHybridSourceEditor
+} from './application/source-editor-registry.js';
 
 export {
   attachHybridWidgetLifecycle,

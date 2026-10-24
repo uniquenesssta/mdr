@@ -65,7 +65,9 @@ function createController(overrides = {}) {
     selection: { start: 0, end: 0 },
     getSelection() { return this.selection; },
     setSelection(start, end) { this.selection = { start, end }; },
-    focus() {}
+    focus() {},
+    subscribe(listener) { const handler=()=>listener({selectionSet:true});editor.addEventListener('select',handler);return ()=>editor.removeEventListener('select',handler); },
+    getScrollMetrics() { return {top:editor.scrollTop,clientHeight:editor.clientHeight}; }
   };
   const editorMapper = {
     getLineNumberAtPosition(position) { return position < 7 ? 1 : 3; },

@@ -10,7 +10,7 @@ test('Atomic 7.2 PreviewState remains a dedicated DOM-free application state own
   const applicationEntries = (await readdir(new URL('src/features/preview/application/', root))).sort();
   assert.ok(applicationEntries.includes('preview-state.js'));
   assert.ok(applicationEntries.includes('preview-controller.js'));
-  assert.ok(applicationEntries.includes('preview-command-handler.js'));
+  assert.ok(applicationEntries.includes('preview-commands.js'));
   const state = await source('src/features/preview/application/preview-state.js');
   assert.doesNotMatch(state, /^import\s/m);
   assert.doesNotMatch(state, /\bwindow\b|\bdocument\b|localStorage|sessionStorage|requestAnimationFrame|setTimeout|Worker\s*\(/);
@@ -23,18 +23,18 @@ test('Atomic 7.2 PreviewState remains a dedicated DOM-free application state own
 test('Atomic 7.2 exposes one scoped compatibility view of canonical state and destroys it from composition root', async () => {
   const [entry, port, main] = await Promise.all([
     source('src/features/preview/index.js'),
-    source('src/features/preview/compatibility/classic-preview-state-port.js'),
+    source('src/features/preview/application/preview-state.js'),
     source('src/main.js')
   ]);
   assert.match(entry, /createPreviewState/);
-  assert.match(entry, /mountClassicPreviewStatePort/);
-  assert.match(port, /markdownEditorPreviewStatePort/);
+  assert.doesNotMatch(entry, /mountClassicPreviewStatePort/);
+  assert.doesNotMatch(port, /markdownEditorPreviewStatePort/);
   assert.doesNotMatch(port, /window\.markdownEditorPreviewState/);
-  assert.match(port, /return state\.snapshot/);
-  assert.doesNotMatch(port, /let\s+snapshot\b|const\s+snapshot\s*=/);
+  assert.match(port, /get snapshot\(\)/);
+  assert.doesNotMatch(port, /markdownEditorPreviewStatePort|Object\.defineProperty/);
   assert.match(main, /const previewState = createPreviewState\(\)/);
-  assert.match(main, /mountClassicPreviewStatePort\(compatibilityPlatformHost, previewState\)/);
-  assert.match(main, /previewStatePort\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewStatePort\(compatibilityPlatformHost, previewState\)/);
+  assert.doesNotMatch(main, /previewStatePort\.destroy\(\)/);
   assert.match(main, /previewState\.destroy\(\)/);
   assert.doesNotMatch(main, /window\.markdownEditorPreviewState/);
 });
@@ -43,7 +43,7 @@ test('Atomic 7.2 state mutations remain in PreviewState while Atomic 7.14 orches
   const [core, engine, handler, webClipper, editorTools] = await Promise.all([
     source('public/app/core.js'),
     source('src/features/preview/pipeline/preview-render-engine.js'),
-    source('src/features/preview/application/preview-command-handler.js'),
+    source('src/features/preview/application/preview-commands.js'),
     source('public/app/web-clipper.js'),
     source('public/app/editor-tools.js')
   ]);

@@ -6,21 +6,17 @@
  * Lifecycle: Explicit View with idempotent destroy(); closes modal and removes listeners.
  */
 import { createEventScope } from '../../../ui/dom/index.js';
-const OPEN_EVENT = 'markdown-editor:modal-shell-open';
-const CLOSE_EVENT = 'markdown-editor:modal-shell-close';
+import { ModalShell } from '../../../ui/components/modal-shell.js';
 const TEMPLATES = Object.freeze({
   mindmap: `mindmap\n  root((主题))\n    子主题 A\n      子节点 A1\n      子节点 A2\n    子主题 B\n      子节点 B1`,
   flowchart: `flowchart TD\n    A[开始] --> B{判断}\n    B -->|是| C[执行]\n    B -->|否| D[结束]`
 });
-function modal(root, type, detail) {
-  const EventCtor = root.ownerDocument?.defaultView?.CustomEvent || globalThis.CustomEvent;
-  root.dispatchEvent(new EventCtor(type, { detail }));
-  if (detail.error) throw detail.error;
-}
 export function createMermaidDialogView({ root, insertMermaid, notify = () => {}, messages = {} } = {}) {
   if (!root?.ownerDocument) throw new TypeError('Mermaid Dialog View requires a modal root.');
   if (typeof insertMermaid !== 'function') throw new TypeError('Mermaid Dialog View requires insertMermaid command.');
   const events = createEventScope();
+  const shell = new ModalShell(root, { panel: root.firstElementChild });
+  try {
   const type = root.querySelector('#mermaid-type');
   const code = root.querySelector('#mermaid-code');
   const text = Object.freeze({
@@ -29,11 +25,11 @@ export function createMermaidDialogView({ root, insertMermaid, notify = () => {}
   });
   let destroyed = false;
   const updateTemplate = () => { if (code) code.value = TEMPLATES[type?.value] || TEMPLATES.mindmap; };
-  const close = () => modal(root, CLOSE_EVENT, { reason: 'feature-close' });
+  const close = () => shell.close('feature-close');
   const open = () => {
     if (type) type.value = 'mindmap';
     updateTemplate();
-    modal(root, OPEN_EVENT, { options: { initialFocus: code } });
+    shell.open(null, { ariaLabel: '插入 Mermaid 图表',  initialFocus: code });
   };
   const confirm = () => {
     const source = String(code?.value || '').trim();
@@ -51,5 +47,12 @@ export function createMermaidDialogView({ root, insertMermaid, notify = () => {}
     if (action === 'close' || action === 'cancel') close();
     if (action === 'confirm') confirm();
   });
-  return Object.freeze({ open, close, updateTemplate, confirm, destroy() { if (destroyed) return; destroyed = true; try { close(); } catch (_) {} events.destroy(); } });
+  return Object.freeze({ open, close, updateTemplate, confirm, destroy() { if (destroyed) return; destroyed = true; const errors = []; for (const action of [() => close(), () => events.destroy(), () => shell.destroy()]) try { action(); } catch (error) { errors.push(error); } if (errors.length) throw new AggregateError(errors, 'Editor dialog cleanup failed.'); } });
+  } catch (error) {
+    const errors = [error];
+    try { events.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    try { shell.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    if (errors.length > 1) throw new AggregateError(errors, 'Editor dialog construction failed.');
+    throw error;
+  }
 }

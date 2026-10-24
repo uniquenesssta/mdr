@@ -95,7 +95,7 @@ test('R14-04 pending frame cancellation releases export without resolving the fr
 
 test('R14-04 image library cancellation releases progress and consumes a late module rejection', async () => {
   const h = createExportVmHost(), pending = deferred(), entered = deferred();
-  h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.loadDomToImage = () => { entered.resolve(); return pending.promise; };
+  h.presentation.loadDomToImage = () => { entered.resolve(); return pending.promise; };
   const work = h.invoke('renderExportImagePreview'); await entered.promise;
   h.cancel(); await work;
   assert.equal(h.taskPort.getSnapshot().activeTask, null);
@@ -120,14 +120,14 @@ test('R14-04 remote image failure preserves placeholder fallback and releases ev
   h.context.Image = class { constructor() { loaders.push(this); } };
   const image = { src: 'https://image.test/a.png' }, root = { querySelectorAll: () => [image] };
   const work = h.preload(root, task); loaders[0].onerror(); await work;
-  assert.equal(image.src, h.assetMount.port.placeholder);
+  assert.equal(image.src, h.imageAssets.placeholder);
   assert.equal(loaders[0].onload, null); assert.equal(loaders[0].onerror, null);
   h.invoke('finishExportTask', task); h.destroy();
 });
 
 test('R14-04 enhancement cancellation prevents later math nodes and releases a pending Mermaid wait', async () => {
   {
-    const h = createExportVmHost(), task = h.invoke('beginExportTask', 'math'), math = h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.math;
+    const h = createExportVmHost(), task = h.invoke('beginExportTask', 'math'), math = h.presentation.math;
     let rendered = 0; math.containsMath = () => true;
     math.renderTree = () => { rendered++; h.cancel(); };
     const root = await h.build(task);
@@ -141,7 +141,7 @@ test('R14-04 enhancement cancellation prevents later math nodes and releases a p
     const pre = { matches: selector => selector === 'pre', querySelector: () => code, querySelectorAll: () => [code] };
     const code = { className: 'language-mermaid', textContent: 'flowchart TD\n A-->B', closest: () => pre, matches: selector => selector === 'code.language-mermaid' };
     root.replaceChildren(pre);
-    h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.mermaid.renderDiagram = (_container, _source, options) => { predicate = options.isCancelled; return pending.promise; };
+    h.presentation.mermaid.renderDiagram = (_container, _source, options) => { predicate = options.isCancelled; return pending.promise; };
     const work = h.enhance(root, task);
     const rejected = assert.rejects(work, cancellation('cancelled')); h.cancel(); await rejected;
     assert.equal(predicate(), true); pending.resolve(); h.invoke('finishExportTask', task); h.destroy();
@@ -152,9 +152,8 @@ for (const operation of ['exportHTML', 'exportWord']) test(`R14-04 ${operation} 
   // Preparation can end immediately while the underlying dialog is still pending.
   {
     const h = createExportVmHost({ desktop: true }), pending = deferred(), entered = deferred(); let writes = 0;
-    h.context.document.getElementById('compatibility-business-ports').markdownEditorPlatformPort.call = (capability, op) => {
-      if (op === 'saveFile') { entered.resolve(); return pending.promise; } writes++;
-    };
+    h.platform.dialogs.saveFile = () => { entered.resolve(); return pending.promise; };
+    h.platform.files.writeText = () => { writes++; };
     const work = h.invoke(operation); await entered.promise; h.cancel(); await work;
     assert.equal(h.taskPort.getSnapshot().activeTask, null); pending.resolve('C:\\late.doc'); await Promise.resolve();
     assert.equal(writes, 0); assert.equal(h.downloads.length, 0); h.destroy();
@@ -162,9 +161,8 @@ for (const operation of ['exportHTML', 'exportWord']) test(`R14-04 ${operation} 
   // After the commit boundary, cancellation/replacement must not pretend the write was aborted.
   {
     const h = createExportVmHost({ desktop: true }), pending = deferred(), entered = deferred(); let writes = 0;
-    h.context.document.getElementById('compatibility-business-ports').markdownEditorPlatformPort.call = (capability, op) => {
-      if (op === 'saveFile') return 'C:\\committed.doc'; writes++; entered.resolve(); return pending.promise;
-    };
+    h.platform.dialogs.saveFile = () => 'C:\\committed.doc';
+    h.platform.files.writeText = () => { writes++; entered.resolve(); return pending.promise; };
     const work = h.invoke(operation); await entered.promise;
     const before = h.taskPort.getSnapshot(); assert.equal(before.activeTask.phase, 'writing'); assert.equal(before.activeTask.cancelable, false);
     assert.equal(h.nodes.get('export-progress-cancel').disabled, true);
@@ -183,7 +181,7 @@ test('R14-04 destruction during lock notification prevents native write submissi
 
 test('R14-04 PNG encoding rejection releases the lock and a subsequent task can start', async () => {
   const h = createExportVmHost();
-  h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.loadDomToImage = async () => ({ toPng: async () => { throw new Error('encoding failed'); } });
+  h.presentation.loadDomToImage = async () => ({ toPng: async () => { throw new Error('encoding failed'); } });
   await h.invoke('renderExportImagePreview'); assert.equal(h.taskPort.getSnapshot().activeTask, null);
   assert.equal(h.imageData(), '');
   const next = h.invoke('beginExportTask', 'next'); assert.equal(next.cancelable, true); assert.equal(h.nodes.get('export-progress-cancel').disabled, false); h.destroy();

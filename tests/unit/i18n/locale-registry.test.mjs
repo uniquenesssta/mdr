@@ -116,13 +116,12 @@ test('Atomic 4.2 locale data remains isolated from the Atomic 4.5 Help feature',
   const serviceIndex = entry.indexOf("createI18nService(localeRegistry, { initialLocale: settingsStore.get('language') })");
   const helpFeatureIndex = entry.indexOf('createHelpFeature({');
   const bindingsIndex = entry.indexOf('createTranslationBindings(i18nService, ui,');
-  const i18nPortIndex = entry.indexOf('mountClassicI18nPort(portsHost, i18nService)');
   const appIndex = entry.indexOf('await importApplication()');
-  assert.ok(serviceIndex >= 0 && helpFeatureIndex > serviceIndex && bindingsIndex > helpFeatureIndex && i18nPortIndex > bindingsIndex && appIndex > i18nPortIndex);
-  assert.match(entry, /i18nPort\?\.destroy\(\)/);
-  assert.match(entry, /i18nService\?\.destroy\(\)/);
+  assert.ok(serviceIndex >= 0 && helpFeatureIndex > serviceIndex && bindingsIndex > helpFeatureIndex && appIndex > bindingsIndex);
+  assert.match(entry, /own\(createI18nService/);
+  assert.doesNotMatch(entry, /mountClassicI18nPort|portsHost/);
   assert.match(index, /locale-registry\.js/);
-  assert.match(index, /classic-i18n-port\.js/);
+  assert.doesNotMatch(index, /classic-i18n-port\.js/);
   assert.match(helpIndex, /help-content-registry\.js/);
   assert.match(core, /coreI18nPort/);
   assert.doesNotMatch(core, /markdownEditorHelpContent|markdownEditorLocalePort|coreLocalePort/);

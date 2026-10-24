@@ -84,7 +84,9 @@ export function createFinalSelectionController({
     selection: { start: editorSelection.from, end: editorSelection.to },
     getSelection() { return this.selection; },
     setSelection(start, end) { this.selection = { start, end }; },
-    focus() {}
+    focus() {},
+    subscribe(listener) { const callback = () => listener({ selectionSet: true }); editor.addEventListener('select', callback); return () => editor.removeEventListener('select', callback); },
+    getScrollMetrics() { return { top: editor.scrollTop, clientHeight: editor.clientHeight }; }
   };
   const documentModel = {
     getTextLength: () => source.length,

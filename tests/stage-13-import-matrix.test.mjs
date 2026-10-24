@@ -164,7 +164,7 @@ function imageHost(confirmLargeFile = () => true) {
     defaultView: { CustomEvent, FileReader: class { readAsDataURL(file) { reads.push(file); this.result = 'data:image/png;base64,AA=='; this.onload(); } } },
     createElement: () => new Element()
   };
-  const view = createImageDialogView({ root, imageController: createImageImportController({ readBrowserImage: (file, options) => createBrowserFileReader({ FileReaderClass: root.ownerDocument.defaultView.FileReader }).readDataUrl(file, options) }), selection: { snapshot: () => ({ start: 1, end: 1 }) }, insertImage: (...args) => inserted.push(args), notify: x => messages.push(x), confirmLargeFile });
+  const view = createImageDialogView({ createModalShell: () => ({ open() {}, close() {}, destroy() {} }), root, imageController: createImageImportController({ readBrowserImage: (file, options) => createBrowserFileReader({ FileReaderClass: root.ownerDocument.defaultView.FileReader }).readDataUrl(file, options) }), selection: { snapshot: () => ({ start: 1, end: 1 }) }, insertImage: (...args) => inserted.push(args), notify: x => messages.push(x), confirmLargeFile });
   view.open();
   return { root, view, reads, inserted, messages, async choose(file) { const input = root.querySelector('#image-file-input'); input.files = file ? [file] : []; input.dispatchEvent(new Event('change')); await new Promise(resolve => setImmediate(resolve)); } };
 }

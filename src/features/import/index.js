@@ -14,3 +14,5 @@ export { extractHtml } from './web-clipper/html-extractor.js';
 export { htmlToMarkdown, convertExtractedHtml } from './web-clipper/html-to-markdown.js';
 export { createWebClipperController } from './web-clipper/web-clipper-controller.js';
 export { createWebClipperView } from './web-clipper/web-clipper-view.js';
+
+export { createImportContentView } from './ui/import-content-view.js';

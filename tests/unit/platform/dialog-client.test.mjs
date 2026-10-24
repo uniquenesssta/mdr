@@ -231,15 +231,15 @@ test('desktop platform exposes the dedicated DialogsPort and current callers kee
   assert.match(fileView, /await chooseFile\(\{ title:/);
   assert.match(fileView, /return await openPath\(path\)/);
   assert.doesNotMatch(core, /call\('dialogs', 'openFile'/);
-  assert.match(core, /call\('dialogs', 'confirm'/);
+  assert.match(core, /dialogs\.confirm\(/);
   assert.match(exportSource, /owners\[format\]\[method\]/);
-  assert.match(main, /mountClassicExportCommandPort/);
+  assert.doesNotMatch(main, /mountClassicExportCommandPort/);
   const imageOwner = await readFile(new URL('../../../src/features/export/formats/image/image-exporter.js', import.meta.url), 'utf8');
   assert.match(imageOwner, /fileWriter\.write/);
   const writer = await readFile(new URL('../../../src/features/export/application/export-file-writer.js', import.meta.url), 'utf8');
   assert.match(writer, /platform\.dialogs\.saveFile/);
   assert.doesNotMatch(imageOwner, /@tauri-apps|__TAURI|markdownEditorNative/);
-  assert.match(settingsController, /platform\.call\('dialogs', 'openDirectory'/);
+  assert.match(settingsController, /platform\.dialogs\.openDirectory\(/);
   assert.doesNotMatch(core + exportSource + settingsController + main + fileView, /markdownEditorNative|@tauri-apps\/plugin-dialog/);
 });
 

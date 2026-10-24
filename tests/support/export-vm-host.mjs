@@ -8,7 +8,7 @@ import vm from 'node:vm';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 const mathCss = readFileSync(join(dirname(createRequire(import.meta.url).resolve('katex')), 'katex.css'), 'utf8');
-import { createExportController, mountClassicExportCommandPort, createExportFileWriter, createImageExporter, createImageExportSurface, mountClassicImageExportPort, imageDataUrlToBytes, mountClassicImageDataPort, createImageAssetPreloader, mountClassicImageAssetPort, createImageExportLayout, mountClassicImageLayoutPort, createPdfExporter, createPdfPrintSurface, mountClassicPdfExportPort, createWordExporter, createWordDocumentSerializer, mountClassicWordExportPort, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, mountClassicHtmlExportPort, createMarkdownExporter, mountClassicMarkdownExportPort, createExportStyleSheet, mountClassicExportStylePort, createExportPreviewEnhancer, mountClassicExportEnhancementPort, createExportDocumentBuilder, mountClassicExportDocumentPort, createExportProgressStore, createExportProgressDialogView, createExportTaskController, mountClassicExportRequestPort, mountClassicExportTaskPort } from '../../src/features/export/index.js';
+import { createExportController, createExportRequestPolicy, EXPORT_IMAGE_PLACEHOLDER, createExportFileWriter, createImageExporter, createImageExportSurface, imageDataUrlToBytes, createImageAssetPreloader, createImageExportLayout, createPdfExporter, createPdfPrintSurface, createWordExporter, createWordDocumentSerializer, createHtmlFontAssets, createHtmlDocumentSerializer, createHtmlExporter, createMarkdownExporter, createExportStyleSheet, createExportPreviewEnhancer, createExportDocumentBuilder, createExportProgressStore, createExportProgressDialogView, createExportTaskController, } from '../../src/features/export/index.js';
 import { createBrowserPrint, createBrowserFileDownload } from '../../src/platform/index.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
@@ -58,13 +58,8 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   };
   let viewMode = 'source';
   const previewPort = { getViewMode: () => viewMode, setViewMode(value) { viewMode = value; calls.push(['view', value]); }, reset: () => calls.push(['reset']), deactivateVirtual: () => calls.push(['deactivateVirtual']) };
-  const host = {
-    markdownEditorPlatformPort: { supports: name => name.startsWith('desktop.') ? desktop : name === 'browser.fileDownload' && !desktop, async call(capability, operation, ...args) { calls.push([operation, ...args]); if (operation === 'saveFile') return savePath; if (failWrite) throw new Error('write denied'); if (operation === 'writeBinary' && !desktop) return browserDownload.downloadBlob(new Blob([args[1]], { type: args[2].mimeType }), args[0]); } },
-    markdownEditorPresentationPort: presentation, markdownEditorPreviewCommandPort: previewPort
-  };
-  for (const key of ['DocumentDomain', 'DocumentSession', 'DocumentController', 'DocumentUiCommand', 'SidebarController']) host['markdownEditor' + key + 'Port'] = {};
-  host.markdownEditorDocumentSessionPort = { get activeId() { return documentId; } };
   const taskController = createExportTaskController();
+  const requestPolicy = createExportRequestPolicy({ getActiveDocumentId: () => documentId, hasDocument: id => documentIds.includes(id) });
   const progressDocument = new ExportProgressDocument();
   const progressStore = createExportProgressStore(taskController);
   const progressView = createExportProgressDialogView({ overlayRoot: progressDocument.body, store: progressStore,
@@ -84,19 +79,17 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
   for (const id of ['export-progress-modal', 'export-progress-title', 'export-progress-value', 'export-progress-status', 'export-progress-cancel']) {
     nodes.set(id, progressDocument.getElementById(id));
   }
-  const taskMount = mountClassicExportTaskPort(host, taskController);
-  const requestMount = mountClassicExportRequestPort(host, { getActiveDocumentId: () => documentId, hasDocument: id => documentIds.includes(id) });
   const escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   const context = vm.createContext({
     coreSettingsStorePort: { get: key => key === 'exportDirectory' ? 'C:\\custom' : undefined },
-    document: { body, head, getElementById: id => id === 'compatibility-business-ports' ? host : getNode(id), createElement: tag => tag === 'iframe' ? printDom.document.createElement(tag) : node(tag), createDocumentFragment() { const result = node(); result.fragment = true; return result; }, querySelectorAll: () => [], querySelector: () => null },
+    document: { body, head, getElementById: id => getNode(id), createElement: tag => tag === 'iframe' ? printDom.document.createElement(tag) : node(tag), createDocumentFragment() { const result = node(); result.fragment = true; return result; }, querySelectorAll: () => [], querySelector: () => null },
     documentModel: { getDocumentVersion: () => 7, createSnapshot(reason) { calls.push(['snapshot', reason]); return sourceText; } },
-    coreExportRequestPort: requestMount.port, coreExportTaskPort: taskMount.port,
+    coreExportRequestPort: requestPolicy, coreExportTaskPort: taskController,
     getActiveDocumentId: () => documentId,
     coreDocumentSessionPort: { getRecord: id => documentIds.includes(id) ? { id, title: name } : null },
     coreDocumentControllerPort: { generation: 1, isCurrentGeneration: generation => generation === 1, isStaleError: () => false,
       async readDocumentContent() { return { generation: 1, content: sourceText }; } },
-    editor: { textLength, value: 'stale editor value' }, filenameInput: { value: name }, exportDirectory: 'C:\\custom',
+    editor: { getTextLength: () => textLength, getText: () => 'stale editor value' }, filenameInput: { value: name }, exportDirectory: 'C:\\custom',
     preview: node(),
     requestAnimationFrame(callback) { frameCount++; onFrame?.(frameCount); queueMicrotask(callback); },
     setTimeout(callback, delay) { timers.push({ callback, delay }); return timers.length; },
@@ -116,21 +109,22 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     readDocumentContent: id => context.coreDocumentControllerPort.readDocumentContent(id)
   };
   const outputPlatform = {
-    capabilities: { desktop: { get dialogs() { return host.markdownEditorPlatformPort.supports('desktop.dialogs'); }, get fileSystem() { return host.markdownEditorPlatformPort.supports('desktop.fileSystem'); } }, browser: { get fileDownload() { return host.markdownEditorPlatformPort.supports('browser.fileDownload'); } } },
-    dialogs: { saveFile: (...args) => host.markdownEditorPlatformPort.call('dialogs', 'saveFile', ...args) },
-    files: { writeBinary: (...args) => host.markdownEditorPlatformPort.call('files', 'writeBinary', ...args), writeText: (path, content, options) => desktop
-      ? host.markdownEditorPlatformPort.call('files', 'writeText', path, content, options)
-      : browserDownload.downloadBlob(new Blob([content], { type: options.mimeType }), path) }
+    capabilities: { desktop: { dialogs: desktop, fileSystem: desktop }, browser: { fileDownload: !desktop } },
+    dialogs: { async saveFile(...args) { calls.push(['saveFile', ...args]); return savePath; } },
+    files: {
+      async writeBinary(...args) { calls.push(['writeBinary', ...args]); if (failWrite) throw new Error('write denied');
+        if (!desktop) return browserDownload.downloadBlob(new Blob([args[1]], { type: args[2].mimeType }), args[0]); },
+      async writeText(path, content, options) { if (desktop) { calls.push(['writeText', path, content, options]); if (failWrite) throw new Error('write denied'); }
+        else return browserDownload.downloadBlob(new Blob([content], { type: options.mimeType }), path); }
+    }
   };
   const fileWriter = createExportFileWriter({ platform: outputPlatform });
   const markdownExporter = createMarkdownExporter({
     documentModel: context.documentModel, taskController,
     documents, fileWriter
   });
-  const markdownMount = mountClassicMarkdownExportPort(host, markdownExporter);
-  context.coreMarkdownExportPort = markdownMount.port;
+  context.coreMarkdownExportPort = markdownExporter;
   const styles = createExportStyleSheet({ documentRef: context.document, mathCss });
-  const styleMount = mountClassicExportStylePort(host, styles);
   const assetTimers = new Map(); let assetTimerId = 0;
   const imageAssets = createImageAssetPreloader({
     createImage: () => new context.Image(), createCanvas: () => context.document.createElement('canvas'),
@@ -138,10 +132,7 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     clearTimer: id => assetTimers.delete(id),
     requestFrame: callback => context.requestAnimationFrame(callback), cancelFrame: handle => context.cancelAnimationFrame?.(handle)
   });
-  const assetMount = mountClassicImageAssetPort(host, imageAssets);
-  const dataMount = mountClassicImageDataPort(host, imageDataUrlToBytes);
   const imageLayout = createImageExportLayout();
-  const layoutMount = mountClassicImageLayoutPort(host, imageLayout);
   const documentBuilder = createExportDocumentBuilder({
     documentRef: context.document, documentModel: { getDocumentVersion: () => context.documentModel.getDocumentVersion(), getTextLength: () => textLength, createSnapshot: (...args) => context.documentModel.createSnapshot(...args) },
     getActiveDocumentId: () => context.getActiveDocumentId(), presentation,
@@ -153,28 +144,23 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     requestFrame: callback => context.requestAnimationFrame(callback), cancelFrame: handle => context.cancelAnimationFrame?.(handle),
     reportError: (...args) => context.console.error(...args)
   });
-  const documentMount = mountClassicExportDocumentPort(host, documentBuilder);
   const enhancer = createExportPreviewEnhancer({ documentRef: context.document,
     documentModel: context.documentModel, getActiveDocumentId: () => context.getActiveDocumentId(),
     builder: documentBuilder, presentation,
     requestFrame: callback => context.requestAnimationFrame(callback), cancelFrame: () => {} });
-  const enhancementMount = mountClassicExportEnhancementPort(host, enhancer);
   const fontRoot = join(dirname(createRequire(import.meta.url).resolve('katex')), 'fonts');
   const assets = createHtmlFontAssets({ mathCss, loaders: Object.fromEntries(readdirSync(fontRoot)
     .filter(name => name.endsWith('.woff2')).map(name => [name, async () => 'data:font/woff2;base64,' + readFileSync(join(fontRoot, name)).toString('base64')])) });
   const htmlExporter = createHtmlExporter({ documentModel: context.documentModel, documents,
     builder: documentBuilder, enhancer, assets, serializer: createHtmlDocumentSerializer({ styles }),
     taskController, fileWriter });
-  const htmlMount = mountClassicHtmlExportPort(host, htmlExporter);
   const wordExporter = createWordExporter({ documentModel: context.documentModel, documents,
     builder: documentBuilder, enhancer, assets, serializer: createWordDocumentSerializer({ styles }),
     taskController, fileWriter });
-  const wordMount = mountClassicWordExportPort(host, wordExporter);
   const printSurface = createPdfPrintSurface({ documentRef: context.document, styles,
     printWindow: frameWindow => createBrowserPrint({ windowObject: frameWindow }).print(), setTimer: printDom.setTimer, clearTimer: printDom.clearTimer });
   const pdfExporter = createPdfExporter({ documentModel: context.documentModel, documents,
     builder: documentBuilder, enhancer, assets, surface: printSurface, taskController });
-  const pdfMount = mountClassicPdfExportPort(host, pdfExporter);
   const captureRoots = [];
   const imageSurface = createImageExportSurface({ documentRef: { createElement(tag) {
       const root = context.document.createElement(tag); captureRoots.push(root); return root;
@@ -183,33 +169,31 @@ export function createExportVmHost({ desktop = false, sourceText = '原文 😀'
     readStyle: root => context.getComputedStyle(root) });
   const imageExporter = createImageExporter({ documentModel: context.documentModel, documents,
     builder: documentBuilder, enhancer, assets: imageAssets, surface: imageSurface,
-    encodeDataUrl: data => dataMount.port.encode(data), loadDomToImage: () => presentation.loadDomToImage(),
+    encodeDataUrl: data => imageDataUrlToBytes(data), loadDomToImage: () => presentation.loadDomToImage(),
     taskController, fileWriter, ...imageOverrides });
-  const imageMount = mountClassicImageExportPort(host, imageExporter);
   context.currentImageRatio = '9:16';
   const imageView = { getOptions: () => ({ratio:context.currentImageRatio,cropFit:Boolean(getNode('image-crop-fit').checked)}),
     setRatio(value) { context.currentImageRatio=value; }, resetCrop() { getNode('image-crop-fit').checked=false; },
     open() { calls.push(['modal','open']); }, close() { return false; } };
-  const controller = createExportController({ requests:requestMount.port, tasks:taskMount.port,
+  const controller = createExportController({ requests:requestPolicy, tasks:taskController,
     owners:{markdown:markdownExporter,html:htmlExporter,word:wordExporter,pdf:pdfExporter,image:imageExporter},
-    imageView,preview:host.markdownEditorPreviewCommandPort,
+    imageView,preview:previewPort,
     readInput:()=>({name:context.filenameInput.value,directory:context.exportDirectory}),
     notify:message=>context.showToast(message),translate:(...args)=>context.t(...args),reportError:error=>context.console.error(error) });
-  const commandMount = mountClassicExportCommandPort(host,controller);
   const aliases={exportFile:'exportMarkdown',exportHTML:'exportHtml',exportWord:'exportWord',exportPDF:'exportPdf',renderExportImagePreview:'renderImage',downloadExportImage:'saveImage',openExportImageModal:'openImage',closeExportImageModal:'closeImage'};
-  for(const [name,action]of Object.entries(aliases))context[name]=()=>commandMount.port.invoke(action);
-  context.selectImageRatio=ratio=>commandMount.port.invoke('selectRatio',{ratio});
-  context.exportTaskPort=taskMount.port;context.exportRequestPort=requestMount.port;
-  context.beginExportTask=title=>{const task=taskMount.port.begin(title);if(!task)context.showToast('当前导出正在生成文件，请稍候');return task;};
-  context.finishExportTask=(...args)=>{try{return taskMount.port.finish(...args);}catch(error){context.showToast('导出清理失败：'+(error?.message||String(error)));return false;}};
+  for(const [name,action]of Object.entries(aliases))context[name]=()=>controller.invoke(action);
+  context.selectImageRatio=ratio=>controller.invoke('selectRatio',{ratio});
+  context.exportTaskPort=taskController;context.exportRequestPort=requestPolicy;
+  context.beginExportTask=title=>{const task=taskController.begin(title);if(!task)context.showToast('当前导出正在生成文件，请稍候');return task;};
+  context.finishExportTask=(...args)=>{try{return taskController.finish(...args);}catch(error){context.showToast('导出清理失败：'+(error?.message||String(error)));return false;}};
   vm.runInContext(markdownDownload, context, {filename:'context-export-fixture',timeout:1000});
   return {
-    context, calls, downloads, nodes, timers, events, printDom, commandMount, imageExporter, imageSurface, imageMount, captureRoots, imageAssets, assetMount, dataMount, assetTimers, pdfExporter, printSurface, imageLayout, layoutMount, taskController, documentBuilder, styles, markdownExporter, htmlExporter, wordExporter,
-    preload: (root, task) => assetMount.port.prepare({ root, task }),
-    enhance: (root, task) => enhancementMount.port.enhance({ root, task, documentId }), createNode: node,
-    build: task => documentMount.port.build({ task, documentId }), taskPort: taskMount.port,
+    context, calls, downloads, nodes, timers, events, printDom, controller, presentation, preview: previewPort, platform: outputPlatform, imagePlaceholder: EXPORT_IMAGE_PLACEHOLDER, imageExporter, imageSurface, captureRoots, imageAssets, assetTimers, pdfExporter, printSurface, imageLayout, taskController, documentBuilder, styles, markdownExporter, htmlExporter, wordExporter,
+    preload: (root, task) => imageAssets.prepare({ root, task }),
+    enhance: (root, task) => enhancer.enhance({ root, task, documentId }), createNode: node,
+    build: task => documentBuilder.build({ task, documentId }), taskPort: taskController,
     cancel: () => nodes.get('export-progress-cancel').click(),
-    destroy() { try { controller.destroy(); commandMount.destroy(); imageExporter.destroy(); imageMount.destroy(); imageSurface.destroy(); pdfExporter.destroy(); pdfMount.destroy(); printSurface.destroy(); wordExporter.destroy(); wordMount.destroy(); htmlExporter.destroy(); htmlMount.destroy(); markdownExporter.destroy(); markdownMount.destroy(); fileWriter.destroy(); taskController.destroy(); } finally { imageAssets.destroy(); assetMount.destroy(); dataMount.destroy(); imageLayout.destroy(); layoutMount.destroy(); enhancer.destroy(); enhancementMount.destroy(); styles.destroy(); styleMount.destroy(); documentBuilder.destroy(); documentMount.destroy(); progressView.destroy(); progressStore.destroy(); taskMount.destroy(); requestMount.destroy(); } },
+    destroy() { try { controller.destroy();  imageExporter.destroy();  imageSurface.destroy(); pdfExporter.destroy();  printSurface.destroy(); wordExporter.destroy();  htmlExporter.destroy();  markdownExporter.destroy();  fileWriter.destroy(); taskController.destroy(); } finally { imageAssets.destroy();   imageLayout.destroy();  enhancer.destroy();  styles.destroy();  documentBuilder.destroy();  progressView.destroy(); progressStore.destroy();   } },
     async runPdf() { const work = context.exportPDF(); await printDom.untilScheduled(); await printDom.fire(80); printDom.frames.at(-1).contentWindow.dispatchEvent({ type: 'afterprint' }); await work; },
     async renderImage(dataUrl) {
       if (dataUrl !== undefined) presentation.loadDomToImage = async () => ({ async toPng() { return dataUrl; } });

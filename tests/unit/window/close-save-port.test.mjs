@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createCloseSavePort, mountClassicCloseSavePort } from '../../../src/features/window/index.js';
+import { createCloseSavePort } from '../../../src/features/window/index.js';
 
 test('Atomic 6.13 CloseSavePort delegates one explicit boolean close-save policy', async () => {
   const port = createCloseSavePort();
@@ -31,18 +31,18 @@ test('CloseSavePort preserves cancellation, handler errors and rejects ambiguous
   await assert.rejects(malformed.prepareClose(), /must resolve to a boolean/);
 });
 
-test('Classic CloseSavePort exposes registration only and cleans the registration with its host property', async () => {
-  const host = {};
+test('R16-08 explicit CloseSave registration releases only its own policy', async () => {
   const closeSave = createCloseSavePort();
-  const classic = mountClassicCloseSavePort(host, closeSave);
-  assert.deepEqual(Object.keys(host.markdownEditorCloseSavePort), ['register']);
-  assert.equal(host.markdownEditorCloseSavePort.register(() => true), true);
+  const unregister = closeSave.register(() => true);
   assert.equal(closeSave.registered, true);
-  assert.throws(() => mountClassicCloseSavePort(host, closeSave), /already mounted/);
-  classic.destroy();
-  classic.destroy();
-  assert.equal(host.markdownEditorCloseSavePort, undefined);
+  assert.equal(await closeSave.prepareClose(), true);
+  unregister();
   assert.equal(closeSave.registered, false);
+  closeSave.register(() => false);
+  unregister();
+  assert.equal(closeSave.registered, true);
+  assert.equal(await closeSave.prepareClose(), false);
+  closeSave.destroy();
 });
 
 test('CloseSavePort destroy is idempotent and terminal', async () => {

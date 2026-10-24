@@ -84,8 +84,8 @@ try {
     binaryPath: resolve(process.env.MARKDOWN_EDITOR_BINARY),
     repositoryRoot, artifactDirectory: evidenceRoot
   }, async browser => {
-    evidence.environment = await browser.execute(async (path, text) => {
-      const host = document.getElementById('compatibility-business-ports');
+    evidence.environment = await browser.inspect(async (path, text) => {
+      const host = applicationCapabilities;
       if (!host?.markdownEditorPreviewRendererPort || !host?.markdownEditorEditorUiCommandPort) {
         throw new Error('Production rendering ports are unavailable.');
       }
@@ -118,7 +118,7 @@ try {
       assert.equal(evidence.environment.e2eOptIn, false, 'Default Windows WebView must not request the E2E bridge.');
       assert.equal(evidence.environment.e2eGlobalPublished, false, 'Default production Windows WebView must not publish E2E globals.');
       // Independently challenge CSP, bypassing the sanitizer with a test-owned node.
-      evidence.cspControl = await browser.execute(async () => {
+      evidence.cspControl = await browser.inspect(async () => {
         window.__r12CspExecuted = false;
         const violations = [];
         const listener = event => violations.push(event.effectiveDirective);
@@ -144,8 +144,8 @@ try {
       evidence.surfaces.push(observation);
       await persist();
       try {
-        await browser.execute(async (kind, data) => {
-          const host = document.getElementById('compatibility-business-ports');
+        await browser.inspect(async (kind, data) => {
+          const host = applicationCapabilities;
           window.__r12Probe = { events: [], ipcAttempted: false, ipc: null, cspViolations: [] };
           window.__r12CspListener && document.removeEventListener('securitypolicyviolation', window.__r12CspListener);
           window.__r12CspListener = event => window.__r12Probe.cspViolations.push({
@@ -157,8 +157,8 @@ try {
           ui.invoke('setLayoutMode', kind === 'hybrid-html-widget' ? 'hybrid' : 'both');
           if (kind === 'preview-markdown' || kind === 'hybrid-html-widget') {
             const editor = document.getElementById('editor');
-            editor.virtualEditor.loadDocument(data.markdown, { selection: data.markdown.length });
-            editor.dispatchEvent(new Event('input', { bubbles: true }));
+            await host.markdownEditorDocumentUiCommandPort.invoke('importTextContent', 'render-boundary.md', data.markdown);
+            editorApi.setSelection(data.markdown.length, data.markdown.length);
             if (kind === 'preview-markdown') await host.markdownEditorPreviewCommandPort.update();
           } else if (kind === 'preview-full-html') {
             host.markdownEditorPreviewRendererPort.patchHtml(data.html, { forceFullRebuild: true });
@@ -189,16 +189,16 @@ try {
           : surface === 'hybrid-html-widget' ? '.cm-hybrid-html-body' : '#preview .markdown-body';
         observation.mount = surface === 'preview-virtual-block'
           ? 'canonical factory in owned connected DOM after live Preview update' : 'production rendering surface';
-        await browser.waitUntil(() => browser.execute((selector, id) => Boolean(
+        await browser.waitUntil(() => browser.inspect((selector, id) => Boolean(
           document.querySelector(`${selector} [data-r12-probe="${id}"]`)
         ), rootSelector, fixture.id), { timeout: 15_000, timeoutMsg: `${surface} did not mount its actual HTML sink.` });
-        await browser.execute((selector, id) => {
+        await browser.inspect((selector, id) => {
           const root = document.querySelector(`${selector} [data-r12-probe="${id}"]`);
           root.querySelector('[data-r12-kind="click"]')?.click();
           for (const kind of ['javascript', 'encoded-url', 'data-url']) root.querySelector(`[data-r12-kind="${kind}"]`)?.click();
         }, rootSelector, fixture.id);
         // Bounded observation window: absence of a marker is inconclusive, never a safety verdict.
-        const snapshot = await browser.execute(async (selector, id) => {
+        const snapshot = await browser.inspect(async (selector, id) => {
           await new Promise(resolvePromise => setTimeout(resolvePromise, 1_000));
           const root = document.querySelector(`${selector} [data-r12-probe="${id}"]`);
           if (!root) throw new Error('Probe left its rendering surface before evidence capture.');
@@ -255,7 +255,7 @@ try {
         await browser.saveScreenshot(join(evidenceRoot, `${surface}.png`));
       } finally {
         if (surface === 'preview-virtual-block') {
-          await browser.execute(() => document.getElementById('r12-owned-virtual-surface')?.remove());
+          await browser.inspect(() => document.getElementById('r12-owned-virtual-surface')?.remove());
         }
       }
     }
@@ -264,16 +264,16 @@ try {
       const png = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
       const markdown = '# R12 safe content\n\n**bold** and *emphasis*\n\n![owned image](' + png + ')\n\n$$\nx^2 + y^2\n$$\n\n```mermaid\nflowchart LR\n  A[Safe] --> B[Content]\n```\n\n<details open><summary>safe disclosure</summary><em>safe HTML</em></details>\n';
       for (const mode of ['both', 'hybrid']) {
-        await browser.execute(async (layout, source) => {
-          const host = document.getElementById('compatibility-business-ports');
+        await browser.inspect(async (layout, source) => {
+          const host = applicationCapabilities;
           host.markdownEditorEditorUiCommandPort.invoke('setLayoutMode', layout);
           const editor = document.getElementById('editor');
-          editor.virtualEditor.loadDocument(source, { selection: 0 });
-          editor.dispatchEvent(new Event('input', { bubbles: true }));
+          await host.markdownEditorDocumentUiCommandPort.invoke('importTextContent', 'legal-content.md', source);
+          editorApi.setSelection(0, 0);
           if (layout === 'both') await host.markdownEditorPreviewCommandPort.update();
         }, mode, markdown);
         const selector = mode === 'both' ? '#preview' : '#editor';
-        await browser.waitUntil(() => browser.execute(rootSelector => {
+        await browser.waitUntil(() => browser.inspect(rootSelector => {
           const root = document.querySelector(rootSelector);
           const image = root?.querySelector('img[alt="owned image"]');
           return Boolean(root?.querySelector('.katex') && root?.querySelector('[data-mermaid-rendered="true"] svg')

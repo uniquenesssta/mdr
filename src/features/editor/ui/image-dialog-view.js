@@ -6,14 +6,8 @@
  * Lifecycle: Explicit View with idempotent destroy(); clears pending upload state, closes modal and removes listeners.
  */
 import { createEventScope } from '../../../ui/dom/index.js';
+import { ModalShell } from '../../../ui/components/modal-shell.js';
 import { isImageImportCancelled } from '../../import/index.js';
-const OPEN_EVENT = 'markdown-editor:modal-shell-open';
-const CLOSE_EVENT = 'markdown-editor:modal-shell-close';
-function modal(root, type, detail) {
-  const EventCtor = root.ownerDocument?.defaultView?.CustomEvent || globalThis.CustomEvent;
-  root.dispatchEvent(new EventCtor(type, { detail }));
-  if (detail.error) throw detail.error;
-}
 export function createImageDialogView({
   root,
   selection,
@@ -22,6 +16,7 @@ export function createImageDialogView({
   notify = () => {},
   confirmLargeFile = () => true,
   fallbackAlt = '图片',
+  createModalShell = (element, options) => new ModalShell(element, options),
   messages = {}
 } = {}) {
   if (!root?.ownerDocument) throw new TypeError('Image Dialog View requires a modal root.');
@@ -29,6 +24,8 @@ export function createImageDialogView({
   if (typeof insertImage !== 'function') throw new TypeError('Image Dialog View requires insertImage command.');
   if (typeof imageController?.readFile !== 'function' || typeof imageController?.createInsertion !== 'function') throw new TypeError('Image Dialog View requires Image Import Controller.');
   const events = createEventScope();
+  const shell = createModalShell(root, { panel: root.firstElementChild });
+  try {
   const text = Object.freeze({
     selectFile: messages.selectFile || '请选择图片文件',
     tooLarge: messages.tooLarge || '图片不能超过 5MB',
@@ -53,7 +50,7 @@ export function createImageDialogView({
     root.querySelectorAll('.image-tab').forEach(button => button.classList.toggle('active', button.dataset.tab === activeTab));
     root.querySelectorAll('.image-tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === `image-tab-${activeTab}`));
   };
-  const close = () => { clearUpload(); pendingSelection = null; modal(root, CLOSE_EVENT, { reason: 'feature-close' }); };
+  const close = () => { clearUpload(); pendingSelection = null; shell.close('feature-close'); };
   const open = () => {
     if (destroyed) return;
     clearUpload();
@@ -63,7 +60,7 @@ export function createImageDialogView({
     }
     q('#image-upload-preview')?.replaceChildren?.();
     switchTab('url');
-    modal(root, OPEN_EVENT, { options: { initialFocus: q('#image-url-input'), onClose: () => { clearUpload(); pendingSelection = null; } } });
+    shell.open(null, { ariaLabel: '插入图片',  initialFocus: q('#image-url-input'), onClose: () => { clearUpload(); pendingSelection = null; } });
   };
   const readFile = async input => {
     if (destroyed) return;
@@ -108,5 +105,12 @@ export function createImageDialogView({
     if (action === 'confirm') { event.preventDefault?.(); confirm(); }
   });
   events.listen(q('#image-file-input'), 'change', event => readFile(event.target));
-  return Object.freeze({ open, close, switchTab, confirm, destroy() { if (destroyed) return; destroyed = true; try { close(); } catch (_) {} imageController.destroy(); events.destroy(); } });
+  return Object.freeze({ open, close, switchTab, confirm, destroy() { if (destroyed) return; destroyed = true; const errors = []; for (const action of [() => close(), () => events.destroy(), () => shell.destroy(), () => imageController.destroy()]) try { action(); } catch (error) { errors.push(error); } if (errors.length) throw new AggregateError(errors, 'Editor dialog cleanup failed.'); } });
+  } catch (error) {
+    const errors = [error];
+    try { events.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    try { shell.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    if (errors.length > 1) throw new AggregateError(errors, 'Editor dialog construction failed.');
+    throw error;
+  }
 }

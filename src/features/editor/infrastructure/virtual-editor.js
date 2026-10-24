@@ -2,8 +2,8 @@
  * Responsibility: Compose the Editor adapter, extensions, host events and document change journal.
  * Imports: Editor infrastructure and the public Hybrid feature only.
  * Exports: createVirtualEditor; application callers use the Editor public entry.
- * State/side effects: One adapter, journal, host compatibility projection and owned subscriptions per host.
- * Lifecycle: Explicit create and idempotent destroy release subscriptions, extensions, host properties and CodeMirror.
+ * State/side effects: One adapter, journal and owned subscriptions per host; no DOM value/selection projection or text cache.
+ * Lifecycle: Explicit create and idempotent destroy release subscriptions, extensions and CodeMirror.
  */
 import { createCodeMirrorAdapter } from './codemirror-editor-adapter.js';
 import { createCodeMirrorExtensionRegistry } from './codemirror-extension-registry.js';
@@ -43,89 +43,14 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value) || 0));
 }
 
-function createSyntheticEvent(target, type, bubbles = false) {
-  const EventConstructor = target?.ownerDocument?.defaultView?.Event || Event;
-  const event = new EventConstructor(type, { bubbles, cancelable: false });
-  Object.defineProperty(event, '__markdownEditorVirtualEditorSynthetic', { value: true });
-  return event;
-}
-
-function installTextareaCompatibility(host, adapter, extensionRegistry) {
-  let suppressInputEvent = 0;
-  let cachedValue = adapter.getText();
-  let valueCacheValid = true;
-  const adapterSetDocumentChunks = adapter.setDocumentChunks.bind(adapter);
-
-  const withSuppressedInput = (callback) => {
-    suppressInputEvent += 1;
-    try {
-      return callback();
-    } finally {
-      suppressInputEvent -= 1;
-    }
-  };
-
-  const invalidateValueCache = () => { valueCacheValid = false; };
-
-  const setValue = (nextValue) => {
-    const value = String(nextValue ?? '');
-    const currentLength = adapter.getTextLength();
-    if (valueCacheValid && cachedValue === value) return false;
-    if (!valueCacheValid && currentLength === value.length) {
-      const currentValue = adapter.getText();
-      cachedValue = currentValue;
-      valueCacheValid = true;
-      if (currentValue === value) return false;
-    }
-    const changed = withSuppressedInput(() => adapter.setText(value, { selection: 'end' }));
-    cachedValue = value;
-    valueCacheValid = true;
-    return changed;
-  };
-
-  const setDocumentChunks = (chunks) => {
-    const length = withSuppressedInput(() => adapterSetDocumentChunks(chunks, { selection: 0 }));
-    cachedValue = '';
-    valueCacheValid = length === 0;
-    return length;
-  };
-
-  Object.defineProperties(host, {
-    value: { configurable: true, get() { if (!valueCacheValid) { cachedValue = adapter.getText(); valueCacheValid = true; } return cachedValue; }, set(value) { setValue(value); } },
-    textLength: { configurable: true, get() { return adapter.getTextLength(); } },
-    lineCount: { configurable: true, get() { return adapter.getLineCount(); } },
-    selectionStart: { configurable: true, get() { return adapter.getSelection().start; }, set(value) { const selection = adapter.getSelection(); adapter.setSelection(value, Math.max(Number(value) || 0, selection.end)); } },
-    selectionEnd: { configurable: true, get() { return adapter.getSelection().end; }, set(value) { const selection = adapter.getSelection(); adapter.setSelection(selection.start, value); } },
-    selectionDirection: { configurable: true, get() { return adapter.getSelection().direction; } },
-    scrollTop: { configurable: true, get() { return adapter.getScrollMetrics().top; }, set(value) { adapter.setScrollTop(value); } },
-    scrollLeft: { configurable: true, get() { return adapter.getScrollMetrics().left; }, set(value) { adapter.setScrollLeft(value); } },
-    scrollHeight: { configurable: true, get() { return adapter.getScrollMetrics().height; } },
-    scrollWidth: { configurable: true, get() { return adapter.getScrollMetrics().width; } },
-    placeholder: { configurable: true, get() { return extensionRegistry.snapshot.placeholder; }, set(value) { const nextValue = String(value ?? ''); extensionRegistry.setPlaceholder(nextValue); host.setAttribute('data-placeholder', nextValue); } },
-    readOnly: { configurable: true, get() { return extensionRegistry.snapshot.readOnly; }, set(value) { adapter.setReadOnly(Boolean(value)); } }
-  });
-
-  host.focus = (options = {}) => adapter.focus(options);
-  host.blur = () => adapter.blur();
-  host.setSelectionRange = (start, end = start, direction = 'none') => { const backward = direction === 'backward'; adapter.setSelection(backward ? end : start, backward ? start : end); };
-  host.setRangeText = (replacement, start = host.selectionStart, end = host.selectionEnd, selectionMode = 'preserve') => { withSuppressedInput(() => adapter.replaceRange(replacement, start, end, selectionMode)); };
-  host.scrollTo = (optionsOrX, y) => adapter.scrollTo(optionsOrX, y);
-  host.scrollBy = (optionsOrX, y) => adapter.scrollBy(optionsOrX, y);
-
-  const compatibilityProperties = ['value', 'textLength', 'lineCount', 'selectionStart', 'selectionEnd', 'selectionDirection', 'scrollTop', 'scrollLeft', 'scrollHeight', 'scrollWidth', 'placeholder', 'readOnly', 'focus', 'blur', 'setSelectionRange', 'setRangeText', 'scrollTo', 'scrollBy'];
-  return {
-    setDocumentChunks,
-    invalidateValueCache,
-    get suppressInputEvent() { return suppressInputEvent > 0; },
-    destroy() { for (const property of compatibilityProperties) delete host[property]; }
-  };
-}
+const editors = new WeakMap();
 
 export function createVirtualEditor(host, { scrollSync = null } = {}) {
   if (scrollSync !== null && (typeof scrollSync.markProgrammaticScroll !== 'function' || typeof scrollSync.suspend !== 'function')) {
     throw new TypeError('Virtual Editor scrollSync requires markProgrammaticScroll/suspend');
   }
-  if (!host || host.virtualEditor) return host?.virtualEditor || null;
+  if (!host) return null;
+  if (editors.has(host)) return editors.get(host);
 
   const initialValue = host.textContent || '';
   const changeJournal = {
@@ -172,24 +97,29 @@ export function createVirtualEditor(host, { scrollSync = null } = {}) {
   adapterApi = codeMirrorApi;
   const detachExtensionRegistry = extensionRegistry.attach(codeMirrorIntegration.dispatchEffects);
   adapterApi.setReadOnly = value => extensionRegistry.setReadOnly(Boolean(value));
-  const textareaCompatibility = installTextareaCompatibility(host, adapterApi, extensionRegistry);
-  adapterApi.setDocumentChunks = textareaCompatibility.setDocumentChunks;
-  adapterApi.invalidateValueCache = textareaCompatibility.invalidateValueCache;
-  Object.defineProperty(adapterApi, 'suppressInputEvent', { configurable: true, get() { return textareaCompatibility.suppressInputEvent; } });
+  let programmaticChanges = 0;
+  adapterApi.runProgrammaticChange = callback => {
+    programmaticChanges += 1;
+    try { return callback(); } finally { programmaticChanges -= 1; }
+  };
+  const setDocumentChunks = adapterApi.setDocumentChunks.bind(adapterApi);
+  adapterApi.setDocumentChunks = (chunks, options) => adapterApi.runProgrammaticChange(() => setDocumentChunks(chunks, options));
+  adapterApi.setPlaceholder = value => {
+    const text = String(value ?? '');
+    extensionRegistry.setPlaceholder(text);
+    host.setAttribute('data-placeholder', text);
+  };
 
   const unsubscribeAdapterUpdates = adapterApi.subscribe(update => {
     const documentChange = recordDocumentChanges(update);
     if (update.docChanged) {
-      textareaCompatibility.invalidateValueCache();
       if (documentChange) {
-        const event = { version: documentChange.version, changes: documentChange.changes.map(change => ({ ...change })), suppressed: textareaCompatibility.suppressInputEvent, length: update.length, lines: update.lines, nonWhitespaceCount: changeJournal.nonWhitespaceCount };
+        const event = { version: documentChange.version, changes: documentChange.changes.map(change => ({ ...change })), suppressed: programmaticChanges > 0, length: update.length, lines: update.lines, nonWhitespaceCount: changeJournal.nonWhitespaceCount };
         for (const listener of documentChangeListeners) {
           try { listener(event); } catch (error) { console.error('Virtual editor document listener failed:', error); }
         }
       }
-      if (!textareaCompatibility.suppressInputEvent) host.dispatchEvent(createSyntheticEvent(host, 'input', true));
     }
-    if (update.selectionSet) host.dispatchEvent(createSyntheticEvent(host, 'select'));
   });
   function loadDocumentState(content, options = {}) {
     const length = codeMirrorIntegration.resetDocument(content, {
@@ -199,7 +129,6 @@ export function createVirtualEditor(host, { scrollSync = null } = {}) {
     changeJournal.version = 0;
     changeJournal.entries = [];
     changeJournal.nonWhitespaceCount = Number.isFinite(Number(options.nonWhitespaceCount)) ? Math.max(0, Number(options.nonWhitespaceCount) || 0) : countDocumentNonWhitespace(adapterApi);
-    textareaCompatibility.invalidateValueCache();
     return length;
   }
 
@@ -243,7 +172,6 @@ export function createVirtualEditor(host, { scrollSync = null } = {}) {
       changeJournal.nonWhitespaceCount = Number.isFinite(Number(nonWhitespaceCount))
         ? Math.max(0, Number(nonWhitespaceCount) || 0)
         : countDocumentNonWhitespace(adapterApi);
-      adapterApi.invalidateValueCache();
     },
     setPresentationMode(mode = 'source') {
       return extensionRegistry.setPresentationMode(mode);
@@ -273,28 +201,22 @@ export function createVirtualEditor(host, { scrollSync = null } = {}) {
     }
   });
 
-  const onCompatibilityInput = event => { if (!event.__markdownEditorVirtualEditorSynthetic) event.stopImmediatePropagation(); };
-  host.addEventListener('input', onCompatibilityInput);
-  const unsubscribeScroll = adapterApi.subscribeScroll(() => { host.dispatchEvent(createSyntheticEvent(host, 'scroll')); });
   const destroyCodeMirrorAdapter = adapterApi.destroy.bind(adapterApi);
   let destroyed = false;
   adapterApi.destroy = () => {
     if (destroyed) return;
     destroyed = true;
     unsubscribeAdapterUpdates();
-    unsubscribeScroll();
     documentChangeListeners.clear();
-    host.removeEventListener('input', onCompatibilityInput);
-    textareaCompatibility.destroy();
     detachExtensionRegistry();
     extensionRegistry.destroy();
     destroyCodeMirrorAdapter();
-    if (host.virtualEditor === adapterApi) delete host.virtualEditor;
+    if (editors.get(host) === adapterApi) editors.delete(host);
     host.classList.remove('virtual-editor-host');
     if (host.getAttribute('role') === 'textbox') host.removeAttribute('role');
     if (host.getAttribute('aria-multiline') === 'true') host.removeAttribute('aria-multiline');
   };
 
-  host.virtualEditor = adapterApi;
+  editors.set(host, adapterApi);
   return adapterApi;
 }

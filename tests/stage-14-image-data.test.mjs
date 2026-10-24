@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { imageDataUrlToBytes, ImageDataEncodingError, mountClassicImageDataPort } from '../src/features/export/index.js';
+import { imageDataUrlToBytes, ImageDataEncodingError, isExportCancelledError } from '../src/features/export/index.js';
 import { createFileSystemClient } from '../src/platform/desktop/file-system-client.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
@@ -60,14 +60,13 @@ test('R14-15 all 256 octets and long payload cross conversion chunks without los
   same('data:,'+Array.from({length:256},(_,i)=>'%'+i.toString(16).padStart(2,'0')).join(''),Array.from(expected.subarray(0,256)));
 });
 
-test('R14-15 scoped port is readonly, preserves replacement and retained methods become terminal', () => {
-  const host={}, mount=mountClassicImageDataPort(host,imageDataUrlToBytes);
-  assert.equal(Object.isFrozen(mount.port),true);assert.equal(Object.getOwnPropertyDescriptor(host,'markdownEditorImageDataPort').writable,false);
-  same(PNG,Array.from(mount.port.encode(PNG)));assert.throws(()=>mountClassicImageDataPort(host,imageDataUrlToBytes),/already mounted/);
-  Object.defineProperty(host,'markdownEditorImageDataPort',{value:'replacement',configurable:true});mount.destroy();mount.destroy();
-  assert.equal(host.markdownEditorImageDataPort,'replacement');assert.throws(()=>mount.port.encode(PNG),/destroyed/);
-  const other={}, own=mountClassicImageDataPort(other,imageDataUrlToBytes);own.destroy();assert.equal(Object.hasOwn(other,'markdownEditorImageDataPort'),false);
-  assert.throws(()=>mountClassicImageDataPort(null,imageDataUrlToBytes),TypeError);assert.throws(()=>mountClassicImageDataPort({},{}),TypeError);
+test('R16-08 direct image byte encoding returns independent buffers without a mutable host capability', () => {
+  const before = Object.getOwnPropertyNames(globalThis);
+  const first = imageDataUrlToBytes(PNG), second = imageDataUrlToBytes(PNG);
+  same(PNG, Array.from(second)); assert.notEqual(first, second);
+  first[0] = 0; assert.equal(second[0], 137);
+  assert.throws(() => imageDataUrlToBytes(null), ImageDataEncodingError);
+  assert.deepEqual(Object.getOwnPropertyNames(globalThis), before);
 });
 
 test('R14-15 actual desktop adapter preserves every decoded octet at the Rust command boundary', async () => {
@@ -98,12 +97,10 @@ test('R14-15 invalid data fails before dialog or binary write and later valid ex
 
 test('R14-15 image bytes are fixed before save dialog even if another preview arrives', async () => {
   const h=createExportVmHost({desktop:true});await h.renderImage(PNG);
-  const port=h.context.document.getElementById('compatibility-business-ports').markdownEditorPlatformPort,original=port.call;
-  let finish,entered;const ready=new Promise(r=>entered=r);port.call=(surface,operation,...args)=>{
-    if(operation==='saveFile'){entered();return new Promise(r=>finish=r);}return original(surface,operation,...args);
-  };
-  const work=h.invoke('downloadExportImage');await ready;const snapshot=h.imageMount.port.getPreview();assert.equal(Object.isFrozen(snapshot),true);assert.throws(()=>{snapshot.dataUrl='data:;base64,AA==';},TypeError);await h.renderImage();finish('C:\\chosen.png');await work;
-  assert.equal(h.calls.some(x=>x[0]==='writeBinary'),false,'Replacing a cancellable dialog task suppresses stale output');port.call=original;await h.invoke('downloadExportImage');assert.deepEqual(Array.from(h.calls.find(x=>x[0]==='writeBinary')[2]),signature);h.destroy();
+  const port=h.platform,original=port.dialogs.saveFile;
+  let finish,entered;const ready=new Promise(r=>entered=r);port.dialogs.saveFile=()=>{ entered(); return new Promise(resolve=>{finish=resolve;}); };
+  const work=h.invoke('downloadExportImage');await ready;const snapshot=h.imageExporter.getPreview();assert.equal(Object.isFrozen(snapshot),true);assert.throws(()=>{snapshot.dataUrl='data:;base64,AA==';},TypeError);await h.renderImage();finish('C:\\chosen.png');await work;
+  assert.equal(h.calls.some(x=>x[0]==='writeBinary'),false,'Replacing a cancellable dialog task suppresses stale output');port.dialogs.saveFile=original;await h.invoke('downloadExportImage');assert.deepEqual(Array.from(h.calls.find(x=>x[0]==='writeBinary')[2]),signature);h.destroy();
 });
 
 for(const savePath of [null,'',false,123,{}]) test('R14-15 cancelled or invalid save path never writes: '+JSON.stringify(savePath), async()=>{
@@ -114,11 +111,11 @@ for(const savePath of [null,'',false,123,{}]) test('R14-15 cancelled or invalid 
 
 for(const boundary of ['write','dialog','capability','destroyed-port'])test('R14-15 '+boundary+' failure has no success toast or leaked browser URL',async()=>{
   const h=createExportVmHost({desktop:boundary!=='write',failWrite:boundary==='write'});await h.renderImage(PNG);
-  const port=h.context.document.getElementById('compatibility-business-ports').markdownEditorPlatformPort;
-  if(boundary==='dialog')port.call=async()=>{throw new Error('dialog denied');};
-  if(boundary==='capability')port.supports=()=>false;
+  const port=h.platform;
+  if(boundary==='dialog')port.dialogs.saveFile=async()=>{throw new Error('dialog denied');};
+  if(boundary==='capability'){port.capabilities.desktop.dialogs=false;port.capabilities.desktop.fileSystem=false;port.capabilities.browser.fileDownload=false;}
   // R14-18 commands use the owner directly; unmount the actual command capability.
-  if(boundary==='destroyed-port'){h.commandMount.destroy();await assert.rejects(async()=>h.invoke('downloadExportImage'),/destroyed/);}
+  if(boundary==='destroyed-port'){h.controller.destroy();await assert.rejects(async()=>h.invoke('downloadExportImage'),error=>isExportCancelledError(error)&&error.reason==='destroyed');}
   else await h.invoke('downloadExportImage');assert.equal(h.calls.some(x=>x[0]==='toast'&&x[1]==='toastImageDownloaded'),false);
   assert.equal(h.downloads.length,0);
   if(boundary==='destroyed-port')assert.equal(h.calls.some(x=>x[0]==='saveFile'||x[0]==='writeBinary'),false);

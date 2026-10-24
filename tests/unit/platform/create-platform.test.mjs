@@ -1,3 +1,4 @@
+import { createApplicationLifetime } from '../../../src/bootstrap/application-lifetime.js';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
@@ -277,7 +278,9 @@ test('R13.4 Drop composition and R13.13 owned callbacks execute against real bro
       assert.equal(id, 'drop-overlay');
       return { classList: { add: value => overlayClasses.add(value), remove: value => overlayClasses.delete(value) } };
     };
+    const lifetime = createApplicationLifetime();
     const context = vm.createContext({ platform, document: runtime.document, window: runtime,
+      ownApplicationExit: release => lifetime.own(release),
       createDropImportController, createDropOverlayView, createImageImportController,
       createBrowserFileReader, createFileImportController,
       notify: message => notifications.push(message), t: key => key,
@@ -298,6 +301,7 @@ test('R13.4 Drop composition and R13.13 owned callbacks execute against real bro
     };
     const importer = createImportDocumentController({ files, images: imageController, documents,
       editor: { insertImage: (url, options) => calls.push(['image', url, options.alt]), appendMarkdown() {} } });
+    lifetime.own(() => importer.destroy());
     context.importDocumentController = importer;
     try {
       vm.runInContext(source.slice(callbacksStart, callbacksEnd), context);
@@ -327,7 +331,7 @@ test('R13.4 Drop composition and R13.13 owned callbacks execute against real bro
       assert.equal(overlayClasses.has('show'), false);
       listeners.get('dragenter')({ preventDefault() {} });
     } finally {
-      importer.destroy(); await controller.destroy(); view.destroy(); imageController.destroy(); files.destroy(); await platform.destroy();
+      lifetime.destroy(); importer.destroy(); await controller.destroy(); view.destroy(); imageController.destroy(); files.destroy(); await platform.destroy();
       assert.equal(overlayClasses.has('show'), false);
       assert.throws(() => importer.openBrowserFile({}), /destroyed/);
       assert.throws(() => controller.openPath('native.md'), /destroyed/);

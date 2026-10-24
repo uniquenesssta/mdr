@@ -18,16 +18,16 @@ test('Atomic 7.8 keeps DOM/block/task/code/math/Mermaid responsibilities split i
 test('Atomic 7.8 composition root owns one shared PreviewRendererPort and destruction', async () => {
   const [main, entry, compatibility] = await Promise.all([
     source('src/main.js'), source('src/features/preview/index.js'),
-    source('src/features/preview/compatibility/classic-preview-renderer-port.js')
+    source('src/features/preview/render/preview-renderer-port.js')
   ]);
   assert.match(entry, /createPreviewRendererPort/);
-  assert.match(entry, /mountClassicPreviewRendererPort/);
+  assert.doesNotMatch(entry, /mountClassicPreviewRendererPort/);
   assert.match(main, /createPreviewRendererPort\(\{/);
   assert.match(main, /presentation: markdownPresentation/);
-  assert.match(main, /mountClassicPreviewRendererPort\(compatibilityPlatformHost, previewRenderer\)/);
-  assert.match(main, /previewRendererPort\?\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewRendererPort\(compatibilityPlatformHost, previewRenderer\)/);
+  assert.doesNotMatch(main, /previewRendererPort\?\.destroy\(\)/);
   assert.match(main, /previewRenderer\?\.destroy\(\)/);
-  assert.match(compatibility, /markdownEditorPreviewRendererPort/);
+  assert.doesNotMatch(compatibility, /markdownEditorPreviewRendererPort/);
 });
 
 test('Atomic 7.8 renderer boundary remains intact after Atomic 7.14 RenderEngine replaces classic preview orchestration', async () => {

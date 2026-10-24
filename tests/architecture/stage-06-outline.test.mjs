@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
 import { readFile } from '../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -14,7 +15,7 @@ const OUTLINE_MODULES = [
   'src/features/sidebar/outline/outline-collapse-store.js',
   'src/features/sidebar/outline/outline-active-heading.js',
   'src/features/sidebar/outline/outline-view.js',
-  'src/features/sidebar/compatibility/classic-outline-controller-port.js'
+  'src/features/sidebar/state/sidebar-state.js'
 ];
 
 function assertNoDirectBrowserGlobalAccess(source) {
@@ -27,7 +28,7 @@ test('Atomic 6.8 exposes the responsibility-split Outline feature through one pu
   const index = await read('src/features/sidebar/index.js');
   for (const symbol of [
     'createOutlineController', 'buildOutlineTree', 'createOutlineCollapseStore',
-    'resolveActiveOutlineHeading', 'createOutlineView', 'mountClassicOutlineControllerPort'
+    'resolveActiveOutlineHeading', 'createOutlineView'
   ]) assert.match(index, new RegExp(symbol));
   for (const path of OUTLINE_MODULES) assert.ok((await read(path)).includes('Responsibility:'));
 });
@@ -73,7 +74,7 @@ test('Atomic 6.8 removes classic Outline state/render/parser authority while Ato
 test('Atomic 6.8 Outline view owns DOM/context actions without executable inline handlers', async () => {
   const [view, html] = await Promise.all([
     read('src/features/sidebar/outline/outline-view.js'),
-    read('public/compatibility/business-content.html')
+    readCurrentViewMarkup()
   ]);
   assert.match(view, /createElement/);
   assert.match(view, /replaceChildren/);
@@ -96,7 +97,7 @@ test('Atomic 6.8 composition keeps Outline ownership intact after the independen
   assert.match(main, /createOutlineView/);
   assert.match(main, /createOutlineController/);
   assert.match(main, /registerLifecycle\('outline', outlineController\)/);
-  assert.match(main, /mountClassicOutlineControllerPort/);
+  assert.doesNotMatch(main, /mountClassicOutlineControllerPort/);
   assert.match(main, /outlineController\.start\(\)/);
   assert.match(main, /outlineController\?\.destroy\(\)/);
   assert.match(folderTree, /export function createFolderTreeController/);

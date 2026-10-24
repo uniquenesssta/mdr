@@ -1,22 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mountClassicPreviewRendererPort } from '../../../src/features/preview/compatibility/classic-preview-renderer-port.js';
-
-const methods = [
-  'patchHtml','patchBlocks','createBlockNodes','applyBlockSourceRange',
-  'renderTaskLists','renderCode','renderMath','renderMermaid'
-];
-
-test('Atomic 7.8 classic Preview Renderer Port is scoped, forwards calls and unmounts exactly itself', async () => {
-  const calls = [];
-  const renderer = Object.fromEntries(methods.map(method => [method, (...args) => { calls.push({ method, args }); return method === 'renderMermaid' ? Promise.resolve('ok') : method; }]));
-  const host = {};
-  const mount = mountClassicPreviewRendererPort(host, renderer);
-  assert.equal(host.markdownEditorPreviewRendererPort.renderCode(['root']), 'renderCode');
-  assert.equal(await host.markdownEditorPreviewRendererPort.renderMermaid(['root'], () => false), 'ok');
-  assert.deepEqual(calls.map(call => call.method), ['renderCode', 'renderMermaid']);
-  const foreign = host.markdownEditorPreviewRendererPort;
-  mount.destroy();
-  assert.equal(host.markdownEditorPreviewRendererPort, undefined);
-  assert.throws(() => foreign.renderMath([]), /destroyed/);
+import { createPreviewRendererPort } from '../../../src/features/preview/index.js';
+test('R16-08 the explicit Preview renderer owns actual specialized renderer lifecycle without a DOM property bridge', async () => {
+  const listeners = new Map(), calls = [];
+  const root = { querySelector: () => null, querySelectorAll: () => [], replaceChildren() {}, contains: () => true,
+    addEventListener(type, callback) { listeners.set(type, callback); }, removeEventListener(type) { listeners.delete(type); } };
+  const documentRef = { body: {}, defaultView: { navigator: {} }, createElement: () => ({ className: '', dataset: {}, setAttribute() {}, classList: { add() {}, remove() {} } }) };
+  const renderer = createPreviewRendererPort({ root, documentRef, documentModel: { sliceText: () => '' },
+    presentation: { code: { getNormalizedCodeLanguage: value => value, renderHighlightedCodeRows: () => true },
+      math: { delimiters: [], renderTree: node => calls.push(node) },
+      mermaid: { getTheme: () => 'default', renderDiagram: async () => ({ status: 'rendered' }) } } });
+  const node = { querySelectorAll: () => [] };
+  assert.throws(() => renderer.renderCode([node]), /not started/);
+  assert.equal(renderer.start(), true); assert.equal(renderer.start(), false);
+  assert.equal(listeners.size, 2);
+  assert.equal(renderer.renderMath([node]), 1);
+  await renderer.renderMermaid([node], () => false);
+  assert.deepEqual(calls, [node]);
+  renderer.destroy(); renderer.destroy();
+  assert.equal(listeners.size, 0);
+  assert.throws(() => renderer.renderMath([node]), /destroyed/);
 });

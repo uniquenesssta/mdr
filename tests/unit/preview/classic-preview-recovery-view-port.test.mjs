@@ -1,49 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mountClassicPreviewRecoveryViewPort } from '../../../src/features/preview/compatibility/classic-preview-recovery-view-port.js';
-
-function createView() {
-  const calls = [];
-  return {
-    calls,
-    inspect() { calls.push(['inspect']); return { present: true, recovery: false, empty: false }; },
-    recover(options) { calls.push(['recover', options]); return { preserved: true }; },
-    isRecoveryBody(body) { calls.push(['isRecoveryBody', body]); return body === 'recovery'; }
-  };
+import { createPreviewRecoveryView } from '../../../src/features/preview/index.js';
+function fixture(initial = null) {
+  let current = initial;
+  const root = { querySelector: () => current, replaceChildren: body => { current = body; } };
+  const documentRef = { createElement: () => ({ dataset: {}, childElementCount: 0 }) };
+  return { root, documentRef, body: () => current, view: createPreviewRecoveryView({ root, documentRef }) };
 }
-
-test('Atomic 7.13 classic Recovery View port delegates the exact View contract without copying state', () => {
-  const host = {};
-  const view = createView();
-  const mount = mountClassicPreviewRecoveryViewPort(host, view);
-  const port = host.markdownEditorPreviewRecoveryViewPort;
-  assert.deepEqual(port.inspect(), { present: true, recovery: false, empty: false });
-  assert.deepEqual(port.recover({ preserveStable: true }), { preserved: true });
-  assert.equal(port.isRecoveryBody('recovery'), true);
-  assert.deepEqual(view.calls, [
-    ['inspect'],
-    ['recover', { preserveStable: true }],
-    ['isRecoveryBody', 'recovery']
-  ]);
-  mount.destroy();
-  assert.equal(Object.hasOwn(host, 'markdownEditorPreviewRecoveryViewPort'), false);
+test('R16-08 direct Recovery View preserves stable DOM and owns only its recovery replacement', () => {
+  const stable = { dataset: {}, childElementCount: 1 }, h = fixture(stable);
+  assert.deepEqual(h.view.inspect(), { present: true, recovery: false, empty: false });
+  assert.equal(h.view.recover({ preserveStable: true }).body, stable);
+  assert.equal(h.view.isRecoveryBody(stable), false);
+  const recovery = h.view.recover({ message: 'retry' });
+  assert.equal(recovery.body.textContent, 'retry');
+  assert.equal(h.view.isRecoveryBody(recovery.body), true);
+  assert.deepEqual(h.view.inspect(), { present: true, recovery: true, empty: true });
+  h.view.destroy();
 });
-
-test('Atomic 7.13 classic Recovery View port rejects duplicate and malformed ownership', () => {
-  assert.throws(() => mountClassicPreviewRecoveryViewPort(null, createView()), /requires a host/);
-  assert.throws(() => mountClassicPreviewRecoveryViewPort({}, {}), /view\.inspect/);
-  const host = {};
-  const first = mountClassicPreviewRecoveryViewPort(host, createView());
-  assert.throws(() => mountClassicPreviewRecoveryViewPort(host, createView()), /already mounted/);
-  first.destroy();
+test('R16-08 Recovery View rejects malformed DOM dependencies before construction', () => {
+  assert.throws(() => createPreviewRecoveryView(), /preview root/);
+  assert.throws(() => createPreviewRecoveryView({ root: { querySelector() {}, replaceChildren() {} } }), /documentRef/);
 });
-
-test('Atomic 7.13 classic Recovery View port destroy is idempotent and makes retained API terminal', () => {
-  const host = {};
-  const mount = mountClassicPreviewRecoveryViewPort(host, createView());
-  const port = host.markdownEditorPreviewRecoveryViewPort;
-  mount.destroy();
-  mount.destroy();
-  assert.throws(() => port.inspect(), /destroyed/);
-  assert.throws(() => port.recover(), /destroyed/);
+test('R16-08 direct Recovery disposal is terminal and does not replace stable DOM', () => {
+  const stable = { dataset: {}, childElementCount: 1 }, h = fixture(stable);
+  h.view.destroy(); h.view.destroy();
+  assert.equal(h.body(), stable);
+  assert.throws(() => h.view.inspect(), /destroyed/);
+  assert.throws(() => h.view.recover(), /destroyed/);
 });

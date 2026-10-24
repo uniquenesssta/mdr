@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
 import { readFile } from '../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -70,18 +71,8 @@ test('Atomic 5.12 creates the planned document/editor UI responsibility modules'
 });
 
 test('Atomic 5.12 migrated UI markup contains no inline event handlers', async () => {
-  const html = await read('public/compatibility/business-content.html');
-  const migratedMarkup = [
-    extractTemplate(html, 'toolbar'),
-    extractTemplate(html, 'editor'),
-    extractElement(html, 'sidebar-docs-panel', 'section'),
-    extractElement(html, 'document-context-menu'),
-    extractElement(html, 'sidebar-context-menu'),
-    extractElement(html, 'find-modal'),
-    extractElement(html, 'link-modal'),
-    extractElement(html, 'image-modal'),
-    extractElement(html, 'mermaid-modal')
-  ].join('\n');
+  const html = await readCurrentViewMarkup();
+  const migratedMarkup = html;
   assert.doesNotMatch(migratedMarkup, /\son(?:click|change|input|keydown|contextmenu|mouseover|mouseleave)\s*=/i);
 });
 
@@ -110,7 +101,7 @@ test('Atomic 5.12 UI Views remain composed after Atomic 5.13 removes textarea co
   const documentsIndex = await read('src/features/documents/index.js');
   const editorIndex = await read('src/features/editor/index.js');
   const main = await read('src/main.js');
-  const html = await read('public/compatibility/business-content.html');
+  const html = await readCurrentViewMarkup();
 
   for (const name of ['createDocumentListView', 'createDocumentContextMenuView', 'createDocumentTitleView']) {
     assert.match(documentsIndex, new RegExp(name));

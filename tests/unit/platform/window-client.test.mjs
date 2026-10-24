@@ -170,7 +170,7 @@ test('save-before-close remains in the application CloseSavePort and stays absen
   assert.match(closeController, /event\?\.preventDefault\?\.\(\)/);
   assert.doesNotMatch(closeController, /saveCurrentDocumentState|confirmUserAction|localStorage|sessionStorage/);
   assert.doesNotMatch(closeSavePort, /saveCurrentDocumentState|confirmUserAction|WindowPort|localStorage|sessionStorage/);
-  assert.match(main, /mountClassicCloseSavePort\(compatibilityPlatformHost, closeSavePort\)/);
+  assert.doesNotMatch(main, /mountClassicCloseSavePort\(compatibilityPlatformHost, closeSavePort\)/);
 });
 
 test('Stage 3 verification keeps Atomic Task 3.5 after dialog and before drag-drop', async () => {

@@ -9,7 +9,7 @@ import { createImageCommand } from '../../../src/features/editor/commands/image-
 import { createTableCommand } from '../../../src/features/editor/commands/table-command.js';
 import { createMathCommand } from '../../../src/features/editor/commands/math-command.js';
 import { createMermaidCommand } from '../../../src/features/editor/commands/mermaid-command.js';
-import { mountClassicEditorUiCommandPort } from '../../../src/features/editor/compatibility/classic-editor-ui-command-port.js';
+import { createCommandRegistry } from '../../../src/shared/commands/command-registry.js';
 
 function createAdapter(initial = 'hello world') {
   let text = initial;
@@ -136,9 +136,9 @@ test('Atomic 5.12 inline format commands include underline/scripts and bounded i
   assert.equal(colorFixture.text, 'color');
 });
 
-test('Atomic 5.12 scoped Editor UI compatibility command port rejects duplicate authority and cleans host lifecycle', () => {
+test('R16-08 explicit Editor commands reject duplicate authority and dispose registrations without publishing a host property', () => {
   const host = {};
-  const port = mountClassicEditorUiCommandPort(host);
+  const port = createCommandRegistry('Editor commands');
   const calls = [];
   const unregister = port.register({ layout: mode => calls.push(mode) });
   assert.equal(port.has('layout'), true);

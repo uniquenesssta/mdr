@@ -1,38 +1,24 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
-import { mountClassicPreviewRenderCoordinatorPort } from '../../../src/features/preview/compatibility/classic-preview-render-coordinator-port.js';
-
-function fakeCoordinator() {
-  const calls = [];
-  return {
-    calls,
-    createPlan(input) {
-      calls.push(['plan', input]);
-      return { strategy: 'dom-incremental', marker: input.marker };
-    },
-    execute(plan, renderers) {
-      calls.push(['execute', plan, renderers]);
-      return renderers.renderIncremental(plan);
-    }
-  };
-}
-
-test('classic Render Coordinator port mounts one scoped forwarding view', () => {
-  const host = {};
-  const coordinator = fakeCoordinator();
-  const handle = mountClassicPreviewRenderCoordinatorPort(host, coordinator);
-  assert.equal(host.markdownEditorPreviewRenderCoordinatorPort, handle.api);
-  const plan = handle.api.createPlan({ marker: 7 });
-  const result = handle.api.execute(plan, { renderIncremental: value => ({ marker: value.marker }) });
-  assert.deepEqual(result, { marker: 7 });
-  assert.deepEqual(coordinator.calls.map(call => call[0]), ['plan', 'execute']);
-  handle.destroy();
-  assert.equal(host.markdownEditorPreviewRenderCoordinatorPort, undefined);
-  handle.destroy();
+import { createPreviewRenderCoordinator } from '../../../src/features/preview/index.js';
+test('R16-08 direct render coordination keeps the model result and dispatches only the selected renderer', () => {
+  const coordinator = createPreviewRenderCoordinator(), result = { blocks: [{ id: 'one' }] }, calls = [];
+  const plan = coordinator.createPlan({ modelResult: result });
+  assert.equal(plan.strategy, 'dom-incremental');
+  assert.equal(plan.renderResult, result);
+  assert.equal(Object.isFrozen(plan), true);
+  const outcome = coordinator.execute(plan, { renderIncremental(context) { calls.push(context); return 'rendered'; } });
+  assert.equal(outcome, 'rendered');
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].renderResult, result);
+  assert.equal(Object.isFrozen(calls[0]), true);
+  coordinator.destroy();
 });
-
-test('classic Render Coordinator port rejects mount collisions', () => {
-  const host = { markdownEditorPreviewRenderCoordinatorPort: { existing: true } };
-  assert.throws(() => mountClassicPreviewRenderCoordinatorPort(host, fakeCoordinator()), /already mounted/);
+test('R16-08 render coordinator validates dispatch and becomes terminal without any mounted host', () => {
+  const coordinator = createPreviewRenderCoordinator(), plan = coordinator.createPlan({});
+  assert.throws(() => coordinator.execute(null, {}), /render plan/);
+  assert.throws(() => coordinator.execute(plan, {}), /renderIncremental/);
+  coordinator.destroy(); coordinator.destroy();
+  assert.throws(() => coordinator.createPlan({}), /destroyed/);
+  assert.throws(() => coordinator.execute(plan, {}), /destroyed/);
 });

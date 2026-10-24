@@ -151,20 +151,13 @@ test('App Shell modules are presentation-only and do not query business state or
   }
 });
 
-test('compatibility business content is a temporary port and never owns shell creation', async () => {
-  const [markup, portSource, entrySource] = await Promise.all([
-    readText('public/compatibility/business-content.html'),
-    readText('src/ui/compatibility/business-content-port.js'),
-    readText('src/bootstrap/module-entry.js')
-  ]);
-  const slotNames = [...markup.matchAll(/<template\s+data-compat-slot="([^"]+)">/g)].map(match => match[1]);
-  assert.deepEqual(slotNames, [...REQUIRED_REFS, 'ports']);
-  assert.doesNotMatch(markup, /<div class="app">|<nav class="menu-bar"|<div class="editor-toolbar"|<div class="workspace"|<aside class="sidebar"|<div class="statusbar"/);
-  assert.doesNotMatch(portSource, /createUI|app-shell-view|shell\//);
-  assert.match(portSource, /createCompatibilityBusinessContentPort/);
-  assert.match(portSource, /slots\[name\]/);
-  assert.match(portSource, /compatibility-business-ports/);
-  assert.match(entrySource, /ui = createUI\(root\)/);
-  assert.match(entrySource, /createCompatibilityBusinessContentPort\(root, ui\)/);
-  assert.doesNotMatch(entrySource, /mountCurrentShell|current-shell/);
+test('R16-08 feature composition uses the existing shell and never constructs another shell', async () => {
+  const entry = await readText('src/bootstrap/module-entry.js');
+  const composition = await readText('src/bootstrap/workspace-content.js');
+  assert.match(entry, /const ui = own\(createUI\(root\)\)/);
+  assert.match(entry, /own\(createWorkspaceContent\(ui\)\)/);
+  assert.doesNotMatch(entry, /compatibility-business-ports|business-content\.html|fetchImpl/);
+  assert.doesNotMatch(composition, /createUI|app-shell-view|shell\//);
+  for (const feature of ['menu','editor','sidebar','preview','persistence','documents','import']) assert.match(composition, new RegExp('features/' + feature + '/index\\.js'));
+  assert.match(composition, /lifetime\.own\(\(\) => view\.destroy\(\)\)/);
 });

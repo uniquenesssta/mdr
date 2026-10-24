@@ -21,7 +21,7 @@ const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
       if (!badge) return;
       const resolved = corePreviewCommandPort.normalizePerformanceMode(mode === 'standard' ? 'full' : mode);
       const labels = { full: '完整预览', virtual: '虚拟预览', chapter: '当前章节' };
-      const shouldShow = resolved !== 'full' || coreSettingsStorePort.get('previewPerformanceMode') !== 'auto' || editor.textLength >= corePreviewBehaviorThresholds.mode.badgeChars;
+      const shouldShow = resolved !== 'full' || coreSettingsStorePort.get('previewPerformanceMode') !== 'auto' || editor.getTextLength() >= corePreviewBehaviorThresholds.mode.badgeChars;
       badge.hidden = !shouldShow;
       badge.textContent = labels[resolved] || labels.full;
       badge.dataset.mode = resolved;
@@ -50,11 +50,11 @@ const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
     function updateCollapseBtnLabels() {
       const editorBtn = document.getElementById('editor-collapse-btn');
       const previewBtn = document.getElementById('preview-collapse-btn');
-      if (editorBtn) editorBtn.title = coreLayoutStatePort.editorCollapsed ? t('expandEditor') : t('collapseEditor');
-      if (previewBtn) previewBtn.title = coreLayoutStatePort.previewCollapsed ? t('expandPreview') : t('collapsePreview');
+      if (editorBtn) editorBtn.title = coreLayoutStatePort.snapshot.split.editorCollapsed ? t('expandEditor') : t('collapseEditor');
+      if (previewBtn) previewBtn.title = coreLayoutStatePort.snapshot.split.previewCollapsed ? t('expandPreview') : t('collapsePreview');
     }
 
-    function updateLargeDocumentMode(length = editor.textLength) {
+    function updateLargeDocumentMode(length = editor.getTextLength()) {
       document.body.classList.toggle('large-document', length >= LARGE_DOCUMENT_CHARS);
       document.body.classList.toggle('ultra-large-document', length >= ULTRA_LARGE_DOCUMENT_CHARS);
     }

@@ -1,33 +1,20 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { PREVIEW_BEHAVIOR_THRESHOLDS, resolvePreviewMode } from '../../../src/features/preview/index.js';
+import { PREVIEW_BEHAVIOR_THRESHOLDS as canonical } from '../../../src/features/preview/pipeline/preview-thresholds.js';
 
-import {
-  PREVIEW_BEHAVIOR_THRESHOLDS,
-  mountClassicPreviewThresholdsPort
-} from '../../../src/features/preview/index.js';
-
-test('Atomic 7.1 classic threshold port exposes the one frozen owner without copying state', () => {
-  const target = {};
-  const mounted = mountClassicPreviewThresholdsPort(target);
-  const descriptor = Object.getOwnPropertyDescriptor(target, 'markdownEditorPreviewThresholdsPort');
-
-  assert.equal(descriptor.enumerable, false);
-  assert.equal(descriptor.writable, false);
-  assert.equal(mounted.api.snapshot, PREVIEW_BEHAVIOR_THRESHOLDS);
-  assert.equal(target.markdownEditorPreviewThresholdsPort.snapshot, PREVIEW_BEHAVIOR_THRESHOLDS);
-
-  assert.throws(
-    () => mountClassicPreviewThresholdsPort(target),
-    /already mounted/
-  );
-
-  mounted.destroy();
-  mounted.destroy();
-  assert.equal(Object.hasOwn(target, 'markdownEditorPreviewThresholdsPort'), false);
-  assert.throws(() => mounted.api.snapshot, /destroyed/);
+test('R16-08 public threshold capability exposes the one recursively frozen owner', () => {
+  assert.equal(PREVIEW_BEHAVIOR_THRESHOLDS, canonical);
+  const check = value => { assert.equal(Object.isFrozen(value), true); for (const child of Object.values(value)) if (child && typeof child === 'object') check(child); };
+  check(canonical);
+  assert.throws(() => { canonical.mode.virtualChars = 0; }, TypeError);
 });
 
-test('Atomic 7.1 classic threshold port rejects invalid targets', () => {
-  assert.throws(() => mountClassicPreviewThresholdsPort(null), TypeError);
-  assert.throws(() => mountClassicPreviewThresholdsPort(undefined), TypeError);
+test('R16-08 the direct resolver preserves threshold boundaries without a mounted DOM object', () => {
+  const threshold = canonical.mode;
+  assert.equal(resolvePreviewMode({}, threshold.virtualChars - 1, 0), 'full');
+  assert.equal(resolvePreviewMode({}, threshold.virtualChars, 0), 'virtual');
+  assert.equal(resolvePreviewMode({}, threshold.chapterChars, 0), 'chapter');
+  assert.equal(resolvePreviewMode({}, 0, threshold.virtualBlocks), 'virtual');
+  assert.equal(resolvePreviewMode({}, 0, threshold.chapterBlocks), 'chapter');
 });

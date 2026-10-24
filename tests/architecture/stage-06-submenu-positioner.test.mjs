@@ -6,7 +6,7 @@ import { access } from 'node:fs/promises';
 test('Atomic 6.11 owns submenu geometry outside MenuView and removes the classic implementation path', async () => {
   const [positioner, port, menuView, menuIndex, moduleEntry, core, events] = await Promise.all([
     readFile('src/features/menu/submenu-positioner.js', 'utf8'),
-    readFile('src/features/menu/compatibility/classic-submenu-positioner-port.js', 'utf8'),
+    readFile('src/features/menu/index.js', 'utf8'),
     readFile('src/features/menu/menu-view.js', 'utf8'),
     readFile('src/features/menu/index.js', 'utf8'),
     readFile('src/bootstrap/module-entry.js', 'utf8'),
@@ -25,12 +25,12 @@ test('Atomic 6.11 owns submenu geometry outside MenuView and removes the classic
 
   assert.doesNotMatch(menuView, /getBoundingClientRect|innerWidth|innerHeight|setTimeout|is-submenu-open/);
   assert.match(menuIndex, /createSubmenuPositioner/);
-  assert.match(menuIndex, /mountClassicSubmenuPositionerPort/);
-  assert.match(port, /markdownEditorSubmenuPositionerPort/);
+  assert.doesNotMatch(menuIndex, /mountClassicSubmenuPositionerPort/);
+  assert.doesNotMatch(port, /markdownEditorSubmenuPositionerPort/);
   assert.doesNotMatch(port, /getBoundingClientRect|setTimeout|localStorage/);
 
   assert.match(moduleEntry, /createSubmenuPositioner/);
-  assert.match(moduleEntry, /mountClassicSubmenuPositionerPort/);
+  assert.doesNotMatch(moduleEntry, /mountClassicSubmenuPositionerPort/);
   assert.match(moduleEntry, /submenuPositioner\.start\(\)/);
   assert.match(core, /coreSubmenuPositionerPort/);
   assert.match(core, /coreSubmenuPositionerPort\.closeAll\(\)/);

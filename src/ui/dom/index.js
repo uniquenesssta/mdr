@@ -3,3 +3,4 @@ export { createFocusScope } from './focus-scope.js';
 export { collectRequiredRefs, isElementRef, requireElementRef } from './required-refs.js';
 export { createSafeElement } from './safe-element.js';
 export { createTransitionVisibility } from './transition-visibility.js';
+export { mountStaticContent } from './static-content.js';

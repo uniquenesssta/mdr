@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { createImageAssetPreloader, EXPORT_IMAGE_PLACEHOLDER, mountClassicImageAssetPort,
-  createExportTaskController, isExportCancelledError } from '../src/features/export/index.js';
+import { createImageAssetPreloader, EXPORT_IMAGE_PLACEHOLDER, createExportTaskController, isExportCancelledError } from '../src/features/export/index.js';
 import { createExportVmHost } from './support/export-vm-host.mjs';
 
 const PNG = 'data:image/png;base64,iVBORw0KGgo=';
@@ -190,14 +189,13 @@ test('R14-14 independent destroy interrupts decode, observes late rejection and 
   await assert.rejects(h.owner.prepare({ root: root([]) }), cancelled('destroyed')); h.clean();
 });
 
-test('R14-14 scoped port is read-only, independently removable and preserves replacement properties', async () => {
-  const h = fixture(), host = {}, mount = mountClassicImageAssetPort(host, h.owner);
-  assert.equal(Object.isFrozen(mount.port), true); assert.equal(mount.port.placeholder, EXPORT_IMAGE_PLACEHOLDER);
-  assert.throws(() => mountClassicImageAssetPort(host, h.owner), /already mounted/);
-  Object.defineProperty(host, 'markdownEditorImageAssetPort', { value: 'replacement', configurable: true });
-  mount.destroy(); mount.destroy(); assert.equal(host.markdownEditorImageAssetPort, 'replacement');
-  assert.throws(() => mount.port.prepare({ root: root([]) }), /destroyed/);
-  assert.equal((await h.owner.prepare({ root: root([]) })).total, 0); h.clean(); h.owner.destroy();
+test('R16-08 direct Image Asset capability is immutable and terminal without mounting a host object', async () => {
+  const h = fixture(), host = {};
+  assert.equal(Object.isFrozen(h.owner), true); assert.equal(h.owner.placeholder, EXPORT_IMAGE_PLACEHOLDER);
+  assert.equal((await h.owner.prepare({ root: root([]) })).total, 0);
+  h.owner.destroy(); h.owner.destroy();
+  assert.equal(Object.hasOwn(host, 'markdownEditorImageAssetPort'), false);
+  await assert.rejects(h.owner.prepare({ root: root([]) }), error => isExportCancelledError(error) && error.reason === 'destroyed'); h.clean();
 });
 
 test('R14-14 classic command uses the public asset boundary before measurement and encoding', async () => {
@@ -208,8 +206,7 @@ test('R14-14 classic command uses the public asset boundary before measurement a
   assert.match(source, /owners\[format\]\[method\]\(\{request\}\)/);
   const ownerSource = readFileSync(new URL('../src/features/export/formats/image/image-exporter.js', import.meta.url), 'utf8');
   assert.match(ownerSource, /assets\.prepare\(\{ root: capture\.root, task, isCurrent:/);
-  const host = h.context.document.getElementById('compatibility-business-ports');
-  host.markdownEditorPresentationPort.loadDomToImage = async () => ({ async toPng() {
+  h.presentation.loadDomToImage = async () => ({ async toPng() {
     prepared = true; assert.equal(h.assetTimers.size, 0); return PNG;
   } });
   await h.invoke('renderExportImagePreview'); assert.equal(prepared, true); assert.equal(h.taskPort.getSnapshot().activeTask, null);
@@ -241,7 +238,7 @@ for (const boundary of ['fallback', 'success']) {
       set src(value) { this.value = value; if (value) queueMicrotask(() => boundary === 'fallback' ? this.onerror?.() : this.onload?.()); }
       get src() { return this.value; } };
     let captured;
-    h.context.document.getElementById('compatibility-business-ports').markdownEditorPresentationPort.loadDomToImage = async () => ({ async toPng(_root, options) {
+    h.presentation.loadDomToImage = async () => ({ async toPng(_root, options) {
       assert.equal(_root, clone); assert.equal(_root.contains(item), true); assert.equal(loaders.length, 1);
       captured = item.src; assert.equal(h.taskPort.getSnapshot().activeTask.cancelable, false);
       assert.equal(options.imagePlaceholder, EXPORT_IMAGE_PLACEHOLDER); assert.equal(h.assetTimers.size, 0); return PNG;

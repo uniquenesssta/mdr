@@ -16,8 +16,7 @@ test('Atomic 6.13 exposes the responsibility-split Window feature through one pu
     'createWindowControlsView',
     'createWindowDragRegion',
     'createWindowCloseController',
-    'createWindowController',
-    'mountClassicCloseSavePort'
+    'createWindowController'
   ]) assert.match(entry, new RegExp(symbol));
 
   for (const path of [
@@ -26,8 +25,7 @@ test('Atomic 6.13 exposes the responsibility-split Window feature through one pu
     'src/features/window/window-controls-view.js',
     'src/features/window/window-drag-region.js',
     'src/features/window/window-close-controller.js',
-    'src/features/window/window-controller.js',
-    'src/features/window/compatibility/classic-close-save-port.js'
+    'src/features/window/window-controller.js'
   ]) assert.equal(await exists(path), true, `${path} must exist`);
 });
 
@@ -37,7 +35,7 @@ test('Atomic 6.13 removes classic Window authority while preserving close-save p
     read('src/main.js'),
     read('src/features/window/window-close-controller.js'),
     read('src/features/window/close-save-port.js'),
-    read('src/features/window/compatibility/classic-close-save-port.js'),
+    read('src/features/window/index.js'),
     read('src/features/persistence/application/close-save-controller.js')
   ]);
   for (const token of [
@@ -48,11 +46,11 @@ test('Atomic 6.13 removes classic Window authority while preserving close-save p
   assert.match(persistence, /closeSavePort\.register/);
   assert.match(persistence, /await saveController\.save\(\{[\s\S]*?forceSnapshot: true/);
   assert.match(persistence, /await decideAfterFailure\(error\)/);
-  assert.match(main, /mountClassicCloseSavePort\(compatibilityPlatformHost, closeSavePort\)/);
+  assert.doesNotMatch(main, /mountClassicCloseSavePort|compatibilityPlatformHost/);
   assert.match(closeController, /closeSave\.prepareClose\(\)/);
   assert.doesNotMatch(closeController, /saveCurrentDocumentState|confirmUserAction|localStorage|sessionStorage/);
   assert.doesNotMatch(closeSavePort, /WindowPort|saveCurrentDocumentState|confirmUserAction|localStorage|sessionStorage/);
-  assert.match(classicPort, /register\(handler\)/);
+  assert.match(closeSavePort, /register\(nextHandler\)/);
   assert.doesNotMatch(classicPort, /prepareClose|requestClose|forceClose|saveCurrentDocumentState/);
 });
 

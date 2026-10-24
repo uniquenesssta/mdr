@@ -3,7 +3,8 @@ import { join } from 'node:path';
 
 const OUTPUT_DIRECTORY = 'artifacts/stage-03';
 const HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT = 174;
-const STAGE_3_PLATFORM_MODULE_COUNT = 36;
+const STAGE_3_PLATFORM_MODULE_COUNT = 36; // Historical accepted surface.
+const CURRENT_PLATFORM_MODULE_COUNT = STAGE_3_PLATFORM_MODULE_COUNT - 1; // R16-08 retires only its bridge.
 const fixture = JSON.parse(await readFile('tests/architecture/fixtures/production-modules.json', 'utf8'));
 const productionPaths = fixture.modules.map(record => record[0]);
 const platformModules = productionPaths.filter(path => path.startsWith('src/platform/')).sort();
@@ -35,15 +36,15 @@ const tauriImportsOutsidePlatform = productionSources
   .filter(([path, source]) => source.includes('@tauri-apps/') && !path.startsWith('src/platform/desktop/'))
   .map(([path]) => path);
 const main = await readFile('src/main.js', 'utf8');
-const bridge = await readFile('src/platform/compatibility/classic-platform-port.js', 'utf8');
+const entry = await readFile('src/bootstrap/module-entry.js', 'utf8');
 const workflow = await readFile('.github/workflows/stage-03-atomic.yml', 'utf8');
 const windowsAutomation = await readFile('tests/e2e/windows/run-window-automation.mjs', 'utf8');
 const classicCallers = Object.fromEntries(await Promise.all(
-  ['public/app/core.js', 'public/app/events.js', 'public/app/web-clipper.js']
+  ['src/features/documents/ui/document-workspace.js', 'src/bootstrap/application-events.js', 'src/bootstrap/workspace-startup.js']
     .map(async path => [path, await readFile(path, 'utf8')])
 ));
 const esmCallers = Object.fromEntries(await Promise.all(
-  ['src/features/export/application/export-controller.js', 'src/features/export/application/export-file-writer.js', 'src/runtime/link-preview.js', 'src/runtime/performance.js', 'src/sidebar/folder-file-tree.js', 'src/storage/native-document-store.js', 'src/editor/hybrid/image-source.js']
+  ['src/features/export/application/export-controller.js', 'src/features/export/application/export-file-writer.js', 'src/features/link-preview/link-preview-controller.js', 'src/features/telemetry/browser-telemetry.js', 'src/features/sidebar/folder-tree/folder-tree-controller.js', 'src/features/persistence/native-document-store/native-document-store.js', 'src/features/hybrid-editor/image/image-source-resolver.js']
     .map(async path => [path, await readFile(path, 'utf8')])
 ));
 
@@ -53,23 +54,22 @@ if (!esmCallers['src/features/export/application/export-file-writer.js'].include
 if (!esmCallers['src/features/export/application/export-file-writer.js'].includes('platform.files.writeBinary')) process.exit(1);
 if (nativeGlobalOwners.length) process.exit(1);
 if (tauriImportsOutsidePlatform.length) process.exit(1);
-if (platformModules.length !== STAGE_3_PLATFORM_MODULE_COUNT) process.exit(1);
+if (platformModules.length !== CURRENT_PLATFORM_MODULE_COUNT) process.exit(1);
 if (productionPaths.includes('src/runtime/tauri.js')) process.exit(1);
-if (!productionPaths.includes('src/platform/compatibility/classic-platform-port.js')) process.exit(1);
-if (!main.includes('createPlatform({') || !main.includes('mountClassicPlatformPort')) process.exit(1);
+if (productionPaths.includes('src/platform/compatibility/classic-platform-port.js')) process.exit(1);
+if (!entry.includes('createPlatform({') || main.includes('mountClassicPlatformPort')) process.exit(1);
 if (/window\.markdownEditorPlatform|window\.platform\s*=|markdownEditorNative/.test(main)) process.exit(1);
-if (!bridge.includes('call(portName, methodName') || !bridge.includes('supports(capability)')) process.exit(1);
-if (/\bwindow\.|\bglobalThis\./.test(bridge)) process.exit(1);
+if (!entry.includes('startApplication({ platform,')) process.exit(1);
 for (const source of Object.values(classicCallers)) {
-  if (!source.includes('compatibility-business-ports') || !source.includes('markdownEditorPlatformPort')) process.exit(1);
+  if (source.includes('compatibility-business-ports') || source.includes('markdownEditorPlatformPort')) process.exit(1);
   if (source.includes('markdownEditorNative')) process.exit(1);
 }
 for (const source of Object.values(esmCallers)) if (source.includes('markdownEditorNative')) process.exit(1);
 if (!workflow.includes('Verify Atomic Task 3.12 final Platform cutover')) process.exit(1);
 if (!workflow.includes('03-12-architecture-scan.json')) process.exit(1);
 if (windowsAutomation.includes('markdownEditorNative')) process.exit(1);
-if (!windowsAutomation.includes("markdownEditorPlatformPort.call('window', 'forceClose')")) process.exit(1);
-if (!windowsAutomation.includes("markdownEditorPlatformPort.call('window', 'isMaximized')")) process.exit(1);
+if (!windowsAutomation.includes("markdownEditorPlatformPort.window.forceClose()")) process.exit(1);
+if (!windowsAutomation.includes("markdownEditorPlatformPort.window.isMaximized()")) process.exit(1);
 
 await mkdir(OUTPUT_DIRECTORY, { recursive: true });
 await writeFile(`${OUTPUT_DIRECTORY}/03-12-platform-cutover-evidence.json`, `${JSON.stringify({
@@ -94,7 +94,7 @@ await writeFile(`${OUTPUT_DIRECTORY}/03-12-platform-cutover-evidence.json`, `${J
     'no-production-js-or-mjs-module-references-window-markdown-editor-native',
     'no-business-module-imports-tauri-directly',
     'main-creates-one-platform-and-does-not-export-it-on-window',
-    'classic-scripts-use-a-scoped-destroyable-compatibility-host-bridge',
+    'feature-consumers-use-explicit-injected-owners-without-a-dom-service-host',
     'esm-consumers-receive-responsibility-focused-platform-ports',
     'native-drag-drop-file-classification-remains-in-application-code-with-rust-owned-mime-reading',
     'windows-native-automation-exercises-final-window-port-instead-of-the-deleted-facade',

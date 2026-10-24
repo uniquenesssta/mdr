@@ -4,8 +4,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   SAVE_STATUS_STATES,
-  createSaveStatusStore,
-  mountClassicSaveStatusStorePort
+  createSaveStatusStore
 } from '../src/features/persistence/index.js';
 
 const root = new URL('../', import.meta.url);
@@ -99,32 +98,31 @@ test('Atomic 10.1 rejects invalid status data and destroy is an irreversible ter
   assert.throws(() => store.subscribe(() => {}), /destroyed/);
 });
 
-test('Atomic 10.1 scoped classic port delegates to one Store and owns no duplicate status state', () => {
+test('R16-08 direct SaveStatus capability has one snapshot authority and independently disposable subscriptions', () => {
   const target = {};
   const store = createSaveStatusStore();
-  const mount = mountClassicSaveStatusStorePort(target, store);
-  const api = target.markdownEditorSaveStatusStorePort;
+  const api = store;
   assert.equal(api.snapshot, store.snapshot);
   assert.equal(Object.prototype.propertyIsEnumerable.call(target, 'markdownEditorSaveStatusStorePort'), false);
   const observed = [];
   const unsubscribe = api.subscribe(event => observed.push(event.current.state));
-  api.setState('saving', '正在手动保存…');
+  api.setState('saving', { message: '正在手动保存…' });
   assert.equal(store.snapshot.state, 'saving');
   assert.equal(store.snapshot.message, '正在手动保存…');
   assert.deepEqual(observed, ['saving']);
   unsubscribe();
-  mount.destroy();
-  mount.destroy();
+  assert.equal(store.snapshot.state, 'saving', 'unsubscribing must preserve Store state');
+  store.destroy();
+  store.destroy();
   assert.equal(Object.hasOwn(target, 'markdownEditorSaveStatusStorePort'), false);
   assert.throws(() => api.snapshot, /destroyed/);
-  assert.equal(store.snapshot.state, 'saving', 'destroying the bridge must not destroy or copy Store state');
   store.destroy();
 });
 
 test('Atomic 10.1 composition gives status authority to Persistence and UI only subscribes it', async () => {
   const [storeSource, portSource, entry, main, core, exportSource, fixtureText] = await Promise.all([
     source('src/features/persistence/state/save-status-store.js'),
-    source('src/features/persistence/compatibility/classic-save-status-store-port.js'),
+    source('src/features/persistence/ui/workspace-status.js'),
     source('src/features/persistence/index.js'),
     source('src/main.js'),
     source('public/app/core.js'),
@@ -133,15 +131,15 @@ test('Atomic 10.1 composition gives status authority to Persistence and UI only 
   ]);
   assert.doesNotMatch(storeSource, /\bwindow\b|\bdocument\b|localStorage|sessionStorage|setTimeout|setInterval|requestAnimationFrame|Worker\s*\(/);
   assert.match(entry, /createSaveStatusStore/);
-  assert.match(entry, /mountClassicSaveStatusStorePort/);
-  assert.match(portSource, /markdownEditorSaveStatusStorePort/);
+  assert.doesNotMatch(entry, /mountClassicSaveStatusStorePort/);
+  assert.match(portSource, /coreSaveStatusStorePort/);
   assert.doesNotMatch(portSource, /window\.markdownEditorSaveStatus/);
   assert.doesNotMatch(portSource, /let\s+snapshot\b|const\s+snapshot\s*=/);
 
   assert.match(main, /createSaveStatusStore\(\)/);
-  assert.match(main, /mountClassicSaveStatusStorePort\(compatibilityPlatformHost, saveStatusStore\)/);
+  assert.match(main, /coreSaveStatusStorePort: saveStatusStore/);
   assert.match(main, /saveStatusStore\.consumePersistenceEvent\(event\)/);
-  assert.match(main, /saveStatusStorePort\.destroy\(\)/);
+  assert.doesNotMatch(main, /saveStatusStorePort\.destroy\(\)/);
   assert.match(main, /saveStatusStore\.destroy\(\)/);
 
   assert.match(core, /coreSaveStatusStorePort/);
@@ -159,6 +157,6 @@ test('Atomic 10.1 composition gives status authority to Persistence and UI only 
   for (const path of [
     'src/features/persistence/index.js',
     'src/features/persistence/state/save-status-store.js',
-    'src/features/persistence/compatibility/classic-save-status-store-port.js'
+    'src/features/persistence/ui/workspace-status.js'
   ]) assert.ok(paths.has(path), `production inventory must classify ${path}`);
 });

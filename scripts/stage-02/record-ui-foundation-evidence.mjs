@@ -5,14 +5,19 @@ import { collectInlineEvents } from '../architecture/source-analysis.mjs';
 import { collectIconReferences, inspectSvgSprite } from './icon-sprite/inspect-svg-sprite.mjs';
 import * as iconView from '../../src/ui/components/icon-view.js';
 import { ModalShell } from '../../src/ui/components/modal-shell.js';
-import * as uiCompatibility from '../../src/ui/compatibility/index.js';
+import { readCurrentViewMarkup } from '../../tests/support/current-view-markup.mjs';
 import * as domPrimitives from '../../src/ui/dom/index.js';
 
 await mkdir('artifacts/stage-02', { recursive: true });
 
 const readText = path => readFile(path, 'utf8');
 const frozenDomInventory = JSON.parse(await readText('tests/ui/fixtures/dom-asset-inventory.json'));
-const CURRENT_COMPATIBILITY_INLINE_EVENT_CAP = 158;
+const CURRENT_COMPATIBILITY_INLINE_EVENT_CAP = 0;
+const retirement = JSON.parse(await readText('docs/audit/r16-08-compatibility-retirements.json'));
+const historicalStage2OwnedModulePaths = retirement.historicalUiModules;
+for (const row of retirement.retiredModules.filter(row => row.path.startsWith('src/ui/compatibility/') || row.path === 'public/compatibility/business-content.html')) {
+  await access(row.path).then(() => { throw new Error('Retired UI returned: ' + row.path); }, error => { if(error.code !== 'ENOENT') throw error; });
+}
 const moduleFixture = JSON.parse(await readText('tests/architecture/fixtures/production-modules.json'));
 const styleRecords = moduleFixture.modules.filter(record => record[0].startsWith('src/styles/'));
 const stylePaths = styleRecords.map(record => record[0]);
@@ -82,7 +87,7 @@ const expectedStyleEntry = `${expectedStyleImports.map(path => `@import '${path}
 
 const [indexSource, compatibilityContentSource, spriteSource, styleEntrySource, tokenSource, lightThemeSource, darkThemeSource] = await Promise.all([
   readText('index.html'),
-  readText('public/compatibility/business-content.html'),
+  readCurrentViewMarkup(),
   readText('public/assets/icons.svg'),
   readText('src/styles/index.css'),
   readText('src/styles/foundation/tokens.css'),
@@ -148,10 +153,13 @@ function collectRuleHeaders(source) {
 }
 
 const indexInventory = buildHtmlInventory(indexSource);
-const inlineEvents = collectInlineEvents('public/compatibility/business-content.html', compatibilityContentSource)
+const inlineEvents = collectInlineEvents('src/bootstrap/workspace-content.js', compatibilityContentSource)
   .reduce((sum, record) => sum + record.count, 0);
 const sprite = inspectSvgSprite(spriteSource);
 const shellIconReferences = collectIconReferences(compatibilityContentSource);
+const clipperIcons = [...(await readText('src/features/import/web-clipper/web-clipper-view.js')).matchAll(/createIconView\(documentRef, '(icon-[a-z-]+)'/g)].map(match=>match[1]);
+const exportIcons = [...(await readText('src/features/export/ui/export-image-dialog-view.js')).matchAll(/createIcon\(doc,'(icon-[a-z-]+)'/g)].map(match=>match[1]);
+if(clipperIcons.length !== 2 || exportIcons.length !== 2 || ![...clipperIcons,...exportIcons].every(id=>sprite.ids.includes(id))) throw new Error('Feature icon ownership drifted.');
 const compatibilitySlots = [...compatibilityContentSource.matchAll(/<template\s+data-compat-slot="([^"]+)">/g)].map(match => match[1]);
 const collectTokenNames = source => [...source.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map(match => match[1]);
 const baseTokenNames = collectTokenNames(tokenSource);
@@ -177,13 +185,14 @@ if (indexInventory.summary.inlineEventCount !== 0) throw new Error('Minimal inde
 if (frozenDomInventory.summary.inlineEventCount !== 184) throw new Error('Frozen legacy HTML baseline drifted.');
 if (inlineEvents > CURRENT_COMPATIBILITY_INLINE_EVENT_CAP) throw new Error(`Compatibility inline-event debt regressed above ${CURRENT_COMPATIBILITY_INLINE_EVENT_CAP}: ${inlineEvents}`);
 if (sprite.symbolCount !== 35 || sprite.uniqueSymbolCount !== 35 || sprite.duplicates.length || sprite.invalidIds.length || sprite.missingViewBoxes.length || sprite.forbiddenMarkup) throw new Error('SVG sprite contract drifted.');
-if (shellIconReferences.length !== 47 || !shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) throw new Error('Icon references drifted.');
-if (JSON.stringify(compatibilitySlots) !== JSON.stringify(['menu','toolbar','sidebar','editor','preview','status','overlay','ports'])) throw new Error('Compatibility slot contract drifted.');
-if (stage2OwnedModulePaths.length !== 72 || new Set(stage2OwnedModulePaths).size !== 72) throw new Error(`Unexpected Stage 2-owned module count: ${stage2OwnedModulePaths.length}`);
-if (architectureModules.appShell.length !== 8 || architectureModules.domPrimitives.length !== 6 || architectureModules.uiComponents.length !== 2 || architectureModules.uiCompatibility.length !== 4) throw new Error('UI architecture counts drifted.');
+if (shellIconReferences.length !== 43 || !shellIconReferences.every(record => record.href === `/assets/icons.svg#${record.iconId}`)) throw new Error('Icon references drifted.');
+if (compatibilitySlots.length) throw new Error('Retired compatibility template returned.');
+if (historicalStage2OwnedModulePaths.length !== 72 || new Set(historicalStage2OwnedModulePaths).size !== 72) throw new Error('Historical Stage 2 provenance drifted.');
+if (stage2OwnedModulePaths.length !== 69 || new Set(stage2OwnedModulePaths).size !== 69) throw new Error(`Unexpected Stage 2-owned module count: ${stage2OwnedModulePaths.length}`);
+if (architectureModules.appShell.length !== 8 || architectureModules.domPrimitives.length !== 7 || architectureModules.uiComponents.length !== 2 || architectureModules.uiCompatibility.length !== 0) throw new Error('UI architecture counts drifted.');
 if (styleEntryModules.length !== 1 || layerModules.foundation.length !== 5 || layerModules.themes.length !== 2 || layerModules.shell.length !== 6 || layerModules.layout.length !== 6 || layerModules.components.length !== 12 || layerModules.features.length !== 20) throw new Error('Style layer counts drifted.');
-if (Object.keys(domPrimitives).sort().join(',') !== 'collectRequiredRefs,createEventScope,createFocusScope,createSafeElement,createTransitionVisibility,isElementRef,requireElementRef') throw new Error('DOM primitive exports drifted.');
-if (typeof ModalShell !== 'function' || Object.keys(uiCompatibility).sort().join(',') !== 'COMPATIBILITY_MODAL_CLOSE_EVENT,COMPATIBILITY_MODAL_OPEN_EVENT,createCompatibilityBusinessContentPort,mountCompatibilityModalShells') throw new Error('Modal contract drifted.');
+if (Object.keys(domPrimitives).sort().join(',') !== 'collectRequiredRefs,createEventScope,createFocusScope,createSafeElement,createTransitionVisibility,isElementRef,mountStaticContent,requireElementRef') throw new Error('DOM primitive exports drifted.');
+if (typeof ModalShell !== 'function') throw new Error('Modal contract drifted.');
 if (styleEntrySource !== expectedStyleEntry) throw new Error('Style entry ordering drifted.');
 if (styleEntrySource.includes('./main.css')) throw new Error('Consolidated stylesheet remains imported.');
 await access('src/styles/main.css').then(() => { throw new Error('Consolidated stylesheet still exists.'); }, () => {});
@@ -239,6 +248,8 @@ const common = Object.freeze({
   currentStage2State: '2.11-completed',
   nextStage: hasStage3PlatformModules ? 'stage-03-started' : 'stage-03-not-started',
   stage2OwnedModuleCount: stage2OwnedModulePaths.length,
+  historicalStage2OwnedModuleCount: historicalStage2OwnedModulePaths.length,
+  retirementEvidence: 'docs/audit/r16-08-compatibility-retirements.json',
   productionModuleCount: moduleFixture.modules.length,
   dependencyAuditDecision: Object.freeze({
     observed: '1 low / 1 high',
@@ -257,7 +268,7 @@ await record('02-02-minimal-index-evidence.json', {
   index: indexInventory.source,
   indexSummary: indexInventory.summary,
   compatibilityContent: {
-    path: 'public/compatibility/business-content.html',
+    path: 'src/bootstrap/workspace-content.js', retiredPath: 'public/compatibility/business-content.html',
     inlineEvents,
     inlineEventCap: CURRENT_COMPATIBILITY_INLINE_EVENT_CAP,
     historicalBaselineInlineEvents: frozenDomInventory.summary.inlineEventCount,
@@ -269,6 +280,8 @@ await record('02-03-svg-sprite-evidence.json', {
   scope: 'external-svg-sprite-and-generic-icon-view',
   sprite: { path: 'public/assets/icons.svg', symbolCount: sprite.symbolCount, ids: sprite.ids },
   compatibilityIconReferences: shellIconReferences.length,
+  dynamicFeatureIconReferences: [...clipperIcons, ...exportIcons],
+  totalFeatureIconReferences: shellIconReferences.length + clipperIcons.length + exportIcons.length,
   iconView: { path: 'src/ui/components/icon-view.js', exports: Object.keys(iconView).sort(), spriteUrl: iconView.ICON_SPRITE_URL }
 });
 await record('02-04-app-shell-evidence.json', {
@@ -287,9 +300,10 @@ await record('02-05-dom-primitives-evidence.json', {
 });
 await record('02-06-modal-shell-evidence.json', {
   node: 'stage-02/02-06',
-  scope: 'generic-modal-shell-and-compatibility-takeover',
+  scope: 'generic-modal-shell-and-direct-feature-ownership',
   component: 'src/ui/components/modal-shell.js',
-  compatibilityBridge: 'src/ui/compatibility/mount-modal-shells.js'
+  retiredCompatibilityBridge: 'src/ui/compatibility/mount-modal-shells.js',
+  compatibilityBridgeRetired: true
 });
 await record('02-07-css-tokens-evidence.json', {
   node: 'stage-02/02-07',
@@ -334,11 +348,11 @@ await record('02-09-style-layering-evidence.json', {
 
 await record('02-11-shell-cutover-evidence.json', {
   node: 'stage-02/02-11',
-  scope: 'single-production-app-shell-with-temporary-business-content-port',
+  scope: 'single-production-app-shell-with-feature-owned-content',
   productionShellOwner: 'src/ui/create-ui.js',
   productionEntry: 'src/bootstrap/module-entry.js',
-  compatibilityPublicEntry: 'src/ui/compatibility/index.js',
-  compatibilityContent: 'public/compatibility/business-content.html',
+  compatibilityPublicEntry: null, contentOwner: 'src/bootstrap/workspace-content.js',
+  compatibilityContent: null, retiredContent: 'public/compatibility/business-content.html',
   removedOldShellPaths: [
     'public/compatibility/current-shell.html',
     'src/ui/compatibility/mount-current-shell.js'

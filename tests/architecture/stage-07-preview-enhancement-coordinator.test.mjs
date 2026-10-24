@@ -11,11 +11,11 @@ test('Atomic 7.12 keeps one taskbook Preview Enhancement Coordinator pipeline ow
   assert.ok(entries.includes('preview-enhancement-coordinator.js'));
   const [entry, coordinator, port] = await Promise.all([
     source('src/features/preview/index.js'), source('src/features/preview/pipeline/preview-enhancement-coordinator.js'),
-    source('src/features/preview/compatibility/classic-preview-enhancement-coordinator-port.js')
+    source('src/features/preview/pipeline/preview-enhancement-coordinator.js')
   ]);
   assert.match(entry, /createPreviewEnhancementCoordinator/);
-  assert.match(entry, /mountClassicPreviewEnhancementCoordinatorPort/);
-  assert.match(port, /markdownEditorPreviewEnhancementCoordinatorPort/);
+  assert.doesNotMatch(entry, /mountClassicPreviewEnhancementCoordinatorPort/);
+  assert.doesNotMatch(port, /markdownEditorPreviewEnhancementCoordinatorPort/);
   for (const token of ['begin','enqueue','setPriorityRange','schedulePostprocess','cancel']) assert.match(coordinator, new RegExp(token));
 });
 
@@ -37,8 +37,8 @@ test('Atomic 7.12 duplicate legacy queue remains removed and PreviewController d
   assert.equal(await exists('src/preview/enhancement-queue.js'), false);
   assert.doesNotMatch(main, /createPreviewEnhancementQueue|\.\/preview\/enhancement-queue\.js/);
   assert.match(main, /createPreviewEnhancementCoordinator\(\{/);
-  assert.match(main, /mountClassicPreviewEnhancementCoordinatorPort\(\s*compatibilityPlatformHost,\s*previewEnhancementCoordinator\s*\)/);
-  assert.match(main, /previewEnhancementCoordinatorPort\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewEnhancementCoordinatorPort\(\s*compatibilityPlatformHost,\s*previewEnhancementCoordinator\s*\)/);
+  assert.doesNotMatch(main, /previewEnhancementCoordinatorPort\.destroy\(\)/);
   assert.match(main, /previewEnhancementCoordinator\.destroy\(\)/);
   assert.match(controller, /enhancementCoordinator\.connect\(\{/);
   assert.match(engine, /enhancementCoordinator\.enqueue/);

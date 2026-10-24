@@ -25,17 +25,17 @@ test('Atomic 7.4 owns scheduler and cancellation as separate DOM-free pipeline r
 test('Atomic 7.4 composition root mounts one scoped classic scheduler port and destroys scheduler/cancellation', async () => {
   const [main, entry, port] = await Promise.all([
     source('src/main.js'), source('src/features/preview/index.js'),
-    source('src/features/preview/compatibility/classic-preview-scheduler-port.js')
+    source('src/features/preview/pipeline/preview-scheduler.js')
   ]);
   assert.match(entry, /createPreviewCancellation/);
   assert.match(entry, /createPreviewScheduler/);
-  assert.match(entry, /mountClassicPreviewSchedulerPort/);
-  assert.match(port, /markdownEditorPreviewSchedulerPort/);
+  assert.doesNotMatch(entry, /mountClassicPreviewSchedulerPort/);
+  assert.doesNotMatch(port, /markdownEditorPreviewSchedulerPort/);
   assert.doesNotMatch(port, /window\.markdownEditorPreviewScheduler/);
   assert.match(main, /createPreviewCancellation\(\)/);
   assert.match(main, /createPreviewScheduler/);
-  assert.match(main, /mountClassicPreviewSchedulerPort/);
-  assert.match(main, /previewSchedulerPort\.destroy\(\)/);
+  assert.doesNotMatch(main, /mountClassicPreviewSchedulerPort/);
+  assert.doesNotMatch(main, /previewSchedulerPort\.destroy\(\)/);
   assert.match(main, /previewScheduler\.destroy\(\)/);
   assert.match(main, /previewCancellation\.destroy\(\)/);
 });

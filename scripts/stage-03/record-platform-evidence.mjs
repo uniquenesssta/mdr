@@ -43,7 +43,8 @@ const DESKTOP_DIRECTORY = `${PLATFORM_ROOT}/desktop`;
 const INVENTORY_PATH = 'tests/unit/platform/fixtures/platform-port-inventory.json';
 const MODULE_FIXTURE_PATH = 'tests/architecture/fixtures/production-modules.json';
 const HISTORICAL_STAGE_3_PRODUCTION_MODULE_COUNT = 174;
-const STAGE_3_PLATFORM_MODULE_COUNT = 36;
+const STAGE_3_PLATFORM_MODULE_COUNT = 36; // Historical accepted surface.
+const CURRENT_PLATFORM_MODULE_COUNT = STAGE_3_PLATFORM_MODULE_COUNT - 1; // R16-08 retires only its bridge.
 
 const methodsByPort = Object.freeze({
   storage: STORAGE_PORT_METHODS,
@@ -119,6 +120,7 @@ const desktopSources = Object.fromEntries(await Promise.all(
 ));
 const desktopPlatformSource = await readFile('src/platform/desktop/desktop-platform.js', 'utf8');
 const mainSource = await readFile('src/main.js', 'utf8');
+const entrySource = await readFile('src/bootstrap/module-entry.js', 'utf8');
 const platformModules = moduleFixture.modules
   .filter(record => String(record[0]).startsWith('src/platform/'))
   .map(record => record[0])
@@ -458,7 +460,7 @@ if (JSON.stringify(portFiles) !== JSON.stringify(expectedPortFiles)) process.exi
 if (JSON.stringify(environmentFiles) !== JSON.stringify(expectedEnvironmentFiles)) process.exit(1);
 if (JSON.stringify(browserFiles) !== JSON.stringify(expectedBrowserFiles)) process.exit(1);
 if (JSON.stringify(desktopFiles) !== JSON.stringify(expectedDesktopFiles)) process.exit(1);
-if (platformModules.length !== STAGE_3_PLATFORM_MODULE_COUNT) process.exit(1);
+if (platformModules.length !== CURRENT_PLATFORM_MODULE_COUNT) process.exit(1);
 if (Object.keys(inventory.legacyNativeMethods).length !== 33) process.exit(1);
 if (Object.keys(inventory.browserSurfaces).length !== 13) process.exit(1);
 if ([...legacyNativeTargets, ...browserTargets].some(target => !declaredTargets.has(target))) process.exit(1);
@@ -490,7 +492,8 @@ if (!desktopPlatformSource.includes('createWebFetchClient')) process.exit(1);
 if (!desktopPlatformSource.includes('createLinkClient')) process.exit(1);
 if (!desktopPlatformSource.includes('createPerformanceLogClient')) process.exit(1);
 if (!desktopPlatformSource.includes('createWindowClient')) process.exit(1);
-if (!mainSource.includes('createPlatform({') || !mainSource.includes('mountClassicPlatformPort')) process.exit(1);
+if (!entrySource.includes('createPlatform({') || mainSource.includes('mountClassicPlatformPort')) process.exit(1);
+if (!entrySource.includes('startApplication({ platform,')) process.exit(1);
 if (/markdownEditorNative|window\.markdownEditorPlatform/.test(mainSource)) process.exit(1);
 if (invokeCalls.length !== 1 || invokeCalls[0].operation !== 'load_document_state' || invokeCalls[0].args !== invokeArgs) process.exit(1);
 if (invokeResult.args !== invokeArgs || capturedInvokeError !== invokeError) process.exit(1);

@@ -10,24 +10,19 @@ function normalizeBlockIds(ids) {
 
 function resolveDocumentSource(source) {
   if (source && typeof source.getDocumentVersion === 'function') return source;
-  return source?.virtualEditor || null;
+  throw new TypeError('Preview worker requires a document source.');
 }
 
-function getSourceSelection(source, editor) {
-  const selection = source?.getSelection?.();
-  if (selection) return selection;
-  return {
-    from: Math.max(0, Number(editor?.selectionStart) || 0),
-    to: Math.max(0, Number(editor?.selectionEnd) || 0)
-  };
+function getSourceSelection(source) {
+  const selection = source.getSelection();
+  return { from: Math.max(0, Number(selection.from ?? selection.start) || 0), to: Math.max(0, Number(selection.to ?? selection.end) || 0) };
 }
 
-function getSourceVisibleRange(source, editor) {
-  const range = source?.getVisibleRange?.() || editor?.virtualEditor?.getVisibleRange?.();
+function getSourceVisibleRange(source) {
+  const range = source.getVisibleRange?.();
   if (!range) return null;
   const from = Math.max(0, Number(range.from) || 0);
-  const to = Math.max(from, Number(range.to) || from);
-  return { from, to };
+  return { from, to: Math.max(from, Number(range.to) || from) };
 }
 
 function resolvePreviewFocusPosition(source, editor, selection) {

@@ -10,8 +10,8 @@ import { createHash } from 'node:crypto';
 export async function verifyImageExportChain({ browser, ownedRoot, evidenceRoot, commit }) {
   const destination=join(ownedRoot,'完整图片😀.png'),blocked=join(ownedRoot,'image-export-directory.png');
   await mkdir(blocked);
-  const result=await browser.execute(async (destination,blocked) => {
-    const host=document.getElementById('compatibility-business-ports'),commands=host.markdownEditorDocumentUiCommandPort;
+  const result=await browser.inspect(async (destination,blocked) => {
+    const host=applicationCapabilities,commands=host.markdownEditorDocumentUiCommandPort;
     const source='# Windows完整图片😀\n\n原文与公式 $x^2$\n\nKEEP NATIVE TAIL';
     if(!await commands.invoke('importTextContent','image-export-native.md',source,''))throw new Error('Real native document import failed.');
     const images=host.markdownEditorImageExportPort,requests=host.markdownEditorExportRequestPort,tasks=host.markdownEditorExportTaskPort;

@@ -1,3 +1,4 @@
+import { readCurrentViewMarkup } from '../../support/current-view-markup.mjs';
 import { readFile } from '../../support/application-surface-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -168,7 +169,7 @@ test('Atomic 4.11 production integration removes classic theme authority and kee
     readFile('public/app/core.js', 'utf8'),
     readFile('public/app/bootstrap.js', 'utf8'),
     readFile('public/app/editor-tools.js', 'utf8'),
-    readFile('public/compatibility/business-content.html', 'utf8'),
+    readCurrentViewMarkup(),
     readFile('src/features/settings/application/settings-apply-coordinator.js', 'utf8')
   ]);
 
@@ -177,9 +178,9 @@ test('Atomic 4.11 production integration removes classic theme authority and kee
   assert.match(entry, /createThemeService/);
   assert.match(entry, /createThemeToggleController/);
   assert.match(entry, /createSettingsApplyCoordinator/);
-  assert.ok(entry.indexOf('createSettingsStore({') < entry.indexOf('createThemeService({'));
-  assert.ok(entry.indexOf('createThemeService({') < entry.indexOf('await importApplication();'));
-  assert.match(entry, /themeService\?\.destroy\(\)/);
+  assert.ok(entry.indexOf('own(createSettingsStore({') < entry.indexOf('own(createThemeService({'));
+  assert.ok(entry.indexOf('own(createThemeService({') < entry.indexOf('await importApplication();'));
+  assert.match(entry, /own\(createThemeService\(/);
   assert.match(service, /SETTINGS_CHANGED_EVENT/);
   assert.match(service, /normalizeSettingValue/);
   assert.match(service, /setAttribute\('data-theme'/);

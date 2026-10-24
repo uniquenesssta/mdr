@@ -17,4 +17,5 @@ export { createNativeSnapshotUploader } from './native-document-store/native-sna
 export { createNativeSegmentedLoader } from './native-document-store/native-segmented-loader.js';
 export { createNativeSearchAdapter } from './native-document-store/native-search-adapter.js';
 export { createBrowserDocumentRepository } from './browser/browser-document-repository.js';
-export { mountClassicSaveStatusStorePort } from './compatibility/classic-save-status-store-port.js';
+
+export { createStatusContentView } from './ui/status-content-view.js';

@@ -161,7 +161,7 @@ test('R15-10 actual Runtime clears a prior configuration when the gate is disabl
   Object.defineProperty(globalThis, 'location', { configurable: true, value: { href: 'http://localhost/' } });
   Object.defineProperty(globalThis, '__MARKDOWN_EDITOR_E2E__', { configurable: true, writable: true, value: true });
   Object.defineProperty(globalThis, '__markdownEditorE2E', { configurable: true, value: undefined });
-  configureMarkdownEditorE2EPorts({ readContext: () => ({ documentId: 'fixture', generation: 1, version: 0 }), readPreviewStats: () => null });
+  configureMarkdownEditorE2EPorts({ editorApi: { getText:()=>'' }, importDocument:async()=>false, readContext: () => ({ documentId: 'fixture', generation: 1, version: 0 }), readPreviewStats: () => null });
   globalThis.__MARKDOWN_EDITOR_E2E__ = false;
   configureMarkdownEditorE2EPorts(null);
   globalThis.__MARKDOWN_EDITOR_E2E__ = true;

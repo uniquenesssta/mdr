@@ -1,4 +1,4 @@
-import { assertExportNonCancelablePhase, createExportCancellationToken } from './export-cancellation.js';
+import { assertExportNonCancelablePhase, createExportCancellationToken, isExportCancelledError } from './export-cancellation.js';
 
 const workPhases = new Set(['preparing', 'building', 'enhancing', 'serializing', 'printing', 'loading', 'images', 'encoding', 'writing']);
 
@@ -104,6 +104,7 @@ export function createExportTaskController() {
       notify();
       return true;
     },
+    isCancelled: isExportCancelledError,
     subscribe,
     destroy() {
       if (destroyed) return;

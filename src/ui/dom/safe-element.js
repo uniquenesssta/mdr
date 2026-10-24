@@ -25,7 +25,7 @@ function assertRecord(value, label) {
   return value;
 }
 
-function setSafeAttribute(element, name, value) {
+export function setSafeAttribute(element, name, value) {
   const normalizedName = String(name || '').trim();
   if (!ATTRIBUTE_NAME_PATTERN.test(normalizedName)) {
     throw new TypeError(`Invalid attribute name: ${normalizedName || '<empty>'}.`);
