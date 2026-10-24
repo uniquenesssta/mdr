@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "40cea4fb83e17c5c0b1df79c3d2b38c3f20e8f1c",
+  "baselineCommit": "d98f713a9ab4588f220811bf3acc652f6af1b8bf",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "4a7219b44aad963c997935d62a08f227b19461b069732ac322185b415188fbea"
+      "sha256": "e17a4eceffe3465ed7b6fada0f23812fee10c94212066c08123b610e667bb18f"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -351,7 +351,7 @@
     },
     {
       "path": "scripts/stage-02/record-ui-foundation-evidence.mjs",
-      "sha256": "d104c3b7593b310a45fc2070b5ae3f11897b7226178ee73561ff4810e014bf6c"
+      "sha256": "42323927d23256b499c9a45304f092744cdc4db2d954431b759565072e89370b"
     },
     {
       "path": "scripts/stage-03/record-create-platform-evidence.mjs",
@@ -1695,7 +1695,7 @@
     },
     {
       "path": "src/features/layout/fullscreen/page-fullscreen-controller.js",
-      "sha256": "aa8e55553cb4872ab3f47399f1596dde44530c0d3d3c535b9c8cc064ee3d9281"
+      "sha256": "817e1822a240c187a233cafc3dc8e1f3313faef65904c0ead7a274ba62788d2e"
     },
     {
       "path": "src/features/layout/fullscreen/system-fullscreen-controller.js",
@@ -1707,7 +1707,7 @@
     },
     {
       "path": "src/features/layout/shell/compact-shell-controller.js",
-      "sha256": "f84d976fdd97d008771d218b1fc50405895aac93ef35042ef5693088796caf9c"
+      "sha256": "8759e8de6dd5355c87332477c492c7db9589d90d1b390a38bf072c772f7dc473"
     },
     {
       "path": "src/features/layout/shell/responsive-breakpoints.js",
@@ -1715,23 +1715,23 @@
     },
     {
       "path": "src/features/layout/sidebar/sidebar-layout-controller.js",
-      "sha256": "14bce67ea1252306abba780b1072253b7cbe34ce209302c547a236cf1c8be021"
+      "sha256": "6eaa53a5e75bcf0eb7a47278a422f29e70f05b26dfbea8ea525d7c85a25bf19f"
     },
     {
       "path": "src/features/layout/sidebar/sidebar-resize-controller.js",
-      "sha256": "87f26428dc85d95b9a58413f68a9708200a8df28dc1497469ac5d786c7b68ee0"
+      "sha256": "b1845913a7d2144f56d47416840b32617bafb8b7c2be09202c21afc6312c647b"
     },
     {
       "path": "src/features/layout/split/compact-split-controller.js",
-      "sha256": "77bf83a963930f9b5667be5ab3b6eeb643042e0fb218045dda5c307e241284e8"
+      "sha256": "93435a0bb5405628e4fed662a66e9a5008588d4354d2a1137fbab349afa7dfb8"
     },
     {
       "path": "src/features/layout/split/split-pane-controller.js",
-      "sha256": "29f067b394af02eb45af440b7583b45657deb4635d408bf2294056f2954d64aa"
+      "sha256": "763bd4fed7c0c2c14ad962f70bc6ea1276b951b601ba88d33be8bd15b176f9e5"
     },
     {
       "path": "src/features/layout/split/split-resize-controller.js",
-      "sha256": "b38fa2c6f96f606f37728e80310a0bc60e673a95840932a8236b2d9dc1e4ef02"
+      "sha256": "f7e92f9149fbca5a1a101a771580c9b74d031c5fd3185292626fd91b168bfbe0"
     },
     {
       "path": "src/features/layout/state/layout-state.js",
@@ -1739,11 +1739,11 @@
     },
     {
       "path": "src/features/layout/toolbar/toolbar-boundary-controller.js",
-      "sha256": "cc31cab6028793e79f77e78aca2260db232d0027f536585563b63e65dcf51870"
+      "sha256": "77e7f891f00579c376ff854159f836b989f9db56667d5e52d410540b26b45648"
     },
     {
       "path": "src/features/layout/workspace-preferences.js",
-      "sha256": "4b99f3cde11f399e267be0f462d0be2effccfb140d3640758ed7ac6db3c87bfb"
+      "sha256": "0298371aa57e32406eb0139b2f496f73bbe1b82d6392eeda44ea964c58bfe29e"
     },
     {
       "path": "src/features/menu/compatibility/classic-menu-command-adapter.js",
@@ -1919,7 +1919,7 @@
     },
     {
       "path": "src/features/preview/pipeline/preview-layout-stability.js",
-      "sha256": "ad3d6a36d79ab72f6d2819b0991c37a79dd2b3855ec271efb3832ccc24d32e37"
+      "sha256": "12a05d10c9962bc1020ff875c7ac9b23b370bc97c10eb662feae7591200e3232"
     },
     {
       "path": "src/features/preview/pipeline/preview-mode-resolver.js",
@@ -2371,7 +2371,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "aeef56c015774c603bac65c2c3a243561b91218b2f199347bbfaada6ed6b40f7"
+      "sha256": "3fde78fae558ea04711b4d24fc408537cf9094f6a756cc9deb7393f795b7c5d5"
     },
     {
       "path": "src/model-kernel/index.js",
@@ -2531,11 +2531,11 @@
     },
     {
       "path": "src/runtime/e2e-bridge.js",
-      "sha256": "0db3142d43080906b863bd9ffc593d3f5a775d32edfe7a9901aa8d34b4b0dc23"
+      "sha256": "532b7aee27a316b18cb03ac438a082251d3c99da23c1f38850441bbc81de7b6d"
     },
     {
       "path": "src/runtime/link-preview.js",
-      "sha256": "e51d5d121a07069dffbcd103a68797108a9ad779818f84df9684fdf414e36185"
+      "sha256": "339d842817365d58fc86c14ba4a2072603a0f0ea14733327771eae2cbdc1ee5a"
     },
     {
       "path": "src/runtime/performance.js",
@@ -2739,7 +2739,7 @@
     },
     {
       "path": "src/styles/shell/app-shell.css",
-      "sha256": "0538c9abcaa96d23113b1793bacc5f75203459db5927e67e527f0da3c05a534d"
+      "sha256": "79cb626abf9e957cfaefada96ec28040e7b5d052f125b473f2af0572322cab14"
     },
     {
       "path": "src/styles/shell/menu-bar.css",
@@ -2835,31 +2835,31 @@
     },
     {
       "path": "src/ui/shell/app-shell-view.js",
-      "sha256": "757909f7e294418e5217b1b322281ac8438cfe71eba370123c39d39376427590"
+      "sha256": "f1bedc3cd84ffc14a295a2d4176e3e25ca2763e60301ff1a4e1823ff7c6759c2"
     },
     {
       "path": "src/ui/shell/menu-bar-shell.js",
-      "sha256": "414e8da913f95bb498f73e9e70bcdc5ff5e4548558dedc6f917ff4864f13b007"
+      "sha256": "e67bd80afcb073c363c1c57cc7afa277d8da5af08594bcda0f0c71506ccc8174"
     },
     {
       "path": "src/ui/shell/overlay-root.js",
-      "sha256": "66215f3d8db7b8fc0f659aff91344b9578d84faa6c5d02a2fadda03a56a47b60"
+      "sha256": "8129f3df2ec7375d80e74bc4f4bcfc1546ce03e89397e3247297dee1d3db4dd6"
     },
     {
       "path": "src/ui/shell/sidebar-shell.js",
-      "sha256": "6f24d3694693f77dbe02e4619752f41455f36ecf3205a33ca9eca0243a203f6e"
+      "sha256": "84087fecb02f56dcbbe5428a0fcddda52a78d7ab3bbfc98fdab987086a35ec51"
     },
     {
       "path": "src/ui/shell/status-bar-shell.js",
-      "sha256": "118a1ef0678322c56ae75702b1956bf6f15a16ff5cfc2d88652037d74d0485f6"
+      "sha256": "bc0df0b7ad87e98a5be455cf781a8809359f938f7bd4d9adecd86bf79c12c5a4"
     },
     {
       "path": "src/ui/shell/toolbar-shell.js",
-      "sha256": "ea4e666a7712e114bf0657c2f4eb9c91e49827d2e5542d101dfb168448b3d579"
+      "sha256": "e495dd824effcb3af277c87016c2b2cadd4043969006d4c8a9aacebd8246ee08"
     },
     {
       "path": "src/ui/shell/workspace-shell.js",
-      "sha256": "0d4b9f8d39377b52e52301a2f6c79bfee4b52db347ad21c4736725ee69881b88"
+      "sha256": "aa931a9f2a3774057766839a3c9f155abc56076e76871d626c48d5d90c3af3c7"
     },
     {
       "path": "tests/architecture/application-composition.test.mjs",
@@ -2991,7 +2991,7 @@
     },
     {
       "path": "tests/architecture/stage-06-sidebar-resize.test.mjs",
-      "sha256": "821444e4cff1b2eb04f606d14aedaf2df1e67a4e978b43d3ebfaf0fa43bd4562"
+      "sha256": "b58b6574fd086c7fa8d8a2ff6b62115848bb1fbc95f99ee26bc2d5e6c69c28df"
     },
     {
       "path": "tests/architecture/stage-06-sidebar-tabs.test.mjs",
@@ -3271,7 +3271,7 @@
     },
     {
       "path": "tests/e2e/preview-layout-stability.test.mjs",
-      "sha256": "9a3d42cdeb9aab6109e76fe2729795b51700438920c7b4d6196ed7f29b74462f"
+      "sha256": "89b25bf1064c01d22486bdb79f17372412c6bc7ffeea8dee60b73b86b8b08233"
     },
     {
       "path": "tests/e2e/preview-recovery-view.test.mjs",
@@ -3287,7 +3287,7 @@
     },
     {
       "path": "tests/e2e/run-browser-tests.mjs",
-      "sha256": "ceb9786121fd6ce5136ca895d787f507c84ba2268b19816a6603248d67d09a51"
+      "sha256": "054456501d6021f591038e8512c9c91e1904397e4a5308e1603c4c417a95af0a"
     },
     {
       "path": "tests/e2e/submenu-positioner.test.mjs",
@@ -3303,7 +3303,7 @@
     },
     {
       "path": "tests/e2e/window-controller.test.mjs",
-      "sha256": "2d1c08267d3429914d4b1092120d653a5ba0ec6955491ef8cc645a9c4ac507a3"
+      "sha256": "0683d4b04e5edddbd4c8c8990e2b4d1bc5a082af2c648d2a333a77d3093652d1"
     },
     {
       "path": "tests/e2e/windows/dependency-tls-server.mjs",
@@ -3355,7 +3355,7 @@
     },
     {
       "path": "tests/e2e/windows/run-window-automation.mjs",
-      "sha256": "c9d22ddd008b06ad6a60ad9bf3e656f8cec6a21c1ea547be4d469e7570fb4dac"
+      "sha256": "0d74477d97747737eb4099eb41a5e2faab6789b3ea59cc021750f87a265e0c91"
     },
     {
       "path": "tests/e2e/windows/window-evidence.mjs",
@@ -3887,7 +3887,7 @@
     },
     {
       "path": "tests/stage-15-event-catalogue.test.mjs",
-      "sha256": "a8cd644928d511da5e70dbb2e7a865a2612b465b324b011b10d4882b4b45d51d"
+      "sha256": "2173a2c62021c65fcea05811f2e81876aa950c851c6b16feffede65930595b32"
     },
     {
       "path": "tests/stage-15-log-cleanup.test.mjs",
@@ -3975,11 +3975,11 @@
     },
     {
       "path": "tests/ui/app-shell.test.mjs",
-      "sha256": "c75e8a8cc320a43439f9be8f6e5dacbe37c69168a0904c4db5b45b2221c21be6"
+      "sha256": "0ef5d5c7c840564c1d92fd14ffd1bf59e4a9f25373b6ef969af45b1628b652b0"
     },
     {
       "path": "tests/ui/css-tokens.test.mjs",
-      "sha256": "c18ddefbfcf17194e38828b5c36bc1cf2788b4f68f83aaf2edb43cbd6bbb9d0b"
+      "sha256": "c6efa0fbeeb372b018b09e351988016ceb9a36dbe08806e3ac52705c92d30aa8"
     },
     {
       "path": "tests/ui/dom-asset-inventory.test.mjs",
@@ -4019,7 +4019,7 @@
     },
     {
       "path": "tests/ui/style-layering.test.mjs",
-      "sha256": "27587a2cf9ba6f7137aaa0c397d8946379ad867ebb418e2ccb4872ea6a57c530"
+      "sha256": "2e54a027255a39c94d53cae59e5be5e1523e64332b32e9a4155c304f30a17bda"
     },
     {
       "path": "tests/ui/style-test-utils.mjs",
@@ -4135,15 +4135,15 @@
     },
     {
       "path": "tests/unit/layout/page-fullscreen-controller.test.mjs",
-      "sha256": "30e1accdd3bdaead286144ad338ecbff94baaa9b1643c6e9ad7e6a68ecf4b231"
+      "sha256": "1d840facc95295ab614a35998d91129b9a916175a5e0b2c16927448236a8266b"
     },
     {
       "path": "tests/unit/layout/sidebar-layout-controller.test.mjs",
-      "sha256": "1dce3cdb0a4451d7fe4b73d7382db618308db3c373b867ec457343a8c3b44a0d"
+      "sha256": "3345124cec124916b0309d23d7c30280a6cb0c6c464bc62d539f7151f14d7b54"
     },
     {
       "path": "tests/unit/layout/sidebar-resize-controller.test.mjs",
-      "sha256": "447c1b2dd05ecd5c2f258fd6d575b92ee7db84255eb97981cbde0a81d4e96b38"
+      "sha256": "118697d62a95f94fa6516ca1bc13142fe04a4818cfc19887d365c90f8d1e98c8"
     },
     {
       "path": "tests/unit/layout/split-pane-controller.test.mjs",
@@ -4163,7 +4163,7 @@
     },
     {
       "path": "tests/unit/layout/toolbar-boundary-controller.test.mjs",
-      "sha256": "cbc93cbc9ec454724d38620f7d3d4c07497907a9def7a0fc7c14a99ddea03f2a"
+      "sha256": "67ec93c51b4066966995daae08200fc338131bcfd834a100ceb588f13333e8ee"
     },
     {
       "path": "tests/unit/menu/classic-menu-command-adapter.test.mjs",
@@ -4363,7 +4363,7 @@
     },
     {
       "path": "tests/unit/preview/preview-layout-stability.test.mjs",
-      "sha256": "3d3ae00757547d3d42cfe78e8503a27b41a1505e27419b8ceb1919550facb440"
+      "sha256": "c2c53d8283aa2aae3253f881f642bc298dcb8c77dee5540bf9ce591db804e9df"
     },
     {
       "path": "tests/unit/preview/preview-mode-resolver.test.mjs",
@@ -4550,7 +4550,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "1e54a48bd7ead321a77dda7d74344cd134bb81fd3cff96e8ed88226f9480b78c",
+  "inputSha256": "392d131351e147c5b9bbbc3b3560bc897598fd88e9417e85c7a5426f66d3c5ea",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -5257,6 +5257,11 @@
     {
       "from": "tests/ui/app-shell.test.mjs",
       "line": 71,
+      "kind": "computed-import"
+    },
+    {
+      "from": "tests/ui/app-shell.test.mjs",
+      "line": 91,
       "kind": "computed-import"
     },
     {
@@ -10291,7 +10296,7 @@
           "target": "public/compatibility/business-content.html",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 136
+          "line": 156
         },
         {
           "from": "tests/ui/minimal-index.test.mjs",
@@ -15548,7 +15553,7 @@
     {
       "path": "src/runtime/e2e-bridge.js",
       "tracked": true,
-      "sha256": "0db3142d43080906b863bd9ffc593d3f5a775d32edfe7a9901aa8d34b4b0dc23",
+      "sha256": "532b7aee27a316b18cb03ac438a082251d3c99da23c1f38850441bbc81de7b6d",
       "status": "referenced",
       "deletionAllowed": false,
       "followup": "R16-07",
@@ -15674,7 +15679,7 @@
     {
       "path": "src/runtime/link-preview.js",
       "tracked": true,
-      "sha256": "e51d5d121a07069dffbcd103a68797108a9ad779818f84df9684fdf414e36185",
+      "sha256": "339d842817365d58fc86c14ba4a2072603a0f0ea14733327771eae2cbdc1ee5a",
       "status": "referenced",
       "deletionAllowed": false,
       "followup": "R16-07",
@@ -17109,7 +17114,7 @@
           "target": "src/ui/compatibility/business-content-port.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 137
+          "line": 157
         },
         {
           "from": "tests/ui/dom-primitives.test.mjs",

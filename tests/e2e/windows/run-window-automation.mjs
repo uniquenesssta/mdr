@@ -26,7 +26,7 @@ async function waitForApplication(browser) {
     async () => browser.execute(() => Boolean(
       document.getElementById('compatibility-business-ports')?.markdownEditorPlatformPort?.supports('desktop.window')
       && document.getElementById('window-controls')
-      && document.querySelector('.menu-bar')
+      && document.querySelector('.l-menu-bar')
     )),
     {
       timeout: 30_000,
@@ -63,7 +63,7 @@ function movedEnough(before, after, threshold = 20) {
 
 async function resolveTitleBarDragTarget(browser) {
   const target = await browser.execute(excludedSelector => {
-    const bar = document.querySelector('.menu-bar');
+    const bar = document.querySelector('.l-menu-bar');
     if (!bar) throw new Error('Menu bar was not found.');
 
     const describeElement = element => {
@@ -139,7 +139,7 @@ async function resolveTitleBarDragTarget(browser) {
   }, TITLE_BAR_EXCLUDED_SELECTOR);
 
   const validation = await browser.execute((point, excludedSelector) => {
-    const bar = document.querySelector('.menu-bar');
+    const bar = document.querySelector('.l-menu-bar');
     const candidate = document.elementFromPoint(point.x, point.y);
     return {
       belongsToBar: Boolean(bar && candidate && (candidate === bar || bar.contains(candidate))),
@@ -259,7 +259,7 @@ try {
 
       await browser.execute(() => {
         const state = window.__windowsNativeAutomation;
-        const bar = document.querySelector('.menu-bar');
+        const bar = document.querySelector('.l-menu-bar');
         if (!bar) throw new Error('Menu bar was not found while installing drag instrumentation.');
         bar.addEventListener('mousedown', event => {
           if (event.buttons === 1) state.menuBarMouseDownEvents += 1;

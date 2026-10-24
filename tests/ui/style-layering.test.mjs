@@ -162,7 +162,7 @@ test('stable compatibility presentation has no inline style authority', async ()
   assert.match(combinedStableSources, /c-clipboard-buffer/);
 });
 
-test('prefixed shell classes are visual authority while legacy classes remain bounded compatibility hooks', async () => {
+test('R16-05 prefixed shell and state classes are the sole projection contract', async () => {
   const [
     shellSources,
     sidebarLayoutSource,
@@ -192,30 +192,31 @@ test('prefixed shell classes are visual authority while legacy classes remain bo
   ]);
   const shellSource = shellSources.join('\n');
   for (const contract of [
-    "className: 'l-app-shell app'",
-    "className: 'l-menu-bar menu-bar'",
-    "className: 'l-toolbar-shell editor-toolbar'",
-    "className: 'l-sidebar sidebar'",
-    "className: 'l-workspace workspace'",
-    "className: 'l-split-pane main'",
-    "className: 'l-pane f-editor-pane pane editor-pane'",
-    "className: 'l-pane f-preview-pane pane preview-pane'",
-    "className: 'l-status-bar statusbar'",
-    "className: 'l-overlay-root overlay-root'"
+    "className: 'l-app-shell'",
+    "className: 'l-menu-bar'",
+    "className: 'l-toolbar-shell'",
+    "className: 'l-sidebar'",
+    "className: 'l-workspace'",
+    "className: 'l-split-pane'",
+    "className: 'l-pane f-editor-pane'",
+    "className: 'l-pane f-preview-pane'",
+    "className: 'l-status-bar'",
+    "className: 'l-overlay-root'"
   ]) assert.match(shellSource, new RegExp(contract.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
   assert.match(sidebarLayoutSource, /sidebar\.classList\.toggle\('is-hidden'/);
   assert.match(splitPaneSource, /editorPane\.classList\?\.toggle\('is-collapsed'/);
   assert.match(splitPaneSource, /previewPane\.classList\?\.toggle\('is-collapsed'/);
-  assert.match(sidebarResizeSource, /body\.classList\.toggle\('resizing'/);
-  assert.match(sidebarResizeSource, /body\.classList\.toggle\('sidebar-resizing'/);
+  assert.doesNotMatch(sidebarResizeSource, /body\.classList\.toggle\('resizing'/);
+  assert.doesNotMatch(sidebarResizeSource, /body\.classList\.toggle\('sidebar-resizing'/);
   assert.match(sidebarResizeSource, /body\.classList\.toggle\('is-resizing'/);
   assert.match(sidebarResizeSource, /body\.classList\.toggle\('is-sidebar-resizing'/);
-  assert.match(fullscreenSource, /classList\.toggle\('page-fullscreen', active\)/);
+  assert.doesNotMatch(fullscreenSource, /classList\.toggle\('page-fullscreen', active\)/);
   assert.match(fullscreenSource, /classList\.toggle\('is-page-fullscreen', active\)/);
-  assert.match(fullscreenSource, /classList\.toggle\('page-fullscreen-active', active\)/);
+  assert.doesNotMatch(fullscreenSource, /classList\.toggle\('page-fullscreen-active', active\)/);
   assert.match(fullscreenSource, /classList\.toggle\('is-page-fullscreen-active', active\)/);
   assert.doesNotMatch(bootstrapSource, /page-fullscreen-active|is-page-fullscreen/);
   assert.doesNotMatch(editorToolsSource, /classList\.(?:add|remove|toggle)\('is-page-fullscreen'/);
-  assert.match(linkPreviewSource, /classList\.add\('link-preview-open', 'has-link-preview'\)/);
+  assert.match(linkPreviewSource, /classList\.add\('has-link-preview'\)/);
+  assert.doesNotMatch(linkPreviewSource, /link-preview-open/);
 });

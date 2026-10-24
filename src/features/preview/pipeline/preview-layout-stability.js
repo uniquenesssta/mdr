@@ -87,7 +87,7 @@ export function createPreviewLayoutStability(options = {}) {
     return Object.freeze({
       width,
       height,
-      visible: Boolean(!pane.classList.contains('collapsed') && width > 0 && height > 0)
+      visible: Boolean(!pane.classList.contains('is-collapsed') && width > 0 && height > 0)
     });
   }
 

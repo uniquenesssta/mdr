@@ -69,12 +69,9 @@ export function createSplitPaneController({
 
   function project() {
     const split = snapshot().split;
-    editorPane.classList?.toggle('collapsed', split.editorCollapsed);
     editorPane.classList?.toggle('is-collapsed', split.editorCollapsed);
-    previewPane.classList?.toggle('collapsed', split.previewCollapsed);
     previewPane.classList?.toggle('is-collapsed', split.previewCollapsed);
     const hidden = split.editorCollapsed || split.previewCollapsed;
-    resizer.classList?.toggle('hidden', hidden);
     resizer.classList?.toggle('is-hidden', hidden);
     updateButton(
       editorCollapseButton,

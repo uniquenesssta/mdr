@@ -46,7 +46,7 @@ test('Atomic 6.2 main lifecycle owns start/destroy and passes explicit geometry 
   assert.match(main, /createSidebarResizeController/);
   assert.match(main, /sidebarResizeController = createSidebarResizeController\(\{/);
   assert.match(main, /state: layoutState/);
-  assert.match(main, /workspace: requireElement\('\.workspace'/);
+  assert.match(main, /workspace: requireElement\('\.l-workspace'/);
   assert.match(main, /resizer: requireElement\('#sidebar-resizer'/);
   assert.match(main, /onGeometryChanged\(\) \{ scrollController\.notifyGeometryChanged\(\); \}/);
   assert.match(main, /sidebarResizeController\.start\(\)/);

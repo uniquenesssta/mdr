@@ -239,7 +239,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "7cf171d7b391486475a4d0094c5b64f9e703c672"
+      "blobSha": "f438ef1f81c977644d5fc5b4f339aaa704c2f2cc"
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
@@ -543,7 +543,7 @@
     },
     {
       "path": "src/runtime/e2e-bridge.js",
-      "blobSha": "f830edc6fb71ef0d2d34740cb84cad55360023d7"
+      "blobSha": "3b659c879d277e45ac714e7aceac2230e0c0b46f"
     },
     {
       "path": "tests/stage-15-e2e-query-api.test.mjs",
@@ -567,7 +567,7 @@
     },
     {
       "path": "tests/e2e/run-browser-tests.mjs",
-      "blobSha": "72830656fe110a89119ba3a0eb80b97030454ba9"
+      "blobSha": "67d7749004ccfbbe00bec16350a811d210bceeae"
     },
     {
       "path": "tests/e2e/lib/application-driver.mjs",
@@ -635,7 +635,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "blobSha": "db30cd402db3c5a7d74c43bf33d245eb6a0e0248"
+      "blobSha": "91f16f00cda41b9704309ff294bd897cb94a9d4d"
     },
     {
       "path": "scripts/stage-16/deletion-inventory.mjs",
@@ -707,7 +707,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "cc296f767c82910bbd9c0f067d35fc76fe3c0526"
+      "blobSha": "c937809aeb4a48d1ac59f1ea63eaad84f29707e8"
     },
     {
       "path": "src/features/documents/application/document-open-coordinator.js",
@@ -727,7 +727,7 @@
     },
     {
       "path": "tests/stage-15-event-catalogue.test.mjs",
-      "blobSha": "84a3ae63b0042e06d02afc3dc55fbfe00595c864"
+      "blobSha": "cebcec3463e2d8a5e0d9fa1e8308f1e915be5235"
     },
     {
       "path": "src/features/documents/ui/document-workspace.js",
@@ -743,7 +743,7 @@
     },
     {
       "path": "src/features/layout/workspace-preferences.js",
-      "blobSha": "dafe6af09fd6bf20fffe204d7379149107e4778b"
+      "blobSha": "e5ac812b9f5a7bfe8cce03da825ef50067d57a57"
     },
     {
       "path": "src/bootstrap/workspace-startup.js",
@@ -847,7 +847,7 @@
     },
     {
       "path": "src/runtime/link-preview.js",
-      "blobSha": "248bbba93b73ac49cf2db50ff99e917bcd110c39"
+      "blobSha": "bfb824f5cd1a61a18dc2d864c3dba10c007a7fdb"
     },
     {
       "path": "tests/architecture/fixtures/production-modules.json",
@@ -936,6 +936,126 @@
     {
       "path": "tests/unit/menu/menu-view.test.mjs",
       "blobSha": "0860d365a160561bc9ff08f535b0045a46a6c7c6"
+    },
+    {
+      "path": "scripts/stage-02/record-ui-foundation-evidence.mjs",
+      "blobSha": "0bdc44629f071d857521a5b5efb0b1d911546097"
+    },
+    {
+      "path": "src/features/layout/fullscreen/page-fullscreen-controller.js",
+      "blobSha": "e80388707630f8e1c244a16f5e871148c70cf9a4"
+    },
+    {
+      "path": "src/features/layout/shell/compact-shell-controller.js",
+      "blobSha": "e34658d60286756fe564c877e70bad19fb1f2af9"
+    },
+    {
+      "path": "src/features/layout/sidebar/sidebar-layout-controller.js",
+      "blobSha": "dbddb4d76c02e9322e8935f749a74fe229866666"
+    },
+    {
+      "path": "src/features/layout/sidebar/sidebar-resize-controller.js",
+      "blobSha": "a37f3d490c8fe36c23260718d4bfa9dcb2ee3585"
+    },
+    {
+      "path": "src/features/layout/split/compact-split-controller.js",
+      "blobSha": "63f8e50d92e0229461e0da36ac87dc3c49513b1c"
+    },
+    {
+      "path": "src/features/layout/split/split-pane-controller.js",
+      "blobSha": "a71444a6411c9713a94474f34b16a5b821e60d4b"
+    },
+    {
+      "path": "src/features/layout/split/split-resize-controller.js",
+      "blobSha": "07ae6620c4fb63cc2b2ba3d8b74666e13dcb74d7"
+    },
+    {
+      "path": "src/features/layout/toolbar/toolbar-boundary-controller.js",
+      "blobSha": "d4a89e69dc0afbc2f5366a2cda226db0fb808021"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-layout-stability.js",
+      "blobSha": "cfc24ef73fb44ccfec438935be09c45b3ccb3293"
+    },
+    {
+      "path": "src/styles/shell/app-shell.css",
+      "blobSha": "d7a8f5815dc52065b9d52c96a18fd7b47cafbff5"
+    },
+    {
+      "path": "src/ui/shell/app-shell-view.js",
+      "blobSha": "7c0aa59e72986f240744addd8f33ad42a0c7f911"
+    },
+    {
+      "path": "src/ui/shell/menu-bar-shell.js",
+      "blobSha": "e3c405270ef45805eb72374d61d3740fdb0a702b"
+    },
+    {
+      "path": "src/ui/shell/overlay-root.js",
+      "blobSha": "93b004a20a467509386414e4333cd23af65c6fef"
+    },
+    {
+      "path": "src/ui/shell/sidebar-shell.js",
+      "blobSha": "205018f10040ea549084fb170896eed695908df3"
+    },
+    {
+      "path": "src/ui/shell/status-bar-shell.js",
+      "blobSha": "8cd51ecf719ee268ec8dda09fbfd77b22fba8040"
+    },
+    {
+      "path": "src/ui/shell/toolbar-shell.js",
+      "blobSha": "eebd2d7c772017d2889dcc74ec4406fa88a3955d"
+    },
+    {
+      "path": "src/ui/shell/workspace-shell.js",
+      "blobSha": "d65b62e439d56613bc9574d56d491a967264c688"
+    },
+    {
+      "path": "tests/architecture/stage-06-sidebar-resize.test.mjs",
+      "blobSha": "ec328c07306cf1910d192804943b23deca76cd73"
+    },
+    {
+      "path": "tests/e2e/preview-layout-stability.test.mjs",
+      "blobSha": "9b0cef96ded87c1ae3bc68696d0f58ef424d0178"
+    },
+    {
+      "path": "tests/e2e/window-controller.test.mjs",
+      "blobSha": "5e28608686e034165fde7bc26ed73d4e923edb35"
+    },
+    {
+      "path": "tests/e2e/windows/run-window-automation.mjs",
+      "blobSha": "44e723b72eb9c9cc2bead2d00bbe7202ad6b515f"
+    },
+    {
+      "path": "tests/ui/app-shell.test.mjs",
+      "blobSha": "2284f644d5a872f2ca22f4056ce5fc2c19a632a1"
+    },
+    {
+      "path": "tests/ui/css-tokens.test.mjs",
+      "blobSha": "5306be2c2d0a82e1b4ab67a6c3cf16e8dd970afe"
+    },
+    {
+      "path": "tests/ui/style-layering.test.mjs",
+      "blobSha": "5ef19e4903198418b19c6d53196a78e5583e21d4"
+    },
+    {
+      "path": "tests/unit/layout/page-fullscreen-controller.test.mjs",
+      "blobSha": "c55358b536fc77a8e439ecaaf755f9ad40e8d2cc"
+    },
+    {
+      "path": "tests/unit/layout/sidebar-layout-controller.test.mjs",
+      "blobSha": "e40ed883e78f9dcc8516798b2e4390fd5339d736"
+    },
+    {
+      "path": "tests/unit/layout/sidebar-resize-controller.test.mjs",
+      "blobSha": "70210a5d54f5b8e1060a29683832e4c53021327d"
+    },
+    {
+      "path": "tests/unit/layout/toolbar-boundary-controller.test.mjs",
+      "blobSha": "1bb504c998e3563856da52e3bb625c0cccbe1e8a"
+    },
+    {
+      "path": "tests/unit/preview/preview-layout-stability.test.mjs",
+      "blobSha": "1c0d672bed89488da8d4823afd1dd60127769f0d"
     }
   ],
   "priorFailures": {
@@ -1151,14 +1271,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R16.4",
+    "stage": "R16.5",
     "date": "2026-10-24",
-    "reviewedCommit": "804950fdc58fb973561f6a4e53c273473258a104",
-    "record": "docs/R16-04-DETAILS.md#正式验收2026-10-24",
-    "status": "accepted-exact-commit-windows-ci",
+    "reviewedCommit": "d98f713a9ab4588f220811bf3acc652f6af1b8bf",
+    "record": "docs/R16-05-DETAILS.md",
+    "status": "locally-verified-pending-exact-commit-windows-ci",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
-    "scope": "Remove ten inert HTML inline handlers; preserve minimal index, current visible UI, external icons and ModalShell; compatibility retirement stays R16-08.",
+    "scope": "Retire legacy shell and duplicate state classes with complete query migration; preserve CSS declarations, current theme and layout behavior.",
     "acceptedPriorStage": {
       "stage": "R15.9",
       "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
@@ -1304,66 +1424,58 @@
       ]
     },
     "currentStageImplementation": {
-      "stage": "R16.4",
-      "baselineCommit": "40cea4fb83e17c5c0b1df79c3d2b38c3f20e8f1c",
+      "stage": "R16.5",
+      "baselineCommit": "d98f713a9ab4588f220811bf3acc652f6af1b8bf",
       "branch": "codex/r16-stage",
-      "record": "docs/R16-04-DETAILS.md",
-      "status": "accepted-exact-commit-windows-ci",
-      "scope": "Remove ten inert HTML inline handlers; preserve minimal index, current visible UI, external icons and ModalShell; compatibility retirement stays R16-08.",
+      "record": "docs/R16-05-DETAILS.md",
+      "status": "locally-verified-pending-exact-commit-windows-ci",
+      "scope": "Retire legacy shell and duplicate state classes with complete query migration; preserve CSS declarations, current theme and layout behavior.",
       "newScenariosDefined": 3,
       "localNewScenariosPassed": 3,
-      "htmlCleanupPassed": 9,
+      "cssCleanupPassed": 64,
+      "localContractBrowserPassed": 11,
       "modelKernelChanged": false,
       "nativeProductionChanged": false,
       "dependenciesChanged": false,
       "productionModuleCount": 570,
-      "businessGlobalWrites": 0,
-      "productionInlineEvents": 0,
-      "removedHtmlHandlers": 10,
-      "exactCommitWindowsPending": false,
-      "localContractBrowserPassed": 11,
-      "frontendSourceSha256": "f8ed6b0de4d8680f67f2d40f7166f999152d42a06a6cae1fa5769bcc96d369f5",
-      "ciPublicHtmlTriggers": true,
-      "sourceReviewCount": 200,
-      "localBuiltAppPassed": 75,
-      "builtAppConsoleErrors": 0,
-      "builtAppExceptions": 0,
-      "browserValidation": {
-        "failedFirstRun": {
-          "node": "24.16.0",
-          "undici": "7.25.0",
-          "passed": 37,
-          "failed": 38,
-          "firstFailure": "CDP connection closed at first export scenario; no assertion relaxation.",
-          "log": "Temp/mdr-r1604-browser-app.log"
-        },
-        "passedRun": {
-          "node": "24.19.0",
-          "undici": "7.29.0",
-          "passed": 75,
-          "failed": 0,
-          "log": "Temp/mdr-r1604-browser-app-runtime24.log"
-        },
-        "conclusion": "Same built source and all original scenarios passed with the previously used bundled runtime. Lower-level cause of first transport closure not proven."
-      },
+      "retiredShellClassNames": 13,
+      "retiredShellClassInstances": 14,
+      "retiredStateClassNames": 10,
+      "customPropertiesAudited": 249,
+      "duplicateCustomProperties": 0,
+      "cssDeclarationsEquivalent": true,
+      "exactCommitWindowsPending": true,
       "finalBuild": {
-        "sourceSha256": "f8ed6b0de4d8680f67f2d40f7166f999152d42a06a6cae1fa5769bcc96d369f5",
+        "sourceSha256": "6949481349c47d036b85e797d0e46d50700c742d7fa800687941aa869ae834f3",
         "inputs": 511,
         "outputs": 137,
-        "mainKb": 586.78,
+        "mainKb": 586.23,
         "initialBudgetBytes": 500000,
         "asyncBudgetBytes": 700000
       },
-      "visibleMarkupPreservedExceptRemovedHandlers": true,
+      "sourceReviewCount": 230,
       "snapshotInputs": 1132,
-      "deletionCandidates": 104,
-      "deletionAuthorized": false,
       "protectedSourcesUnchanged": 10,
-      "localRecursiveNodePassed": 2740,
+      "localBuiltAppPassed": 75,
+      "builtAppConsoleErrors": 0,
+      "builtAppExceptions": 0,
+      "localBrowserEnvironment": {
+        "platform": "Windows",
+        "node": "24.19.0",
+        "undici": "7.29.0",
+        "actualPagePassed": 75
+      },
+      "firstCumulative": {
+        "passed": 2742,
+        "failed": 1,
+        "reason": "Three unchanged event producers now have authorized class-only migrations; frozen R15 catalogue bytes retained and exact class-transform proof added."
+      },
+      "telemetryCataloguePassed": 24,
+      "localRecursiveNodePassed": 2743,
       "localRepositoryFiles": 362,
       "localRepositoryDirectories": 16,
       "fourArchitectureGatesPassed": true,
-      "finalDeliveryContractsPassed": 9
+      "finalDeliveryContractsPassed": 64
     },
     "priorStageAcceptance": {
       "stage": "R15.9",
@@ -12926,6 +13038,68 @@
           }
         },
         "nativeProductionBehaviorChanged": false
+      },
+      {
+        "stage": "R16.4",
+        "baselineCommit": "40cea4fb83e17c5c0b1df79c3d2b38c3f20e8f1c",
+        "branch": "codex/r16-stage",
+        "record": "docs/R16-04-DETAILS.md",
+        "status": "accepted-exact-commit-windows-ci",
+        "scope": "Remove ten inert HTML inline handlers; preserve minimal index, current visible UI, external icons and ModalShell; compatibility retirement stays R16-08.",
+        "newScenariosDefined": 3,
+        "localNewScenariosPassed": 3,
+        "htmlCleanupPassed": 9,
+        "modelKernelChanged": false,
+        "nativeProductionChanged": false,
+        "dependenciesChanged": false,
+        "productionModuleCount": 570,
+        "businessGlobalWrites": 0,
+        "productionInlineEvents": 0,
+        "removedHtmlHandlers": 10,
+        "exactCommitWindowsPending": false,
+        "localContractBrowserPassed": 11,
+        "frontendSourceSha256": "f8ed6b0de4d8680f67f2d40f7166f999152d42a06a6cae1fa5769bcc96d369f5",
+        "ciPublicHtmlTriggers": true,
+        "sourceReviewCount": 200,
+        "localBuiltAppPassed": 75,
+        "builtAppConsoleErrors": 0,
+        "builtAppExceptions": 0,
+        "browserValidation": {
+          "failedFirstRun": {
+            "node": "24.16.0",
+            "undici": "7.25.0",
+            "passed": 37,
+            "failed": 38,
+            "firstFailure": "CDP connection closed at first export scenario; no assertion relaxation.",
+            "log": "Temp/mdr-r1604-browser-app.log"
+          },
+          "passedRun": {
+            "node": "24.19.0",
+            "undici": "7.29.0",
+            "passed": 75,
+            "failed": 0,
+            "log": "Temp/mdr-r1604-browser-app-runtime24.log"
+          },
+          "conclusion": "Same built source and all original scenarios passed with the previously used bundled runtime. Lower-level cause of first transport closure not proven."
+        },
+        "finalBuild": {
+          "sourceSha256": "f8ed6b0de4d8680f67f2d40f7166f999152d42a06a6cae1fa5769bcc96d369f5",
+          "inputs": 511,
+          "outputs": 137,
+          "mainKb": 586.78,
+          "initialBudgetBytes": 500000,
+          "asyncBudgetBytes": 700000
+        },
+        "visibleMarkupPreservedExceptRemovedHandlers": true,
+        "snapshotInputs": 1132,
+        "deletionCandidates": 104,
+        "deletionAuthorized": false,
+        "protectedSourcesUnchanged": 10,
+        "localRecursiveNodePassed": 2740,
+        "localRepositoryFiles": 362,
+        "localRepositoryDirectories": 16,
+        "fourArchitectureGatesPassed": true,
+        "finalDeliveryContractsPassed": 9
       }
     ],
     "migratedReviewedSources": [
@@ -13312,6 +13486,60 @@
         "blobSha": "5fb5afccb7bddb39119ff89a0295ff28780e09af",
         "stage": "R16.4",
         "receiver": "docs/R16-04-DETAILS.md"
+      },
+      {
+        "path": ".github/workflows/r12-14.yml",
+        "blobSha": "db30cd402db3c5a7d74c43bf33d245eb6a0e0248",
+        "stage": "R16.5",
+        "receiver": "docs/R16-05-DETAILS.md"
+      },
+      {
+        "path": "src/features/layout/workspace-preferences.js",
+        "blobSha": "dafe6af09fd6bf20fffe204d7379149107e4778b",
+        "stage": "R16.5",
+        "receiver": "docs/R16-05-DETAILS.md"
+      },
+      {
+        "path": "src/main.js",
+        "blobSha": "7cf171d7b391486475a4d0094c5b64f9e703c672",
+        "stage": "R16.5",
+        "receiver": "docs/R16-05-DETAILS.md"
+      },
+      {
+        "path": "src/runtime/e2e-bridge.js",
+        "blobSha": "f830edc6fb71ef0d2d34740cb84cad55360023d7",
+        "stage": "R16.5",
+        "receiver": "docs/R16-05-DETAILS.md"
+      },
+      {
+        "path": "src/runtime/link-preview.js",
+        "blobSha": "248bbba93b73ac49cf2db50ff99e917bcd110c39",
+        "stage": "R16.5",
+        "receiver": "docs/R16-05-DETAILS.md"
+      },
+      {
+        "path": "tests/e2e/run-browser-tests.mjs",
+        "blobSha": "72830656fe110a89119ba3a0eb80b97030454ba9",
+        "stage": "R16.5",
+        "receiver": "docs/R16-05-DETAILS.md"
+      },
+      {
+        "path": "docs/audit/r16-01-deletion-inventory.json",
+        "blobSha": "cc296f767c82910bbd9c0f067d35fc76fe3c0526",
+        "stage": "R16.5",
+        "receiver": "docs/R16-05-DETAILS.md"
+      },
+      {
+        "path": "tests/stage-15-event-catalogue.test.mjs",
+        "blobSha": "84a3ae63b0042e06d02afc3dc55fbfe00595c864",
+        "stage": "R16.5-verification",
+        "receiver": "docs/R16-05-DETAILS.md"
+      },
+      {
+        "path": "docs/audit/r16-01-deletion-inventory.json",
+        "blobSha": "7cf35d05fabd8e5f75ea74b23055fa4414e9646a",
+        "stage": "R16.5-verification",
+        "receiver": "docs/R16-05-DETAILS.md"
       }
     ],
     "currentPhaseAcceptance": {

@@ -49,9 +49,7 @@ export function createPageFullscreenController({
   }
 
   function project(active) {
-    app.classList.toggle('page-fullscreen', active);
     app.classList.toggle('is-page-fullscreen', active);
-    body.classList.toggle('page-fullscreen-active', active);
     body.classList.toggle('is-page-fullscreen-active', active);
   }
 

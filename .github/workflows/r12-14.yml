@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R16-04 clean HTML entry and cumulative regression · ${{ github.sha }}
+run-name: R16-05 canonical CSS classes and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -289,6 +289,12 @@ jobs:
         shell: bash
         run: node --test tests/stage-15-log-cleanup.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/log-cleanup.log"
 
+      - name: R16-05 CSS ownership, canonical layout states and Preview visibility
+        if: ${{ !cancelled() }}
+        run: |
+          node --test tests/ui/app-shell.test.mjs tests/ui/css-tokens.test.mjs tests/ui/style-layering.test.mjs \
+            tests/unit/layout/*.test.mjs tests/unit/preview/preview-layout-stability.test.mjs \
+            2>&1 | tee "$RUNNER_TEMP/r12-14/css-cleanup-tests.log"
       - name: R16-04 minimal HTML, zero inline events and explicit Menu commands
         if: ${{ !cancelled() }}
         run: |

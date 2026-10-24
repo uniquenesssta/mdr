@@ -1,10 +1,12 @@
 # Markdown Editor
 
-R16-04已正式验收（804950f / CI40060322282）：七组Windows及全部步骤成功，同提交accepted=true、Rust301、全仓Node2740、HTML9、浏览器11＋75及原生大文档4路通过。继续codex/r16-stage开始R16-05 CSS清理；16.6未开始，推送后不轮询。 [04验收](docs/R16-04-DETAILS.md#正式验收2026-10-24)。
+R16-04已正式验收（804950f / CI40060322282）。R16-05已清理旧壳查询与重复状态class，CSS声明等价；专项64/64、全仓2743/2743、浏览器11＋75、构建及四门禁通过，历史事件SHA和3处类名迁移均核验。待精确Windows CI；16.6未开始，推送后不轮询。 [05详情](docs/R16-05-DETAILS.md)。
 
 历史与文档索引见 [docs/README.md](docs/README.md)。
 
 ## Change Log
+
+- 2026-10-24：R16-05清理旧壳class及重复状态别名，Preview/工具栏/窗口查询同步迁移，保持CSS声明、主题、断点和持久化；待完整Windows CI验收。 [详情](docs/R16-05-DETAILS.md)。
 
 - 2026-10-24：R16-04已正式验收（804950f / CI40060322282）：七组Windows及全部步骤成功，同提交accepted=true、Rust301、全仓Node2740、HTML9、浏览器11＋75及原生大文档4路通过。继续codex/r16-stage开始R16-05 CSS清理；16.6未开始，推送后不轮询。 [04验收](docs/R16-04-DETAILS.md#正式验收2026-10-24)。
 

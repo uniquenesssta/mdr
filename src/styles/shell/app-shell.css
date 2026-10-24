@@ -1,12 +1,8 @@
 /* Responsibility: Top-level application shell surface and chrome geometry. */
 
 .l-app-shell {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-}
-
-.l-app-shell {
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   padding: 0 var(--space-lg) var(--space-md);
   background:

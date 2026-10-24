@@ -8,7 +8,7 @@ import { createPreviewScheduler } from '../../../src/features/preview/pipeline/p
 function createClassList(collapsed = false) {
   let value = Boolean(collapsed);
   return {
-    contains(name) { return name === 'collapsed' && value; },
+    contains(name) { return name === 'is-collapsed' && value; },
     setCollapsed(next) { value = Boolean(next); }
   };
 }
@@ -150,6 +150,23 @@ test('Atomic 7.9 hidden preview retries without rendering and observer recovery 
   await h.runOne(h.frames);
   assert.equal(h.counters.geometry, 2);
   assert.equal(h.records.at(-1)[1].details.reason, 'preview-became-visible');
+});
+
+test('R16-05 canonical collapse state blocks nonzero Preview geometry until the pane reopens', async () => {
+  const h = createHarness({ collapsed: true });
+  h.stability.start();
+  h.stability.requestRefresh({ forceRender: true, reason: 'canonical-collapse' });
+  await h.runOne(h.frames);
+  assert.equal(h.counters.renders, 0);
+  assert.equal(h.timers.size, 1);
+  h.pane.classList.setCollapsed(false);
+  h.stability.requestRefresh({ forceRender: true, reason: 'canonical-reopen' });
+  assert.equal(h.timers.size, 0);
+  await h.settleVisible();
+  assert.equal(h.counters.renders, 1);
+  h.stability.destroy();
+  assert.equal(h.frames.size, 0);
+  assert.equal(h.timers.size, 0);
 });
 
 test('Atomic 7.9 maximum attempts bounds unstable visible layout and still commits the latest geometry', async () => {

@@ -36,10 +36,10 @@ function getLayoutMode() {
     || localStorage.getItem('md_editor_view_mode')
     || 'both';
   if (document.body.classList.contains('hybrid-view-mode')) return 'hybrid';
-  const editorPane = document.querySelector('.editor-pane');
-  const previewPane = document.querySelector('.preview-pane');
-  const editorCollapsed = editorPane?.classList.contains('collapsed');
-  const previewCollapsed = previewPane?.classList.contains('collapsed');
+  const editorPane = document.querySelector('.f-editor-pane');
+  const previewPane = document.querySelector('.f-preview-pane');
+  const editorCollapsed = editorPane?.classList.contains('is-collapsed');
+  const previewCollapsed = previewPane?.classList.contains('is-collapsed');
   if (editorCollapsed && !previewCollapsed) return 'preview';
   if (!editorCollapsed && previewCollapsed) return 'edit';
   return ['both', 'hybrid', 'edit', 'preview'].includes(stored) ? stored : 'both';

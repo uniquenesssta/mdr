@@ -21,7 +21,8 @@ test('Atomic 6.4 SidebarLayout projects authoritative visibility and auto-collap
   assert.equal(sidebar.classes.has('is-hidden'), false);
   assert.equal(sidebar.attributes.get('aria-hidden'), 'false');
   state.setSidebar({ autoCollapsed: true });
-  assert.equal(sidebar.classes.has('hidden'), true);
+  assert.equal(sidebar.classes.has('is-hidden'), true);
+  assert.equal(sidebar.classes.has('hidden'), false);
   assert.equal(resizer.classes.has('is-hidden'), true);
   assert.equal(sidebar.attributes.get('aria-hidden'), 'true');
   assert.equal(geometry.length, 1);

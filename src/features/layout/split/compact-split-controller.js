@@ -50,7 +50,6 @@ export function createCompactSplitController({
   const width = () => Math.max(0, Number(main.getBoundingClientRect?.().width) || Number(main.clientWidth) || 0);
 
   function setClass(active) {
-    main.classList?.toggle('compact-split', Boolean(active));
     main.classList?.toggle('is-compact-split', Boolean(active));
   }
 

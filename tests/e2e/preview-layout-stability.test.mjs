@@ -19,7 +19,7 @@ async function waitForLayout(predicate, description) {
       state: window.__layoutState,
       width: document.getElementById('preview')?.clientWidth,
       height: document.getElementById('preview')?.clientHeight,
-      collapsed: document.getElementById('pane')?.classList.contains('collapsed'),
+      collapsed: document.getElementById('pane')?.classList.contains('is-collapsed'),
       visibility: document.visibilityState,
       pending: window.__layoutScheduler?.hasPending('layout')
     }))()`).catch(diagnosticError => ({ diagnosticError: diagnosticError.message }));
@@ -31,8 +31,8 @@ async function waitForLayout(predicate, description) {
 
 try {
   await browser.page.setDocumentContent(`<!doctype html><html><head><base href="${virtualHost.origin}/"><style>
-    html,body{margin:0;width:100%;height:100%}.preview-pane{width:420px;height:260px}.preview-pane.collapsed{display:none}#preview{width:100%;height:100%;overflow:auto}.markdown-body{min-height:40px}
-  </style></head><body><section id="pane" class="preview-pane collapsed"><div id="preview"></div></section></body></html>`);
+    html,body{margin:0;width:100%;height:100%}.f-preview-pane{width:420px;height:260px}.f-preview-pane.is-collapsed{display:none}#preview{width:100%;height:100%;overflow:auto}.markdown-body{min-height:40px}
+  </style></head><body><section id="pane" class="f-preview-pane is-collapsed"><div id="preview"></div></section></body></html>`);
   await browser.page.evaluate(`(async()=>{
     const base=${JSON.stringify(virtualHost.origin)};
     const [{createPreviewCancellation},{createPreviewScheduler},{createPreviewLayoutStability}]=await Promise.all([
@@ -69,7 +69,7 @@ try {
   await new Promise(resolvePromise => setTimeout(resolvePromise, 90));
   assert.equal(await browser.page.evaluate(`window.__layoutState.renders`), 0, 'hidden preview must not render into zero geometry');
 
-  await browser.page.evaluate(`document.getElementById('pane').classList.remove('collapsed')`);
+  await browser.page.evaluate(`document.getElementById('pane').classList.remove('is-collapsed')`);
   await waitForLayout(
     () => window.__layoutState?.renders >= 1 && window.__layoutState?.geometry >= 2
       && !window.__layoutScheduler.hasPending('layout'),

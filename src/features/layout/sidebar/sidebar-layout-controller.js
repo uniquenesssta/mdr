@@ -36,10 +36,8 @@ export function createSidebarLayoutController({ state, sidebar, resizer, onGeome
     const visible = Boolean(current.visible && !current.autoCollapsed);
     const previousVisible = projectedVisible;
     projectedVisible = visible;
-    sidebar.classList.toggle('hidden', !visible);
     sidebar.classList.toggle('is-hidden', !visible);
     sidebar.setAttribute?.('aria-hidden', visible ? 'false' : 'true');
-    resizer.classList.toggle('hidden', !visible);
     resizer.classList.toggle('is-hidden', !visible);
     if (notify && previousVisible !== null && previousVisible !== visible) {
       onGeometryChanged(Object.freeze({ reason, visible, previousVisible }));

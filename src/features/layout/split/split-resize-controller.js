@@ -63,9 +63,7 @@ export function createSplitResizeController({
   };
 
   function setPresentation(active) {
-    body.classList?.toggle('resizing', active);
     body.classList?.toggle('is-resizing', active);
-    resizer.classList?.toggle('dragging', active);
     resizer.classList?.toggle('is-dragging', active);
     body.style.cursor = active ? 'col-resize' : '';
     body.style.userSelect = active ? 'none' : '';

@@ -201,7 +201,7 @@ export function createLinkPreview({ document, window, links: platformLinks, reco
     urlElement.title = parsed.url;
     overlay.classList.add('is-loading');
     visibility.show();
-    document.documentElement.classList.add('link-preview-open', 'has-link-preview');
+    document.documentElement.classList.add('has-link-preview');
     frame.src = parsed.url;
     requestAnimationFrame(() => {
       if (visibility?.isVisible() && !focusScope?.isDestroyed()) focusScope?.focusInitial({ preventScroll: true });
@@ -223,7 +223,7 @@ export function createLinkPreview({ document, window, links: platformLinks, reco
     focusScope = null;
     overlay.classList.remove('is-loading');
     const hidden = visibility.hide();
-    document.documentElement.classList.remove('link-preview-open', 'has-link-preview');
+    document.documentElement.classList.remove('has-link-preview');
     currentUrl = '';
 
     hidden.then(completed => {
@@ -337,7 +337,7 @@ export function createLinkPreview({ document, window, links: platformLinks, reco
     release(() => visibility?.destroy()); visibility = null;
     release(() => { if (frame) frame.src = 'about:blank'; });
     release(() => overlay?.remove()); overlay = null; frame = null; currentUrl = '';
-    release(() => document.documentElement.classList.remove('link-preview-open', 'has-link-preview'));
+    release(() => document.documentElement.classList.remove('has-link-preview'));
     if (errors.length) throw new AggregateError(errors, 'Link preview cleanup failed');
     return true;
   }

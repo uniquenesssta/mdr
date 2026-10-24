@@ -82,7 +82,7 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
         item.classList.toggle('toolbar-item-hidden', new Set(coreSettingsStorePort.get('toolbarHiddenItems')).has(item.dataset.toolbarItem));
       });
 
-      const formatGroup = document.querySelector('.editor-toolbar .format-group');
+      const formatGroup = document.querySelector('.l-toolbar-shell .format-group');
       if (!formatGroup) return;
       const children = Array.from(formatGroup.children);
       children.filter(child => child.classList.contains('divider'))
@@ -111,9 +111,8 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
       else document.body.style.removeProperty('--color-editor-text');
       if (coreSettingsStorePort.get('activeLineColor')) document.body.style.setProperty('--color-editor-active-line', coreSettingsStorePort.get('activeLineColor'));
       else document.body.style.removeProperty('--color-editor-active-line');
-      const toolbar = document.querySelector('.editor-toolbar');
+      const toolbar = document.querySelector('.l-toolbar-shell');
       if (toolbar) {
-        toolbar.classList.toggle('hidden', !coreSettingsStorePort.get('toolbarVisible'));
         toolbar.classList.toggle('is-hidden', !coreSettingsStorePort.get('toolbarVisible'));
       }
       updateToolbarItemVisibility();

@@ -115,11 +115,8 @@ export function createSidebarResizeController({
   }
 
   function setActivePresentation(active) {
-    body.classList.toggle('resizing', active);
-    body.classList.toggle('sidebar-resizing', active);
     body.classList.toggle('is-resizing', active);
     body.classList.toggle('is-sidebar-resizing', active);
-    resizer.classList?.toggle('dragging', active);
     resizer.classList?.toggle('is-dragging', active);
     body.style.cursor = active ? 'col-resize' : '';
     body.style.userSelect = active ? 'none' : '';

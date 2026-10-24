@@ -39,9 +39,9 @@ test('Atomic 6.6 page fullscreen restores persisted state without rewriting pers
   const h = createHarness('true');
   h.controller.start();
   assert.equal(h.state.snapshot.fullscreen.page, true);
-  assert.equal(h.app.classList.contains('page-fullscreen'), true);
+  assert.equal(h.app.classList.contains('page-fullscreen'), false);
   assert.equal(h.app.classList.contains('is-page-fullscreen'), true);
-  assert.equal(h.body.classList.contains('page-fullscreen-active'), true);
+  assert.equal(h.body.classList.contains('page-fullscreen-active'), false);
   assert.equal(h.body.classList.contains('is-page-fullscreen-active'), true);
   assert.deepEqual(h.writes, []);
   assert.equal(h.geometry.length, 1);
@@ -59,7 +59,7 @@ test('Atomic 6.6 page fullscreen toggles from LayoutState authority and persists
   });
   assert.equal(h.state.snapshot.fullscreen.page, true);
   assert.deepEqual(h.writes, [[PAGE_FULLSCREEN_STORAGE_KEY, 'true']]);
-  assert.equal(h.app.classList.contains('page-fullscreen'), true);
+  assert.equal(h.app.classList.contains('page-fullscreen'), false);
   assert.equal(h.body.classList.contains('is-page-fullscreen-active'), true);
   assert.equal(h.geometry.length, 1);
   h.controller.destroy();

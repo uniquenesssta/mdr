@@ -63,7 +63,7 @@ export function createToolbarBoundaryController({
 
   function evaluate(reason = 'manual') {
     assertActive();
-    if (toolbar.classList.contains('hidden')) {
+    if (toolbar.classList.contains('is-hidden')) {
       toolbar.classList.remove('toolbar-boundary-wrap');
       wrapped = false;
       return Object.freeze({ wrapped: false, hidden: true, reason });

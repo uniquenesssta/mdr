@@ -96,7 +96,8 @@ test('Atomic 6.2 restores width, captures one pointer, projects live width and p
   assert.equal(down.defaultPrevented, true);
   assert.equal(fixture.resizer.hasPointerCapture(7), true);
   assert.equal(fixture.state.snapshot.resize.sidebarActive, true);
-  assert.equal(fixture.body.classList.contains('sidebar-resizing'), true);
+  assert.equal(fixture.body.classList.contains('sidebar-resizing'), false);
+  assert.equal(fixture.body.classList.contains('is-sidebar-resizing'), true);
 
   fixture.resizer.emit('pointermove', { pointerId: 7, clientX: 440 });
   assert.equal(fixture.state.snapshot.sidebar.width, 400);
@@ -107,7 +108,7 @@ test('Atomic 6.2 restores width, captures one pointer, projects live width and p
   assert.equal(fixture.state.snapshot.resize.sidebarActive, false);
   assert.equal(fixture.storage.value(SIDEBAR_WIDTH_STORAGE_KEY), '400');
   assert.equal(fixture.resizer.hasPointerCapture(7), false);
-  assert.equal(fixture.body.classList.contains('sidebar-resizing'), false);
+  assert.equal(fixture.body.classList.contains('is-sidebar-resizing'), false);
   assert.deepEqual(fixture.geometry.map(event => event.reason), ['pointer-move', 'pointer-end']);
 });
 

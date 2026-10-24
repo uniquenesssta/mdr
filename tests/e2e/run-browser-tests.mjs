@@ -582,6 +582,8 @@ async function runAppSuite() {
           implicitHandlers:Array.from(document.querySelectorAll('*')).filter(node=>Array.from(node.attributes).some(attribute=>/^on(?:click|change|input)$/.test(attribute.name))).length,
           appCount:document.querySelectorAll('.l-app-shell').length,
           legacyAppHookCount:document.querySelectorAll('.app').length,
+          legacyShellAliases:Array.from(root.querySelectorAll('*')).flatMap(node=>Array.from(node.classList))
+            .filter(name=>['app','menu-bar','editor-toolbar','workspace','sidebar','sidebar-resizer','main','pane','editor-pane','preview-pane','resizer','statusbar','overlay-root'].includes(name)),
           counts,
           appChildren:Array.from(shell?.children||[]).map(element=>element.className),
           workspaceChildren:Array.from(shell?.querySelector('.l-workspace')?.children||[]).map(element=>element.id||element.className),
@@ -599,11 +601,12 @@ async function runAppSuite() {
       assert.deepEqual(snapshot.businessGlobals, []);
       assert.equal(snapshot.implicitHandlers, 0);
       assert.equal(snapshot.appCount, 1);
-      assert.equal(snapshot.legacyAppHookCount, 1);
+      assert.equal(snapshot.legacyAppHookCount, 0);
+      assert.deepEqual(snapshot.legacyShellAliases, []);
       assert.deepEqual(snapshot.counts, {menu:1,toolbar:1,sidebar:1,editor:1,preview:1,status:1,overlay:1});
-      assert.deepEqual(snapshot.appChildren, ['l-menu-bar menu-bar','l-toolbar-shell editor-toolbar','l-workspace workspace','l-status-bar statusbar']);
-      assert.deepEqual(snapshot.workspaceChildren, ['sidebar','sidebar-resizer','l-split-pane main']);
-      assert.deepEqual(snapshot.mainChildren, ['l-pane f-editor-pane pane editor-pane','resizer','l-pane f-preview-pane pane preview-pane']);
+      assert.deepEqual(snapshot.appChildren, ['l-menu-bar','l-toolbar-shell','l-workspace','l-status-bar']);
+      assert.deepEqual(snapshot.workspaceChildren, ['sidebar','sidebar-resizer','l-split-pane']);
+      assert.deepEqual(snapshot.mainChildren, ['l-pane f-editor-pane','resizer','l-pane f-preview-pane']);
       assert.equal(snapshot.overlayParent, 'app-root');
       assert.equal(snapshot.settingsParent, 'overlay-root');
       assert.equal(snapshot.compatibilityPortHostParent, 'overlay-root');
@@ -716,7 +719,7 @@ async function runAppSuite() {
       };
       await setLanguage('en');
       await browser.page.waitFor(() => document.documentElement.lang === 'en', { description: 'committed English locale' });
-      const applied = await browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorI18nPort,store=host.markdownEditorSettingsStorePort,button=document.getElementById('editor-collapse-btn'),collapsed=document.querySelector('.editor-pane')?.classList.contains('collapsed');return {locale:port.locale,committed:store.get('language'),stored:localStorage.getItem('md_editor_language'),htmlLang:document.documentElement.lang,dynamicMatches:Boolean(button&&button.title===port.t(collapsed?'expandEditor':'collapseEditor')),globals:{i18n:typeof window.i18n,currentLang:typeof window.currentLang,setLanguage:typeof window.setLanguage}};})()");
+      const applied = await browser.page.evaluate("(()=>{const host=document.getElementById('compatibility-business-ports'),port=host.markdownEditorI18nPort,store=host.markdownEditorSettingsStorePort,button=document.getElementById('editor-collapse-btn'),collapsed=document.querySelector('.f-editor-pane')?.classList.contains('is-collapsed');return {locale:port.locale,committed:store.get('language'),stored:localStorage.getItem('md_editor_language'),htmlLang:document.documentElement.lang,dynamicMatches:Boolean(button&&button.title===port.t(collapsed?'expandEditor':'collapseEditor')),globals:{i18n:typeof window.i18n,currentLang:typeof window.currentLang,setLanguage:typeof window.setLanguage}};})()");
       assert.deepEqual(applied, {locale:'en',committed:'en',stored:'en',htmlLang:'en',dynamicMatches:true,globals:{i18n:'undefined',currentLang:'undefined',setLanguage:'undefined'}});
       await setLanguage('zh-CN');
       await browser.page.waitFor(() => document.documentElement.lang === 'zh-CN', { description: 'restore zh-CN locale' });
@@ -1172,7 +1175,7 @@ async function runAppSuite() {
       await browser.page.setViewport({ width: 1800, height: 900 });
       await browser.page.waitFor(() => window.innerWidth === 1800 && !document.documentElement.classList.contains('is-compact-shell'), { description: 'wide toolbar viewport' });
       const before = await browser.page.evaluate(`(()=>{
-        const toolbar=document.querySelector('.editor-toolbar');
+        const toolbar=document.querySelector('.l-toolbar-shell');
         const format=toolbar?.querySelector('.format-group');
         const actions=toolbar?.querySelector('.editor-actions');
         if(!toolbar||!format||!actions)throw new Error('Toolbar Boundary fixture unavailable');
@@ -1189,15 +1192,15 @@ async function runAppSuite() {
       try {
         await browser.page.evaluate(`(()=>{
           const target=${JSON.stringify(targetWidth)};
-          const toolbar=document.querySelector('.editor-toolbar');
+          const toolbar=document.querySelector('.l-toolbar-shell');
           toolbar.style.width=target+'px';
           toolbar.style.maxWidth=target+'px';
           toolbar.style.boxSizing='border-box';
           toolbar.style.alignSelf='flex-start';
         })()`);
-        await browser.page.waitFor(() => document.querySelector('.editor-toolbar')?.classList.contains('toolbar-boundary-wrap') === true, { description: 'content-width toolbar wrapping' });
+        await browser.page.waitFor(() => document.querySelector('.l-toolbar-shell')?.classList.contains('toolbar-boundary-wrap') === true, { description: 'content-width toolbar wrapping' });
         const wrapped = await browser.page.evaluate(`(()=>{
-          const toolbar=document.querySelector('.editor-toolbar');
+          const toolbar=document.querySelector('.l-toolbar-shell');
           const format=toolbar.querySelector('.format-group');
           const actions=toolbar.querySelector('.editor-actions');
           const formatRect=format.getBoundingClientRect();
@@ -1215,7 +1218,7 @@ async function runAppSuite() {
         assert.deepEqual(wrapped.hidden, before.hidden, 'responsive boundary must not hide toolbar tools');
       } finally {
         await browser.page.evaluate(`(()=>{
-          const toolbar=document.querySelector('.editor-toolbar');
+          const toolbar=document.querySelector('.l-toolbar-shell');
           if(!toolbar)return;
           toolbar.style.removeProperty('width');
           toolbar.style.removeProperty('max-width');
@@ -1223,9 +1226,9 @@ async function runAppSuite() {
           toolbar.style.removeProperty('align-self');
         })()`);
       }
-      await browser.page.waitFor(() => document.querySelector('.editor-toolbar')?.classList.contains('toolbar-boundary-wrap') === false, { description: 'wide toolbar unwrap restoration' });
+      await browser.page.waitFor(() => document.querySelector('.l-toolbar-shell')?.classList.contains('toolbar-boundary-wrap') === false, { description: 'wide toolbar unwrap restoration' });
       const restored = await browser.page.evaluate(`(()=>({
-        hidden:Array.from(document.querySelectorAll('.editor-toolbar [data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')])
+        hidden:Array.from(document.querySelectorAll('.l-toolbar-shell [data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')])
       }))()`);
       assert.deepEqual(restored.hidden, before.hidden);
       await browser.page.setViewport({ width: 1440, height: 1000 });
@@ -1242,7 +1245,7 @@ async function runAppSuite() {
         localStorage.setItem('md_editor_page_fullscreen','false');
         return {
           active:layout.pageFullscreen,
-          app:document.querySelector('.app')?.classList.contains('is-page-fullscreen')||false,
+          app:document.querySelector('.l-app-shell')?.classList.contains('is-page-fullscreen')||false,
           body:document.body.classList.contains('is-page-fullscreen-active')
         };
       })()`);
@@ -1253,18 +1256,18 @@ async function runAppSuite() {
       await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.pageFullscreen === true, { description: 'page fullscreen enter' });
       let snapshot = await browser.page.evaluate(`(()=>({
         state:document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.pageFullscreen,
-        appLegacy:document.querySelector('.app').classList.contains('page-fullscreen'),
-        appCurrent:document.querySelector('.app').classList.contains('is-page-fullscreen'),
+        appLegacy:document.querySelector('.l-app-shell').classList.contains('page-fullscreen'),
+        appCurrent:document.querySelector('.l-app-shell').classList.contains('is-page-fullscreen'),
         bodyLegacy:document.body.classList.contains('page-fullscreen-active'),
         bodyCurrent:document.body.classList.contains('is-page-fullscreen-active'),
         persisted:localStorage.getItem('md_editor_page_fullscreen')
       }))()`);
-      assert.deepEqual(snapshot, { state:true, appLegacy:true, appCurrent:true, bodyLegacy:true, bodyCurrent:true, persisted:'true' });
+      assert.deepEqual(snapshot, { state:true, appLegacy:false, appCurrent:true, bodyLegacy:false, bodyCurrent:true, persisted:'true' });
       await browser.page.evaluate(`document.getElementById('compatibility-business-ports').markdownEditorEditorUiCommandPort.invoke('togglePageFullscreen')`);
       await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.pageFullscreen === false, { description: 'page fullscreen exit' });
       snapshot = await browser.page.evaluate(`(()=>({
         state:document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.pageFullscreen,
-        app:document.querySelector('.app').classList.contains('is-page-fullscreen'),
+        app:document.querySelector('.l-app-shell').classList.contains('is-page-fullscreen'),
         body:document.body.classList.contains('is-page-fullscreen-active'),
         persisted:localStorage.getItem('md_editor_page_fullscreen')
       }))()`);
@@ -1512,8 +1515,8 @@ async function runAppSuite() {
       const inspectMermaid = `selector=>{const svg=document.querySelector(selector);const style=svg?getComputedStyle(svg):null;return {role:svg?.getAttribute('role'),label:svg?.getAttribute('aria-label'),className:svg?.getAttribute('class')||'',heightAttribute:svg?.getAttribute('height'),inlineStyle:svg?.getAttribute('style'),maxWidth:style?.maxWidth||'',backgroundColor:style?.backgroundColor||''}}`;
       const hybrid = await browser.page.evaluate(`(${inspectMermaid})('[data-hybrid-block-type=\"mermaid\"] svg')`);
       await setAppLayout(browser.page, 'preview');
-      await browser.page.waitFor(() => Boolean(document.querySelector('.preview-pane .mermaid svg')), { timeoutMs: 10000, description: 'preview Mermaid SVG' });
-      const previewResult = await browser.page.evaluate(`(${inspectMermaid})('.preview-pane .mermaid svg')`);
+      await browser.page.waitFor(() => Boolean(document.querySelector('.f-preview-pane .mermaid svg')), { timeoutMs: 10000, description: 'preview Mermaid SVG' });
+      const previewResult = await browser.page.evaluate(`(${inspectMermaid})('.f-preview-pane .mermaid svg')`);
       assert.deepEqual(previewResult, hybrid);
       assert.match(hybrid.className, /(?:^|\s)f-mermaid-svg(?:\s|$)/);
       assert.equal(hybrid.heightAttribute, null);
@@ -1565,32 +1568,32 @@ async function runAppSuite() {
       assert.ok(Number(dragged.aria) >= 15 && Number(dragged.aria) <= 85);
 
       await browser.page.click('#preview-collapse-btn');
-      await browser.page.waitFor(() => document.querySelector('.preview-pane')?.classList.contains('is-collapsed'), { description: 'preview collapsed' });
+      await browser.page.waitFor(() => document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed'), { description: 'preview collapsed' });
       let collapsed=await browser.page.evaluate(`(()=>({
-        editor:document.querySelector('.editor-pane')?.classList.contains('is-collapsed'),
-        preview:document.querySelector('.preview-pane')?.classList.contains('is-collapsed'),
+        editor:document.querySelector('.f-editor-pane')?.classList.contains('is-collapsed'),
+        preview:document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed'),
         resizer:document.getElementById('resizer')?.classList.contains('is-hidden')
       }))()`);
       assert.deepEqual(collapsed,{editor:false,preview:true,resizer:true});
       await browser.page.waitForElementStable('#preview-collapse-btn', { description: 'preview collapse button after collapse' });
       await browser.page.click('#preview-collapse-btn');
-      await browser.page.waitFor(() => !document.querySelector('.preview-pane')?.classList.contains('is-collapsed'), { description: 'preview expanded' });
+      await browser.page.waitFor(() => !document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed'), { description: 'preview expanded' });
 
       await browser.page.evaluate(`(()=>{
-        const main=document.querySelector('.main'); main.style.flex='0 0 710px'; main.style.width='710px';
+        const main=document.querySelector('.l-split-pane'); main.style.flex='0 0 710px'; main.style.width='710px';
       })()`);
       await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactSplitActive === true, { description: 'compact split enter' });
-      await browser.page.evaluate(`(()=>{const main=document.querySelector('.main');main.style.flex='0 0 740px';main.style.width='740px';})()`);
+      await browser.page.evaluate(`(()=>{const main=document.querySelector('.l-split-pane');main.style.flex='0 0 740px';main.style.width='740px';})()`);
       await new Promise(resolve => setTimeout(resolve, 80));
       assert.equal(await browser.page.evaluate("document.getElementById('compatibility-business-ports').markdownEditorLayoutStatePort.compactSplitActive"), true);
-      await browser.page.evaluate(`(()=>{const main=document.querySelector('.main');main.style.flex='0 0 780px';main.style.width='780px';})()`);
+      await browser.page.evaluate(`(()=>{const main=document.querySelector('.l-split-pane');main.style.flex='0 0 780px';main.style.width='780px';})()`);
       await browser.page.waitFor(() => document.getElementById('compatibility-business-ports')?.markdownEditorLayoutStatePort?.compactSplitActive === false, { description: 'compact split hysteresis exit' });
       collapsed=await browser.page.evaluate(`(()=>({
-        editor:document.querySelector('.editor-pane')?.classList.contains('is-collapsed'),
-        preview:document.querySelector('.preview-pane')?.classList.contains('is-collapsed')
+        editor:document.querySelector('.f-editor-pane')?.classList.contains('is-collapsed'),
+        preview:document.querySelector('.f-preview-pane')?.classList.contains('is-collapsed')
       }))()`);
       assert.deepEqual(collapsed,{editor:false,preview:false});
-      await browser.page.evaluate(`(()=>{const main=document.querySelector('.main');main.style.removeProperty('flex');main.style.removeProperty('width');})()`);
+      await browser.page.evaluate(`(()=>{const main=document.querySelector('.l-split-pane');main.style.removeProperty('flex');main.style.removeProperty('width');})()`);
     });
 
     await test('application sidebar resize captures pointer, projects width and persists the final width', async () => {

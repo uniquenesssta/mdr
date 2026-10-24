@@ -114,11 +114,11 @@ test('Atomic 6.5 hidden toolbar clears boundary wrapping without changing toolba
   h.controller.start();
   h.flushFrame();
   assert.equal(h.toolbar.classList.contains('toolbar-boundary-wrap'), true);
-  h.toolbar.classList.add('hidden');
+  h.toolbar.classList.add('is-hidden');
   h.controller.refresh();
   h.flushFrame();
   assert.equal(h.toolbar.classList.contains('toolbar-boundary-wrap'), false);
-  assert.equal(h.toolbar.classList.contains('hidden'), true);
+  assert.equal(h.toolbar.classList.contains('is-hidden'), true);
   h.controller.destroy();
 });
 

@@ -256,7 +256,7 @@ const previewFocusControllerPort = mountClassicPreviewFocusControllerPort(compat
 const previewRenderCoordinator = createPreviewRenderCoordinator();
 const previewRenderCoordinatorPort = mountClassicPreviewRenderCoordinatorPort(compatibilityPlatformHost, previewRenderCoordinator);
 const previewLayoutRoot = document.getElementById('preview');
-const previewLayoutPane = document.querySelector('.preview-pane');
+const previewLayoutPane = document.querySelector('.f-preview-pane');
 const previewLayoutFrameHost = document.defaultView;
 if (!previewLayoutRoot) throw new Error('Preview host is missing.');
 if (!previewLayoutPane) throw new Error('Preview pane is missing.');
@@ -1262,7 +1262,7 @@ async function loadAppModules() {
 
     const toolbarView = createEditorToolbarView({
       root: toolbarRoot,
-      commandRoots: [document.querySelector('.menu-bar')],
+      commandRoots: [document.querySelector('.l-menu-bar')],
       commands: { execute: executeEditorAction },
       dialogs: { link: linkView, image: imageView, find: findView, mermaid: mermaidView, math: mathView },
       tableView,
@@ -1275,7 +1275,7 @@ async function loadAppModules() {
     featureViews.push(toolbarView);
 
     const editorPaneView = createEditorPaneView({
-      root: requireElement('.editor-pane', 'Editor pane'),
+      root: requireElement('.f-editor-pane', 'Editor pane'),
       editorElement: editorHost,
       collapse: pane => splitPaneController.togglePane(pane),
       onSelectionChange() {
@@ -1617,7 +1617,7 @@ async function loadAppModules() {
     compactShellController.start();
     pageFullscreenController = createPageFullscreenController({
       state: layoutState,
-      app: requireElement('.app', 'Application shell'),
+      app: requireElement('.l-app-shell', 'Application shell'),
       body: document.body,
       storage: platform.storage,
       onGeometryChanged() {
@@ -1678,12 +1678,12 @@ async function loadAppModules() {
         return result;
       }
     });
-    const editorPaneElement = requireElement('.editor-pane', 'Editor pane');
-    const previewPaneElement = requireElement('.preview-pane', 'Preview pane');
+    const editorPaneElement = requireElement('.f-editor-pane', 'Editor pane');
+    const previewPaneElement = requireElement('.f-preview-pane', 'Preview pane');
     const splitResizerElement = requireElement('#resizer', 'Split resize handle');
     splitResizeController = createSplitResizeController({
       state: layoutState,
-      main: requireElement('.main', 'Main split layout'),
+      main: requireElement('.l-split-pane', 'Main split layout'),
       editorPane: editorPaneElement,
       previewPane: previewPaneElement,
       resizer: splitResizerElement,
@@ -1713,7 +1713,7 @@ async function loadAppModules() {
     });
     compactSplitController = createCompactSplitController({
       state: layoutState,
-      main: requireElement('.main', 'Main split layout'),
+      main: requireElement('.l-split-pane', 'Main split layout'),
       editorPane: editorPaneElement,
       previewPane: previewPaneElement,
       paneController: splitPaneController,
@@ -1733,7 +1733,7 @@ async function loadAppModules() {
     compactSplitController.start();
     sidebarResizeController = createSidebarResizeController({
       state: layoutState,
-      workspace: requireElement('.workspace', 'Workspace'),
+      workspace: requireElement('.l-workspace', 'Workspace'),
       resizer: requireElement('#sidebar-resizer', 'Sidebar resize handle'),
       root: document.documentElement,
       body: document.body,
@@ -1876,7 +1876,7 @@ async function loadAppModules() {
       reportError(message, error) { console.error(message, error); }
     });
     const windowDragRegion = createWindowDragRegion({
-      target: requireElement('.menu-bar', 'Window drag region'),
+      target: requireElement('.l-menu-bar', 'Window drag region'),
       enabled: windowSupported,
       startDrag: () => nextWindowController.startDrag(),
       toggleMaximize: () => nextWindowController.toggleMaximize(),

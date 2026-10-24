@@ -60,7 +60,6 @@ export function createCompactShellController({
   const width = () => Math.max(0, Number(viewport.innerWidth) || 0);
 
   function projectRoot(active) {
-    root.classList.toggle('compact-shell', Boolean(active));
     root.classList.toggle('is-compact-shell', Boolean(active));
   }
 

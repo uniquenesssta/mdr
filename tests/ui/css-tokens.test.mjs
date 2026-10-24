@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readdir } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
 import test from 'node:test';
+import postcss from 'postcss';
 import {
   STYLE_IMPORTS,
   collectDefinitions,
@@ -30,6 +31,24 @@ const legacyTokens = [
   '--editor-active-line-color', '--chrome-bg', '--card-bg', '--shadow-sm', '--shadow',
   '--shadow-md', '--shadow-lg', '--font-sans', '--font-mono', '--font-editor', '--font-ui'
 ];
+
+test('R16-05 CSS variables have one declaration per rule while theme and media overrides remain scoped', async () => {
+  const duplicates = source => {
+    const result = [];
+    postcss.parse(source).walkRules(rule => {
+      const seen = new Set();
+      for (const node of rule.nodes || []) {
+        if (node.type !== 'decl' || !node.prop.startsWith('--')) continue;
+        if (seen.has(node.prop)) result.push(`${rule.selector}: ${node.prop}`);
+        seen.add(node.prop);
+      }
+    });
+    return result;
+  };
+  assert.deepEqual(duplicates(':root{--size:1px;--size:2px}'), [':root: --size']);
+  assert.deepEqual(duplicates(':root{--size:1px}[data-theme="dark"]{--size:2px}@media(max-width:600px){:root{--size:3px}}'), []);
+  for (const { path, source } of await readImportedStyles()) assert.deepEqual(duplicates(source), [], path);
+});
 
 const requiredTokens = {
   color: [

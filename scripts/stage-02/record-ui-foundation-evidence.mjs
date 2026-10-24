@@ -316,7 +316,7 @@ await record('02-09-style-layering-evidence.json', {
     stableInlineStyleAttributes: 0,
     stableGeneratedStyleStrings: 0,
     prefixedNaming: ['c-', 'l-', 'f-', 'is-', 'has-'],
-    legacyShellClasses: 'compatibility-query-hooks-only',
+    legacyShellClasses: 'retired-by-R16-05-prefixed-queries-only',
     consolidatedMainCss: 'removed'
   },
   guarantees: [
@@ -325,7 +325,7 @@ await record('02-09-style-layering-evidence.json', {
     'visual-css-has-no-id-selectors',
     'compatibility-html-has-no-stable-inline-style-attributes',
     'prefixed-classes-own-new-visual-shell-contracts',
-    'legacy-classes-remain-only-to-preserve-unmigrated-feature-query-contracts',
+    'R16-05-legacy-shell-classes-retired-current-contracts-preserved',
     'theme-switch-and-layout-behavior-remain-compatible',
     'responsive-multi-viewport-acceptance-remains-atomic-task-2.10'
   ]

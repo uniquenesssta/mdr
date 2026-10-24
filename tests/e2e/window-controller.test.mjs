@@ -11,7 +11,7 @@ const virtualHost = await installVirtualFileHost(browser.page, { root: projectRo
 
 try {
   await browser.page.setDocumentContent(`<!doctype html><html><body>
-    <div class="menu-bar" style="width:600px;height:44px">
+    <div class="l-menu-bar" style="width:600px;height:44px">
       <div class="menu-dropdown">File</div>
       <div id="window-controls" hidden>
         <button id="window-minimize-btn">-</button>
@@ -54,7 +54,7 @@ try {
       onClose:()=>controller.requestClose('control')
     });
     const dragRegion=createWindowDragRegion({
-      target:document.querySelector('.menu-bar'),
+      target:document.querySelector('.l-menu-bar'),
       enabled:true,
       startDrag:()=>controller.startDrag(),
       toggleMaximize:()=>controller.toggleMaximize()
@@ -102,11 +102,11 @@ try {
   const beforeInteractiveDrag = await browser.page.evaluate(`window.__windowCalls.filter(call=>call==='startDrag').length`);
   await browser.page.evaluate(`document.getElementById('window-minimize-btn').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,buttons:1,detail:1}))`);
   assert.equal(await browser.page.evaluate(`window.__windowCalls.filter(call=>call==='startDrag').length`), beforeInteractiveDrag);
-  await browser.page.evaluate(`document.querySelector('.menu-bar').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,buttons:1,detail:1}))`);
+  await browser.page.evaluate(`document.querySelector('.l-menu-bar').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,buttons:1,detail:1}))`);
   await browser.page.waitFor(() => window.__windowCalls.includes('startDrag'), { description: 'window drag command' });
 
   const toggleCount = await browser.page.evaluate(`window.__windowCalls.filter(call=>call==='toggleMaximize').length`);
-  await browser.page.evaluate(`document.querySelector('.menu-bar').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,buttons:1,detail:2}))`);
+  await browser.page.evaluate(`document.querySelector('.l-menu-bar').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,buttons:1,detail:2}))`);
   await browser.page.waitFor(`window.__windowCalls.filter(call=>call==='toggleMaximize').length > ${toggleCount}`, { description: 'double click maximize command' });
 
   await browser.page.evaluate(`window.__emitResize(true)`);
@@ -134,7 +134,7 @@ try {
 
   await browser.page.evaluate(`{
     document.getElementById('window-minimize-btn').click();
-    document.querySelector('.menu-bar').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,buttons:1,detail:1}));
+    document.querySelector('.l-menu-bar').dispatchEvent(new MouseEvent('mousedown',{bubbles:true,buttons:1,detail:1}));
   }`);
   await new Promise(resolve => setTimeout(resolve, 50));
   assert.equal(await browser.page.evaluate(`window.__windowCalls.length`), destroyed.calls);
