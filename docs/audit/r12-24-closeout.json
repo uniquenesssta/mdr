@@ -1461,9 +1461,9 @@
   "currentSourceReview": {
     "stage": "R16.13",
     "date": "2026-10-25",
-    "reviewedCommit": "24fefecba18f3539741ad3f9a3444fb78b27f2cb",
+    "reviewedCommit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
     "record": "docs/R16-13-DETAILS.md",
-    "status": "implemented-pending-exact-commit-windows-validation",
+    "status": "accepted",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "Only R16.13 browser and Tauri default-entry execution without retired application files; overall R16 awaits exact-commit acceptance.",
@@ -1801,42 +1801,55 @@
         "record": "docs/R16-10-DETAILS.md"
       }
     ],
-    "conclusion": "Local full repository 2847/2847 (373 files, 16 directories), related contracts 75/75, browser 11+76, real default Tauri and four architecture gates pass. Both runtimes use current built sources without 95 retired source files or 10 former public assets; no production/dependency/model change. R16.13 and overall R16 await exact implementation Windows cumulative acceptance.",
+    "conclusion": "R16.13 and the cleanup scope of phase R16 accepted at eade767 / CI40137615204: all seven jobs/steps pass, exact-commit dual execution and 277 risk fingerprints verified. R17.1 authorized; installer/upgrade/association/desktop/recovery/performance acceptance remains in R17.",
     "priorImplementationWindowsRun": 40134714024,
     "priorImplementationWindowsJobs": 7,
-    "implementationWindowsRun": null,
-    "implementationWindowsJobs": [],
+    "implementationWindowsRun": 40137615204,
+    "implementationWindowsJobs": 7,
     "currentStageAcceptance": {
-      "stage": "R16.12",
+      "stage": "R16.13",
       "date": "2026-10-25",
-      "commit": "59b86ab47dc3c2dfd3652e1992d3a0e2e165297c",
-      "run": 40134714024,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40134714024",
-      "record": "docs/R16-12-DETAILS.md#正式验收2026-10-25",
+      "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+      "run": 40137615204,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40137615204",
+      "record": "docs/R16-13-DETAILS.md#正式验收与阶段16交接2026-10-25",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "recursiveNodePassed": 2832,
-      "nodeTestFiles": 372,
+      "recursiveNodePassed": 2847,
+      "nodeTestFiles": 373,
       "nodeDirectories": 16,
       "contractBrowserPassed": 11,
-      "builtAppPassed": 75,
+      "builtAppPassed": 76,
       "rustPassed": 301,
-      "dependencyGraphPassed": 24,
+      "singleImplementationContractsPassed": 12,
+      "cumulativeRejectionContractsPassed": 3,
+      "nativeSingleImplementationPassed": true,
       "nativeLargeImportScenariosPassed": 4,
+      "singleImplementation": {
+        "accepted": true,
+        "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+        "platforms": [
+          "browser",
+          "tauri"
+        ],
+        "retiredSources": 95,
+        "retiredPublicAssets": 10,
+        "sourceSha256": "7b27e96f2b414c4fb09979bf6942470cf7aabd3a1eaceaa4024bbd7b60bc4a78"
+      },
       "artifacts": [
         {
-          "id": 12576388096,
+          "id": 12576977928,
           "kind": "closeout",
-          "bytes": 12066,
-          "digest": "sha256:eb7394e1f26880a25ca345408f9e02467848e134bdd11aa7ec62aeb128db2221",
+          "bytes": 12440,
+          "digest": "sha256:6265cfc5af5a35aa5dbf9453858fd6dcb95b47eb08a357ea72be7fda1c2c54ad",
           "downloadDigestVerified": true
         },
         {
-          "id": 12576792340,
+          "id": 12577967512,
           "kind": "webview",
-          "bytes": 1393876,
-          "digest": "sha256:c56b842629c011592acb8b2b4142226c29fc70064919aebad0b20bae65ac7ada",
+          "bytes": 1455138,
+          "digest": "sha256:02a3fe851fe7afba024bc8b32a1ea67f8b00c18d505fef8180b79aae06eb463a",
           "downloadDigestVerified": true
         }
       ]
@@ -1846,7 +1859,7 @@
       "baselineCommit": "24fefecba18f3539741ad3f9a3444fb78b27f2cb",
       "branch": "codex/r16-stage",
       "record": "docs/R16-13-DETAILS.md",
-      "status": "implemented-pending-exact-commit-windows-validation",
+      "status": "accepted",
       "newSingleImplementationContracts": 12,
       "newCumulativeRejectionContracts": 3,
       "productionModuleCount": 532,
@@ -1857,7 +1870,7 @@
       "modelKernelChanged": false,
       "nativeProductionChanged": false,
       "dependenciesChanged": false,
-      "exactCommitWindowsPending": true,
+      "exactCommitWindowsPending": false,
       "sourceReviewCount": 277,
       "snapshotInputs": 1111,
       "trackedPathsAudited": 1368,
@@ -1884,7 +1897,9 @@
       "localRepositoryDirectories": 16,
       "localSkipped": 0,
       "localCancelled": 0,
-      "isolatedNativeProtectedPackages": 457
+      "isolatedNativeProtectedPackages": 457,
+      "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+      "windowsRun": 40137615204
     },
     "priorStageAcceptance": {
       "stage": "R16.12",
@@ -14697,6 +14712,118 @@
       }
     ],
     "currentPhaseAcceptance": {
+      "stage": "R16",
+      "accepted": true,
+      "atomicTasksAccepted": 13,
+      "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+      "run": 40137615204,
+      "record": "docs/R16-13-DETAILS.md#正式验收与阶段16交接2026-10-25",
+      "scope": "Retire migrated classic/global/HTML/CSS/runtime/compatibility/generated/test paths, audit names and complete source dependencies, and prove current default browser/Tauri entry without retired files.",
+      "atomicAcceptances": [
+        {
+          "stage": "R16.1",
+          "commit": "733c2ae00dd949280dc33bf2ad0094ec518d8e06",
+          "run": 39960541384,
+          "record": "docs/R16-01-DETAILS.md#正式验收2026-10-23"
+        },
+        {
+          "stage": "R16.2",
+          "commit": "0963dfe4ee1dd9b29053b8982489e04a6645f93f",
+          "run": 39971556914,
+          "record": "docs/R16-02-DETAILS.md#正式验收2026-10-23"
+        },
+        {
+          "stage": "R16.3",
+          "commit": "52aa8f21851850e2a29a0acd7fdcf081c104c2da",
+          "run": 39988412402,
+          "record": "docs/R16-03-DETAILS.md#正式验收2026-10-24"
+        },
+        {
+          "stage": "R16.4",
+          "commit": "804950fdc58fb973561f6a4e53c273473258a104",
+          "run": 40060322282,
+          "record": "docs/R16-04-DETAILS.md#正式验收2026-10-24"
+        },
+        {
+          "stage": "R16.5",
+          "commit": "d072309ff623cd0118498da679b2aafbf3b21a66",
+          "run": 40066385721,
+          "record": "docs/R16-05-DETAILS.md#正式验收2026-10-24"
+        },
+        {
+          "stage": "R16.6",
+          "commit": "5a3bb9befed21010a6f3640e9c79c53e97f380a1",
+          "run": 40069504230,
+          "record": "docs/R16-06-DETAILS.md#正式验收2026-10-24"
+        },
+        {
+          "stage": "R16.7",
+          "commit": "9d206b6bf11b1951e1442dce4a17ed8943c939c1",
+          "run": 40088353919,
+          "record": "docs/R16-07-DETAILS.md#正式验收2026-10-24"
+        },
+        {
+          "stage": "R16.8",
+          "commit": "a2899c559a37c87696b8eab272e52309a2372b24",
+          "run": 40114949538,
+          "record": "docs/R16-08-DETAILS.md#正式验收2026-10-25"
+        },
+        {
+          "stage": "R16.9",
+          "commit": "004b4aba232b3c643524978522fe35dd66c242f0",
+          "run": 40120746556,
+          "record": "docs/R16-09-DETAILS.md#正式验收2026-10-25"
+        },
+        {
+          "stage": "R16.10",
+          "commit": "72fd215ee67e41bcbd2d7ed10d99a52b59a5a6c0",
+          "run": 40125945813,
+          "record": "docs/R16-10-DETAILS.md#正式验收2026-10-25"
+        },
+        {
+          "stage": "R16.11",
+          "commit": "16c6c20d47f5b41e77e9c16b013f8a5bd129f588",
+          "run": 40129983868,
+          "record": "docs/R16-11-DETAILS.md#正式验收2026-10-25"
+        },
+        {
+          "stage": "R16.12",
+          "commit": "59b86ab47dc3c2dfd3652e1992d3a0e2e165297c",
+          "run": 40134714024,
+          "record": "docs/R16-12-DETAILS.md#正式验收2026-10-25"
+        },
+        {
+          "stage": "R16.13",
+          "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+          "run": 40137615204,
+          "record": "docs/R16-13-DETAILS.md#正式验收与阶段16交接2026-10-25"
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "image-menu-pointer-focus",
+          "status": "open-outside-R16-cleanup-scope",
+          "receiver": "R17.13 desktop interaction",
+          "record": "docs/R15-13-DETAILS.md",
+          "constraint": "Real-pointer image menu close/focus finding remains open; a UI repair requires Figma and its applicable authorization."
+        },
+        {
+          "id": "release-acceptance",
+          "status": "not-yet-validated",
+          "receiver": [
+            "R17.11",
+            "R17.12",
+            "R17.13",
+            "R17.14",
+            "R17.15",
+            "R17.16",
+            "R17.17"
+          ],
+          "scope": "Installation/upgrade, associations and real desktop behavior, old data recovery, performance and final release report are not implied by cleanup acceptance."
+        }
+      ]
+    },
+    "priorPhaseAcceptance": {
       "stage": "R15",
       "accepted": true,
       "atomicTasksAccepted": 13,
@@ -14708,6 +14835,21 @@
         "Current classic/compatibility references and .vite exceptions require R16 proof before deletion.",
         "Independent Image Menu real-pointer focus finding remains open and requires UI/Figma scope for repair."
       ]
-    }
+    },
+    "phaseAcceptanceHistory": [
+      {
+        "stage": "R15",
+        "accepted": true,
+        "atomicTasksAccepted": 13,
+        "commit": "5c50f9c5a2c2c27348eb8ebd3088409e22df488a",
+        "run": 39946123945,
+        "record": "docs/R15-13-DETAILS.md#正式验收与阶段15交接2026-10-23",
+        "scope": "Telemetry and opt-in E2E contracts, trusted runner, stale build admission and tracked runtime log retirement.",
+        "handoffs": [
+          "Current classic/compatibility references and .vite exceptions require R16 proof before deletion.",
+          "Independent Image Menu real-pointer focus finding remains open and requires UI/Figma scope for repair."
+        ]
+      }
+    ]
   }
 }
