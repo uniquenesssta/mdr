@@ -289,7 +289,7 @@ test('production integration keeps raw CodeMirror confined to editor and the exp
   const repositoryRoot = path.resolve(import.meta.dirname, '../../..');
   const virtualEditor = fs.readFileSync(path.join(repositoryRoot, 'src/features/editor/infrastructure/virtual-editor.js'), 'utf8');
   const scrollSync = fs.readFileSync(path.join(repositoryRoot, 'src/features/sync/scroll/scroll-sync-controller.js'), 'utf8');
-  const performanceRuntime = fs.readFileSync(path.join(repositoryRoot, 'src/runtime/performance.js'), 'utf8');
+  const performanceRuntime = fs.readFileSync(path.join(repositoryRoot, 'src/features/telemetry/browser-telemetry.js'), 'utf8');
   const main = fs.readFileSync(path.join(repositoryRoot, 'src/main.js'), 'utf8');
 
   assert.match(virtualEditor, /createCodeMirrorAdapter/);

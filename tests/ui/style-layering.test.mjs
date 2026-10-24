@@ -188,7 +188,7 @@ test('R16-05 prefixed shell and state classes are the sole projection contract',
     readText('public/app/bootstrap.js'),
     readText('public/app/editor-tools.js'),
     readText('src/features/layout/fullscreen/page-fullscreen-controller.js'),
-    readText('src/runtime/link-preview.js')
+    readText('src/features/link-preview/link-preview-controller.js')
   ]);
   const shellSource = shellSources.join('\n');
   for (const contract of [

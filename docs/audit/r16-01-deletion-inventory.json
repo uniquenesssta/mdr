@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "ac3fc3e82b8e4d1258ed38ab991be10686d06317",
+  "baselineCommit": "2b955f8ef69412e7f16bced71c47e9dcb0fb51cc",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "2edede5f04406b425a56e76ee705a1c5d052b9ebbb0224b027c64703fbd0c06e"
+      "sha256": "5950b094e58d836a7695cec0dd3d3ada5607aac39ee23de3c272240299bd9045"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -1034,6 +1034,10 @@
       "sha256": "81d0b3ce20b29c8a25a20e1b8b56cc35f2acbc2646856170ce1a57798485010e"
     },
     {
+      "path": "src/features/e2e/browser-e2e-bridge.js",
+      "sha256": "2da370523d52b390e4f23f3c4c566fb3bf0909621c84b021bfea2ee332460e6d"
+    },
+    {
       "path": "src/features/e2e/e2e-bridge.js",
       "sha256": "6cdaab197604bb602aeeeabe46e07fe58f499c99d2542c58995804cad64dc057"
     },
@@ -1043,7 +1047,7 @@
     },
     {
       "path": "src/features/e2e/index.js",
-      "sha256": "4e90005a027a796b042e0d30e5e9ee85201e99331b2815f9d5c0f861365bf5bb"
+      "sha256": "9658f950cc07047b24c7c4b2966a7a1a7084634f7cba69dfcdd38d242fac0896"
     },
     {
       "path": "src/features/editor/application/editor-command-service.js",
@@ -1746,6 +1750,14 @@
       "sha256": "0298371aa57e32406eb0139b2f496f73bbe1b82d6392eeda44ea964c58bfe29e"
     },
     {
+      "path": "src/features/link-preview/index.js",
+      "sha256": "1b87e2786332b29046983a94cf673a1fc15bebebaf4ce732f432b3e3ffa8b3f2"
+    },
+    {
+      "path": "src/features/link-preview/link-preview-controller.js",
+      "sha256": "8cce1c16436888b160a291b56e370330a681168bbcf7541417e55e57b15cc6ad"
+    },
+    {
       "path": "src/features/menu/compatibility/classic-menu-command-adapter.js",
       "sha256": "88c339f6b6368c35ba7eabbe9180530df694043fd7012e609e0e92daa49f8b6c"
     },
@@ -2246,8 +2258,12 @@
       "sha256": "9bf1dc2db078db50ef74e25522133cc2863e884f315001b4ad70c7b2e8faac9d"
     },
     {
+      "path": "src/features/telemetry/browser-telemetry.js",
+      "sha256": "e3bedcf005b9731e5037e0b4a4d229f12c62697f516751d3b1d23a43ccb55153"
+    },
+    {
       "path": "src/features/telemetry/index.js",
-      "sha256": "e04194307e7c62f9a7437c847d76e136b7aef8b20aa601678ab5319ad1274b57"
+      "sha256": "755af39f7e05856e939fa84d5eefd9dae0d8a1d48f41bb0bbce8f052fab42e9c"
     },
     {
       "path": "src/features/telemetry/long-task-observer.js",
@@ -2375,7 +2391,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "1b3605b0300a1e3b49d83d6a3c53b361569cd80ec1e26ed5e7fe7dbb99242bdb"
+      "sha256": "a0045f77f4f7fb91c4df87d84fbd200f17ac6231462e7b81030dcbaa423e5a2c"
     },
     {
       "path": "src/model-kernel/index.js",
@@ -2532,18 +2548,6 @@
     {
       "path": "src/preview/math-source.js",
       "sha256": "3d86e20d41c0c85a426d2ee83848f68527ef4f7042d9479573eeb31ffe6ba6ee"
-    },
-    {
-      "path": "src/runtime/e2e-bridge.js",
-      "sha256": "532b7aee27a316b18cb03ac438a082251d3c99da23c1f38850441bbc81de7b6d"
-    },
-    {
-      "path": "src/runtime/link-preview.js",
-      "sha256": "339d842817365d58fc86c14ba4a2072603a0f0ea14733327771eae2cbdc1ee5a"
-    },
-    {
-      "path": "src/runtime/performance.js",
-      "sha256": "ae8dc8144065436d0b2e5f4ecf1bf4a2c0e47a7c1c647a83dc224598d300a543"
     },
     {
       "path": "src/shared/scheduling/classic-task-scheduler-port.js",
@@ -2895,7 +2899,7 @@
     },
     {
       "path": "tests/architecture/fixtures/production-modules.json",
-      "sha256": "1b19ff8159736fb768ac744e3cb3096d17a9ddaade6fd5262f81da6c5e29523c"
+      "sha256": "e5011beee97e0b389dceea41a8799862d90f3bf700274b71c06dab09cf31a233"
     },
     {
       "path": "tests/architecture/global-write-scanner.test.mjs",
@@ -2955,7 +2959,7 @@
     },
     {
       "path": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-      "sha256": "6f63308d44ba0e34428b0ff0546fe3db492218bbe18a926eadcd9a3373748790"
+      "sha256": "81af47119bbd62a34a45830ff2ebdd81c14e8fd235591087ffa4e5a2cf121b37"
     },
     {
       "path": "tests/architecture/stage-06-compact-shell.test.mjs",
@@ -3131,7 +3135,7 @@
     },
     {
       "path": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
-      "sha256": "4d8a9b694ccaf17e7178b9d02f10359a06de35fbe67b8d780ed615c8c8772f35"
+      "sha256": "ecddc343ee0396c1b501f8fca338843318e56b350cc28c066d9c669eed78e14f"
     },
     {
       "path": "tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs",
@@ -3259,7 +3263,7 @@
     },
     {
       "path": "tests/e2e/link-preview.test.mjs",
-      "sha256": "f1a6dc7dce59317ac59b19597275e024ac81f99e82fe2447cf2de3fa6e25b5e2"
+      "sha256": "d6f08a9955f7ccab1f33cf2bc8536269e061e0a206a4bee64fc8ea74c364cda3"
     },
     {
       "path": "tests/e2e/preview-enhancement-coordinator.test.mjs",
@@ -3292,6 +3296,10 @@
     {
       "path": "tests/e2e/submenu-positioner.test.mjs",
       "sha256": "c3bcd7ecbc6319aae6626ebfb0104e6d6ed9149f3152744aedf12df1ae49d10c"
+    },
+    {
+      "path": "tests/e2e/telemetry-mount.test.mjs",
+      "sha256": "4e1c17b708afe8655b0d60f61dff277068addcbf7ae0cec0e2004058d15f7819"
     },
     {
       "path": "tests/e2e/web-clipper.test.mjs",
@@ -3635,7 +3643,7 @@
     },
     {
       "path": "tests/stage-12-closeout.test.mjs",
-      "sha256": "cdd25b87d9c3a0b17df5f643d0e20ad615813531aaa82a234e737a18620b8d85"
+      "sha256": "143ca2904327f31c3cdca33dad27f990f2635f3be25300ded154be91390bc113"
     },
     {
       "path": "tests/stage-12-command-registry.test.mjs",
@@ -3871,15 +3879,15 @@
     },
     {
       "path": "tests/stage-15-aggregation-buffer.test.mjs",
-      "sha256": "70edbbb5b6cb76ca005817da45fd1d8c43d939d1ca34009c2a058bcda994479d"
+      "sha256": "26f4965756085b89ac8d91426f23a63fe2bd0aa95e9b8e8a8c64b6f5b35f0e7d"
     },
     {
       "path": "tests/stage-15-e2e-installation.test.mjs",
-      "sha256": "7599e1eff60825b27d419b8d34623b42725ad35945fe9122d9a8aad637d8db0d"
+      "sha256": "00947988c73d231736f428b6160f205afde473a2ebc6486a5320a4d6cfa60839"
     },
     {
       "path": "tests/stage-15-e2e-query-api.test.mjs",
-      "sha256": "92afd587243d9e7b2e0604d83d9e9326a290a09dbf7fc7c371dabe75af1b7a73"
+      "sha256": "4afbd26afa0217d67db7725cdcef336dce4fcc4f700d7acd70c282c92cb9d8d4"
     },
     {
       "path": "tests/stage-15-e2e-runner.test.mjs",
@@ -3887,7 +3895,7 @@
     },
     {
       "path": "tests/stage-15-event-catalogue.test.mjs",
-      "sha256": "05d8456318da06fe41026dd7f9c802f15ae4aa86b30d431bf9cadf75c7b61145"
+      "sha256": "ada2234228ddd36bc6bdca0d00e1663455d113cf762390879657ab6a238eddd7"
     },
     {
       "path": "tests/stage-15-log-cleanup.test.mjs",
@@ -3895,23 +3903,23 @@
     },
     {
       "path": "tests/stage-15-long-task-observer.test.mjs",
-      "sha256": "0a932dd2c0f340bd09077c450e997a1710ac9534a9fbf587e12608c5abf0f83c"
+      "sha256": "ba0a137fbcaa5ba10df9855faf3fb4356f5d062e1a1983a76381197d132847a5"
     },
     {
       "path": "tests/stage-15-native-log-sink.test.mjs",
-      "sha256": "c643cf4c54a32898275fa3acd17c1be7e42782da553db24a7e205e1e654e8dac"
+      "sha256": "c034460dbfd5ee0b7d4f36fec50175e95100341a6c391d8dc33e69b9e5e7dcf5"
     },
     {
       "path": "tests/stage-15-recorder.test.mjs",
-      "sha256": "94a4634b95887b36446e442d1f4b682f90de97490c267c14060ab83ab806bcac"
+      "sha256": "ad9805c3f2f3c6e2cd0f11dc052046f315156316076260feb61e59b2416321cd"
     },
     {
       "path": "tests/stage-15-redaction.test.mjs",
-      "sha256": "8ddab98f81d7bb1b0c38700678fd9d7e661abfe7ebd27e64e3d282229dc0cae7"
+      "sha256": "cccac42668a4c58ddb66bdb526d63ff60a02282d5b8fbf27ef80402a10f82c0e"
     },
     {
       "path": "tests/stage-15-runtime-snapshot.test.mjs",
-      "sha256": "7229f1d0d8a41be38ddabab857eeb55540243fbc7b2d98087829ae5c54ed3c05"
+      "sha256": "7867aa4fa73482c7d32b3c433f3b4d46cabab60730707a12704d7a63a633f759"
     },
     {
       "path": "tests/stage-15-stale-dist.test.mjs",
@@ -3919,7 +3927,7 @@
     },
     {
       "path": "tests/stage-15-telemetry-lifecycle.test.mjs",
-      "sha256": "2d2d32f64bd4ed03b90501920cb2b7c311358ecf8cabf7f3498d6394aa69309c"
+      "sha256": "90e0dcd2a7355fdcd972a0afb55851d1a37d0b3e22fdad5611b7f99cb39f590c"
     },
     {
       "path": "tests/stage-16-deletion-inventory.test.mjs",
@@ -3935,7 +3943,11 @@
     },
     {
       "path": "tests/stage-16-global-api.test.mjs",
-      "sha256": "fcdb829b748243e39ede9bf47bfc7ea548d96ba708059caeffa04065f2eed574"
+      "sha256": "c8fe8c528cb190b9fd4373b1772ba987293105e43a5b2262e6987cc1983f7e32"
+    },
+    {
+      "path": "tests/stage-16-runtime-cleanup.test.mjs",
+      "sha256": "9afa6708af3b840d35a457f5cae1930272f2fb55bdb0ab8a8c71cde17c1880b1"
     },
     {
       "path": "tests/support/application-surface-source.mjs",
@@ -3959,7 +3971,7 @@
     },
     {
       "path": "tests/support/performance-log/frontend-payload.mjs",
-      "sha256": "0af044c23c76de9c2294e050d24323c1b0be550870641cdb001f6b9d9e4829a7"
+      "sha256": "3ef83d96064cf53f944fca873182db47656947fc36b43ea61c55cbc936038b23"
     },
     {
       "path": "tests/support/performance-log/storage-contract.mjs",
@@ -3971,11 +3983,11 @@
     },
     {
       "path": "tests/support/telemetry-runtime-host.mjs",
-      "sha256": "f26f646eb05aae6f6dedb73cd6e8e123e39be472a7099b8003a5a978eaac257c"
+      "sha256": "c7fe1954b9d01a83559940d3e6a3ab25b64583e333968b96cdc6d6fb34be8958"
     },
     {
       "path": "tests/svg-sprite.test.mjs",
-      "sha256": "152514856606dfb592cbf794ceb733e1e1b4c40029fe5fabf602a49f3839958b"
+      "sha256": "1c50a753ed69fccb741f6e3f444e476141061ca6a88bec013fd0787319c09eb8"
     },
     {
       "path": "tests/ui/app-shell.test.mjs",
@@ -3991,7 +4003,7 @@
     },
     {
       "path": "tests/ui/dom-primitives.test.mjs",
-      "sha256": "b2f2600607264bc59a84bf9c7d9ed634c930543a4e6b5ec2a3e191eac727582b"
+      "sha256": "7338e9757269f23fb1d63ab11840390156a73e42ee590c654b2d520a232d6cd8"
     },
     {
       "path": "tests/ui/fixtures/dom-asset-inventory.json",
@@ -4023,7 +4035,7 @@
     },
     {
       "path": "tests/ui/style-layering.test.mjs",
-      "sha256": "2e54a027255a39c94d53cae59e5be5e1523e64332b32e9a4155c304f30a17bda"
+      "sha256": "d83427d0964a435bc035306aa1e35eedeeee50ba99a427c88dca4d5e76e52c99"
     },
     {
       "path": "tests/ui/style-test-utils.mjs",
@@ -4059,7 +4071,7 @@
     },
     {
       "path": "tests/unit/editor/codemirror-adapter.test.mjs",
-      "sha256": "f2b07f576146b60ad06c85c8d871c821864a5526d1c4d1eb79b14ac13c2b76f2"
+      "sha256": "0ae5606f2c27ce6147e9f1d4938a919bf66b552bd76bb5bb24db5753b32c4207"
     },
     {
       "path": "tests/unit/editor/codemirror-extension-registry.test.mjs",
@@ -4271,15 +4283,15 @@
     },
     {
       "path": "tests/unit/platform/link-client.test.mjs",
-      "sha256": "c05126b06e669202a6a722cd2c47e382c4da9da957fbde633b9ca329ebc911d7"
+      "sha256": "55393e2474f28ebe4edb7f326e16da314a181fd749bee5798e8ac73db9f0b477"
     },
     {
       "path": "tests/unit/platform/performance-log-client.test.mjs",
-      "sha256": "658d7b1608d2a43dbe415d9794eae3e78f199f1cc8cea976a9cd686ea3cc1b76"
+      "sha256": "a2a8b879a5a34e162886ebfc963928b69789d2a462f33a63cd93447756906bb0"
     },
     {
       "path": "tests/unit/platform/platform-cutover.test.mjs",
-      "sha256": "c9acda77e64edb05a3c532f82b3c9ebdb42cda86ed0068257d115282bd229772"
+      "sha256": "02bd70929e2defed8ad6e9d67e7a07f97b84f5aa85d7e0c51c15972f64386903"
     },
     {
       "path": "tests/unit/platform/platform-detection.test.mjs",
@@ -4554,7 +4566,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "f9e2cd32cf6a54d103961b6ae2e9e30ed57c6aaa58f942e57798b592b12d4915",
+  "inputSha256": "1af743756760237c3770f46af63e092e65b4af995ae54c75e3d22217b869782e",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -5256,6 +5268,11 @@
     {
       "from": "tests/stage-16-esm-application.test.mjs",
       "line": 19,
+      "kind": "computed-import"
+    },
+    {
+      "from": "tests/stage-16-runtime-cleanup.test.mjs",
+      "line": 62,
       "kind": "computed-import"
     },
     {
@@ -15184,50 +15201,14 @@
     },
     {
       "path": "src/runtime/e2e-bridge.js",
-      "tracked": true,
-      "sha256": "532b7aee27a316b18cb03ac438a082251d3c99da23c1f38850441bbc81de7b6d",
-      "status": "referenced",
+      "tracked": false,
+      "sha256": null,
+      "status": "absent",
       "deletionAllowed": false,
       "followup": "R16-07",
-      "ownership": {
-        "responsibility": "Browser environment and descriptor capability adapter; public E2E Bridge solely owns opt-in and installation lifecycle.",
-        "stateOwner": "e2e-browser-adapter",
-        "lifecycle": "conditional-runtime"
-      },
-      "detected": {
-        "imports": [
-          "../features/e2e/index.js"
-        ],
-        "exports": [
-          "configureMarkdownEditorE2EPorts",
-          "destroyMarkdownEditorE2EBridge",
-          "installMarkdownEditorE2EBridge"
-        ],
-        "listeners": [],
-        "globalWrites": [],
-        "sideEffects": {
-          "domAccess": true,
-          "storageAccess": true,
-          "networkAccess": false,
-          "timers": [
-            "requestAnimationFrame",
-            "setTimeout"
-          ],
-          "observers": [],
-          "workers": [],
-          "tauriCommands": [
-            "importTextContent"
-          ]
-        }
-      },
+      "ownership": null,
+      "detected": null,
       "references": [
-        {
-          "from": "src/main.js",
-          "target": "src/runtime/e2e-bridge.js",
-          "surface": "production",
-          "kind": "module",
-          "line": 73
-        },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "src/runtime/e2e-bridge.js",
@@ -15236,39 +15217,11 @@
           "line": 22
         },
         {
-          "from": "tests/architecture/fixtures/production-modules.json",
-          "target": "src/runtime/e2e-bridge.js",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 3481
-        },
-        {
-          "from": "tests/stage-15-e2e-installation.test.mjs",
-          "target": "src/runtime/e2e-bridge.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 5
-        },
-        {
-          "from": "tests/stage-15-e2e-installation.test.mjs",
+          "from": "tests/stage-16-runtime-cleanup.test.mjs",
           "target": "src/runtime/e2e-bridge.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 32
-        },
-        {
-          "from": "tests/stage-15-e2e-query-api.test.mjs",
-          "target": "src/runtime/e2e-bridge.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 5
-        },
-        {
-          "from": "tests/stage-15-e2e-query-api.test.mjs",
-          "target": "src/runtime/e2e-bridge.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 39
+          "line": 15
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -15306,42 +15259,17 @@
           "line": 19172
         }
       ],
-      "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
+      "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
     },
     {
       "path": "src/runtime/link-preview.js",
-      "tracked": true,
-      "sha256": "339d842817365d58fc86c14ba4a2072603a0f0ea14733327771eae2cbdc1ee5a",
-      "status": "referenced",
+      "tracked": false,
+      "sha256": null,
+      "status": "absent",
       "deletionAllowed": false,
       "followup": "R16-07",
-      "ownership": {
-        "responsibility": "Explicitly constructed link overlay and system navigation; owns document/overlay listeners, focus scopes, animation frames and terminal cleanup with injected platform, notifications and telemetry.",
-        "stateOwner": "link-preview-overlay",
-        "lifecycle": "explicit-instance"
-      },
-      "detected": {
-        "imports": [
-          "../ui/components/icon-view.js",
-          "../ui/dom/index.js"
-        ],
-        "exports": [
-          "createLinkPreview"
-        ],
-        "listeners": [],
-        "globalWrites": [],
-        "sideEffects": {
-          "domAccess": true,
-          "storageAccess": false,
-          "networkAccess": false,
-          "timers": [
-            "requestAnimationFrame"
-          ],
-          "observers": [],
-          "workers": [],
-          "tauriCommands": []
-        }
-      },
+      "ownership": null,
+      "detected": null,
       "references": [
         {
           "from": "scripts/stage-03/record-platform-cutover-evidence.mjs",
@@ -15349,13 +15277,6 @@
           "surface": "build",
           "kind": "path-literal",
           "line": 46
-        },
-        {
-          "from": "src/main.js",
-          "target": "src/runtime/link-preview.js",
-          "surface": "production",
-          "kind": "module",
-          "line": 18
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
@@ -15370,13 +15291,6 @@
           "surface": "governance",
           "kind": "path-literal",
           "line": 365
-        },
-        {
-          "from": "tests/architecture/fixtures/production-modules.json",
-          "target": "src/runtime/link-preview.js",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 3491
         },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
@@ -15428,32 +15342,18 @@
           "line": 21
         },
         {
-          "from": "tests/stage-16-global-api.test.mjs",
-          "target": "src/runtime/link-preview.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 9
-        },
-        {
-          "from": "tests/svg-sprite.test.mjs",
+          "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "src/runtime/link-preview.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 72
+          "line": 22
         },
         {
-          "from": "tests/ui/dom-primitives.test.mjs",
+          "from": "tests/stage-16-runtime-cleanup.test.mjs",
           "target": "src/runtime/link-preview.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 124
-        },
-        {
-          "from": "tests/ui/dom-primitives.test.mjs",
-          "target": "src/runtime/link-preview.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 135
+          "line": 14
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -15608,78 +15508,19 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 23873
-        },
-        {
-          "from": "tests/ui/style-layering.test.mjs",
-          "target": "src/runtime/link-preview.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 191
-        },
-        {
-          "from": "tests/unit/platform/link-client.test.mjs",
-          "target": "src/runtime/link-preview.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 66
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "src/runtime/link-preview.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 53
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "src/runtime/link-preview.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 8
         }
       ],
-      "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
+      "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
     },
     {
       "path": "src/runtime/performance.js",
-      "tracked": true,
-      "sha256": "ae8dc8144065436d0b2e5f4ecf1bf4a2c0e47a7c1c647a83dc224598d300a543",
-      "status": "referenced",
+      "tracked": false,
+      "sha256": null,
+      "status": "absent",
       "deletionAllowed": false,
       "followup": "R16-07",
-      "ownership": {
-        "responsibility": "DEV DOM/event/navigation diagnostics and lifecycle composition over public telemetry owners; connects one explicit recording channel and publishes no global API or function wrapper.",
-        "stateOwner": "performance-runtime",
-        "lifecycle": "module-singleton"
-      },
-      "detected": {
-        "imports": [
-          "../features/telemetry/index.js"
-        ],
-        "exports": [
-          "configurePerformancePlatform",
-          "configurePerformanceRuntimeStats",
-          "destroyPerformanceTelemetry",
-          "getPerformanceBufferStats",
-          "getPerformanceTelemetryState",
-          "startPerformanceTelemetry",
-          "stopPerformanceTelemetry"
-        ],
-        "listeners": [],
-        "globalWrites": [],
-        "sideEffects": {
-          "domAccess": true,
-          "storageAccess": false,
-          "networkAccess": false,
-          "timers": [
-            "requestAnimationFrame",
-            "setTimeout"
-          ],
-          "observers": [],
-          "workers": [],
-          "tauriCommands": []
-        }
-      },
+      "ownership": null,
+      "detected": null,
       "references": [
         {
           "from": "scripts/stage-03/record-platform-cutover-evidence.mjs",
@@ -15689,39 +15530,11 @@
           "line": 46
         },
         {
-          "from": "src/main.js",
-          "target": "src/runtime/performance.js",
-          "surface": "production",
-          "kind": "module",
-          "line": 19
-        },
-        {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "src/runtime/performance.js",
           "surface": "governance",
           "kind": "path-literal",
           "line": 373
-        },
-        {
-          "from": "tests/architecture/fixtures/production-modules.json",
-          "target": "src/runtime/performance.js",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 3501
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 27
-        },
-        {
-          "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 79
         },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
@@ -15885,13 +15698,6 @@
           "line": 686
         },
         {
-          "from": "tests/stage-15-aggregation-buffer.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 24
-        },
-        {
           "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "src/runtime/performance.js",
           "surface": "tests",
@@ -15899,60 +15705,18 @@
           "line": 21
         },
         {
-          "from": "tests/stage-15-long-task-observer.test.mjs",
+          "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "src/runtime/performance.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 31
+          "line": 22
         },
         {
-          "from": "tests/stage-15-native-log-sink.test.mjs",
+          "from": "tests/stage-16-runtime-cleanup.test.mjs",
           "target": "src/runtime/performance.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 17
-        },
-        {
-          "from": "tests/stage-15-recorder.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 20
-        },
-        {
-          "from": "tests/stage-15-redaction.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 32
-        },
-        {
-          "from": "tests/stage-15-runtime-snapshot.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 28
-        },
-        {
-          "from": "tests/stage-15-telemetry-lifecycle.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 25
-        },
-        {
-          "from": "tests/support/performance-log/frontend-payload.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 12
-        },
-        {
-          "from": "tests/support/telemetry-runtime-host.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 17
+          "line": 16
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -16023,44 +15787,9 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 19516
-        },
-        {
-          "from": "tests/unit/editor/codemirror-adapter.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 292
-        },
-        {
-          "from": "tests/unit/platform/performance-log-client.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 33
-        },
-        {
-          "from": "tests/unit/platform/performance-log-client.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 63
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 52
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "src/runtime/performance.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 8
         }
       ],
-      "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
+      "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
     },
     {
       "path": "src/runtime/task-scheduler.js",
@@ -16833,8 +16562,8 @@
   ],
   "summary": {
     "protected": 6,
-    "absent": 41,
-    "referenced": 55,
+    "absent": 44,
+    "referenced": 52,
     "unproven": 2
   }
 }

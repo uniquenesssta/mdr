@@ -21,7 +21,7 @@ test('R15-04 Buffer owns queue aggregation batches and backoff through a public 
   const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8'),source=read('src/features/telemetry/aggregation-buffer.js');
   assert.doesNotMatch(source,/node:fs|@tauri|writePerformance|\bwindow\.|\bdocument\./);
   assert.match(read('src/features/telemetry/index.js'),/export \{ createAggregationBuffer \}/);
-  const runtime=read('src/runtime/performance.js');assert.match(runtime,/buffer = createAggregationBuffer/);
+  const runtime=read('src/features/telemetry/browser-telemetry.js');assert.match(runtime,/buffer = createAggregationBuffer/);
   assert.doesNotMatch(runtime,/const queue =|const aggregates =|queue\.unshift|flushInProgress|setTimeout\(.*50/);
 });
 for(const name of ['now','createEntry','writeBatch','schedule','cancel','batchPrefix'])test('R15-04 rejects invalid dependency '+name,t=>{

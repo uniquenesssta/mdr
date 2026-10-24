@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R16-06 directory public APIs and cumulative regression · ${{ github.sha }}
+run-name: R16-07 feature-owned browser lifetimes and cumulative regression · ${{ github.sha }}
 
 on:
   push:
@@ -289,6 +289,12 @@ jobs:
         shell: bash
         run: node --test tests/stage-15-log-cleanup.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/log-cleanup.log"
 
+      - name: R16-07 feature-owned browser telemetry, E2E and link lifetimes
+        if: ${{ !cancelled() }}
+        run: node --test tests/stage-16-runtime-cleanup.test.mjs tests/stage-15-telemetry-lifecycle.test.mjs tests/stage-15-e2e-installation.test.mjs tests/stage-16-global-api.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/runtime-cleanup-tests.log"
+      - name: R16-07 actual Vite DEV telemetry mount and terminal disposal
+        if: ${{ !cancelled() }}
+        run: node --test tests/e2e/telemetry-mount.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/dev-telemetry-tests.log"
       - name: R16-06 retired aggregates and directory public API contracts
         if: ${{ !cancelled() }}
         run: node --test tests/stage-16-directory-api.test.mjs tests/stage-10-native-save-session.test.mjs tests/stage-10-native-save-queue.test.mjs tests/stage-10-native-segmented-loader.test.mjs tests/stage-10-native-snapshot-uploader.test.mjs tests/stage-10-native-search-adapter.test.mjs tests/architecture/stage-08-hybrid-editor-controller.test.mjs tests/unit/editor/codemirror-adapter.test.mjs tests/unit/editor/codemirror-extension-registry.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/directory-api-tests.log"

@@ -29,7 +29,7 @@ test('R15-03 pure redaction is the sole details owner and all retained runtime d
   assert.doesNotMatch(pure, /\b(?:window|document|setTimeout|setInterval|fetch)\s*[.(]|node:fs|writePerformance/);
   assert.match(source('src/features/telemetry/performance-recorder.js'), /redactTelemetryDetails as safeDetails/);
   assert.doesNotMatch(source('src/features/telemetry/performance-recorder.js'), /function safeDetails|new WeakSet/);
-  const runtime = source('src/runtime/performance.js');
+  const runtime = source('src/features/telemetry/browser-telemetry.js');
   assert.match(runtime, /const key = redactTelemetryIdentity/); assert.match(runtime, /const fingerprint = redactTelemetryIdentity/);
 });
 

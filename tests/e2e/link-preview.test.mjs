@@ -9,9 +9,9 @@ test('R16-03 actual link preview retains one focus owner across consecutive open
   let browser;
   try {
     browser = await launchChromium();
-    await browser.page.navigate(host.origin + '/runtime/link-preview.js');
+    await browser.page.navigate(host.origin + '/features/link-preview/index.js');
     const result = await browser.page.evaluate(`(async () => {
-      const { createLinkPreview } = await import('/runtime/link-preview.js');
+      const { createLinkPreview } = await import('/features/link-preview/index.js');
       const NativeSet = window.Set, owners = [];
       let preview;
       try {
@@ -23,7 +23,7 @@ test('R16-03 actual link preview retains one focus owner across consecutive open
       const counts = [];
       try {
         for (let index = 0; index < 25; index++) {
-          preview.open(location.origin + '/runtime/link-preview.js?focus-probe=' + index);
+          preview.open(location.origin + '/features/link-preview/index.js?focus-probe=' + index);
           await new Promise(resolve => requestAnimationFrame(resolve));
           counts.push(scopes().length);
         }

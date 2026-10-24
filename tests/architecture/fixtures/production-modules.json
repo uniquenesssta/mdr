@@ -3478,33 +3478,33 @@
       true
     ],
     [
-      "src/runtime/e2e-bridge.js",
+      "src/features/e2e/browser-e2e-bridge.js",
       "esm-module",
-      "test-support",
-      "Browser environment and descriptor capability adapter; public E2E Bridge solely owns opt-in and installation lifecycle.",
+      "e2e",
+      "Browser capability adapter with explicit E2E installation/configuration and terminal cleanup through neutral query and bridge owners.",
       "e2e-browser-adapter",
       "conditional-runtime",
-      "retain-until-final-switch",
+      "retain",
       false
     ],
     [
-      "src/runtime/link-preview.js",
+      "src/features/link-preview/link-preview-controller.js",
       "esm-module",
-      "runtime-ui",
-      "Explicitly constructed link overlay and system navigation; owns document/overlay listeners, focus scopes, animation frames and terminal cleanup with injected platform, notifications and telemetry.",
+      "link-preview",
+      "Link Preview instance owning overlay, navigation, DOM/focus scopes, frames and injected external-link capability.",
       "link-preview-overlay",
       "explicit-instance",
-      "rewrite",
+      "retain",
       false
     ],
     [
-      "src/runtime/performance.js",
+      "src/features/telemetry/browser-telemetry.js",
       "esm-module",
       "telemetry",
-      "DEV DOM/event/navigation diagnostics and lifecycle composition over public telemetry owners; connects one explicit recording channel and publishes no global API or function wrapper.",
+      "Explicitly mounted browser diagnostics composition for public Recorder, Buffer, observers, native sink and Lifecycle; no import-time browser resources.",
       "performance-runtime",
-      "module-singleton",
-      "decompose",
+      "explicit-mount-start-stop-destroy",
+      "retain",
       false
     ],
     [
@@ -5714,6 +5714,16 @@
       "Observe snapshot latency through the existing frozen model instance without changing model bytes or authority.",
       "model-method-instrumentation",
       "explicit-attach-release",
+      "retain",
+      false
+    ],
+    [
+      "src/features/link-preview/index.js",
+      "esm-facade",
+      "link-preview",
+      "Public link preview capability with explicit instance lifecycle and no import-time overlay or subscriptions.",
+      "none",
+      "import-only",
       "retain",
       false
     ]

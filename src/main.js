@@ -15,8 +15,8 @@ import { createExportController, createExportImageDialogView, mountClassicExport
 import { createImageImportController, createDropImportController, createDropOverlayView, createImportDocumentController, createFileImportView } from './features/import/index.js';
 import { createWebClipperController, createWebClipperView, convertExtractedHtml, extractHtml, createWebFetchCoordinator, createFileImportController } from './features/import/index.js';
 import { createBrowserPrint, createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
-import { createLinkPreview } from './runtime/link-preview.js';
-import { configurePerformancePlatform, configurePerformanceRuntimeStats, destroyPerformanceTelemetry } from './runtime/performance.js';
+import { createLinkPreview } from './features/link-preview/index.js';
+import { mountPerformanceTelemetry, configurePerformancePlatform, configurePerformanceRuntimeStats, destroyPerformanceTelemetry } from './features/telemetry/index.js';
 import { createVirtualEditor } from './features/editor/index.js';
 import {
   createEditorCommandService,
@@ -70,7 +70,7 @@ import { mountClassicTaskSchedulerPort } from './shared/scheduling/classic-task-
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
 import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler, createSelectionSyncController } from './features/sync/index.js';
-import { configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge } from './runtime/e2e-bridge.js';
+import { configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge } from './features/e2e/index.js';
 import {
   createFolderTreeController,
   createFolderTreeState,
@@ -140,6 +140,8 @@ import {
   mountClassicPreviewStatePort,
   mountClassicPreviewThresholdsPort
 } from './features/preview/index.js';
+
+if (import.meta.env.DEV) mountPerformanceTelemetry();
 
 const platform = createPlatform({
   runtime: window,

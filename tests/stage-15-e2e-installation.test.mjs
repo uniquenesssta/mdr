@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { createE2EBridge } from '../src/features/e2e/index.js';
-import { configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge } from '../src/runtime/e2e-bridge.js';
+import { configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge } from '../src/features/e2e/index.js';
 
 function fixture(t, overrides = {}) {
   const host = {}, calls = [];
@@ -29,7 +29,7 @@ test('R15-10 installation is a public DOM-free owner and Runtime delegates its s
   const source = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
   assert.match(source('src/features/e2e/index.js'), /export \{ createE2EBridge \}/);
   assert.doesNotMatch(source('src/features/e2e/e2e-bridge.js'), /globalThis\.|window\.|document\.|querySelector|setTimeout\(|requestAnimationFrame\(/);
-  const runtime = source('src/runtime/e2e-bridge.js');
+  const runtime = source('src/features/e2e/browser-e2e-bridge.js');
   assert.match(runtime, /createE2EBridge/); assert.match(runtime, /getInstallation\(\)\.install\(\)/);
   assert.doesNotMatch(runtime, /function isE2EEnabled|searchParams|let providers|let installed|previousDescriptor/);
 });

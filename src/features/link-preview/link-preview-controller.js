@@ -1,11 +1,18 @@
-import { createIconView } from '../ui/components/icon-view.js';
+/**
+ * Responsibility: Own link preview navigation, overlay interaction and external-link delegation.
+ * Imports: Shared DOM scopes and icon presentation; native link capability is injected.
+ * Exports: createLinkPreview through the Link Preview public entry.
+ * State/side effects: One overlay, focus/visibility scopes, event subscriptions and frame set per instance.
+ * Lifecycle: Explicit create and terminal idempotent destroy release every owned resource and reject late opens.
+ */
+import { createIconView } from '../../ui/components/icon-view.js';
 import {
   createEventScope,
   createFocusScope,
   createSafeElement,
   createTransitionVisibility,
   isElementRef
-} from '../ui/dom/index.js';
+} from '../../ui/dom/index.js';
 
 const SUPPORTED_SCHEMES = new Set(['http:', 'https:', 'mailto:', 'tel:']);
 const PREVIEWABLE_SCHEMES = new Set(['http:', 'https:']);

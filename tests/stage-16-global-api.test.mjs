@@ -6,7 +6,7 @@ import { checkLegacyRuntime } from '../scripts/architecture/checks.mjs';
 import { telemetry, connectTelemetryRecorder } from '../src/features/telemetry/index.js';
 import { configureHybridLinkPreview, getHybridLinkPreview } from '../src/features/hybrid-editor/runtime/hybrid-link-capabilities.js';
 import { observeDocumentSnapshots } from '../src/features/documents/application/document-snapshot-telemetry.js';
-import { createLinkPreview } from '../src/runtime/link-preview.js';
+import { createLinkPreview } from '../src/features/link-preview/index.js';
 import {
   registerHybridWidgetCleanup, disposeHybridWidget, registerHybridDirectEditor,
   commitHybridDirectEditor, destroyHybridDirectEditor, registerHybridCellActivation,

@@ -1,4 +1,12 @@
-import { createE2EBridge, createE2EQueryAPI } from '../features/e2e/index.js';
+/**
+ * Responsibility: Adapt the browser DOM and application ports to the E2E installation and readonly query contracts.
+ * Imports: E2E installation and query owners only; no business implementation dependency.
+ * Exports: configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge and destroyMarkdownEditorE2EBridge via the E2E public entry.
+ * State/side effects: One lazy installation owner; importing does not install a global or read browser DOM.
+ * Lifecycle: Explicit configure/install and terminal owner destroy; the next explicit request creates a fresh installation.
+ */
+import { createE2EBridge } from './e2e-bridge.js';
+import { createE2EQueryAPI } from './e2e-query-api.js';
 
 let installation = null;
 function getInstallation() {

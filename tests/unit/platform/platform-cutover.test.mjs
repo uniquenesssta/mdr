@@ -5,7 +5,7 @@ import test from 'node:test';
 import { classifyBrowserFile, classifyImportPath, IMPORT_KINDS } from '../../../src/features/import/index.js';
 
 const migratedCallers = [
-  'src/main.js', 'src/runtime/link-preview.js', 'src/runtime/performance.js',
+  'src/main.js', 'src/features/link-preview/link-preview-controller.js', 'src/features/telemetry/browser-telemetry.js',
   'src/features/sidebar/folder-tree/folder-tree-controller.js', 'src/features/persistence/native-document-store/native-document-store.js',
   'src/features/hybrid-editor/image/image-source-resolver.js', 'public/app/core.js', 'public/app/events.js',
   'public/app/web-clipper.js'
@@ -49,8 +49,8 @@ test('ESM consumers receive responsibility-focused ports rather than native DTO 
   const loader = await readFile(new URL('../../../src/features/persistence/native-document-store/native-segmented-loader.js', import.meta.url), 'utf8');
   const tree = await readFile(new URL('../../../src/features/sidebar/folder-tree/folder-tree-controller.js', import.meta.url), 'utf8');
   const images = await readFile(new URL('../../../src/features/hybrid-editor/image/image-source-resolver.js', import.meta.url), 'utf8');
-  const performance = await readFile(new URL('../../../src/runtime/performance.js', import.meta.url), 'utf8');
-  const links = await readFile(new URL('../../../src/runtime/link-preview.js', import.meta.url), 'utf8');
+  const performance = await readFile(new URL('../../../src/features/telemetry/browser-telemetry.js', import.meta.url), 'utf8');
+  const links = await readFile(new URL('../../../src/features/link-preview/link-preview-controller.js', import.meta.url), 'utf8');
   assert.match(store, /this\.documentStore\.save\(/);
   assert.match(store, /createNativeSegmentedLoader\(\{\s*documentStore: this\.documentStore/);
   assert.match(loader, /documentStore\.readChunk\(/);

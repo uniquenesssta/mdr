@@ -24,7 +24,7 @@ test('Atomic 5.13 removes hidden textarea compatibility from production callers 
     read('public/app/events.js'),
     read('src/features/preview/pipeline/preview-render-engine.js'),
     read('public/app/web-clipper.js'),
-    read('src/runtime/performance.js'),
+    read('src/features/telemetry/browser-telemetry.js'),
     read('src/styles/features/preview.css'),
     read('src/styles/features/export.css')
   ]);

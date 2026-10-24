@@ -76,7 +76,7 @@ test('R9-12 removes hidden sync globals from Virtual Editor, Hybrid integration 
     'src/features/editor/infrastructure/virtual-editor.js',
     'src/features/editor/infrastructure/codemirror-hybrid-extension.js',
     'src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js',
-    'src/runtime/performance.js'
+    'src/features/telemetry/browser-telemetry.js'
   ];
   const combined = (await Promise.all(paths.map(read))).join('\n');
   assert.doesNotMatch(combined, /markdownEditorScrollSync|markdownEditorScrollController|markdownEditorSelectionController/);

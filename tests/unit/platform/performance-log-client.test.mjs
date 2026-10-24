@@ -30,7 +30,7 @@ test('Atomic Task 3.9 writes the supplied performance batch with recursive telem
 
 test('performance-log client leaves queueing aggregation retry in AggregationBuffer and diagnostics in Runtime', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/performance-log-client.js', import.meta.url), 'utf8');
-  const runtimeSource = await readFile(new URL('../../../src/runtime/performance.js', import.meta.url), 'utf8');
+  const runtimeSource = await readFile(new URL('../../../src/features/telemetry/browser-telemetry.js', import.meta.url), 'utf8');
 
   assert.doesNotMatch(clientSource, /MAX_QUEUE|aggregates|diagnosticStates|flushInProgress|setTimeout|queue\.unshift/);
   const bufferSource = await readFile(new URL('../../../src/features/telemetry/aggregation-buffer.js', import.meta.url), 'utf8');
@@ -60,7 +60,7 @@ test('invalid performance-log client dependencies fail at the adapter boundary',
 
 test('desktop platform maps LogsPort through the dedicated client and performance runtime consumes it by injection', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
-  const performance = await readFile(new URL('../../../src/runtime/performance.js', import.meta.url), 'utf8');
+  const performance = await readFile(new URL('../../../src/features/telemetry/browser-telemetry.js', import.meta.url), 'utf8');
   assert.match(desktop, /logs: performanceLogClient/);
   assert.match(performance, /platformLogs\.writePerformance\(entries, meta\)/);
   assert.doesNotMatch(performance, /markdownEditorNative/);

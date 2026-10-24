@@ -6,3 +6,13 @@ export { createRuntimeSnapshotRecorder } from './runtime-snapshot-recorder.js';
 export { createNativeLogSink } from './native-log-sink.js';
 export { createTelemetryLifecycle } from './telemetry-lifecycle.js';
 export { telemetry, connectTelemetryRecorder } from './telemetry-channel.js';
+export {
+  mountPerformanceTelemetry,
+  configurePerformancePlatform,
+  configurePerformanceRuntimeStats,
+  getPerformanceBufferStats,
+  startPerformanceTelemetry,
+  stopPerformanceTelemetry,
+  getPerformanceTelemetryState,
+  destroyPerformanceTelemetry
+} from './browser-telemetry.js';

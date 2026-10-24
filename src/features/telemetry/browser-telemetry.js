@@ -1,4 +1,18 @@
-import { createTelemetryRecorder, redactTelemetryIdentity, createAggregationBuffer, createLongTaskObserver, createRuntimeSnapshotRecorder, createNativeLogSink, createTelemetryLifecycle, connectTelemetryRecorder } from '../features/telemetry/index.js';
+/**
+ * Responsibility: Compose browser event diagnostics with the Telemetry Recorder, Buffer, observers, sink and Lifecycle.
+ * Imports: Telemetry collaborators only; native writes and runtime metrics are injected by the application.
+ * Exports: Explicit mount/configure/start/stop/query/destroy through the Telemetry public entry.
+ * State/side effects: One application session and owned resource graph; importing this module installs no browser resources.
+ * Lifecycle: The application mounts once; stop/start retain owners, while destroy is terminal and releases the recording channel.
+ */
+import { createTelemetryRecorder } from './performance-recorder.js';
+import { redactTelemetryIdentity } from './telemetry-redaction.js';
+import { createAggregationBuffer } from './aggregation-buffer.js';
+import { createLongTaskObserver } from './long-task-observer.js';
+import { createRuntimeSnapshotRecorder } from './runtime-snapshot-recorder.js';
+import { createNativeLogSink } from './native-log-sink.js';
+import { createTelemetryLifecycle } from './telemetry-lifecycle.js';
+import { connectTelemetryRecorder } from './telemetry-channel.js';
 
 const sessionId = globalThis.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const diagnosticStates = new Map();
@@ -346,7 +360,8 @@ export function startPerformanceTelemetry() { return !telemetryDestroyed && getT
 export function stopPerformanceTelemetry() { return telemetryLifecycle?.stop(); }
 export function getPerformanceTelemetryState() { return telemetryLifecycle?.getState() || { state: telemetryDestroyed ? 'destroyed' : 'idle' }; }
 
-if (import.meta.env.DEV) {
+export function mountPerformanceTelemetry() {
+  if (!import.meta.env.DEV || telemetryDestroyed || disconnectRecorder) return false;
   disconnectRecorder = connectTelemetryRecorder({ record, diagnostic });
   record('frontend.bootstrap', { category: 'app.lifecycle', durationMs: performance.now(), details: {
     userAgent: navigator.userAgent, hardwareConcurrency: navigator.hardwareConcurrency || null,
@@ -354,4 +369,5 @@ if (import.meta.env.DEV) {
   } });
   getTelemetryLifecycle().mount();
   getTelemetryLifecycle().start();
+  return true;
 }

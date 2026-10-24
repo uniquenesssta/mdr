@@ -121,7 +121,7 @@ test('DOM primitive public entry is exact and callers do not bypass it', async (
     'src/ui/shell/status-bar-shell.js',
     'src/ui/shell/toolbar-shell.js',
     'src/ui/shell/workspace-shell.js',
-    'src/runtime/link-preview.js'
+    'src/features/link-preview/link-preview-controller.js'
   ];
   for (const path of migratedCallers) {
     const source = await readText(path);
@@ -132,7 +132,7 @@ test('DOM primitive public entry is exact and callers do not bypass it', async (
   for (const path of migratedCallers.filter(path => path.includes('/shell/'))) {
     assert.doesNotMatch(await readText(path), /\.createElement\(/, path);
   }
-  const linkPreview = await readText('src/runtime/link-preview.js');
+  const linkPreview = await readText('src/features/link-preview/link-preview-controller.js');
   assert.doesNotMatch(linkPreview, /document\.createElement\(|document\.addEventListener\(/);
   assert.match(linkPreview, /createFocusScope\(/);
   assert.match(linkPreview, /createTransitionVisibility\(/);

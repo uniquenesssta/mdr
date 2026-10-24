@@ -14,7 +14,7 @@ function fixture(t,extra={}) {
 }
 test('R15-07 Native Sink owns only bounded native waits and uses the public entry',()=>{
  const s=readFileSync(new URL('../src/features/telemetry/native-log-sink.js',import.meta.url),'utf8');assert.doesNotMatch(s,/node:fs|@tauri|\bwindow\.|\bdocument\.|setInterval|setTimeout/);
- const r=readFileSync(new URL('../src/runtime/performance.js',import.meta.url),'utf8');assert.match(r,/nativeLogSink = createNativeLogSink/);assert.match(r,/nativeLogSink.writeBatch\(entries, meta\)/);
+ const r=readFileSync(new URL('../src/features/telemetry/browser-telemetry.js',import.meta.url),'utf8');assert.match(r,/nativeLogSink = createNativeLogSink/);assert.match(r,/nativeLogSink.writeBatch\(entries, meta\)/);
 });
 for(const name of ['write','schedule','cancel','isEnabled'])test('R15-07 rejects missing port '+name,t=>{assert.throws(()=>fixture(t,{[name]:null}),TypeError);});
 for(const timeoutMs of [0,249,5001,Infinity])test('R15-07 rejects unbounded timeout '+timeoutMs,t=>{assert.throws(()=>fixture(t,{timeoutMs}),TypeError);});

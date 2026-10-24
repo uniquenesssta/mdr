@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {readFileSync} from 'node:fs';
 import {createE2EQueryAPI} from '../src/features/e2e/index.js';
-import {configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge} from '../src/runtime/e2e-bridge.js';
+import {configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge} from '../src/features/e2e/index.js';
 
 const tick = async () => { for (let i=0;i<20;i++) await Promise.resolve(); };
 const required = ['readContext','readSnapshot','readPreviewStats','readText','importDocument','setLayout','setVisualEditing','focus','select','scroll','findText','clearStorage','now','schedule','cancel','requestFrame','cancelFrame'];
@@ -36,7 +36,7 @@ test('R15-09 semantic owner uses public entry and injected ports without DOM glo
   const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
   assert.match(read('src/features/e2e/index.js'),/export \{ createE2EQueryAPI \}/);
   assert.doesNotMatch(read('src/features/e2e/e2e-query-api.js'),/\b(?:window|document|globalThis)\.|querySelector|virtualEditor|from ['"]|setTimeout\(|requestAnimationFrame\(/);
-  const bridge=read('src/runtime/e2e-bridge.js');assert.match(bridge,/from '..\/features\/e2e\/index.js'/);assert.doesNotMatch(bridge,/function (?:waitForIdle|loadMarkdown|revealPosition|revealText)|waitForAnimationFrames/);
+  const bridge=read('src/features/e2e/browser-e2e-bridge.js');assert.match(bridge,/createE2EQueryAPI.*from '\.\/e2e-query-api\.js'/);assert.doesNotMatch(bridge,/function (?:waitForIdle|loadMarkdown|revealPosition|revealText)|waitForAnimationFrames/);
   const main=read('src/main.js');assert.match(main,/configureMarkdownEditorE2EPorts/);assert.match(main,/const destroyDocumentFeatures = \(\) => \{\s*destroyMarkdownEditorE2EBridge\(\)/);
 });
 for(const name of required)test('R15-09 rejects invalid dependency '+name,t=>{assert.throws(()=>fixture(t,{[name]:null}),TypeError);});

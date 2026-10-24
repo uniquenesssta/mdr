@@ -25,7 +25,7 @@ test('R15-06 public Snapshot owns bounded schema and recurring timer without glo
   const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8'),source=read('src/features/telemetry/runtime-snapshot-recorder.js');
   assert.match(read('src/features/telemetry/index.js'),/export \{ createRuntimeSnapshotRecorder \}/);
   assert.doesNotMatch(source,/\b(?:window|globalThis)\.|querySelectorAll|setTimeout\(|setInterval\(|node:fs|@tauri|writePerformance/);
-  const runtime=read('src/runtime/performance.js');assert.match(runtime,/function getRuntimeSnapshotRecorder\(/);
+  const runtime=read('src/features/telemetry/browser-telemetry.js');assert.match(runtime,/function getRuntimeSnapshotRecorder\(/);
   assert.match(runtime,/if \(!runtimeSnapshotRecorder\) runtimeSnapshotRecorder = createRuntimeSnapshotRecorder/);
   assert.match(runtime,/if \(import.meta.env.DEV\) getRuntimeSnapshotRecorder\(\).start\(\)/);
   assert.doesNotMatch(runtime,/const runtimeSnapshotRecorder = createRuntimeSnapshotRecorder/);
