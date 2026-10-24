@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DocumentModel } from '../src/document/document-model.js';
-import { NativeDocumentStore } from '../src/storage/native-document-store.js';
+import { NativeDocumentStore } from '../src/features/persistence/index.js';
 import {
   createDocumentRecord, updateDocumentRecord, createDocumentSessionStore,
   createDocumentSessionController, createSessionDocumentRepository

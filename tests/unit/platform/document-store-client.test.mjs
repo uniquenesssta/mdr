@@ -134,7 +134,7 @@ test('invalid client options fail at the adapter boundary', () => {
 
 test('DocumentStore client contains transport mapping only while Stage 10 specialists own persistence policy', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/document-store-client.js', import.meta.url), 'utf8');
-  const storeSource = await readFile(new URL('../../../src/storage/native-document-store.js', import.meta.url), 'utf8');
+  const storeSource = await readFile(new URL('../../../src/features/persistence/native-document-store/native-document-store.js', import.meta.url), 'utf8');
   assert.doesNotMatch(clientSource, /sessions|loadSequence|VERSION_MISMATCH|forceSnapshot =|queueMicrotask|saveSnapshotInChunks|DOCUMENT_LOAD_CANCELLED/);
   assert.match(storeSource, /this\.sessions = new Map\(\)/);
   assert.match(storeSource, /VERSION_MISMATCH/);
@@ -162,7 +162,7 @@ test('Rust document-store structs and commands remain camelCase authorities', as
 
 test('desktop platform exposes DocumentStorePort and Stage 10 persistence consumers use only frozen port names', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
-  const store = await readFile(new URL('../../../src/storage/native-document-store.js', import.meta.url), 'utf8');
+  const store = await readFile(new URL('../../../src/features/persistence/native-document-store/native-document-store.js', import.meta.url), 'utf8');
   const uploader = await readFile(new URL('../../../src/features/persistence/native-document-store/native-snapshot-uploader.js', import.meta.url), 'utf8');
   const loader = await readFile(new URL('../../../src/features/persistence/native-document-store/native-segmented-loader.js', import.meta.url), 'utf8');
   const search = await readFile(new URL('../../../src/features/persistence/native-document-store/native-search-adapter.js', import.meta.url), 'utf8');

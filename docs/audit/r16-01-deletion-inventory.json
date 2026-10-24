@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "d98f713a9ab4588f220811bf3acc652f6af1b8bf",
+  "baselineCommit": "ac3fc3e82b8e4d1258ed38ab991be10686d06317",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "e17a4eceffe3465ed7b6fada0f23812fee10c94212066c08123b610e667bb18f"
+      "sha256": "2edede5f04406b425a56e76ee705a1c5d052b9ebbb0224b027c64703fbd0c06e"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -375,7 +375,7 @@
     },
     {
       "path": "scripts/stage-16/deletion-inventory.mjs",
-      "sha256": "c410ddf8a261f9c4fa7560fe3f0a0c8593a055f9faa3bc91b58642a16eebce24"
+      "sha256": "084d0c4c1b0bbcd8c5c0ec1e78129c9192a77e88f911ae8f8863e6b37b3d51c1"
     },
     {
       "path": "scripts/verify-architecture.mjs",
@@ -914,10 +914,6 @@
       "sha256": "d74ef9f70d389f3cc6afaca8acc3e7b0ae0cee9790c527f92868a69c60dd83b9"
     },
     {
-      "path": "src/editor/hybrid-markdown.js",
-      "sha256": "f9b62de1216dc1895bee482cedba4dcffb9a70a0beeff9c332b13dd4748ee6b0"
-    },
-    {
       "path": "src/editor/hybrid/block-registry.js",
       "sha256": "c7e7c8067dd1c0717ff0901383cd2a0e4126168405dcf9968d3700e587a5c0fe"
     },
@@ -932,10 +928,6 @@
     {
       "path": "src/editor/hybrid/table-model.js",
       "sha256": "c09d43ec577c294f67c18dd6aa6fae4ff119da78d4bf456b78875c0173319186"
-    },
-    {
-      "path": "src/editor/virtual-editor.js",
-      "sha256": "0e64e37cae8565225f7149bd2af7d38caaacbe73ea99be0e06e0effbc9b4e318"
     },
     {
       "path": "src/features/documents/application/document-close-coordinator.js",
@@ -1127,7 +1119,7 @@
     },
     {
       "path": "src/features/editor/index.js",
-      "sha256": "49b6341769c3cdcf30beb1be49f9c09b713b450fb7d177c12f473fffc6873195"
+      "sha256": "aadf3886c19b8913941bb17337cc983339ffb964723c8e6757074509579a0f38"
     },
     {
       "path": "src/features/editor/infrastructure/codemirror-editor-adapter.js",
@@ -1135,7 +1127,15 @@
     },
     {
       "path": "src/features/editor/infrastructure/codemirror-extension-registry.js",
-      "sha256": "6bfacc63439a149b6a22ac6b3667f304a345cbcb622b3026e1d651985e38b095"
+      "sha256": "794b5f8aa431cafdeb1ddb62fcdd9852dea4a2307c7ee2de68b07d8733334137"
+    },
+    {
+      "path": "src/features/editor/infrastructure/codemirror-hybrid-extension.js",
+      "sha256": "c0c4510241e982e71057281d9367ae310bb9a42dcc69f966c7e3ab59ff88ca5e"
+    },
+    {
+      "path": "src/features/editor/infrastructure/codemirror-source-editor-port.js",
+      "sha256": "367e3c54a9a5c5c77dd3871e08080f163d55ad9694151509e1b479f3a2622e9f"
     },
     {
       "path": "src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js",
@@ -1148,6 +1148,10 @@
     {
       "path": "src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js",
       "sha256": "b140da314211ca69d24a9db7cfdc4009afe085e8fd8addb9526051a4229b7419"
+    },
+    {
+      "path": "src/features/editor/infrastructure/virtual-editor.js",
+      "sha256": "fa2d9f22335770f55aea189cd0c0d3b8e592b65abd7cee78d238e8b6afadd99b"
     },
     {
       "path": "src/features/editor/ui/editor-pane-view.js",
@@ -1460,10 +1464,6 @@
     {
       "path": "src/features/hybrid-editor/compatibility/classic-hybrid-source-edit-controller-port.js",
       "sha256": "93206bc8b890567e55386b54392557bfb0850d10d2ef8a68c91bfa5c7367324e"
-    },
-    {
-      "path": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
-      "sha256": "8793f145d8a6ce8a414789e5e21ca6c323ccdb5fd488e610e3dd1a53bd50be5b"
     },
     {
       "path": "src/features/hybrid-editor/image/image-source-cache.js",
@@ -1815,7 +1815,11 @@
     },
     {
       "path": "src/features/persistence/index.js",
-      "sha256": "664c91a1117e7ea5ed0b573838f1045abdc72821e5504ffd9f858c339d3ccb66"
+      "sha256": "bca101266e7b6b3fc1acc7dd07f75ab355d61a0ccf0b63687a57ebb3b6a1ec23"
+    },
+    {
+      "path": "src/features/persistence/native-document-store/native-document-store.js",
+      "sha256": "41acb596fa5903d7be1c259d725952399652ffd3241f714c141dc0f6442077f9"
     },
     {
       "path": "src/features/persistence/native-document-store/native-save-queue.js",
@@ -2371,7 +2375,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "3fde78fae558ea04711b4d24fc408537cf9094f6a756cc9deb7393f795b7c5d5"
+      "sha256": "1b3605b0300a1e3b49d83d6a3c53b361569cd80ec1e26ed5e7fe7dbb99242bdb"
     },
     {
       "path": "src/model-kernel/index.js",
@@ -2556,10 +2560,6 @@
     {
       "path": "src/shared/vendor/capability-loader.js",
       "sha256": "85445ad14974da3f655f547e86eb62fac4414be58361e6009277257b5344eec1"
-    },
-    {
-      "path": "src/storage/native-document-store.js",
-      "sha256": "0632a4d216492e412f2b95d893a1f682baea19ee9920e668d71ffe60b899d54c"
     },
     {
       "path": "src/styles/components/badge.css",
@@ -2895,7 +2895,7 @@
     },
     {
       "path": "tests/architecture/fixtures/production-modules.json",
-      "sha256": "0ad50a2e7f1d841007516fe03436377749c2ff998dd48330a391b891531c20d7"
+      "sha256": "1b19ff8159736fb768ac744e3cb3096d17a9ddaade6fd5262f81da6c5e29523c"
     },
     {
       "path": "tests/architecture/global-write-scanner.test.mjs",
@@ -2943,7 +2943,7 @@
     },
     {
       "path": "tests/architecture/stage-05-editor-infrastructure-conformance.test.mjs",
-      "sha256": "202fa4308095a8b4628f010e095d6aeba9c8c51c2cf1560ad3c8f66421cac1a6"
+      "sha256": "7520c431c1510477e6b10ef778a7fe6baf3b59e5de264a39f8bef7e573b6290c"
     },
     {
       "path": "tests/architecture/stage-05-find-replace-boundary.test.mjs",
@@ -2951,7 +2951,7 @@
     },
     {
       "path": "tests/architecture/stage-05-history-authority.test.mjs",
-      "sha256": "8308344f0c2b20f28e3542d8c3dc52f4acb56a00afeebd46d6888bbaaad15772"
+      "sha256": "ae2a5963025f48db05f91aaeaf2be7a1562a7361bf89487d0900b94341b23bb1"
     },
     {
       "path": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
@@ -3071,43 +3071,43 @@
     },
     {
       "path": "tests/architecture/stage-08-hybrid-activation.test.mjs",
-      "sha256": "bc320f3d2d123bbea19199a7047ebdc7e9af85a1dc0fc3416af7bc3f102d59e7"
+      "sha256": "bb5ec9adc242ea85737cee312ade0f8eeea194286c1d3cc9bd63519fbc136459"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-code-block.test.mjs",
-      "sha256": "564522e7b2a3c07fbe1fc0d749cb1b35e5296215304679826fa0cf6b1af787fa"
+      "sha256": "079f042bd165ff9e4dd2a0595e7bd7fb508a24954ec26aa9074fd4eadfa7a371"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-component-session.test.mjs",
-      "sha256": "ff32b0fa2c01600d335492b7415601175f0977dd92e8c69a605f90697e97027a"
+      "sha256": "ef14f931fea70054fd15899ce9e26f6d0a380fe2eb49b8eee631e034ac24cdda"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-editor-controller.test.mjs",
-      "sha256": "92fa1a0991e49a98bf27aa04f64e3ce74834e643534ffab417d4543001e8fec0"
+      "sha256": "b39257a25b17a172547d63ec7014de687bd1df262c7e021a78818651e5505e99"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-html.test.mjs",
-      "sha256": "0cf3632dd7f8314b4728dfa1c9a0ab110bdfc47ddc54737cdfe3596748939296"
+      "sha256": "433d7f519711b4069ee526eabc299f1de52ecdea15372176766113907856773b"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-image.test.mjs",
-      "sha256": "cc448d37035ecfc780a4a360e8fc84971a363a0f51dd3e6ae522a9b6d851644b"
+      "sha256": "3e5e6ffe98be8f5b82b119c91eb9e8046133aa547ee37744a05aa4abf1b47b9a"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-inline-presentation.test.mjs",
-      "sha256": "05dcbc260253a47337459d117e40f3abfded72b8738c1e2812e2e68d6921aeb0"
+      "sha256": "cd7fd8509cf651763edc41a8148575d9294ed1e2044fc4ce8574ebbf8625877f"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-math.test.mjs",
-      "sha256": "265baa1d3397d3bb1241f869898c59003f455637908572f498d3507263d0a056"
+      "sha256": "10bf83b141cc88cbb92bdd1f4ad20b586b490ca96406e9e6d2b7cab6c7998334"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-mermaid.test.mjs",
-      "sha256": "f62fde94b5e76ade3ff1ff24ccf91695aec4b651041640a1088e57bfe6f0cffb"
+      "sha256": "0784098520aebf269b1e7585358bf65b92cdcb22c6484096fcc0fceab41e564a"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-prefix-hr.test.mjs",
-      "sha256": "6bee0bb106c6cb45fc59730f3b9689188463f51f32bbcee197b1f3ab31f9e7df"
+      "sha256": "40c5516b3ebcbab3171ade774c6f6ebafd76008801c95bb138b745a4b1228bbd"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-shared-widget-ui.test.mjs",
@@ -3115,15 +3115,15 @@
     },
     {
       "path": "tests/architecture/stage-08-hybrid-source-edit-controller.test.mjs",
-      "sha256": "e33b703f477112d5eac1bfa14090b8f0f1ee113de91d9b8d7b64bbfbb7435c96"
+      "sha256": "1a07dbe3c75987033af112148af40f30afcb1b4cf8fa221ee45cbea362ae21ee"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-table.test.mjs",
-      "sha256": "cb9d47f1f2c7a2b1501cfe68d915da197f8a8c34d91ea8ca3feaee3f89bbef3f"
+      "sha256": "2d299f045c9b1bdd87184441a1b73a169f9df76b13eb21fbf630ec1d40304be4"
     },
     {
       "path": "tests/architecture/stage-08-hybrid-widget-lifecycle.test.mjs",
-      "sha256": "df01cc60bcdeff14e1af7d5448c0bcc10ae2d6e8f64131b227f11c1fee280001"
+      "sha256": "7de2b8b4f8af1578dd4137077a79fc37c018126d6bd620802f819fead886985e"
     },
     {
       "path": "tests/architecture/stage-09-editor-scroll-mapper.test.mjs",
@@ -3131,7 +3131,7 @@
     },
     {
       "path": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
-      "sha256": "1a4b8ac079bda1b6eb117438d0bdaff81d7821cbd0bc0c78bcd48105444a84fc"
+      "sha256": "4d8a9b694ccaf17e7178b9d02f10359a06de35fbe67b8d780ed615c8c8772f35"
     },
     {
       "path": "tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs",
@@ -3431,7 +3431,7 @@
     },
     {
       "path": "tests/hybrid-component-contract.test.mjs",
-      "sha256": "c946c9aa40594b539657517b9034b93a7595c7fea5620cc0764a239d8674b8db"
+      "sha256": "5fdb9c293a5478ace089467b41b6becd9de78d92eeb0a88742bcfbcd348f6473"
     },
     {
       "path": "tests/hybrid-component-state.test.mjs",
@@ -3451,7 +3451,7 @@
     },
     {
       "path": "tests/presentation-renderer-contract.test.mjs",
-      "sha256": "f995ab8bfde8a23fd33790112e142ed5563e6b2e3c1321633390ece0088d888a"
+      "sha256": "7799c5b45849d1806ca290ba3b9d2e07f5dddcd2fbeff30d9b27ad407a39b1f2"
     },
     {
       "path": "tests/stage-01-handoff.test.mjs",
@@ -3523,7 +3523,7 @@
     },
     {
       "path": "tests/stage-08-hybrid-state-machine-freeze.test.mjs",
-      "sha256": "881a5138264f0991c4af9dfa73b77b2368a47b6a9118477ccf957795d7bff2b6"
+      "sha256": "00d2f9742440a8c543e4990bed6c7a74de329a1e2464a90f88cf39963a01b7dc"
     },
     {
       "path": "tests/stage-08-hybrid-table.test.mjs",
@@ -3599,23 +3599,23 @@
     },
     {
       "path": "tests/stage-10-native-save-queue.test.mjs",
-      "sha256": "5c5ba600c3d23e934e142f206fddbe783e8592bc05ca0fe62587d33cec0f4109"
+      "sha256": "3377592f32c9407d2438d0d0253daa6851a0a3cbaa27189c3499b06328f3bc14"
     },
     {
       "path": "tests/stage-10-native-save-session.test.mjs",
-      "sha256": "741da9df9f9a3ddd68356a0d36e609c357111ff561b0958cf7cdf12981716fd4"
+      "sha256": "27ab9ca598f15a0c4c2e0e28c2df1199cf74291ded7e7a29f3bb490de4a91e06"
     },
     {
       "path": "tests/stage-10-native-search-adapter.test.mjs",
-      "sha256": "6c1d2da8151fe0031a68e301d0ed62a07a03bd1e5be3347780e2e66c3d4b3165"
+      "sha256": "6471cff9978ecf1efb77f52edc3ec8d323e21c17c940d6ec07103b6f17088326"
     },
     {
       "path": "tests/stage-10-native-segmented-loader.test.mjs",
-      "sha256": "ab1cfbe93fe3cc6f780cfdb9a3f5a62a3b74858eb7d3a68dce5ae7ee15c8f53a"
+      "sha256": "693aaa158d60c3aa115db55271ff3ed9f7419bd5ee37dc14526d0d67635a32cb"
     },
     {
       "path": "tests/stage-10-native-snapshot-uploader.test.mjs",
-      "sha256": "2f6a8ae9845c93c4e5e0a202664bb584162090085c0496dabe61864de6b93a48"
+      "sha256": "50b3b0769a30df94664d19cd20caba35ab6a0fa2c33c31dadb81f2e961f95072"
     },
     {
       "path": "tests/stage-10-remove-legacy-save.test.mjs",
@@ -3695,7 +3695,7 @@
     },
     {
       "path": "tests/stage-12-save-commit.test.mjs",
-      "sha256": "069f6502afc6f886920ae20a8bb80137b2ca891b3b7df7a294fbd2c7e8b91009"
+      "sha256": "f769f5a13a2e4cb468bb83883d57225720f3bb501391a76c79a822870cd90258"
     },
     {
       "path": "tests/stage-12-security-contract.test.mjs",
@@ -3887,7 +3887,7 @@
     },
     {
       "path": "tests/stage-15-event-catalogue.test.mjs",
-      "sha256": "2173a2c62021c65fcea05811f2e81876aa950c851c6b16feffede65930595b32"
+      "sha256": "05d8456318da06fe41026dd7f9c802f15ae4aa86b30d431bf9cadf75c7b61145"
     },
     {
       "path": "tests/stage-15-log-cleanup.test.mjs",
@@ -3924,6 +3924,10 @@
     {
       "path": "tests/stage-16-deletion-inventory.test.mjs",
       "sha256": "ab52bd813b234fb9b36b5a170f0ed38c7ad5ca1c3f16d8751900024c7b7bd4f3"
+    },
+    {
+      "path": "tests/stage-16-directory-api.test.mjs",
+      "sha256": "4afaa83abbe20180bab89fc71c19e616177a6db10242d2d395bb7d2c536541fa"
     },
     {
       "path": "tests/stage-16-esm-application.test.mjs",
@@ -4031,15 +4035,15 @@
     },
     {
       "path": "tests/unit/documents/document-domain.test.mjs",
-      "sha256": "6dcb14da4f9a1185d5c7fc1fdf797508a5aa7f491b0a5ac431f96c2f793b221c"
+      "sha256": "54b30d7c425b90f5828e23054d7b437c7d07bf593533b4c782583fa726dd7f42"
     },
     {
       "path": "tests/unit/documents/document-session-controller.test.mjs",
-      "sha256": "1fed1a2ee918a7802907e9610ca2b73ae339e51069be5fff9f3b44c6b130c279"
+      "sha256": "4584760e2737eba44cbd70375679ee554f1aa8544d44c3d365fd6c10e770cac5"
     },
     {
       "path": "tests/unit/documents/document-session-store.test.mjs",
-      "sha256": "1312a74733b00703c41844df635f52ccbf3d72898865f91ff07f396d8c9b4583"
+      "sha256": "17594e9ea348bff8417050d939991c5ca9db53d09d134a002cfcdb067c6e8e3e"
     },
     {
       "path": "tests/unit/documents/document-ui.test.mjs",
@@ -4055,11 +4059,11 @@
     },
     {
       "path": "tests/unit/editor/codemirror-adapter.test.mjs",
-      "sha256": "e21ae01a25bbd68cefcf33a323ad450139f347076665b1454b5d6287410fb2e0"
+      "sha256": "f2b07f576146b60ad06c85c8d871c821864a5526d1c4d1eb79b14ac13c2b76f2"
     },
     {
       "path": "tests/unit/editor/codemirror-extension-registry.test.mjs",
-      "sha256": "5e6b8de48c3e6037b02f1856023493d98e30a8624df5aef99958eb56d305e266"
+      "sha256": "c9afbeb194c02536456fd73150691297c8daa8fc5a4757ffd2585779326f3f40"
     },
     {
       "path": "tests/unit/editor/editor-command-service.test.mjs",
@@ -4247,7 +4251,7 @@
     },
     {
       "path": "tests/unit/platform/document-store-client.test.mjs",
-      "sha256": "2b23ee96f0a6f9e30e372b1b3e354b3dca3b2aa119adc0e737fe47e16f022538"
+      "sha256": "243c6f1aee33db9eb40d3f8eaddb5924487d5c775fd206ee789e02e5ab5c22dc"
     },
     {
       "path": "tests/unit/platform/drag-drop-client.test.mjs",
@@ -4275,7 +4279,7 @@
     },
     {
       "path": "tests/unit/platform/platform-cutover.test.mjs",
-      "sha256": "9942c07ffcc9780507ae40218d9475d928366ebe5dd6d1ad2e8268c2b9d2b821"
+      "sha256": "c9acda77e64edb05a3c532f82b3c9ebdb42cda86ed0068257d115282bd229772"
     },
     {
       "path": "tests/unit/platform/platform-detection.test.mjs",
@@ -4550,7 +4554,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "392d131351e147c5b9bbbc3b3560bc897598fd88e9417e85c7a5426f66d3c5ea",
+  "inputSha256": "f9e2cd32cf6a54d103961b6ae2e9e30ed57c6aaa58f942e57798b592b12d4915",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -10710,217 +10714,14 @@
     },
     {
       "path": "src/editor/hybrid-markdown.js",
-      "tracked": true,
-      "sha256": "f9b62de1216dc1895bee482cedba4dcffb9a70a0beeff9c332b13dd4748ee6b0",
-      "status": "referenced",
+      "tracked": false,
+      "sha256": null,
+      "status": "absent",
       "deletionAllowed": false,
       "followup": "R16-06",
-      "ownership": {
-        "responsibility": "Final Stage 8 CodeMirror integration facade composing editor/vendor/frozen-model/Preview capabilities into the Hybrid Editor public contract without feature state ownership.",
-        "stateOwner": "none",
-        "lifecycle": "editor-extension-composition"
-      },
-      "detected": {
-        "imports": [
-          "../features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
-          "../features/hybrid-editor/index.js",
-          "../features/preview/render/presentation/math-presentation.js",
-          "../features/preview/render/presentation/mermaid-presentation.js",
-          "../features/telemetry/index.js",
-          "../model-kernel/index.js",
-          "@codemirror/commands",
-          "@codemirror/language",
-          "@codemirror/state",
-          "@codemirror/view",
-          "marked"
-        ],
-        "exports": [
-          "buildHybridMarkdownDecorations",
-          "createHybridMarkdownConfiguration",
-          "createHybridMarkdownExtension",
-          "getHybridMarkdownStats"
-        ],
-        "listeners": [],
-        "globalWrites": [],
-        "sideEffects": {
-          "domAccess": false,
-          "storageAccess": false,
-          "networkAccess": false,
-          "timers": [],
-          "observers": [],
-          "workers": [],
-          "tauriCommands": []
-        }
-      },
+      "ownership": null,
+      "detected": null,
       "references": [
-        {
-          "from": "src/editor/virtual-editor.js",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "production",
-          "kind": "module",
-          "line": 6
-        },
-        {
-          "from": "src/features/editor/infrastructure/codemirror-extension-registry.js",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "production",
-          "kind": "module",
-          "line": 26
-        },
-        {
-          "from": "src/features/editor/infrastructure/codemirror-extension-registry.js",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "production",
-          "kind": "path-literal",
-          "line": 29
-        },
-        {
-          "from": "tests/architecture/fixtures/production-modules.json",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 671
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-activation.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 29
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-code-block.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 65
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-component-session.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 27
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-component-session.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 40
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-editor-controller.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 48
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-editor-controller.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 62
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-editor-controller.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 76
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-editor-controller.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 87
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-html.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 62
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-image.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 71
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-inline-presentation.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 100
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-inline-presentation.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 58
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-math.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 53
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-mermaid.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 73
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-prefix-hr.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 44
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-source-edit-controller.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 21
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-source-edit-controller.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 40
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-table.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 63
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-widget-lifecycle.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 40
-        },
-        {
-          "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 77
-        },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
           "target": "src/editor/hybrid-markdown.js",
@@ -10971,34 +10772,6 @@
           "line": 951
         },
         {
-          "from": "tests/hybrid-component-contract.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 51
-        },
-        {
-          "from": "tests/presentation-renderer-contract.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 26
-        },
-        {
-          "from": "tests/presentation-renderer-contract.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 51
-        },
-        {
-          "from": "tests/stage-08-hybrid-state-machine-freeze.test.mjs",
-          "target": "src/editor/hybrid-markdown.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 22
-        },
-        {
           "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "src/editor/hybrid-markdown.js",
           "surface": "tests",
@@ -11006,21 +10779,21 @@
           "line": 21
         },
         {
-          "from": "tests/unit/editor/codemirror-extension-registry.test.mjs",
+          "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "src/editor/hybrid-markdown.js",
           "surface": "tests",
-          "kind": "module",
-          "line": 10
+          "kind": "path-literal",
+          "line": 22
         },
         {
-          "from": "tests/unit/editor/codemirror-extension-registry.test.mjs",
+          "from": "tests/stage-16-directory-api.test.mjs",
           "target": "src/editor/hybrid-markdown.js",
           "surface": "tests",
           "kind": "path-literal",
           "line": 12
         }
       ],
-      "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
+      "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
     },
     {
       "path": "src/editor/hybrid/block-registry.js",
@@ -12442,81 +12215,20 @@
     },
     {
       "path": "src/editor/virtual-editor.js",
-      "tracked": true,
-      "sha256": "0e64e37cae8565225f7149bd2af7d38caaacbe73ea99be0e06e0effbc9b4e318",
-      "status": "referenced",
+      "tracked": false,
+      "sha256": null,
+      "status": "absent",
       "deletionAllowed": false,
       "followup": "R16-06",
-      "ownership": {
-        "responsibility": "Textarea-compatible virtual-editor facade delegating CodeMirror runtime to the adapter and consuming explicitly injected scroll synchronization capability without window Sync globals.",
-        "stateOwner": "virtual-editor-compatibility",
-        "lifecycle": "explicit-instance"
-      },
-      "detected": {
-        "imports": [
-          "../features/editor/index.js",
-          "../features/hybrid-editor/index.js",
-          "./hybrid-markdown.js"
-        ],
-        "exports": [
-          "createVirtualEditor"
-        ],
-        "listeners": [
-          "host:input"
-        ],
-        "globalWrites": [],
-        "sideEffects": {
-          "domAccess": false,
-          "storageAccess": false,
-          "networkAccess": false,
-          "timers": [],
-          "observers": [],
-          "workers": [],
-          "tauriCommands": []
-        }
-      },
+      "ownership": null,
+      "detected": null,
       "references": [
         {
-          "from": "src/main.js",
-          "target": "src/editor/virtual-editor.js",
-          "surface": "production",
-          "kind": "module",
-          "line": 20
-        },
-        {
-          "from": "tests/architecture/fixtures/production-modules.json",
-          "target": "src/editor/virtual-editor.js",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 721
-        },
-        {
-          "from": "tests/architecture/stage-05-editor-infrastructure-conformance.test.mjs",
+          "from": "tests/stage-16-directory-api.test.mjs",
           "target": "src/editor/virtual-editor.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 63
-        },
-        {
-          "from": "tests/architecture/stage-05-history-authority.test.mjs",
-          "target": "src/editor/virtual-editor.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 54
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-component-session.test.mjs",
-          "target": "src/editor/virtual-editor.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 28
-        },
-        {
-          "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
-          "target": "src/editor/virtual-editor.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 76
+          "line": 13
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -12524,23 +12236,9 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 23557
-        },
-        {
-          "from": "tests/unit/editor/codemirror-adapter.test.mjs",
-          "target": "src/editor/virtual-editor.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 290
-        },
-        {
-          "from": "tests/unit/editor/codemirror-extension-registry.test.mjs",
-          "target": "src/editor/virtual-editor.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 148
         }
       ],
-      "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
+      "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
     },
     {
       "path": "src/features/documents/compatibility/classic-document-controller-port.js",
@@ -13703,89 +13401,23 @@
     },
     {
       "path": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
-      "tracked": true,
-      "sha256": "8793f145d8a6ce8a414789e5e21ca6c323ccdb5fd488e610e3dd1a53bd50be5b",
-      "status": "referenced",
+      "tracked": false,
+      "sha256": null,
+      "status": "absent",
       "deletionAllowed": false,
-      "followup": "R16-08",
-      "ownership": {
-        "responsibility": "Scoped CodeMirror transaction adapter for Atomic 8.4 source reveal, selection, focus, coordinate lookup and update mapping without business/source state ownership.",
-        "stateOwner": "none",
-        "lifecycle": "explicit-instance"
-      },
-      "detected": {
-        "imports": [
-          "@codemirror/state",
-          "@codemirror/view"
-        ],
-        "exports": [
-          "createCodeMirrorSourceEditorPort",
-          "revealHybridSourceRangeEffect"
-        ],
-        "listeners": [],
-        "globalWrites": [],
-        "sideEffects": {
-          "domAccess": false,
-          "storageAccess": false,
-          "networkAccess": false,
-          "timers": [],
-          "observers": [],
-          "workers": [],
-          "tauriCommands": []
-        }
-      },
+      "followup": "R16-06",
+      "ownership": null,
+      "detected": null,
       "references": [
         {
-          "from": "src/editor/hybrid-markdown.js",
-          "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
-          "surface": "production",
-          "kind": "module",
-          "line": 48
-        },
-        {
-          "from": "src/editor/hybrid-markdown.js",
-          "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
-          "surface": "production",
-          "kind": "path-literal",
-          "line": 51
-        },
-        {
-          "from": "tests/architecture/fixtures/production-modules.json",
-          "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 1551
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-source-edit-controller.test.mjs",
+          "from": "tests/stage-16-directory-api.test.mjs",
           "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 12
-        },
-        {
-          "from": "tests/architecture/stage-08-hybrid-source-edit-controller.test.mjs",
-          "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 68
-        },
-        {
-          "from": "tests/hybrid-component-contract.test.mjs",
-          "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 53
-        },
-        {
-          "from": "tests/unit/editor/codemirror-adapter.test.mjs",
-          "target": "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 306
+          "line": 15
         }
       ],
-      "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
+      "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
     },
     {
       "path": "src/features/layout/compatibility/classic-layout-state-port.js",
@@ -14154,7 +13786,7 @@
           "target": "src/features/persistence/compatibility/classic-save-status-store-port.js",
           "surface": "production",
           "kind": "module",
-          "line": 19
+          "line": 20
         },
         {
           "from": "tests/architecture/fixtures/production-modules.json",
@@ -16734,39 +16366,13 @@
     },
     {
       "path": "src/storage/native-document-store.js",
-      "tracked": true,
-      "sha256": "0632a4d216492e412f2b95d893a1f682baea19ee9920e668d71ffe60b899d54c",
-      "status": "referenced",
+      "tracked": false,
+      "sha256": null,
+      "status": "absent",
       "deletionAllowed": false,
       "followup": "R16-06",
-      "ownership": {
-        "responsibility": "Transitional NativeDocumentStore orchestration retaining save/session integration while delegating queue, chunk upload, segmented load and native search responsibilities to Stage 10 Persistence specialists.",
-        "stateOwner": "native-document-store-orchestration",
-        "lifecycle": "explicit-instance"
-      },
-      "detected": {
-        "imports": [
-          "../features/documents/index.js",
-          "../features/persistence/index.js"
-        ],
-        "exports": [
-          "NativeDocumentStore",
-          "createNativeDocumentStore"
-        ],
-        "listeners": [],
-        "globalWrites": [],
-        "sideEffects": {
-          "domAccess": true,
-          "storageAccess": false,
-          "networkAccess": false,
-          "timers": [
-            "setTimeout"
-          ],
-          "observers": [],
-          "workers": [],
-          "tauriCommands": []
-        }
-      },
+      "ownership": null,
+      "detected": null,
       "references": [
         {
           "from": "scripts/stage-03/record-platform-cutover-evidence.mjs",
@@ -16776,161 +16382,14 @@
           "line": 46
         },
         {
-          "from": "src/main.js",
-          "target": "src/storage/native-document-store.js",
-          "surface": "production",
-          "kind": "module",
-          "line": 57
-        },
-        {
-          "from": "tests/architecture/fixtures/production-modules.json",
-          "target": "src/storage/native-document-store.js",
-          "surface": "governance",
-          "kind": "path-literal",
-          "line": 3541
-        },
-        {
-          "from": "tests/stage-10-native-save-queue.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 6
-        },
-        {
-          "from": "tests/stage-10-native-save-queue.test.mjs",
+          "from": "tests/stage-16-directory-api.test.mjs",
           "target": "src/storage/native-document-store.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 249
-        },
-        {
-          "from": "tests/stage-10-native-save-session.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 5
-        },
-        {
-          "from": "tests/stage-10-native-save-session.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 126
-        },
-        {
-          "from": "tests/stage-10-native-search-adapter.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 6
-        },
-        {
-          "from": "tests/stage-10-native-search-adapter.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 115
-        },
-        {
-          "from": "tests/stage-10-native-segmented-loader.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 5
-        },
-        {
-          "from": "tests/stage-10-native-segmented-loader.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 168
-        },
-        {
-          "from": "tests/stage-10-native-snapshot-uploader.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 6
-        },
-        {
-          "from": "tests/stage-10-native-snapshot-uploader.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 277
-        },
-        {
-          "from": "tests/stage-12-save-commit.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 4
-        },
-        {
-          "from": "tests/unit/documents/document-domain.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 110
-        },
-        {
-          "from": "tests/unit/documents/document-session-controller.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "module",
-          "line": 19
-        },
-        {
-          "from": "tests/unit/documents/document-session-controller.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 428
-        },
-        {
-          "from": "tests/unit/documents/document-session-store.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "module",
           "line": 14
-        },
-        {
-          "from": "tests/unit/documents/document-session-store.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 148
-        },
-        {
-          "from": "tests/unit/platform/document-store-client.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 137
-        },
-        {
-          "from": "tests/unit/platform/document-store-client.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 165
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 48
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "src/storage/native-document-store.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 9
         }
       ],
-      "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
+      "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
     },
     {
       "path": "src/styles/main.css",
@@ -17374,8 +16833,8 @@
   ],
   "summary": {
     "protected": 6,
-    "absent": 37,
-    "referenced": 59,
+    "absent": 41,
+    "referenced": 55,
     "unproven": 2
   }
 }

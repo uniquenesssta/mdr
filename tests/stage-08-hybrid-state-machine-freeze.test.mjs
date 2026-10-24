@@ -19,7 +19,7 @@ import {
 } from '../src/features/hybrid-editor/index.js';
 
 const codeBlockDirectEditorUrl = new URL('../src/features/hybrid-editor/widgets/code-block/code-block-direct-editor.js', import.meta.url);
-const controllerUrl = new URL('../src/editor/hybrid-markdown.js', import.meta.url);
+const controllerUrl = new URL('../src/features/editor/infrastructure/codemirror-hybrid-extension.js', import.meta.url);
 const sourceEditControllerUrl = new URL('../src/features/hybrid-editor/application/hybrid-source-edit-controller.js', import.meta.url);
 const tableCellEditorUrl = new URL('../src/features/hybrid-editor/widgets/table/table-cell-editor.js', import.meta.url);
 

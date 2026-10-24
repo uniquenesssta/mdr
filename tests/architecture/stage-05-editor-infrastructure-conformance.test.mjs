@@ -60,7 +60,7 @@ test('CR-05 retires the pre-conformance 5.5-5.7 infrastructure paths instead of 
 test('CR-05 makes the Stage 5 Editor feature entry the public infrastructure boundary for remaining legacy callers', async () => {
   const [editorIndex, virtualEditor, architectureFixture] = await Promise.all([
     readFile('src/features/editor/index.js', 'utf8'),
-    readFile('src/editor/virtual-editor.js', 'utf8'),
+    readFile('src/features/editor/infrastructure/virtual-editor.js', 'utf8'),
     readFile('tests/architecture/fixtures/production-modules.json', 'utf8')
   ]);
 
@@ -74,7 +74,9 @@ test('CR-05 makes the Stage 5 Editor feature entry the public infrastructure bou
   }
   assert.doesNotMatch(editorIndex, /EditorView|EditorState|Compartment/);
 
-  assert.match(virtualEditor, /from ['"]\.\.\/features\/editor\/index\.js['"]/);
+  assert.match(virtualEditor, /from ['"]\.\/codemirror-editor-adapter\.js['"]/);
+  assert.match(virtualEditor, /from ['"]\.\/codemirror-extension-registry\.js['"]/);
+  assert.match(editorIndex, /createVirtualEditor/);
   assert.doesNotMatch(virtualEditor, /\.\/codemirror\/index\.js/);
 
   for (const path of completedEditorModules.slice(2)) {

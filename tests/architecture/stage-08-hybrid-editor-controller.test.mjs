@@ -45,21 +45,21 @@ test('Atomic 8.15 Hybrid public entry exposes final application owners without l
 });
 
 test('Atomic 8.15 editor facade is the sole CodeMirror/vendor/model/Preview integration boundary while the public Hybrid entry remains browser-direct-safe', async () => {
-  const facade = await read('src/editor/hybrid-markdown.js');
+  const facade = await read('src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   const index = await read('src/features/hybrid-editor/index.js');
   assert.match(facade, /from ['"]@codemirror\//);
   assert.match(facade, /from ['"]marked['"]/);
   assert.match(facade, /\.\.\/model-kernel\/index\.js/);
-  assert.match(facade, /\.\.\/features\/preview\/render\/presentation\/math-presentation\.js/);
-  assert.match(facade, /\.\.\/features\/hybrid-editor\/index\.js/);
-  assert.match(facade, /\.\.\/features\/hybrid-editor\/compatibility\/codemirror-source-editor-port\.js/);
+  assert.match(facade, /renderMathFormula.*from ['"]\.\.\/\.\.\/preview\/index\.js/);
+  assert.match(facade, /\.\.\/\.\.\/hybrid-editor\/index\.js/);
+  assert.match(facade, /\.\/codemirror-source-editor-port\.js/);
   assert.doesNotMatch(facade, /features\/hybrid-editor\/(?:application|widgets|presentation|state|activation)\//);
   assert.doesNotMatch(facade, /\.\/hybrid\/controller\.js/);
   assert.doesNotMatch(index, /from ['"]@codemirror\/|from ['"]marked['"]|codemirror-source-editor-port/);
 });
 
 test('Atomic 8.15 preserves the external hybrid-markdown facade surface', async () => {
-  const facade = await read('src/editor/hybrid-markdown.js');
+  const facade = await read('src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   for (const name of [
     'buildHybridMarkdownDecorations',
     'getHybridMarkdownStats',
@@ -73,7 +73,7 @@ test('Atomic 8.15 production inventory has final Stage 8 ownership and no legacy
   const paths = new Set(inventory.modules.map(record => record[0]));
   await assertProductionInventory(inventory);
   for (const path of APP_FILES) assert.equal(paths.has(path), true, path);
-  assert.equal(paths.has('src/editor/hybrid-markdown.js'), true);
+  assert.equal(paths.has('src/features/editor/infrastructure/codemirror-hybrid-extension.js'), true);
   for (const path of [
     'src/editor/hybrid/controller.js',
     'src/editor/hybrid/widgets.js',
@@ -84,7 +84,7 @@ test('Atomic 8.15 production inventory has final Stage 8 ownership and no legacy
 test('Atomic 8.15 legacy Hybrid globals stay removed while the current migration baseline advances monotonically', async () => {
   const baseline = JSON.parse(await read('tests/architecture/fixtures/architecture-baseline.json'));
   assert.equal(baseline.businessGlobalWrites.some(record => record.path === 'src/editor/hybrid/controller.js'), false);
-  assert.equal(baseline.businessGlobalWrites.some(record => record.path === 'src/editor/hybrid-markdown.js'), false);
+  assert.equal(baseline.businessGlobalWrites.some(record => record.path === 'src/features/editor/infrastructure/codemirror-hybrid-extension.js'), false);
   assert.deepEqual(await checkLegacyRuntime(), []);
 
   for (const global of [

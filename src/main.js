@@ -17,7 +17,7 @@ import { createWebClipperController, createWebClipperView, convertExtractedHtml,
 import { createBrowserPrint, createPlatform, mountClassicPlatformPort, createBrowserFileReader } from './platform/index.js';
 import { createLinkPreview } from './runtime/link-preview.js';
 import { configurePerformancePlatform, configurePerformanceRuntimeStats, destroyPerformanceTelemetry } from './runtime/performance.js';
-import { createVirtualEditor } from './editor/virtual-editor.js';
+import { createVirtualEditor } from './features/editor/index.js';
 import {
   createEditorCommandService,
   createEditorController,
@@ -54,7 +54,7 @@ import {
   createDocumentModel,
   selectionMappingApi
 } from './model-kernel/index.js';
-import { createNativeDocumentStore } from './storage/native-document-store.js';
+import { createNativeDocumentStore } from './features/persistence/index.js';
 import { SETTINGS_CHANGED_EVENT } from './features/settings/index.js';
 import {
   createAutosaveController,

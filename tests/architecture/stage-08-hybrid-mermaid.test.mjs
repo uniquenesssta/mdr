@@ -70,12 +70,12 @@ test('Atomic 8.12 separates Mermaid actions from render state and widget orchest
 test('Atomic 8.12 removes legacy Mermaid authority and composes Preview presentation plus WidgetType only at the editor integration boundary', async () => {
   const [widgets, controller] = await Promise.all([
     text('src/features/hybrid-editor/widgets/html/html-block-widget.js'),
-    text('src/editor/hybrid-markdown.js')
+    text('src/features/editor/infrastructure/codemirror-hybrid-extension.js')
   ]);
   assert.doesNotMatch(widgets, /class MermaidBlockWidget|renderHybridMermaid|reportMermaidRenderFailure|createMermaidStatus/);
   assert.doesNotMatch(widgets, /mermaid-presentation\.js|renderMermaidDiagram|getMermaidTheme/);
   assert.match(controller, /createMermaidBlockWidgetType/);
-  assert.match(controller, /renderMermaidDiagram[\s\S]*mermaid-presentation\.js/);
+  assert.match(controller, /renderMermaidDiagram.*from ['"]\.\.\/\.\.\/preview\/index\.js/);
   assert.match(controller, /getMermaidTheme/);
   assert.match(controller, /const MermaidBlockWidget = createMermaidBlockWidgetType\(WidgetType/);
   assert.doesNotMatch(controller, /import\s*\{[^}]*MermaidBlockWidget[^}]*\}\s*from '\.\/widgets\.js'/);

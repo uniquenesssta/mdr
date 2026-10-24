@@ -668,7 +668,7 @@
       true
     ],
     [
-      "src/editor/hybrid-markdown.js",
+      "src/features/editor/infrastructure/codemirror-hybrid-extension.js",
       "esm-facade",
       "editor-integration",
       "Final Stage 8 CodeMirror integration facade composing editor/vendor/frozen-model/Preview capabilities into the Hybrid Editor public contract without feature state ownership.",
@@ -718,13 +718,13 @@
       true
     ],
     [
-      "src/editor/virtual-editor.js",
+      "src/features/editor/infrastructure/virtual-editor.js",
       "esm-module",
       "editor",
       "Textarea-compatible virtual-editor facade delegating CodeMirror runtime to the adapter and consuming explicitly injected scroll synchronization capability without window Sync globals.",
       "virtual-editor-compatibility",
       "explicit-instance",
-      "decompose",
+      "retain",
       false
     ],
     [
@@ -1548,13 +1548,13 @@
       false
     ],
     [
-      "src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js",
+      "src/features/editor/infrastructure/codemirror-source-editor-port.js",
       "esm-module",
-      "hybrid-editor-compatibility",
-      "Scoped CodeMirror transaction adapter for Atomic 8.4 source reveal, selection, focus, coordinate lookup and update mapping without business/source state ownership.",
+      "editor-infrastructure",
+      "Editor-owned CodeMirror transaction capability for Hybrid source reveal, selection, focus, coordinate lookup and update mapping; no business/source state.",
       "none",
       "explicit-instance",
-      "remove-with-codemirror-compatibility",
+      "retain",
       false
     ],
     [
@@ -3538,13 +3538,13 @@
       false
     ],
     [
-      "src/storage/native-document-store.js",
+      "src/features/persistence/native-document-store/native-document-store.js",
       "esm-module",
-      "storage",
-      "Transitional NativeDocumentStore orchestration retaining save/session integration while delegating queue, chunk upload, segmented load and native search responsibilities to Stage 10 Persistence specialists.",
+      "persistence",
+      "NativeDocumentStore orchestration owning native session/queue integration and delegating upload, segmented load and search to Persistence specialists.",
       "native-document-store-orchestration",
       "explicit-instance",
-      "rewrite",
+      "retain",
       false
     ],
     [

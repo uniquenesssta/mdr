@@ -11,7 +11,7 @@ import {
   createDocumentSessionStore,
   mountClassicDocumentSessionPort
 } from '../../../src/features/documents/index.js';
-import { createNativeDocumentStore } from '../../../src/storage/native-document-store.js';
+import { createNativeDocumentStore } from '../../../src/features/persistence/index.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const readText = path => readFile(resolve(ROOT, path), 'utf8');
@@ -145,7 +145,7 @@ test('Atomic 5.2 production integration removes classic session-state authority 
     readText('src/features/export/application/export-controller.js'),
     readText('src/features/preview/pipeline/preview-render-engine.js'),
     readText('src/bootstrap/module-entry.js'),
-    readText('src/storage/native-document-store.js'),
+    readText('src/features/persistence/native-document-store/native-document-store.js'),
     readText('src/features/documents/index.js')
   ]);
   assert.doesNotMatch(core, /\blet\s+documents\b/);

@@ -18,6 +18,7 @@ const fixedPaths = [
   'src/ui/compatibility/mount-modal-shells.js', 'src/ui/compatibility/index.js',
   ...['tauri', 'performance', 'e2e-bridge', 'link-preview', 'task-scheduler', 'vendor'].map(name => 'src/runtime/' + name + '.js'),
   'src/styles/main.css', 'src/editor/virtual-editor.js', 'src/editor/precise-pointer-selection.js', 'src/editor/hybrid-markdown.js',
+  'src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js',
   ...['widgets', 'inline-presentation', 'controller', 'component-state', 'double-activation', 'image-source',
     'widget-lifecycle', 'code-highlighter', 'code-presentation'].map(name => 'src/editor/hybrid/' + name + '.js'),
   ...['preview-worker-client', 'preview-worker', 'virtual-preview', 'enhancement-queue'].map(name => 'src/preview/' + name + '.js'),
@@ -27,6 +28,7 @@ const fixedPaths = [
 function followup(path) {
   if (path.startsWith('public/app/') || path === 'public/i18n.js') return 'R16-02';
   if (path === 'src/styles/main.css') return 'R16-05';
+  if (path === 'src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js') return 'R16-06';
   if (path.startsWith('src/runtime/')) return 'R16-07';
   if (path.startsWith('.vite/') || path.startsWith('logs/')) return 'R16-09';
   if (path.includes('/compatibility/') || posix.basename(path).startsWith('classic-')) return 'R16-08';

@@ -24,8 +24,8 @@ test('Atomic 8.2 has one public Component Session owner and removes the legacy s
 
 test('Atomic 8.2 production callers depend on the Hybrid Editor public entry only after the final Atomic 8.15 migration', async () => {
   const callers = {
-    'src/editor/hybrid-markdown.js': '../features/hybrid-editor/index.js',
-    'src/editor/virtual-editor.js': '../features/hybrid-editor/index.js'
+    'src/features/editor/infrastructure/codemirror-hybrid-extension.js': '../../hybrid-editor/index.js',
+    'src/features/editor/infrastructure/virtual-editor.js': '../../hybrid-editor/index.js'
   };
   await access(file('src/features/hybrid-editor/widgets/html/html-block-widget.js'));
   for (const [path, publicEntry] of Object.entries(callers)) {
@@ -37,7 +37,7 @@ test('Atomic 8.2 production callers depend on the Hybrid Editor public entry onl
 });
 
 test('Atomic 8.2 Session lifecycle remains authoritative through the Atomic 8.15 application boundary', async () => {
-  const facade = await text('src/editor/hybrid-markdown.js');
+  const facade = await text('src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   const application = await text('src/features/hybrid-editor/application/hybrid-editor-controller.js');
   assert.match(facade, /getHybridComponentSession\(view, \{ onTransition: recordHybridComponentTransition \}\)/);
   assert.match(facade, /destroySession: \(\) => destroyHybridComponentSession\(view\)/);

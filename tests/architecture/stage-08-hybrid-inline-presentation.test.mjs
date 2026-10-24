@@ -55,7 +55,7 @@ test('Atomic 8.14 Hybrid public entry exposes only the coordinator across the pr
 });
 
 test('Atomic 8.14 controller is the sole editor integration boundary for inline presentation capabilities', async () => {
-  const controller = await read('src/editor/hybrid-markdown.js');
+  const controller = await read('src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   assert.doesNotMatch(controller, /\.\/inline-presentation\.js/);
   assert.match(controller, /createInlinePresentationCoordinator\(\{/);
   assert.match(controller, /Decoration,[\s\S]*WidgetType,[\s\S]*marked\.Lexer\.lexInline/);
@@ -97,7 +97,7 @@ test('Atomic 8.14 production inventory replaces one aggregate with seven present
 
 test('Atomic 8.14 presentation ownership remains intact after the Stage 8.15 final controller deletion', async () => {
   await assert.rejects(access(file('src/editor/hybrid/controller.js')));
-  await access(file('src/editor/hybrid-markdown.js'));
+  await access(file('src/features/editor/infrastructure/codemirror-hybrid-extension.js'));
   await access(file('src/features/hybrid-editor/application/hybrid-decoration-coordinator.js'));
   await access(file('src/features/hybrid-editor/application/hybrid-editor-controller.js'));
 });

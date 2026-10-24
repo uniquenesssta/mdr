@@ -1,7 +1,7 @@
-import { telemetry } from '../features/telemetry/index.js';
+import { telemetry } from '../../telemetry/index.js';
 
 /**
- * Responsibility: Final CodeMirror integration facade for the Stage 8 Hybrid Editor feature; compose editor/vendor/model/Preview capabilities into the public Hybrid feature without owning feature policy.
+ * Responsibility: Own the Editor's CodeMirror integration for Hybrid; compose vendor/model/Preview capabilities with the public Hybrid feature without owning feature policy.
  * Imports: CodeMirror, Marked, frozen model facade, canonical Preview presentation APIs and only the Hybrid Editor public entry.
  * Exports: buildHybridMarkdownDecorations, getHybridMarkdownStats, createHybridMarkdownExtension and createHybridMarkdownConfiguration.
  * State/side effects: Defines CodeMirror facets/effects/plugin integration only; Hybrid runtime and decoration state are owned by feature application controllers.
@@ -22,9 +22,8 @@ import {
   intersectsRevealRanges,
   overlapsRanges,
   shouldDecorateSourceActiveLine
-} from '../model-kernel/index.js';
-import { renderMathFormula } from '../features/preview/render/presentation/math-presentation.js';
-import { getMermaidTheme, renderMermaidDiagram } from '../features/preview/render/presentation/mermaid-presentation.js';
+} from '../../../model-kernel/index.js';
+import { renderMathFormula, getMermaidTheme, renderMermaidDiagram } from '../../preview/index.js';
 import {
   createCodeBlockWidgetType,
   createHtmlBlockWidgetType,
@@ -44,11 +43,11 @@ import {
   getHybridComponentSession,
   mountClassicHybridSourceEditControllerPort,
   scheduleHybridWidgetGeometry
-} from '../features/hybrid-editor/index.js';
+} from '../../hybrid-editor/index.js';
 import {
   createCodeMirrorSourceEditorPort,
   revealHybridSourceRangeEffect
-} from '../features/hybrid-editor/compatibility/codemirror-source-editor-port.js';
+} from './codemirror-source-editor-port.js';
 
 const setHybridBlockDecorations = StateEffect.define();
 

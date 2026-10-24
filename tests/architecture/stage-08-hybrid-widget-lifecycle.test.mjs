@@ -37,7 +37,7 @@ test('Atomic 8.5 separates element observation from the geometry side-effect que
 
 test('Atomic 8.5 lifecycle ownership remains behind the Hybrid boundary after the final Atomic 8.15 controller migration', async () => {
   const widgets = await text('src/features/hybrid-editor/widgets/html/html-block-widget.js');
-  const facade = await text('src/editor/hybrid-markdown.js');
+  const facade = await text('src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   const application = await text('src/features/hybrid-editor/application/hybrid-editor-controller.js');
   assert.doesNotMatch(widgets, /from ['"]\.\/widget-lifecycle\.js['"]/);
   assert.match(widgets, /lifecycle\/widget-lifecycle\.js/);

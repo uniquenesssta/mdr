@@ -50,13 +50,13 @@ test('Atomic 8.11 keeps inline and block delimiter/source semantics separate whi
 test('Atomic 8.11 Math ownership remains intact through the Atomic 8.14 presentation boundary', async () => {
   const [htmlWidget, controller, inlinePresentation] = await Promise.all([
     text('src/features/hybrid-editor/widgets/html/html-block-widget.js'),
-    text('src/editor/hybrid-markdown.js'),
+    text('src/features/editor/infrastructure/codemirror-hybrid-extension.js'),
     text('src/features/hybrid-editor/presentation/inline-presentation-coordinator.js')
   ]);
   assert.doesNotMatch(htmlWidget, /class InlineMathWidget|class MathBlockWidget|function renderMathInto|reportMathRenderFailure/);
   assert.doesNotMatch(htmlWidget, /math-presentation\.js/);
   assert.match(controller, /createMathBlockWidgetType/);
-  assert.match(controller, /renderMathFormula[\s\S]*math-presentation\.js/);
+  assert.match(controller, /renderMathFormula.*from ['"]\.\.\/\.\.\/preview\/index\.js/);
   assert.match(controller, /const MathBlockWidget = createMathBlockWidgetType\(WidgetType/);
   assert.match(controller, /createInlinePresentationCoordinator\(\{[\s\S]*renderFormula:\s*renderMathFormula/);
   assert.doesNotMatch(controller, /MathBlockWidget,[\s\S]*from '\.\/widgets\.js'/);

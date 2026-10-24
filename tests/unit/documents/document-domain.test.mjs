@@ -107,7 +107,7 @@ test('Atomic 5.1 production integration removes classic metadata normalization a
   const [core, bootstrap, nativeStore, entry, recentFilesRepository] = await Promise.all([
     readText('public/app/core.js'),
     readText('src/bootstrap/module-entry.js'),
-    readText('src/storage/native-document-store.js'),
+    readText('src/features/persistence/native-document-store/native-document-store.js'),
     readText('src/features/documents/index.js'),
     readText('src/features/documents/infrastructure/recent-files-repository.js')
   ]);
@@ -117,7 +117,7 @@ test('Atomic 5.1 production integration removes classic metadata normalization a
   assert.doesNotMatch(core, /createRecentFileEntry/);
   assert.match(recentFilesRepository, /createRecentFileEntry/);
   assert.match(bootstrap, /mountClassicDocumentDomainPort\(portsHost\)/);
-  assert.match(nativeStore, /features\/documents\/index\.js/);
+  assert.match(nativeStore, /\.\.\/\.\.\/documents\/index\.js/);
   assert.equal((nativeStore.match(/normalizeDocumentNativeMetadata/g) || []).length, 3);
   assert.match(entry, /document-record\.js/);
   const globals = core + '\n' + bootstrap + '\n' + nativeStore + '\n' + entry;

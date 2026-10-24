@@ -60,7 +60,7 @@ test('Atomic 8.9 separates Table view, cell editor, keyboard navigation and writ
 
 test('Atomic 8.9 keeps Table authority migrated and composes WidgetType, frozen encoder and history only in the final editor facade', async () => {
   const [widgets, facade] = await Promise.all([
-    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'), text('src/editor/hybrid-markdown.js')
+    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'), text('src/features/editor/infrastructure/codemirror-hybrid-extension.js')
   ]);
   assert.doesNotMatch(widgets, /class TableBlockWidget|function createEditableTableCellInput|function getTableCellTargetKey|function scheduleTableCellEdit|reportTableCellEditFailure/);
   assert.doesNotMatch(widgets, /encodeTableCell/);
@@ -68,7 +68,7 @@ test('Atomic 8.9 keeps Table authority migrated and composes WidgetType, frozen 
   assert.match(facade, /const TableBlockWidget = createTableBlockWidgetType\(WidgetType/);
   assert.match(facade, /encodeTableCell/);
   assert.match(facade, /createHistoryAnnotation: \(\) => isolateHistory\.of\('full'\)/);
-  assert.match(facade, /from '\.\.\/features\/hybrid-editor\/index\.js'/);
+  assert.match(facade, /from '\.\.\/\.\.\/hybrid-editor\/index\.js'/);
   assert.doesNotMatch(facade, /features\/hybrid-editor\/widgets\/table\//);
   await assert.rejects(access(file('src/editor/hybrid/controller.js')));
 });

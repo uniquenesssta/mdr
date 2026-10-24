@@ -51,7 +51,7 @@ test('Atomic 5.13 removes the temporary History Adapter wrapper and keeps one di
 
 test('document replacement resets CodeMirror state directly without a second reset-history compatibility path', async () => {
   const [virtualEditor, codeMirrorAdapter] = await Promise.all([
-    read('src/editor/virtual-editor.js'),
+    read('src/features/editor/infrastructure/virtual-editor.js'),
     read('src/features/editor/infrastructure/codemirror-editor-adapter.js')
   ]);
   assert.doesNotMatch(virtualEditor, /consumeDocumentLoadHistoryReset|resetHistory\s*\(/);

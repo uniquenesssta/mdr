@@ -287,7 +287,7 @@ function walkJavaScript(root) {
 
 test('production integration keeps raw CodeMirror confined to editor and the explicit Hybrid compatibility port', () => {
   const repositoryRoot = path.resolve(import.meta.dirname, '../../..');
-  const virtualEditor = fs.readFileSync(path.join(repositoryRoot, 'src/editor/virtual-editor.js'), 'utf8');
+  const virtualEditor = fs.readFileSync(path.join(repositoryRoot, 'src/features/editor/infrastructure/virtual-editor.js'), 'utf8');
   const scrollSync = fs.readFileSync(path.join(repositoryRoot, 'src/features/sync/scroll/scroll-sync-controller.js'), 'utf8');
   const performanceRuntime = fs.readFileSync(path.join(repositoryRoot, 'src/runtime/performance.js'), 'utf8');
   const main = fs.readFileSync(path.join(repositoryRoot, 'src/main.js'), 'utf8');
@@ -303,7 +303,7 @@ test('production integration keeps raw CodeMirror confined to editor and the exp
   assert.match(main, /virtualEditor\.destroy\(\)/);
 
   // R8 moved this responsibility into a single explicit Hybrid compatibility port.
-  const hybridPort = path.join(repositoryRoot, 'src/features/hybrid-editor/compatibility/codemirror-source-editor-port.js');
+  const hybridPort = path.join(repositoryRoot, 'src/features/editor/infrastructure/codemirror-source-editor-port.js');
   const hybridPortSource = fs.readFileSync(hybridPort, 'utf8');
   assert.match(hybridPortSource, /export function createCodeMirrorSourceEditorPort/);
   assert.match(hybridPortSource, /destroy\(/);

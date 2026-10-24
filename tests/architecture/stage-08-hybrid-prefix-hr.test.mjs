@@ -41,7 +41,7 @@ test('Atomic 8.7 Prefix and HR presentation ownership remains intact through Ato
   const [inline, listPresentation, controller, legacy] = await Promise.all([
     read('src/features/hybrid-editor/presentation/inline-presentation-coordinator.js'),
     read('src/features/hybrid-editor/presentation/list-presentation.js'),
-    read('src/editor/hybrid-markdown.js'),
+    read('src/features/editor/infrastructure/codemirror-hybrid-extension.js'),
     read('src/features/hybrid-editor/widgets/html/html-block-widget.js')
   ]);
   assert.doesNotMatch(inline, /import \{ InlineMathWidget \} from '\.\/widgets\.js';/);

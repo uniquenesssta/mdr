@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import test from 'node:test';
 import { createNativeSearchAdapter } from '../src/features/persistence/index.js';
-import { createNativeDocumentStore } from '../src/storage/native-document-store.js';
+import { createNativeDocumentStore } from '../src/features/persistence/index.js';
 
 const root = new URL('../', import.meta.url);
 const source = path => readFile(new URL(path, root), 'utf8');
@@ -112,7 +112,7 @@ test('Atomic 10.8 NativeDocumentStore delegates native search while preserving t
 
   const [entry, nativeStoreSource, webClipperSource, fixtureText] = await Promise.all([
     source('src/features/persistence/index.js'),
-    source('src/storage/native-document-store.js'),
+    source('src/features/persistence/native-document-store/native-document-store.js'),
     source('public/app/web-clipper.js'),
     source('tests/architecture/fixtures/production-modules.json')
   ]);

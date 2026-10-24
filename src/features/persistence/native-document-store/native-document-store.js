@@ -1,11 +1,16 @@
-import { normalizeDocumentNativeMetadata } from '../features/documents/index.js';
-import {
-  createNativeSaveQueue,
-  createNativeSaveSession,
-  createNativeSegmentedLoader,
-  createNativeSnapshotUploader,
-  createNativeSearchAdapter
-} from '../features/persistence/index.js';
+/**
+ * Responsibility: Compose native save sessions, per-document queues, snapshot upload, segmented load and search.
+ * Imports: Persistence native-store collaborators and the public Documents metadata contract.
+ * Exports: NativeDocumentStore and createNativeDocumentStore through the Persistence public entry.
+ * State/side effects: Owns session/queue maps, active native document and notification listeners; delegates disk access.
+ * Lifecycle: Explicit instance; cancelLoad retires loads and delete releases a document's queue, upload and session.
+ */
+import { normalizeDocumentNativeMetadata } from '../../documents/index.js';
+import { createNativeSaveQueue } from './native-save-queue.js';
+import { createNativeSaveSession } from './native-save-session.js';
+import { createNativeSegmentedLoader } from './native-segmented-loader.js';
+import { createNativeSnapshotUploader } from './native-snapshot-uploader.js';
+import { createNativeSearchAdapter } from './native-search-adapter.js';
 
 const NATIVE_DOCUMENT_THRESHOLD = 100000;
 

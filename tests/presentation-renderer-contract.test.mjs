@@ -23,13 +23,13 @@ test('application composes one canonical presentation API into Preview without p
 
 test('hybrid and Preview Mermaid rendering use the canonical Preview presentation renderer', async () => {
   const htmlWidget = await source('../src/features/hybrid-editor/widgets/html/html-block-widget.js');
-  const controller = await source('../src/editor/hybrid-markdown.js');
+  const controller = await source('../src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   const mermaidWidget = await source('../src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
   const previewRenderer = await source('../src/features/preview/render/mermaid-renderer.js');
   const previewController = await source('../src/features/preview/application/preview-controller.js');
   const previewTools = await source('../public/app/editor-tools.js');
   const renderer = await source('../src/features/preview/render/presentation/mermaid-presentation.js');
-  assert.match(controller, /features\/preview\/render\/presentation\/mermaid-presentation\.js/);
+  assert.match(controller, /getMermaidTheme, renderMermaidDiagram.*from ['"]\.\.\/\.\.\/preview\/index\.js/);
   assert.match(controller, /renderMermaidDiagram/);
   assert.match(controller, /getMermaidTheme/);
   assert.match(mermaidWidget, /renderDiagram/);
@@ -48,7 +48,7 @@ test('hybrid and Preview Mermaid rendering use the canonical Preview presentatio
 
 test('hybrid Preview and export math rendering use the canonical math presentation contract without vendor globals', async () => {
   const htmlWidget = await source('../src/features/hybrid-editor/widgets/html/html-block-widget.js');
-  const controller = await source('../src/editor/hybrid-markdown.js');
+  const controller = await source('../src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   const inlinePresentation = await source('../src/features/hybrid-editor/presentation/inline-presentation-coordinator.js');
   const inlineMathWidget = await source('../src/features/hybrid-editor/widgets/math/inline-math-widget.js');
   const blockMathWidget = await source('../src/features/hybrid-editor/widgets/math/block-math-widget.js');
@@ -56,7 +56,7 @@ test('hybrid Preview and export math rendering use the canonical math presentati
   const previewController = await source('../src/features/preview/application/preview-controller.js');
   const exportSource = await source('../src/features/export/application/export-controller.js');
   const math = await source('../src/features/preview/render/presentation/math-presentation.js');
-  assert.match(controller, /features\/preview\/render\/presentation\/math-presentation\.js/);
+  assert.match(controller, /renderMathFormula.*from ['"]\.\.\/\.\.\/preview\/index\.js/);
   assert.match(controller, /renderMathFormula/);
   assert.doesNotMatch(inlinePresentation, /features\/preview\/|renderMathFormula/);
   assert.match(inlinePresentation, /renderFormula/);

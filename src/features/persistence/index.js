@@ -11,6 +11,7 @@ export { createAutosaveController } from './application/autosave-controller.js';
 export { createLoadController } from './application/load-controller.js';
 export { createCloseSaveController } from './application/close-save-controller.js';
 export { createNativeSaveSession } from './native-document-store/native-save-session.js';
+export { NativeDocumentStore, createNativeDocumentStore } from './native-document-store/native-document-store.js';
 export { createNativeSaveQueue } from './native-document-store/native-save-queue.js';
 export { createNativeSnapshotUploader } from './native-document-store/native-snapshot-uploader.js';
 export { createNativeSegmentedLoader } from './native-document-store/native-segmented-loader.js';

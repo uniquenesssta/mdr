@@ -1,9 +1,14 @@
-import {
-  createCodeMirrorAdapter,
-  createCodeMirrorExtensionRegistry
-} from '../features/editor/index.js';
-import { getHybridComponentStateSnapshot } from '../features/hybrid-editor/index.js';
-import { getHybridMarkdownStats } from './hybrid-markdown.js';
+/**
+ * Responsibility: Compose the Editor adapter, extensions, host events and document change journal.
+ * Imports: Editor infrastructure and the public Hybrid feature only.
+ * Exports: createVirtualEditor; application callers use the Editor public entry.
+ * State/side effects: One adapter, journal, host compatibility projection and owned subscriptions per host.
+ * Lifecycle: Explicit create and idempotent destroy release subscriptions, extensions, host properties and CodeMirror.
+ */
+import { createCodeMirrorAdapter } from './codemirror-editor-adapter.js';
+import { createCodeMirrorExtensionRegistry } from './codemirror-extension-registry.js';
+import { getHybridComponentStateSnapshot } from '../../hybrid-editor/index.js';
+import { getHybridMarkdownStats } from './codemirror-hybrid-extension.js';
 
 function countNonWhitespace(value) {
   let count = 0;

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { createNativeSegmentedLoader } from '../src/features/persistence/index.js';
-import { createNativeDocumentStore } from '../src/storage/native-document-store.js';
+import { createNativeDocumentStore } from '../src/features/persistence/index.js';
 
 const root = new URL('../', import.meta.url);
 const source = path => readFile(new URL(path, root), 'utf8');
@@ -165,7 +165,7 @@ test('Atomic 10.7 NativeDocumentStore publishes Session metadata only for the ac
 
   const [entry, nativeStoreSource] = await Promise.all([
     source('src/features/persistence/index.js'),
-    source('src/storage/native-document-store.js')
+    source('src/features/persistence/native-document-store/native-document-store.js')
   ]);
   assert.match(entry, /createNativeSegmentedLoader/);
   assert.match(nativeStoreSource, /createNativeSegmentedLoader/);

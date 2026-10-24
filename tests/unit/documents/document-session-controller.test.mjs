@@ -16,7 +16,7 @@ import {
   mountClassicDocumentControllerPort
 } from '../../../src/features/documents/index.js';
 import { createBrowserDocumentRepository, createLoadController } from '../../../src/features/persistence/index.js';
-import { NativeDocumentStore } from '../../../src/storage/native-document-store.js';
+import { NativeDocumentStore } from '../../../src/features/persistence/index.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const readText = path => readFile(resolve(ROOT, path), 'utf8');
@@ -425,7 +425,7 @@ test('Atomic 5.3 production integration removes classic lifecycle/body-cache aut
     readText('src/features/export/application/export-controller.js'),
     readText('public/app/events.js'),
     readText('src/main.js'),
-    readText('src/storage/native-document-store.js'),
+    readText('src/features/persistence/native-document-store/native-document-store.js'),
     readText('src/features/persistence/native-document-store/native-segmented-loader.js'),
     readText('src/features/documents/index.js'),
     readText('src/features/persistence/application/load-controller.js'),

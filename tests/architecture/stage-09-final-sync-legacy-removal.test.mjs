@@ -73,8 +73,8 @@ test('R9-12 frozen selection mapping implementation and model-kernel export rema
 
 test('R9-12 removes hidden sync globals from Virtual Editor, Hybrid integration and performance diagnostics', async () => {
   const paths = [
-    'src/editor/virtual-editor.js',
-    'src/editor/hybrid-markdown.js',
+    'src/features/editor/infrastructure/virtual-editor.js',
+    'src/features/editor/infrastructure/codemirror-hybrid-extension.js',
     'src/features/hybrid-editor/lifecycle/widget-geometry-scheduler.js',
     'src/runtime/performance.js'
   ];

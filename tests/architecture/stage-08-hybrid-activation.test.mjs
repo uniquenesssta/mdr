@@ -26,7 +26,7 @@ test('Atomic 8.3 production callers retain Activation ownership after the final 
   const mermaidWidget = await text('src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
   const sourceAction = await text('src/features/hybrid-editor/widgets/shared/widget-source-action.js');
   const tableCellEditor = await text('src/features/hybrid-editor/widgets/table/table-cell-editor.js');
-  const facade = await text('src/editor/hybrid-markdown.js');
+  const facade = await text('src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   const application = await text('src/features/hybrid-editor/application/hybrid-editor-controller.js');
   assert.match(widgets, /bindWidgetSourceAction/);
   assert.doesNotMatch(widgets, /bindStrictDoubleActivation|bindSourceActivation|bindOutsidePointerClosure/);

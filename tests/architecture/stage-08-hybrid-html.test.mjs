@@ -59,11 +59,11 @@ test('Atomic 8.13 HTML Widget owns SOURCE delegation and explicit idempotent cle
 test('Atomic 8.13 keeps legacy HTML authority removed and composes HTML through the final Hybrid editor facade', async () => {
   await assert.rejects(access(file('src/editor/hybrid/widgets.js')));
   await assert.rejects(access(file('src/editor/hybrid/controller.js')));
-  const facade = await text('src/editor/hybrid-markdown.js');
+  const facade = await text('src/features/editor/infrastructure/codemirror-hybrid-extension.js');
   assert.match(facade, /createHtmlBlockWidgetType/);
   assert.match(facade, /const HtmlBlockWidget = createHtmlBlockWidgetType\(WidgetType/);
   assert.match(facade, /recordInteraction/);
-  assert.match(facade, /from '\.\.\/features\/hybrid-editor\/index\.js'/);
+  assert.match(facade, /from '\.\.\/\.\.\/hybrid-editor\/index\.js'/);
   assert.doesNotMatch(facade, /features\/hybrid-editor\/widgets\/html\//);
   assert.doesNotMatch(facade, /class HtmlBlockWidget|template\.innerHTML/);
 });

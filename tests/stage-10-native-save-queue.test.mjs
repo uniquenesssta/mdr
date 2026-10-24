@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { createNativeSaveQueue } from '../src/features/persistence/index.js';
-import { createNativeDocumentStore } from '../src/storage/native-document-store.js';
+import { createNativeDocumentStore } from '../src/features/persistence/index.js';
 
 const root = new URL('../', import.meta.url);
 const source = path => readFile(new URL(path, root), 'utf8');
@@ -246,7 +246,7 @@ test('Atomic 10.5 NativeDocumentStore delegates queue state while preserving nat
   const [entry, queueSource, nativeStoreSource, fixtureText, handoff] = await Promise.all([
     source('src/features/persistence/index.js'),
     source('src/features/persistence/native-document-store/native-save-queue.js'),
-    source('src/storage/native-document-store.js'),
+    source('src/features/persistence/native-document-store/native-document-store.js'),
     source('tests/architecture/fixtures/production-modules.json'),
     source('tests/stage-01-handoff.test.mjs')
   ]);

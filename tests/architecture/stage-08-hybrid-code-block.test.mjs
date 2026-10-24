@@ -62,7 +62,7 @@ test('Atomic 8.8 separates view, direct-edit fence/writeback, actions and widget
 
 test('Atomic 8.8 keeps Code Block authority migrated and composes CodeMirror capabilities only in the final editor facade', async () => {
   const [widgets, facade] = await Promise.all([
-    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'), text('src/editor/hybrid-markdown.js')
+    text('src/features/hybrid-editor/widgets/html/html-block-widget.js'), text('src/features/editor/infrastructure/codemirror-hybrid-extension.js')
   ]);
   assert.doesNotMatch(widgets, /class CodeBlockWidget|function buildCodeBlockWriteback|function createEditableCodeArea|resolveCodePointerOffset|createCodePresentationBody/);
   assert.doesNotMatch(widgets, /createCodeBlockDirectEditor|reportLegacyFencedEditorFailure/);
@@ -71,7 +71,7 @@ test('Atomic 8.8 keeps Code Block authority migrated and composes CodeMirror cap
   assert.match(facade, /createCodeBlockWidgetType/);
   assert.match(facade, /const CodeBlockWidget = createCodeBlockWidgetType\(WidgetType/);
   assert.match(facade, /createHistoryAnnotation: \(\) => isolateHistory\.of\('full'\)/);
-  assert.match(facade, /from '\.\.\/features\/hybrid-editor\/index\.js'/);
+  assert.match(facade, /from '\.\.\/\.\.\/hybrid-editor\/index\.js'/);
   assert.doesNotMatch(facade, /features\/hybrid-editor\/widgets\/code-block\//);
   await assert.rejects(access(file('src/editor/hybrid/controller.js')));
   await assert.rejects(access(file('src/editor/hybrid/code-highlighter.js')));

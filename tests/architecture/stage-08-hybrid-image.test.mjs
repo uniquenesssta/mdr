@@ -68,7 +68,7 @@ test('Atomic 8.10 async image completion validates the current component version
 
 test('Atomic 8.10 removes legacy Image authority and composes platform plus WidgetType only through the Hybrid Editor public entry', async () => {
   const [main, controller, widgets] = await Promise.all([
-    text('src/main.js'), text('src/editor/hybrid-markdown.js'), text('src/features/hybrid-editor/widgets/html/html-block-widget.js')
+    text('src/main.js'), text('src/features/editor/infrastructure/codemirror-hybrid-extension.js'), text('src/features/hybrid-editor/widgets/html/html-block-widget.js')
   ]);
   await assert.rejects(access(file('src/editor/hybrid/image-source.js')));
   assert.doesNotMatch(widgets, /class ImageBlockWidget|resolveHybridImageSource|invalidateHybridImageSource|cm-hybrid-image-error/);

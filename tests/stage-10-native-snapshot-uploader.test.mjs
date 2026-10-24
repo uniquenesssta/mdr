@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { createNativeSnapshotUploader } from '../src/features/persistence/index.js';
-import { createNativeDocumentStore } from '../src/storage/native-document-store.js';
+import { createNativeDocumentStore } from '../src/features/persistence/index.js';
 
 const root = new URL('../', import.meta.url);
 const source = path => readFile(new URL(path, root), 'utf8');
@@ -274,7 +274,7 @@ test('Atomic 10.6 NativeDocumentStore delegates large reset snapshots through th
 
   const [entry, nativeStoreSource, queueSource, fixtureText, handoff] = await Promise.all([
     source('src/features/persistence/index.js'),
-    source('src/storage/native-document-store.js'),
+    source('src/features/persistence/native-document-store/native-document-store.js'),
     source('src/features/persistence/native-document-store/native-save-queue.js'),
     source('tests/architecture/fixtures/production-modules.json'),
     source('tests/stage-01-handoff.test.mjs')

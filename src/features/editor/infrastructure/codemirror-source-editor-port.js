@@ -1,3 +1,10 @@
+/**
+ * Responsibility: Adapt one CodeMirror view to the Hybrid source editor capability contract.
+ * Imports: CodeMirror state and view primitives only; Hybrid controllers stay vendor-neutral.
+ * Exports: createCodeMirrorSourceEditorPort and revealHybridSourceRangeEffect for Editor integration.
+ * State/side effects: View capability calls and one terminal destroyed flag; no application state.
+ * Lifecycle: Explicit port construction with idempotent destroy; all subsequent capabilities reject.
+ */
 import { StateEffect } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 

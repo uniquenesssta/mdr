@@ -9,7 +9,7 @@ import {
 } from '../../../src/features/editor/index.js';
 import {
   createHybridMarkdownConfiguration
-} from '../../../src/editor/hybrid-markdown.js';
+} from '../../../src/features/editor/infrastructure/codemirror-hybrid-extension.js';
 
 const [tableProvider, codeProvider] = createHybridMarkdownConfiguration({ tableVisualEditing: true, codeVisualEditing: true });
 const hybridTableVisualEditingFacet = tableProvider.facet;
@@ -145,7 +145,7 @@ test('Atomic 5.6 registry destroy is idempotent and makes configuration operatio
 
 test('Atomic 5.6 production integration removes extension and Compartment ownership from virtual-editor', () => {
   const repositoryRoot = path.resolve(import.meta.dirname, '../../..');
-  const virtualEditor = fs.readFileSync(path.join(repositoryRoot, 'src/editor/virtual-editor.js'), 'utf8');
+  const virtualEditor = fs.readFileSync(path.join(repositoryRoot, 'src/features/editor/infrastructure/virtual-editor.js'), 'utf8');
   const registry = fs.readFileSync(path.join(repositoryRoot, 'src/features/editor/infrastructure/codemirror-extension-registry.js'), 'utf8');
   const index = fs.readFileSync(path.join(repositoryRoot, 'src/features/editor/index.js'), 'utf8');
 

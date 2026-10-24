@@ -22,6 +22,13 @@ export { createTableDialogView } from './ui/table-dialog-view.js';
 export { createMathDialogView } from './ui/math-dialog-view.js';
 export { createMermaidDialogView } from './ui/mermaid-dialog-view.js';
 export { createCodeMirrorAdapter } from './infrastructure/codemirror-editor-adapter.js';
+export { createVirtualEditor } from './infrastructure/virtual-editor.js';
+export {
+  buildHybridMarkdownDecorations,
+  getHybridMarkdownStats,
+  createHybridMarkdownExtension,
+  createHybridMarkdownConfiguration
+} from './infrastructure/codemirror-hybrid-extension.js';
 export {
   CODEMIRROR_EXTENSION_SLOT_NAMES,
   createCodeMirrorExtensionRegistry
