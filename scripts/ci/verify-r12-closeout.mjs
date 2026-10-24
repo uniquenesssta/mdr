@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { assessDependencyAudit } from './run-windows-dependency-audit.mjs';
 import { assessImportDocumentChain } from './verify-r13-import-chain.mjs';
+import { retiredSourcePaths, assessSingleImplementationEvidence } from '../stage-16/single-implementation.mjs';
 
 const repository = fileURLToPath(new URL('../../', import.meta.url));
 const requiredJobs = ['frontend', 'rust', 'native-boundary', 'repository-tests', 'dependency-advisories', 'webview-baseline'];
@@ -76,7 +77,9 @@ export function assessCloseout(input) {
   assert.doesNotMatch(rustLog, /test result: FAILED/);
   const rustPassed = rustResults.reduce((sum, result) => sum + Number(result[1]), 0);
   assert.ok(rustPassed > 0);
-  return { rustPassed, nodeTestFiles: inventory.length, nodeDirectories: suites.length, closedCurrentScope: closedIds, deferredNotFixed: ['A04', 'A05'] };
+  const singleImplementation = policy.currentSourceReview?.stage === 'R16.13'
+    ? assessSingleImplementationEvidence({ ...input.singleImplementation, commit, paths: input.retiredInputs }) : null;
+  return { ...(singleImplementation ? { singleImplementation } : {}), rustPassed, nodeTestFiles: inventory.length, nodeDirectories: suites.length, closedCurrentScope: closedIds, deferredNotFixed: ['A04', 'A05'] };
 }
 
 async function runCloseout() {
@@ -121,7 +124,12 @@ async function runCloseout() {
     const rawAssessment = assessDependencyAudit({ audit: await json(join(dependencyRoot, 'cargo-audit.json')), metadata: await json(join(dependencyRoot, 'windows-metadata.json')), lockText, policy: dependencyPolicy });
     assert.deepEqual(rawAssessment, dependency.assessment, 'Dependency raw reports contradict the summary.');
     const nodeRoot = artifact('repository-tests-windows');
+    const singleImplementation = policy.currentSourceReview?.stage === 'R16.13' ? {
+      browser: await json(join(frontend, 'browser-artifacts/r16-13-browser.json')),
+      native: await json(join(webviewRoot, 'r16-13-native.json')) } : undefined;
     evidence.results = assessCloseout({
+      singleImplementation, retiredInputs: singleImplementation
+        ? retiredSourcePaths(await json(join(repository, 'docs/audit/r16-01-deletion-inventory.json'))) : undefined,
       commit: evidence.commit, jobResults: JSON.parse(process.env.R12_JOB_RESULTS), policy, dependencyPolicy, dependency,
       inventory: await json(join(nodeRoot, 'test-inventory.json')),
       currentTests: command(['ls-files', '-z', 'tests']).split('\0').filter(path => path.endsWith('.test.mjs')),
@@ -131,6 +139,7 @@ async function runCloseout() {
     });
     evidence.importDocumentChain = assessImportDocumentChain(
       await json(join(webviewRoot, 'render-boundary-verification.json')), evidence.commit);
+    if (evidence.results.singleImplementation) evidence.singleImplementation = evidence.results.singleImplementation;
     evidence.handoffs = policy.records.filter(item => item.status === 'deferred-not-fixed');
     evidence.reviewedSources = policy.reviewedSources;
     evidence.scopeLimits = policy.scopeLimits;

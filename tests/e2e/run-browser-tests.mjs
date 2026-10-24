@@ -11,6 +11,8 @@ import { runExportCharacterization } from './lib/export-characterization.mjs';
 import { runE2EInstallationChecks } from './lib/e2e-installation.mjs';
 import { evaluateApplication, waitForApplication, releaseApplicationInspector } from './lib/application-inspector.mjs';
 import { createApplicationDriver } from './lib/application-driver.mjs';
+import { verifyRetiredInputsAbsent } from '../../scripts/stage-16/single-implementation.mjs';
+import { verifySingleImplementationRuntime } from './lib/single-implementation.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '../..');
@@ -520,6 +522,29 @@ async function runAppSuite() {
   try {
     applicationHost = externalUrl ? null : await startBuiltApplicationHost(resolve(projectRoot, 'dist'));
     const baseUrl = externalUrl || applicationHost.origin;
+    if (!externalUrl) await test('R16-13 default built entry runs with retired files absent', async () => {
+      const evidence = { stage: 'R16.13', platform: 'browser', commit: process.env.GITHUB_SHA || '', status: 'running' };
+      let singleBrowser;
+      try {
+        evidence.before = await verifyRetiredInputsAbsent({ projectRoot });
+        evidence.build = await verifyBuiltApplication({ projectRoot });
+        singleBrowser = await launchChromium({ width: 1280, height: 900 });
+        await singleBrowser.page.navigate(baseUrl);
+        await singleBrowser.page.waitFor(() => document.documentElement.classList.contains('app-ready'), {
+          timeoutMs: 20000, description: 'default single-implementation entry ready'
+        });
+        evidence.runtime = await verifySingleImplementationRuntime({ platform: 'browser', paths: evidence.before.paths,
+          evaluate: (fn, ...args) => evaluateApplication(singleBrowser.page, '(' + fn.toString() + ')(...' + JSON.stringify(args) + ')') });
+        assert.deepEqual(singleBrowser.page.exceptions, []);
+        await singleBrowser.page.screenshot(join(artifactRoot, 'r16-13-browser.png'));
+        evidence.after = await verifyRetiredInputsAbsent({ projectRoot });
+        evidence.status = 'passed';
+      } catch (error) { evidence.status = 'failed'; evidence.error = String(error.stack || error); throw error; }
+      finally {
+        try { if (singleBrowser) { await releaseApplicationInspector(singleBrowser.page); await singleBrowser.close(); } }
+        finally { await writeFile(join(artifactRoot, 'r16-13-browser.json'), JSON.stringify(evidence, null, 2) + '\n'); }
+      }
+    });
     await runE2EInstallationChecks({ test, baseUrl, artifactRoot });
     if (!externalUrl) await browser.page.addInitScript(`
       localStorage.setItem('md_editor_help_shown','true');

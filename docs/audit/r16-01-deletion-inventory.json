@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "09071c022e0f47964b2be68cfb50c94fb101bd55",
+  "baselineCommit": "24fefecba18f3539741ad3f9a3444fb78b27f2cb",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "9c519179554e30753c0b24b9fe9fb8e0f5cc282fab98b0e63dba70866907c323"
+      "sha256": "54e62009633a527fd40ebeed05dcfe481cb074950ebe664b4b9591841090f85c"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -271,7 +271,7 @@
     },
     {
       "path": "scripts/ci/verify-r12-closeout.mjs",
-      "sha256": "eed120bc13623f339fe6bb0cfb6b49346370409a9eef62362d483ffeee4ded9b"
+      "sha256": "2ca9fbebcad4bd9ee7ffa37a55d647756316c712ab1b6b4b208735e34fde1fdd"
     },
     {
       "path": "scripts/ci/verify-r13-import-chain.mjs",
@@ -372,6 +372,10 @@
     {
       "path": "scripts/stage-16/deletion-inventory.mjs",
       "sha256": "c25e78312839d38206b6f87a6dfdba164c915398856c8df0d4161653bec8ac16"
+    },
+    {
+      "path": "scripts/stage-16/single-implementation.mjs",
+      "sha256": "14970b79666059b6a603c1231bb333d06a42568527470b39a1aa7ff70f54e7b0"
     },
     {
       "path": "scripts/verify-architecture.mjs",
@@ -3114,6 +3118,10 @@
       "sha256": "58a76a8a01828dbf3fe7db9085a3e89352e5f8281c993ef05cda444a7f9f2146"
     },
     {
+      "path": "tests/e2e/lib/single-implementation.mjs",
+      "sha256": "00563f66533082a04fff73b5a5f0ed4f5f43d5933940b6761382f2303487070d"
+    },
+    {
       "path": "tests/e2e/lib/virtual-file-host.mjs",
       "sha256": "8bba513b9e9e106272cd162caa22172fc546a92c8d49bfafba5da298e43324d8"
     },
@@ -3147,7 +3155,7 @@
     },
     {
       "path": "tests/e2e/run-browser-tests.mjs",
-      "sha256": "edffc6662b1e78d994e62ccef1577f9c9174445ca2aa72d7a56bb1652b60103d"
+      "sha256": "72f33b597cc53ac42547e7a2ad1fc5850f1cae61148686474f953e19cb19cad6"
     },
     {
       "path": "tests/e2e/submenu-positioner.test.mjs",
@@ -3216,6 +3224,10 @@
     {
       "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
       "sha256": "f87633e1061c3148f9d97f04eb10d93da2622bb2c62f95e067cc8655201d538d"
+    },
+    {
+      "path": "tests/e2e/windows/run-single-implementation.mjs",
+      "sha256": "1c4f913abdd22fff7e9f1815bbe21d673b96165be96bbd6c8814730768049515"
     },
     {
       "path": "tests/e2e/windows/run-window-automation.mjs",
@@ -3503,7 +3515,7 @@
     },
     {
       "path": "tests/stage-12-closeout.test.mjs",
-      "sha256": "d80e2a00930d8a8caaeac6a64d2558f036d5db5ce683cd9ed5976f979e7bb1fc"
+      "sha256": "6d0961400db9d01b483f265dfa84ca577db8b41f2e6fce8d13530442bf209d25"
     },
     {
       "path": "tests/stage-12-command-registry.test.mjs",
@@ -3824,6 +3836,10 @@
     {
       "path": "tests/stage-16-runtime-cleanup.test.mjs",
       "sha256": "5dba9d846489ad99dc9dc1e32e8faecf4d3d7ae883b50f83db959ea99c5d563a"
+    },
+    {
+      "path": "tests/stage-16-single-implementation.test.mjs",
+      "sha256": "8feaf1ab643831bb93e3f946eb03d7b886ccd150b18801410ddd971d66cbd576"
     },
     {
       "path": "tests/stage-16-test-cleanup.test.mjs",
@@ -4450,7 +4466,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "a93dfdfedc4a573555bac8705d5301bd04c7f0d716256f7d3bf166b4bc19d11e",
+  "inputSha256": "605d5b8e710f9a26b48059cd1c75c671b6637bc87a474fa32a8a5ef765d42d79",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -5121,7 +5137,7 @@
     },
     {
       "from": "tests/e2e/run-browser-tests.mjs",
-      "line": 244,
+      "line": 246,
       "kind": "computed-import"
     },
     {
@@ -5484,6 +5500,20 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 12
+        },
+        {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "public/app/core.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 63
+        },
+        {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "public/app/core.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 9
         },
         {
           "from": "tests/stage-16-test-cleanup.test.mjs",
@@ -9097,6 +9127,13 @@
           "line": 88
         },
         {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "public/i18n.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 9
+        },
+        {
           "from": "tests/ui/dom-asset-inventory.test.mjs",
           "target": "public/i18n.js",
           "surface": "tests",
@@ -9309,6 +9346,20 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 73
+        },
+        {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "src-tauri/src/local_file.rs",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 10
+        },
+        {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "src-tauri/src/local_file.rs",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 48
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -12484,6 +12535,20 @@
           "line": 58
         },
         {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "src/runtime/tauri.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 48
+        },
+        {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "src/runtime/tauri.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 9
+        },
+        {
           "from": "tests/ui/fixtures/dom-migration-map.json",
           "target": "src/runtime/tauri.js",
           "surface": "tests",
@@ -12744,6 +12809,20 @@
           "line": 198
         },
         {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "src/styles/main.css",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 67
+        },
+        {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "src/styles/main.css",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 9
+        },
+        {
           "from": "tests/ui/style-layering.test.mjs",
           "target": "src/styles/main.css",
           "surface": "tests",
@@ -12893,6 +12972,20 @@
       "ownership": null,
       "detected": null,
       "references": [
+        {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "src/ui/compatibility/index.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 10
+        },
+        {
+          "from": "tests/stage-16-single-implementation.test.mjs",
+          "target": "src/ui/compatibility/index.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 48
+        },
         {
           "from": "tests/ui/shell-cutover.test.mjs",
           "target": "src/ui/compatibility/index.js",

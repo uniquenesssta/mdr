@@ -2,11 +2,20 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
+import { retiredSourcePaths } from '../scripts/stage-16/single-implementation.mjs';
 import { assessCloseout, assessNativeBoundary } from '../scripts/ci/verify-r12-closeout.mjs';
 
 const policy = JSON.parse(await readFile(new URL('../docs/audit/r12-24-closeout.json', import.meta.url), 'utf8'));
 const dependencyPolicy = JSON.parse(await readFile(new URL('../docs/audit/r12-23-dependency-advisories.json', import.meta.url), 'utf8'));
 const sha = 'a'.repeat(40);
+const retiredInputs = retiredSourcePaths(JSON.parse(await readFile(new URL('../docs/audit/r16-01-deletion-inventory.json', import.meta.url), 'utf8')));
+const singleEvidence = platform => ({ stage: 'R16.13', platform, commit: sha, status: 'passed',
+  before: { absent: true, paths: retiredInputs, publicAssets: retiredInputs.filter(path => path.startsWith('public/')).length },
+  after: { absent: true, paths: retiredInputs, publicAssets: retiredInputs.filter(path => path.startsWith('public/')).length },
+  build: { accepted: true, sourceSha256: 'b'.repeat(64), sourceFiles: 1, outputFiles: 1 },
+  runtime: { ready: true, exactText: true, previewRendered: true, shells: 1, editors: 1, previews: 1,
+    e2ePublished: false, globalTauriPublished: false, businessGlobals: [], nativeIpc: platform === 'tauri',
+    nativeCanaryExact: platform === 'tauri' ? true : null, scripts: [{ type: 'module', url: 'http://owned/assets/index-current.js' }], resources: [] } });
 
 test('current source review matches the checkout while archived R12 fingerprints remain historical', () => {
   const git = args => execFileSync('git', args, { cwd: new URL('../', import.meta.url), encoding: 'utf8' }).trim();
@@ -28,6 +37,7 @@ test('current source review matches the checkout while archived R12 fingerprints
 
 function fixture() {
   return {
+    retiredInputs, singleImplementation: { browser: singleEvidence('browser'), native: singleEvidence('tauri') },
     commit: sha, policy: structuredClone(policy), dependencyPolicy: structuredClone(dependencyPolicy),
     jobResults: Object.fromEntries(policy.requiredJobs.map(job => [job, { result: 'success' }])),
     inventory: ['tests/a.test.mjs', 'tests/nested/b.test.mjs'],
@@ -130,4 +140,26 @@ test('silent successful native compilation is valid only with a passing signatur
     assert.throws(() => assessNativeBoundary({ compileLog: '', signatureLog }));
   }
   assert.throws(() => assessNativeBoundary({ signatureLog: 'test result: ok. 1 passed; 0 failed; 0 ignored' }), /Missing native compilation/);
+});
+
+
+test('R16-13 cumulative acceptance rejects missing browser or native execution evidence', () => {
+  for (const platform of ['browser', 'native']) {
+    const input = fixture(); input.policy.currentSourceReview.stage = 'R16.13';
+    delete input.singleImplementation[platform]; assert.throws(() => assessCloseout(input));
+  }
+});
+test('R16-13 cumulative acceptance rejects stale run and incomplete absence proof', () => {
+  for (const mutate of [input => input.singleImplementation.native.commit = 'c'.repeat(40),
+    input => input.singleImplementation.browser.after.paths = []]) {
+    const input = fixture(); input.policy.currentSourceReview.stage = 'R16.13'; mutate(input);
+    assert.throws(() => assessCloseout(input));
+  }
+});
+test('R16-13 cumulative acceptance rejects emulated native IPC and mismatched frontend sources', () => {
+  for (const mutate of [input => input.singleImplementation.native.runtime.nativeCanaryExact = false,
+    input => input.singleImplementation.native.build.sourceSha256 = 'c'.repeat(64)]) {
+    const input = fixture(); input.policy.currentSourceReview.stage = 'R16.13'; mutate(input);
+    assert.throws(() => assessCloseout(input));
+  }
 });
