@@ -1421,9 +1421,9 @@
   "currentSourceReview": {
     "stage": "R16.11",
     "date": "2026-10-25",
-    "reviewedCommit": "aac985b3181df63507c88bbc4e591a4b91f4d4d2",
+    "reviewedCommit": "16c6c20d47f5b41e77e9c16b013f8a5bd129f588",
     "record": "docs/R16-11-DETAILS.md",
-    "status": "implemented-pending-exact-commit-windows-validation",
+    "status": "accepted",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
     "scope": "Only R16.11 module naming and duplicate-owner audit; R16.12 dependency audit not started.",
@@ -1761,42 +1761,42 @@
         "record": "docs/R16-10-DETAILS.md"
       }
     ],
-    "conclusion": "Reviewed current migration/date/copy name findings, content-copy candidates and scoped same-name production modules. Four historical names and nine scoped groups are legitimate; no product rename or deletion required. R16.10 accepted at 72fd215 / CI40125945813. R16.11 requires exact-commit Windows validation; R16.12 not started.",
+    "conclusion": "Reviewed current migration/date/copy name findings, content-copy candidates and scoped same-name production modules. Four historical names and nine scoped groups are legitimate; no product rename or deletion required. R16.10 accepted at 72fd215 / CI40125945813. R16.11 requires exact-commit Windows validation; R16.12 not started. R16.11 exact-commit Windows run 40129983868 accepted with 267 matching review fingerprints and verified downloaded artifact digests. User authorized R16.12 dependency audit; R16.13 not started.",
     "priorImplementationWindowsRun": 40125945813,
     "priorImplementationWindowsJobs": 7,
-    "implementationWindowsRun": null,
-    "implementationWindowsJobs": [],
+    "implementationWindowsRun": 40129983868,
+    "implementationWindowsJobs": 7,
     "currentStageAcceptance": {
-      "stage": "R16.10",
+      "stage": "R16.11",
       "date": "2026-10-25",
-      "commit": "72fd215ee67e41bcbd2d7ed10d99a52b59a5a6c0",
-      "run": 40125945813,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40125945813",
-      "record": "docs/R16-10-DETAILS.md#正式验收2026-10-25",
+      "commit": "16c6c20d47f5b41e77e9c16b013f8a5bd129f588",
+      "run": 40129983868,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40129983868",
+      "record": "docs/R16-11-DETAILS.md#正式验收2026-10-25",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "recursiveNodePassed": 2794,
-      "nodeTestFiles": 370,
+      "recursiveNodePassed": 2808,
+      "nodeTestFiles": 371,
       "nodeDirectories": 16,
       "contractBrowserPassed": 11,
       "builtAppPassed": 75,
       "rustPassed": 301,
-      "testCleanupPassed": 4,
+      "moduleNamingPassed": 14,
       "nativeLargeImportScenariosPassed": 4,
       "artifacts": [
         {
-          "id": 12573702054,
+          "id": 12574779112,
           "kind": "closeout",
-          "bytes": 11830,
-          "digest": "sha256:2bf22f747f6d03f67b329867cc3d9aad092b9ff937661869268a2cd6db331a5f",
+          "bytes": 11930,
+          "digest": "sha256:5860f0986da6b5affb42460f64ccf513181bed29b53ef6f45f88e2a1321b33fa",
           "downloadDigestVerified": true
         },
         {
-          "id": 12573297086,
+          "id": 12573957600,
           "kind": "webview",
-          "bytes": 1393065,
-          "digest": "sha256:e04657426a1a98f7d76538e634a84373afe6d6039ba15b4e976252fad7dec095",
+          "bytes": 1431944,
+          "digest": "sha256:e00247e971b7c900fc25b3c6be063294a9bacdd3f94bbfd81f990fda1d097161",
           "downloadDigestVerified": true
         }
       ]
@@ -1806,7 +1806,7 @@
       "baselineCommit": "aac985b3181df63507c88bbc4e591a4b91f4d4d2",
       "branch": "codex/r16-stage",
       "record": "docs/R16-11-DETAILS.md",
-      "status": "implemented-pending-exact-commit-windows-validation",
+      "status": "accepted",
       "audit": "docs/audit/r16-11-module-naming.json",
       "newNamingContracts": 14,
       "legalNameFindings": 4,
@@ -1817,7 +1817,7 @@
       "nativeProductionChanged": false,
       "productionChanged": false,
       "dependenciesChanged": false,
-      "exactCommitWindowsPending": true,
+      "exactCommitWindowsPending": false,
       "sourceReviewCount": 267,
       "snapshotInputs": 1105,
       "localRelatedContractsPassed": 77,
@@ -1848,35 +1848,41 @@
         "inputs": 473,
         "outputs": 136,
         "productionSourceUnchanged": true
-      }
+      },
+      "commit": "16c6c20d47f5b41e77e9c16b013f8a5bd129f588",
+      "windowsRun": 40129983868
     },
     "priorStageAcceptance": {
-      "stage": "R16.9",
+      "stage": "R16.10",
       "date": "2026-10-25",
-      "commit": "004b4aba232b3c643524978522fe35dd66c242f0",
-      "run": 40120746556,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40120746556",
-      "record": "docs/R16-09-DETAILS.md#正式验收2026-10-25",
+      "commit": "72fd215ee67e41bcbd2d7ed10d99a52b59a5a6c0",
+      "run": 40125945813,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40125945813",
+      "record": "docs/R16-10-DETAILS.md#正式验收2026-10-25",
       "accepted": true,
       "windowsJobsPassed": 7,
       "allStepsPassed": true,
-      "recursiveNodePassed": 2791,
+      "recursiveNodePassed": 2794,
+      "nodeTestFiles": 370,
+      "nodeDirectories": 16,
       "contractBrowserPassed": 11,
       "builtAppPassed": 75,
       "rustPassed": 301,
-      "generatedCleanupPassed": 23,
+      "testCleanupPassed": 4,
       "nativeLargeImportScenariosPassed": 4,
       "artifacts": [
         {
-          "id": 12570953095,
+          "id": 12573702054,
           "kind": "closeout",
-          "digest": "sha256:eb2d66c6ad3371ba0cea17e4a6eaced80b7644d3696e74a928d07c50f961f03b",
+          "bytes": 11830,
+          "digest": "sha256:2bf22f747f6d03f67b329867cc3d9aad092b9ff937661869268a2cd6db331a5f",
           "downloadDigestVerified": true
         },
         {
-          "id": 12571092895,
+          "id": 12573297086,
           "kind": "webview",
-          "digest": "sha256:c5d30770dac1ca3075d2746b1d719d422b5f0f60a56d0126e7006fb416e7285f",
+          "bytes": 1393065,
+          "digest": "sha256:e04657426a1a98f7d76538e634a84373afe6d6039ba15b4e976252fad7dec095",
           "downloadDigestVerified": true
         }
       ]
@@ -5543,6 +5549,41 @@
             "id": 12571092895,
             "kind": "webview",
             "digest": "sha256:c5d30770dac1ca3075d2746b1d719d422b5f0f60a56d0126e7006fb416e7285f",
+            "downloadDigestVerified": true
+          }
+        ]
+      },
+      {
+        "stage": "R16.10",
+        "date": "2026-10-25",
+        "commit": "72fd215ee67e41bcbd2d7ed10d99a52b59a5a6c0",
+        "run": 40125945813,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/40125945813",
+        "record": "docs/R16-10-DETAILS.md#正式验收2026-10-25",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "recursiveNodePassed": 2794,
+        "nodeTestFiles": 370,
+        "nodeDirectories": 16,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 75,
+        "rustPassed": 301,
+        "testCleanupPassed": 4,
+        "nativeLargeImportScenariosPassed": 4,
+        "artifacts": [
+          {
+            "id": 12573702054,
+            "kind": "closeout",
+            "bytes": 11830,
+            "digest": "sha256:2bf22f747f6d03f67b329867cc3d9aad092b9ff937661869268a2cd6db331a5f",
+            "downloadDigestVerified": true
+          },
+          {
+            "id": 12573297086,
+            "kind": "webview",
+            "bytes": 1393065,
+            "digest": "sha256:e04657426a1a98f7d76538e634a84373afe6d6039ba15b4e976252fad7dec095",
             "downloadDigestVerified": true
           }
         ]
