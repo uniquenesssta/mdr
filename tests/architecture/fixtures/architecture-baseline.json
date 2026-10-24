@@ -8,98 +8,7 @@
     "additionsRequireMigrationRemovalOrBaselineReview": true
   },
   "legacyClassicScripts": [],
-  "inlineEvents": [
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "newDocument(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        10
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "renameCurrentDocument(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        14
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('both'); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        52
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('edit'); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        53
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "setLayoutMode('preview'); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        54
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleCodeVisualEditing(event)",
-      "count": 1,
-      "lines": [
-        80
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleFullscreen(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        57
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "togglePageFullscreen(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        56
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleSidebar(); closeAppMenus();",
-      "count": 1,
-      "lines": [
-        50
-      ]
-    },
-    {
-      "path": "public/compatibility/business-content.html",
-      "attribute": "onclick",
-      "handler": "toggleTableVisualEditing(event)",
-      "count": 1,
-      "lines": [
-        76
-      ]
-    }
-  ],
+  "inlineEvents": [],
   "businessGlobalWrites": [],
   "trackedGeneratedFiles": [
     ".vite/deps/_metadata.json",
@@ -470,6 +379,103 @@
         }
       ],
       "publicationPolicy": "Only explicitly enabled E2E slots; frozen DocumentModel optional read retained byte-identical and unreachable, snapshot telemetry composed externally."
+    },
+    "r16HtmlCleanup": {
+      "baselineCommit": "40cea4fb83e17c5c0b1df79c3d2b38c3f20e8f1c",
+      "record": "docs/R16-04-DETAILS.md",
+      "removedInlineEvents": [
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "newDocument(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            10
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "renameCurrentDocument(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            14
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "setLayoutMode('both'); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            52
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "setLayoutMode('edit'); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            53
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "setLayoutMode('preview'); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            54
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleCodeVisualEditing(event)",
+          "count": 1,
+          "lines": [
+            80
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleFullscreen(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            57
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "togglePageFullscreen(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            56
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleSidebar(); closeAppMenus();",
+          "count": 1,
+          "lines": [
+            50
+          ]
+        },
+        {
+          "path": "public/compatibility/business-content.html",
+          "attribute": "onclick",
+          "handler": "toggleTableVisualEditing(event)",
+          "count": 1,
+          "lines": [
+            76
+          ]
+        }
+      ],
+      "reason": "All ten menu actions already use explicit MenuView/Controller command dispatch; HTML no longer carries executable fallback handlers. Index remains the minimal entry; compatibility mount retirement remains R16-08."
     }
   }
 }

@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { buildHtmlInventory } from '../../../scripts/stage-02/dom-inventory/html-inventory.mjs';
 import { MENU_DECLARATION } from '../../../src/features/menu/menu-state.js';
 import { createMenuView } from '../../../src/features/menu/menu-view.js';
+import { createMenuController } from '../../../src/features/menu/menu-controller.js';
+import { createMenuCommandBindings } from '../../../src/features/menu/menu-command-bindings.js';
+import { createClassicMenuCommandAdapter } from '../../../src/features/menu/compatibility/classic-menu-command-adapter.js';
 
 function classList(...initial) {
   const set = new Set(initial);
@@ -96,4 +101,94 @@ test('Atomic 6.10 MenuView binds command metadata, blocks legacy bubbling and de
   assert.equal(root.listenerCount(), 0);
   assert.equal(save.dataset.menuCommand, undefined);
   assert.throws(() => view.bindDeclaration(MENU_DECLARATION), /destroyed/);
+});
+
+function productionMenu() {
+  const markup = readFileSync('public/compatibility/business-content.html', 'utf8');
+  const inventory = buildHtmlInventory(markup);
+  assert.equal(inventory.summary.inlineEventCount, 0, 'menu commands must work without inline fallback');
+  const root = el(), nodes = new Map();
+  for (const record of inventory.nodes) {
+    const node = el({ id: record.id || '', classes: record.classes });
+    for (const [name, value] of Object.entries(record.attributes)) node.setAttribute(name, value);
+    nodes.set(record.path, node);
+    (nodes.get(record.parentPath) || root).append(node);
+  }
+  const calls = [], errors = [];
+  let failure = null;
+  const port = {
+    has: () => true,
+    invoke(name, ...args) {
+      if (failure) throw failure;
+      calls.push([name, ...args]);
+      return true;
+    }
+  };
+  const bindings = createMenuCommandBindings();
+  const adapter = createClassicMenuCommandAdapter({ bindings, host: {
+    markdownEditorDocumentUiCommandPort: port, markdownEditorEditorUiCommandPort: port
+  } });
+  adapter.start();
+  const controller = createMenuController({
+    state: { declaration: MENU_DECLARATION, isVisible: () => true, isEnabled: () => true, subscribe: () => () => {} },
+    bindings, view: createMenuView({ root }),
+    closeMenus: () => calls.push(['close']), reportError: (_message, error) => errors.push(error)
+  });
+  controller.start();
+  const commands = new Map([...nodes.values()].filter(node => node.dataset.menuCommand)
+    .map(node => [node.dataset.menuCommand, node]));
+  return {
+    calls, errors, fail: value => { failure = value; },
+    click(id) {
+      const node = commands.get(id);
+      assert.ok(node, `production markup lost ${id}`);
+      return root.emitCaptureClick(node.children[0] || node);
+    },
+    destroy() { controller.destroy(); adapter.destroy(); bindings.destroy(); }
+  };
+}
+
+test('R16-04 production HTML routes all ten retired handlers once through explicit Menu commands', () => {
+  const menu = productionMenu();
+  try {
+    for (const [id, expected, closes] of [
+      ['document.new', ['newDocument'], true],
+      ['document.rename-active', ['renameDocument'], true],
+      ['layout.toggle-sidebar', ['toggleSidebar'], true],
+      ['layout.mode.both', ['executeEditorAction', 'layout', 'both'], true],
+      ['layout.mode.edit', ['executeEditorAction', 'layout', 'edit'], true],
+      ['layout.mode.preview', ['executeEditorAction', 'layout', 'preview'], true],
+      ['layout.fullscreen.page-toggle', ['executeEditorAction', 'page-fullscreen'], true],
+      ['layout.fullscreen.system-toggle', ['executeEditorAction', 'system-fullscreen'], true],
+      ['editor.table.visual-toggle', ['toggleTableVisualEditing'], false],
+      ['editor.code.visual-toggle', ['toggleCodeVisualEditing'], false]
+    ]) {
+      menu.calls.length = 0;
+      assert.deepEqual(menu.click(id), { prevented: 1, stopped: 1 });
+      if (closes) assert.deepEqual(menu.calls[0], expected);
+      else {
+        assert.equal(menu.calls[0].length, 2);
+        assert.equal(menu.calls[0][0], expected[0]);
+        assert.equal(typeof menu.calls[0][1]?.preventDefault, 'function');
+      }
+      assert.deepEqual(menu.calls.slice(1), closes ? [['close']] : []);
+    }
+    assert.deepEqual(menu.errors, []);
+  } finally { menu.destroy(); }
+});
+
+test('R16-04 Menu reports capability failure, recovers and rejects dispatch after destroy', () => {
+  const menu = productionMenu();
+  try {
+    const failure = new Error('feature command unavailable');
+    menu.fail(failure); menu.click('document.new');
+    assert.deepEqual(menu.calls, []);
+    assert.deepEqual(menu.errors, [failure]);
+    menu.fail(null); menu.click('document.new');
+    assert.deepEqual(menu.calls, [['newDocument'], ['close']]);
+    menu.destroy();
+    menu.calls.length = 0;
+    assert.deepEqual(menu.click('document.new'), { prevented: 0, stopped: 0 });
+    assert.deepEqual(menu.calls, []);
+  } finally { menu.destroy(); }
 });

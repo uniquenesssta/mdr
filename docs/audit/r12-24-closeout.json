@@ -211,7 +211,7 @@
     },
     {
       "path": "public/compatibility/business-content.html",
-      "blobSha": "0ecca007cd4c9fe6a75173e3ad8bfb6d12964079"
+      "blobSha": "242726fa6d5bac9997de028b869b316fbd2f0eb3"
     },
     {
       "path": "src/features/import/application/import-document-controller.js",
@@ -567,7 +567,7 @@
     },
     {
       "path": "tests/e2e/run-browser-tests.mjs",
-      "blobSha": "81e018041a245063c3498dd98e9bf9526eece7e5"
+      "blobSha": "72830656fe110a89119ba3a0eb80b97030454ba9"
     },
     {
       "path": "tests/e2e/lib/application-driver.mjs",
@@ -615,7 +615,7 @@
     },
     {
       "path": "tests/architecture/fixtures/architecture-baseline.json",
-      "blobSha": "ffa42d511f4106bd8a1406fab2170b9456e381dc"
+      "blobSha": "87b55485d7724c68e1b686b36aee3cec9263af7f"
     },
     {
       "path": "tests/architecture/architecture-tooling.test.mjs",
@@ -635,7 +635,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "blobSha": "ad8a40dad11526bbfc41147bf87a9ceb9e65fcba"
+      "blobSha": "db30cd402db3c5a7d74c43bf33d245eb6a0e0248"
     },
     {
       "path": "scripts/stage-16/deletion-inventory.mjs",
@@ -707,7 +707,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "5fb5afccb7bddb39119ff89a0295ff28780e09af"
+      "blobSha": "cc296f767c82910bbd9c0f067d35fc76fe3c0526"
     },
     {
       "path": "src/features/documents/application/document-open-coordinator.js",
@@ -924,6 +924,18 @@
     {
       "path": "src-tauri/tests/support/document_store_concurrency.rs",
       "blobSha": "88bd6a74a7bc3025164cad88f7fabf61d7baa207"
+    },
+    {
+      "path": "tests/architecture/no-inline-events.test.mjs",
+      "blobSha": "1c3c0079b6bb1ad6388476ceb70d640fee16faa0"
+    },
+    {
+      "path": "tests/ui/minimal-index.test.mjs",
+      "blobSha": "84b9db239756c0ab2549729513d321be5de1b732"
+    },
+    {
+      "path": "tests/unit/menu/menu-view.test.mjs",
+      "blobSha": "0860d365a160561bc9ff08f535b0045a46a6c7c6"
     }
   ],
   "priorFailures": {
@@ -1139,14 +1151,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R16.3",
+    "stage": "R16.4",
     "date": "2026-10-24",
-    "reviewedCommit": "52aa8f21851850e2a29a0acd7fdcf081c104c2da",
-    "record": "docs/R16-03-DETAILS.md#正式验收2026-10-24",
-    "status": "accepted-exact-commit-windows-ci",
+    "reviewedCommit": "40cea4fb83e17c5c0b1df79c3d2b38c3f20e8f1c",
+    "record": "docs/R16-04-DETAILS.md",
+    "status": "locally-verified-pending-exact-commit-windows-ci",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
-    "scope": "R16-03 explicit module APIs, owned widget capabilities and bounded cache admission test coordination; R16-04 authorized next.",
+    "scope": "Remove ten inert HTML inline handlers; preserve minimal index, current visible UI, external icons and ModalShell; compatibility retirement stays R16-08.",
     "acceptedPriorStage": {
       "stage": "R15.9",
       "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
@@ -1294,111 +1306,66 @@
       ]
     },
     "currentStageImplementation": {
-      "stage": "R16.3",
-      "baselineCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
+      "stage": "R16.4",
+      "baselineCommit": "40cea4fb83e17c5c0b1df79c3d2b38c3f20e8f1c",
       "branch": "codex/r16-stage",
-      "record": "docs/R16-03-DETAILS.md",
-      "status": "accepted-exact-commit-windows-ci",
-      "newScenariosDefined": 19,
+      "record": "docs/R16-04-DETAILS.md",
+      "status": "locally-verified-pending-exact-commit-windows-ci",
+      "scope": "Remove ten inert HTML inline handlers; preserve minimal index, current visible UI, external icons and ModalShell; compatibility retirement stays R16-08.",
+      "newScenariosDefined": 3,
+      "localNewScenariosPassed": 3,
+      "htmlCleanupPassed": 9,
       "modelKernelChanged": false,
-      "nativeProductionChanged": true,
+      "nativeProductionChanged": false,
       "dependenciesChanged": false,
       "productionModuleCount": 570,
       "businessGlobalWrites": 0,
-      "implicitWidgetHandlers": 0,
-      "frozenOptionalGlobalReads": 1,
-      "exactCommitWindowsPending": false,
-      "localNewScenariosPassed": 19,
+      "productionInlineEvents": 0,
+      "removedHtmlHandlers": 10,
+      "exactCommitWindowsPending": true,
       "localContractBrowserPassed": 11,
-      "localFirstCumulative": {
-        "passed": 2734,
-        "failed": 2,
-        "reasons": [
-          "Windows package gate invoked outside npm lacked npm_execpath",
-          "Current source-review fingerprints not yet refreshed"
-        ]
+      "frontendSourceSha256": "f8ed6b0de4d8680f67f2d40f7166f999152d42a06a6cae1fa5769bcc96d369f5",
+      "ciPublicHtmlTriggers": true,
+      "sourceReviewCount": 200,
+      "localBuiltAppPassed": 75,
+      "builtAppConsoleErrors": 0,
+      "builtAppExceptions": 0,
+      "browserValidation": {
+        "failedFirstRun": {
+          "node": "24.16.0",
+          "undici": "7.25.0",
+          "passed": 37,
+          "failed": 38,
+          "firstFailure": "CDP connection closed at first export scenario; no assertion relaxation.",
+          "log": "Temp/mdr-r1604-browser-app.log"
+        },
+        "passedRun": {
+          "node": "24.19.0",
+          "undici": "7.29.0",
+          "passed": 75,
+          "failed": 0,
+          "log": "Temp/mdr-r1604-browser-app-runtime24.log"
+        },
+        "conclusion": "Same built source and all original scenarios passed with the previously used bundled runtime. Lower-level cause of first transport closure not proven."
       },
-      "localFirstBuiltApp": {
-        "passed": 73,
-        "failed": 2,
-        "reason": "Two remaining test probes read the removed model global; replaced by existing detached E2E queries with identity/body/version assertions retained."
+      "finalBuild": {
+        "sourceSha256": "f8ed6b0de4d8680f67f2d40f7166f999152d42a06a6cae1fa5769bcc96d369f5",
+        "inputs": 511,
+        "outputs": 137,
+        "mainKb": 586.78,
+        "initialBudgetBytes": 500000,
+        "asyncBudgetBytes": 700000
       },
-      "sourceReviewCount": 197,
-      "localSecondCumulative": {
-        "passed": 2734,
-        "failed": 2,
-        "reasons": [
-          "Two HTML lifecycle source assertions still required a removed unused direct-destroy import; current Widget Lifecycle registry guarantees final observation teardown."
-        ]
-      },
-      "scope": "Remove business global publications and implicit widget callbacks through explicit module capabilities, retain frozen model bytes and opt-in E2E boundary; HTML/runtime/compatibility retirement remains assigned to 16.4/16.7/16.8.",
-      "localRecursiveNodePassed": 2737,
+      "visibleMarkupPreservedExceptRemovedHandlers": true,
+      "snapshotInputs": 1132,
+      "deletionCandidates": 104,
+      "deletionAuthorized": false,
+      "protectedSourcesUnchanged": 10,
+      "localRecursiveNodePassed": 2740,
       "localRepositoryFiles": 362,
       "localRepositoryDirectories": 16,
-      "localBuiltAppPassed": 75,
-      "localNativeLargeImportScenariosPassed": 8,
-      "nativeOriginalCharacters": 5453875,
-      "localNativeEvidence": "mdr-r1603-native-3ThisJ/verification.json",
-      "localNativeEnvironment": "Existing debug Tauri binary with final Vite sources and isolated WebView profile; exact embedded production CI pending.",
       "fourArchitectureGatesPassed": true,
-      "finalBuild": {
-        "accepted": true,
-        "sourceSha256": "14a6ed038657c11ada42372661e36fb63bcec8b25611cf1fd2fcf551c7524fdc",
-        "sourceFiles": 511,
-        "outputFiles": 137
-      },
-      "finalTargetedOwnershipPassed": 28,
-      "localFocusBrowserPassed": 1,
-      "focusRetentionNegativeControlRejected": true,
-      "localGlobalApiPassed": 16,
-      "snapshotInputs": 1132,
-      "finalDeliveryContractsPassed": 38,
-      "localNewRustScenariosDefined": 2,
-      "ciRepair": {
-        "date": "2026-10-24",
-        "baselineCommit": "f3570af01938ff463a53a14a9f9f7acb0159ba72",
-        "failedRun": 39979330283,
-        "url": "https://github.com/uniquenesssta/mdr/actions/runs/39979330283",
-        "record": "docs/R16-03-DETAILS.md#ci未通过与并发夹具修复2026-10-24",
-        "status": "accepted-exact-commit-windows-ci",
-        "failedUnitPassed": 285,
-        "failedUnitFailed": 2,
-        "otherJobsPassed": 5,
-        "failures": [
-          "reservation_releases_mutex_and_keeps_other_documents_available: old line55 Timeout",
-          "io_failure_discards_uncommitted_document_and_allows_a_retry: old line194 Timeout"
-        ],
-        "repair": "Bound actual cache admission rather than real filesystem completion; retain original five-second admission budget, alias exclusion, join and version/body readback. Only cfg(test) read-only cache observation added.",
-        "newRustScenarios": 2,
-        "localConcurrencyPassed": 9,
-        "negativeControlRejected": true,
-        "rustfmtInputsPassed": 45,
-        "clippyWarningsDeniedPassed": true,
-        "cargoCheckPassed": true,
-        "productionRustBehaviorChanged": false,
-        "modelKernelChanged": false,
-        "frontendBuildInputsChanged": false,
-        "dependenciesChanged": false,
-        "localRust": {
-          "unitPassed": 288,
-          "unitFailed": 1,
-          "compatibilityPassed": 12,
-          "totalDefined": 301,
-          "environmentLimitation": "Unchanged case-sensitive-directory test: fsutil setup returned request not supported; same test passed in CI39979330283. Test remains mandatory."
-        },
-        "sourceReviewCount": 197,
-        "nativeSourceChangeScope": "Only a cfg(test) readonly observer added to cache.rs; production checkout/save/drop behavior unchanged.",
-        "localTargetedNodePassed": 78,
-        "fourArchitectureGatesPassed": true,
-        "protectedSourcesUnchanged": 10,
-        "frontendSourceSha256": "14a6ed038657c11ada42372661e36fb63bcec8b25611cf1fd2fcf551c7524fdc",
-        "acceptance": {
-          "commit": "52aa8f21851850e2a29a0acd7fdcf081c104c2da",
-          "run": 39988412402,
-          "record": "docs/R16-03-DETAILS.md#正式验收2026-10-24"
-        }
-      },
-      "nativeProductionBehaviorChanged": false
+      "finalDeliveryContractsPassed": 9
     },
     "priorStageAcceptance": {
       "stage": "R15.9",
@@ -12821,6 +12788,113 @@
         "actualDirectoryGuardPassed": 63,
         "esmScenariosDefined": 12,
         "cdpNewScenariosDefined": 3
+      },
+      {
+        "stage": "R16.3",
+        "baselineCommit": "7c2c62e59b9c8a9b6102e6561af70ed6d90199cf",
+        "branch": "codex/r16-stage",
+        "record": "docs/R16-03-DETAILS.md",
+        "status": "accepted-exact-commit-windows-ci",
+        "newScenariosDefined": 19,
+        "modelKernelChanged": false,
+        "nativeProductionChanged": true,
+        "dependenciesChanged": false,
+        "productionModuleCount": 570,
+        "businessGlobalWrites": 0,
+        "implicitWidgetHandlers": 0,
+        "frozenOptionalGlobalReads": 1,
+        "exactCommitWindowsPending": false,
+        "localNewScenariosPassed": 19,
+        "localContractBrowserPassed": 11,
+        "localFirstCumulative": {
+          "passed": 2734,
+          "failed": 2,
+          "reasons": [
+            "Windows package gate invoked outside npm lacked npm_execpath",
+            "Current source-review fingerprints not yet refreshed"
+          ]
+        },
+        "localFirstBuiltApp": {
+          "passed": 73,
+          "failed": 2,
+          "reason": "Two remaining test probes read the removed model global; replaced by existing detached E2E queries with identity/body/version assertions retained."
+        },
+        "sourceReviewCount": 197,
+        "localSecondCumulative": {
+          "passed": 2734,
+          "failed": 2,
+          "reasons": [
+            "Two HTML lifecycle source assertions still required a removed unused direct-destroy import; current Widget Lifecycle registry guarantees final observation teardown."
+          ]
+        },
+        "scope": "Remove business global publications and implicit widget callbacks through explicit module capabilities, retain frozen model bytes and opt-in E2E boundary; HTML/runtime/compatibility retirement remains assigned to 16.4/16.7/16.8.",
+        "localRecursiveNodePassed": 2737,
+        "localRepositoryFiles": 362,
+        "localRepositoryDirectories": 16,
+        "localBuiltAppPassed": 75,
+        "localNativeLargeImportScenariosPassed": 8,
+        "nativeOriginalCharacters": 5453875,
+        "localNativeEvidence": "mdr-r1603-native-3ThisJ/verification.json",
+        "localNativeEnvironment": "Existing debug Tauri binary with final Vite sources and isolated WebView profile; exact embedded production CI pending.",
+        "fourArchitectureGatesPassed": true,
+        "finalBuild": {
+          "accepted": true,
+          "sourceSha256": "14a6ed038657c11ada42372661e36fb63bcec8b25611cf1fd2fcf551c7524fdc",
+          "sourceFiles": 511,
+          "outputFiles": 137
+        },
+        "finalTargetedOwnershipPassed": 28,
+        "localFocusBrowserPassed": 1,
+        "focusRetentionNegativeControlRejected": true,
+        "localGlobalApiPassed": 16,
+        "snapshotInputs": 1132,
+        "finalDeliveryContractsPassed": 38,
+        "localNewRustScenariosDefined": 2,
+        "ciRepair": {
+          "date": "2026-10-24",
+          "baselineCommit": "f3570af01938ff463a53a14a9f9f7acb0159ba72",
+          "failedRun": 39979330283,
+          "url": "https://github.com/uniquenesssta/mdr/actions/runs/39979330283",
+          "record": "docs/R16-03-DETAILS.md#ci未通过与并发夹具修复2026-10-24",
+          "status": "accepted-exact-commit-windows-ci",
+          "failedUnitPassed": 285,
+          "failedUnitFailed": 2,
+          "otherJobsPassed": 5,
+          "failures": [
+            "reservation_releases_mutex_and_keeps_other_documents_available: old line55 Timeout",
+            "io_failure_discards_uncommitted_document_and_allows_a_retry: old line194 Timeout"
+          ],
+          "repair": "Bound actual cache admission rather than real filesystem completion; retain original five-second admission budget, alias exclusion, join and version/body readback. Only cfg(test) read-only cache observation added.",
+          "newRustScenarios": 2,
+          "localConcurrencyPassed": 9,
+          "negativeControlRejected": true,
+          "rustfmtInputsPassed": 45,
+          "clippyWarningsDeniedPassed": true,
+          "cargoCheckPassed": true,
+          "productionRustBehaviorChanged": false,
+          "modelKernelChanged": false,
+          "frontendBuildInputsChanged": false,
+          "dependenciesChanged": false,
+          "localRust": {
+            "unitPassed": 288,
+            "unitFailed": 1,
+            "compatibilityPassed": 12,
+            "totalDefined": 301,
+            "environmentLimitation": "Unchanged case-sensitive-directory test: fsutil setup returned request not supported; same test passed in CI39979330283. Test remains mandatory."
+          },
+          "sourceReviewCount": 197,
+          "nativeSourceChangeScope": "Only a cfg(test) readonly observer added to cache.rs; production checkout/save/drop behavior unchanged.",
+          "localTargetedNodePassed": 78,
+          "fourArchitectureGatesPassed": true,
+          "protectedSourcesUnchanged": 10,
+          "frontendSourceSha256": "14a6ed038657c11ada42372661e36fb63bcec8b25611cf1fd2fcf551c7524fdc",
+          "acceptance": {
+            "commit": "52aa8f21851850e2a29a0acd7fdcf081c104c2da",
+            "run": 39988412402,
+            "record": "docs/R16-03-DETAILS.md#正式验收2026-10-24"
+          }
+        },
+        "nativeProductionBehaviorChanged": false
       }
     ],
     "migratedReviewedSources": [
@@ -13177,6 +13251,36 @@
         "blobSha": "1cc712c8dfc6cc14f4783135cf57a44d6d81767c",
         "stage": "R16.3-CI-repair",
         "receiver": "docs/R16-03-DETAILS.md#ci未通过与并发夹具修复2026-10-24"
+      },
+      {
+        "path": ".github/workflows/r12-14.yml",
+        "blobSha": "ad8a40dad11526bbfc41147bf87a9ceb9e65fcba",
+        "stage": "R16.4",
+        "receiver": "docs/R16-04-DETAILS.md"
+      },
+      {
+        "path": "public/compatibility/business-content.html",
+        "blobSha": "0ecca007cd4c9fe6a75173e3ad8bfb6d12964079",
+        "stage": "R16.4",
+        "receiver": "docs/R16-04-DETAILS.md"
+      },
+      {
+        "path": "tests/architecture/fixtures/architecture-baseline.json",
+        "blobSha": "ffa42d511f4106bd8a1406fab2170b9456e381dc",
+        "stage": "R16.4",
+        "receiver": "docs/R16-04-DETAILS.md"
+      },
+      {
+        "path": "tests/e2e/run-browser-tests.mjs",
+        "blobSha": "81e018041a245063c3498dd98e9bf9526eece7e5",
+        "stage": "R16.4",
+        "receiver": "docs/R16-04-DETAILS.md"
+      },
+      {
+        "path": "docs/audit/r16-01-deletion-inventory.json",
+        "blobSha": "5fb5afccb7bddb39119ff89a0295ff28780e09af",
+        "stage": "R16.4",
+        "receiver": "docs/R16-04-DETAILS.md"
       }
     ],
     "currentPhaseAcceptance": {

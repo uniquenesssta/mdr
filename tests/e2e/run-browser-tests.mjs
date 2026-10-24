@@ -565,6 +565,10 @@ async function runAppSuite() {
     const bridgeAvailable = await browser.page.evaluate('Boolean(window.__markdownEditorE2E)');
     if (!bridgeAvailable) throw new Error('Public E2E capability is unavailable at ?e2e=1 after application startup.');
     await test('application mounts one App Shell with strict named slots', async () => {
+      // Check the delivered asset before MenuView can remove legacy attributes.
+      const markupResponse = await fetch(`${baseUrl.replace(/\/$/, '')}/compatibility/business-content.html`);
+      assert.equal(markupResponse.status, 200);
+      assert.doesNotMatch(await markupResponse.text(), /\son[a-z][a-z0-9:_-]*\s*=/i);
       const snapshot = await browser.page.evaluate(`(()=>{
         const root=document.getElementById('app-root');
         const shell=root?.querySelector('[data-ui-shell="app"]');

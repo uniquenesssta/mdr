@@ -9,7 +9,6 @@ import { collectInlineEvents } from '../../scripts/architecture/source-analysis.
 const root = process.cwd();
 const readText = path => readFile(resolve(root, path), 'utf8');
 const readJson = async path => JSON.parse(await readText(path));
-const CURRENT_COMPATIBILITY_INLINE_EVENT_CAP = 157;
 
 const expectedIndex = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -52,11 +51,8 @@ test('compatibility asset owns only the remaining unmigrated business content wh
     .reduce((sum, record) => sum + record.count, 0);
 
   assert.equal(frozenInventory.summary.inlineEventCount, 184);
-  assert.ok(
-    currentInlineEventCount <= CURRENT_COMPATIBILITY_INLINE_EVENT_CAP,
-    `compatibility inline events may only shrink from the reconciled cap ${CURRENT_COMPATIBILITY_INLINE_EVENT_CAP}; received ${currentInlineEventCount}`
-  );
-  assert.ok(CURRENT_COMPATIBILITY_INLINE_EVENT_CAP <= frozenInventory.summary.inlineEventCount);
+  assert.equal(currentInlineEventCount, 0, 'R16-04 forbids inline events before startup controllers run');
+  assert.equal(buildHtmlInventory(markup).summary.inlineEventCount, 0);
   assert.doesNotMatch(markup, /<script\b/i);
   assert.doesNotMatch(markup, /<html\b|<head\b|<body\b/i);
   assert.deepEqual([...markup.matchAll(/<template\s+data-compat-slot=\"([^\"]+)\">/g)].map(match => match[1]), ['menu', 'toolbar', 'sidebar', 'editor', 'preview', 'status', 'overlay', 'ports']);

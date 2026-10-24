@@ -1,11 +1,13 @@
 name: Windows Rewrite Revalidation
-run-name: R16-03 explicit module APIs and cumulative regression · ${{ github.sha }}
+run-name: R16-04 clean HTML entry and cumulative regression · ${{ github.sha }}
 
 on:
   push:
     branches: [agent/r14-stage, agent/r15-stage, codex/r16-stage]
     paths:
       - 'src/**'
+      - 'index.html'
+      - 'public/**'
       - 'public/app/core.js'
       - 'public/app/export.js'
       - 'src-tauri/**'
@@ -287,6 +289,11 @@ jobs:
         shell: bash
         run: node --test tests/stage-15-log-cleanup.test.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/log-cleanup.log"
 
+      - name: R16-04 minimal HTML, zero inline events and explicit Menu commands
+        if: ${{ !cancelled() }}
+        run: |
+          node --test tests/ui/minimal-index.test.mjs tests/unit/menu/menu-view.test.mjs tests/architecture/no-inline-events.test.mjs \
+            2>&1 | tee "$RUNNER_TEMP/r12-14/html-cleanup-tests.log"
       - name: R16-03 no business globals and owned widget capabilities
         shell: bash
         run: |

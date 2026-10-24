@@ -5,6 +5,25 @@ import { join } from 'node:path';
 import { checkLegacyRuntime } from '../../scripts/architecture/checks.mjs';
 import { createArchitectureFixture, moduleRecord } from './helpers.mjs';
 
+test('R16-04 zero baseline rejects click, change and input handlers on either HTML surface', async () => {
+  const surfaces = ['index.html', 'public/compatibility/business-content.html'];
+  const clean = '<div id="app-root"></div>\n';
+  const root = await createArchitectureFixture(
+    Object.fromEntries(surfaces.map(path => [path, clean])),
+    surfaces.map(path => moduleRecord(path, { surface: 'html-entrypoint', migration: 'rewrite' }))
+  );
+  assert.deepEqual(await checkLegacyRuntime({ root }), []);
+  for (const path of surfaces) {
+    for (const attribute of ['onclick', 'onchange', 'oninput']) {
+      await writeFile(join(root, path), `<input ${attribute}="retiredGlobal()">\n`, 'utf8');
+      const issues = await checkLegacyRuntime({ root });
+      assert.ok(issues.some(issue => issue.rule === 'inline-event-regression' && issue.path === path));
+      await writeFile(join(root, path), clean, 'utf8');
+    }
+  }
+  assert.deepEqual(await checkLegacyRuntime({ root }), []);
+});
+
 test('rejects any inline-event addition beyond the exact migration baseline', async () => {
   const root = await createArchitectureFixture({
     'index.html': '<button onclick="legacyOpen()">Open</button>\n<script src="/app/core.js"></script>\n',
