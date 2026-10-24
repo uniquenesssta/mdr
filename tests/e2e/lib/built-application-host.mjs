@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
+import { isFetchCompatiblePort } from './cdp-browser.mjs';
 
 const mimeTypes = new Map([
   ['.html', 'text/html; charset=utf-8'], ['.js', 'text/javascript; charset=utf-8'],
@@ -11,9 +12,9 @@ const mimeTypes = new Map([
 
 // Serve actual dist bytes to the page and its Worker from the same native origin.
 // CDP page-only interception cannot serve a separate Worker target.
-export async function startBuiltApplicationHost(root) {
+export async function startBuiltApplicationHost(root, { createServerImpl = createServer } = {}) {
   const directory = resolve(root), requests = [];
-  const server = createServer(async (request, response) => {
+  const server = createServerImpl(async (request, response) => {
     const record = { url: request.url, method: request.method, status: null };
     requests.push(record);
     const send = (status, content, type = 'text/plain; charset=utf-8') => {
@@ -30,13 +31,21 @@ export async function startBuiltApplicationHost(root) {
     try { send(200, await readFile(file), mimeTypes.get(extname(file).toLowerCase()) || 'application/octet-stream'); }
     catch (error) { send(['ENOENT', 'EISDIR', 'ENOTDIR'].includes(error.code) ? 404 : 500, 'Unable to read asset'); }
   });
-  await new Promise((resolveListen, reject) => {
-    server.once('error', reject);
-    server.listen(0, '127.0.0.1', () => { server.removeListener('error', reject); resolveListen(); });
-  });
+  let port;
+  for (let attempt = 0; attempt < 32; attempt++) {
+    await new Promise((resolveListen, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', () => { server.removeListener('error', reject); resolveListen(); });
+    });
+    port = server.address()?.port;
+    if (isFetchCompatiblePort(port)) break;
+    await new Promise((accept, reject) => server.close(error => error ? reject(error) : accept()));
+    port = null;
+  }
+  if (!port) throw new Error('No browser-compatible application HTTP port was allocated after 32 attempts.');
   let closed = false;
   return {
-    origin: 'http://127.0.0.1:' + server.address().port,
+    origin: 'http://127.0.0.1:' + port,
     requests,
     async close() {
       if (closed) return;

@@ -17,7 +17,13 @@ async function fixture(run) {
     await writeFile(join(root, 'outside.js'), 'outside root');
     host = await startBuiltApplicationHost(dist);
     await run(host);
-  } finally { await host?.close(); await rm(root, { recursive: true, force: true }); }
+  } finally {
+    await host?.close();
+    await rm(join(root, 'dist/assets/preview-worker.js'), { force: true });
+    await rm(join(root, 'dist/assets/app.js'), { force: true });
+    await rm(join(root, 'dist/index.html'), { force: true });
+    await rm(join(root, 'outside.js'), { force: true });
+  }
 }
 
 test('built app HTTP host serves native page, module and Worker bytes from one loopback origin', () => fixture(async host => {
@@ -55,3 +61,26 @@ test('built app HTTP host supports HEAD and releases its listening port idempote
   await host.close();
   await assert.rejects(fetch(host.origin));
 }));
+
+function portServer(allocate) {
+  const closed = []; let port;
+  return { closed, server: {
+    once() {}, removeListener() {},
+    listen(_port, _address, ready) { port = allocate(); ready(); },
+    address: () => ({ port }),
+    close(done) { closed.push(port); done(); }, closeAllConnections() {}
+  } };
+}
+
+test('built app HTTP host closes restricted allocations before retaining a browser-compatible listening port', async () => {
+  const ports = [10080, 6679, 6680], probe = portServer(() => ports.shift());
+  const host = await startBuiltApplicationHost('.', { createServerImpl: () => probe.server });
+  assert.equal(host.origin, 'http://127.0.0.1:6680'); assert.deepEqual(probe.closed, [10080, 6679]);
+  await host.close(); await host.close(); assert.deepEqual(probe.closed, [10080, 6679, 6680]);
+});
+
+test('built app HTTP host fails bounded allocation with every rejected socket closed', async () => {
+  const probe = portServer(() => 10080);
+  await assert.rejects(startBuiltApplicationHost('.', { createServerImpl: () => probe.server }), /after 32 attempts/);
+  assert.equal(probe.closed.length, 32); assert.ok(probe.closed.every(port => port === 10080));
+});

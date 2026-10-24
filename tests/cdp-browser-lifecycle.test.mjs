@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createServer } from 'node:http';
-import { CdpConnection, waitForJson, recoverChromiumStartup, getFreePort } from './e2e/lib/cdp-browser.mjs';
+import { CdpConnection, CdpPage, waitForJson, recoverChromiumStartup, getFreePort } from './e2e/lib/cdp-browser.mjs';
+
+test('CDP navigation reports the actual browser failure before evaluating an error page', async () => {
+  const methods = [], page = new CdpPage({ send: async method => { methods.push(method); return { errorText: 'net::ERR_UNSAFE_PORT' }; } });
+  await assert.rejects(page.navigate('http://127.0.0.1:10080/'), /net::ERR_UNSAFE_PORT; url=http:\/\/127\.0\.0\.1:10080\//);
+  assert.deepEqual(methods, ['Page.navigate']);
+});
 
 test('an unanswered CDP cleanup command rejects and releases its pending entry', async () => {
   const connection = new CdpConnection('unused', { commandTimeoutMs: 20 });

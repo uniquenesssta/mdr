@@ -182,14 +182,19 @@ test('Stage 1 historical handoff and current migration baseline remain explicit'
   assert.doesNotMatch(currentHtml, /onclick="openUrlModal\(/);
   assert.doesNotMatch(currentHtml, /cancelActiveExport|id="export-progress-modal"/);
   assert.deepEqual(await checkLegacyRuntime({ root: ROOT }), []);
-  assert.deepEqual(baseline.trackedGeneratedFiles, ['.vite/deps/_metadata.json', '.vite/deps/package.json']);
+  assert.deepEqual(baseline.trackedGeneratedFiles, []);
+  const generatedRetirement = baseline.auditCorrections.r16GeneratedRetirement;
+  assert.equal(generatedRetirement.atomic, 'R16-09');
+  assert.deepEqual(generatedRetirement.removedTrackedGeneratedFiles.map(item => item.path),
+    ['.vite/deps/_metadata.json', '.vite/deps/package.json']);
   const logRetirement = baseline.auditCorrections.r15RuntimeLogRetirement;
   assert.equal(logRetirement.atomic, 'R15-13');
   assert.deepEqual(logRetirement.removedTrackedGeneratedFiles.map(item => item.path), [
     'logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl',
     'logs/performance-2026-07-25_17-29-13-389_pid-20484.jsonl'
   ]);
-  assert.equal(baseline.trackedGeneratedFiles.length + logRetirement.removedTrackedGeneratedFiles.length, 4);
+  assert.equal(baseline.trackedGeneratedFiles.length + logRetirement.removedTrackedGeneratedFiles.length
+    + generatedRetirement.removedTrackedGeneratedFiles.length, 4);
   assert.equal(baseline.policy.wildcardExemptions, false);
   assert.equal(
     baseline.legacyClassicScripts.some(item => item.loader === 'src/main.js' && item.script === 'public/app/scroll-sync.js'),

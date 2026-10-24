@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "4386b57c000b344f19de87dfd2c7ab2543c8e08b",
+  "baselineCommit": "a2fc2669a1dffbcdf4b89a571d276ba5b182667f",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "fe70a4e30ef92a4a61d2be499f1f3f2381d959e2e521039ea65fd12ba6b78d13"
+      "sha256": "f0663f60da33cd00cf8dfb181df06cade7e9ba4add2aa0b44d08bd0becaa222b"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -207,15 +207,7 @@
     },
     {
       "path": ".gitignore",
-      "sha256": "fc29491e98f59290afe4b2ae22e3968cc816efcf61f102bdabcfc5efc59fbacf"
-    },
-    {
-      "path": ".vite/deps/_metadata.json",
-      "sha256": "9a33a5595ba54d57c56aa1206872e4d3cc840bb3f2282d9231b952abe60bcb64"
-    },
-    {
-      "path": ".vite/deps/package.json",
-      "sha256": "3ca9d4afd21425087cf31893b8f9f63c81b0b8408db5e343ca76e5f8aa26ab9a"
+      "sha256": "14f05a1f2e95f9b9d9c98f51534a164cfd30a388f6373498adcc37837565715c"
     },
     {
       "path": "index.html",
@@ -235,7 +227,7 @@
     },
     {
       "path": "scripts/architecture/checks.mjs",
-      "sha256": "951a42d2a594fc3f027caa35055cc80142ec730e322106560c11a9e8888cb1e3"
+      "sha256": "e272bc37591a6f327373e874d6f484a83cb0eed177f99748041a98be5a9e9219"
     },
     {
       "path": "scripts/architecture/cli.mjs",
@@ -371,7 +363,7 @@
     },
     {
       "path": "scripts/stage-16/deletion-inventory.mjs",
-      "sha256": "f2d1e44e311387c2cf655e2177b77eec6593990331e8290f7d88a0c0799d02c8"
+      "sha256": "c25e78312839d38206b6f87a6dfdba164c915398856c8df0d4161653bec8ac16"
     },
     {
       "path": "scripts/verify-architecture.mjs",
@@ -2739,7 +2731,7 @@
     },
     {
       "path": "tests/architecture/fixtures/architecture-baseline.json",
-      "sha256": "7b7c6b87e7ead80503a5e35cd520de4763de07424e1170e623078abb24b52a75"
+      "sha256": "85f956af5c19ce502ae536d1b0041902f8ff6088d7d028786a025ee9b6da621c"
     },
     {
       "path": "tests/architecture/fixtures/production-modules.json",
@@ -2751,7 +2743,7 @@
     },
     {
       "path": "tests/architecture/helpers.mjs",
-      "sha256": "c3052c3cf161248161975e15d37a8ab96989620112508b8bf04a5a1889cc80e3"
+      "sha256": "a2c9717d26e1e71d0b116607dd97d01926ba0d314dc2317db4356fe0838d8f10"
     },
     {
       "path": "tests/architecture/model-kernel-contract.test.mjs",
@@ -3031,11 +3023,11 @@
     },
     {
       "path": "tests/built-application-host.test.mjs",
-      "sha256": "c5f0fa20045b5df727c8ceb8ed52ec5d1f3a2953ecd1afa18aee80630e462e9b"
+      "sha256": "b5ef12146d09bd554029624dbbf84301cdd876e81234018e0f133d4aa106def0"
     },
     {
       "path": "tests/cdp-browser-lifecycle.test.mjs",
-      "sha256": "60efebe7eb56542c8bb0e45884aca1069b7e387d453a78c11c584d0318aced74"
+      "sha256": "61e16aeb02ebba8b30b17f1763af9a821890a3e5377bfee08e2b96419735287d"
     },
     {
       "path": "tests/dependency-location.test.mjs",
@@ -3066,6 +3058,10 @@
       "sha256": "e910d97f875d4b4d5ffafcc70060cc90590de9d158772aa3650e3250989c6ffc"
     },
     {
+      "path": "tests/e2e/generated-cleanup.test.mjs",
+      "sha256": "f0ce453c2969069dbd9ec0992644646d0bfeaa2a9f796cd52f120911a617da9c"
+    },
+    {
       "path": "tests/e2e/html-extractor.test.mjs",
       "sha256": "8591a0367a87343fe5b3fce6f9b862a4cd6324113eecc31b18e6fcbee818a077"
     },
@@ -3091,11 +3087,11 @@
     },
     {
       "path": "tests/e2e/lib/built-application-host.mjs",
-      "sha256": "63f768f67fdded3f67a8aee9a7c505c79ddf6ce208bae700fbb9aa5c75f2f28b"
+      "sha256": "d03a9f81d232df8019fee67d7380fe1b504c2707654104ece29f8ea5e620b7a5"
     },
     {
       "path": "tests/e2e/lib/cdp-browser.mjs",
-      "sha256": "c2ce714d0457c5c16d0538de98df59dbfe67820157da4eb4d352c720527cbbe6"
+      "sha256": "8d1a798df6070be45ed8de4ab5af6ad197f1d51b7ec65766e6b53f8c654d5a5d"
     },
     {
       "path": "tests/e2e/lib/e2e-installation.mjs",
@@ -3319,7 +3315,7 @@
     },
     {
       "path": "tests/stage-01-handoff.test.mjs",
-      "sha256": "b418ce420fdb6c778eef4d3cb61b2ce0c8c6a98fe8cd3595e3a5f2bc59799503"
+      "sha256": "b104f54d0fb95eeffdae34e855dc3b9acfd2538b083ef6797dc39c356480f8e7"
     },
     {
       "path": "tests/stage-06-menu-model.test.mjs",
@@ -3755,7 +3751,7 @@
     },
     {
       "path": "tests/stage-15-log-cleanup.test.mjs",
-      "sha256": "6d6caa742aa72415a99a545debac784fbf0388b036e31a42db81e6d4d847b0d9"
+      "sha256": "1a1e95613ef5208c21d47be9c496db2bc1d7e5109934be1516d3f70c18ee010c"
     },
     {
       "path": "tests/stage-15-long-task-observer.test.mjs",
@@ -3800,6 +3796,10 @@
     {
       "path": "tests/stage-16-esm-application.test.mjs",
       "sha256": "a4eb983a43b0b0148cb1d42d83712ae4175d186a3d5d132f11697346a747c6d6"
+    },
+    {
+      "path": "tests/stage-16-generated-cleanup.test.mjs",
+      "sha256": "eed1b4ec1ed17e2abb7ea336b7f070df5fcbe6c7676a6d8abfe525fc4f4d8f95"
     },
     {
       "path": "tests/stage-16-global-api.test.mjs",
@@ -4430,7 +4430,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "d35f8416f8cfe73a701def13e7a43bcf4590626157252758b06e6a668bbb23cb",
+  "inputSha256": "756e75d06c0485dc4b2507988c55a1f3030896fd4e96a63a739e8ed056af09e6",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -4976,7 +4976,7 @@
   "uncertainties": [
     {
       "from": "scripts/architecture/checks.mjs",
-      "line": 425,
+      "line": 443,
       "kind": "computed-import"
     },
     {
@@ -5153,27 +5153,27 @@
   "candidates": [
     {
       "path": ".vite/deps/_metadata.json",
-      "tracked": true,
-      "sha256": "9a33a5595ba54d57c56aa1206872e4d3cc840bb3f2282d9231b952abe60bcb64",
-      "status": "unproven",
+      "tracked": false,
+      "sha256": null,
+      "status": "absent",
       "deletionAllowed": false,
       "followup": "R16-09",
       "ownership": null,
       "detected": null,
       "references": [],
-      "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
+      "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
     },
     {
       "path": ".vite/deps/package.json",
-      "tracked": true,
-      "sha256": "3ca9d4afd21425087cf31893b8f9f63c81b0b8408db5e343ca76e5f8aa26ab9a",
-      "status": "unproven",
+      "tracked": false,
+      "sha256": null,
+      "status": "absent",
       "deletionAllowed": false,
       "followup": "R16-09",
       "ownership": null,
       "detected": null,
       "references": [],
-      "requiredProof": "Recheck every reference, replace/remove callers in its authorized Atomic, prove equivalent behavior and rebuild before deletion; zero text matches alone is insufficient."
+      "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
     },
     {
       "path": "logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl",
@@ -5190,7 +5190,7 @@
           "target": "logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 199
+          "line": 196
         },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
@@ -5204,7 +5204,7 @@
           "target": "logs/performance-2026-07-25_17-18-03-768_pid-3260.jsonl",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 189
+          "line": 193
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -5224,7 +5224,7 @@
           "target": "logs/performance-2026-07-25_17-29-13-389_pid-20484.jsonl",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 205
+          "line": 202
         },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
@@ -5238,7 +5238,7 @@
           "target": "logs/performance-2026-07-25_17-29-13-389_pid-20484.jsonl",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 190
+          "line": 194
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -5258,7 +5258,7 @@
           "target": "public/app/bootstrap.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 219
+          "line": 216
         },
         {
           "from": "tests/architecture/stage-04-taskbook-conformance.test.mjs",
@@ -5502,21 +5502,21 @@
           "target": "public/app/core.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 224
+          "line": 221
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/app/core.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 310
+          "line": 307
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/app/core.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 319
+          "line": 316
         },
         {
           "from": "tests/architecture/no-inline-events.test.mjs",
@@ -7342,7 +7342,7 @@
           "target": "public/app/editor-tools.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 229
+          "line": 226
         },
         {
           "from": "tests/architecture/stage-05-basic-command-boundary.test.mjs",
@@ -8139,7 +8139,7 @@
           "target": "public/app/events.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 234
+          "line": 231
         },
         {
           "from": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
@@ -8614,7 +8614,7 @@
           "target": "public/app/export.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 59
+          "line": 56
         },
         {
           "from": "tests/e2e/lib/export-characterization.mjs",
@@ -9214,7 +9214,7 @@
           "target": "public/app/scroll-sync.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 195
+          "line": 200
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -9311,7 +9311,7 @@
           "target": "public/app/web-clipper.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 239
+          "line": 236
         },
         {
           "from": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
@@ -9793,224 +9793,224 @@
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 102
+          "line": 108
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 111
+          "line": 117
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 120
+          "line": 126
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 129
+          "line": 135
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 138
+          "line": 144
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 147
+          "line": 153
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 156
+          "line": 162
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 165
+          "line": 171
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 174
+          "line": 180
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 183
+          "line": 242
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 245
+          "line": 251
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 254
+          "line": 260
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 263
+          "line": 269
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 272
+          "line": 278
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 281
+          "line": 287
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 290
+          "line": 296
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 299
+          "line": 385
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 388
+          "line": 394
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 397
+          "line": 403
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 406
+          "line": 40
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 415
+          "line": 412
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 424
+          "line": 421
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 433
+          "line": 430
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 43
+          "line": 439
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 442
+          "line": 448
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 451
+          "line": 457
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 460
+          "line": 466
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 469
+          "line": 62
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 65
+          "line": 71
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 74
+          "line": 81
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 84
+          "line": 90
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "public/compatibility/business-content.html",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 93
+          "line": 99
         },
         {
           "from": "tests/architecture/no-inline-events.test.mjs",
@@ -12875,7 +12875,7 @@
           "target": "src/runtime/e2e-bridge.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 22
+          "line": 19
         },
         {
           "from": "tests/stage-16-runtime-cleanup.test.mjs",
@@ -12937,14 +12937,14 @@
           "target": "src/runtime/link-preview.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 30
+          "line": 27
         },
         {
           "from": "tests/architecture/fixtures/architecture-baseline.json",
           "target": "src/runtime/link-preview.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 365
+          "line": 362
         },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
@@ -13181,7 +13181,7 @@
           "target": "src/runtime/performance.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 373
+          "line": 370
         },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
@@ -13953,8 +13953,8 @@
   ],
   "summary": {
     "protected": 6,
-    "absent": 97,
+    "absent": 99,
     "referenced": 0,
-    "unproven": 2
+    "unproven": 0
   }
 }

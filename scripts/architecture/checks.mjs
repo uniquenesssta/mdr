@@ -27,9 +27,15 @@ import {
 const DEFAULT_BASELINE_PATH = 'tests/architecture/fixtures/architecture-baseline.json';
 const RUNTIME_LOG_PATH = /^logs(?:\/|$)/i;
 const GENERATED_RUNTIME_PATTERNS = [
-  /^(?:dist|\.vite|logs)(?:\/|$)/,
-  /^src-tauri\/target(?:\/|$)/,
+  /(?:^|\/)(?:dist|target|\.vite|node_modules)(?:\/|$)/i,
+  /^(?:logs|artifacts|\.cargo-target|\.(?:windows-driver-host|markdown-editor-windows-driver-host))(?:\/|$)/i,
+  /^\.(?:windows-driver-host|markdown-editor-windows-driver-host)\.zip$/i,
   /\.log$/i
+];
+const REQUIRED_GENERATED_IGNORES = [
+  'node_modules/', '.vite/', 'dist/', 'target/', 'src-tauri/target/',
+  'artifacts/', '.cargo-target/', '.windows-driver-host/', '.windows-driver-host.zip',
+  '.markdown-editor-windows-driver-host/', '.markdown-editor-windows-driver-host.zip', 'runtime.log'
 ];
 const LEGACY_SUFFIX_PATTERN = /(?:^|[-_.])(old|new|v\d+|final|copy)$/i;
 const STRICT_IMPORT_ZONES = [
@@ -242,7 +248,6 @@ export async function checkGeneratedFiles({
   const expectedGenerated = [...baseline.trackedGeneratedFiles].sort();
   const issues = [];
 
-  const expected = new Set(expectedGenerated);
   const actual = new Set(actualGenerated);
   for (const path of actualGenerated) {
     if (RUNTIME_LOG_PATH.test(path)) {
@@ -250,7 +255,7 @@ export async function checkGeneratedFiles({
         'tracked-runtime-log', path,
         'Runtime logs must not be tracked by Git, including force-added or previously exempted files.'
       ));
-    } else if (!expected.has(path)) {
+    } else {
       issues.push(architectureIssue(
         'tracked-generated-file-regression',
         path,
@@ -264,7 +269,13 @@ export async function checkGeneratedFiles({
         'runtime-log-baseline-exemption', path,
         'Runtime logs cannot be exempted by the generated-file baseline; remove this active exemption.'
       ));
-    } else if (!actual.has(path)) {
+    } else {
+      issues.push(architectureIssue(
+        'generated-file-baseline-exemption', path,
+        'Generated output cannot be exempted by the active architecture baseline.'
+      ));
+    }
+    if (!actual.has(path)) {
       issues.push(architectureIssue(
         'generated-file-baseline-stale',
         path,
@@ -275,20 +286,27 @@ export async function checkGeneratedFiles({
 
   // Ask Git to evaluate the directory itself, including negation semantics.
   // Local/global excludes are not a portable repository policy.
+  const ignorePaths = ['logs/', ...REQUIRED_GENERATED_IGNORES];
   const ignored = spawnSync('git', ['check-ignore', '--no-index', '--verbose', '--non-matching', '--stdin', '-z'], {
-    cwd: root, input: 'logs/\0', encoding: 'utf8'
+    cwd: root, input: ignorePaths.join('\0') + '\0', encoding: 'utf8'
   });
-  const [ignoreSource, , ignorePattern, ignoredPath] = (ignored.stdout || '').split('\0');
   if (ignored.error || ![0, 1].includes(ignored.status)) {
     issues.push(architectureIssue(
       'runtime-logs-ignore-check-failed', '.gitignore',
       'Unable to evaluate the shared logs/ ignore rule with git check-ignore.'
     ));
-  } else if (ignoreSource !== '.gitignore' || !ignorePattern || ignorePattern.startsWith('!') || ignoredPath !== 'logs/') {
-    issues.push(architectureIssue(
-      'runtime-logs-ignore-missing', '.gitignore',
-      'The repository .gitignore must ignore the entire logs/ directory, for example with /logs/.'
-    ));
+  } else {
+    const records = (ignored.stdout || '').split('\0');
+    for (let index = 0; index < ignorePaths.length; index++) {
+      const [ignoreSource, , ignorePattern, ignoredPath] = records.slice(index * 4, index * 4 + 4);
+      const output = ignorePaths[index];
+      if (ignoreSource === '.gitignore' && ignorePattern && !ignorePattern.startsWith('!') && ignoredPath === output) continue;
+      issues.push(architectureIssue(
+        output === 'logs/' ? 'runtime-logs-ignore-missing' : 'generated-output-ignore-missing', '.gitignore',
+        `The repository .gitignore must ignore ${output}, including the whole directory for directory outputs.`,
+        { detail: { output } }
+      ));
+    }
   }
 
   for (const path of files.filter(shouldScanLegacySuffix)) {

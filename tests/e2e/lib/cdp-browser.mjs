@@ -99,6 +99,10 @@ const FETCH_BLOCKED_PORTS = new Set([
   6679, 6697, 10080
 ]);
 
+export function isFetchCompatiblePort(port) {
+  return Number.isInteger(port) && port > 0 && port <= 65535 && !FETCH_BLOCKED_PORTS.has(port);
+}
+
 export async function getFreePort({ createServerImpl = createServer } = {}) {
   // Exclude blocked ports before launching a browser; ordinary ephemeral ports
   // below 10080 remain usable on hosts with a customized dynamic port range.
@@ -111,7 +115,7 @@ export async function getFreePort({ createServerImpl = createServer } = {}) {
     const address = server.address();
     const port = typeof address === 'object' && address ? address.port : 0;
     await new Promise((resolvePromise, reject) => server.close(error => error ? reject(error) : resolvePromise()));
-    if (Number.isInteger(port) && port > 0 && port <= 65535 && !FETCH_BLOCKED_PORTS.has(port)) return port;
+    if (isFetchCompatiblePort(port)) return port;
   }
   throw new Error('No Fetch-compatible ephemeral CDP port was allocated after 32 attempts.');
 }
@@ -263,7 +267,8 @@ export class CdpPage {
   }
 
   async navigate(url) {
-    await this.connection.send('Page.navigate', { url });
+    const result = await this.connection.send('Page.navigate', { url });
+    if (result.errorText) throw new Error('Page navigation failed: ' + result.errorText + '; url=' + url);
     await this.waitFor(() => document.readyState === 'complete', { timeoutMs: 15000, description: 'document ready' });
   }
 

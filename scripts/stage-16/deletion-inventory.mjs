@@ -12,6 +12,7 @@ const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const git = (root, args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
 const listed = root => git(root, ['ls-files', '-z']).split('\0').filter(Boolean).sort();
 const fixedPaths = [
+  '.vite/deps/_metadata.json', '.vite/deps/package.json',
   'public/i18n.js', 'public/app/core.js', 'public/app/bootstrap.js', 'public/app/preview.js', 'public/app/export.js',
   'public/app/editor-tools.js', 'public/app/web-clipper.js', 'public/app/events.js', 'public/app/scroll-sync.js',
   'public/compatibility/business-content.html', 'src/ui/compatibility/business-content-port.js',

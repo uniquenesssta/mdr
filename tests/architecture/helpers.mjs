@@ -4,6 +4,12 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { writeArchitectureBaseline } from '../../scripts/architecture/checks.mjs';
 
+export const GENERATED_OUTPUT_IGNORE_RULES = [
+  'node_modules/', '.vite/', 'dist/', 'target/', '/logs/', '/artifacts/', '/.cargo-target/',
+  '/.windows-driver-host/', '/.windows-driver-host.zip', '/.markdown-editor-windows-driver-host/',
+  '/.markdown-editor-windows-driver-host.zip', '*.log'
+];
+
 export async function createArchitectureFixture(files, moduleRecords) {
   const root = await mkdtemp(join(tmpdir(), 'mdr-architecture-'));
   const fields = ['path', 'layer', 'responsibility', 'stateOwner', 'lifecycle', 'surface', 'migration', 'frozen', 'notes'];
@@ -11,7 +17,7 @@ export async function createArchitectureFixture(files, moduleRecords) {
     field === 'frozen' ? false : ''
   )));
   const allFiles = {
-    '.gitignore': '/logs/\n',
+    '.gitignore': GENERATED_OUTPUT_IGNORE_RULES.join('\n') + '\n',
     'tests/architecture/fixtures/production-modules.json': `${JSON.stringify({ schemaVersion: 1, fields, modules }, null, 2)}\n`,
     'README.md': '# Fixture\n\n## Change Log\n',
     ...files

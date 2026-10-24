@@ -3,7 +3,12 @@ node_modules/
 .windows-driver-host/
 .windows-driver-host.zip
 dist/
+target/
 src-tauri/target/
+/artifacts/
+/.cargo-target/
+/.markdown-editor-windows-driver-host/
+/.markdown-editor-windows-driver-host.zip
 .DS_Store
 *.log
 /logs/

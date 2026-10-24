@@ -10,10 +10,7 @@
   "legacyClassicScripts": [],
   "inlineEvents": [],
   "businessGlobalWrites": [],
-  "trackedGeneratedFiles": [
-    ".vite/deps/_metadata.json",
-    ".vite/deps/package.json"
-  ],
+  "trackedGeneratedFiles": [],
   "auditCorrections": {
     "atomic": "R12-18",
     "reason": "Equality capability reads were incorrectly classified as global assignments. No real assignment exemption was added.",
@@ -476,6 +473,25 @@
         }
       ],
       "reason": "All ten menu actions already use explicit MenuView/Controller command dispatch; HTML no longer carries executable fallback handlers. Index remains the minimal entry; compatibility mount retirement remains R16-08."
+    },
+    "r16GeneratedRetirement": {
+      "atomic": "R16-09",
+      "sourceCommit": "a2fc2669a1dffbcdf4b89a571d276ba5b182667f",
+      "removedTrackedGeneratedFiles": [
+        {
+          "path": ".vite/deps/_metadata.json",
+          "bytes": 146,
+          "blobSha": "2d644a17f46b25f89f68c919bed6d185385d24f1",
+          "sha256": "9a33a5595ba54d57c56aa1206872e4d3cc840bb3f2282d9231b952abe60bcb64"
+        },
+        {
+          "path": ".vite/deps/package.json",
+          "bytes": 23,
+          "blobSha": "3dbc1ca591c0557e35b6004aeba250e6a70b56e3",
+          "sha256": "3ca9d4afd21425087cf31893b8f9f63c81b0b8408db5e343ca76e5f8aa26ab9a"
+        }
+      ],
+      "reason": "Retired stale root Vite metadata. Current Vite cacheDir is ../node_modules/.vite/markdown-editor; no production input imports these paths. Exact generated-output exemptions are now forbidden; user logs, documents, fixed fixtures and managed Tauri schemas remain intact."
     }
   }
 }

@@ -4,14 +4,15 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { checkGeneratedFiles, writeArchitectureBaseline } from '../scripts/architecture/checks.mjs';
-import { createArchitectureFixture, moduleRecord } from './architecture/helpers.mjs';
+import { createArchitectureFixture, moduleRecord, GENERATED_OUTPUT_IGNORE_RULES } from './architecture/helpers.mjs';
 
 const baselinePath = 'tests/architecture/fixtures/architecture-baseline.json';
 const cliPath = resolve(import.meta.dirname, '../scripts/verify-generated-files.mjs');
 const rootOfRepository = resolve(import.meta.dirname, '..');
 const git = (root, args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' });
 const fixture = (ignore = '/logs/\n', extra = {}) => createArchitectureFixture({
-  '.gitignore': ignore, 'src/main.js': 'export const ready = true;\n', ...extra
+  '.gitignore': GENERATED_OUTPUT_IGNORE_RULES.filter(rule => rule !== '/logs/').join('\n') + '\n' + ignore,
+  'src/main.js': 'export const ready = true;\n', ...extra
 }, [moduleRecord('src/main.js', { surface: 'esm-entrypoint' })]);
 async function track(root, path) {
   await mkdir(dirname(join(root, path)), { recursive: true });
@@ -79,9 +80,10 @@ test('R15-13 legitimate journal JSONL fixtures outside the log directory remain 
   assert.deepEqual(await checkGeneratedFiles({ root }), []);
 });
 
-test('R15-13 existing non-log generated exceptions retain exact matching behavior', async () => {
+test('R15-13 non-log generated outputs also become non-exemptible after R16-09 retirement', async () => {
   const root = await fixture('/logs/\n', { '.vite/deps/package.json': '{"type":"module"}' });
-  assert.deepEqual(await checkGeneratedFiles({ root }), []);
+  await track(root, '.vite/deps/package.json'); await writeArchitectureBaseline({ root });
+  assert.ok((await checkGeneratedFiles({ root })).some(issue => issue.rule === 'generated-file-baseline-exemption' && issue.path === '.vite/deps/package.json'));
   await track(root, 'dist/unexpected.js');
   assert.ok((await checkGeneratedFiles({ root })).some(issue => issue.rule === 'tracked-generated-file-regression' && issue.path === 'dist/unexpected.js'));
 });
