@@ -34,3 +34,11 @@ tests/support/application-surface-source.mjs原来把五个已退役classic路�
 ## 恢复
 
 可从24bd196逐文件恢复本次测试和治理记录；旧读取适配器的精确Git blob保存在审计账本。没有文档或持久化数据迁移，也不清理用户原文、日志或本机生成目录。
+
+## 正式验收（2026-10-25）
+
+实现72fd215ee67e41bcbd2d7ed10d99a52b59a5a6c0的[CI40125945813](https://github.com/uniquenesssta/mdr/actions/runs/40125945813)七组Windows及全部步骤通过；同提交accepted=true、264风险指纹一致，实际Node日志累计2794/2794（370文件、16目录）。10专项4、Rust301、浏览器11＋75与真实WebView安全/导入、大文档4路及原生导出读回均通过，10正式收尾。初始失败和修复记录保留。
+
+closeout归档12573702054（11830字节）SHA256=2bf22f747f6d03f67b329867cc3d9aad092b9ff937661869268a2cd6db331a5f；WebView归档12573297086（1393065字节）SHA256=e04657426a1a98f7d76538e634a84373afe6d6039ba15b4e976252fad7dec095，均已下载核对。
+
+用户授权11命名检查，沿用codex/r16-stage；搜索迁移后缀、日期副本和重复模块，合法历史/领域命名须有可核对说明，12未开始。用户AGENTS.md既有修改保持，推送后停止CI轮询。
