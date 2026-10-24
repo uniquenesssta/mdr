@@ -30,7 +30,7 @@ $archivePath = Join-Path $repositoryParent '.markdown-editor-windows-driver-host
 $cargoTargetPath = Join-Path $repositoryParent '.cargo-target\markdown-editor-windows-driver-host'
 
 if (Test-Path $hostRootPath) {
-  Remove-Item $hostRootPath -Recurse -Force
+  throw "Windows driver host already exists: $hostRootPath. Choose a fresh HostRoot or remove it manually."
 }
 if (Test-Path $archivePath) {
   Remove-Item $archivePath -Force
@@ -70,6 +70,35 @@ version = "1"
     -Needle '    let result = tauri::Builder::default()' `
     -Replacement "    let result = tauri::Builder::default()`n        .plugin(tauri_plugin_wdio_webdriver::init())" `
     -Description 'Tauri builder'
+  # WebView2 150+ ignores environment browser flags in elevated CI processes.
+  # Configure only the archived host through the WebView2 API before its windows exist.
+  # The default arguments below match the production-locked wry 0.55.1 (autoplay=true,
+  # no proxy); reject a different baseline instead of silently changing its behavior.
+  $inspectorContext = @'
+    let mut context = tauri::generate_context!();
+    if let Ok(value) = std::env::var("MDR_TEST_DEBUGGING_PORT") {
+        let port = value.parse::<u16>().expect("Invalid isolated inspector port");
+        assert!(port > 0, "Invalid isolated inspector port");
+        for window in &mut context.config_mut().app.windows {
+            assert!(window.proxy_url.is_none(), "Review isolated inspector proxy arguments");
+            let arguments = window.additional_browser_args.take().unwrap_or_else(|| {
+                "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required".to_string()
+            });
+            window.additional_browser_args = Some(format!("{arguments} --remote-debugging-port={port}"));
+        }
+    }
+    let result = tauri::Builder::default()
+'@
+  $productionLockForInspector = Get-Content (Join-Path $repositoryRoot 'src-tauri\Cargo.lock') -Raw
+  if ($productionLockForInspector -notmatch '(?ms)\[\[package\]\]\r?\nname = "wry"\r?\nversion = "0\.55\.1"\r?\n') {
+    throw 'Review isolated inspector default arguments for the new production wry version.'
+  }
+  $entry = Assert-SingleReplacement -Content $entry `
+    -Needle '    let result = tauri::Builder::default()' `
+    -Replacement $inspectorContext -Description 'isolated inspector context'
+  $entry = Assert-SingleReplacement -Content $entry `
+    -Needle '.run(tauri::generate_context!());' `
+    -Replacement '.run(context);' -Description 'isolated inspector context use'
   Set-Content -Path $entryPath -Value $entry -Encoding utf8
 
   # Only this archived test host resolves one reserved fixture hostname to its owned server.

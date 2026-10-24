@@ -57,8 +57,7 @@ async function startApplication({ binaryPath, repositoryRoot, artifactDirectory,
     env: {
       ...process.env,
       TAURI_WEBDRIVER_PORT: String(port),
-      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: [process.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS || '',
-        `--remote-debugging-port=${debuggingPort}`].filter(Boolean).join(' ')
+      MDR_TEST_DEBUGGING_PORT: String(debuggingPort)
     },
     stdio: ['ignore', 'pipe', 'pipe'],
     windowsHide: false
@@ -180,6 +179,7 @@ async function connectInspector({ debuggingPort, process, logPath, timeout = 200
     assertApplicationRunning(process, logPath, 'integration inspector attachment');
     try {
       const response = await fetch(`http://127.0.0.1:${debuggingPort}/json/list`, { signal: AbortSignal.timeout(1000) });
+      if (!response.ok) throw new Error('Inspector discovery returned HTTP ' + response.status);
       const targets = await response.json();
       const pages = targets.filter(target => target.type === 'page' && target.webSocketDebuggerUrl && !target.url.startsWith('devtools:'));
       if (pages.length === 1) return await new CdpConnection(pages[0].webSocketDebuggerUrl).open();
@@ -187,7 +187,9 @@ async function connectInspector({ debuggingPort, process, logPath, timeout = 200
     } catch (error) { lastError = error; }
     await pause(150);
   }
-  throw new Error('Embedded integration inspector did not attach: ' + String(lastError?.message || lastError));
+  throw new Error('Embedded integration inspector did not attach on port ' + debuggingPort + ': '
+    + String(lastError?.message || lastError) + '; cause=' + String(lastError?.cause?.code || lastError?.cause?.message || 'unavailable')
+    + '. See ' + logPath, { cause: lastError });
 }
 
 async function waitForWindowHandle({ driver, process, logPath, timeout = 20_000 }) {
@@ -303,6 +305,7 @@ export async function withEmbeddedSession(options, run) {
       try {nativeWindow=getWindowSnapshot();}catch(error){nativeWindowError=error.message;}
       await writeFile(resolve(options.artifactDirectory,`${options.label}-startup-${attempt}.json`),JSON.stringify({
         attempt,stage,recover,port:options.port,pid:application?.child.pid??null,
+        debuggingPort:application?.debuggingPort??null,
         exitCode:application?.child.exitCode??null,signalCode:application?.child.signalCode??null,
         applicationLog:application?.logPath??null,error:String(error.stack||error),nativeWindow,nativeWindowError
       },null,2));

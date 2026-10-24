@@ -1,5 +1,5 @@
 name: Windows Rewrite Revalidation
-run-name: R16-07 feature-owned browser lifetimes and cumulative regression · ${{ github.sha }}
+run-name: R16-08 compatibility retirement and Windows inspector regression · ${{ github.sha }}
 
 on:
   push:

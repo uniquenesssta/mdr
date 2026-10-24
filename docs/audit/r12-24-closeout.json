@@ -139,7 +139,7 @@
   "reviewedSources": [
     {
       "path": ".github/workflows/r12-14.yml",
-      "blobSha": "00dddbe0e6c54a4fe968df41a9d2fa70918d6dda"
+      "blobSha": "b70dc152bafeb6f5b4d813214c9df9937a3b312a"
     },
     {
       "path": ".gitignore",
@@ -147,7 +147,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "446793773cef02836bedaf9278b9759c630239ea"
+      "blobSha": "9341e7c64ecf54ecc793172a67720caeb1bc5085"
     },
     {
       "path": "scripts/architecture/checks.mjs",
@@ -171,7 +171,7 @@
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
-      "blobSha": "2db4ff5f14cd5c4e46c78618d0d146b12e10da8e"
+      "blobSha": "5699c039889b367f514b2dae385be96dd8757ae5"
     },
     {
       "path": "scripts/stage-16/deletion-inventory.mjs",
@@ -1821,7 +1821,7 @@
       "nativeProductionChanged": false,
       "dependenciesChanged": false,
       "exactCommitWindowsPending": true,
-      "localRecursiveNodePassed": 2764,
+      "localRecursiveNodePassed": 2765,
       "localRepositoryFiles": 367,
       "localRepositoryDirectories": 16,
       "localArchitecturePassed": 374,
@@ -1837,7 +1837,35 @@
         "outputs": 136,
         "outputsIdenticalToTestedBuild": true
       },
-      "testTransport": "DevTools-held actual owners; default product E2E remains disabled"
+      "testTransport": "DevTools-held actual owners; default product E2E remains disabled",
+      "failedWindowsValidation": {
+        "commit": "4386b57c000b344f19de87dfd2c7ab2543c8e08b",
+        "runId": 40111244305,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/40111244305",
+        "rootFailure": "Native WebView inspector endpoint never opened: environment browser arguments ignored by elevated WebView2. Frontend, repository Node, Rust, native linkage and dependency jobs passed; final admission rejected the failed WebView job.",
+        "repair": "Archived host supplies the bounded runtime debugging port through context window additional_browser_args before creating WebView2; production source/config unchanged; no timeout, assertion or admission gate weakened.",
+        "status": "repaired-pending-exact-commit-windows-validation",
+        "localRepairVerification": {
+          "nativeHostBuildPassed": true,
+          "rustToolchain": "1.88.0",
+          "webViewMajor": 155,
+          "securitySurfacesPassed": 5,
+          "nativeImportScenariosPassed": 8,
+          "largeDocumentRoutesPassed": 4,
+          "largeDocumentCharacters": 5216751,
+          "largeDocumentSha256": "8ecfe5ecdcc43baab38401fe6424e9d3d7502f46841502cf301d42052b717f1c",
+          "imageDataVectorsPassed": 4,
+          "fileWriterFormatsPassed": 4,
+          "actualImageExportPassed": true,
+          "windowsTransportContractsPassed": 14,
+          "productionE2EEnabled": false,
+          "localFixtureCleanup": "retained in temporary directory; no recursive deletion",
+          "acceptance": "local uncommitted repair verification only; new exact-commit Windows CI still required",
+          "recursiveNodePassed": 2765,
+          "fourArchitectureGatesPassed": true,
+          "nativeVerificationSha256": "314d649492559c2eb3c895e021d9df316887bf4b95a1699ed81fb64923d585fa"
+        }
+      }
     },
     "priorStageAcceptance": {
       "stage": "R16.6",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "3f22fd6b79e17d481d69ae2822c49268e1e0e993",
+  "baselineCommit": "4386b57c000b344f19de87dfd2c7ab2543c8e08b",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "8e43b4ff4dbb55433ef6489f1f7c9037c40b53b357f0cafea9fa423b1e175bb0"
+      "sha256": "fe70a4e30ef92a4a61d2be499f1f3f2381d959e2e521039ea65fd12ba6b78d13"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -363,7 +363,7 @@
     },
     {
       "path": "scripts/stage-03/windows/prepare-embedded-driver-host.ps1",
-      "sha256": "edffcf6a5618cd57bfc4c88b84bf2f5ec9953b9ada6c25350573ddc69b232d6c"
+      "sha256": "14dca13398f6a6545a2aa89edf2eab0bf6f8f2e9d3c5440310482a64ac556140"
     },
     {
       "path": "scripts/stage-04/locale-key-audit.mjs",
@@ -3175,7 +3175,7 @@
     },
     {
       "path": "tests/e2e/windows/embedded-webdriver-session.mjs",
-      "sha256": "3473f93abd6a441a4b7e16c04127ebe22c0b68d7c527f06305b2c3460678c664"
+      "sha256": "e1106eec846776e3c329731f1434a896d8d023d472b1b9d4f55cd850406e7e2f"
     },
     {
       "path": "tests/e2e/windows/file-writer-chain.mjs",
@@ -4423,14 +4423,14 @@
     },
     {
       "path": "tests/windows-window-automation.test.mjs",
-      "sha256": "8e56da10a9bbeea2ace4335d72ef47fe1ad8e4a2fdbed5795e0e7fd1cc0fe83d"
+      "sha256": "854e3dc2d6644b9d2c68cae061c3e160887d71d4aef3570441a90d370b47fda3"
     },
     {
       "path": "vite.config.js",
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "b0804192bd13261f7b742ec5d782a27c5d62c88a9fbed252615002d7e6bd11e3",
+  "inputSha256": "d35f8416f8cfe73a701def13e7a43bcf4590626157252758b06e6a668bbb23cb",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",

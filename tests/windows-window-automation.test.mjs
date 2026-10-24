@@ -73,6 +73,8 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(hostBuilder, /Properties\.Remove\('beforeDevCommand'\)/);
   assert.match(hostBuilder, /frontendSource = 'embedded-dist'/);
   assert.match(hostBuilder, /productionConfigUnchanged = \$true/);
+  assert.doesNotMatch(hostBuilder, /Remove-Item[^\n]*-Recurse/);
+  assert.match(hostBuilder, /Windows driver host already exists/);
 
   for (const contract of [
     'native-window-state-subscriptions-and-drag',
@@ -106,6 +108,8 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.doesNotMatch(runner, /rect\.right - 180|dragFromViewportPoint|Builder, By, Capabilities|tauri-driver|MSEDGEDRIVER_PATH/);
 
   assert.match(sessionOwner, /TAURI_WEBDRIVER_PORT/);
+  assert.match(sessionOwner, /MDR_TEST_DEBUGGING_PORT: String\(debuggingPort\)/);
+  assert.doesNotMatch(sessionOwner, /WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS/);
   assert.match(sessionOwner, /\/status/);
   assert.match(sessionOwner, /setBrowserName\('tauri'\)/);
   assert.match(sessionOwner, /Builder, By, Capabilities/);
@@ -168,4 +172,29 @@ test('Windows native window workflow is pinned, isolated and evidence-producing'
   assert.match(tauriConfig, /"devUrl": "http:\/\/127\.0\.0\.1:16663"/);
   assert.match(tauriConfig, /"beforeDevCommand": "npm run dev"/);
   assert.doesNotMatch(runner, /browser\.tauri|@wdio\/tauri-plugin/);
+});
+
+test('isolated Windows inspector forwards the runtime port through the WebView2 API before window creation', async () => {
+  const [builder, entry, config, lock] = await Promise.all([
+    readFile('scripts/stage-03/windows/prepare-embedded-driver-host.ps1', 'utf8'),
+    readFile('src-tauri/src/main.rs', 'utf8'),
+    readFile('src-tauri/tauri.conf.json', 'utf8'),
+    readFile('src-tauri/Cargo.lock', 'utf8')
+  ]);
+  const context = builder.match(/\$inspectorContext = @'\r?\n([\s\S]*?)\r?\n'@/)?.[1];
+  assert.ok(context, 'Archived host must construct its inspector context.');
+  assert.match(context, /std::env::var\("MDR_TEST_DEBUGGING_PORT"\)/);
+  assert.match(context, /parse::<u16>\(\)/);
+  assert.match(context, /assert!\(port > 0/);
+  assert.match(context, /context\.config_mut\(\)\.app\.windows/);
+  assert.match(context, /window\.additional_browser_args\.take\(\)/);
+  assert.match(context, /window\.proxy_url\.is_none\(\)/);
+  assert.match(context, /--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required/);
+  assert.match(context, /window\.additional_browser_args = Some\(format!\("\{arguments\} --remote-debugging-port=\{port\}"\)\)/);
+  assert.ok(context.indexOf('config_mut()') < context.indexOf('tauri::Builder::default()'));
+  assert.match(builder, /-Replacement \$inspectorContext -Description 'isolated inspector context'/);
+  assert.match(builder, /-Replacement '\.run\(context\);' -Description 'isolated inspector context use'/);
+  assert.match(builder, /Review isolated inspector default arguments for the new production wry version/);
+  assert.match(lock, /name = "wry"\r?\nversion = "0\.55\.1"/);
+  assert.doesNotMatch(entry + config, /MDR_TEST_DEBUGGING_PORT|remote-debugging-port|additionalBrowserArgs/);
 });
