@@ -1,9 +1,9 @@
 name: Windows Rewrite Revalidation
-run-name: R16-13 browser and Tauri single-implementation execution and cumulative regression · ${{ github.sha }}
+run-name: R17-01 workspace and diff audit and cumulative regression · ${{ github.sha }}
 
 on:
   push:
-    branches: [agent/r14-stage, agent/r15-stage, codex/r16-stage]
+    branches: [agent/r14-stage, agent/r15-stage, codex/r16-stage, codex/r17-stage]
     paths:
       - 'src/**'
       - 'index.html'
@@ -36,7 +36,9 @@ on:
       - 'docs/R13-01-DETAILS.md'
       - 'docs/R15-*-DETAILS.md'
       - 'docs/R16-*-DETAILS.md'
+      - 'docs/R17-*-DETAILS.md'
       - 'docs/audit/r16-*.json'
+      - 'docs/audit/r17-*.json'
       - 'docs/R14-01-DETAILS.md'
       - 'docs/R14-02-DETAILS.md'
       - 'docs/R14-03-DETAILS.md'
@@ -47,6 +49,7 @@ on:
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/15-*'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/16-*'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/17-*'
+      - 'docs/markdown-main-full-rewrite-taskbook-18-docs/18-*'
       - 'docs/audit/r12-23-dependency-advisories.json'
       - 'docs/markdown-main-full-rewrite-taskbook-18-docs/01-*'
       - 'src-tauri/src/external_link.rs'

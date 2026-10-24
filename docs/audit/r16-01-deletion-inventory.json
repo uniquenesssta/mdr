@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "24fefecba18f3539741ad3f9a3444fb78b27f2cb",
+  "baselineCommit": "cd6420d99136e434e0f2de03c309fa12118de9ea",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "54e62009633a527fd40ebeed05dcfe481cb074950ebe664b4b9591841090f85c"
+      "sha256": "fe1cd27c784afca312fe865ecaeeef6e6bb5be8236d06f0d27d9504b28e254e3"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -271,7 +271,7 @@
     },
     {
       "path": "scripts/ci/verify-r12-closeout.mjs",
-      "sha256": "2ca9fbebcad4bd9ee7ffa37a55d647756316c712ab1b6b4b208735e34fde1fdd"
+      "sha256": "6e27f482283f14ce4d3141617aa950026299f55d2369af84d3cab11b90a4eb18"
     },
     {
       "path": "scripts/ci/verify-r13-import-chain.mjs",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "tests/historical-workflow-routing.test.mjs",
-      "sha256": "ff0add840b5d5503f0f8da19b65c19ad0d362e8d2d498f9df1b12d9544ec9296"
+      "sha256": "2a4e14835a6346e2eb6b613b87919818c1778b6d42e2ce7615132b16e8d8ec5b"
     },
     {
       "path": "tests/hybrid-component-contract.test.mjs",
@@ -3515,7 +3515,7 @@
     },
     {
       "path": "tests/stage-12-closeout.test.mjs",
-      "sha256": "6d0961400db9d01b483f265dfa84ca577db8b41f2e6fce8d13530442bf209d25"
+      "sha256": "be187c732da9593c76fdc58dd7e7a787948387e88b3094073f1fc500c51c93e1"
     },
     {
       "path": "tests/stage-12-command-registry.test.mjs",
@@ -4466,7 +4466,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "605d5b8e710f9a26b48059cd1c75c671b6637bc87a474fa32a8a5ef765d42d79",
+  "inputSha256": "e00ef5cb444d726873f048b4c4430cd6e25f9644ac55869d4881698a69db7b60",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -9262,7 +9262,7 @@
           "target": "src-tauri/src/external_link.rs",
           "surface": "build",
           "kind": "path-literal",
-          "line": 52
+          "line": 55
         },
         {
           "from": "src-tauri/tests/fixtures/stage_12_security/manifest.json",
@@ -9296,7 +9296,7 @@
           "target": "src-tauri/src/local_file.rs",
           "surface": "build",
           "kind": "path-literal",
-          "line": 62
+          "line": 65
         },
         {
           "from": "src-tauri/tests/fixtures/stage_12_security/manifest.json",

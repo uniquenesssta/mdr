@@ -163,3 +163,18 @@ test('R16-13 cumulative acceptance rejects emulated native IPC and mismatched fr
     assert.throws(() => assessCloseout(input));
   }
 });
+
+
+test('R17-01 changing phases preserves the accepted R16 dual-execution hard gate', () => {
+  for (const location of ['current', 'history']) {
+    const input = fixture(); const review = input.policy.currentSourceReview;
+    review.stage = 'R17.1'; review.currentStageAcceptance = { stage: 'R16.13', accepted: true };
+    if (location === 'history') {
+      review.currentStageAcceptance = { stage: 'R17.1', accepted: true };
+      review.stageAcceptanceHistory.push({ stage: 'R16.13', accepted: true });
+    }
+    assert.doesNotThrow(() => assessCloseout(input));
+    delete input.singleImplementation.native;
+    assert.throws(() => assessCloseout(input), /Missing tauri single-implementation evidence/);
+  }
+});

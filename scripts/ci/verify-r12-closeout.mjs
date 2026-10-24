@@ -13,6 +13,11 @@ const repository = fileURLToPath(new URL('../../', import.meta.url));
 const requiredJobs = ['frontend', 'rust', 'native-boundary', 'repository-tests', 'dependency-advisories', 'webview-baseline'];
 const surfaces = ['preview-markdown', 'preview-full-html', 'preview-block-html', 'hybrid-html-widget', 'preview-virtual-block'];
 const closedIds = ['A01', 'A02', 'A03', 'A06', 'A07', 'A08', 'A09', 'A10'];
+const requiresSingleImplementation = policy => {
+  const review = policy.currentSourceReview;
+  return review?.stage === 'R16.13' || [review?.currentStageAcceptance, ...(review?.stageAcceptanceHistory || [])]
+    .some(record => record?.stage === 'R16.13' && record.accepted === true);
+};
 
 export function assessNativeBoundary({ compileLog, signatureLog }) {
   // rustc is silent on success. Reading compile.log still requires the artifact to exist.
@@ -77,7 +82,7 @@ export function assessCloseout(input) {
   assert.doesNotMatch(rustLog, /test result: FAILED/);
   const rustPassed = rustResults.reduce((sum, result) => sum + Number(result[1]), 0);
   assert.ok(rustPassed > 0);
-  const singleImplementation = policy.currentSourceReview?.stage === 'R16.13'
+  const singleImplementation = requiresSingleImplementation(policy)
     ? assessSingleImplementationEvidence({ ...input.singleImplementation, commit, paths: input.retiredInputs }) : null;
   return { ...(singleImplementation ? { singleImplementation } : {}), rustPassed, nodeTestFiles: inventory.length, nodeDirectories: suites.length, closedCurrentScope: closedIds, deferredNotFixed: ['A04', 'A05'] };
 }
@@ -124,7 +129,7 @@ async function runCloseout() {
     const rawAssessment = assessDependencyAudit({ audit: await json(join(dependencyRoot, 'cargo-audit.json')), metadata: await json(join(dependencyRoot, 'windows-metadata.json')), lockText, policy: dependencyPolicy });
     assert.deepEqual(rawAssessment, dependency.assessment, 'Dependency raw reports contradict the summary.');
     const nodeRoot = artifact('repository-tests-windows');
-    const singleImplementation = policy.currentSourceReview?.stage === 'R16.13' ? {
+    const singleImplementation = requiresSingleImplementation(policy) ? {
       browser: await json(join(frontend, 'browser-artifacts/r16-13-browser.json')),
       native: await json(join(webviewRoot, 'r16-13-native.json')) } : undefined;
     evidence.results = assessCloseout({

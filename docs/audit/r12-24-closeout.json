@@ -139,7 +139,7 @@
   "reviewedSources": [
     {
       "path": ".github/workflows/r12-14.yml",
-      "blobSha": "bcf120621743207bd35b17b66ee035beef459c87"
+      "blobSha": "387a8fba7ede9e0aa6449f2531e6382723f39e6e"
     },
     {
       "path": ".gitignore",
@@ -147,7 +147,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "d99a48a6460e1c708259b5c095373daaad69d255"
+      "blobSha": "08ec9d6a1dd87cce85a7c0aa7db57fe81cd69835"
     },
     {
       "path": "scripts/architecture/checks.mjs",
@@ -995,7 +995,7 @@
     },
     {
       "path": "tests/historical-workflow-routing.test.mjs",
-      "blobSha": "d9ce35d907116f40b745ad3e6d09d71b6d3aaab9"
+      "blobSha": "9f4d5a6bea1da4237954137d4bc94b8dbde5f2a9"
     },
     {
       "path": "tests/stage-01-handoff.test.mjs",
@@ -1203,7 +1203,7 @@
     },
     {
       "path": "docs/audit/r16-11-module-naming.json",
-      "blobSha": "6413ba71e8fcfb53e4c5b00eca6249cf1193b7a8"
+      "blobSha": "8ed3fcd2372e6567dc88732571d083f512e42d33"
     },
     {
       "path": "scripts/architecture/dependency-graph.mjs",
@@ -1239,11 +1239,11 @@
     },
     {
       "path": "scripts/ci/verify-r12-closeout.mjs",
-      "blobSha": "4ef7b02bb8f6f3131b894a62e776652d6f1d1007"
+      "blobSha": "4b72fd3ecbc3101cc680cbf6303dc0cefd1d4065"
     },
     {
       "path": "tests/stage-12-closeout.test.mjs",
-      "blobSha": "ac261bfde7f2750c5a46b63226d67cc3d36e80c3"
+      "blobSha": "7db99273070d5f3a8589cc16aaccc3ac4e3af20c"
     }
   ],
   "priorFailures": {
@@ -1459,14 +1459,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R16.13",
+    "stage": "R17.1",
     "date": "2026-10-25",
-    "reviewedCommit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
-    "record": "docs/R16-13-DETAILS.md",
-    "status": "accepted",
+    "reviewedCommit": "cd6420d99136e434e0f2de03c309fa12118de9ea",
+    "record": "docs/R17-01-DETAILS.md",
+    "status": "implemented-pending-exact-commit-windows-validation",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
-    "scope": "Only R16.13 browser and Tauri default-entry execution without retired application files; overall R16 awaits exact-commit acceptance.",
+    "scope": "Only R17.1 workspace/diff/README audit and necessary preservation of inherited CI on the new phase branch; R17.2 not started.",
     "acceptedPriorStage": {
       "stage": "R15.9",
       "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
@@ -1801,11 +1801,11 @@
         "record": "docs/R16-10-DETAILS.md"
       }
     ],
-    "conclusion": "R16.13 and the cleanup scope of phase R16 accepted at eade767 / CI40137615204: all seven jobs/steps pass, exact-commit dual execution and 277 risk fingerprints verified. R17.1 authorized; installer/upgrade/association/desktop/recovery/performance acceptance remains in R17.",
-    "priorImplementationWindowsRun": 40134714024,
+    "conclusion": "R17.1 local affected contracts 58/58 and all four gates pass. Workspace/diff audit records 1370 tracked paths and preserves the only existing user edit (AGENTS.md); no product/model/native/dependency changes. Accepted R16 double-platform evidence remains mandatory across phase changes. Exact implementation Windows acceptance pending; R17.2 not started.",
+    "priorImplementationWindowsRun": 40137615204,
     "priorImplementationWindowsJobs": 7,
-    "implementationWindowsRun": 40137615204,
-    "implementationWindowsJobs": 7,
+    "implementationWindowsRun": null,
+    "implementationWindowsJobs": [],
     "currentStageAcceptance": {
       "stage": "R16.13",
       "date": "2026-10-25",
@@ -1855,6 +1855,87 @@
       ]
     },
     "currentStageImplementation": {
+      "stage": "R17.1",
+      "baselineCommit": "cd6420d99136e434e0f2de03c309fa12118de9ea",
+      "branch": "codex/r17-stage",
+      "record": "docs/R17-01-DETAILS.md",
+      "audit": "docs/audit/r17-01-workspace-audit.json",
+      "status": "implemented-pending-exact-commit-windows-validation",
+      "newCumulativeRegressionContracts": 1,
+      "existingWorkflowRoutingExtended": true,
+      "productionChanged": false,
+      "modelKernelChanged": false,
+      "nativeProductionChanged": false,
+      "dependenciesChanged": false,
+      "exactCommitWindowsPending": true,
+      "userChangePreserved": "AGENTS.md; existing trailing newline difference; not staged or committed",
+      "priorPhaseAcceptancePreserved": "R16 / eade767 / CI40137615204",
+      "r17_2Started": false,
+      "sourceReviewCount": 277,
+      "trackedPathsAudited": 1370,
+      "moduleCandidatesAudited": 594,
+      "snapshotInputs": 1111,
+      "protectedSourcesUnchanged": 10,
+      "localRelatedContractsPassed": 58,
+      "fourArchitectureGatesPassed": true,
+      "localBuildOriginVerified": {
+        "accepted": true,
+        "sourceSha256": "7b27e96f2b414c4fb09979bf6942470cf7aabd3a1eaceaa4024bbd7b60bc4a78",
+        "sourceFiles": 473,
+        "outputFiles": 136
+      },
+      "localFullRepositoryRerun": false,
+      "fullRepositoryRerunScope": "No production behavior changed; affected admission/routing/documentation/naming/deletion/dual-evidence contracts verified locally. Full same-commit cumulative validation remains in CI."
+    },
+    "priorStageAcceptance": {
+      "stage": "R16.13",
+      "date": "2026-10-25",
+      "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+      "run": 40137615204,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40137615204",
+      "record": "docs/R16-13-DETAILS.md#正式验收与阶段16交接2026-10-25",
+      "accepted": true,
+      "windowsJobsPassed": 7,
+      "allStepsPassed": true,
+      "recursiveNodePassed": 2847,
+      "nodeTestFiles": 373,
+      "nodeDirectories": 16,
+      "contractBrowserPassed": 11,
+      "builtAppPassed": 76,
+      "rustPassed": 301,
+      "singleImplementationContractsPassed": 12,
+      "cumulativeRejectionContractsPassed": 3,
+      "nativeSingleImplementationPassed": true,
+      "nativeLargeImportScenariosPassed": 4,
+      "singleImplementation": {
+        "accepted": true,
+        "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+        "platforms": [
+          "browser",
+          "tauri"
+        ],
+        "retiredSources": 95,
+        "retiredPublicAssets": 10,
+        "sourceSha256": "7b27e96f2b414c4fb09979bf6942470cf7aabd3a1eaceaa4024bbd7b60bc4a78"
+      },
+      "artifacts": [
+        {
+          "id": 12576977928,
+          "kind": "closeout",
+          "bytes": 12440,
+          "digest": "sha256:6265cfc5af5a35aa5dbf9453858fd6dcb95b47eb08a357ea72be7fda1c2c54ad",
+          "downloadDigestVerified": true
+        },
+        {
+          "id": 12577967512,
+          "kind": "webview",
+          "bytes": 1455138,
+          "digest": "sha256:02a3fe851fe7afba024bc8b32a1ea67f8b00c18d505fef8180b79aae06eb463a",
+          "downloadDigestVerified": true
+        }
+      ]
+    },
+    "priorStageImplementation": {
       "stage": "R16.13",
       "baselineCommit": "24fefecba18f3539741ad3f9a3444fb78b27f2cb",
       "branch": "codex/r16-stage",
@@ -1900,99 +1981,6 @@
       "isolatedNativeProtectedPackages": 457,
       "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
       "windowsRun": 40137615204
-    },
-    "priorStageAcceptance": {
-      "stage": "R16.12",
-      "date": "2026-10-25",
-      "commit": "59b86ab47dc3c2dfd3652e1992d3a0e2e165297c",
-      "run": 40134714024,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40134714024",
-      "record": "docs/R16-12-DETAILS.md#正式验收2026-10-25",
-      "accepted": true,
-      "windowsJobsPassed": 7,
-      "allStepsPassed": true,
-      "recursiveNodePassed": 2832,
-      "nodeTestFiles": 372,
-      "nodeDirectories": 16,
-      "contractBrowserPassed": 11,
-      "builtAppPassed": 75,
-      "rustPassed": 301,
-      "dependencyGraphPassed": 24,
-      "nativeLargeImportScenariosPassed": 4,
-      "artifacts": [
-        {
-          "id": 12576388096,
-          "kind": "closeout",
-          "bytes": 12066,
-          "digest": "sha256:eb7394e1f26880a25ca345408f9e02467848e134bdd11aa7ec62aeb128db2221",
-          "downloadDigestVerified": true
-        },
-        {
-          "id": 12576792340,
-          "kind": "webview",
-          "bytes": 1393876,
-          "digest": "sha256:c56b842629c011592acb8b2b4142226c29fc70064919aebad0b20bae65ac7ada",
-          "downloadDigestVerified": true
-        }
-      ]
-    },
-    "priorStageImplementation": {
-      "stage": "R16.12",
-      "baselineCommit": "09071c022e0f47964b2be68cfb50c94fb101bd55",
-      "branch": "codex/r16-stage",
-      "record": "docs/R16-12-DETAILS.md",
-      "status": "accepted",
-      "audit": "docs/audit/r16-12-dependency-graph.json",
-      "newDependencyContracts": 24,
-      "productionModuleCount": 532,
-      "graphNodes": 588,
-      "graphEdges": 1187,
-      "cycles": 0,
-      "architectureIssues": 0,
-      "modelKernelChanged": false,
-      "nativeProductionChanged": false,
-      "productionChanged": false,
-      "dependenciesChanged": false,
-      "exactCommitWindowsPending": false,
-      "localDependencyAndExistingBoundaryPassed": 26,
-      "initialContracts": {
-        "total": 22,
-        "passed": 21,
-        "failed": 1,
-        "reason": "The prior checker had not yet delegated computed imports to the complete graph."
-      },
-      "compilerAndVendorBoundaries": "Rust compiler owns symbol/cfg/macro and Cargo target/transitive resolution; Vite validates external vendor glob expansion.",
-      "sourceReviewCount": 271,
-      "snapshotInputs": 1107,
-      "protectedSourcesUnchanged": 10,
-      "trackedPathsAudited": 1363,
-      "moduleCandidatesAudited": 592,
-      "localRelatedContractsPassed": 64,
-      "fourArchitectureGatesPassed": true,
-      "existingBuildVerification": {
-        "accepted": true,
-        "sourceSha256": "7b27e96f2b414c4fb09979bf6942470cf7aabd3a1eaceaa4024bbd7b60bc4a78",
-        "inputs": 473,
-        "outputs": 136,
-        "productionSourceUnchanged": true
-      },
-      "vendorGlobTraversalRegression": {
-        "reproduced": true,
-        "negativeTests": 24,
-        "negativePassed": 23,
-        "negativeFailed": 1,
-        "fixedRelatedContractsPassed": 64,
-        "fullInitialNodePassed": 2832,
-        "finalFullRunPending": false,
-        "finalFullNodePassed": 2832
-      },
-      "localRecursiveNodePassed": 2832,
-      "localRepositoryFiles": 372,
-      "localRepositoryDirectories": 16,
-      "localSkipped": 0,
-      "localCancelled": 0,
-      "commit": "59b86ab47dc3c2dfd3652e1992d3a0e2e165297c",
-      "windowsRun": 40134714024
     },
     "stageAcceptanceHistory": [
       {
@@ -5712,6 +5700,54 @@
             "kind": "webview",
             "bytes": 1393876,
             "digest": "sha256:c56b842629c011592acb8b2b4142226c29fc70064919aebad0b20bae65ac7ada",
+            "downloadDigestVerified": true
+          }
+        ]
+      },
+      {
+        "stage": "R16.13",
+        "date": "2026-10-25",
+        "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+        "run": 40137615204,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/40137615204",
+        "record": "docs/R16-13-DETAILS.md#正式验收与阶段16交接2026-10-25",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "recursiveNodePassed": 2847,
+        "nodeTestFiles": 373,
+        "nodeDirectories": 16,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 76,
+        "rustPassed": 301,
+        "singleImplementationContractsPassed": 12,
+        "cumulativeRejectionContractsPassed": 3,
+        "nativeSingleImplementationPassed": true,
+        "nativeLargeImportScenariosPassed": 4,
+        "singleImplementation": {
+          "accepted": true,
+          "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+          "platforms": [
+            "browser",
+            "tauri"
+          ],
+          "retiredSources": 95,
+          "retiredPublicAssets": 10,
+          "sourceSha256": "7b27e96f2b414c4fb09979bf6942470cf7aabd3a1eaceaa4024bbd7b60bc4a78"
+        },
+        "artifacts": [
+          {
+            "id": 12576977928,
+            "kind": "closeout",
+            "bytes": 12440,
+            "digest": "sha256:6265cfc5af5a35aa5dbf9453858fd6dcb95b47eb08a357ea72be7fda1c2c54ad",
+            "downloadDigestVerified": true
+          },
+          {
+            "id": 12577967512,
+            "kind": "webview",
+            "bytes": 1455138,
+            "digest": "sha256:02a3fe851fe7afba024bc8b32a1ea67f8b00c18d505fef8180b79aae06eb463a",
             "downloadDigestVerified": true
           }
         ]
@@ -14269,6 +14305,53 @@
         "localCancelled": 0,
         "commit": "59b86ab47dc3c2dfd3652e1992d3a0e2e165297c",
         "windowsRun": 40134714024
+      },
+      {
+        "stage": "R16.13",
+        "baselineCommit": "24fefecba18f3539741ad3f9a3444fb78b27f2cb",
+        "branch": "codex/r16-stage",
+        "record": "docs/R16-13-DETAILS.md",
+        "status": "accepted",
+        "newSingleImplementationContracts": 12,
+        "newCumulativeRejectionContracts": 3,
+        "productionModuleCount": 532,
+        "retiredSourceFiles": 95,
+        "retiredPublicAssets": 10,
+        "localNativeSingleImplementationPassed": true,
+        "productionChanged": false,
+        "modelKernelChanged": false,
+        "nativeProductionChanged": false,
+        "dependenciesChanged": false,
+        "exactCommitWindowsPending": false,
+        "sourceReviewCount": 277,
+        "snapshotInputs": 1111,
+        "trackedPathsAudited": 1368,
+        "moduleCandidatesAudited": 594,
+        "protectedSourcesUnchanged": 10,
+        "localRelatedContractsPassed": 75,
+        "localSingleImplementationContractsPassed": 12,
+        "localContractBrowserPassed": 11,
+        "localBuiltAppPassed": 76,
+        "fourArchitectureGatesPassed": true,
+        "localDualExecution": {
+          "accepted": true,
+          "commit": "24fefecba18f3539741ad3f9a3444fb78b27f2cb",
+          "platforms": [
+            "browser",
+            "tauri"
+          ],
+          "retiredSources": 95,
+          "retiredPublicAssets": 10,
+          "sourceSha256": "7b27e96f2b414c4fb09979bf6942470cf7aabd3a1eaceaa4024bbd7b60bc4a78"
+        },
+        "localRecursiveNodePassed": 2847,
+        "localRepositoryFiles": 373,
+        "localRepositoryDirectories": 16,
+        "localSkipped": 0,
+        "localCancelled": 0,
+        "isolatedNativeProtectedPackages": 457,
+        "commit": "eade7675e2bfe9a1f4b0a91f05cd0ed49a2b8e5a",
+        "windowsRun": 40137615204
       }
     ],
     "migratedReviewedSources": [

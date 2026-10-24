@@ -19,13 +19,16 @@ test('historical workflow definitions retain their dispatch syntax and do not va
   }
 });
 
-test('the existing Windows workflow follows accepted R14/R15 and current R16 stage branches', async () => {
+test('the existing Windows workflow follows accepted R14/R15/R16 and current R17 stage branches', async () => {
   const workflow = await readFile('.github/workflows/r12-14.yml', 'utf8');
-  assert.match(workflow, /push:\s*\n\s*branches:\s*\[agent\/r14-stage, agent\/r15-stage, codex\/r16-stage\]/);
+  assert.match(workflow, /push:\s*\n\s*branches:\s*\[agent\/r14-stage, agent\/r15-stage, codex\/r16-stage, codex\/r17-stage\]/);
   assert.match(workflow, /tests\/stage-15-event-catalogue\.test\.mjs/);
   assert.match(workflow, /tests\/stage-16-deletion-inventory\.test\.mjs/);
   assert.match(workflow, /scripts\/stage-16\/deletion-inventory\.mjs/);
   assert.match(workflow, /docs\/markdown-main-full-rewrite-taskbook-18-docs\/17-\*/);
+  assert.match(workflow, /docs\/markdown-main-full-rewrite-taskbook-18-docs\/18-\*/);
+  assert.match(workflow, /docs\/R17-\*-DETAILS\.md/);
+  assert.match(workflow, /docs\/audit\/r17-\*\.json/);
   assert.match(workflow, /tests\/stage-14-export-characterization\.test\.mjs/);
   assert.match(workflow, /tests\/stage-14-export-request\.test\.mjs/);
   assert.match(workflow, /tests\/stage-14-export-task\.test\.mjs/);
