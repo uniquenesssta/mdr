@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { access, readFile, readdir, stat } from 'node:fs/promises';
-import { dirname, extname, join, relative, resolve, sep } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const DEFAULT_IGNORED_DIRECTORIES = new Set([
@@ -108,19 +108,6 @@ export function getGitHead(root = process.cwd()) {
     stdio: ['ignore', 'pipe', 'pipe']
   });
   return result.status === 0 ? result.stdout.trim() : null;
-}
-
-export async function resolveRelativeModule(root, importerPath, specifier, knownModules) {
-  if (!String(specifier).startsWith('.')) return null;
-  const base = normalizePath(join(dirname(importerPath), specifier));
-  const candidates = extname(base)
-    ? [base]
-    : [base, `${base}.js`, `${base}.mjs`, `${base}/index.js`, `${base}/index.mjs`];
-  for (const candidate of candidates) {
-    if (knownModules?.has(candidate)) return candidate;
-    if (await pathExists(resolve(root, candidate))) return candidate;
-  }
-  return null;
 }
 
 export async function repositoryFileRecord(root, path) {

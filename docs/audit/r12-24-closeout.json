@@ -139,7 +139,7 @@
   "reviewedSources": [
     {
       "path": ".github/workflows/r12-14.yml",
-      "blobSha": "68bc4568fd09c56e20aceb11b4b39211654987d7"
+      "blobSha": "b0530619baef8666806794b403c1b040582ee370"
     },
     {
       "path": ".gitignore",
@@ -147,11 +147,11 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "77c487472880ec9940a211f6fb310015c4f1f60a"
+      "blobSha": "59ce02480d2de49a6b7a9eff04319b3e1c89cf75"
     },
     {
       "path": "scripts/architecture/checks.mjs",
-      "blobSha": "00be4301456ba51ddda737bce54b68f59dfa1f55"
+      "blobSha": "5e9ec5f7deda2b5c403daf81bc912c330c8c414b"
     },
     {
       "path": "scripts/build/fingerprint-plugin.mjs",
@@ -1203,7 +1203,23 @@
     },
     {
       "path": "docs/audit/r16-11-module-naming.json",
-      "blobSha": "46bbf5261816467886424b57f1c234017f4600f9"
+      "blobSha": "cd98a1f60599902eaf2f76dfaf9aa101eb1d3d71"
+    },
+    {
+      "path": "scripts/architecture/dependency-graph.mjs",
+      "blobSha": "1ccd5b9a49387fbbcfe5d5843e1fa3338bff29e6"
+    },
+    {
+      "path": "tests/stage-16-dependency-graph.test.mjs",
+      "blobSha": "0b8a13d787e7f77bb0af7134c48a21bbb14493fc"
+    },
+    {
+      "path": "docs/audit/r16-12-dependency-graph.json",
+      "blobSha": "1406d5a02b5037a6c758466a1ecf77a4466ff823"
+    },
+    {
+      "path": "scripts/architecture/repository.mjs",
+      "blobSha": "897b22243115cd64f4db89c35fd472dcfa3aae64"
     }
   ],
   "priorFailures": {
@@ -1419,14 +1435,14 @@
     "r13Started": false
   },
   "currentSourceReview": {
-    "stage": "R16.11",
+    "stage": "R16.12",
     "date": "2026-10-25",
-    "reviewedCommit": "16c6c20d47f5b41e77e9c16b013f8a5bd129f588",
-    "record": "docs/R16-11-DETAILS.md",
-    "status": "accepted",
+    "reviewedCommit": "09071c022e0f47964b2be68cfb50c94fb101bd55",
+    "record": "docs/R16-12-DETAILS.md",
+    "status": "implemented-pending-exact-commit-windows-validation",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
-    "scope": "Only R16.11 module naming and duplicate-owner audit; R16.12 dependency audit not started.",
+    "scope": "Only R16.12 production dependency graph and architecture admission; R16.13 not started.",
     "acceptedPriorStage": {
       "stage": "R15.9",
       "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
@@ -1761,11 +1777,11 @@
         "record": "docs/R16-10-DETAILS.md"
       }
     ],
-    "conclusion": "Reviewed current migration/date/copy name findings, content-copy candidates and scoped same-name production modules. Four historical names and nine scoped groups are legitimate; no product rename or deletion required. R16.10 accepted at 72fd215 / CI40125945813. R16.11 requires exact-commit Windows validation; R16.12 not started. R16.11 exact-commit Windows run 40129983868 accepted with 267 matching review fingerprints and verified downloaded artifact digests. User authorized R16.12 dependency audit; R16.13 not started.",
-    "priorImplementationWindowsRun": 40125945813,
+    "conclusion": "All 532 actual production files have graph nodes; 588 nodes and 1187 edges, no cycle or forbidden internal import. Final local repository 2832/2832, related contracts 64/64 and four architecture gates pass. Exact implementation Windows cumulative acceptance remains pending; R16.13 not started.",
+    "priorImplementationWindowsRun": 40129983868,
     "priorImplementationWindowsJobs": 7,
-    "implementationWindowsRun": 40129983868,
-    "implementationWindowsJobs": 7,
+    "implementationWindowsRun": null,
+    "implementationWindowsJobs": [],
     "currentStageAcceptance": {
       "stage": "R16.11",
       "date": "2026-10-25",
@@ -1802,6 +1818,97 @@
       ]
     },
     "currentStageImplementation": {
+      "stage": "R16.12",
+      "baselineCommit": "09071c022e0f47964b2be68cfb50c94fb101bd55",
+      "branch": "codex/r16-stage",
+      "record": "docs/R16-12-DETAILS.md",
+      "status": "implemented-pending-exact-commit-windows-validation",
+      "audit": "docs/audit/r16-12-dependency-graph.json",
+      "newDependencyContracts": 24,
+      "productionModuleCount": 532,
+      "graphNodes": 588,
+      "graphEdges": 1187,
+      "cycles": 0,
+      "architectureIssues": 0,
+      "modelKernelChanged": false,
+      "nativeProductionChanged": false,
+      "productionChanged": false,
+      "dependenciesChanged": false,
+      "exactCommitWindowsPending": true,
+      "localDependencyAndExistingBoundaryPassed": 26,
+      "initialContracts": {
+        "total": 22,
+        "passed": 21,
+        "failed": 1,
+        "reason": "The prior checker had not yet delegated computed imports to the complete graph."
+      },
+      "compilerAndVendorBoundaries": "Rust compiler owns symbol/cfg/macro and Cargo target/transitive resolution; Vite validates external vendor glob expansion.",
+      "sourceReviewCount": 271,
+      "snapshotInputs": 1107,
+      "protectedSourcesUnchanged": 10,
+      "trackedPathsAudited": 1363,
+      "moduleCandidatesAudited": 592,
+      "localRelatedContractsPassed": 64,
+      "fourArchitectureGatesPassed": true,
+      "existingBuildVerification": {
+        "accepted": true,
+        "sourceSha256": "7b27e96f2b414c4fb09979bf6942470cf7aabd3a1eaceaa4024bbd7b60bc4a78",
+        "inputs": 473,
+        "outputs": 136,
+        "productionSourceUnchanged": true
+      },
+      "vendorGlobTraversalRegression": {
+        "reproduced": true,
+        "negativeTests": 24,
+        "negativePassed": 23,
+        "negativeFailed": 1,
+        "fixedRelatedContractsPassed": 64,
+        "fullInitialNodePassed": 2832,
+        "finalFullRunPending": false,
+        "finalFullNodePassed": 2832
+      },
+      "localRecursiveNodePassed": 2832,
+      "localRepositoryFiles": 372,
+      "localRepositoryDirectories": 16,
+      "localSkipped": 0,
+      "localCancelled": 0
+    },
+    "priorStageAcceptance": {
+      "stage": "R16.11",
+      "date": "2026-10-25",
+      "commit": "16c6c20d47f5b41e77e9c16b013f8a5bd129f588",
+      "run": 40129983868,
+      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40129983868",
+      "record": "docs/R16-11-DETAILS.md#正式验收2026-10-25",
+      "accepted": true,
+      "windowsJobsPassed": 7,
+      "allStepsPassed": true,
+      "recursiveNodePassed": 2808,
+      "nodeTestFiles": 371,
+      "nodeDirectories": 16,
+      "contractBrowserPassed": 11,
+      "builtAppPassed": 75,
+      "rustPassed": 301,
+      "moduleNamingPassed": 14,
+      "nativeLargeImportScenariosPassed": 4,
+      "artifacts": [
+        {
+          "id": 12574779112,
+          "kind": "closeout",
+          "bytes": 11930,
+          "digest": "sha256:5860f0986da6b5affb42460f64ccf513181bed29b53ef6f45f88e2a1321b33fa",
+          "downloadDigestVerified": true
+        },
+        {
+          "id": 12573957600,
+          "kind": "webview",
+          "bytes": 1431944,
+          "digest": "sha256:e00247e971b7c900fc25b3c6be063294a9bacdd3f94bbfd81f990fda1d097161",
+          "downloadDigestVerified": true
+        }
+      ]
+    },
+    "priorStageImplementation": {
       "stage": "R16.11",
       "baselineCommit": "aac985b3181df63507c88bbc4e591a4b91f4d4d2",
       "branch": "codex/r16-stage",
@@ -1851,90 +1958,6 @@
       },
       "commit": "16c6c20d47f5b41e77e9c16b013f8a5bd129f588",
       "windowsRun": 40129983868
-    },
-    "priorStageAcceptance": {
-      "stage": "R16.10",
-      "date": "2026-10-25",
-      "commit": "72fd215ee67e41bcbd2d7ed10d99a52b59a5a6c0",
-      "run": 40125945813,
-      "url": "https://github.com/uniquenesssta/mdr/actions/runs/40125945813",
-      "record": "docs/R16-10-DETAILS.md#正式验收2026-10-25",
-      "accepted": true,
-      "windowsJobsPassed": 7,
-      "allStepsPassed": true,
-      "recursiveNodePassed": 2794,
-      "nodeTestFiles": 370,
-      "nodeDirectories": 16,
-      "contractBrowserPassed": 11,
-      "builtAppPassed": 75,
-      "rustPassed": 301,
-      "testCleanupPassed": 4,
-      "nativeLargeImportScenariosPassed": 4,
-      "artifacts": [
-        {
-          "id": 12573702054,
-          "kind": "closeout",
-          "bytes": 11830,
-          "digest": "sha256:2bf22f747f6d03f67b329867cc3d9aad092b9ff937661869268a2cd6db331a5f",
-          "downloadDigestVerified": true
-        },
-        {
-          "id": 12573297086,
-          "kind": "webview",
-          "bytes": 1393065,
-          "digest": "sha256:e04657426a1a98f7d76538e634a84373afe6d6039ba15b4e976252fad7dec095",
-          "downloadDigestVerified": true
-        }
-      ]
-    },
-    "priorStageImplementation": {
-      "stage": "R16.10",
-      "baselineCommit": "24bd196a751394c382076d54078a2218d039cd99",
-      "branch": "codex/r16-stage",
-      "record": "docs/R16-10-DETAILS.md",
-      "status": "accepted",
-      "ledger": "docs/audit/r16-10-test-cleanup.json",
-      "consumerFiles": 73,
-      "baselineDeclaredTestCalls": 443,
-      "directRetiredPathReads": 130,
-      "retiredRedundantCases": 1,
-      "newCleanupContracts": 4,
-      "productionModuleCount": 532,
-      "sourceReviewCount": 264,
-      "modelKernelChanged": false,
-      "nativeProductionChanged": false,
-      "dependenciesChanged": false,
-      "productionChanged": false,
-      "exactCommitWindowsPending": false,
-      "snapshotInputs": 1103,
-      "localRepairContractsPassed": 37,
-      "initialFullRun": {
-        "total": 2794,
-        "passed": 2789,
-        "failed": 5,
-        "failure": "Synchronous source grouping changed return type; computed/resolve old source paths remained in Web Fetch, Locale and Platform tests.",
-        "repair": "Preserve synchronous readFileSync grouping and expand explicit current source paths; retain every original assertion."
-      },
-      "localRecursiveNodePassed": 2794,
-      "localRepositoryFiles": 370,
-      "localRepositoryDirectories": 16,
-      "localContractBrowserPassed": 11,
-      "localBuiltAppPassed": 75,
-      "fourArchitectureGatesPassed": true,
-      "protectedSourcesUnchanged": 10,
-      "localCleanupContractsPassed": 4,
-      "localConsoleErrors": 0,
-      "localUnhandledExceptions": 0,
-      "existingBuildVerification": {
-        "accepted": true,
-        "sourceSha256": "7b27e96f2b414c4fb09979bf6942470cf7aabd3a1eaceaa4024bbd7b60bc4a78",
-        "inputs": 473,
-        "outputs": 136,
-        "productionSourceUnchanged": true
-      },
-      "localFinalEvidencePassed": 26,
-      "commit": "72fd215ee67e41bcbd2d7ed10d99a52b59a5a6c0",
-      "windowsRun": 40125945813
     },
     "stageAcceptanceHistory": [
       {
@@ -5584,6 +5607,41 @@
             "kind": "webview",
             "bytes": 1393065,
             "digest": "sha256:e04657426a1a98f7d76538e634a84373afe6d6039ba15b4e976252fad7dec095",
+            "downloadDigestVerified": true
+          }
+        ]
+      },
+      {
+        "stage": "R16.11",
+        "date": "2026-10-25",
+        "commit": "16c6c20d47f5b41e77e9c16b013f8a5bd129f588",
+        "run": 40129983868,
+        "url": "https://github.com/uniquenesssta/mdr/actions/runs/40129983868",
+        "record": "docs/R16-11-DETAILS.md#正式验收2026-10-25",
+        "accepted": true,
+        "windowsJobsPassed": 7,
+        "allStepsPassed": true,
+        "recursiveNodePassed": 2808,
+        "nodeTestFiles": 371,
+        "nodeDirectories": 16,
+        "contractBrowserPassed": 11,
+        "builtAppPassed": 75,
+        "rustPassed": 301,
+        "moduleNamingPassed": 14,
+        "nativeLargeImportScenariosPassed": 4,
+        "artifacts": [
+          {
+            "id": 12574779112,
+            "kind": "closeout",
+            "bytes": 11930,
+            "digest": "sha256:5860f0986da6b5affb42460f64ccf513181bed29b53ef6f45f88e2a1321b33fa",
+            "downloadDigestVerified": true
+          },
+          {
+            "id": 12573957600,
+            "kind": "webview",
+            "bytes": 1431944,
+            "digest": "sha256:e00247e971b7c900fc25b3c6be063294a9bacdd3f94bbfd81f990fda1d097161",
             "downloadDigestVerified": true
           }
         ]
@@ -14032,6 +14090,57 @@
         "localFinalEvidencePassed": 26,
         "commit": "72fd215ee67e41bcbd2d7ed10d99a52b59a5a6c0",
         "windowsRun": 40125945813
+      },
+      {
+        "stage": "R16.11",
+        "baselineCommit": "aac985b3181df63507c88bbc4e591a4b91f4d4d2",
+        "branch": "codex/r16-stage",
+        "record": "docs/R16-11-DETAILS.md",
+        "status": "accepted",
+        "audit": "docs/audit/r16-11-module-naming.json",
+        "newNamingContracts": 14,
+        "legalNameFindings": 4,
+        "legalScopedBasenameGroups": 9,
+        "duplicateImplementations": 0,
+        "productionModuleCount": 532,
+        "modelKernelChanged": false,
+        "nativeProductionChanged": false,
+        "productionChanged": false,
+        "dependenciesChanged": false,
+        "exactCommitWindowsPending": false,
+        "sourceReviewCount": 267,
+        "snapshotInputs": 1105,
+        "localRelatedContractsPassed": 77,
+        "localNamingContractsPassed": 14,
+        "localRecursiveNodePassed": 2808,
+        "localRepositoryFiles": 371,
+        "localRepositoryDirectories": 16,
+        "fourArchitectureGatesPassed": true,
+        "protectedSourcesUnchanged": 10,
+        "trackedPathsAudited": 1359,
+        "moduleCandidatesAudited": 591,
+        "illegalNameFindings": 0,
+        "unreviewedScopedBasenameGroups": 0,
+        "initialContracts": {
+          "total": 14,
+          "passed": 12,
+          "failed": 2,
+          "reason": "Old Generated Files gate omitted date/copy detection and the new audit had not yet been recorded."
+        },
+        "postFullBoundarySupplement": {
+          "scope": "Scanner-only dot directory, extensionless copy, compound copy numbering and attached date/time samples; product source unchanged.",
+          "localAffectedContractsPassed": 77,
+          "fullRunPrecedesThisSupplement": true
+        },
+        "existingBuildVerification": {
+          "accepted": true,
+          "sourceSha256": "7b27e96f2b414c4fb09979bf6942470cf7aabd3a1eaceaa4024bbd7b60bc4a78",
+          "inputs": 473,
+          "outputs": 136,
+          "productionSourceUnchanged": true
+        },
+        "commit": "16c6c20d47f5b41e77e9c16b013f8a5bd129f588",
+        "windowsRun": 40129983868
       }
     ],
     "migratedReviewedSources": [

@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { discoverProductionFiles } from '../stage-01/module-inventory-core.mjs';
 import { auditModuleNaming } from './module-naming.mjs';
+import { buildDependencyGraph } from './dependency-graph.mjs';
 import {
   getGitHead,
   getLineAndColumn,
@@ -12,17 +13,13 @@ import {
   loadOwnershipManifest,
   normalizePath,
   pathExists,
-  readRepositoryText,
-  resolveRelativeModule
+  readRepositoryText
 } from './repository.mjs';
 import {
   collectBusinessGlobalWrites,
   collectDynamicClassicScripts,
   collectHtmlClassicScripts,
-  collectInlineEvents,
-  collectModuleSpecifiers,
-  featureName,
-  isPublicFeatureEntry
+  collectInlineEvents
 } from './source-analysis.mjs';
 
 const DEFAULT_BASELINE_PATH = 'tests/architecture/fixtures/architecture-baseline.json';
@@ -308,105 +305,8 @@ export async function checkGeneratedFiles({
   return issues;
 }
 
-function canonicalCycle(cycle) {
-  const nodes = cycle.slice(0, -1);
-  const rotations = nodes.map((_, index) => [...nodes.slice(index), ...nodes.slice(0, index)]);
-  rotations.sort((left, right) => left.join('>').localeCompare(right.join('>')));
-  const canonical = rotations[0];
-  return [...canonical, canonical[0]];
-}
-
-function findCycles(graph) {
-  const state = new Map();
-  const stack = [];
-  const cycles = new Map();
-
-  function visit(node) {
-    state.set(node, 1);
-    stack.push(node);
-    for (const target of graph.get(node) || []) {
-      if (!graph.has(target)) continue;
-      if (!state.has(target)) visit(target);
-      else if (state.get(target) === 1) {
-        const index = stack.indexOf(target);
-        const cycle = [...stack.slice(index), target];
-        const canonical = canonicalCycle(cycle);
-        cycles.set(canonical.join('>'), canonical);
-      }
-    }
-    stack.pop();
-    state.set(node, 2);
-  }
-
-  for (const node of graph.keys()) {
-    if (!state.has(node)) visit(node);
-  }
-  return [...cycles.values()];
-}
-
-export async function checkDependencyBoundaries({ root = process.cwd() } = {}) {
-  const manifest = await loadOwnershipManifest(root);
-  const javascriptModules = manifest.modules
-    .map(record => normalizePath(record.path))
-    .filter(path => /\.(?:js|mjs)$/.test(path));
-  const knownModules = new Set(javascriptModules);
-  const graph = new Map(javascriptModules.map(path => [path, []]));
-  const issues = [];
-
-  for (const importer of javascriptModules) {
-    const source = await readRepositoryText(root, importer);
-    for (const imported of collectModuleSpecifiers(source)) {
-      const target = await resolveRelativeModule(root, importer, imported.specifier, knownModules);
-      if (!target || !knownModules.has(target)) continue;
-      graph.get(importer).push(target);
-
-      const importerFeature = featureName(importer);
-      const targetFeature = featureName(target);
-      if (importerFeature && target.startsWith('src/app/')) {
-        issues.push(architectureIssue(
-          'feature-imports-composition-root',
-          importer,
-          `Feature ${importerFeature} must not import application composition internals: ${target}.`,
-          { line: imported.line, column: imported.column }
-        ));
-      }
-      if (importerFeature && targetFeature && importerFeature !== targetFeature && !isPublicFeatureEntry(target)) {
-        issues.push(architectureIssue(
-          'cross-feature-internal-import',
-          importer,
-          `Feature ${importerFeature} must import feature ${targetFeature} through ${`src/features/${targetFeature}/index.js`}, not ${target}.`,
-          { line: imported.line, column: imported.column }
-        ));
-      }
-      if (importer.startsWith('src/platform/') && target.startsWith('src/features/')) {
-        issues.push(architectureIssue(
-          'platform-imports-feature',
-          importer,
-          `Platform module must not import feature module ${target}.`,
-          { line: imported.line, column: imported.column }
-        ));
-      }
-      if (importer.startsWith('src/model-kernel/') && /^(?:src\/(?:app|platform|features|ui)\/)/.test(target)) {
-        issues.push(architectureIssue(
-          'model-kernel-import-direction',
-          importer,
-          `Model kernel must not import higher layer ${target}.`,
-          { line: imported.line, column: imported.column }
-        ));
-      }
-    }
-    graph.set(importer, [...new Set(graph.get(importer))].sort());
-  }
-
-  for (const cycle of findCycles(graph)) {
-    issues.push(architectureIssue(
-      'circular-dependency',
-      cycle[0],
-      `Circular dependency: ${cycle.join(' -> ')}.`,
-      { detail: cycle }
-    ));
-  }
-  return issues;
+export async function checkDependencyBoundaries(options = {}) {
+  return (await buildDependencyGraph(options)).issues;
 }
 
 function strictImportModules(manifest) {
