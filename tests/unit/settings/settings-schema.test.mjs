@@ -1,7 +1,6 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -156,9 +155,14 @@ test('Settings serialization preserves legacy string formats and reports missing
 
 test('Atomic 4.6 keeps legacy persistence keys schema-owned after Atomic 4.7 repository cutover', async () => {
   const [core, bootstrap, editorTools] = await Promise.all([
-    readText('public/app/core.js'),
-    readText('public/app/bootstrap.js'),
-    readText('public/app/editor-tools.js')
+    Promise.all([
+      readText('src/features/documents/ui/document-workspace.js'),
+      readText('src/features/menu/shell-menus.js'),
+      readText('src/features/persistence/ui/workspace-status.js'),
+      readText('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    readText('src/bootstrap/workspace-startup.js'),
+    readText('src/features/layout/workspace-preferences.js')
   ]);
   const classicSource = [core, bootstrap, editorTools].join('\n');
   for (const key of Object.values(EXPECTED_KEYS)) assert.doesNotMatch(classicSource, new RegExp(key));

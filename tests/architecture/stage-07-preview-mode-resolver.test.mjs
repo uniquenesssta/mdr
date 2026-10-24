@@ -1,7 +1,7 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, readdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
 import test from 'node:test';
+import { resolvePreviewMode } from '../../src/features/preview/index.js';
 
 const root = new URL('../../', import.meta.url);
 const source = path => readFile(new URL(path, root), 'utf8');
@@ -19,17 +19,22 @@ test('Atomic 7.3 Mode Resolver remains a dedicated pure pipeline owner', async (
   assert.doesNotMatch(resolver, /workerChars/);
 });
 
-test('Atomic 7.3 preserves manual override before automatic character or block thresholds', async () => {
-  const resolver = await source('src/features/preview/pipeline/preview-mode-resolver.js');
-  const manual = resolver.indexOf("if (requested !== 'auto') return requested;");
-  const chapter = resolver.indexOf('thresholds.chapterChars');
-  const virtual = resolver.indexOf('thresholds.virtualChars');
-  assert.ok(manual >= 0 && chapter > manual && virtual > manual);
+test('Atomic 7.3 preserves manual override before automatic character or block thresholds', () => {
+  for (const mode of ['full', 'virtual', 'chapter']) {
+    const settings = Object.freeze({ previewPerformanceMode: mode });
+    assert.equal(resolvePreviewMode(settings, 1, 1), mode);
+    assert.equal(resolvePreviewMode(settings, 2_000_000, 20_000), mode);
+  }
 });
 
 test('Atomic 7.3 remains the only mode policy after Atomic 7.14 removes classic preview resolver logic', async () => {
   const [main, core, entry, port, handler, engine] = await Promise.all([
-    source('src/main.js'), source('public/app/core.js'), source('src/features/preview/index.js'),
+    source('src/main.js'), Promise.all([
+      source('src/features/documents/ui/document-workspace.js'),
+      source('src/features/menu/shell-menus.js'),
+      source('src/features/persistence/ui/workspace-status.js'),
+      source('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')), source('src/features/preview/index.js'),
     source('src/features/preview/pipeline/preview-mode-resolver.js'),
     source('src/features/preview/application/preview-commands.js'),
     source('src/features/preview/pipeline/preview-render-engine.js')

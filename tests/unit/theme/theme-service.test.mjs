@@ -1,5 +1,5 @@
 import { readCurrentViewMarkup } from '../../support/current-view-markup.mjs';
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { discoverProductionFiles } from '../../../scripts/stage-01/module-inventory-core.mjs';
@@ -166,9 +166,14 @@ test('Atomic 4.11 production integration removes classic theme authority and kee
     readFile('src/theme/index.js', 'utf8'),
     readFile('src/theme/theme-service.js', 'utf8'),
     readFile('src/theme/theme-toggle-controller.js', 'utf8'),
-    readFile('public/app/core.js', 'utf8'),
-    readFile('public/app/bootstrap.js', 'utf8'),
-    readFile('public/app/editor-tools.js', 'utf8'),
+    Promise.all([
+      readFile('src/features/documents/ui/document-workspace.js', 'utf8'),
+      readFile('src/features/menu/shell-menus.js', 'utf8'),
+      readFile('src/features/persistence/ui/workspace-status.js', 'utf8'),
+      readFile('src/features/layout/workspace-preferences.js', 'utf8')
+    ]).then(sources => sources.join('\n')),
+    readFile('src/bootstrap/workspace-startup.js', 'utf8'),
+    readFile('src/features/layout/workspace-preferences.js', 'utf8'),
     readCurrentViewMarkup(),
     readFile('src/features/settings/application/settings-apply-coordinator.js', 'utf8')
   ]);

@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -105,7 +105,12 @@ test('R16-08 pure Documents metadata capabilities preserve normalization without
 
 test('Atomic 5.1 production integration removes classic metadata normalization authority without changing the frozen DocumentModel', async () => {
   const [core, bootstrap, nativeStore, entry, recentFilesRepository] = await Promise.all([
-    readText('public/app/core.js'),
+    Promise.all([
+      readText('src/features/documents/ui/document-workspace.js'),
+      readText('src/features/menu/shell-menus.js'),
+      readText('src/features/persistence/ui/workspace-status.js'),
+      readText('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     readText('src/bootstrap/module-entry.js'),
     readText('src/features/persistence/native-document-store/native-document-store.js'),
     readText('src/features/documents/index.js'),

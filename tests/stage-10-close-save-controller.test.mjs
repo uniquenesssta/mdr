@@ -2,7 +2,7 @@ import { assertProductionInventory } from './support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { readFileSync } from './support/application-surface-source.mjs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createCloseSaveController } from '../src/features/persistence/application/close-save-controller.js';
@@ -159,7 +159,7 @@ test('Atomic 10.11 concurrent requests coalesce and destroy suppresses late save
 test('Atomic 10.11 production integration gives Persistence one Close Save authority and leaves Window port-only', async () => {
   const persistenceEntry = read('src/features/persistence/index.js');
   const main = read('src/main.js');
-  const events = read('public/app/events.js');
+  const events = read('src/bootstrap/application-events.js');
   const windowClose = read('src/features/window/window-close-controller.js');
   const fixture = JSON.parse(read('tests/architecture/fixtures/production-modules.json'));
 

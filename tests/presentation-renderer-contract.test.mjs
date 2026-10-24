@@ -1,4 +1,4 @@
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -27,7 +27,7 @@ test('hybrid and Preview Mermaid rendering use the canonical Preview presentatio
   const mermaidWidget = await source('../src/features/hybrid-editor/widgets/mermaid/mermaid-widget.js');
   const previewRenderer = await source('../src/features/preview/render/mermaid-renderer.js');
   const previewController = await source('../src/features/preview/application/preview-controller.js');
-  const previewTools = await source('../public/app/editor-tools.js');
+  const previewTools = await source('../src/features/layout/workspace-preferences.js');
   const renderer = await source('../src/features/preview/render/presentation/mermaid-presentation.js');
   assert.match(controller, /getMermaidTheme, renderMermaidDiagram.*from ['"]\.\.\/\.\.\/preview\/index\.js/);
   assert.match(controller, /renderMermaidDiagram/);

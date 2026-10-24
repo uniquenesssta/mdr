@@ -1,5 +1,5 @@
 import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
@@ -29,8 +29,13 @@ test('Atomic 6.3 exposes three split responsibilities only through Layout public
 
 test('Atomic 6.3 removes classic split authority and direct split listeners', async () => {
   const [core, bootstrap, events, editorTools, html] = await Promise.all([
-    read('public/app/core.js'), read('public/app/bootstrap.js'), read('public/app/events.js'),
-    read('public/app/editor-tools.js'), readCurrentViewMarkup()
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')), read('src/bootstrap/workspace-startup.js'), read('src/bootstrap/application-events.js'),
+    read('src/features/layout/workspace-preferences.js'), readCurrentViewMarkup()
   ]);
   for (const legacy of ['startResize', 'stopResize', 'onResizeMove', 'applySplit', 'applyPaneStates', 'reconcileCompactSplitLayout', 'activateCompactSplitPane', 'initializeCompactSplitObserver', 'scheduleCompactSplitEvaluation']) {
     assert.doesNotMatch(core, new RegExp(`\\b${legacy}\\b`), `core must not retain ${legacy}`);

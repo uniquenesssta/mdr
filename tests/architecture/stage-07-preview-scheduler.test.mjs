@@ -1,6 +1,5 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, readdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -42,7 +41,12 @@ test('Atomic 7.4 composition root mounts one scoped classic scheduler port and d
 
 test('Atomic 7.4 scheduler remains authoritative while 7.9, 7.11, 7.12 and 7.14 orchestrate distinct work', async () => {
   const [core, controller, engine, layout, focus, enhancement] = await Promise.all([
-    source('public/app/core.js'), source('src/features/preview/application/preview-controller.js'),
+    Promise.all([
+      source('src/features/documents/ui/document-workspace.js'),
+      source('src/features/menu/shell-menus.js'),
+      source('src/features/persistence/ui/workspace-status.js'),
+      source('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')), source('src/features/preview/application/preview-controller.js'),
     source('src/features/preview/pipeline/preview-render-engine.js'), source('src/features/preview/pipeline/preview-layout-stability.js'),
     source('src/features/preview/pipeline/preview-focus-controller.js'), source('src/features/preview/pipeline/preview-enhancement-coordinator.js')
   ]);

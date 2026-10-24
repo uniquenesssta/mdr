@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -132,8 +132,8 @@ test('R16-08 explicit Editor controller retains writes, readonly snapshots and t
 
 test('Atomic 5.8 production integration gives input one Controller transaction path and removes direct classic editor.value writes without starting 5.9', async () => {
   const [main, events, bootstrap, tools, clipper, controller, editorIndex] = await Promise.all([
-    readText('src/main.js'), readText('public/app/events.js'), readText('public/app/bootstrap.js'),
-    readText('public/app/editor-tools.js'), readText('public/app/web-clipper.js'),
+    readText('src/main.js'), readText('src/bootstrap/application-events.js'), readText('src/bootstrap/workspace-startup.js'),
+    readText('src/features/layout/workspace-preferences.js'), readText('src/features/editor/application/find-preview-commands.js'),
     readText('src/features/editor/application/editor-controller.js'), readText('src/features/editor/index.js')
   ]);
   assert.equal(main.includes("from './features/editor/index.js'"), true);

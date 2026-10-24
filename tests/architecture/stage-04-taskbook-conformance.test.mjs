@@ -1,6 +1,5 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 import test from 'node:test';
 
 const plannedModules = Object.freeze([
@@ -64,8 +63,13 @@ test('Stage 4 taskbook planned files exist and declare responsibility contracts'
 test('Stage 4 final cutover keeps the retired classic I18n implementation absent', async () => {
   await assert.rejects(access('public/i18n.js'));
   const [core, bootstrap] = await Promise.all([
-    readFile('public/app/core.js', 'utf8'),
-    readFile('public/app/bootstrap.js', 'utf8')
+    Promise.all([
+      readFile('src/features/documents/ui/document-workspace.js', 'utf8'),
+      readFile('src/features/menu/shell-menus.js', 'utf8'),
+      readFile('src/features/persistence/ui/workspace-status.js', 'utf8'),
+      readFile('src/features/layout/workspace-preferences.js', 'utf8')
+    ]).then(sources => sources.join('\n')),
+    readFile('src/bootstrap/workspace-startup.js', 'utf8')
   ]);
   assert.doesNotMatch(core, /let currentLang\s*=|function setLanguage\s*\(|coreI18nPort\.setLocale\(/);
   assert.doesNotMatch(bootstrap, /savedLang|coreI18nPort\.setLocale\(|currentLang\s*=/);

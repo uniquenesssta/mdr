@@ -1,9 +1,8 @@
-import { readFileSync } from './application-surface-source.mjs';
+import { readFileSync, readdirSync } from 'node:fs';
 // Characterization host: invoke actual public Export Controller and format owners.
 // Old scenario names map to explicit test-only command aliases; no retired product script/global is supplied.
 // DOM/vendor/platform doubles prove orchestration only; actual Builder/Enhancer own the complete body.
 // Retired Worker/enhancement globals are never supplied. Actual renderer output is checked in built-app tests.
-import { readdirSync } from 'node:fs';
 import vm from 'node:vm';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
@@ -14,8 +13,11 @@ import { ModalShell } from '../../src/ui/components/modal-shell.js';
 import { ExportProgressDocument } from './export-progress-dom.mjs';
 import { createExportPrintDom } from './export-print-dom.mjs';
 
-const markdownSource = readFileSync(new URL('../../public/app/core.js', import.meta.url), 'utf8');
-const markdownDownload = markdownSource.slice(markdownSource.indexOf('    async function exportContextDocument('), markdownSource.indexOf('    function copyContextDocumentTitle('));
+const markdownSource = readFileSync(new URL('../../src/features/documents/ui/document-workspace.js', import.meta.url), 'utf8');
+const markdownStart = markdownSource.indexOf('    async function exportContextDocument(');
+const markdownEnd = markdownSource.indexOf('    function copyContextDocumentTitle(');
+if (markdownStart < 0 || markdownEnd <= markdownStart) throw new Error('Current document export source boundaries are missing.');
+const markdownDownload = markdownSource.slice(markdownStart, markdownEnd);
 
 export function createExportVmHost({ desktop = false, sourceText = '原文 😀', name = 'report.md', savePath = 'C:\\exports\\report', failWrite = false, workerBlocks = null, workerVersion = 7, textLength = 20, parseError = false, imageHeight = 100, documentId = 'export-doc', documentIds = [documentId], imageOverrides = {} } = {}) {
   const calls = [], downloads = [], blobs = new Map(), timers = [], events = new Map(), nodes = new Map();

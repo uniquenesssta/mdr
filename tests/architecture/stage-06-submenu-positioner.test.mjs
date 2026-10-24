@@ -1,7 +1,6 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 
 test('Atomic 6.11 owns submenu geometry outside MenuView and removes the classic implementation path', async () => {
   const [positioner, port, menuView, menuIndex, moduleEntry, core, events] = await Promise.all([
@@ -10,8 +9,13 @@ test('Atomic 6.11 owns submenu geometry outside MenuView and removes the classic
     readFile('src/features/menu/menu-view.js', 'utf8'),
     readFile('src/features/menu/index.js', 'utf8'),
     readFile('src/bootstrap/module-entry.js', 'utf8'),
-    readFile('public/app/core.js', 'utf8'),
-    readFile('public/app/events.js', 'utf8')
+    Promise.all([
+      readFile('src/features/documents/ui/document-workspace.js', 'utf8'),
+      readFile('src/features/menu/shell-menus.js', 'utf8'),
+      readFile('src/features/persistence/ui/workspace-status.js', 'utf8'),
+      readFile('src/features/layout/workspace-preferences.js', 'utf8')
+    ]).then(sources => sources.join('\n')),
+    readFile('src/bootstrap/application-events.js', 'utf8')
   ]);
 
   assert.match(positioner, /getBoundingClientRect\(\)/);

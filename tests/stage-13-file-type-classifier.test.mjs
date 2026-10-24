@@ -1,4 +1,4 @@
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
@@ -71,7 +71,7 @@ test('classification never reads contents, size or platform capabilities', () =>
 test('production routing consumes one public classifier with startup and teardown wiring', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
   const [events, main, image, drop, entry] = await Promise.all([
-    read('public/app/events.js'), read('src/main.js'), read('src/features/editor/ui/image-dialog-view.js'),
+    read('src/bootstrap/application-events.js'), read('src/main.js'), read('src/features/editor/ui/image-dialog-view.js'),
     read('src/features/import/files/drop-import-controller.js'), read('src/features/import/index.js')
   ]);
   assert.doesNotMatch(events, /eventsDropImportPort|eventsFileImportPort/);

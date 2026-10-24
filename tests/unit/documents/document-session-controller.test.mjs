@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import { createFileImportController, createImportDocumentController, createImageImportController } from '../../../src/features/import/index.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -422,9 +422,14 @@ test('R16-08 explicit Document controller preserves active identity, operation g
 
 test('Atomic 5.3 production integration removes classic lifecycle/body-cache authority and keeps the frozen DocumentModel exact', async () => {
   const [core, exportModule, events, main, nativeStore, segmentedLoader, entry, loadControllerSource, persistenceEntry, sessionControllerSource] = await Promise.all([
-    readText('public/app/core.js'),
+    Promise.all([
+      readText('src/features/documents/ui/document-workspace.js'),
+      readText('src/features/menu/shell-menus.js'),
+      readText('src/features/persistence/ui/workspace-status.js'),
+      readText('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     readText('src/features/export/application/export-controller.js'),
-    readText('public/app/events.js'),
+    readText('src/bootstrap/application-events.js'),
     readText('src/main.js'),
     readText('src/features/persistence/native-document-store/native-document-store.js'),
     readText('src/features/persistence/native-document-store/native-segmented-loader.js'),

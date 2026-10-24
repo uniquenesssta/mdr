@@ -1,6 +1,5 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, readdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -26,7 +25,12 @@ test('Atomic 7.11 Focus Controller stays DOM-free and owns request-token invalid
 
 test('Atomic 7.11 composition owns one scoped Focus port while PreviewController delegates focus behavior to the canonical owner', async () => {
   const [main, controller, core, port] = await Promise.all([
-    source('src/main.js'), source('src/features/preview/application/preview-controller.js'), source('public/app/core.js'),
+    source('src/main.js'), source('src/features/preview/application/preview-controller.js'), Promise.all([
+      source('src/features/documents/ui/document-workspace.js'),
+      source('src/features/menu/shell-menus.js'),
+      source('src/features/persistence/ui/workspace-status.js'),
+      source('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     source('src/features/preview/pipeline/preview-focus-controller.js')
   ]);
   assert.match(main, /createPreviewFocusController\(\{/);

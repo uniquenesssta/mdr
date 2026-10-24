@@ -1,7 +1,6 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -106,7 +105,12 @@ test('Atomic 4.2 locale registry remains the only short-text data authority afte
 test('Atomic 4.2 locale data remains isolated from the Atomic 4.5 Help feature', async () => {
   const [entry, core, index, helpIndex] = await Promise.all([
     readFile(resolve(ROOT, 'src/bootstrap/module-entry.js'), 'utf8'),
-    readFile(resolve(ROOT, 'public/app/core.js'), 'utf8'),
+    Promise.all([
+      readFile(resolve(ROOT, 'src/features/documents/ui/document-workspace.js'), 'utf8'),
+      readFile(resolve(ROOT, 'src/features/menu/shell-menus.js'), 'utf8'),
+      readFile(resolve(ROOT, 'src/features/persistence/ui/workspace-status.js'), 'utf8'),
+      readFile(resolve(ROOT, 'src/features/layout/workspace-preferences.js'), 'utf8')
+    ]).then(sources => sources.join('\n')),
     readFile(resolve(ROOT, 'src/i18n/index.js'), 'utf8'),
     readFile(resolve(ROOT, 'src/features/help/index.js'), 'utf8')
   ]);

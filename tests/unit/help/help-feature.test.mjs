@@ -1,7 +1,6 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile, access, readdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { access, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 import {
@@ -211,9 +210,14 @@ test('R16-08 explicit Help capability keeps navigation, first-run policy and ter
 test('Atomic 4.5 production integration removes the classic Help authority and wires one ESM Help feature before Translation Bindings', async () => {
   const [entry, core, bootstrap, editorTools, markup, modalBridge, helpDialog, sourceAnalysis] = await Promise.all([
     readFile('src/bootstrap/module-entry.js', 'utf8'),
-    readFile('public/app/core.js', 'utf8'),
-    readFile('public/app/bootstrap.js', 'utf8'),
-    readFile('public/app/editor-tools.js', 'utf8'),
+    Promise.all([
+      readFile('src/features/documents/ui/document-workspace.js', 'utf8'),
+      readFile('src/features/menu/shell-menus.js', 'utf8'),
+      readFile('src/features/persistence/ui/workspace-status.js', 'utf8'),
+      readFile('src/features/layout/workspace-preferences.js', 'utf8')
+    ]).then(sources => sources.join('\n')),
+    readFile('src/bootstrap/workspace-startup.js', 'utf8'),
+    readFile('src/features/layout/workspace-preferences.js', 'utf8'),
     readFile('src/features/menu/ui/menu-content-view.js', 'utf8'),
     readFile('src/bootstrap/workspace-content.js', 'utf8'),
     readFile('src/features/help/ui/help-dialog-view.js', 'utf8'),

@@ -1,4 +1,4 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -30,9 +30,14 @@ test('Atomic 6.12 keeps Documents as the sole Recent Files persistence authority
   const [repository, classicPort, core, classicBootstrap, events, main, importer] = await Promise.all([
     read('src/features/documents/infrastructure/recent-files-repository.js'),
     read('src/features/documents/application/recent-files-read-source.js'),
-    read('public/app/core.js'),
-    read('public/app/bootstrap.js'),
-    read('public/app/events.js'),
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    read('src/bootstrap/workspace-startup.js'),
+    read('src/bootstrap/application-events.js'),
     read('src/main.js'),
     read('src/features/import/application/import-document-controller.js')
   ]);

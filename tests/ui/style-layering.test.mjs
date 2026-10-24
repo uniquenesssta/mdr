@@ -131,7 +131,7 @@ test('stable compatibility presentation has no inline style authority', async ()
       'src/ui/shell/status-bar-shell.js',
       'src/ui/shell/overlay-root.js'
     ].map(readText)),
-    readText('public/app/web-clipper.js'),
+    readText('src/features/editor/application/find-preview-commands.js'),
     readText('src/features/export/application/export-controller.js')
   ]);
 
@@ -186,8 +186,8 @@ test('R16-05 prefixed shell and state classes are the sole projection contract',
     readText('src/features/layout/sidebar/sidebar-layout-controller.js'),
     readText('src/features/layout/split/split-pane-controller.js'),
     readText('src/features/layout/sidebar/sidebar-resize-controller.js'),
-    readText('public/app/bootstrap.js'),
-    readText('public/app/editor-tools.js'),
+    readText('src/bootstrap/workspace-startup.js'),
+    readText('src/features/layout/workspace-preferences.js'),
     readText('src/features/layout/fullscreen/page-fullscreen-controller.js'),
     readText('src/features/link-preview/link-preview-controller.js')
   ]);

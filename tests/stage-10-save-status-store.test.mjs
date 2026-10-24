@@ -1,4 +1,4 @@
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 import test from 'node:test';
@@ -125,7 +125,12 @@ test('Atomic 10.1 composition gives status authority to Persistence and UI only 
     source('src/features/persistence/ui/workspace-status.js'),
     source('src/features/persistence/index.js'),
     source('src/main.js'),
-    source('public/app/core.js'),
+    Promise.all([
+      source('src/features/documents/ui/document-workspace.js'),
+      source('src/features/menu/shell-menus.js'),
+      source('src/features/persistence/ui/workspace-status.js'),
+      source('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     source('src/features/export/application/export-controller.js'),
     source('tests/architecture/fixtures/production-modules.json')
   ]);

@@ -1,5 +1,5 @@
 import { readCurrentViewMarkup } from './support/current-view-markup.mjs';
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 import { resolve } from 'node:path';
@@ -64,9 +64,14 @@ test('Atomic Task 2.3 sprite has one stable definition for every preserved icon 
 test('compatibility and dynamic callers reference the external sprite without a second geometry authority', async () => {
   const [shell, core, splitPane, events, windowControls, helpDialog, settingsDialog, linkPreview, folderTree, browserTest, clipperView, exportImageView] = await Promise.all([
     readCurrentViewMarkup(),
-    readText('public/app/core.js'),
+    Promise.all([
+      readText('src/features/documents/ui/document-workspace.js'),
+      readText('src/features/menu/shell-menus.js'),
+      readText('src/features/persistence/ui/workspace-status.js'),
+      readText('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     readText('src/features/layout/split/split-pane-controller.js'),
-    readText('public/app/events.js'),
+    readText('src/bootstrap/application-events.js'),
     readText('src/features/window/window-controls-view.js'),
     readText('src/features/help/ui/help-dialog-view.js'),
     readText('src/features/settings/ui/settings-dialog-view.js'),

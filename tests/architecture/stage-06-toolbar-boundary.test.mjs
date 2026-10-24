@@ -1,4 +1,4 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
@@ -23,7 +23,12 @@ test('Atomic 6.5 exposes one Toolbar Boundary controller through the Layout publ
 });
 
 test('Atomic 6.5 removes classic Toolbar Boundary authority but preserves user-configured toolbar visibility', async () => {
-  const core = await read('public/app/core.js');
+  const core = await Promise.all([
+    read('src/features/documents/ui/document-workspace.js'),
+    read('src/features/menu/shell-menus.js'),
+    read('src/features/persistence/ui/workspace-status.js'),
+    read('src/features/layout/workspace-preferences.js')
+  ]).then(sources => sources.join('\n'));
   for (const legacy of [
     'toolbarBoundaryObserver', 'toolbarBoundaryRaf', 'toolbarBoundaryInitialized', 'toolbarBoundaryWrapped',
     'evaluateToolbarBoundary', 'scheduleToolbarBoundaryEvaluation', 'initializeToolbarBoundaryLayout'

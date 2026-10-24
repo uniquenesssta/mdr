@@ -1,7 +1,6 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
 
 import {
   SETTINGS_CHANGED_EVENT,
@@ -302,8 +301,13 @@ test('Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Servic
   const [entry, settingsIndex, core, events, markup, modalBridge, dialog, fieldFactory, navigation, autosave, color, directory] = await Promise.all([
     readFile('src/bootstrap/module-entry.js', 'utf8'),
     readFile('src/features/settings/index.js', 'utf8'),
-    readFile('public/app/core.js', 'utf8'),
-    readFile('public/app/events.js', 'utf8'),
+    Promise.all([
+      readFile('src/features/documents/ui/document-workspace.js', 'utf8'),
+      readFile('src/features/menu/shell-menus.js', 'utf8'),
+      readFile('src/features/persistence/ui/workspace-status.js', 'utf8'),
+      readFile('src/features/layout/workspace-preferences.js', 'utf8')
+    ]).then(sources => sources.join('\n')),
+    readFile('src/bootstrap/application-events.js', 'utf8'),
     readFile('src/features/menu/ui/menu-content-view.js', 'utf8'),
     readFile('src/bootstrap/workspace-content.js', 'utf8'),
     readFile('src/features/settings/ui/settings-dialog-view.js', 'utf8'),

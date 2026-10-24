@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 import test from 'node:test';
@@ -158,7 +158,7 @@ test('invalid client options fail at the adapter boundary', () => {
 
 test('the FileSystem client contains command mapping only and does not own document or Toast behavior', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/file-system-client.js', import.meta.url), 'utf8');
-  const eventSource = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
+  const eventSource = await readFile(new URL('../../../src/bootstrap/application-events.js', import.meta.url), 'utf8');
   const exportSource = await readFile(new URL('../../../src/features/export/application/export-controller.js', import.meta.url), 'utf8');
   const rustFileKind = await readFile(
     new URL('../../../src-tauri/src/local_file/file_kind.rs', import.meta.url),

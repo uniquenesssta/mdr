@@ -1,4 +1,4 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -17,10 +17,12 @@ const LEGACY_HISTORY_AUTHORITY = Object.freeze([
 
 test('Atomic 5.9 removes the classic full-text history authority from every remaining classic app module', async () => {
   const paths = [
-    'public/app/core.js',
-    'public/app/bootstrap.js',
-    'public/app/editor-tools.js',
-    'public/app/events.js'
+    'src/features/documents/ui/document-workspace.js',
+    'src/features/menu/shell-menus.js',
+    'src/features/persistence/ui/workspace-status.js',
+    'src/features/layout/workspace-preferences.js',
+    'src/bootstrap/workspace-startup.js',
+    'src/bootstrap/application-events.js'
   ];
   for (const file of paths) {
     const source = await read(file);
@@ -32,7 +34,7 @@ test('Atomic 5.9 removes the classic full-text history authority from every rema
 
 test('Atomic 5.13 removes the temporary History Adapter wrapper and keeps one direct history authority', async () => {
   const [editorTools, main, editorIndex, historySource, fixture] = await Promise.all([
-    read('public/app/editor-tools.js'),
+    read('src/features/layout/workspace-preferences.js'),
     read('src/main.js'),
     read('src/features/editor/index.js'),
     read('src/features/editor/application/editor-history-adapter.js'),

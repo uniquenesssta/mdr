@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 import test from 'node:test';
@@ -164,7 +164,7 @@ test('the drag/drop client is the sole production owner of the Tauri webview imp
 
 test('desktop platform exposes DragDropPort directly and Import consumes normalized Platform events', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
-  const events = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
+  const events = await readFile(new URL('../../../src/bootstrap/application-events.js', import.meta.url), 'utf8');
   assert.match(desktop, /createDragDropClient\(/);
   assert.match(desktop, /dragDrop: dragDropClient/);
   const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
@@ -179,7 +179,7 @@ test('desktop platform exposes DragDropPort directly and Import consumes normali
 
 test('file interpretation remains in the application layer, not the DragDrop client', async () => {
   const clientSource = await readFile(new URL('../../../src/platform/desktop/drag-drop-client.js', import.meta.url), 'utf8');
-  const eventsSource = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
+  const eventsSource = await readFile(new URL('../../../src/bootstrap/application-events.js', import.meta.url), 'utf8');
   assert.doesNotMatch(clientSource, /read_dropped_file|readDroppedFile|allowedText|\.markdown|image\/|features\/import|classifyImportPath|classifyBrowserFile/i);
   // R13.4 moves event routing into Import; Platform still only transports paths.
   const drop = await readFile(new URL('../../../src/features/import/files/drop-import-controller.js', import.meta.url), 'utf8');

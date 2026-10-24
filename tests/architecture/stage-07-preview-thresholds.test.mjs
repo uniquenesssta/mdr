@@ -1,6 +1,5 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access, readdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { access, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -26,7 +25,12 @@ test('Atomic 7.1 keeps the preview threshold owner and scoped classic read port 
 
 test('Atomic 7.1 callers still read one canonical threshold object after Atomic 7.14 removes classic preview ownership', async () => {
   const [main, core, handler, engine] = await Promise.all([
-    source('src/main.js'), source('public/app/core.js'),
+    source('src/main.js'), Promise.all([
+      source('src/features/documents/ui/document-workspace.js'),
+      source('src/features/menu/shell-menus.js'),
+      source('src/features/persistence/ui/workspace-status.js'),
+      source('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     source('src/features/preview/application/preview-commands.js'),
     source('src/features/preview/pipeline/preview-render-engine.js')
   ]);
@@ -42,7 +46,12 @@ test('Atomic 7.1 callers still read one canonical threshold object after Atomic 
 
 test('Atomic 7.1 keeps one threshold authority across virtual, Worker and enhancement owners after Atomic 7.14', async () => {
   const [core, controller, virtualPreview, worker, enhancementCoordinator, main] = await Promise.all([
-    source('public/app/core.js'),
+    Promise.all([
+      source('src/features/documents/ui/document-workspace.js'),
+      source('src/features/menu/shell-menus.js'),
+      source('src/features/persistence/ui/workspace-status.js'),
+      source('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     source('src/features/preview/application/preview-controller.js'),
     source('src/features/preview/virtual/virtual-preview-controller.js'),
     source('src/features/preview/worker/preview-worker.js'),

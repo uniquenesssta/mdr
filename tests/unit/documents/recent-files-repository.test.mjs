@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -197,9 +197,14 @@ test('R16-08 explicit Recent Files writes preserve one Repository and the Menu r
 
 test('Atomic 6.12 production integration keeps persistence in Documents and removes classic Recent Files menu read authority', async () => {
   const [core, bootstrap, events, main, index, repositorySource, portSource, menuController, importer] = await Promise.all([
-    readText('public/app/core.js'),
-    readText('public/app/bootstrap.js'),
-    readText('public/app/events.js'),
+    Promise.all([
+      readText('src/features/documents/ui/document-workspace.js'),
+      readText('src/features/menu/shell-menus.js'),
+      readText('src/features/persistence/ui/workspace-status.js'),
+      readText('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    readText('src/bootstrap/workspace-startup.js'),
+    readText('src/bootstrap/application-events.js'),
     readText('src/main.js'),
     readText('src/features/documents/index.js'),
     readText('src/features/documents/infrastructure/recent-files-repository.js'),

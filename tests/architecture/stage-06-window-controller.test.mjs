@@ -1,7 +1,6 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 import { constants } from 'node:fs';
 
 const ROOT = new URL('../../', import.meta.url);
@@ -31,7 +30,7 @@ test('Atomic 6.13 exposes the responsibility-split Window feature through one pu
 
 test('Atomic 6.13 removes classic Window authority while preserving close-save policy in the application layer', async () => {
   const [events, main, closeController, closeSavePort, classicPort, persistence] = await Promise.all([
-    read('public/app/events.js'),
+    read('src/bootstrap/application-events.js'),
     read('src/main.js'),
     read('src/features/window/window-close-controller.js'),
     read('src/features/window/close-save-port.js'),

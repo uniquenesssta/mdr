@@ -1,6 +1,5 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, readdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -41,11 +40,16 @@ test('Atomic 7.2 exposes one scoped compatibility view of canonical state and de
 
 test('Atomic 7.2 state mutations remain in PreviewState while Atomic 7.14 orchestration delegates to it', async () => {
   const [core, engine, handler, webClipper, editorTools] = await Promise.all([
-    source('public/app/core.js'),
+    Promise.all([
+      source('src/features/documents/ui/document-workspace.js'),
+      source('src/features/menu/shell-menus.js'),
+      source('src/features/persistence/ui/workspace-status.js'),
+      source('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     source('src/features/preview/pipeline/preview-render-engine.js'),
     source('src/features/preview/application/preview-commands.js'),
-    source('public/app/web-clipper.js'),
-    source('public/app/editor-tools.js')
+    source('src/features/editor/application/find-preview-commands.js'),
+    source('src/features/layout/workspace-preferences.js')
   ]);
   for (const migrated of ['previewRenderVersion','activeResolvedPreviewMode','activePreviewScopeKey','activePreviewFocusChapter','previewWorkerFailureNotified']) {
     assert.doesNotMatch(core, new RegExp(`\\b${migrated}\\b`));
@@ -62,7 +66,7 @@ test('Atomic 7.2 state mutations remain in PreviewState while Atomic 7.14 orches
 test('Atomic 7.2 stable metadata remains authoritative before Recovery View presentation checks after Atomic 7.14', async () => {
   const [engine, editorTools] = await Promise.all([
     source('src/features/preview/pipeline/preview-render-engine.js'),
-    source('public/app/editor-tools.js')
+    source('src/features/layout/workspace-preferences.js')
   ]);
   const stableRead = engine.indexOf('const lastStable = state.snapshot.lastStableResult;');
   const recoveryInspect = engine.indexOf('recoveryView.inspect()', stableRead);

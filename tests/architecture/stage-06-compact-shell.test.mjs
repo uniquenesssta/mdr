@@ -1,4 +1,4 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
@@ -26,7 +26,12 @@ test('Atomic 6.4 exposes Compact Shell and Sidebar Layout only through the Layou
 });
 
 test('Atomic 6.4 removes classic Compact Shell and sidebar projection authority while keeping View Transition burst gating', async () => {
-  const [core, bootstrap] = await Promise.all([read('public/app/core.js'), read('public/app/bootstrap.js')]);
+  const [core, bootstrap] = await Promise.all([Promise.all([
+    read('src/features/documents/ui/document-workspace.js'),
+    read('src/features/menu/shell-menus.js'),
+    read('src/features/persistence/ui/workspace-status.js'),
+    read('src/features/layout/workspace-preferences.js')
+  ]).then(sources => sources.join('\n')), read('src/bootstrap/workspace-startup.js')]);
   for (const legacy of [
     'WINDOW_RESIZE_SETTLE_MS', 'compactShellRaf', 'windowResizeSettleTimer', 'markWindowResizeActivity',
     'evaluateCompactShellLayout', 'scheduleCompactShellEvaluation', 'initializeCompactShellLayout',
@@ -43,7 +48,12 @@ test('Atomic 6.4 removes classic Compact Shell and sidebar projection authority 
 });
 
 test('Atomic 6.4 main composition remains intact after the 6.5 Toolbar Boundary migration', async () => {
-  const [main, core] = await Promise.all([read('src/main.js'), read('public/app/core.js')]);
+  const [main, core] = await Promise.all([read('src/main.js'), Promise.all([
+    read('src/features/documents/ui/document-workspace.js'),
+    read('src/features/menu/shell-menus.js'),
+    read('src/features/persistence/ui/workspace-status.js'),
+    read('src/features/layout/workspace-preferences.js')
+  ]).then(sources => sources.join('\n'))]);
   assert.match(main, /createCompactShellController/);
   assert.match(main, /createSidebarLayoutController/);
   assert.match(main, /sidebarLayoutController\.start\(\)/);

@@ -1,4 +1,4 @@
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -10,8 +10,13 @@ test('Atomic 6.12 public contract keeps Recent Files Menu read-only and command-
   const [controller, readSource, core, bootstrap, main] = await Promise.all([
     read('src/features/menu/recent-files-menu-controller.js'),
     read('src/features/documents/application/recent-files-read-source.js'),
-    read('public/app/core.js'),
-    read('public/app/bootstrap.js'),
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    read('src/bootstrap/workspace-startup.js'),
     read('src/main.js')
   ]);
   assert.match(controller, /source\.subscribe/);

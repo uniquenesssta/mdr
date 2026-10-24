@@ -1,4 +1,4 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
@@ -27,7 +27,12 @@ test('Atomic 6.6 exposes separate page and system fullscreen controllers through
 
 test('Atomic 6.6 removes classic fullscreen authority and direct browser fullscreen listeners', async () => {
   const [core, bootstrap, editorTools, events] = await Promise.all([
-    read('public/app/core.js'), read('public/app/bootstrap.js'), read('public/app/editor-tools.js'), read('public/app/events.js')
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')), read('src/bootstrap/workspace-startup.js'), read('src/features/layout/workspace-preferences.js'), read('src/bootstrap/application-events.js')
   ]);
   assert.doesNotMatch(core, /PAGE_FULLSCREEN_KEY/);
   assert.doesNotMatch(bootstrap, /md_editor_page_fullscreen|pageFullscreen\s*=|page-fullscreen-active|is-page-fullscreen/);

@@ -1,8 +1,7 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import { assertProductionInventory } from '../support/production-inventory.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 import { constants } from 'node:fs';
 
 async function read(path) { return readFile(new URL(`../../${path}`, import.meta.url), 'utf8'); }
@@ -84,8 +83,13 @@ test('R9-12 removes hidden sync globals from Virtual Editor, Hybrid integration 
 });
 
 test('R9-12 remaining classic callers use scoped editor UI commands instead of deleted sync globals', async () => {
-  const core = await read('public/app/core.js');
-  const clipper = await read('public/app/web-clipper.js');
+  const core = await Promise.all([
+    read('src/features/documents/ui/document-workspace.js'),
+    read('src/features/menu/shell-menus.js'),
+    read('src/features/persistence/ui/workspace-status.js'),
+    read('src/features/layout/workspace-preferences.js')
+  ]).then(sources => sources.join('\n'));
+  const clipper = await read('src/features/editor/application/find-preview-commands.js');
   assert.match(core, /coreEditorUiCommandPort\.invoke\('preparePreviewEditorMetrics'\)/);
   assert.match(clipper, /webClipperEditorUiCommandPort\.invoke\('syncEditorSelectionToPreview'/);
   assert.doesNotMatch(clipper, /\bsyncEditorSelectionToPreview\(/);

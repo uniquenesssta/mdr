@@ -1,8 +1,7 @@
 import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 
 const read = path => readFile(path, 'utf8');
 
@@ -78,11 +77,16 @@ test('Atomic 5.12 migrated UI markup contains no inline event handlers', async (
 
 test('Atomic 5.12 removes document-list rendering and migrated dialog event ownership from classic files', async () => {
   const [bootstrap, core, events, editorTools, webClipper, toolbarView] = await Promise.all([
-    read('public/app/bootstrap.js'),
-    read('public/app/core.js'),
-    read('public/app/events.js'),
-    read('public/app/editor-tools.js'),
-    read('public/app/web-clipper.js'),
+    read('src/bootstrap/workspace-startup.js'),
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    read('src/bootstrap/application-events.js'),
+    read('src/features/layout/workspace-preferences.js'),
+    read('src/features/editor/application/find-preview-commands.js'),
     read('src/features/editor/ui/editor-toolbar-view.js')
   ]);
 

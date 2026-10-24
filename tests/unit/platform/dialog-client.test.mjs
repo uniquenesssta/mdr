@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 import test from 'node:test';
@@ -217,7 +217,12 @@ test('the desktop dialog client is the sole production owner of the Tauri dialog
 
 test('desktop platform exposes the dedicated DialogsPort and current callers keep dialog ownership behind Platform', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
-  const core = await readFile(new URL('../../../public/app/core.js', import.meta.url), 'utf8');
+  const core = await Promise.all([
+    readFile(new URL('../../../src/features/documents/ui/document-workspace.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/features/menu/shell-menus.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/features/persistence/ui/workspace-status.js', import.meta.url), 'utf8'),
+    readFile(new URL('../../../src/features/layout/workspace-preferences.js', import.meta.url), 'utf8')
+  ]).then(sources => sources.join('\n'));
   const exportSource = await readFile(new URL('../../../src/features/export/application/export-controller.js', import.meta.url), 'utf8');
   const settingsController = await readFile(
     new URL('../../../src/features/settings/application/settings-controller.js', import.meta.url),

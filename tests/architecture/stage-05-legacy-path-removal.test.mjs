@@ -1,30 +1,25 @@
 import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
-import { execFileSync } from 'node:child_process';
-import { applicationSurfaceOwners } from '../support/application-surface-source.mjs';
 
 const read = path => readFile(path, 'utf8');
 const mustBeMissing = async path => {
   await assert.rejects(access(path), error => error?.code === 'ENOENT');
 };
-const classicSyntaxPaths = [
-  'public/app/core.js',
-  'public/app/editor-tools.js',
-  'public/app/events.js',
-  'public/app/web-clipper.js'
-];
-const awaitableSource = Object.fromEntries(await Promise.all(classicSyntaxPaths.map(async path => [path, await read(path)])));
 
 test('Atomic 5.13 removes hidden textarea compatibility from production callers and presentation', async () => {
   const [html, core, events, previewEngine, clipper, performance, previewCss, exportCss] = await Promise.all([
     readCurrentViewMarkup(),
-    read('public/app/core.js'),
-    read('public/app/events.js'),
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    read('src/bootstrap/application-events.js'),
     read('src/features/preview/pipeline/preview-render-engine.js'),
-    read('public/app/web-clipper.js'),
+    read('src/features/editor/application/find-preview-commands.js'),
     read('src/features/telemetry/browser-telemetry.js'),
     read('src/styles/features/preview.css'),
     read('src/styles/features/export.css')
@@ -42,7 +37,7 @@ test('Atomic 5.13 deletes migrated command/history wrappers instead of retaining
   await mustBeMissing('src/features/editor/compatibility/classic-editor-command-port.js');
   await mustBeMissing('src/features/editor/compatibility/classic-editor-history-port.js');
   const [editorTools, main, editorIndex, fixture] = await Promise.all([
-    read('public/app/editor-tools.js'),
+    read('src/features/layout/workspace-preferences.js'),
     read('src/main.js'),
     read('src/features/editor/index.js'),
     read('tests/architecture/fixtures/production-modules.json')
@@ -56,7 +51,7 @@ test('Atomic 5.13 deletes migrated command/history wrappers instead of retaining
 
 test('Atomic 5.13 preserves unresolved later-stage editor-tools responsibilities while verified Stage 7 migrations leave classic ownership', async () => {
   const [source, mermaidRenderer] = await Promise.all([
-    read('public/app/editor-tools.js'),
+    read('src/features/layout/workspace-preferences.js'),
     read('src/features/preview/render/mermaid-renderer.js')
   ]);
   for (const responsibility of [
@@ -88,7 +83,7 @@ test('Atomic 5.13 routes migrated menu actions through declarative Editor View c
 
 test('Atomic 5.13 web clipper still mutates only DocumentModel through the R13.13 public Editor command', async () => {
   const [clipper, main, importer, editor] = await Promise.all([
-    read('public/app/web-clipper.js'), read('src/main.js'),
+    read('src/features/editor/application/find-preview-commands.js'), read('src/main.js'),
     read('src/features/import/application/import-document-controller.js'),
     read('src/features/editor/application/editor-controller.js')
   ]);
@@ -102,18 +97,4 @@ test('Atomic 5.13 web clipper still mutates only DocumentModel through the R13.1
   assert.match(editor, /model\.replaceRange\(source, 0, length, 'end'\)/);
   assert.match(editor, /model\.replaceRange\('\\n\\n' \+ source, length, length, 'end'\)/);
   assert.doesNotMatch(clipper, /webClipperEditorControllerPort|webClipperEditorCommandPort|\beditor\.value\s*(?:\+?=)/);
-});
-
-
-test('Atomic 5.13 modified classic scripts remain parseable before browser execution', async () => {
-  for (const path of [
-    'public/app/core.js',
-    'public/app/editor-tools.js',
-    'public/app/events.js',
-    'public/app/web-clipper.js'
-  ]) {
-    for (const owner of applicationSurfaceOwners[path]) {
-      assert.doesNotThrow(() => execFileSync(process.execPath, ['--check', owner]));
-    }
-  }
 });

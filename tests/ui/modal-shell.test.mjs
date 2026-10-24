@@ -1,4 +1,4 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import { createExportImageDialogView } from '../../src/features/export/index.js';
 import { ExportProgressDocument } from '../support/export-progress-dom.mjs';
 import assert from 'node:assert/strict';
@@ -349,7 +349,7 @@ test('R16-08 editor dialogs own ModalShell directly without modal events or a se
     'src/features/editor/ui/image-dialog-view.js',
     'src/features/editor/ui/mermaid-dialog-view.js'
   ].map(path => readFile(path, 'utf8')));
-  const eventSource = await readFile('public/app/events.js', 'utf8');
+  const eventSource = await readFile('src/bootstrap/application-events.js', 'utf8');
   const helpDialogSource = await readFile('src/features/help/ui/help-dialog-view.js', 'utf8');
   const settingsDialogSource = await readFile('src/features/settings/ui/settings-dialog-view.js', 'utf8');
   const clipperSource = await readFile('src/features/import/web-clipper/web-clipper-view.js', 'utf8');

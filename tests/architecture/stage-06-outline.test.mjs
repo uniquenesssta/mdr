@@ -1,5 +1,5 @@
 import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -51,7 +51,12 @@ test('Atomic 6.8 consumes model/preview heading indexes and never reparses the f
 
 test('Atomic 6.8 removes classic Outline state/render/parser authority while Atomic 7.14 Preview consumes Outline through direct injection', async () => {
   const [core, bootstrap, events, renderEngine, scroll] = await Promise.all([
-    read('public/app/core.js'), read('public/app/bootstrap.js'), read('public/app/events.js'),
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')), read('src/bootstrap/workspace-startup.js'), read('src/bootstrap/application-events.js'),
     read('src/features/preview/pipeline/preview-render-engine.js'), read('src/main.js')
   ]);
   for (const legacy of [

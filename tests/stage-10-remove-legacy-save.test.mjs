@@ -2,7 +2,7 @@ import { readCurrentViewMarkup } from './support/current-view-markup.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { readFileSync } from './support/application-surface-source.mjs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createSaveController, createSaveStatusStore } from '../src/features/persistence/index.js';
@@ -98,7 +98,12 @@ test('Atomic 10.12 keeps export free of persistence policy after R13.13 moves im
 });
 
 test('Atomic 10.12 core.js dispatches persistence intents and owns no manual/autosave implementation', () => {
-  const source = read('public/app/core.js');
+  const source = [
+    read('src/features/documents/ui/document-workspace.js'),
+    read('src/features/menu/shell-menus.js'),
+    read('src/features/persistence/ui/workspace-status.js'),
+    read('src/features/layout/workspace-preferences.js')
+  ].join('\n');
   assert.match(source, /requestDocumentPersistence/);
   assert.match(source, /prepareDocumentTransition/);
   assert.match(source, /invoke\('saveCurrentFile'\)/);
@@ -107,7 +112,7 @@ test('Atomic 10.12 core.js dispatches persistence intents and owns no manual/aut
 });
 
 test('Atomic 10.12 events.js routes edit autosave and Ctrl-S variants through explicit commands only', () => {
-  const source = read('public/app/events.js');
+  const source = read('src/bootstrap/application-events.js');
   assert.match(source, /requestDocumentPersistence/);
   assert.match(source, /invoke\('saveCurrentFile'\)/);
   assert.match(source, /invoke\('saveAsMarkdown'\)/);

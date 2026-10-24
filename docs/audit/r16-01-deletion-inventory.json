@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "R16-01",
-  "baselineCommit": "a2fc2669a1dffbcdf4b89a571d276ba5b182667f",
+  "baselineCommit": "24bd196a751394c382076d54078a2218d039cd99",
   "deletionAuthorized": false,
   "scope": "Conservative tracked import/HTML/test/build/Rust evidence; no file deletion or runtime migration.",
   "checkedEntrypoints": [
@@ -151,7 +151,7 @@
     },
     {
       "path": ".github/workflows/r12-14.yml",
-      "sha256": "f0663f60da33cd00cf8dfb181df06cade7e9ba4add2aa0b44d08bd0becaa222b"
+      "sha256": "5b96adc0c4592f09ffd0338d99b896536c71659676079e469120548ee294430c"
     },
     {
       "path": ".github/workflows/r9-12-candidate.yml",
@@ -2771,15 +2771,15 @@
     },
     {
       "path": "tests/architecture/stage-04-taskbook-conformance.test.mjs",
-      "sha256": "f3d489f462f76cb7985383da8253c0b645e038205d5d30cd7f6eb29ea998b482"
+      "sha256": "2dfb2219d49cf590a4f2edec1b7a50e4ebc77902108e62d80eb1552d5b15d439"
     },
     {
       "path": "tests/architecture/stage-05-basic-command-boundary.test.mjs",
-      "sha256": "e0c95295df02b791c98286d922a4e3e51313a6ce7b06d6b159fade498d12eebd"
+      "sha256": "bf0e673bdba567485795230e2d7b126ccab8514da2a20401db27d5d590819b85"
     },
     {
       "path": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
-      "sha256": "47d097eccc0bd8b4eed3262c18742a037cff36614f1691f9643e21bdd5aadda9"
+      "sha256": "2935bb09427d88bf063170588ee12ecd0607c33056bcaae420b900d7ddcb99e8"
     },
     {
       "path": "tests/architecture/stage-05-editor-infrastructure-conformance.test.mjs",
@@ -2787,19 +2787,19 @@
     },
     {
       "path": "tests/architecture/stage-05-find-replace-boundary.test.mjs",
-      "sha256": "d551be2e81d776c7a6834b19baf5dc594a14df8c481d1832248fc0540e52af63"
+      "sha256": "6631378f73c4ba95c80c1ea692c0c1bbc53e7e478f6988d983b95b35a47c1800"
     },
     {
       "path": "tests/architecture/stage-05-history-authority.test.mjs",
-      "sha256": "ae2a5963025f48db05f91aaeaf2be7a1562a7361bf89487d0900b94341b23bb1"
+      "sha256": "2c645b40ddd8130ec81088236daec0b1708feb394a5214d0df3f0c8b7f00f540"
     },
     {
       "path": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-      "sha256": "eeb25307b8532c90074261c5ca6728e2eb2290e822664ae481ef7f4ccb8bbd25"
+      "sha256": "849ab10dfa2176bf9f069bdea38ca7e71836cb6920a2265e646ea0b2d764a82d"
     },
     {
       "path": "tests/architecture/stage-06-compact-shell.test.mjs",
-      "sha256": "a09ef4824afea4f875077c9bee2e32d7cd4776254f7f883456f19bc406a75d94"
+      "sha256": "814c22e166679a22f6995d7fc90b3462013299d88220d83fe3862ce604e6e0da"
     },
     {
       "path": "tests/architecture/stage-06-destroy-validation.test.mjs",
@@ -2807,15 +2807,15 @@
     },
     {
       "path": "tests/architecture/stage-06-folder-tree.test.mjs",
-      "sha256": "7ab59315aedc0b424f8a05950fc73d4a453efd41edbe370409a650e1e4e6c208"
+      "sha256": "2d1f9de53af2a25217f8e5c03027bf5013ea8fb5f0d91aee56461bce9f367e53"
     },
     {
       "path": "tests/architecture/stage-06-fullscreen.test.mjs",
-      "sha256": "96022b9b1149f307f100c4ef73fe5e36d4324d9bd74f3a25d65c20d134d54925"
+      "sha256": "f2127928aca910032330e0a15a85c245bc9c7e1b7558fae6b6f858642064b4c5"
     },
     {
       "path": "tests/architecture/stage-06-layout-state.test.mjs",
-      "sha256": "fab9cfd6579e8fab804a95e392d5925e686a240d1f80383641015def2b2566c4"
+      "sha256": "8cee743827aaa24b859dc793a279929506eed9f6f1fdec79b5ad6a1db27c6474"
     },
     {
       "path": "tests/architecture/stage-06-menu-model.test.mjs",
@@ -2823,39 +2823,39 @@
     },
     {
       "path": "tests/architecture/stage-06-outline.test.mjs",
-      "sha256": "93409a2fa1fdf456c467af13a4d0ec61dd99dea6126b97ef3aa4708f717e3e4e"
+      "sha256": "f0910348c97fdf3ee14d792cb3d2ee60a4a58f7f51343a765639c7b1680c306f"
     },
     {
       "path": "tests/architecture/stage-06-recent-files-menu.test.mjs",
-      "sha256": "adf95807f07506676c11dc8556aa0c7e8c475ff1b5250be7af70fcb70f4294a8"
+      "sha256": "c6aed4805653f9b479b894b3a7bf55f1427a0163facfb2b8c58fdbdb8b24c8c4"
     },
     {
       "path": "tests/architecture/stage-06-sidebar-resize.test.mjs",
-      "sha256": "b58b6574fd086c7fa8d8a2ff6b62115848bb1fbc95f99ee26bc2d5e6c69c28df"
+      "sha256": "584da3c89a2e2bf6b007a2523158ba553e7d03c8f13f75476cd16a4b77531367"
     },
     {
       "path": "tests/architecture/stage-06-sidebar-tabs.test.mjs",
-      "sha256": "b8d0e9b358ac07a9dd9840ea547eb78ecd3561b6e93503b17141bb130ded037b"
+      "sha256": "2fab5758e4a42afcc96be1a2e4c8a8004fc9ab0207da3559ecb86e08d484d27a"
     },
     {
       "path": "tests/architecture/stage-06-split-controllers.test.mjs",
-      "sha256": "88f9a1f7b306566a2627aa15cd47d0afef327ceeeb21054a7341f48290c9530f"
+      "sha256": "62203162394eb5aedba64211a31fd31d911c9535a70f7528f7036c949da5e0a4"
     },
     {
       "path": "tests/architecture/stage-06-submenu-positioner.test.mjs",
-      "sha256": "5cb2845daa5524ecb59d0d64fddf91e91fd0069e159180bcea98d03be6e791de"
+      "sha256": "552acf3f4482083c2a4272aeda6a6b913d2e049a6509b67ec45f1620756587f2"
     },
     {
       "path": "tests/architecture/stage-06-toolbar-boundary.test.mjs",
-      "sha256": "b144a21f47e0bdb3ff9d553d050824c5d2b74c9d17467664dd21d2974620fbe4"
+      "sha256": "388b8e1bdcbc1c2450c55e0f62ff0c1d522e44eca26f782ce68d2b43bf13dc5d"
     },
     {
       "path": "tests/architecture/stage-06-window-controller.test.mjs",
-      "sha256": "bbccaa518488ac6cf10d8a328b8ce4eef3f03e084771b922329f3e70f978fb33"
+      "sha256": "f1b78ca8fb7536318a923461f0c7dc9b079278b12756c105a4de0d6c8bc40fe5"
     },
     {
       "path": "tests/architecture/stage-07-preview-dom-renderers.test.mjs",
-      "sha256": "0e3ae2a67c475718cda9a7063e6420522f1532faf2c5e7b3d18b1b7a34d17747"
+      "sha256": "5fd83e718c281becb74b29542cda7c06f9f4d36f37688e8c5ecbb321d6fa007e"
     },
     {
       "path": "tests/architecture/stage-07-preview-enhancement-coordinator.test.mjs",
@@ -2863,19 +2863,19 @@
     },
     {
       "path": "tests/architecture/stage-07-preview-focus-controller.test.mjs",
-      "sha256": "4bb4b5d2ddfa0f3ced5b4d32bb9a446b663ad2de508602b543ba161943abb866"
+      "sha256": "f97590a54e73df2f70af5c6b6428119edf694579ab6c1078de5387b258213c16"
     },
     {
       "path": "tests/architecture/stage-07-preview-layout-stability.test.mjs",
-      "sha256": "651c085f8c9d6ac3650dd0bb501a3431322cf0a6f06945309c2c0b9839dcf441"
+      "sha256": "c59baef9ef568e751ed110f2b2c4b76b8e458e0b3512d84d96c9cddd01a82ac3"
     },
     {
       "path": "tests/architecture/stage-07-preview-legacy-deletion.test.mjs",
-      "sha256": "ca29b476db096f6b0aebc4fe60b1239414926b8dc176815f4c0355c568254be3"
+      "sha256": "6811fd632575afae355c314288e8e7ab70e2452f46a4c8476bbb8a5354a4c778"
     },
     {
       "path": "tests/architecture/stage-07-preview-mode-resolver.test.mjs",
-      "sha256": "47dc5854163750af264346d58001af1fe089677659150e618ad751f90d6bd9e3"
+      "sha256": "ee8703978a16e6a915c025a2638e64b1dba5ffc8c2872234b8f08fe9bde11cc2"
     },
     {
       "path": "tests/architecture/stage-07-preview-recovery-view.test.mjs",
@@ -2887,15 +2887,15 @@
     },
     {
       "path": "tests/architecture/stage-07-preview-scheduler.test.mjs",
-      "sha256": "660a86fbdb6ebe6e575085921e503f62a1d6fa47cdb6c9b75be44bcdc71d6985"
+      "sha256": "7954bbb08940dd196a35bd819182726879473bf4d9c4e8235fa9894b813d1f5f"
     },
     {
       "path": "tests/architecture/stage-07-preview-state.test.mjs",
-      "sha256": "851f033e6ca58f3201d2d7156286f6290268571c9ebe9244f372c5c530b609a6"
+      "sha256": "40d9c59ed092457ce70143ffc5c809486eb04c062fd96b5ea8a1ffcb0e0d14c3"
     },
     {
       "path": "tests/architecture/stage-07-preview-thresholds.test.mjs",
-      "sha256": "69002cbdeb675e267b27a2372cfb0e624dc36090f6a1c143ad78e40f5b8ea695"
+      "sha256": "eb55be3ead99f9938ad4f3e9b0b6721c644eb10ac5db5de04db21cda1fdf3c66"
     },
     {
       "path": "tests/architecture/stage-07-preview-virtual-window.test.mjs",
@@ -2967,11 +2967,11 @@
     },
     {
       "path": "tests/architecture/stage-09-editor-scroll-mapper.test.mjs",
-      "sha256": "236e8f02c7ad650a7cf00e1e58cad0db57e7badc7b9808802fa978f9459f70cb"
+      "sha256": "fc75f1debb70a02002efda10e7e05537281238b7cc5700a7f3986be8efd70d1b"
     },
     {
       "path": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
-      "sha256": "ecddc343ee0396c1b501f8fca338843318e56b350cc28c066d9c669eed78e14f"
+      "sha256": "58e81db656b0baa9f8d496c101b899c85dec1fac8603556af16c9b7fe68e73a1"
     },
     {
       "path": "tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs",
@@ -2979,7 +2979,7 @@
     },
     {
       "path": "tests/architecture/stage-09-preview-scroll-mapper.test.mjs",
-      "sha256": "3b815b850ae3dbe33368c2f1eb8e9f041ca86745e3e7aeb59e18ea6aac9c68e1"
+      "sha256": "64dcc976899615ec65a3ac530054a9f531c35c8bbf9fb7a4d05daf25831be8b8"
     },
     {
       "path": "tests/architecture/stage-09-scroll-contract-freeze.test.mjs",
@@ -2999,7 +2999,7 @@
     },
     {
       "path": "tests/architecture/stage-09-selection-feedback-guard.test.mjs",
-      "sha256": "e41591943b920afb0e8d5f31a2cd5a1cfefde1298a024b5808f1dca85f40c633"
+      "sha256": "bb93228e58e686fc72e7699d4bce8090e1ecdc29524ed39fb7c154920501e1f6"
     },
     {
       "path": "tests/architecture/stage-09-selection-highlight-session.test.mjs",
@@ -3275,7 +3275,7 @@
     },
     {
       "path": "tests/folder-file-tree.test.mjs",
-      "sha256": "167101413c8d8bf3477e055922fe14c5ad51b25070ef08dfecf06cbb296b8750"
+      "sha256": "447385f6004d92ed267748c9ce1ec939924358cde09dce829676304d63b4a452"
     },
     {
       "path": "tests/helpers/lifecycle-resource-ledger.mjs",
@@ -3311,7 +3311,7 @@
     },
     {
       "path": "tests/presentation-renderer-contract.test.mjs",
-      "sha256": "436eeae51159d4703f43f75d2e08f6eeec03a439951d810fe75672435e288c29"
+      "sha256": "4d10d000ac6306f3ee8ad5c17f65fb2e9a5514095593d1efccc51ecc09f3b309"
     },
     {
       "path": "tests/stage-01-handoff.test.mjs",
@@ -3323,7 +3323,7 @@
     },
     {
       "path": "tests/stage-06-recent-files-menu.test.mjs",
-      "sha256": "eeead144ea2067b294d4cad61fe4a9a3f3a280f6906f8b2c443553dce9bcdf65"
+      "sha256": "ff8d7d61a7cdc01111bca688cea5bdb187b4f50e668cb58869551a30dfabd907"
     },
     {
       "path": "tests/stage-06-submenu-positioner.test.mjs",
@@ -3443,7 +3443,7 @@
     },
     {
       "path": "tests/stage-10-autosave-controller.test.mjs",
-      "sha256": "93ab8c818f57195a02a2a8f357ba042e8a23f687dcd5e1012e7ff1971adea769"
+      "sha256": "c87ef280042ca6dbe2696626124c088f41af763421bc9672d2685142ea95c4f6"
     },
     {
       "path": "tests/stage-10-browser-document-repository.test.mjs",
@@ -3451,7 +3451,7 @@
     },
     {
       "path": "tests/stage-10-close-save-controller.test.mjs",
-      "sha256": "9e308f1b03450d405fdafed02b37f881771fbc5b7f426af8879139e7e7ffe908"
+      "sha256": "45f59481fac859e15723ef06c513d151a1d0205fe3c86bbf73fd14796e4f6c5e"
     },
     {
       "path": "tests/stage-10-load-controller.test.mjs",
@@ -3467,7 +3467,7 @@
     },
     {
       "path": "tests/stage-10-native-search-adapter.test.mjs",
-      "sha256": "6471cff9978ecf1efb77f52edc3ec8d323e21c17c940d6ec07103b6f17088326"
+      "sha256": "7698cb4be6064c192f11628b345c7a579ea9174a504c87270103331b1482c332"
     },
     {
       "path": "tests/stage-10-native-segmented-loader.test.mjs",
@@ -3479,15 +3479,15 @@
     },
     {
       "path": "tests/stage-10-remove-legacy-save.test.mjs",
-      "sha256": "4a642313a7731f698b95e5c3fda5d9bbce67949178494bdb273f05e6cdcc306f"
+      "sha256": "45d0f1b74019d70e78a9c023cce540643963e97a99587875e298e2e30f00b0f9"
     },
     {
       "path": "tests/stage-10-save-controller.test.mjs",
-      "sha256": "ca6f9d8b2dbf66926baf7482d9f38ccbc71e87991f752ed968d5424731dd8107"
+      "sha256": "92e49348ac5325cebbeb2a111a76f1c813ca3f2d93bc1aa5138eeffef9c861b7"
     },
     {
       "path": "tests/stage-10-save-status-store.test.mjs",
-      "sha256": "bab0a69d3f176d8779b13692bc0ff449201d71f656ac9ca7b27832231883d3b4"
+      "sha256": "40f7bae1fdb62dbb154c3b62f0ea31880f99e73d883a5e05152e1466a6541d2c"
     },
     {
       "path": "tests/stage-11-document-store-commands.test.mjs",
@@ -3591,23 +3591,23 @@
     },
     {
       "path": "tests/stage-13-drop-import.test.mjs",
-      "sha256": "bb3671c7ad4c09394c251072466d89df7afac4895270fac97cc98cdc325e2981"
+      "sha256": "c59d8b04370078838a3fd45033778e4722df261a2b8a5dd5c7af7e885cbadbfc"
     },
     {
       "path": "tests/stage-13-drop-overlay.test.mjs",
-      "sha256": "de657775c773ed18170d9a929ff32f8230782bcd8fa5dc41a6ac1be6cf26979f"
+      "sha256": "ddbd06c725399ac82309b4606bcc27f3a57014427e4c2be6dc14675570bc045f"
     },
     {
       "path": "tests/stage-13-file-import.test.mjs",
-      "sha256": "b3960926eebcc9139b031cf4f577ed791c515368d9a516c2616a8537e2701773"
+      "sha256": "e9c9d05a3180fb338abc5074691935626869c4686ac94e26313e9fe98c0ccd1e"
     },
     {
       "path": "tests/stage-13-file-type-classifier.test.mjs",
-      "sha256": "45b6746cd2bb67467786698e9d804da4ab6e042a60f49887f8ffb82637e63ecb"
+      "sha256": "44668d24a463f27f021107ea64435d8134f5d3b00b82e90fd007b5fca4040c93"
     },
     {
       "path": "tests/stage-13-html-extractor.test.mjs",
-      "sha256": "ee77b9b2ba82a76ded39f30f9ad614bcdefbfd55d04f471e390deec213d96b52"
+      "sha256": "e0aa874af9ca7648c00612deeaccdf3bd62745e52b5c23c8abe2d116d976b8e4"
     },
     {
       "path": "tests/stage-13-html-markdown.test.mjs",
@@ -3623,7 +3623,7 @@
     },
     {
       "path": "tests/stage-13-image-policy.test.mjs",
-      "sha256": "92de657842e8bd4c6b4f5a910b78febf36e9870630922130959a00de26b3333f"
+      "sha256": "5f334fb5dfcdb925ca1a4be594146ce9105d2b89b182c8a8d2475d610fdfde1b"
     },
     {
       "path": "tests/stage-13-import-chain-evidence.test.mjs",
@@ -3639,7 +3639,7 @@
     },
     {
       "path": "tests/stage-13-web-fetch-coordinator.test.mjs",
-      "sha256": "4a8eb0622de2487079bbd33935190cbb30d895310e7e7db326fbc3f33e618397"
+      "sha256": "24ce610c1e8f630d65535383045ce9b9cd88e53b4f3c398acfde5eb77c80ecaa"
     },
     {
       "path": "tests/stage-13-web-hardening.test.mjs",
@@ -3723,7 +3723,7 @@
     },
     {
       "path": "tests/stage-14-settings-effects.test.mjs",
-      "sha256": "65b12ab5871a7f8b6f11342341816f56bca78565dac0ed2f41bc45c863f85a46"
+      "sha256": "89baadd576574a7f8ee72d237ffd624a8a61f5f51860ba74bc930eb04768a7f4"
     },
     {
       "path": "tests/stage-14-word-exporter.test.mjs",
@@ -3787,7 +3787,7 @@
     },
     {
       "path": "tests/stage-16-deletion-inventory.test.mjs",
-      "sha256": "ab52bd813b234fb9b36b5a170f0ed38c7ad5ca1c3f16d8751900024c7b7bd4f3"
+      "sha256": "8a3a5c96f0ae5fe51c672a33989e707338cfde203467a627207594d844861350"
     },
     {
       "path": "tests/stage-16-directory-api.test.mjs",
@@ -3795,7 +3795,7 @@
     },
     {
       "path": "tests/stage-16-esm-application.test.mjs",
-      "sha256": "a4eb983a43b0b0148cb1d42d83712ae4175d186a3d5d132f11697346a747c6d6"
+      "sha256": "d8097e04df824c0107f2b187bd4fb204c81bdef6fa70abc4d4edde980594451d"
     },
     {
       "path": "tests/stage-16-generated-cleanup.test.mjs",
@@ -3810,8 +3810,8 @@
       "sha256": "5dba9d846489ad99dc9dc1e32e8faecf4d3d7ae883b50f83db959ea99c5d563a"
     },
     {
-      "path": "tests/support/application-surface-source.mjs",
-      "sha256": "b1176d8d14ed5e0482f01de562db2269e7b0e446abd31d0f454d3f092afa47a3"
+      "path": "tests/stage-16-test-cleanup.test.mjs",
+      "sha256": "193d713fd4cf8657c1ab7c36ad2e7ce0b63b84d8b8a04f062565d9e907aebe45"
     },
     {
       "path": "tests/support/current-rust-contracts.mjs",
@@ -3831,7 +3831,7 @@
     },
     {
       "path": "tests/support/export-vm-host.mjs",
-      "sha256": "cb34d970a19e20a209aff9b34bd089b3e53c3537a266ef9b5d44141d7042d3f0"
+      "sha256": "56697e9912a0d82ee6219a141894d01f6ad2eb462876b55515a2916d0b1a944c"
     },
     {
       "path": "tests/support/performance-log/frontend-payload.mjs",
@@ -3850,8 +3850,12 @@
       "sha256": "c7fe1954b9d01a83559940d3e6a3ab25b64583e333968b96cdc6d6fb34be8958"
     },
     {
+      "path": "tests/support/test-cleanup-audit.mjs",
+      "sha256": "eac02a248d1ac1961cc84060b101769889b76078c5d8bace9451b9105a7dad0b"
+    },
+    {
       "path": "tests/svg-sprite.test.mjs",
-      "sha256": "d42a27f0fb6d02ee3d0e9f4640c17b06439809ab22612bcbbd170ee54e06a7f3"
+      "sha256": "9c611a04bf02964224a4e55c498f12d850414db73b1978fe225c74a25eeba808"
     },
     {
       "path": "tests/ui/app-shell.test.mjs",
@@ -3887,7 +3891,7 @@
     },
     {
       "path": "tests/ui/modal-shell.test.mjs",
-      "sha256": "d4b7033a9c70930fe3d9a9dd44baa70db999300e4fedc07af1676f103fd79542"
+      "sha256": "7a44396766d0188c272bc2032ab556b17b85676c95bd97d90cac0934b4475e8b"
     },
     {
       "path": "tests/ui/responsive-shell.test.mjs",
@@ -3899,11 +3903,11 @@
     },
     {
       "path": "tests/ui/style-layering.test.mjs",
-      "sha256": "99a32f028e12c6f9430ccfc8898e164db815bd1469395fb5a2662830fff82457"
+      "sha256": "5ae32918b49aee1c70ab1e70b9551fab548705df414ecc4acf9b7afa144ef5f0"
     },
     {
       "path": "tests/ui/style-test-utils.mjs",
-      "sha256": "9ba209129086ccb4d9d1b2959c264b92a759b9e6f0bf92dcb8b9ab25699ca8ef"
+      "sha256": "75062dbbdc30f1ef1b8d9852b9f622542fdcefc96ba46985a47f4ddea896fd2a"
     },
     {
       "path": "tests/ui/themes.test.mjs",
@@ -3911,15 +3915,15 @@
     },
     {
       "path": "tests/unit/documents/document-domain.test.mjs",
-      "sha256": "25d0f40f54c784926b621515d48bb55be59a267c6f36d58d118f95f7a3856ce5"
+      "sha256": "b8a394607246567b8f0084498f00800f2a08054209d1c8a218f2816f5ad0d468"
     },
     {
       "path": "tests/unit/documents/document-session-controller.test.mjs",
-      "sha256": "78a8ee22e95c99522794a336d5209e8e800c2b21643cb00a838e3c9e90cbf673"
+      "sha256": "3046ab2e5d5e1a3c37c5b216d65a34848b12fe66049b329fcca47bcf2ac3d260"
     },
     {
       "path": "tests/unit/documents/document-session-store.test.mjs",
-      "sha256": "8d3729f53625ec4b45c3a849225b5fdd6830c28b97d6c9a0221349b131c524a1"
+      "sha256": "0c18664d328a4cffdd0f22d938a1d58f89750694313c2cdeeb340dd9fcaae758"
     },
     {
       "path": "tests/unit/documents/document-ui.test.mjs",
@@ -3931,7 +3935,7 @@
     },
     {
       "path": "tests/unit/documents/recent-files-repository.test.mjs",
-      "sha256": "53e1541b0bb453b27ea594a5abc0d89346d83816d5b168a841aa0fe490c8141a"
+      "sha256": "1d2eae62b791c9068ec547b3437b31074c58be6ae1ff3e8fe2caa4edbb8f0174"
     },
     {
       "path": "tests/unit/editor/codemirror-adapter.test.mjs",
@@ -3947,7 +3951,7 @@
     },
     {
       "path": "tests/unit/editor/editor-controller.test.mjs",
-      "sha256": "c56545720b87a06ebeac61b16fd85ce28869e534e797d152d7e2eb973167fd6d"
+      "sha256": "a3bc8fd819065d7e09ccae571fc3ac5f2fd8214ce9c886515c74c7da69785543"
     },
     {
       "path": "tests/unit/editor/editor-history-adapter.test.mjs",
@@ -3967,7 +3971,7 @@
     },
     {
       "path": "tests/unit/help/help-feature.test.mjs",
-      "sha256": "93c4dfa3e4a45e5871111adcc8d716f6e65b7c044957c4f79f02fea05a2d01ef"
+      "sha256": "ea409d96759d0f77ae7f508614a8503ea9ea44d348df0f3fd79097a3c21b2793"
     },
     {
       "path": "tests/unit/i18n/fixtures/locale-key-compatibility.json",
@@ -3979,7 +3983,7 @@
     },
     {
       "path": "tests/unit/i18n/i18n-service.test.mjs",
-      "sha256": "45577e8cc4e01c96073c11f708b55b101e2f47ff9aa0d20a24ed4ff402eb6dc7"
+      "sha256": "32a37c5d647c237eb10423557b20d8a0a8f37f9625b912f25722ac26ca2ed6cb"
     },
     {
       "path": "tests/unit/i18n/locale-key-audit.test.mjs",
@@ -3987,15 +3991,15 @@
     },
     {
       "path": "tests/unit/i18n/locale-registry.test.mjs",
-      "sha256": "2b9bd6aad71134f5702cc6a3e4737a2b5dc99682ae62c31985c986093f5f401c"
+      "sha256": "457e56b869b2f32de47736ca84174da1706a8b43d2f89fd96b967be9b3797cfd"
     },
     {
       "path": "tests/unit/i18n/settings-locale-controller.test.mjs",
-      "sha256": "be90c66e6fdc6d6a9ec32b11044ec3a048f42a34a620813b99511c0751d83bdc"
+      "sha256": "f4fc2c6f66f9c230f4e112cbaecc88a94de2c30fd63966c7ebb288c1fd2321b4"
     },
     {
       "path": "tests/unit/i18n/translation-bindings.test.mjs",
-      "sha256": "1b191e8a169d51fae875711f52b22f984b994b587fc3dce31fe2cca926af576a"
+      "sha256": "acc29e63fc4cc2edc457cd8806fd1b76148775d670c5ce979408b6450319ccd5"
     },
     {
       "path": "tests/unit/layout/classic-layout-state-port.test.mjs",
@@ -4123,7 +4127,7 @@
     },
     {
       "path": "tests/unit/platform/dialog-client.test.mjs",
-      "sha256": "28edd498fb272003c74749b0571414c3cee94022a666cf121a64e07d23de303a"
+      "sha256": "296dbba26a82a27e1d5beda307f016f1190de736e96c61fbfdd84ace207f97c8"
     },
     {
       "path": "tests/unit/platform/document-store-client.test.mjs",
@@ -4131,11 +4135,11 @@
     },
     {
       "path": "tests/unit/platform/drag-drop-client.test.mjs",
-      "sha256": "592be297edbce3c05481f98e283df0e74140ef45718e83870b5f76321afd3de9"
+      "sha256": "acabb962347d638d4b525422a15b503b6453586caa292369abb2234829991569"
     },
     {
       "path": "tests/unit/platform/file-system-client.test.mjs",
-      "sha256": "799cf6097a390fc39f5e3de9214d7e3626f24b0a5dcf9a21967e8a1f7bc5059b"
+      "sha256": "26ec445a89a1a75f128c7bd23aa2c9dde0f91c5cb5689c595de4cfa56247c58e"
     },
     {
       "path": "tests/unit/platform/fixtures/platform-port-inventory.json",
@@ -4155,7 +4159,7 @@
     },
     {
       "path": "tests/unit/platform/platform-cutover.test.mjs",
-      "sha256": "cd1ebab22830d81aee5dd3f6dd7ac93f6083a2ae4b3f3a6b12c983336f95ec8d"
+      "sha256": "73e9a8251fff249a2ad5e90bb7ecc8cdfc03bed115ee2b6cb4d9fe50df756c74"
     },
     {
       "path": "tests/unit/platform/platform-detection.test.mjs",
@@ -4167,7 +4171,7 @@
     },
     {
       "path": "tests/unit/platform/web-fetch-client.test.mjs",
-      "sha256": "67b76719855bdb8a76a9a80ed8f67a1ff16858234ecd93b2c3ca1908429cc059"
+      "sha256": "09e5aff40e3b69a3f1852fe7e30097b3079b9ddbf00a1b9a5554b049f3678c2f"
     },
     {
       "path": "tests/unit/platform/window-client.test.mjs",
@@ -4303,7 +4307,7 @@
     },
     {
       "path": "tests/unit/settings/classic-settings-store-port.test.mjs",
-      "sha256": "742f7ae54ff45e307a6a9bb6108426c7271275623c3c6b1aff9bd9954d45ec6a"
+      "sha256": "c99eba1fe8348dc4f08825c12377347c859be1e9cbea980743fa0d5fa2cb7956"
     },
     {
       "path": "tests/unit/settings/settings-repository.test.mjs",
@@ -4311,7 +4315,7 @@
     },
     {
       "path": "tests/unit/settings/settings-schema.test.mjs",
-      "sha256": "ad0ac89bba7a53ac918bc7e955ba025258e1c81d67ddac570412d4a804aaae6f"
+      "sha256": "53b34b61051f6cad9e6a14d4eb4c9a527e4bb8ef876339fd9d875c7385e4a07a"
     },
     {
       "path": "tests/unit/settings/settings-sections.test.mjs",
@@ -4323,7 +4327,7 @@
     },
     {
       "path": "tests/unit/settings/settings-ui.test.mjs",
-      "sha256": "4e5ffd6cc1904340763e123ad8dc4351327d4bbed3364b70fd85ddbf00cdcde2"
+      "sha256": "7bcc6ff3da85574835a52f840a084871cffd2d7d6d746aa890261c97002c42c7"
     },
     {
       "path": "tests/unit/sidebar/classic-folder-tree-controller-port.test.mjs",
@@ -4387,7 +4391,7 @@
     },
     {
       "path": "tests/unit/theme/theme-service.test.mjs",
-      "sha256": "cdd4a05d64027a40e0dc72b2040e0a08dc1dab94a7c90962a6228e2d4bb7d3e0"
+      "sha256": "0d59b244336a04a5fc1996579b659438b44062dd729a77a16ee728f3aa013cf2"
     },
     {
       "path": "tests/unit/window/close-save-port.test.mjs",
@@ -4430,7 +4434,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "756e75d06c0485dc4b2507988c55a1f3030896fd4e96a63a739e8ed056af09e6",
+  "inputSha256": "a118c09a134f980aca046cf8541db4039593ad9bd5d46045fc0506b5ee168cd0",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -5131,7 +5135,7 @@
     },
     {
       "from": "tests/stage-16-esm-application.test.mjs",
-      "line": 19,
+      "line": 23,
       "kind": "computed-import"
     },
     {
@@ -5261,118 +5265,6 @@
           "line": 216
         },
         {
-          "from": "tests/architecture/stage-04-taskbook-conformance.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 68
-        },
-        {
-          "from": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 81
-        },
-        {
-          "from": "tests/architecture/stage-05-history-authority.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 21
-        },
-        {
-          "from": "tests/architecture/stage-06-compact-shell.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 29
-        },
-        {
-          "from": "tests/architecture/stage-06-fullscreen.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 30
-        },
-        {
-          "from": "tests/architecture/stage-06-layout-state.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 103
-        },
-        {
-          "from": "tests/architecture/stage-06-layout-state.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 38
-        },
-        {
-          "from": "tests/architecture/stage-06-outline.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 54
-        },
-        {
-          "from": "tests/architecture/stage-06-recent-files-menu.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 34
-        },
-        {
-          "from": "tests/architecture/stage-06-sidebar-resize.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 30
-        },
-        {
-          "from": "tests/architecture/stage-06-sidebar-tabs.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 22
-        },
-        {
-          "from": "tests/architecture/stage-06-split-controllers.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 32
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-layout-stability.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 35
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-legacy-deletion.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 60
-        },
-        {
-          "from": "tests/stage-06-recent-files-menu.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 14
-        },
-        {
-          "from": "tests/stage-10-autosave-controller.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 233
-        },
-        {
           "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "public/app/bootstrap.js",
           "surface": "tests",
@@ -5380,11 +5272,18 @@
           "line": 23
         },
         {
-          "from": "tests/support/application-surface-source.mjs",
+          "from": "tests/stage-16-esm-application.test.mjs",
           "target": "public/app/bootstrap.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 14
+          "line": 12
+        },
+        {
+          "from": "tests/support/test-cleanup-audit.mjs",
+          "target": "public/app/bootstrap.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 6
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -5406,76 +5305,6 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 20641
-        },
-        {
-          "from": "tests/ui/style-layering.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 189
-        },
-        {
-          "from": "tests/unit/documents/recent-files-repository.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 201
-        },
-        {
-          "from": "tests/unit/editor/editor-controller.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 135
-        },
-        {
-          "from": "tests/unit/help/help-feature.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 215
-        },
-        {
-          "from": "tests/unit/i18n/i18n-service.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 128
-        },
-        {
-          "from": "tests/unit/i18n/settings-locale-controller.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 111
-        },
-        {
-          "from": "tests/unit/i18n/translation-bindings.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 173
-        },
-        {
-          "from": "tests/unit/settings/classic-settings-store-port.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 61
-        },
-        {
-          "from": "tests/unit/settings/settings-schema.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 160
-        },
-        {
-          "from": "tests/unit/theme/theme-service.test.mjs",
-          "target": "public/app/bootstrap.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 170
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -5575,237 +5404,6 @@
           "line": 69
         },
         {
-          "from": "tests/architecture/stage-04-taskbook-conformance.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 67
-        },
-        {
-          "from": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 82
-        },
-        {
-          "from": "tests/architecture/stage-05-history-authority.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 20
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 110
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 14
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 24
-        },
-        {
-          "from": "tests/architecture/stage-06-compact-shell.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 29
-        },
-        {
-          "from": "tests/architecture/stage-06-compact-shell.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 46
-        },
-        {
-          "from": "tests/architecture/stage-06-folder-tree.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 13
-        },
-        {
-          "from": "tests/architecture/stage-06-fullscreen.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 30
-        },
-        {
-          "from": "tests/architecture/stage-06-layout-state.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 102
-        },
-        {
-          "from": "tests/architecture/stage-06-layout-state.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 114
-        },
-        {
-          "from": "tests/architecture/stage-06-layout-state.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 37
-        },
-        {
-          "from": "tests/architecture/stage-06-layout-state.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 64
-        },
-        {
-          "from": "tests/architecture/stage-06-layout-state.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 82
-        },
-        {
-          "from": "tests/architecture/stage-06-outline.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 54
-        },
-        {
-          "from": "tests/architecture/stage-06-recent-files-menu.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 33
-        },
-        {
-          "from": "tests/architecture/stage-06-sidebar-resize.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 29
-        },
-        {
-          "from": "tests/architecture/stage-06-sidebar-tabs.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 21
-        },
-        {
-          "from": "tests/architecture/stage-06-split-controllers.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 32
-        },
-        {
-          "from": "tests/architecture/stage-06-submenu-positioner.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 13
-        },
-        {
-          "from": "tests/architecture/stage-06-toolbar-boundary.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 26
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-focus-controller.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 29
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-legacy-deletion.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 59
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-mode-resolver.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 32
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-scheduler.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 45
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-state.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 44
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-thresholds.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 29
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-thresholds.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 45
-        },
-        {
-          "from": "tests/architecture/stage-09-editor-scroll-mapper.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 75
-        },
-        {
-          "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 87
-        },
-        {
-          "from": "tests/architecture/stage-09-preview-scroll-mapper.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 55
-        },
-        {
-          "from": "tests/architecture/stage-09-selection-feedback-guard.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 46
-        },
-        {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
           "target": "public/app/core.js",
           "surface": "tests",
@@ -5841,48 +5439,6 @@
           "line": 521
         },
         {
-          "from": "tests/folder-file-tree.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 54
-        },
-        {
-          "from": "tests/stage-06-recent-files-menu.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 13
-        },
-        {
-          "from": "tests/stage-10-autosave-controller.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 232
-        },
-        {
-          "from": "tests/stage-10-remove-legacy-save.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 101
-        },
-        {
-          "from": "tests/stage-10-save-controller.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 217
-        },
-        {
-          "from": "tests/stage-10-save-status-store.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 128
-        },
-        {
           "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "public/app/core.js",
           "surface": "tests",
@@ -5897,25 +5453,39 @@
           "line": 24
         },
         {
-          "from": "tests/support/application-surface-source.mjs",
+          "from": "tests/stage-16-esm-application.test.mjs",
           "target": "public/app/core.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 8
+          "line": 12
         },
         {
-          "from": "tests/support/export-vm-host.mjs",
+          "from": "tests/stage-16-test-cleanup.test.mjs",
           "target": "public/app/core.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 17
+          "line": 20
         },
         {
-          "from": "tests/svg-sprite.test.mjs",
+          "from": "tests/stage-16-test-cleanup.test.mjs",
           "target": "public/app/core.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 67
+          "line": 24
+        },
+        {
+          "from": "tests/stage-16-test-cleanup.test.mjs",
+          "target": "public/app/core.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 25
+        },
+        {
+          "from": "tests/support/test-cleanup-audit.mjs",
+          "target": "public/app/core.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 6
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -7206,123 +6776,11 @@
           "line": 21691
         },
         {
-          "from": "tests/unit/documents/document-domain.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 108
-        },
-        {
-          "from": "tests/unit/documents/document-session-controller.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 425
-        },
-        {
-          "from": "tests/unit/documents/document-session-store.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 145
-        },
-        {
-          "from": "tests/unit/documents/recent-files-repository.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 200
-        },
-        {
-          "from": "tests/unit/help/help-feature.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 214
-        },
-        {
-          "from": "tests/unit/i18n/i18n-service.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 127
-        },
-        {
           "from": "tests/unit/i18n/locale-registry.test.mjs",
           "target": "public/app/core.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 109
-        },
-        {
-          "from": "tests/unit/i18n/locale-registry.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 147
-        },
-        {
-          "from": "tests/unit/i18n/settings-locale-controller.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 110
-        },
-        {
-          "from": "tests/unit/i18n/translation-bindings.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 172
-        },
-        {
-          "from": "tests/unit/platform/dialog-client.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 220
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 10
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 27
-        },
-        {
-          "from": "tests/unit/settings/classic-settings-store-port.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 60
-        },
-        {
-          "from": "tests/unit/settings/settings-schema.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 159
-        },
-        {
-          "from": "tests/unit/settings/settings-ui.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 305
-        },
-        {
-          "from": "tests/unit/theme/theme-service.test.mjs",
-          "target": "public/app/core.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 169
+          "line": 151
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -7343,118 +6801,6 @@
           "surface": "governance",
           "kind": "path-literal",
           "line": 226
-        },
-        {
-          "from": "tests/architecture/stage-05-basic-command-boundary.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 55
-        },
-        {
-          "from": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 84
-        },
-        {
-          "from": "tests/architecture/stage-05-history-authority.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 22
-        },
-        {
-          "from": "tests/architecture/stage-05-history-authority.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 35
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 111
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 15
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 45
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 59
-        },
-        {
-          "from": "tests/architecture/stage-06-fullscreen.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 30
-        },
-        {
-          "from": "tests/architecture/stage-06-layout-state.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 39
-        },
-        {
-          "from": "tests/architecture/stage-06-split-controllers.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 33
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-dom-renderers.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 35
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-layout-stability.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 35
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-legacy-deletion.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 62
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-state.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 48
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-state.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 65
         },
         {
           "from": "tests/fixtures/stage-15-telemetry/event-catalogue.json",
@@ -7478,13 +6824,6 @@
           "line": 54
         },
         {
-          "from": "tests/presentation-renderer-contract.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 30
-        },
-        {
           "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "public/app/editor-tools.js",
           "surface": "tests",
@@ -7492,11 +6831,32 @@
           "line": 23
         },
         {
-          "from": "tests/support/application-surface-source.mjs",
+          "from": "tests/stage-16-esm-application.test.mjs",
           "target": "public/app/editor-tools.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 17
+          "line": 12
+        },
+        {
+          "from": "tests/stage-16-test-cleanup.test.mjs",
+          "target": "public/app/editor-tools.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 23
+        },
+        {
+          "from": "tests/stage-16-test-cleanup.test.mjs",
+          "target": "public/app/editor-tools.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 36
+        },
+        {
+          "from": "tests/support/test-cleanup-audit.mjs",
+          "target": "public/app/editor-tools.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 6
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -8078,48 +7438,6 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 22254
-        },
-        {
-          "from": "tests/ui/style-layering.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 190
-        },
-        {
-          "from": "tests/unit/editor/editor-controller.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 136
-        },
-        {
-          "from": "tests/unit/help/help-feature.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 216
-        },
-        {
-          "from": "tests/unit/settings/classic-settings-store-port.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 62
-        },
-        {
-          "from": "tests/unit/settings/settings-schema.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 161
-        },
-        {
-          "from": "tests/unit/theme/theme-service.test.mjs",
-          "target": "public/app/editor-tools.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 171
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -8142,160 +7460,6 @@
           "line": 231
         },
         {
-          "from": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 83
-        },
-        {
-          "from": "tests/architecture/stage-05-history-authority.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 23
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 112
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 16
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 25
-        },
-        {
-          "from": "tests/architecture/stage-06-fullscreen.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 30
-        },
-        {
-          "from": "tests/architecture/stage-06-layout-state.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 40
-        },
-        {
-          "from": "tests/architecture/stage-06-outline.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 54
-        },
-        {
-          "from": "tests/architecture/stage-06-recent-files-menu.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 35
-        },
-        {
-          "from": "tests/architecture/stage-06-split-controllers.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 32
-        },
-        {
-          "from": "tests/architecture/stage-06-submenu-positioner.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 14
-        },
-        {
-          "from": "tests/architecture/stage-06-window-controller.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 34
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-legacy-deletion.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 61
-        },
-        {
-          "from": "tests/stage-10-autosave-controller.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 235
-        },
-        {
-          "from": "tests/stage-10-close-save-controller.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 162
-        },
-        {
-          "from": "tests/stage-10-remove-legacy-save.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 110
-        },
-        {
-          "from": "tests/stage-10-save-controller.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 218
-        },
-        {
-          "from": "tests/stage-13-drop-import.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 109
-        },
-        {
-          "from": "tests/stage-13-drop-overlay.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 58
-        },
-        {
-          "from": "tests/stage-13-file-import.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 95
-        },
-        {
-          "from": "tests/stage-13-file-type-classifier.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 74
-        },
-        {
-          "from": "tests/stage-13-image-policy.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 54
-        },
-        {
           "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "public/app/events.js",
           "surface": "tests",
@@ -8303,18 +7467,25 @@
           "line": 23
         },
         {
-          "from": "tests/support/application-surface-source.mjs",
+          "from": "tests/stage-16-esm-application.test.mjs",
           "target": "public/app/events.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 20
+          "line": 13
         },
         {
-          "from": "tests/svg-sprite.test.mjs",
+          "from": "tests/stage-16-test-cleanup.test.mjs",
           "target": "public/app/events.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 69
+          "line": 36
+        },
+        {
+          "from": "tests/support/test-cleanup-audit.mjs",
+          "target": "public/app/events.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 7
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -8497,90 +7668,6 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 22306
-        },
-        {
-          "from": "tests/ui/modal-shell.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 352
-        },
-        {
-          "from": "tests/unit/documents/document-session-controller.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 427
-        },
-        {
-          "from": "tests/unit/documents/recent-files-repository.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 202
-        },
-        {
-          "from": "tests/unit/editor/editor-controller.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 135
-        },
-        {
-          "from": "tests/unit/platform/drag-drop-client.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 167
-        },
-        {
-          "from": "tests/unit/platform/drag-drop-client.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 182
-        },
-        {
-          "from": "tests/unit/platform/file-system-client.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 161
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 10
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 27
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 31
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 66
-        },
-        {
-          "from": "tests/unit/settings/settings-ui.test.mjs",
-          "target": "public/app/events.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 306
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -8879,7 +7966,7 @@
           "target": "public/app/preview.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 13
+          "line": 12
         },
         {
           "from": "tests/architecture/stage-07-preview-recovery-view.test.mjs",
@@ -9116,28 +8203,28 @@
           "target": "public/app/scroll-sync.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 138
+          "line": 158
         },
         {
           "from": "tests/architecture/stage-09-editor-scroll-mapper.test.mjs",
           "target": "public/app/scroll-sync.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 79
+          "line": 83
         },
         {
           "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
           "target": "public/app/scroll-sync.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 15
+          "line": 101
         },
         {
           "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
           "target": "public/app/scroll-sync.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 97
+          "line": 14
         },
         {
           "from": "tests/architecture/stage-09-frozen-selection-mapping-integration.test.mjs",
@@ -9158,7 +8245,7 @@
           "target": "public/app/scroll-sync.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 64
+          "line": 68
         },
         {
           "from": "tests/architecture/stage-09-scroll-contract-freeze.test.mjs",
@@ -9193,7 +8280,7 @@
           "target": "public/app/scroll-sync.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 50
+          "line": 54
         },
         {
           "from": "tests/architecture/stage-09-selection-readers.test.mjs",
@@ -9314,90 +8401,6 @@
           "line": 236
         },
         {
-          "from": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 85
-        },
-        {
-          "from": "tests/architecture/stage-05-find-replace-boundary.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 53
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 113
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 17
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 27
-        },
-        {
-          "from": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 91
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-legacy-deletion.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 63
-        },
-        {
-          "from": "tests/architecture/stage-07-preview-state.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 47
-        },
-        {
-          "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 88
-        },
-        {
-          "from": "tests/stage-10-native-search-adapter.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 116
-        },
-        {
-          "from": "tests/stage-13-html-extractor.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 24
-        },
-        {
-          "from": "tests/stage-13-web-fetch-coordinator.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 146
-        },
-        {
           "from": "tests/stage-15-event-catalogue.test.mjs",
           "target": "public/app/web-clipper.js",
           "surface": "tests",
@@ -9405,11 +8408,18 @@
           "line": 23
         },
         {
-          "from": "tests/support/application-surface-source.mjs",
+          "from": "tests/stage-16-esm-application.test.mjs",
           "target": "public/app/web-clipper.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 23
+          "line": 13
+        },
+        {
+          "from": "tests/support/test-cleanup-audit.mjs",
+          "target": "public/app/web-clipper.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 7
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -9711,48 +8721,6 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 22730
-        },
-        {
-          "from": "tests/ui/style-layering.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 134
-        },
-        {
-          "from": "tests/unit/editor/editor-controller.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 136
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 11
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 27
-        },
-        {
-          "from": "tests/unit/platform/platform-cutover.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 30
-        },
-        {
-          "from": "tests/unit/platform/web-fetch-client.test.mjs",
-          "target": "public/app/web-clipper.js",
-          "surface": "tests",
-          "kind": "path-literal",
-          "line": 65
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -10086,7 +9054,7 @@
           "target": "public/i18n.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 65
+          "line": 64
         },
         {
           "from": "tests/built-application-assets.test.mjs",
@@ -10135,14 +9103,14 @@
           "target": "public/i18n.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 113
+          "line": 117
         },
         {
           "from": "tests/unit/i18n/settings-locale-controller.test.mjs",
           "target": "public/i18n.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 105
+          "line": 104
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -11090,6 +10058,13 @@
           "surface": "tests",
           "kind": "path-literal",
           "line": 18
+        },
+        {
+          "from": "tests/stage-16-test-cleanup.test.mjs",
+          "target": "src/editor/hybrid/ranges.js",
+          "surface": "tests",
+          "kind": "path-literal",
+          "line": 27
         }
       ],
       "requiredProof": "Frozen contract; excluded from deletion."
@@ -12445,7 +11420,7 @@
           "target": "src/features/preview/compatibility/classic-preview-thresholds-port.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 14
+          "line": 13
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -12465,7 +11440,7 @@
           "target": "src/features/settings/compatibility/classic-settings-store-port.js",
           "surface": "tests",
           "kind": "module",
-          "line": 80
+          "line": 84
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -12552,7 +11527,7 @@
           "target": "src/platform/compatibility/classic-platform-port.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 41
+          "line": 45
         },
         {
           "from": "tests/unit/platform/platform-ports.test.mjs",
@@ -12661,7 +11636,7 @@
           "target": "src/preview/incremental-preview.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 40
+          "line": 39
         }
       ],
       "requiredProof": "Frozen contract; excluded from deletion."
@@ -12746,7 +11721,7 @@
           "target": "src/preview/math-source.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 41
+          "line": 40
         }
       ],
       "requiredProof": "Frozen contract; excluded from deletion."
@@ -12766,7 +11741,7 @@
           "target": "src/preview/preview-worker-client.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 14
+          "line": 13
         },
         {
           "from": "tests/architecture/stage-07-preview-recovery-view.test.mjs",
@@ -12793,7 +11768,7 @@
           "target": "src/preview/preview-worker.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 15
+          "line": 14
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -12813,7 +11788,7 @@
           "target": "src/preview/virtual-preview.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 16
+          "line": 15
         },
         {
           "from": "tests/architecture/stage-07-preview-recovery-view.test.mjs",
@@ -13453,7 +12428,7 @@
           "target": "src/runtime/task-scheduler.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 20
+          "line": 19
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -13494,7 +12469,7 @@
           "target": "src/runtime/tauri.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 15
+          "line": 16
         },
         {
           "from": "tests/unit/platform/platform-ports.test.mjs",
@@ -13521,7 +12496,7 @@
           "target": "src/runtime/vendor.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 21
+          "line": 20
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -13553,7 +12528,7 @@
           "target": "src/sidebar/folder-file-tree.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 11
+          "line": 10
         },
         {
           "from": "tests/ui/fixtures/dom-migration-map.json",
@@ -13794,28 +12769,28 @@
           "target": "src/sync/selection-controller.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 103
+          "line": 107
         },
         {
           "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
           "target": "src/sync/selection-controller.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 16
+          "line": 102
         },
         {
           "from": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
           "target": "src/sync/selection-controller.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 98
+          "line": 15
         },
         {
           "from": "tests/architecture/stage-09-preview-scroll-mapper.test.mjs",
           "target": "src/sync/selection-controller.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 82
+          "line": 86
         },
         {
           "from": "tests/architecture/stage-09-scroll-contract-freeze.test.mjs",
@@ -13931,7 +12906,7 @@
           "target": "src/ui/compatibility/mount-modal-shells.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 166
+          "line": 165
         },
         {
           "from": "tests/ui/shell-cutover.test.mjs",

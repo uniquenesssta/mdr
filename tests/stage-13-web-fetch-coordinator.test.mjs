@@ -1,8 +1,7 @@
 import { readCurrentViewMarkup } from './support/current-view-markup.mjs';
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { access } from 'node:fs/promises';
 import { createWebClipperController, createWebFetchCoordinator } from '../src/features/import/index.js';
 import { createWebFetchClient } from '../src/platform/desktop/web-fetch-client.js';
 import { assertProductionInventory } from './support/production-inventory.mjs';
@@ -143,7 +142,7 @@ test('clipper close/reopen and edited inputs reject late HTML', async () => {
 });
 
 test('web routing has one feature owner and the production inventory includes it', async () => {
-  const source = await readFile(new URL('../public/app/web-clipper.js', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../src/features/editor/application/find-preview-commands.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /await fetch\(|allorigins|codetabs|fetchWithNativeBackend|status\.innerHTML/);
   assert.doesNotMatch(source, /openUrlModal|markdownEditorWeb(?:Clipper|Fetch)Port|webClipperDocumentUiCommandPort/);
   const main = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
@@ -164,8 +163,9 @@ test('retired import ports, global opener and inline clipper markup cannot re-en
   const html = await readCurrentViewMarkup();
   assert.doesNotMatch(html, /id="(?:url-modal|url-input|manual-html)"|openUrlModal/);
   await assert.rejects(access(new URL('../src/ui/compatibility/mount-modal-shells.js', import.meta.url)), { code: 'ENOENT' });
-  for (const name of ['web-clipper', 'events', 'editor-tools']) {
-    const source = await readFile(new URL('../public/app/' + name + '.js', import.meta.url), 'utf8');
+  for (const path of ['src/features/editor/application/find-preview-commands.js',
+    'src/bootstrap/application-events.js', 'src/features/layout/workspace-preferences.js']) {
+    const source = await readFile(new URL('../' + path, import.meta.url), 'utf8');
     assert.doesNotMatch(source, /function\s+(?:openUrlModal|triggerImportFile|importFile|fetchUrl|insertUrlMarkdown)\s*\(|mountClassic(?:Web|Html)/);
   }
 });

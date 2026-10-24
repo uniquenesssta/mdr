@@ -1,9 +1,8 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import { assertProductionInventory } from '../support/production-inventory.mjs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -43,7 +42,12 @@ test('R9-08 final SelectionSyncController consumes the Guard and owns no applyin
 });
 
 test('R9-08 legacy selectionSyncLock authority remains deleted after classic scroll-sync removal', async () => {
-  const core = await read('public/app/core.js');
+  const core = await Promise.all([
+    read('src/features/documents/ui/document-workspace.js'),
+    read('src/features/menu/shell-menus.js'),
+    read('src/features/persistence/ui/workspace-status.js'),
+    read('src/features/layout/workspace-preferences.js')
+  ]).then(sources => sources.join('\n'));
   const controller = await read(controllerPath);
   assert.doesNotMatch(core, /selectionSyncLock/);
   assert.doesNotMatch(controller, /selectionSyncLock/);

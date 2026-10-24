@@ -1,4 +1,4 @@
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
@@ -21,7 +21,7 @@ test('public clipper preserves extraction result identity and parse errors befor
 });
 
 test('ESM composition injects the sole extractor and converter; classic code retains no conversion authority', async () => {
-  const source = await readFile(new URL('../public/app/web-clipper.js', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../src/features/editor/application/find-preview-commands.js', import.meta.url), 'utf8');
   const main = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
   assert.match(main, /extract: html => extractHtml\(html, document\), convert: convertExtractedHtml/);
   assert.match(main, /insertMarkdown: markdown => importDocumentController\.insertWebMarkdown\(markdown\)/);

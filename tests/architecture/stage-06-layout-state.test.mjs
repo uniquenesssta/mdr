@@ -1,7 +1,6 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { access } from 'node:fs/promises';
 
 const read = path => readFile(path, 'utf8');
 
@@ -34,13 +33,14 @@ test('Atomic 6.1 creates the public Layout feature and one scoped state owner be
 
 test('all migrated classic callers use the scoped LayoutState port while Atomic 7.14 Preview uses direct LayoutState injection without a second state center', async () => {
   const classicPaths = [
-    'public/app/core.js',
-    'public/app/bootstrap.js',
-    'public/app/editor-tools.js',
-    'public/app/events.js'
+    ['src/features/documents/ui/document-workspace.js', 'src/features/menu/shell-menus.js',
+      'src/features/persistence/ui/workspace-status.js', 'src/features/layout/workspace-preferences.js'],
+    ['src/bootstrap/workspace-startup.js'],
+    ['src/features/layout/workspace-preferences.js'],
+    ['src/bootstrap/application-events.js']
   ];
   const [classicSources, previewController] = await Promise.all([
-    Promise.all(classicPaths.map(read)),
+    Promise.all(classicPaths.map(paths => Promise.all(paths.map(read)).then(sources => sources.join('\n')))),
     read('src/features/preview/application/preview-controller.js')
   ]);
   for (const [index, source] of classicSources.entries()) {
@@ -61,7 +61,12 @@ test('all migrated classic callers use the scoped LayoutState port while Atomic 
 test('responsive layout logic gets every current JS breakpoint from responsive-breakpoints', async () => {
   const [breakpoints, core, compactShell, compactSplit, toolbarBoundary] = await Promise.all([
     read('src/features/layout/shell/responsive-breakpoints.js'),
-    read('public/app/core.js'),
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     read('src/features/layout/shell/compact-shell-controller.js'),
     read('src/features/layout/split/compact-split-controller.js'),
     read('src/features/layout/toolbar/toolbar-boundary-controller.js')
@@ -79,7 +84,12 @@ test('responsive layout logic gets every current JS breakpoint from responsive-b
 
 test('Atomic 6.3 advances the 6.1/6.2 handoff: split authority leaves core while Sidebar and Frozen DocumentModel stay intact', async () => {
   const [core, sidebarResize, splitResize, compactSplit, model] = await Promise.all([
-    read('public/app/core.js'),
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     read('src/features/layout/sidebar/sidebar-resize-controller.js'),
     read('src/features/layout/split/split-resize-controller.js'),
     read('src/features/layout/split/compact-split-controller.js'),
@@ -99,8 +109,13 @@ test('Atomic 6.3 advances the 6.1/6.2 handoff: split authority leaves core while
 
 test('Atomic 6.1 migration preserves source object members and persisted Settings keys', async () => {
   const [core, bootstrap] = await Promise.all([
-    read('public/app/core.js'),
-    read('public/app/bootstrap.js')
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    read('src/bootstrap/workspace-startup.js')
   ]);
   assert.match(bootstrap, /restoredSettings\.sidebarVisible/);
   assert.doesNotMatch(bootstrap, /restoredSettings\.bootstrapLayoutStatePort/);
@@ -111,7 +126,12 @@ test('Atomic 6.1 migration preserves source object members and persisted Setting
 });
 
 test('Atomic 6.1 layout state remains single-authority after Atomic 6.4 removes classic compact-shell authority', async () => {
-  const core = await read('public/app/core.js');
+  const core = await Promise.all([
+    read('src/features/documents/ui/document-workspace.js'),
+    read('src/features/menu/shell-menus.js'),
+    read('src/features/persistence/ui/workspace-status.js'),
+    read('src/features/layout/workspace-preferences.js')
+  ]).then(sources => sources.join('\n'));
   for (const name of [
     'sidebarVisible', 'sidebarAutoCollapsed', 'sidebarWidth',
     'editorCollapsed', 'previewCollapsed', 'editorRatio',

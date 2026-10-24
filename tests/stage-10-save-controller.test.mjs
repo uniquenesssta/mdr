@@ -1,4 +1,4 @@
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 
 import assert from 'node:assert/strict';
 
@@ -214,8 +214,13 @@ test('Atomic 10.2 SaveController remains the single manual-save authority after 
     source('src/features/persistence/index.js'),
     source('src/main.js'),
     source('src/features/export/application/export-controller.js'),
-    source('public/app/core.js'),
-    source('public/app/events.js'),
+    Promise.all([
+      source('src/features/documents/ui/document-workspace.js'),
+      source('src/features/menu/shell-menus.js'),
+      source('src/features/persistence/ui/workspace-status.js'),
+      source('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    source('src/bootstrap/application-events.js'),
     source('tests/architecture/fixtures/production-modules.json')
   ]);
   assert.match(entry, /createSaveController/);

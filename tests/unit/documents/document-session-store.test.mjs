@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -142,7 +142,12 @@ test('Atomic 5.2 NativeDocumentStore accepts frozen records and returns native m
 
 test('Atomic 5.2 production integration removes classic session-state authority and keeps the frozen DocumentModel exact', async () => {
   const [core, exportModule, previewEngine, bootstrap, nativeStore, entry] = await Promise.all([
-    readText('public/app/core.js'),
+    Promise.all([
+      readText('src/features/documents/ui/document-workspace.js'),
+      readText('src/features/menu/shell-menus.js'),
+      readText('src/features/persistence/ui/workspace-status.js'),
+      readText('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
     readText('src/features/export/application/export-controller.js'),
     readText('src/features/preview/pipeline/preview-render-engine.js'),
     readText('src/bootstrap/module-entry.js'),

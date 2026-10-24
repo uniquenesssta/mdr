@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 import test from 'node:test';
@@ -124,8 +124,13 @@ test('Atomic 4.3 production integration keeps service DOM/storage-free and remov
     readFile('src/i18n/i18n-service.js', 'utf8'),
     readFile('src/i18n/index.js', 'utf8'),
     readFile('src/bootstrap/module-entry.js', 'utf8'),
-    readFile('public/app/core.js', 'utf8'),
-    readFile('public/app/bootstrap.js', 'utf8')
+    Promise.all([
+      readFile('src/features/documents/ui/document-workspace.js', 'utf8'),
+      readFile('src/features/menu/shell-menus.js', 'utf8'),
+      readFile('src/features/persistence/ui/workspace-status.js', 'utf8'),
+      readFile('src/features/layout/workspace-preferences.js', 'utf8')
+    ]).then(sources => sources.join('\n')),
+    readFile('src/bootstrap/workspace-startup.js', 'utf8')
   ]);
 
   assert.doesNotMatch(serviceSource, /\bdocument\b|\bwindow\b|localStorage|querySelector|querySelectorAll/);

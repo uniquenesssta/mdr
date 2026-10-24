@@ -1,4 +1,4 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -52,7 +52,7 @@ test('Atomic 5.10 places each basic formatting responsibility in the planned Edi
 
 test('Atomic 5.13 removes the temporary basic-command wrapper while keeping the Editor Command Service authoritative', async () => {
   const [editorTools, main, editorIndex, fixture] = await Promise.all([
-    read('public/app/editor-tools.js'),
+    read('src/features/layout/workspace-preferences.js'),
     read('src/main.js'),
     read('src/features/editor/index.js'),
     read('tests/architecture/fixtures/production-modules.json')

@@ -1,0 +1,2270 @@
+{
+  "schemaVersion": 1,
+  "stage": "R16.10",
+  "sourceCommit": "24bd196a751394c382076d54078a2218d039cd99",
+  "sourceReader": {
+    "path": "tests/support/application-surface-source.mjs",
+    "sourceBlob": "2bc890e00964e9461a4465bda97e5a4564384596"
+  },
+  "retiredSurfaceOwners": {
+    "public/app/core.js": [
+      "src/features/documents/ui/document-workspace.js",
+      "src/features/menu/shell-menus.js",
+      "src/features/persistence/ui/workspace-status.js",
+      "src/features/layout/workspace-preferences.js"
+    ],
+    "public/app/bootstrap.js": [
+      "src/bootstrap/workspace-startup.js"
+    ],
+    "public/app/editor-tools.js": [
+      "src/features/layout/workspace-preferences.js"
+    ],
+    "public/app/events.js": [
+      "src/bootstrap/application-events.js"
+    ],
+    "public/app/web-clipper.js": [
+      "src/features/editor/application/find-preview-commands.js"
+    ]
+  },
+  "consumers": [
+    {
+      "path": "tests/architecture/stage-04-taskbook-conformance.test.mjs",
+      "sourceBlob": "85ae3ffb34bfc70ec32e537320ca9ee9f08b3ccd",
+      "caseNames": [
+        "Stage 4 taskbook planned files exist and declare responsibility contracts",
+        "Stage 4 final cutover keeps the retired classic I18n implementation absent"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-05-basic-command-boundary.test.mjs",
+      "sourceBlob": "47046dc12990784e3cfa7eebe6859bc227288434",
+      "caseNames": [
+        "Atomic 5.10 places each basic formatting responsibility in the planned Editor feature modules",
+        "Atomic 5.13 removes the temporary basic-command wrapper while keeping the Editor Command Service authoritative",
+        "Atomic 5.10 command layer remains independent from history, UI, persistence and raw CodeMirror implementation details"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-05-document-editor-ui-boundary.test.mjs",
+      "sourceBlob": "fbd79d87e5deab0a4baef61b9b1fc846150bf2b0",
+      "caseNames": [
+        "Atomic 5.12 creates the planned document/editor UI responsibility modules",
+        "Atomic 5.12 migrated UI markup contains no inline event handlers",
+        "Atomic 5.12 removes document-list rendering and migrated dialog event ownership from classic files",
+        "Atomic 5.12 UI Views remain composed after Atomic 5.13 removes textarea compatibility"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-05-find-replace-boundary.test.mjs",
+      "sourceBlob": "60fdd6dc4b1570127e32b2a40fab498af7f89529",
+      "caseNames": [
+        "Atomic 5.11 places Find/Replace in the planned Editor command module and reserves a request-tagged native-search port",
+        "Atomic 5.13 keeps Find/Replace command authority direct after deleting the classic command wrapper"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-05-history-authority.test.mjs",
+      "sourceBlob": "4f89376acc69bf07b8d694846e1cb7ce513e4425",
+      "caseNames": [
+        "Atomic 5.9 removes the classic full-text history authority from every remaining classic app module",
+        "Atomic 5.13 removes the temporary History Adapter wrapper and keeps one direct history authority",
+        "document replacement resets CodeMirror state directly without a second reset-history compatibility path"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
+      "sourceBlob": "4580d7ebe195d7d3b0cb5222b62a8a508c3dd5c0",
+      "caseNames": [
+        "Atomic 5.13 removes hidden textarea compatibility from production callers and presentation",
+        "Atomic 5.13 deletes migrated command/history wrappers instead of retaining aliases or facades",
+        "Atomic 5.13 preserves unresolved later-stage editor-tools responsibilities while verified Stage 7 migrations leave classic ownership",
+        "Atomic 5.13 routes migrated menu actions through declarative Editor View commands",
+        "Atomic 5.13 web clipper still mutates only DocumentModel through the R13.13 public Editor command",
+        "Atomic 5.13 modified classic scripts remain parseable before browser execution"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        },
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-compact-shell.test.mjs",
+      "sourceBlob": "07b4a348bf7b882e1275508bd4e905d9dfbf1690",
+      "caseNames": [
+        "Atomic 6.4 exposes Compact Shell and Sidebar Layout only through the Layout public entrypoint",
+        "Atomic 6.4 removes classic Compact Shell and sidebar projection authority while keeping View Transition burst gating",
+        "Atomic 6.4 main composition remains intact after the 6.5 Toolbar Boundary migration",
+        "Atomic 6.4 Preview keeps LayoutState and Outline boundaries after Atomic 7.14 removes the classic Preview script"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-folder-tree.test.mjs",
+      "sourceBlob": "bce442b36ee502aec31a5f42052ea218dd36cda7",
+      "caseNames": [
+        "Atomic 6.9 exposes responsibility-split Folder Tree modules through the Sidebar public entry",
+        "Atomic 6.9 Folder Tree reads exclusively through injected FilesPort and owns stale/destroy lifecycle",
+        "Atomic 6.9 removes Folder Tree globals and routes classic sync/open through scoped ports",
+        "Atomic 6.9 keeps Folder Tree state, path policy, normalization, view and node-view boundaries separate",
+        "Atomic 6.9 production modules have no direct browser-global authority and 6.10 Menu Model is not started"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-fullscreen.test.mjs",
+      "sourceBlob": "003134e0c71d30360a89cc5d2ae5431a93db8613",
+      "caseNames": [
+        "Atomic 6.6 exposes separate page and system fullscreen controllers through the Layout entrypoint",
+        "Atomic 6.6 removes classic fullscreen authority and direct browser fullscreen listeners",
+        "Atomic 6.6 main composition owns both fullscreen lifecycles and uses Platform ports",
+        "Atomic 6.6 leaves Stage 3 fullscreen platform ownership intact"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-layout-state.test.mjs",
+      "sourceBlob": "1cd0ea48445cdff56a9e3b48ae17c4b449a583af",
+      "caseNames": [
+        "Atomic 6.1 creates the public Layout feature and one scoped state owner before classic application loading",
+        "all migrated classic callers use the scoped LayoutState port while Atomic 7.14 Preview uses direct LayoutState injection without a second state center",
+        "responsive layout logic gets every current JS breakpoint from responsive-breakpoints",
+        "Atomic 6.3 advances the 6.1/6.2 handoff: split authority leaves core while Sidebar and Frozen DocumentModel stay intact",
+        "Atomic 6.1 migration preserves source object members and persisted Settings keys",
+        "Atomic 6.1 layout state remains single-authority after Atomic 6.4 removes classic compact-shell authority",
+        "LayoutState owns resize activity and the current split controller notifies ScrollSync geometry"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-outline.test.mjs",
+      "sourceBlob": "6624c0e81cbd582ec2c4cec57a93fdeb5a3c523f",
+      "caseNames": [
+        "Atomic 6.8 exposes the responsibility-split Outline feature through one public Sidebar entry",
+        "Atomic 6.8 consumes model/preview heading indexes and never reparses the full editor document",
+        "Atomic 6.8 removes classic Outline state/render/parser authority while Atomic 7.14 Preview consumes Outline through direct injection",
+        "Atomic 6.8 Outline view owns DOM/context actions without executable inline handlers",
+        "Atomic 6.8 composition keeps Outline ownership intact after the independent 6.9 Folder Tree migration",
+        "Atomic 6.8 production Outline modules have no direct browser-global authority"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-recent-files-menu.test.mjs",
+      "sourceBlob": "c25f24d9816ce63551e5f333c290b044f0a006cd",
+      "caseNames": [
+        "Atomic 6.12 Recent Files Menu has one dedicated controller behind public Menu/Documents entries",
+        "Atomic 6.12 keeps Documents as the sole Recent Files persistence authority and classic as write-only compatibility",
+        "Atomic 6.12 emits stable Menu commands and does not leak Recent Files into MenuView or Submenu Positioner",
+        "Atomic 6.12 subscription/listener boundaries remain intact after independent Atomic 6.13 Window migration"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-sidebar-resize.test.mjs",
+      "sourceBlob": "ec328c07306cf1910d192804943b23deca76cd73",
+      "caseNames": [
+        "Atomic 6.2 exposes Sidebar Resize only through the Layout public entrypoint",
+        "Atomic 6.2 keeps sidebar resize migrated after Atomic 6.3 removes the remaining classic split resize authority",
+        "Atomic 6.2 main lifecycle owns start/destroy and passes explicit geometry dependencies",
+        "Atomic 6.2 does not modify Frozen DocumentModel"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-sidebar-tabs.test.mjs",
+      "sourceBlob": "5de2f487a990e93346df3b3fed2c5d1c1c7b74bf",
+      "caseNames": [
+        "Atomic 6.7 exposes Sidebar state/tab/compatibility through the public Sidebar feature entry",
+        "Atomic 6.7 keeps classic tab state, persistence and inline click authority removed after Atomic 7.14 Preview deletion",
+        "Atomic 6.7 composition still owns tab mount switching while Documents keeps document-list ownership",
+        "Atomic 6.7 remains a pure tab boundary after independent Outline and Folder Tree migrations",
+        "Atomic 6.7 Sidebar tab modules avoid direct browser-global authority"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-split-controllers.test.mjs",
+      "sourceBlob": "2950f68011d3799abe00772396ded08dce4e9891",
+      "caseNames": [
+        "Atomic 6.3 exposes three split responsibilities only through Layout public entrypoint",
+        "Atomic 6.3 removes classic split authority and direct split listeners",
+        "Atomic 6.3 composition owns start/destroy and routes split geometry to Scroll Controller"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-submenu-positioner.test.mjs",
+      "sourceBlob": "bf63deb672228be1d4fba7f96107ce5c28f8b141",
+      "caseNames": [
+        "Atomic 6.11 owns submenu geometry outside MenuView and removes the classic implementation path"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-toolbar-boundary.test.mjs",
+      "sourceBlob": "5215061b86ef4cdc9b60298b3a4baa6312c2c3c6",
+      "caseNames": [
+        "Atomic 6.5 exposes one Toolbar Boundary controller through the Layout public entrypoint",
+        "Atomic 6.5 removes classic Toolbar Boundary authority but preserves user-configured toolbar visibility",
+        "Atomic 6.5 main composition owns start, refresh registration and destroy with explicit platform dependencies",
+        "Atomic 6.5 toolbar shell projects a true two-row flex layout without responsive item hiding"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-06-window-controller.test.mjs",
+      "sourceBlob": "7666728fdc3ff6b97d99e8bfc37815325d2af08b",
+      "caseNames": [
+        "Atomic 6.13 exposes the responsibility-split Window feature through one public entry",
+        "Atomic 6.13 removes classic Window authority while preserving close-save policy in the application layer",
+        "WindowState is the unique desktop-window state owner and DOM geometry/control responsibilities stay separated",
+        "Atomic 6.13 composition uses only public Window/Platform entries and keeps Tauri ownership in Stage 3 WindowClient",
+        "Atomic 6.13 stale/destroy ownership remains local after Atomic 6.14 adds lifecycle validation"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-dom-renderers.test.mjs",
+      "sourceBlob": "90147a1fa146bbfb861b0fbe57351a54526dd6ea",
+      "caseNames": [
+        "Atomic 7.8 keeps DOM/block/task/code/math/Mermaid responsibilities split into render modules",
+        "Atomic 7.8 composition root owns one shared PreviewRendererPort and destruction",
+        "Atomic 7.8 renderer boundary remains intact after Atomic 7.14 RenderEngine replaces classic preview orchestration"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-focus-controller.test.mjs",
+      "sourceBlob": "410af7d9c8f2aad9c712269aa16770e4c39cc2f2",
+      "caseNames": [
+        "Atomic 7.11 keeps one taskbook Preview Focus Controller pipeline owner",
+        "Atomic 7.11 Focus Controller stays DOM-free and owns request-token invalidation instead of browser globals",
+        "Atomic 7.11 composition owns one scoped Focus port while PreviewController delegates focus behavior to the canonical owner",
+        "Atomic 7.11 Focus ownership remains isolated after 7.12, 7.13 and Atomic 7.14"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-layout-stability.test.mjs",
+      "sourceBlob": "817ceb4e342280dd7988554e9eeb22c004cd4bd8",
+      "caseNames": [
+        "Atomic 7.9 keeps one Preview Layout Stability owner for visibility, stable-size retries and geometry notifications",
+        "Atomic 7.9 composition root owns and destroys one scoped layout stability port with frozen Stage 7 thresholds",
+        "Atomic 7.9 layout-stability authority moves into PreviewController while classic callers use the command facade",
+        "Atomic 7.9 stays isolated from Virtual Window, Focus, Enhancement and Atomic 7.14 orchestration"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-legacy-deletion.test.mjs",
+      "sourceBlob": "24f188e31bbcc12cb2a8b503db33683420c55b58",
+      "caseNames": [
+        "Atomic 7.14 deletes every migrated legacy Preview/runtime/rendering path while retaining frozen model consumers",
+        "Atomic 7.14 application composition owns one PreviewController/RenderEngine and no classic Preview loader or Preview runtime globals",
+        "Atomic 7.14 remaining classic callers use the single scoped Preview command surface instead of rebuilding Preview ownership",
+        "Atomic 7.14 keeps application, render, Worker, virtual, scheduler and presentation responsibilities in separate modules"
+      ],
+      "sourceReads": [],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-mode-resolver.test.mjs",
+      "sourceBlob": "525f2181937ad24fce47256d34c2d43564fa2a6a",
+      "caseNames": [
+        "Atomic 7.3 Mode Resolver remains a dedicated pure pipeline owner",
+        "Atomic 7.3 preserves manual override before automatic character or block thresholds",
+        "Atomic 7.3 remains the only mode policy after Atomic 7.14 removes classic preview resolver logic",
+        "Atomic 7.3 policy remains pure while Atomic 7.14 Controller and RenderEngine consume it"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-scheduler.test.mjs",
+      "sourceBlob": "8fef25ba0030d0c42dbf9502083dfb08e310fbc6",
+      "caseNames": [
+        "Atomic 7.4 owns scheduler and cancellation as separate DOM-free pipeline responsibilities",
+        "Atomic 7.4 composition root mounts one scoped classic scheduler port and destroys scheduler/cancellation",
+        "Atomic 7.4 scheduler remains authoritative while 7.9, 7.11, 7.12 and 7.14 orchestrate distinct work",
+        "Atomic 7.4 scheduling owner remains isolated after Atomic 7.14 application assembly"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-state.test.mjs",
+      "sourceBlob": "30e82d7af1c417892d997eef60771d5ff8599ab8",
+      "caseNames": [
+        "Atomic 7.2 PreviewState remains a dedicated DOM-free application state owner",
+        "Atomic 7.2 exposes one scoped compatibility view of canonical state and destroys it from composition root",
+        "Atomic 7.2 state mutations remain in PreviewState while Atomic 7.14 orchestration delegates to it",
+        "Atomic 7.2 stable metadata remains authoritative before Recovery View presentation checks after Atomic 7.14",
+        "Atomic 7.2 state owner stays independent of Atomic 7.13 Recovery View and Atomic 7.14 Controller"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-thresholds.test.mjs",
+      "sourceBlob": "3ea68d10f1f83573d9eb3aa5541e56b2d67333f5",
+      "caseNames": [
+        "Atomic 7.1 keeps the preview threshold owner and scoped classic read port intact",
+        "Atomic 7.1 callers still read one canonical threshold object after Atomic 7.14 removes classic preview ownership",
+        "Atomic 7.1 keeps one threshold authority across virtual, Worker and enhancement owners after Atomic 7.14",
+        "Atomic 7.1 threshold ownership remains isolated after the Atomic 7.14 application cutover"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/core.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-09-editor-scroll-mapper.test.mjs",
+      "sourceBlob": "f839fbfffda7c6047bd619e751a1675591e7eb2d",
+      "caseNames": [
+        "R9-04 creates one canonical EditorScrollMapper and exports it only through the Sync public entry",
+        "R9-04 mapper is DOM-free and owns neither source state nor scroll writes nor full-text measurement",
+        "R9-04 mapper composes frozen model line ranges with neutral CodeMirror geometry reads",
+        "R9-04 final composition injects editor/model capabilities through the public Sync factory and owns mapper teardown",
+        "R9-04 final Sync code has no legacy Canvas textarea metric authority and delegates editor geometry only to EditorScrollMapper",
+        "R9-04 metric guard permits injected export Canvas but rejects restored Sync Canvas or measurement authority",
+        "R9-04 remains intact after final Selection migration without restoring old mapping or Controller authority",
+        "R9-04 inventory records one editor mapper and final Stage 9 cardinality"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-09-final-sync-legacy-removal.test.mjs",
+      "sourceBlob": "afdfd1c273d94670e0b57c0e0cbf3165f93a96c9",
+      "caseNames": [
+        "R9-12 removes the classic scroll-sync script and migrates SelectionSyncController to the Stage 9 feature boundary",
+        "R9-12 classic loader and composition root no longer publish scroll or selection sync controllers on window",
+        "R9-12 sync production code has no implicit full-editor value access or legacy text-search/estimation fallback",
+        "R9-12 PreviewScrollMapper owns source annotation from render metadata without lexer or fallback block inheritance",
+        "R9-12 final SelectionSyncController consumes frozen mapping API only through injected capability and never imports/copies the algorithm",
+        "R9-12 frozen selection mapping implementation and model-kernel export remain unchanged by final cleanup",
+        "R9-12 removes hidden sync globals from Virtual Editor, Hybrid integration and performance diagnostics",
+        "R9-12 remaining classic callers use scoped editor UI commands instead of deleted sync globals",
+        "R9-12 production inventory removes classic scroll-sync, replaces old controller path and contains the final sync modules exactly once"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-09-preview-scroll-mapper.test.mjs",
+      "sourceBlob": "74937448ab4fe6d6a9d1b124ce18cf6c673dc62e",
+      "caseNames": [
+        "R9-05 creates one canonical PreviewScrollMapper and exports it only through the Sync public entry",
+        "R9-05 mapper owns no editor internals source ownership or target scroll writes",
+        "R9-05 mapper uses only virtual height-index capabilities or preview source anchors",
+        "R9-05 final composition injects preview virtual capabilities and owns mapper teardown before Preview command teardown",
+        "R9-05 preview geometry cache and ResizeObserver authority live only inside PreviewScrollMapper after classic aggregate removal",
+        "R9-05 final annotation and refresh paths update mapper-owned anchors rather than a second cache",
+        "R9-05 remains intact after final Selection orchestration and legacy removal",
+        "R9-05 inventory records preview mapper and final Stage 9 cardinality"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/architecture/stage-09-selection-feedback-guard.test.mjs",
+      "sourceBlob": "3e42408ab9fdac525549b17b89a1192131f723c5",
+      "caseNames": [
+        "R9-08 creates the canonical SelectionFeedbackGuard and exports it only through the Sync public entry",
+        "R9-08 Feedback Guard owns sequence source revision and release lifecycle without DOM mapping highlight retry or scroll policy",
+        "R9-08 final SelectionSyncController consumes the Guard and owns no applying-side release or preview revision duplicates",
+        "R9-08 legacy selectionSyncLock authority remains deleted after classic scroll-sync removal",
+        "R9-08 composition creates exactly one Guard injects it directly into final Controller and destroys it",
+        "R9-08 keeps frozen mapping and prior Stage 9 scroll/read owners separate from the final Controller",
+        "R9-08 production inventory records one Feedback Guard responsibility and final Stage 9 cardinality",
+        "R9-08 keeps Reader ownership separate from feedback policy after final Selection Controller migration"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/folder-file-tree.test.mjs",
+      "sourceBlob": "35680fa9232eaee87b4c74279bfe99de42184b20",
+      "caseNames": [
+        "folder file tree normalizes Windows paths and parent directories",
+        "folder file tree keeps supported files, sorts directories first, and normalizes counts",
+        "folder file tree is wired through the Sidebar controller, runtime bridge, core state, and Rust command"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/presentation-renderer-contract.test.mjs",
+      "sourceBlob": "f11cdd759799294b420e3e3fe03f471994a56691",
+      "caseNames": [
+        "application composes one canonical presentation API into Preview without publishing presentation globals",
+        "hybrid and Preview Mermaid rendering use the canonical Preview presentation renderer",
+        "hybrid Preview and export math rendering use the canonical math presentation contract without vendor globals",
+        "Preview code enhancement delegates to the shared code presentation through Code Renderer"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-06-recent-files-menu.test.mjs",
+      "sourceBlob": "6ced5bce2852d939c0ef9b739a39eb5f9dc71892",
+      "caseNames": [
+        "Atomic 6.12 public contract keeps Recent Files Menu read-only and command-driven"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-10-autosave-controller.test.mjs",
+      "sourceBlob": "446423e0afd9c7afd09cf083226fb92b65c8f32c",
+      "caseNames": [
+        "Atomic 10.3 AutosaveController has an explicit DOM-free dependency and timer surface",
+        "Atomic 10.3 debounce owns exactly one timer and delegates one autosave through SaveController",
+        "Atomic 10.3 same document version and unchanged title skips redundant autosave",
+        "Atomic 10.3 title-only change saves even when editor version is unchanged",
+        "Atomic 10.3 Settings subscription cancels disabled work and re-arms with the committed delay",
+        "Atomic 10.3 failed autosave never establishes a fake saved baseline and remains retryable",
+        "Atomic 10.3 stale or cancelled save completion does not suppress the next autosave",
+        "Atomic 10.3 destroy is terminal, cancels debounce work and unsubscribes Settings",
+        "Atomic 10.3 AutosaveController remains the single autosave authority after R10-12 classic caller removal"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-10-close-save-controller.test.mjs",
+      "sourceBlob": "461e1fb5d0ee09d01b1d8562d3e922a6f561cb7e",
+      "caseNames": [
+        "Atomic 10.11 CloseSaveController owns only close-time persistence admission and terminal lifecycle",
+        "Atomic 10.11 start registers exactly one CloseSavePort handler and is idempotent",
+        "Atomic 10.11 no-active-document close cancels pending autosave and admits close without inventing a save",
+        "Atomic 10.11 active close cancels Autosave then delegates one forced final snapshot with current title",
+        "Atomic 10.11 accepted final save admits close without consulting failure decision",
+        "Atomic 10.11 cancelled or stale SaveController results block close without force-close prompting",
+        "Atomic 10.11 persistence failure blocks close when the injected user decision declines",
+        "Atomic 10.11 persistence failure permits explicit force-close decision with original error identity",
+        "Atomic 10.11 concurrent requests coalesce and destroy suppresses late save approval",
+        "Atomic 10.11 production integration gives Persistence one Close Save authority and leaves Window port-only"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-10-native-search-adapter.test.mjs",
+      "sourceBlob": "fdbd8930ff44749e8ed8edddb18926e2e89d9c63",
+      "caseNames": [
+        "Atomic 10.8 NativeSearchAdapter owns only native search mapping and terminal lifecycle",
+        "Atomic 10.8 support and empty-input gating preserve the previous NativeDocumentStore contract",
+        "Atomic 10.8 maps document query from and wrap exactly as the legacy native search path",
+        "Atomic 10.8 preserves UTF-16 offsets backend version and result identity without JS reinterpretation",
+        "Atomic 10.8 preserves null not-found results from the Platform command",
+        "Atomic 10.8 propagates native search failures with original identity",
+        "Atomic 10.8 destroy is terminal and a late in-flight result cannot escape the adapter",
+        "Atomic 10.8 NativeDocumentStore delegates native search while preserving the existing classic Find caller contract"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-10-remove-legacy-save.test.mjs",
+      "sourceBlob": "6fc542cb0d3962a97cbcb2be69c3b97ac9b9e685",
+      "caseNames": [
+        "Atomic 10.12 removes the explicitly temporary Save/Autosave classic bridges and public exports",
+        "Atomic 10.12 keeps export free of persistence policy after R13.13 moves import transition preparation",
+        "Atomic 10.12 core.js dispatches persistence intents and owns no manual/autosave implementation",
+        "Atomic 10.12 events.js routes edit autosave and Ctrl-S variants through explicit commands only",
+        "Atomic 10.12 file-menu Save actions are declarative and no longer call classic save globals inline",
+        "Atomic 10.12 SaveController current-file save writes an existing desktop path after one persistence save",
+        "Atomic 10.12 first desktop save binds the chosen path only after SaveController persistence generation checks complete",
+        "Atomic 10.12 desktop picker cancellation remains distinct after internal document persistence",
+        "Atomic 10.12 browser Save As delegates one Markdown download without binding a fake filesystem path",
+        "Atomic 10.12 stale non-active Save As content is cancelled before any external write or path bind",
+        "Atomic 10.12 Save As rejects a document transition completed while the desktop picker is open before any external write or path bind"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-10-save-controller.test.mjs",
+      "sourceBlob": "e387d3c5e070a3c96b51807482806dcd79d25433",
+      "caseNames": [
+        "Atomic 10.2 SaveController has an explicit DOM-free dependency surface",
+        "Atomic 10.2 manual save delegates once and publishes frozen title/path/version/native result context",
+        "Atomic 10.2 stale document cancellation is not reported as a save failure",
+        "Atomic 10.2 post-persist user cancellation remains saved internally and distinct from failure",
+        "Atomic 10.2 persistence failure publishes error and never executes the manual continuation",
+        "Atomic 10.2 continuation failure is one save failure and never publishes fake success",
+        "Atomic 10.2 destroy is terminal and rejects late in-flight success publication",
+        "Atomic 10.2 SaveController remains the single manual-save authority after R10-12 classic caller removal"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-10-save-status-store.test.mjs",
+      "sourceBlob": "bbde5a87e2c384336c583275c3849869bb1b4d9d",
+      "caseNames": [
+        "Atomic 10.1 SaveStatusStore owns the six canonical states as immutable snapshots",
+        "Atomic 10.1 maps native persistence events without copying document payload data",
+        "Atomic 10.1 rejects invalid status data and destroy is an irreversible terminal lifecycle",
+        "R16-08 direct SaveStatus capability has one snapshot authority and independently disposable subscriptions",
+        "Atomic 10.1 composition gives status authority to Persistence and UI only subscribes it"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "source",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-13-drop-import.test.mjs",
+      "sourceBlob": "fbae87f57d6d64d47455fe5f217be107a8f44874",
+      "caseNames": [
+        "nested DOM drag counters balance, clamp and reset on empty drop; destroy removes every listener",
+        "browser routes only first metadata item, text before MIME, with no content access",
+        "native normalized events suppress DOM duplicate, use first path and clear overlay on leave",
+        "native subscription arriving after destroy is disposed once and cannot route",
+        "native subscription and cleanup failures report once without unhandled rejection",
+        "new drops and destruction invalidate pending commands and suppress stale failure notifications",
+        "public Drop controller enforces activation and terminal teardown without a classic bridge",
+        "production routing has one owner and deletes the obsolete classifier bridge"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-13-drop-overlay.test.mjs",
+      "sourceBlob": "89f0fcf029e26b0e76136bdc5bcd8b872342a66e",
+      "caseNames": [
+        "Drop Overlay renders only controller visibility and preserves unrelated classes",
+        "missing optional overlay remains supported; malformed elements are rejected",
+        "controller owns counters; overlay teardown before late native callbacks cannot show it again",
+        "production composes the public view before owned Import callbacks and destroys it on both exit paths"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-13-file-import.test.mjs",
+      "sourceBlob": "2c10450ec045b144f3211993aa6724d79cc8a458",
+      "caseNames": [
+        "File Import returns the same immutable text shape for browser and native reads",
+        "empty text is valid, invalid file/path/result fail without coercing a DTO into content",
+        "read errors preserve identity and do not poison the next import",
+        "new read cancels the old browser signal and ignores its late success",
+        "cancel and destroy settle pending native reads without waiting for native I/O",
+        "cancel before the read microtask prevents I/O from starting",
+        "public reader accepts external cancellation without starting or publishing I/O",
+        "text callers use Import while Documents retains lazy load and document commit ownership"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-13-file-type-classifier.test.mjs",
+      "sourceBlob": "de423ee299b0186aba784a6d3124cbd8f1395d0a",
+      "caseNames": [
+        "browser classification preserves text precedence and MIME-only image selection",
+        "native paths use final basename and preserve text/image extension differences",
+        "returned native kind is explicit and cannot be guessed from filename or MIME",
+        "empty or malformed metadata is unsupported and inputs are not mutated",
+        "classification never reads contents, size or platform capabilities",
+        "production routing consumes one public classifier with startup and teardown wiring"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-13-html-extractor.test.mjs",
+      "sourceBlob": "ae528d404347da9168298a1b3709f6d918354247",
+      "caseNames": [
+        "public clipper preserves extraction result identity and parse errors before insertion",
+        "ESM composition injects the sole extractor and converter; classic code retains no conversion authority"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-13-image-policy.test.mjs",
+      "sourceBlob": "dc1cec82105fdb62ea8d811aa2fc5903840cced7",
+      "caseNames": [
+        "browser MIME compatibility is shared with classification, without reading size or content",
+        "drop and dialog share inclusive 5 MiB limit; only dialog above 2 MiB asks for confirmation",
+        "policy is metadata-only and does not override text-first drop routing",
+        "production callers use one browser policy while native byte enforcement stays in Rust"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "read",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-13-web-fetch-coordinator.test.mjs",
+      "sourceBlob": "1db0082268e63777235ba37a398590c9ae3ecd91",
+      "caseNames": [
+        "native success/failure are explicit and never escape into a browser proxy",
+        "local proxy retains URL encoding, content alias and error hints without public fallback",
+        "public proxy order, JSON/base64 decoding, short body rejection and final failure stay explicit",
+        "replacement, parent abort, manual input and destruction settle requests and quarantine late results",
+        "empty and pre-aborted requests do no I/O; one total deadline stops proxy fallback",
+        "native adapter receives the exact request cancellation; cancellation failures remain observable",
+        "public clipper input changes cancel coordinator results and release subscriptions",
+        "clipper close/reopen and edited inputs reject late HTML",
+        "web routing has one feature owner and the production inventory includes it",
+        "retired import ports, global opener and inline clipper markup cannot re-enter production"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-14-settings-effects.test.mjs",
+      "sourceBlob": "fb1155b5a6e526e2be34afad4d4cdccb96be4c1b",
+      "caseNames": [
+        "R14-06 theme toggle and committed theme draft preserve an existing Preview body through the actual ESM owner",
+        "R14-06 mixed Settings commit still applies changed layout, preferences and sidebar exactly once",
+        "R14-06 changing Preview performance mode retains its layout refresh without unrelated preference work",
+        "R14-06 editor and toolbar changes apply their preferences without rebuilding layout",
+        "R14-06 locale, autosave and export-directory commits preserve Preview and route their committed values"
+      ],
+      "sourceReads": [],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-16-deletion-inventory.test.mjs",
+      "sourceBlob": "a761019ee984430f41d0abf1c7fd2ca7ae9784d7",
+      "caseNames": [
+        "R16-01 literal imports, re-exports and new URL test reads block deletion",
+        "R16-01 classic loader, HTML and public build copying are separate evidence",
+        "R16-01 Rust mod and explicit path/include edges resolve the actual file",
+        "R16-01 directory mod resolution does not invent a reference to the retired flat Rust file",
+        "R16-01 ownership metadata without consumer matches is unproven rather than a deletion permit",
+        "R16-01 frozen models are protected even inside old directory candidates",
+        "R16-01 historical task paths remain represented after prior removal",
+        "R16-01 compatibility adapters and actual generated files expand the frozen scope",
+        "R16-01 source or reference changes invalidate frozen evidence",
+        "R16-01 force-added candidates invalidate the tracked source inventory",
+        "R16-01 modifying a deletion decision or omitting a candidate cannot pass verification",
+        "R16-01 docs changes do not masquerade as product reference drift",
+        "R16-01 actual frozen evidence remains current and authorizes no deletion"
+      ],
+      "sourceReads": [],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/stage-16-esm-application.test.mjs",
+      "sourceBlob": "42f8c1a28201a4679bd8ed444cb6841bf0691217",
+      "caseNames": [
+        "R16-02 production entry imports ESM owners and every classic file is absent",
+        "R16-02 lifetime cancels timers and attempts all independent releases after a disposer fails",
+        "R16-02 partially installed listeners are removable even when registration throws",
+        "R16-02 interactive edit reaches lazy document, geometry, Preview and persistence without retired metrics globals",
+        "R16-02 shortcuts preserve save-as and four-space Tab insertion",
+        "R16-02 native Find waits for save before searching the same document",
+        "expression:'R16-02 native Find rejects a late save after ' + reason",
+        "R16-02 startup restores preferences before session, Preview, layout and help",
+        "R16-02 destroyed startup cannot open a late launch path",
+        "R16-02 startup failure preserves the original error and stops later initialization",
+        "R16-02 late Find frame cannot synchronize a replaced document or a destroyed owner"
+      ],
+      "sourceReads": [],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/support/export-vm-host.mjs",
+      "sourceBlob": "14796a1bc4b21cce0858800591d6876859542b92",
+      "caseNames": [],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFileSync",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/svg-sprite.test.mjs",
+      "sourceBlob": "84e5b7db55c2a683ffa4eb943406877ddcd4c743",
+      "caseNames": [
+        "Atomic Task 2.3 sprite has one stable definition for every preserved icon ID",
+        "compatibility and dynamic callers reference the external sprite without a second geometry authority",
+        "icon-view is a pure generic renderer with decorative and labelled accessibility modes"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/ui/modal-shell.test.mjs",
+      "sourceBlob": "ac75e1866c881fb4242396477398faf9da6eb8a8",
+      "caseNames": [
+        "ModalShell owns dialog semantics, initial focus, Escape close and focus restoration",
+        "ModalShell closes only for the owned backdrop and honors disabled close policies",
+        "ModalShell cancels stale close completion when reopened and keeps the new session authoritative",
+        "ModalShell accepts feature content, validates accessibility options and restores adopted DOM on destroy",
+        "independent image export dialog retains its non-dismissible policy and terminal ownership",
+        "R16-08 editor dialogs own ModalShell directly without modal events or a second registry"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/ui/style-layering.test.mjs",
+      "sourceBlob": "7e613240749c74871186f3ac1f9d69851c624cb6",
+      "caseNames": [
+        "Atomic Task 2.9 replaces consolidated CSS with explicit responsibility modules",
+        "each style module stays bounded to one declared responsibility",
+        "visual CSS uses class contracts instead of IDs or legacy shell class authority",
+        "layered selectors do not cross independent feature namespaces",
+        "stable compatibility presentation has no inline style authority",
+        "R16-05 prefixed shell and state classes are the sole projection contract"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/ui/style-test-utils.mjs",
+      "sourceBlob": "c9fd14d0a3e6806b48c3f71e754e26e9b6ff779e",
+      "caseNames": [],
+      "sourceReads": [],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/documents/document-domain.test.mjs",
+      "sourceBlob": "77fc1f2aa8d3bbf19fde0d4929a88c766f9deeb0",
+      "caseNames": [
+        "Atomic 5.1 creates safe compatible ids while preserving previously accepted persisted identifiers exactly",
+        "Atomic 5.1 normalizes title and path without taking body ownership",
+        "Atomic 5.1 new document records are immutable metadata-only values with compatible metadata surfaces",
+        "Atomic 5.1 record updates preserve identity and tolerate legacy records that omitted createdAt",
+        "Atomic 5.1 native metadata and recent-file entries preserve legacy numeric tolerance and exact persistence surfaces",
+        "R16-08 pure Documents metadata capabilities preserve normalization without creating a host object",
+        "Atomic 5.1 production integration removes classic metadata normalization authority without changing the frozen DocumentModel"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/documents/document-session-controller.test.mjs",
+      "sourceBlob": "7ab1c02d3589fa483960672b4ee3b3b953ea439b",
+      "caseNames": [
+        "Atomic 5.3 coordinates new, open, rename and close through one session/model/persistence path",
+        "Atomic 5.3 operation generation prevents a slower open from overwriting a newer document",
+        "Atomic 5.3 begins external-open generation before async file I/O so stale file reads cannot commit",
+        "Atomic 5.3 rolls back runtime activation when import validation fails before Session Store commit",
+        "Atomic 5.3 stale close cannot remove or activate documents after a newer lifecycle operation wins",
+        "Atomic 5.3 stale native save completion cannot write native metadata into a newer generation",
+        "Atomic 5.3 read-only inactive content uses an isolated repository load and remains generation-guarded",
+        "Atomic 5.3 session repository owns only compatibility body persistence and isolated native reads",
+        "Atomic 5.3 NativeDocumentStore isolated reads neither cancel nor are cancelled by lifecycle loads",
+        "R16-08 explicit Document controller preserves active identity, operation generations and terminal lifecycle",
+        "Atomic 5.3 production integration removes classic lifecycle/body-cache authority and keeps the frozen DocumentModel exact",
+        "R13.3 real Documents controller commits imported text only after read success",
+        "R13.3 cancelled or superseded file reads never create an empty or stale document",
+        "large native and browser-file imports commit native bodies before quota-limited session storage",
+        "failed native import keeps the previous document and cleans up the uncommitted body",
+        "superseded native import cannot commit after a newer document activates",
+        "cancelling during native import persistence rolls back without publishing success",
+        "metadata persistence failure after a native import commit is explicit and cleans the unpublished document",
+        "R13.13 real Documents chain saves before read, normalizes CRLF, commits once and registers successful native paths",
+        "R13.13 save and read failures preserve the current document and never create empty records",
+        "R13.13 cancellation during save prevents source I/O and cancellation during read rejects late results",
+        "R13.13 image imports cannot mutate a different document after switching and destroy cancels text",
+        "R13.13 successful empty text is a document; empty or failed web conversion is not"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/documents/document-session-store.test.mjs",
+      "sourceBlob": "6cf4c471eacdb6e4662b3dbd0d456e556b51cf09",
+      "caseNames": [
+        "Atomic 5.2 owns one immutable metadata-only records list and activeId snapshot",
+        "Atomic 5.2 rejects duplicate ids and invalid active targets before state mutation",
+        "Atomic 5.2 updates, activates and removes records through immutable session events with no-op suppression",
+        "Atomic 5.2 listener failures are reported without rolling back committed session state",
+        "R16-08 explicit metadata projection excludes legacy bodies before the sole Store boundary",
+        "Atomic 5.2 destroy is idempotent, removes listeners and makes Store operations terminal",
+        "Atomic 5.2 NativeDocumentStore accepts frozen records and returns native metadata without mutating them",
+        "Atomic 5.2 production integration removes classic session-state authority and keeps the frozen DocumentModel exact"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/documents/recent-files-repository.test.mjs",
+      "sourceBlob": "1fcb3667428f5d8809bea80ece4662a59a89a700",
+      "caseNames": [
+        "Atomic 5.4 loads one bounded case-insensitive deduplicated recent-file snapshot and repairs serialization",
+        "Atomic 5.4 add promotes one path, compares case-insensitively and enforces the exact 20-entry cap",
+        "Atomic 5.4 preserves legacy malformed-read and write-failure behavior without losing in-memory state",
+        "Atomic 5.4 valid non-array legacy data normalizes to an empty serialized list and invalid add is a no-op",
+        "Atomic 5.4 clear persists an exact empty list while destroy is idempotent and terminal",
+        "Atomic 6.12 repository publishes immutable read-only snapshots only on semantic recent-file changes",
+        "R16-08 explicit Recent Files writes preserve one Repository and the Menu read source stays readonly",
+        "Atomic 6.12 production integration keeps persistence in Documents and removes classic Recent Files menu read authority"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/editor/editor-controller.test.mjs",
+      "sourceBlob": "202d4b8834342ed7b90574a4888b35e84ff32d94",
+      "caseNames": [
+        "Atomic 5.8 publishes one frozen model-authoritative transaction after the adapter journal version is committed",
+        "Atomic 5.8 preserves suppressed programmatic mutations as non-interactive transactions",
+        "Atomic 5.8 rejects an adapter transaction that the DocumentModel has not committed",
+        "Atomic 5.8 setText routes whole-body writes through DocumentModel.replaceRange and never writes the adapter directly",
+        "Atomic 5.8 listener failures are reported without blocking sibling transaction subscribers",
+        "Atomic 5.8 destroy is idempotent, unsubscribes the adapter and makes stateful operations terminal",
+        "R16-08 explicit Editor controller retains writes, readonly snapshots and terminal lifecycle",
+        "Atomic 5.8 production integration gives input one Controller transaction path and removes direct classic editor.value writes without starting 5.9",
+        "R13.13 imported Markdown replaces blank content or appends in one model transaction"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/help/help-feature.test.mjs",
+      "sourceBlob": "40cfe45bf542de7242addf0e003f8f1088df37ee",
+      "caseNames": [
+        "Atomic 4.5 exposes ten independent Help content modules while preserving the frozen long-form HTML hashes",
+        "Help content registry rejects duplicate, malformed and executable content without weakening fallback behavior",
+        "Help state owns one normalized navigation page and becomes terminal after destroy",
+        "Help controller preserves first-show semantics, owns navigation and handles the explicit menu trigger",
+        "Help controller keeps the active page across locale changes and unsubscribes before terminal destroy",
+        "Help controller construction rolls back locale subscriptions when menu listener installation fails",
+        "R16-08 explicit Help capability keeps navigation, first-run policy and terminal cleanup",
+        "Atomic 4.5 production integration removes the classic Help authority and wires one ESM Help feature before Translation Bindings"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/i18n/i18n-service.test.mjs",
+      "sourceBlob": "a9bc4578fb19315427f4756d5139c10d8741e894",
+      "caseNames": [
+        "Atomic 4.3 I18n Service owns locale state with deterministic default normalization",
+        "Atomic 4.3 t() preserves legacy placeholder formatting and fallback-to-key behavior",
+        "Atomic 4.3 locale switching emits immutable events only for real transitions",
+        "Atomic 4.3 listener failures do not roll back state and multiple failures are aggregated",
+        "Atomic 4.3 destroy is idempotent and makes stateful service operations terminal",
+        "R16-08 direct I18n capability preserves service semantics without raw locale dictionaries",
+        "Atomic 4.3 production integration keeps service DOM/storage-free and removes classic translation ownership"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/i18n/locale-registry.test.mjs",
+      "sourceBlob": "dc94a1487cee4862bf5c434b6707984347f60109",
+      "caseNames": [
+        "Atomic 4.2 exposes ten immutable short-text locale modules with one exact key surface",
+        "Atomic 4.2 materializes only the historical zh-CN fallback keys and preserves every other short value",
+        "Atomic 4.2 help HTML remains byte-compatible after the Atomic 4.5 Help content migration",
+        "locale registry rejects duplicate locales, key drift, placeholder drift, HTML and non-string values",
+        "Atomic 4.2 locale registry remains the only short-text data authority after service extraction",
+        "Atomic 4.2 locale data remains isolated from the Atomic 4.5 Help feature",
+        "current locale audit reports a complete split registry with separate help content"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/i18n/settings-locale-controller.test.mjs",
+      "sourceBlob": "36281951c096f9206c16ffd9b0a835486b891855",
+      "caseNames": [
+        "Atomic 4.12 Settings Locale Controller applies only committed language changes",
+        "Atomic 4.12 Settings Locale Controller ignores malformed and unrelated events",
+        "Atomic 4.12 validates the committed language before delegating to I18n Service",
+        "Atomic 4.12 destroy removes the Settings listener, is idempotent and makes explicit apply terminal",
+        "Atomic 4.12 construction rolls back a partially installed Settings listener",
+        "Atomic 4.12 production integration removes legacy locale ownership from public i18n, core and bootstrap"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/i18n/translation-bindings.test.mjs",
+      "sourceBlob": "8b65a8d7c385c8a15b8fe8f4fdefb1d87cb8720e",
+      "caseNames": [
+        "binds text, title, placeholder, alt and aria-label across explicit View roots",
+        "locale changes refresh cached bindings without rescanning any View",
+        "destroy removes the locale subscription and is idempotent",
+        "requires every named View and rejects cross-document roots",
+        "does not depend on a global document or window",
+        "refresh continues through binding failures and reports them after remaining writes",
+        "production integration preserves 113 bindings across shell, Help and the owned clipper view"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/platform/dialog-client.test.mjs",
+      "sourceBlob": "2fe5ecad9dc9eb547d99e589eb3e22a7f55d970b",
+      "caseNames": [
+        "Atomic Task 3.4 normalizes open-file options and records successful completion",
+        "file and directory cancellation resolve to explicit null values instead of errors",
+        "save-file normalization preserves filename cleaning, native path joining and extension completion",
+        "confirmation delegates exact defaults and false remains a normal cancellation value",
+        "native dialog errors retain identity and telemetry failures cannot replace native semantics",
+        "invalid dialog client dependencies fail at the adapter boundary",
+        "the desktop dialog client is the sole production owner of the Tauri dialog plugin import",
+        "desktop platform exposes the dedicated DialogsPort and current callers keep dialog ownership behind Platform",
+        "Stage 3 verification keeps Atomic Task 3.4 after invoke and before later adapters"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/platform/drag-drop-client.test.mjs",
+      "sourceBlob": "fb98f9bb2c65b41080d76b4b82d550641a5fbd15",
+      "caseNames": [
+        "Atomic Task 3.6 converts Tauri drag/drop payloads into immutable platform events",
+        "drag/drop normalization is tolerant and does not classify file types",
+        "subscription disposers are idempotent and destroy releases active subscriptions in reverse order",
+        "a subscription resolved after destroy is disposed immediately and never becomes active",
+        "native registration and cleanup errors preserve their original identity",
+        "invalid dependencies, handlers and native subscription results fail at the adapter boundary",
+        "the drag/drop client is the sole production owner of the Tauri webview import",
+        "desktop platform exposes DragDropPort directly and Import consumes normalized Platform events",
+        "file interpretation remains in the application layer, not the DragDrop client",
+        "Stage 3 verification keeps Atomic Task 3.6 after window and before later adapters"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/platform/file-system-client.test.mjs",
+      "sourceBlob": "b7438f18800f20ea30e3ea8da9be686cc395aa4a",
+      "caseNames": [
+        "Atomic Task 3.7 maps the six Rust local-file commands with existing argument semantics",
+        "path normalization matches the legacy facade at every file-system boundary",
+        "Rust file DTOs and MIME-bearing results pass through without client interpretation",
+        "native file command errors retain their original identity",
+        "invalid client options fail at the adapter boundary",
+        "the FileSystem client contains command mapping only and does not own document or Toast behavior",
+        "desktop platform maps the six FilesPort responsibilities through the dedicated FileSystem client",
+        "FileSystem client is exported through the platform public entry and registered in production ownership",
+        "Stage 3 verification runs Atomic Task 3.7 after drag-drop and before later adapters"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/platform/platform-cutover.test.mjs",
+      "sourceBlob": "a0d0ec7db1b735456464025754a6a4525ce83122",
+      "caseNames": [
+        "Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-global caller",
+        "classic callers use the scoped compatibility host instead of a replacement global facade",
+        "ESM consumers receive responsibility-focused ports rather than native DTO facade methods",
+        "native drag/drop keeps file classification in application code and MIME decoding outside it",
+        "Stage 3 evidence keeps 174 as historical context while enforcing the exact 36-module Platform surface"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/events.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/platform/web-fetch-client.test.mjs",
+      "sourceBlob": "cc95affe998ec71c7f622ef1e45756a69daf9bad",
+      "caseNames": [
+        "Atomic Task 3.9 maps fetch_url without changing the existing URL payload",
+        "web-fetch client preserves native result and error identity",
+        "Rust remains authoritative for URL normalization, redirects and HTTP validation",
+        "invalid web-fetch client dependencies fail at the adapter boundary",
+        "desktop WebPort reaches the import coordinator through the application composition",
+        "AbortSignal cancels the native request with its exact identifier and ignores late success",
+        "pre-cancelled signals never invoke and completed calls remove their cancellation listener",
+        "failed cancellation is reported and native fetch rejection preserves its cause",
+        "native cancellation arriving before its acknowledgement is normalized to AbortError"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/web-clipper.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/editor/application/find-preview-commands.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/settings/classic-settings-store-port.test.mjs",
+      "sourceBlob": "c9dcbd79b77284110a5146d7a6611b1d222b15a5",
+      "caseNames": [
+        "R16-08 direct Settings Store preserves committed and draft operations without a host facade",
+        "R16-08 Settings draft has one owner and Store disposal is terminal and idempotent",
+        "R16-08 bootstrap retains the internal Repository and injects the committed Store before starting the application",
+        "Atomic 4.8 Store remains the Settings state authority after Atomic 4.10 migrates dialog ownership",
+        "Atomic 4.8 retires the Repository compatibility bridge while Atomic 4.10 adds UI/application beside the unchanged Store boundary"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/settings/settings-schema.test.mjs",
+      "sourceBlob": "2828683acd44f45e2678525253c0bde8ae856f32",
+      "caseNames": [
+        "Atomic 4.6 declares every persisted user setting with the exact legacy localStorage key",
+        "Settings defaults, sections and nested schema metadata are immutable and preserve existing defaults",
+        "Settings Schema preserves exact option surfaces used by the current Settings UI and editor toggles",
+        "Settings validation rejects wrong types and illegal values while canonicalizing valid colors, paths and arrays",
+        "Settings serialization preserves legacy string formats and reports missing or invalid persisted values without storage I/O",
+        "Atomic 4.6 keeps legacy persistence keys schema-owned after Atomic 4.7 repository cutover",
+        "Atomic 4.6 Settings domain remains pure while later layers add Repository, Store, Sections and Atomic 4.10 UI"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "readText",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/settings/settings-ui.test.mjs",
+      "sourceBlob": "5a36ae8b1b689e03bf638781a7266fa108294859",
+      "caseNames": [
+        "Atomic 4.10 Apply Coordinator publishes immutable effective changes only after a successful Store apply",
+        "Atomic 4.10 controller opens one Store draft, updates only draft state, navigates and applies through the coordinator",
+        "Atomic 4.10 Cancel, Escape/backdrop View close callback and validation failure all keep committed state untouched",
+        "Atomic 4.10 persistence failure keeps the committed snapshot unchanged and leaves the draft available for correction",
+        "Atomic 4.10 directory selection updates draft only, ignores cancellation/stale completion and reports unsupported platforms",
+        "Atomic 4.10 controller destroy removes listeners, cancels draft and makes operations terminal",
+        "Atomic 4.10 controller construction rolls back an already-installed open trigger listener when shortcut binding fails",
+        "Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Service remains bootstrap-owned"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/events.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/application-events.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    },
+    {
+      "path": "tests/unit/theme/theme-service.test.mjs",
+      "sourceBlob": "85809aa3fbafde8c95b8d3b8bbf5e2ee89cf6083",
+      "caseNames": [
+        "Atomic 4.11 Theme Toggle Controller commits the next validated Settings theme without owning theme DOM",
+        "Atomic 4.11 Theme Toggle Controller rolls back a partially installed trigger listener",
+        "Atomic 4.11 Theme Service applies the validated initial Settings theme to one explicit root",
+        "Atomic 4.11 follows only committed SettingsChanged events that include the theme id",
+        "Atomic 4.11 rejects invalid direct or published theme snapshots before changing the applied theme",
+        "Atomic 4.11 has no cancel or stale async path because draft edits publish no SettingsChanged event",
+        "Atomic 4.11 destroy removes the Settings listener, restores the original attribute and makes operations terminal",
+        "Atomic 4.11 construction rolls back the root theme when listener installation fails",
+        "Atomic 4.11 production integration removes classic theme authority and keeps semantic tokens CSS-owned"
+      ],
+      "sourceReads": [
+        {
+          "retired": "public/app/core.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/documents/ui/document-workspace.js",
+            "src/features/menu/shell-menus.js",
+            "src/features/persistence/ui/workspace-status.js",
+            "src/features/layout/workspace-preferences.js"
+          ]
+        },
+        {
+          "retired": "public/app/bootstrap.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/bootstrap/workspace-startup.js"
+          ]
+        },
+        {
+          "retired": "public/app/editor-tools.js",
+          "reader": "readFile",
+          "currentOwners": [
+            "src/features/layout/workspace-preferences.js"
+          ]
+        }
+      ],
+      "preservedIntent": "Current source ownership assertions, behavior cases, negative controls and lifecycle scenarios remain; source reads become explicit native reads."
+    }
+  ],
+  "retiredCases": [
+    {
+      "path": "tests/architecture/stage-05-legacy-path-removal.test.mjs",
+      "name": "Atomic 5.13 modified classic scripts remain parseable before browser execution",
+      "reason": "The classic paths no longer exist and the case only parsed their redirected ESM owner sources. The existing real ESM imports already parse and evaluate all seven current owners, with runtime-free import and absence assertions.",
+      "replacement": {
+        "path": "tests/stage-16-esm-application.test.mjs",
+        "name": "R16-02 production entry imports ESM owners and every classic file is absent"
+      }
+    }
+  ],
+  "behaviorReplacements": [
+    {
+      "path": "tests/architecture/stage-07-preview-mode-resolver.test.mjs",
+      "name": "Atomic 7.3 preserves manual override before automatic character or block thresholds",
+      "oldIntent": "Manual override precedes automatic size thresholds; formerly checked statement text and ordering.",
+      "currentContract": "Call the actual public resolvePreviewMode for each manual mode with both tiny and oversized document signals; original exact boundary unit suite remains."
+    }
+  ],
+  "preservedEvidence": [
+    "Frozen eight model APIs and hashes",
+    "Historical acceptance and negative legacy fixtures",
+    "Retired-path absence guards",
+    "Real browser and Windows/native scenarios",
+    "Failure/cancel/stale-result/destroy contracts"
+  ],
+  "indirectReads": [
+    {
+      "path": "tests/architecture/stage-05-history-authority.test.mjs",
+      "oldPaths": [
+        "public/app/core.js",
+        "public/app/bootstrap.js",
+        "public/app/editor-tools.js",
+        "public/app/events.js"
+      ],
+      "currentContract": "Read all six unique current owners; retain every legacy full-text history authority rejection."
+    },
+    {
+      "path": "tests/architecture/stage-06-layout-state.test.mjs",
+      "oldPaths": [
+        "public/app/core.js",
+        "public/app/bootstrap.js",
+        "public/app/editor-tools.js",
+        "public/app/events.js"
+      ],
+      "currentContract": "Explicit current-owner groups preserve the original four source sets, ordering and every LayoutState assertion."
+    },
+    {
+      "path": "tests/architecture/stage-07-preview-legacy-deletion.test.mjs",
+      "oldPaths": [
+        "public/app/core.js",
+        "public/app/bootstrap.js",
+        "public/app/editor-tools.js",
+        "public/app/events.js",
+        "public/app/web-clipper.js"
+      ],
+      "currentContract": "Read all seven unique current owners; retain the shared Preview command and every forbidden owner check."
+    },
+    {
+      "path": "tests/stage-13-web-fetch-coordinator.test.mjs",
+      "oldPaths": [
+        "public/app/web-clipper.js",
+        "public/app/events.js",
+        "public/app/editor-tools.js"
+      ],
+      "currentContract": "Expand concatenated filenames to the three explicit current owners; retain every retired import authority rejection."
+    },
+    {
+      "path": "tests/unit/platform/platform-cutover.test.mjs",
+      "oldPaths": [
+        "public/app/core.js",
+        "public/app/events.js",
+        "public/app/web-clipper.js"
+      ],
+      "currentContract": "Read all current owners for native-global absence; explicit current source groups preserve all three original scoped-port boundary checks."
+    }
+  ],
+  "sourceExtraction": {
+    "path": "tests/support/export-vm-host.mjs",
+    "owner": "src/features/documents/ui/document-workspace.js",
+    "currentContract": "Same exportContextDocument body; throw immediately for absent or reversed function boundaries."
+  },
+  "synchronousReadPreservation": {
+    "path": "tests/stage-10-remove-legacy-save.test.mjs",
+    "currentContract": "Keep readFileSync-derived source groups synchronous; every persistence intent and forbidden implementation assertion remains."
+  }
+}

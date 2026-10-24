@@ -1,4 +1,4 @@
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 import test from 'node:test';
@@ -113,7 +113,7 @@ test('Atomic 10.8 NativeDocumentStore delegates native search while preserving t
   const [entry, nativeStoreSource, webClipperSource, fixtureText] = await Promise.all([
     source('src/features/persistence/index.js'),
     source('src/features/persistence/native-document-store/native-document-store.js'),
-    source('public/app/web-clipper.js'),
+    source('src/features/editor/application/find-preview-commands.js'),
     source('tests/architecture/fixtures/production-modules.json')
   ]);
   assert.match(entry, /createNativeSearchAdapter/);

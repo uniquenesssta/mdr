@@ -1,4 +1,4 @@
-import { readFileSync } from './support/application-surface-source.mjs';
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 import test from 'node:test';

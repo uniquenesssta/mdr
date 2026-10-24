@@ -5,19 +5,22 @@ import { createApplicationLifetime } from '../src/bootstrap/application-lifetime
 import { createApplicationEvents } from '../src/bootstrap/application-events.js';
 import { createFindPreviewCommands } from '../src/features/editor/application/find-preview-commands.js';
 import { createWorkspaceStartup } from '../src/bootstrap/workspace-startup.js';
-import { applicationSurfaceOwners } from './support/application-surface-source.mjs';
 
 test('R16-02 production entry imports ESM owners and every classic file is absent', async () => {
   const main = await readFile('src/main.js', 'utf8');
   assert.doesNotMatch(main, /APP_MODULES|loadClassicScript|createElement\(['"]script|__markdownEditorInitPromise|['"]\/app\//);
-  for (const [retired, owners] of Object.entries(applicationSurfaceOwners)) {
+  for (const retired of ['public/app/core.js', 'public/app/bootstrap.js', 'public/app/editor-tools.js',
+    'public/app/events.js', 'public/app/web-clipper.js']) {
     await assert.rejects(access(retired), { code: 'ENOENT' });
-    for (const owner of owners) {
-      const source = await readFile(owner, 'utf8');
-      assert.match(source, /export function create/);
-      assert.doesNotMatch(source, /getElementById\(['"]compatibility-business-ports|eval\(|new Function/);
-      await import(new URL('../' + owner, import.meta.url));
-    }
+  }
+  for (const owner of ['src/features/documents/ui/document-workspace.js', 'src/features/menu/shell-menus.js',
+    'src/features/persistence/ui/workspace-status.js', 'src/features/layout/workspace-preferences.js',
+    'src/bootstrap/workspace-startup.js', 'src/bootstrap/application-events.js',
+    'src/features/editor/application/find-preview-commands.js']) {
+    const source = await readFile(owner, 'utf8');
+    assert.match(source, /export function create/);
+    assert.doesNotMatch(source, /getElementById\(['"]compatibility-business-ports|eval\(|new Function/);
+    await import(new URL('../' + owner, import.meta.url));
   }
 });
 

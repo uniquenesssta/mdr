@@ -1,14 +1,15 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 import test from 'node:test';
 import { classifyBrowserFile, classifyImportPath, IMPORT_KINDS } from '../../../src/features/import/index.js';
 
 const migratedCallers = [
   'src/main.js', 'src/features/link-preview/link-preview-controller.js', 'src/features/telemetry/browser-telemetry.js',
   'src/features/sidebar/folder-tree/folder-tree-controller.js', 'src/features/persistence/native-document-store/native-document-store.js',
-  'src/features/hybrid-editor/image/image-source-resolver.js', 'public/app/core.js', 'public/app/events.js',
-  'public/app/web-clipper.js'
+  'src/features/hybrid-editor/image/image-source-resolver.js',
+  'src/features/documents/ui/document-workspace.js', 'src/features/menu/shell-menus.js',
+  'src/features/persistence/ui/workspace-status.js', 'src/features/layout/workspace-preferences.js',
+  'src/bootstrap/application-events.js', 'src/features/editor/application/find-preview-commands.js'
 ];
 
 test('Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-global caller', async () => {
@@ -24,11 +25,14 @@ test('Atomic Task 3.12 deletes the legacy Tauri facade and removes every native-
 });
 
 test('classic callers use the scoped compatibility host instead of a replacement global facade', async () => {
-  for (const path of ['public/app/core.js', 'public/app/events.js', 'public/app/web-clipper.js']) {
-    const source = await readFile(new URL('../../../' + path, import.meta.url), 'utf8');
+  for (const { paths, boundary } of [
+    { paths: ['src/features/documents/ui/document-workspace.js', 'src/features/menu/shell-menus.js',
+      'src/features/persistence/ui/workspace-status.js', 'src/features/layout/workspace-preferences.js'], boundary: /corePlatformPort/ },
+    { paths: ['src/bootstrap/application-events.js'], boundary: /eventsDocumentUiCommandPort/ },
+    { paths: ['src/features/editor/application/find-preview-commands.js'], boundary: /webClipperEditorUiCommandPort/ }
+  ]) {
+    const source = (await Promise.all(paths.map(path => readFile(new URL('../../../' + path, import.meta.url), 'utf8')))).join('\n');
     assert.doesNotMatch(source, /getElementById\(['"]compatibility-business-ports/);
-    const boundary = path === 'public/app/web-clipper.js' ? /webClipperEditorUiCommandPort/
-      : path === 'public/app/events.js' ? /eventsDocumentUiCommandPort/ : /corePlatformPort/;
     assert.match(source, boundary);
 
     assert.doesNotMatch(source, /window\.markdownEditorPlatform|window\.markdownEditorNative/);
@@ -63,7 +67,7 @@ test('ESM consumers receive responsibility-focused ports rather than native DTO 
 });
 
 test('native drag/drop keeps file classification in application code and MIME decoding outside it', async () => {
-  const events = await readFile(new URL('../../../public/app/events.js', import.meta.url), 'utf8');
+  const events = await readFile(new URL('../../../src/bootstrap/application-events.js', import.meta.url), 'utf8');
   // R13.4 moves event routing into Import; Platform still only transports paths.
   const drop = await readFile(new URL('../../../src/features/import/files/drop-import-controller.js', import.meta.url), 'utf8');
   assert.match(drop, /classifyBrowserFile\(file\)/);

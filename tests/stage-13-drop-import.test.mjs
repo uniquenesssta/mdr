@@ -1,7 +1,6 @@
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { access } from 'node:fs/promises';
 import { createDropImportController } from '../src/features/import/index.js';
 
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
@@ -106,7 +105,7 @@ test('public Drop controller enforces activation and terminal teardown without a
 
 test('production routing has one owner and deletes the obsolete classifier bridge', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
-  const [events, main, drop, fixture] = await Promise.all([read('public/app/events.js'), read('src/main.js'), read('src/features/import/files/drop-import-controller.js'), read('tests/architecture/fixtures/production-modules.json')]);
+  const [events, main, drop, fixture] = await Promise.all([read('src/bootstrap/application-events.js'), read('src/main.js'), read('src/features/import/files/drop-import-controller.js'), read('tests/architecture/fixtures/production-modules.json')]);
   assert.doesNotMatch(events, /dragCounter|addEventListener\('drag(?:enter|leave|over)'|addEventListener\('drop'|call\('dragDrop', 'subscribe'|eventsImportClassifierPort/);
   assert.doesNotMatch(events, /markdownEditorDropImportPort|handleNativeDroppedPath/);
   assert.match(main, /openImportPath: path => dropImportController\.openPath\(path\)/);

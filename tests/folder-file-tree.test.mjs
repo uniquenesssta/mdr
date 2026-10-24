@@ -1,5 +1,5 @@
 import { readCurrentViewMarkup } from './support/current-view-markup.mjs';
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -51,7 +51,12 @@ test('folder file tree is wired through the Sidebar controller, runtime bridge, 
   const [index, main, core, sidebarState, desktopPlatform, rustMain, rustLocal, treeLimits] = await Promise.all([
     readCurrentViewMarkup(),
     readFile(new URL('../src/main.js', import.meta.url), 'utf8'),
-    readFile(new URL('../public/app/core.js', import.meta.url), 'utf8'),
+    Promise.all([
+      readFile(new URL('../src/features/documents/ui/document-workspace.js', import.meta.url), 'utf8'),
+      readFile(new URL('../src/features/menu/shell-menus.js', import.meta.url), 'utf8'),
+      readFile(new URL('../src/features/persistence/ui/workspace-status.js', import.meta.url), 'utf8'),
+      readFile(new URL('../src/features/layout/workspace-preferences.js', import.meta.url), 'utf8')
+    ]).then(sources => sources.join('\n')),
     readFile(new URL('../src/features/sidebar/state/sidebar-state.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8'),
     readFile(new URL('../src-tauri/src/main.rs', import.meta.url), 'utf8'),

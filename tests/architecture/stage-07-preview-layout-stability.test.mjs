@@ -1,6 +1,5 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, readdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -32,7 +31,7 @@ test('Atomic 7.9 composition root owns and destroys one scoped layout stability 
 
 test('Atomic 7.9 layout-stability authority moves into PreviewController while classic callers use the command facade', async () => {
   const [controller, bootstrap, editorTools] = await Promise.all([
-    source('src/features/preview/application/preview-controller.js'), source('public/app/bootstrap.js'), source('public/app/editor-tools.js')
+    source('src/features/preview/application/preview-controller.js'), source('src/bootstrap/workspace-startup.js'), source('src/features/layout/workspace-preferences.js')
   ]);
   assert.match(controller, /layoutStability\.connect\(\{/);
   assert.match(controller, /layoutStability\.start\(\)/);

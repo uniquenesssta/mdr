@@ -1,6 +1,5 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -56,11 +55,13 @@ test('Atomic 7.14 application composition owns one PreviewController/RenderEngin
 
 test('Atomic 7.14 remaining classic callers use the single scoped Preview command surface instead of rebuilding Preview ownership', async () => {
   const paths = [
-    'public/app/core.js',
-    'public/app/bootstrap.js',
-    'public/app/events.js',
-    'public/app/editor-tools.js',
-    'public/app/web-clipper.js'
+    'src/features/documents/ui/document-workspace.js',
+    'src/features/menu/shell-menus.js',
+    'src/features/persistence/ui/workspace-status.js',
+    'src/features/layout/workspace-preferences.js',
+    'src/bootstrap/workspace-startup.js',
+    'src/bootstrap/application-events.js',
+    'src/features/editor/application/find-preview-commands.js'
   ];
   const combined = (await Promise.all(paths.map(source))).join('\n');
   assert.match(combined, /corePreviewCommandPort/);

@@ -1,4 +1,4 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -50,7 +50,7 @@ test('Atomic 5.11 places Find/Replace in the planned Editor command module and r
 
 test('Atomic 5.13 keeps Find/Replace command authority direct after deleting the classic command wrapper', async () => {
   const [clipper, main, view] = await Promise.all([
-    read('public/app/web-clipper.js'),
+    read('src/features/editor/application/find-preview-commands.js'),
     read('src/main.js'),
     read('src/features/editor/ui/find-replace-dialog-view.js')
   ]);

@@ -1,6 +1,5 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile, access } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 import test from 'node:test';
 
 import { SETTINGS_CHANGED_EVENT } from '../../../src/features/settings/index.js';
@@ -107,8 +106,13 @@ test('Atomic 4.12 production integration removes legacy locale ownership from pu
     readFile('src/i18n/index.js', 'utf8'),
     readFile('src/i18n/settings-locale-controller.js', 'utf8'),
     readFile('src/bootstrap/module-entry.js', 'utf8'),
-    readFile('public/app/core.js', 'utf8'),
-    readFile('public/app/bootstrap.js', 'utf8'),
+    Promise.all([
+      readFile('src/features/documents/ui/document-workspace.js', 'utf8'),
+      readFile('src/features/menu/shell-menus.js', 'utf8'),
+      readFile('src/features/persistence/ui/workspace-status.js', 'utf8'),
+      readFile('src/features/layout/workspace-preferences.js', 'utf8')
+    ]).then(sources => sources.join('\n')),
+    readFile('src/bootstrap/workspace-startup.js', 'utf8'),
     readFile('src/main.js', 'utf8')
   ]);
 

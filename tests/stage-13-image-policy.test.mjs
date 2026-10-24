@@ -1,4 +1,4 @@
-import { readFile } from './support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
@@ -51,7 +51,7 @@ test('policy is metadata-only and does not override text-first drop routing', ()
 test('production callers use one browser policy while native byte enforcement stays in Rust', async () => {
   const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
   const [events, controller, classifier, rust, main, importer] = await Promise.all([
-    read('public/app/events.js'), read('src/features/import/images/image-import-controller.js'),
+    read('src/bootstrap/application-events.js'), read('src/features/import/images/image-import-controller.js'),
     read('src/features/import/files/file-type-classifier.js'), read('src-tauri/src/local_file/image_reader.rs'),
     read('src/main.js'), read('src/features/import/application/import-document-controller.js')
   ]);

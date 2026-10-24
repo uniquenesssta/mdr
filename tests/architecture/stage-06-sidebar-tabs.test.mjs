@@ -1,5 +1,5 @@
 import { readCurrentViewMarkup } from '../support/current-view-markup.mjs';
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -18,8 +18,13 @@ test('Atomic 6.7 exposes Sidebar state/tab/compatibility through the public Side
 
 test('Atomic 6.7 keeps classic tab state, persistence and inline click authority removed after Atomic 7.14 Preview deletion', async () => {
   const [core, bootstrap, previewController, html] = await Promise.all([
-    read('public/app/core.js'),
-    read('public/app/bootstrap.js'),
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    read('src/bootstrap/workspace-startup.js'),
     read('src/features/preview/application/preview-controller.js'),
     readCurrentViewMarkup()
   ]);

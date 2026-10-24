@@ -1,4 +1,4 @@
-import { readFile } from '../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
@@ -26,8 +26,13 @@ test('Atomic 6.2 exposes Sidebar Resize only through the Layout public entrypoin
 
 test('Atomic 6.2 keeps sidebar resize migrated after Atomic 6.3 removes the remaining classic split resize authority', async () => {
   const [core, bootstrap] = await Promise.all([
-    read('public/app/core.js'),
-    read('public/app/bootstrap.js')
+    Promise.all([
+      read('src/features/documents/ui/document-workspace.js'),
+      read('src/features/menu/shell-menus.js'),
+      read('src/features/persistence/ui/workspace-status.js'),
+      read('src/features/layout/workspace-preferences.js')
+    ]).then(sources => sources.join('\n')),
+    read('src/bootstrap/workspace-startup.js')
   ]);
   for (const legacy of [
     'SIDEBAR_WIDTH_KEY', 'normalizeSidebarWidth', 'applySidebarWidth', 'sidebarResizeRect',

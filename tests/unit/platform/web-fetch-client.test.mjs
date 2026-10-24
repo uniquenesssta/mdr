@@ -1,4 +1,4 @@
-import { readFile } from '../../support/application-surface-source.mjs';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 import test from 'node:test';
@@ -62,7 +62,7 @@ test('invalid web-fetch client dependencies fail at the adapter boundary', () =>
 
 test('desktop WebPort reaches the import coordinator through the application composition', async () => {
   const desktop = await readFile(new URL('../../../src/platform/desktop/desktop-platform.js', import.meta.url), 'utf8');
-  const clipper = await readFile(new URL('../../../public/app/web-clipper.js', import.meta.url), 'utf8');
+  const clipper = await readFile(new URL('../../../src/features/editor/application/find-preview-commands.js', import.meta.url), 'utf8');
   assert.match(desktop, /webFetchClient\.fetchUrl\(url, options\)/);
   const main = await readFile(new URL('../../../src/main.js', import.meta.url), 'utf8');
   assert.match(main, /nativeFetch: platform\.capabilities\.desktop\.webFetch \? \(url, options\) => platform\.web\.fetchText\(url, options\)/);
