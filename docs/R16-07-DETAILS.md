@@ -43,3 +43,11 @@ main统一从三个功能公共入口调用。功能内部直接依赖同功能�
 本项Rust/IPC、数据格式和依赖保持，未重跑完整本地Rust与原生WebView；06的301项Rust及四路大文档CI仅作基线。07必须由新精确提交Windows累计CI复验后验收，当前不勾选，不进入16.8，推送后停止CI轮询。
 
 最终审查：234项当前风险源、1136输入删除清单、10项冻结源及571项真实生产集合核验一致。原43源R15事件目录、R12政策/历史验收、06正式验收、锁文件与用户AGENTS.md保持。完整回归证据Temp/mdr-r1607-repository-tests.log和mdr-r1607-repository/repository-audit/{test-inventory.json,suite-results.json}；新增真实DEV页面日志亦在全仓结果中。浏览器使用bundled Node24.19.0/Undici7.29.0。
+
+## 正式验收（2026-10-24）
+
+实现提交9d206b6bf11b1951e1442dce4a17ed8943c939c1的[CI40088353919](https://github.com/uniquenesssta/mdr/actions/runs/40088353919)七组Windows及全部步骤成功。同提交closeout accepted=true、run/commit匹配；全仓Node2759（365文件/16目录）、Runtime专项114、真实DEV1、Rust301、浏览器11＋75、四门禁、真实WebView安全/导入链、大文档4路、原生图片和四格式写入通过。07正式收尾，首轮SVG路径与新增E2E方法名断言修正历史保留。
+
+归档12557604944（closeout，10890字节）SHA256=d48558eac56fa9cfba33744f11997ba2a8a075ee590639e6794f48f29760b242；12558450284（WebView，1348398字节）SHA256=26f9c800a4d3c19859cc65b6e6c2a97c7db05622713e7ca7f2ee874704a3f746，均已下载核对一致。
+
+按用户“收尾07开始08”，继续唯一codex/r16-stage实施16.8兼容路径清理，16.9未开始。用户既有AGENTS.md修改、冻结模型及既有UI交接保持；推送后停止CI查询。
