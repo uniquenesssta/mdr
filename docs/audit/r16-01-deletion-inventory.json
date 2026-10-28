@@ -719,7 +719,7 @@
     },
     {
       "path": "src-tauri/src/performance_log/redaction.rs",
-      "sha256": "85a83afcf0a13df19418ed57e6197578fe07dc0356e409f2060cb8d4fe07d50a"
+      "sha256": "de1350a00a9b3d54f50eb65351eb3174c8cb54aa62422632eb60d49c78e6b37e"
     },
     {
       "path": "src-tauri/src/performance_log/writer.rs",
@@ -1723,7 +1723,7 @@
     },
     {
       "path": "src/features/layout/sidebar/sidebar-resize-controller.js",
-      "sha256": "29dc70acd8bb656e7588cb20a6841c1084be4b13b0c5f4718bbb66c8192b6a02"
+      "sha256": "3052275c6a15a1151fecf92c6a44a5be5fee8486fb1e9bc97b0392f17348ec46"
     },
     {
       "path": "src/features/layout/split/compact-split-controller.js",
@@ -1871,7 +1871,7 @@
     },
     {
       "path": "src/features/preview/application/preview-controller.js",
-      "sha256": "301353916b0c03cee4b1644d0b299e8fd60cb7eb72f6fbb26ea6e570671c1a76"
+      "sha256": "aae26a7edbd3aebd00ecf1e9889fbe687d5b751ab48484222ab52c596844f6f4"
     },
     {
       "path": "src/features/preview/application/preview-state.js",
@@ -1907,7 +1907,7 @@
     },
     {
       "path": "src/features/preview/pipeline/preview-render-engine.js",
-      "sha256": "dd4ef0a2223d3b9890fafed2c3fefafb3eeaf64934ee8c041d9dc8d85026962c"
+      "sha256": "a0b2b3d4dad2cf74c8202f7dec860f1633ed497c78f3395df978ce28d5d32943"
     },
     {
       "path": "src/features/preview/pipeline/preview-scheduler.js",
@@ -1971,7 +1971,7 @@
     },
     {
       "path": "src/features/preview/render/virtual-window/virtual-window-controller.js",
-      "sha256": "840cbbd53c34f6d8e75e6573707149f05190f691865dd37f1c98e3f84b0b47c8"
+      "sha256": "34884b7689a94fa449cfdc75fcd7b12a737dd96cf53d79e7559a95346fed9a4c"
     },
     {
       "path": "src/features/preview/render/virtual-window/virtual-window-model.js",
@@ -1987,7 +1987,7 @@
     },
     {
       "path": "src/features/preview/virtual/virtual-preview-controller.js",
-      "sha256": "6e3996779f5a72b54ea27ce5622e5f9445dcd0bc694103f6c9e91a90e5274d13"
+      "sha256": "58f72468a25f2b2ab60b09a7f6990f58b8053feb3b89eb3a9d6531141f96b515"
     },
     {
       "path": "src/features/preview/worker/preview-worker-client.js",
@@ -2219,7 +2219,7 @@
     },
     {
       "path": "src/features/sync/selection/selection-sync-controller.js",
-      "sha256": "abb747750b32f93db8507a01c0e413269b11a9bd77bf18cdeca83a3ab839c5a6"
+      "sha256": "100eaa59c95bbe4dec9ba5b4f1647a03479ee3444a2df81fb726cba0fc9b5329"
     },
     {
       "path": "src/features/telemetry/aggregation-buffer.js",
@@ -2259,7 +2259,7 @@
     },
     {
       "path": "src/features/telemetry/telemetry-redaction.js",
-      "sha256": "6d083180e3102ab20eb819668111598088fba9e616ff9de85cd9de160cb50a7f"
+      "sha256": "59b6674d89cb8953890fe9281b3efe4f421431a5069ed2f45f6a3623bfea6850"
     },
     {
       "path": "src/features/window/close-save-port.js",
@@ -2351,7 +2351,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "2a9a6e19d78d768743800b63c9fca94be1456fd413f3246651e745fe3d3f0765"
+      "sha256": "c46d6bde7488ab4f408f33fc2f158babcc96b3c56f46105dd4122374bb9d050d"
     },
     {
       "path": "src/model-kernel/index.js",
@@ -3310,6 +3310,10 @@
       "sha256": "13ce8727eb2bb20cc28839878d26cfaa906c21c03b845118f27f4d147ae54d31"
     },
     {
+      "path": "tests/e2e/lib/sidebar-resize-selection-checks.mjs",
+      "sha256": "7261be91d872242c07001dae4e83d1f980baf896d25b617cc8c43e9ab0e79e0d"
+    },
+    {
       "path": "tests/e2e/lib/single-implementation.mjs",
       "sha256": "00563f66533082a04fff73b5a5f0ed4f5f43d5933940b6761382f2303487070d"
     },
@@ -3447,7 +3451,7 @@
     },
     {
       "path": "tests/e2e/windows/run-native-frame-check.mjs",
-      "sha256": "2f113d3bb9c35fd978f1d8efea2c1023f09baf41552caea867055f09eb14b07c"
+      "sha256": "74c4ae604d8e60baea8f0076a25343d49a28546ab9231c43579a6830915ac171"
     },
     {
       "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
@@ -3707,7 +3711,7 @@
     },
     {
       "path": "tests/stage-09-selection-reveal.test.mjs",
-      "sha256": "9d8b4f1ac4dd5a564695bbb54fa2665dfdda4c155ba07eae87ea5855db129385"
+      "sha256": "79b994994535fb280fac77d6bba94d35d83b5a34d48952f67ab152f222807b84"
     },
     {
       "path": "tests/stage-10-autosave-controller.test.mjs",
@@ -4035,7 +4039,7 @@
     },
     {
       "path": "tests/stage-15-redaction.test.mjs",
-      "sha256": "efd08de5b70fce25faa07f6472e3041c188895d3a4050bf33e6bb5ef9568f9b8"
+      "sha256": "8e17fe4c1466cf9a40a1114a4b07550f254837a892125c61d95bb2ede63334c2"
     },
     {
       "path": "tests/stage-15-runtime-snapshot.test.mjs",
@@ -4311,7 +4315,7 @@
     },
     {
       "path": "tests/unit/layout/sidebar-resize-controller.test.mjs",
-      "sha256": "118697d62a95f94fa6516ca1bc13142fe04a4818cfc19887d365c90f8d1e98c8"
+      "sha256": "52dd6f7b64c33c6d2ca57ce4268dea54c8cf79b88ba5d0fe235e9cce2d85cba7"
     },
     {
       "path": "tests/unit/layout/split-pane-controller.test.mjs",
@@ -4591,7 +4595,7 @@
     },
     {
       "path": "tests/unit/preview/virtual-window-controller.test.mjs",
-      "sha256": "3755b07be62cd13431564ace5278697392bca4d297a65e280902f5de0d16c311"
+      "sha256": "ee219a23e3dc116c8c8a68179016e469613de96208d8728192fcd3445c1bd5b1"
     },
     {
       "path": "tests/unit/preview/virtual-window-model.test.mjs",
@@ -4734,7 +4738,7 @@
       "sha256": "48a161e29393d9a64abf44a2d02eab7293c19fd0eac6e548351b0c8a0d5033de"
     }
   ],
-  "inputSha256": "b35b5f499db8110a0eb9d02db1ce3320e4d18286c8fb2a04f7af339c6a99af3a",
+  "inputSha256": "a193723ea375b0150361d54b20304ed5a15ebe26407d5b44eda7454d76d0175f",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",

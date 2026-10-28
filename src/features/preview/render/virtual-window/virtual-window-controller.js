@@ -24,6 +24,7 @@ export class VirtualWindowController {
     scheduleIdle,
     cancelIdle,
     now,
+    isGeometryChanging = () => false,
     notifyPreviewMounted = () => {},
     notifyGeometryChanged = () => {},
     invalidateAnchorMetrics = () => {},
@@ -43,6 +44,9 @@ export class VirtualWindowController {
     this.cancelFrame = cancelFrame;
     this.createResizeObserver = createResizeObserver;
     this.getComputedStyle = getComputedStyleFn;
+    this.isGeometryChanging = isGeometryChanging;
+    this.cacheDocumentId = '';
+    this.cacheVisualKey = '';
     this.notifyPreviewMounted = notifyPreviewMounted;
     this.notifyGeometryChanged = notifyGeometryChanged;
     this.invalidateAnchorMetrics = invalidateAnchorMetrics;
@@ -118,19 +122,32 @@ export class VirtualWindowController {
     const becameVisible = width > 0 && height > 0 && (this.viewportWidth <= 0 || this.viewportHeight <= 0);
     this.viewportWidth = width;
     this.viewportHeight = height;
-    if (!this.active || width <= 0 || height <= 0 || (!changed && !becameVisible)) return;
+    if (!this.active || this.isGeometryChanging() || width <= 0 || height <= 0 || (!changed && !becameVisible)) return;
     this.cancelFrame(this.viewportResizeFrame);
     this.viewportResizeFrame = this.requestFrame(() => {
       this.viewportResizeFrame = 0;
       if (!this.active || this.preview.clientWidth <= 0 || this.preview.clientHeight <= 0) return;
-      this.refreshViewport({ forceWindow: true });
+      this.refreshViewport({ forceWindow: false });
     });
   }
 
   setCacheContext(documentId, visualKey = '') {
     this.assertAlive();
+    this.cacheDocumentId = documentId;
+    this.cacheVisualKey = visualKey;
+    return this.syncHeightLayout();
+  }
+
+  syncHeightLayout() {
+    const style = this.getComputedStyle(this.body || this.preview);
+    const rect = (this.body || this.preview).getBoundingClientRect?.();
+    const width = Math.max(0, (rect?.width || this.body?.clientWidth || this.preview.clientWidth || 0)
+      - (Number.parseFloat(style.paddingLeft) || 0) - (Number.parseFloat(style.paddingRight) || 0)
+      - (Number.parseFloat(style.borderLeftWidth) || 0) - (Number.parseFloat(style.borderRightWidth) || 0));
+    const layout = [Number(width.toFixed(2)), style.fontFamily, style.fontSize, style.fontWeight,
+      style.fontStyle, style.lineHeight, style.letterSpacing, style.wordSpacing].join(':');
     this.heightCache.setBlocks(this.blocks);
-    return this.heightCache.setContext(documentId, visualKey);
+    return this.heightCache.setContext(this.cacheDocumentId, `${this.cacheVisualKey}:${layout}`);
   }
 
   shouldUse(blocks, sourceLength) {
@@ -419,12 +436,13 @@ export class VirtualWindowController {
 
   refreshViewport(options = {}) {
     this.assertAlive();
-    if (!this.active || !this.body?.isConnected) return false;
+    if (!this.active || this.isGeometryChanging() || !this.body?.isConnected) return false;
     this.cancelFrame(this.renderFrame);
     this.cancelFrame(this.measureFrame);
     this.renderFrame = 0;
     this.measureFrame = 0;
     this.lastScrollTop = this.preview.scrollTop || 0;
+    this.measureMountedBlocks();
     this.renderWindow(Boolean(options.forceWindow));
     this.scheduleMeasure();
     this.notifyGeometryChanged('preview');
@@ -450,7 +468,9 @@ export class VirtualWindowController {
 
   measureMountedBlocks() {
     this.assertAlive();
-    if (!this.active || !this.mounted.size) return false;
+    if (!this.active || this.isGeometryChanging() || !this.mounted.size) return false;
+    const anchor = this.heightCache.measuredCount ? this.captureScrollAnchor() : null;
+    const layoutChanged = this.syncHeightLayout();
     const oldStartOffset = this.model.offsets[this.range.start] || 0;
     let changed = false;
     for (const [id, wrapper] of this.mounted) {
@@ -460,20 +480,22 @@ export class VirtualWindowController {
       const outerHeight = Math.max(18, wrapper.offsetHeight + marginTop + marginBottom);
       changed = this.heightCache.recordMeasurement(id, outerHeight, { top: marginTop, bottom: marginBottom }) || changed;
     }
-    if (!changed) return false;
+    if (!changed && !layoutChanged) return false;
     this.heightCache.schedulePersist();
     this.model.rebuild();
     this.metricsCache = null;
     const newStartOffset = this.model.offsets[this.range.start] || 0;
     const delta = newStartOffset - oldStartOffset;
     this.updateSpacers(this.range);
-    if (Math.abs(delta) >= 1 && this.range.start > 0) {
+    if (layoutChanged && anchor) this.restoreScrollAnchor(anchor);
+    else if (Math.abs(delta) >= 1 && this.range.start > 0) {
       const compensated = this.compensateScroll(delta, 'virtual-preview-height');
       if (!compensated) this.preview.scrollTop += delta;
       this.lastScrollTop = this.preview.scrollTop;
     }
     this.invalidateAnchorMetrics();
     this.notifyGeometryChanged('preview');
+    this.notifyPreviewMounted('virtual-preview-measured');
     return true;
   }
 

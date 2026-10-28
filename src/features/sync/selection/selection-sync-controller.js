@@ -103,6 +103,7 @@ export class SelectionSyncController {
       cancelFrame,
       now = () => 0,
       isHybridLayout = () => false,
+      isGeometryChanging = () => false,
       updateActiveLine = () => {},
       record = () => {},
       diagnostic = () => {}
@@ -129,7 +130,7 @@ export class SelectionSyncController {
     if (typeof requestFrame !== 'function' || typeof cancelFrame !== 'function') {
       throw new TypeError('SelectionSyncController requires requestFrame/cancelFrame capabilities');
     }
-    for (const [name, value] of Object.entries({ now, isHybridLayout, updateActiveLine, record, diagnostic })) {
+    for (const [name, value] of Object.entries({ now, isHybridLayout, isGeometryChanging, updateActiveLine, record, diagnostic })) {
       if (typeof value !== 'function') throw new TypeError(`SelectionSyncController requires ${name} capability`);
     }
 
@@ -154,6 +155,9 @@ export class SelectionSyncController {
     this.cancelScheduledFrameRequest = cancelFrame;
     this.now = now;
     this.isHybridLayout = isHybridLayout;
+    this.isGeometryChanging = isGeometryChanging;
+    this.layoutRevision = 0;
+    this.layoutSize = this.readLayoutSize();
     this.updateActiveLine = updateActiveLine;
     this.record = record;
     this.diagnostic = diagnostic;
@@ -297,7 +301,39 @@ export class SelectionSyncController {
   }
 
   selectionIdentity(selection = this.editorSelectionReader.read()) {
-    return `${this.documentModel.documentId || ''}:${this.documentModel.generation || 0}:${this.documentModel.getDocumentVersion()}:${selection?.from}:${selection?.to}`;
+    return `${this.documentModel.documentId || ''}:${this.documentModel.generation || 0}:${this.documentModel.getDocumentVersion()}:${selection?.from}:${selection?.to}:${this.layoutRevision}`;
+  }
+
+  readLayoutSize() {
+    return [this.editor, this.preview].map(element => {
+      const rect = element.getBoundingClientRect?.();
+      const width = Number.isFinite(rect?.width) ? Number(rect.width.toFixed(2)) : element.clientWidth || 0;
+      const height = Number.isFinite(rect?.height) ? Number(rect.height.toFixed(2)) : element.clientHeight || 0;
+      return `${width}:${height}`;
+    }).join('|');
+  }
+
+  notifyLayoutGeometry(reason = 'layout-resize-settled') {
+    if (this.destroyed || this.isGeometryChanging()) return false;
+    const size = this.readLayoutSize();
+    if (size === this.layoutSize) return false;
+    this.layoutSize = size;
+    this.layoutRevision += 1;
+    this.editorIntent = null;
+    this.lastEditorKey = '';
+    this.retryScheduler.cancel();
+    this.cancelScheduledFrame('editor');
+    if (this.previewSelectionReader.read()) {
+      this.schedulePreview(reason, { force: true, frames: 2 });
+      return true;
+    }
+    const selection = this.editorSelectionReader.read();
+    const scroll = this.scrollController.getState();
+    if (selection && !selection.isCollapsed && scroll.sourceSide !== 'preview'
+      && !['wheel', 'touch'].includes(scroll.sourceReason)) {
+      this.scheduleEditor(true, reason, { force: true, frames: 2 });
+    }
+    return true;
   }
 
   isEditorIntentCurrent(intent = this.editorIntent) {
@@ -357,7 +393,7 @@ export class SelectionSyncController {
   }
 
   runEditor(shouldScroll, reason, force, attempt) {
-    if (this.destroyed || this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) return null;
+    if (this.destroyed || this.isGeometryChanging() || this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) return null;
     if (['wheel', 'touch'].includes(this.scrollController.getState().sourceReason)) shouldScroll = false;
     const selection = this.editorSelectionReader.read();
     if (!this.isEditorIntentCurrent()) this.editorIntent = null;
@@ -396,7 +432,7 @@ export class SelectionSyncController {
   }
 
   runPreview(reason, force, snapshot = null, snapshotProvided = false) {
-    if (this.destroyed || this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return null;
+    if (this.destroyed || this.isGeometryChanging() || this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return null;
     const selection = snapshotProvided ? snapshot : this.previewSelectionReader.read();
     if (!selection) return null;
     this.editorIntent = null;
@@ -558,6 +594,10 @@ export class SelectionSyncController {
       this.highlightSession.clear();
       return { status: 'cleared', selectionLength: 0, matchedAnchors: 0 };
     }
+    if (to - from <= 2 && /^[\r\n]+$/.test(this.documentModel.sliceText(from, to))) {
+      this.highlightSession.clear();
+      return { status: 'cleared', selectionLength: to - from, matchedAnchors: 0 };
+    }
 
     const endPosition = Math.max(from, to - 1);
     const fromLine = this.editorMapper.getLineNumberAtPosition(from);
@@ -679,7 +719,7 @@ export class SelectionSyncController {
   }
 
   notifyPreviewMounted(reason = 'preview-mounted') {
-    if (this.destroyed) return;
+    if (this.destroyed || this.isGeometryChanging()) return;
     this.feedbackGuard.advanceRevision();
     this.highlightSession.restore();
     // A mount notification is an internal continuation of the Editor request,
@@ -703,7 +743,7 @@ export class SelectionSyncController {
   }
 
   notifyEditorGeometry(reason = 'editor-geometry') {
-    if (this.destroyed || this.feedbackGuard.shouldIgnore('editor', { allowSource: true }) || this.editorIntent?.scopePending || this.editorPointerActive) return;
+    if (this.destroyed || this.isGeometryChanging() || this.feedbackGuard.shouldIgnore('editor', { allowSource: true }) || this.editorIntent?.scopePending || this.editorPointerActive) return;
     this.stats.editorGeometryRefreshes += 1;
     // Geometry measurements follow the current scroll gesture; they must not
     // pull a virtual window back to an old selection that the user scrolled away from.
@@ -739,6 +779,7 @@ export class SelectionSyncController {
       matchedAnchors: Number(result?.matchedAnchors) || 0,
       virtualized: Boolean(this.getPreviewVirtual()?.active),
       previewRevision: this.feedbackGuard.getRevision(),
+      layoutRevision: this.layoutRevision,
       sourceViewportRatio: Number.isFinite(result?.sourceViewportRatio) ? Number(result.sourceViewportRatio.toFixed(3)) : null,
       targetViewportRatio: Number.isFinite(result?.targetViewportRatio) ? Number(result.targetViewportRatio.toFixed(3)) : null,
       mappingMode: result?.mappingMode || null,

@@ -129,7 +129,7 @@ test('R15-03 aggregate duration objects are converted to numeric metrics rather 
 });
 
 test('selection component semantics and layout enums survive minimization without admitting arbitrary strings', () => {
-  const safe = { mappingMode: 'source-component', nextMode: 'both', previousMode: 'hybrid', mode: 'chapter', origin: 'programmatic', theme: 'dark', presentation: 'source' };
+  const safe = { mappingMode: 'source-component', nextMode: 'both', previousMode: 'hybrid', mode: 'hybrid-index-only', reason: 'layout-resize-settled', origin: 'programmatic', theme: 'dark', presentation: 'source' };
   assert.deepEqual(plain(redactTelemetryDetails(safe)), safe);
   const unsafe = Object.fromEntries(Object.keys(safe).map(key => [key, 'PRIVATE document text']));
   assert.deepEqual(plain(redactTelemetryDetails(unsafe)), Object.fromEntries(Object.keys(safe).map(key => [key, '[redacted]'])));

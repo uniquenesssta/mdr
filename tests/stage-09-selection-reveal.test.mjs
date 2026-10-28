@@ -78,3 +78,45 @@ test('a first chapter reveal follows measured block heights before it completes'
     assert.equal(h.writes.length, 2);
   } finally { h.controller.destroy(); }
 });
+
+test('a real pane-size change invalidates a completed reveal while unchanged measurements stay quiet', () => {
+  const h=fixture();
+  try {
+    h.controller.runEditor(true,'editor-pointerup',true,0);h.frames.flushAll();
+    h.moveTarget(340);h.preview.clientWidth=220;
+    assert.equal(h.controller.notifyLayoutGeometry(),true);h.frames.flushAll();
+    assert.equal(h.writes.length,1);assert.equal(h.preview.scrollTop,168);
+    const revision=h.controller.layoutRevision;
+    h.controller.notifyLayoutGeometry();h.frames.flushAll();assert.equal(h.controller.layoutRevision,revision);
+    assert.equal(h.writes.length,1);
+  }finally{h.controller.destroy();}
+});
+
+test('pane resizing does not steal the preview from a manual preview scroll', () => {
+  const h=fixture();
+  try {
+    h.controller.scheduleEditor(true,'editor-pointerup',{force:true,frames:2});
+    h.controller.scrollController.getState=()=>({sourceSide:'preview',sourceReason:'wheel'});
+    h.moveTarget(400);h.preview.clientWidth=220;h.controller.notifyLayoutGeometry();h.frames.flushAll();
+    assert.equal(h.writes.length,0);
+  }finally{h.controller.destroy();}
+});
+
+test('a native preview selection keeps ownership while pane geometry is recalibrated', () => {
+  const h=fixture();let remapped=0;
+  try {
+    h.controller.previewSelectionReader.read=()=>({text:'view selection'});
+    h.controller.schedulePreview=()=>{remapped++;};
+    h.preview.clientWidth=220;h.controller.notifyLayoutGeometry();h.frames.flushAll();
+    assert.equal(h.writes.length,0);assert.equal(remapped,1);
+  }finally{h.controller.destroy();}
+});
+
+test('a selected line break clears stale highlights without a pending retry or mapping warning', () => {
+  let clears=0,warnings=0;
+  const h=createFinalSelectionController({source:'a\nb',editorSelection:{from:1,to:2,isCollapsed:false},
+    highlightSession:{canPresent:()=>true,show(){},restore(){},clear(){clears++;}}});
+  h.controller.diagnostic=()=>warnings++;
+  try{assert.equal(h.controller.runEditor(true,'editor-pointerup',true,0).status,'cleared');assert.equal(warnings,0);assert.equal(clears,1);}
+  finally{h.controller.destroy();}
+});

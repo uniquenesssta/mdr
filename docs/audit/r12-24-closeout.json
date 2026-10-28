@@ -147,7 +147,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "4ef527a679a95d561dc7e282c748a64828398574"
+      "blobSha": "c6b8a0a7bb53517556344c385e3913b925026d9f"
     },
     {
       "path": "scripts/architecture/checks.mjs",
@@ -199,7 +199,7 @@
     },
     {
       "path": "src-tauri/src/performance_log/redaction.rs",
-      "blobSha": "0242b696740e8266876d301eddff1f85abecb9c8"
+      "blobSha": "524780d440cca8650413302e5ea3934cec6bfea1"
     },
     {
       "path": "src-tauri/src/performance_log/writer.rs",
@@ -603,7 +603,7 @@
     },
     {
       "path": "src/features/layout/sidebar/sidebar-resize-controller.js",
-      "blobSha": "e9cd0574cbba23ee11981d88bb6a4387d5ee402f"
+      "blobSha": "f0f0310d4a1aed1ffb81d3bd1713aa8bbacd7795"
     },
     {
       "path": "src/features/layout/split/compact-split-controller.js",
@@ -675,7 +675,7 @@
     },
     {
       "path": "src/features/preview/application/preview-controller.js",
-      "blobSha": "18e1782cdb0411060d3fd14494df765a2643a2ad"
+      "blobSha": "17d3e4eccfe19e3a56e5b8ac7467c0bf69b345cd"
     },
     {
       "path": "src/features/preview/index.js",
@@ -687,7 +687,7 @@
     },
     {
       "path": "src/features/preview/pipeline/preview-render-engine.js",
-      "blobSha": "a9cc9cb9cf4c6db9a78dc661336c163ce83f3fa8"
+      "blobSha": "53414f3d0a6f9127077a29bd4e4b70b2d2bf407a"
     },
     {
       "path": "src/features/preview/render/presentation/math-presentation.js",
@@ -727,7 +727,7 @@
     },
     {
       "path": "src/features/sync/selection/selection-sync-controller.js",
-      "blobSha": "bdcc584495b8dd784c3967db0c1329172190bf06"
+      "blobSha": "928eff18dbd9d166c15f91c2d07a8f88303deef9"
     },
     {
       "path": "src/features/telemetry/aggregation-buffer.js",
@@ -767,7 +767,7 @@
     },
     {
       "path": "src/features/telemetry/telemetry-redaction.js",
-      "blobSha": "b6cb8b6798e0fc7cbccbf04e7afe91caab5c4622"
+      "blobSha": "0cbf5cced6b51812b1d296093bb0a69895a5947d"
     },
     {
       "path": "src/features/window/index.js",
@@ -783,7 +783,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "33c0be8cb01216058652d515f0a046633d8a4fb9"
+      "blobSha": "c3abfa30a1f68d8da505baaf0b6cea8652fdd312"
     },
     {
       "path": "src/platform/desktop/performance-log-client.js",
@@ -1095,7 +1095,7 @@
     },
     {
       "path": "tests/stage-15-redaction.test.mjs",
-      "blobSha": "b6df845bcce009516c99634e81423f509fc783eb"
+      "blobSha": "04486af902e035ccac5faa4d02ac1e7f4f990366"
     },
     {
       "path": "tests/stage-15-stale-dist.test.mjs",
@@ -1163,7 +1163,7 @@
     },
     {
       "path": "tests/unit/layout/sidebar-resize-controller.test.mjs",
-      "blobSha": "70210a5d54f5b8e1060a29683832e4c53021327d"
+      "blobSha": "fd1d06d5766fedef8395c6824c14c5b3cb4a119f"
     },
     {
       "path": "tests/unit/layout/toolbar-boundary-controller.test.mjs",
@@ -1203,7 +1203,7 @@
     },
     {
       "path": "docs/audit/r16-11-module-naming.json",
-      "blobSha": "4515733535a25ab0ff578efb2cb7e9cf47f44c6e"
+      "blobSha": "5e62ba65027eda01ca227ec4ea6dadb27a0ddfe6"
     },
     {
       "path": "scripts/architecture/dependency-graph.mjs",
@@ -1215,7 +1215,7 @@
     },
     {
       "path": "docs/audit/r16-12-dependency-graph.json",
-      "blobSha": "809d6f8e533104adc430933e37454573147b112e"
+      "blobSha": "d78d6f5d5ab18b6ce479d6063449573342dde003"
     },
     {
       "path": "scripts/architecture/repository.mjs",
@@ -1416,6 +1416,14 @@
     {
       "path": "src/features/editor/ui/selection-toolbar-view.js",
       "blobSha": "c9bb05b471f7e646feba3e4e0a81e9ae4d0daace"
+    },
+    {
+      "path": "src/features/preview/render/virtual-window/virtual-window-controller.js",
+      "blobSha": "3aa850907881b5c90075b1966d9dbd9478faf013"
+    },
+    {
+      "path": "src/features/preview/virtual/virtual-preview-controller.js",
+      "blobSha": "22e4af8abce39588030ac70f2b86ea44dfd26103"
     }
   ],
   "priorFailures": {
@@ -16136,6 +16144,97 @@
           "afterWhitespaceAuditTests": 60
         },
         "status": "ready-for-local-integration-commit"
+      }
+    },
+    "continuousResizeRepair": {
+      "date": "2026-10-28",
+      "baselineCommit": "1120c82e489c5274ba2afdf7586ffa5c91ea670c",
+      "record": "docs/design/blue-integration.json#continuousResizeRepair",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "4ef527a679a95d561dc7e282c748a64828398574",
+          "blobSha": "c6b8a0a7bb53517556344c385e3913b925026d9f"
+        },
+        {
+          "path": "src-tauri/src/performance_log/redaction.rs",
+          "previousBlob": "0242b696740e8266876d301eddff1f85abecb9c8",
+          "blobSha": "524780d440cca8650413302e5ea3934cec6bfea1"
+        },
+        {
+          "path": "src/features/layout/sidebar/sidebar-resize-controller.js",
+          "previousBlob": "e9cd0574cbba23ee11981d88bb6a4387d5ee402f",
+          "blobSha": "f0f0310d4a1aed1ffb81d3bd1713aa8bbacd7795"
+        },
+        {
+          "path": "src/features/preview/application/preview-controller.js",
+          "previousBlob": "18e1782cdb0411060d3fd14494df765a2643a2ad",
+          "blobSha": "17d3e4eccfe19e3a56e5b8ac7467c0bf69b345cd"
+        },
+        {
+          "path": "src/features/preview/pipeline/preview-render-engine.js",
+          "previousBlob": "a9cc9cb9cf4c6db9a78dc661336c163ce83f3fa8",
+          "blobSha": "53414f3d0a6f9127077a29bd4e4b70b2d2bf407a"
+        },
+        {
+          "path": "src/features/sync/selection/selection-sync-controller.js",
+          "previousBlob": "bdcc584495b8dd784c3967db0c1329172190bf06",
+          "blobSha": "928eff18dbd9d166c15f91c2d07a8f88303deef9"
+        },
+        {
+          "path": "src/features/telemetry/telemetry-redaction.js",
+          "previousBlob": "b6cb8b6798e0fc7cbccbf04e7afe91caab5c4622",
+          "blobSha": "0cbf5cced6b51812b1d296093bb0a69895a5947d"
+        },
+        {
+          "path": "src/main.js",
+          "previousBlob": "33c0be8cb01216058652d515f0a046633d8a4fb9",
+          "blobSha": "c3abfa30a1f68d8da505baaf0b6cea8652fdd312"
+        },
+        {
+          "path": "tests/stage-15-redaction.test.mjs",
+          "previousBlob": "b6df845bcce009516c99634e81423f509fc783eb",
+          "blobSha": "04486af902e035ccac5faa4d02ac1e7f4f990366"
+        },
+        {
+          "path": "tests/unit/layout/sidebar-resize-controller.test.mjs",
+          "previousBlob": "70210a5d54f5b8e1060a29683832e4c53021327d",
+          "blobSha": "fd1d06d5766fedef8395c6824c14c5b3cb4a119f"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "previousBlob": "4515733535a25ab0ff578efb2cb7e9cf47f44c6e",
+          "blobSha": "5e62ba65027eda01ca227ec4ea6dadb27a0ddfe6"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "previousBlob": "809d6f8e533104adc430933e37454573147b112e",
+          "blobSha": "d78d6f5d5ab18b6ce479d6063449573342dde003"
+        },
+        {
+          "path": "src/features/preview/render/virtual-window/virtual-window-controller.js",
+          "previousBlob": null,
+          "blobSha": "3aa850907881b5c90075b1966d9dbd9478faf013"
+        },
+        {
+          "path": "src/features/preview/virtual/virtual-preview-controller.js",
+          "previousBlob": null,
+          "blobSha": "22e4af8abce39588030ac70f2b86ea44dfd26103"
+        }
+      ],
+      "scope": "User-authorized real large-document sidebar resize and size-dependent source selection repair. Coalesced/deferred layout, exact height-cache geometry, layout epochs, native-selection ownership and line-break diagnostics. Frozen models, original documents and acceptance preserved.",
+      "validation": {
+        "staticGatesPassed": 4,
+        "productionBuild": true,
+        "native": true,
+        "browserUi": 82,
+        "fullNode": 2953,
+        "trackedTestFiles": 389,
+        "groups": 17,
+        "rustRedaction": 17,
+        "fullRustRerun": false,
+        "stageAccepted": false,
+        "evidence": "O:/Project/Markdown Rust/Temp/resize-repair-20261028"
       }
     }
   }

@@ -12,6 +12,7 @@ import { runSelectionRevealChecks } from '../lib/selection-reveal-checks.mjs';
 import { runCrossChapterSelectionCheck } from '../lib/selection-stability-checks.mjs';
 import { runMinimalHeaderChecks, inspectMinimalHeader } from '../lib/minimal-header-checks.mjs';
 import { runDiagramSelectionChecks } from '../lib/diagram-selection-checks.mjs';
+import { runSidebarResizeSelectionChecks } from '../lib/sidebar-resize-selection-checks.mjs';
 
 const binary = resolve(process.argv[2]);
 const artifacts = resolve(process.argv[3]);
@@ -88,6 +89,12 @@ try {
     const checks=await runDiagramSelectionChecks({page,app:createApplicationDriver(page),artifacts,source});
     await writeFile(join(artifacts,'native-diagram-selection.json'),JSON.stringify({passed:true,checks,originalReadOnly:sourcePath||null},null,2));
   }
+  if (process.argv.includes('--sidebar-resize-selection')) {
+    const sourcePath=process.argv.find(arg=>arg.startsWith('--resize-source='))?.slice(16);
+    assert.ok(sourcePath,'Provide the original read-only large-document path.');
+    await runSidebarResizeSelectionChecks({page,app:createApplicationDriver(page),artifacts,source:await readFile(sourcePath,'utf8'),
+      resizeViewport:async size=>{geometry(false,false,size);await page.waitFor(`innerWidth===${size.width}&&innerHeight===${size.height}`);}});
+  }
   if (process.argv.includes('--selection-reveal')) {
     const app=createApplicationDriver(page);
     const checks=await runSelectionRevealChecks({page,app,artifacts});
@@ -146,6 +153,8 @@ try {
   await writeFile(join(artifacts,'native-frame.json'),JSON.stringify({frame,ui,normalFrame,maximizedFrame,restoredFrame,narrow,finalFrame,version:await connection.send('Browser.getVersion'),stderr},null,2));
   console.log(JSON.stringify({frame,ui}));
 } catch(error) {
+  await page?.screenshot(join(artifacts,'native-failure.png')).catch(()=>{});
+  if(page)await writeFile(join(artifacts,'native-failure-selection.json'),JSON.stringify(await page.evaluate(`(()=>{const s=getSelection(),p=document.querySelector('#preview'),e=document.querySelector('#editor');return {selection:s?.toString(),anchorInPreview:p?.contains(s?.anchorNode),anchorInEditor:e?.contains(s?.anchorNode),toolbar:getComputedStyle(document.querySelector('.format-group')).display,previewSize:{width:p?.clientWidth,height:p?.clientHeight},highlights:[...CSS.highlights?.get('preview-selection-sync')||[]].map(r=>r.toString())};})()`).catch(()=>null),null,2));
   await writeFile(join(artifacts,'native-failure.json'),JSON.stringify({error:error.stack,stderr,pid:processHandle.pid,exitCode:processHandle.exitCode,exceptions:page?.exceptions,console:page?.consoleMessages,dom:await page?.evaluate("({url:location.href,state:document.readyState,text:document.body.innerText.slice(0,4000),classes:document.documentElement.className})").catch(()=>null)},null,2));
   throw error;
 } finally {

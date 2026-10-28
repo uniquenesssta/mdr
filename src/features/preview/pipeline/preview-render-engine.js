@@ -83,8 +83,7 @@ export function createPreviewRenderEngine(options = {}) {
 
   function getHeightCacheVisualKey() {
     const theme = root.ownerDocument?.body?.getAttribute('data-theme') || 'light';
-    const widthBucket = Math.max(1, Math.round((root.clientWidth || 800) / 80));
-    return `${theme}:${shell.getEditorFontSize?.() || 16}:${widthBucket}`;
+    return `${theme}:${shell.getEditorFontSize?.() || 16}`;
   }
 
   function getVirtualController() {
@@ -93,6 +92,7 @@ export function createPreviewRenderEngine(options = {}) {
         scheduler: backgroundScheduler,
         selectionController,
         scrollController,
+        isGeometryChanging: () => Boolean(layoutState?.snapshot?.resize?.sidebarActive || layoutState?.snapshot?.resize?.splitActive),
         storage: root.ownerDocument?.defaultView?.localStorage,
         invalidateAnchorMetrics: () => shell.invalidatePreviewAnchorMetrics?.(),
         reportError: (message, error) => console.debug(message, error?.message || error)

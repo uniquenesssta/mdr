@@ -890,5 +890,189 @@
       "afterWhitespaceAuditTests": 60
     },
     "status": "ready-for-local-integration-commit"
+  },
+  "continuousResizeRepair": {
+    "date": "2026-10-28",
+    "baselineCommit": "1120c82e489c5274ba2afdf7586ffa5c91ea670c",
+    "status": "implemented-built-browser-windows-and-repository-verified",
+    "authorization": "User reports five-million-character sidebar dragging stalls and source-to-preview positioning errors at different widths; explicitly requests repair.",
+    "figma": {
+      "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+      "sessionId": "60bdc4ad-6d9d-45df-8071-6df0bdbb6dc5",
+      "nodes": [
+        "99:6098",
+        "99:6149",
+        "95:2571"
+      ],
+      "scope": "Interaction descriptions were synchronized for reference. Performance fixes and verification are owned by source code and Windows runtime evidence; Figma editing is not a prerequisite for performance work. Only a change to visual layout or interaction design requires design review."
+    },
+    "contract": [
+      "Normal resize coalesces width updates per animation frame. Documents at the existing virtual-character threshold preview the separator and commit content width once on release.",
+      "Actual content width and font metrics determine height-cache identity. Initial height warmup does not preserve an unmeasured guessed scroll anchor.",
+      "A true pane-size change invalidates completed source selection positioning; same-layout refreshes retain it. Native preview selections and manual preview scrolling retain ownership.",
+      "Only line-break selections clear stale highlights without pending warnings. Actual text, readonly policy, frozen mapping and 96% text coverage remain."
+    ],
+    "baseline": {
+      "evidence": "O:/Project/Markdown Rust/Temp/resize-repair-20261028/before-native/sidebar-resize-selection.json",
+      "dragMs": [
+        5702,
+        5424,
+        4934,
+        4992,
+        5109,
+        5116
+      ],
+      "longTasksPerDrag": 26,
+      "note": "Initial compact-pane assertions inspected a hidden preview; final regression uses the real pane switch and measures all visible states."
+    },
+    "verification": {
+      "evidence": "O:/Project/Markdown Rust/Temp/resize-repair-20261028",
+      "native": "native-final",
+      "nativeVisualReview": "native-reviewed",
+      "characters": 5453875,
+      "physicalWindows": [
+        [
+          1280,
+          860
+        ],
+        [
+          1060,
+          860
+        ],
+        [
+          1440,
+          860
+        ]
+      ],
+      "sidebarWidths": [
+        180,
+        360,
+        520,
+        240,
+        420,
+        240
+      ],
+      "cases": 6,
+      "retainedAndCrossChapterSelectionsPassed": true,
+      "contentWidthCommitsPerDrag": 1,
+      "fullNode": {
+        "tests": 2953,
+        "pass": 2953,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "groups": 17,
+        "trackedTestFiles": 389,
+        "evidence": "O:/Project/Markdown Rust/Temp/resize-repair-20261028/repository-final.log"
+      },
+      "browserUi": {
+        "passed": 82,
+        "failed": 0,
+        "evidence": "O:/Project/Markdown Rust/Temp/resize-repair-20261028/ui-final/figma-ui-results.json"
+      },
+      "rustRedaction": {
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "includesActualFrontendToRustJsonl": true,
+        "evidence": "O:/Project/Markdown Rust/Temp/resize-repair-20261028/rust.log"
+      },
+      "fullRust": "Not rerun; existing environment limitation remains.",
+      "stageAccepted": false,
+      "initialRepositoryRun": {
+        "evidence": "repository.log",
+        "failedGroups": [
+          "tests/architecture",
+          "tests/unit/layout"
+        ],
+        "causes": [
+          "A derived LayoutState query reused the retired isResizing identifier; renamed the query while preserving canonical state ownership.",
+          "Normal resize teardown touched deferred-only separator style; limited restoration to the deferred path."
+        ],
+        "testsRelaxed": false
+      },
+      "productionBuild": {
+        "accepted": true,
+        "sourceSha256": "6cf371be05d008ce054773eb48ec3dd6f3162c527931ce0fa307d81965114f0c",
+        "sourceFiles": 497,
+        "outputFiles": 140
+      },
+      "windows": {
+        "passed": true,
+        "evidence": "O:/Project/Markdown Rust/Temp/resize-repair-20261028/native-final",
+        "processId": 44116,
+        "testProcessClosed": true,
+        "retainedAndFreshSelectionsVisibleAndStable": true,
+        "originalDocumentsUnchanged": true,
+        "sourceSha256": "c042b1ab556d9156f22a4b81e761a6bb11861324eb762d6e2083fb98850f1032",
+        "previewSelectionChecks": 20,
+        "diagramChecks": 5,
+        "physicalPointer": true,
+        "physicalWindowResize": true,
+        "dragMs": [
+          728,
+          639,
+          623,
+          626,
+          653,
+          646
+        ],
+        "widthCommits": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "longTasks": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "maxTaskMs": [
+          193,
+          190,
+          170,
+          178,
+          157,
+          189
+        ],
+        "freshSelectionMs": [
+          479,
+          431,
+          588,
+          451,
+          458,
+          437
+        ],
+        "failures": []
+      },
+      "staticGates": {
+        "passed": [
+          "verify-architecture",
+          "verify-no-legacy-runtime",
+          "verify-generated-files",
+          "verify-readme-record",
+          "git diff --check"
+        ],
+        "evidence": "O:/Project/Markdown Rust/Temp/resize-repair-20261028/gate-final-*.log"
+      },
+      "finalScopedFixes": {
+        "passed": 21,
+        "failed": 0,
+        "evidence": "O:/Project/Markdown Rust/Temp/resize-repair-20261028/unit-final-fixes.log"
+      },
+      "fullClippy": "Not rerun; three existing findings in frozen storage and compatibility tests remain outside this repair.",
+      "scopeComplete": true
+    },
+    "limitations": [
+      "This repairs continuous sidebar and split geometry without changing frozen source mapping algorithms.",
+      "One final reflow remains at pointer release; native measurements recorded end tasks around 0.2 seconds with the large outline visible.",
+      "R17 formal acceptance and remote push remain out of scope."
+    ]
   }
 }

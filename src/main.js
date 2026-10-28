@@ -1252,6 +1252,7 @@ async function loadAppModules() {
     cancelFrame: id => window.cancelAnimationFrame(id),
     now: () => performance.now(),
     isHybridLayout: () => layoutState.snapshot.mode === 'hybrid',
+    isGeometryChanging: () => layoutState.snapshot.resize.sidebarActive || layoutState.snapshot.resize.splitActive,
     updateActiveLine: line => outlineController?.updateActiveLine?.(line),
     record: (operation, entry) => telemetry.record?.(operation, entry),
     diagnostic: (operation, entry) => telemetry.diagnostic?.(operation, entry)
@@ -1364,6 +1365,7 @@ async function loadAppModules() {
       presentation: markdownPresentation,
       shell: previewShell,
       scrollController,
+      selectionController,
       storage: window.localStorage
     });
     previewController.start();
@@ -1652,7 +1654,10 @@ async function loadAppModules() {
       matchMedia: typeof document.defaultView?.matchMedia === 'function'
         ? document.defaultView.matchMedia.bind(document.defaultView)
         : null,
-      onGeometryChanged() { scrollController.notifyGeometryChanged(); }
+      requestFrame: requestLayoutFrame,
+      cancelFrame: cancelLayoutFrame,
+      deferContentResize: () => virtualEditor.getTextLength() >= PREVIEW_BEHAVIOR_THRESHOLDS.mode.virtualChars,
+      onGeometryChanged(event) { if (!event.active) scrollController.notifyGeometryChanged(); }
     });
     sidebarResizeController.start();
     const ownApplication = owner => { applicationLifetime.own(() => owner.destroy()); return owner; };

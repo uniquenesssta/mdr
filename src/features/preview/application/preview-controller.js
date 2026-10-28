@@ -22,6 +22,7 @@ export function createPreviewController(options = {}) {
     presentation,
     shell,
     scrollController,
+    selectionController,
     storage,
     thresholds = PREVIEW_BEHAVIOR_THRESHOLDS
   } = options;
@@ -32,11 +33,14 @@ export function createPreviewController(options = {}) {
   let destroyed = false;
   let countTimer = 0;
   let viewMode = 'preview';
+  let unsubscribeLayout = null;
+  let resizeActive = false;
   const runtime = root.ownerDocument?.defaultView || globalThis;
   const assertActive = () => {
     if (destroyed) throw new Error('Preview Controller is destroyed.');
   };
   const isHybrid = () => layoutState.snapshot.mode === 'hybrid';
+  const hasActiveResize = () => Boolean(layoutState.snapshot.resize?.sidebarActive || layoutState.snapshot.resize?.splitActive);
 
   const update = optionsValue => {
     assertActive();
@@ -44,16 +48,19 @@ export function createPreviewController(options = {}) {
   };
 
   layoutStability.connect({
-    isSuspended: isHybrid,
+    isSuspended: () => isHybrid() || hasActiveResize(),
     hasStablePreview: () => Boolean(state.snapshot.lastStableResult),
     inspectRenderTarget() {
       const target = recoveryView.inspect();
       return { present: target.present, loading: target.recovery, empty: target.empty };
     },
     render: update,
-    refreshViewport: () => renderEngine.refreshVirtualViewport({ forceWindow: true }),
+    refreshViewport: () => renderEngine.refreshVirtualViewport({ forceWindow: false }),
     invalidateGeometry: () => shell.invalidatePreviewAnchorMetrics?.(),
-    notifyGeometryChanged: reason => scrollController?.notifyGeometryChanged?.(reason),
+    notifyGeometryChanged: reason => {
+      scrollController?.notifyGeometryChanged?.(reason);
+      selectionController?.notifyLayoutGeometry?.();
+    },
     getStats() {
       const virtual = renderEngine.getVirtualStats();
       return {
@@ -125,6 +132,14 @@ export function createPreviewController(options = {}) {
     if (started) return false;
     started = true;
     layoutStability.start();
+    unsubscribeLayout = layoutState.subscribe?.(event => {
+      if (event.changedGroup !== 'resize') return;
+      const active = hasActiveResize();
+      if (active === resizeActive) return;
+      resizeActive = active;
+      if (active) layoutStability.cancel();
+      else if (!isHybrid()) layoutStability.requestRefresh({ forceRender: false, reason: 'layout-resize-settled' });
+    });
     return true;
   }
 
@@ -226,6 +241,8 @@ export function createPreviewController(options = {}) {
       if (destroyed) return;
       destroyed = true;
       if (countTimer) runtime.clearTimeout(countTimer);
+      unsubscribeLayout?.();
+      unsubscribeLayout = null;
       countTimer = 0;
       renderEngine.destroy();
     }

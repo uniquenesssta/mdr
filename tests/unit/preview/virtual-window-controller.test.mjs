@@ -131,7 +131,7 @@ const blocks = Array.from({ length: 20 }, (_, index) => ({
   raw: `line ${index}`
 }));
 
-function createController(harness, notifications = []) {
+function createController(harness, notifications = [], options = {}) {
   return createVirtualWindowController(harness.preview, {
     thresholds,
     documentRef: harness.documentRef,
@@ -142,7 +142,8 @@ function createController(harness, notifications = []) {
     getComputedStyleFn: node => ({ marginTop: node.style.marginTop || '0', marginBottom: node.style.marginBottom || '0' }),
     notifyPreviewMounted: reason => notifications.push(`mounted:${reason}`),
     notifyGeometryChanged: reason => notifications.push(`geometry:${reason}`),
-    invalidateAnchorMetrics: () => notifications.push('invalidate')
+    invalidateAnchorMetrics: () => notifications.push('invalidate'),
+    ...options
   });
 }
 
@@ -162,6 +163,35 @@ test('Atomic 7.10 controller initially mounts only the necessary block window wi
   assert.equal(result.body.children[0].className, 'virtual-preview-spacer virtual-preview-spacer-top');
   assert.equal(result.body.children.at(-1).className, 'virtual-preview-spacer virtual-preview-spacer-bottom');
   controller.destroy();
+});
+
+test('exact content widths and typography invalidate height contexts without remounting unchanged blocks', () => {
+  const h=createDomHarness(),values=new Map();h.preview.clientWidth=600;let lineHeight='32px';
+  const c=createController(h,[],{storage:{getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)},
+    getComputedStyleFn:()=>({marginTop:'0',marginBottom:'0',paddingLeft:'24px',paddingRight:'24px',fontSize:'17px',fontFamily:'Noto Sans SC',lineHeight})});
+  c.setCacheContext('doc','light:18');c.update({blocks,changedIds:[]},{forceAll:true,createNodes:()=>[],applySourceRange(){}});h.flushFrames();
+  const wrapper=c.mounted.get('b0');c.heightCache.persist();const key=()=>JSON.parse([...values.values()][0]).visualKey;const initial=key();
+  h.preview.clientWidth=620;c.refreshViewport();h.flushFrames();c.heightCache.persist();const resized=key();
+  assert.notEqual(resized,initial,'a 20px width change must not reuse an 80px bucket');assert.equal(c.mounted.get('b0'),wrapper);
+  lineHeight='40px';c.refreshViewport();h.flushFrames();c.heightCache.persist();assert.notEqual(key(),resized);
+  c.destroy();
+});
+
+test('interactive pane resize defers virtual refresh and measurement until completion', () => {
+  const h=createDomHarness();let resizing=false;const notifications=[];
+  const c=createController(h,notifications,{isGeometryChanging:()=>resizing});
+  c.update({blocks,changedIds:[]},{forceAll:true,createNodes:()=>[],applySourceRange(){}});h.flushFrames();const before=notifications.length;
+  resizing=true;h.preview.clientWidth=500;c.handleViewportResize([{contentRect:{width:500,height:200}}]);h.flushFrames();
+  assert.equal(c.refreshViewport(),false);assert.equal(c.measureMountedBlocks(),false);assert.equal(notifications.length,before);
+  resizing=false;assert.equal(c.refreshViewport(),true);h.flushFrames();assert.ok(notifications.length>before);c.destroy();
+});
+
+test('initial height warmup does not preserve an unmeasured guessed scroll anchor', () => {
+  const h=createDomHarness();h.preview.clientWidth=600;const c=createController(h);
+  c.setCacheContext('doc','light:18');c.update({blocks,changedIds:[]},{forceAll:true,createNodes:()=>[],applySourceRange(){}});
+  for(const node of c.mounted.values())node.offsetHeight=300;
+  h.preview.scrollTop=200;h.preview.clientWidth=620;c.measureMountedBlocks();
+  assert.equal(h.preview.scrollTop,200,'first measured heights must not amplify a guessed position into a distant block');c.destroy();
 });
 
 test('Atomic 7.10 controller switches the mounted window after scroll without mounting the whole document', () => {

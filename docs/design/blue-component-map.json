@@ -1833,7 +1833,12 @@
         "changed": false,
         "dimensionsAuthority": "variants (live Figma values)"
       },
-      "previousContractBeforeFullReview": "392unpinned/424pinned width by content,H36/40. More routes to toolbar settings;pin/unpin/AltF10 and preference IDs retained."
+      "previousContractBeforeFullReview": "392unpinned/424pinned width by content,H36/40. More routes to toolbar settings;pin/unpin/AltF10 and preference IDs retained.",
+      "continuousResizeContract": {
+        "date": "2026-10-28",
+        "record": "blue-integration.json#continuousResizeRepair",
+        "rule": "Large-document separator preview with a single content-width commit on release; exact content-width/typography cache; recheck visibility in a new layout epoch. Ordinary same-layout mounts do not reopen a completed reveal; native preview selection and manual preview scrolling keep ownership."
+      }
     },
     {
       "id": "95:2731",
@@ -3272,6 +3277,11 @@
         "reviewed": true,
         "changed": false,
         "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "continuousResizeContract": {
+        "date": "2026-10-28",
+        "record": "blue-integration.json#continuousResizeRepair",
+        "rule": "Large-document separator preview with a single content-width commit on release; exact content-width/typography cache; recheck visibility in a new layout epoch. Ordinary same-layout mounts do not reopen a completed reveal; native preview selection and manual preview scrolling keep ownership."
       }
     },
     {
@@ -3325,6 +3335,11 @@
         "reviewed": true,
         "changed": false,
         "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "continuousResizeContract": {
+        "date": "2026-10-28",
+        "record": "blue-integration.json#continuousResizeRepair",
+        "rule": "Large-document separator preview with a single content-width commit on release; exact content-width/typography cache; recheck visibility in a new layout epoch. Ordinary same-layout mounts do not reopen a completed reveal; native preview selection and manual preview scrolling keep ownership."
       }
     },
     {

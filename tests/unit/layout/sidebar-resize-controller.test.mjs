@@ -59,7 +59,7 @@ function createStorage(initial = {}) {
   };
 }
 
-function setup({ storedWidth = 310, narrow = false } = {}) {
+function setup({ storedWidth = 310, narrow = false, deferred = false } = {}) {
   const state = createLayoutState();
   const workspace = new FakeElement();
   const resizer = new FakeElement();
@@ -69,6 +69,8 @@ function setup({ storedWidth = 310, narrow = false } = {}) {
   viewport.innerWidth = 1200;
   const storage = createStorage({ [SIDEBAR_WIDTH_STORAGE_KEY]: storedWidth });
   const geometry = [];
+  const frames = new Map(); let nextFrame = 0;
+  const flush = () => { const tasks = [...frames.values()]; frames.clear(); for (const task of tasks) task(); };
   const controller = createSidebarResizeController({
     state,
     workspace,
@@ -78,9 +80,12 @@ function setup({ storedWidth = 310, narrow = false } = {}) {
     storage,
     viewport,
     matchMedia: () => ({ matches: narrow }),
+    requestFrame: callback => { const id = ++nextFrame; frames.set(id, callback); return id; },
+    cancelFrame: id => frames.delete(id),
+    deferContentResize: () => deferred,
     onGeometryChanged: event => geometry.push(event)
   });
-  return { state, workspace, resizer, root, body, viewport, storage, geometry, controller };
+  return { state, workspace, resizer, root, body, viewport, storage, geometry, controller, flush, frames };
 }
 
 test('Atomic 6.2 restores width, captures one pointer, projects live width and persists exactly on end', () => {
@@ -100,6 +105,8 @@ test('Atomic 6.2 restores width, captures one pointer, projects live width and p
   assert.equal(fixture.body.classList.contains('is-sidebar-resizing'), true);
 
   fixture.resizer.emit('pointermove', { pointerId: 7, clientX: 440 });
+  assert.equal(fixture.state.snapshot.sidebar.width, 310);
+  fixture.flush();
   assert.equal(fixture.state.snapshot.sidebar.width, 400);
   assert.equal(fixture.root.style.getPropertyValue('--sidebar-width'), '400px');
   assert.equal(fixture.storage.value(SIDEBAR_WIDTH_STORAGE_KEY), '310');
@@ -119,8 +126,10 @@ test('Sidebar Resize Controller preserves the 180px minimum and dynamic 520px ma
   fixture.controller.start();
   fixture.resizer.emit('pointerdown', { pointerId: 3, clientX: 300, button: 0, isPrimary: true });
   fixture.resizer.emit('pointermove', { pointerId: 3, clientX: 1000 });
+  fixture.flush();
   assert.equal(fixture.state.snapshot.sidebar.width, 340);
   fixture.resizer.emit('pointermove', { pointerId: 3, clientX: 50 });
+  fixture.flush();
   assert.equal(fixture.state.snapshot.sidebar.width, 180);
   fixture.resizer.emit('pointerup', { pointerId: 3 });
 });
@@ -162,6 +171,7 @@ test('destroy removes listeners and cleans an active pointer without persisting 
   fixture.controller.start();
   fixture.resizer.emit('pointerdown', { pointerId: 9, clientX: 320, button: 0, isPrimary: true });
   fixture.resizer.emit('pointermove', { pointerId: 9, clientX: 390 });
+  fixture.flush();
   assert.equal(fixture.state.snapshot.sidebar.width, 350);
   fixture.controller.destroy();
   fixture.controller.destroy();
@@ -170,4 +180,23 @@ test('destroy removes listeners and cleans an active pointer without persisting 
   assert.equal(fixture.resizer.hasPointerCapture(9), false);
   fixture.resizer.emit('pointerdown', { pointerId: 10, clientX: 400, button: 0, isPrimary: true });
   assert.equal(fixture.state.snapshot.resize.sidebarActive, false);
+});
+
+test('large-document dragging previews the boundary and commits only the final width, even before the next frame', () => {
+  const h=setup({storedWidth:300,deferred:true});h.controller.start();
+  h.resizer.emit('pointerdown',{pointerId:1,clientX:340,button:0});
+  for(const clientX of [380,400,440])h.resizer.emit('pointermove',{pointerId:1,clientX});
+  assert.equal(h.frames.size,1);h.flush();
+  assert.equal(h.state.snapshot.sidebar.width,300);assert.equal(h.resizer.style.transform,'translateX(100px)');
+  h.resizer.emit('pointermove',{pointerId:1,clientX:460});h.resizer.emit('pointerup',{pointerId:1});
+  assert.equal(h.state.snapshot.sidebar.width,420);assert.equal(h.storage.value(SIDEBAR_WIDTH_STORAGE_KEY),'420');
+  assert.equal(h.frames.size,0);assert.equal(h.resizer.style.transform,'');assert.deepEqual(h.geometry.map(x=>x.reason),['pointer-end']);
+  h.controller.destroy();
+});
+
+test('destroy cancels a queued deferred boundary without applying or persisting it', () => {
+  const h=setup({storedWidth:300,deferred:true});h.controller.start();
+  h.resizer.emit('pointerdown',{pointerId:1,clientX:340,button:0});h.resizer.emit('pointermove',{pointerId:1,clientX:480});
+  h.controller.destroy();h.flush();assert.equal(h.state.snapshot.sidebar.width,300);
+  assert.equal(h.storage.value(SIDEBAR_WIDTH_STORAGE_KEY),'300');assert.equal(h.frames.size,0);
 });

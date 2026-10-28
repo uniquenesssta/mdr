@@ -34,6 +34,9 @@ export function createSidebarResizeController({
   storage,
   viewport,
   matchMedia,
+  requestFrame = callback => viewport.requestAnimationFrame(callback),
+  cancelFrame = handle => viewport.cancelAnimationFrame(handle),
+  deferContentResize = () => false,
   onGeometryChanged = () => {}
 } = {}) {
   requireObject(state, 'Sidebar Resize LayoutState');
@@ -57,11 +60,19 @@ export function createSidebarResizeController({
   requireFunction(viewport.addEventListener, 'Sidebar Resize viewport addEventListener');
   requireFunction(viewport.removeEventListener, 'Sidebar Resize viewport removeEventListener');
   requireFunction(onGeometryChanged, 'Sidebar Resize geometry notification');
+  requireFunction(requestFrame, 'Sidebar Resize frame request');
+  requireFunction(cancelFrame, 'Sidebar Resize frame cancellation');
+  requireFunction(deferContentResize, 'Sidebar Resize content policy');
 
   let started = false;
   let destroyed = false;
   let activePointerId = null;
   let resizeRect = null;
+  let resizeFrame = null;
+  let pendingWidth = null;
+  let previewWidth = null;
+  let initialWidth = 0;
+  let deferred = false;
 
   const snapshot = () => state.snapshot;
 
@@ -74,7 +85,7 @@ export function createSidebarResizeController({
     const numeric = Number(value);
     const maxWidth = Math.max(
       MIN_DYNAMIC_MAX_WIDTH,
-      Math.min(MAX_WIDTH, getWorkspaceWidth() - WORKSPACE_RESERVED_WIDTH)
+      Math.min(MAX_WIDTH, (resizeRect?.width ?? getWorkspaceWidth()) - WORKSPACE_RESERVED_WIDTH)
     );
     if (!Number.isFinite(numeric)) return DEFAULT_WIDTH;
     return Math.round(Math.max(MIN_WIDTH, Math.min(maxWidth, numeric)));
@@ -96,6 +107,19 @@ export function createSidebarResizeController({
       onGeometryChanged(Object.freeze({ reason, width, previousWidth: previous, active: activePointerId !== null }));
     }
     return width;
+  }
+
+  function flushWidth() {
+    if (resizeFrame !== null) cancelFrame(resizeFrame);
+    resizeFrame = null;
+    if (pendingWidth === null) return;
+    const width = normalizeWidth(pendingWidth);
+    pendingWidth = null;
+    previewWidth = width;
+    if (deferred) {
+      resizer.style.transform = `translateX(${width - initialWidth}px)`;
+      resizer.setAttribute?.('aria-valuenow', String(width));
+    } else commitWidth(width, 'pointer-move');
   }
 
   function restoreWidth() {
@@ -134,6 +158,14 @@ export function createSidebarResizeController({
   function finishResize(reason, { persist = true, release = true } = {}) {
     if (activePointerId === null) return false;
     const pointerId = activePointerId;
+    if (persist) {
+      flushWidth();
+      if (deferred && previewWidth !== null) commitWidth(previewWidth, 'pointer-commit', false);
+    } else if (resizeFrame !== null) cancelFrame(resizeFrame);
+    resizeFrame = null;
+    pendingWidth = null;
+    previewWidth = null;
+    if (deferred) resizer.style.transform = '';
     activePointerId = null;
     resizeRect = null;
     state.setResize({ sidebarActive: false });
@@ -158,6 +190,8 @@ export function createSidebarResizeController({
     resizer.setPointerCapture(pointerId);
     activePointerId = pointerId;
     resizeRect = rect;
+    initialWidth = snapshot().sidebar.width;
+    deferred = Boolean(deferContentResize());
     state.setResize({ sidebarActive: true });
     setActivePresentation(true);
     event.preventDefault?.();
@@ -167,7 +201,8 @@ export function createSidebarResizeController({
     if (activePointerId === null || Number(event.pointerId) !== activePointerId || !resizeRect) return;
     const clientX = Number(event.clientX);
     if (!Number.isFinite(clientX)) return;
-    commitWidth(clientX - Number(resizeRect.left), 'pointer-move');
+    pendingWidth = clientX - Number(resizeRect.left);
+    if (resizeFrame === null) resizeFrame = requestFrame(flushWidth);
     event.preventDefault?.();
   }
 

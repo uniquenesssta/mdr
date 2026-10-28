@@ -16,6 +16,7 @@ export class VirtualPreviewController extends VirtualWindowController {
       : () => {};
     super(preview, {
       thresholds: options.thresholds || PREVIEW_BEHAVIOR_THRESHOLDS,
+      isGeometryChanging: options.isGeometryChanging,
       documentRef: preview?.ownerDocument || runtime.document,
       storage: options.storage || runtime.localStorage,
       requestFrame: callback => runtime.requestAnimationFrame(callback),

@@ -301,7 +301,7 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
         }
         "mode" => matches!(
             value,
-            "source" | "hybrid" | "preview" | "full" | "virtual" | "chapter"
+            "source" | "hybrid" | "preview" | "full" | "virtual" | "chapter" | "hybrid-index-only"
         ),
         "presentationMode" | "presentation" => matches!(value, "source" | "hybrid" | "preview"),
         "previousMode" | "nextMode" => matches!(value, "hybrid" | "both" | "edit" | "preview"),
@@ -339,6 +339,11 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                 | "preview-dom-patch"
                 | "virtual-preview-window"
                 | "virtual-preview-block-update"
+                | "layout-resize-settled"
+                | "preview-container-resize"
+                | "editor-scope-ready"
+                | "editor-reveal-settle"
+                | "virtual-preview-measured"
         ),
         "failureStage" => matches!(value, "save-before-read" | "read" | "activate" | "apply-ui"),
         "errorCode" => matches!(
@@ -455,7 +460,7 @@ pub(super) fn redact_value(value: &Value) -> Value {
 mod tests {
     #[test]
     fn preserves_reviewed_selection_and_runtime_event_labels_without_free_text() {
-        let fields = serde_json::json!({"mappingMode":"source-component","nextMode":"both","origin":"programmatic","theme":"dark"});
+        let fields = serde_json::json!({"mappingMode":"source-component","nextMode":"both","origin":"programmatic","theme":"dark","mode":"hybrid-index-only","reason":"layout-resize-settled"});
         assert_eq!(redact_value(&fields), fields);
         let malicious = serde_json::json!({"mappingMode":"PRIVATE","nextMode":"PRIVATE","origin":"PRIVATE","theme":"PRIVATE","status":"PRIVATE"});
         for key in ["mappingMode", "nextMode", "origin", "theme", "status"] {

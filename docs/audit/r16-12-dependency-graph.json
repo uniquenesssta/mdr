@@ -1,9 +1,9 @@
 {
-  "baselineCommit": "d9d3767f00cad6107187bc0a5cb37cece43e18d5",
+  "baselineCommit": "1120c82e489c5274ba2afdf7586ffa5c91ea670c",
   "schemaVersion": 1,
   "stage": "R16.12",
   "productionFiles": 559,
-  "inputSha256": "89ae517c8266e5d1b8ff71610ee60818455a825e6080057d4f44ece5e11dbab8",
+  "inputSha256": "2657d819a0633bb184f1a1dcb4895b3627b0e3a3b334ba71f05604d0d5a8a1fa",
   "nodes": [
     {
       "id": "builtin:node:crypto",
@@ -5960,7 +5960,7 @@
       "kind": "rust-namespace",
       "domain": null,
       "specifier": "serde_json::json",
-      "line": 482,
+      "line": 487,
       "column": 5
     },
     {
@@ -5969,7 +5969,7 @@
       "kind": "rust-namespace",
       "domain": null,
       "specifier": "super::redact_value",
-      "line": 481,
+      "line": 486,
       "column": 5
     },
     {
@@ -16209,7 +16209,7 @@
     {
       "from": "src-tauri/src/performance_log/redaction.rs",
       "specifier": "serde_json::json",
-      "line": 482,
+      "line": 487,
       "column": 5,
       "modulePrefix": "cargo:serde_json",
       "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
@@ -16217,7 +16217,7 @@
     {
       "from": "src-tauri/src/performance_log/redaction.rs",
       "specifier": "super::redact_value",
-      "line": 481,
+      "line": 486,
       "column": 5,
       "modulePrefix": "src-tauri/src/performance_log/mod.rs",
       "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."

@@ -5,7 +5,7 @@ const ENUMS = {
   side: new Set(['editor', 'preview', '']), sourceSide: new Set(['editor', 'preview', '']),
   scrollSourceSide: new Set(['editor', 'preview', '']),
   targetSide: new Set(['editor', 'preview', '']),
-  mode: new Set(['source', 'hybrid', 'preview', 'full', 'virtual', 'chapter']), presentationMode: new Set(['source', 'hybrid', 'preview']),
+  mode: new Set(['source', 'hybrid', 'preview', 'full', 'virtual', 'chapter', 'hybrid-index-only']), presentationMode: new Set(['source', 'hybrid', 'preview']),
   previousMode: new Set(['hybrid', 'both', 'edit', 'preview']), nextMode: new Set(['hybrid', 'both', 'edit', 'preview']),
   presentation: new Set(['hybrid', 'source']),
   theme: new Set(['default', 'dark']),
@@ -18,7 +18,8 @@ const ENUMS = {
   reason: new Set(['editor-select', 'editor-keyup', 'editor-pointerup', 'editor-selection',
     'editor-select-retry', 'editor-keyup-retry', 'editor-pointerup-retry', 'editor-selection-retry',
     'preview-selection', 'preview-keyup', 'preview-pointerup', 'document-selectionchange',
-    'preview-mounted', 'preview-replaced', 'editor-geometry', 'preview-enhancements', 'preview-dom-patch', 'virtual-preview-window', 'virtual-preview-block-update']),
+    'preview-mounted', 'preview-replaced', 'editor-geometry', 'preview-enhancements', 'preview-dom-patch', 'virtual-preview-window', 'virtual-preview-block-update',
+    'layout-resize-settled', 'preview-container-resize', 'editor-scope-ready', 'editor-reveal-settle', 'virtual-preview-measured']),
   failureStage: new Set(['save-before-read', 'read', 'activate', 'apply-ui']),
   errorCode: new Set(['STORAGE_QUOTA_EXCEEDED', 'DOCUMENT_CHANGED_DURING_SAVE', 'DOCUMENT_IMPORT_FAILED']),
   extension: new Set(['', 'md', 'markdown', 'txt', 'html', 'htm', 'doc', 'docx', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'avif'])

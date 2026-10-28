@@ -1355,5 +1355,18 @@
       "headerFamily": "98:6172",
       "status": "implemented_built_browser_windows_and_repository_verified"
     }
+  },
+  "continuousResizeRepair": {
+    "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+    "sessionId": "60bdc4ad-6d9d-45df-8071-6df0bdbb6dc5",
+    "nodes": [
+      "99:6098",
+      "99:6149",
+      "95:2571"
+    ],
+    "authorization": "User reports five-million-character sidebar dragging stalls and source-to-preview positioning errors at different widths; explicitly requests repair.",
+    "record": "blue-integration.json#continuousResizeRepair",
+    "status": "interaction-reference-synchronized-source-repair-runtime-and-repository-verified",
+    "scope": "Reference interaction descriptions only; performance implementation and validation are source code and runtime concerns. Figma is not a prerequisite for performance fixes."
   }
 }
