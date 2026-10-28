@@ -1,9 +1,9 @@
 {
-  "baselineCommit": "1120c82e489c5274ba2afdf7586ffa5c91ea670c",
+  "baselineCommit": "1fe334dbea05e95b0c4cec721d5e639e421d7c9d",
   "schemaVersion": 1,
   "stage": "R16.12",
-  "productionFiles": 559,
-  "inputSha256": "2657d819a0633bb184f1a1dcb4895b3627b0e3a3b334ba71f05604d0d5a8a1fa",
+  "productionFiles": 561,
+  "inputSha256": "d274daa594fc0481f581d8c04d9b8ddcf431e968143fa0792cc6bcdcb04633a3",
   "nodes": [
     {
       "id": "builtin:node:crypto",
@@ -129,7 +129,7 @@
       "id": "npm:@codemirror/language",
       "kind": "npm-package",
       "feature": null,
-      "declaredVersion": "^6.12.4",
+      "declaredVersion": "6.12.4",
       "lockedVersion": "6.12.4"
     },
     {
@@ -241,6 +241,11 @@
     {
       "id": "rust:std",
       "kind": "rust-standard-library",
+      "feature": null
+    },
+    {
+      "id": "scripts/build/codemirror-parse-budget.mjs",
+      "kind": "build-input",
       "feature": null
     },
     {
@@ -2274,6 +2279,16 @@
       "feature": "sidebar"
     },
     {
+      "id": "src/features/sidebar/outline/outline-window-model.js",
+      "kind": "js",
+      "feature": "sidebar"
+    },
+    {
+      "id": "src/features/sidebar/outline/outline-window-view.js",
+      "kind": "js",
+      "feature": "sidebar"
+    },
+    {
       "id": "src/features/sidebar/state/sidebar-state.js",
       "kind": "js",
       "feature": "sidebar"
@@ -3260,6 +3275,24 @@
       "kind": "package-declaration",
       "domain": null,
       "specifier": "vite"
+    },
+    {
+      "from": "scripts/build/codemirror-parse-budget.mjs",
+      "to": "builtin:node:fs/promises",
+      "specifier": "node:fs/promises",
+      "kind": "import",
+      "domain": "esm",
+      "line": 1,
+      "column": 1
+    },
+    {
+      "from": "scripts/build/codemirror-parse-budget.mjs",
+      "to": "builtin:node:path",
+      "specifier": "node:path",
+      "kind": "import",
+      "domain": "esm",
+      "line": 2,
+      "column": 1
     },
     {
       "from": "scripts/build/fingerprint-plugin.mjs",
@@ -12012,6 +12045,24 @@
       "column": 1
     },
     {
+      "from": "src/features/sidebar/outline/outline-view.js",
+      "to": "src/features/sidebar/outline/outline-window-view.js",
+      "specifier": "./outline-window-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 1,
+      "column": 1
+    },
+    {
+      "from": "src/features/sidebar/outline/outline-window-view.js",
+      "to": "src/features/sidebar/outline/outline-window-model.js",
+      "specifier": "./outline-window-model.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 1,
+      "column": 1
+    },
+    {
       "from": "src/features/sidebar/tabs/sidebar-tab-controller.js",
       "to": "src/features/sidebar/state/sidebar-state.js",
       "specifier": "../state/sidebar-state.js",
@@ -14632,6 +14683,15 @@
       "kind": "import",
       "domain": "esm",
       "line": 3,
+      "column": 1
+    },
+    {
+      "from": "vite.config.js",
+      "to": "scripts/build/codemirror-parse-budget.mjs",
+      "specifier": "./scripts/build/codemirror-parse-budget.mjs",
+      "kind": "import",
+      "domain": "esm",
+      "line": 5,
       "column": 1
     },
     {

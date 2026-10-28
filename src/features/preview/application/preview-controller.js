@@ -95,6 +95,8 @@ export function createPreviewController(options = {}) {
     },
     getPriority(node, lineRange) {
       const anchor = node?.closest?.('.preview-virtual-block') || node;
+      const virtualPriority = renderEngine.getVirtualBlockPriority?.(anchor?.dataset?.previewBlockId);
+      if (Number.isFinite(virtualPriority)) return virtualPriority;
       if (anchor?.isConnected) {
         const top = anchor.offsetTop;
         const bottom = top + Math.max(1, anchor.offsetHeight);

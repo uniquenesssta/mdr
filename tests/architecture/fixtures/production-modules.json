@@ -2588,6 +2588,26 @@
       false
     ],
     [
+      "src/features/sidebar/outline/outline-window-model.js",
+      "esm-module",
+      "sidebar-outline-domain",
+      "Flatten expanded headings and calculate bounded viewport ranges without discarding the canonical heading tree.",
+      "none",
+      "pure",
+      "retain",
+      false
+    ],
+    [
+      "src/features/sidebar/outline/outline-window-view.js",
+      "esm-module",
+      "sidebar-outline-ui",
+      "Own bounded large-outline row mounting, fixed-height scroll geometry, boundary keyboard focus and observer disposal.",
+      "outline-window-projection-state",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
       "src/features/sidebar/state/sidebar-state.js",
       "esm-module",
       "sidebar-state",

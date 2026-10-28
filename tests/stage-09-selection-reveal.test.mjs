@@ -120,3 +120,25 @@ test('a selected line break clears stale highlights without a pending retry or m
   try{assert.equal(h.controller.runEditor(true,'editor-pointerup',true,0).status,'cleared');assert.equal(warnings,0);assert.equal(clears,1);}
   finally{h.controller.destroy();}
 });
+
+test('measurement-only notifications do not rebuild completed highlights or advance the DOM revision', () => {
+  const h=fixture();let restores=0;
+  try {
+    h.controller.highlightSession.restore=()=>restores++;
+    h.controller.runEditor(true,'editor-pointerup',true,0);h.frames.flushAll();
+    const revision=h.controller.feedbackGuard.getRevision(),requests=h.controller.stats.editorRequests;
+    for(let i=0;i<20;i++)h.controller.notifyPreviewMeasured();h.frames.flushAll();
+    assert.equal(restores,0);assert.equal(h.controller.feedbackGuard.getRevision(),revision);
+    assert.equal(h.controller.stats.editorRequests,requests);assert.equal(h.writes.length,0);
+  }finally{h.controller.destroy();}
+});
+
+test('measurement-only notifications still settle an unfinished reveal at its measured position', () => {
+  const h=fixture({top:330,scrollTop:100});
+  try {
+    h.controller.runEditor(true,'editor-pointerup',true,0);h.moveTarget(430);
+    h.controller.notifyPreviewMeasured();h.frames.flushAll();
+    assert.equal(h.writes.length,2);assert.equal(h.preview.scrollTop,258);
+    assert.equal(h.controller.shouldRealignEditorSelection(),false);
+  }finally{h.controller.destroy();}
+});

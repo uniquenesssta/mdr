@@ -129,3 +129,7 @@
 .outline-toggle { width:12px;height:28px;padding:0; }
 .outline-children { margin-left:16px;padding-left:0;border:0; }
 .outline-row.active .outline-link { color:var(--color-accent); }
+
+/* Large outlines keep the full index but mount only the viewport's 36px rows. */
+.outline-window-tree { position:relative;flex:none;contain:layout style; }
+.outline-window-tree>.outline-node { position:absolute;right:0;height:36px; }

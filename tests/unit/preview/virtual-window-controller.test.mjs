@@ -240,3 +240,25 @@ test('Atomic 7.10 asynchronous measurement corrects cached geometry after mount'
   controller.destroy();
   assert.throws(() => controller.getStats(), /destroyed/);
 });
+
+test('virtual enhancement priority uses the existing height index without DOM layout reads', () => {
+  const harness=createDomHarness(),controller=createController(harness,[]);
+  controller.update({blocks,changedIds:[],reason:'initial'},{forceAll:true,createNodes:()=>[],applySourceRange(){}});
+  Object.defineProperty(controller.body,'offsetTop',{get(){throw Error('priority must not force layout');}});
+  assert.equal(controller.getBlockPriority(blocks[0].id),0);
+  controller.lastScrollTop=100000;assert.equal(controller.getBlockPriority(blocks[0].id),2);
+  controller.priorityChapter={startLine:1,endLine:100};assert.equal(controller.getBlockPriority(blocks[0].id),1);
+  assert.equal(controller.getBlockPriority('missing'),null);controller.destroy();
+});
+
+test('virtual diagnostic stats use the observed viewport without a synchronous layout read', () => {
+  const harness=createDomHarness(),controller=createController(harness,[]);
+  controller.update({blocks,changedIds:[],reason:'initial'},{forceAll:true,createNodes:()=>[],applySourceRange(){}});
+  const width=controller.viewportWidth,height=controller.viewportHeight;
+  Object.defineProperty(harness.preview,'clientWidth',{get(){throw Error('stats must not force layout');}});
+  Object.defineProperty(harness.preview,'clientHeight',{get(){throw Error('stats must not force layout');}});
+  assert.equal(controller.getStats().viewportWidth,width);assert.equal(controller.getStats().viewportHeight,height);
+  controller.handleViewportResize([{contentRect:{width:360,height:140}}]);
+  assert.equal(controller.getStats().viewportWidth,360);assert.equal(controller.getStats().viewportHeight,140);
+  controller.destroy();
+});

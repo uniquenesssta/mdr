@@ -1,3 +1,5 @@
+import { createOutlineWindowView } from './outline-window-view.js';
+
 /**
  * Responsibility: Own Outline DOM projection and Outline-specific list/context-menu listeners.
  * Imports: None; controller actions, context-menu placement and collapse lookups are injected.
@@ -60,6 +62,8 @@ export function createOutlineView({
   let contextHeadingId = '';
   let started = false;
   let destroyed = false;
+  const windowView = createOutlineWindowView({ documentRef, panel, list, isCollapsed,
+    createRow: node => createNode(node, false), rowByHeadingId });
 
   const assertActive = () => {
     if (destroyed) throw new Error('OutlineView is destroyed.');
@@ -82,7 +86,7 @@ export function createOutlineView({
     return button;
   }
 
-  function createNode(node) {
+  function createNode(node, includeChildren = true) {
     const collapsed = Boolean(node.children?.length && isCollapsed(node.id));
     const item = documentRef.createElement('li');
     item.className = `outline-node outline-level-${node.level}`;
@@ -109,7 +113,7 @@ export function createOutlineView({
     row.appendChild(link);
     item.appendChild(row);
 
-    if (node.children?.length) {
+    if (includeChildren && node.children?.length) {
       const children = documentRef.createElement('ul');
       children.className = 'outline-children';
       if (collapsed) children.classList.add('collapsed');
@@ -174,8 +178,10 @@ export function createOutlineView({
     },
     render(tree) {
       assertActive();
-      rowByHeadingId.clear();
       const nodes = Array.isArray(tree) ? tree : [];
+      const windowResult = windowView.render(nodes);
+      if (windowResult) return Object.freeze(windowResult);
+      rowByHeadingId.clear();
       if (!nodes.length) {
         activeHeadingId = '';
         renderEmpty();
@@ -202,6 +208,7 @@ export function createOutlineView({
     },
     destroy() {
       if (destroyed) return;
+      windowView.destroy();
       if (started) {
         list.removeEventListener('click', onListClick);
         panel.removeEventListener('contextmenu', onPanelContextMenu);

@@ -26,6 +26,7 @@ export class VirtualWindowController {
     now,
     isGeometryChanging = () => false,
     notifyPreviewMounted = () => {},
+    notifyPreviewMeasured = () => {},
     notifyGeometryChanged = () => {},
     invalidateAnchorMetrics = () => {},
     compensateScroll = () => false,
@@ -48,6 +49,7 @@ export class VirtualWindowController {
     this.cacheDocumentId = '';
     this.cacheVisualKey = '';
     this.notifyPreviewMounted = notifyPreviewMounted;
+    this.notifyPreviewMeasured = notifyPreviewMeasured;
     this.notifyGeometryChanged = notifyGeometryChanged;
     this.invalidateAnchorMetrics = invalidateAnchorMetrics;
     this.compensateScroll = compensateScroll;
@@ -495,7 +497,7 @@ export class VirtualWindowController {
     }
     this.invalidateAnchorMetrics();
     this.notifyGeometryChanged('preview');
-    this.notifyPreviewMounted('virtual-preview-measured');
+    this.notifyPreviewMeasured('virtual-preview-measured');
     return true;
   }
 
@@ -550,6 +552,18 @@ export class VirtualWindowController {
     return [...this.mounted.values()];
   }
 
+  getBlockPriority(id) {
+    this.assertAlive();
+    const index = this.blockIndexById.get(id);
+    if (!this.active || index === undefined) return null;
+    // Enhancement order is approximate; it must not force DOM layout before
+    // the measurement pass. Selection/scroll geometry still uses real metrics.
+    const top = this.model.offsets[index] || 0, bottom = this.model.offsets[index + 1] || top;
+    if (bottom >= this.lastScrollTop && top <= this.lastScrollTop + this.viewportHeight) return 0;
+    const block = this.blocks[index], chapter = this.priorityChapter;
+    return chapter && block.endLine >= chapter.startLine && block.startLine <= chapter.endLine ? 1 : 2;
+  }
+
   getMetrics() {
     this.assertAlive();
     if (!this.active) return null;
@@ -587,8 +601,8 @@ export class VirtualWindowController {
       scope: this.scope,
       scopeStartLine: this.blocks[0]?.startLine || 0,
       scopeEndLine: this.blocks[this.blocks.length - 1]?.endLine || 0,
-      viewportWidth: Math.round(this.preview.clientWidth || 0),
-      viewportHeight: Math.round(this.preview.clientHeight || 0)
+      viewportWidth: this.viewportWidth,
+      viewportHeight: this.viewportHeight
     };
   }
 

@@ -584,6 +584,7 @@ export function createPreviewRenderEngine(options = {}) {
     ensureVirtualLineVisible: line => virtualController?.ensureLineVisible?.(line) || null,
     ensureVirtualLineRangeVisible: (from, to) => virtualController?.ensureLineRangeVisible?.(from, to) || null,
     getVirtualMountedAnchors: () => virtualController?.getMountedAnchors?.() || [],
+    getVirtualBlockPriority: id => virtualController?.getBlockPriority?.(id) ?? null,
     getVirtualMetrics: () => virtualController?.getMetrics?.() || [],
     getVirtualContentYForLine: line => virtualController?.getContentYForLine?.(line) ?? null,
     getVirtualLineForContentY: y => virtualController?.getLineForContentY?.(y) ?? null,

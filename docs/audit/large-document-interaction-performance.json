@@ -1,0 +1,339 @@
+{
+  "date": "2026-10-29",
+  "baselineCommit": "1fe334dbea05e95b0c4cec721d5e639e421d7c9d",
+  "branch": "codex/figma-ui",
+  "authorization": "User requested repair after the latest real five-million-character session remained visibly slow.",
+  "status": "implemented-native-performance-verified-existing-browser-findings-retained",
+  "scope": "Source/runtime performance; established Figma appearance and product functions retained. No Figma edit is a prerequisite.",
+  "evidence": "O:/Project/Markdown Rust/Temp/interaction-repair-20261029",
+  "source": {
+    "characters": 5453875,
+    "originalReadOnly": true,
+    "sha256": "c042b1ab556d9156f22a4b81e761a6bb11861324eb762d6e2083fb98850f1032"
+  },
+  "findings": [
+    "The real page held 15495 DOM elements and3339 outline rows; timeline showed full-page layout work over approximately20000 layout objects.",
+    "Measurement completion was routed through structural mount notifications and rebuilt unchanged selection mappings.",
+    "Enhancement priority and diagnostic statistics synchronously read layout.",
+    "CodeMirror language6.12.4 schedules up to100ms per idle parse slice, despite smaller idle deadlines."
+  ],
+  "changes": [
+    "Window only large outlines, preserving the full canonical index, collapsed hierarchy, row appearance, last-heading navigation and keyboard traversal.",
+    "Separate measurement continuation from DOM replacement; completed live highlights need no remapping.",
+    "Use existing height-index estimates only for background enhancement ordering; keep actual geometry for selection and scroll mapping.",
+    "Read observed viewport dimensions for diagnostics.",
+    "Pin the already installed language6.12.4 and change only Work.Slice and Work.MinSlice to8ms for production and development. Version/source mismatch fails the build. No dependency resolution, grammar or frozen model algorithm changed."
+  ],
+  "buildPolicy": {
+    "dependency": "@codemirror/language",
+    "version": "6.12.4",
+    "license": "MIT",
+    "newRuntimeDependencies": 0,
+    "additionalRuntimeImplementation": "Two scheduling constants only; build adapter is not shipped as application code.",
+    "maintenance": "Review the two guarded source seams and timing/grammar regressions before upgrading this dependency."
+  },
+  "budget": {
+    "maxLongTaskMs": 100,
+    "selectionStableMs": 400,
+    "maximumDomNodes": 2500,
+    "maximumMountedOutlineRows": 80,
+    "responseClock": "Gesture start through correct stable visible selection; observer delivery wait is separately recorded as observationMs."
+  },
+  "before": {
+    "report": "before-native/large-document-interactions.json",
+    "dom": {
+      "nodes": 15495,
+      "outlineRows": 3339
+    },
+    "measurements": [
+      {
+        "name": "outline-open",
+        "elapsedMs": 695,
+        "longTasks": 2,
+        "longTaskMs": 635,
+        "maxTaskMs": 335
+      },
+      {
+        "name": "split-open",
+        "elapsedMs": 422,
+        "longTasks": 1,
+        "longTaskMs": 118,
+        "maxTaskMs": 118
+      },
+      {
+        "name": "chapter-selection-0.343",
+        "elapsedMs": 998,
+        "visible": true,
+        "stable": true,
+        "ms": 57.100000001490116,
+        "longTasks": 3,
+        "longTaskMs": 497,
+        "maxTaskMs": 346
+      },
+      {
+        "name": "scroll-0.343",
+        "elapsedMs": 346,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "chapter-selection-0.6",
+        "elapsedMs": 859,
+        "visible": true,
+        "stable": true,
+        "ms": 52.5,
+        "longTasks": 2,
+        "longTaskMs": 410,
+        "maxTaskMs": 344
+      },
+      {
+        "name": "scroll-0.6",
+        "elapsedMs": 339,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "chapter-selection-0.9",
+        "elapsedMs": 887,
+        "visible": true,
+        "stable": true,
+        "ms": 22.200000002980232,
+        "longTasks": 2,
+        "longTaskMs": 406,
+        "maxTaskMs": 318
+      },
+      {
+        "name": "scroll-0.9",
+        "elapsedMs": 332,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "sidebar-drag",
+        "elapsedMs": 886,
+        "longTasks": 3,
+        "longTaskMs": 470,
+        "maxTaskMs": 217
+      }
+    ]
+  },
+  "historical": {
+    "revision": "1120c82",
+    "provenance": "historical-source.json",
+    "report": "historical-relative-native/large-document-interactions.json",
+    "measurements": [
+      {
+        "name": "outline-open",
+        "elapsedMs": 664,
+        "longTasks": 2,
+        "longTaskMs": 621,
+        "maxTaskMs": 319
+      },
+      {
+        "name": "split-open",
+        "elapsedMs": 672,
+        "longTasks": 2,
+        "longTaskMs": 160,
+        "maxTaskMs": 110
+      },
+      {
+        "name": "chapter-selection-0.343",
+        "elapsedMs": 955,
+        "visible": true,
+        "stable": true,
+        "ms": 19,
+        "longTasks": 2,
+        "longTaskMs": 433,
+        "maxTaskMs": 332
+      },
+      {
+        "name": "scroll-0.343",
+        "elapsedMs": 347,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "chapter-selection-0.6",
+        "elapsedMs": 838,
+        "visible": true,
+        "stable": true,
+        "ms": 43.29999999701977,
+        "longTasks": 2,
+        "longTaskMs": 411,
+        "maxTaskMs": 342
+      },
+      {
+        "name": "scroll-0.6",
+        "elapsedMs": 325,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "chapter-selection-0.9",
+        "elapsedMs": 866,
+        "visible": true,
+        "stable": true,
+        "ms": 46,
+        "longTasks": 2,
+        "longTaskMs": 420,
+        "maxTaskMs": 326
+      },
+      {
+        "name": "scroll-0.9",
+        "elapsedMs": 332,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "sidebar-drag",
+        "elapsedMs": 8365,
+        "longTasks": 26,
+        "longTaskMs": 8044,
+        "maxTaskMs": 567
+      }
+    ]
+  },
+  "after": {
+    "report": "final-native/large-document-interactions.json",
+    "dom": {
+      "nodes": 1338,
+      "outlineRows": 20
+    },
+    "measurements": [
+      {
+        "name": "outline-open",
+        "elapsedMs": 64,
+        "observationMs": 92,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "split-open",
+        "elapsedMs": 266,
+        "observationMs": 287,
+        "longTasks": 1,
+        "longTaskMs": 72,
+        "maxTaskMs": 72
+      },
+      {
+        "name": "chapter-selection-0.343",
+        "elapsedMs": 317,
+        "observationMs": 338,
+        "visible": true,
+        "stable": true,
+        "ms": 107.60000000149012,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "scroll-0.343",
+        "elapsedMs": 273,
+        "observationMs": 291,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "chapter-selection-0.6",
+        "elapsedMs": 283,
+        "observationMs": 304,
+        "visible": true,
+        "stable": true,
+        "ms": 116.39999999850988,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "scroll-0.6",
+        "elapsedMs": 256,
+        "observationMs": 277,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "chapter-selection-0.9",
+        "elapsedMs": 279,
+        "observationMs": 296,
+        "visible": true,
+        "stable": true,
+        "ms": 99.30000000447035,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "scroll-0.9",
+        "elapsedMs": 291,
+        "observationMs": 312,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      },
+      {
+        "name": "sidebar-drag",
+        "elapsedMs": 448,
+        "observationMs": 491,
+        "longTasks": 0,
+        "longTaskMs": 0,
+        "maxTaskMs": 0
+      }
+    ],
+    "failures": []
+  },
+  "validation": {
+    "productionBuild": {
+      "sourceSha256": "70a16dd79da1d880936707a638d6431ceafd3d9d7557c56891ef4057ca808466",
+      "sourceFiles": 500,
+      "outputFiles": 140
+    },
+    "native": true,
+    "outlineFunctionChecks": "final-native/outline-window.json",
+    "selectionAndFrameRegression": "final-native/native-frame.json",
+    "developmentPrebundle": "dev-prebundle.json",
+    "browser": {
+      "currentUi": { "passed": 82, "report": "ui/figma-ui-results.json", "currentFingerprintAdmitted": true },
+      "contract": { "passed": 12, "failed": 0, "log": "browser-contract.log" },
+      "genericApp": { "total": 84, "passed": 55, "failed": 29, "log": "browser.log", "accepted": false },
+      "headDiagnostic": { "total": 83, "passed": 72, "failed": 11, "log": "head-browser.log", "provenance": "head-baseline-source.json", "currentFingerprintAdmitted": false },
+      "isolatedOriginalChecks": { "passed": 5, "failed": 1, "report": "isolated-regression/results.json", "assertionsPreserved": true },
+      "interpretation": "The generic suite contains old shell/settings/theme assumptions and shared-page contamination. A clean page passes the original split drag/collapse/hysteresis, preview highlight, source drag, wheel sync and cross-chapter 8px stability checks. Baseline and current generic runs have different failure counts and are not claimed equivalent or green. The baseline external-server run omits the one current-build admission case."
+    },
+    "fullNode": { "passed": 2961, "failed": 0, "skipped": 0, "cancelled": 0, "trackedTestFiles": 391, "groups": 17, "log": "repository-corrected.log", "inventory": "repository-corrected/repository-audit/test-inventory.json", "groupResults": "repository-corrected/repository-audit/suite-results.json" },
+    "staticGates": "Architecture, no-legacy-runtime, generated-files and README-record all passed.",
+    "fullRust": "Not rerun; no Rust source changes.",
+    "stageAccepted": false
+  },
+  "retainedAttempts": [
+    "Historical diagnostic absolute asset path failed; relative path was corrected before the valid historical comparison.",
+    "Initial response clock included three observer-drain frames; corrected to separately expose observationMs. Original evidence retained.",
+    "CSS-only isolation improved layout but missed latency budgets; replaced with bounded outline mounting.",
+    "A proposed parser-wrapper experiment did not preserve complete incremental syntax semantics; removed before final implementation. Original dependency grammar retained.",
+    "Initial development verification incorrectly expected comments that esbuild strips; verified the compiled expression.",
+    "Initial native outline inspection used an incorrect test-side binding name; fixed without product hooks or assertion removal.",
+    "The first complete Node run used a nonexistent npm CLI path supplied by this task. Only the package-script execution test failed. The complete four-test file and then all2961 tests passed with the installed npm path in the corrected environment.",
+    "The generic browser run failed; the HEAD diagnostic also failed. Original failures, screenshots and clean-page follow-up results are retained without weakening assertions."
+  ],
+  "existingFindings": [
+    {
+      "issue": "The original HTML source-EOF input check can replace the preceding HTML block rather than append a paragraph.",
+      "reproduced": "Both current and unchanged HEAD diagnostic builds fail the same original source-EOF assertion in clean windows.",
+      "report": "html-input-comparison.json",
+      "status": "Unresolved pre-existing correctness finding; not changed or accepted by this performance-only patch.",
+      "nextStep": "Inspect the editor source-range exit and pending paragraph selection before any claim that the complete pointer/IME suite passes."
+    }
+  ],
+  "limitations": [
+    "Performance values are from the recorded real Windows/WebView2 machine and original document, not a guarantee for every document or device.",
+    "R17 final acceptance and remote push remain out of scope."
+  ]
+}

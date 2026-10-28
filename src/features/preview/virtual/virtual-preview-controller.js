@@ -36,6 +36,7 @@ export class VirtualPreviewController extends VirtualWindowController {
       cancelIdle: () => scheduler?.cancel?.('preview-height-cache'),
       now: () => runtime.Date.now(),
       notifyPreviewMounted: reason => selection?.notifyPreviewMounted?.(reason),
+      notifyPreviewMeasured: reason => selection?.notifyPreviewMeasured?.(reason),
       notifyGeometryChanged: reason => scroll?.notifyGeometryChanged?.(reason),
       invalidateAnchorMetrics,
       compensateScroll(delta, reason) {

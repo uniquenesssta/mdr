@@ -721,15 +721,22 @@ export class SelectionSyncController {
   notifyPreviewMounted(reason = 'preview-mounted') {
     if (this.destroyed || this.isGeometryChanging()) return;
     this.feedbackGuard.advanceRevision();
-    this.highlightSession.restore();
     // A mount notification is an internal continuation of the Editor request,
     // not a new Preview selection competing with it.
     if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true }) || this.editorIntent?.scopePending || this.editorPointerActive) return;
     const editorSelection = this.editorSelectionReader.read();
-    if (!editorSelection || editorSelection.isCollapsed) return;
+    if (!editorSelection || editorSelection.isCollapsed) { this.highlightSession.restore(); return; }
     this.stats.previewRefreshes += 1;
     const shouldRealign = this.shouldRealignEditorSelection();
     this.scheduleEditor(shouldRealign, reason, { force: true, frames: 2, extendAlignment: false });
+  }
+
+  notifyPreviewMeasured(reason = 'virtual-preview-measured') {
+    // Size measurements do not replace DOM nodes. Live ranges remain valid;
+    // only an unfinished reveal needs another geometry check.
+    if (this.destroyed || this.isGeometryChanging() || this.editorPointerActive || this.editorIntent?.scopePending
+      || !this.shouldRealignEditorSelection()) return;
+    this.scheduleEditor(true, reason, { force: true, frames: 2, extendAlignment: false });
   }
 
   notifyPreviewReplaced(reason = 'preview-replaced') {

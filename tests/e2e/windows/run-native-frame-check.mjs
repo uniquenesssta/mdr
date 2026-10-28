@@ -13,6 +13,8 @@ import { runCrossChapterSelectionCheck } from '../lib/selection-stability-checks
 import { runMinimalHeaderChecks, inspectMinimalHeader } from '../lib/minimal-header-checks.mjs';
 import { runDiagramSelectionChecks } from '../lib/diagram-selection-checks.mjs';
 import { runSidebarResizeSelectionChecks } from '../lib/sidebar-resize-selection-checks.mjs';
+import { runLargeDocumentInteractionChecks } from '../lib/large-document-interaction-checks.mjs';
+import { runOutlineWindowChecks } from '../lib/outline-window-checks.mjs';
 
 const binary = resolve(process.argv[2]);
 const artifacts = resolve(process.argv[3]);
@@ -53,6 +55,12 @@ try {
     : (process.argv.find(arg=>arg.startsWith('--url='))?.slice(6)||'http://127.0.0.1:16663');
   await page.navigate(appOrigin+'/?e2e=1');
   await page.waitFor(()=>document.documentElement.classList.contains('app-ready'), { timeoutMs:20000 });
+  if (process.argv.includes('--large-document-interactions')) {
+    const sourcePath=process.argv.find(arg=>arg.startsWith('--resize-source='))?.slice(16);
+    assert.ok(sourcePath,'Provide the original read-only large-document path.');
+    await runLargeDocumentInteractionChecks({page,app:createApplicationDriver(page),artifacts,source:await readFile(sourcePath,'utf8'),enforce:process.argv.includes('--check-performance')});
+    if (process.argv.includes('--outline-window')) await runOutlineWindowChecks({page,app:createApplicationDriver(page),artifacts});
+  }
   if (process.argv.includes('--empty-document-modes')) {
     const modeState = () => page.evaluate(`({mode:document.querySelector('.writing-modes button.active').dataset.mode,
       locked:[...document.querySelectorAll('.writing-modes button')].every(button=>button.disabled),
