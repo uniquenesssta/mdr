@@ -131,6 +131,40 @@ test('Atomic 6.11 delayed close respects hover and focus ownership then closes o
   positioner.destroy();
 });
 
+test('hovering a sibling switches immediately without waiting for the previous branch close timer', () => {
+  const clock = runtime(), f = fixture();
+  const positioner = createSubmenuPositioner({ root: f.root, runtime: clock });
+  positioner.start();
+  f.rightOwner.emit('pointerenter'); clock.flushFrames();
+  f.rightOwner.emit('pointerleave');
+  f.leftOwner.emit('pointerenter');
+  assert.equal(f.rightOwner.classList.contains('is-submenu-open'), false);
+  assert.equal(f.leftOwner.classList.contains('is-submenu-open'), true);
+  assert.equal(clock.pendingTimers(), 0);
+  positioner.destroy();
+});
+
+test('nested submenu entry preserves its ancestor and peer switching closes the entire old branch', () => {
+  const clock = runtime(), f = fixture();
+  const nestedOwner = element({ classes: ['menu-submenu'] });
+  const nestedList = element({ classes: ['menu-submenu-list'] });
+  f.leftList.append(nestedOwner); nestedOwner.append(nestedList);
+  f.root.querySelectorAll = () => [f.leftOwner, nestedOwner, f.rightOwner];
+  const positioner = createSubmenuPositioner({ root: f.root, runtime: clock });
+  positioner.start();
+  f.leftOwner.emit('pointerenter');
+  nestedOwner.emit('pointerenter');
+  clock.flushFrames();
+  assert.equal(f.leftOwner.classList.contains('is-submenu-open'), true);
+  assert.equal(nestedOwner.classList.contains('is-submenu-open'), true);
+  f.rightOwner.emit('pointerenter');
+  assert.equal(f.leftOwner.classList.contains('is-submenu-open'), false);
+  assert.equal(nestedOwner.classList.contains('is-submenu-open'), false);
+  assert.equal(f.rightOwner.classList.contains('is-submenu-open'), true);
+  positioner.destroy();
+  assert.equal(nestedOwner.listenerCount(), 0);
+});
+
 test('Atomic 6.11 closeAll and destroy cancel pending work, reset styles and remove every listener', () => {
   const clock = runtime();
   const f = fixture();

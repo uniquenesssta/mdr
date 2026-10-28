@@ -26,6 +26,8 @@ let referenceDefinitions = '';
 let sentReferenceDefinitions = '';
 const headingByBlockId = new Map();
 const model = new IncrementalPreviewModel(marked.lexer.bind(marked));
+let indexedResult = null;
+let blockById = new Map();
 
 function applyTransaction(text, transaction) {
   const changes = Array.isArray(transaction?.changes) ? transaction.changes : [];
@@ -235,8 +237,7 @@ function findFocusChapter(blocks, focusLine) {
   };
 }
 
-function renderBlocksByIds(blocks, ids, definitions, forcePayload = false) {
-  const blockById = new Map(blocks.map(block => [block.id, block]));
+function renderBlocksByIds(ids, definitions, forcePayload = false) {
   const rendered = [];
   for (const id of ids || []) {
     const block = blockById.get(id);
@@ -261,19 +262,7 @@ function renderBlocksByIds(blocks, ids, definitions, forcePayload = false) {
   return rendered;
 }
 
-function renderPriorityBlocks(result, focusChapter, definitions) {
-  const requested = new Set();
-  const blocks = result.blocks || [];
-  if (result.incremental) {
-    let changedChars = 0;
-    for (const id of result.changedIds || []) {
-      const block = blocks.find(item => item.id === id);
-      if (!block) continue;
-      requested.add(id);
-      changedChars += block.raw.length;
-      if (requested.size >= CHAPTER_THRESHOLDS.priorityBlocks || changedChars >= CHAPTER_THRESHOLDS.priorityChars) break;
-    }
-  }
+function addChapterRequests(requested, blocks, focusChapter) {
   if (focusChapter) {
     const chapterStart = Math.max(0, focusChapter.startIndex);
     const chapterEnd = Math.min(blocks.length, focusChapter.endIndex);
@@ -292,18 +281,34 @@ function renderPriorityBlocks(result, focusChapter, definitions) {
     }
   }
 
-  const currentIds = new Set(blocks.map(block => block.id));
+}
+
+function renderPriorityBlocks(result, focusChapter, definitions) {
+  const requested = new Set();
+  if (result.incremental) {
+    let changedChars = 0;
+    for (const id of result.changedIds || []) {
+      const block = blockById.get(id);
+      if (!block) continue;
+      requested.add(id);
+      changedChars += block.raw.length;
+      if (requested.size >= CHAPTER_THRESHOLDS.priorityBlocks || changedChars >= CHAPTER_THRESHOLDS.priorityChars) break;
+    }
+  }
+  addChapterRequests(requested, result.blocks || [], focusChapter);
   for (const id of htmlCache.keys()) {
-    if (!currentIds.has(id)) {
+    if (!blockById.has(id)) {
       htmlCache.delete(id);
       sentHtmlRaw.delete(id);
     }
   }
 
-  return renderBlocksByIds(blocks, requested, definitions, false);
+  return renderBlocksByIds(requested, definitions, false);
 }
 
 function serializeResult(result, focusLine, indexOnly = false) {
+  indexedResult = result;
+  blockById = new Map((result.blocks || []).map(block => [block.id, block]));
   const blockPayload = createBlockPayload(result);
   const headingPayload = updateHeadingIndex(blockPayload);
   const focusChapter = indexOnly ? null : findFocusChapter(result.blocks || [], focusLine);
@@ -346,6 +351,23 @@ function serializeResult(result, focusLine, indexOnly = false) {
     referenceDefinitionsChanged,
     wholeDocument: false,
     wholeHtml: ''
+  };
+}
+
+// Same-version navigation uses the existing model and index. It neither scans
+// all blocks to manufacture an empty patch nor retransmits their metadata.
+function serializeFocusResult(focusLine, indexOnly) {
+  const focusChapter = indexOnly ? null : findFocusChapter(previousBlocks, focusLine);
+  const requested = new Set();
+  if (!indexOnly) addChapterRequests(requested, previousBlocks, focusChapter);
+  return {
+    incremental: true, reason: 'unchanged', parsedChars: 0,
+    changedIds: [], removedIds: [], fullBlocks: null, blockPatch: null,
+    headings: null, headingPatch: null, statistics: null,
+    renderedBlocks: renderBlocksByIds(requested, referenceDefinitions),
+    focusChapter, tokens: [], globalSyntax: Boolean(indexedResult.wholeDocument),
+    referenceDefinitions: null, referenceDefinitionsChanged: false,
+    wholeDocument: false, wholeHtml: ''
   };
 }
 
@@ -398,11 +420,18 @@ export function startPreviewWorker(scope) {
       if (Number(message.version) !== version) {
         throw new Error('Preview worker prewarm version mismatch');
       }
-      const renderedBlocks = renderBlocksByIds(previousBlocks, message.ids || [], referenceDefinitions, true);
+      const renderedBlocks = renderBlocksByIds(message.ids || [], referenceDefinitions, true);
       scope.postMessage(createPreviewWorkerAck(message, {
         durationMs: performance.now() - started,
         renderedBlocks
       }));
+      return;
+    }
+
+    if (message.type === PREVIEW_WORKER_MESSAGE_TYPES.FOCUS) {
+      if (!indexedResult || Number(message.version) !== version) throw new Error('Preview worker focus version mismatch');
+      const result = serializeFocusResult(message.focusLine, Boolean(message.indexOnly));
+      scope.postMessage(createPreviewWorkerAck(message, { result, durationMs: performance.now() - started }));
       return;
     }
 
@@ -418,6 +447,8 @@ export function startPreviewWorker(scope) {
       referenceDefinitions = '';
       sentReferenceDefinitions = '';
       headingByBlockId.clear();
+      indexedResult = null;
+      blockById.clear();
     } else if (message.type === PREVIEW_WORKER_MESSAGE_TYPES.TRANSACTIONS) {
       for (const transaction of message.transactions) {
         source = applyTransaction(source, transaction);
@@ -427,8 +458,7 @@ export function startPreviewWorker(scope) {
         throw new Error('Preview worker document version mismatch');
       }
     } else if (
-      message.type === PREVIEW_WORKER_MESSAGE_TYPES.FOCUS
-      || message.type === PREVIEW_WORKER_MESSAGE_TYPES.CANCEL
+      message.type === PREVIEW_WORKER_MESSAGE_TYPES.CANCEL
     ) {
       throw new Error(`Preview worker ${message.type} handling belongs to a later Atomic task`);
     } else {
@@ -436,9 +466,10 @@ export function startPreviewWorker(scope) {
     }
 
     const result = model.update(source, { forceFull: Boolean(message.forceFull) });
+    const serialized = serializeResult(result, message.focusLine, Boolean(message.indexOnly));
     scope.postMessage(createPreviewWorkerAck(message, {
       durationMs: performance.now() - started,
-      result: serializeResult(result, message.focusLine, Boolean(message.indexOnly))
+      result: serialized
     }));
   } catch (error) {
     if (message && REQUEST_TYPES.has(message.type)) {

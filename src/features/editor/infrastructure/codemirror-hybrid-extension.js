@@ -48,6 +48,7 @@ import {
   createCodeMirrorSourceEditorPort,
   revealHybridSourceRangeEffect
 } from './codemirror-source-editor-port.js';
+import { readTargetLine } from './pointer-selection/caret-boundary-reader.js';
 
 const setHybridBlockDecorations = StateEffect.define();
 
@@ -221,7 +222,11 @@ function createBlockDecoration(view, descriptor, presentationRange) {
   else if (descriptor.type === 'math') widget = new MathBlockWidget(descriptor);
   else if (descriptor.type === 'html') widget = new HtmlBlockWidget(descriptor);
   if (!widget) return null;
-  return Decoration.replace({ widget, block: true, inclusive: false }).range(
+  // A block covers its source endpoints. Leaving both sides open creates
+  // editable-looking empty rows that still belong to the hidden block.
+  // At EOF retain an append target; the pointer extension creates a real line.
+  return Decoration.replace({ widget, block: true, inclusiveStart: true,
+    inclusiveEnd: presentationRange.to < view.state.doc.length }).range(
     presentationRange.from,
     presentationRange.to
   );
@@ -231,7 +236,12 @@ const decorationCoordinator = createHybridDecorationCoordinator({
   getSyntaxTree: view => syntaxTree(view.state),
   getEditableRanges,
   getActiveSourceRange: view => getHybridSourceEditor(view)?.getActiveRange() || null,
-  collectHybridBlocks,
+  collectHybridBlocks: (view, tree, ranges) => collectHybridBlocks({
+    state: view.state,
+    // A viewport entirely covered by block widgets has no visible text range.
+    // Keep discovering its blocks from the bounded CodeMirror viewport.
+    visibleRanges: view.visibleRanges.length ? view.visibleRanges : [view.viewport]
+  }, tree, ranges),
   buildInlinePresentation,
   createBlockDecoration,
   createDecorationSet: ranges => Decoration.set(ranges, true),
@@ -303,6 +313,11 @@ const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
       reportDiagnostic: reportHybridDiagnostic,
       getViewDiagnosticDetails
     });
+    // The application may construct the view before attaching its host. The
+    // first publication is then deliberately deferred by the controller.
+    view.requestMeasure({ key: this, read: () => queueMicrotask(() => {
+      if (!view.destroyed) this.controller.refreshPresentation();
+    }) });
   }
 
   update(update) {
@@ -314,6 +329,18 @@ const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
   }
 }, {
   decorations: value => value.controller.getDecorations(),
+  eventObservers: {
+    compositionstart(_event, view) {
+      queueMicrotask(() => {
+        if (!view.destroyed) view.plugin(hybridMarkdownPlugin)?.controller?.refreshPresentation();
+      });
+    },
+    compositionend(_event, view) {
+      queueMicrotask(() => {
+        if (!view.destroyed) view.plugin(hybridMarkdownPlugin)?.controller?.refreshPresentation();
+      });
+    }
+  },
   eventHandlers: {
     mousedown(event, view) {
       if (event.button !== 0) return false;
@@ -325,11 +352,14 @@ const hybridMarkdownPlugin = ViewPlugin.fromClass(class {
         event.stopPropagation();
         return true;
       }
+      const sourceRange = getHybridSourceEditor(view)?.getActiveRange();
+      const endLine = sourceRange?.to === view.state.doc.length ? readTargetLine(view, event) : null;
       return view.plugin(hybridMarkdownPlugin)?.controller?.closeSourceFromPointer({
         button: event.button,
         x: event.clientX,
         y: event.clientY,
         targetIsEditorLine: event.target instanceof Element && Boolean(event.target.closest('.cm-line')),
+        afterSourceEnd: Boolean(endLine && endLine.line.number === view.state.doc.lines && event.clientY > endLine.rect.bottom),
         preventDefault: () => event.preventDefault(),
         stopPropagation: () => event.stopPropagation()
       }) || false;

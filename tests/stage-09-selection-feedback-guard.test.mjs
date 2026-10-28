@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createSelectionFeedbackGuard } from '../src/features/sync/index.js';
+import { createSelectionFeedbackGuard, createSelectionRetryScheduler } from '../src/features/sync/index.js';
 import { createFinalSelectionController, createFrames } from './helpers/stage-09-selection-controller-harness.mjs';
 
 function createTimers() {
@@ -134,3 +134,90 @@ test('R9-08 final SelectionSyncController exposes applyingSide/previewRevision f
   controller.destroy();
   guard.destroy();
 });
+
+test('preview-owned wheel geometry never schedules an old editor selection to scroll the preview', () => {
+  const { controller, frames } = createFinalSelectionController();
+  controller.scrollController.getState = () => ({ sourceSide: 'preview' });
+  controller.notifyEditorGeometry();
+  assert.equal(frames.activeCount(), 0);
+  controller.destroy();
+});
+
+test('a new editor wheel also supersedes the earlier selection alignment and pending editor retries', () => {
+  let mounts = 0;
+  const { controller } = createFinalSelectionController({ getPreviewVirtual: () => ({ active: true,
+    containsLineRange: () => true, hasLineRangeMounted: () => false, ensureLineRangeVisible() { mounts += 1; } }) });
+  controller.editorAlignmentUntil = 1000;
+  controller.scrollController.getState = () => ({ sourceSide: 'editor', sourceReason: 'wheel' });
+  assert.equal(controller.shouldRealignEditorSelection(), false);
+  assert.equal(controller.runEditor(true, 'editor-pointerup-retry', true, 1).status, 'offscreen');
+  assert.equal(mounts, 0);
+  controller.destroy();
+});
+
+function createChapterSelection() {
+  const frames = createFrames(), timers = createTimers();
+  const guard = createSelectionFeedbackGuard({ setTimer: callback => timers.set(callback), clearTimer: id => timers.clear(id) });
+  const retry = createSelectionRetryScheduler({ requestFrame: callback => frames.request(callback), cancelFrame: id => frames.cancel(id) });
+  const calls = [], scroll = { sourceSide: 'editor', sourceReason: 'pointer' };
+  let mounted = false, finish;
+  const ready = new Promise(resolve => { finish = resolve; });
+  const range = { getClientRects: () => [{ top: 30, bottom: 50, left: 0, right: 20, width: 20, height: 20 }] };
+  const h = createFinalSelectionController({ frames, feedbackGuard: guard, retryScheduler: retry,
+    highlightSession: { canPresent: () => true, show() { calls.push('highlight'); }, restore() {}, clear() {} },
+    selectionMapping: { createPreviewRangesForSourceSelection: () => ({ ranges: [range], sourceCharacters: 4, mappedCharacters: 4, projectionCoverage: 1 }), mapPreviewDomPointToSource() {} },
+    getPreviewVirtual: () => ({ active: true, containsLineRange: () => mounted, hasLineRangeMounted: () => mounted, ensureLineRangeVisible: () => ({}) }),
+    focusPreviewLine(line, options) { calls.push(['focus', line, options.scroll]); return ready; }
+  });
+  h.previewMapper.getAnchors = () => [{ dataset: { sourceStartIndex: '0', sourceEndIndex: '10' } }];
+  h.controller.scrollController.getState = () => scroll;
+  h.controller.scrollController.scrollTo = () => { calls.push('scroll'); };
+  return { ...h, frames, timers, guard, calls, scroll, retry,
+    async mount() { mounted = true; h.controller.notifyPreviewMounted('chapter-ready'); finish(true); await Promise.resolve(); await Promise.resolve(); },
+    destroy() { h.controller.destroy(); guard.destroy(); retry.destroy(); }
+  };
+}
+
+test('one selection awaits chapter readiness and completes exact alignment during its own feedback settlement', async () => {
+  const h = createChapterSelection();
+  try {
+    assert.equal(h.controller.runEditor(true, 'editor-pointerup', true, 0).status, 'pending');
+    h.frames.flushAll();
+    await Promise.resolve();
+    assert.equal(h.calls.filter(call => Array.isArray(call)).length, 1, 'one chapter request must replace frame polling');
+    assert.deepEqual(h.calls[0], ['focus', 1, false], 'scope preparation must leave scrolling to the current exact selection');
+    await h.mount();
+    h.frames.flushAll();
+    assert.equal(h.calls.filter(call => call === 'highlight').length, 1);
+    assert.equal(h.calls.filter(call => call === 'scroll').length, 1, 'no second user gesture is required');
+  } finally { h.destroy(); }
+});
+
+test('wrapped source selections align to the actual character row instead of the paragraph height midpoint', async () => {
+  const h = createChapterSelection();
+  try {
+    await h.mount();
+    h.editorApi.getPositionCoordinates = () => ({ top: 90, bottom: 110 });
+    h.editorApi.getScrollViewportRect = () => ({ top: 0, bottom: 200 });
+    const result = h.controller.syncEditorToPreview(false, 'wrapped-source');
+    assert.equal(result.status, 'exact');
+    assert.equal(result.sourceViewportRatio, 0.5, 'line-block midpoint would incorrectly return 0.1');
+  } finally { h.destroy(); }
+});
+
+for (const change of ['wheel', 'pointer', 'selection', 'document', 'destroy']) {
+  test(`late chapter readiness cannot align after a newer ${change}`, async () => {
+    const h = createChapterSelection();
+    try {
+      h.controller.runEditor(true, 'editor-pointerup', true, 0);
+      if (change === 'wheel') h.scroll.sourceReason = 'wheel';
+      if (change === 'pointer') { h.controller.start(); h.editor.emit('pointerdown'); }
+      if (change === 'selection') h.controller.editorSelectionReader.read = () => ({ from: 6, to: 9, isCollapsed: false });
+      if (change === 'document') h.documentModel.generation = 1;
+      if (change === 'destroy') h.controller.destroy();
+      await h.mount(); h.frames.flushAll(); h.timers.flushAll(); h.frames.flushAll();
+      assert.equal(h.calls.includes('scroll'), false);
+      assert.equal(h.calls.includes('highlight'), false);
+    } finally { h.destroy(); }
+  });
+}

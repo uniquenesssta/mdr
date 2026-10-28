@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "stage": "R17",
+  "status": "in-progress; release-blocked-by-missing-required-evidence",
+  "accepted": false,
+  "candidateCommit": null,
+  "groups": [
+    {
+      "id": "R17-G1",
+      "name": "最终代码检查",
+      "originalTasks": [
+        "17.1",
+        "17.2",
+        "17.3",
+        "17.4",
+        "17.5",
+        "17.6",
+        "17.7",
+        "17.8",
+        "17.9",
+        "17.10"
+      ],
+      "status": "safe-local-checks-passed; native-and-current-RustSec-pending",
+      "accepted": false,
+      "localNode": {
+        "tests": 2913,
+        "passed": 2913,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "productionBrowser": {
+        "passed": 96,
+        "total": 96,
+        "reused": true,
+        "build": {
+          "accepted": true,
+          "sourceSha256": "d0030f5288c393dbd77d6272247959f6ddbc9507b698cfd4d1509d1fd1d0d3d0",
+          "sourceFiles": 473,
+          "outputFiles": 136
+        }
+      },
+      "rust": {
+        "toolchain": "1.88.0",
+        "checkAllTargets": "passed",
+        "clippyAllTargets": "passed",
+        "ciFormatFiles": 45,
+        "ciFormat": "passed",
+        "tests": "not-run"
+      },
+      "npmAudit": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    },
+    {
+      "id": "R17-G2",
+      "name": "Windows 成品验收",
+      "originalTasks": [
+        "17.11",
+        "17.12",
+        "17.13"
+      ],
+      "status": "not-run",
+      "accepted": false
+    },
+    {
+      "id": "R17-G3",
+      "name": "数据与稳定性验收",
+      "originalTasks": [
+        "17.14",
+        "17.15",
+        "17.16"
+      ],
+      "status": "not-run-on-final-native-candidate",
+      "accepted": false
+    }
+  ],
+  "reportTask": "17.17",
+  "ciPolling": "Stop after push; user reports the result or explicitly requests a check.",
+  "updatedAtUtc": "2026-10-25T09:54:28.905Z",
+  "capturedHead": "ff21aade691167271ee493ae83f5aafed8c9b8bf",
+  "productSourceSha256": "d0030f5288c393dbd77d6272247959f6ddbc9507b698cfd4d1509d1fd1d0d3d0",
+  "workspaceAudit": "docs/audit/r17-01-workspace-reaudit.json",
+  "blockers": [
+    {
+      "task": "17.8",
+      "status": "not-run",
+      "reason": "Native tests contain recursive directory cleanup; a policy-compliant harness is required before execution.",
+      "paths": [
+        "src-tauri/src/document_store/chunks/upload_session.rs",
+        "src-tauri/src/document_store/journal/append.rs",
+        "src-tauri/src/document_store/journal/recovery.rs",
+        "src-tauri/src/document_store/repository.rs",
+        "src-tauri/src/document_store/snapshot/loader.rs",
+        "src-tauri/src/document_store/snapshot/writer.rs",
+        "src-tauri/src/document_store/store.rs",
+        "src-tauri/src/local_file/directory_tree.rs",
+        "src-tauri/src/local_file/path_policy.rs",
+        "src-tauri/tests/external_link/opener.rs",
+        "src-tauri/tests/local_file/atomic_writer.rs",
+        "src-tauri/tests/local_file/commands.rs",
+        "src-tauri/tests/local_file/legacy.rs",
+        "src-tauri/tests/local_file/stage_12.rs",
+        "src-tauri/tests/performance_log/batch_contract.rs",
+        "src-tauri/tests/performance_log/lifecycle_contract.rs",
+        "src-tauri/tests/performance_log/writer_contract.rs",
+        "src-tauri/tests/support/document_store_command_contracts.rs"
+      ]
+    },
+    {
+      "task": "17.10",
+      "status": "not-run",
+      "reason": "Final candidate commit and full Tauri installer/bundle evidence not yet produced; browser build is not native packaging."
+    },
+    {
+      "task": "A10",
+      "status": "not-run-current-RustSec",
+      "reason": "Existing cumulative RustSec runner pins the 2026-09-30 database. A current advisory scan/disposition is still required; npm zero advisories cannot replace it."
+    },
+    {
+      "task": "17.11-17.16",
+      "status": "not-run-final-native-candidate",
+      "reason": "Installation/upgrade, associations, real native gestures, data recovery, original large-file performance and resource matrix must use the same actual candidate."
+    }
+  ],
+  "supplementaryFormatScan": {
+    "status": "failed",
+    "scope": "Additional full-tree formatting sweep; existing CI formatter is 45 files with max_width=120 and passed unchanged.",
+    "action": "Record existing differences; do not apply unrelated whole-tree formatting."
+  }
+}

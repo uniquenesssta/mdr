@@ -206,12 +206,22 @@ export function createPreviewRenderEngine(options = {}) {
     });
   }
 
-  async function update() {
+  async function update({ line: focusLine, isCurrent: requestIsCurrent = () => true } = {}) {
     assertActive();
+    if (!requestIsCurrent()) return;
     scheduler.cancel('input');
     const previousEnhancements = enhancementCoordinator.getStats();
     const interruptedEnhancements = previousEnhancements.pending > 0 || previousEnhancements.running;
+    const previous = state.snapshot;
+    const settledStatus = previous.status !== 'rendering' ? previous.status
+      : previous.lastStableResult ? (previous.error ? 'degraded' : 'stable') : (previous.error ? 'error' : 'idle');
     const renderVersion = state.beginRender();
+    const isSuperseded = () => {
+      if (destroyed || !state.isCurrentVersion(renderVersion)) return true;
+      if (requestIsCurrent()) return false;
+      state.invalidate({ status: settledStatus, clearStable: false, clearError: false });
+      return true;
+    };
     enhancementCoordinator.begin(renderVersion);
     let resolvedMode = state.snapshot.mode;
     let resolvedScopeKey = state.snapshot.lastStableResult?.scopeKey || resolvedMode;
@@ -244,8 +254,8 @@ export function createPreviewRenderEngine(options = {}) {
 
     try {
       if (useWorker) {
-        modelResult = await getWorkerClient().update(documentModel, getSourceText, forceFullRebuild, { indexOnly: hybrid });
-        if (modelResult?.cancelled || !state.isCurrentVersion(renderVersion)) return;
+        modelResult = await getWorkerClient().update(documentModel, getSourceText, forceFullRebuild, { indexOnly: hybrid, focusLine });
+        if (modelResult?.cancelled || isSuperseded()) return;
         workerDocumentId = renderingDocumentId;
         workerDurationMs = modelResult.workerDurationMs || 0;
         blockTokens = modelResult.tokens || [];
@@ -288,7 +298,8 @@ export function createPreviewRenderEngine(options = {}) {
           previewPerformanceMode: performanceMode(),
           previousMode: previousState.mode,
           previousScopeKey,
-          forceFullRebuild
+          forceFullRebuild,
+          viewportHeight: root.clientHeight
         });
         resolvedMode = renderPlan.mode;
         resolvedScopeKey = renderPlan.scopeKey;
@@ -366,6 +377,7 @@ export function createPreviewRenderEngine(options = {}) {
         });
       }
     } catch (error) {
+      if (isSuperseded()) return;
       console.warn('Incremental preview fallback:', error);
       diagnose(hybrid ? 'hybrid.preview-index-failure' : 'preview.pipeline-failure', {
         category: hybrid ? 'editor.hybrid' : 'render.pipeline',
@@ -382,7 +394,7 @@ export function createPreviewRenderEngine(options = {}) {
       if (workerFailed && state.snapshot.error?.source !== 'worker') show('后台预览暂时不可用，已启用安全降级');
     }
 
-    if (!state.isCurrentVersion(renderVersion)) return;
+    if (isSuperseded()) return;
 
     if (hybrid) {
       enhancementCoordinator.cancel();
@@ -462,7 +474,12 @@ export function createPreviewRenderEngine(options = {}) {
 
     const retryEnhancements = patchResult.mode === 'unchanged-enhancement-retry';
     if (!patchResult.virtualized || retryEnhancements) {
-      enhanceNodes(patchResult.changedNodes, retryEnhancements ? [] : patchResult.changedNodes);
+      // Any DOM patch can reuse nodes whose old jobs were cancelled by begin(),
+      // including a scope/layout transition that does not take the stable-reuse path.
+      const enhancementRoots = interruptedEnhancements && !patchResult.virtualized
+        ? [...new Set([...(patchResult.changedNodes || []), ...Array.from(patchResult.body.children || [])])]
+        : patchResult.changedNodes;
+      enhanceNodes(enhancementRoots, retryEnhancements ? [] : patchResult.changedNodes);
       if (!patchResult.virtualized) selectionController?.notifyPreviewReplaced?.('preview-dom-patch');
     }
     if (!skipEnhancements) {

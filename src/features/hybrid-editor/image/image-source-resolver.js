@@ -9,6 +9,7 @@ import {
   setHybridImageSourceCachePending,
   setHybridImageSourceCacheResolved
 } from './image-source-cache.js';
+import { isSafeDocumentUrl } from '../../../shared/security/document-html.js';
 
 let platformFiles = null;
 let localImageEnabled = false;
@@ -49,6 +50,7 @@ export async function resolveHybridImageSource(source) {
   if (!original) throw new Error('图片地址为空');
   if (/^(?:javascript|vbscript):/i.test(original)) throw new Error('不支持此图片地址');
   if (isDirectImageSource(original)) {
+    if (!isSafeDocumentUrl(original, true)) throw new Error('不支持此图片地址');
     return { url: original, kind: 'direct', displaySource: original };
   }
 

@@ -8,6 +8,7 @@ import { createVirtualEditor, createHybridMarkdownExtension, getHybridMarkdownSt
 import { createNativeDocumentStore, NativeDocumentStore } from '../src/features/persistence/index.js';
 
 const baseline = 'ac3fc3e82b8e4d1258ed38ab991be10686d06317';
+const migrationCommit = '3f22fd6b79e17d481d69ae2822c49268e1e0e993';
 const migrations = [
   ['src/editor/hybrid-markdown.js', 'src/features/editor/infrastructure/codemirror-hybrid-extension.js', 'const setHybridBlockDecorations'],
   ['src/editor/virtual-editor.js', 'src/features/editor/infrastructure/virtual-editor.js', 'function countNonWhitespace'],
@@ -36,11 +37,13 @@ function importIssues(path, source) {
 }
 
 for (const [old, current, marker] of migrations) {
-  test('R16-06 removes ' + old + ' and preserves its complete implementation at the current owner', async () => {
+  test('R16-06 removes ' + old + ' and preserves its complete implementation at the migration commit', async () => {
     await assert.rejects(access(new URL(old, root)), { code: 'ENOENT' });
+    await access(new URL(current, root));
     const previous = git(['show', baseline + ':' + old]);
-    const source = ['src/editor/hybrid-markdown.js','src/editor/virtual-editor.js','src/storage/native-document-store.js'].includes(old)
-      ? git(['show', '3f22fd6b79e17d481d69ae2822c49268e1e0e993:' + current]) : await read(current);
+    // This is the historical move proof. Current behavior is covered by the
+    // Editor/Hybrid port tests; authorized bug fixes must not rewrite this proof.
+    const source = git(['show', migrationCommit + ':' + current]);
     assert.equal(previous.split(marker).length, 2, old);
     assert.equal(source.split(marker).length, 2, current);
     assert.equal(source.slice(source.indexOf(marker)).trimEnd(), previous.slice(previous.indexOf(marker)), current + ': logic changed beyond imports/header');

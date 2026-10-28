@@ -145,6 +145,8 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                         | "downloadExportImage"
                         | "duplicateDocument"
                         | "editor.pointer-position-corrected"
+                        | "editor.pointer-line-check"
+                        | "editor.input-line-check"
                         | "exportFile"
                         | "exportHTML"
                         | "exportPDF"

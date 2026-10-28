@@ -44,7 +44,7 @@ test('R9-10 final SelectionSyncController delegates retry scheduling and owns no
 
 test('R9-10 retry orchestration remains limited to recoverable pending results after classic mapping removal', async () => {
   const controller = await read(controllerPath);
-  assert.match(controller, /if \(result\?\.status === 'pending'\)/);
+  assert.match(controller, /if \(result\?\.status === 'pending' && !this\.editorIntent\?\.scopePending\)/);
   const runEditorBlock = controller.slice(controller.indexOf('  runEditor('), controller.indexOf('  schedulePreview('));
   assert.match(runEditorBlock, /retryScheduler\.schedule/);
   assert.doesNotMatch(runEditorBlock, /mapping-failed/);

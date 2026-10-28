@@ -12,7 +12,8 @@ const attributes = 'alt checked class colspan datetime disabled height href id l
 export function isSafeDocumentUrl(value, image = false) {
   const text = String(value || '').trim();
   if (!text || /[\u0000-\u001f\u007f]/.test(text) || text.includes('\\')) return false;
-  if (image && /^data:image\/(?:png|jpeg|gif|webp|bmp|avif);base64,[a-z0-9+/=]+$/i.test(text)) return true;
+  // SVG is allowed only as a passive <img> resource, never as inline SVG or a navigation URL.
+  if (image && /^data:image\/(?:png|jpeg|gif|webp|bmp|avif|svg\+xml);base64,[a-z0-9+/=]+$/i.test(text)) return true;
   if (!image && text.startsWith('#')) return true;
   if (!/^[a-z][a-z0-9+.-]*:/i.test(text)) return image && !text.startsWith('//');
   try {
@@ -70,7 +71,7 @@ export function createDocumentHtmlFragment(source, documentRef = globalThis.docu
     ALLOWED_ATTR: attributes,
     // DOMPurify's default URI list omits the desktop asset and browser blob schemes.
     // The element-specific hook still validates every surviving href/src.
-    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|asset|blob):|data:image\/(?:png|jpeg|gif|webp|bmp|avif);base64,|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|asset|blob):|data:image\/(?:png|jpeg|gif|webp|bmp|avif|svg\+xml);base64,|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     ALLOW_DATA_ATTR: false,
     ALLOW_ARIA_ATTR: false,
     SANITIZE_NAMED_PROPS: true,

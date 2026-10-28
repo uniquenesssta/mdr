@@ -4,9 +4,10 @@ import test from 'node:test';
 import { createPreviewRenderEngine } from '../../../src/features/preview/pipeline/preview-render-engine.js';
 import { createPreviewEnhancementCoordinator } from '../../../src/features/preview/pipeline/preview-enhancement-coordinator.js';
 import { createMermaidRenderer } from '../../../src/features/preview/render/mermaid-renderer.js';
+import { createPreviewState } from '../../../src/features/preview/application/preview-state.js';
 
 function createHarness({ sourceLength = 32, workerFailure = false, stable = false, body = null,
-  scheduler: suppliedScheduler = null, enhancements = null, reuseAfterFirst = false } = {}) {
+  scheduler: suppliedScheduler = null, enhancements = null, reuseAfterFirst = false, workerUpdate = null, previewState = null } = {}) {
   const calls = [];
   const previewBody = body || { children: [{ id: 'rendered' }] };
   const documentBody = {
@@ -37,7 +38,7 @@ function createHarness({ sourceLength = 32, workerFailure = false, stable = fals
     error: null
   };
   let version = 0;
-  const state = {
+  const state = previewState || {
     snapshot,
     beginRender() { calls.push('state.beginRender'); return ++version; },
     isCurrentVersion(value) { return value === version; },
@@ -111,10 +112,11 @@ function createHarness({ sourceLength = 32, workerFailure = false, stable = fals
     const session = { snapshot: { initialized: false, syncedVersion: 7 } };
     return {
       session, documentSource: documentModel, blocks: modelResult.blocks,
-      async update() {
+      async update(...args) {
         calls.push('worker.update');
         if (workerFailure) throw new Error('worker failed');
         session.snapshot.initialized = true;
+        if (workerUpdate) return workerUpdate(...args);
         return modelResult;
       },
       destroy() { workerDestroyCalls += 1; calls.push('worker.destroy'); }
@@ -158,6 +160,7 @@ function createHarness({ sourceLength = 32, workerFailure = false, stable = fals
 
   return {
     engine,
+    renderer,
     documentModel, documentSession,
     calls,
     previewBody,
@@ -167,6 +170,56 @@ function createHarness({ sourceLength = 32, workerFailure = false, stable = fals
     get renderWholeCalls() { return renderWholeCalls; }
   };
 }
+
+test('a superseded selection scope cannot publish delayed Worker DOM or stable metadata', async () => {
+  let finish, requested, current = true;
+  const h = createHarness({ sourceLength: 200000, workerUpdate(...args) {
+    requested = args[3]; return new Promise(resolve => { finish = resolve; });
+  } });
+  const pending = h.engine.update({ line: 47356, isCurrent: () => current });
+  assert.equal(requested.focusLine, 47356);
+  current = false; finish({}); await pending;
+  assert.equal(h.calls.includes('renderer.patchBlocks'), false);
+  assert.equal(h.calls.some(call => Array.isArray(call) && call[0] === 'state.stable'), false);
+  assert.equal(h.renderWholeCalls, 0);
+  h.engine.destroy();
+});
+
+for (const status of ['stable', 'degraded']) test(`cancelled scope work restores the previous ${status} Preview state instead of remaining rendering`, async () => {
+  const state = createPreviewState();
+  state.commitStable(state.beginRender(), { mode: 'full', result: {
+    scopeKey: 'full', renderMode: 'dom-keyed', sourceLength: 200000, blockCount: 1, mountedBlocks: 1, documentVersion: 7
+  } });
+  if (status === 'degraded') state.commitDegraded(state.snapshot.version, { mode: 'full', error: { name: 'Error', message: 'existing failure', source: 'worker' } });
+  const previous = state.snapshot.lastStableResult;
+  const previousError = state.snapshot.error;
+  let finish, current = true;
+  const h = createHarness({ sourceLength: 200000, previewState: state,
+    workerUpdate: () => new Promise(resolve => { finish = resolve; }) });
+  const pending = h.engine.update({ line: 47356, isCurrent: () => current });
+  assert.equal(state.snapshot.status, 'rendering');
+  current = false; finish({}); await pending;
+  assert.equal(state.snapshot.status, status);
+  assert.deepEqual(state.snapshot.lastStableResult, previous);
+  assert.deepEqual(state.snapshot.error, previousError);
+  assert.equal(h.calls.includes('renderer.patchBlocks'), false);
+  h.engine.destroy(); state.destroy();
+});
+
+test('an incremental DOM patch requeues reused roots when its previous enhancement generation was interrupted', async () => {
+  const root = { id: 'pending-math' }, queues = [];
+  let pending = 0;
+  const enhancements = {
+    getStats: () => ({ pending }), begin() { pending = 0; }, setPriorityRange() {}, cancel() {},
+    enqueue(nodes) { queues.push([...nodes]); pending += nodes.length; }, schedulePostprocess() {}
+  };
+  const h = createHarness({ body: { children: [root] }, enhancements });
+  await h.engine.update();
+  h.renderer.patchBlocks = () => ({ body: h.previewBody, changedNodes: [], reused: 1, virtualized: false });
+  await h.engine.update();
+  assert.deepEqual(queues, [[root], [root]], 'Cancelling queued work must not leave reused math and diagram nodes permanently raw');
+  h.engine.destroy();
+});
 
 test('Atomic 7.14 RenderEngine keeps small-document incremental rendering on the canonical main-thread path', async () => {
   const harness = createHarness({ sourceLength: 32 });

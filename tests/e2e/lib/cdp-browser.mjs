@@ -1,5 +1,5 @@
 import { accessSync, constants } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { delimiter, extname, isAbsolute, join, resolve } from 'node:path';
@@ -461,21 +461,6 @@ export class CdpPage {
   }
 }
 
-async function removeProfileDirectory(path, attempts = 8) {
-  let lastError = null;
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
-    try {
-      await rm(path, { recursive: true, force: true });
-      return;
-    } catch (error) {
-      lastError = error;
-      if (!['ENOTEMPTY', 'EBUSY', 'EPERM'].includes(error?.code) || attempt >= attempts - 1) throw error;
-      await new Promise(resolvePromise => setTimeout(resolvePromise, 80 * (attempt + 1)));
-    }
-  }
-  if (lastError) throw lastError;
-}
-
 // taskkill can report a child-termination race even after every reported target exited.
 // Accept that result only after probing every failed PID and the owned root; unknown errors fail.
 export async function confirmTaskkillExit(error, rootPid, {
@@ -593,12 +578,13 @@ async function launchChromiumOnce(options) {
     const page = await new CdpPage(connection).initialize();
     return {
       executable,
+      profileDirectory: profileDir,
       process: processHandle,
       page,
       async close() {
         connection.close();
         await stopChromium(processHandle);
-        await removeProfileDirectory(profileDir);
+        // Retain the owned profile; repository policy prohibits recursive deletion.
       },
       get stderr() { return stderr; }
     };
@@ -611,7 +597,7 @@ async function launchChromiumOnce(options) {
       spawnError: startupError?.message, stdout, stderr });
     const cleanupErrors = [];
     try { await stopChromium(processHandle); } catch (cleanupError) { cleanupErrors.push(cleanupError.message); }
-    try { await removeProfileDirectory(profileDir); } catch (cleanupError) { cleanupErrors.push(cleanupError.message); }
+    // Failed-start profiles are retained as well, including their diagnostics.
     const failure = new Error(`${error.message}\nChromium startup: ${diagnostics}`
       + (cleanupErrors.length ? `\nCleanup: ${cleanupErrors.join('; ')}` : ''), { cause: error });
     if (refusedStartup && cleanupErrors.length === 0) failure.code = 'CDP_STARTUP_REFUSED_CLEANED';

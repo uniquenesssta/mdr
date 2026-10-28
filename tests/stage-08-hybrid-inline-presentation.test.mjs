@@ -14,6 +14,12 @@ import {
 } from '../src/features/hybrid-editor/presentation/html-inline-presentation.js';
 import { applyFallbackInlinePresentation } from '../src/features/hybrid-editor/presentation/inline-format-presentation.js';
 import { createInlinePresentationCoordinator } from '../src/features/hybrid-editor/presentation/inline-presentation-coordinator.js';
+import { EditorState } from '@codemirror/state';
+import { syntaxTree } from '@codemirror/language';
+import { markdown } from '@codemirror/lang-markdown';
+import { Decoration as RealDecoration, WidgetType as RealWidgetType } from '@codemirror/view';
+import { marked } from 'marked';
+import * as model from '../src/model-kernel/index.js';
 
 const Decoration = {
   replace(spec = {}) { return { kind: 'replace', spec, range: (from, to) => ({ kind: 'replace', spec, from, to }) }; },
@@ -22,6 +28,48 @@ const Decoration = {
 };
 
 class WidgetType {}
+
+function sourceLineHighlights(source, anchor, head = anchor) {
+  const state = EditorState.create({ doc: source, selection: { anchor, head }, extensions: [markdown()] });
+  const view = { state, hasFocus: true, visibleRanges: [{ from: 0, to: source.length }] };
+  const build = createInlinePresentationCoordinator({
+    Decoration: RealDecoration, WidgetType: RealWidgetType, lexInline: text => marked.lexer(text),
+    renderFormula: () => { throw new Error('Unexpected math fixture'); },
+    ...Object.fromEntries(['collectInlineMathRanges', 'collectVisibleLines', 'intersectsRanges',
+      'intersectsRevealRanges', 'overlapsRanges', 'shouldDecorateSourceActiveLine'].map(name => [name, model[name]]))
+  });
+  const tree = syntaxTree(state);
+  return build(view, tree, model.getEditableRanges(view, tree), []).ranges
+    .filter(range => range.value.spec.attributes?.class?.includes('cm-hybrid-source-active'))
+    .map(range => state.doc.lineAt(range.from).number);
+}
+
+test('source highlights on every ATX heading and rule exclude the preceding blank line', () => {
+  for (const label of ['---', '***', '___', ...Array.from({ length: 6 }, (_, i) => '#'.repeat(i + 1) + ' Heading 标题')]) {
+    const source = 'before\n\n' + label + '\n\nafter';
+    assert.deepEqual(sourceLineHighlights(source, source.indexOf(label) + 1), [3], label);
+  }
+});
+
+test('multiline quote source highlights only the caret line including lazy continuations', () => {
+  for (const body of ['> first\n> second', '> first\nlazy continuation', '> > nested first\n> > nested second']) {
+    const source = '# Heading\n\n' + body + '\n\nafter';
+    const first = source.indexOf('first'), second = source.indexOf('\n', first) + 1;
+    assert.deepEqual(sourceLineHighlights(source, first), [3]);
+    assert.deepEqual(sourceLineHighlights(source, second), [4]);
+  }
+});
+
+test('blank-line carets, multiline paragraphs and Setext source highlight exactly the caret line', () => {
+  const source = 'before\n\n## Heading\n\nafter';
+  assert.deepEqual(sourceLineHighlights(source, 7), [2]);
+  assert.deepEqual(sourceLineHighlights('before\n\nTitle\n=====\n\nafter', 9), [3]);
+  assert.deepEqual(sourceLineHighlights('before\n\nTitle\n=====\n\nafter', 14), [4]);
+  assert.deepEqual(sourceLineHighlights('before\n\nfirst\nsecond\n\nafter', 9), [3]);
+  assert.deepEqual(sourceLineHighlights('before\n\nfirst\nsecond\n\nafter', 15), [4]);
+  assert.deepEqual(sourceLineHighlights(source, 8, 13), []);
+  assert.deepEqual(sourceLineHighlights('before\n', 7), [2]);
+});
 
 test('Atomic 8.14 quote presentation preserves nested prefix depth and source offsets', () => {
   assert.deepEqual(parseQuotePrefix('  > > quoted'), {

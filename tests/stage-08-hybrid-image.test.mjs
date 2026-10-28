@@ -8,6 +8,7 @@ import {
 } from '../src/features/hybrid-editor/image/image-source-resolver.js';
 import { createImageErrorView } from '../src/features/hybrid-editor/widgets/image/image-error-view.js';
 import { createImageLoadVersionGuard } from '../src/features/hybrid-editor/widgets/image/image-widget.js';
+import { isSafeDocumentUrl } from '../src/shared/security/document-html.js';
 
 function configure(files, enabled, contextRef) {
   configureHybridImageSourcePlatform({
@@ -42,6 +43,22 @@ test('Atomic 8.10 keeps relative sources relative when local image loading is di
     kind: 'relative',
     displaySource: './assets/a.png'
   });
+  assert.equal(reads, 0);
+});
+
+test('Hybrid and Preview apply the same passive image URL policy to embedded SVG and direct URLs', async () => {
+  let reads = 0;
+  configure({ async readImage() { reads += 1; } }, true, { current: {} });
+  const svg = 'data:image/svg+xml;base64,' + Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>').toString('base64');
+  for (const source of [svg, 'data:image/png;base64,AAEC', 'blob:https://example.test/image', 'asset://localhost/image.svg']) {
+    assert.equal(isSafeDocumentUrl(source, true), true);
+    assert.equal((await resolveHybridImageSource(source)).url, source);
+  }
+  for (const source of ['data:image/unknown;base64,AAEC', 'data:image/svg+xml;base64,AAEC" onload="bad',
+    'https://user:pass@example.test/image.svg', 'http://ipc.localhost/image.svg', 'https://example.test/\nimage.svg']) {
+    assert.equal(isSafeDocumentUrl(source, true), false);
+    await assert.rejects(resolveHybridImageSource(source), /不支持此图片地址/, source);
+  }
   assert.equal(reads, 0);
 });
 

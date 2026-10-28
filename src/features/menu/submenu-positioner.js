@@ -6,7 +6,7 @@
  * Lifecycle: Explicit idempotent start/closeAll/destroy; destroy removes every listener and cancels pending work.
  */
 
-const DEFAULT_CLOSE_DELAY_MS = 1000;
+const DEFAULT_CLOSE_DELAY_MS = 120;
 const DEFAULT_VIEWPORT_MARGIN = 8;
 const DEFAULT_GAP = 4;
 const DEFAULT_TOP_OFFSET = 6;
@@ -115,6 +115,12 @@ export function createSubmenuPositioner({
 
   function open(entry) {
     if (destroyed || entry.owner.classList?.contains?.('disabled')) return false;
+    // Keep only the active ancestor/descendant branch. A sibling must not
+    // overlap the new panel for the duration of its pointer-leave grace timer.
+    for (const other of entries.values()) {
+      if (other !== entry && !other.owner.contains?.(entry.owner)
+        && !entry.owner.contains?.(other.owner)) resetEntry(other);
+    }
     cancelClose(entry);
     cancelPosition(entry);
     entry.owner.classList?.add?.('is-submenu-open');

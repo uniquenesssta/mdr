@@ -3,10 +3,10 @@
   "schemaVersion": 1,
   "stage": "R16.11",
   "scope": "Tracked file/directory names, actual production discoveries, production modules, build scripts and reusable test hosts. No file mutation or semantic equivalence claim.",
-  "trackedPaths": 1370,
+  "trackedPaths": 1380,
   "productionFiles": 532,
-  "moduleCandidates": 594,
-  "inputSha256": "97a52b59a49de030be8f341e74e0fe934c70aafe76aa6a0062dac78303742e7d",
+  "moduleCandidates": 598,
+  "inputSha256": "0cdaa3f2d6bb7dcabb89c209384b767fd08fc1a60d169f57a8c54e5fd8d9515f",
   "nameFindings": [
     {
       "path": "docs/audit/windows-validation-final.json",

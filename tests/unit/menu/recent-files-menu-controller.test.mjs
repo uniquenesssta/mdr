@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MENU_COMMAND_IDS as C, createRecentFilesMenuController } from '../../../src/features/menu/index.js';
+import { MENU_COMMAND_IDS as C, createRecentFilesMenuController, createMenuState,
+  createMenuCommandBindings, createMenuController } from '../../../src/features/menu/index.js';
 
 function createClassList(initial = []) {
   const values = new Set(initial);
@@ -142,6 +143,27 @@ test('Atomic 6.12 Recent Files Menu preserves desktop-only state without exposin
   controller.destroy();
   assert.equal(owner.classList.contains('disabled'), false);
   assert.equal(owner.getAttribute('aria-disabled'), null);
+});
+
+test('recent rows reach real MenuState and bindings for every open item and clear', () => {
+  const documentRef = createDocument(), owner = createElement(documentRef), list = createElement(documentRef);
+  const entries = ['A', 'B', 'C'].map(name => ({ path: `C:/Notes/${name}.md`, name }));
+  const source = createSource(entries), calls = [], errors = [], state = createMenuState(), bindings = createMenuCommandBindings();
+  bindings.register(C.RECENT_FILE_OPEN, payload => calls.push(payload.path));
+  bindings.register(C.RECENT_FILES_CLEAR, () => { calls.push('clear'); source.publish([]); });
+  const commands = createMenuController({ state, bindings,
+    view: { bindDeclaration() {}, setCommandState() {}, start() {}, destroy() {} },
+    closeMenus: () => calls.push('close'), reportError: (...args) => errors.push(args) });
+  commands.start();
+  const controller = createRecentFilesMenuController({ owner, list, source, commands, available: true });
+  controller.start();
+  for (const row of list.children.slice(0, entries.length)) list.emitClick(row.children[0]);
+  list.emitClick(list.children.at(-1));
+  assert.deepEqual(calls, ['C:/Notes/A.md', 'close', 'C:/Notes/B.md', 'close', 'C:/Notes/C.md', 'close', 'clear', 'close']);
+  assert.deepEqual(errors, []);
+  assert.equal(list.children[0].textContent, '暂无记录');
+  assert.equal(commands.execute('unknown.command'), false);
+  controller.destroy(); commands.destroy(); bindings.destroy(); state.destroy();
 });
 
 test('Atomic 6.12 Recent Files Menu contains synchronous and asynchronous command failures', async () => {

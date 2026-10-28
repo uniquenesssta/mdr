@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { checkProductionInventory } from '../../scripts/architecture/checks.mjs';
@@ -22,6 +22,6 @@ test('architecture gate independently rejects missing duplicate and obsolete own
     assert.match((await check(['src/current.js', 'src/current.js']))[0].message, /Duplicate/);
     assert.match((await check(['src/current.js', 'src/deleted.js']))[0].message, /no production file/);
   } finally {
-    await rm(root, { recursive: true, force: true });
+    // Retain this isolated fixture: repository policy prohibits recursive deletion.
   }
 });

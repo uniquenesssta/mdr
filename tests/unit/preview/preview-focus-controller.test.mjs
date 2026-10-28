@@ -148,6 +148,23 @@ test('Atomic 7.11 deduplicates same-target scope refresh while only the newest r
   assert.deepEqual(events, [80]);
 });
 
+test('a selection scope refresh carries cancellation through rendering and does not scroll after user supersession', async () => {
+  let finish, allowed = true, request;
+  const h = createHarness({ capabilities: { refreshPreview(context) {
+    request = context;
+    return new Promise(resolve => { finish = resolve; });
+  } } });
+  const pending = h.controller.focusLine(80, { isCurrent: () => allowed });
+  assert.equal(typeof request.isCurrent, 'function');
+  assert.equal(request.isCurrent(), true);
+  allowed = false;
+  assert.equal(request.isCurrent(), false);
+  finish();
+  assert.equal(await pending, false);
+  assert.equal(h.events.some(event => event[0] === 'scroll'), false);
+  h.controller.destroy();
+});
+
 test('Atomic 7.11 cursor focus scheduling occurs only when crossing the tracked chapter', () => {
   const harness = createHarness({ virtualActive: false, virtualContains: false });
   assert.equal(harness.controller.scheduleCursorFocus(5), false);

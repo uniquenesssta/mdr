@@ -26,3 +26,13 @@ test('conversion shares the existing document URL policy without widening scheme
   assert.equal(isSafeDocumentUrl('mailto:a@example.test'), true);
   assert.equal(isSafeDocumentUrl('data:image/png;base64,AAEC', true), true);
 });
+
+test('embedded SVG is an image source only, never a document navigation URL', () => {
+  const svg = 'data:image/svg+xml;base64,' + Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>').toString('base64');
+  assert.equal(isSafeDocumentUrl(svg, true), true);
+  assert.equal(isSafeDocumentUrl(svg), false);
+  for (const source of ['data:text/html;base64,PHN2Zy8+', 'data:image/svg+xml;base64,AAEC" onload="bad',
+    'data:image/svg+xml;base64,AA\nEC', 'data:image/unknown;base64,AAEC']) {
+    assert.equal(isSafeDocumentUrl(source, true), false, source);
+  }
+});

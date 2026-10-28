@@ -118,11 +118,11 @@ test('R9-10 final SelectionSyncController delegates only recoverable pending edi
     retryScheduler,
     getPreviewVirtual: () => virtualPending ? {
       active: true,
-      containsLineRange: () => false,
+      containsLineRange: () => true,
       hasLineRangeMounted: () => false
     } : null
   });
-  controller.runEditor(false, 'test', true, 0);
+  controller.runEditor(true, 'test', true, 0);
   assert.equal(scheduled.length, 1);
   assert.equal(scheduled[0].version, '7:2:6:0');
   assert.equal(scheduled[0].getVersion(), '7:2:6:0');
@@ -144,10 +144,10 @@ test('R9-10 final SelectionSyncController cancels stale retries at lifecycle bou
     frames,
     feedbackGuard: createGuard(),
     retryScheduler,
-    getPreviewVirtual: () => ({ active: true, containsLineRange: () => false, hasLineRangeMounted: () => false })
+    getPreviewVirtual: () => ({ active: true, containsLineRange: () => true, hasLineRangeMounted: () => false })
   });
   controller.start();
-  controller.scheduleEditor(false, 'fresh');
+  controller.scheduleEditor(true, 'fresh');
   assert.equal(cancels, 1);
   frames.flush();
   assert.equal(scheduled.length, 1);
@@ -159,5 +159,20 @@ test('R9-10 final SelectionSyncController cancels stale retries at lifecycle bou
   assert.equal(cancels, 2);
   controller.stop();
   assert.equal(cancels, 3);
+  controller.destroy();
+});
+
+test('offscreen highlight refresh never mounts or retries an old selection outside the current virtual viewport', () => {
+  let mounts = 0, focuses = 0, retries = 0;
+  const { controller } = createFinalSelectionController({
+    retryScheduler: { cancel() {}, schedule() { retries += 1; } },
+    getPreviewVirtual: () => ({ active: true, containsLineRange: () => true, hasLineRangeMounted: () => false,
+      ensureLineRangeVisible() { mounts += 1; } }),
+    focusPreviewLine: () => { focuses += 1; }
+  });
+  assert.equal(controller.runEditor(false, 'preview-mounted', true, 0).status, 'offscreen');
+  assert.equal(mounts, 0);
+  assert.equal(focuses, 0);
+  assert.equal(retries, 0);
   controller.destroy();
 });

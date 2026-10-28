@@ -41,6 +41,8 @@ export function createPreviewFocusController(options = {}) {
   let requestGeneration = 0;
   let pendingRefreshPromise = null;
   let pendingRefreshTarget = 0;
+  let pendingRefreshCurrent = () => false;
+  let refreshSequence = 0;
 
   const assertActive = () => {
     if (destroyed) throw new Error('Preview Focus Controller is destroyed.');
@@ -60,14 +62,17 @@ export function createPreviewFocusController(options = {}) {
     return sectionContainsLine(capabilities.getFocusSection(), targetLine);
   }
 
-  async function refreshScope(line, generation) {
+  async function refreshScope(line, generation, isAllowed) {
     scheduler.cancel('focus');
     scheduler.cancel('input');
 
     let pending = pendingRefreshPromise;
+    pendingRefreshCurrent = () => isCurrent(generation) && isAllowed();
     if (!pending || pendingRefreshTarget !== line) {
       pendingRefreshTarget = line;
-      pending = Promise.resolve(capabilities.refreshPreview({ line, generation }));
+      const sequence = ++refreshSequence;
+      pending = Promise.resolve(capabilities.refreshPreview({ line, generation,
+        isCurrent: () => !destroyed && sequence === refreshSequence && pendingRefreshCurrent() }));
       pendingRefreshPromise = pending;
       void pending.then(
         () => {
@@ -91,7 +96,7 @@ export function createPreviewFocusController(options = {}) {
       if (isCurrent(generation)) throw error;
       return false;
     }
-    return isCurrent(generation);
+    return isCurrent(generation) && isAllowed();
   }
 
   return Object.freeze({
@@ -133,24 +138,26 @@ export function createPreviewFocusController(options = {}) {
       assertConnected();
       const targetLine = normalizeLine(line);
       const generation = ++requestGeneration;
+      const isAllowed = typeof optionsValue.isCurrent === 'function' ? optionsValue.isCurrent : () => true;
+      const current = () => isCurrent(generation) && isAllowed();
       const behavior = normalizeBehavior(optionsValue.behavior);
       const shouldScroll = optionsValue.scroll !== false;
       scheduler.cancel('focus');
 
       const needsScopeRefresh = capabilities.getMode() === 'chapter' && !scopeContainsLine(targetLine);
       if (needsScopeRefresh) {
-        const refreshed = await refreshScope(targetLine, generation);
+        const refreshed = await refreshScope(targetLine, generation, isAllowed);
         if (!refreshed) return false;
       }
-      if (!isCurrent(generation)) return false;
+      if (!current()) return false;
 
       if (capabilities.isVirtualWindowActive()) {
         const anchor = capabilities.ensureLineVisible(targetLine);
-        if (!isCurrent(generation)) return false;
+        if (!current()) return false;
         if (!anchor && capabilities.getMode() === 'chapter') return false;
         capabilities.invalidateAnchors();
       }
-      if (!isCurrent(generation)) return false;
+      if (!current()) return false;
 
       if (shouldScroll) capabilities.scrollToLine(targetLine, behavior, 0.5);
       return true;

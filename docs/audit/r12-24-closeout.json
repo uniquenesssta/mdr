@@ -147,7 +147,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "08ec9d6a1dd87cce85a7c0aa7db57fe81cd69835"
+      "blobSha": "54f643e651d67aad02193ed106de96acaebc710a"
     },
     {
       "path": "scripts/architecture/checks.mjs",
@@ -199,7 +199,7 @@
     },
     {
       "path": "src-tauri/src/performance_log/redaction.rs",
-      "blobSha": "23b94a82f0a4131c97afe526921c6d414a4dcdc9"
+      "blobSha": "ff00373baae7b02c92f82f3f4c9d81949d32e8ff"
     },
     {
       "path": "src-tauri/src/performance_log/writer.rs",
@@ -235,7 +235,7 @@
     },
     {
       "path": "src-tauri/tests/performance_log/redaction_pipeline.rs",
-      "blobSha": "5e20f90c1359c0ccd64a52f681b53f00efdddfbc"
+      "blobSha": "69283ec55914ad39452f360ad5cafeee5febbb25"
     },
     {
       "path": "src-tauri/tests/support/document_store_concurrency.rs",
@@ -319,11 +319,11 @@
     },
     {
       "path": "src/features/editor/infrastructure/codemirror-hybrid-extension.js",
-      "blobSha": "35bf012fc1cfafe09a16f77014a45dcb612d3660"
+      "blobSha": "e2527e5f119eb5d26581b4b79804af3557eb414b"
     },
     {
       "path": "src/features/editor/infrastructure/codemirror-source-editor-port.js",
-      "blobSha": "a860f6d2f981ac397e3b1bc8bf2432634f89b4f4"
+      "blobSha": "92ab27aaf6441f0fc9b17894cc7d378722a55f46"
     },
     {
       "path": "src/features/editor/infrastructure/document-model-binding.js",
@@ -331,7 +331,7 @@
     },
     {
       "path": "src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js",
-      "blobSha": "1f06d36570c633c289623a669ecd4910c6a9e91e"
+      "blobSha": "5c1f0bd86d75db2d782a5a659f2c6aad81c74482"
     },
     {
       "path": "src/features/editor/infrastructure/virtual-editor.js",
@@ -647,7 +647,7 @@
     },
     {
       "path": "src/features/menu/shell-menus.js",
-      "blobSha": "f8301ddb844477d4ad72c310906b8e36c54bf3c0"
+      "blobSha": "386e484be4dbd1924414e31592268fff55b36ca0"
     },
     {
       "path": "src/features/menu/ui/menu-content-view.js",
@@ -675,7 +675,7 @@
     },
     {
       "path": "src/features/preview/application/preview-controller.js",
-      "blobSha": "e8f6d0238e89f085497ab4aa0f07bfcd2428b889"
+      "blobSha": "be306f07cfb3de10e8409ca14baf4a46bed7807f"
     },
     {
       "path": "src/features/preview/index.js",
@@ -683,11 +683,11 @@
     },
     {
       "path": "src/features/preview/pipeline/preview-layout-stability.js",
-      "blobSha": "cfc24ef73fb44ccfec438935be09c45b3ccb3293"
+      "blobSha": "067b34ad82355a91616be96f2571e3b68ab12184"
     },
     {
       "path": "src/features/preview/pipeline/preview-render-engine.js",
-      "blobSha": "091a32f769d0d880e920d7c4dc4e8fdec0c3ade9"
+      "blobSha": "a9cc9cb9cf4c6db9a78dc661336c163ce83f3fa8"
     },
     {
       "path": "src/features/preview/render/presentation/math-presentation.js",
@@ -703,7 +703,7 @@
     },
     {
       "path": "src/features/preview/worker/preview-worker-client.js",
-      "blobSha": "59a98fbfaadadd1a076a5b8ef0618d0972400ca9"
+      "blobSha": "cf967269ca143789b082b6b2fb2c14fd9f210166"
     },
     {
       "path": "src/features/settings/application/settings-controller.js",
@@ -727,7 +727,7 @@
     },
     {
       "path": "src/features/sync/selection/selection-sync-controller.js",
-      "blobSha": "9599cacab9d67e3170d04c5426c97feb433ae38e"
+      "blobSha": "8e7ae0e4920fa7ad807d6fea4b50bf228b107ba6"
     },
     {
       "path": "src/features/telemetry/aggregation-buffer.js",
@@ -811,7 +811,7 @@
     },
     {
       "path": "src/shared/security/document-html.js",
-      "blobSha": "131f8f4f9b0e7fe1652ee380c96cf5eee68d3fdf"
+      "blobSha": "f64f60769305642c256f4a314ce4f131d42d300f"
     },
     {
       "path": "src/styles/features/export.css",
@@ -935,7 +935,7 @@
     },
     {
       "path": "tests/e2e/lib/cdp-browser.mjs",
-      "blobSha": "ab5d28a5edc2d1c7aebb12719e1eab0b06b991c7"
+      "blobSha": "a0e20cdad250d8e7d5f397c510b7c3298d93d6f6"
     },
     {
       "path": "tests/e2e/lib/e2e-installation.mjs",
@@ -959,7 +959,7 @@
     },
     {
       "path": "tests/e2e/run-browser-tests.mjs",
-      "blobSha": "5d33e51b7b92d2e7d736c01684bb870dba0ba35e"
+      "blobSha": "15b1215060743bea49edd9078630346e963fd607"
     },
     {
       "path": "tests/e2e/window-controller.test.mjs",
@@ -1015,59 +1015,59 @@
     },
     {
       "path": "tests/stage-12-directory-tree.test.mjs",
-      "blobSha": "51f256de299b93e0a4ce32884f1008722c6c6160"
+      "blobSha": "8203dbfe4f09fa97541d69d3627fd0f76d50a645"
     },
     {
       "path": "tests/stage-12-external-link-validation.test.mjs",
-      "blobSha": "1ac03e09d1ad212a490bb2dcd6962e05e8f74641"
+      "blobSha": "1614d8ef884ea80eb8e304cc61e4512b2c283877"
     },
     {
       "path": "tests/stage-12-file-kind.test.mjs",
-      "blobSha": "82ed60c9c6081c97960530a48370214529fea894"
+      "blobSha": "a45b73afa527418410b833e02a19c7b60e22b549"
     },
     {
       "path": "tests/stage-12-local-commands.test.mjs",
-      "blobSha": "16986ff912baba3bfb3f8e1d3bf6b06207532bc5"
+      "blobSha": "5c5b4bde54249ba9ffb3b0af22491fbc45e50705"
     },
     {
       "path": "tests/stage-12-log-redaction.test.mjs",
-      "blobSha": "da998ee832079d22deae3c75203c661f0e585ee5"
+      "blobSha": "a869ad78bfe793fbd9696445c904a9cdb27148c2"
     },
     {
       "path": "tests/stage-12-opener.test.mjs",
-      "blobSha": "d361e1490389d1be6002f623d34f61d4b41ff182"
+      "blobSha": "535bcf1e769546d408d23c160fe08bb8b82448e6"
     },
     {
       "path": "tests/stage-12-path-policy.test.mjs",
-      "blobSha": "32dff0ea5d1a8bec091a0ab9de7b66a3f9679a1a"
+      "blobSha": "e8a83704049e47f45433cf6ca997578d5b7cf602"
     },
     {
       "path": "tests/stage-12-readers.test.mjs",
-      "blobSha": "6d01ecb9f5cdfbc19598e72a712b585d4d1e4b26"
+      "blobSha": "360515e5d3ea930989379d353afd2475057b37db"
     },
     {
       "path": "tests/stage-12-security-contract.test.mjs",
-      "blobSha": "8738f5f3ad20f60dc9524b1d5deaee9d199c37e0"
+      "blobSha": "425a23a1ce75331097940dbbbb3fa75067479045"
     },
     {
       "path": "tests/stage-12-tree-limits.test.mjs",
-      "blobSha": "fd742f115bbf142c11a15266b9b3a9c1faf596e9"
+      "blobSha": "5cf8a1fafe28ab874cc749397be56237793be8a0"
     },
     {
       "path": "tests/stage-12-web-client.test.mjs",
-      "blobSha": "c9c00484fae2b04429a8955ad11ba5b5c4546197"
+      "blobSha": "d65b1635f4feb41e80dd012972188a262f96b577"
     },
     {
       "path": "tests/stage-12-web-response.test.mjs",
-      "blobSha": "ffb6f3775307b0d5d85421cd92b7ba7be243b637"
+      "blobSha": "52cb8372a6bff1ec003988bd1aac9a586e9f9185"
     },
     {
       "path": "tests/stage-12-web-validation.test.mjs",
-      "blobSha": "2a0be9e977b01787e49d070a5f6cc0a606168c8f"
+      "blobSha": "4009fd8ab13b542955d33bee9142b9aaa05c73a7"
     },
     {
       "path": "tests/stage-12-writers.test.mjs",
-      "blobSha": "5dc43f2f2aa63a1a022f410b5062c0185076fba0"
+      "blobSha": "900ff3afd7f55d6e199158cf7252fd1c1f7f1685"
     },
     {
       "path": "tests/stage-15-e2e-installation.test.mjs",
@@ -1083,7 +1083,7 @@
     },
     {
       "path": "tests/stage-15-event-catalogue.test.mjs",
-      "blobSha": "59b4f144a38c21496105c9779c7eb77561f63155"
+      "blobSha": "c0348bbc8391589dd5880102c6520489acd037a1"
     },
     {
       "path": "tests/stage-15-log-cleanup.test.mjs",
@@ -1175,7 +1175,7 @@
     },
     {
       "path": "tests/unit/preview/preview-layout-stability.test.mjs",
-      "blobSha": "1c0d672bed89488da8d4823afd1dd60127769f0d"
+      "blobSha": "3397e2cb4e37f56e5d3b08a111e4ba9f32abca8f"
     },
     {
       "path": "vite.config.js",
@@ -1203,7 +1203,7 @@
     },
     {
       "path": "docs/audit/r16-11-module-naming.json",
-      "blobSha": "8ed3fcd2372e6567dc88732571d083f512e42d33"
+      "blobSha": "c1d53e6db52d8abd3ce4f749952901bd24285995"
     },
     {
       "path": "scripts/architecture/dependency-graph.mjs",
@@ -1215,7 +1215,7 @@
     },
     {
       "path": "docs/audit/r16-12-dependency-graph.json",
-      "blobSha": "1406d5a02b5037a6c758466a1ecf77a4466ff823"
+      "blobSha": "c325210ac6f93f24e31a1205db14ecb697c369a8"
     },
     {
       "path": "scripts/architecture/repository.mjs",
@@ -1244,6 +1244,110 @@
     {
       "path": "tests/stage-12-closeout.test.mjs",
       "blobSha": "7db99273070d5f3a8589cc16aaccc3ac4e3af20c"
+    },
+    {
+      "path": "src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js",
+      "blobSha": "f216074ce5e6bca1e1f2354bd872bf48082a1cef"
+    },
+    {
+      "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
+      "blobSha": "c8b80aba1ca4fc29cc13450b8d838f3aa0a43c89"
+    },
+    {
+      "path": "src/features/hybrid-editor/application/hybrid-editor-controller.js",
+      "blobSha": "c2164341ffed5bec1fade9532f0ef30e9aba41b5"
+    },
+    {
+      "path": "src/features/hybrid-editor/application/hybrid-source-edit-controller.js",
+      "blobSha": "0da1404387b665be271dc2452704ab6a04f921c9"
+    },
+    {
+      "path": "tests/e2e/lib/hybrid-pointer-checks.mjs",
+      "blobSha": "bb8f033b9d745701d684f3b0a56c9cb70000e1ee"
+    },
+    {
+      "path": "tests/editor-hybrid-source-pointer.test.mjs",
+      "blobSha": "ffebf547c5b82337cf11c2273cce53a24b056832"
+    },
+    {
+      "path": "tests/editor-pointer-line-diagnostics.test.mjs",
+      "blobSha": "dd0b7ff06340fad15091631d4ade6b124d99f443"
+    },
+    {
+      "path": "tests/stage-08-hybrid-editor-controller.test.mjs",
+      "blobSha": "4d88de3a921cc2f29cf933d8a7f3e1dc325c979c"
+    },
+    {
+      "path": "src/features/hybrid-editor/presentation/inline-presentation-coordinator.js",
+      "blobSha": "370347ecd394f245d795703ba754ec721082e281"
+    },
+    {
+      "path": "tests/stage-08-hybrid-inline-presentation.test.mjs",
+      "blobSha": "39a5d2eb162d2e4a0a75b5daad78b6c15d445f6e"
+    },
+    {
+      "path": "src/features/menu/submenu-positioner.js",
+      "blobSha": "e9fa1399cc157559da00d2fd28667dbb73a09e10"
+    },
+    {
+      "path": "src/styles/shell/menu-bar.css",
+      "blobSha": "c54ed7d227a31f79b18eaaab461d487c1e7bce1c"
+    },
+    {
+      "path": "tests/unit/menu/shell-menus.test.mjs",
+      "blobSha": "b24e1bd4493f4d83c50669bdf12dd563aee649ec"
+    },
+    {
+      "path": "tests/unit/menu/submenu-positioner.test.mjs",
+      "blobSha": "24ac930082ecba98d828c92b7f932526af52b188"
+    },
+    {
+      "path": "tests/e2e/lib/menu-pointer-checks.mjs",
+      "blobSha": "766a1da54c5b45aaedde3d43dc461a7a3d6d5402"
+    },
+    {
+      "path": "tests/stage-08-hybrid-source-edit-controller.test.mjs",
+      "blobSha": "a3f1933ea76ade3af6d34282f1fff4b05787415d"
+    },
+    {
+      "path": "src/features/menu/menu-state.js",
+      "blobSha": "f05f52bfa71056779a0c2800395ced2eec564da2"
+    },
+    {
+      "path": "tests/unit/menu/recent-files-menu-controller.test.mjs",
+      "blobSha": "9f574cb993c3a09bae2e294139ca02c3ba6a8dd8"
+    },
+    {
+      "path": "src/features/hybrid-editor/image/image-source-resolver.js",
+      "blobSha": "188857e6181222dc67af9d92a92bdbe27009a105"
+    },
+    {
+      "path": "tests/e2e/lib/hybrid-image-checks.mjs",
+      "blobSha": "e32d8e7b5257b6c10ced4dab2ae6361b49bcd082"
+    },
+    {
+      "path": "tests/e2e/lib/selection-stability-checks.mjs",
+      "blobSha": "5d07e6063156e62bcd8def66d1139916e1ed262d"
+    },
+    {
+      "path": "tests/unit/preview/preview-worker-focus.test.mjs",
+      "blobSha": "74133660328f2901f2cf54f9178a9a7a641979b3"
+    },
+    {
+      "path": "tests/unit/preview/preview-render-engine.test.mjs",
+      "blobSha": "808f4c01304f6e9cc37015a9fdcefbf21de9c723"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-focus-controller.js",
+      "blobSha": "865eaeeedbf09c7c37ef472a668ffe76c429ba9a"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-render-coordinator.js",
+      "blobSha": "b7f5027c0b6e6ea309edd6f8a3c73d5f4ca69840"
+    },
+    {
+      "path": "src/features/preview/worker/preview-worker.js",
+      "blobSha": "727383200f4771e39c8fe9a8c1f35f1253af8282"
     }
   ],
   "priorFailures": {
@@ -1461,12 +1565,12 @@
   "currentSourceReview": {
     "stage": "R17.1",
     "date": "2026-10-25",
-    "reviewedCommit": "cd6420d99136e434e0f2de03c309fa12118de9ea",
+    "reviewedCommit": "ff21aade691167271ee493ae83f5aafed8c9b8bf",
     "record": "docs/R17-01-DETAILS.md",
     "status": "implemented-pending-exact-commit-windows-validation",
     "priorWindowsRun": 38217129135,
     "priorWindowsJobsPassed": 7,
-    "scope": "Only R17.1 workspace/diff/README audit and necessary preservation of inherited CI on the new phase branch; R17.2 not started.",
+    "scope": "R17.1 audit plus separately user-authorized Hybrid click/input diagnostics, table/IME and heading/rule repair, independent paragraphs below blocks/source EOF, and click-first menu hover/fast submenu switching. User explicitly waived Figma for this repair only. Frozen model and R15 baseline evidence retained; R17.2 not started; no new CI acceptance claimed. Separately authorized regression repair: repeated blank clicks reuse paragraph slots, one caret source-line highlight, and Recent Files dynamic command admission. Click-only selection now stages paragraph intent; actual input, paste and IME commit own all separator writes. Separately authorized SVG repair preserves visible source-toggle scroll anchors and shares passive image URL validation across Preview/Hybrid; inline SVG and active HTML remain forbidden. Separately authorized selection/large-preview repair retains native Preview word selection and source-origin Hybrid drags, stops offscreen selection remounts, and lets new user scroll gestures override prior selection settlement. Mode-transition required rendering is retained across coalesced geometry refreshes; cancelled incremental enhancement work is requeued for reused DOM. Separately authorized first-word navigation and performance repair: await chapter readiness with cancellable document/selection intent, exact wrapped-row source coordinates, bounded neighboring chapter context, same-version indexed Worker focus and inclusive result-preparation timing. No new concurrency pool, I/O format or frozen model change.",
     "acceptedPriorStage": {
       "stage": "R15.9",
       "commit": "4fa93d2d2921dcd1a8dbda686a72f41e09b07dd6",
@@ -14933,6 +15037,325 @@
           "Independent Image Menu real-pointer focus finding remains open and requires UI/Figma scope for repair."
         ]
       }
-    ]
+    ],
+    "telemetryProducerUpdates": [
+      {
+        "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
+        "baselineBlob": "f29820dd71e6d5aa95706906a90e725b444e2bb9",
+        "currentPath": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js"
+      },
+      {
+        "path": "src/features/hybrid-editor/application/hybrid-editor-controller.js",
+        "baselineBlob": "3a174fb5f4e73112e0935b0ad6601ada7eafb5c7",
+        "currentPath": "src/features/hybrid-editor/application/hybrid-editor-controller.js"
+      },
+      {
+        "path": "src/features/preview/pipeline/preview-layout-stability.js",
+        "baselineBlob": "41cf537aa473a800c22af50657d304dba9ec7312",
+        "currentPath": "src/features/preview/pipeline/preview-layout-stability.js",
+        "reason": "R17.1 separately authorized mode-transition preview recovery; frozen telemetry baseline retained, event schema unchanged."
+      }
+    ],
+    "supplementalRepair": {
+      "date": "2026-10-25",
+      "record": "docs/R17-01-DETAILS.md#混合模式表格输入修复2026-10-25",
+      "scope": "Rendered block boundaries, table separators/EOF, source exit, IME node protection, document-aware block publication and missing caret geometry diagnostics.",
+      "status": "local targeted Node 612/612, native log pipeline 2/2, final browser 86/87 plus same-build failed-scenario revalidation 1/1; no exact-commit CI or user desktop acceptance"
+    },
+    "headingPointerRepair": {
+      "date": "2026-10-25",
+      "record": "docs/R17-01-DETAILS.md#标题与分隔线点击审计修复2026-10-25",
+      "scope": "Presentation-only source-line ownership, shared precise source-exit pointer resolution, layout-aware geometry checks and one mouseup record per gesture. Frozen model and visual styles unchanged.",
+      "status": "local targeted Node 617/617, real DEV heading/rule cases 18/18 with 121 clean click/input checks, production browser 87/88 plus same-build default-entry revalidation 1/1; no exact-commit CI or user desktop acceptance"
+    },
+    "blockMenuRepair": {
+      "date": "2026-10-25",
+      "record": "docs/R17-01-DETAILS.md#块下正文与菜单悬停修复2026-10-25",
+      "scope": "Preserve semantic block separators and create independent paragraphs on plain clicks below blocks and EOF source; click one top-level menu before hover switches, close peer submenu branches immediately and remove duplicate CSS visibility/entry animation.",
+      "figmaAuthorization": "User explicitly authorized direct repair without Figma for this task; this is not a general project exemption.",
+      "status": "local targeted Node 654/654, real DEV independent-paragraph cases 30/30 and EOF SOURCE cases 24/24, click-first menu hover cases 8/8 plus submenu switches 2/2, production browser 89/89 and four delivery gates passed; no exact-commit CI or user desktop acceptance",
+      "productionSourceSha256": "550860c6d10c267377af0f6641a1545b1ac359fdb0259ba2fb39265f362559bb",
+      "diagnostics": {
+        "clicks": 107,
+        "inputChecks": 176,
+        "clickGeometryWarnings": 10,
+        "inputWarnings": 0,
+        "explanation": "Warnings retain raw geometry after explicit EOF paragraph creation and block restoration; exact source/caret and English/IME input assertions passed."
+      }
+    },
+    "clickRegressionRepair": {
+      "date": "2026-10-25",
+      "record": "docs/R17-01-DETAILS.md#最近打开与重复空白点击回归修复2026-10-25",
+      "scope": "Recent Files dynamic command state admission without weakening unknown-command rejection; idempotent separator click normalization; highlight only the caret source row while preserving complete source reveal.",
+      "status": "local Node 657/657, DEV repeated blank clicks 30 and quote caret cases 4, final production repeated blank clicks 60 with subsequent English/IME input, real Menu DOM recent open cases 6 and clear cases 2, complete browser 90/90 and four gates passed; no new exact-commit CI or native desktop acceptance",
+      "productionSourceSha256": "6374b4023858edf729524df2d67b68e3708e8b0fd17af23b7098dd6070073682",
+      "logEvidence": {
+        "file": "logs/performance-2026-10-25_01-08-45-390_pid-32672.jsonl",
+        "records": 366,
+        "pointerChecks": 97,
+        "pointerWarnings": 5,
+        "importedDocumentInitialChars": 5955,
+        "importedDocumentFinalChars": 5978,
+        "clickOnlyDocumentVersions": 20,
+        "unattributedPreImportRejections": 1
+      }
+    },
+    "clickOnlyInputRepair": {
+      "date": "2026-10-25",
+      "record": "docs/R17-01-DETAILS.md#点击不再修改正文2026-10-25",
+      "scope": "First and repeated clicks never change source or versions; stage paragraph input in CodeMirror, join separators with typed/pasted text and composition history, preserve native composition ranges and roll back separators on cancelled widget composition.",
+      "status": "local Node 660/660, final production 80 repeated blank clicks with source/version invariance and HTML 10-click/3-undo/paste/IME commit/cancel regression, complete browser 90/90 and four gates passed; no new exact-commit CI or native desktop acceptance",
+      "productionSourceSha256": "5524dabf177932346678761fb7aba34d981853dc16cd5bf75ba2df89ca75acc0",
+      "logEvidence": {
+        "file": "logs/performance-2026-10-25_01-29-19-850_pid-42900.jsonl",
+        "records": 227,
+        "pointerChecks": 41,
+        "lastDocumentChars": [
+          5961,
+          5959,
+          5961
+        ],
+        "lastDocumentVersions": [
+          6,
+          7,
+          8
+        ],
+        "lastClicksHadBodyInput": false
+      }
+    },
+    "svgImageRepair": {
+      "date": "2026-10-25",
+      "record": "docs/R17-01-DETAILS.md#svg显示与源码切换滚动修复2026-10-25",
+      "status": "local Node 1143/1143, DEV and production 48 source toggles plus three-layout SVG/PNG passive-image regression, complete production browser 92/92 and four gates passed; no new exact-commit CI or native desktop acceptance",
+      "logEvidence": {
+        "file": "logs/performance-2026-10-25_01-55-15-580_pid-34216.jsonl",
+        "sourceRange": {
+          "from": 1486,
+          "to": 2571
+        },
+        "sourceOpenCount": 7,
+        "sourceCloseCount": 7,
+        "localTime": "09:58:03.894-09:58:26.062"
+      },
+      "securityScope": "Only base64 SVG URLs in passive img sources; raw inline SVG, scripts, navigation data URLs, event attributes, embedded documents and prior CSP restrictions stay blocked. Hybrid direct URLs use the same document URL policy.",
+      "workflowTestCorrection": {
+        "baselineCommit": "ff21aade691167271ee493ae83f5aafed8c9b8bf",
+        "files": [
+          "tests/stage-12-directory-tree.test.mjs",
+          "tests/stage-12-external-link-validation.test.mjs",
+          "tests/stage-12-file-kind.test.mjs",
+          "tests/stage-12-local-commands.test.mjs",
+          "tests/stage-12-opener.test.mjs",
+          "tests/stage-12-path-policy.test.mjs",
+          "tests/stage-12-readers.test.mjs",
+          "tests/stage-12-security-contract.test.mjs",
+          "tests/stage-12-tree-limits.test.mjs",
+          "tests/stage-12-web-client.test.mjs",
+          "tests/stage-12-web-response.test.mjs",
+          "tests/stage-12-web-validation.test.mjs",
+          "tests/stage-12-writers.test.mjs"
+        ],
+        "change": "Exact branch list adds the already configured codex/r17-stage; all other assertions retained."
+      },
+      "productionSourceSha256": "9a266dedd32dae531c7984657320d1b83e36ca8aaeb63e1322e4e2237fbba883",
+      "validation": {
+        "node": {
+          "editorPreviewHybridImportMenuArchitecture": 411,
+          "securityAndExport": 732,
+          "total": 1143,
+          "failed": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "excluded": "Unrelated stage-12-validation-workspace fixture requires prohibited recursive cleanup; not run or counted."
+        },
+        "browser": {
+          "contract": 12,
+          "application": 80,
+          "total": 92,
+          "failed": 0,
+          "scrollCycles": 48,
+          "viewports": 3,
+          "sourceSizes": 2,
+          "imageLayouts": 3
+        },
+        "build": {
+          "sourceFiles": 473,
+          "outputFiles": 136,
+          "artifacts": "C:/Users/uniqu/AppData/Local/Temp/mdr-heading-audit-full-On9tP0"
+        },
+        "gates": [
+          "architecture",
+          "no-legacy-runtime",
+          "generated-files",
+          "readme-record"
+        ]
+      }
+    },
+    "selectionStabilityRepair": {
+      "date": "2026-10-25",
+      "record": "docs/R17-01-DETAILS.md#选区可见性与大文档滚动修复2026-10-25",
+      "status": "implemented; related Node 2043/2043 and complete production browser 95/95 passed; real Tauri and exact-commit CI acceptance pending",
+      "logEvidence": {
+        "file": "logs/performance-2026-10-25_07-28-06-302_pid-51100.jsonl",
+        "records": 435,
+        "selectionResults": 35,
+        "selectionWarnings": 16,
+        "largeDocumentCharacters": 5453875,
+        "largeDocumentImported": true,
+        "previewRevisionDuringRepeatedOldSelection": [
+          15,
+          122
+        ]
+      },
+      "originalDocumentFrontendCheck": {
+        "path": "O:/Project/Markdown Rust/500万字.md",
+        "characters": 5453875,
+        "postScrollFrames": 60,
+        "blankFrames": 0,
+        "sourceUnchanged": true,
+        "artifact": "C:/Users/uniqu/AppData/Local/Temp/mdr-heading-audit-wzEQBX/original-large-scroll.json",
+        "boundary": "Actual original text, actual frontend import/worker/model/editor/virtual-preview/scroll modules; only isolated browser large-body storage replaced with memory because ordinary browser imports were rejected. No native persistence or complete desktop acceptance claimed.",
+        "duringAndAfterScrollFrames": 120
+      },
+      "productionRecovery": "Production attempts 94/95 and 93/95 retained; cancelled incremental enhancement work is requeued. A mode-transition forced render was lost to a later geometry-only ResizeObserver request; outstanding render requirements now survive task replacement. Negative tests reproduced both gaps, repaired units and real DEV recovery passed. Final independent production build and cumulative browser 95/95 passed.",
+      "validation": {
+        "relatedNode": {
+          "tests": 2043,
+          "passed": 2043,
+          "failed": 0,
+          "log": "mdr-selection-final-relevant-passed.log"
+        },
+        "browser": {
+          "tests": 95,
+          "passed": 95,
+          "failed": 0,
+          "contract": 12,
+          "application": 83,
+          "artifact": "C:/Users/uniqu/AppData/Local/Temp/mdr-heading-audit-full-GCpRF5",
+          "log": "mdr-selection-browser-complete.log"
+        },
+        "build": {
+          "sourceSha256": "1f2d1e9144f6ad5d43fa882119ddc072608985ac297beea0e83010682259cf40",
+          "sourceFiles": 473,
+          "outputFiles": 136
+        },
+        "widerAttempt": {
+          "tests": 2836,
+          "passed": 2829,
+          "failed": 7,
+          "log": "mdr-selection-node-complete.log",
+          "boundary": "Not full-suite acceptance. npm invocation context and current review hashes affected three failures; four R16 frozen audit snapshots still disagree with accumulated repair changes. No historical acceptance rewritten."
+        },
+        "cleanupIncident": "Wider invocation accidentally included two recursive-cleanup test fixtures; only their own temporary directories were removed. Later relevant file list excludes both. Project/original document/browser artifacts retained.",
+        "gates": {
+          "architecture": true,
+          "noLegacyRuntime": true,
+          "generatedFiles": true,
+          "readmeRecord": true,
+          "currentReviewSources": 298,
+          "currentReviewMismatches": 0,
+          "diffCheck": true
+        }
+      }
+    },
+    "firstWordNavigationRepair": {
+      "date": "2026-10-25",
+      "record": "docs/R17-01-DETAILS.md#首次跨章节划词定位与计算优化2026-10-25",
+      "status": "implemented; related Node 2058/2058, complete final-source production browser 96/96 and four gates passed; native desktop and exact-commit CI acceptance pending",
+      "log": {
+        "file": "logs/performance-2026-10-25_08-33-20-347_pid-14648.jsonl",
+        "records": 192,
+        "pendingWarnings": 12,
+        "pendingGroups": 4,
+        "largeDocumentPointerChecks": 12,
+        "sourceLineMismatches": 0
+      },
+      "workerBenchmark": {
+        "boundary": "Actual worker handler in Node, 5453875-character original document, identical 30 navigation targets; excludes IPC and WebView DOM.",
+        "before": {
+          "p50Ms": 22.338399999999865,
+          "p95Ms": 30.60559999999998
+        },
+        "after": {
+          "p50Ms": 0.013399999999990087,
+          "p95Ms": 1.051400000000001
+        },
+        "logs": [
+          "mdr-first-focus-benchmark-before.log",
+          "mdr-first-focus-benchmark-after.log"
+        ]
+      },
+      "originalFrontend": {
+        "artifact": "C:/Users/uniqu/AppData/Local/Temp/mdr-heading-audit-Xgc4vR",
+        "measurements": [
+          {
+            "line": 33276,
+            "stableMs": 336,
+            "maxErrorPx": 0.109375
+          },
+          {
+            "line": 47358,
+            "stableMs": 441,
+            "maxErrorPx": 0.34375
+          },
+          {
+            "line": 90002,
+            "stableMs": 445,
+            "maxErrorPx": 0.03125
+          }
+        ],
+        "sourceUnchanged": true,
+        "boundary": "Read-only original file, actual frontend Worker/model/editor/preview; isolated large-body storage uses the previously disclosed memory replacement, not native persistence proof."
+      },
+      "constraints": "Previous fixes and user AGENTS.md retained. No new production module/dependency, model change, cleanup, CI polling or native desktop acceptance.",
+      "cancellation": "Superseded Worker results do not mutate Preview DOM. Cancellation also restores the prior settled state and retains an existing degraded status/error; actual PreviewState negative test failed before and passed after.",
+      "validation": {
+        "relatedNode": {
+          "tests": 2058,
+          "passed": 2058,
+          "failed": 0,
+          "log": "mdr-first-selection-complete-node.log",
+          "fileList": "mdr-first-selection-node-files.txt"
+        },
+        "browser": {
+          "tests": 96,
+          "passed": 96,
+          "failed": 0,
+          "contract": 12,
+          "application": 84,
+          "artifact": "C:/Users/uniqu/AppData/Local/Temp/mdr-heading-audit-full-Pf5o4i",
+          "log": "mdr-first-selection-complete-browser.log"
+        },
+        "build": {
+          "sourceSha256": "d0030f5288c393dbd77d6272247959f6ddbc9507b698cfd4d1509d1fd1d0d3d0",
+          "sourceFiles": 473,
+          "outputFiles": 136
+        },
+        "gates": {
+          "architecture": true,
+          "noLegacyRuntime": true,
+          "generatedFiles": true,
+          "readmeRecord": true,
+          "currentReviewSources": 303,
+          "currentReviewMismatches": 0,
+          "diffCheck": true
+        },
+        "boundary": "Targeted/cumulative local validation, not full-repository historical snapshot acceptance, native desktop acceptance or CI. No cleanup or submission performed."
+      }
+    },
+    "finalAcceptancePlan": {
+      "capturedHead": "ff21aade691167271ee493ae83f5aafed8c9b8bf",
+      "stage": "R17",
+      "groups": [
+        "R17-G1",
+        "R17-G2",
+        "R17-G3"
+      ],
+      "status": "in-progress; not-accepted",
+      "taskbook": "docs/markdown-main-full-rewrite-taskbook-18-docs/18-阶段17-最终全链路验证.md",
+      "workspaceReaudit": "docs/audit/r17-01-workspace-reaudit.json",
+      "state": "docs/audit/r17-acceptance.json",
+      "historicalAcceptancesUnchanged": true
+    }
   }
 }

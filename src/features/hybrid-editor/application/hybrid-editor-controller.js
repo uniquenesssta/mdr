@@ -3,7 +3,7 @@
  * Responsibility: Own one mounted Hybrid editor runtime session: decoration rebuild scheduling, deferred block publication and SOURCE-controller teardown ordering.
  * Imports: None. CodeMirror, DOM, model, Preview, telemetry and scheduling capabilities are injected by the editor integration boundary.
  * Exports: HybridEditorController and createHybridEditorController.
- * State/side effects: Owns current inline decorations/stats plus pending/applied block-publication state; delegates document/source state to existing authoritative owners.
+ * State/side effects: Owns inline decorations/stats, document-scoped source-drag presentation ranges and pending/applied block publication; document text and component SOURCE state remain delegated.
  * Lifecycle: Explicit instance lifecycle; destroy() is idempotent, invalidates queued publication and destroys injected owned resources exactly once.
  */
 
@@ -49,8 +49,12 @@ export class HybridEditorController {
     this.pendingBlockDecorations = null;
     this.pendingBlockSignature = '';
     this.appliedBlockSignature = '';
+    this.appliedBlockDocument = undefined;
+    this.sourceSelectionDocument = this.view.state?.doc;
+    this.sourceSelectionRanges = [];
 
     const built = this.decorationCoordinator.build(this.view);
+    this.sourceSelectionRanges = built.editableSourceRanges || [];
     this.decorations = built.decorations;
     this.stats = built.stats;
     this.scheduleBlockUpdate(built.blockDecorations, built.blockSignature);
@@ -64,6 +68,19 @@ export class HybridEditorController {
     return this.stats;
   }
 
+  refreshPresentation() {
+    if (this.destroyed || this.view?.destroyed) return false;
+    const built = this.decorationCoordinator.build(this.view, {
+      sourceSelectionRanges: this.sourceSelectionDocument === this.view.state?.doc ? this.sourceSelectionRanges : []
+    });
+    this.sourceSelectionDocument = this.view.state?.doc;
+    this.sourceSelectionRanges = built.editableSourceRanges || [];
+    this.decorations = built.decorations;
+    this.stats = built.stats;
+    this.scheduleBlockUpdate(built.blockDecorations, built.blockSignature);
+    return true;
+  }
+
   closeSourceFromPointer(pointer = {}) {
     if (this.destroyed) return false;
     return this.sourceEditController.closeFromPointer(pointer);
@@ -73,7 +90,8 @@ export class HybridEditorController {
     if (this.destroyed) return false;
     this.pendingBlockDecorations = blockDecorations;
     this.pendingBlockSignature = String(signature || '');
-    if (this.pendingBlockSignature === this.appliedBlockSignature || this.blockDispatchQueued) return false;
+    if ((this.pendingBlockSignature === this.appliedBlockSignature
+      && this.appliedBlockDocument === this.view.state?.doc) || this.blockDispatchQueued) return false;
     this.blockDispatchQueued = true;
     const generation = ++this.blockDispatchGeneration;
     this.enqueueMicrotask(() => {
@@ -82,7 +100,8 @@ export class HybridEditorController {
         || generation !== this.blockDispatchGeneration
         || this.view?.destroyed
         || this.view?.dom?.isConnected === false
-        || this.pendingBlockSignature === this.appliedBlockSignature) {
+        || (this.pendingBlockSignature === this.appliedBlockSignature
+          && this.appliedBlockDocument === this.view.state?.doc)) {
         return;
       }
       const nextSignature = this.pendingBlockSignature;
@@ -90,6 +109,7 @@ export class HybridEditorController {
       try {
         this.dispatchBlockDecorations(this.view, nextDecorations);
         this.appliedBlockSignature = nextSignature;
+        this.appliedBlockDocument = this.view.state?.doc;
       } catch (error) {
         this.reportDiagnostic('hybrid.block-dispatch-failure', {
           status: 'error',
@@ -123,11 +143,7 @@ export class HybridEditorController {
       && !update.focusChanged)) {
       return false;
     }
-    const built = this.decorationCoordinator.build(update.view);
-    this.decorations = built.decorations;
-    this.stats = built.stats;
-    this.scheduleBlockUpdate(built.blockDecorations, built.blockSignature);
-    return true;
+    return this.refreshPresentation();
   }
 
   destroy() {
@@ -141,6 +157,9 @@ export class HybridEditorController {
     this.destroyGeometry();
     this.destroySession();
     this.pendingBlockDecorations = null;
+    this.appliedBlockDocument = null;
+    this.sourceSelectionDocument = null;
+    this.sourceSelectionRanges = [];
     this.view = null;
   }
 }

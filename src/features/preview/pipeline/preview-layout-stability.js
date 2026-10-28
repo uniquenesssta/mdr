@@ -72,6 +72,7 @@ export function createPreviewLayoutStability(options = {}) {
   let destroyed = false;
   let observedWidth = 0;
   let observedHeight = 0;
+  let pendingForceRender = false;
 
   const assertActive = () => {
     if (destroyed) throw new Error('Preview Layout Stability is destroyed.');
@@ -119,7 +120,10 @@ export function createPreviewLayoutStability(options = {}) {
 
   function requestRefresh(optionsValue = {}) {
     assertConnected();
-    const forceRender = optionsValue.forceRender !== false;
+    // Resize observations may replace the layout task before a mode transition
+    // settles. Preserve its required render until the current task completes it.
+    pendingForceRender ||= optionsValue.forceRender !== false;
+    const forceRender = pendingForceRender;
     const reason = String(optionsValue.reason || 'layout-visible');
     let attempts = 0;
     let stableFrames = 0;
@@ -157,6 +161,7 @@ export function createPreviewLayoutStability(options = {}) {
       try {
         if (shouldRender) await Promise.resolve(capabilities.render());
         if (!task.isCurrent() || capabilities.isSuspended()) return;
+        pendingForceRender = false;
         refreshGeometry(task);
       } catch (error) {
         task.commit(() => reportError('Preview layout refresh failed.', error));
@@ -254,11 +259,13 @@ export function createPreviewLayoutStability(options = {}) {
     requestRefresh,
     cancel() {
       assertActive();
+      pendingForceRender = false;
       return scheduler.cancel('layout');
     },
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      pendingForceRender = false;
       const errors = [];
       try { observer?.disconnect(); } catch (error) { errors.push(error); }
       observer = null;

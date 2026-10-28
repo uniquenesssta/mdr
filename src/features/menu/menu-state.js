@@ -61,7 +61,14 @@ export const MENU_DECLARATION = Object.freeze([
   descriptor('menu.help.open', MENU_COMMAND_IDS.HELP_OPEN)
 ]);
 
-const DECLARATION_BY_ID = new Map(MENU_DECLARATION.map(item => [item.commandId, item]));
+// Recent rows are projected by their own controller, outside the static DOM
+// declaration. Their commands still use the same enabled/visible authority.
+const RECENT_FILES_DECLARATION = Object.freeze([
+  descriptor('menu.file.recent', MENU_COMMAND_IDS.RECENT_FILE_OPEN),
+  descriptor('menu.file.clearRecent', MENU_COMMAND_IDS.RECENT_FILES_CLEAR)
+]);
+const DECLARATION_BY_ID = new Map([...MENU_DECLARATION, ...RECENT_FILES_DECLARATION]
+  .map(item => [item.commandId, item]));
 
 export function createMenuState({ selectors = {} } = {}) {
   let destroyed = false;

@@ -1,7 +1,7 @@
 /**
  * Responsibility: Final Stage 9 bidirectional selection orchestration. It coordinates Readers, frozen model-kernel mapping, Highlight Session, Feedback Guard and Retry Scheduler without owning any of those specialist responsibilities.
  * Imports: No production imports; every editor/model/preview/scroll/mapping/runtime capability is injected by the composition root.
- * State/side effects: Owns only selection orchestration listener lifecycle, two cancellable scheduling frames, dedupe/alignment state and orchestration statistics.
+ * State/side effects: Owns selection listeners, two cancellable frames, one document-scoped Editor navigation intent, dedupe/alignment state and statistics. Chapter work stays with Preview.
  * Lifecycle: start()/stop() are idempotent; destroy() is terminal and removes every owned listener/frame/subscription while leaving injected dependencies to their owners.
  */
 
@@ -120,7 +120,7 @@ export class SelectionSyncController {
     assertMethods(highlightSession, REQUIRED_HIGHLIGHT_METHODS, 'SelectionHighlightSession');
     assertMethods(retryScheduler, REQUIRED_RETRY_METHODS, 'SelectionRetryScheduler');
     assertMethods(selectionMapping, REQUIRED_MAPPING_METHODS, 'frozen selectionMappingApi');
-    assertMethods(scrollController, ['scrollTo'], 'ScrollSyncController');
+    assertMethods(scrollController, ['scrollTo', 'getState'], 'ScrollSyncController');
     if (!documentRef || typeof documentRef.addEventListener !== 'function' || typeof documentRef.removeEventListener !== 'function') {
       throw new TypeError('SelectionSyncController requires documentRef event target');
     }
@@ -165,6 +165,7 @@ export class SelectionSyncController {
     this.lastEditorKey = '';
     this.lastPreviewKey = '';
     this.editorAlignmentUntil = 0;
+    this.editorIntent = null;
     this.finalFeedbackState = null;
     this.stats = {
       editorRequests: 0,
@@ -183,7 +184,13 @@ export class SelectionSyncController {
         this.scheduleEditor(Boolean(event?.shiftKey), 'editor-keyup');
       }
     };
-    this.onEditorPointerDown = () => { this.editorPointerActive = true; };
+    this.onEditorPointerDown = () => {
+      this.editorPointerActive = true;
+      this.editorIntent = null;
+      this.highlightSession.clear();
+      this.retryScheduler.cancel();
+      this.cancelScheduledFrame('editor');
+    };
     this.onDocumentPointerUp = () => {
       if (!this.editorPointerActive) return;
       this.editorPointerActive = false;
@@ -234,6 +241,7 @@ export class SelectionSyncController {
 
   stop() {
     if (this.destroyed) return;
+    this.editorIntent = null;
     this.retryScheduler.cancel();
     this.cancelScheduledFrame('editor');
     this.cancelScheduledFrame('preview');
@@ -286,6 +294,51 @@ export class SelectionSyncController {
     return `${this.documentModel.getDocumentVersion()}:${from}:${to}:${this.feedbackGuard.getRevision()}`;
   }
 
+  selectionIdentity(selection = this.editorSelectionReader.read()) {
+    return `${this.documentModel.documentId || ''}:${this.documentModel.generation || 0}:${this.documentModel.getDocumentVersion()}:${selection?.from}:${selection?.to}`;
+  }
+
+  isEditorIntentCurrent(intent = this.editorIntent) {
+    if (this.destroyed || !intent || intent !== this.editorIntent || this.isHybridLayout()) return false;
+    const scroll = this.scrollController.getState();
+    return intent.identity === this.selectionIdentity()
+      && scroll.sourceSide !== 'preview'
+      && !['wheel', 'touch'].includes(scroll.sourceReason);
+  }
+
+  prepareEditorIntent(selection) {
+    if (!this.isEditorIntentCurrent()) {
+      this.editorIntent = {
+        identity: this.selectionIdentity(selection),
+        scopePending: false
+      };
+    }
+    return this.editorIntent;
+  }
+
+  requestPreviewScope(line) {
+    const intent = this.prepareEditorIntent(this.editorSelectionReader.read());
+    if (intent.scopePending) return;
+    intent.scopePending = true;
+    // Keep this exact selection alive across asynchronous chapter work. A new
+    // gesture/document/selection invalidates it, independently of DOM revisions.
+    Promise.resolve().then(() => {
+      if (!this.isEditorIntentCurrent(intent)) return false;
+      return this.focusPreviewLine(line, { behavior: 'auto', scroll: false,
+        isCurrent: () => this.isEditorIntentCurrent(intent) });
+    }).then(ready => {
+      if (!this.isEditorIntentCurrent(intent)) return;
+      intent.scopePending = false;
+      if (ready === false) { this.editorIntent = null; return; }
+      this.scheduleEditor(true, 'editor-scope-ready', { force: true, frames: 2, extendAlignment: false });
+    }, error => {
+      if (!this.isEditorIntentCurrent(intent)) return;
+      this.editorIntent = null;
+      this.diagnostic('selection.sync-anomaly', { category: 'sync.selection', status: 'error',
+        details: { direction: 'editor-to-preview', reason: 'preview-focus-failed', message: error?.message || String(error) } });
+    });
+  }
+
   scheduleEditor(shouldScroll = false, reason = 'editor-selection', options = {}) {
     if (this.destroyed) return false;
     if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) {
@@ -303,7 +356,10 @@ export class SelectionSyncController {
 
   runEditor(shouldScroll, reason, force, attempt) {
     if (this.destroyed || this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) return null;
+    if (['wheel', 'touch'].includes(this.scrollController.getState().sourceReason)) shouldScroll = false;
     const selection = this.editorSelectionReader.read();
+    if (!this.isEditorIntentCurrent()) this.editorIntent = null;
+    if (shouldScroll && selection && !selection.isCollapsed) this.prepareEditorIntent(selection);
     const key = this.makeEditorKey(selection);
     if (!force && key === this.lastEditorKey) return null;
     const token = this.feedbackGuard.begin('editor');
@@ -315,7 +371,7 @@ export class SelectionSyncController {
       this.feedbackGuard.release(token, 32);
     }
     this.recordResult('editor-to-preview', reason, result);
-    if (result?.status === 'pending') {
+    if (result?.status === 'pending' && !this.editorIntent?.scopePending) {
       const scheduled = this.retryScheduler.schedule({
         version: key,
         getVersion: () => this.makeEditorKey(),
@@ -341,6 +397,7 @@ export class SelectionSyncController {
     if (this.destroyed || this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return null;
     const selection = snapshotProvided ? snapshot : this.previewSelectionReader.read();
     if (!selection) return null;
+    this.editorIntent = null;
     const key = `${selection.text || ''}:${selection.anchorOffset || 0}:${selection.focusOffset || 0}:${this.feedbackGuard.getRevision()}`;
     if (!force && key === this.lastPreviewKey) return null;
     const token = this.feedbackGuard.begin('preview');
@@ -413,10 +470,11 @@ export class SelectionSyncController {
     const virtual = this.getPreviewVirtual();
     if (!virtual?.active) return true;
     if (virtual.containsLineRange?.(fromLine, toLine) === false) {
-      void this.focusPreviewLine(fromLine, { behavior: 'auto', scroll: Boolean(shouldScroll) });
+      if (shouldScroll) this.requestPreviewScope(fromLine);
       return false;
     }
-    if (shouldScroll || virtual.hasLineRangeMounted?.(fromLine, toLine) === false) {
+    if (!shouldScroll && virtual.hasLineRangeMounted?.(fromLine, toLine) === false) return false;
+    if (shouldScroll) {
       virtual.ensureLineRangeVisible?.(fromLine, toLine) || virtual.ensureLineVisible?.(fromLine);
       this.requirePreviewMapper().invalidateStructure?.();
     }
@@ -442,6 +500,17 @@ export class SelectionSyncController {
     });
   }
 
+  getEditorContentYForPosition(position) {
+    const rect = this.editorApi.getPositionCoordinates?.(position);
+    const viewport = this.editorApi.getScrollViewportRect?.();
+    if (rect && viewport && Number.isFinite(rect.top) && Number.isFinite(rect.bottom)) {
+      return this.editorApi.getScrollMetrics().top + (rect.top + rect.bottom) / 2 - viewport.top;
+    }
+    // Unmounted positions use the frozen mapper's estimate. Visible words need
+    // their actual wrapped row rather than the midpoint of the whole paragraph.
+    return this.editorMapper.getContentYForPosition(position);
+  }
+
   syncEditorToPreview(shouldScroll = false, reason = 'editor-selection', selectionSnapshot = null) {
     if (this.destroyed) return { status: 'destroyed', selectionLength: 0, matchedAnchors: 0 };
     if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) {
@@ -465,7 +534,8 @@ export class SelectionSyncController {
     const fromLine = this.editorMapper.getLineNumberAtPosition(from);
     const toLine = this.editorMapper.getLineNumberAtPosition(endPosition);
     if (!this.ensurePreviewRangeReady(fromLine, toLine, shouldScroll)) {
-      return { status: 'pending', selectionLength: to - from, matchedAnchors: 0 };
+      this.highlightSession.clear();
+      return { status: shouldScroll ? 'pending' : 'offscreen', selectionLength: to - from, matchedAnchors: 0, sourceStart: from, sourceEnd: to };
     }
     const createPlan = () => this.buildPreviewHighlightPlan(from, to);
     const plan = createPlan();
@@ -473,7 +543,7 @@ export class SelectionSyncController {
       return { status: this.getPreviewVirtual()?.active ? 'pending' : 'mapping-failed', selectionLength: to - from, matchedAnchors: 0 };
     }
     this.highlightSession.show(plan, { restore: createPlan });
-    const editorY = this.editorMapper.getContentYForPosition(from + Math.floor((to - from) / 2));
+    const editorY = this.getEditorContentYForPosition(from + Math.floor((to - from) / 2));
     const sourceViewportRatio = clamp(
       (editorY - this.editorApi.getScrollMetrics().top) / Math.max(1, this.editorApi.getScrollMetrics().clientHeight),
       0.05,
@@ -489,6 +559,8 @@ export class SelectionSyncController {
       mappingCoverage: Math.min(plan.visibleCoverage, plan.projectionCoverage),
       mappingMode: 'source-dom',
       exactMapping: true,
+      sourceStart: from,
+      sourceEnd: to,
       sourceViewportRatio,
       targetViewportRatio: sourceViewportRatio
     };
@@ -542,12 +614,11 @@ export class SelectionSyncController {
     if (end <= start) {
       return { status: 'mapping-failed', selectionLength: selection.text?.length || 0, matchedAnchors: 2, mappingCoverage: coverage };
     }
-    this.editorApi.focus({ preventScroll: true });
     this.editorApi.setSelection(start, end);
     const selectionRect = rangeViewportRect(range);
     const sourceViewportRatio = viewportRatioForRect(this.preview, selectionRect);
     const targetIndex = start + Math.floor((end - start) / 2);
-    const editorY = this.editorMapper.getContentYForPosition(targetIndex);
+    const editorY = this.getEditorContentYForPosition(targetIndex);
     const behavior = /pointerup|keyup|selectionchange/.test(reason) ? 'smooth' : 'auto';
     this.scrollController.scrollTo('editor', editorY - this.editorApi.getScrollMetrics().clientHeight * sourceViewportRatio, {
       behavior,
@@ -556,11 +627,11 @@ export class SelectionSyncController {
       settleMs: behavior === 'smooth' ? 1000 : 700
     });
     this.updateActiveLine(this.editorMapper.getLineNumberAtPosition(start));
-    const highlight = this.syncEditorToPreview(false, 'preview-selection-confirm', {
-      from: start,
-      to: end,
-      isCollapsed: false
-    });
+    // This is still the Preview-owned operation. Re-entering editor-to-preview
+    // synchronization is correctly blocked by the feedback guard and loses its highlight.
+    const createPlan = () => this.buildPreviewHighlightPlan(start, end);
+    const highlight = createPlan();
+    if (highlight) this.highlightSession.show(highlight, { restore: createPlan });
     return {
       status: 'mapped',
       selectionLength: selection.text?.length || end - start,
@@ -579,21 +650,32 @@ export class SelectionSyncController {
     if (this.destroyed) return;
     this.feedbackGuard.advanceRevision();
     this.highlightSession.restore();
-    if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return;
+    // A mount notification is an internal continuation of the Editor request,
+    // not a new Preview selection competing with it.
+    if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true }) || this.editorIntent?.scopePending || this.editorPointerActive) return;
     const editorSelection = this.editorSelectionReader.read();
     if (!editorSelection || editorSelection.isCollapsed) return;
     this.stats.previewRefreshes += 1;
-    const shouldRealign = this.now() < this.editorAlignmentUntil;
-    this.scheduleEditor(shouldRealign, reason, { force: true, frames: 1, extendAlignment: false });
+    const shouldRealign = this.shouldRealignEditorSelection();
+    this.scheduleEditor(shouldRealign, reason, { force: true, frames: 2, extendAlignment: false });
   }
 
   notifyPreviewReplaced(reason = 'preview-replaced') {
     this.notifyPreviewMounted(reason);
   }
 
+  shouldRealignEditorSelection() {
+    const source = this.scrollController.getState();
+    return this.now() < this.editorAlignmentUntil && source.sourceSide !== 'preview'
+      && !['wheel', 'touch', 'keyboard'].includes(source.sourceReason);
+  }
+
   notifyEditorGeometry(reason = 'editor-geometry') {
-    if (this.destroyed || this.feedbackGuard.shouldIgnore('editor')) return;
+    if (this.destroyed || this.feedbackGuard.shouldIgnore('editor', { allowSource: true }) || this.editorIntent?.scopePending || this.editorPointerActive) return;
     this.stats.editorGeometryRefreshes += 1;
+    // Geometry measurements follow the current scroll gesture; they must not
+    // pull a virtual window back to an old selection that the user scrolled away from.
+    if (this.scrollController.getState().sourceSide === 'preview') return;
     const previewSelection = this.previewSelectionReader.read();
     if (previewSelection) {
       this.schedulePreview(reason, { force: true, frames: 2 });
@@ -601,12 +683,13 @@ export class SelectionSyncController {
     }
     const editorSelection = this.editorSelectionReader.read();
     if (editorSelection && !editorSelection.isCollapsed) {
-      this.scheduleEditor(true, reason, { force: true, frames: 2, extendAlignment: false });
+      this.scheduleEditor(this.shouldRealignEditorSelection(), reason, { force: true, frames: 2, extendAlignment: false });
     }
   }
 
   clear() {
     if (this.destroyed) return;
+    this.editorIntent = null;
     this.lastEditorKey = '';
     this.lastPreviewKey = '';
     this.retryScheduler.cancel();
@@ -615,7 +698,7 @@ export class SelectionSyncController {
 
   recordResult(direction, reason, result = {}) {
     const status = result?.status || 'unknown';
-    if (status === 'hybrid' || status === 'cleared' || status === 'locked' || status === 'destroyed') return;
+    if (status === 'hybrid' || status === 'cleared' || status === 'locked' || status === 'destroyed' || status === 'offscreen') return;
     const details = {
       direction,
       reason,

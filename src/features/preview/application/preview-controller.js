@@ -38,9 +38,9 @@ export function createPreviewController(options = {}) {
   };
   const isHybrid = () => layoutState.snapshot.mode === 'hybrid';
 
-  const update = () => {
+  const update = optionsValue => {
     assertActive();
-    return renderEngine.update();
+    return renderEngine.update(optionsValue);
   };
 
   layoutStability.connect({

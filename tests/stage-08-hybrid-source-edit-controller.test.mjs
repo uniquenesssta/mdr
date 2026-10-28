@@ -57,12 +57,22 @@ test('Atomic 8.4 opens SOURCE through the editor port with frozen range, selecti
     ['mark', 'editor', 420],
     ['focus'],
     ['reveal', {
-      sourceFrom: 20, sourceTo: 80, selectionFrom: 30, selectionTo: 70, position: 35, yMargin: 120
+      sourceFrom: 20, sourceTo: 80, selectionFrom: 30, selectionTo: 70, position: 35, yMargin: 120, preserveViewport: true
     }]
   ]);
   assert.equal(h.calls.some(call => call[0] === 'geometry'), false);
   h.frames.shift()();
   assert.deepEqual(h.calls.at(-1), ['geometry', 'source-opened']);
+});
+
+test('visible widget source activation retains the viewport while clipped or missing anchors still reveal source', () => {
+  for (const [anchorRect, preserveViewport] of [[{ top: 220 }, true], [{ top: 99 }, false],
+    [{ top: 580 }, false], [undefined, false]]) {
+    const h = createHarness();
+    h.controller.open({ componentType: 'image', from: 20, to: 80 }, { anchorRect });
+    assert.equal(h.calls.find(call => call[0] === 'reveal')[1].preserveViewport, preserveViewport);
+    h.controller.destroy();
+  }
 });
 
 test('Atomic 8.4 maps the active range and closes SOURCE when selection leaves it', () => {
@@ -114,6 +124,20 @@ test('Atomic 8.4 keeps an inside-source editor-line pointer open and blurs only 
   full.calls.length = 0;
   assert.equal(full.controller.closeFromPointer({ button: 0, targetIsEditorLine: false }), true);
   assert.deepEqual(full.calls.find(call => call[0] === 'blur'), ['blur']);
+});
+
+test('an explicit click below a source block at document end exits to the append target instead of blurring', () => {
+  const h = createHarness({ documentLength: 40, position: 40 });
+  h.controller.open({ componentType: 'code', from: 0, to: 40 });
+  h.calls.length = 0;
+  let selected;
+  h.port.setSelection = (position, options) => { selected = { position, options }; return 41; };
+  assert.equal(h.controller.closeFromPointer({ button: 0, targetIsEditorLine: false, afterSourceEnd: true }), true);
+  assert.deepEqual(selected, { position: 40, options: {
+    sourceRange: { from: 0, to: 40, componentType: 'code', componentKey: 'code:0' }, appendAfterSource: true
+  } });
+  assert.equal(h.calls.some(call => call[0] === 'blur'), false);
+  assert.equal(h.closes.at(-1).fallbackPosition, 41);
 });
 
 test('Atomic 8.4 invalidates stale deferred geometry and destroy is terminal', () => {

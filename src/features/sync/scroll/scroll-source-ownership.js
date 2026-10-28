@@ -40,6 +40,8 @@ export class ScrollSourceOwnership {
     this.sourceReason = String(reason || 'user');
     this.sourceLastEventAt = this.now();
     this.programmaticUntil[side] = 0;
+    // A new wheel/pointer/key gesture takes precedence over an older selection's scroll settlement.
+    this.suspendedUntil = 0;
     return { accepted: true, sourceChanged };
   }
 

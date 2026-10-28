@@ -1,12 +1,13 @@
 /**
  * Responsibility: Adapt one CodeMirror view to the Hybrid source editor capability contract.
- * Imports: CodeMirror state and view primitives only; Hybrid controllers stay vendor-neutral.
+ * Imports: CodeMirror state/view primitives and the Editor's shared pointer resolver; Hybrid controllers stay vendor-neutral.
  * Exports: createCodeMirrorSourceEditorPort and revealHybridSourceRangeEffect for Editor integration.
  * State/side effects: View capability calls and one terminal destroyed flag; no application state.
  * Lifecycle: Explicit port construction with idempotent destroy; all subsequent capabilities reject.
  */
 import { StateEffect } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
+import { getHybridParagraphBoundary, prepareHybridParagraphSelection, resolvePrecisePointerPosition } from './pointer-selection/precise-pointer-selection.js';
 
 export const revealHybridSourceRangeEffect = StateEffect.define();
 
@@ -66,10 +67,10 @@ export function createCodeMirrorSourceEditorPort(view, options = {}) {
             from: Number(request.sourceFrom) || 0,
             to: Number(request.sourceTo) || 0
           }),
-          EditorView.scrollIntoView(Number(request.position) || 0, {
+          ...(!request.preserveViewport ? [EditorView.scrollIntoView(Number(request.position) || 0, {
             y: 'start',
             yMargin: Math.max(0, Number(request.yMargin) || 0)
-          })
+          })] : [])
         ]
       });
     },
@@ -99,12 +100,40 @@ export function createCodeMirrorSourceEditorPort(view, options = {}) {
 
     positionAtCoordinates(coords) {
       assertAlive();
-      return editorView.posAtCoords({ x: Number(coords?.x) || 0, y: Number(coords?.y) || 0 });
+      const clientX = Number(coords?.x) || 0, clientY = Number(coords?.y) || 0;
+      return resolvePrecisePointerPosition(editorView, {
+        clientX, clientY, target: editorView.dom.ownerDocument.elementFromPoint?.(clientX, clientY)
+      })?.pos ?? null;
     },
 
-    setSelection(position) {
+    setSelection(position, { sourceRange, appendAfterSource = false } = {}) {
       assertAlive();
-      editorView.dispatch({ selection: { anchor: Math.max(0, Number(position) || 0) } });
+      const doc = editorView.state.doc;
+      let anchor = Math.max(0, Math.min(doc.length, Number(position) || 0));
+      let changes;
+      let normalized = false;
+      const line = doc.lineAt(anchor);
+      const skipTableSeparator = sourceRange?.componentType === 'table'
+        && anchor === sourceRange.to + 1 && line.from === anchor && line.to === anchor;
+      if (appendAfterSource && sourceRange?.to === doc.length && !editorView.state.readOnly) {
+        const required = ['code', 'mermaid'].includes(sourceRange.componentType) ? 1 : 2;
+        const trailing = doc.sliceString(Math.max(0, doc.length - 2), doc.length).match(/\n*$/)[0].length;
+        const insert = '\n'.repeat(Math.max(0, required - trailing));
+        if (insert) changes = { from: doc.length, insert };
+        anchor = doc.length + insert.length;
+        normalized = true;
+      } else if (skipTableSeparator) {
+        if (line.number < doc.lines) { anchor = doc.line(line.number + 1).from; normalized = true; }
+        else if (!editorView.state.readOnly) { changes = { from: doc.length, insert: '\n' }; anchor = doc.length + 1; normalized = true; }
+      }
+      const paragraph = !changes && !normalized ? getHybridParagraphBoundary(editorView, anchor,
+        anchor === sourceRange?.to + 1 ? sourceRange.componentType : '') : null;
+      if (paragraph) { changes = paragraph.changes; anchor = paragraph.anchor; }
+      const prepared = prepareHybridParagraphSelection(anchor, changes ? { changes, anchor,
+        beforeComposition: ['code', 'mermaid', 'table', 'image', 'math', 'html'].includes(sourceRange?.componentType) } : null);
+      editorView.dispatch({ selection: { anchor: prepared.anchor }, effects: prepared.effects,
+        ...(paragraph || normalized ? { userEvent: 'select.pointer.normalized' } : {}) });
+      return prepared.anchor;
     },
 
     blur() {

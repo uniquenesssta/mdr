@@ -1,7 +1,7 @@
 /**
  * Responsibility: Read CodeMirror/DOM caret, visible-line and pointer geometry needed to resolve document boundaries without owning selection policy.
  * Imports: No module imports; consumes only the injected CodeMirror view/event and their DOM APIs, never document/session/persistence state.
- * Exports: clampDocumentPosition, readTargetLine, readNativeCaretPosition, readPositionRect, measurePointerDistance, findBestPositionNear and readDragBoundaryContext.
+ * Exports: Caret/line geometry readers, including content-free rendered/source line diagnostic context.
  * State/side effects: No owned state; performs bounded DOM/CodeMirror geometry reads only.
  * Lifecycle: Pure-with-view helper module; no start/destroy lifecycle.
  */
@@ -30,8 +30,23 @@ function readLineRecord(view, element) {
   if (!element || !view.contentDOM.contains(element)) return null;
   try {
     const domPosition = view.posAtDOM(element, 0);
-    const line = view.state.doc.lineAt(clampDocumentPosition(domPosition, 0, view.state.doc.length));
-    return { element, line, rect: element.getBoundingClientRect() };
+    if (!Number.isInteger(domPosition) || domPosition < 0 || domPosition > view.state.doc.length) return null;
+    const mappedLine = view.state.doc.lineAt(domPosition);
+    const previousBlock = element.previousElementSibling?.matches('.cm-hybrid-block-widget')
+      ? element.previousElementSibling : null;
+    const lineBlock = previousBlock ? view.lineBlockAt(domPosition) : null;
+    const blocks = Array.isArray(lineBlock?.type) ? lineBlock.type : lineBlock ? [lineBlock] : [];
+    const blockEnd = blocks.find(block => block.widget && block.to === domPosition)?.to;
+    const trailingBlockBoundary = Boolean(previousBlock && !element.textContent
+      && domPosition === blockEnd);
+    const needsTrailingLine = trailingBlockBoundary && mappedLine.number === view.state.doc.lines;
+    const line = trailingBlockBoundary && !needsTrailingLine ? view.state.doc.line(mappedLine.number + 1) : mappedLine;
+    return { element, line, mappedLine, position: domPosition, needsTrailingLine, trailingBlockBoundary,
+      previousBlockType: previousBlock?.dataset.hybridBlockType || '',
+      paragraphBoundary: Boolean(previousBlock && ['table', 'image', 'math', 'html'].includes(previousBlock.dataset.hybridBlockType)),
+      tableBoundary: trailingBlockBoundary && previousBlock.dataset.hybridBlockType === 'table',
+      boundaryPosition: trailingBlockBoundary && !needsTrailingLine ? line.from : null,
+      rect: element.getBoundingClientRect() };
   } catch (_) {
     return null;
   }
@@ -71,6 +86,38 @@ export function readTargetLine(view, event) {
     if (!best || score < best.score) best = { element, score };
   }
   return best ? readLineRecord(view, best.element) : null;
+}
+
+/** Keep the rendered row separate from its source mapping at replaced block edges. */
+export function readPointerLineContext(view, event) {
+  const target = readTargetLine(view, event);
+  if (!target) return null;
+  const { element, line, mappedLine, rect, trailingBlockBoundary, tableBoundary, paragraphBoundary, needsTrailingLine } = target;
+  const viewport = view.scrollDOM.getBoundingClientRect();
+  const visibleLines = Array.from(view.contentDOM.querySelectorAll('.cm-line')).filter(node => {
+    const bounds = node.getBoundingClientRect();
+    return bounds.height > 0 && bounds.bottom > viewport.top && bounds.top < viewport.bottom;
+  });
+  return {
+    pointerX: event.clientX, pointerY: event.clientY,
+    renderedRow: visibleLines.indexOf(element) + 1,
+    mappedLine: mappedLine.number, expectedLine: needsTrailingLine
+      ? line.number + (paragraphBoundary && line.to > line.from ? 2 : 1) : line.number,
+    expectedPosition: needsTrailingLine ? line.to : line.from,
+    trailingBlockBoundary,
+    tableBoundary,
+    targetTop: rect.top, targetBottom: rect.bottom
+  };
+}
+
+/** Read the same source row after a reveal/collapse has changed its geometry. */
+export function readSourceLineRect(view, position) {
+  const line = view.state.doc.lineAt(clampDocumentPosition(position, 0, view.state.doc.length));
+  for (const element of view.contentDOM?.querySelectorAll?.('.cm-line') || []) {
+    const record = readLineRecord(view, element);
+    if (record?.line.from === line.from && record.rect.height > 0) return record.rect;
+  }
+  return null;
 }
 
 export function readNativeCaretPosition(view, event) {

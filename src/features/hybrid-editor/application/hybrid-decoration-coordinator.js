@@ -73,6 +73,13 @@ export class HybridDecorationCoordinator {
     const from = Math.max(0, Number(descriptor?.from) || 0);
     let to = Math.max(from, Number(descriptor?.to) || from);
     const type = String(descriptor?.type || '');
+    // The empty separator after a table belongs to its presentation, rather
+    // than being offered as a text row whose input would become another cell.
+    if (type === 'table' && to < view.state.doc.length
+      && view.state.doc.sliceString(to, to + 1) === '\n') {
+      const separator = view.state.doc.lineAt(to + 1);
+      if (separator.from === to + 1 && separator.to === separator.from) to = separator.to;
+    }
     if ((type === 'code' || type === 'mermaid')
       && to === view.state.doc.length
       && to > from
@@ -131,17 +138,43 @@ export class HybridDecorationCoordinator {
     }).join('|');
   }
 
-  build(view) {
+  build(view, { sourceSelectionRanges = [] } = {}) {
     const started = this.now();
     try {
       const tree = this.getSyntaxTree(view);
-      const editableRanges = this.getEditableRanges(view, tree);
+      const selection = view.state.selection?.main;
+      // Frozen range discovery keeps a presentation-origin drag rendered. Retain
+      // a source-origin drag here so activating a source row is not undone by selecting it.
+      const retainSource = view.hasFocus !== false && selection && !selection.empty
+        && sourceSelectionRanges.some(range => selection.anchor >= range.from && selection.anchor <= range.to);
+      const retainedSourceRanges = retainSource ? [...sourceSelectionRanges, {
+        from: Math.min(selection.anchor, selection.head), to: Math.max(selection.anchor, selection.head), revealBlock: true
+      }] : [];
+      const editableRanges = [...this.getEditableRanges(view, tree), ...retainedSourceRanges]
+        .sort((a, b) => a.from - b.from).reduce((merged, range) => {
+          const previous = merged.at(-1);
+          if (previous && range.from <= previous.to + 1) {
+            previous.to = Math.max(previous.to, range.to);
+            previous.revealBlock ||= range.revealBlock;
+          } else merged.push({ ...range });
+          return merged;
+        }, []);
       const activeSourceRange = this.getActiveSourceRange(view) || null;
-      const protectedSourceRanges = activeSourceRange ? [activeSourceRange] : [];
-      const blocks = this.validateBlocks(
+      // An IME owns the live text DOM until compositionend. A block replacement
+      // over that range would detach the very node CodeMirror is composing in.
+      const protectedSourceRanges = [
+        ...(activeSourceRange ? [activeSourceRange] : []),
+        ...(retainSource ? editableRanges : []),
+        ...(view.compositionStarted ? editableRanges : [])
+      ];
+      const candidates = this.validateBlocks(
         view,
         this.collectHybridBlocks(view, tree, protectedSourceRanges)
       );
+      const blocks = view.compositionStarted ? candidates.filter(block => {
+        const range = this.getBlockPresentationRange(view, block);
+        return !editableRanges.some(editable => editable.from <= range.to && editable.to >= range.from);
+      }) : candidates;
       const blockRanges = blocks.map(block => this.getBlockPresentationRange(view, block));
       const blockDecorationRanges = [];
       for (let index = 0; index < blocks.length; index += 1) {
@@ -191,6 +224,7 @@ export class HybridDecorationCoordinator {
       }
 
       const result = {
+        editableSourceRanges: editableRanges,
         decorations: this.createDecorationSet(inline.ranges),
         blockDecorations: this.createDecorationSet(blockDecorationRanges),
         blockSignature: this.getBlockSignature(blocks, {

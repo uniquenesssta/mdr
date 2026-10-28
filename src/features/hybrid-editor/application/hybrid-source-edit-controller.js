@@ -151,7 +151,10 @@ export class HybridSourceEditController {
       selectionFrom,
       selectionTo,
       position,
-      yMargin
+      yMargin,
+      // An already visible block keeps CodeMirror's document scroll anchor.
+      // Aligning its source glyph to the card edge introduces a fresh offset on every open.
+      preserveViewport: Number.isFinite(anchorTop) && relativeTop >= 0 && relativeTop < availableHeight
     });
     this.#scheduleDeferredGeometry('source-opened');
     return this.getActiveRange();
@@ -199,14 +202,15 @@ export class HybridSourceEditController {
       x: Number(pointer.x) || 0,
       y: Number(pointer.y) || 0
     });
-    const clickedSourceLine = Boolean(pointer.targetIsEditorLine)
+    const afterSourceEnd = Boolean(pointer.afterSourceEnd) && range.to === this.editorPort.getDocumentLength();
+    const clickedSourceLine = !afterSourceEnd && Boolean(pointer.targetIsEditorLine)
       && Number.isInteger(clickedPosition)
       && clickedPosition >= range.from
       && clickedPosition <= range.to;
     if (clickedSourceLine) return false;
 
-    let fallbackPosition = Number.isInteger(clickedPosition) ? clickedPosition : null;
-    if (fallbackPosition !== null
+    let fallbackPosition = afterSourceEnd ? range.to : Number.isInteger(clickedPosition) ? clickedPosition : null;
+    if (!afterSourceEnd && fallbackPosition !== null
       && fallbackPosition >= range.from
       && fallbackPosition <= range.to) {
       fallbackPosition = null;
@@ -222,7 +226,10 @@ export class HybridSourceEditController {
     this.close('pointer-outside-source', { trigger: 'pointer-outside-source' });
     pointer.preventDefault?.();
     pointer.stopPropagation?.();
-    if (fallbackPosition !== null) this.editorPort.setSelection(fallbackPosition);
+    if (fallbackPosition !== null) {
+      const selectedPosition = this.editorPort.setSelection(fallbackPosition, { sourceRange: range, appendAfterSource: afterSourceEnd });
+      if (Number.isInteger(selectedPosition)) fallbackPosition = selectedPosition;
+    }
     else this.editorPort.blur();
     this.recordClose({
       trigger: 'pointer-outside-source',

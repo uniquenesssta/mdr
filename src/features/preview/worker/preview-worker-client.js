@@ -36,8 +36,8 @@ function resolvePreviewFocusPosition(source, editor, selection) {
 }
 
 export class PreviewWorkerClient {
-  constructor() {
-    this.session = createPreviewWorkerSession({ createWorker });
+  constructor({ createWorker: workerFactory = createWorker } = {}) {
+    this.session = createPreviewWorkerSession({ createWorker: workerFactory });
     this.active = null;
     this.pendingUpdate = null;
     this.pendingPrewarm = null;
@@ -46,6 +46,8 @@ export class PreviewWorkerClient {
     this.headings = [];
     this.statistics = null;
     this.documentSource = null;
+    this.syncedSource = null;
+    this.syncedIdentity = '';
   }
 
   update(documentSource, source, forceFull = false, options = {}) {
@@ -60,7 +62,8 @@ export class PreviewWorkerClient {
     api?.registerConsumer?.('preview', sessionState.initialized ? sessionState.syncedVersion : version);
     const selection = getSourceSelection(api, editor);
     const focusPosition = resolvePreviewFocusPosition(api, editor, selection);
-    const focusLine = api?.getLineNumberAtPosition?.(focusPosition) || 1;
+    const focusLine = Number.isSafeInteger(options.focusLine) && options.focusLine > 0
+      ? options.focusLine : api?.getLineNumberAtPosition?.(focusPosition) || 1;
     const getSource = typeof source === 'function'
       ? source
       : () => String(source ?? '');
@@ -68,6 +71,7 @@ export class PreviewWorkerClient {
       const request = {
         kind: 'update',
         documentSource: api,
+        identity: `${api.documentId || ''}:${api.generation || 0}`,
         editor,
         getSource,
         forceFull,
@@ -114,7 +118,7 @@ export class PreviewWorkerClient {
     const api = request.documentSource || resolveDocumentSource(request.editor);
     let type;
     let payload;
-    if (!sessionState.initialized) {
+    if (!sessionState.initialized || this.syncedSource !== api || this.syncedIdentity !== request.identity) {
       const snapshot = typeof api?.createSnapshotPayload === 'function'
         ? api.createSnapshotPayload('preview-worker-reset')
         : { source: request.getSource(), sourceChunks: null };
@@ -126,6 +130,9 @@ export class PreviewWorkerClient {
         indexOnly: request.indexOnly,
         focusLine: request.focusLine
       };
+    } else if (!request.forceFull && request.version === sessionState.syncedVersion) {
+      type = 'focus';
+      payload = { focusLine: request.focusLine, indexOnly: request.indexOnly };
     } else {
       const transactions = typeof api?.getChangesSince === 'function'
         ? api.getChangesSince(sessionState.syncedVersion, 'preview')
@@ -199,6 +206,8 @@ export class PreviewWorkerClient {
   applyUpdateResult(message, active) {
     const workerVersion = this.session.snapshot.syncedVersion;
     const result = message.result || {};
+    this.syncedSource = active.documentSource;
+    this.syncedIdentity = active.identity;
     if (Array.isArray(result.fullBlocks)) {
       this.blocks = result.fullBlocks;
     } else if (result.blockPatch) {
@@ -334,6 +343,8 @@ export class PreviewWorkerClient {
     this.headings = [];
     this.statistics = null;
     this.documentSource = null;
+    this.syncedSource = null;
+    this.syncedIdentity = '';
   }
 
   destroy() {
@@ -353,6 +364,6 @@ export class PreviewWorkerClient {
   }
 }
 
-export function createPreviewWorkerClient() {
-  return new PreviewWorkerClient();
+export function createPreviewWorkerClient(options) {
+  return new PreviewWorkerClient(options);
 }

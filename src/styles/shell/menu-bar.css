@@ -45,7 +45,7 @@
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-floating);
       z-index: var(--layer-menu);
-      animation: menuIn var(--motion-duration-moderate) var(--motion-ease-emphasized);
+      animation: none;
 }
 
 .menu-dropdown-list.show { display: flex; }
@@ -105,8 +105,6 @@
       min-width: 160px;
 }
 
-.menu-submenu:hover > .menu-submenu-list,
-.menu-submenu:focus-within > .menu-submenu-list,
 .menu-submenu.is-submenu-open > .menu-submenu-list { display: flex; }
 
 .menu-separator { height: 1px; background: var(--color-border-subtle); margin: 5px var(--space-xs); }

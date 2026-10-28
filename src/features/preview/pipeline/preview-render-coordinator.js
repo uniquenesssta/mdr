@@ -16,7 +16,7 @@ const STRATEGIES = Object.freeze({
   DOM_INCREMENTAL: 'dom-incremental'
 });
 
-function chapterPreviewResult(result, minimumBlocks) {
+function chapterPreviewResult(result, minimumBlocks, contextBlocks) {
   const chapter = result?.focusChapter;
   const blocks = Array.isArray(result?.blocks) ? result.blocks : [];
   if (!chapter || !blocks.length) return result;
@@ -26,8 +26,10 @@ function chapterPreviewResult(result, minimumBlocks) {
     chapterStartIndex + 1,
     Math.min(blocks.length, Number(chapter.endIndex) || blocks.length)
   );
-  let startIndex = chapterStartIndex;
-  let endIndex = chapterEndIndex;
+  // Real neighboring text supplies the scroll range required to align a word
+  // near a chapter boundary. Virtual mounting still enforces its normal cap.
+  let startIndex = Math.max(0, chapterStartIndex - contextBlocks);
+  let endIndex = Math.min(blocks.length, chapterEndIndex + contextBlocks);
   if (endIndex - startIndex < minimumBlocks) {
     const missing = minimumBlocks - (endIndex - startIndex);
     startIndex = Math.max(0, startIndex - Math.ceil(missing / 2));
@@ -81,15 +83,20 @@ export function createPreviewRenderCoordinator({
       previewPerformanceMode = 'auto',
       previousMode = 'full',
       previousScopeKey = previousMode,
-      forceFullRebuild = false
+      forceFullRebuild = false,
+      viewportHeight = 0
     } = {}) {
       assertActive();
       const result = modelResult && typeof modelResult === 'object' ? modelResult : {};
       const blocks = Array.isArray(result.blocks) ? result.blocks : [];
       const normalizedSourceLength = Math.max(0, Number(sourceLength) || 0);
       const mode = resolveMode({ previewPerformanceMode }, normalizedSourceLength, blocks.length);
+      // Virtual block measurements have an 18px lower bound; reserve at most
+      // the existing maximum window budget on either side of the chapter.
+      const contextBlocks = Math.min(thresholds.virtualWindow?.maximumBlocks || 180,
+        Math.ceil(Math.max(0, Number(viewportHeight) || 0) / 18));
       const renderResult = mode === 'chapter'
-        ? chapterPreviewResult(result, minimumChapterBlocks)
+        ? chapterPreviewResult(result, minimumChapterBlocks, contextBlocks)
         : result;
       const scopeKey = mode === 'chapter'
         ? (renderResult?.previewScopeKey || 'chapter:document')

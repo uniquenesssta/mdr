@@ -38,7 +38,7 @@ function fixture(run) {
     git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'fixture');
     run({ repo, evidence, git, write, execute });
   } finally {
-    rmSync(root, { recursive: true, force: true });
+    // Retain this isolated fixture: repository policy prohibits recursive deletion.
   }
 }
 

@@ -156,6 +156,20 @@ test('R9-02 sequence allocation is monotonic and destroy is terminal and idempot
   assert.equal(ownership.getState().sourceSide, '');
 });
 
+test('a fresh user gesture immediately resumes linked scrolling after programmatic selection alignment', () => {
+  const { ownership, setTime } = makeOwnership();
+  setTime(10);
+  ownership.beginUserGesture('editor', 'pointer');
+  ownership.suspend(520);
+  ownership.markProgrammaticScroll('preview', 700);
+  setTime(20);
+  ownership.beginUserGesture('preview', 'wheel');
+  assert.equal(ownership.isSuspended(), false);
+  assert.equal(ownership.isProgrammatic('preview'), false);
+  assert.equal(ownership.getSourceSide(), 'preview');
+  ownership.destroy();
+});
+
 test('R9-02 scroll controller delegates source state to an injected owner and does not destroy external ownership', () => {
   const restoreFrames = installFrameRuntime();
   const { ownership, setTime } = makeOwnership();

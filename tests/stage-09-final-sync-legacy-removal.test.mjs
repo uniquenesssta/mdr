@@ -105,7 +105,7 @@ function createController(overrides = {}) {
     highlightSession,
     retryScheduler,
     selectionMapping,
-    scrollController: { scrollTo(...args) { scrollWrites.push(args); return true; } },
+    scrollController: { scrollTo(...args) { scrollWrites.push(args); return true; }, getState() { return { sourceSide: '' }; } },
     documentRef,
     requestFrame: callback => frames.request(callback),
     cancelFrame: id => frames.cancel(id),

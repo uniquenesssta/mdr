@@ -197,6 +197,22 @@ test('Atomic 7.9 skips redundant render for populated stable preview but still r
   assert.equal(h.counters.geometry, 2);
 });
 
+test('layout resize preserves an outstanding render required by a mode transition', async () => {
+  const h = createHarness();
+  h.counters.stable = true;
+  h.counters.target = { present: true, loading: false, empty: false };
+  h.stability.start();
+  h.stability.requestRefresh({ forceRender: true, reason: 'hybrid-to-preview' });
+  h.root.clientWidth += 80;
+  h.resizeCallback();
+  await h.settleVisible();
+  assert.equal(h.counters.renders, 1, 'geometry-only resize must retain the required render');
+  await h.runOne(h.frames);
+  h.stability.requestRefresh({ forceRender: false, reason: 'settled-resize' });
+  await h.settleVisible();
+  assert.equal(h.counters.renders, 1, 'successful rendering consumes the outstanding request');
+});
+
 test('Atomic 7.9 suspension and replacement requests prevent stale layout commits', async () => {
   const h = createHarness({ thresholds: { stableFrames: 0 } });
   h.stability.start();

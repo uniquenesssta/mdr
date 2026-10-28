@@ -42,8 +42,14 @@ export function createShellMenus({ document, window, toast, coreSubmenuPositione
       const target = document.getElementById(menuId);
       if (!target) return;
       const willShow = !target.classList.contains('show');
+      if (!willShow) { closeAppMenus(); return; }
+      openAppMenu(menuId);
+    }
+
+    function openAppMenu(menuId) {
+      const target = document.getElementById(menuId);
+      if (!target || target.classList.contains('show')) return;
       closeAppMenus();
-      if (!willShow) return;
       target.classList.add('show');
       const trigger = target.parentElement?.querySelector(':scope > .menu-trigger, :scope > button');
       trigger?.setAttribute('aria-expanded', 'true');
@@ -91,6 +97,13 @@ export function createShellMenus({ document, window, toast, coreSubmenuPositione
     lifetime.own(() => { toast.classList.remove('show'); closeContextMenus(); closeAppMenus(); });
     lifetime.own(coreEditorUiCommandPort.register({ notify: showToast, closeAppMenus, showContextMenu, closeContextMenus }));
     for (const trigger of document.querySelectorAll('[data-menu-toggle]')) {
+      lifetime.listen(trigger, 'pointerenter', event => {
+        if (event.pointerType === 'touch' || event.buttons) return;
+        if (!document.querySelectorAll('.menu-dropdown-list.show').length) return;
+        const id = trigger.dataset.menuToggle;
+        if (document.getElementById(id)?.classList.contains('show')) return;
+        openAppMenu(id);
+      });
       lifetime.listen(trigger, 'click', () => toggleAppMenu(trigger.dataset.menuToggle));
     }
     return Object.freeze({ showToast, closeAppMenus, closeContextMenus, toggleAppMenu, destroy: lifetime.destroy });

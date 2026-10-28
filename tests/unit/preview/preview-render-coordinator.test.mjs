@@ -148,6 +148,17 @@ test('Render Coordinator preserves unchanged reuse as its own strategy and never
   coordinator.destroy();
 });
 
+test('chapter scope retains real neighboring content for word alignment near either viewport edge', () => {
+  const coordinator = createPreviewRenderCoordinator();
+  const plan = coordinator.createPlan({ sourceLength: 5453875, viewportHeight: 1002,
+    modelResult: { blocks: blocks(400), changedIds: new Set(), removedIds: new Set(),
+      focusChapter: { startIndex: 180, endIndex: 200, startLine: 181, endLine: 200, headingId: 'middle' } } });
+  assert.ok(plan.renderResult.blocks[0].startLine <= 125, 'one viewport of real context precedes the chapter');
+  assert.ok(plan.renderResult.blocks.at(-1).endLine >= 256, 'one viewport follows the chapter instead of clamping the last word');
+  assert.ok(plan.renderResult.blocks.length < 180, 'context stays bounded rather than reverting to a full document');
+  coordinator.destroy();
+});
+
 test('Render Coordinator forces a normal renderer when theme or scope invalidates unchanged reuse', () => {
   const coordinator = createPreviewRenderCoordinator();
   const modelResult = { blocks: blocks(3), reason: 'unchanged', incremental: true };

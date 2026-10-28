@@ -89,6 +89,8 @@ export function createInlinePresentationCoordinator(options = {}) {
 
   return function buildInlinePresentation(view, tree, editableRanges, blockRanges, activeSourceRanges = []) {
     const trailingEmptyCaretLineFrom = getTrailingEmptyCaretLineFrom(view);
+    const caretLineFrom = view.state.selection.main.empty
+      ? view.state.doc.lineAt(view.state.selection.main.head).from : null;
     const ranges = [];
     const replacements = [];
     const lineClasses = new Map();
@@ -151,7 +153,14 @@ export function createInlinePresentationCoordinator(options = {}) {
         return safeFrom === trailingEmptyCaretLineFrom
           && !overlapsRanges(blockRanges, safeFrom, safeTo);
       }
-      return shouldDecorateSourceActiveLine(editableRanges, blockRanges, from, to);
+      // The frozen reveal-range reader includes touching endpoints. A visual
+      // line needs actual ownership: an empty preceding line must not acquire
+      // the highlight just because its synthetic end reaches the next block.
+      return shouldDecorateSourceActiveLine(editableRanges, blockRanges, from, to)
+        && editableRanges.some(range => range.revealBlock && (range.from === range.to
+          ? from <= range.from && range.from <= to
+          : from === to ? range.from <= from && from < range.to
+            : range.from < to && from < range.to));
     };
 
     for (const math of collectInlineMathRanges(view, tree, activeSourceRanges, blockRanges)) {
@@ -194,7 +203,9 @@ export function createInlinePresentationCoordinator(options = {}) {
       const text = line.text;
       if (overlapsRanges(blockRanges, line.from, Math.max(line.from + 1, line.to))) continue;
       if (shouldDecoratePresentationSourceActiveLine(line.from, line.to)) {
-        addLineClass(lineClasses, line.from, 'cm-hybrid-source-active');
+        // Revealing a multi-line source block does not make every row active.
+        // Keep all revealed rows in source layout and highlight only the caret.
+        if (line.from === caretLineFrom) addLineClass(lineClasses, line.from, 'cm-hybrid-source-active');
         continue;
       }
 
@@ -326,7 +337,7 @@ export function createInlinePresentationCoordinator(options = {}) {
       if (!range.revealBlock) continue;
       let line = view.state.doc.lineAt(Math.min(view.state.doc.length, range.from));
       while (line.from <= range.to) {
-        if (shouldDecoratePresentationSourceActiveLine(line.from, line.to)) {
+        if (line.from === caretLineFrom && shouldDecoratePresentationSourceActiveLine(line.from, line.to)) {
           addLineClass(lineClasses, line.from, 'cm-hybrid-source-active');
         }
         if (line.number >= view.state.doc.lines) break;

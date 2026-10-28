@@ -108,4 +108,35 @@ fn imported_document_labels_survive_without_exposing_unknown_labels_or_error_pro
         super::redaction::redact_value(&serde_json::json!({"operation":"PRIVATE-label"}))["operation"],
         "[redacted]"
     );
+    let session = format!("00000000-0000-4000-8000-{:012x}", std::process::id());
+    let mut pointer_entries = Vec::new();
+    for operation in ["editor.pointer-line-check", "editor.input-line-check"] {
+        let entry = serde_json::json!({
+            "sessionId":session,
+            "operation":operation,"category":"editor.input","status":"warning",
+            "details":{"clickId":1,"mappedLine":7,"expectedLine":8,"caretLine":7,
+                "inputStartLine":7,"lineMismatch":true,"tableBoundary":true,"text":"PRIVATE"}
+        });
+        let redacted = super::redaction::redact_value(&entry);
+        assert_eq!(redacted["operation"], operation);
+        assert_eq!(redacted["details"]["expectedLine"], 8);
+        assert_eq!(redacted["details"]["lineMismatch"], true);
+        assert!(redacted["details"].get("text").is_none());
+        pointer_entries.push(entry);
+    }
+    let path = write_performance_logs(pointer_entries).unwrap();
+    let contents = {
+        let _guard = super::writer::write_lock().lock().unwrap();
+        fs::read_to_string(path).unwrap()
+    };
+    let rows: Vec<Value> = contents
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .filter(|row| row["sessionId"] == session)
+        .collect();
+    assert_eq!(rows.len(), 2);
+    assert_eq!(rows[0]["operation"], "editor.pointer-line-check");
+    assert_eq!(rows[1]["operation"], "editor.input-line-check");
+    assert_eq!(rows[1]["details"]["expectedLine"], 8);
+    assert!(!serde_json::to_string(&rows).unwrap().contains("PRIVATE"));
 }

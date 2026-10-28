@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +9,10 @@ import { startBuiltApplicationHost } from './lib/built-application-host.mjs';
 import { verifyBuiltApplication } from './lib/built-application-check.mjs';
 import { runExportCharacterization } from './lib/export-characterization.mjs';
 import { runE2EInstallationChecks } from './lib/e2e-installation.mjs';
+import { runHybridPointerChecks } from './lib/hybrid-pointer-checks.mjs';
+import { runHybridImageScrollChecks, runImagePresentationChecks } from './lib/hybrid-image-checks.mjs';
+import { runPreviewSelectionVisibilityCheck, runHybridSourceDragCheck, runLargeSelectionScrollCheck, runCrossChapterSelectionCheck } from './lib/selection-stability-checks.mjs';
+import { runMenuPointerChecks, runRecentFilesPointerChecks } from './lib/menu-pointer-checks.mjs';
 import { evaluateApplication, waitForApplication, releaseApplicationInspector } from './lib/application-inspector.mjs';
 import { createApplicationDriver } from './lib/application-driver.mjs';
 import { verifyRetiredInputsAbsent } from '../../scripts/stage-16/single-implementation.mjs';
@@ -338,6 +342,9 @@ async function runContractSuite() {
       assert.equal(result.mounted.previousPresent,false);
       assert.deepEqual(result.afterContent,{shellCount:1,menuChildren:0,filePortPresent:false,foreignPresent:true});
       assert.deepEqual(result.afterUI,{hidden:true,children:['pre-shell-node'],shellCount:0});
+    });
+    await test('recent files real pointer rows and clear reach Menu state and command bindings', async () => {
+      await runRecentFilesPointerChecks(browser.page, virtualHost.origin, setContractDocument);
     });
   } finally {
     activePage = null;
@@ -1497,6 +1504,39 @@ async function runAppSuite() {
       assert.equal(result.textLength, beforeLength + 4);
     });
 
+    await test('application table, heading and rule clicks preserve IME input, highlights and later pointer positions', async () => {
+      await browser.page.setViewport({ width: 1440, height: 1000 });
+      await runHybridPointerChecks(browser.page, app);
+    });
+
+    await test('application menus require one initial click then switch on hover without stale submenu panels', async () => {
+      await runMenuPointerChecks(browser.page);
+    });
+
+    await test('application image source toggles preserve scroll position through repeated double-click and source-button activation', async () => {
+      await runHybridImageScrollChecks(browser.page, app);
+    });
+
+    await test('application embedded SVG and PNG images share passive presentation across hybrid, split and preview layouts', async () => {
+      await runImagePresentationChecks(browser.page, app);
+    });
+
+    await test('application preview word selection stays visibly selected after source synchronization', async () => {
+      await runPreviewSelectionVisibilityCheck(browser.page, app);
+    });
+
+    await test('application source-origin hybrid drags keep activated Markdown source exposed', async () => {
+      await runHybridSourceDragCheck(browser.page, app);
+    });
+
+    await test('application large-document wheel scrolling does not remount an old selection over the visible preview', async () => {
+      await runLargeSelectionScrollCheck(browser.page, app);
+    });
+
+    await test('application first word selection aligns across distant chapters without a second gesture', async () => {
+      await runCrossChapterSelectionCheck(browser.page, app);
+    });
+
     await test('application Mermaid presentation stays normalized across hybrid and preview layouts', async () => {
       await loadAppFixture(browser.page);
       await setAppLayout(browser.page, 'hybrid');
@@ -1755,5 +1795,5 @@ if (runApp) await runAppSuite();
 
 const failed = results.filter(result => !result.ok);
 console.log(`\nBrowser tests: ${results.length}, passed: ${results.length - failed.length}, failed: ${failed.length}`);
-if (!failed.length && !process.env.E2E_ARTIFACT_DIR) await rm(artifactRoot, { recursive: true, force: true });
+// Retain evidence after success and failure; repository policy prohibits recursive deletion.
 if (failed.length) process.exitCode = 1;

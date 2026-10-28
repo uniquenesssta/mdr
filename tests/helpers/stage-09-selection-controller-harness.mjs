@@ -105,7 +105,7 @@ export function createFinalSelectionController({
     getLineForContentY: () => 1,
     invalidateStructure() {}
   };
-  const scrollController = { scrollTo() { return true; } };
+  const scrollController = { scrollTo() { return true; }, getState() { return { sourceSide: '' }; } };
   const controller = createSelectionSyncController(editor, preview, {
     editorApi,
     documentModel,
